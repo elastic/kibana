@@ -14,55 +14,64 @@ import {
   esqlColumnSchema,
   metricOperationDefinitionSchema,
 } from '../metric_ops';
-import { colorByValueSchema } from '../color';
+import { colorByValueSchema, noColorSchema, autoColorSchema, AUTO_COLOR } from '../color';
 import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import { dslOnlyPanelInfoSchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
 import { mergeAllMetricsWithChartDimensionSchema } from './shared';
 import { builderEnums } from '../enums';
 import { objectUnion } from './utils/object_union';
 
-const gaugeStateSharedOptionsSchema = {
-  shape: schema.maybe(
-    schema.oneOf(
-      [
-        schema.object(
-          {
-            type: schema.literal('bullet'),
-            orientation: builderEnums.simpleOrientation({
-              defaultValue: 'horizontal',
-            }),
-          },
-          {
-            meta: {
-              id: 'gaugeShapeBullet',
-              title: 'Shape (Bullet)',
-              description: 'Bullet gauge shape',
+const gaugeStylingSchema = schema.object(
+  {
+    shape: schema.maybe(
+      schema.oneOf(
+        [
+          schema.object(
+            {
+              type: schema.literal('bullet'),
+              orientation: builderEnums.simpleOrientation({
+                defaultValue: 'horizontal',
+              }),
             },
-          }
-        ),
-        schema.object(
-          {
-            type: schema.oneOf([
-              schema.literal('circle'),
-              schema.literal('semi_circle'),
-              schema.literal('arc'),
-            ]),
-          },
-          {
-            meta: {
-              id: 'gaugeShapeCircular',
-              title: 'Shape (Circular)',
-              description: 'Circular gauge shape',
+            {
+              meta: {
+                id: 'gaugeShapeBullet',
+                title: 'Shape (Bullet)',
+                description: 'Bullet gauge shape',
+              },
+            }
+          ),
+          schema.object(
+            {
+              type: schema.oneOf([
+                schema.literal('circle'),
+                schema.literal('semi_circle'),
+                schema.literal('arc'),
+              ]),
             },
-          }
-        ),
-      ],
-      { defaultValue: { type: 'bullet', orientation: 'horizontal' } }
-    )
-  ),
-};
+            {
+              meta: {
+                id: 'gaugeShapeCircular',
+                title: 'Shape (Circular)',
+                description: 'Circular gauge shape',
+              },
+            }
+          ),
+        ],
+        { defaultValue: { type: 'bullet', orientation: 'horizontal' } }
+      )
+    ),
+  },
+  {
+    meta: {
+      id: 'gaugeStyling',
+      title: 'Gauge styling',
+      description: 'Visual chart styling options',
+    },
+  }
+);
 
-const gaugeStateMetricInnerNoESQLOpsSchema = {
+const gaugeConfigMetricInnerNoESQLOpsSchema = {
   /**
    * Minimum value for the gauge
    * Note: label, format and other visual options are ignored
@@ -80,7 +89,7 @@ const gaugeStateMetricInnerNoESQLOpsSchema = {
   goal: schema.maybe(metricOperationDefinitionSchema),
 };
 
-const gaugeStateMetricInnerESQLOpsSchema = {
+const gaugeConfigMetricInnerESQLOpsSchema = {
   /**
    * Minimum value for the gauge
    */
@@ -95,7 +104,7 @@ const gaugeStateMetricInnerESQLOpsSchema = {
   goal: schema.maybe(esqlColumnSchema),
 };
 
-const gaugeStateMetricOptionsSchema = {
+const gaugeConfigMetricOptionsSchema = {
   /**
    * Title configuration
    */
@@ -122,7 +131,11 @@ const gaugeStateMetricOptionsSchema = {
   /**
    * Color configuration
    */
-  color: schema.maybe(colorByValueSchema),
+  color: schema.maybe(
+    schema.oneOf([colorByValueSchema, noColorSchema, autoColorSchema], {
+      defaultValue: AUTO_COLOR,
+    })
+  ),
   /**
    * Tick marks configuration
    */
@@ -138,7 +151,7 @@ const gaugeStateMetricOptionsSchema = {
         mode: schema.maybe(
           schema.oneOf([schema.literal('auto'), schema.literal('bands')], {
             meta: { description: 'Tick placement mode' },
-            defaultValue: 'auto',
+            defaultValue: 'bands',
           })
         ),
       },
@@ -147,47 +160,47 @@ const gaugeStateMetricOptionsSchema = {
   ),
 };
 
-export const gaugeStateSchemaNoESQL = schema.object(
+export const gaugeConfigSchemaNoESQL = schema.object(
   {
     type: schema.literal('gauge'),
     ...sharedPanelInfoSchema,
     ...dslOnlyPanelInfoSchema,
     ...layerSettingsSchema,
     ...dataSourceSchema,
-    ...gaugeStateSharedOptionsSchema,
+    styling: schema.maybe(gaugeStylingSchema),
     /**
      * Primary value configuration, must define operation.
      */
     metric: mergeAllMetricsWithChartDimensionSchema({
-      ...gaugeStateMetricOptionsSchema,
-      ...gaugeStateMetricInnerNoESQLOpsSchema,
+      ...gaugeConfigMetricOptionsSchema,
+      ...gaugeConfigMetricInnerNoESQLOpsSchema,
     }),
   },
   { meta: { id: 'gaugeNoESQL', title: 'Gauge Chart (DSL)' } }
 );
 
-export const gaugeStateSchemaESQL = schema.object(
+export const gaugeConfigSchemaESQL = schema.object(
   {
     type: schema.literal('gauge'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
     ...dataSourceEsqlTableSchema,
-    ...gaugeStateSharedOptionsSchema,
+    styling: schema.maybe(gaugeStylingSchema),
     /**
      * Primary value configuration, must define operation.
      */
     metric: esqlColumnWithFormatSchema.extends({
-      ...gaugeStateMetricOptionsSchema,
-      ...gaugeStateMetricInnerESQLOpsSchema,
+      ...gaugeConfigMetricOptionsSchema,
+      ...gaugeConfigMetricInnerESQLOpsSchema,
     }),
   },
   { meta: { id: 'gaugeESQL', title: 'Gauge Chart (ES|QL)' } }
 );
 
-export const gaugeStateSchema = objectUnion([gaugeStateSchemaNoESQL, gaugeStateSchemaESQL], {
+export const gaugeConfigSchema = objectUnion([gaugeConfigSchemaNoESQL, gaugeConfigSchemaESQL], {
   meta: { id: 'gaugeChart', title: 'Gauge Chart' },
 });
 
-export type GaugeState = TypeOf<typeof gaugeStateSchema>;
-export type GaugeStateNoESQL = TypeOf<typeof gaugeStateSchemaNoESQL>;
-export type GaugeStateESQL = TypeOf<typeof gaugeStateSchemaESQL>;
+export type GaugeConfig = TypeOf<typeof gaugeConfigSchema>;
+export type GaugeConfigNoESQL = TypeOf<typeof gaugeConfigSchemaNoESQL>;
+export type GaugeConfigESQL = TypeOf<typeof gaugeConfigSchemaESQL>;

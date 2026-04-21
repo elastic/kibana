@@ -33,7 +33,7 @@
           "ESQLCommandOption"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/esql_helpers.ts",
-        "lineNumber": 47,
+        "lineNumber": 116,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -256,6 +256,105 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.definitionToESQLQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "definitionToESQLQuery",
+        "description": [
+          "\nAssembles an ES|QL query string for a draft stream's ES|QL view.\n\nDraft streams use read-time ES|QL views instead of ingest pipelines.\nThe generated query reads from the parent stream's view, filters by\nthe routing condition, and applies processing steps.\n\nOTel mapping aliases (e.g. message, trace.id) and passthrough\nnamespace resolution (e.g. attributes.host.name → host.name) are\nhandled by Elasticsearch at the index level when the parent view\nreads from the underlying indices, so no explicit EVALs are needed."
+        ],
+        "signature": [
+          "(options: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.DefinitionToESQLQueryOptions",
+            "text": "DefinitionToESQLQueryOptions"
+          },
+          ") => Promise<string>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/definition_to_esql_query.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.definitionToESQLQuery.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.DefinitionToESQLQueryOptions",
+                "text": "DefinitionToESQLQueryOptions"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/definition_to_esql_query.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.deriveQueryType",
+        "type": "Function",
+        "tags": [],
+        "label": "deriveQueryType",
+        "description": [
+          "\nDerives the canonical {@link QueryType} from an ES|QL query string\nby checking whether it contains a STATS command."
+        ],
+        "signature": [
+          "(esql: string) => ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.QueryType",
+            "text": "QueryType"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/esql_helpers.ts",
+        "lineNumber": 224,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.deriveQueryType.$1",
+            "type": "string",
+            "tags": [],
+            "label": "esql",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/esql_helpers.ts",
+            "lineNumber": 228,
+            "columnNumber": 33,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.effectiveToIngestLifecycle",
         "type": "Function",
         "tags": [],
@@ -325,7 +424,7 @@
           "(esql: string) => string"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/esql_helpers.ts",
-        "lineNumber": 76,
+        "lineNumber": 146,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -341,8 +440,164 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/esql_helpers.ts",
-            "lineNumber": 80,
+            "lineNumber": 150,
             "columnNumber": 32,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.extractBucketColumnName",
+        "type": "Function",
+        "tags": [],
+        "label": "extractBucketColumnName",
+        "description": [
+          "\nExtracts the output column name for the temporal BUCKET/TBUCKET call\nin the STATS command's BY clause.\n\nReturns `null` when no bucket call is found or the query fails to parse."
+        ],
+        "signature": [
+          "(esql: string) => string | null"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/esql_helpers.ts",
+        "lineNumber": 495,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.extractBucketColumnName.$1",
+            "type": "string",
+            "tags": [],
+            "label": "esql",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/esql_helpers.ts",
+            "lineNumber": 501,
+            "columnNumber": 41,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.extractBucketIntervalMs",
+        "type": "Function",
+        "tags": [],
+        "label": "extractBucketIntervalMs",
+        "description": [
+          "\nExtracts the temporal bucket interval from a STATS query's\n`BUCKET(@timestamp, N unit)` or `TBUCKET(@timestamp, N unit)` call\nand returns the interval in milliseconds.\n\nReturns `null` when no temporal bucketing is found."
+        ],
+        "signature": [
+          "(esql: string) => number | null"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/esql_helpers.ts",
+        "lineNumber": 556,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.extractBucketIntervalMs.$1",
+            "type": "string",
+            "tags": [],
+            "label": "esql",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/esql_helpers.ts",
+            "lineNumber": 563,
+            "columnNumber": 41,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.extractBucketTargetField",
+        "type": "Function",
+        "tags": [],
+        "label": "extractBucketTargetField",
+        "description": [
+          "\nExtracts the source field passed as the first argument to BUCKET/TBUCKET\n(e.g. `@timestamp` in `BUCKET(@timestamp, 5 minutes)`).\n\nReturns `null` when no temporal bucketing is found or the query fails to parse."
+        ],
+        "signature": [
+          "(esql: string) => string | null"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/esql_helpers.ts",
+        "lineNumber": 534,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.extractBucketTargetField.$1",
+            "type": "string",
+            "tags": [],
+            "label": "esql",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/esql_helpers.ts",
+            "lineNumber": 540,
+            "columnNumber": 42,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.extractStatsGroupColumns",
+        "type": "Function",
+        "tags": [],
+        "label": "extractStatsGroupColumns",
+        "description": [
+          "\nExtracts the output column names from the STATS command's BY clause.\nUsed to identify group-by dimensions for preview multi-group detection\nand potential future alert identity hashing.\n\nReturns column names in sorted order for deterministic comparison.\nReturns an empty array when no STATS or BY clause is found, or on parse failure."
+        ],
+        "signature": [
+          "(esql: string) => string[]"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/esql_helpers.ts",
+        "lineNumber": 475,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.extractStatsGroupColumns.$1",
+            "type": "string",
+            "tags": [],
+            "label": "esql",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/esql_helpers.ts",
+            "lineNumber": 483,
+            "columnNumber": 42,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -366,7 +621,7 @@
           " | undefined"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/esql_helpers.ts",
-        "lineNumber": 61,
+        "lineNumber": 130,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -382,7 +637,7 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/esql_helpers.ts",
-            "lineNumber": 66,
+            "lineNumber": 135,
             "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
@@ -992,7 +1247,7 @@
           "(esql: string) => string[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/esql_helpers.ts",
-        "lineNumber": 109,
+        "lineNumber": 179,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1008,7 +1263,7 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/esql_helpers.ts",
-            "lineNumber": 113,
+            "lineNumber": 183,
             "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
@@ -1474,6 +1729,45 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.getStatsQueryHints",
+        "type": "Function",
+        "tags": [],
+        "label": "getStatsQueryHints",
+        "description": [
+          "\nReturns quality hints for STATS queries to feed back to the LLM.\nChecks for common structural issues in aggregate queries.\nReturns an empty array for non-STATS queries or when no issues are found.\n\nNote: This re-parses the ES|QL string (same as {@link hasStatsCommand}).\nThe double parse is intentional — callers may invoke only one of the two\nfunctions, and merging them would couple unrelated responsibilities."
+        ],
+        "signature": [
+          "(esql: string) => string[]"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/esql_helpers.ts",
+        "lineNumber": 339,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.getStatsQueryHints.$1",
+            "type": "string",
+            "tags": [],
+            "label": "esql",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/esql_helpers.ts",
+            "lineNumber": 348,
+            "columnNumber": 36,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.getStreamNameFromViewName",
         "type": "Function",
         "tags": [],
@@ -1714,6 +2008,45 @@
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
             "lineNumber": 95,
             "columnNumber": 58,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.hasStatsCommand",
+        "type": "Function",
+        "tags": [],
+        "label": "hasStatsCommand",
+        "description": [
+          "\nReturns `true` when the ES|QL query contains a STATS command,\nindicating an aggregation-based (symptom) query rather than a\nrow-level (cause / match) query.\n\nWhen parsing succeeds the AST is inspected for a `stats` command.\nOn parse failure a regex fallback (`STATS_REGEX`) is used so that\nunparseable queries containing `| STATS` are still classified\ncorrectly rather than silently defaulting to `match`.\n\n**Limitation**: the regex fallback can misclassify if `| STATS`\nappears inside a string literal or comment. Callers in validation\npaths (e.g. {@link validateEsqlQueryForStreamOrThrow}) should\nparse independently so a parse failure surfaces before classification."
+        ],
+        "signature": [
+          "(esql: string) => boolean"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/esql_helpers.ts",
+        "lineNumber": 203,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.hasStatsCommand.$1",
+            "type": "string",
+            "tags": [],
+            "label": "esql",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/esql_helpers.ts",
+            "lineNumber": 218,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2982,7 +3315,7 @@
           "(esql: string) => string"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/esql_helpers.ts",
-        "lineNumber": 98,
+        "lineNumber": 168,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2998,7 +3331,7 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/esql_helpers.ts",
-            "lineNumber": 104,
+            "lineNumber": 174,
             "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
@@ -3021,7 +3354,7 @@
           "(esql: string, newSources: string[]) => string"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/esql_helpers.ts",
-        "lineNumber": 119,
+        "lineNumber": 189,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3037,7 +3370,7 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/esql_helpers.ts",
-            "lineNumber": 124,
+            "lineNumber": 194,
             "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
@@ -3054,7 +3387,7 @@
               "string[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/esql_helpers.ts",
-            "lineNumber": 124,
+            "lineNumber": 194,
             "columnNumber": 50,
             "deprecated": false,
             "trackAdoption": false,
@@ -3077,7 +3410,7 @@
           "(esql: string, transform: (index: string) => string) => string"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/esql_helpers.ts",
-        "lineNumber": 133,
+        "lineNumber": 576,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3093,7 +3426,7 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/esql_helpers.ts",
-            "lineNumber": 140,
+            "lineNumber": 583,
             "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
@@ -3110,7 +3443,7 @@
               "(index: string) => string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/esql_helpers.ts",
-            "lineNumber": 140,
+            "lineNumber": 583,
             "columnNumber": 50,
             "deprecated": false,
             "trackAdoption": false,
@@ -3359,6 +3692,107 @@
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/fields/index.ts",
             "lineNumber": 179,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.DefinitionToESQLQueryOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "DefinitionToESQLQueryOptions",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/definition_to_esql_query.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.DefinitionToESQLQueryOptions.definition",
+            "type": "Object",
+            "tags": [],
+            "label": "definition",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.WiredStream",
+                "text": "WiredStream"
+              },
+              ".Definition"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/definition_to_esql_query.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.DefinitionToESQLQueryOptions.routingCondition",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "routingCondition",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streamlang",
+                "scope": "common",
+                "docId": "kibKbnStreamlangPluginApi",
+                "section": "def-common.FilterCondition",
+                "text": "FilterCondition"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/streamlang",
+                "scope": "common",
+                "docId": "kibKbnStreamlangPluginApi",
+                "section": "def-common.AndCondition",
+                "text": "AndCondition"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/streamlang",
+                "scope": "common",
+                "docId": "kibKbnStreamlangPluginApi",
+                "section": "def-common.OrCondition",
+                "text": "OrCondition"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/streamlang",
+                "scope": "common",
+                "docId": "kibKbnStreamlangPluginApi",
+                "section": "def-common.NotCondition",
+                "text": "NotCondition"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/streamlang",
+                "scope": "common",
+                "docId": "kibKbnStreamlangPluginApi",
+                "section": "def-common.NeverCondition",
+                "text": "NeverCondition"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/streamlang",
+                "scope": "common",
+                "docId": "kibKbnStreamlangPluginApi",
+                "section": "def-common.AlwaysCondition",
+                "text": "AlwaysCondition"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/definition_to_esql_query.ts",
+            "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3645,11 +4079,27 @@
         "label": "GeneratedSignificantEventQuery",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
-        "lineNumber": 57,
+        "lineNumber": 78,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.GeneratedSignificantEventQuery.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"match\" | \"stats\""
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "@kbn/streams-schema",
             "id": "def-common.GeneratedSignificantEventQuery.title",
@@ -3658,7 +4108,7 @@
             "label": "title",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
-            "lineNumber": 58,
+            "lineNumber": 80,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3680,7 +4130,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
-            "lineNumber": 59,
+            "lineNumber": 81,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3693,7 +4143,7 @@
             "label": "severity_score",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
-            "lineNumber": 60,
+            "lineNumber": 82,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3709,7 +4159,7 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
-            "lineNumber": 61,
+            "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3722,7 +4172,7 @@
             "label": "description",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
-            "lineNumber": 62,
+            "lineNumber": 84,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4419,18 +4869,19 @@
           {
             "parentPluginId": "@kbn/streams-schema",
             "id": "def-common.IngestBase.processing",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "processing",
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/streams-schema",
+                "pluginId": "@kbn/streamlang",
                 "scope": "common",
-                "docId": "kibKbnStreamsSchemaPluginApi",
-                "section": "def-common.IngestStreamProcessing",
-                "text": "IngestStreamProcessing"
-              }
+                "docId": "kibKbnStreamlangPluginApi",
+                "section": "def-common.StreamlangDSL",
+                "text": "StreamlangDSL"
+              },
+              " & { updated_at: string; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/base.ts",
             "lineNumber": 62,
@@ -4606,52 +5057,6 @@
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/lifecycle/index.ts",
             "lineNumber": 32,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/streams-schema",
-        "id": "def-common.IngestStreamProcessing",
-        "type": "Interface",
-        "tags": [],
-        "label": "IngestStreamProcessing",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.IngestStreamProcessing",
-            "text": "IngestStreamProcessing"
-          },
-          " extends ",
-          {
-            "pluginId": "@kbn/streamlang",
-            "scope": "common",
-            "docId": "kibKbnStreamlangPluginApi",
-            "section": "def-common.StreamlangDSL",
-            "text": "StreamlangDSL"
-          }
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/processing.ts",
-        "lineNumber": 11,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/streams-schema",
-            "id": "def-common.IngestStreamProcessing.updated_at",
-            "type": "string",
-            "tags": [],
-            "label": "updated_at",
-            "description": [],
-            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/processing.ts",
-            "lineNumber": 12,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5292,7 +5697,7 @@
         "label": "QueriesGetResponse",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
-        "lineNumber": 62,
+        "lineNumber": 90,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5315,7 +5720,7 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
-            "lineNumber": 63,
+            "lineNumber": 91,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5328,7 +5733,7 @@
             "label": "page",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
-            "lineNumber": 64,
+            "lineNumber": 92,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5341,7 +5746,7 @@
             "label": "perPage",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
-            "lineNumber": 65,
+            "lineNumber": 93,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5354,7 +5759,7 @@
             "label": "total",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
-            "lineNumber": 66,
+            "lineNumber": 94,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5370,7 +5775,7 @@
         "label": "QueriesOccurrencesGetResponse",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
-        "lineNumber": 69,
+        "lineNumber": 97,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5386,7 +5791,7 @@
               "{ x: string; y: number; }[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
-            "lineNumber": 70,
+            "lineNumber": 98,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5399,7 +5804,7 @@
             "label": "total_occurrences",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
-            "lineNumber": 71,
+            "lineNumber": 99,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5446,7 +5851,7 @@
         "label": "QueryLink",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
-        "lineNumber": 74,
+        "lineNumber": 102,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5459,7 +5864,7 @@
             "label": "'asset.uuid'",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
-            "lineNumber": 75,
+            "lineNumber": 103,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5475,7 +5880,7 @@
               "\"query\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
-            "lineNumber": 76,
+            "lineNumber": 104,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5488,7 +5893,7 @@
             "label": "'asset.id'",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
-            "lineNumber": 77,
+            "lineNumber": 105,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5510,7 +5915,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
-            "lineNumber": 78,
+            "lineNumber": 106,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5523,7 +5928,7 @@
             "label": "stream_name",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
-            "lineNumber": 79,
+            "lineNumber": 107,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5538,7 +5943,7 @@
               "Whether a Kibana rule exists for this query."
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
-            "lineNumber": 80,
+            "lineNumber": 108,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5553,7 +5958,7 @@
               "The deterministic ID of the Kibana rule associated with this query."
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
-            "lineNumber": 82,
+            "lineNumber": 110,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5731,7 +6136,7 @@
         "label": "SignificantEventsQueriesGenerationResult",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
-        "lineNumber": 72,
+        "lineNumber": 94,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5754,7 +6159,7 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
-            "lineNumber": 73,
+            "lineNumber": 95,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5770,7 +6175,7 @@
               "{ completion: number; prompt: number; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
-            "lineNumber": 74,
+            "lineNumber": 96,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5911,11 +6316,27 @@
           " extends StreamQueryBase"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
-        "lineNumber": 28,
+        "lineNumber": 35,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.StreamQuery.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"match\" | \"stats\""
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "@kbn/streams-schema",
             "id": "def-common.StreamQuery.esql",
@@ -5933,7 +6354,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
-            "lineNumber": 29,
+            "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5949,7 +6370,7 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
-            "lineNumber": 31,
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5965,7 +6386,7 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
-            "lineNumber": 32,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6043,6 +6464,25 @@
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
         "lineNumber": 44,
         "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.bulkStreamQueryInputSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "bulkStreamQueryInputSchema",
+        "description": [
+          "\nWire schema for the bulk endpoint index operations.\nSame as {@link upsertStreamQueryRequestSchema} but with `id` included,\nand `type` intentionally omitted — derived server-side."
+        ],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
+        "lineNumber": 86,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6180,11 +6620,11 @@
           "StrictOmit",
           "<",
           {
-            "pluginId": "@kbn/streams-schema",
+            "pluginId": "@kbn/streamlang",
             "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.IngestStreamProcessing",
-            "text": "IngestStreamProcessing"
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.StreamlangDSLWithUpdatedAt",
+            "text": "StreamlangDSLWithUpdatedAt"
           },
           ", \"updated_at\">; } & ",
           "IngestClassic"
@@ -6859,6 +7299,32 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.IngestStreamProcessing",
+        "type": "Type",
+        "tags": [],
+        "label": "IngestStreamProcessing",
+        "description": [
+          "Streamlang on ingest plus the `updated_at` cursor managed by the stack."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.StreamlangDSL",
+            "text": "StreamlangDSL"
+          },
+          " & { updated_at: string; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/processing.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.IngestUpsertRequest",
         "type": "Type",
         "tags": [],
@@ -7346,6 +7812,74 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.QUERY_TYPE_MATCH",
+        "type": "string",
+        "tags": [],
+        "label": "QUERY_TYPE_MATCH",
+        "description": [],
+        "signature": [
+          "\"match\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
+        "lineNumber": 28,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.QUERY_TYPE_STATS",
+        "type": "string",
+        "tags": [],
+        "label": "QUERY_TYPE_STATS",
+        "description": [],
+        "signature": [
+          "\"stats\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
+        "lineNumber": 29,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.QueryType",
+        "type": "Type",
+        "tags": [],
+        "label": "QueryType",
+        "description": [],
+        "signature": [
+          "\"match\" | \"stats\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.queryTypeSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "queryTypeSchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
+        "lineNumber": 33,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.RootStreamName",
         "type": "Type",
         "tags": [],
@@ -7459,7 +7993,7 @@
           "; } & { type: \"generated_queries\"; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
-        "lineNumber": 65,
+        "lineNumber": 87,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7473,15 +8007,15 @@
         "label": "SignificantEventsPreviewResponse",
         "description": [],
         "signature": [
-          "{ esql: ",
+          "Pick<",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.EsqlQuery",
-            "text": "EsqlQuery"
+            "section": "def-common.SignificantEventsResponse",
+            "text": "SignificantEventsResponse"
           },
-          "; occurrences: SignificantEventOccurrence[]; change_points: { type: Partial<Record<ChangePointsType, Partial<{ p_value: number; r_value: number; change_point: number; trend: string; }>>>; }; }"
+          ", \"esql\" | \"occurrences\" | \"change_points\"> & { firing_count?: number | undefined; truncated?: boolean | undefined; multi_group?: boolean | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
         "lineNumber": 52,
@@ -7573,7 +8107,7 @@
           ")"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
-        "lineNumber": 77,
+        "lineNumber": 99,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -8516,12 +9050,14 @@
         "type": "Any",
         "tags": [],
         "label": "upsertStreamQueryRequestSchema",
-        "description": [],
+        "description": [
+          "\nWire schema for creating/updating a query. The `type` field is intentionally\nomitted — the server derives it from the ES|QL content via `deriveQueryType`\non every write, so client-supplied values would be ignored."
+        ],
         "signature": [
           "any"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
-        "lineNumber": 54,
+        "lineNumber": 73,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -8545,7 +9081,7 @@
           " & IngestWired"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/wired.ts",
-        "lineNumber": 49,
+        "lineNumber": 51,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -8612,16 +9148,16 @@
           "StrictOmit",
           "<",
           {
-            "pluginId": "@kbn/streams-schema",
+            "pluginId": "@kbn/streamlang",
             "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.IngestStreamProcessing",
-            "text": "IngestStreamProcessing"
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.StreamlangDSLWithUpdatedAt",
+            "text": "StreamlangDSLWithUpdatedAt"
           },
           ", \"updated_at\">; } & IngestWired"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/wired.ts",
-        "lineNumber": 61,
+        "lineNumber": 63,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -9780,6 +10316,178 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.MS_PER_UNIT",
+        "type": "Object",
+        "tags": [],
+        "label": "MS_PER_UNIT",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/esql_helpers.ts",
+        "lineNumber": 519,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.MS_PER_UNIT.s",
+            "type": "number",
+            "tags": [],
+            "label": "s",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/esql_helpers.ts",
+            "lineNumber": 520,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.MS_PER_UNIT.second",
+            "type": "number",
+            "tags": [],
+            "label": "second",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/esql_helpers.ts",
+            "lineNumber": 521,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.MS_PER_UNIT.seconds",
+            "type": "number",
+            "tags": [],
+            "label": "seconds",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/esql_helpers.ts",
+            "lineNumber": 522,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.MS_PER_UNIT.m",
+            "type": "number",
+            "tags": [],
+            "label": "m",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/esql_helpers.ts",
+            "lineNumber": 523,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.MS_PER_UNIT.minute",
+            "type": "number",
+            "tags": [],
+            "label": "minute",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/esql_helpers.ts",
+            "lineNumber": 524,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.MS_PER_UNIT.minutes",
+            "type": "number",
+            "tags": [],
+            "label": "minutes",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/esql_helpers.ts",
+            "lineNumber": 525,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.MS_PER_UNIT.h",
+            "type": "number",
+            "tags": [],
+            "label": "h",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/esql_helpers.ts",
+            "lineNumber": 526,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.MS_PER_UNIT.hour",
+            "type": "number",
+            "tags": [],
+            "label": "hour",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/esql_helpers.ts",
+            "lineNumber": 527,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.MS_PER_UNIT.hours",
+            "type": "number",
+            "tags": [],
+            "label": "hours",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/esql_helpers.ts",
+            "lineNumber": 528,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.MS_PER_UNIT.d",
+            "type": "number",
+            "tags": [],
+            "label": "d",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/esql_helpers.ts",
+            "lineNumber": 529,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.MS_PER_UNIT.day",
+            "type": "number",
+            "tags": [],
+            "label": "day",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/esql_helpers.ts",
+            "lineNumber": 530,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.MS_PER_UNIT.days",
+            "type": "number",
+            "tags": [],
+            "label": "days",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/esql_helpers.ts",
+            "lineNumber": 531,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.namedFieldDefinitionConfigSchema",
         "type": "Object",
         "tags": [],
@@ -10209,7 +10917,9 @@
         "type": "Object",
         "tags": [],
         "label": "streamQuerySchema",
-        "description": [],
+        "description": [
+          "\nThe `type` default exists for backward compatibility with pre-migration\nstored documents that lack a type field. For all new writes the type MUST\nbe derived server-side via {@link deriveQueryType} — never trust the default."
+        ],
         "signature": [
           "ZodType",
           "<",
@@ -10233,7 +10943,7 @@
           ", unknown>>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
-        "lineNumber": 41,
+        "lineNumber": 54,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -10888,7 +11598,7 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/wired.ts",
-        "lineNumber": 56,
+        "lineNumber": 58,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -10916,7 +11626,7 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/wired.ts",
-        "lineNumber": 68,
+        "lineNumber": 70,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -10985,7 +11695,7 @@
           ".UpsertRequest>; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/wired.ts",
-        "lineNumber": 85,
+        "lineNumber": 87,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -10999,7 +11709,7 @@
         "label": "WiredStream",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/wired.ts",
-        "lineNumber": 146,
+        "lineNumber": 148,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -11020,7 +11730,7 @@
               ".Definition>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/wired.ts",
-            "lineNumber": 152,
+            "lineNumber": 154,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11041,7 +11751,7 @@
               ".Definition>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/wired.ts",
-            "lineNumber": 156,
+            "lineNumber": 158,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11066,7 +11776,7 @@
               ".Definition>>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/wired.ts",
-            "lineNumber": 160,
+            "lineNumber": 162,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11091,7 +11801,7 @@
               ".Definition>>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/wired.ts",
-            "lineNumber": 164,
+            "lineNumber": 166,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

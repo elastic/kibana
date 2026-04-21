@@ -7,20 +7,27 @@
 
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
-import type { Streams } from '@kbn/streams-schema';
 import { useCallback } from 'react';
 import { DISCOVERY_QUERIES_QUERY_KEY } from '../../../../hooks/sig_events/use_fetch_discovery_queries';
+import { DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY } from '../../../../hooks/sig_events/use_fetch_discovery_queries_occurrences';
+import { UNBACKED_QUERIES_COUNT_QUERY_KEY } from '../../../../hooks/sig_events/use_unbacked_queries_count';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { useQueriesApi } from '../../../../hooks/sig_events/use_queries_api';
+import { useQueriesApi, type PromoteResult } from '../../../../hooks/sig_events/use_queries_api';
 import { useStreamFeaturesApi } from '../../../../hooks/sig_events/use_stream_features_api';
+import {
+  PROMOTE_QUERY_ALREADY_PROMOTED,
+  STATS_PROMOTE_DISABLED_TOOLTIP,
+} from '../../significant_events_discovery/components/queries_table/translations';
+
+export const KI_ROW_ACTION_MUTATION_KEY = ['ki-row-action'];
 
 interface UseKnowledgeIndicatorActionsParams {
-  definition: Streams.all.Definition;
+  streamName: string;
   onSuccess?: () => void;
 }
 
 export function useKnowledgeIndicatorActions({
-  definition,
+  streamName,
   onSuccess,
 }: UseKnowledgeIndicatorActionsParams) {
   const {
@@ -29,17 +36,21 @@ export function useKnowledgeIndicatorActions({
     },
   } = useKibana();
   const queryClient = useQueryClient();
-  const { excludeFeaturesInBulk, restoreFeaturesInBulk } = useStreamFeaturesApi(definition);
+  const { excludeFeaturesInBulk, restoreFeaturesInBulk } = useStreamFeaturesApi(streamName);
   const { promote } = useQueriesApi();
 
   const invalidateData = useCallback(async () => {
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_QUERY_KEY }),
-      queryClient.invalidateQueries({ queryKey: ['features', definition.name] }),
+      queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY }),
+      queryClient.invalidateQueries({ queryKey: UNBACKED_QUERIES_COUNT_QUERY_KEY }),
+      queryClient.invalidateQueries({ queryKey: ['features', streamName] }),
+      queryClient.invalidateQueries({ queryKey: ['features', 'all'] }),
     ]);
-  }, [definition.name, queryClient]);
+  }, [streamName, queryClient]);
 
   const excludeAction = useMutation<void, Error, string>({
+    mutationKey: KI_ROW_ACTION_MUTATION_KEY,
     mutationFn: async (featureUuid) => {
       await excludeFeaturesInBulk([featureUuid]);
     },
@@ -54,6 +65,7 @@ export function useKnowledgeIndicatorActions({
   });
 
   const restoreAction = useMutation<void, Error, string>({
+    mutationKey: KI_ROW_ACTION_MUTATION_KEY,
     mutationFn: async (featureUuid) => {
       await restoreFeaturesInBulk([featureUuid]);
     },
@@ -67,13 +79,20 @@ export function useKnowledgeIndicatorActions({
     },
   });
 
-  const promoteAction = useMutation<void, Error, string>({
+  const promoteAction = useMutation<PromoteResult, Error, string>({
+    mutationKey: KI_ROW_ACTION_MUTATION_KEY,
     mutationFn: async (queryId) => {
-      await promote({ queryIds: [queryId] });
+      return promote({ queryIds: [queryId] });
     },
-    onSuccess: async () => {
+    onSuccess: async (result) => {
       await invalidateData();
-      toasts.addSuccess({ title: PROMOTE_SUCCESS_TOAST });
+      if (result.promoted > 0) {
+        toasts.addSuccess({ title: PROMOTE_SUCCESS_TOAST });
+      } else if (result.skipped_stats > 0) {
+        toasts.addInfo({ title: STATS_PROMOTE_DISABLED_TOOLTIP });
+      } else {
+        toasts.addInfo({ title: PROMOTE_QUERY_ALREADY_PROMOTED });
+      }
       onSuccess?.();
     },
     onError: (error) => {

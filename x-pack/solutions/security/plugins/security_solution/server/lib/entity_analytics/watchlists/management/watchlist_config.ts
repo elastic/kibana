@@ -100,6 +100,7 @@ export class WatchlistConfigClient {
       options: {
         index: getIndexForWatchlist(this.deps.namespace),
         mappings: generateWatchlistEntityIndexMappings(),
+        settings: { hidden: true },
       },
     });
 

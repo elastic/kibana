@@ -30,6 +30,9 @@ import { CopyPacksResponse } from './copy_pack.gen';
 
 export type OsqueryCopyPacksRequestParams = z.infer<typeof OsqueryCopyPacksRequestParams>;
 export const OsqueryCopyPacksRequestParams = z.object({
+  /**
+   * The ID of the pack to copy.
+   */
   id: PackId,
 });
 export type OsqueryCopyPacksRequestParamsInput = z.input<typeof OsqueryCopyPacksRequestParams>;
@@ -46,6 +49,9 @@ export const OsqueryCreatePacksResponse = CreatePacksResponse;
 
 export type OsqueryDeletePacksRequestParams = z.infer<typeof OsqueryDeletePacksRequestParams>;
 export const OsqueryDeletePacksRequestParams = z.object({
+  /**
+   * The pack ID.
+   */
   id: PackId,
 });
 export type OsqueryDeletePacksRequestParamsInput = z.input<typeof OsqueryDeletePacksRequestParams>;
@@ -54,9 +60,21 @@ export type OsqueryDeletePacksResponse = z.infer<typeof OsqueryDeletePacksRespon
 export const OsqueryDeletePacksResponse = z.object({});
 export type OsqueryFindPacksRequestQuery = z.infer<typeof OsqueryFindPacksRequestQuery>;
 export const OsqueryFindPacksRequestQuery = z.object({
+  /**
+   * The page number to return.
+   */
   page: PageOrUndefined.optional(),
+  /**
+   * The number of results to return per page.
+   */
   pageSize: PageSizeOrUndefined.optional(),
+  /**
+   * The field to sort results by.
+   */
   sort: SortOrUndefined.optional(),
+  /**
+   * The sort order.
+   */
   sortOrder: SortOrderOrUndefined.optional(),
 });
 export type OsqueryFindPacksRequestQueryInput = z.input<typeof OsqueryFindPacksRequestQuery>;
@@ -68,6 +86,9 @@ export type OsqueryGetPacksDetailsRequestParams = z.infer<
   typeof OsqueryGetPacksDetailsRequestParams
 >;
 export const OsqueryGetPacksDetailsRequestParams = z.object({
+  /**
+   * The pack ID.
+   */
   id: PackId,
 });
 export type OsqueryGetPacksDetailsRequestParamsInput = z.input<
@@ -79,6 +100,9 @@ export const OsqueryGetPacksDetailsResponse = FindPackResponse;
 
 export type OsqueryUpdatePacksRequestParams = z.infer<typeof OsqueryUpdatePacksRequestParams>;
 export const OsqueryUpdatePacksRequestParams = z.object({
+  /**
+   * The pack ID.
+   */
   id: PackId,
 });
 export type OsqueryUpdatePacksRequestParamsInput = z.input<typeof OsqueryUpdatePacksRequestParams>;
