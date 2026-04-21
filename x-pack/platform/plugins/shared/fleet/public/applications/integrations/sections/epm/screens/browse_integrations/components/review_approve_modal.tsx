@@ -496,7 +496,7 @@ export const ReviewApproveModal: React.FC<{
         {reviewError && (
           <>
             <EuiSpacer size="m" />
-            <EuiText color="danger" size="s">
+            <EuiText color="danger" size="s" data-test-subj="manageIntegrationReviewError">
               {reviewError}
             </EuiText>
           </>
