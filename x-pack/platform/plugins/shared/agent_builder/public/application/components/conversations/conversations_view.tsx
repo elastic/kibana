@@ -12,10 +12,7 @@ import { useLocation } from 'react-router-dom';
 import { Conversation } from './conversation';
 import { ConversationHeader } from './conversation_header/conversation_header';
 import { RoutedConversationsProvider } from '../../context/conversation/routed_conversations_provider';
-import {
-  SendMessageProvider,
-  useSendMessage,
-} from '../../context/send_message/send_message_context';
+import { useSendMessage } from '../../context/send_message/send_message_context';
 import { conversationBackgroundStyles, headerHeight } from './conversation.styles';
 import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 
@@ -62,17 +59,15 @@ export const AgentBuilderConversationsView: React.FC<{}> = () => {
 
   return (
     <RoutedConversationsProvider onConversationChange={notifyConversationChange}>
-      <SendMessageProvider>
-        <LocationErrorClearer />
-        <div css={containerStyles} data-test-subj="agentBuilderPageConversations">
-          <div css={headerStyles}>
-            <ConversationHeader />
-          </div>
-          <div css={contentStyles}>
-            <Conversation />
-          </div>
+      <LocationErrorClearer />
+      <div css={containerStyles} data-test-subj="agentBuilderPageConversations">
+        <div css={headerStyles}>
+          <ConversationHeader />
         </div>
-      </SendMessageProvider>
+        <div css={contentStyles}>
+          <Conversation />
+        </div>
+      </div>
     </RoutedConversationsProvider>
   );
 };

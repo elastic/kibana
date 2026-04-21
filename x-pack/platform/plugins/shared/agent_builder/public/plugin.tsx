@@ -57,10 +57,7 @@ import type {
   AgentBuilderStartDependencies,
   ConversationSidebarRef,
 } from './types';
-import type {
-  EmbeddableConversationChange,
-  EmbeddableConversationProps,
-} from './embeddable/types';
+import type { EmbeddableConversationChange, EmbeddableConversationProps } from './embeddable/types';
 import type { OpenConversationSidebarOptions } from './sidebar/types';
 import {
   setSidebarServices,
@@ -92,9 +89,7 @@ export class AgentBuilderPlugin
     addAttachment: (attachment: AttachmentInput) => void;
     invalidateConversation: () => void;
   } | null = null;
-  private activeConversationState$ = new BehaviorSubject<EmbeddableConversationChange | null>(
-    null
-  );
+  private activeConversationState$ = new BehaviorSubject<EmbeddableConversationChange | null>(null);
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private sidebarOpenState$ = new BehaviorSubject<boolean>(false);
   private experimentalDeepLinksSubscription?: Subscription;

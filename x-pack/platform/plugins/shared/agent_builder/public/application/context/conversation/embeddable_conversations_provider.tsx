@@ -20,7 +20,7 @@ import { upsertAttachmentsIntoList } from './upsert_attachments_into_list';
 import { AgentBuilderServicesContext } from '../agent_builder_services_context';
 import { SendMessageProvider } from '../send_message/send_message_context';
 import { useConversationActions } from './use_conversation_actions';
-import { useNotifyConversationChange } from './use_notify_conversation_change';
+import { ConversationChangeNotifier } from './conversation_change_notifier';
 import { usePersistedConversationId } from '../../hooks/use_persisted_conversation_id';
 import { AppLeaveContext } from '../app_leave_context';
 
@@ -159,12 +159,6 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     invalidateConversationRef.current = conversationActions.invalidateConversation;
   }, [conversationActions.invalidateConversation]);
 
-  useNotifyConversationChange({
-    conversationId,
-    conversationsService: services.conversationsService,
-    onConversationChange: contextProps.onConversationChange,
-  });
-
   // Resets the {initialMessage} and {autoSendInitialMessage} flags after an initial message has been sent or set in the {ConversationInput} component
   const resetInitialMessage = useCallback(() => {
     setCurrentProps((prevProps) => ({
@@ -244,7 +238,13 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
           <AgentBuilderServicesContext.Provider value={services}>
             <AppLeaveContext.Provider value={noopOnAppLeave}>
               <ConversationContext.Provider value={conversationContextValue}>
-                <SendMessageProvider>{children}</SendMessageProvider>
+                <SendMessageProvider>
+                  <ConversationChangeNotifier
+                    onConversationChange={contextProps.onConversationChange}
+                  >
+                    {children}
+                  </ConversationChangeNotifier>
+                </SendMessageProvider>
               </ConversationContext.Provider>
             </AppLeaveContext.Provider>
           </AgentBuilderServicesContext.Provider>

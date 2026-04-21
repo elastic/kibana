@@ -154,7 +154,10 @@ describe('EmbeddableConversationsProvider - new functionality', () => {
 
     it('fires with conversation id but no attachments when fetch fails', async () => {
       const props = createProps();
-      props.services.conversationsService.get = jest.fn().mockRejectedValue(new Error('Not found'));
+      // Use a 404 so useConversation does not retry (retry is disabled for 404).
+      props.services.conversationsService.get = jest
+        .fn()
+        .mockRejectedValue({ response: { status: 404 } });
 
       const onConversationChange = jest.fn();
       const onReady = jest.fn();

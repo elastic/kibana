@@ -216,16 +216,14 @@ describe('AgentBuilderPlugin', () => {
       const runtimeContext = sidebarRuntimeContext$.getValue();
       expect(runtimeContext?.onConversationChange).toEqual(expect.any(Function));
 
-      const firstSubscription =
-        service.events.ui.activeConversation$.subscribe(firstListener);
+      const firstSubscription = service.events.ui.activeConversation$.subscribe(firstListener);
       expect(firstListener).toHaveBeenLastCalledWith(null);
 
       runtimeContext?.onConversationChange?.({ id: 'conversation-1' });
 
       expect(firstListener).toHaveBeenLastCalledWith({ id: 'conversation-1' });
 
-      const secondSubscription =
-        service.events.ui.activeConversation$.subscribe(secondListener);
+      const secondSubscription = service.events.ui.activeConversation$.subscribe(secondListener);
       expect(secondListener).toHaveBeenLastCalledWith({ id: 'conversation-1' });
 
       secondSubscription.unsubscribe();

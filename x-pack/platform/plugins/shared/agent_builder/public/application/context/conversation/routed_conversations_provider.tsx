@@ -19,7 +19,8 @@ import { useConversationActions } from './use_conversation_actions';
 import { queryKeys } from '../../query_keys';
 import { upsertAttachmentsIntoList } from './upsert_attachments_into_list';
 import type { ConversationChangeHandler } from '../../../embeddable/types';
-import { useNotifyConversationChange } from './use_notify_conversation_change';
+import { SendMessageProvider } from '../send_message/send_message_context';
+import { ConversationChangeNotifier } from './conversation_change_notifier';
 
 interface RoutedConversationsProviderProps {
   children: React.ReactNode;
@@ -150,13 +151,13 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
     ]
   );
 
-  useNotifyConversationChange({
-    conversationId,
-    conversationsService,
-    onConversationChange,
-  });
-
   return (
-    <ConversationContext.Provider value={contextValue}>{children}</ConversationContext.Provider>
+    <ConversationContext.Provider value={contextValue}>
+      <SendMessageProvider>
+        <ConversationChangeNotifier onConversationChange={onConversationChange}>
+          {children}
+        </ConversationChangeNotifier>
+      </SendMessageProvider>
+    </ConversationContext.Provider>
   );
 };
