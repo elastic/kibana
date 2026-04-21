@@ -56,6 +56,7 @@ const createToolStartMock = (): ToolServiceStartContractMock => {
 
 const createStartContractMock = (): AgentBuilderPluginStartMock => {
   return {
+    getEmbeddableConversation: jest.fn().mockReturnValue(() => null),
     agents: createAgentStartMock(),
     attachments: createAttachmentStartMock(),
     tools: createToolStartMock(),

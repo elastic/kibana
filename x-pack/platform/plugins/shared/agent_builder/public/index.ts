@@ -12,11 +12,18 @@ import type {
   AgentBuilderSetupDependencies,
   AgentBuilderStartDependencies,
   ConfigSchema,
+  EmbeddableConversationProps,
+  EmbeddableConversationComponent,
 } from './types';
 import { AgentBuilderPlugin } from './plugin';
 import { AGENTBUILDER_FEATURE_ID, uiPrivileges } from '../common/features';
 
-export type { AgentBuilderPluginSetup, AgentBuilderPluginStart };
+export type {
+  AgentBuilderPluginSetup,
+  AgentBuilderPluginStart,
+  EmbeddableConversationProps,
+  EmbeddableConversationComponent,
+};
 export { AGENTBUILDER_FEATURE_ID, uiPrivileges };
 export const plugin: PluginInitializer<
   AgentBuilderPluginSetup,
