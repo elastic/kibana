@@ -109,6 +109,12 @@ export function AboutPanel() {
   );
 
   useEffect(() => {
+    if (!isEditing) {
+      setDescriptionValue(description ?? '');
+    }
+  }, [description, isEditing]);
+
+  useEffect(() => {
     if (isEditing && textAreaRef.current) {
       const node = textAreaRef.current;
       node.focus();
@@ -149,7 +155,7 @@ export function AboutPanel() {
           }
         `}
       >
-        <EuiFlexGroup gutterSize="none">
+        <EuiFlexGroup gutterSize="none" responsive={false}>
           <EuiFlexItem grow>
             <EuiTitle size="xs">
               <h2>
@@ -201,7 +207,7 @@ export function AboutPanel() {
                 border: none;
                 border-bottom-left-radius: 0;
                 border-bottom-right-radius: 0;
-                height: 280px;
+                height: ${description.length > 200 ? '280px' : '100px'};
               `}
               fullWidth
               placeholder={i18n.translate(
@@ -223,7 +229,12 @@ export function AboutPanel() {
               inputRef={textAreaRef}
             />
             <EuiPanel hasBorder={false} hasShadow={false} paddingSize="xs" color="subdued">
-              <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
+              <EuiFlexGroup
+                alignItems="center"
+                justifyContent="flexStart"
+                gutterSize="s"
+                responsive={false}
+              >
                 {isAIAvailable && (
                   <EuiFlexItem grow={false}>
                     <EuiToolTip
@@ -287,35 +298,37 @@ export function AboutPanel() {
             <EuiMarkdownFormat
               textSize="s"
               color="subdued"
-              onClick={() => setIsEditing(true)}
               css={css`
-                cursor: pointer;
                 height: ${isExpanded ? 'auto' : '40px'};
                 overflow: hidden;
               `}
             >
               {description}
             </EuiMarkdownFormat>
-            <EuiButtonEmpty
-              flush="both"
-              css={css`
-                block-size: 28px;
-              `}
-              onClick={(e: React.MouseEvent) => {
-                setExpanded(!isExpanded);
-                e.stopPropagation();
-              }}
-            >
-              {!isExpanded &&
-                i18n.translate('xpack.streams.aboutPanel.readMoreButtonEmptyLabel', {
-                  defaultMessage: 'Read more',
-                })}
+            {description.length > 120 ? (
+              <EuiButtonEmpty
+                flush="both"
+                css={css`
+                  block-size: 28px;
+                `}
+                onClick={(e: React.MouseEvent) => {
+                  setExpanded(!isExpanded);
+                  e.stopPropagation();
+                }}
+              >
+                <>
+                  {!isExpanded &&
+                    i18n.translate('xpack.streams.aboutPanel.readMoreButtonEmptyLabel', {
+                      defaultMessage: 'Read more',
+                    })}
 
-              {isExpanded &&
-                i18n.translate('xpack.streams.aboutPanel.readLessButtonEmptyLabel', {
-                  defaultMessage: 'Read less',
-                })}
-            </EuiButtonEmpty>
+                  {isExpanded &&
+                    i18n.translate('xpack.streams.aboutPanel.readLessButtonEmptyLabel', {
+                      defaultMessage: 'Read less',
+                    })}
+                </>
+              </EuiButtonEmpty>
+            ) : null}
           </>
         )}
 

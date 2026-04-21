@@ -32,7 +32,7 @@ import { useElasticChartsTheme } from '@kbn/charts-theme';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { Streams } from '@kbn/streams-schema';
+import { isEnabledFailureStore, Streams } from '@kbn/streams-schema';
 import React, { useCallback, useMemo } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { useKibana } from '../../hooks/use_kibana';
@@ -76,7 +76,8 @@ function IngestRateChartContent({ definition }: { definition: Streams.all.GetRes
   const barSeriesTimeZone = useMemo(() => getChartTimeZone(uiSettings), [uiSettings]);
 
   const canReadFailureStore = Streams.ingest.all.GetResponse.is(definition)
-    ? definition.privileges.read_failure_store
+    ? definition.privileges.read_failure_store &&
+      isEnabledFailureStore(definition.effective_failure_store)
     : false;
   const streamName = definition.stream.name;
   const isQueryStream = Streams.QueryStream.GetResponse.is(definition);

@@ -46,13 +46,26 @@ export function TopFailureReasons({ streamName, canReadFailureStore }: TopFailur
     async ({ signal, timeState: ts }) => {
       if (!canReadFailureStore || !ts) return [];
 
-      const response = await executeEsqlQuery({
-        query: buildTopFailureReasonsEsql(streamName),
-        search: data.search.search,
-        signal,
-        start: ts.start,
-        end: ts.end,
-      });
+      let response;
+      try {
+        response = await executeEsqlQuery({
+          query: buildTopFailureReasonsEsql(streamName),
+          search: data.search.search,
+          signal,
+          start: ts.start,
+          end: ts.end,
+        });
+      } catch (error: unknown) {
+        // The ::failures backing index is created lazily — treat "Unknown index" as no data.
+        if (
+          error instanceof Error &&
+          (error.message.includes('Unknown index') ||
+            error.message.includes('index_not_found_exception'))
+        ) {
+          return [];
+        }
+        throw error;
+      }
 
       const errorTypeIdx = response.columns.findIndex((c) => c.name === 'error_type');
       const countIdx = response.columns.findIndex((c) => c.name === 'count');

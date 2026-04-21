@@ -21,6 +21,21 @@ import { executeEsqlQuery } from './use_execute_esql_query';
  */
 export const STREAMS_HISTOGRAM_NUM_DATA_POINTS = 25;
 
+/**
+ * Returns true if the error is an ES|QL "Unknown index" error.
+ * This happens when a failure-store backing index does not yet exist — it is created lazily
+ * on the first failed document, so an enabled failure store with no failures is normal.
+ */
+function isUnknownIndexError(error: unknown): boolean {
+  if (error instanceof Error) {
+    return (
+      error.message.includes('Unknown index') ||
+      error.message.includes('index_not_found_exception')
+    );
+  }
+  return false;
+}
+
 export interface StreamDocCountsFetch {
   docCount: Promise<StreamDocsStat[]>;
   failedDocCount: Promise<StreamDocsStat[]>;
@@ -178,6 +193,13 @@ export function useStreamDocCountsFetch({
         signal: abortController.signal,
         start: timeState.start,
         end: timeState.end,
+      }).catch((error: unknown) => {
+        // The ::failures backing index is created lazily (only when a document first fails).
+        // An enabled failure store with no data yet returns "Unknown index" — treat it as empty.
+        if (isUnknownIndexError(error)) {
+          return { columns: [], values: [] };
+        }
+        throw error;
       }) as Promise<UnparsedEsqlResponse>;
 
       histogramPromiseCache.current[cacheKey] = histogramPromise;
