@@ -63,14 +63,21 @@ export interface PluginMetricsInfo {
  *    user-facing `id` (e.g. "core", "discover") differs from the internal
  *    `chunkName` to match legacy metrics format and limits.yml keys.
  *
- * 3. ASYNC CHUNK TRAVERSAL
+ * 3. ASYNC CHUNK TRAVERSAL (exclusive-ownership filtering)
  *
- *    All bundles (core + plugins) use `chunk.getAllAsyncChunks()` which walks
- *    child chunk groups recursively and returns all downstream async chunks.
- *    If `splitChunks` extracts shared code, that chunk appears in multiple
- *    bundles' results -- semantically correct as it represents per-bundle
- *    download cost. No special traversal is needed for core since it is now
- *    a regular async chunk like plugins.
+ *    All bundles (core + plugins) call `chunk.getAllAsyncChunks()` which
+ *    walks child chunk groups recursively. In the unified compilation this
+ *    returns named shared chunks (`shared-plugins`, `vendors`, etc.) and
+ *    other plugin entry chunks that are reachable through the graph. To
+ *    avoid massive double-counting we filter the result with an exclusion
+ *    set built from `sharedChunkNames` (already tracked individually in
+ *    `page load bundle size`) and `chunkNameToInfo` keys (each plugin's
+ *    own entry chunk, tracked in its own per-plugin metrics). Only unnamed
+ *    chunks (genuine per-plugin async splits from dynamic imports) pass
+ *    through. Some unnamed chunks may be shared by a few plugins via
+ *    `splitChunks`; counting them per consumer is semantically equivalent
+ *    to legacy's code duplication and represents genuine download cost.
+ *    Core (`plugin-core`) receives the same treatment as any plugin.
  *
  * 4. ENTRY CHUNK (kibana.bundle.js)
  *
@@ -264,6 +271,15 @@ export class BundleMetricsPlugin {
           let sharedChunkCount = 0;
           const namedSharedData: typeof entryData = [];
 
+          // Chunks whose async size is already tracked elsewhere:
+          //  - named shared chunks (tracked individually in `page load bundle size`)
+          //  - other plugin entry chunks (tracked in their own per-plugin metrics)
+          // Unnamed chunks (genuine per-plugin async splits) pass through.
+          const excludedChunkNames = new Set([
+            ...this.sharedChunkNames,
+            ...this.chunkNameToInfo.keys(),
+          ]);
+
           for (const chunk of compilation.chunks) {
             const info = chunk.name ? this.chunkNameToInfo.get(chunk.name) : undefined;
 
@@ -298,14 +314,15 @@ export class BundleMetricsPlugin {
             let asyncCount: number;
 
             {
-              // All bundles (core + plugins) use getAllAsyncChunks(), dedup with Set.
-              // Core is now an async chunk like plugins, so no special traversal needed.
-              const asyncChunks = new Set(chunk.getAllAsyncChunks());
+              const allAsync = new Set(chunk.getAllAsyncChunks());
+              const pluginAsync = [...allAsync].filter(
+                (c) => !c.name || !excludedChunkNames.has(c.name)
+              );
               asyncSize = sumJsFileSize(
-                [...asyncChunks].flatMap((c) => [...c.files]),
+                pluginAsync.flatMap((c) => [...c.files]),
                 compilation
               );
-              asyncCount = asyncChunks.size;
+              asyncCount = pluginAsync.length;
             }
 
             // Miscellaneous assets (non-JS auxiliary files)
