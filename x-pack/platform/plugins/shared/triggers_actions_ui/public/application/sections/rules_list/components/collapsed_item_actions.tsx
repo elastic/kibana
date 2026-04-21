@@ -319,7 +319,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
           title: (
             <EuiFlexGroup alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <EuiIcon type="bellSlash" />
+                <EuiIcon type="bellSlash" aria-hidden={true} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 {i18n.translate(
@@ -350,6 +350,10 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
     item.isEditable && (
       <>
         <EuiPopover
+          aria-label={i18n.translate(
+            'xpack.triggersActionsUI.sections.rulesList.collapsedItemActions.popoverAriaLabel',
+            { defaultMessage: 'Rule actions' }
+          )}
           button={
             <EuiButtonIcon
               data-test-subj="selectActionButton"

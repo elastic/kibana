@@ -60,9 +60,9 @@ export const DataStreams = React.memo<{ integrationId?: string }>(() => {
   const handleOpenCreateDataStreamFlyout = useCallback(() => {
     openCreateDataStreamFlyout();
     reportDataStreamFlyoutOpened({
-      isFirstDataStream: !hasDataStreams,
+      integrationId,
     });
-  }, [hasDataStreams, reportDataStreamFlyoutOpened, openCreateDataStreamFlyout]);
+  }, [integrationId, reportDataStreamFlyoutOpened, openCreateDataStreamFlyout]);
 
   const renderAddDataStreamButton = useCallback(
     (layout: 'header' | 'zeroState') => {

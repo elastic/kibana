@@ -8,8 +8,9 @@
  */
 
 import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
-import { gaugeStateSchema } from '../../schema/charts/gauge';
-import type { GaugeState } from '../../schema/charts/gauge';
+
+import { gaugeConfigSchema } from '../../schema/charts/gauge';
+import type { GaugeConfig } from '../../schema/charts/gauge';
 import { AUTO_COLOR, NO_COLOR } from '../../schema/color';
 import { LensConfigBuilder } from '../../config_builder';
 import { validateAPIConverter, validateConverter } from '../validate';
@@ -32,48 +33,48 @@ import {
 describe('Gauge', () => {
   describe('validateConverter', () => {
     it('should convert a gauge chart with full config and absolute color mode', () => {
-      validateConverter(gaugeAttributes, gaugeStateSchema);
+      validateConverter(gaugeAttributes, gaugeConfigSchema);
     });
 
     it('should convert a gauge chart with full config and percentage color mode', () => {
-      validateConverter(gaugeAttributesWithPercentageColorMode, gaugeStateSchema);
+      validateConverter(gaugeAttributesWithPercentageColorMode, gaugeConfigSchema);
     });
 
     it('should convert a gauge chart with ESQL datasource', () => {
-      validateConverter(gaugeESQLAttributes, gaugeStateSchema);
+      validateConverter(gaugeESQLAttributes, gaugeConfigSchema);
     });
 
     it('should convert a default color by value palette', () => {
-      validateConverter(defaultColorByValueAttributes, gaugeStateSchema);
+      validateConverter(defaultColorByValueAttributes, gaugeConfigSchema);
     });
 
     it('should convert a selector color by value palette', () => {
-      validateConverter(selectorColorByValueAttributes, gaugeStateSchema);
+      validateConverter(selectorColorByValueAttributes, gaugeConfigSchema);
     });
   });
   describe('validateAPIConverter', () => {
     it('should convert a basic gauge chart with ad hoc dataView', () => {
-      validateAPIConverter(basicGaugeWithAdHocDataView, gaugeStateSchema);
+      validateAPIConverter(basicGaugeWithAdHocDataView, gaugeConfigSchema);
     });
 
     it('should convert a basic gauge chart with dataView', () => {
-      validateAPIConverter(basicGaugeWithDataView, gaugeStateSchema);
+      validateAPIConverter(basicGaugeWithDataView, gaugeConfigSchema);
     });
 
     it('should convert a ESQL-based gauge chart', () => {
-      validateAPIConverter(esqlGauge, gaugeStateSchema);
+      validateAPIConverter(esqlGauge, gaugeConfigSchema);
     });
 
     it('should convert a comprehensive gauge chart with ad hoc data view', () => {
-      validateAPIConverter(comprehensiveGaugeWithAdHocDataView, gaugeStateSchema);
+      validateAPIConverter(comprehensiveGaugeWithAdHocDataView, gaugeConfigSchema);
     });
 
     it('should convert a comprehensive gauge chart with data view', () => {
-      validateAPIConverter(comprehensiveGaugeWithDataView, gaugeStateSchema);
+      validateAPIConverter(comprehensiveGaugeWithDataView, gaugeConfigSchema);
     });
 
     it('should convert a comprehensive ESQL-based gauge chart', () => {
-      validateAPIConverter(comprehensiveEsqlGauge, gaugeStateSchema);
+      validateAPIConverter(comprehensiveEsqlGauge, gaugeConfigSchema);
     });
   });
 
@@ -92,12 +93,12 @@ describe('Gauge', () => {
       },
       sampling: 1,
       ignore_global_filters: false,
-    } satisfies GaugeState;
+    } satisfies GaugeConfig;
 
     it('should emit AUTO_COLOR when no color is specified', () => {
       const builder = new LensConfigBuilder();
       const lensState = builder.fromAPIFormat(baseGauge);
-      const apiOutput = builder.toAPIFormat(lensState) as GaugeState;
+      const apiOutput = builder.toAPIFormat(lensState) as GaugeConfig;
 
       expect(apiOutput.metric.color).toEqual(AUTO_COLOR);
     });
@@ -106,11 +107,11 @@ describe('Gauge', () => {
       const config = {
         ...baseGauge,
         metric: { ...baseGauge.metric, color: NO_COLOR },
-      } satisfies GaugeState;
+      } satisfies GaugeConfig;
 
       const builder = new LensConfigBuilder();
       const lensState = builder.fromAPIFormat(config);
-      const apiOutput = builder.toAPIFormat(lensState) as GaugeState;
+      const apiOutput = builder.toAPIFormat(lensState) as GaugeConfig;
 
       expect(apiOutput.metric.color).toEqual(NO_COLOR);
     });
