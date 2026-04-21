@@ -11,7 +11,7 @@
  *
  * info:
  *   title: Entity Store - Update or Create Entities Bulk
- *   version: 2023-10-31
+ *   version: 1
  */
 
 import { z } from '@kbn/zod/v4';
