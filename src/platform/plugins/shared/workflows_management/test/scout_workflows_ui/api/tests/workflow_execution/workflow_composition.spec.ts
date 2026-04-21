@@ -143,7 +143,6 @@ spaceTest.describe('Workflow composition', { tag: tags.deploymentAgnostic }, () 
   let syncParentId: string;
 
   spaceTest.beforeAll(async ({ apiServices }) => {
-    spaceTest.setTimeout(60_000);
     workflowsApi = apiServices.workflowsApi;
 
     const child = await workflowsApi.create(CHILD_HEALTH_CHECK_YAML);
