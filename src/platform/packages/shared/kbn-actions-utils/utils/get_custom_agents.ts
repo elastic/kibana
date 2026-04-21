@@ -133,17 +133,39 @@ export function getCustomAgents(opts: GetCustomAgentsOpts): GetCustomAgentsRespo
     proxySettings.proxySSLSettings.verificationMode,
     sslOverrides
   );
+
+  const hasUrlAuth = Boolean(proxyUrl.username && proxyUrl.password);
+  const hasConfigAuth = Boolean(
+    proxySettings.proxyUser &&
+      proxySettings.proxyPassword &&
+      proxySettings.proxyUser !== '' &&
+      proxySettings.proxyPassword !== ''
+  );
+  let proxyAuth: string | undefined;
+  if (hasUrlAuth) {
+    proxyAuth = `${decodeURIComponent(proxyUrl.username)}:${decodeURIComponent(proxyUrl.password)}`;
+  } else if (hasConfigAuth) {
+    proxyAuth = `${proxySettings.proxyUser}:${proxySettings.proxyPassword}`;
+  }
+
+  let httpProxyAgentUrl = proxySettings.proxyUrl;
+  if (!hasUrlAuth && hasConfigAuth) {
+    const withAuth = new URL(proxySettings.proxyUrl);
+    withAuth.username = proxySettings.proxyUser as string;
+    withAuth.password = proxySettings.proxyPassword as string;
+    httpProxyAgentUrl = withAuth.toString();
+  }
+
   // At this point, we are going to use a proxy, so we need new agents.
   // We will though, copy over the calculated ssl options from above, into
   // the https agent.
-  const httpAgent = new HttpProxyAgent(proxySettings.proxyUrl) as unknown as HttpAgent;
+  const httpAgent = new HttpProxyAgent(httpProxyAgentUrl) as unknown as HttpAgent;
   const httpsAgent = new HttpsProxyAgent({
     host: proxyUrl.hostname,
-    port: Number(proxyUrl.port),
+    port: Number(proxyUrl.port) || (proxyUrl.protocol === 'https:' ? 443 : 80),
     protocol: proxyUrl.protocol,
     headers: proxySettings.proxyHeaders,
-    ...(proxyUrl.username &&
-      proxyUrl.password && { auth: `${proxyUrl.username}:${proxyUrl.password}` }),
+    ...(proxyAuth && { auth: proxyAuth }),
     // do not fail on invalid certs if value is false
     ...proxyNodeSSLOptions,
   }) as unknown as HttpsAgent;

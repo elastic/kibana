@@ -385,6 +385,18 @@ describe('getProxySettings', () => {
     expect(proxySettings?.proxyOnlyHosts).toEqual(new Set(proxyOnlyHosts));
   });
 
+  test('returns proxyUser and proxyPassword when set', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      proxyUrl: 'https://proxy.elastic.co',
+      proxyUser: 'proxy_user',
+      proxyPassword: 'proxy_secret',
+    };
+    const proxySettings = getActionsConfigurationUtilities(config).getProxySettings();
+    expect(proxySettings?.proxyUser).toBe('proxy_user');
+    expect(proxySettings?.proxyPassword).toBe('proxy_secret');
+  });
+
   test('getCustomHostSettings() returns undefined when no matching config', () => {
     const httpsUrl = 'https://elastic.co/foo/bar';
     const smtpUrl = 'smtp://elastic.co';

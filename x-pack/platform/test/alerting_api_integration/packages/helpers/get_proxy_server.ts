@@ -5,12 +5,46 @@
  * 2.0.
  */
 
+import http from 'http';
 import httpProxy from 'http-proxy';
+
+function getProxyBasicAuthFromServerArgs(
+  kbnTestServerConfig: string[]
+): { user: string; password: string } | undefined {
+  const userLine = kbnTestServerConfig.find((val: string) =>
+    val.startsWith('--xpack.actions.proxyUser=')
+  );
+  const passLine = kbnTestServerConfig.find((val: string) =>
+    val.startsWith('--xpack.actions.proxyPassword=')
+  );
+  if (!userLine || !passLine) {
+    return undefined;
+  }
+
+  const result = {
+    user: userLine.replace('--xpack.actions.proxyUser=', ''),
+    password: passLine.replace('--xpack.actions.proxyPassword=', ''),
+  };
+  return result;
+}
+
+type ProxyReqHandler = (
+  proxyReq?: http.ClientRequest,
+  req?: http.IncomingMessage,
+  res?: http.ServerResponse
+) => void;
+
+type ProxyResHandler = (
+  proxyRes?: http.IncomingMessage,
+  req?: http.IncomingMessage,
+  res?: http.ServerResponse
+) => void;
 
 export const getHttpProxyServer = async (
   targetUrl: string,
-  kbnTestServerConfig: any,
-  onProxyResHandler: (proxyRes?: unknown, req?: unknown, res?: unknown) => void
+  kbnTestServerConfig: string[],
+  onProxyResHandler: ProxyResHandler,
+  onProxyReqHandler?: ProxyReqHandler
 ): Promise<httpProxy> => {
   const proxyServer = httpProxy.createProxyServer({
     target: targetUrl,
@@ -18,30 +52,64 @@ export const getHttpProxyServer = async (
     selfHandleResponse: false,
   });
 
-  proxyServer.on('proxyRes', (proxyRes: unknown, req: unknown, res: unknown) => {
+  proxyServer.on('proxyRes', (proxyRes, req, res) => {
     onProxyResHandler(proxyRes, req, res);
   });
 
-  // http-proxy doesn't propagate client disconnects to the target server.
-  // Tear down the proxied request when the client disconnects early (e.g. when the request is aborted).
   proxyServer.on('proxyReq', (proxyReq, req, res) => {
     res.on('close', () => {
       if (!res.writableFinished) {
         proxyReq.destroy();
       }
     });
+    onProxyReqHandler?.(proxyReq, req, res);
   });
 
   const proxyPort = getProxyPort(kbnTestServerConfig);
+  const basicAuth = getProxyBasicAuthFromServerArgs(kbnTestServerConfig);
+
+  if (basicAuth) {
+    const expectedAuth = `Basic ${Buffer.from(
+      `${basicAuth.user}:${basicAuth.password}`,
+      'utf8'
+    ).toString('base64')}`;
+    const server = http.createServer((req, res) => {
+      const proxyAuthHeader = req.headers['proxy-authorization'];
+
+      if (proxyAuthHeader !== expectedAuth) {
+        if (proxyAuthHeader == null) {
+          // eslint-disable-next-line no-console
+          console.log('Proxy-Authorization header is missing');
+        } else {
+          const encodedCreds = proxyAuthHeader.replace('Basic ', '');
+          const decodedAuth = Buffer.from(encodedCreds, 'base64').toString('utf8');
+          // eslint-disable-next-line no-console
+          console.log(`Proxy-Authorization header is using credentials ${decodedAuth}`);
+        }
+
+        res.writeHead(407, { 'Proxy-Authenticate': 'Basic realm="proxy"' });
+        res.end();
+        return;
+      }
+      proxyServer.web(req, res);
+    });
+    server.listen(proxyPort);
+    return server as unknown as httpProxy;
+  }
+
   proxyServer.listen(proxyPort);
 
   return proxyServer;
 };
 
-export const getProxyPort = (kbnTestServerConfig: any): number => {
+export const getProxyPort = (kbnTestServerConfig: string[]): number => {
   const proxyUrl = kbnTestServerConfig
     .find((val: string) => val.startsWith('--xpack.actions.proxyUrl='))
-    .replace('--xpack.actions.proxyUrl=', '');
+    ?.replace('--xpack.actions.proxyUrl=', '');
+
+  if (!proxyUrl) {
+    throw new Error('Expected --xpack.actions.proxyUrl= in kbn test server args');
+  }
 
   const urlObject = new URL(proxyUrl);
   return Number(urlObject.port);

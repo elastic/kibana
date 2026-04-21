@@ -12,7 +12,7 @@ import { getProxyPort } from '@kbn/alerting-api-integration-helpers';
 import { getDataFromRequest } from './data_handler';
 
 export interface ProxyArgs {
-  config: string;
+  config: string[];
   proxyHandler?: (proxyRes?: unknown, req?: unknown, res?: unknown) => void;
 }
 

@@ -36,5 +36,6 @@ export default function connectorsTests({ loadTestFile, getService }: FtrProvide
     loadTestFile(require.resolve('../../../group2/tests/actions/bulk_enqueue'));
     loadTestFile(require.resolve('../../../group2/tests/actions/sub_feature_descriptions'));
     loadTestFile(require.resolve('../../../group2/tests/actions/sub_action_framework'));
+    loadTestFile(require.resolve('../../../group2/tests/actions/proxy_auth'));
   });
 }

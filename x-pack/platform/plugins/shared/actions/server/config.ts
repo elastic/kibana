@@ -98,6 +98,8 @@ export const configSchema = schema.object({
     validate: validatePreconfigured,
   }),
   proxyUrl: schema.maybe(schema.string()),
+  proxyUser: schema.maybe(schema.string()),
+  proxyPassword: schema.maybe(schema.string()),
   proxyHeaders: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   proxyBypassHosts: schema.maybe(schema.arrayOf(schema.string({ hostname: true }))),
   proxyOnlyHosts: schema.maybe(schema.arrayOf(schema.string({ hostname: true }))),

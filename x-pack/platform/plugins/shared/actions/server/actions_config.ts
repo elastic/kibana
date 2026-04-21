@@ -137,6 +137,8 @@ function getProxySettingsFromConfig(config: ActionsConfig): undefined | ProxySet
     proxyOnlyHosts: arrayAsSet(config.proxyOnlyHosts),
     proxyHeaders: config.proxyHeaders,
     proxySSLSettings: getSSLSettingsFromConfig(config.ssl?.proxyVerificationMode),
+    ...(config.proxyUser != null && { proxyUser: config.proxyUser }),
+    ...(config.proxyPassword != null && { proxyPassword: config.proxyPassword }),
   };
 }
 

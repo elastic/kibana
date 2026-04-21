@@ -7,12 +7,14 @@
 
 import { createTestConfig } from '../../common/config';
 import { EmailMaximumBodyLength } from '../group2/config';
+import { ProxyAuthUser, ProxyAuthPassword } from '../../common/lib';
 
 export default createTestConfig('security_and_spaces', {
   disabledPlugins: [],
   license: 'trial',
   ssl: true,
   enableActionsProxy: true,
+  actionsProxyBasicAuth: { user: ProxyAuthUser, password: ProxyAuthPassword },
   publicBaseUrl: true,
   testFiles: [require.resolve('./tests')],
   useDedicatedTaskRunner: true,

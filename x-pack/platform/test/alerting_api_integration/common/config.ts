@@ -24,6 +24,7 @@ interface CreateTestConfigOptions {
   disabledPlugins?: string[];
   ssl?: boolean;
   enableActionsProxy: boolean;
+  actionsProxyBasicAuth?: { user: string; password: string };
   verificationMode?: 'full' | 'none' | 'certificate';
   publicBaseUrl?: boolean;
   preconfiguredAlertHistoryEsIndex?: boolean;
@@ -267,6 +268,12 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       ? [
           `--xpack.actions.proxyUrl=http://localhost:${proxyPort}`,
           `--xpack.actions.proxyOnlyHosts=${JSON.stringify(proxyHosts)}`,
+          ...(options.actionsProxyBasicAuth
+            ? [
+                `--xpack.actions.proxyUser=${options.actionsProxyBasicAuth.user}`,
+                `--xpack.actions.proxyPassword=${options.actionsProxyBasicAuth.password}`,
+              ]
+            : []),
         ]
       : [
           `--xpack.actions.proxyUrl=http://elastic.co`,
