@@ -208,14 +208,14 @@ export type StoredQueryLink = QueryLinkStorageFields & {
   [STREAM_NAME]: string;
 };
 
-interface QueryBulkIndexOperation {
+interface QueryStorageBulkIndexOperation {
   index: { asset: QueryLinkRequest };
 }
-interface QueryBulkDeleteOperation {
+interface QueryStorageBulkDeleteOperation {
   delete: { asset: QueryUnlinkRequest };
 }
 
-export type QueryBulkOperation = QueryBulkIndexOperation | QueryBulkDeleteOperation;
+type QueryStorageBulkOperation = QueryStorageBulkIndexOperation | QueryStorageBulkDeleteOperation;
 
 function fromStorage(link: StoredQueryLink): QueryLink {
   const esql = link[QUERY_ESQL_QUERY];
@@ -326,6 +326,16 @@ function toQueryLinkFromQuery({
   };
 }
 
+/** Operations accepted by {@link QueryClient.bulk} (stream queries + id deletes). */
+export interface QueryClientBulkOperation {
+  index?: StreamQuery;
+  delete?: { id: string };
+}
+/** Index-only bulk operation for {@link QueryClient.bulk}. */
+export interface QueryClientBulkIndexOperation {
+  index: StreamQuery;
+}
+
 export class QueryClient {
   constructor(
     private readonly dependencies: {
@@ -372,7 +382,7 @@ export class QueryClient {
     const nextIds = new Set(nextQueryLinks.map((link) => link[ASSET_UUID]));
     const queryLinksDeleted = existingQueryLinks.filter((link) => !nextIds.has(link[ASSET_UUID]));
 
-    const operations: QueryBulkOperation[] = [
+    const operations: QueryStorageBulkOperation[] = [
       ...queryLinksDeleted.map((asset) => ({ delete: { asset } })),
       ...nextQueryLinks.map((asset) => ({ index: { asset } })),
     ];
@@ -670,7 +680,10 @@ export class QueryClient {
     return mapSearchHits(assetsResponse);
   }
 
-  private async bulkStorage(definition: Streams.all.Definition, operations: QueryBulkOperation[]) {
+  private async bulkStorage(
+    definition: Streams.all.Definition,
+    operations: QueryStorageBulkOperation[]
+  ) {
     return await this.dependencies.storageClient.bulk({
       operations: operations.map((operation) => {
         if ('index' in operation) {
@@ -876,7 +889,7 @@ export class QueryClient {
 
   public async bulk(
     definition: Streams.all.Definition,
-    operations: Array<{ index?: StreamQuery; delete?: { id: string } }>,
+    operations: QueryClientBulkOperation[],
     options?: { createRules?: boolean }
   ) {
     const stream = definition.name;

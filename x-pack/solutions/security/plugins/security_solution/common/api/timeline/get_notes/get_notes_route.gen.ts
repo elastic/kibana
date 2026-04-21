@@ -19,8 +19,9 @@ import { z } from '@kbn/zod/v4';
 import { Note } from '../model/components.gen';
 
 /**
- * Filter notes based on their association with a document or saved object.
- */
+  * How the note is associated with a Timeline saved object and/or an event (`eventId`). `all`: no association-based restriction from this parameter. `document_only`: document-linked notes (non-empty `eventId`) without timeline association in the API's internal sense; post-filtering drops notes without a usable `eventId`. `saved_object_only`: timeline notes with no linked event (`eventId` empty or absent); post-filtering keeps timeline-only notes. `document_and_saved_object`: notes on a timeline and linked to an event; post-filtering enforces a real `eventId`. `orphan`: not on a timeline and `eventId` is empty (stricter than missing `eventId` in some cases).
+
+  */
 export type AssociatedFilterType = z.infer<typeof AssociatedFilterType>;
 export const AssociatedFilterType = z.enum([
   'all',
@@ -32,14 +33,23 @@ export const AssociatedFilterType = z.enum([
 export type AssociatedFilterTypeEnum = typeof AssociatedFilterType.enum;
 export const AssociatedFilterTypeEnum = AssociatedFilterType.enum;
 
+/**
+ * One document ID or an array of IDs (Elasticsearch `_id` of the event).
+ */
 export type DocumentIds = z.infer<typeof DocumentIds>;
 export const DocumentIds = z.union([z.array(z.string()), z.string()]);
 
+/**
+ * One Timeline saved object ID or an array of IDs.
+ */
 export type SavedObjectIds = z.infer<typeof SavedObjectIds>;
 export const SavedObjectIds = z.union([z.array(z.string()), z.string()]);
 
 export type GetNotesResult = z.infer<typeof GetNotesResult>;
 export const GetNotesResult = z.object({
+  /**
+   * Number of notes returned (may be adjusted after the query when `associatedFilter` applies post-filtering).
+   */
   totalCount: z.number(),
   notes: z.array(Note),
 });
@@ -47,44 +57,51 @@ export const GetNotesResult = z.object({
 export type GetNotesRequestQuery = z.infer<typeof GetNotesRequestQuery>;
 export const GetNotesRequestQuery = z.object({
   /**
-   * Elasticsearch document `_id` values (or serialized array) to fetch notes for.
-   */
+      * Event document `_id` values to match against each note's `eventId`. When this parameter is present, the response is all matching notes (up to the server's hard limit), not a paged list using `page`/`perPage`.
+
+      */
   documentIds: DocumentIds.optional(),
   /**
-   * Saved object ids (for example timeline `savedObjectId`) whose notes should be returned.
-   */
+      * Timeline `savedObjectId` value(s). Returns notes that reference those timelines. When present, list-mode pagination parameters are not used; up to the server's hard limit of notes may be returned.
+
+      */
   savedObjectIds: SavedObjectIds.optional(),
   /**
-   * 1-based page index for pagination (string for compatibility with existing clients).
-   */
+      * Page number for list mode (when `documentIds` and `savedObjectIds` are omitted). Passed as a string; default 1.
+
+      */
   page: z.string().nullable().optional(),
   /**
-   * Page size as a string (for example `20`).
-   */
+      * Page size for list mode (when `documentIds` and `savedObjectIds` are omitted). Passed as a string; default 10.
+
+      */
   perPage: z.string().nullable().optional(),
   /**
-   * Free-text filter applied to note body content.
+   * Search string for saved-objects find (list mode only).
    */
   search: z.string().nullable().optional(),
   /**
-   * Field name to sort by (implementation-specific; commonly `updated` or `created`).
+   * Field to sort by for saved-objects find (list mode only).
    */
   sortField: z.string().nullable().optional(),
   /**
-   * Sort direction (`asc` or `desc`).
+   * Sort order (`asc` or `desc`) for saved-objects find (list mode only).
    */
   sortOrder: z.string().nullable().optional(),
   /**
-   * Advanced filter expression supported by the notes finder.
-   */
+      * Kuery filter string combined with other list-mode filters (for example `createdByFilter` or `associatedFilter`). Typed as a string for API compatibility; interpreted by the saved-objects layer (list mode only).
+
+      */
   filter: z.string().nullable().optional(),
   /**
-   * Optional filter on author username or identifier.
-   */
+      * Kibana user profile **UID** (UUID). The server resolves the user's display identifiers and returns notes whose `createdBy` matches any of them (list mode only).
+
+      */
   createdByFilter: z.string().nullable().optional(),
   /**
-   * Restrict results based on how notes are linked to documents and saved objects.
-   */
+      * Restricts notes by how they relate to a Timeline and/or an event document (list mode only). Some values apply extra filtering after the query. Ignored when `documentIds` or `savedObjectIds` is used.
+
+      */
   associatedFilter: AssociatedFilterType.optional(),
 });
 export type GetNotesRequestQueryInput = z.input<typeof GetNotesRequestQuery>;

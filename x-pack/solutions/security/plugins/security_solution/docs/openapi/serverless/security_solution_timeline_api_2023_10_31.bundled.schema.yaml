@@ -15,7 +15,15 @@ servers:
 paths:
   /api/note:
     delete:
-      description: Delete a note from a Timeline using the note ID.
+      description: >
+        Deletes notes by saved object ID. Send either `noteId` (single ID) or
+        `noteIds` (array of IDs) in the JSON body.
+
+
+        The response has HTTP 200 with an empty body on success.
+
+
+        Requires the **Timeline and Notes** write privilege (`notes_write`).
       operationId: DeleteNote
       requestBody:
         content:
@@ -31,6 +39,7 @@ paths:
                   type: object
                   properties:
                     noteId:
+                      description: Saved object ID of the note to delete.
                       type: string
                   required:
                     - noteId
@@ -38,97 +47,148 @@ paths:
                   type: object
                   properties:
                     noteIds:
+                      description: Saved object IDs of the notes to delete.
                       items:
                         type: string
                       nullable: true
                       type: array
                   required:
                     - noteIds
-        description: The ID of the note to delete.
+        description: >
+          Exactly one shape: `{ "noteId": "<id>" }` for a single delete, or `{
+          "noteIds": ["<id>", ...] }` for bulk delete.
+
+          `noteIds` may be null in some clients; prefer an empty array or omit
+          unused fields when possible.
         required: true
       responses:
         '200':
-          content:
-            application/json:
-              examples:
-                success:
-                  summary: Empty success payload
-                  value: {}
-              schema:
-                additionalProperties: true
-                type: object
-          description: Indicates a successful call.
-      summary: Delete a note
+          description: The notes were deleted successfully. Response body is empty.
+      summary: Delete one or more notes
       tags:
         - Security Timeline API
         - access:securitySolution
     get:
-      description: Get all notes for a given document.
+      description: >
+        Returns Security Timeline notes as saved objects.
+
+
+        **Query modes (mutually exclusive branches on the server):**
+
+
+        1. **`documentIds` is set** — Returns notes whose `eventId` matches the
+        given Elasticsearch document `_id` (single string or array). Pagination
+        query parameters (`page`, `perPage`, etc.) are **not** applied; the
+        server uses a fixed page size (up to 10000 notes).
+
+
+        2. **`savedObjectIds` is set** — Returns notes linked to the given
+        Timeline saved object id(s). Same fixed cap as above; list-mode query
+        parameters are **not** applied.
+
+
+        3. **Neither `documentIds` nor `savedObjectIds`** — Lists notes using
+        saved-objects find semantics: `page` (default 1), `perPage` (default
+        10), optional `search`, `sortField`, `sortOrder`, `filter`,
+        `createdByFilter`, and `associatedFilter`.
+
+
+        Requires the **Timeline and Notes** read privilege (`notes_read`).
       operationId: GetNotes
       parameters:
-        - description: >-
-            Elasticsearch document `_id` values (or serialized array) to fetch
-            notes for.
+        - description: >
+            Event document `_id` values to match against each note's `eventId`.
+            When this parameter is present, the response is all matching notes
+            (up to the server's hard limit), not a paged list using
+            `page`/`perPage`.
+          examples:
+            multiple:
+              summary: Multiple document ids (array)
+              value:
+                - id-one
+                - id-two
+            single:
+              summary: Single document id
+              value: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bcbf66f57d124dcc739c98e6b
           in: query
           name: documentIds
           schema:
             $ref: '#/components/schemas/DocumentIds'
-        - description: >-
-            Saved object ids (for example timeline `savedObjectId`) whose notes
-            should be returned.
+        - description: >
+            Timeline `savedObjectId` value(s). Returns notes that reference
+            those timelines. When present, list-mode pagination parameters are
+            not used; up to the server's hard limit of notes may be returned.
+          examples:
+            singleTimeline:
+              summary: Single timeline id
+              value: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
           in: query
           name: savedObjectIds
           schema:
             $ref: '#/components/schemas/SavedObjectIds'
-        - description: >-
-            1-based page index for pagination (string for compatibility with
-            existing clients).
+        - description: >
+            Page number for list mode (when `documentIds` and `savedObjectIds`
+            are omitted). Passed as a string; default 1.
+          example: '1'
           in: query
           name: page
           schema:
             nullable: true
             type: string
-        - description: Page size as a string (for example `20`).
+        - description: >
+            Page size for list mode (when `documentIds` and `savedObjectIds` are
+            omitted). Passed as a string; default 10.
+          example: '20'
           in: query
           name: perPage
           schema:
             nullable: true
             type: string
-        - description: Free-text filter applied to note body content.
+        - description: Search string for saved-objects find (list mode only).
           in: query
           name: search
           schema:
             nullable: true
             type: string
-        - description: >-
-            Field name to sort by (implementation-specific; commonly `updated`
-            or `created`).
+        - description: Field to sort by for saved-objects find (list mode only).
           in: query
           name: sortField
           schema:
             nullable: true
             type: string
-        - description: Sort direction (`asc` or `desc`).
+        - description: >-
+            Sort order (`asc` or `desc`) for saved-objects find (list mode
+            only).
+          example: desc
           in: query
           name: sortOrder
           schema:
             nullable: true
             type: string
-        - description: Advanced filter expression supported by the notes finder.
+        - description: >
+            Kuery filter string combined with other list-mode filters (for
+            example `createdByFilter` or `associatedFilter`). Typed as a string
+            for API compatibility; interpreted by the saved-objects layer (list
+            mode only).
           in: query
           name: filter
           schema:
             nullable: true
             type: string
-        - description: Optional filter on author username or identifier.
+        - description: >
+            Kibana user profile **UID** (UUID). The server resolves the user's
+            display identifiers and returns notes whose `createdBy` matches any
+            of them (list mode only).
+          example: f1c2d3e4-5b6a-7890-abcd-ef1234567890
           in: query
           name: createdByFilter
           schema:
             nullable: true
             type: string
-        - description: >-
-            Restrict results based on how notes are linked to documents and
-            saved objects.
+        - description: >
+            Restricts notes by how they relate to a Timeline and/or an event
+            document (list mode only). Some values apply extra filtering after
+            the query. Ignored when `documentIds` or `savedObjectIds` is used.
           in: query
           name: associatedFilter
           schema:
@@ -150,13 +210,29 @@ paths:
                     totalCount: 1
               schema:
                 $ref: '#/components/schemas/GetNotesResult'
-          description: Indicates a successful call.
+          description: Notes and total count for the requested mode.
       summary: Get notes
       tags:
         - Security Timeline API
         - access:securitySolution
     patch:
-      description: Add a note to a Timeline or update an existing note.
+      description: >
+        Creates a new note or updates an existing one.
+
+
+        **Create:** Send `note` and omit `noteId` to create a new saved object.
+
+
+        **Update:** Send `note` with the changed fields and set `noteId` to the
+        note's saved object ID. Optionally include `version` for optimistic
+        concurrency when the client has it from a prior read.
+
+
+        Requires the **Timeline and Notes** write privilege (`notes_write`).
+      externalDocs:
+        description: Add or update a note on a Timeline
+        url: >-
+          https://www.elastic.co/guide/en/security/current/timeline-api-update.html
       operationId: PersistNoteRoute
       requestBody:
         content:
@@ -174,20 +250,32 @@ paths:
               properties:
                 note:
                   $ref: '#/components/schemas/BareNote'
-                  description: The note to add or update.
+                  description: >-
+                    Note payload (timeline, text, optional event linkage,
+                    metadata).
                 noteId:
-                  description: The `savedObjectId` of the note
+                  description: >-
+                    The `savedObjectId` of the note to update. Omit when
+                    creating a new note.
                   example: 709f99c6-89b6-4953-9160-35945c8e174e
                   nullable: true
                   type: string
                 version:
-                  description: The version of the note
+                  description: >-
+                    Saved object version string from a previous read; optional
+                    on update.
                   example: WzQ2LDFd
                   nullable: true
                   type: string
               required:
                 - note
-        description: The note to add or update, along with additional metadata.
+        description: >
+          Body must include the `note` object. For updates, include `noteId`
+          (and optionally `version`).
+
+          To attach a note to a specific event, set `note.eventId` to that
+          event's document `_id`; for a timeline-wide note, omit or clear
+          `eventId` per product rules.
         required: true
       responses:
         '200':
@@ -205,7 +293,7 @@ paths:
                       version: WzQ2LDFd
               schema:
                 $ref: '#/components/schemas/ResponseNote'
-          description: Indicates a successful call.
+          description: The persisted note, including `noteId` and `version`.
       summary: Add or update a note
       tags:
         - Security Timeline API
@@ -1292,7 +1380,17 @@ paths:
 components:
   schemas:
     AssociatedFilterType:
-      description: Filter notes based on their association with a document or saved object.
+      description: >
+        How the note is associated with a Timeline saved object and/or an event
+        (`eventId`). `all`: no association-based restriction from this
+        parameter. `document_only`: document-linked notes (non-empty `eventId`)
+        without timeline association in the API's internal sense; post-filtering
+        drops notes without a usable `eventId`. `saved_object_only`: timeline
+        notes with no linked event (`eventId` empty or absent); post-filtering
+        keeps timeline-only notes. `document_and_saved_object`: notes on a
+        timeline and linked to an event; post-filtering enforces a real
+        `eventId`. `orphan`: not on a timeline and `eventId` is empty (stricter
+        than missing `eventId` in some cases).
       enum:
         - all
         - document_only
@@ -1306,7 +1404,10 @@ components:
         - type: object
           properties:
             eventId:
-              description: The `_id` of the associated event for this note.
+              description: >
+                Elasticsearch document `_id` for the event or alert this note
+                refers to. Same value as the `documentIds` query parameter when
+                fetching notes via GET /api/note.
               example: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bc
               nullable: true
               type: string
@@ -1317,8 +1418,8 @@ components:
               type: string
             timelineId:
               description: >-
-                The `savedObjectId` of the Timeline that this note is associated
-                with
+                The `savedObjectId` of the Timeline this note belongs to (not
+                the note's own ID).
               example: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
               type: string
           required:
@@ -1439,6 +1540,7 @@ components:
         - template
       type: string
     DocumentIds:
+      description: One document ID or an array of IDs (Elasticsearch `_id` of the event).
       oneOf:
         - items:
             type: string
@@ -1558,6 +1660,9 @@ components:
             $ref: '#/components/schemas/Note'
           type: array
         totalCount:
+          description: >-
+            Number of notes returned (may be adjusted after the query when
+            `associatedFilter` applies post-filtering).
           type: number
       required:
         - totalCount
@@ -1797,6 +1902,7 @@ components:
         - zeek
       type: string
     SavedObjectIds:
+      description: One Timeline saved object ID or an array of IDs.
       oneOf:
         - items:
             type: string

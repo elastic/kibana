@@ -275,6 +275,85 @@ describe('lookup index utilities', () => {
     ]);
   });
 
+  it.each([
+    {
+      title: 'adds self-rows for confirmed resolution targets without resolved_to',
+      page: {
+        entityIds: ['user:target-silent'],
+        scores: [],
+        entities: new Map([
+          [
+            'user:target-silent',
+            {
+              entity: {
+                id: 'user:target-silent',
+                relationships: {
+                  resolution: {},
+                },
+              },
+            },
+          ],
+        ]),
+      } as ScoredEntityPage,
+      resolutionTargetIds: ['user:target-silent'],
+      expectedUpserts: [
+        {
+          entity_id: 'user:target-silent',
+          resolution_target_id: 'user:target-silent',
+          propagation_target_id: null,
+          relationship_type: 'self',
+          '@timestamp': '2026-01-01T00:00:00.000Z',
+        },
+      ],
+    },
+    {
+      title: 'does not overwrite existing alias rows when target ids are injected',
+      page: {
+        entityIds: ['user:b'],
+        scores: [],
+        entities: new Map([
+          [
+            'user:b',
+            {
+              entity: {
+                id: 'user:b',
+                relationships: {
+                  resolution: { resolved_to: 'user:c' },
+                },
+              },
+            },
+          ],
+        ]),
+      } as ScoredEntityPage,
+      resolutionTargetIds: ['user:b'],
+      expectedUpserts: [
+        {
+          entity_id: 'user:b',
+          resolution_target_id: 'user:c',
+          propagation_target_id: null,
+          relationship_type: 'entity.relationships.resolution.resolved_to',
+          '@timestamp': '2026-01-01T00:00:00.000Z',
+        },
+        {
+          entity_id: 'user:c',
+          resolution_target_id: 'user:c',
+          propagation_target_id: null,
+          relationship_type: 'self',
+          '@timestamp': '2026-01-01T00:00:00.000Z',
+        },
+      ],
+    },
+  ])('$title', ({ page, resolutionTargetIds, expectedUpserts }) => {
+    const operations = buildLookupSyncOperationsForPage({
+      page,
+      now: '2026-01-01T00:00:00.000Z',
+      notInStoreEntityIds: [],
+      resolutionTargetIds,
+    });
+
+    expect(operations.upserts).toEqual(expectedUpserts);
+  });
+
   it('syncs a scored page using one helper call', async () => {
     const page: ScoredEntityPage = {
       entityIds: ['user:alias-4'],

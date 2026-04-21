@@ -160,7 +160,7 @@
               "() => Promise<void>"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/saved_objects_service.ts",
-            "lineNumber": 475,
+            "lineNumber": 484,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1103,7 +1103,7 @@
         "label": "SAVED_OBJECT_TYPES_COUNT",
         "description": [],
         "signature": [
-          "155"
+          "156"
         ],
         "path": "src/core/packages/saved-objects/server-internal/src/object_types/index.ts",
         "lineNumber": 14,
