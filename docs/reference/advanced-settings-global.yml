@@ -42,7 +42,7 @@ groups:
         id: custom-logo
         description: |
           A custom image that appears in the header of all {{product.kibana}} pages. Images must have a transparent background, and 128x128 pixels or smaller.
-        datatype: string
+        datatype: image
         applies_to:
           stack: ga
           ech: ga
