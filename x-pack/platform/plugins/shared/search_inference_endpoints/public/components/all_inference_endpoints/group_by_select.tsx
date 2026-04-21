@@ -34,7 +34,7 @@ const GROUP_BY_OPTIONS = [
   {
     key: GroupByOptions.Model,
     label: i18n.translate('xpack.searchInferenceEndpoints.groupBy.options.models.label', {
-      defaultMessage: 'Model Author',
+      defaultMessage: 'Model ID',
     }),
   },
   {
