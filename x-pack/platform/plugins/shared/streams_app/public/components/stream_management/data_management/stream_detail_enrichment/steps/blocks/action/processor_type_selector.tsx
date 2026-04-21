@@ -673,7 +673,7 @@ const getAvailableProcessors: (
       return (
         <FormattedMessage
           id="xpack.streams.streamDetailView.managementTab.enrichment.processor.userAgentHelpText"
-          defaultMessage="{userAgentLink} from browser user agent strings (browser name, OS, device info, etc.)."
+          defaultMessage="{userAgentLink} from the user agent string a browser sends with its web requests."
           values={{
             userAgentLink: (
               <EuiLink
