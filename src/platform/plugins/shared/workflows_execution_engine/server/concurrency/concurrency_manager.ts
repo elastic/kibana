@@ -9,6 +9,7 @@
 
 import type { ConcurrencySettings, WorkflowContext } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
+import type { ConcurrencySemaphoreRepository } from '../repositories/concurrency_semaphore_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { WorkflowTemplatingEngine } from '../templating_engine';
 import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
@@ -19,20 +20,29 @@ import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task
  * Scope:
  * - Evaluating concurrency group keys from static strings or template expressions
  * - Enforcing concurrency limits per group
- * - Implementing collision strategies (drop, cancel-in-progress)
+ * - Implementing collision strategies (drop, cancel-in-progress, queue)
+ *
+ * The 'queue' strategy uses a two-path approach:
+ * - Fast path: if no executions are already queued, acquire a semaphore slot directly
+ *   and return true so the caller proceeds immediately in the current TM task.
+ * - Slow path: if the queue is non-empty, always join the back of the queue (FIFO
+ *   fairness). Slot acquisition and TM-task scheduling happen in promoteFromQueue().
  */
 export class ConcurrencyManager {
   private readonly templatingEngine: WorkflowTemplatingEngine;
   private readonly workflowTaskManager: WorkflowTaskManager;
   private readonly workflowExecutionRepository: WorkflowExecutionRepository;
+  private readonly concurrencySemaphoreRepository: ConcurrencySemaphoreRepository;
 
   constructor(
     workflowTaskManager: WorkflowTaskManager,
-    workflowExecutionRepository: WorkflowExecutionRepository
+    workflowExecutionRepository: WorkflowExecutionRepository,
+    concurrencySemaphoreRepository: ConcurrencySemaphoreRepository
   ) {
     this.templatingEngine = new WorkflowTemplatingEngine();
     this.workflowTaskManager = workflowTaskManager;
     this.workflowExecutionRepository = workflowExecutionRepository;
+    this.concurrencySemaphoreRepository = concurrencySemaphoreRepository;
   }
 
   /**
@@ -73,15 +83,21 @@ export class ConcurrencyManager {
   /**
    * Checks concurrency limits and applies the collision strategy if needed.
    *
-   * For 'cancel-in-progress' strategy:
-   * - Queries for non-terminal executions with the same concurrency group key
-   * - If limit is exceeded, cancels the oldest execution(s) to make room
-   * - Returns true if the new execution can proceed, false otherwise
+   * For 'queue' strategy:
+   * - Fast path: if the queue is empty, acquire a semaphore slot directly and
+   *   return true — the caller proceeds immediately in the current TM task with
+   *   no QUEUED state and no extra round-trip.
+   * - Slow path: if the queue is non-empty, join the back of the queue (FIFO).
+   *   Slot acquisition happens in promoteFromQueue() when a slot frees up.
+   * - Skips if the queue is already at maxQueueSize
    *
    * For 'drop' strategy:
    * - Queries for non-terminal executions with the same concurrency group key
    * - If limit is exceeded, marks the new execution as SKIPPED and returns false
-   * - Returns true if the new execution can proceed, false otherwise
+   *
+   * For 'cancel-in-progress' strategy:
+   * - Queries for non-terminal executions with the same concurrency group key
+   * - If limit is exceeded, cancels the oldest execution(s) to make room
    *
    * @param concurrencySettings - The concurrency settings from workflow definition
    * @param concurrencyGroupKey - The evaluated concurrency group key
@@ -95,15 +111,58 @@ export class ConcurrencyManager {
     currentExecutionId: string,
     spaceId: string
   ): Promise<boolean> {
-    // If no concurrency settings or key, allow execution to proceed
     if (!concurrencySettings || !concurrencyGroupKey) {
       return true;
     }
 
-    const strategy = concurrencySettings.strategy;
     const maxConcurrency = concurrencySettings.max ?? 1;
 
-    // Query for non-terminal execution IDs in the same concurrency group
+    // --- Queue strategy: fast path + FIFO slow path ---
+    if (concurrencySettings.strategy === 'queue') {
+      const maxQueueSize = concurrencySettings.maxQueueSize;
+      const queued = await this.workflowExecutionRepository.getQueuedExecutionsByConcurrencyGroup(
+        concurrencyGroupKey,
+        spaceId
+      );
+
+      if (queued.length >= maxQueueSize) {
+        await this.workflowExecutionRepository.updateWorkflowExecution({
+          id: currentExecutionId,
+          status: ExecutionStatus.SKIPPED,
+          cancelRequested: true,
+          cancellationReason: `Queue full (maxQueueSize: ${maxQueueSize})`,
+          cancelledAt: new Date().toISOString(),
+          cancelledBy: 'system',
+        });
+        return false;
+      }
+
+      // Fast path: no executions are waiting, so try to acquire a slot directly.
+      // This lets the caller proceed immediately in the current TM task —
+      // no QUEUED write, no extra TM round-trip.
+      // FIFO is preserved: if there ARE queued items we skip this and join the
+      // back of the queue below, preventing new arrivals from jumping the line.
+      if (queued.length === 0) {
+        const acquired = await this.concurrencySemaphoreRepository.tryAcquireSlot(
+          concurrencyGroupKey,
+          spaceId,
+          currentExecutionId,
+          maxConcurrency
+        );
+        if (acquired) {
+          return true;
+        }
+      }
+
+      // Slow path: queue is non-empty or all slots are taken — join the queue.
+      await this.workflowExecutionRepository.updateWorkflowExecution({
+        id: currentExecutionId,
+        status: ExecutionStatus.QUEUED,
+      });
+      return false;
+    }
+
+    // --- Drop and cancel-in-progress: search-based (unchanged) ---
     const runningExecutionIds =
       await this.workflowExecutionRepository.getRunningExecutionsByConcurrencyGroup(
         concurrencyGroupKey,
@@ -113,13 +172,11 @@ export class ConcurrencyManager {
 
     const activeCount = runningExecutionIds.length;
 
-    // If we're within the limit, allow execution to proceed
     if (activeCount < maxConcurrency) {
       return true;
     }
 
-    // Handle 'drop' strategy: mark new execution as SKIPPED if limit is exceeded
-    if (strategy === 'drop') {
+    if (concurrencySettings.strategy === 'drop') {
       const skipTimestamp = new Date().toISOString();
       await this.workflowExecutionRepository.updateWorkflowExecution({
         id: currentExecutionId,
@@ -129,18 +186,13 @@ export class ConcurrencyManager {
         cancelledAt: skipTimestamp,
         cancelledBy: 'system',
       });
-      return false; // Drop the new execution
+      return false;
     }
 
-    // Handle 'cancel-in-progress' strategy: cancel oldest execution(s) to make room
-    if (strategy === 'cancel-in-progress') {
-      // Calculate how many executions to cancel
+    if (concurrencySettings.strategy === 'cancel-in-progress') {
       const executionsToCancel = activeCount - maxConcurrency + 1;
-
-      // Cancel the oldest executions (they're already sorted by createdAt ascending)
       const executionIdsToCancel = runningExecutionIds.slice(0, executionsToCancel);
 
-      // Bulk update all executions to cancelled status in a single ES request
       const cancellationTimestamp = new Date().toISOString();
       await this.workflowExecutionRepository.bulkUpdateWorkflowExecutions(
         executionIdsToCancel.map((id) => ({
@@ -153,12 +205,11 @@ export class ConcurrencyManager {
         }))
       );
 
-      // Propagate cancellation to running tasks (can be done in parallel)
       await Promise.all(
         executionIdsToCancel.map((id) => this.workflowTaskManager.forceRunIdleTasks(id))
       );
 
-      return true; // Execution can proceed after cancelling old ones
+      return true;
     }
 
     return true;

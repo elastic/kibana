@@ -153,6 +153,7 @@ export const WorkflowExecutionList = ({
                 <WorkflowExecutionListItem
                   status={execution.status}
                   isTestRun={execution.isTestRun}
+                  createdAt={execution.createdAt ? new Date(execution.createdAt) : null}
                   startedAt={toValidDate(execution.startedAt)}
                   duration={execution.duration}
                   executedBy={execution.executedBy}

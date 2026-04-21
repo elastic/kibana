@@ -10,6 +10,7 @@
 import type { ConcurrencySettings, WorkflowContext } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { ConcurrencyManager } from './concurrency_manager';
+import type { ConcurrencySemaphoreRepository } from '../repositories/concurrency_semaphore_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
@@ -18,6 +19,7 @@ describe('ConcurrencyManager', () => {
   let mockContext: WorkflowContext;
   let mockWorkflowTaskManager: jest.Mocked<WorkflowTaskManager>;
   let mockWorkflowExecutionRepository: jest.Mocked<WorkflowExecutionRepository>;
+  let mockConcurrencySemaphoreRepository: jest.Mocked<ConcurrencySemaphoreRepository>;
 
   beforeEach(() => {
     mockWorkflowTaskManager = {
@@ -27,13 +29,21 @@ describe('ConcurrencyManager', () => {
 
     mockWorkflowExecutionRepository = {
       getRunningExecutionsByConcurrencyGroup: jest.fn(),
+      getQueuedExecutionsByConcurrencyGroup: jest.fn(),
       bulkUpdateWorkflowExecutions: jest.fn().mockResolvedValue(undefined),
       updateWorkflowExecution: jest.fn(),
     } as unknown as jest.Mocked<WorkflowExecutionRepository>;
 
+    mockConcurrencySemaphoreRepository = {
+      tryAcquireSlot: jest.fn().mockResolvedValue(true),
+      releaseSlot: jest.fn().mockResolvedValue(undefined),
+      reconcileSlots: jest.fn().mockResolvedValue(undefined),
+    } as unknown as jest.Mocked<ConcurrencySemaphoreRepository>;
+
     concurrencyManager = new ConcurrencyManager(
       mockWorkflowTaskManager,
-      mockWorkflowExecutionRepository
+      mockWorkflowExecutionRepository,
+      mockConcurrencySemaphoreRepository
     );
 
     mockContext = {
@@ -600,6 +610,136 @@ describe('ConcurrencyManager', () => {
         'default'
       );
       expect(result2).toBe(true); // Should proceed (within limit for group2)
+    });
+
+    describe('queue strategy', () => {
+      it('fast path: acquires slot directly when queue is empty and slot is available', async () => {
+        const settings: ConcurrencySettings = {
+          key: 'server-1',
+          strategy: 'queue',
+          max: 2,
+          maxQueueSize: 5,
+        };
+        mockWorkflowExecutionRepository.getQueuedExecutionsByConcurrencyGroup.mockResolvedValue([]);
+        mockConcurrencySemaphoreRepository.tryAcquireSlot.mockResolvedValue(true);
+
+        const result = await concurrencyManager.checkConcurrency(
+          settings,
+          'server-1',
+          'exec-1',
+          'default'
+        );
+
+        expect(result).toBe(true);
+        expect(mockConcurrencySemaphoreRepository.tryAcquireSlot).toHaveBeenCalledWith(
+          'server-1',
+          'default',
+          'exec-1',
+          2
+        );
+        expect(mockWorkflowExecutionRepository.updateWorkflowExecution).not.toHaveBeenCalled();
+      });
+
+      it('slow path: queues when queue is empty but all slots are taken', async () => {
+        const settings: ConcurrencySettings = {
+          key: 'server-1',
+          strategy: 'queue',
+          max: 2,
+          maxQueueSize: 5,
+        };
+        mockWorkflowExecutionRepository.getQueuedExecutionsByConcurrencyGroup.mockResolvedValue([]);
+        mockConcurrencySemaphoreRepository.tryAcquireSlot.mockResolvedValue(false);
+
+        const result = await concurrencyManager.checkConcurrency(
+          settings,
+          'server-1',
+          'exec-1',
+          'default'
+        );
+
+        expect(result).toBe(false);
+        expect(mockWorkflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith({
+          id: 'exec-1',
+          status: ExecutionStatus.QUEUED,
+        });
+      });
+
+      it('slow path: always queues when there are already queued items (FIFO)', async () => {
+        const settings: ConcurrencySettings = {
+          key: 'server-1',
+          strategy: 'queue',
+          max: 2,
+          maxQueueSize: 5,
+        };
+        mockWorkflowExecutionRepository.getQueuedExecutionsByConcurrencyGroup.mockResolvedValue([
+          { id: 'exec-3', workflowId: 'wf-1' },
+        ]);
+
+        const result = await concurrencyManager.checkConcurrency(
+          settings,
+          'server-1',
+          'exec-4',
+          'default'
+        );
+
+        expect(result).toBe(false);
+        // Should NOT attempt direct slot acquisition when older items are waiting
+        expect(mockConcurrencySemaphoreRepository.tryAcquireSlot).not.toHaveBeenCalled();
+        expect(mockWorkflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith({
+          id: 'exec-4',
+          status: ExecutionStatus.QUEUED,
+        });
+      });
+
+      it('should mark execution as SKIPPED when queue is full', async () => {
+        const settings: ConcurrencySettings = {
+          key: 'server-1',
+          strategy: 'queue',
+          max: 1,
+          maxQueueSize: 2,
+        };
+        mockWorkflowExecutionRepository.getQueuedExecutionsByConcurrencyGroup.mockResolvedValue([
+          { id: 'exec-2', workflowId: 'wf-1' },
+          { id: 'exec-3', workflowId: 'wf-1' },
+        ]);
+
+        const result = await concurrencyManager.checkConcurrency(
+          settings,
+          'server-1',
+          'exec-4',
+          'default'
+        );
+
+        expect(result).toBe(false);
+        expect(mockConcurrencySemaphoreRepository.tryAcquireSlot).not.toHaveBeenCalled();
+        expect(mockWorkflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith({
+          id: 'exec-4',
+          status: ExecutionStatus.SKIPPED,
+          cancelRequested: true,
+          cancellationReason: 'Queue full (maxQueueSize: 2)',
+          cancelledAt: expect.any(String),
+          cancelledBy: 'system',
+        });
+      });
+
+      it('should not call forceRunIdleTasks or search-based methods for queue strategy', async () => {
+        const settings: ConcurrencySettings = {
+          key: 'server-1',
+          strategy: 'queue',
+          max: 1,
+          maxQueueSize: 5,
+        };
+        mockWorkflowExecutionRepository.getQueuedExecutionsByConcurrencyGroup.mockResolvedValue([]);
+        mockConcurrencySemaphoreRepository.tryAcquireSlot.mockResolvedValue(false);
+
+        await concurrencyManager.checkConcurrency(settings, 'server-1', 'exec-2', 'default');
+
+        expect(mockWorkflowTaskManager.forceRunIdleTasks).not.toHaveBeenCalled();
+        expect(mockWorkflowExecutionRepository.bulkUpdateWorkflowExecutions).not.toHaveBeenCalled();
+        expect(
+          mockWorkflowExecutionRepository.getRunningExecutionsByConcurrencyGroup
+        ).not.toHaveBeenCalled();
+      });
     });
 
     describe('error handling', () => {

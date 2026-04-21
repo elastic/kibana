@@ -12,7 +12,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { type TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import { WORKFLOW_RESUME_TASK_TYPE } from './types';
-import type { ResumeWorkflowExecutionParams } from './types';
+import type { ResumeWorkflowExecutionParams, StartWorkflowExecutionParams } from './types';
 import { generateExecutionTaskScope } from '../utils';
 
 export class WorkflowTaskManager {
@@ -45,6 +45,30 @@ export class WorkflowTaskManager {
     return {
       taskId: task.id,
     };
+  }
+
+  async scheduleExecutionTask({
+    executionId,
+    workflowId,
+    spaceId,
+    fakeRequest,
+  }: {
+    executionId: string;
+    workflowId: string;
+    spaceId: string;
+    fakeRequest?: KibanaRequest;
+  }): Promise<void> {
+    await this.taskManager.schedule(
+      {
+        id: `workflow:${executionId}:promoted`,
+        taskType: 'workflow:run',
+        params: { workflowRunId: executionId, spaceId } as StartWorkflowExecutionParams,
+        state: { lastRunAt: null, lastRunStatus: null, lastRunError: null },
+        scope: ['workflow', `workflow:${workflowId}`, `workflow:execution:${executionId}`],
+        enabled: true,
+      },
+      fakeRequest ? { request: fakeRequest } : {}
+    );
   }
 
   async scheduleImmediateResume({

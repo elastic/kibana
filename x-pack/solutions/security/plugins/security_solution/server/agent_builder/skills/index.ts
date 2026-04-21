@@ -8,5 +8,6 @@
 export { alertAnalysisSkill } from './alert_analysis';
 export { threatHuntingSkill } from './threat_hunting';
 export { createAutomaticTroubleshootingSkill } from './automatic_troubleshooting';
+export { createMalwareAnalysisSkill } from './malware_analysis_skill';
 export { getDetectionRuleEditSkill } from './detection_rule_edit';
 export { registerSkills } from './register_skills';

@@ -61,6 +61,8 @@ import {
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
   SERVER_APP_ID,
   CASE_ATTACHMENT_INDICATOR_TYPE_ID,
+  PREINSTALLED_WORKFLOWS_FEATURE_FLAG,
+  PREINSTALLED_WORKFLOWS_FEATURE_FLAG_DEFAULT,
 } from '../common/constants';
 import { getEventAttachmentType } from './cases/attachments/event';
 import { DefaultClosingReasonSchema } from '../common/types';
@@ -126,6 +128,8 @@ import {
   ENDPOINT_SEARCH_STRATEGY,
 } from '../common/endpoint/constants';
 
+import { bootstrapPreinstalledWorkflows } from './lib/workflows';
+
 import { registerPrivilegeMonitoringTask } from './lib/entity_analytics/privilege_monitoring/tasks/privilege_monitoring_task';
 import { registerLeadGenerationTask } from './lib/entity_analytics/lead_generation/tasks';
 import { ProductFeaturesService } from './lib/product_features_service/product_features_service';
@@ -165,6 +169,7 @@ import {
 } from './lib/trial_companion/services/trial_companion_milestone_service';
 import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
 import type { TrialCompanionRoutesDeps } from './lib/trial_companion/types';
+import { registerWorkflowSteps } from './workflows/step_types';
 import { setupAlertsCapabilitiesSwitcher } from './lib/capabilities/alerts_capabilities_switcher';
 import { securityAlertsProfileInitializer } from './lib/anonymization';
 import { registerWatchlistMaintainer } from './lib/entity_analytics/watchlists/maintainer/register_watchlist_maintainer';
@@ -282,7 +287,16 @@ export class Plugin implements ISecuritySolutionPlugin {
       kibanaVersion: this.pluginContext.env.packageInfo.version,
       logger,
       ml: plugins.ml,
-      options: { endpointAppContextService },
+      options: {
+        endpointAppContextService,
+        malwareAnalysis: this.config.malwareAnalysis
+          ? {
+              orchestratorUrl: this.config.malwareAnalysis.orchestratorUrl,
+              apiToken: this.config.malwareAnalysis.apiToken,
+              timeout: this.config.malwareAnalysis.timeout,
+            }
+          : undefined,
+      },
     }).catch((error) => {
       this.logger.error(`Error registering security skills: ${error}`);
     });
@@ -817,6 +831,56 @@ export class Plugin implements ISecuritySolutionPlugin {
     }
 
     this.registerAgentBuilderAttachmentsAndTools(plugins, core, this.logger);
+
+    if (plugins.workflowsExtensions) {
+      const workflowsExtensions = plugins.workflowsExtensions;
+      core
+        .getStartServices()
+        .then(async ([coreStart]) => {
+          await registerWorkflowSteps(workflowsExtensions, coreStart);
+        })
+        .catch((error) => {
+          this.logger.error(
+            `[RegisterAlertValidationSteps] Error registering alert validation steps: ${error.message}`,
+            {
+              error: error.stack,
+            }
+          );
+        });
+    }
+
+    if (plugins.workflowsManagement) {
+      const workflowsManagement = plugins.workflowsManagement;
+      core
+        .getStartServices()
+        .then(async ([coreStart]) => {
+          const isEnabled = await coreStart.featureFlags.getBooleanValue(
+            PREINSTALLED_WORKFLOWS_FEATURE_FLAG,
+            PREINSTALLED_WORKFLOWS_FEATURE_FLAG_DEFAULT
+          );
+          this.logger.info(
+            `[PreinstalledWorkflows] Pre-installed workflows feature flag: ${isEnabled}`
+          );
+          if (isEnabled) {
+            this.logger.info(
+              '[PreinstalledWorkflows] Starting bootstrap of pre-installed workflows'
+            );
+            return bootstrapPreinstalledWorkflows(workflowsManagement, 'default', this.logger);
+          } else {
+            this.logger.info(
+              '[PreinstalledWorkflows] Pre-installed workflows feature flag is disabled, skipping bootstrap'
+            );
+          }
+        })
+        .catch((error) => {
+          this.logger.error(
+            `[PreinstalledWorkflows] Error bootstrapping pre-installed workflows: ${error.message}`,
+            {
+              error: error.stack,
+            }
+          );
+        });
+    }
 
     setupAlertsCapabilitiesSwitcher({
       core,

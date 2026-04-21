@@ -83,6 +83,11 @@ const getExecutionStatusColorsMap = (
       backgroundColor: euiTheme.colors.backgroundBaseSubdued,
       tokenColor: 'gray',
     },
+    [ExecutionStatus.QUEUED]: {
+      color: euiTheme.colors.textSubdued,
+      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+      tokenColor: 'gray' as const,
+    },
   };
 };
 
@@ -110,6 +115,7 @@ const ExecutionStatusIconTypeMap: Record<ExecutionStatus, EuiIconType> = {
   [ExecutionStatus.WAITING_FOR_INPUT]: 'hourglass',
   [ExecutionStatus.CANCELLED]: 'crossCircle',
   [ExecutionStatus.SKIPPED]: 'minusCircle',
+  [ExecutionStatus.QUEUED]: 'clock',
 };
 
 export const getExecutionStatusIcon = (euiTheme: EuiThemeComputed, status: ExecutionStatus) => {

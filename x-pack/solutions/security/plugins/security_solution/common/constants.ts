@@ -10,6 +10,7 @@ import {
   RULES_FEATURE_LATEST,
   SECURITY_FEATURE_ID_V5,
 } from '@kbn/security-solution-features/constants';
+import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import * as i18n from './translations';
 
 export {
@@ -720,5 +721,15 @@ export enum SecurityAgentBuilderAttachments {
   entity = 'security.entity',
   rule = 'security.rule',
 }
+
+export const THREAT_HUNTING_AGENT_ID = `${internalNamespaces.security}.agent`;
+
+export const PREINSTALLED_WORKFLOWS_FEATURE_FLAG =
+  'securitySolution.preinstalledWorkflowsEnabled' as const;
+export const PREINSTALLED_WORKFLOWS_FEATURE_FLAG_DEFAULT = true as const;
+
+export const REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG =
+  'securitySolution.registerAlertValidationStepsEnabled' as const;
+export const REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT = true as const;
 
 export const SECURITY_RULE_ATTACHMENT_ID = 'ai-rule-creation';

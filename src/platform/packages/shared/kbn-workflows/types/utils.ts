@@ -81,7 +81,8 @@ export function isCancelableStatus(status: ExecutionStatus) {
     status === ExecutionStatus.RUNNING ||
     status === ExecutionStatus.WAITING ||
     status === ExecutionStatus.WAITING_FOR_INPUT ||
-    status === ExecutionStatus.PENDING
+    status === ExecutionStatus.PENDING ||
+    status === ExecutionStatus.QUEUED
   );
 }
 

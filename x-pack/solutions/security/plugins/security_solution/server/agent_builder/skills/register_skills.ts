@@ -16,6 +16,8 @@ import { threatHuntingSkill } from './threat_hunting';
 import { alertAnalysisSkill } from './alert_analysis';
 import type { EntityAnalyticsRoutesDeps } from '../../lib/entity_analytics/types';
 import { getSecurityMlJobsSkill } from './security_ml_jobs';
+import type { MalwareAnalysisConfig } from '../../lib/malware_analysis';
+import { createMalwareAnalysisSkill } from './malware_analysis_skill';
 
 interface RegisterSkillsOpts {
   agentBuilder: AgentBuilderPluginSetup;
@@ -26,6 +28,7 @@ interface RegisterSkillsOpts {
   ml: EntityAnalyticsRoutesDeps['ml'];
   options: {
     endpointAppContextService: EndpointAppContextService;
+    malwareAnalysis?: MalwareAnalysisConfig;
   };
 }
 
@@ -59,4 +62,8 @@ export const registerSkills = async ({
 
   await agentBuilder.skills.register(threatHuntingSkill);
   await agentBuilder.skills.register(alertAnalysisSkill);
+
+  if (options.malwareAnalysis) {
+    await agentBuilder.skills.register(createMalwareAnalysisSkill(options.malwareAnalysis));
+  }
 };

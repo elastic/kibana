@@ -37,6 +37,7 @@ const mockExecution: WorkflowExecutionDto = {
   id: 'exec-1',
   status: ExecutionStatus.COMPLETED,
   isTestRun: false,
+  createdAt: '2024-01-01T00:00:00Z',
   startedAt: '2024-01-01T00:00:00Z',
   error: null,
   finishedAt: '2024-01-01T00:01:00Z',
