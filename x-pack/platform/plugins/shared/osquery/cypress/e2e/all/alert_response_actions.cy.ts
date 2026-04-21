@@ -40,8 +40,7 @@ import {
 } from '../../tasks/integrations';
 import { disableNewFeaturesTours } from '../../tasks/navigation';
 
-// Failing: See https://github.com/elastic/kibana/issues/264525
-describe.skip(
+describe(
   'Alert Response Actions',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {
@@ -374,10 +373,9 @@ describe.skip(
           // `data-grid-row-index` was removed from EUI; cells use `data-gridcell-visible-row-index`.
           // Scope under `osqueryResultsTable` so we match the results grid (unified uses an inner
           // `docTable`, legacy attaches the test subj to `EuiDataGrid` directly).
-          cy.get(
-            '[data-test-subj="osqueryResultsTable"] [data-gridcell-visible-row-index="1"]',
-            { timeout: 180000 }
-          ).should('exist');
+          cy.get('[data-test-subj="osqueryResultsTable"] [data-gridcell-visible-row-index="1"]', {
+            timeout: 180000,
+          }).should('exist');
         });
       });
 
