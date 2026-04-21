@@ -15,6 +15,12 @@
  * Evaluation suites opt in by importing directly from this package.
  */
 
+/**
+ * Package version — asserted by the package-health test and used as a
+ * quick runtime health check for consumers.
+ */
+export const EVALS_EXTENSIONS_VERSION = '1.0.0';
+
 // Core re-exports for convenience
 export type { Evaluator, Example, EvaluationDataset, TaskOutput } from '@kbn/evals';
 export type { EvaluationScoreDocument } from '@kbn/evals';
@@ -42,6 +48,8 @@ export { createSkillSafetyEvaluator } from './src/evaluators/skill_preset/safety
 export { createBackingIndexValidator } from './src/evaluators/code/backing_index_validator';
 export { createEsqlPatternEvaluator } from './src/evaluators/code/esql_pattern';
 export { createSkillPiiEvaluator } from './src/evaluators/code/skill_pii';
+export { createSecretScannerEvaluator } from './src/evaluators/code/secret_scanner';
+export { createPromptInjectionEvaluator } from './src/evaluators/code/prompt_injection';
 export { createKeywordsEvaluator } from './src/evaluators/code/keywords';
 export type { KeywordsEvaluatorConfig } from './src/evaluators/code/keywords';
 export { createPathEfficiencyEvaluator } from './src/evaluators/code/path_efficiency';

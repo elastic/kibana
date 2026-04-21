@@ -14,6 +14,8 @@ import { createSkillSafetyEvaluator } from './safety';
 import { createBackingIndexValidator } from '../code/backing_index_validator';
 import { createEsqlPatternEvaluator } from '../code/esql_pattern';
 import { createSkillPiiEvaluator } from '../code/skill_pii';
+import { createSecretScannerEvaluator } from '../code/secret_scanner';
+import { createPromptInjectionEvaluator } from '../code/prompt_injection';
 
 export interface SkillPresetConfig {
   weights?: Record<string, number>;
@@ -28,7 +30,17 @@ const DEFAULT_WEIGHTS: Record<string, number> = {
   specificity: 0.15,
 };
 
-const DEFAULT_REQUIRED_PASS = ['skill-safety', 'backing-index-validator', 'skill-pii'];
+// Hard-fail gates: if any of these score 0/null, skip the expensive LLM
+// judges for this item. `skill-secret-scanner` and `skill-prompt-injection`
+// are cheap CODE checks that should always block on a hit — no need to pay
+// for LLM evaluation of a skill that leaks a token or contains an injection.
+const DEFAULT_REQUIRED_PASS = [
+  'skill-safety',
+  'backing-index-validator',
+  'skill-pii',
+  'skill-secret-scanner',
+  'skill-prompt-injection',
+];
 
 export const createSkillEvaluatorPreset = (config?: SkillPresetConfig) => ({
   evaluators: [
@@ -40,6 +52,8 @@ export const createSkillEvaluatorPreset = (config?: SkillPresetConfig) => ({
     createBackingIndexValidator(),
     createEsqlPatternEvaluator(),
     createSkillPiiEvaluator(),
+    createSecretScannerEvaluator(),
+    createPromptInjectionEvaluator(),
   ] as Evaluator[],
   weights: config?.weights ?? DEFAULT_WEIGHTS,
   requiredPass: config?.requiredPass ?? DEFAULT_REQUIRED_PASS,
