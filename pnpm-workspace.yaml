@@ -404,6 +404,7 @@ packages:
   - 'src/core/packages/feature-flags/server-internal'
   - 'src/core/packages/feature-flags/server-mocks'
   - 'src/core/packages/hotkeys/browser'
+  - 'src/core/packages/hotkeys/browser-mocks'
   - 'src/core/packages/http/browser'
   - 'src/core/packages/http/browser-internal'
   - 'src/core/packages/http/browser-mocks'

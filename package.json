@@ -1776,6 +1776,7 @@
     "@kbn/core-execution-context-browser-mocks": "workspace:*",
     "@kbn/core-execution-context-server-mocks": "workspace:*",
     "@kbn/core-fatal-errors-browser-mocks": "workspace:*",
+    "@kbn/core-hotkeys-browser-mocks": "workspace:*",
     "@kbn/core-http-browser-mocks": "workspace:*",
     "@kbn/core-http-context-server-mocks": "workspace:*",
     "@kbn/core-http-resources-server-mocks": "workspace:*",

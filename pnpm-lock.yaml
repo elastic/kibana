@@ -5243,6 +5243,9 @@ importers:
       '@kbn/core-fatal-errors-browser-mocks':
         specifier: workspace:*
         version: link:src/core/packages/fatal-errors/browser-mocks
+      '@kbn/core-hotkeys-browser-mocks':
+        specifier: workspace:*
+        version: link:src/core/packages/hotkeys/browser-mocks
       '@kbn/core-http-browser-mocks':
         specifier: workspace:*
         version: link:src/core/packages/http/browser-mocks
@@ -7273,6 +7276,8 @@ importers:
   src/core/packages/feature-flags/server-mocks: {}
 
   src/core/packages/hotkeys/browser: {}
+
+  src/core/packages/hotkeys/browser-mocks: {}
 
   src/core/packages/http/browser: {}
 
