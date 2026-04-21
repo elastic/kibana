@@ -752,7 +752,7 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
               <EuiToolTip content={analyzeLogsDisabledTooltipContent} position="top">
                 <span tabIndex={0}>
                   <AiButton
-                    iconType="productAgent"
+                    iconType="sparkles"
                     variant="accent"
                     onClick={handleAnalyzeLogs}
                     disabled={isAnalyzeDisabled}
@@ -765,7 +765,7 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
               </EuiToolTip>
             ) : (
               <AiButton
-                iconType="productAgent"
+                iconType="sparkles"
                 variant="accent"
                 onClick={handleAnalyzeLogs}
                 disabled={isAnalyzeDisabled}
