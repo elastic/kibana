@@ -12,11 +12,10 @@ import { euiShadow } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
-import { omit, uniqBy, type MapCache } from 'lodash';
+import { uniqBy, type MapCache } from 'lodash';
 import { useRef } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
-import type { ESQLCallbacks } from '@kbn/esql-types';
 import {
   EDITOR_MAX_HEIGHT,
   EDITOR_MIN_HEIGHT,
@@ -397,33 +396,6 @@ export const filterDuplicatedWarnings = (
 };
 
 /**
- * Filters quick fixes that shouldn't be displayed by checking the display condition.
- * If no displayCondition is provided by the fix, we assume it should be shown always.
- */
-export const filterQuickFixes = async (
-  messages: MonacoMessage[],
-  query: string,
-  callbacks: ESQLCallbacks
-): Promise<MonacoMessage[]> => {
-  const result: MonacoMessage[] = [];
-  for (const message of messages) {
-    if (message.quickFix?.displayCondition) {
-      try {
-        const shouldDisplayFix = await message.quickFix.displayCondition(query, callbacks);
-        if (!shouldDisplayFix) {
-          result.push(omit(message, 'quickFix'));
-          continue;
-        }
-      } catch (error) {
-        continue;
-      }
-    }
-    result.push(message);
-  }
-  return result;
-};
-
-/**
  * Computes toggled comment lines for a set of lines, following standard IDE behavior:
  * comment all lines if any line is uncommented, uncomment all only if every line
  * is already commented.
@@ -489,4 +461,25 @@ export const trackSuggestionPopupState = (
       isSuggestionPopupOpenRef.current = false;
     });
   }
+};
+
+/**
+ * Checks if the code actions menu is being displayed.
+ * @param editor
+ * @returns
+ */
+export const isCodeActionMenuVisible = (editor: monaco.editor.IStandaloneCodeEditor): boolean => {
+  const editorDomNode = editor.getDomNode();
+  const contextKeyService = (
+    editor as monaco.editor.IStandaloneCodeEditor & {
+      _contextKeyService?: {
+        getContext: (target: HTMLElement | null) => {
+          getValue: (key: string) => unknown;
+        };
+      };
+    }
+  )._contextKeyService;
+  return (
+    contextKeyService?.getContext(editorDomNode ?? null)?.getValue('codeActionMenuVisible') === true
+  );
 };

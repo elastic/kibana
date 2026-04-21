@@ -16,7 +16,6 @@ import {
   filterDataErrors,
   filterDuplicatedWarnings,
   filterOutWarningsOverlappingWithErrors,
-  filterQuickFixes,
   parseErrors,
   parseWarning,
   useDebounceWithOptions,
@@ -82,11 +81,12 @@ export const useQueryValidation = ({
     warnings: serverWarning ? parseWarning(serverWarning) : [],
   });
 
-  const quickFixMessagesRef = useRef<MonacoMessage[]>([]);
+  // Mirror editorMessages into a ref so callbacks (Monaco providers, long-lived
+  // closures) can read the latest value without needing to be re-created on every
+  // validation tick.
+  const editorMessagesRef = useRef(editorMessages);
   useEffect(() => {
-    quickFixMessagesRef.current = [...editorMessages.errors, ...editorMessages.warnings].filter(
-      (m) => m.quickFix
-    );
+    editorMessagesRef.current = editorMessages;
   }, [editorMessages]);
 
   const parseMessages = useCallback(
@@ -94,11 +94,12 @@ export const useQueryValidation = ({
       if (editorModel.current) {
         const { callbacks: timedCallbacks, getCallbacksDuration } =
           createTimedCallbacks(esqlCallbacks);
-        const result = await ESQLLang.validate(editorModel.current, code, timedCallbacks, options);
-        const [errors, warnings] = await Promise.all([
-          filterQuickFixes(result.errors, code, esqlCallbacks),
-          filterQuickFixes(result.warnings, code, esqlCallbacks),
-        ]);
+        const { errors, warnings } = await ESQLLang.validate(
+          editorModel.current,
+          code,
+          timedCallbacks,
+          options
+        );
         return {
           errors,
           warnings,
@@ -299,7 +300,7 @@ export const useQueryValidation = ({
 
   return {
     editorMessages,
-    quickFixMessagesRef,
+    editorMessagesRef,
     queryValidation,
     onLookupIndexCreate,
     onNewFieldsAddedToLookupIndex,

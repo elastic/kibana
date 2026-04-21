@@ -42,7 +42,10 @@ interface UseEditorConfigParams {
   measuredEditorWidth: number;
   setMeasuredEditorWidth: (width: number) => void;
   resetPendingTracking: () => void;
-  quickFixMessagesRef: React.MutableRefObject<MonacoMessage[]>;
+  editorMessagesRef: React.MutableRefObject<{
+    errors: MonacoMessage[];
+    warnings: MonacoMessage[];
+  }>;
 }
 
 export const useEditorConfig = ({
@@ -56,7 +59,7 @@ export const useEditorConfig = ({
   measuredEditorWidth,
   setMeasuredEditorWidth,
   resetPendingTracking,
-  quickFixMessagesRef,
+  editorMessagesRef,
 }: UseEditorConfigParams) => {
   const suggestionProvider = sharedEsqlSuggestionProvider;
   const codeActionsProvider = sharedEsqlCodeActionProvider;
@@ -67,10 +70,10 @@ export const useEditorConfig = ({
       esqlDepsByModelUri.set(modelUri, {
         ...esqlCallbacks,
         telemetry: telemetryCallbacks,
-        getQuickFixableMessages: () => quickFixMessagesRef.current,
+        getEditorMessages: () => editorMessagesRef.current,
       });
     }
-  }, [esqlCallbacks, telemetryCallbacks, editorModelUriRef, quickFixMessagesRef]);
+  }, [esqlCallbacks, telemetryCallbacks, editorModelUriRef, editorMessagesRef]);
 
   const hoverProvider = useMemo(
     () =>
@@ -180,10 +183,10 @@ export const useEditorConfig = ({
       fontSize: 14,
       hideCursorInOverviewRuler: true,
       lightbulb: {
-        enabled: true,
+        enabled: false,
       },
       lineDecorationsWidth: 20,
-      lineNumbers: 'on',
+      lineNumbers: 'on' as const,
       lineNumbersMinChars: 3,
       minimap: { enabled: false },
       overviewRulerLanes: 0,

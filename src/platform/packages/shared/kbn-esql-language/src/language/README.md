@@ -286,3 +286,5 @@ Its parameters are as follows
 2. the expected suggestions (can be strings or `Partial<ISuggestionItem>`)
 3. the trigger character. This should only be included if the test is intended to validate a "Trigger Character" trigger kind from Monaco ([ref](https://microsoft.github.io/monaco-editor/typedoc/enums/languages.CompletionTriggerKind.html#TriggerCharacter))
 4. custom callback data such as a list of indicies or a field list
+
+// HD Add documentation about code actions

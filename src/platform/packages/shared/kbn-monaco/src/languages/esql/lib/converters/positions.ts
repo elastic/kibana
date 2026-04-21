@@ -60,7 +60,6 @@ export function wrapAsMonacoMessages(
       endLineNumber: endPosition.lineNumber,
       severity: convertSeverityToMonacoKind(e.type),
       underlinedWarning: e.underlinedWarning,
-      quickFix: e.quickFix,
       _source: 'client' as const,
     };
   });

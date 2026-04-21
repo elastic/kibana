@@ -494,6 +494,16 @@ export interface ValidationErrors {
 export type ErrorTypes = keyof ValidationErrors;
 export type ErrorValues<K extends ErrorTypes> = ValidationErrors[K]['type'];
 
+export interface QuickFix {
+  // Title of the quick fix button
+  title: string;
+  // A function that recieves the current query and returns it corrected.
+  fixQuery: (query: string) => string;
+  // A function that determines if the quick fix should be displayed under some special condition,
+  // it will be always visible if not provided.
+  displayCondition?: (query: string, callbacks: ESQLCallbacks) => Promise<boolean>;
+}
+
 export interface ESQLMessage {
   type: 'error' | 'warning';
   text: string;
@@ -504,16 +514,6 @@ export interface ESQLMessage {
 
   // By default warnings are not underlined, use this flag to indicate it should be
   underlinedWarning?: boolean;
-
-  quickFix?: {
-    // Title of the quick fix button
-    title: string;
-    // A function that recieves the current query and returns it corrected.
-    fixQuery: (query: string) => string;
-    // A function that determines if the quick fix should be displayed under some special condition,
-    // it will be always visible if not provided.
-    displayCondition?: (query: string, callbacks: ESQLCallbacks) => Promise<boolean>;
-  };
 }
 
 /**

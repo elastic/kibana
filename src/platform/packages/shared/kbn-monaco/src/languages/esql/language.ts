@@ -18,6 +18,7 @@ import {
   suggest,
   validateQuery,
   getIndexSourcesFromQuery,
+  getQuickFixForMessage,
 } from '@kbn/esql-language';
 import * as monarchDefinitions from '@elastic/monaco-esql/lib/definitions';
 import type { ESQLTelemetryCallbacks, ESQLCallbacks } from '@kbn/esql-types';
@@ -31,8 +32,10 @@ import {
   getDecorationHoveredMessages,
   filterSuggestionsWithCustomCommands,
   monacoPositionToOffset,
+  findMessageByMarker,
 } from './lib/shared/utils';
 import { buildEsqlTheme } from './lib/theme';
+import { wrapAsMonacoCodeAction } from './lib/converters/code_actions';
 
 const removeKeywordSuffix = (name: string) => {
   return name.endsWith('.keyword') ? name.slice(0, -8) : name;
@@ -45,16 +48,15 @@ export type MonacoMessage = monaco.editor.IMarkerData & {
 
   // By default warnings are not underlined, use this flag to indicate it should be
   underlinedWarning?: ESQLMessage['underlinedWarning'];
-  quickFix?: ESQLMessage['quickFix'];
 };
 
 export type ESQLDependencies = ESQLCallbacks &
   Partial<{
     telemetry: ESQLTelemetryCallbacks;
     /**
-     * Latest validation messages that still include a `quickFix` (for Monaco code actions).
+     * Latest validation messages (errors + warnings) for the current model.
      */
-    getQuickFixableMessages?: () => MonacoMessage[];
+    getEditorMessages?: () => { errors: MonacoMessage[]; warnings: MonacoMessage[] };
     /**
      * Optional resolver to provide model-specific dependencies.
      *
@@ -112,56 +114,36 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
     return { errors: monacoErrors, warnings: monacoWarnings };
   },
   getCodeActionProvider: (deps?: ESQLDependencies): monaco.languages.CodeActionProvider => ({
-    provideCodeActions(model, _range, context, _token) {
-      const resolved = deps?.getModelDependencies?.(model);
-      const messagesWithFix = resolved?.getQuickFixableMessages?.() ?? [];
-      if (!messagesWithFix.length || !context.markers.length) {
-        return { actions: [], dispose: () => {} };
-      }
-
+    async provideCodeActions(model, _range, context, _token) {
       const actions: monaco.languages.CodeAction[] = [];
+      const modelDeps = deps?.getModelDependencies?.(model);
+      const resolvedDeps = modelDeps ? { ...deps, ...modelDeps } : deps;
 
-      for (const marker of context.markers) {
-        const message = messagesWithFix.find(
-          (m) =>
-            m.startLineNumber === marker.startLineNumber &&
-            m.startColumn === marker.startColumn &&
-            m.endLineNumber === marker.endLineNumber &&
-            m.endColumn === marker.endColumn &&
-            m.message === marker.message
-        );
-        const quickFix = message?.quickFix;
-        if (!quickFix?.fixQuery) {
-          continue;
-        }
+      const editorMessages = resolvedDeps?.getEditorMessages?.();
+      const allMessages = editorMessages
+        ? [...editorMessages.errors, ...editorMessages.warnings]
+        : [];
 
-        let fixed: string;
-        try {
-          fixed = quickFix.fixQuery(model.getValue());
-        } catch {
-          continue;
-        }
+      const queryString = model.getValue();
 
-        actions.push({
-          title: quickFix.title,
-          kind: 'quickfix',
-          diagnostics: [marker],
-          isPreferred: true,
-          edit: {
-            edits: [
-              {
-                resource: model.uri,
-                versionId: model.getVersionId(),
-                textEdit: {
-                  range: model.getFullModelRange(),
-                  text: fixed,
-                },
-              },
-            ],
-          },
-        });
-      }
+      // For each marker, resolve its source message and request its quick
+      // fixes. Results are paired with the marker so the Monaco action can
+      // attach it back as a diagnostic.
+      await Promise.all(
+        context.markers.map(async (marker) => {
+          const message = findMessageByMarker(allMessages, marker);
+          if (!message) return [];
+          const quickFix = await getQuickFixForMessage({
+            queryString,
+            message,
+            callbacks: resolvedDeps,
+          });
 
+          if (quickFix) {
+            actions.push(wrapAsMonacoCodeAction(model, marker, quickFix));
+          }
+        })
+      );
       return { actions, dispose: () => {} };
     },
   }),

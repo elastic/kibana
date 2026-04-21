@@ -59,6 +59,7 @@ import {
   trackSuggestionPopupState,
   onKeyDownResizeHandler,
   onMouseDownResizeHandler,
+  isCodeActionMenuVisible,
 } from './helpers';
 import {
   useInitLatencyTracking,
@@ -357,7 +358,17 @@ const ESQLEditorInternal = function ESQLEditor({
         suppressSuggestionsRef.current = false;
         return;
       }
-      editorRef.current?.trigger(undefined, 'editor.action.triggerSuggest', { auto: true });
+
+      if (!editorRef.current) {
+        return;
+      }
+
+      // Do not trigger suggestions when the code actions menu is visible.
+      if (isCodeActionMenuVisible(editorRef.current)) {
+        return;
+      }
+
+      editorRef.current.trigger(undefined, 'editor.action.triggerSuggest', { auto: true });
     }, 0);
   }, []);
 
@@ -540,34 +551,30 @@ const ESQLEditorInternal = function ESQLEditor({
     telemetryService,
   });
 
-  const {
-    editorMessages,
-    quickFixMessagesRef,
-    onLookupIndexCreate,
-    onNewFieldsAddedToLookupIndex,
-  } = useQueryValidation({
-    code,
-    codeWhenSubmitted,
-    editorRef,
-    editorModel,
-    esqlCallbacks,
-    serverErrors,
-    serverWarning,
-    mergeExternalMessages,
-    dataErrorsControl,
-    isLoading,
-    isQueryLoading,
-    dataSourcesCache,
-    esqlFieldsCache,
-    getJoinIndicesCallback,
-    onQueryUpdate,
-    pickerProjectRouting,
-    latencyTracking: {
-      trackValidationLatencyStart,
-      trackValidationLatencyEnd,
-      resetValidationTracking,
-    },
-  });
+  const { editorMessages, editorMessagesRef, onLookupIndexCreate, onNewFieldsAddedToLookupIndex } =
+    useQueryValidation({
+      code,
+      codeWhenSubmitted,
+      editorRef,
+      editorModel,
+      esqlCallbacks,
+      serverErrors,
+      serverWarning,
+      mergeExternalMessages,
+      dataErrorsControl,
+      isLoading,
+      isQueryLoading,
+      dataSourcesCache,
+      esqlFieldsCache,
+      getJoinIndicesCallback,
+      onQueryUpdate,
+      pickerProjectRouting,
+      latencyTracking: {
+        trackValidationLatencyStart,
+        trackValidationLatencyEnd,
+        resetValidationTracking,
+      },
+    });
 
   const { lookupIndexBadgeStyle, addLookupIndicesDecorator } = useLookupIndexCommand(
     editorRef,
@@ -601,7 +608,7 @@ const ESQLEditorInternal = function ESQLEditor({
     measuredEditorWidth,
     setMeasuredEditorWidth,
     resetPendingTracking,
-    quickFixMessagesRef,
+    editorMessagesRef,
   });
 
   const htmlId = useGeneratedHtmlId({ prefix: 'esql-editor' });
@@ -697,7 +704,7 @@ const ESQLEditorInternal = function ESQLEditor({
                     esqlDepsByModelUri.set(editorModelUriRef.current, {
                       ...esqlCallbacks,
                       telemetry: telemetryCallbacks,
-                      getQuickFixableMessages: () => quickFixMessagesRef.current,
+                      getEditorMessages: () => editorMessagesRef.current,
                     });
                     await addLookupIndicesDecorator();
                     if (enableResourceBrowser) {
@@ -753,7 +760,16 @@ const ESQLEditorInternal = function ESQLEditor({
                     // Skip triggering suggestions on initial focus to avoid interfering
                     // with editor initialization and automated tests
                     // Also skip when date picker is open to prevent overlap
-                    if (!isFirstFocusRef.current && !datePickerOpenStatusRef.current) {
+                    // Also skip when code action widget is visible to prevent overlap..
+                    const isCodeActionWidgetVisible = Boolean(
+                      editor.getDomNode()?.ownerDocument.querySelector('.action-widget')
+                    );
+
+                    if (
+                      !isFirstFocusRef.current &&
+                      !datePickerOpenStatusRef.current &&
+                      !isCodeActionWidgetVisible
+                    ) {
                       triggerSuggestions();
                     }
 

@@ -25,7 +25,7 @@ import type {
   ESQLTelemetryCallbacks,
   ESQLSourceResult,
 } from '@kbn/esql-types';
-import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
+import type { ESQLDependencies } from '@kbn/monaco/src/languages/esql/language';
 
 export interface DataErrorsControl {
   enabled: boolean;
@@ -129,5 +129,5 @@ export enum HistoryTabId {
 export type EsqlLanguageDeps = ESQLCallbacks &
   Partial<{
     telemetry: ESQLTelemetryCallbacks;
-    getQuickFixableMessages: () => MonacoMessage[];
+    getEditorMessages: ESQLDependencies['getEditorMessages'];
   }>;
