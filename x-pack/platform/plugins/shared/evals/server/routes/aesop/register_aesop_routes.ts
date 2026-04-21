@@ -66,7 +66,11 @@ export function registerAESOPRoutes(deps: AESOPRouteDependencies) {
   registerGetExplorationProgressRoute({ router, logger });
   registerGetExecutionDetailRoute({ router, logger });
   registerListProposedSkillsRoute({ router, logger });
-  registerRunSkillValidationRoute({ router, logger });
+  registerRunSkillValidationRoute({
+    router,
+    logger,
+    evaluatorRegistry: deps.evaluatorRegistry,
+  });
   registerUpdateSkillRoute({ router, logger });
   registerImproveSkillRoute({ router, logger });
   registerApproveSkillRoute({ router, logger });

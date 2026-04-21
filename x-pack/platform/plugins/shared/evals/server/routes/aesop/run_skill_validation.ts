@@ -11,14 +11,58 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { AESOPRouteDependencies } from './register_aesop_routes';
-import type { ProposedSkillDocument } from '../../lib/aesop/types';
+import type { ProposedSkillDocument, SkillEvaluatorResult } from '../../lib/aesop/types';
 import {
   buildLlmRequestBody,
   extractLlmResponseText,
   getConnectorTypeId,
 } from '../../lib/aesop/llm_defaults';
+import {
+  createEvaluationRunner,
+  type EvaluatorRegistry,
+  type ServerEvaluatorResult,
+} from '../../lib/evaluation_engine';
+import { createActionsInferenceClient } from '../../lib/aesop/actions_inference_adapter';
+import { buildValidationSummary } from '../../lib/aesop/validation_result_builder';
+import { runConvergenceLoop } from '../../lib/aesop/convergence_loop';
 
 type ActionsClient = Awaited<ReturnType<ActionsPluginStart['getActionsClientWithRequest']>>;
+
+/**
+ * Composite score threshold at which a skill is considered "passed". This is
+ * the server-side gate — the LLM judges' self-reported `passed` field (if any)
+ * is ignored. The UI also uses 0.85 as the display threshold.
+ */
+const PASS_THRESHOLD = 0.85;
+
+/**
+ * Evaluators that MUST pass (score >= 0.7, label != 'fail') for the skill to
+ * be gated as passed, regardless of composite score. These are either safety
+ * gates (no hard-coded secrets, no prompt injection, no PII) or grounding
+ * gates (references resolve on the active cluster).
+ */
+const REQUIRED_PASS_EVALUATORS = [
+  'skill-safety',
+  'skill-pii',
+  'skill-secret-scanner',
+  'skill-prompt-injection',
+  'backing-index-validator',
+];
+
+const SKILL_PRESET_EVALUATORS = [
+  'skill-relevance',
+  'skill-completeness',
+  'skill-accuracy',
+  'skill-specificity',
+  'skill-safety',
+  'backing-index-validator',
+  'esql-pattern',
+  'esql-compile',
+  'skill-index-resolves',
+  'skill-pii',
+  'skill-secret-scanner',
+  'skill-prompt-injection',
+];
 
 const runSkillValidationParamsSchema = z.object({
   skillId: z.string(),
@@ -30,7 +74,26 @@ const runSkillValidationBodySchema = z.object({
   use_agent: z.boolean().optional().default(false),
 });
 
-export function registerRunSkillValidationRoute({ router, logger }: AESOPRouteDependencies) {
+// Hard upper bound on how long an in-flight validation can remain in the
+// 'validating' state before the watchdog forces it to 'failed'. Without this
+// the background LLM call (agent or convergence) can hang silently — e.g. the
+// Bedrock connector can keep a socket open well past our route timeout — and
+// leave the proposed-skill row stuck in 'validating' forever, blocking retries.
+const VALIDATION_WATCHDOG_MS = 15 * 60 * 1000;
+
+export function registerRunSkillValidationRoute({
+  router,
+  logger,
+  evaluatorRegistry,
+}: AESOPRouteDependencies) {
+  if (!evaluatorRegistry) {
+    // The route is registered with a logger-only fallback in older code
+    // paths; refuse to start rather than silently regressing to the
+    // monolithic LLM prompt.
+    throw new Error(
+      'registerRunSkillValidationRoute: evaluatorRegistry dependency is required'
+    );
+  }
   router.versioned
     .post({
       path: '/internal/aesop/skills/{skillId}/validate',
@@ -124,48 +187,63 @@ export function registerRunSkillValidationRoute({ router, logger }: AESOPRouteDe
 
                 // Fire-and-forget agent-based validation
                 const agentStartTime = Date.now();
+                const cancelWatchdog = startValidationWatchdog({
+                  esClient,
+                  skillId,
+                  mode: 'agent',
+                  logger,
+                });
                 void (async () => {
                   try {
                     const result = await orchestrator.validateSkill(skill.markdown || '');
-                    if (result) {
-                      await esClient.update({
-                        index: '.aesop-proposed-skills',
-                        id: skillId,
-                        doc: {
-                          validation: {
-                            status: result.passed ? 'passed' : 'failed',
-                            final_score: result.score,
-                            completed_at: new Date().toISOString(),
-                            connector_id: connectorId,
-                            duration_ms: Date.now() - agentStartTime,
-                            criteria: result.criteria,
-                            llm_feedback: result.feedback,
-                            strengths: result.strengths,
-                            weaknesses: result.weaknesses,
-                            suggestions: result.suggestions,
-                            iterations: [{ score: result.score, iteration: 1 }],
-                            validated_by: 'agent',
-                          },
-                        },
-                        refresh: 'wait_for',
+                    if (!result) {
+                      // Orchestrator returned nothing — treat as a failure so the
+                      // skill does not sit in 'validating' indefinitely.
+                      await markValidationFailed({
+                        esClient,
+                        skillId,
+                        reason: 'Agent orchestrator returned no result',
+                        logger,
                       });
+                      return;
                     }
+                    await esClient.update({
+                      index: '.aesop-proposed-skills',
+                      id: skillId,
+                      doc: {
+                        validation: {
+                          status: result.passed ? 'passed' : 'failed',
+                          final_score: result.score,
+                          completed_at: new Date().toISOString(),
+                          connector_id: connectorId,
+                          duration_ms: Date.now() - agentStartTime,
+                          criteria: result.criteria,
+                          llm_feedback: result.feedback,
+                          strengths: result.strengths,
+                          weaknesses: result.weaknesses,
+                          suggestions: result.suggestions,
+                          iterations: [{ score: result.score, iteration: 1 }],
+                          validated_by: 'agent',
+                        },
+                      },
+                      refresh: 'wait_for',
+                    });
                   } catch (err) {
                     logger.error(
                       `[AESOP] Agent-based validation failed, results not saved skill_id=${skillId}: ${
                         err instanceof Error ? err.message : String(err)
                       }`
                     );
-                    // Fall back: mark as failed so user can retry with direct LLM
-                    await esClient
-                      .update({
-                        index: '.aesop-proposed-skills',
-                        id: skillId,
-                        doc: {
-                          validation: { status: 'failed', error: 'Agent validation failed' },
-                        },
-                      })
-                      .catch(() => {});
+                    await markValidationFailed({
+                      esClient,
+                      skillId,
+                      reason: `Agent validation failed: ${
+                        err instanceof Error ? err.message : String(err)
+                      }`,
+                      logger,
+                    });
+                  } finally {
+                    cancelWatchdog();
                   }
                 })();
 
@@ -191,89 +269,72 @@ export function registerRunSkillValidationRoute({ router, logger }: AESOPRouteDe
           }
 
           if (autoConverge) {
-            // 4a. Use convergence loop: iterate improve->validate until passing
-            const { ConvergenceLoop } = await import('../../lib/aesop/validation/convergence_loop');
-
-            const loop = new ConvergenceLoop({
-              threshold: 0.85,
-              maxIterations: 5,
-              convergenceDelta: 0.02,
-              validate: async () => {
-                return await runLLMValidationAndGetScore({
-                  esClient,
-                  actionsClient,
-                  connectorId,
-                  skillId,
-                  skill,
-                  logger,
-                });
-              },
-              improve: async () => {
-                await runLLMImprovement({
-                  esClient,
-                  actionsClient,
-                  connectorId,
-                  skillId,
-                  logger,
-                });
-              },
-              onError: (error, iteration) => {
-                logger.error(
-                  `[AESOP] Convergence loop error at iteration ${iteration} skill_id=${skillId}: ${
-                    error instanceof Error ? error.message : String(error)
-                  }`
-                );
-              },
+            // 4a. Convergence loop: iterate improve→validate until the server-
+            // side gate passes or we hit maxIterations. Uses the evaluator
+            // registry (per-criterion evaluators, CODE gates, multi-step
+            // scoring) — no monolithic LLM prompt.
+            const cancelWatchdog = startValidationWatchdog({
+              esClient,
+              skillId,
+              mode: 'convergence',
+              logger,
             });
-
-            // Fire-and-forget the convergence loop
-            loop
-              .run()
-              .then(async (convergenceResult) => {
-                // Store convergence metadata
-                await esClient.update({
-                  index: '.aesop-proposed-skills',
-                  id: skillId,
-                  doc: {
-                    validation: {
-                      status: convergenceResult.converged ? 'passed' : 'failed',
-                      final_score: convergenceResult.finalScore,
-                      completed_at: new Date().toISOString(),
-                      convergence: {
-                        converged: convergenceResult.converged,
-                        reason: convergenceResult.reason,
-                        total_iterations: convergenceResult.iterations.length,
-                        total_duration_ms: convergenceResult.totalDurationMs,
-                      },
-                      iterations: convergenceResult.iterations,
-                    },
-                  },
-                  refresh: 'wait_for',
-                });
-              })
-              .catch((err) => {
+            void runConvergenceValidation({
+              esClient,
+              actionsClient,
+              connectorId,
+              skillId,
+              skill,
+              evaluatorRegistry,
+              logger,
+            })
+              .catch(async (err) => {
                 logger.error(
-                  `[AESOP] Convergence loop failed skill_id=${skillId}: ${
+                  `[AESOP] Convergence validation failed skill_id=${skillId}: ${
                     err instanceof Error ? err.message : String(err)
                   }`
                 );
+                await markValidationFailed({
+                  esClient,
+                  skillId,
+                  reason: `Convergence validation failed: ${
+                    err instanceof Error ? err.message : String(err)
+                  }`,
+                  logger,
+                });
+              })
+              .finally(() => {
+                cancelWatchdog();
               });
           } else {
-            // 4b. Single-pass validation (existing behavior)
+            // 4b. Single-pass validation — one trip through the evaluator
+            // registry, no improvement loop. Watchdog preserves Step-6
+            // stuck-state correctness.
+            const cancelWatchdog = startValidationWatchdog({
+              esClient,
+              skillId,
+              mode: 'single',
+              logger,
+            });
             runLLMValidation({
               esClient,
               actionsClient,
               connectorId,
               skillId,
               skill,
+              evaluatorRegistry,
               logger,
-            }).catch((err) => {
-              logger.error(
-                `[AESOP] Background LLM validation failed skill_id=${skillId}: ${
-                  err instanceof Error ? err.message : String(err)
-                }`
-              );
-            });
+            })
+              .catch((err) => {
+                logger.error(
+                  `[AESOP] Background LLM validation failed skill_id=${skillId}: ${
+                    err instanceof Error ? err.message : String(err)
+                  }`
+                );
+              })
+              .finally(() => {
+                cancelWatchdog();
+              });
           }
 
           return response.ok({
@@ -322,12 +383,70 @@ export function registerRunSkillValidationRoute({ router, logger }: AESOPRouteDe
     );
 }
 
+/**
+ * Runs the evaluator registry against a skill's current markdown. This
+ * replaces the old monolithic 5-criteria LLM prompt with a per-criterion
+ * evaluator pipeline: every CODE evaluator (secret scanner, prompt injection,
+ * index resolves, esql-compile, backing-index validator, PII) runs first,
+ * then the five LLM judges (relevance/completeness/accuracy/specificity/
+ * safety) run in parallel. `passed` is determined server-side from the gate
+ * result — we no longer trust any LLM self-report.
+ */
+async function runSkillEvaluators({
+  actionsClient,
+  connectorId,
+  esClient,
+  evaluatorRegistry,
+  skill,
+  logger,
+}: {
+  actionsClient: ActionsClient;
+  connectorId: string;
+  esClient: ElasticsearchClient;
+  evaluatorRegistry: EvaluatorRegistry;
+  skill: ProposedSkillDocument;
+  logger: Logger;
+}): Promise<ServerEvaluatorResult[]> {
+  const inferenceClient = createActionsInferenceClient({
+    actionsClient,
+    connectorId,
+    logger,
+    baseSystemPrompt:
+      'You are an expert evaluator for Agent Builder skills used in a Security Operations platform. ' +
+      'Score strictly per the rubric you are given and respond with only the requested JSON.',
+    temperature: 0.1,
+  });
+
+  const runner = createEvaluationRunner(evaluatorRegistry, logger);
+  const runResult = await runner.run({
+    items: [
+      {
+        input: {
+          name: skill.name,
+          description: skill.description,
+          confidence: skill.confidence,
+          source: skill.source ?? {},
+        },
+        output: skill.markdown || skill.content || '',
+      },
+    ],
+    evaluatorNames: SKILL_PRESET_EVALUATORS,
+    connectorId,
+    requiredPass: REQUIRED_PASS_EVALUATORS,
+    inferenceClient,
+    esClient,
+  });
+
+  return runResult.results[0]?.evaluatorResults ?? [];
+}
+
 async function runLLMValidation({
   esClient,
   actionsClient,
   connectorId,
   skillId,
   skill,
+  evaluatorRegistry,
   logger,
 }: {
   esClient: ElasticsearchClient;
@@ -335,82 +454,55 @@ async function runLLMValidation({
   connectorId: string;
   skillId: string;
   skill: ProposedSkillDocument;
+  evaluatorRegistry: EvaluatorRegistry;
   logger: Logger;
 }) {
   const startTime = Date.now();
   const evalTraceId = `aesop-eval-${skillId}-${Date.now()}`;
 
   try {
-    // Build the evaluation prompt
-    const systemPrompt =
-      'You are an expert skill evaluator for a security operations platform. ' +
-      'Evaluate the proposed Agent Builder skill across these criteria:\n' +
-      '1. **Relevance** (0-1): Is this skill useful for security analysts?\n' +
-      '2. **Completeness** (0-1): Does the skill content provide enough detail for an AI agent to execute it?\n' +
-      '3. **Accuracy** (0-1): Are the described patterns/queries correct for the data sources?\n' +
-      '4. **Specificity** (0-1): Is the skill specific enough to be actionable (not too generic)?\n' +
-      '5. **Safety** (0-1): Does the skill avoid dangerous operations (write/delete/modify data)?\n\n' +
-      'Respond with a JSON object:\n' +
-      '{ "score": <weighted average 0.0-1.0>, "passed": <true if score >= 0.85>, ' +
-      '"criteria": { "relevance": <0-1>, "completeness": <0-1>, "accuracy": <0-1>, "specificity": <0-1>, "safety": <0-1> }, ' +
-      '"feedback": "<detailed 2-3 sentence summary>", ' +
-      '"strengths": ["..."], "weaknesses": ["..."], "suggestions": ["..."] }';
-    const userPrompt = buildValidationPrompt(skill);
-    const connectorTypeId = await getConnectorTypeId(actionsClient, connectorId);
-
-    // Execute LLM connector
-    const result = await actionsClient.execute({
-      actionId: connectorId,
-      params: {
-        subAction: 'run',
-        subActionParams: {
-          body: JSON.stringify(
-            buildLlmRequestBody({
-              system: systemPrompt,
-              messages: [{ role: 'user', content: userPrompt }],
-              temperature: 0.3,
-              connectorTypeId,
-            })
-          ),
-        },
-      },
+    const evaluatorResults = await runSkillEvaluators({
+      actionsClient,
+      connectorId,
+      esClient,
+      evaluatorRegistry,
+      skill,
+      logger,
     });
 
-    if (result.status === 'error') {
-      throw new Error(`Connector execution failed: ${result.message} - ${result.serviceMessage}`);
-    }
-
-    // Parse LLM response
-    const llmRawResponse = extractLlmResponseText(result.data);
-    const evaluation = parseLLMEvaluation(llmRawResponse);
+    const summary = buildValidationSummary(evaluatorResults, {
+      requiredPass: REQUIRED_PASS_EVALUATORS,
+      compositeThreshold: PASS_THRESHOLD,
+    });
 
     const durationMs = Date.now() - startTime;
 
     logger.info(
-      `[AESOP] LLM validation completed skill_id=${skillId} score=${evaluation.score} passed=${evaluation.passed} duration_ms=${durationMs} eval_trace_id=${evalTraceId}`
+      `[AESOP] Registry validation completed skill_id=${skillId} score=${summary.score.toFixed(
+        3
+      )} passed=${summary.passed} duration_ms=${durationMs} eval_trace_id=${evalTraceId}`
     );
 
-    // Update skill with validation results
     await esClient.update({
       index: '.aesop-proposed-skills',
       id: skillId,
       doc: {
         validation: {
-          status: evaluation.passed ? 'passed' : 'failed',
-          final_score: evaluation.score,
+          status: summary.passed ? 'passed' : 'failed',
+          final_score: summary.score,
           started_at: skill.validation?.started_at || new Date().toISOString(),
           completed_at: new Date().toISOString(),
           connector_id: connectorId,
           eval_trace_id: evalTraceId,
           duration_ms: durationMs,
-          criteria: evaluation.criteria,
-          llm_feedback: evaluation.feedback,
-          strengths: evaluation.strengths,
-          weaknesses: evaluation.weaknesses,
-          suggestions: evaluation.suggestions,
-          llm_prompt: userPrompt,
-          llm_raw_response: llmRawResponse,
-          iterations: [{ score: evaluation.score, iteration: 1 }],
+          criteria: summary.criteria,
+          llm_feedback: summary.feedback,
+          strengths: summary.strengths,
+          weaknesses: summary.weaknesses,
+          suggestions: summary.suggestions,
+          evaluator_results: summary.evaluatorResults,
+          gate: summary.gate,
+          iterations: [{ score: summary.score, iteration: 1 }],
         },
       },
       refresh: 'wait_for',
@@ -419,12 +511,11 @@ async function runLLMValidation({
     const durationMs = Date.now() - startTime;
 
     logger.error(
-      `[AESOP] LLM validation failed skill_id=${skillId} duration_ms=${durationMs}: ${
+      `[AESOP] Registry validation failed skill_id=${skillId} duration_ms=${durationMs}: ${
         error instanceof Error ? error.message : String(error)
       }`
     );
 
-    // Mark as failed — preserve previous score if it exists
     await esClient
       .update({
         index: '.aesop-proposed-skills',
@@ -449,129 +540,24 @@ async function runLLMValidation({
   }
 }
 
-function buildValidationPrompt(skill: ProposedSkillDocument): string {
-  return `Evaluate this proposed Agent Builder skill for a Security Operations platform:
-
-## Skill Name
-${skill.name}
-
-## Description
-${skill.description}
-
-## Skill Content (Markdown)
-${skill.markdown || skill.content || 'No content available'}
-
-## Discovery Context
-- Confidence: ${(skill.confidence * 100).toFixed(1)}%
-- Pattern Frequency: ${skill.source?.pattern_frequency || 'unknown'} occurrences
-- Rationale: ${skill.source?.rationale || 'N/A'}
-- Source Indices: ${JSON.stringify(
-    skill.source?.source_indices || skill.metadata?.source_indices || []
-  )}
-
-## Evaluation Criteria
-1. **Relevance** (0-1): Is this skill useful for security analysts?
-2. **Completeness** (0-1): Does the skill content provide enough detail for an AI agent to execute it?
-3. **Accuracy** (0-1): Are the described patterns/queries correct for the data sources?
-4. **Specificity** (0-1): Is the skill specific enough to be actionable (not too generic)?
-5. **Safety** (0-1): Does the skill avoid dangerous operations (write/delete/modify data)?
-
-Respond with ONLY a JSON object (no markdown fences):
-{ "score": <weighted average 0.0-1.0>, "passed": <true if score >= 0.85>, "criteria": { "relevance": <0-1>, "completeness": <0-1>, "accuracy": <0-1>, "specificity": <0-1>, "safety": <0-1> }, "feedback": "<2-3 sentence summary>", "strengths": ["..."], "weaknesses": ["..."], "suggestions": ["..."] }`;
-}
-
-interface CriteriaScores {
-  relevance: number;
-  completeness: number;
-  accuracy: number;
-  specificity: number;
-  safety: number;
-}
-
-interface LLMEvaluation {
-  score: number;
-  passed: boolean;
-  criteria: CriteriaScores;
-  feedback: string;
-  strengths: string[];
-  weaknesses: string[];
-  suggestions: string[];
-}
-
-function parseLLMEvaluation(response: string): LLMEvaluation {
-  const defaultCriteria: CriteriaScores = {
-    relevance: 0,
-    completeness: 0,
-    accuracy: 0,
-    specificity: 0,
-    safety: 0,
-  };
-
-  const defaults: LLMEvaluation = {
-    score: 0.5,
-    passed: false,
-    criteria: defaultCriteria,
-    feedback: 'Unable to parse LLM evaluation response',
-    strengths: [],
-    weaknesses: [],
-    suggestions: [],
-  };
-
-  try {
-    // Strip DeepSeek-R1 <think>...</think> tags, markdown fences, and other wrappers
-    let cleaned = response;
-    // Remove <think>...</think> reasoning blocks (DeepSeek-R1)
-    cleaned = cleaned.replace(/<think>[\s\S]*?<\/think>/g, '');
-    // Remove markdown code fences
-    cleaned = cleaned.replace(/```json?\s*/g, '').replace(/```\s*/g, '');
-    cleaned = cleaned.trim();
-    // If there's still no JSON-like content, try to extract it
-    if (!cleaned.startsWith('{')) {
-      const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        cleaned = jsonMatch[0];
-      }
-    }
-    const parsed = JSON.parse(cleaned);
-
-    const criteria: CriteriaScores = {
-      relevance: Number(parsed.criteria?.relevance) || 0,
-      completeness: Number(parsed.criteria?.completeness) || 0,
-      accuracy: Number(parsed.criteria?.accuracy) || 0,
-      specificity: Number(parsed.criteria?.specificity) || 0,
-      safety: Number(parsed.criteria?.safety) || 0,
-    };
-
-    return {
-      score: Math.max(0, Math.min(1, Number(parsed.score) || 0.5)),
-      passed: parsed.passed ?? Number(parsed.score) >= 0.85,
-      criteria,
-      feedback: String(parsed.feedback || defaults.feedback),
-      strengths: Array.isArray(parsed.strengths) ? parsed.strengths : [],
-      weaknesses: Array.isArray(parsed.weaknesses) ? parsed.weaknesses : [],
-      suggestions: Array.isArray(parsed.suggestions) ? parsed.suggestions : [],
-    };
-  } catch {
-    // If JSON parse fails, try to extract a score from the text
-    const scoreMatch = response.match(/"score"\s*:\s*([\d.]+)/);
-    if (scoreMatch) {
-      const score = Number(scoreMatch[1]);
-      return { ...defaults, score, passed: score >= 0.85 };
-    }
-    return defaults;
-  }
-}
-
 /**
- * Run LLM validation and return the score without persisting results.
- * Used by the convergence loop to evaluate each iteration.
+ * Convergence validation: uses `runConvergenceLoop` from `lib/aesop` (the
+ * registry-backed implementation) instead of the old class-based
+ * `ConvergenceLoop` helper that wrapped the monolithic LLM prompt.
+ *
+ * Each iteration:
+ *  1. Runs the full evaluator registry against the current markdown.
+ *  2. Persists the per-iteration snapshot so the UI shows progress.
+ *  3. Calls `runLLMImprovement` to rewrite the skill using the evaluator
+ *     feedback before the next iteration.
  */
-async function runLLMValidationAndGetScore({
+async function runConvergenceValidation({
   esClient,
   actionsClient,
   connectorId,
   skillId,
   skill,
+  evaluatorRegistry,
   logger,
 }: {
   esClient: ElasticsearchClient;
@@ -579,100 +565,191 @@ async function runLLMValidationAndGetScore({
   connectorId: string;
   skillId: string;
   skill: ProposedSkillDocument;
+  evaluatorRegistry: EvaluatorRegistry;
   logger: Logger;
-}): Promise<{ score: number; passed: boolean }> {
-  // Re-read the skill in case it was improved since the loop started
-  const skillDoc = await esClient.get({
-    index: '.aesop-proposed-skills',
-    id: skillId,
+}) {
+  const inferenceClient = createActionsInferenceClient({
+    actionsClient,
+    connectorId,
+    logger,
+    baseSystemPrompt:
+      'You are an expert evaluator for Agent Builder skills used in a Security Operations platform. ' +
+      'Score strictly per the rubric you are given and respond with only the requested JSON.',
+    temperature: 0.1,
   });
-  const currentSkill = skillDoc._source as ProposedSkillDocument | undefined;
-  if (!currentSkill) {
-    throw new Error(`Skill ${skillId} source unavailable`);
-  }
 
-  const systemPrompt =
-    'You are an expert skill evaluator for a security operations platform. ' +
-    'Evaluate the proposed Agent Builder skill across these criteria:\n' +
-    '1. **Relevance** (0-1): Is this skill useful for security analysts?\n' +
-    '2. **Completeness** (0-1): Does the skill content provide enough detail for an AI agent to execute it?\n' +
-    '3. **Accuracy** (0-1): Are the described patterns/queries correct for the data sources?\n' +
-    '4. **Specificity** (0-1): Is the skill specific enough to be actionable (not too generic)?\n' +
-    '5. **Safety** (0-1): Does the skill avoid dangerous operations (write/delete/modify data)?\n\n' +
-    'Respond with a JSON object:\n' +
-    '{ "score": <weighted average 0.0-1.0>, "passed": <true if score >= 0.85>, ' +
-    '"criteria": { "relevance": <0-1>, "completeness": <0-1>, "accuracy": <0-1>, "specificity": <0-1>, "safety": <0-1> }, ' +
-    '"feedback": "<detailed 2-3 sentence summary>", ' +
-    '"strengths": ["..."], "weaknesses": ["..."], "suggestions": ["..."] }';
-  const userPrompt = buildValidationPrompt(currentSkill);
-  const connectorTypeId = await getConnectorTypeId(actionsClient, connectorId);
+  const startTime = Date.now();
+  const evalTraceId = `aesop-converge-${skillId}-${Date.now()}`;
 
-  const result = await actionsClient.execute({
-    actionId: connectorId,
-    params: {
-      subAction: 'run',
-      subActionParams: {
-        body: JSON.stringify(
-          buildLlmRequestBody({
-            system: systemPrompt,
-            messages: [{ role: 'user', content: userPrompt }],
-            temperature: 0.3,
-            connectorTypeId,
-          })
-        ),
-      },
+  const convergenceResult = await runConvergenceLoop(
+    skill,
+    {
+      threshold: PASS_THRESHOLD,
+      maxIterations: 5,
+      convergenceDelta: 0.02,
+      connectorId,
+      evaluators: SKILL_PRESET_EVALUATORS,
+      requiredPass: REQUIRED_PASS_EVALUATORS,
     },
-  });
-
-  if (result.status === 'error') {
-    throw new Error(`Connector execution failed: ${result.message} - ${result.serviceMessage}`);
-  }
-
-  const llmRawResponse = extractLlmResponseText(result.data);
-  const evaluation = parseLLMEvaluation(llmRawResponse);
-
-  logger.info(
-    `[AESOP] Convergence iteration validated skill_id=${skillId} score=${evaluation.score} passed=${evaluation.passed}`
+    {
+      evaluatorRegistry,
+      logger,
+      inferenceClient,
+      esClient,
+      improveSkill: async (currentSkill, feedback) => {
+        await runLLMImprovement({
+          esClient,
+          actionsClient,
+          connectorId,
+          skillId,
+          feedback,
+          logger,
+        });
+        // Re-fetch so the next iteration sees the improved markdown.
+        const updated = await esClient.get({
+          index: '.aesop-proposed-skills',
+          id: skillId,
+        });
+        const next = updated._source as ProposedSkillDocument | undefined;
+        if (!next) {
+          throw new Error(`Skill ${skillId} disappeared during improvement`);
+        }
+        return next;
+      },
+      onIteration: async (iteration) => {
+        // Build a live summary from this iteration's evaluator results so
+        // the UI shows progress without waiting for the full loop to finish.
+        const serverResults = iteration.evaluator_results.map((r) =>
+          skillResultToServerResult(r)
+        );
+        const summary = buildValidationSummary(serverResults, {
+          requiredPass: REQUIRED_PASS_EVALUATORS,
+          compositeThreshold: PASS_THRESHOLD,
+        });
+        await esClient
+          .update({
+            index: '.aesop-proposed-skills',
+            id: skillId,
+            doc: {
+              validation: {
+                status: 'validating',
+                final_score: summary.score,
+                connector_id: connectorId,
+                criteria: summary.criteria,
+                llm_feedback: summary.feedback,
+                strengths: summary.strengths,
+                weaknesses: summary.weaknesses,
+                suggestions: summary.suggestions,
+                evaluator_results: summary.evaluatorResults,
+              },
+            },
+            refresh: 'wait_for',
+          })
+          .catch((err) => {
+            logger.warn(
+              `[AESOP] Failed to persist iteration snapshot skill_id=${skillId}: ${
+                err instanceof Error ? err.message : String(err)
+              }`
+            );
+          });
+      },
+    }
   );
 
-  // Persist the latest evaluation details (criteria, feedback, etc.) for the UI
+  const durationMs = Date.now() - startTime;
+  const finalIter = convergenceResult.iterations[convergenceResult.iterations.length - 1];
+
+  const finalSummary = finalIter
+    ? buildValidationSummary(
+        finalIter.evaluator_results.map((r) => skillResultToServerResult(r)),
+        { requiredPass: REQUIRED_PASS_EVALUATORS, compositeThreshold: PASS_THRESHOLD }
+      )
+    : null;
+
+  logger.info(
+    `[AESOP] Convergence validation completed skill_id=${skillId} score=${convergenceResult.finalScore.toFixed(
+      3
+    )} converged=${convergenceResult.converged} reason=${convergenceResult.reason} iterations=${
+      convergenceResult.iterations.length
+    } duration_ms=${durationMs}`
+  );
+
   await esClient.update({
     index: '.aesop-proposed-skills',
     id: skillId,
     doc: {
       validation: {
-        status: 'validating',
-        final_score: evaluation.score,
+        // Gate result is authoritative. We cross-check with convergenceResult
+        // to avoid `converged: true` + `gate.passed: false` confusion (can't
+        // happen today since the loop short-circuits on gate pass, but the
+        // explicit check makes the invariant visible).
+        status:
+          convergenceResult.converged && finalSummary?.passed !== false ? 'passed' : 'failed',
+        final_score: convergenceResult.finalScore,
+        completed_at: new Date().toISOString(),
         connector_id: connectorId,
-        criteria: evaluation.criteria,
-        llm_feedback: evaluation.feedback,
-        strengths: evaluation.strengths,
-        weaknesses: evaluation.weaknesses,
-        suggestions: evaluation.suggestions,
-        llm_raw_response: llmRawResponse,
+        eval_trace_id: evalTraceId,
+        duration_ms: durationMs,
+        criteria: finalSummary?.criteria ?? {},
+        llm_feedback: finalSummary?.feedback ?? '',
+        strengths: finalSummary?.strengths ?? [],
+        weaknesses: finalSummary?.weaknesses ?? [],
+        suggestions: finalSummary?.suggestions ?? [],
+        evaluator_results: finalSummary?.evaluatorResults ?? [],
+        gate: finalSummary?.gate ?? { passed: false, failedRequired: [] },
+        convergence: {
+          converged: convergenceResult.converged,
+          reason: convergenceResult.reason,
+          total_iterations: convergenceResult.iterations.length,
+          total_duration_ms: convergenceResult.totalDurationMs,
+        },
+        iterations: convergenceResult.iterations,
       },
     },
     refresh: 'wait_for',
   });
+}
 
-  return { score: evaluation.score, passed: evaluation.passed };
+/**
+ * Map a `SkillEvaluatorResult` (convergence-loop shape) back to
+ * `ServerEvaluatorResult` so it can be fed through `buildValidationSummary`.
+ * `SkillEvaluatorResult` drops `label`/`metadata` — we reconstruct `label`
+ * from `pass` so the summary's strength/weakness logic keeps working.
+ */
+function skillResultToServerResult(r: SkillEvaluatorResult): ServerEvaluatorResult {
+  return {
+    evaluator: r.evaluator,
+    kind: (r.kind as ServerEvaluatorResult['kind']) ?? 'LLM',
+    score: r.score,
+    label: r.score == null ? 'skipped' : r.pass ? 'pass' : 'fail',
+    explanation: r.explanation,
+    traceId: r.trace_id,
+  };
 }
 
 /**
  * Run LLM improvement for the convergence loop.
- * Reads the current skill + validation feedback, generates improvements, and saves them.
+ *
+ * Takes the per-iteration evaluator feedback produced by the evaluator
+ * registry rather than reading `validation.llm_feedback` off the skill SO
+ * — the SO snapshot can be stale relative to the current loop iteration,
+ * and the registry results are richer (one entry per evaluator with the
+ * specific failure mode). We feed the weak/skipped evaluators straight
+ * into the rewrite prompt so the LLM addresses them individually.
  */
 async function runLLMImprovement({
   esClient,
   actionsClient,
   connectorId,
   skillId,
+  feedback,
   logger,
 }: {
   esClient: ElasticsearchClient;
   actionsClient: ActionsClient;
   connectorId: string;
   skillId: string;
+  feedback: SkillEvaluatorResult[];
   logger: Logger;
 }): Promise<void> {
   const skillDoc = await esClient.get({
@@ -684,14 +761,31 @@ async function runLLMImprovement({
     throw new Error(`Skill ${skillId} source unavailable`);
   }
 
-  if (!skill.validation?.llm_feedback) {
-    logger.warn(
-      `[AESOP] No validation feedback available for improvement, skipping skill_id=${skillId}`
+  const weaknesses = feedback.filter((r) => !r.pass && r.score != null);
+  const skipped = feedback.filter((r) => r.score == null);
+
+  if (weaknesses.length === 0 && skipped.length === 0) {
+    logger.info(
+      `[AESOP] No weaknesses to improve, skipping improvement skill_id=${skillId}`
     );
     return;
   }
 
-  const prompt = `Improve this Agent Builder skill based on the validation feedback below.
+  const weaknessBlock = weaknesses
+    .map(
+      (r) =>
+        `- **${r.evaluator}** (score ${r.score?.toFixed(2) ?? 'n/a'}): ${
+          r.explanation || 'no explanation'
+        }`
+    )
+    .join('\n');
+  const skippedBlock = skipped.length
+    ? `\n**Unable to score (evaluator skipped):**\n${skipped
+        .map((r) => `- ${r.evaluator}: ${r.explanation || 'missing prerequisite'}`)
+        .join('\n')}`
+    : '';
+
+  const prompt = `Improve this Agent Builder skill based on the per-evaluator feedback below.
 
 ## Current Skill
 **Name:** ${skill.name}
@@ -700,17 +794,13 @@ async function runLLMImprovement({
 **Content:**
 ${skill.markdown || skill.content || ''}
 
-## Validation Results (Score: ${((skill.validation?.final_score || 0) * 100).toFixed(0)}%)
+## Evaluator Feedback
 
-**Feedback:** ${skill.validation?.llm_feedback || 'N/A'}
+**Failed / Weak:**
+${weaknessBlock || '(none)'}
+${skippedBlock}
 
-**Weaknesses:**
-${(skill.validation?.weaknesses || []).map((w: string) => `- ${w}`).join('\n')}
-
-**Suggestions:**
-${(skill.validation?.suggestions || []).map((s: string) => `- ${s}`).join('\n')}
-
-Apply all suggestions and fix all weaknesses. Make the skill specific, actionable, and complete.
+For every failing evaluator, make a targeted edit to the skill markdown that would flip the result to passing. Do not lower scores elsewhere.
 Return the improved skill as JSON: { "name": "...", "description": "...", "markdown": "..." }`;
 
   const connectorTypeId = await getConnectorTypeId(actionsClient, connectorId);
@@ -767,6 +857,93 @@ Return the improved skill as JSON: { "name": "...", "description": "...", "markd
   });
 
   logger.info(`[AESOP] Convergence iteration improved skill skill_id=${skillId}`);
+}
+
+/**
+ * Best-effort transition of a proposed skill into the 'failed' state.
+ *
+ * Called from both the agent and convergence fire-and-forget paths so the
+ * skill row never stays stuck in 'validating' when the background work can
+ * no longer make progress. Uses a conditional script so we only overwrite
+ * statuses that are still 'validating' — avoids racing with a success-path
+ * update that already wrote 'passed' or 'failed'.
+ */
+async function markValidationFailed({
+  esClient,
+  skillId,
+  reason,
+  logger,
+}: {
+  esClient: ElasticsearchClient;
+  skillId: string;
+  reason: string;
+  logger: Logger;
+}): Promise<void> {
+  try {
+    await esClient.update({
+      index: '.aesop-proposed-skills',
+      id: skillId,
+      script: {
+        lang: 'painless',
+        source: `
+          if (ctx._source.validation == null) { ctx._source.validation = new HashMap(); }
+          if (ctx._source.validation.status == 'validating') {
+            ctx._source.validation.status = 'failed';
+            ctx._source.validation.completed_at = params.now;
+            ctx._source.validation.error = params.reason;
+          } else {
+            ctx.op = 'noop';
+          }
+        `,
+        params: { now: new Date().toISOString(), reason },
+      },
+      refresh: 'wait_for',
+    });
+  } catch (err) {
+    logger.warn(
+      `[AESOP] Failed to mark skill as failed skill_id=${skillId}: ${
+        err instanceof Error ? err.message : String(err)
+      }`
+    );
+  }
+}
+
+/**
+ * Schedules a watchdog that forces the skill out of 'validating' after
+ * VALIDATION_WATCHDOG_MS. Returns a canceller the success/failure paths
+ * should invoke once they have written a terminal status, so we do not
+ * clobber good results with a late timeout write.
+ */
+function startValidationWatchdog({
+  esClient,
+  skillId,
+  mode,
+  logger,
+}: {
+  esClient: ElasticsearchClient;
+  skillId: string;
+  mode: 'agent' | 'convergence' | 'single';
+  logger: Logger;
+}): () => void {
+  const timer = setTimeout(() => {
+    logger.warn(
+      `[AESOP] Validation watchdog fired skill_id=${skillId} mode=${mode} after_ms=${VALIDATION_WATCHDOG_MS}`
+    );
+    void markValidationFailed({
+      esClient,
+      skillId,
+      reason: `Validation exceeded ${Math.round(
+        VALIDATION_WATCHDOG_MS / 60_000
+      )}-minute watchdog timeout (mode=${mode})`,
+      logger,
+    });
+  }, VALIDATION_WATCHDOG_MS);
+
+  // Prevent the watchdog from keeping the Node event loop alive during
+  // graceful shutdown.
+  if (typeof timer.unref === 'function') timer.unref();
+
+  return () => clearTimeout(timer);
 }
 
 function parseImprovedSkillResponse(response: string): {

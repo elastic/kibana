@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type {
   ProposedSkillDocument,
   ConvergenceConfig,
@@ -14,6 +15,12 @@ import type {
 } from './types';
 import type { EvaluatorRegistry, ServerEvaluatorResult } from '../evaluation_engine';
 import { createEvaluationRunner } from '../evaluation_engine';
+
+export interface InferenceClient {
+  chatComplete: (params: {
+    messages: Array<{ role: string; content: string }>;
+  }) => Promise<{ content?: string }>;
+}
 
 // ─── Inlined scoring types/functions (from @kbn/evals-extensions, devOnly) ───
 
@@ -148,14 +155,20 @@ export interface ConvergenceResult {
 }
 
 const SKILL_PRESET_EVALUATOR_NAMES = [
+  // LLM judges
   'skill-relevance',
   'skill-completeness',
   'skill-accuracy',
   'skill-specificity',
   'skill-safety',
+  // CODE evaluators — run first, gate LLM judges on failure
   'backing-index-validator',
   'esql-pattern',
+  'esql-compile',
+  'skill-index-resolves',
   'skill-pii',
+  'skill-secret-scanner',
+  'skill-prompt-injection',
 ];
 
 const DEFAULT_COMPOSITE_CONFIG: CompositeScoreConfig = {
@@ -212,10 +225,29 @@ export const runConvergenceLoop = async (
       currentSkill: ProposedSkillDocument,
       feedback: SkillEvaluatorResult[]
     ) => Promise<ProposedSkillDocument>;
+    /**
+     * Inference client used by LLM-kind evaluators. Required if the evaluator
+     * list includes any LLM judges (it does by default via `skill-preset`).
+     */
+    inferenceClient?: InferenceClient;
+    /**
+     * Scoped Elasticsearch client used by grounding evaluators (esql-compile,
+     * skill-index-resolves). Optional — evaluators that need it will mark
+     * themselves as 'skipped' if absent.
+     */
+    esClient?: ElasticsearchClient;
+    /**
+     * Called after every iteration so callers can persist intermediate state
+     * (e.g. the AESOP route updates the .aesop-proposed-skills document with
+     * the latest score/criteria so the UI can show progress). Errors here are
+     * logged but do not abort the loop.
+     */
+    onIteration?: (iteration: ConvergenceIteration) => Promise<void> | void;
   }
 ): Promise<ConvergenceResult> => {
   const { threshold, maxIterations, convergenceDelta } = config;
-  const { evaluatorRegistry, logger, improveSkill } = dependencies;
+  const { evaluatorRegistry, logger, improveSkill, inferenceClient, esClient, onIteration } =
+    dependencies;
   const iterations: ConvergenceIteration[] = [];
   const startTime = Date.now();
   let currentSkill = skill;
@@ -239,6 +271,8 @@ export const runConvergenceLoop = async (
       evaluatorNames,
       connectorId: config.connectorId,
       requiredPass: config.requiredPass,
+      inferenceClient,
+      esClient,
     });
 
     const serverResults = runResult.results[0]?.evaluatorResults ?? [];
@@ -258,13 +292,26 @@ export const runConvergenceLoop = async (
       { requiredPass: config.requiredPass, compositeThreshold: threshold }
     );
 
-    iterations.push({
+    const iterationRecord: ConvergenceIteration = {
       iteration: i,
       score: currentScore,
       evaluator_results: evaluatorResults,
       improved,
       timestamp: new Date().toISOString(),
-    });
+    };
+    iterations.push(iterationRecord);
+
+    if (onIteration) {
+      try {
+        await onIteration(iterationRecord);
+      } catch (err) {
+        logger.warn(
+          `onIteration hook failed at iteration ${i}: ${
+            err instanceof Error ? err.message : String(err)
+          }`
+        );
+      }
+    }
 
     logger.info(
       `Convergence iteration ${i}: score=${currentScore.toFixed(3)}, gate=${
