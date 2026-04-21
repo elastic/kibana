@@ -119,7 +119,11 @@ export const UPDATE_DATA_VIEW_SUMMARY = 'Update a data view';
 export const UPDATE_DATA_VIEW_FIELDS_SUMMARY = 'Update field metadata';
 export const UPDATE_RUNTIME_FIELD_SUMMARY = 'Update a runtime field';
 
-const DATA_VIEW_DOCS_URL = 'https://www.elastic.co/docs/manage-data/data-store/data-views';
+// Doc URLs match `getDocLinks` in @kbn/doc-links (`indexPatterns.introduction`, `scriptedFields.painless`).
+const DATA_VIEW_DOCS_URL =
+  'https://www.elastic.co/docs/explore-analyze/find-and-organize/data-views';
+const PAINLESS_DOCS_URL =
+  'https://www.elastic.co/docs/explore-analyze/scripting/modules-scripting-painless';
 
 /**
  * Operation descriptions (expanded, used in OAS description)
@@ -135,7 +139,7 @@ export const CREATE_DATA_VIEW_DESCRIPTION =
   `To learn more, refer to the [data views documentation](${DATA_VIEW_DOCS_URL}).`;
 
 export const GET_DATA_VIEWS_DESCRIPTION =
-  'Retrieve a list of all data views. Use this endpoint to discover available data views in the current Kibana space.';
+  'Retrieve a list of all data views. Use this endpoint to identify available data views in the current Kibana space.';
 
 export const GET_DATA_VIEW_DESCRIPTION =
   `Retrieve a single data view by its identifier. ${DATA_VIEW_DESCRIPTION_PREAMBLE} ` +
@@ -160,7 +164,7 @@ export const UPDATE_DATA_VIEW_FIELDS_DESCRIPTION =
 
 export const CREATE_RUNTIME_FIELD_DESCRIPTION =
   'Create a runtime field for a data view. Runtime fields are computed at query time ' +
-  'using a Painless script and do not require reindexing.';
+  `using a [Painless script](${PAINLESS_DOCS_URL}) and do not require reindexing.`;
 
 export const CREATE_UPDATE_RUNTIME_FIELD_DESCRIPTION =
   'Create or update a runtime field for a data view. If the runtime field already exists, ' +

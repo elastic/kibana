@@ -3,7 +3,9 @@ post:
   operationId: createRuntimeFieldDefault
   description: >
     Create a runtime field for a data view.
-    Runtime fields are computed at query time using a Painless script and do not require reindexing.
+    Runtime fields are computed at query time using a
+    [Painless script](https://www.elastic.co/docs/explore-analyze/scripting/modules-scripting-painless)
+    and do not require reindexing.
   tags:
     - data views
   x-codeSamples:
