@@ -29,7 +29,6 @@ export const createSecurityDocumentProfileProviders = (
   const baseProvider = createSecurityDocumentProfileProvider(providerServices);
   const enhancedProvider = extendProfileProvider(baseProvider, {
     profileId: SECURITY_PROFILE_ID.enhanced_document,
-    isExperimental: true,
     profile: {
       getDocViewer: (prev) => (params) => {
         const prevDocViewer = prev(params);
