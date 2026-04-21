@@ -49,6 +49,7 @@ import {
   createEventIngestedPipeline,
   getIngestPipelineName,
 } from '../utils/event_ingested_pipeline';
+import { DEFAULT_MAX_TERMS_QUERY_COUNT } from '../utils/elasticsearch_terms_limits';
 
 interface RiskScoringDataClientOpts {
   logger: Logger;
@@ -110,45 +111,49 @@ export class RiskScoreDataClient {
     const { esClient, namespace } = this.options;
     const index = getRiskScoreTimeSeriesIndex(namespace);
 
-    const response = await esClient.search({
-      index,
-      size: 0,
-      ignore_unavailable: true,
-      allow_no_indices: true,
-      query: {
-        bool: {
-          filter: [
-            { terms: { [`${entityType}.name`]: [...entityNames] } },
-            { range: { '@timestamp': range } },
-          ],
+    for (let offset = 0; offset < entityNames.length; offset += DEFAULT_MAX_TERMS_QUERY_COUNT) {
+      const batch = entityNames.slice(offset, offset + DEFAULT_MAX_TERMS_QUERY_COUNT);
+
+      const response = await esClient.search({
+        index,
+        size: 0,
+        ignore_unavailable: true,
+        allow_no_indices: true,
+        query: {
+          bool: {
+            filter: [
+              { terms: { [`${entityType}.name`]: [...batch] } },
+              { range: { '@timestamp': range } },
+            ],
+          },
         },
-      },
-      aggs: {
-        by_entity: {
-          terms: { field: `${entityType}.name`, size: entityNames.length },
-          aggs: {
-            scores_over_time: {
-              date_histogram: { field: '@timestamp', calendar_interval: 'day' },
-              aggs: {
-                avg_score: { avg: { field: `${entityType}.risk.calculated_score_norm` } },
+        aggs: {
+          by_entity: {
+            terms: { field: `${entityType}.name`, size: batch.length },
+            aggs: {
+              scores_over_time: {
+                date_histogram: { field: '@timestamp', calendar_interval: 'day' },
+                aggs: {
+                  avg_score: { avg: { field: `${entityType}.risk.calculated_score_norm` } },
+                },
               },
             },
           },
         },
-      },
-    });
+      });
 
-    const buckets = ((response.aggregations?.by_entity as Record<string, unknown>)?.buckets ??
-      []) as Array<{
-      key: string;
-      scores_over_time: { buckets: Array<{ avg_score: { value: number | null } }> };
-    }>;
+      const buckets = ((response.aggregations?.by_entity as Record<string, unknown>)?.buckets ??
+        []) as Array<{
+        key: string;
+        scores_over_time: { buckets: Array<{ avg_score: { value: number | null } }> };
+      }>;
 
-    for (const bucket of buckets) {
-      const scores = bucket.scores_over_time.buckets
-        .map((b) => b.avg_score.value)
-        .filter((v): v is number => v != null);
-      result.set(`${entityType}:${bucket.key}`, scores);
+      for (const bucket of buckets) {
+        const scores = bucket.scores_over_time.buckets
+          .map((b) => b.avg_score.value)
+          .filter((v): v is number => v != null);
+        result.set(`${entityType}:${bucket.key}`, scores);
+      }
     }
 
     return result;
