@@ -6,19 +6,20 @@
  */
 
 import type { CasesPublicSetup } from '@kbn/cases-plugin/public';
+import { ML_ANOMALY_SWIMLANE_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { casesSchemaValidator } from '../../common/util/cases_utils';
 import { PLUGIN_ICON } from '../../common/constants/app';
-import { CASE_ATTACHMENT_TYPE_ID_ANOMALY_SWIMLANE } from '../../common/constants/cases';
 import type { MlStartDependencies } from '../plugin';
 
 export function registerAnomalySwimLaneCasesAttachment(
   cases: CasesPublicSetup,
   pluginStart: MlStartDependencies
 ) {
-  cases.attachmentFramework.registerPersistableState({
-    id: CASE_ATTACHMENT_TYPE_ID_ANOMALY_SWIMLANE,
+  cases.attachmentFramework.registerUnified({
+    id: ML_ANOMALY_SWIMLANE_ATTACHMENT_TYPE,
     icon: PLUGIN_ICON,
     displayName: i18n.translate('xpack.ml.cases.anomalySwimLane.displayName', {
       defaultMessage: 'Anomaly swim lane',
@@ -38,5 +39,6 @@ export function registerAnomalySwimLaneCasesAttachment(
         };
       }),
     }),
+    schemaValidator: casesSchemaValidator,
   });
 }

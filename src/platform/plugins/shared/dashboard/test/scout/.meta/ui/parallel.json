@@ -1,5 +1,5 @@
 {
-  "sha1": "1263b482961785ecb0c0ed0d7f147a2770fa1094",
+  "sha1": "a0ad58eac5a854e1e3a9334e92725f3ee4e4d927",
   "tests": [
     {
       "id": "98600d12651f127-aa69b48f5334963",
@@ -154,6 +154,58 @@
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_lens_by_value.spec.ts",
         "line": 112,
+        "column": 12
+      }
+    },
+    {
+      "id": "d98c74ed9645275-c025951c60b0ab8",
+      "title": "Dashboard listing navigation clicking create new dashboard and navigating back to listing page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_listing_navigation.spec.ts",
+        "line": 32,
+        "column": 12
+      }
+    },
+    {
+      "id": "d98c74ed9645275-844fd4955f0e9f1",
+      "title": "Dashboard listing navigation saving a dashboard and returning to the listing page shows it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_listing_navigation.spec.ts",
+        "line": 53,
         "column": 12
       }
     },
