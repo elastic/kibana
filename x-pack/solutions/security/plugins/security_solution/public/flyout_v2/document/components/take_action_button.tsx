@@ -17,6 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
+import { isCCSRemoteIndexName } from '@kbn/es-query';
 import { ALERT_WORKFLOW_STATUS, EVENT_KIND } from '@kbn/rule-data-utils';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { EventKind } from '../constants/event_kinds';
@@ -105,6 +106,10 @@ export const TakeActionButton = memo(
     const isInSecurityApp = useIsInSecurityApp();
 
     const documentId = hit.raw._id as string;
+    const isRemoteDocument = useMemo(
+      () => isCCSRemoteIndexName(hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? ''),
+      [hit]
+    );
     const isAlert = useMemo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
       [hit]
@@ -210,16 +215,19 @@ export const TakeActionButton = memo(
     }, [closePopoverHandler, hit, isAlert, services.application]);
 
     const items = useMemo(
-      () => [
-        ...addToCaseActionItems,
-        ...(isAlert ? statusActionItems : []),
-        ...(isAlert ? alertTagsItems : []),
-        ...(isAlert ? alertAssigneesItems : []),
-        ...(isAlert ? runWorkflowMenuItem : documentWorkflowMenuItem),
-        ...(isAlert ? [] : noteItems),
-        ...(isInSecurityApp ? investigateInTimelineActionItems : []),
-        ...(!isInSecurityApp ? exploreActionItems : []),
-      ],
+      () =>
+        isRemoteDocument
+          ? [...(isInSecurityApp ? investigateInTimelineActionItems : [])]
+          : [
+              ...addToCaseActionItems,
+              ...(isAlert ? statusActionItems : []),
+              ...(isAlert ? alertTagsItems : []),
+              ...(isAlert ? alertAssigneesItems : []),
+              ...(isAlert ? runWorkflowMenuItem : documentWorkflowMenuItem),
+              ...(isAlert ? [] : noteItems),
+              ...(isInSecurityApp ? investigateInTimelineActionItems : []),
+              ...(!isInSecurityApp ? exploreActionItems : []),
+            ],
       [
         addToCaseActionItems,
         alertAssigneesItems,
@@ -229,6 +237,7 @@ export const TakeActionButton = memo(
         investigateInTimelineActionItems,
         isAlert,
         isInSecurityApp,
+        isRemoteDocument,
         noteItems,
         runWorkflowMenuItem,
         statusActionItems,
@@ -238,15 +247,16 @@ export const TakeActionButton = memo(
     const panels = useMemo(
       () => [
         { id: 0, items },
-        ...(isAlert ? statusActionPanels : []),
-        ...(isAlert ? alertAssigneesPanels : []),
-        ...(isAlert ? alertTagsPanels : []),
-        ...(isAlert ? runAlertWorkflowPanel : runDocumentWorkflowPanel),
+        ...(!isRemoteDocument && isAlert ? statusActionPanels : []),
+        ...(!isRemoteDocument && isAlert ? alertAssigneesPanels : []),
+        ...(!isRemoteDocument && isAlert ? alertTagsPanels : []),
+        ...(!isRemoteDocument ? (isAlert ? runAlertWorkflowPanel : runDocumentWorkflowPanel) : []),
       ],
       [
         alertAssigneesPanels,
         alertTagsPanels,
         isAlert,
+        isRemoteDocument,
         items,
         runAlertWorkflowPanel,
         runDocumentWorkflowPanel,
