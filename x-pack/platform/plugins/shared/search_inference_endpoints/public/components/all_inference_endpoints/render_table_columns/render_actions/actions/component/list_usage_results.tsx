@@ -7,9 +7,9 @@
 
 import React, { useState } from 'react';
 import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import type { InferenceUsageInfo } from '../../../../types';
-import * as i18n from '../delete/confirm_delete_endpoint/translations';
 import { IndexItem } from './index_item';
 import { PipelineItem } from './pipeline_item';
 
@@ -24,11 +24,17 @@ export const ListUsageResults: React.FC<ListUsageResultsProps> = ({ list }) => {
     <EuiFlexGroup gutterSize="m" direction="column">
       <EuiFlexItem>
         <EuiFieldSearch
-          placeholder={i18n.SEARCH_LABEL}
+          placeholder={i18n.translate(
+            'xpack.searchInferenceEndpoints.confirmDeleteEndpoint.searchLabel',
+            { defaultMessage: 'Search' }
+          )}
           value={term}
           onChange={(e) => setTerm(e.target.value)}
           isClearable={true}
-          aria-label={i18n.SEARCH_ARIA_LABEL}
+          aria-label={i18n.translate(
+            'xpack.searchInferenceEndpoints.confirmDeleteEndpoint.searchARIALabel',
+            { defaultMessage: 'Search indices and pipelines' }
+          )}
           fullWidth={true}
           data-test-subj="usageFieldSearch"
         />

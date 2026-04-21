@@ -6,34 +6,40 @@
  */
 
 import { esql, type EsqlRequest } from '@elastic/esql';
+import { ALERT_ACTIONS_DATA_STREAM } from '../../resources/datastreams/alert_actions';
 import {
-  ALERT_ACTIONS_BACKING_INDEX,
-  ALERT_ACTIONS_DATA_STREAM,
-} from '../../resources/datastreams/alert_actions';
-import {
-  ALERT_EVENTS_BACKING_INDEX,
   ALERT_EVENTS_DATA_STREAM,
   type AlertEventType,
 } from '../../resources/datastreams/alert_events';
 import type { AlertEpisode, NotificationGroupId } from './types';
 
+/**
+ * Fetches dispatchable alert events by querying both alert_events and alert_actions data streams.
+ *
+ * Uses field-based discrimination instead of `_index LIKE` to tell rows apart:
+ *  - alert_events has a `type` field ('signal' | 'alert'); alert_actions does not (NULL in ES|QL).
+ *  - alert_actions has an `action_type` field; alert_events does not (NULL in ES|QL).
+ *
+ * This avoids an ES|QL regression where `WHERE _index LIKE` before `STATS` in a multi-index
+ * query returns 0 rows. See: https://github.com/elastic/elasticsearch/issues/146318
+ */
 export const getDispatchableAlertEventsQuery = (): EsqlRequest => {
   const alertEventType: AlertEventType = 'alert';
 
-  return esql`FROM ${ALERT_EVENTS_DATA_STREAM},${ALERT_ACTIONS_DATA_STREAM} METADATA _index, _source
-      | WHERE (_index LIKE ${ALERT_ACTIONS_BACKING_INDEX}) OR (_index LIKE ${ALERT_EVENTS_BACKING_INDEX} and type == ${alertEventType})
+  return esql`FROM ${ALERT_EVENTS_DATA_STREAM},${ALERT_ACTIONS_DATA_STREAM} METADATA _source
+      | WHERE type IS NULL OR type == ${alertEventType}
       | EVAL
           rule_id = COALESCE(rule.id, rule_id),
           episode_id = COALESCE(episode.id, episode_id),
           episode_status = episode.status,
-          data_json = CASE(_index LIKE ${ALERT_EVENTS_BACKING_INDEX}, JSON_EXTRACT(_source, "$.data"), NULL)
+          data_json = CASE(type IS NOT NULL, JSON_EXTRACT(_source, "$.data"), NULL)
       | DROP episode.id, rule.id, episode.status
-      | INLINE STATS last_fired = max(last_series_event_timestamp) WHERE _index LIKE ${ALERT_ACTIONS_BACKING_INDEX} AND (action_type == "fire" OR action_type == "suppress" OR action_type == "unmatched") BY rule_id, group_hash
-      | WHERE (last_fired IS NULL OR last_fired < @timestamp) or (_index LIKE ${ALERT_ACTIONS_BACKING_INDEX})
+      | INLINE STATS last_fired = max(last_series_event_timestamp) WHERE action_type == "fire" OR action_type == "suppress" OR action_type == "unmatched" BY rule_id, group_hash
+      | WHERE last_fired IS NULL OR last_fired < @timestamp
       | STATS
-          last_event_timestamp = MAX(@timestamp) WHERE _index LIKE ${ALERT_EVENTS_BACKING_INDEX},
-          last_episode_status = LAST(episode_status, @timestamp) WHERE _index LIKE ${ALERT_EVENTS_BACKING_INDEX},
-          data_json = LAST(data_json, @timestamp) WHERE _index LIKE ${ALERT_EVENTS_BACKING_INDEX}
+          last_event_timestamp = MAX(@timestamp) WHERE type IS NOT NULL,
+          last_episode_status = LAST(episode_status, @timestamp) WHERE type IS NOT NULL,
+          data_json = LAST(data_json, @timestamp) WHERE type IS NOT NULL
           BY rule_id, group_hash, episode_id
       | WHERE last_event_timestamp IS NOT NULL
       | KEEP last_event_timestamp, rule_id, group_hash, episode_id, last_episode_status, data_json

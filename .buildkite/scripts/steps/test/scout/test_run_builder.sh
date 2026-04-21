@@ -5,6 +5,10 @@ set -euo pipefail
 source .buildkite/scripts/bootstrap.sh
 .buildkite/scripts/setup_es_snapshot_cache.sh
 
+if should_enable_fips; then
+  export NODE_OPTIONS="${NODE_OPTIONS:-} --enable-fips --openssl-config=$HOME/nodejs.cnf"
+fi
+
 echo '--- Verify Playwright CLI is functional'
 node scripts/scout run-playwright-test-check
 

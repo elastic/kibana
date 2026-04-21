@@ -17,6 +17,8 @@ paths:
           required: false
           schema:
             type: string
+          description: Field to sort results by.
+          example: 'entity.name'
         - name: sort_order
           in: query
           required: false
@@ -25,12 +27,15 @@ paths:
             enum:
               - asc
               - desc
+          description: Sort order.
         - name: page
           in: query
           required: false
           schema:
             type: integer
             minimum: 1
+          description: Page number to return (1-indexed).
+          example: 1
         - name: per_page
           in: query
           required: false
@@ -38,6 +43,8 @@ paths:
             type: integer
             minimum: 1
             maximum: 10000
+          description: Number of entities per page.
+          example: 10
         - name: filterQuery
           in: query
           required: false
@@ -51,6 +58,7 @@ paths:
             type: array
             items:
               $ref: '../common.schema.yaml#/components/schemas/EntityType'
+          description: Entity types to include in the results.
       responses:
         '200':
           description: Entities returned successfully
@@ -61,18 +69,22 @@ paths:
                 properties:
                   records:
                     type: array
+                    description: The entity records for this page.
                     items:
                       $ref: './common.schema.yaml#/components/schemas/Entity'
                   page:
                     type: integer
                     minimum: 1
+                    description: Current page number.
                   per_page:
                     type: integer
                     minimum: 1
                     maximum: 1000
+                    description: Number of entities per page.
                   total:
                     type: integer
                     minimum: 0
+                    description: Total number of entities matching the query.
                   inspect:
                     $ref: '../common.schema.yaml#/components/schemas/InspectQuery'
                 required:
