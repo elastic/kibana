@@ -28,7 +28,11 @@ test.describe(
       await browserAuth.loginAsAdmin();
     });
 
-    test('shows sigevents overview when flag is enabled', async ({ page, kbnUrl, apiServices }) => {
+    test('shows sigevents overview with inline conversation when flag is enabled', async ({
+      page,
+      kbnUrl,
+      apiServices,
+    }) => {
       await apiServices.core.settings({
         'feature_flags.overrides': {
           [SIGEVENTS_FEATURE_FLAG]: true,
@@ -39,6 +43,8 @@ test.describe(
 
       await expect(page.getByTestId('obltSigeventsOverviewPageHeader')).toBeVisible();
       await expect(page.getByTestId('obltSigeventsOverviewPlaceholder')).toBeVisible();
+      await expect(page.getByTestId('obltSigeventsConversation')).toBeVisible();
+      await expect(page.getByTestId('agentBuilderInlineConversation')).toBeVisible();
     });
 
     test('landing page redirects to sigevents when flag is enabled', async ({
