@@ -992,7 +992,7 @@ const xyLayerUnionESQL = objectUnion([xyDataLayerSchemaESQL], {
 /**
  * XY chart state for DSL layers
  */
-export const xyStateSchemaNoESQL = schema.object(
+export const xyConfigSchemaNoESQL = schema.object(
   {
     type: schema.literal('xy'),
     ...sharedPanelInfoSchema,
@@ -1016,7 +1016,7 @@ export const xyStateSchemaNoESQL = schema.object(
 /**
  * XY chart state for ES|QL layers only (reference lines are not supported)
  */
-export const xyStateSchemaESQL = schema.object(
+export const xyConfigSchemaESQL = schema.object(
   {
     type: schema.literal('xy'),
     ...sharedPanelInfoSchema,
@@ -1039,7 +1039,7 @@ export const xyStateSchemaESQL = schema.object(
 /**
  * XY chart state
  */
-export const xyStateSchema = objectUnion([xyStateSchemaNoESQL, xyStateSchemaESQL], {
+export const xyConfigSchema = objectUnion([xyConfigSchemaNoESQL, xyConfigSchemaESQL], {
   meta: {
     id: 'xyChart',
     title: 'XY Chart',
@@ -1047,9 +1047,9 @@ export const xyStateSchema = objectUnion([xyStateSchemaNoESQL, xyStateSchemaESQL
   },
 });
 
-export type XYStateNoESQL = TypeOf<typeof xyStateSchemaNoESQL>;
-export type XYStateESQL = TypeOf<typeof xyStateSchemaESQL>;
-export type XYState = TypeOf<typeof xyStateSchema>;
+export type XYConfigNoESQL = TypeOf<typeof xyConfigSchemaNoESQL>;
+export type XYConfigESQL = TypeOf<typeof xyConfigSchemaESQL>;
+export type XYConfig = TypeOf<typeof xyConfigSchema>;
 export type DataLayerTypeESQL = TypeOf<typeof xyDataLayerSchemaESQL>;
 export type DataLayerTypeNoESQL = TypeOf<typeof xyDataLayerSchemaNoESQL>;
 export type DataLayerType = DataLayerTypeNoESQL | DataLayerTypeESQL;
@@ -1071,5 +1071,3 @@ export type LayerTypeNoESQL =
   | ReferenceLineLayerTypeNoESQL
   | AnnotationLayerType;
 export type XYLayer = LayerTypeNoESQL | LayerTypeESQL;
-
-export type XYStyling = TypeOf<typeof xyStylingSchema>;

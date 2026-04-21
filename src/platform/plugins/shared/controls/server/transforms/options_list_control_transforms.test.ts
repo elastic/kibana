@@ -21,19 +21,19 @@ const baseState = {
 
 const panelReferences = [{ name: REF_NAME, type: 'index-pattern', id: 'data-view-id' }];
 
-const getTransformOut = () => {
+const getTransforms = () => {
   const embeddable = createEmbeddableSetupMock();
   registerOptionsListControlTransforms(embeddable);
 
   const [, transformsSetup] = embeddable.registerTransforms.mock.calls[0];
-  const { transformOut } = transformsSetup.getTransforms!({} as DrilldownTransforms);
-  return transformOut!;
+  const { transformOut, transformIn } = transformsSetup.getTransforms!({} as DrilldownTransforms);
+  return { transformOut: transformOut!, transformIn: transformIn! };
 };
 
 describe('options list control transforms', () => {
-  describe('transformOut', () => {
-    const transformOut = getTransformOut();
+  const { transformOut } = getTransforms();
 
+  describe('transformOut', () => {
     it('omits null values while keeping non-null values', () => {
       const result = transformOut(
         {
@@ -88,6 +88,20 @@ describe('options list control transforms', () => {
           "use_global_filters": true,
         }
       `);
+    });
+
+    it('throws on empty required fields', () => {
+      expect(() =>
+        transformOut({
+          data_view_id: '',
+        })
+      ).toThrow('Must include a non-empty data view ID');
+      expect(() =>
+        transformOut({
+          data_view_id: 'test',
+          field_name: '',
+        })
+      ).toThrow('Must include a non-empty field name');
     });
   });
 });
