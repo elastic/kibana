@@ -9,7 +9,8 @@
 
 import { schema } from '@kbn/config-schema';
 import { AS_CODE_DATA_VIEW_REFERENCE_TYPE, AS_CODE_DATA_VIEW_SPEC_TYPE } from './constants';
-import { runtimeFieldSchema } from './schema_runtime_field';
+import { commonDataViewSpecSchema } from '../common/data_views';
+import { runtimeFieldSchema } from './runtime_fields';
 
 export const dataViewReferenceSchema = schema.object(
   {
@@ -24,23 +25,9 @@ export const dataViewReferenceSchema = schema.object(
   { meta: { id: 'kbn-data-view-reference-schema', title: 'Data view reference' } }
 );
 
-export const dataViewSpecSchema = schema.object(
+export const dataViewSpecSchema = commonDataViewSpecSchema.extends(
   {
     type: schema.literal(AS_CODE_DATA_VIEW_SPEC_TYPE),
-    index_pattern: schema.string({
-      meta: {
-        description:
-          'The index pattern (Elasticsearch index expression) to use as the data source. Example: "my-index-*".',
-      },
-    }),
-    time_field: schema.maybe(
-      schema.string({
-        meta: {
-          description:
-            'The name of the time field in the index. Used for time-based filtering. Example: "@timestamp".',
-        },
-      })
-    ),
     runtime_fields: schema.maybe(schema.arrayOf(runtimeFieldSchema, { maxSize: 100 })),
   },
   { meta: { id: 'kbn-data-view-spec-schema', title: 'Data view inline spec' } }

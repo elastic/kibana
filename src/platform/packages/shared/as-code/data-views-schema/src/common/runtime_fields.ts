@@ -14,7 +14,7 @@ import type {
   RuntimeFieldCompositeType,
 } from '@kbn/data-views-plugin/common';
 
-const PRIMITIVE_RUNTIME_FIELD_TYPES: PrimitiveRuntimeFieldTypes = [
+export const PRIMITIVE_RUNTIME_FIELD_TYPES: PrimitiveRuntimeFieldTypes = [
   'keyword',
   'long',
   'double',
@@ -24,14 +24,14 @@ const PRIMITIVE_RUNTIME_FIELD_TYPES: PrimitiveRuntimeFieldTypes = [
   'geo_point',
 ];
 
-const RUNTIME_FIELD_COMPOSITE_TYPE: RuntimeFieldCompositeType = 'composite';
+export const RUNTIME_FIELD_COMPOSITE_TYPE: RuntimeFieldCompositeType = 'composite';
 
 const MAX_NAME_LENGTH = 1000;
 
 /**
  * Both composite and primitive runtime fields share the same base - name and script.
  */
-const commonRuntimeFieldSchema = {
+export const commonRuntimeFieldSchema = {
   /**
    * The name of the runtime field.
    * Example: 'my_runtime_field'
@@ -65,7 +65,7 @@ const commonRuntimeFieldSchema = {
 /**
  * The field definition is applicable for both top level fields in a primitive runtime field and subfields in a composite runtime field.
  */
-const commonFieldSchema = {
+export const commonFieldSchema = {
   /**
    * The type of the runtime field (e.g., 'keyword', 'long', 'date').
    * Example: 'keyword'
@@ -126,41 +126,18 @@ const commonFieldSchema = {
   ),
 };
 
-export const primitiveRuntimeFieldSchema = schema.object(
-  {
-    ...commonFieldSchema,
-    ...commonRuntimeFieldSchema,
-  },
-  { meta: { id: 'kbn-runtime-field-schema', title: 'Runtime field' } }
-);
-
-export const compositeRuntimeFieldSchema = schema.object(
-  {
-    type: schema.literal(RUNTIME_FIELD_COMPOSITE_TYPE),
-    fields: schema.arrayOf(
-      schema.object({
-        /**
-         * The name of the subfield.
-         * If the name is "field" and this subname is "name" the full name of the subfield will be "field.name".
-         */
-        name: schema.string({
-          minLength: 1,
-          maxLength: MAX_NAME_LENGTH,
-          meta: {
-            description:
-              'The name of the runtime subfield, it gets appended to the parent field name. Example: "parent_name.my_runtime_subfield".',
-          },
-        }),
-        ...commonFieldSchema,
-      }),
-      { maxSize: 100 }
-    ),
-    ...commonRuntimeFieldSchema,
-  },
-  { meta: { id: 'kbn-composite-runtime-field-schema', title: 'Composite runtime field' } }
-);
-
-export const runtimeFieldSchema = schema.discriminatedUnion('type', [
-  primitiveRuntimeFieldSchema,
-  compositeRuntimeFieldSchema,
-]);
+export const compositeSubfieldSchema = schema.object({
+  /**
+   * The name of the subfield.
+   * If the name is "field" and this subname is "name" the full name of the subfield will be "field.name".
+   */
+  name: schema.string({
+    minLength: 1,
+    maxLength: MAX_NAME_LENGTH,
+    meta: {
+      description:
+        'The name of the runtime subfield, it gets appended to the parent field name. Example: "parent_name.my_runtime_subfield".',
+    },
+  }),
+  ...commonFieldSchema,
+});

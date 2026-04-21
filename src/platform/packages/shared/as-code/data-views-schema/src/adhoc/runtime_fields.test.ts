@@ -11,11 +11,8 @@ import {
   PRIMITIVE_RUNTIME_FIELD_TYPES,
   RUNTIME_FIELD_COMPOSITE_TYPE,
 } from '@kbn/data-views-plugin/common';
-import type {
-  compositeRuntimeFieldSchema,
-  primitiveRuntimeFieldSchema,
-} from './schema_runtime_field';
-import { runtimeFieldSchema } from './schema_runtime_field';
+import type { compositeRuntimeFieldSchema, primitiveRuntimeFieldSchema } from './runtime_fields';
+import { runtimeFieldSchema } from './runtime_fields';
 import type { TypeOf } from '@kbn/config-schema';
 
 const buildPrimitiveRuntimeField = (
@@ -36,7 +33,7 @@ const buildCompositeRuntimeField = (
   };
 };
 
-describe('schema_runtime_fields', () => {
+describe('runtime_fields', () => {
   describe('given an invalid type', () => {
     it('should throw an error', () => {
       // Given

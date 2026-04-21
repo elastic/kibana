@@ -10,19 +10,23 @@
 export {
   AS_CODE_DATA_VIEW_REFERENCE_TYPE,
   AS_CODE_DATA_VIEW_SPEC_TYPE,
-  AS_CODE_ESQL_DATA_SOURCE_TYPE,
-} from './src/constants';
+} from './src/adhoc/constants';
+export { AS_CODE_ESQL_DATA_SOURCE_TYPE } from './src/constants';
 export {
   dataViewReferenceSchema,
   dataViewSchema,
   dataViewSpecSchema,
-} from './src/schema_data_view';
+} from './src/adhoc/data_views';
+export { runtimeFieldSchema } from './src/adhoc/runtime_fields';
+export { storedDataViewSchema } from './src/stored/data_views';
+export { storedRuntimeFieldSchema } from './src/stored/runtime_fields';
 export { esqlDataSourceSchema } from './src/schema_esql_data_source';
-export { runtimeFieldSchema } from './src/schema_runtime_field';
 export type {
   AsCodeDataView,
   AsCodeDataViewReference,
   AsCodeDataViewSpec,
   AsCodeEsqlDataSource,
   AsCodeRuntimeField,
+  AsCodeStoredDataView,
+  AsCodeStoredRuntimeField,
 } from './src/types';
