@@ -691,7 +691,8 @@ describe('RuleInlineContent integration', () => {
       threshold: { field: 'source.ip', value: 5 },
     });
 
-    expect(screen.getAllByText('Threshold')).toHaveLength(2);
+    expect(screen.getByText('Custom query')).toBeInTheDocument();
+    expect(screen.getByText('Threshold')).toBeInTheDocument();
     expect(screen.getByText(/source\.ip/)).toBeInTheDocument();
     expect(screen.getByText(/>= 5/)).toBeInTheDocument();
   });
@@ -708,7 +709,7 @@ describe('RuleInlineContent integration', () => {
       ],
     });
 
-    expect(screen.getByText('Indicator Match')).toBeInTheDocument();
+    expect(screen.getByText('Custom query')).toBeInTheDocument();
     expect(screen.getByText('Indicator index patterns')).toBeInTheDocument();
     expect(screen.getByText('filebeat-*')).toBeInTheDocument();
     expect(screen.getByText(/source\.ip MATCHES threat\.indicator\.ip/)).toBeInTheDocument();
@@ -722,7 +723,6 @@ describe('RuleInlineContent integration', () => {
       anomaly_threshold: 75,
     });
 
-    expect(screen.getByText('Machine Learning')).toBeInTheDocument();
     expect(screen.getByText('Machine Learning job')).toBeInTheDocument();
     expect(screen.getByText('v3_linux_anomalous_network_activity')).toBeInTheDocument();
     expect(screen.getByText('75')).toBeInTheDocument();
@@ -737,7 +737,7 @@ describe('RuleInlineContent integration', () => {
       history_window_start: 'now-7d',
     });
 
-    expect(screen.getByText('New Terms')).toBeInTheDocument();
+    expect(screen.getByText('Custom query')).toBeInTheDocument();
     expect(screen.getByText('Fields')).toBeInTheDocument();
     expect(screen.getByText('host.name')).toBeInTheDocument();
     expect(screen.getByText('7d')).toBeInTheDocument();
@@ -753,7 +753,7 @@ describe('RuleInlineContent integration', () => {
       tiebreaker_field: 'event.sequence',
     });
 
-    expect(screen.getByText('EQL')).toBeInTheDocument();
+    expect(screen.getByText('EQL query')).toBeInTheDocument();
     expect(screen.getByText(/Event category field/)).toBeInTheDocument();
     expect(screen.getByText('event.category')).toBeInTheDocument();
     expect(screen.getByText('event.sequence')).toBeInTheDocument();
@@ -767,7 +767,7 @@ describe('RuleInlineContent integration', () => {
       language: 'eql',
     });
 
-    expect(screen.getByText('EQL')).toBeInTheDocument();
+    expect(screen.getByText('EQL query')).toBeInTheDocument();
     expect(screen.queryByText(/Event category field/)).not.toBeInTheDocument();
   });
 
@@ -778,7 +778,7 @@ describe('RuleInlineContent integration', () => {
       query: 'host.name: *',
     });
 
-    expect(screen.getByText('Query')).toBeInTheDocument();
+    expect(screen.getByText('Custom query')).toBeInTheDocument();
     expect(screen.queryByText('Indicator index patterns')).not.toBeInTheDocument();
     expect(screen.queryByText('Machine Learning job')).not.toBeInTheDocument();
     expect(screen.queryByText(/Event category field/)).not.toBeInTheDocument();
@@ -792,6 +792,7 @@ describe('RuleInlineContent integration', () => {
       language: 'esql',
     });
 
+    expect(screen.getByText('ES|QL query')).toBeInTheDocument();
     expect(screen.queryByText('Indicator index patterns')).not.toBeInTheDocument();
     expect(screen.queryByText('Machine Learning job')).not.toBeInTheDocument();
     expect(screen.queryByText(/Event category field/)).not.toBeInTheDocument();
@@ -804,7 +805,6 @@ describe('RuleInlineContent integration', () => {
       saved_id: 'my-saved-query',
     });
 
-    expect(screen.getByText('Saved Query')).toBeInTheDocument();
     expect(screen.queryByText('Indicator index patterns')).not.toBeInTheDocument();
     expect(screen.queryByText('Machine Learning job')).not.toBeInTheDocument();
   });
@@ -853,13 +853,11 @@ describe('RuleInlineContent integration', () => {
       tags: ['test-tag'],
     });
 
-    expect(screen.getByText('Description')).toBeInTheDocument();
-    expect(screen.getByText('A test rule')).toBeInTheDocument();
+    expect(screen.getByText('Custom query')).toBeInTheDocument();
+    expect(screen.getByText('Index patterns')).toBeInTheDocument();
     expect(screen.getByText('logs-*')).toBeInTheDocument();
     expect(screen.getByText(/Results aggregated by/)).toBeInTheDocument();
     expect(screen.getByText('test-tag')).toBeInTheDocument();
-    expect(screen.getByText('Severity:')).toBeInTheDocument();
-    expect(screen.getByText('Risk Score:')).toBeInTheDocument();
   });
 
   it('renders empty rule content for invalid JSON', () => {
@@ -936,7 +934,7 @@ describe('RuleInlineContent integration', () => {
     expect(screen.queryByText('Filters')).not.toBeInTheDocument();
   });
 
-  it('renders query in a code block', () => {
+  it('renders query in a code block with correct heading', () => {
     renderInlineContent({
       ...baseRule,
       type: 'query',
@@ -945,7 +943,7 @@ describe('RuleInlineContent integration', () => {
     });
 
     expect(screen.getByText('host.name: *')).toBeInTheDocument();
-    expect(screen.getByText('KQL Detection Logic')).toBeInTheDocument();
+    expect(screen.getByText('Custom query')).toBeInTheDocument();
   });
 
   it('renders filters for indicator match rule with threat_filters', () => {
