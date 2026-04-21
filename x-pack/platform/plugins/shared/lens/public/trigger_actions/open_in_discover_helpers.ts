@@ -81,7 +81,7 @@ async function getDiscoverLocationParams({
     ? embeddable.parentApi
     : undefined;
 
-  const useGeneratedFromFilters = embeddable.isTextBasedLanguage() && filtersToApply.length > 0; // check this
+  const useGeneratedFromFilters = embeddable.isTextBasedLanguage() && (filters || []).length > 0;
 
   const query: AggregateQuery | Query | undefined = useGeneratedFromFilters
     ? { esql: getInitialESQLQuery(dataView, undefined, filtersToApply) }
