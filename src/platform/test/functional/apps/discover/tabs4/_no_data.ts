@@ -59,10 +59,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('non-classic solution type', function () {
       before(async () => {
-        await spaceSettings.switchSpaceSolutionType({
-          spaceName: 'default',
-          solution: 'search',
-        });
         await switchSpaceSolutionTypeAndWait('search');
       });
 
@@ -71,10 +67,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       after(async () => {
-        await spaceSettings.switchSpaceSolutionType({
-          spaceName: 'default',
-          solution: 'classic',
-        });
         await switchSpaceSolutionTypeAndWait('classic');
       });
 
