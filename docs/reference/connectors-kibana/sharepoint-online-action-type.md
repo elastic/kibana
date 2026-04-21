@@ -17,16 +17,35 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 ### Connector configuration [sharepoint-online-connector-configuration]
 
-SharePoint Online connectors have the following configuration properties:
+SharePoint Online connectors support two Microsoft Entra ID authentication types. Choose one when you create or edit the connector:
 
-Token URL
-:   The OAuth 2.0 token endpoint URL. Use the format: `https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token`.
+- **OAuth 2.0 authorization code** — delegated, per-user access. The user signs in through {{kib}} and the connector acts on their behalf, constrained by their own SharePoint permissions.
+- **OAuth Client Certificate (Microsoft Entra)** — app-only access signed with a JWT client assertion (PS256 + `x5t#S256`). The connector acts as the application itself, with the permissions granted to the app registration. This is Microsoft's recommended flow for production app-only access to Microsoft Graph.
 
-Client ID
-:   The application (client) ID from your Microsoft Entra app registration.
+::::{tip}
+App-only (certificate) auth is recommended for production and for unattended/server-to-server scenarios. Use the authorization code flow when you need results scoped to a specific user's access.
+::::
 
-Client Secret
-:   The client secret generated for your Microsoft Entra application.
+OAuth 2.0 authorization code
+:   Delegated flow. In {{kib}} you provide:
+
+    - **Authorization URL**: `https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/authorize`
+    - **Token URL**: `https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token`
+    - **Client ID**: the Application (client) ID from your Entra app registration
+    - **Client Secret**: a client secret generated for the app registration
+
+    Replace `{tenant-id}` with your Microsoft Entra tenant ID. The connector uses the default scope `Sites.Read.All Files.Read.All offline_access`. See [Get API credentials](#sharepoint-online-api-credentials) for the Entra app-registration steps.
+
+OAuth Client Certificate (Microsoft Entra)
+:   App-only flow using a signed JWT client assertion. In {{kib}} you provide:
+
+    - **Token URL**: `https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token`
+    - **Client ID**: the Application (client) ID from your Entra app registration
+    - **Certificate**: the PEM-encoded public X.509 certificate you uploaded to the app registration. Must begin with `-----BEGIN CERTIFICATE-----`.
+    - **Private Key**: the PEM-encoded RSA private key that matches the uploaded certificate. Must begin with one of `-----BEGIN PRIVATE KEY-----` (PKCS#8), `-----BEGIN RSA PRIVATE KEY-----` (PKCS#1), or `-----BEGIN ENCRYPTED PRIVATE KEY-----` (encrypted PKCS#8). Stored encrypted at rest.
+    - **Passphrase** (optional): only required if the private key is encrypted (`ENCRYPTED PRIVATE KEY`).
+
+    The connector uses the default scope `https://graph.microsoft.com/.default`. See [Get API credentials](#sharepoint-online-api-credentials) for the Entra app-registration and certificate-upload steps.
 
 ## Test connectors [sharepoint-online-action-configuration]
 
@@ -36,14 +55,17 @@ The SharePoint Online connector has the following actions:
 
 Search
 :   Search for content across SharePoint sites, lists, and drives using the Microsoft Graph Search API.
-    - `query` (required): The search query string.
-    - `entityTypes` (optional): Array of entity types to search. Valid values: `site`, `list`, `listItem`, `drive`, `driveItem`. Defaults to `site`.
-    - `region` (optional): Search region (`NAM`, `EUR`, `APC`, `LAM`, `MEA`). Defaults to `NAM`.
+    - `query` (required): The search query string (KQL syntax).
+    - `entityTypes` (optional): Array of entity types to search. Valid values: `site`, `list`, `listItem`, `drive`, `driveItem`. Defaults to `[site]`.
+    - `region` (optional): Search region (`NAM`, `EUR`, `APC`, `LAM`, `MEA`). Only used with app-only (certificate) auth; ignored with delegated auth. Defaults to `NAM` when using app-only auth.
     - `from` (optional): Offset for pagination.
     - `size` (optional): Number of results to return.
 
 Get all sites
-:   List all SharePoint sites.
+:   List all SharePoint sites the connector has access to. Behavior depends on auth type:
+
+    - **App-only (certificate) auth**: calls `/sites/getAllSites` and returns every site the app has access to. The `search` parameter is ignored.
+    - **Delegated (authorization code) auth**: `/sites/getAllSites` requires application permissions, so the connector falls back to `/sites?search=`. Provide a keyword or omit/`*` for a wildcard.
 
 Get site
 :   Get a single site by ID or relative URL.
@@ -103,7 +125,9 @@ Use the [Action configuration settings](/reference/configuration-reference/alert
 
 ## Get API credentials [sharepoint-online-api-credentials]
 
-To use the SharePoint Online connector, register an application in Microsoft Entra (formerly Azure Active Directory):
+Both authentication types start with the same Entra app registration. The differences are in which credential type you add (client secret vs. certificate) and which permission kind you grant (delegated vs. application).
+
+### Create the Entra app registration [sharepoint-online-entra-registration]
 
 1. Go to the [Azure Portal](https://portal.azure.com/).
 2. Go to **Microsoft Entra ID** > **App registrations**.
@@ -111,18 +135,72 @@ To use the SharePoint Online connector, register an application in Microsoft Ent
 4. Enter a name for your application.
 5. Select **Accounts in this organizational directory only**.
 6. Select **Register**.
-7. In your app registration, go to **API permissions**.
-8. Select **Add a permission** > **Microsoft Graph** > **Application permissions**.
-9. Add the following permissions:
-   - `Sites.Read.All` — Read items in all site collections.
-   - `Sites.ReadWrite.All` — Read and write items in all site collections (if write operations are needed).
-10. Select **Grant admin consent** for your organization.
-11. In your app registration, go to **Certificates & secrets**.
-12. Select **New client secret**.
-13. Enter a description and select an expiration period.
-14. Select **Add**.
-15. Copy the secret value immediately (you cannot view it again after you leave the page).
-16. Enter the following values when configuring the connector in {{kib}}:
-    - **Token URL**: `https://login.microsoftonline.com/{your-tenant-id}/oauth2/v2.0/token` (find your tenant ID in the **Overview** section of your app registration).
-    - **Client ID**: Found in the **Overview** section (also called Application ID).
-    - **Client Secret**: The value you copied in step 15.
+7. From the app registration's **Overview**, copy the **Application (client) ID** and **Directory (tenant) ID**. You will need both when configuring the connector in {{kib}}.
+
+### OAuth Client Certificate (Microsoft Entra) — recommended for production [sharepoint-online-cert-credentials]
+
+This matches the **OAuth Client Certificate (Microsoft Entra)** authentication type in {{kib}}.
+
+1. Grant **application** Microsoft Graph permissions:
+   1. In the app registration, go to **API permissions** > **Add a permission** > **Microsoft Graph** > **Application permissions**.
+   2. Add the following permissions:
+      - `Sites.Read.All` — read items in all site collections.
+      - `Files.Read.All` — read files in all site collections.
+      - `Sites.ReadWrite.All` and/or `Files.ReadWrite.All` — only if write operations are needed.
+   3. Select **Grant admin consent** for your organization.
+2. Generate or obtain a certificate and its matching private key. The certificate can be self-signed (common for service-to-service scenarios) or CA-issued.
+
+   For example, to generate a self-signed RSA certificate with OpenSSL:
+
+   ```bash
+   openssl req -x509 -newkey rsa:2048 -nodes \
+     -keyout private_key.pem \
+     -out certificate.pem \
+     -days 365 \
+     -subj "/CN=kibana-sharepoint-connector"
+   ```
+
+   Use `-nodes` only if you do not want the private key encrypted with a passphrase. Omit `-nodes` (and instead use `-passout`) if you prefer an encrypted PKCS#8 key.
+3. Upload the certificate to the Entra app registration:
+   1. In the app registration, go to **Certificates & secrets** > **Certificates** > **Upload certificate**.
+   2. Upload the `.pem` (or `.cer`) public certificate from the previous step.
+4. Enter the following values when configuring the connector in {{kib}}:
+    - **Token URL**: `https://login.microsoftonline.com/{your-tenant-id}/oauth2/v2.0/token`
+    - **Client ID**: the Application (client) ID copied above.
+    - **Certificate**: paste the full contents of `certificate.pem` (including the `-----BEGIN CERTIFICATE-----` / `-----END CERTIFICATE-----` markers).
+    - **Private Key**: paste the full contents of `private_key.pem` (including the BEGIN/END markers).
+    - **Passphrase**: only if you generated an encrypted private key.
+
+::::{tip}
+Under the hood, the connector signs a JWT client assertion with the private key using `PS256` and sends it to the Entra token endpoint along with the certificate's SHA-256 thumbprint (`x5t#S256` header). The private key never leaves {{kib}}.
+::::
+
+### OAuth 2.0 authorization code — for per-user delegated access [sharepoint-online-oauth-code-credentials]
+
+This matches the **OAuth 2.0 authorization code** authentication type in {{kib}}.
+
+1. Add a redirect URI so Entra can return the user to {{kib}} after sign-in:
+   1. In the app registration, go to **Authentication** > **Add a platform** > **Web**.
+   2. Under **Redirect URIs**, add {{kib}}'s connector OAuth callback. Substitute your public {{kib}} hostname:
+
+      ```text
+      https://<your-kibana-host>/api/actions/connector/_oauth_callback
+      ```
+
+   3. Save the platform configuration.
+2. Grant **delegated** Microsoft Graph permissions:
+   1. In the app registration, go to **API permissions** > **Add a permission** > **Microsoft Graph** > **Delegated permissions**.
+   2. Add the following permissions:
+      - `Sites.Read.All` — read items in site collections the signed-in user has access to.
+      - `Files.Read.All` — read files in site collections the signed-in user has access to.
+      - `offline_access` — allow {{kib}} to refresh tokens without re-prompting the user.
+   3. Select **Grant admin consent** if required by your tenant's policy.
+3. Create a client secret:
+   1. In the app registration, go to **Certificates & secrets** > **Client secrets** > **New client secret**.
+   2. Enter a description and an expiration period.
+   3. Copy the secret **Value** immediately — it is not retrievable after you leave the page.
+4. Enter the following values when configuring the connector in {{kib}}:
+    - **Authorization URL**: `https://login.microsoftonline.com/{your-tenant-id}/oauth2/v2.0/authorize`
+    - **Token URL**: `https://login.microsoftonline.com/{your-tenant-id}/oauth2/v2.0/token`
+    - **Client ID**: the Application (client) ID copied above.
+    - **Client Secret**: the secret value you copied.
