@@ -7,16 +7,10 @@
 
 import React from 'react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
-import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RESPONSE_DETAILS_TEST_ID } from './test_ids';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { useResponseActionsView } from '../hooks/use_response_actions_view';
-
-const ExtendedFlyoutWrapper = styled.div`
- figure {
-  background-color: white
-`;
 
 /**
  * Automated response actions results, displayed in the document details expandable flyout left section under the Insights tab, Response tab
@@ -48,7 +42,7 @@ export const ResponseDetails: React.FC = () => {
           </EuiTitle>
           <EuiSpacer size="s" />
 
-          <ExtendedFlyoutWrapper>{responseActionsView?.content}</ExtendedFlyoutWrapper>
+          {responseActionsView?.content}
         </>
       )}
     </div>
