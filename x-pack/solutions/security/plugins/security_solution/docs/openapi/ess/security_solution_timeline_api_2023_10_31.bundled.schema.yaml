@@ -380,7 +380,7 @@ paths:
         - access:securitySolution
   /api/timeline/_copy:
     get:
-      description: |
+      description: >
         Copies and returns a timeline or timeline template.
       operationId: CopyTimeline
       requestBody:

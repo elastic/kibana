@@ -2570,8 +2570,11 @@ components:
             type: string
           type: array
         values:
-          description: |
-            Matcher values. Must be either an array of strings (e.g. group or role names) or an array of booleans (e.g. integration-derived flags like privileged_group_member). Mixed types are intentionally not supported for simplicity and predictability.
+          description: >
+            Matcher values. Must be either an array of strings (e.g. group or
+            role names) or an array of booleans (e.g. integration-derived flags
+            like privileged_group_member). Mixed types are intentionally not
+            supported for simplicity and predictability.
           oneOf:
             - items:
                 type: string

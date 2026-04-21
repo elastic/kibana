@@ -123,7 +123,7 @@ paths:
         - Security Endpoint Management API
   /api/endpoint/action/{action_id}/file/{file_id}:
     get:
-      description: |
+      description: >
         Get information for the specified response action file download.
       operationId: EndpointFileInfo
       parameters:
@@ -2398,7 +2398,7 @@ components:
         - type: object
           properties:
             parameters:
-              description: |
+              description: >
                 One of the following set of parameters must be provided
               oneOf:
                 - $ref: '#/components/schemas/RawScriptParameters'
