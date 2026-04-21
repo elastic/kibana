@@ -26,7 +26,7 @@ import {
 export type GetTimelinesRequestQuery = z.infer<typeof GetTimelinesRequestQuery>;
 export const GetTimelinesRequestQuery = z.object({
   /**
-   * If true, only timelines that are marked as favorites by the user are returned.
+   * If `true`, only Timelines that the current user has marked as favorite are returned.
    */
   only_user_favorite: z.enum(['true', 'false']).nullable().optional(),
   /**
