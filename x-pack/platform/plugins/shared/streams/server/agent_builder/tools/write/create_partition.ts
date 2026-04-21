@@ -13,13 +13,13 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { isNeverCondition } from '@kbn/streamlang';
 import dedent from 'dedent';
 import type { GetScopedClients } from '../../../routes/types';
-import { STREAMS_FORK_STREAM_TOOL_ID } from '../tool_ids';
-import { classifyError } from '../error_utils';
-import { validateConditionJson } from '../format_validation_errors';
+import { STREAMS_CREATE_PARTITION_TOOL_ID } from '../tool_ids';
+import { classifyError } from '../../utils/error_utils';
+import { validateConditionJson } from '../../utils/format_validation_errors';
 import { getConfirmationMessage } from './confirmation_helpers';
-import { type StreamsWriteQueue, abortSignalFromRequest } from '../write_queue';
+import { type StreamsWriteQueue, abortSignalFromRequest } from '../../utils/write_queue';
 
-const forkStreamSchema = z.object({
+const createPartitionSchema = z.object({
   parent: z.string().describe('Parent stream name, e.g. "logs.ecs"'),
   child_name: z
     .string()
@@ -34,33 +34,34 @@ const forkStreamSchema = z.object({
   status: z
     .enum(['enabled', 'disabled'])
     .describe('Routing status. Use "enabled" unless the condition is a never-match.'),
-  change_description: z
+  confirmation_body: z
     .string()
     .optional()
     .describe(
-      'Markdown summary of the new child stream for the user confirmation prompt. Include parent hierarchy, existing children, the new child name, and the routing condition.'
+      'Markdown text displayed in the user-facing confirmation dialog. Include parent hierarchy, existing children, the new child name, and the routing condition. This is NOT an instruction — it is only shown to the user for review.'
     ),
 });
 
-export const createForkStreamTool = ({
+export const createCreatePartitionTool = ({
   getScopedClients,
   writeQueue,
 }: {
   getScopedClients: GetScopedClients;
   writeQueue: StreamsWriteQueue;
-}): BuiltinToolDefinition<typeof forkStreamSchema> => ({
-  id: STREAMS_FORK_STREAM_TOOL_ID,
+}): BuiltinToolDefinition<typeof createPartitionSchema> => ({
+  id: STREAMS_CREATE_PARTITION_TOOL_ID,
   type: ToolType.builtin,
   description: dedent(`
-    Creates a child stream (partition) under a parent wired stream with a routing condition.
-    Documents matching the condition are routed from the parent to the new child stream.
+    Creates a child stream (partition) under a parent wired stream with a routing condition. This tool MUTATES state — only call when the user explicitly asks to create a partition, route, or child stream.
+
+    **Cancellation:** If this tool returns "The user chose not to proceed with this action", stop immediately, acknowledge, and ask how to proceed. Do NOT retry.
 
     Child names MUST follow the parent.childname convention: for parent "logs.ecs", use "logs.ecs.nginx"; for parent "logs.otel", use "logs.otel.nginx".
 
     Only works on wired streams. When creating multiple children under the same parent, call this tool sequentially (they modify the parent's routing table). Children under different parents can be created in parallel.
   `),
-  tags: ['streams', 'management'],
-  schema: forkStreamSchema,
+  tags: ['streams'],
+  schema: createPartitionSchema,
   confirmation: {
     askUser: 'always',
     getConfirmation: ({ toolParams }) => ({
@@ -68,7 +69,7 @@ export const createForkStreamTool = ({
         defaultMessage: 'Create child stream "{childName}"',
         values: { childName: toolParams.child_name },
       }),
-      message: getConfirmationMessage(toolParams, 'change_description'),
+      message: getConfirmationMessage(toolParams, 'confirmation_body'),
       confirm_text: i18n.translate(
         'xpack.streams.agentBuilder.tools.forkStream.confirmButtonLabel',
         { defaultMessage: 'Create stream' }
@@ -89,7 +90,7 @@ export const createForkStreamTool = ({
             type: ToolResultType.error,
             data: {
               message: `Invalid child name "${childName}": must start with "${expectedPrefix}" (e.g. "${expectedPrefix}nginx"). Child streams follow the parent.childname naming convention.`,
-              operation: 'fork_stream',
+              operation: 'create_partition',
               likely_cause: `The child name must be prefixed with the parent name. For parent "${parent}", use "${expectedPrefix}<suffix>".`,
             },
           },
@@ -110,7 +111,7 @@ export const createForkStreamTool = ({
               type: ToolResultType.error,
               data: {
                 message: `Invalid condition JSON: ${conditionJson}`,
-                operation: 'fork_stream',
+                operation: 'create_partition',
                 likely_cause: 'The condition_json parameter must be a valid JSON string.',
               },
             },
@@ -126,7 +127,7 @@ export const createForkStreamTool = ({
               type: ToolResultType.error,
               data: {
                 message: `Invalid routing condition: ${validation.error}`,
-                operation: 'fork_stream',
+                operation: 'create_partition',
                 likely_cause: 'invalid_condition',
               },
             },
@@ -173,7 +174,7 @@ export const createForkStreamTool = ({
               message: `Failed to fork stream "${parent}" -> "${childName}": ${message}`,
               parent,
               child: childName,
-              operation: 'fork_stream',
+              operation: 'create_partition',
               likely_cause: classifyError(err),
             },
           },

@@ -19,9 +19,10 @@ import {
   flattenAndTruncateDocs,
   computeTimestampRange,
   detectEmptyAggregations,
+  isNotFoundError,
   createQueryDocumentsTool,
 } from './query_documents';
-import { createMockGetScopedClients, createMockToolContext } from '../test_helpers';
+import { createMockGetScopedClients, createMockToolContext } from '../../utils/test_helpers';
 
 describe('createQueryDocumentsTool handler', () => {
   const mockDefinition = {
@@ -144,6 +145,116 @@ describe('createQueryDocumentsTool handler', () => {
       const data = result.results[0].data as Record<string, unknown>;
       expect(data.aggregation_note).toContain('empty results');
     }
+  });
+
+  it('uses failure store index when source is "failures"', async () => {
+    const { tool, context, streamsClient, esClient } = setup();
+
+    streamsClient.getStream.mockResolvedValue(mockDefinition);
+    esClient.fieldCaps.mockResolvedValue(emptyFieldCaps);
+    esClient.search.mockResolvedValueOnce(emptySearchResponse).mockResolvedValueOnce({
+      hits: {
+        hits: [
+          {
+            _index: 'logs::failures',
+            _id: '1',
+            _source: { error: { type: 'mapper_parsing_exception', message: 'failed' } },
+          },
+        ],
+        total: { value: 1 },
+      },
+    } as unknown as SearchResponse);
+
+    const inferenceClient = (await context.modelProvider.getDefaultModel()).inferenceClient;
+    (inferenceClient.chatComplete as jest.Mock).mockResolvedValue({
+      content: '{ "query": { "match_all": {} }, "size": 10 }',
+    });
+
+    const result = await tool.handler(
+      { name: 'logs', query: 'show me failed docs', source: 'failures' },
+      context
+    );
+
+    expect('results' in result).toBe(true);
+    if ('results' in result) {
+      const data = result.results[0].data as Record<string, unknown>;
+      expect(data.returned_count).toBe(1);
+    }
+
+    const fieldCapsCall = esClient.fieldCaps.mock.calls[0][0] as Record<string, unknown>;
+    expect(fieldCapsCall.index).toBe('logs::failures');
+
+    const sampleSearchCall = esClient.search.mock.calls[0][0] as Record<string, unknown>;
+    expect(sampleSearchCall.index).toBe('logs::failures');
+
+    const finalSearchCall = esClient.search.mock.calls[1][0] as Record<string, unknown>;
+    expect(finalSearchCall.index).toBe('logs::failures');
+  });
+
+  it('returns graceful message when failure store does not exist', async () => {
+    const { tool, context, streamsClient, esClient } = setup();
+
+    streamsClient.getStream.mockResolvedValue(mockDefinition);
+    esClient.fieldCaps.mockRejectedValue(
+      Object.assign(new Error('index_not_found_exception'), { statusCode: 404 })
+    );
+
+    const result = await tool.handler(
+      { name: 'logs', query: 'show failed docs', source: 'failures' },
+      context
+    );
+
+    expect('results' in result).toBe(true);
+    if ('results' in result) {
+      const data = result.results[0].data as Record<string, unknown>;
+      expect(data.source).toBe('failures');
+      expect(data.documents).toEqual([]);
+      expect(data.returned_count).toBe(0);
+      expect(data.note).toContain('No failure store');
+    }
+  });
+
+  it('default source queries primary data index', async () => {
+    const { tool, context, streamsClient, esClient } = setup();
+
+    streamsClient.getStream.mockResolvedValue(mockDefinition);
+    esClient.fieldCaps.mockResolvedValue(emptyFieldCaps);
+    esClient.search.mockResolvedValueOnce(emptySearchResponse).mockResolvedValueOnce({
+      hits: { hits: [], total: { value: 0 } },
+    } as unknown as SearchResponse);
+
+    const inferenceClient = (await context.modelProvider.getDefaultModel()).inferenceClient;
+    (inferenceClient.chatComplete as jest.Mock).mockResolvedValue({
+      content: '{ "query": { "match_all": {} }, "size": 10 }',
+    });
+
+    await tool.handler({ name: 'logs', query: 'show me docs' }, context);
+
+    const fieldCapsCall = esClient.fieldCaps.mock.calls[0][0] as Record<string, unknown>;
+    expect(fieldCapsCall.index).toBe('logs');
+
+    const sampleSearchCall = esClient.search.mock.calls[0][0] as Record<string, unknown>;
+    expect(sampleSearchCall.index).toBe('logs');
+  });
+
+  it('explicit source "data" queries primary data index', async () => {
+    const { tool, context, streamsClient, esClient } = setup();
+
+    streamsClient.getStream.mockResolvedValue(mockDefinition);
+    esClient.fieldCaps.mockResolvedValue(emptyFieldCaps);
+    esClient.search.mockResolvedValueOnce(emptySearchResponse).mockResolvedValueOnce({
+      hits: { hits: [], total: { value: 0 } },
+    } as unknown as SearchResponse);
+
+    const inferenceClient = (await context.modelProvider.getDefaultModel()).inferenceClient;
+    (inferenceClient.chatComplete as jest.Mock).mockResolvedValue({
+      content: '{ "query": { "match_all": {} }, "size": 10 }',
+    });
+
+    await tool.handler({ name: 'logs', query: 'show me docs', source: 'data' }, context);
+
+    const fieldCapsCall = esClient.fieldCaps.mock.calls[0][0] as Record<string, unknown>;
+    expect(fieldCapsCall.index).toBe('logs');
   });
 
   it('returns error result for not-found stream', async () => {
@@ -421,6 +532,21 @@ describe('computeTimestampRange', () => {
     const { oldest, newest } = computeTimestampRange(docs);
     expect(oldest).toBeNull();
     expect(newest).toBeNull();
+  });
+});
+
+describe('isNotFoundError', () => {
+  it('detects 404 status code', () => {
+    const err = Object.assign(new Error('not found'), { statusCode: 404 });
+    expect(isNotFoundError(err)).toBe(true);
+  });
+
+  it('detects index_not_found_exception in message', () => {
+    expect(isNotFoundError(new Error('index_not_found_exception'))).toBe(true);
+  });
+
+  it('returns false for other errors', () => {
+    expect(isNotFoundError(new Error('search_phase_execution_exception'))).toBe(false);
   });
 });
 

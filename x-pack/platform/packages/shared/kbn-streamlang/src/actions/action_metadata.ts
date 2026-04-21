@@ -322,7 +322,7 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
         description: i18n.translate(
           'xpack.streamlang.actionMetadata.removeByPrefix.examples.debug',
           {
-            defaultMessage: 'Drop all debug.* fields before indexing',
+            defaultMessage: 'Remove all debug.* fields before indexing',
           }
         ),
         yaml: `- action: remove_by_prefix
@@ -341,11 +341,12 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
       defaultMessage: 'Remove',
     }),
     description: i18n.translate('xpack.streamlang.actionMetadata.remove.description', {
-      defaultMessage: 'Delete a specific field from the document',
+      defaultMessage:
+        'Delete a specific field from the document while keeping the document itself.',
     }),
     usage: i18n.translate('xpack.streamlang.actionMetadata.remove.usage', {
       defaultMessage:
-        'Provide the `from` field to delete. Combine with `ignore_missing` if the field may not exist.',
+        'Provide the `from` field to delete. Combine with `ignore_missing` if the field may not exist. Add a `where` condition to remove the field only on matching documents.',
     }),
     examples: [
       {
@@ -356,12 +357,21 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
   from: password`,
       },
       {
-        description: i18n.translate('xpack.streamlang.actionMetadata.remove.examples.nested', {
-          defaultMessage: 'Drop a nested attribute when present',
+        description: i18n.translate('xpack.streamlang.actionMetadata.remove.examples.conditional', {
+          defaultMessage: 'Remove a field only when a condition is met',
         }),
         yaml: `- action: remove
-  from: attributes.debug`,
+  from: host.name
+  where:
+    field: host.name
+    eq: "host3"`,
       },
+    ],
+    tips: [
+      i18n.translate('xpack.streamlang.actionMetadata.remove.tips.notDrop', {
+        defaultMessage:
+          'To discard entire documents instead of individual fields, use drop_document',
+      }),
     ],
   },
 
@@ -370,10 +380,11 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
       defaultMessage: 'Drop Document',
     }),
     description: i18n.translate('xpack.streamlang.actionMetadata.dropDocument.description', {
-      defaultMessage: 'Discard the entire document from the pipeline',
+      defaultMessage: 'Discard the entire document so it is not indexed at all.',
     }),
     usage: i18n.translate('xpack.streamlang.actionMetadata.dropDocument.usage', {
-      defaultMessage: 'Drops documents matching the condition. The documents will not be indexed.',
+      defaultMessage:
+        'Drops entire documents matching the condition. The documents will not be indexed.',
     }),
     examples: [
       {
@@ -406,6 +417,10 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
     tips: [
       i18n.translate('xpack.streamlang.actionMetadata.dropDocument.tips.irreversible', {
         defaultMessage: 'Dropped documents are permanently discarded and will not be indexed',
+      }),
+      i18n.translate('xpack.streamlang.actionMetadata.dropDocument.tips.notRemove', {
+        defaultMessage:
+          'To remove individual fields instead of discarding the entire document, use the remove action',
       }),
     ],
   },

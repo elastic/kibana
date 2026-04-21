@@ -41,7 +41,7 @@ export const registerStreamsAgentBuilder = async ({
 
   // The memory skill is registered lazily — only once the Streams memory advanced setting is on.
   // This avoids exposing the skill to the agent when memory is not configured.
-  // Call ensureMemorySkillRegistered() after enabling observability:streamsEnableMemory.
+  // Call onMemorySettingChanged when observability:streamsEnableMemory may have changed (e.g. from a uiSettings subscription).
   let memorySkillRegistered = false;
 
   const ensureMemorySkillRegistered = () => {
@@ -62,5 +62,16 @@ export const registerStreamsAgentBuilder = async ({
     ensureMemorySkillRegistered();
   }
 
-  return { ensureMemorySkillRegistered };
+  return {
+    ensureMemorySkillRegistered,
+    /**
+     * Call this from a uiSettings change subscription (e.g. in plugin start)
+     * to auto-register the memory skill when the setting is toggled on.
+     */
+    onMemorySettingChanged: async () => {
+      if (await isMemoryEnabled()) {
+        ensureMemorySkillRegistered();
+      }
+    },
+  };
 };

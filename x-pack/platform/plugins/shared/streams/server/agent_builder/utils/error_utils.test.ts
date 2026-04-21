@@ -6,17 +6,24 @@
  */
 
 import { classifyError } from './error_utils';
-import { STREAMS_LIST_STREAMS_TOOL_ID } from './tool_ids';
+import { STREAMS_INSPECT_STREAMS_TOOL_ID } from '../tools/tool_ids';
 
 describe('classifyError', () => {
   it('returns not-found message for 404 statusCode', () => {
     const err = Object.assign(new Error('something'), { statusCode: 404 });
     expect(classifyError(err)).toContain('Stream not found');
-    expect(classifyError(err)).toContain(STREAMS_LIST_STREAMS_TOOL_ID);
+    expect(classifyError(err)).toContain(STREAMS_INSPECT_STREAMS_TOOL_ID);
   });
 
-  it('returns not-found message for "not found" in message', () => {
-    expect(classifyError(new Error('index not found'))).toContain('Stream not found');
+  it('returns not-found message for 404 statusCode without "not found" in message', () => {
+    const err = Object.assign(new Error('resource unavailable'), { statusCode: 404 });
+    expect(classifyError(err)).toContain('Stream not found');
+  });
+
+  it('does not misclassify errors that happen to contain "not found"', () => {
+    expect(classifyError(new Error('index not found in cluster'))).not.toContain(
+      'Stream not found'
+    );
   });
 
   it('returns not-found message for "Cannot find stream" in message', () => {
@@ -66,5 +73,20 @@ describe('classifyError', () => {
   it('handles non-Error with toString containing keywords', () => {
     const obj = { toString: () => 'security_exception: forbidden' };
     expect(classifyError(obj)).toContain('Insufficient index privileges');
+  });
+
+  it('returns permissions message for 403 statusCode', () => {
+    const err = Object.assign(new Error('forbidden'), { statusCode: 403 });
+    expect(classifyError(err)).toContain('Insufficient index privileges');
+  });
+
+  it('returns permissions message for security_exception error type in body', () => {
+    const err = { message: 'auth error', body: { error: { type: 'security_exception' } } };
+    expect(classifyError(err)).toContain('Insufficient index privileges');
+  });
+
+  it('reads statusCode from meta.statusCode', () => {
+    const err = Object.assign(new Error('not found'), { meta: { statusCode: 404 } });
+    expect(classifyError(err)).toContain('Stream not found');
   });
 });

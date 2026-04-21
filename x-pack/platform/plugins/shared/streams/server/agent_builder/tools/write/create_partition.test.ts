@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { createForkStreamTool } from './fork_stream';
-import { createMockGetScopedClients, createMockToolContext } from '../test_helpers';
-import { StreamsWriteQueue } from '../write_queue';
+import { createCreatePartitionTool } from './create_partition';
+import { createMockGetScopedClients, createMockToolContext } from '../../utils/test_helpers';
+import { StreamsWriteQueue } from '../../utils/write_queue';
 
-describe('createForkStreamTool', () => {
+describe('createCreatePartitionTool', () => {
   const setup = () => {
     const { getScopedClients, streamsClient } = createMockGetScopedClients();
     const writeQueue = new StreamsWriteQueue();
-    const tool = createForkStreamTool({ getScopedClients, writeQueue });
+    const tool = createCreatePartitionTool({ getScopedClients, writeQueue });
     const context = createMockToolContext();
     return { tool, context, streamsClient };
   };
@@ -24,7 +24,7 @@ describe('createForkStreamTool', () => {
     expect(tool.confirmation!.askUser).toBe('always');
   });
 
-  it('uses change_description as confirmation message when provided', async () => {
+  it('uses confirmation_body as confirmation message when provided', async () => {
     const { tool } = setup();
     const description = '**Parent**: logs.otel\n**New child**: logs.otel.nginx';
 
@@ -34,7 +34,7 @@ describe('createForkStreamTool', () => {
         child_name: 'logs.otel.nginx',
         condition_json: '{"field":"service.name","eq":"nginx"}',
         status: 'enabled',
-        change_description: description,
+        confirmation_body: description,
       },
     });
 
@@ -43,7 +43,7 @@ describe('createForkStreamTool', () => {
     expect(confirmation.message).toBe(description);
   });
 
-  it('falls back to JSON params when change_description is omitted', async () => {
+  it('falls back to JSON params when confirmation_body is omitted', async () => {
     const { tool } = setup();
 
     const confirmation = await tool.confirmation!.getConfirmation!({
@@ -55,9 +55,9 @@ describe('createForkStreamTool', () => {
       },
     });
 
-    expect(confirmation.message).toContain('"parent": "logs.otel"');
-    expect(confirmation.message).toContain('```json');
-    expect(confirmation.message).not.toContain('change_description');
+    expect(confirmation.message).toContain('**parent:** logs.otel');
+    expect(confirmation.message).not.toContain('```json');
+    expect(confirmation.message).not.toContain('confirmation_body');
   });
 
   it('forks a stream with an enabled condition', async () => {
