@@ -30,12 +30,6 @@ import type {
   UserAgentFormState,
 } from '../../../../types';
 
-const userAgentPropertyOptions: Array<EuiComboBoxOptionOption<UserAgentProperty>> =
-  userAgentProperties.map((prop) => ({
-    label: prop,
-    value: prop,
-  }));
-
 const TargetFieldSelector = () => {
   const { register } = useFormContext<UserAgentFormState>();
   const { ref, ...inputProps } = register('to');
@@ -68,13 +62,13 @@ const RegexFileField = () => {
     <EuiFormRow
       label={i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.processor.userAgentRegexFileLabel',
-        { defaultMessage: 'Regex file (optional)' }
+        { defaultMessage: 'Regex file' }
       )}
       helpText={i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.processor.userAgentRegexFileHelpText',
         {
           defaultMessage:
-            'File containing the regular expressions used to parse the user agent string. Located in config/ingest-user-agent directory.',
+            'File containing the regular expressions used to parse the user agent string.',
         }
       )}
       fullWidth
@@ -116,7 +110,10 @@ const PropertiesField = () => {
       <EuiComboBox
         compressed
         fullWidth
-        options={userAgentPropertyOptions}
+        options={userAgentProperties.map((prop) => ({
+          label: prop,
+          value: prop,
+        }))}
         selectedOptions={selectedOptions}
         onChange={handleChange}
         isClearable
@@ -153,7 +150,7 @@ const ExtractDeviceTypeToggle = () => {
       helpText={i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.processor.userAgentExtractDeviceTypeHelpText',
         {
-          defaultMessage: 'Extracts device type from the user agent string on a best-effort basis.',
+          defaultMessage: 'Extracts device type from the user agent string.',
         }
       )}
     />
