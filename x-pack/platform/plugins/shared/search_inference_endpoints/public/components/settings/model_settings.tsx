@@ -26,6 +26,7 @@ import { ResetDefaultsModal } from './reset_defaults_modal';
 import { UnsavedChangesModal } from './unsaved_changes_modal';
 import { useModelSettingsForm } from './use_model_settings_form';
 import { useDefaultModelSettings } from '../../hooks/use_default_model_settings';
+import { useDefaultModelValidation } from '../../hooks/use_default_model_validation';
 import { useConnectors } from '../../hooks/use_connectors';
 import { useKibana } from '../../hooks/use_kibana';
 
@@ -43,6 +44,7 @@ export const ModelSettings: React.FC = () => {
   } = useModelSettingsForm();
 
   const defaultModelSettings = useDefaultModelSettings();
+  const defaultModelValidation = useDefaultModelValidation(defaultModelSettings.state);
   const { data: connectors, isLoading: connectorsLoading } = useConnectors();
   const {
     services: { application, http },
@@ -76,13 +78,16 @@ export const ModelSettings: React.FC = () => {
   }, [isDirty, history]);
 
   const handleSave = useCallback(async () => {
+    if (!defaultModelValidation.isValid) {
+      return;
+    }
     if (isFeatureDirty) {
       saveFeatures();
     }
     if (defaultModelSettings.isDirty) {
       await defaultModelSettings.save();
     }
-  }, [isFeatureDirty, saveFeatures, defaultModelSettings]);
+  }, [isFeatureDirty, saveFeatures, defaultModelSettings, defaultModelValidation.isValid]);
 
   const handleDiscardAndLeave = useCallback(() => {
     defaultModelSettings.reset();
@@ -104,7 +109,9 @@ export const ModelSettings: React.FC = () => {
     setResetParentKey(null);
   }, [resetParentKey, resetSection]);
 
+  const enableAi = defaultModelSettings.state.enableAi;
   const disallowOtherModels = defaultModelSettings.state.disallowOtherModels;
+  const hideFeatureSections = !enableAi || disallowOtherModels;
 
   if (connectorsLoading || isLoading) {
     return (
@@ -139,7 +146,7 @@ export const ModelSettings: React.FC = () => {
             fill
             onClick={handleSave}
             isLoading={isSaving}
-            isDisabled={!isDirty}
+            isDisabled={!isDirty || !defaultModelValidation.isValid}
             data-test-subj="save-settings-button"
           >
             {i18n.translate('xpack.searchInferenceEndpoints.settings.saveButton', {
@@ -167,8 +174,11 @@ export const ModelSettings: React.FC = () => {
         data-test-subj="modelSettingsContent"
         restrictWidth={true}
       >
-        <DefaultModelSection defaultModelSettings={defaultModelSettings} />
-        {disallowOtherModels ? null : (
+        <DefaultModelSection
+          defaultModelSettings={defaultModelSettings}
+          validation={defaultModelValidation}
+        />
+        {hideFeatureSections ? null : (
           <>
             {invalidEndpointIds.size > 0 && (
               <>

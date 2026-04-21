@@ -15,12 +15,14 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { ModelSettings } from './model_settings';
 import { useModelSettingsForm } from './use_model_settings_form';
 import { useDefaultModelSettings } from '../../hooks/use_default_model_settings';
+import { useDefaultModelValidation } from '../../hooks/use_default_model_validation';
 import { useConnectors } from '../../hooks/use_connectors';
 import { useKibana } from '../../hooks/use_kibana';
 import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../../common/types';
 
 jest.mock('./use_model_settings_form');
 jest.mock('../../hooks/use_default_model_settings');
+jest.mock('../../hooks/use_default_model_validation');
 jest.mock('../../hooks/use_connectors');
 jest.mock('../../hooks/use_kibana');
 jest.mock('./no_models_empty_prompt', () => ({
@@ -41,6 +43,7 @@ jest.mock('./default_model_section', () => ({
 
 const mockUseModelSettingsForm = useModelSettingsForm as jest.Mock;
 const mockUseDefaultModelSettings = useDefaultModelSettings as jest.Mock;
+const mockUseDefaultModelValidation = useDefaultModelValidation as jest.Mock;
 const mockUseConnectors = useConnectors as jest.Mock;
 const mockUseKibana = useKibana as jest.Mock;
 
@@ -78,13 +81,20 @@ const defaultFormState = {
 };
 
 const defaultModelSettingsState = {
-  state: { defaultModelId: 'NO_DEFAULT_MODEL', disallowOtherModels: false },
-  savedState: { defaultModelId: 'NO_DEFAULT_MODEL', disallowOtherModels: false },
+  state: { enableAi: true, defaultModelId: 'pre-1', disallowOtherModels: false },
+  savedState: { enableAi: true, defaultModelId: 'pre-1', disallowOtherModels: false },
   isDirty: false,
+  setEnableAi: jest.fn(),
   setDefaultModelId: jest.fn(),
   setDisallowOtherModels: jest.fn(),
   save: jest.fn().mockResolvedValue(undefined),
   reset: jest.fn(),
+};
+
+const validValidation = {
+  errors: [],
+  isValid: true,
+  missingDefaultModel: false,
 };
 
 const Wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -100,6 +110,7 @@ describe('ModelSettings', () => {
     jest.clearAllMocks();
     mockUseModelSettingsForm.mockReturnValue(defaultFormState);
     mockUseDefaultModelSettings.mockReturnValue(defaultModelSettingsState);
+    mockUseDefaultModelValidation.mockReturnValue(validValidation);
     mockUseConnectors.mockReturnValue({
       data: [{ connectorId: 'test-connector', name: 'Test', isPreconfigured: true }],
       isLoading: false,
@@ -244,7 +255,7 @@ describe('ModelSettings', () => {
   it('hides feature sections when disallowOtherModels is true', () => {
     mockUseDefaultModelSettings.mockReturnValue({
       ...defaultModelSettingsState,
-      state: { defaultModelId: 'some-model', disallowOtherModels: true },
+      state: { enableAi: true, defaultModelId: 'some-model', disallowOtherModels: true },
     });
 
     render(
@@ -257,10 +268,26 @@ describe('ModelSettings', () => {
     expect(screen.queryByTestId('settings-no-features')).not.toBeInTheDocument();
   });
 
-  it('shows feature sections when disallowOtherModels is false', () => {
+  it('hides feature sections when AI is disabled entirely', () => {
     mockUseDefaultModelSettings.mockReturnValue({
       ...defaultModelSettingsState,
-      state: { defaultModelId: 'some-model', disallowOtherModels: false },
+      state: { enableAi: false, defaultModelId: 'NO_DEFAULT_MODEL', disallowOtherModels: true },
+    });
+
+    render(
+      <Wrapper>
+        <ModelSettings />
+      </Wrapper>
+    );
+
+    expect(screen.queryByTestId('featureSection-Search')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('settings-no-features')).not.toBeInTheDocument();
+  });
+
+  it('shows feature sections when AI is on and disallowOtherModels is false', () => {
+    mockUseDefaultModelSettings.mockReturnValue({
+      ...defaultModelSettingsState,
+      state: { enableAi: true, defaultModelId: 'some-model', disallowOtherModels: false },
     });
 
     render(
@@ -270,6 +297,58 @@ describe('ModelSettings', () => {
     );
 
     expect(screen.getByTestId('featureSection-Search')).toBeInTheDocument();
+  });
+
+  it('disables save when the default-model section is invalid, even if dirty', () => {
+    mockUseDefaultModelSettings.mockReturnValue({
+      ...defaultModelSettingsState,
+      isDirty: true,
+    });
+    mockUseDefaultModelValidation.mockReturnValue({
+      errors: ['Select a default model before hiding model selection within features.'],
+      isValid: false,
+      missingDefaultModel: true,
+    });
+
+    render(
+      <Wrapper>
+        <ModelSettings />
+      </Wrapper>
+    );
+
+    expect(screen.getByTestId('save-settings-button')).toBeDisabled();
+  });
+
+  it('clicking save is a no-op when validation fails', () => {
+    const saveFeatures = jest.fn();
+    const saveDefaultModel = jest.fn().mockResolvedValue(undefined);
+
+    mockUseModelSettingsForm.mockReturnValue({
+      ...defaultFormState,
+      isDirty: true,
+      save: saveFeatures,
+    });
+    mockUseDefaultModelSettings.mockReturnValue({
+      ...defaultModelSettingsState,
+      isDirty: true,
+      save: saveDefaultModel,
+    });
+    mockUseDefaultModelValidation.mockReturnValue({
+      errors: ['Select a default model before hiding model selection within features.'],
+      isValid: false,
+      missingDefaultModel: true,
+    });
+
+    render(
+      <Wrapper>
+        <ModelSettings />
+      </Wrapper>
+    );
+
+    fireEvent.click(screen.getByTestId('save-settings-button'));
+
+    expect(saveFeatures).not.toHaveBeenCalled();
+    expect(saveDefaultModel).not.toHaveBeenCalled();
   });
 
   it('calls both saveFeatures and defaultModelSettings.save when both are dirty', async () => {
