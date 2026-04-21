@@ -10,13 +10,24 @@ import { StorageIndexAdapter } from '@kbn/storage-adapter';
 import type { StreamsPluginStartDependencies } from '../../../types';
 import { FeatureClient } from './feature_client';
 import type { StoredFeature } from './stored_feature';
-import { featureStorageSettings, type FeatureStorageSettings } from './storage_settings';
-import { FEATURE_ID, FEATURE_PROPERTIES, FEATURE_SUBTYPE, FEATURE_UUID } from './fields';
+import {
+  featureStorageSettings,
+  getFeatureStorageSettings,
+  type FeatureStorageSettings,
+} from './storage_settings';
+import {
+  FEATURE_ID,
+  FEATURE_PROPERTIES,
+  FEATURE_SEARCH_EMBEDDING,
+  FEATURE_SUBTYPE,
+  FEATURE_UUID,
+} from './fields';
 import { storedFeatureSchema } from './stored_feature';
 import {
   DEFAULT_SIG_EVENTS_TUNING_CONFIG,
   type SigEventsTuningConfig,
 } from '../../../../common/sig_events_tuning_config';
+import { getInferenceIdFromIndex } from '../helpers/get_inference_id_from_index';
 
 export class FeatureService {
   constructor(
@@ -34,10 +45,19 @@ export class FeatureService {
 
     const esClient = coreStart.elasticsearch.client.asInternalUser;
 
+    const existingInferenceId = await getInferenceIdFromIndex(
+      esClient,
+      featureStorageSettings.name,
+      FEATURE_SEARCH_EMBEDDING,
+      this.logger
+    );
+
+    const storageSettings = getFeatureStorageSettings(existingInferenceId);
+
     const adapter = new StorageIndexAdapter<FeatureStorageSettings, StoredFeature>(
       esClient,
       this.logger.get('features'),
-      featureStorageSettings,
+      storageSettings as FeatureStorageSettings,
       {
         migrateSource: (source) => {
           if (!(FEATURE_ID in source)) {

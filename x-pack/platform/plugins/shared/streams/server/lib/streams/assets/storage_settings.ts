@@ -28,13 +28,14 @@ import {
  * Note: The index name ".kibana_streams_assets" is kept for backwards compatibility,
  * but this index is only used to store query assets (Significant Events queries linked to streams).
  *
- * `semantic_text` without an explicit `inference_id` uses the cluster's default
- * inference endpoint at write time. Existing indices that already have a mapping
- * with an explicit `inference_id` keep it -- ES merges additively on putMapping,
- * so the existing inference_id is preserved (verified against ES 8.x behaviour;
- * confirm on major ES upgrades). The bulk write path retries without the
- * embedding field when inference-related errors are detected
- * (see `bulkWithInferenceFallback`).
+ * The base settings use `semantic_text()` with no explicit `inference_id`,
+ * which causes ES to use the cluster default at index-creation time.
+ * For existing indices that already have a `semantic_text` mapping with a
+ * specific `inference_id`, use `getQueryStorageSettings(existingId)` so that
+ * the schema hash and putMapping payload stay compatible with the index.
+ * Sending a bare `semantic_text()` to putMapping on such an index would resolve
+ * to the cluster default (potentially a different model) and fail with
+ * illegal_argument_exception when the models are incompatible.
  */
 export const queryStorageSettings = {
   name: '.kibana_streams_assets',
@@ -59,3 +60,18 @@ export const queryStorageSettings = {
 } satisfies IndexStorageSettings;
 
 export type QueryStorageSettings = typeof queryStorageSettings;
+
+export function getQueryStorageSettings(inferenceId?: string): IndexStorageSettings {
+  if (!inferenceId) {
+    return queryStorageSettings;
+  }
+  return {
+    name: queryStorageSettings.name,
+    schema: {
+      properties: {
+        ...queryStorageSettings.schema.properties,
+        [QUERY_SEARCH_EMBEDDING]: types.semantic_text({ inference_id: inferenceId }),
+      },
+    },
+  };
+}

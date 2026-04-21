@@ -28,19 +28,25 @@ import {
   QUERY_KQL_BODY,
   QUERY_FEATURE_FILTER,
   QUERY_FEATURE_NAME,
+  QUERY_SEARCH_EMBEDDING,
   QUERY_TYPE,
   STREAM_NAME,
   RULE_ID,
   RULE_BACKED,
   ASSET_UUID,
 } from '../fields';
-import { queryStorageSettings, type QueryStorageSettings } from '../storage_settings';
+import {
+  queryStorageSettings,
+  getQueryStorageSettings,
+  type QueryStorageSettings,
+} from '../storage_settings';
 import { QueryClient, type StoredQueryLink } from './query_client';
 import { computeRuleId, buildEsqlQueryFromKql } from './helpers/query';
 import {
   DEFAULT_SIG_EVENTS_TUNING_CONFIG,
   type SigEventsTuningConfig,
 } from '../../../../../common/sig_events_tuning_config';
+import { getInferenceIdFromIndex } from '../../helpers/get_inference_id_from_index';
 
 export class QueryService {
   constructor(
@@ -65,10 +71,19 @@ export class QueryService {
     const isSignificantEventsEnabled =
       (await uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS)) ?? false;
 
+    const existingInferenceId = await getInferenceIdFromIndex(
+      esClient,
+      queryStorageSettings.name,
+      QUERY_SEARCH_EMBEDDING,
+      this.logger
+    );
+
+    const storageSettings = getQueryStorageSettings(existingInferenceId);
+
     const adapter = new StorageIndexAdapter<QueryStorageSettings, StoredQueryLink>(
       esClient,
       this.logger.get('queries'),
-      queryStorageSettings,
+      storageSettings as QueryStorageSettings,
       {
         migrateSource: (source) => {
           let migrated = source as Record<string, unknown>;
