@@ -96,6 +96,7 @@ export class WorkflowStateTracker {
             number_of_shards: 1,
             number_of_replicas: 0,
             'index.hidden': true,
+            'index.lifecycle.name': 'aesop-lifecycle',
           },
           mappings: {
             properties: {

@@ -38,4 +38,8 @@ export const evalsRemoteKibanaConfigSavedObjectType: SavedObjectsType = {
   management: {
     importableAndExportable: false,
   },
+  // Baseline model version so future schema changes have a migration anchor.
+  modelVersions: {
+    1: { changes: [] },
+  },
 };

@@ -78,4 +78,8 @@ export const proposedSkillSavedObjectType: SavedObjectsType = {
       exploration_execution_id: { type: 'keyword' },
     },
   },
+  // Baseline model version so future schema changes have a migration anchor.
+  modelVersions: {
+    1: { changes: [] },
+  },
 };

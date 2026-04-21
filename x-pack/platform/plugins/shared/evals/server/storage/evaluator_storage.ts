@@ -41,4 +41,10 @@ export const evaluatorSavedObjectType: SavedObjectsType = {
       updated_at: { type: 'date' },
     },
   },
+  // Baseline model version so future schema changes have a migration anchor.
+  // Intentionally schema-less to avoid retroactively rejecting any existing
+  // persisted attributes; future versions should add schemas + changes.
+  modelVersions: {
+    1: { changes: [] },
+  },
 };
