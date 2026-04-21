@@ -90,12 +90,12 @@ export class GenAiSettingsPlugin
 
     if (licensing) {
       this.licensingSubscription = licensing.license$.subscribe((license) => {
-        const hasEnterpriseLicense = license?.hasAtLeast('enterprise') ?? false;
+        const hasEnterpriseLicense = license.hasAtLeast('enterprise');
 
-        if (hasEnterpriseLicense && (hasConnectorsReadPrivilege || hasAnonymizationPrivilege)) {
-          this.registeredApp?.enable();
+        if (this.registeredApp && hasEnterpriseLicense && (hasConnectorsReadPrivilege || hasAnonymizationPrivilege)) {
+          this.registeredApp.enable();
         } else {
-          this.registeredApp?.disable();
+          this.registeredApp.disable();
         }
       });
     }
