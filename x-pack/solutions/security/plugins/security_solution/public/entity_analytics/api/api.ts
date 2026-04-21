@@ -793,6 +793,15 @@ export const useEntityAnalyticsRoutes = () => {
         }
       );
 
+    const deleteWatchlistEntitySource = async (params: {
+      watchlistId: string;
+      entitySourceId: string;
+    }) =>
+      http.fetch(`${WATCHLISTS_URL}/${params.watchlistId}/entity_source/${params.entitySourceId}`, {
+        version: API_VERSIONS.public.v1,
+        method: 'DELETE',
+      });
+
     const searchWatchlistIndices = async (params: {
       query: string | undefined;
       signal?: AbortSignal;
@@ -932,6 +941,7 @@ export const useEntityAnalyticsRoutes = () => {
       listWatchlistEntitySources,
       updateWatchlistEntitySource,
       createWatchlistEntitySource,
+      deleteWatchlistEntitySource,
       searchWatchlistIndices,
       uploadWatchlistCsv,
       fetchRiskEngineSettings,
