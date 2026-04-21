@@ -2406,7 +2406,7 @@
   resolved "https://registry.yarnpkg.com/@elastic/filesaver/-/filesaver-1.1.2.tgz#1998ffb3cd89c9da4ec12a7793bfcae10e30c77a"
   integrity sha512-YZbSufYFBhAj+S2cJgiKALoxIJevqXN2MSr6Yqr42rJdaPuM31cj6pUDwflkql1oDjupqD9la+MfxPFjXI1JFQ==
 
-"@elastic/kibana-d3-color@npm:@elastic/kibana-d3-color@2.0.1":
+"@elastic/kibana-d3-color@npm:@elastic/kibana-d3-color@2.0.1", "d3-color@1 - 2", "d3-color@npm:@elastic/kibana-d3-color@2.0.1":
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/@elastic/kibana-d3-color/-/kibana-d3-color-2.0.1.tgz#f83b9c2fea09273a918659de04d5e8098c82f65c"
   integrity sha512-YZ8hV2bWNyYi833Yj3UWczmTxdHzmo/Xc2IVkNXr/ZqtkrTDlTLysCyJm7SfAt9iBy6EVRGWTn8cPz8QOY6Ixw==
@@ -5628,6 +5628,10 @@
   uid ""
 
 "@kbn/core-history-block-plugin@link:src/platform/test/plugin_functional/plugins/core_history_block":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-hotkeys-browser@link:src/core/packages/hotkeys/browser":
   version "0.0.0"
   uid ""
 
@@ -14044,6 +14048,13 @@
   dependencies:
     defer-to-connect "^2.0.0"
 
+"@tanstack/hotkeys@0.7.1":
+  version "0.7.1"
+  resolved "https://registry.yarnpkg.com/@tanstack/hotkeys/-/hotkeys-0.7.1.tgz#51b95dd4ed20d7dace66184b7a08edf03009362d"
+  integrity sha512-YHVO1z6wnvUCu7bg870Kv5k2D+FIuIOSIcbN0dAmTTsJ3mLMDLwcTVx0qVaq+SZp1B514JJTqGVstvUp85yIpQ==
+  dependencies:
+    "@tanstack/store" "^0.9.3"
+
 "@tanstack/match-sorter-utils@^8.7.0":
   version "8.7.0"
   resolved "https://registry.yarnpkg.com/@tanstack/match-sorter-utils/-/match-sorter-utils-8.7.0.tgz#60b09a6d3d7974d5f86f1318053c1bd5a85fb0be"
@@ -14086,6 +14097,11 @@
   integrity sha512-Gd13QdxPSukP8ZrkbgS2RwoZseTTbQPLnQEn7HY/rqtM+8Zt95f7xKC7N0EsKs7aoz0WzZ+fditZux+F8EzYxA==
   dependencies:
     "@tanstack/virtual-core" "3.13.12"
+
+"@tanstack/store@^0.9.3":
+  version "0.9.3"
+  resolved "https://registry.yarnpkg.com/@tanstack/store/-/store-0.9.3.tgz#0f9ebca34d194442fe559afce1e8a7327f6d3eb4"
+  integrity sha512-8reSzl/qGWGGVKhBoxXPMWzATSbZLZFWhwBAFO9NAyp0TxzfBP0mIrGb8CP8KrQTmvzXlR/vFPPUrHTLBGyFyw==
 
 "@tanstack/table-core@8.21.3":
   version "8.21.3"
