@@ -97,7 +97,7 @@ export const SharepointOnline: ConnectorSpec = {
                 }
               ),
             },
-            scope: { disabled: true },
+            scope: { hidden: true },
           },
         },
       },

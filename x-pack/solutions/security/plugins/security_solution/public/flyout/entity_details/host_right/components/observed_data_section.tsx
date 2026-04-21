@@ -58,7 +58,7 @@ export const ObservedDataSection = memo(
         <h3>
           <FormattedMessage
             id="xpack.securitySolution.flyout.entityDetails.observedDataTitle"
-            defaultMessage="Observed data"
+            defaultMessage="Observed attributes"
           />
         </h3>
       </EuiTitle>
@@ -76,7 +76,7 @@ export const ObservedDataSection = memo(
             title={
               <FormattedMessage
                 id="xpack.securitySolution.flyout.entityDetails.observedDataInspectTitle"
-                defaultMessage="Observed data"
+                defaultMessage="Observed attributes"
               />
             }
           />

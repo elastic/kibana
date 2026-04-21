@@ -128,7 +128,7 @@ export const createMessageEvent = (
     type: ChatEventType.messageComplete,
     data: {
       message_id: messageId,
-      message_content: typeof content === 'string' ? content : '',
+      message_content: typeof content === 'string' ? content : JSON.stringify(content),
       ...(typeof content === 'object' ? { structured_output: content } : {}),
     },
   };
@@ -136,13 +136,19 @@ export const createMessageEvent = (
 
 export const createReasoningEvent = (
   reasoning: string,
-  { transient }: { transient?: boolean } = {}
+  {
+    transient,
+    toolCallId,
+    toolCallGroupId,
+  }: { transient?: boolean; toolCallId?: string; toolCallGroupId?: string } = {}
 ): ReasoningEvent => {
   return {
     type: ChatEventType.reasoning,
     data: {
       reasoning,
       transient,
+      tool_call_id: toolCallId,
+      tool_call_group_id: toolCallGroupId,
     },
   };
 };

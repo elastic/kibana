@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RegionMapState } from '../../schema';
+import {
+  AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+  AS_CODE_DATA_VIEW_SPEC_TYPE,
+} from '@kbn/as-code-data-views-schema';
+import type { RegionMapConfig } from '../../schema';
 
 /**
  * Basic region map chart with ad hoc dataView
@@ -15,9 +19,9 @@ import type { RegionMapState } from '../../schema';
 export const basicRegionMapWithAdHocDataView = {
   title: 'Test Region Map',
   type: 'region_map',
-  dataset: {
-    type: 'index',
-    index: 'test-index',
+  data_source: {
+    type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+    index_pattern: 'test-index',
     time_field: '@timestamp',
   },
   metric: {
@@ -39,7 +43,7 @@ export const basicRegionMapWithAdHocDataView = {
   },
   sampling: 1,
   ignore_global_filters: false,
-} satisfies RegionMapState;
+} satisfies RegionMapConfig;
 
 /**
  * Basic region map chart with existing dataView
@@ -47,9 +51,9 @@ export const basicRegionMapWithAdHocDataView = {
 export const basicRegionMapWithDataView = {
   title: 'Test Region Map',
   type: 'region_map',
-  dataset: {
-    type: 'dataView',
-    id: 'test-id',
+  data_source: {
+    type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+    ref_id: 'test-id',
   },
   metric: {
     operation: 'percentile',
@@ -75,7 +79,7 @@ export const basicRegionMapWithDataView = {
   },
   sampling: 1,
   ignore_global_filters: false,
-} satisfies RegionMapState;
+} satisfies RegionMapConfig;
 
 /**
  * ESQL-based region map chart
@@ -83,7 +87,7 @@ export const basicRegionMapWithDataView = {
 export const basicEsqlRegionMap = {
   title: 'Test Region Map',
   type: 'region_map',
-  dataset: {
+  data_source: {
     type: 'esql',
     query: 'FROM test-index | STATS bytes=AVG(bytes) BY geo.dest',
   },
@@ -99,7 +103,7 @@ export const basicEsqlRegionMap = {
   },
   sampling: 1,
   ignore_global_filters: false,
-} satisfies RegionMapState;
+} satisfies RegionMapConfig;
 
 /**
  * Comprehensive region map chart with ad hoc dataView
@@ -107,9 +111,9 @@ export const basicEsqlRegionMap = {
 export const comprehensiveRegionMapWithAdHocDataView = {
   title: 'Comprehensive Test Region Map',
   type: 'region_map',
-  dataset: {
-    type: 'index',
-    index: 'test-index',
+  data_source: {
+    type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+    index_pattern: 'test-index',
     time_field: '@timestamp',
   },
   metric: {
@@ -134,7 +138,7 @@ export const comprehensiveRegionMapWithAdHocDataView = {
   },
   sampling: 1,
   ignore_global_filters: false,
-} satisfies RegionMapState;
+} satisfies RegionMapConfig;
 
 /**
  * Comprehensive region map chart with existing dataView
@@ -142,9 +146,9 @@ export const comprehensiveRegionMapWithAdHocDataView = {
 export const comprehensiveRegionMapWithDataView = {
   title: 'Comprehensive Test Region Map',
   type: 'region_map',
-  dataset: {
-    type: 'dataView',
-    id: 'my-custom-data-view-id',
+  data_source: {
+    type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+    ref_id: 'my-custom-data-view-id',
   },
   metric: {
     operation: 'count',
@@ -168,7 +172,7 @@ export const comprehensiveRegionMapWithDataView = {
   },
   sampling: 1,
   ignore_global_filters: false,
-} satisfies RegionMapState;
+} satisfies RegionMapConfig;
 
 /**
  * Comprehensive ESQL-based region map chart
@@ -176,7 +180,7 @@ export const comprehensiveRegionMapWithDataView = {
 export const comprehensiveEsqlRegionMap = {
   title: 'Comprehensive Test Region Map',
   type: 'region_map',
-  dataset: {
+  data_source: {
     type: 'esql',
     query: 'FROM test-index | STATS bytes=AVG(bytes) BY geo.dest',
   },
@@ -192,4 +196,4 @@ export const comprehensiveEsqlRegionMap = {
   },
   sampling: 1,
   ignore_global_filters: false,
-} satisfies RegionMapState;
+} satisfies RegionMapConfig;

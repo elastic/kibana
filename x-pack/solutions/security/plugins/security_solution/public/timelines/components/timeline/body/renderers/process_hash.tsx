@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React from 'react';
-import styled from 'styled-components';
 
 import { DraggableBadge } from '../../../../../common/components/draggables';
 
 import { isNillEmptyOrNotFinite, TokensFlexItem } from './helpers';
-
-const HashFlexGroup = styled(EuiFlexGroup)`
-  margin: ${({ theme }) => theme.eui.euiSizeXS};
-`;
 
 interface Props {
   contextId: string;
@@ -26,12 +22,21 @@ interface Props {
 
 export const ProcessHash = React.memo<Props>(
   ({ contextId, eventId, processHashSha256, scopeId }) => {
+    const { euiTheme } = useEuiTheme();
+
     if (isNillEmptyOrNotFinite(processHashSha256)) {
       return null;
     }
 
     return (
-      <HashFlexGroup alignItems="center" direction="column" gutterSize="none">
+      <EuiFlexGroup
+        alignItems="center"
+        direction="column"
+        gutterSize="none"
+        css={css`
+          margin: ${euiTheme.size.xs};
+        `}
+      >
         <TokensFlexItem grow={false} component="div">
           <DraggableBadge
             scopeId={scopeId}
@@ -44,7 +49,7 @@ export const ProcessHash = React.memo<Props>(
             isAggregatable={true}
           />
         </TokensFlexItem>
-      </HashFlexGroup>
+      </EuiFlexGroup>
     );
   }
 );

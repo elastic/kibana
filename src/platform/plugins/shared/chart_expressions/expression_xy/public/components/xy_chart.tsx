@@ -131,6 +131,7 @@ declare global {
 }
 
 const MULTILAYER_TIME_AXIS_TICKLINE_PADDING = 4;
+const DEFAULT_LEGEND_TRUNCATE_WIDTH_LIMIT = 1000;
 
 export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   chartsThemeService: ChartsPluginSetup['theme'];
@@ -869,7 +870,7 @@ export function XYChart({
                     labelOptions: legend.shouldTruncate
                       ? {
                           maxLines: legend?.maxLines ?? 1,
-                          widthLimit: legend.maxPixels ?? 1000,
+                          widthLimit: DEFAULT_LEGEND_TRUNCATE_WIDTH_LIMIT,
                         }
                       : {
                           maxLines: 0,

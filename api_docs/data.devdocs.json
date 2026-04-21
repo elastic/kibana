@@ -2904,7 +2904,7 @@
           ">"
         ],
         "path": "src/platform/plugins/shared/data/public/plugin.ts",
-        "lineNumber": 45,
+        "lineNumber": 46,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2920,7 +2920,7 @@
               "any"
             ],
             "path": "src/platform/plugins/shared/data/public/plugin.ts",
-            "lineNumber": 59,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2934,10 +2934,10 @@
                 "description": [],
                 "signature": [
                   "PluginInitializerContext",
-                  "<Readonly<{} & { search: Readonly<{} & { asyncSearch: Readonly<{ pollInterval?: number | undefined; } & { waitForCompletion: moment.Duration; keepAlive: moment.Duration; batchedReduceSize: number; }>; aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; sessions: Readonly<{} & { enabled: boolean; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; }>; }>; query: Readonly<{} & { timefilter: Readonly<{} & { minRefreshInterval: number; }>; }>; enableUiSettingsValidations: boolean; }>>"
+                  "<Readonly<{} & { search: Readonly<{} & { asyncSearch: Readonly<{ pollInterval?: number | undefined; pollLength?: moment.Duration | undefined; } & { waitForCompletion: moment.Duration; keepAlive: moment.Duration; batchedReduceSize: number; }>; aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; sessions: Readonly<{} & { enabled: boolean; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; }>; }>; query: Readonly<{} & { timefilter: Readonly<{} & { minRefreshInterval: number; }>; }>; enableUiSettingsValidations: boolean; }>>"
                 ],
                 "path": "src/platform/plugins/shared/data/public/plugin.ts",
-                "lineNumber": 59,
+                "lineNumber": 60,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2978,7 +2978,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/data/public/plugin.ts",
-            "lineNumber": 69,
+            "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3005,7 +3005,7 @@
                   ">"
                 ],
                 "path": "src/platform/plugins/shared/data/public/plugin.ts",
-                "lineNumber": 70,
+                "lineNumber": 71,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3022,7 +3022,7 @@
                   "DataSetupDependencies"
                 ],
                 "path": "src/platform/plugins/shared/data/public/plugin.ts",
-                "lineNumber": 71,
+                "lineNumber": 72,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3053,7 +3053,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/data/public/plugin.ts",
-            "lineNumber": 137,
+            "lineNumber": 138,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3069,7 +3069,7 @@
                   "CoreStart"
                 ],
                 "path": "src/platform/plugins/shared/data/public/plugin.ts",
-                "lineNumber": 138,
+                "lineNumber": 139,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3086,7 +3086,7 @@
                   "DataStartDependencies"
                 ],
                 "path": "src/platform/plugins/shared/data/public/plugin.ts",
-                "lineNumber": 139,
+                "lineNumber": 140,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3106,7 +3106,7 @@
               "() => void"
             ],
             "path": "src/platform/plugins/shared/data/public/plugin.ts",
-            "lineNumber": 226,
+            "lineNumber": 228,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -12679,7 +12679,7 @@
                 "description": [],
                 "signature": [
                   "PluginInitializerContext",
-                  "<Readonly<{} & { search: Readonly<{} & { asyncSearch: Readonly<{ pollInterval?: number | undefined; } & { waitForCompletion: moment.Duration; keepAlive: moment.Duration; batchedReduceSize: number; }>; aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; sessions: Readonly<{} & { enabled: boolean; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; }>; }>; query: Readonly<{} & { timefilter: Readonly<{} & { minRefreshInterval: number; }>; }>; enableUiSettingsValidations: boolean; }>>"
+                  "<Readonly<{} & { search: Readonly<{} & { asyncSearch: Readonly<{ pollInterval?: number | undefined; pollLength?: moment.Duration | undefined; } & { waitForCompletion: moment.Duration; keepAlive: moment.Duration; batchedReduceSize: number; }>; aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; sessions: Readonly<{} & { enabled: boolean; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; }>; }>; query: Readonly<{} & { timefilter: Readonly<{} & { minRefreshInterval: number; }>; }>; enableUiSettingsValidations: boolean; }>>"
                 ],
                 "path": "src/platform/plugins/shared/data/server/plugin.ts",
                 "lineNumber": 82,
@@ -15513,7 +15513,7 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-            "lineNumber": 1194,
+            "lineNumber": 1218,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -15537,7 +15537,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-                "lineNumber": 1199,
+                "lineNumber": 1223,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -15577,7 +15577,7 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-            "lineNumber": 1221,
+            "lineNumber": 1245,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -15601,7 +15601,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-                "lineNumber": 1227,
+                "lineNumber": 1251,
                 "columnNumber": 35,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -15618,7 +15618,7 @@
                   "boolean"
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-                "lineNumber": 1227,
+                "lineNumber": 1251,
                 "columnNumber": 55,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -15656,7 +15656,7 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-            "lineNumber": 1234,
+            "lineNumber": 1258,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -15680,7 +15680,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-                "lineNumber": 1243,
+                "lineNumber": 1267,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -15697,7 +15697,7 @@
                   "boolean"
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-                "lineNumber": 1244,
+                "lineNumber": 1268,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -15716,7 +15716,7 @@
                   "boolean"
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-                "lineNumber": 1245,
+                "lineNumber": 1269,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -15735,7 +15735,7 @@
                   "boolean"
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-                "lineNumber": 1246,
+                "lineNumber": 1270,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -15765,7 +15765,7 @@
               ", overwrite?: boolean) => Promise<void>"
             ],
             "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-            "lineNumber": 1254,
+            "lineNumber": 1278,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -15789,7 +15789,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-                "lineNumber": 1260,
+                "lineNumber": 1284,
                 "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -15806,7 +15806,7 @@
                   "boolean"
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-                "lineNumber": 1260,
+                "lineNumber": 1284,
                 "columnNumber": 55,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -15836,7 +15836,7 @@
               ", saveAttempts?: number, ignoreErrors?: boolean, displayErrors?: boolean) => Promise<void>"
             ],
             "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-            "lineNumber": 1289,
+            "lineNumber": 1313,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -15858,7 +15858,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-                "lineNumber": 1298,
+                "lineNumber": 1322,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -15875,7 +15875,7 @@
                   "number"
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-                "lineNumber": 1299,
+                "lineNumber": 1323,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -15892,7 +15892,7 @@
                   "boolean"
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-                "lineNumber": 1300,
+                "lineNumber": 1324,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -15911,7 +15911,7 @@
                   "boolean"
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-                "lineNumber": 1301,
+                "lineNumber": 1325,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -15933,7 +15933,7 @@
               "(indexPatternId: string) => Promise<void>"
             ],
             "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-            "lineNumber": 1394,
+            "lineNumber": 1418,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -15949,7 +15949,7 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-                "lineNumber": 1398,
+                "lineNumber": 1422,
                 "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -15971,7 +15971,7 @@
               "() => Promise<boolean>"
             ],
             "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-            "lineNumber": 1430,
+            "lineNumber": 1454,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -15999,7 +15999,7 @@
               " | null>"
             ],
             "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-            "lineNumber": 1437,
+            "lineNumber": 1461,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -16029,7 +16029,7 @@
               " | null>"
             ],
             "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-            "lineNumber": 1455,
+            "lineNumber": 1479,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -16042,7 +16042,7 @@
                 "label": "options",
                 "description": [],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-                "lineNumber": 1467,
+                "lineNumber": 1491,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -16058,7 +16058,7 @@
                       "boolean | undefined"
                     ],
                     "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-                    "lineNumber": 1468,
+                    "lineNumber": 1492,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -16076,7 +16076,7 @@
                       "boolean | undefined"
                     ],
                     "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-                    "lineNumber": 1469,
+                    "lineNumber": 1493,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -16115,7 +16115,7 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-            "lineNumber": 1483,
+            "lineNumber": 1507,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -16137,7 +16137,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-                "lineNumber": 1483,
+                "lineNumber": 1507,
                 "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -16173,7 +16173,7 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-            "lineNumber": 1507,
+            "lineNumber": 1531,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -16195,7 +16195,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-                "lineNumber": 1507,
+                "lineNumber": 1531,
                 "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -16692,7 +16692,7 @@
         "label": "search",
         "description": [],
         "path": "src/platform/plugins/shared/data/server/index.ts",
-        "lineNumber": 74,
+        "lineNumber": 73,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -16705,7 +16705,7 @@
             "label": "aggs",
             "description": [],
             "path": "src/platform/plugins/shared/data/server/index.ts",
-            "lineNumber": 75,
+            "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -16728,7 +16728,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/data/server/index.ts",
-                "lineNumber": 76,
+                "lineNumber": 75,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -16744,7 +16744,7 @@
                   "(interval: string, shouldForceFixed?: boolean | undefined) => Interval"
                 ],
                 "path": "src/platform/plugins/shared/data/server/index.ts",
-                "lineNumber": 77,
+                "lineNumber": 76,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -16799,7 +16799,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/data/server/index.ts",
-                "lineNumber": 78,
+                "lineNumber": 77,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -16815,7 +16815,7 @@
                   "(interval: string) => moment.Duration | null"
                 ],
                 "path": "src/platform/plugins/shared/data/server/index.ts",
-                "lineNumber": 79,
+                "lineNumber": 78,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -16847,7 +16847,7 @@
                   "(maxBucketCount: number, duration: number) => moment.Duration"
                 ],
                 "path": "src/platform/plugins/shared/data/server/index.ts",
-                "lineNumber": 80,
+                "lineNumber": 79,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -21606,7 +21606,7 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-            "lineNumber": 1194,
+            "lineNumber": 1218,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -21630,7 +21630,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-                "lineNumber": 1199,
+                "lineNumber": 1223,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -21670,7 +21670,7 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-            "lineNumber": 1221,
+            "lineNumber": 1245,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -21694,7 +21694,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-                "lineNumber": 1227,
+                "lineNumber": 1251,
                 "columnNumber": 35,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -21711,7 +21711,7 @@
                   "boolean"
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-                "lineNumber": 1227,
+                "lineNumber": 1251,
                 "columnNumber": 55,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -21749,7 +21749,7 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-            "lineNumber": 1234,
+            "lineNumber": 1258,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -21773,7 +21773,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-                "lineNumber": 1243,
+                "lineNumber": 1267,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -21790,7 +21790,7 @@
                   "boolean"
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-                "lineNumber": 1244,
+                "lineNumber": 1268,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -21809,7 +21809,7 @@
                   "boolean"
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-                "lineNumber": 1245,
+                "lineNumber": 1269,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -21828,7 +21828,7 @@
                   "boolean"
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-                "lineNumber": 1246,
+                "lineNumber": 1270,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -21858,7 +21858,7 @@
               ", overwrite?: boolean) => Promise<void>"
             ],
             "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-            "lineNumber": 1254,
+            "lineNumber": 1278,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -21882,7 +21882,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-                "lineNumber": 1260,
+                "lineNumber": 1284,
                 "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -21899,7 +21899,7 @@
                   "boolean"
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-                "lineNumber": 1260,
+                "lineNumber": 1284,
                 "columnNumber": 55,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -21929,7 +21929,7 @@
               ", saveAttempts?: number, ignoreErrors?: boolean, displayErrors?: boolean) => Promise<void>"
             ],
             "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-            "lineNumber": 1289,
+            "lineNumber": 1313,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -21951,7 +21951,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-                "lineNumber": 1298,
+                "lineNumber": 1322,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -21968,7 +21968,7 @@
                   "number"
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-                "lineNumber": 1299,
+                "lineNumber": 1323,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -21985,7 +21985,7 @@
                   "boolean"
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-                "lineNumber": 1300,
+                "lineNumber": 1324,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -22004,7 +22004,7 @@
                   "boolean"
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-                "lineNumber": 1301,
+                "lineNumber": 1325,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -22026,7 +22026,7 @@
               "(indexPatternId: string) => Promise<void>"
             ],
             "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-            "lineNumber": 1394,
+            "lineNumber": 1418,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -22042,7 +22042,7 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-                "lineNumber": 1398,
+                "lineNumber": 1422,
                 "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -22064,7 +22064,7 @@
               "() => Promise<boolean>"
             ],
             "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-            "lineNumber": 1430,
+            "lineNumber": 1454,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -22092,7 +22092,7 @@
               " | null>"
             ],
             "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-            "lineNumber": 1437,
+            "lineNumber": 1461,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -22122,7 +22122,7 @@
               " | null>"
             ],
             "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-            "lineNumber": 1455,
+            "lineNumber": 1479,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -22135,7 +22135,7 @@
                 "label": "options",
                 "description": [],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-                "lineNumber": 1467,
+                "lineNumber": 1491,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -22151,7 +22151,7 @@
                       "boolean | undefined"
                     ],
                     "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-                    "lineNumber": 1468,
+                    "lineNumber": 1492,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -22169,7 +22169,7 @@
                       "boolean | undefined"
                     ],
                     "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-                    "lineNumber": 1469,
+                    "lineNumber": 1493,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -22208,7 +22208,7 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-            "lineNumber": 1483,
+            "lineNumber": 1507,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -22230,7 +22230,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-                "lineNumber": 1483,
+                "lineNumber": 1507,
                 "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -22266,7 +22266,7 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-            "lineNumber": 1507,
+            "lineNumber": 1531,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -22288,7 +22288,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-                "lineNumber": 1507,
+                "lineNumber": 1531,
                 "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -25295,7 +25295,7 @@
           "\"index-pattern\""
         ],
         "path": "src/platform/plugins/shared/data_views/common/constants.ts",
-        "lineNumber": 53,
+        "lineNumber": 57,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -25633,7 +25633,7 @@
           ">; }"
         ],
         "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
-        "lineNumber": 1529,
+        "lineNumber": 1553,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -25978,7 +25978,7 @@
           "\"metaFields\""
         ],
         "path": "src/platform/plugins/shared/data_views/common/constants.ts",
-        "lineNumber": 47,
+        "lineNumber": 51,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -26184,7 +26184,7 @@
           "\nUsed to optimize on-boarding experience to determine if the instance has some user created data views or data indices/streams by filtering data sources\nthat are created by default by elastic in ese.\nWe should somehow prevent creating initial data for the users without their explicit action\ninstead of relying on these hardcoded assets"
         ],
         "path": "src/platform/plugins/shared/data_views/common/constants.ts",
-        "lineNumber": 36,
+        "lineNumber": 40,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -26200,7 +26200,7 @@
               "string[]"
             ],
             "path": "src/platform/plugins/shared/data_views/common/constants.ts",
-            "lineNumber": 37,
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -26219,7 +26219,7 @@
           "readonly [\"keyword\", \"long\", \"double\", \"date\", \"ip\", \"boolean\", \"geo_point\", \"composite\"]"
         ],
         "path": "src/platform/plugins/shared/data_views/common/constants.ts",
-        "lineNumber": 26,
+        "lineNumber": 30,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

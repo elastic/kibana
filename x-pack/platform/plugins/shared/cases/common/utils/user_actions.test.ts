@@ -106,7 +106,7 @@ describe('user action utils', () => {
     });
 
     it('returns false if the type is not a user action type', () => {
-      expect(isCreateCaseUserAction('not-exist')).toBe(false);
+      expect(isUserActionType('not-exist')).toBe(false);
     });
   });
 });

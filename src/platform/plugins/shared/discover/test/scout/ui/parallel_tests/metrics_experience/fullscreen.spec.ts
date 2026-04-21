@@ -18,8 +18,7 @@ import {
 
 const { PAGE_SIZE } = PAGINATION;
 
-// Failing: See https://github.com/elastic/kibana/issues/261198
-spaceTest.describe.skip(
+spaceTest.describe(
   'Metrics in Discover - Fullscreen Mode',
   {
     tag: testData.METRICS_EXPERIENCE_TAGS,
@@ -150,5 +149,36 @@ spaceTest.describe.skip(
         await expect(metricsExperience.fullscreen).toBeHidden();
       });
     });
+
+    spaceTest(
+      'should show insights flyout without clipping in fullscreen mode',
+      async ({ pageObjects }) => {
+        await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
+        const { metricsExperience } = pageObjects;
+        await expect(metricsExperience.grid).toBeVisible();
+
+        await spaceTest.step('enter fullscreen and open flyout', async () => {
+          await metricsExperience.toggleFullscreen();
+          await expect(metricsExperience.fullscreen).toBeVisible();
+
+          await metricsExperience.openInsightsFlyout(0);
+          await expect(metricsExperience.flyout.container).toBeVisible();
+        });
+
+        await spaceTest.step('verify flyout content is within viewport in fullscreen', async () => {
+          await expect.soft(metricsExperience.flyout.overview.descriptionList).toBeInViewport();
+          await expect
+            .soft(metricsExperience.flyout.overview.dimensionsPagination.container)
+            .toBeInViewport();
+        });
+
+        await spaceTest.step('close flyout and exit fullscreen', async () => {
+          await metricsExperience.flyout.closeButton.click();
+          await expect(metricsExperience.flyout.container).toBeHidden();
+          await metricsExperience.toggleFullscreen();
+          await expect(metricsExperience.fullscreen).toBeHidden();
+        });
+      }
+    );
   }
 );

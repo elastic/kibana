@@ -100,6 +100,7 @@ function wrapSearchBarInContext(
         session: getSessionServiceMock({ state$: sessionState$ }),
       }),
       query: {
+        ...dataStart.query,
         savedQueries: {
           findSavedQueries: () =>
             Promise.resolve({

@@ -279,22 +279,24 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         if (testData.fieldSelectorApplyAvailable) {
           await ml.testExecution.logTestStep('regroup results');
           await aiops.logRateAnalysisPage.clickFieldFilterApplyButton('aiopsFieldFilterButton');
-
-          const filteredAnalysisGroupsTable =
-            await aiops.logRateAnalysisResultsGroupsTable.parseAnalysisTable();
-
-          const actualFilteredAnalysisGroupsTable = orderBy(filteredAnalysisGroupsTable, 'group');
           const expectedFilteredAnalysisGroupsTable = orderBy(
             testData.expected.filteredAnalysisGroupsTable,
             'group'
           );
 
-          expect(actualFilteredAnalysisGroupsTable).to.be.eql(
-            expectedFilteredAnalysisGroupsTable,
-            `Expected filtered analysis groups table to be ${JSON.stringify(
-              expectedFilteredAnalysisGroupsTable
-            )}, got ${JSON.stringify(actualFilteredAnalysisGroupsTable)}`
-          );
+          await retry.tryForTime(30 * 1000, async () => {
+            const filteredAnalysisGroupsTable =
+              await aiops.logRateAnalysisResultsGroupsTable.parseAnalysisTable();
+
+            const actualFilteredAnalysisGroupsTable = orderBy(filteredAnalysisGroupsTable, 'group');
+
+            expect(actualFilteredAnalysisGroupsTable).to.be.eql(
+              expectedFilteredAnalysisGroupsTable,
+              `Expected filtered analysis groups table to be ${JSON.stringify(
+                expectedFilteredAnalysisGroupsTable
+              )}, got ${JSON.stringify(actualFilteredAnalysisGroupsTable)}`
+            );
+          });
         }
 
         if (testData.action !== undefined) {

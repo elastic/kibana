@@ -85,7 +85,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const expectDisabledAllTime = async (exist: boolean) => {
         await timePicker.timePickerExists();
         if (exist) {
-          await testSubjects.existOrFail('kbnQueryBar-datePicker-disabled');
+          await testSubjects.existOrFail('kbnQueryBar-datePicker-disabled', { allowHidden: true });
         } else {
           await testSubjects.missingOrFail('kbnQueryBar-datePicker-disabled');
         }

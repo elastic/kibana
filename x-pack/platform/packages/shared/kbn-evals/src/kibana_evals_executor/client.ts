@@ -18,6 +18,7 @@ import type {
   EvaluationDataset,
   EvaluationDatasetWithId,
   ExperimentTask,
+  OnEvaluationComplete,
   RanExperiment,
   TaskOutput,
 } from '../types';
@@ -40,6 +41,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
       getDatasetByName?: (
         datasetName: string
       ) => Promise<EvaluationDataset | EvaluationDatasetWithId | null>;
+      onEvaluationComplete?: OnEvaluationComplete;
     }
   ) {}
 
@@ -181,15 +183,33 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                 })
               );
 
-              results.forEach(({ evaluatorName, result, evaluatorTraceId }) => {
-                evaluationRuns.push({
+              for (const { evaluatorName, result, evaluatorTraceId } of results) {
+                const evalRun = {
                   name: evaluatorName,
                   result,
                   experimentRunId: runKey,
                   traceId: evaluatorTraceId,
                   exampleId: example.id,
-                });
-              });
+                };
+                evaluationRuns.push(evalRun);
+
+                if (this.options.onEvaluationComplete) {
+                  try {
+                    await this.options.onEvaluationComplete({
+                      experimentId,
+                      datasetId,
+                      datasetName: resolvedDataset.name,
+                      taskRun: runs[runKey],
+                      evaluationRun: evalRun,
+                      exampleId: example.id ?? String(exampleIndex),
+                    });
+                  } catch (err) {
+                    this.options.log.warning(
+                      `Incremental score export failed (will retry in batch): ${err}`
+                    );
+                  }
+                }
+              }
             })
           );
         });

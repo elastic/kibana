@@ -51,7 +51,7 @@ Stripping is always unconditional regardless of API or whether `meta.name` is se
 |-------------------|-------|---------|
 | `PROJECT_ROUTING_ORIGIN` | `_alias:_origin` | Route to the origin project (default) |
 | `PROJECT_ROUTING_ALL` | `_alias:*` | Route across all projects |
-| `getSpaceNPRE(request)` | `kibana_space_<id>_default` | Route to a specific Kibana space |
+| `getSpaceNPRE(request)` | `kibana_space_<id>_default` | Route to a specific Kibana space; uses `request.rewrittenUrl` when set so space is correct after Spaces pre-routing strips `/s/:id` from `request.url` |
 
 The factory maps routing options as follows:
 

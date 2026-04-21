@@ -182,7 +182,35 @@ describe('TaskScheduling', () => {
 
     const result = await taskScheduling.ensureScheduled(task);
 
-    expect(bulkUpdateScheduleSpy).toHaveBeenCalledWith(['my-foo-id'], { interval: '1m' });
+    expect(bulkUpdateScheduleSpy).toHaveBeenCalledWith(
+      ['my-foo-id'],
+      { interval: '1m' },
+      undefined
+    );
+
+    expect(result.id).toEqual('my-foo-id');
+  });
+
+  test('forwards options to bulkUpdateSchedules when updating schedule for tasks that have already been scheduled', async () => {
+    const task = getTask();
+    const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+    const bulkUpdateScheduleSpy = jest
+      .spyOn(taskScheduling, 'bulkUpdateSchedules')
+      .mockResolvedValue({ tasks: [task], errors: [] });
+    mockTaskStore.schedule.mockRejectedValueOnce({
+      statusCode: 409,
+    });
+
+    const mockRequest = httpServerMock.createKibanaRequest();
+    const result = await taskScheduling.ensureScheduled(task, { request: mockRequest });
+
+    expect(bulkUpdateScheduleSpy).toHaveBeenCalledWith(
+      ['my-foo-id'],
+      { interval: '1m' },
+      {
+        request: mockRequest,
+      }
+    );
 
     expect(result.id).toEqual('my-foo-id');
   });
@@ -233,7 +261,11 @@ describe('TaskScheduling', () => {
       `[Error: Tried to update schedule for existing task "my-foo-id" but failed with error: Failed to update schedule for reasons]`
     );
 
-    expect(bulkUpdateScheduleSpy).toHaveBeenCalledWith(['my-foo-id'], { interval: '1m' });
+    expect(bulkUpdateScheduleSpy).toHaveBeenCalledWith(
+      ['my-foo-id'],
+      { interval: '1m' },
+      undefined
+    );
   });
 
   test('handles VERSION_CONFLICT_STATUS errors when trying to update schedule for tasks that have already been scheduled', async () => {
@@ -261,7 +293,11 @@ describe('TaskScheduling', () => {
 
     const result = await taskScheduling.ensureScheduled(task);
 
-    expect(bulkUpdateScheduleSpy).toHaveBeenCalledWith(['my-foo-id'], { interval: '1m' });
+    expect(bulkUpdateScheduleSpy).toHaveBeenCalledWith(
+      ['my-foo-id'],
+      { interval: '1m' },
+      undefined
+    );
     expect(result.id).toEqual('my-foo-id');
   });
 
@@ -290,7 +326,11 @@ describe('TaskScheduling', () => {
 
     const result = await taskScheduling.ensureScheduled(task);
 
-    expect(bulkUpdateScheduleSpy).toHaveBeenCalledWith(['my-foo-id'], { interval: '1m' });
+    expect(bulkUpdateScheduleSpy).toHaveBeenCalledWith(
+      ['my-foo-id'],
+      { interval: '1m' },
+      undefined
+    );
     expect(result.id).toEqual('my-foo-id');
   });
 

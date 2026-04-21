@@ -10,6 +10,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { IStorageClient } from '@kbn/storage-adapter';
 import type { StreamQuery, Streams } from '@kbn/streams-schema';
+import { QUERY_TYPE_STATS } from '@kbn/streams-schema/src/queries';
 import type { QueryStorageSettings } from '../storage_settings';
 import {
   ASSET_ID,
@@ -25,6 +26,7 @@ import {
   QUERY_SEARCH_EMBEDDING,
   QUERY_SEVERITY_SCORE,
   QUERY_TITLE,
+  QUERY_TYPE,
   RULE_BACKED,
   RULE_ID,
   STREAM_NAME,
@@ -75,6 +77,7 @@ const createQueryClient = ({
 
 const createQuery = (overrides: Partial<StreamQuery> = {}): StreamQuery => ({
   id: 'test-query-id',
+  type: 'match',
   title: 'SSH Brute Force Detection',
   description: 'Detects repeated failed SSH login attempts from a single source IP',
   esql: { query: 'FROM logs-* | WHERE event.action == "ssh_login" AND event.outcome == "failure"' },
@@ -192,6 +195,7 @@ describe('QueryClient backward compatibility', () => {
         rule_id: 'rule-old-1',
         query: {
           id: 'query-old-1',
+          type: 'match',
           title: 'SSH Failed Logins',
           description: 'Detects failed SSH login attempts',
           esql: {
@@ -467,6 +471,354 @@ describe('QueryClient backward compatibility', () => {
       const { client } = createQueryClient({ storageClient, inferenceAvailable: false });
 
       await expect(client.findQueries(['logs.test'], 'SSH')).rejects.toThrow('index not found');
+    });
+  });
+
+  describe('severity filtering via minSeverityScore', () => {
+    describe('getQueryLinks with minSeverityScore', () => {
+      it('includes a range filter when minSeverityScore is provided', async () => {
+        const storageClient = createMockStorageClient();
+        storageClient.search.mockResolvedValue({ hits: { hits: [] } });
+        const { client } = createQueryClient({ storageClient });
+
+        await client.getQueryLinks(['logs.test'], { minSeverityScore: 60 });
+
+        const searchArgs = storageClient.search.mock.calls[0][0];
+        const filter: unknown[] = searchArgs.query.bool.filter;
+        const rangeFilter = filter.find(
+          (f) =>
+            typeof f === 'object' &&
+            f !== null &&
+            'range' in f &&
+            QUERY_SEVERITY_SCORE in ((f as Record<string, unknown>).range as object)
+        );
+        expect(rangeFilter).toEqual({ range: { [QUERY_SEVERITY_SCORE]: { gte: 60 } } });
+      });
+
+      it('excludes the range filter when minSeverityScore is omitted', async () => {
+        const storageClient = createMockStorageClient();
+        storageClient.search.mockResolvedValue({ hits: { hits: [] } });
+        const { client } = createQueryClient({ storageClient });
+
+        await client.getQueryLinks(['logs.test']);
+
+        const searchArgs = storageClient.search.mock.calls[0][0];
+        const filter: unknown[] = searchArgs.query.bool.filter;
+        const rangeFilter = filter.find(
+          (f) =>
+            typeof f === 'object' &&
+            f !== null &&
+            'range' in f &&
+            QUERY_SEVERITY_SCORE in ((f as Record<string, unknown>).range as object)
+        );
+        expect(rangeFilter).toBeUndefined();
+      });
+    });
+
+    describe('countPromotableUnbackedQueries with minSeverityScore', () => {
+      it('includes a range filter when minSeverityScore is provided', async () => {
+        const storageClient = createMockStorageClient();
+        storageClient.search.mockResolvedValue({
+          hits: { hits: [], total: { value: 5 } },
+        });
+        const { client } = createQueryClient({ storageClient });
+
+        const count = await client.countPromotableUnbackedQueries({ minSeverityScore: 60 });
+
+        const searchArgs = storageClient.search.mock.calls[0][0];
+        const filter: unknown[] = searchArgs.query.bool.filter;
+        expect(filter).toContainEqual({ range: { [QUERY_SEVERITY_SCORE]: { gte: 60 } } });
+        expect(count).toBe(5);
+      });
+
+      it('excludes the range filter when minSeverityScore is omitted', async () => {
+        const storageClient = createMockStorageClient();
+        storageClient.search.mockResolvedValue({
+          hits: { hits: [], total: { value: 10 } },
+        });
+        const { client } = createQueryClient({ storageClient });
+
+        await client.countPromotableUnbackedQueries();
+
+        const searchArgs = storageClient.search.mock.calls[0][0];
+        const filter: unknown[] = searchArgs.query.bool.filter;
+        const rangeFilter = filter.find(
+          (f) =>
+            typeof f === 'object' &&
+            f !== null &&
+            'range' in f &&
+            QUERY_SEVERITY_SCORE in ((f as Record<string, unknown>).range as object)
+        );
+        expect(rangeFilter).toBeUndefined();
+      });
+    });
+
+    describe('getPromotableUnbackedQueries with minSeverityScore', () => {
+      it('passes minSeverityScore through to the underlying search', async () => {
+        const storageClient = createMockStorageClient();
+        storageClient.search.mockResolvedValue({ hits: { hits: [] } });
+        const { client } = createQueryClient({ storageClient });
+
+        await client.getPromotableUnbackedQueries({ minSeverityScore: 60 });
+
+        const searchArgs = storageClient.search.mock.calls[0][0];
+        const filter: unknown[] = searchArgs.query.bool.filter;
+        expect(filter).toContainEqual({ range: { [QUERY_SEVERITY_SCORE]: { gte: 60 } } });
+        // Must also restrict to unbacked-only
+        expect(filter).toContainEqual({ term: { [RULE_BACKED]: false } });
+      });
+
+      it('does not include a range filter when minSeverityScore is omitted', async () => {
+        const storageClient = createMockStorageClient();
+        storageClient.search.mockResolvedValue({ hits: { hits: [] } });
+        const { client } = createQueryClient({ storageClient });
+
+        await client.getPromotableUnbackedQueries();
+
+        const searchArgs = storageClient.search.mock.calls[0][0];
+        const filter: unknown[] = searchArgs.query.bool.filter;
+        const rangeFilter = filter.find(
+          (f) =>
+            typeof f === 'object' &&
+            f !== null &&
+            'range' in f &&
+            QUERY_SEVERITY_SCORE in ((f as Record<string, unknown>).range as object)
+        );
+        expect(rangeFilter).toBeUndefined();
+      });
+
+      it('excludes STATS queries via must_not so the set matches the count', async () => {
+        const storageClient = createMockStorageClient();
+        storageClient.search.mockResolvedValue({ hits: { hits: [] } });
+        const { client } = createQueryClient({ storageClient });
+
+        await client.getPromotableUnbackedQueries();
+
+        const searchArgs = storageClient.search.mock.calls[0][0];
+        const mustNot: unknown = searchArgs.query.bool.must_not;
+        expect(mustNot).toContainEqual({ term: { [QUERY_TYPE]: QUERY_TYPE_STATS } });
+      });
+    });
+
+    describe('promoteUnbackedQueries orchestration', () => {
+      const promotableHit = (overrides: Record<string, unknown>) =>
+        toSearchHit(createOldShapeStoredDoc({ [RULE_BACKED]: false, ...overrides }));
+
+      it('promotes every promotable candidate when queryIds is omitted', async () => {
+        const storageClient = createMockStorageClient();
+        storageClient.search.mockResolvedValue({
+          hits: {
+            hits: [
+              promotableHit({ [STREAM_NAME]: 'logs.a', [ASSET_ID]: 'q1', [ASSET_UUID]: 'u1' }),
+              promotableHit({ [STREAM_NAME]: 'logs.a', [ASSET_ID]: 'q2', [ASSET_UUID]: 'u2' }),
+            ],
+          },
+        });
+        const { client } = createQueryClient({ storageClient });
+        const promoteSpy = jest
+          .spyOn(client, 'promoteQueries')
+          .mockResolvedValue({ promoted: 2, skipped_stats: 0 });
+
+        const result = await client.promoteUnbackedQueries({
+          streamDefinitions: new Map([['logs.a', createMockDefinition('logs.a')]]),
+        });
+
+        expect(promoteSpy).toHaveBeenCalledTimes(1);
+        expect(promoteSpy).toHaveBeenCalledWith(expect.objectContaining({ name: 'logs.a' }), [
+          'q1',
+          'q2',
+        ]);
+        expect(result).toEqual({ promoted: 2, skipped_stats: 0 });
+      });
+
+      it('groups queries by stream_name and invokes promoteQueries once per stream', async () => {
+        const storageClient = createMockStorageClient();
+        storageClient.search.mockResolvedValue({
+          hits: {
+            hits: [
+              promotableHit({ [STREAM_NAME]: 'logs.a', [ASSET_ID]: 'q1', [ASSET_UUID]: 'u1' }),
+              promotableHit({ [STREAM_NAME]: 'logs.b', [ASSET_ID]: 'q2', [ASSET_UUID]: 'u2' }),
+              promotableHit({ [STREAM_NAME]: 'logs.a', [ASSET_ID]: 'q3', [ASSET_UUID]: 'u3' }),
+            ],
+          },
+        });
+        const { client } = createQueryClient({ storageClient });
+        const promoteSpy = jest
+          .spyOn(client, 'promoteQueries')
+          .mockResolvedValue({ promoted: 1, skipped_stats: 0 });
+
+        await client.promoteUnbackedQueries({
+          streamDefinitions: new Map([
+            ['logs.a', createMockDefinition('logs.a')],
+            ['logs.b', createMockDefinition('logs.b')],
+          ]),
+        });
+
+        expect(promoteSpy).toHaveBeenCalledTimes(2);
+        expect(promoteSpy).toHaveBeenCalledWith(expect.objectContaining({ name: 'logs.a' }), [
+          'q1',
+          'q3',
+        ]);
+        expect(promoteSpy).toHaveBeenCalledWith(expect.objectContaining({ name: 'logs.b' }), [
+          'q2',
+        ]);
+      });
+
+      it('warns and skips when a stream definition is missing', async () => {
+        const storageClient = createMockStorageClient();
+        storageClient.search.mockResolvedValue({
+          hits: {
+            hits: [
+              promotableHit({ [STREAM_NAME]: 'logs.a', [ASSET_ID]: 'q1', [ASSET_UUID]: 'u1' }),
+              promotableHit({
+                [STREAM_NAME]: 'logs.missing',
+                [ASSET_ID]: 'q2',
+                [ASSET_UUID]: 'u2',
+              }),
+            ],
+          },
+        });
+        const { client, logger } = createQueryClient({ storageClient });
+        const promoteSpy = jest
+          .spyOn(client, 'promoteQueries')
+          .mockResolvedValue({ promoted: 1, skipped_stats: 0 });
+
+        await client.promoteUnbackedQueries({
+          streamDefinitions: new Map([['logs.a', createMockDefinition('logs.a')]]),
+        });
+
+        expect(promoteSpy).toHaveBeenCalledTimes(1);
+        expect(promoteSpy).toHaveBeenCalledWith(expect.objectContaining({ name: 'logs.a' }), [
+          'q1',
+        ]);
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining('Skipping promotion for missing stream logs.missing')
+        );
+      });
+
+      it('sums promoted and skipped_stats across streams', async () => {
+        const storageClient = createMockStorageClient();
+        storageClient.search.mockResolvedValue({
+          hits: {
+            hits: [
+              promotableHit({ [STREAM_NAME]: 'logs.a', [ASSET_ID]: 'q1', [ASSET_UUID]: 'u1' }),
+              promotableHit({ [STREAM_NAME]: 'logs.b', [ASSET_ID]: 'q2', [ASSET_UUID]: 'u2' }),
+            ],
+          },
+        });
+        const { client } = createQueryClient({ storageClient });
+        jest
+          .spyOn(client, 'promoteQueries')
+          .mockResolvedValueOnce({ promoted: 2, skipped_stats: 0 })
+          .mockResolvedValueOnce({ promoted: 3, skipped_stats: 1 });
+
+        const result = await client.promoteUnbackedQueries({
+          streamDefinitions: new Map([
+            ['logs.a', createMockDefinition('logs.a')],
+            ['logs.b', createMockDefinition('logs.b')],
+          ]),
+        });
+
+        expect(result).toEqual({ promoted: 5, skipped_stats: 1 });
+      });
+
+      it('silently drops queryIds that are not in the promotable set', async () => {
+        const storageClient = createMockStorageClient();
+        storageClient.search.mockResolvedValue({
+          hits: {
+            hits: [
+              promotableHit({ [STREAM_NAME]: 'logs.a', [ASSET_ID]: 'q1', [ASSET_UUID]: 'u1' }),
+            ],
+          },
+        });
+        const { client } = createQueryClient({ storageClient });
+        const promoteSpy = jest
+          .spyOn(client, 'promoteQueries')
+          .mockResolvedValue({ promoted: 1, skipped_stats: 0 });
+
+        // q-unknown does not match any candidate (e.g. a STATS id, or an
+        // id that no longer exists) — it must be silently filtered out.
+        const result = await client.promoteUnbackedQueries({
+          queryIds: ['q1', 'q-unknown'],
+          streamDefinitions: new Map([['logs.a', createMockDefinition('logs.a')]]),
+        });
+
+        expect(promoteSpy).toHaveBeenCalledTimes(1);
+        expect(promoteSpy).toHaveBeenCalledWith(expect.objectContaining({ name: 'logs.a' }), [
+          'q1',
+        ]);
+        expect(result).toEqual({ promoted: 1, skipped_stats: 0 });
+      });
+
+      it('passes minSeverityScore through to getPromotableUnbackedQueries', async () => {
+        const storageClient = createMockStorageClient();
+        storageClient.search.mockResolvedValue({ hits: { hits: [] } });
+        const { client } = createQueryClient({ storageClient });
+        jest.spyOn(client, 'promoteQueries').mockResolvedValue({ promoted: 0, skipped_stats: 0 });
+
+        await client.promoteUnbackedQueries({
+          minSeverityScore: 70,
+          streamDefinitions: new Map(),
+        });
+
+        const searchArgs = storageClient.search.mock.calls[0][0];
+        const filter: unknown[] = searchArgs.query.bool.filter;
+        expect(filter).toContainEqual({ range: { [QUERY_SEVERITY_SCORE]: { gte: 70 } } });
+      });
+    });
+
+    describe('per-row promote regression — promoteQueries ignores severity', () => {
+      it('fetches unbacked queries without a severity range filter', async () => {
+        const storageClient = createMockStorageClient();
+        // Return one unbacked query for the stream
+        storageClient.search.mockResolvedValue({
+          hits: {
+            hits: [
+              toSearchHit(
+                createOldShapeStoredDoc({
+                  [RULE_BACKED]: false,
+                  [QUERY_SEVERITY_SCORE]: 20, // Low severity — should still be promotable per-row
+                  [RULE_ID]: 'rule-old-1',
+                })
+              ),
+            ],
+          },
+        });
+        const rulesClient = {
+          create: jest.fn().mockResolvedValue({}),
+          update: jest.fn().mockResolvedValue({}),
+          bulkDeleteRules: jest.fn().mockResolvedValue({}),
+        };
+        const client = new QueryClient(
+          {
+            storageClient: storageClient as unknown as IStorageClient<
+              QueryStorageSettings,
+              StoredQueryLink
+            >,
+            soClient: {} as SavedObjectsClientContract,
+            rulesClient: rulesClient as unknown as RulesClient,
+            logger: createMockLogger() as unknown as Logger,
+          },
+          true,
+          false
+        );
+
+        await client.promoteQueries(createMockDefinition(), ['query-old-1']);
+
+        // First search call is for getUnbackedQueries — verify no severity range filter
+        const searchArgs = storageClient.search.mock.calls[0][0];
+        const filter: unknown[] = searchArgs.query.bool.filter;
+        const rangeFilter = filter.find(
+          (f) =>
+            typeof f === 'object' &&
+            f !== null &&
+            'range' in f &&
+            QUERY_SEVERITY_SCORE in ((f as Record<string, unknown>).range as object)
+        );
+        expect(rangeFilter).toBeUndefined();
+        // Rule creation should proceed for the low-severity query
+        expect(rulesClient.create).toHaveBeenCalledTimes(1);
+      });
     });
   });
 

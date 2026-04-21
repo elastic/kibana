@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { MIGRATIONS_PANEL_BTN, TRANSLATED_RULES_PAGE } from '../screens/security_header';
+import {
+  MIGRATIONS_PANEL_BTN,
+  TRANSLATED_RULES_PAGE,
+  LAUNCHPAD_PANEL_BTN,
+  LAUNCHPAD_TRANSLATED_RULES_PAGE,
+} from '../screens/security_header';
 import {
   FOOTER_LAUNCHPAD,
   openNavigationPanel,
@@ -15,12 +20,17 @@ import {
 import * as SELECTORS from '../screens/siem_migrations';
 import { bedrockConnectorAPIPayload } from './api_calls/connectors';
 
-export const navigateToTranslatedRulesPage = () => {
+export const navigateToTranslatedRulesPage = (isClassicNavUpdateEnabled: boolean) => {
   if (Cypress.env('IS_SERVERLESS')) {
     openNavigationPanel(RULES_PANEL_BTN_SERVERLESS);
     cy.get(FOOTER_LAUNCHPAD).click();
     cy.get(TRANSLATED_RULES_PAGE_SERVERLESS).click();
+  } else if (isClassicNavUpdateEnabled) {
+    // ESS with classic nav: navigate through Launchpad group to reach Migrations
+    openNavigationPanel(LAUNCHPAD_PANEL_BTN);
+    cy.get(LAUNCHPAD_TRANSLATED_RULES_PAGE).click();
   } else {
+    // ESS without classic nav: navigate directly to Migrations in the side nav
     openNavigationPanel(MIGRATIONS_PANEL_BTN);
     cy.get(TRANSLATED_RULES_PAGE).click();
   }

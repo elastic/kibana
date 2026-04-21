@@ -21,6 +21,7 @@ import { getGraphViewTab } from '../shared/components/left';
 
 import type { HostDetailsPanelProps } from '.';
 import { HostDetailsPanelKey } from '.';
+import { useHasEntityResolutionLicense } from '../../../common/hooks/use_has_entity_resolution_license';
 
 export const useSelectedTab = (params: HostDetailsPanelProps, tabs: LeftPanelTabsType) => {
   const { openLeftPanel } = useExpandableFlyoutApi();
@@ -58,6 +59,8 @@ export const useTabs = ({
   hasNonClosedAlerts,
   entityStoreEntityId,
 }: HostDetailsPanelProps): LeftPanelTabsType => {
+  const hasEntityResolutionLicense = useHasEntityResolutionLicense();
+
   return useMemo(() => {
     const isRiskScoreTabAvailable = (isRiskScoreExist || entityStoreEntityId) && hostName;
     const riskScoreTab = isRiskScoreTabAvailable
@@ -89,9 +92,16 @@ export const useTabs = ({
       ? [getGraphViewTab({ entityId: entityStoreEntityId, scopeId })]
       : [];
 
-    const resolutionTab = entityStoreEntityId
-      ? [getResolutionGroupTab({ entityId: entityStoreEntityId, entityType: EntityType.host })]
-      : [];
+    const resolutionTab =
+      entityStoreEntityId && hasEntityResolutionLicense
+        ? [
+            getResolutionGroupTab({
+              entityId: entityStoreEntityId,
+              entityType: EntityType.host,
+              scopeId,
+            }),
+          ]
+        : [];
 
     return [...riskScoreTab, ...insightsTab, ...graphViewTab, ...resolutionTab];
   }, [
@@ -103,5 +113,6 @@ export const useTabs = ({
     hasVulnerabilitiesFindings,
     hasNonClosedAlerts,
     entityStoreEntityId,
+    hasEntityResolutionLicense,
   ]);
 };

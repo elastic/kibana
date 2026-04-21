@@ -42,8 +42,6 @@ export interface SmlContext {
   esClient: ElasticsearchClient;
   savedObjectsClient: SavedObjectsClientContract;
   logger: Logger;
-  /** The current user's request, when available. Absent during background crawler runs. */
-  request?: KibanaRequest;
 }
 
 /**
@@ -224,7 +222,6 @@ export interface SmlService {
     esClient: ElasticsearchClient;
     savedObjectsClient: SavedObjectsClientContract;
     logger: Logger;
-    request?: KibanaRequest;
   }) => Promise<void>;
 
   /** Fetch SML documents by their chunk IDs, scoped to a space */

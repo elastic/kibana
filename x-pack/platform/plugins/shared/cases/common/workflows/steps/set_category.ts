@@ -8,7 +8,7 @@
 import type { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
-import { CaseCategory } from '../../bundled-types.gen';
+import { CaseCategory, Owner } from '../../bundled-types.gen';
 import * as i18n from '../translations';
 import {
   CasesStepBaseConfigSchema,
@@ -20,6 +20,7 @@ export const SetCategoryStepTypeId = 'cases.setCategory';
 
 const InputSchema = CasesStepCaseIdVersionSchema.extend({
   category: CaseCategory.min(1, 'category is required'),
+  owner: Owner.optional(),
 });
 
 const OutputSchema = CasesStepSingleCaseOutputSchema;
@@ -34,7 +35,7 @@ export const setCategoryStepCommonDefinition: CommonStepDefinition<
   SetCategoryStepOutputSchema
 > = {
   id: SetCategoryStepTypeId,
-  category: StepCategory.Kibana,
+  category: StepCategory.KibanaCases,
   label: i18n.ADD_CATEGORY_STEP_LABEL,
   description: i18n.ADD_CATEGORY_STEP_DESCRIPTION,
   documentation: {

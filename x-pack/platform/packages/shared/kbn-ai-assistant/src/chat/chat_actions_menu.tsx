@@ -5,33 +5,20 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { lazy, Suspense, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiButton,
-  EuiButtonIcon,
-  EuiContextMenu,
-  EuiIcon,
-  EuiPopover,
-  EuiPopoverFooter,
-  EuiToolTip,
-} from '@elastic/eui';
-import {
-  navigateToSettingsManagementApp,
-  useAgentBuilderOptIn,
-} from '@kbn/observability-ai-assistant-plugin/public';
-import { AIAgentConfirmationModal } from '@kbn/ai-agent-confirmation-modal';
+import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
+import { navigateToSettingsManagementApp } from '@kbn/observability-ai-assistant-plugin/public';
 import {
   ConnectorSelectable,
   type ConnectorSelectableComponentProps,
 } from '@kbn/ai-assistant-connector-selector-action';
 import type { ApplicationStart } from '@kbn/core/public';
-import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
-import { isSupportedConnectorType } from '@kbn/inference-common';
-import { GenerativeAIForObservabilityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
 import { useKibana } from '../hooks/use_kibana';
 import { useKnowledgeBase } from '../hooks';
+
+const InferenceFlyoutWrapper = lazy(() => import('@kbn/inference-endpoint-ui-common'));
 
 type ConnectorLists = [
   preConfigured: ConnectorSelectableComponentProps['preConfiguredConnectors'],
@@ -40,26 +27,16 @@ type ConnectorLists = [
 export function ChatActionsMenu({
   connectors,
   disabled,
-  isConversationApp,
-  navigateToConnectorsManagementApp,
+  navigateToModelManagementApp,
 }: {
   connectors: UseGenAIConnectorsResult;
   disabled: boolean;
-  isConversationApp: boolean;
-  navigateToConnectorsManagementApp: (application: ApplicationStart) => void;
+  navigateToModelManagementApp: (application: ApplicationStart) => void;
 }) {
-  const { application, http, triggersActionsUi, docLinks } = useKibana().services;
+  const { application, http, notifications } = useKibana().services;
   const knowledgeBase = useKnowledgeBase();
   const [isOpen, setIsOpen] = useState(false);
   const [connectorFlyoutOpen, setConnectorFlyoutOpen] = useState(false);
-
-  const {
-    showAgentBuilderOptInCta,
-    isAgentBuilderConfirmationModalOpen,
-    openAgentBuilderConfirmationModal,
-    closeAgentBuilderConfirmationModal,
-    confirmAgentBuilderOptIn,
-  } = useAgentBuilderOptIn({ navigateFromConversationApp: isConversationApp });
 
   const toggleActionsMenu = () => {
     setIsOpen(!isOpen);
@@ -84,19 +61,6 @@ export function ChatActionsMenu({
       [[], []]
     );
   }, [connectors.connectors]);
-
-  const ConnectorFlyout = useMemo(
-    () => triggersActionsUi.getAddConnectorFlyout,
-    [triggersActionsUi]
-  );
-
-  const onConnectorCreated = (createdConnector: ActionConnector) => {
-    setConnectorFlyoutOpen(false);
-
-    if (isSupportedConnectorType(createdConnector.actionTypeId)) {
-      connectors.reloadConnectors();
-    }
-  };
 
   const contextMenuItems = [
     ...(knowledgeBase?.status.value?.enabled
@@ -125,7 +89,7 @@ export function ChatActionsMenu({
       name: (
         <div className="eui-textTruncate">
           {i18n.translate('xpack.aiAssistant.chatHeader.actions.connector', {
-            defaultMessage: 'Connector',
+            defaultMessage: 'Model',
           })}{' '}
           <strong>
             {
@@ -138,40 +102,17 @@ export function ChatActionsMenu({
       ),
       panel: !connectors.isConnectorSelectionRestricted ? 1 : undefined,
     },
-    ...(showAgentBuilderOptInCta
-      ? [
-          {
-            isSeparator: true as const,
-            key: 'agentBuilderOptInSeparator',
-          },
-          {
-            renderItem: () => (
-              <EuiPopoverFooter paddingSize="s">
-                <EuiButton
-                  fullWidth
-                  size="s"
-                  color="accent"
-                  style={{ marginInlineStart: 'auto' }}
-                  onClick={() => {
-                    toggleActionsMenu();
-                    openAgentBuilderConfirmationModal();
-                  }}
-                >
-                  <EuiIcon type="productAgent" size="m" />
-                  {i18n.translate('xpack.aiAssistant.chatHeader.actions.agentBuilderOptInButton', {
-                    defaultMessage: 'Try AI Agent',
-                  })}
-                </EuiButton>
-              </EuiPopoverFooter>
-            ),
-          },
-        ]
-      : []),
   ];
 
   return (
     <>
       <EuiPopover
+        aria-label={i18n.translate(
+          'xpack.aiAssistant.chatActionsMenu.euiToolTip.moreActionsLabel',
+          {
+            defaultMessage: 'More actions',
+          }
+        )}
         isOpen={isOpen}
         button={
           <EuiToolTip
@@ -213,7 +154,7 @@ export function ChatActionsMenu({
                 id: 1,
                 width: 256,
                 title: i18n.translate('xpack.aiAssistant.chatHeader.actions.connector', {
-                  defaultMessage: 'Connector',
+                  defaultMessage: 'Model',
                 }),
                 content: (
                   <ConnectorSelectable
@@ -231,7 +172,7 @@ export function ChatActionsMenu({
                     }}
                     onManageConnectorsClick={() => {
                       toggleActionsMenu();
-                      navigateToConnectorsManagementApp(application!);
+                      navigateToModelManagementApp(application!);
                     }}
                   />
                 ),
@@ -240,20 +181,16 @@ export function ChatActionsMenu({
           />
         </div>
       </EuiPopover>
-      {connectorFlyoutOpen && (
-        <ConnectorFlyout
-          featureId={GenerativeAIForObservabilityConnectorFeatureId}
-          onConnectorCreated={onConnectorCreated}
-          onClose={() => setConnectorFlyoutOpen(false)}
-        />
-      )}
 
-      {isAgentBuilderConfirmationModalOpen && docLinks?.links && (
-        <AIAgentConfirmationModal
-          onConfirm={confirmAgentBuilderOptIn}
-          onCancel={closeAgentBuilderConfirmationModal}
-          docLinks={docLinks.links}
-        />
+      {connectorFlyoutOpen && (
+        <Suspense fallback={null}>
+          <InferenceFlyoutWrapper
+            http={http!}
+            toasts={notifications!.toasts}
+            onFlyoutClose={() => setConnectorFlyoutOpen(false)}
+            onSubmitSuccess={() => connectors.reloadConnectors()}
+          />
+        </Suspense>
       )}
     </>
   );

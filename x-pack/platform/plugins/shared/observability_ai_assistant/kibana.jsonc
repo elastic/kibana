@@ -18,16 +18,17 @@
       "dataViews",
       "inference",
       "llmTasks",
-      "productDocBase"
+      "productDocBase",
+      "searchInferenceEndpoints"
     ],
     "optionalPlugins": [
       "cloud",
       "serverless",
       "usageCollection",
       "agentBuilder",
-      "searchInferenceEndpoints"
+      "evals"
     ],
-    "requiredBundles": ["kibanaReact", "kibanaUtils", "aiAssistantManagementSelection"],
+    "requiredBundles": ["kibanaReact", "kibanaUtils"],
     "runtimePluginDependencies": ["ml"],
     "extraPublicDirs": []
   }
