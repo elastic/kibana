@@ -17,12 +17,7 @@ jest.mock('@elastic/eui', () => ({
 describe('ShareUrlIconButton', () => {
   it('renders nothing when url is null', () => {
     const { container } = render(
-      <ShareUrlIconButton
-        url={null}
-        tooltip="tip"
-        ariaLabel="share"
-        dataTestSubj="shareBtn"
-      />
+      <ShareUrlIconButton url={null} tooltip="tip" ariaLabel="share" dataTestSubj="shareBtn" />
     );
     expect(container).toBeEmptyDOMElement();
   });
