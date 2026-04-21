@@ -974,6 +974,31 @@ describe('Textbased Data Source', () => {
       ).toEqual(null);
     });
 
+    it('should set ignoreGlobalFilters in the esql expression when the layer has it enabled', () => {
+      const stateWithIgnoreFilters = {
+        ...queryBaseState,
+        layers: {
+          a: {
+            ...queryBaseState.layers.a,
+            ignoreGlobalFilters: true,
+          },
+        },
+      } as unknown as TextBasedPrivateState;
+
+      const expression = TextBasedDatasource.toExpression(
+        stateWithIgnoreFilters,
+        'a',
+        indexPatterns,
+        dateRange,
+        new Date()
+      );
+
+      expect(expression).toHaveProperty(
+        'chain.2.arguments',
+        expect.objectContaining({ ignoreGlobalFilters: [true] })
+      );
+    });
+
     it('should generate an expression for an SQL query', async () => {
       expect(
         TextBasedDatasource.toExpression(queryBaseState, 'a', indexPatterns, dateRange, new Date())
@@ -994,6 +1019,9 @@ describe('Textbased Data Source', () => {
               "arguments": Object {
                 "descriptionForInspector": Array [
                   "This request queries Elasticsearch to fetch the data for the visualization.",
+                ],
+                "ignoreGlobalFilters": Array [
+                  false,
                 ],
                 "locale": Array [
                   "en",

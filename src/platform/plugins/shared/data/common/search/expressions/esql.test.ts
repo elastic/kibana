@@ -13,6 +13,7 @@ import { getEsqlFn } from './esql';
 import type { ExecutionContext } from '@kbn/expressions-plugin/common';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
+import type { KibanaContext } from '..';
 
 describe('getEsqlFn', () => {
   it('should always return a fully serializable table', async () => {
@@ -53,5 +54,66 @@ describe('getEsqlFn', () => {
 
     expect(result?.type).toEqual('datatable');
     expect(() => JSON.stringify(result)).not.toThrow();
+  });
+
+  describe('ignoreGlobalFilters', () => {
+    const makeEsqlFn = (mockSearch: jest.Mock) =>
+      getEsqlFn({
+        getStartDependencies: async () => ({
+          search: mockSearch,
+          uiSettings: {
+            get: jest.fn((key: string) => {
+              if (key === 'dateFormat:tz') return 'UTC';
+              return undefined;
+            }),
+          } as unknown as UiSettingsCommon,
+        }),
+      });
+
+    const makeContext = () =>
+      ({
+        abortSignal: new AbortController().signal,
+        inspectorAdapters: {},
+        getKibanaRequest: jest.fn(),
+        getSearchSessionId: jest.fn(),
+      } as unknown as ExecutionContext);
+
+    const inputFilter = {
+      meta: { alias: null, disabled: false, negate: false },
+      query: { match_phrase: { myField: 'uniqueTestValue' } },
+    };
+
+    const input: KibanaContext = {
+      type: 'kibana_context',
+      filters: [inputFilter],
+    };
+
+    const emptySearchResponse = of({
+      rawResponse: { values: [], columns: [] },
+    } as unknown as IKibanaSearchResponse<ESQLSearchResponse>);
+
+    it('should include global filters in the query when ignoreGlobalFilters is false', async () => {
+      const mockSearch = jest.fn().mockReturnValue(emptySearchResponse);
+      const esqlFn = makeEsqlFn(mockSearch);
+
+      await esqlFn
+        .fn(input, { query: 'FROM index', ignoreGlobalFilters: false }, makeContext())
+        .toPromise();
+
+      const params = mockSearch.mock.calls[0][0].params;
+      expect(JSON.stringify(params.filter)).toContain('uniqueTestValue');
+    });
+
+    it('should exclude global filters from the query when ignoreGlobalFilters is true', async () => {
+      const mockSearch = jest.fn().mockReturnValue(emptySearchResponse);
+      const esqlFn = makeEsqlFn(mockSearch);
+
+      await esqlFn
+        .fn(input, { query: 'FROM index', ignoreGlobalFilters: true }, makeContext())
+        .toPromise();
+
+      const params = mockSearch.mock.calls[0][0].params;
+      expect(JSON.stringify(params.filter)).not.toContain('uniqueTestValue');
+    });
   });
 });
