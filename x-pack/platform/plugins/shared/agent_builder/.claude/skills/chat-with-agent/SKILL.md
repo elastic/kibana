@@ -67,21 +67,16 @@ Relay the agent's response to the user. Highlight:
 
 ## Session Auth (Acting as a Browser User)
 
-By default, `kibana_api_common.sh` authenticates via HTTP Basic auth, which uses
-the `__http__` auth provider. This is a different auth realm than the browser,
-which uses the `basic` provider. Any per-user state tied to a browser session
-(e.g. OAuth tokens, user-specific settings) will not be visible to API calls
-made with HTTP Basic auth.
+By default, `kibana_api_common.sh` authenticates via HTTP Basic auth, which uses the `__http__` auth provider. 
+This is a different auth realm than the browser, which uses the `basic` provider.
+Any per-user state tied to a browser session (e.g. OAuth tokens, user-specific settings) will not be visible to API calls made with HTTP Basic auth.
 
-To authenticate in the same auth realm as a browser user, set
-`KIBANA_USE_SESSION=true` before sourcing `kibana_api_common.sh`. This logs in
-via the `basic` auth provider and uses a session cookie for all subsequent
-`kibana_curl` calls:
+To authenticate in the same auth realm as a browser user, set `KIBANA_USE_SESSION=true` before sourcing `kibana_api_common.sh`.
+This logs in via the `basic` auth provider and uses a session cookie for all subsequent `kibana_curl` calls:
 
 ```bash
 export KIBANA_USE_SESSION=true
 source "$REPO_ROOT/scripts/kibana_api_common.sh"
 ```
 
-Any script that sources `kibana_api_common.sh` with this variable set will
-automatically use session auth — no changes needed in downstream scripts.
+Any script that sources `kibana_api_common.sh` with this variable set will automatically use session auth — no changes needed in downstream scripts.
