@@ -242,7 +242,12 @@ export const PutSpaceSettingsRequestSchema = {
             }
           },
         }),
-        { maxSize: 100 }
+        {
+          maxSize: 100,
+          meta: {
+            description: 'Namespaces for which to create namespace-level index templates.',
+          },
+        }
       )
     ),
   }),
