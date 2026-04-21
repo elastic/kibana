@@ -81,7 +81,7 @@ export const CreateArchives: Task = {
               [
                 '-c',
                 '-I',
-                'zstd -19 -T0',
+                'zstd -12 -T0',
                 '-f',
                 destination,
                 basename,
