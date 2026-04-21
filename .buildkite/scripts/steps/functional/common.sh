@@ -32,6 +32,10 @@ if [[ $download_exit -ne 0 ]]; then
   echo "Artifact download failed with exit code $download_exit"
   exit $download_exit
 fi
+
+echo "--- Build platform plugins"
+node scripts/build_kibana_platform_plugins
+
 .buildkite/scripts/setup_es_snapshot_cache.sh
 
 is_test_execution_step
