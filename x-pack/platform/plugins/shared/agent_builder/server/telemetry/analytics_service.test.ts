@@ -311,7 +311,7 @@ describe('AnalyticsService', () => {
         skill_id: 'plugin-f3a4ba6782682a47-eabadf06389e747c',
         origin: 'plugin',
         solution_area: 'plugin',
-        plugin_id: 'custom-f3a4ba6782682a47',
+        plugin_id: 'plugin-f3a4ba6782682a47',
         agent_id: 'custom-da3031a511e7fadf',
         conversation_id: undefined,
         execution_id: undefined,
@@ -365,7 +365,7 @@ describe('AnalyticsService', () => {
       });
 
       expect(analytics.reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.PluginImported, {
-        plugin_id: 'custom-f3a4ba6782682a47',
+        plugin_id: 'plugin-f3a4ba6782682a47',
         source_type: 'url',
         skill_count: 2,
       });

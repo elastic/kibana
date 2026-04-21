@@ -19,7 +19,7 @@ describe('normalizePluginIdForTelemetry', () => {
   });
 
   it('returns a stable hashed label for plugin ids', () => {
-    expect(normalizePluginIdForTelemetry('plugin-uuid-1')).toBe('custom-f3a4ba6782682a47');
+    expect(normalizePluginIdForTelemetry('plugin-uuid-1')).toBe('plugin-f3a4ba6782682a47');
   });
 
   it('returns the same hash for the same input across calls', () => {
