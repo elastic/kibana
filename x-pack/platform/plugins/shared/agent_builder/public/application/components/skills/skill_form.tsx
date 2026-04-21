@@ -121,6 +121,7 @@ interface SkillFormContentProps {
   toolOptions: Array<{ label: string; value: string }>;
   connectorId: string;
   http: ReturnType<typeof useKibana>['services']['http'];
+  isEvalsAvailable: boolean;
   onSubmit: (data: SkillFormData) => Promise<void>;
   onOpenChat: (evalResults?: EvalResults) => void;
   onApplyImprovement: (data: { name: string; description: string; content: string }) => void;
@@ -133,6 +134,7 @@ const SkillFormContent: React.FC<SkillFormContentProps> = ({
   toolOptions,
   connectorId,
   http,
+  isEvalsAvailable,
   onSubmit,
   onOpenChat,
   onApplyImprovement,
@@ -337,8 +339,9 @@ const SkillFormContent: React.FC<SkillFormContentProps> = ({
         />
       </FormSection>
 
-      {/* Section: Evaluation — only shown for existing skills */}
-      {!isCreateMode && skill && (
+      {/* Section: Evaluation — only shown for existing skills when the
+          evals plugin is available (xpack.evals.enabled=true). */}
+      {!isCreateMode && skill && isEvalsAvailable && (
         <>
           <EuiHorizontalRule />
           <FormSection
@@ -381,11 +384,13 @@ export const SkillForm: React.FC<SkillFormProps> = ({
   const {
     services: {
       http,
+      plugins,
       application: { navigateToUrl },
       overlays: { openConfirm },
       appParams: { history },
     },
   } = useKibana();
+  const isEvalsAvailable = Boolean(plugins.evals);
   const { navigateToAgentBuilderUrl } = useNavigation();
   const { openSidebarConversation } = useAgentBuilderServices();
   const { tools } = useTools();
@@ -619,6 +624,7 @@ export const SkillForm: React.FC<SkillFormProps> = ({
               toolOptions={toolOptions}
               connectorId={connectorId}
               http={http}
+              isEvalsAvailable={isEvalsAvailable}
               onSubmit={onSubmit}
               onOpenChat={handleOpenChat}
               onApplyImprovement={handleApplyImprovement}

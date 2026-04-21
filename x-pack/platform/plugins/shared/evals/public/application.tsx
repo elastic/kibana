@@ -19,16 +19,35 @@ import {
 import { Router, Route, Routes } from '@kbn/shared-ux-router';
 import type { AppMountParameters, ChromeBreadcrumb } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { useHistory, useLocation } from 'react-router-dom';
+import { Redirect, useHistory, useLocation } from 'react-router-dom';
 import { RunsListPage } from './pages/runs_list';
 import { DatasetsListPage } from './pages/datasets_list';
-import { ProposedSkillsList } from './pages/aesop/proposed_skills_list';
-import { ExplorationDashboard } from './pages/aesop/exploration_dashboard';
-import { ExecutionDetailPage } from './pages/aesop/execution_detail';
-import { AesopErrorBoundary } from './pages/aesop/components/aesop_error_boundary';
 import { EvaluatorCatalogPage } from './pages/evaluators';
 import { SkillPerformanceDashboard } from './pages/monitoring';
 import { SuitesListPage } from './pages/suites_list';
+// AesopErrorBoundary is a lightweight class used as the wrapper around
+// lazy AESOP routes; imported eagerly so it can catch errors thrown by
+// the lazy children during render. It is tree-shakable when no AESOP
+// route is rendered (i.e. xpack.evals.aesop.enabled is false).
+import { AesopErrorBoundary } from './pages/aesop/components/aesop_error_boundary';
+
+// AESOP pages are lazy-loaded so their bundle cost is paid only when
+// xpack.evals.aesop.enabled is true AND the user navigates to an
+// AESOP route.
+const ProposedSkillsList = React.lazy(async () => {
+  const mod = await import('./pages/aesop/proposed_skills_list');
+  return { default: mod.ProposedSkillsList };
+});
+
+const ExplorationDashboard = React.lazy(async () => {
+  const mod = await import('./pages/aesop/exploration_dashboard');
+  return { default: mod.ExplorationDashboard };
+});
+
+const ExecutionDetailPage = React.lazy(async () => {
+  const mod = await import('./pages/aesop/execution_detail');
+  return { default: mod.ExecutionDetailPage };
+});
 
 const RunDetailPage = React.lazy(async () => {
   const mod = await import('./pages/run_detail');
@@ -388,6 +407,10 @@ export const EvalsApp: React.FC<{
                   </AesopErrorBoundary>
                 </Route>
               )}
+              {/* When AESOP is disabled, bookmarked deep-links to /aesop/*
+                  would otherwise render a blank page. Redirect them to the
+                  root instead so the user lands on a working page. */}
+              {!aesopEnabled && <Route path="/aesop" render={() => <Redirect to={ROOT_PATH} />} />}
               <Route exact path="/evaluators" component={EvaluatorCatalogPage} />
               <Route exact path="/monitoring" component={SkillPerformanceDashboard} />
               <Route path="/monitoring/:skillId" component={SkillPerformanceDashboard} />

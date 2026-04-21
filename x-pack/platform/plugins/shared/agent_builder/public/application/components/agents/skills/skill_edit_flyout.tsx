@@ -44,10 +44,7 @@ import type { SkillFormData } from '../../skills/skill_form_validation';
 import { SkillEvalSection } from '../../skills/skill_eval_section';
 import { useAesopSuggestions } from '../../skills/use_aesop_suggestions';
 import { useSkillBrowserApiTools } from '../../skills/use_skill_browser_api_tools';
-import {
-  buildInitialMessage,
-  buildSidebarAttachments,
-} from '../../skills/skill_chat_helpers';
+import { buildInitialMessage, buildSidebarAttachments } from '../../skills/skill_chat_helpers';
 import type { EvalResults } from '../../skills/types';
 import { SkillForm } from './skill_form';
 
@@ -63,8 +60,9 @@ export const SkillEditFlyout: React.FC<SkillEditFlyoutProps> = ({ skillId, onClo
   const { tools } = useTools();
   const { euiTheme } = useEuiTheme();
   const {
-    services: { http },
+    services: { http, plugins },
   } = useKibana();
+  const isEvalsAvailable = Boolean(plugins.evals);
   const { openSidebarConversation } = useAgentBuilderServices();
   const { selectedConnector, defaultConnectorId } = useConnectorSelection();
   const connectorId = selectedConnector ?? defaultConnectorId ?? '';
@@ -207,8 +205,9 @@ export const SkillEditFlyout: React.FC<SkillEditFlyoutProps> = ({ skillId, onClo
 
             {/* Evaluation section — lets the user run skill evals from inside
                 the agent builder and auto-apply LLM/AESOP-suggested fixes
-                directly into this flyout's form. */}
-            {skill && (
+                directly into this flyout's form. Gated on the evals plugin
+                being available (xpack.evals.enabled=true). */}
+            {skill && isEvalsAvailable && (
               <>
                 <EuiSpacer size="l" />
                 <EuiHorizontalRule margin="none" />
