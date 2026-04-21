@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useState } from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
-import { useFetchApmIndex } from '../../../hooks/use_fetch_apm_indices';
+import { useFetchApmIndices } from '../../../hooks/use_fetch_apm_indices';
 import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
 import { getResolvedApmParams } from '../../../utils/slo/get_apm_source_field_link';
 import { getApmTracesDiscoverUrl } from '../utils/discover_links/get_discover_link';
@@ -53,7 +53,7 @@ export function SliChartPanelActions({ slo, timeRange }: SliChartPanelActionsPro
 
   const {
     data: { transaction, span },
-  } = useFetchApmIndex({ enabled: true });
+  } = useFetchApmIndices({ enabled: true });
 
   const tracesIndices = [
     ...new Set([

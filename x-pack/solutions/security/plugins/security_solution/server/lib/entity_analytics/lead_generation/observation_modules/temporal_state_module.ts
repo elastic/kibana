@@ -6,9 +6,14 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { getHistorySnapshotIndexPattern } from '@kbn/entity-store/server';
 import type { LeadEntity, Observation, ObservationModule, ObservationSeverity } from '../types';
-import { makeObservation, extractIsPrivileged } from './utils';
-import { getEntitiesSnapshotIndexPattern } from '../../entity_store/utils/entity_utils';
+import {
+  PRIVILEGED_USER_WATCHLIST_ID,
+  makeObservation,
+  extractIsPrivileged,
+  entityTypeLabel,
+} from './utils';
 import type { EntityType as EntityTypeOpenAPI } from '../../../../../common/api/entity_analytics/entity_store/common.gen';
 
 const MODULE_ID = 'temporal_state_analysis';
@@ -61,8 +66,8 @@ export const createTemporalStateModule = ({
 
 /**
  * For each currently-privileged entity, retrieves the earliest snapshot via a
- * top_hits aggregation. If the oldest snapshot had privileged=false, the entity
- * was escalated.
+ * top_hits aggregation. If the oldest snapshot's `entity.attributes.watchlists`
+ * did NOT include a privileged-user watchlist entry, the entity was escalated.
  */
 const fetchPrivilegeEscalations = async (
   esClient: ElasticsearchClient,
@@ -78,7 +83,7 @@ const fetchPrivilegeEscalations = async (
     const ofType = privilegedEntities.filter((e) => e.type === entityType);
     if (ofType.length > 0) {
       const names = ofType.map((e) => e.name);
-      const historyPattern = getEntitiesSnapshotIndexPattern(entityType, spaceId);
+      const historyPattern = getHistorySnapshotIndexPattern(spaceId);
 
       try {
         const response = await esClient.search({
@@ -97,7 +102,7 @@ const fetchPrivilegeEscalations = async (
                   top_hits: {
                     size: 1,
                     sort: [{ '@timestamp': { order: 'asc' } }],
-                    _source: ['entity.attributes.privileged'],
+                    _source: ['entity.attributes.watchlists'],
                   },
                 },
               },
@@ -115,9 +120,13 @@ const fetchPrivilegeEscalations = async (
           const hit = bucket.oldest_snapshot.hits.hits[0];
           if (hit) {
             const entityField = hit._source?.entity as Record<string, unknown> | undefined;
-            const attrs = entityField?.attributes as { privileged?: boolean } | undefined;
+            const attrs = entityField?.attributes as { watchlists?: string[] } | undefined;
+            const watchlists = Array.isArray(attrs?.watchlists) ? attrs.watchlists : [];
+            const wasPrivileged = watchlists.some(
+              (w) => typeof w === 'string' && w.startsWith(PRIVILEGED_USER_WATCHLIST_ID)
+            );
 
-            if (attrs !== undefined && attrs.privileged === false) {
+            if (!wasPrivileged) {
               escalated.add(`${entityType}:${bucket.key}`);
             }
           }
@@ -137,6 +146,8 @@ const buildPrivilegeEscalationObservation = (entity: LeadEntity): Observation =>
     score: 85,
     severity: 'high' as ObservationSeverity,
     confidence: 0.85,
-    description: `Entity ${entity.name} transitioned from non-privileged to privileged access`,
+    description: `${entityTypeLabel(entity)} ${
+      entity.name
+    } transitioned from non-privileged to privileged access`,
     metadata: { entity_type: entity.type },
   });

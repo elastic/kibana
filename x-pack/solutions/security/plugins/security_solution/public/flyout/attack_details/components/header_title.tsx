@@ -81,6 +81,10 @@ export const HeaderTitle = memo(() => {
                 {alertsCount}
               </AlertHeaderBlock>
             </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem css={flyoutHeaderBlockStyles}>
+          <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
             <EuiFlexItem>
               <AlertHeaderBlock
                 hasBorder

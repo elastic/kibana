@@ -14,6 +14,8 @@ export {
   getStreamsForInputType,
   getRegistryStreamWithDataStreamForInputType,
   varsReducer,
+  getInputEffectiveName,
+  buildInputKey,
 } from './package_to_package_policy';
 export { fullAgentPolicyToYaml } from './full_agent_policy_to_yaml';
 export { isPackageLimited, doesAgentPolicyAlreadyIncludePackage } from './limited_package';

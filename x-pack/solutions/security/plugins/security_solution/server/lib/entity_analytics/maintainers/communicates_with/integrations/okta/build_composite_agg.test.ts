@@ -8,20 +8,20 @@
 import { isEventOutcomeTermFilter } from '../query_filter_test_utils';
 
 import { buildCompositeAggQuery } from './build_composite_agg';
-import { OKTA_AUTH_EVENT_ACTIONS } from './constants';
+import { OKTA_USER_ADMIN_EVENT_ACTIONS } from './constants';
 
 describe('communicates_with Okta buildCompositeAggQuery', () => {
-  it('filters for auth event actions', () => {
+  it('filters for user admin event actions', () => {
     const query = buildCompositeAggQuery();
     expect(query.query.bool.filter).toContainEqual({
-      terms: { 'event.action': OKTA_AUTH_EVENT_ACTIONS },
+      terms: { 'event.action': OKTA_USER_ADMIN_EVENT_ACTIONS },
     });
   });
 
-  it('requires okta.target.display_name to exist', () => {
+  it('requires user.target.email to exist', () => {
     const query = buildCompositeAggQuery();
     expect(query.query.bool.filter).toContainEqual({
-      exists: { field: 'okta.target.display_name' },
+      exists: { field: 'user.target.email' },
     });
   });
 

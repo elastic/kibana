@@ -21,67 +21,82 @@ import { usersUrl } from '../../../urls/navigation';
 import { waitForTabToBeLoaded } from '../../../tasks/common';
 import { ENABLE_RISK_SCORE_BUTTON } from '../../../screens/entity_analytics';
 
-describe('Users stats and tables', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
-    cy.task('esArchiverLoad', { archiveName: 'users' });
-  });
-
-  beforeEach(() => {
-    login();
-    visitWithTimeRange(usersUrl('allUsers'));
-  });
-
-  after(() => {
-    cy.task('esArchiverUnload', { archiveName: 'users' });
-  });
-
-  describe('Users page tabs', () => {
-    it(`renders all users`, () => {
-      const totalUsers = 1;
-
-      cy.get(ALL_USERS_TABLE)
-        .find(HEADER_SUBTITLE)
-        .should('have.text', `Showing: ${totalUsers} user`);
+describe(
+  'Users stats and tables',
+  {
+    tags: ['@ess', '@serverless'],
+    env: {
+      ftrConfig: {
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'disable:entityAnalyticsEntityStoreV2',
+          ])}`,
+        ],
+      },
+    },
+  },
+  () => {
+    before(() => {
+      cy.task('esArchiverLoad', { archiveName: 'users' });
     });
 
-    it(`renders all authentications`, () => {
-      const totalUsers = 1;
-
-      waitForTabToBeLoaded(AUTHENTICATIONS_TAB);
-
-      cy.get(AUTHENTICATIONS_TABLE)
-        .find(HEADER_SUBTITLE)
-        .should('have.text', `Showing: ${totalUsers} user`);
+    beforeEach(() => {
+      login();
+      visitWithTimeRange(usersUrl('allUsers'));
     });
 
-    it(`renders anomalies tab`, () => {
-      waitForTabToBeLoaded(ANOMALIES_TAB);
-
-      cy.get(ANOMALIES_TAB_CONTENT).should('exist');
+    after(() => {
+      cy.task('esArchiverUnload', { archiveName: 'users' });
     });
 
-    it(`renders events tab`, () => {
-      waitForTabToBeLoaded(EVENTS_TAB);
+    describe('Users page tabs', () => {
+      it(`renders all users`, () => {
+        const totalUsers = 1;
 
-      cy.get(EVENTS_TAB_CONTENT).should('exist');
+        cy.get(ALL_USERS_TABLE)
+          .find(HEADER_SUBTITLE)
+          .should('have.text', `Showing: ${totalUsers} user`);
+      });
+
+      it(`renders all authentications`, () => {
+        const totalUsers = 1;
+
+        waitForTabToBeLoaded(AUTHENTICATIONS_TAB);
+
+        cy.get(AUTHENTICATIONS_TABLE)
+          .find(HEADER_SUBTITLE)
+          .should('have.text', `Showing: ${totalUsers} user`);
+      });
+
+      it(`renders anomalies tab`, () => {
+        waitForTabToBeLoaded(ANOMALIES_TAB);
+
+        cy.get(ANOMALIES_TAB_CONTENT).should('exist');
+      });
+
+      it(`renders events tab`, () => {
+        waitForTabToBeLoaded(EVENTS_TAB);
+
+        cy.get(EVENTS_TAB_CONTENT).should('exist');
+      });
+
+      // https://github.com/elastic/kibana/issues/184201
+      it(`renders users risk tab`, { tags: ['@skipInServerless'] }, () => {
+        waitForTabToBeLoaded(RISK_SCORE_TAB);
+
+        cy.get(ENABLE_RISK_SCORE_BUTTON).should('exist');
+      });
     });
 
-    // https://github.com/elastic/kibana/issues/184201
-    it(`renders users risk tab`, { tags: ['@skipInServerless'] }, () => {
-      waitForTabToBeLoaded(RISK_SCORE_TAB);
+    describe('User details tabs', () => {
+      it(`renders authentications tab`, () => {
+        visitUserDetailsPage();
+        const totalUsers = 1;
 
-      cy.get(ENABLE_RISK_SCORE_BUTTON).should('exist');
+        cy.get(AUTHENTICATIONS_TABLE)
+          .find(HEADER_SUBTITLE)
+          .should('have.text', `Showing: ${totalUsers} host`);
+      });
     });
-  });
-
-  describe('User details tabs', () => {
-    it(`renders authentications tab`, () => {
-      visitUserDetailsPage();
-      const totalUsers = 1;
-
-      cy.get(AUTHENTICATIONS_TABLE)
-        .find(HEADER_SUBTITLE)
-        .should('have.text', `Showing: ${totalUsers} host`);
-    });
-  });
-});
+  }
+);

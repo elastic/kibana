@@ -90,7 +90,7 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     it('should add the old integration and be able to upgrade it', { tags: '@ess' }, () => {
-      cy.visit(createOldOsqueryPath(oldVersion));
+      navigateTo(createOldOsqueryPath(oldVersion));
       addCustomIntegration(integrationName, policyName);
       policyContainsIntegration(integrationName, policyName);
       checkDataStreamsInPolicyDetails();
