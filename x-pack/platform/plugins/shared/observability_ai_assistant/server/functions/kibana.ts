@@ -13,6 +13,18 @@ import { addSpaceIdToPath, getSpaceIdFromPath } from '@kbn/spaces-plugin/common'
 import type { FunctionRegistrationParameters } from '.';
 import { KIBANA_FUNCTION_NAME } from '..';
 
+function isEnotfoundError(e: unknown): boolean {
+  if (e instanceof Error) {
+    if ((e as NodeJS.ErrnoException).code === 'ENOTFOUND') {
+      return true;
+    }
+    if ('cause' in e && e.cause) {
+      return isEnotfoundError(e.cause);
+    }
+  }
+  return false;
+}
+
 export function registerKibanaFunction({
   functions,
   resources,
@@ -72,6 +84,21 @@ export function registerKibanaFunction({
         return pathnameWithSpaceId;
       }
 
+      function getLocalServerUrl() {
+        const serverInfo = core.http.getServerInfo();
+        const hostname =
+          serverInfo.hostname === '0.0.0.0' || serverInfo.hostname === '::'
+            ? 'localhost'
+            : serverInfo.hostname;
+        return {
+          protocol: `${serverInfo.protocol}:`,
+          hostname,
+          port: serverInfo.port,
+          pathname: getPathnameWithSpaceId(),
+          query: query ? (query as Record<string, string>) : undefined,
+        };
+      }
+
       const parsedPublicBaseUrl = getParsedPublicBaseUrl();
       const nextUrl = {
         host: parsedPublicBaseUrl.host,
@@ -109,16 +136,43 @@ export function registerKibanaFunction({
         );
       });
 
+      const data = body ? JSON.stringify(body) : undefined;
+
       try {
         const response = await axios({
           method,
           headers,
           url: format(nextUrl),
-          data: body ? JSON.stringify(body) : undefined,
+          data,
           signal,
         });
         return { content: response.data };
       } catch (e) {
+        if (isEnotfoundError(e)) {
+          const localUrl = getLocalServerUrl();
+          logger.debug(
+            `publicBaseUrl "${format(nextUrl)}" is not reachable from the Kibana server ` +
+              `(ENOTFOUND). Retrying with local server address: ` +
+              `"${method} ${format(localUrl)}"`
+          );
+          try {
+            const response = await axios({
+              method,
+              headers,
+              url: format(localUrl),
+              data,
+              signal,
+            });
+            return { content: response.data };
+          } catch (retryError) {
+            logger.error(
+              `Error calling Kibana API via local fallback: ${method} ${format(localUrl)}. ` +
+                `Failed with ${retryError}`
+            );
+            throw retryError;
+          }
+        }
+
         logger.error(`Error calling Kibana API: ${method} ${format(nextUrl)}. Failed with ${e}`);
         throw e;
       }

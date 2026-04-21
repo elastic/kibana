@@ -13,13 +13,23 @@ import type { FunctionRegistrationParameters } from '.';
 jest.mock('axios');
 const mockedAxios = jest.mocked(axios);
 
+function createEnotfoundError(hostname: string): Error {
+  const cause = new Error(`getaddrinfo ENOTFOUND ${hostname}`) as NodeJS.ErrnoException;
+  cause.code = 'ENOTFOUND';
+  const error = new Error(`getaddrinfo ENOTFOUND ${hostname}`) as NodeJS.ErrnoException;
+  error.code = 'ERR_NETWORK';
+  error.cause = cause;
+  return error;
+}
+
 function registerFunction(overrides: {
   publicBaseUrl?: string;
   requestUrl?: URL;
   rewrittenUrl?: URL;
   headers?: Record<string, string>;
+  serverInfo?: { hostname: string; port: number; protocol: 'http' | 'https' };
 }) {
-  const logger = { info: jest.fn(), error: jest.fn() };
+  const logger = { info: jest.fn(), debug: jest.fn(), warn: jest.fn(), error: jest.fn() };
   const coreStart = {
     http: {
       basePath: {
@@ -27,6 +37,14 @@ function registerFunction(overrides: {
         serverBasePath: '',
         get: jest.fn(),
       },
+      getServerInfo: jest.fn().mockReturnValue(
+        overrides.serverInfo ?? {
+          name: 'kibana',
+          hostname: '0.0.0.0',
+          port: 5601,
+          protocol: 'http',
+        }
+      ),
     },
   };
 
@@ -149,5 +167,33 @@ describe('kibana tool', () => {
     ).rejects.toThrow(
       'Cannot invoke Kibana tool: "server.publicBaseUrl" must be configured in kibana.yml'
     );
+  });
+
+  it('falls back to local server address when publicBaseUrl hostname is not resolvable', async () => {
+    const { handler, resources } = registerFunction({
+      publicBaseUrl: 'https://kibana-vpc.internal:5601',
+      serverInfo: { hostname: '0.0.0.0', port: 5601, protocol: 'http' },
+    });
+
+      mockedAxios
+        .mockRejectedValueOnce(createEnotfoundError('kibana-vpc.internal'))
+        .mockResolvedValueOnce({ data: { status: 'ok' } });
+
+    const result = await handler({
+      arguments: { method: 'GET', pathname: '/api/status' },
+    });
+
+    expect(mockedAxios).toHaveBeenCalledTimes(2);
+
+    const firstCall = mockedAxios.mock.calls[0][0] as AxiosRequestConfig;
+    expect(firstCall.url).toBe('https://kibana-vpc.internal:5601/api/status');
+
+    const retryCall = mockedAxios.mock.calls[1][0] as AxiosRequestConfig;
+    expect(retryCall.url).toBe('http://localhost:5601/api/status');
+
+    expect(result).toEqual({ content: { status: 'ok' } });
+      expect(resources.logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('(ENOTFOUND)')
+      );
   });
 });
