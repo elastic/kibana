@@ -10,10 +10,35 @@ import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { SECURITY_ENTITY_RISK_SCORE_TOOL_ID } from '../tools';
 import { securityAttachmentDataSchema } from './security_attachment_data_schema';
 
-const riskEntityAttachmentDataSchema = securityAttachmentDataSchema.extend({
+/**
+ * Maximum number of entities allowed in a single multi-entity attachment.
+ * Keeps chat payloads bounded and caps the client-side fetch fan-out in the
+ * rich renderer's multi-entity table.
+ */
+export const MAX_ENTITIES_PER_ATTACHMENT = 50;
+
+const entityIdentifierSchema = z.object({
   identifierType: z.enum(['host', 'user', 'service', 'generic']),
   identifier: z.string().min(1),
 });
+
+/**
+ * Entity attachment payload. Two backward-compatible shapes are supported:
+ *
+ * 1. Single-entity (legacy): `{ identifierType, identifier, attachmentLabel? }`.
+ *    Rendered as a single card.
+ * 2. Multi-entity: `{ entities: [{ identifierType, identifier }, ...], attachmentLabel? }`.
+ *    Rendered as a table. Capped at {@link MAX_ENTITIES_PER_ATTACHMENT}.
+ */
+const riskEntityAttachmentDataSchema = z.union([
+  securityAttachmentDataSchema.extend({
+    identifierType: z.enum(['host', 'user', 'service', 'generic']),
+    identifier: z.string().min(1),
+  }),
+  securityAttachmentDataSchema.extend({
+    entities: z.array(entityIdentifierSchema).min(1).max(MAX_ENTITIES_PER_ATTACHMENT),
+  }),
+]);
 
 /**
  * Creates the definition for the `entity` attachment type.
@@ -32,16 +57,29 @@ export const createEntityAttachmentType = (): AttachmentTypeDefinition => {
     format: () => ({}),
     getTools: () => [SECURITY_ENTITY_RISK_SCORE_TOOL_ID],
     getAgentDescription: () => {
-      const description = `You have access to a risk entity that needs to be evaluated. The entity has an identifierType and identifier that you should use to query the risk score.
+      return `You have access to one or more risk entities that need to be evaluated. Each entity has an identifierType and identifier that you should use to query the risk score.
 
-RISK ENTITY DATA:
-{riskEntityData}
+## PAYLOAD SHAPES
+The attachment data is one of two shapes:
+- Single entity: top-level \`identifierType\` + \`identifier\` (+ optional \`attachmentLabel\`).
+- Multi-entity: an \`entities\` array of \`{ identifierType, identifier }\` objects (+ optional \`attachmentLabel\`).
+Handle both shapes.
 
----
+## INLINE RENDERING (REQUIRED)
+When a ${SecurityAgentBuilderAttachments.entity} attachment is present in the conversation, you MUST render it inline in your response using the custom XML element:
 
-1. Extract the identifierType and identifier from the provided risk entity attachment.
-2. Use the available tools to gather context about the alert and provide a response.`;
-      return description;
+    <render_attachment attachment_id="ATTACHMENT_ID" />
+
+Rules:
+- Copy ATTACHMENT_ID verbatim from the attachment's \`attachment_id\` field shown to you in the conversation's attachment manifest. Do not invent or alter it.
+- Emit the \`<render_attachment>\` tag BEFORE your prose summary so the user sees the rich entity card or table first.
+- Render each ${SecurityAgentBuilderAttachments.entity} attachment at most once per turn.
+- Only omit the render tag if the user explicitly asks you not to show the entity card/table.
+
+## ANALYSIS STEPS
+1. Extract the \`identifierType\` and \`identifier\` (or list of them) from the attachment.
+2. Use the available tools (e.g. risk score, asset criticality, entity store lookup) to gather context.
+3. After emitting the \`<render_attachment>\` tag, provide a concise prose summary of the findings.`;
     },
   };
 };

@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { ToolResultType, type ErrorResult, type EsqlResults } from '@kbn/agent-builder-common';
+import {
+  ToolResultType,
+  type ErrorResult,
+  type EsqlResults,
+  type OtherResult,
+} from '@kbn/agent-builder-common';
 import { executeEsql } from '@kbn/agent-builder-genai-utils';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import type { coreMock } from '@kbn/core/server/mocks';
@@ -17,6 +22,7 @@ import {
   setupMockCoreStartServices,
 } from '../../__mocks__/test_helpers';
 import type { ExperimentalFeatures } from '../../../../common';
+import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../lib/telemetry/event_based/events';
 import { getEntityTool, SECURITY_GET_ENTITY_TOOL_ID } from './get_entity_tool';
 
@@ -922,6 +928,251 @@ describe('getEntityTool', () => {
           expect.objectContaining({ entityTypes: [] })
         );
       });
+    });
+  });
+
+  describe('entity attachment side effect', () => {
+    // Uses a dedicated tool instance so we can flip the experimental flag
+    // without disturbing the rest of the suite, which asserts the legacy
+    // (flag-off) shape of `result.results`.
+    const richTool = getEntityTool(mockCore, mockLogger, {
+      ...mockExperimentalFeatures,
+      entityAttachmentRichRenderer: true,
+    } as ExperimentalFeatures);
+
+    const expectedAttachmentId = `${SecurityAgentBuilderAttachments.entity}:host:server1`;
+
+    const exactHitResponse = {
+      columns: [
+        { name: 'entity.id', type: 'keyword' },
+        { name: 'entity.name', type: 'keyword' },
+        { name: 'entity.EngineMetadata.Type', type: 'keyword' },
+      ],
+      values: [['host:server1', 'server1', 'host']],
+    };
+
+    it('creates a security.entity attachment on exact single hit and appends an other result', async () => {
+      (executeEsql as jest.Mock).mockResolvedValueOnce(exactHitResponse);
+
+      const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+      (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce(undefined);
+      (context.attachments.add as jest.Mock).mockResolvedValueOnce({
+        id: expectedAttachmentId,
+        current_version: 1,
+      });
+
+      const result = (await richTool.handler(
+        { entityType: 'host', entityId: 'server1' },
+        context
+      )) as ToolHandlerStandardReturn;
+
+      expect(context.attachments.add).toHaveBeenCalledTimes(1);
+      expect(context.attachments.add).toHaveBeenCalledWith({
+        id: expectedAttachmentId,
+        type: SecurityAgentBuilderAttachments.entity,
+        data: {
+          identifierType: 'host',
+          identifier: 'server1',
+          attachmentLabel: 'host: server1',
+        },
+        description: 'host: server1',
+      });
+      expect(context.attachments.update).not.toHaveBeenCalled();
+
+      expect(result.results).toHaveLength(2);
+      expect(result.results[0].type).toBe(ToolResultType.esqlResults);
+      const otherResult = result.results[1] as OtherResult<{
+        attachmentId: string;
+        version: number;
+      }>;
+      expect(otherResult.type).toBe(ToolResultType.other);
+      expect(otherResult.data).toEqual({ attachmentId: expectedAttachmentId, version: 1 });
+    });
+
+    it('updates the existing attachment (bumping version) on a repeat exact hit for the same entity', async () => {
+      (executeEsql as jest.Mock).mockResolvedValueOnce(exactHitResponse);
+
+      const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+      (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce({
+        id: expectedAttachmentId,
+        current_version: 1,
+      });
+      (context.attachments.update as jest.Mock).mockResolvedValueOnce({
+        id: expectedAttachmentId,
+        current_version: 2,
+      });
+
+      const result = (await richTool.handler(
+        { entityType: 'host', entityId: 'server1' },
+        context
+      )) as ToolHandlerStandardReturn;
+
+      expect(context.attachments.update).toHaveBeenCalledTimes(1);
+      expect(context.attachments.update).toHaveBeenCalledWith(expectedAttachmentId, {
+        data: {
+          identifierType: 'host',
+          identifier: 'server1',
+          attachmentLabel: 'host: server1',
+        },
+        description: 'host: server1',
+      });
+      expect(context.attachments.add).not.toHaveBeenCalled();
+
+      const otherResult = result.results[1] as OtherResult<{
+        attachmentId: string;
+        version: number;
+      }>;
+      expect(otherResult.type).toBe(ToolResultType.other);
+      expect(otherResult.data).toEqual({ attachmentId: expectedAttachmentId, version: 2 });
+    });
+
+    it('does not create an attachment when the match came from the entity.id RLIKE fallback', async () => {
+      (executeEsql as jest.Mock)
+        // 1. Exact match — empty
+        .mockResolvedValueOnce({ columns: [{ name: 'entity.id', type: 'keyword' }], values: [] })
+        // 2. entity.id RLIKE fallback — single match
+        .mockResolvedValueOnce({
+          columns: [
+            { name: 'entity.id', type: 'keyword' },
+            { name: 'entity.name', type: 'keyword' },
+            { name: 'entity.EngineMetadata.Type', type: 'keyword' },
+          ],
+          values: [['host:server1', 'server1', 'host']],
+        });
+
+      const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+
+      const result = (await richTool.handler(
+        { entityType: 'host', entityId: 'server1' },
+        context
+      )) as ToolHandlerStandardReturn;
+
+      expect(context.attachments.add).not.toHaveBeenCalled();
+      expect(context.attachments.update).not.toHaveBeenCalled();
+      expect(result.results).toHaveLength(1);
+      expect(result.results[0].type).toBe(ToolResultType.esqlResults);
+    });
+
+    it('does not create an attachment when the match came from the entity.name RLIKE fallback', async () => {
+      (executeEsql as jest.Mock)
+        // 1. Exact match — empty
+        .mockResolvedValueOnce({ columns: [{ name: 'entity.id', type: 'keyword' }], values: [] })
+        // 2. entity.id RLIKE fallback — empty
+        .mockResolvedValueOnce({ columns: [{ name: 'entity.id', type: 'keyword' }], values: [] })
+        // 3. entity.name RLIKE fallback — single match
+        .mockResolvedValueOnce({
+          columns: [
+            { name: 'entity.id', type: 'keyword' },
+            { name: 'entity.name', type: 'keyword' },
+            { name: 'entity.EngineMetadata.Type', type: 'keyword' },
+          ],
+          values: [['host:server1', 'server1', 'host']],
+        });
+
+      const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+
+      const result = (await richTool.handler(
+        { entityType: 'host', entityId: 'server1' },
+        context
+      )) as ToolHandlerStandardReturn;
+
+      expect(context.attachments.add).not.toHaveBeenCalled();
+      expect(context.attachments.update).not.toHaveBeenCalled();
+      expect(result.results).toHaveLength(1);
+      expect(result.results[0].type).toBe(ToolResultType.esqlResults);
+    });
+
+    it('does not create an attachment when zero hits are returned', async () => {
+      (executeEsql as jest.Mock)
+        .mockResolvedValueOnce({ columns: [], values: [] })
+        .mockResolvedValueOnce({ columns: [], values: [] })
+        .mockResolvedValueOnce({ columns: [], values: [] });
+
+      const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+
+      const result = (await richTool.handler(
+        { entityType: 'host', entityId: 'server1' },
+        context
+      )) as ToolHandlerStandardReturn;
+
+      expect(context.attachments.add).not.toHaveBeenCalled();
+      expect(context.attachments.update).not.toHaveBeenCalled();
+      expect(result.results).toHaveLength(1);
+      expect(result.results[0].type).toBe(ToolResultType.error);
+    });
+
+    it('does not create an attachment when the rich renderer experimental flag is off', async () => {
+      (executeEsql as jest.Mock).mockResolvedValueOnce(exactHitResponse);
+
+      // The top-level `tool` is built from `mockExperimentalFeatures`, which
+      // does NOT include `entityAttachmentRichRenderer`, so the flag is off.
+      const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+
+      const result = (await tool.handler(
+        { entityType: 'host', entityId: 'server1' },
+        context
+      )) as ToolHandlerStandardReturn;
+
+      expect(context.attachments.add).not.toHaveBeenCalled();
+      expect(context.attachments.update).not.toHaveBeenCalled();
+      expect(result.results).toHaveLength(1);
+      expect(result.results[0].type).toBe(ToolResultType.esqlResults);
+    });
+
+    it('skips the attachment when the resolved row has an unknown entity type', async () => {
+      (executeEsql as jest.Mock).mockResolvedValueOnce({
+        columns: [
+          { name: 'entity.id', type: 'keyword' },
+          { name: 'entity.name', type: 'keyword' },
+          { name: 'entity.EngineMetadata.Type', type: 'keyword' },
+        ],
+        values: [['device:d1', 'd1', 'device']],
+      });
+
+      const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+
+      const result = (await richTool.handler(
+        { entityId: 'd1' },
+        context
+      )) as ToolHandlerStandardReturn;
+
+      expect(context.attachments.add).not.toHaveBeenCalled();
+      expect(context.attachments.update).not.toHaveBeenCalled();
+      expect(result.results).toHaveLength(1);
+      expect(result.results[0].type).toBe(ToolResultType.esqlResults);
+    });
+
+    it('keeps the other result when enrichment fails on the happy path', async () => {
+      (executeEsql as jest.Mock)
+        // 1. Entity lookup with a risk score (triggers enrichment)
+        .mockResolvedValueOnce({
+          columns: [
+            { name: 'entity.id', type: 'keyword' },
+            { name: 'entity.name', type: 'keyword' },
+            { name: 'entity.EngineMetadata.Type', type: 'keyword' },
+            { name: 'entity.risk.calculated_score_norm', type: 'double' },
+          ],
+          values: [['host:server1', 'server1', 'host', 75.5]],
+        })
+        // 2. Risk score inputs query fails
+        .mockRejectedValueOnce(new Error('risk index unavailable'));
+
+      const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+      (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce(undefined);
+      (context.attachments.add as jest.Mock).mockResolvedValueOnce({
+        id: expectedAttachmentId,
+        current_version: 1,
+      });
+
+      const result = (await richTool.handler(
+        { entityType: 'host', entityId: 'server1' },
+        context
+      )) as ToolHandlerStandardReturn;
+
+      expect(context.attachments.add).toHaveBeenCalledTimes(1);
+      expect(result.results).toHaveLength(2);
+      expect(result.results[0].type).toBe(ToolResultType.esqlResults);
+      expect(result.results[1].type).toBe(ToolResultType.other);
     });
   });
 });

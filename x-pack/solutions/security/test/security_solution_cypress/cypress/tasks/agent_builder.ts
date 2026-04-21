@@ -13,6 +13,7 @@ import {
   CREATE_RULE_CONTEXT_MENU_POPOVER,
   AI_RULE_CREATION_MENU_ITEM,
   MANUAL_RULE_CREATION_MENU_ITEM,
+  ENTITY_ATTACHMENT_CONTINUE_CONVERSATION_ACTION,
 } from '../screens/agent_builder';
 
 export const clickNewAgentBuilderAttachmentButton = () => {
@@ -42,4 +43,8 @@ export const assertAgentBuilderSidebarIsOpen = () => {
 
 export const assertAgentBuilderSidebarIsNotOpen = () => {
   cy.get(AGENT_BUILDER_SIDEBAR_PANEL).should('not.exist');
+};
+
+export const clickEntityAttachmentContinueConversation = () => {
+  cy.get(ENTITY_ATTACHMENT_CONTINUE_CONVERSATION_ACTION).first().should('be.visible').click();
 };

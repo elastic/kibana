@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
+import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { executeEsql } from '@kbn/agent-builder-genai-utils';
 import {
   getHistorySnapshotIndexPattern,
@@ -19,7 +20,11 @@ import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ExperimentalFeatures } from '../../../../common';
 import { IdentifierType } from '../../../../common/api/entity_analytics/common/common.gen';
-import { DEFAULT_ALERTS_INDEX, ESSENTIAL_ALERT_FIELDS } from '../../../../common/constants';
+import {
+  DEFAULT_ALERTS_INDEX,
+  ESSENTIAL_ALERT_FIELDS,
+  SecurityAgentBuilderAttachments,
+} from '../../../../common/constants';
 import { getRiskScoreTimeSeriesIndex } from '../../../../common/entity_analytics/risk_engine/indices';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
@@ -29,6 +34,125 @@ import { securityTool } from '../constants';
 const ENTITY_STORE_RISK_SCORE_NORMALIZED_FIELD = 'entity.risk.calculated_score_norm';
 const ENTITY_STORE_ENTITY_TYPE_FIELD = 'entity.EngineMetadata.Type';
 const ENTITY_STORE_ENTITY_ID_FIELD = 'entity.id';
+const ENTITY_STORE_ENTITY_NAME_FIELD = 'entity.name';
+
+const ATTACHMENT_IDENTIFIER_TYPES = ['host', 'user', 'service', 'generic'] as const;
+type AttachmentIdentifierType = (typeof ATTACHMENT_IDENTIFIER_TYPES)[number];
+
+const isAttachmentIdentifierType = (value: unknown): value is AttachmentIdentifierType =>
+  typeof value === 'string' &&
+  (ATTACHMENT_IDENTIFIER_TYPES as readonly string[]).includes(value);
+
+/**
+ * Strips the `{type}:` prefix from a canonical entity id so the attachment
+ * receives the bare identity value the rich renderer expects (host.name,
+ * user.name, service.name). For `generic` entities we keep the full id because
+ * those records are matched on `entity.id` directly.
+ */
+const stripEntityIdPrefix = (entityId: string, identifierType: AttachmentIdentifierType): string => {
+  if (identifierType === 'generic') {
+    return entityId;
+  }
+  const prefix = `${identifierType}:`;
+  return entityId.startsWith(prefix) ? entityId.slice(prefix.length) : entityId;
+};
+
+const buildEntityAttachmentId = (
+  identifierType: AttachmentIdentifierType,
+  identifier: string
+): string => `${SecurityAgentBuilderAttachments.entity}:${identifierType}:${identifier}`;
+
+interface EntityAttachmentDescriptor {
+  identifierType: AttachmentIdentifierType;
+  identifier: string;
+  attachmentLabel: string;
+}
+
+/**
+ * Derives the attachment payload from a resolved entity row. Returns `null`
+ * when we cannot extract a trustworthy identifier (e.g. missing type) so the
+ * caller can skip the attachment side-effect instead of emitting garbage.
+ */
+const describeAttachmentForRow = ({
+  columns,
+  row,
+}: {
+  columns: Array<{ name: string }>;
+  row: unknown[];
+}): EntityAttachmentDescriptor | null => {
+  const rawType = getRowValue(columns, row, ENTITY_STORE_ENTITY_TYPE_FIELD);
+  if (!isAttachmentIdentifierType(rawType)) {
+    return null;
+  }
+
+  const rawId = getRowValue(columns, row, ENTITY_STORE_ENTITY_ID_FIELD);
+  const rawName = getRowValue(columns, row, ENTITY_STORE_ENTITY_NAME_FIELD);
+
+  const bareFromId = typeof rawId === 'string' ? stripEntityIdPrefix(rawId, rawType) : undefined;
+  const bareName = typeof rawName === 'string' && rawName.length > 0 ? rawName : undefined;
+
+  const identifier = bareName ?? bareFromId;
+  if (!identifier) {
+    return null;
+  }
+
+  return {
+    identifierType: rawType,
+    identifier,
+    attachmentLabel: `${rawType}: ${identifier}`,
+  };
+};
+
+/**
+ * Creates (or refreshes) the `security.entity` attachment representing a
+ * single resolved entity. Uses a deterministic id so repeated lookups in the
+ * same conversation bump the version instead of piling up pills. Failures are
+ * logged and swallowed — the tool result itself is still useful without the
+ * inline card.
+ */
+const ensureEntityAttachment = async ({
+  attachments,
+  descriptor,
+  logger,
+}: {
+  attachments: AttachmentStateManager;
+  descriptor: EntityAttachmentDescriptor;
+  logger: Logger;
+}): Promise<{ attachmentId: string; version: number } | null> => {
+  const attachmentId = buildEntityAttachmentId(descriptor.identifierType, descriptor.identifier);
+  const data = {
+    identifierType: descriptor.identifierType,
+    identifier: descriptor.identifier,
+    attachmentLabel: descriptor.attachmentLabel,
+  };
+  const description = descriptor.attachmentLabel;
+
+  try {
+    const existing = attachments.getAttachmentRecord(attachmentId);
+    if (existing) {
+      const updated = await attachments.update(attachmentId, { data, description });
+      if (!updated) {
+        return null;
+      }
+      return { attachmentId: updated.id, version: updated.current_version };
+    }
+
+    const created = await attachments.add({
+      id: attachmentId,
+      type: SecurityAgentBuilderAttachments.entity,
+      data,
+      description,
+    });
+    return { attachmentId: created.id, version: created.current_version };
+  } catch (error) {
+    logger.warn(
+      `Failed to persist security.entity attachment for ${attachmentId}: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+    return null;
+  }
+};
 
 const schema = z.object({
   entityType: IdentifierType.describe(
@@ -312,7 +436,9 @@ export const getEntityTool = (
   return {
     id: SECURITY_GET_ENTITY_TOOL_ID,
     type: ToolType.builtin,
-    description: `Retrieve profile for security entity (user, host, service, generic) from the Entity store using entity ID (EUID). Includes the alerts that contributed to the risk score if the entity has a risk score.`,
+    description: `Retrieve profile for security entity (user, host, service, generic) from the Entity store using entity ID (EUID). Includes the alerts that contributed to the risk score if the entity has a risk score.
+
+When exactly one entity is resolved, this tool also stores a \`security.entity\` attachment (creating new or updating existing) so the rich entity card can render inline. Use the returned \`attachmentId\` and \`version\` with \`<render_attachment id="..." version="..." />\` BEFORE your prose summary so the user sees the card alongside your analysis.`,
     schema,
     tags: ['security', 'entity-store', 'entity-analytics'],
     availability: {
@@ -356,7 +482,7 @@ export const getEntityTool = (
         }
       },
     },
-    handler: async (params, { spaceId, esClient }) => {
+    handler: async (params, { spaceId, esClient, attachments }) => {
       logger.debug(
         `${SECURITY_GET_ENTITY_TOOL_ID} tool called with parameters ${JSON.stringify(params)}`
       );
@@ -392,6 +518,36 @@ export const getEntityTool = (
           };
         }
 
+        // Only persist a rich entity attachment when the exact-match query
+        // returned a single entity. RLIKE fallbacks are skipped because weakly
+        // matched rows should not produce a card for an unintended entity.
+        const isExactSingleHit = values.length === 1 && !query.includes(' RLIKE ');
+        const shouldCreateAttachment =
+          experimentalFeatures.entityAttachmentRichRenderer && isExactSingleHit;
+
+        const attachmentResult = shouldCreateAttachment
+          ? await (async () => {
+              const descriptor = describeAttachmentForRow({ columns, row: values[0] });
+              if (!descriptor) {
+                return null;
+              }
+              return ensureEntityAttachment({ attachments, descriptor, logger });
+            })()
+          : null;
+
+        const attachmentSideEffectResults = attachmentResult
+          ? [
+              {
+                tool_result_id: getToolResultId(),
+                type: ToolResultType.other as const,
+                data: {
+                  attachmentId: attachmentResult.attachmentId,
+                  version: attachmentResult.version,
+                },
+              },
+            ]
+          : [];
+
         try {
           const enrichedResults = await Promise.all(
             values.map((row) =>
@@ -400,7 +556,7 @@ export const getEntityTool = (
           );
           success = true;
           entitiesReturned = enrichedResults.length;
-          return { results: enrichedResults };
+          return { results: [...enrichedResults, ...attachmentSideEffectResults] };
         } catch (error) {
           logger.debug(
             `Error enriching entity results: ${
@@ -410,11 +566,14 @@ export const getEntityTool = (
           success = true;
           entitiesReturned = values.length;
           return {
-            results: values.map((row) => ({
-              tool_result_id: getToolResultId(),
-              type: ToolResultType.esqlResults,
-              data: { query, columns, values: [row] },
-            })),
+            results: [
+              ...values.map((row) => ({
+                tool_result_id: getToolResultId(),
+                type: ToolResultType.esqlResults,
+                data: { query, columns, values: [row] },
+              })),
+              ...attachmentSideEffectResults,
+            ],
           };
         }
       } catch (error) {

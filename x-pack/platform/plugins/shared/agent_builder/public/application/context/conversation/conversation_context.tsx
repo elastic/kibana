@@ -8,6 +8,7 @@
 import { createContext, useContext } from 'react';
 import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { ComposerInjection } from '../../types/composer';
 import type { ConversationActions } from './use_conversation_actions';
 
 interface ConversationContextValue {
@@ -23,6 +24,21 @@ interface ConversationContextValue {
   upsertAttachments?: (attachments: AttachmentInput[]) => void;
   resetAttachments?: () => void;
   removeAttachment?: (attachmentIndex: number) => void;
+  /**
+   * Latest composer injection requested by attachment UX; cleared after
+   * `ConversationInput` applies it via `acknowledgeComposerInjection`.
+   */
+  composerInjection?: ComposerInjection | null;
+  /**
+   * Replace the composer editor content with `text`. The effect re-runs even
+   * when `text` is unchanged because a monotonically-increasing `key` is used.
+   */
+  setComposerContent?: (text: string) => void;
+  /**
+   * Called by `ConversationInput` once the injection has been applied to the
+   * editor. Clears `composerInjection` to `null`.
+   */
+  acknowledgeComposerInjection?: () => void;
   browserApiTools?: Array<BrowserApiToolDefinition<any>>;
   setConversationId?: (conversationId?: string) => void;
   setAgentId?: (agentId: string) => void;

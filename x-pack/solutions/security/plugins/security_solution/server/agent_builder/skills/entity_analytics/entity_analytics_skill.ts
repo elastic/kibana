@@ -68,6 +68,19 @@ Use this skill when:
       - Provide a summary of the FIRST result.
       - You MUST mention the other results found and provide the COMPLETE entity ID for each
 
+#### Inline rendering (REQUIRED when a single entity is resolved)
+When \`security.get_entity\` resolves exactly one entity, it also stores a \`security.entity\` attachment
+and returns an \`other\` result containing \`attachmentId\` and \`version\`. You MUST render that
+attachment inline using the custom XML element:
+
+    <render_attachment id="ATTACHMENT_ID" version="VERSION" />
+
+Rules:
+- Copy \`id\` and \`version\` verbatim from the tool result. Do not invent or alter them.
+- Emit the \`<render_attachment>\` tag BEFORE your prose summary so the user sees the rich entity card first.
+- Render each \`security.entity\` attachment at most once per turn.
+- When multiple results are returned (fallback match), no attachment is stored — skip the render tag and summarise in prose.
+
 ### Search Entities Tool
 - \`security.search_entities\` - Search the entity store for security entities (host, user, service, generic) matching specific criteria.
     Use this tool to find entities based on:

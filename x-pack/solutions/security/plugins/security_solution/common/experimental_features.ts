@@ -194,6 +194,14 @@ export const allowedExperimentalValues = Object.freeze({
   entityAnalyticsWatchlistEnabled: false,
 
   /**
+   * Enables the rich visual renderer for `security.entity` Agent Builder
+   * attachments (single-entity card inspired by the Entity Details flyout,
+   * and a multi-entity table inspired by the Entity Analytics entities table).
+   * When disabled, attachments fall back to the minimal label-only pill.
+   */
+  entityAttachmentRichRenderer: false,
+
+  /**
    * Enables the Trial Companion feature.
    */
   trialCompanionEnabled: false,

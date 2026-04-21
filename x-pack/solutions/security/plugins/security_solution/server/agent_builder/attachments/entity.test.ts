@@ -6,7 +6,7 @@
  */
 
 import { SECURITY_ENTITY_RISK_SCORE_TOOL_ID } from '../tools';
-import { createEntityAttachmentType } from './entity';
+import { createEntityAttachmentType, MAX_ENTITIES_PER_ATTACHMENT } from './entity';
 
 describe('createEntityAttachmentType', () => {
   const attachmentType = createEntityAttachmentType();
@@ -115,6 +115,71 @@ describe('createEntityAttachmentType', () => {
         expect(result.error).toBeDefined();
       }
     });
+
+    describe('multi-entity (entities list)', () => {
+      it('returns valid when entities array contains a single item', async () => {
+        const input = {
+          entities: [{ identifierType: 'host', identifier: 'hostname-1' }],
+          attachmentLabel: '1 risk entity',
+        };
+
+        const result = await attachmentType.validate(input);
+
+        expect(result.valid).toBe(true);
+        if (result.valid) {
+          expect(result.data).toEqual(input);
+        }
+      });
+
+      it('returns valid when entities array contains mixed types', async () => {
+        const input = {
+          entities: [
+            { identifierType: 'host', identifier: 'hostname-1' },
+            { identifierType: 'user', identifier: 'username-1' },
+            { identifierType: 'service', identifier: 'service-1' },
+            { identifierType: 'generic', identifier: 'generic-1' },
+          ],
+        };
+
+        const result = await attachmentType.validate(input);
+
+        expect(result.valid).toBe(true);
+      });
+
+      it('returns invalid when entities array is empty', async () => {
+        const input = { entities: [] };
+
+        const result = await attachmentType.validate(input);
+
+        expect(result.valid).toBe(false);
+      });
+
+      it(`returns invalid when entities array exceeds MAX_ENTITIES_PER_ATTACHMENT (${MAX_ENTITIES_PER_ATTACHMENT})`, async () => {
+        const input = {
+          entities: Array.from({ length: MAX_ENTITIES_PER_ATTACHMENT + 1 }, (_, i) => ({
+            identifierType: 'host' as const,
+            identifier: `host-${i}`,
+          })),
+        };
+
+        const result = await attachmentType.validate(input);
+
+        expect(result.valid).toBe(false);
+      });
+
+      it('returns invalid when an entity in the list is malformed', async () => {
+        const input = {
+          entities: [
+            { identifierType: 'host', identifier: 'hostname-1' },
+            { identifierType: 'invalid', identifier: 'oops' },
+          ],
+        };
+
+        const result = await attachmentType.validate(input);
+
+        expect(result.valid).toBe(false);
+      });
+    });
   });
 
   describe('getTools', () => {
@@ -132,10 +197,28 @@ describe('createEntityAttachmentType', () => {
     it('returns expected description', () => {
       const description = attachmentType.getAgentDescription?.();
 
-      expect(description).toContain('risk entity');
-      expect(description).toContain('RISK ENTITY DATA');
+      expect(description).toContain('risk entit');
       expect(description).toContain('identifierType');
       expect(description).toContain('identifier');
+    });
+
+    it('mentions both single and list payload shapes', () => {
+      const description = attachmentType.getAgentDescription?.();
+
+      expect(description).toContain('entities');
+    });
+
+    it('instructs the agent to emit <render_attachment> so the inline renderer fires', () => {
+      const description = attachmentType.getAgentDescription?.();
+
+      expect(description).toContain('<render_attachment');
+      expect(description).toContain('attachment_id');
+    });
+
+    it('does not leak the removed {riskEntityData} placeholder', () => {
+      const description = attachmentType.getAgentDescription?.();
+
+      expect(description).not.toContain('{riskEntityData}');
     });
   });
 });

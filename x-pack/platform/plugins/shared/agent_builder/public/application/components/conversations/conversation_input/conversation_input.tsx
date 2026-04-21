@@ -33,6 +33,7 @@ import { InputActions } from './input_actions';
 import { borderRadiusXlStyles } from '../../../../common.styles';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { AttachmentPillsRow } from './attachment_pills_row';
+import { useComposerInjectionEffect } from './use_composer_injection_effect';
 
 const INPUT_MIN_HEIGHT = '150px';
 const useInputBorderStyles = () => {
@@ -156,8 +157,14 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   const { addErrorToast } = useToasts();
   const hasActiveConversation = useHasActiveConversation();
   const isAwaitingPrompt = useIsAwaitingPrompt();
-  const { attachments, initialMessage, autoSendInitialMessage, resetInitialMessage } =
-    useConversationContext();
+  const {
+    attachments,
+    initialMessage,
+    autoSendInitialMessage,
+    resetInitialMessage,
+    composerInjection,
+    acknowledgeComposerInjection,
+  } = useConversationContext();
 
   const validateAgentId = useValidateAgentId();
   const isAgentIdValid = validateAgentId(agentId);
@@ -211,6 +218,12 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     messageEditorController,
     resetInitialMessage,
   ]);
+
+  useComposerInjectionEffect({
+    composerInjection,
+    messageEditorController,
+    acknowledgeComposerInjection,
+  });
 
   // Auto-focus when conversation changes
   useEffect(() => {

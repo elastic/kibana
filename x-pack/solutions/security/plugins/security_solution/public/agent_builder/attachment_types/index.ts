@@ -8,6 +8,8 @@ import { i18n } from '@kbn/i18n';
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
+import type { ExperimentalFeatures } from '../../../common/experimental_features';
+import { createEntityAttachmentDefinition } from './entity_attachment';
 
 /**
  * Extension of UnknownAttachment that includes an optional attachmentLabel field in the data property
@@ -23,22 +25,21 @@ interface AttachmentTypeConfig {
   icon: string;
 }
 
-const ATTACHMENT_TYPE_CONFIGS: AttachmentTypeConfig[] = [
-  {
-    type: SecurityAgentBuilderAttachments.alert,
-    label: i18n.translate('xpack.securitySolution.agentBuilder.attachments.alert.label', {
-      defaultMessage: 'Security Alert',
-    }),
-    icon: 'bell',
-  },
-  {
-    type: SecurityAgentBuilderAttachments.entity,
-    label: i18n.translate('xpack.securitySolution.agentBuilder.attachments.entity.label', {
-      defaultMessage: 'Risk Entity',
-    }),
-    icon: 'user',
-  },
-];
+const ALERT_ATTACHMENT_CONFIG: AttachmentTypeConfig = {
+  type: SecurityAgentBuilderAttachments.alert,
+  label: i18n.translate('xpack.securitySolution.agentBuilder.attachments.alert.label', {
+    defaultMessage: 'Security Alert',
+  }),
+  icon: 'bell',
+};
+
+const ENTITY_ATTACHMENT_LABEL_ONLY_CONFIG: AttachmentTypeConfig = {
+  type: SecurityAgentBuilderAttachments.entity,
+  label: i18n.translate('xpack.securitySolution.agentBuilder.attachments.entity.label', {
+    defaultMessage: 'Risk Entity',
+  }),
+  icon: 'user',
+};
 
 const createAttachmentTypeConfig = (defaultLabel: string, icon: string) => ({
   getLabel: (attachment: UnknownAttachmentWithLabel) => {
@@ -48,11 +49,29 @@ const createAttachmentTypeConfig = (defaultLabel: string, icon: string) => ({
   getIcon: () => icon,
 });
 
-export const registerAttachmentUiDefinitions = (attachments: AttachmentServiceStartContract) => {
-  ATTACHMENT_TYPE_CONFIGS.forEach(({ type, label, icon }) => {
-    attachments.addAttachmentType<UnknownAttachmentWithLabel>(
-      type,
-      createAttachmentTypeConfig(label, icon)
+export const registerAttachmentUiDefinitions = (
+  attachments: AttachmentServiceStartContract,
+  { experimentalFeatures }: { experimentalFeatures: ExperimentalFeatures }
+) => {
+  // Alert attachment — always registers as label + icon only for now.
+  attachments.addAttachmentType<UnknownAttachmentWithLabel>(
+    ALERT_ATTACHMENT_CONFIG.type,
+    createAttachmentTypeConfig(ALERT_ATTACHMENT_CONFIG.label, ALERT_ATTACHMENT_CONFIG.icon)
+  );
+
+  // Entity attachment — flag-gated between rich renderer and label-only fallback.
+  if (experimentalFeatures.entityAttachmentRichRenderer) {
+    attachments.addAttachmentType(
+      SecurityAgentBuilderAttachments.entity,
+      createEntityAttachmentDefinition({ experimentalFeatures })
     );
-  });
+  } else {
+    attachments.addAttachmentType<UnknownAttachmentWithLabel>(
+      ENTITY_ATTACHMENT_LABEL_ONLY_CONFIG.type,
+      createAttachmentTypeConfig(
+        ENTITY_ATTACHMENT_LABEL_ONLY_CONFIG.label,
+        ENTITY_ATTACHMENT_LABEL_ONLY_CONFIG.icon
+      )
+    );
+  }
 };

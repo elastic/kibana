@@ -77,7 +77,7 @@ export const useLeadingControlColumns = ({
       });
     }
 
-    if (isAgentBuilderEnabled && agentBuilder?.openChat) {
+    if (agentBuilder?.openChat) {
       columns.push({
         id: 'entity-analytics-ai-action',
         render: (Control, { record }) => {
@@ -127,5 +127,5 @@ export const useLeadingControlColumns = ({
     }
 
     return columns;
-  }, [canUseTimeline, investigateInTimeline, isAgentBuilderEnabled, agentBuilder]);
+  }, [canUseTimeline, investigateInTimeline, agentBuilder]);
 };
