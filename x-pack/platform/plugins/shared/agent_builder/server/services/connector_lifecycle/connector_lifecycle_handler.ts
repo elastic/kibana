@@ -14,16 +14,19 @@ import type {
 } from '@kbn/actions-plugin/server';
 import type { CoreStart } from '@kbn/core/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { ServiceManager } from '..';
+import { trackSmlDeleteFailure, trackSmlIndexFailure } from '../../telemetry/usage_counters';
 
 interface ConnectorLifecycleHandlerDeps {
   serviceManager: ServiceManager;
   logger: Logger;
   getStartServices: () => Promise<[CoreStart, { spaces?: SpacesPluginStart }, unknown]>;
+  usageCounter?: UsageCounter;
 }
 
 export function createConnectorLifecycleHandler(deps: ConnectorLifecycleHandlerDeps) {
-  const { serviceManager, logger, getStartServices } = deps;
+  const { serviceManager, logger, getStartServices, usageCounter } = deps;
 
   return {
     async onPostCreate(params: ConnectorLifecyclePostCreateParams): Promise<void> {
@@ -78,6 +81,7 @@ export function createConnectorLifecycleHandler(deps: ConnectorLifecycleHandlerD
                 (smlError as Error).message
               }`
             );
+            trackSmlIndexFailure(usageCounter);
           }
         }
       } catch (error) {
@@ -127,6 +131,7 @@ export function createConnectorLifecycleHandler(deps: ConnectorLifecycleHandlerD
                 (smlError as Error).message
               }`
             );
+            trackSmlDeleteFailure(usageCounter);
           }
         }
       } catch (error) {

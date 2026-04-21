@@ -12,6 +12,8 @@ import {
   trackLLMUsage,
   trackConversationRound,
   trackQueryToResultTime,
+  trackSmlIndexFailure,
+  trackSmlDeleteFailure,
   AGENTBUILDER_USAGE_DOMAIN,
 } from './usage_counters';
 
@@ -307,6 +309,54 @@ describe('usage_counters', () => {
           incrementBy: 1,
         });
       }
+    });
+  });
+
+  describe('trackSmlIndexFailure', () => {
+    let mockUsageCounter: jest.Mocked<UsageCounter>;
+
+    beforeEach(() => {
+      mockUsageCounter = {
+        incrementCounter: jest.fn(),
+      } as unknown as jest.Mocked<UsageCounter>;
+    });
+
+    it('does nothing when usageCounter is undefined', () => {
+      expect(() => trackSmlIndexFailure(undefined)).not.toThrow();
+    });
+
+    it('increments the sml_index_failure counter', () => {
+      trackSmlIndexFailure(mockUsageCounter);
+
+      expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'agent_builder_sml_index_failure',
+        counterType: 'count',
+        incrementBy: 1,
+      });
+    });
+  });
+
+  describe('trackSmlDeleteFailure', () => {
+    let mockUsageCounter: jest.Mocked<UsageCounter>;
+
+    beforeEach(() => {
+      mockUsageCounter = {
+        incrementCounter: jest.fn(),
+      } as unknown as jest.Mocked<UsageCounter>;
+    });
+
+    it('does nothing when usageCounter is undefined', () => {
+      expect(() => trackSmlDeleteFailure(undefined)).not.toThrow();
+    });
+
+    it('increments the sml_delete_failure counter', () => {
+      trackSmlDeleteFailure(mockUsageCounter);
+
+      expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'agent_builder_sml_delete_failure',
+        counterType: 'count',
+        incrementBy: 1,
+      });
     });
   });
 });

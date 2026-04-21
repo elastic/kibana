@@ -8,6 +8,7 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { createConnectorLifecycleHandler } from './connector_lifecycle_handler';
 
 const createMockUiSettingsClient = (experimentalFeaturesEnabled = true) => ({
@@ -45,6 +46,9 @@ const createMockGetStartServices = () =>
     { spaces: { spacesService: { getSpaceId: jest.fn().mockReturnValue('default') } } },
     {},
   ]);
+
+const createMockUsageCounter = (): jest.Mocked<UsageCounter> =>
+  ({ incrementCounter: jest.fn() } as unknown as jest.Mocked<UsageCounter>);
 
 const createBaseParams = (overrides = {}) => ({
   connectorId: 'connector-abc',
@@ -129,6 +133,37 @@ describe('createConnectorLifecycleHandler', () => {
       );
     });
 
+    it('increments sml_index_failure counter when SML indexing fails', async () => {
+      const sml = createMockSmlService();
+      sml.indexAttachment.mockRejectedValue(new Error('SML error'));
+      const usageCounter = createMockUsageCounter();
+      const handler = createConnectorLifecycleHandler({
+        serviceManager: createMockServiceManager(createMockUiSettingsClient(), sml) as any,
+        logger,
+        getStartServices: createMockGetStartServices(),
+        usageCounter,
+      });
+
+      await handler.onPostCreate(createBaseParams() as any);
+
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith(
+        expect.objectContaining({ counterName: 'agent_builder_sml_index_failure' })
+      );
+    });
+
+    it('does not throw when usageCounter is undefined and SML indexing fails', async () => {
+      const sml = createMockSmlService();
+      sml.indexAttachment.mockRejectedValue(new Error('SML error'));
+      const handler = createConnectorLifecycleHandler({
+        serviceManager: createMockServiceManager(createMockUiSettingsClient(), sml) as any,
+        logger,
+        getStartServices: createMockGetStartServices(),
+        usageCounter: undefined,
+      });
+
+      await expect(handler.onPostCreate(createBaseParams() as any)).resolves.toBeUndefined();
+    });
+
     it('returns early when services are not started', async () => {
       const handler = createConnectorLifecycleHandler({
         serviceManager: { internalStart: undefined } as any,
@@ -180,6 +215,39 @@ describe('createConnectorLifecycleHandler', () => {
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('failed to remove connector')
       );
+    });
+
+    it('increments sml_delete_failure counter when SML delete fails', async () => {
+      const sml = createMockSmlService();
+      sml.indexAttachment.mockRejectedValue(new Error('SML delete error'));
+      const usageCounter = createMockUsageCounter();
+      const handler = createConnectorLifecycleHandler({
+        serviceManager: createMockServiceManager(createMockUiSettingsClient(), sml) as any,
+        logger,
+        getStartServices: createMockGetStartServices(),
+        usageCounter,
+      });
+
+      await handler.onPostDelete(createBaseParams({ connectorType: '.test' }) as any);
+
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith(
+        expect.objectContaining({ counterName: 'agent_builder_sml_delete_failure' })
+      );
+    });
+
+    it('does not throw when usageCounter is undefined and SML delete fails', async () => {
+      const sml = createMockSmlService();
+      sml.indexAttachment.mockRejectedValue(new Error('SML delete error'));
+      const handler = createConnectorLifecycleHandler({
+        serviceManager: createMockServiceManager(createMockUiSettingsClient(), sml) as any,
+        logger,
+        getStartServices: createMockGetStartServices(),
+        usageCounter: undefined,
+      });
+
+      await expect(
+        handler.onPostDelete(createBaseParams({ connectorType: '.test' }) as any)
+      ).resolves.toBeUndefined();
     });
 
     it('returns early when services are not started', async () => {

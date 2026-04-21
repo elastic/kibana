@@ -14,6 +14,8 @@ export {
   trackLLMUsage,
   trackConversationRound,
   trackQueryToResultTime,
+  trackSmlIndexFailure,
+  trackSmlDeleteFailure,
   AGENTBUILDER_USAGE_DOMAIN,
 } from './usage_counters';
 export { registerTelemetryCollector, type AgentBuilderTelemetry } from './telemetry_collector';

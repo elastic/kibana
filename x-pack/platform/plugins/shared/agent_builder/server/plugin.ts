@@ -227,6 +227,7 @@ export class AgentBuilderPlugin
       serviceManager: this.serviceManager,
       logger: this.logger.get('connector-lifecycle'),
       getStartServices: coreSetup.getStartServices,
+      usageCounter: this.usageCounter,
     });
 
     setupDeps.actions.registerConnectorLifecycleListener({

@@ -132,3 +132,31 @@ export function trackQueryToResultTime(
     incrementBy: 1,
   });
 }
+
+/**
+ * Helper to track SML index failures when a connector fails to be indexed
+ * @param usageCounter - Usage counter instance
+ */
+export function trackSmlIndexFailure(usageCounter: UsageCounter | undefined): void {
+  if (!usageCounter) return;
+
+  usageCounter.incrementCounter({
+    counterName: `${AGENTBUILDER_USAGE_DOMAIN}_sml_index_failure`,
+    counterType: 'count',
+    incrementBy: 1,
+  });
+}
+
+/**
+ * Helper to track SML delete failures when a connector fails to be removed from the index
+ * @param usageCounter - Usage counter instance
+ */
+export function trackSmlDeleteFailure(usageCounter: UsageCounter | undefined): void {
+  if (!usageCounter) return;
+
+  usageCounter.incrementCounter({
+    counterName: `${AGENTBUILDER_USAGE_DOMAIN}_sml_delete_failure`,
+    counterType: 'count',
+    incrementBy: 1,
+  });
+}
