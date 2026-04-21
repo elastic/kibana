@@ -75,10 +75,7 @@ describe('<Content />', () => {
       selectedPatterns: ['auditbeat-*'],
     });
 
-    mockUseNetworkDetails.mockReturnValue([
-      false,
-      { id: 'test-id', networkDetails: {} },
-    ]);
+    mockUseNetworkDetails.mockReturnValue([false, { id: 'test-id', networkDetails: {} }]);
 
     mockUseAnomaliesTableData.mockReturnValue([false, null]);
 
