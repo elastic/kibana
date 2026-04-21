@@ -307,6 +307,9 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
     .monaco-hover .hover-row.status-bar .actions > .action-container:nth-of-type(1) {
       display: none;
     }
+    .monaco-editor .action-widget {
+      min-width: 200px !important;
+    }
 
     .margin-view-overlays .line-numbers {
       color: ${theme.euiTheme.colors.textDisabled};
