@@ -11,6 +11,7 @@ import React from 'react';
 import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
+import { getFieldSnakeKey } from '../../../../../common/utils';
 import type {
   InputTextFieldSchema,
   ConditionRenderProps,
@@ -81,7 +82,7 @@ export const InputText = ({
   return (
     <UseField
       key={name}
-      path={`${CASE_EXTENDED_FIELDS}.${name}_as_${type}`}
+      path={`${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`}
       component={TextField}
       config={{ validations }}
       componentProps={{

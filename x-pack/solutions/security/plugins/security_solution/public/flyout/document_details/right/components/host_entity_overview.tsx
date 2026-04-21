@@ -169,10 +169,10 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
 
   const [isHostDetailsLoading, { hostDetails }] = useHostDetails({
     hostName,
+    entityId: entityStoreV2Enabled ? storeHostEntityId : undefined,
     indexNames: selectedPatterns,
     startDate: from,
     endDate: to,
-    skip: entityStoreV2Enabled,
   });
 
   const hostRiskData = useMemo(() => {

@@ -18,6 +18,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isCCSRemoteIndexName } from '@kbn/es-query';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { UsersAvatarsPanel } from '../../../common/components/user_profiles/users_avatars_panel';
 import { useBulkGetUserProfiles } from '../../../common/components/user_profiles/use_bulk_get_user_profiles';
@@ -56,7 +57,8 @@ AssigneesButton.displayName = 'AssigneesButton';
  * + useAttackAssigneesContextMenuItems, with EuiPopover + EuiContextMenu.
  */
 export const Assignees = memo(() => {
-  const { attackId, refetch } = useAttackDetailsContext();
+  const { attackId, indexName, refetch } = useAttackDetailsContext();
+  const isRemoteDocument = useMemo(() => isCCSRemoteIndexName(indexName), [indexName]);
   const { alertIds, assignees } = useHeaderData();
   const invalidateFindAttackDiscoveries = useInvalidateFindAttackDiscoveries();
   const { hasIndexWrite, hasAttackIndexWrite, loading: privilegesLoading } = useAttacksPrivileges();
@@ -98,9 +100,13 @@ export const Assignees = memo(() => {
 
   const button = useMemo(
     () => (
-      <AssigneesButton onClick={togglePopover} isDisabled={false} toolTipMessage={toolTipMessage} />
+      <AssigneesButton
+        onClick={togglePopover}
+        isDisabled={isRemoteDocument}
+        toolTipMessage={toolTipMessage}
+      />
     ),
-    [togglePopover, toolTipMessage]
+    [togglePopover, toolTipMessage, isRemoteDocument]
   );
 
   if (!hasPermission) {

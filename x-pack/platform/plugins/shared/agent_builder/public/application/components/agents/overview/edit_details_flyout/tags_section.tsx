@@ -23,13 +23,13 @@ export const TagsSection: React.FC = () => {
       <EuiTitle size="xs">
         <h3>{flyoutLabels.tagsTitle}</h3>
       </EuiTitle>
-      <EuiSpacer size="xs" />
-      <EuiText size="xs" color="subdued">
+      <EuiSpacer size="s" />
+      <EuiText size="s" color="subdued" component="p">
         {flyoutLabels.tagsDescription}
       </EuiText>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="l" />
 
-      <EuiFormRow label={flyoutLabels.tagsLabel} fullWidth>
+      <EuiFormRow aria-label={flyoutLabels.tagsLabel} fullWidth>
         <Controller
           name="labels"
           control={control}
