@@ -100,7 +100,7 @@ function buildFormulaLayer(
   dataView: DataView
 ): FormBasedPersistedState['layers'] {
   const baseLayer: PersistedIndexPatternLayer = {
-    columnOrder: [HISTOGRAM_COLUMN_NAME, ACCESSOR],
+    columnOrder: [ACCESSOR, HISTOGRAM_COLUMN_NAME],
     columns: {
       [HISTOGRAM_COLUMN_NAME]: getHistogramColumn({
         options: {
