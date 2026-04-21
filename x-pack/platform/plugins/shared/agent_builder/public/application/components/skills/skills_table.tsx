@@ -28,11 +28,7 @@ import { useNavigation } from '../../hooks/use_navigation';
 import { useUiPrivileges } from '../../hooks/use_ui_privileges';
 import { appPaths } from '../../utils/app_paths';
 import { labels } from '../../utils/i18n';
-import {
-  createSkillIdColumn,
-  createSkillTypeColumn,
-  createAesopSuggestionColumn,
-} from './skills_columns';
+import { createSkillTypeColumn, createAesopSuggestionColumn } from './skills_columns';
 import { SkillContextMenu } from './skills_table_context_menu';
 import { useAesopSuggestions, type AesopSkillSuggestion } from './use_aesop_suggestions';
 

@@ -37,10 +37,11 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import type { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup, IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import type { EvalResults } from './types';
 import type { AesopSkillSuggestion } from './use_aesop_suggestions';
 import { SkillImprovementDiffFlyout } from './skill_improvement_diff_flyout';
+import { useKibana } from '../../hooks/use_kibana';
 
 interface ProposedEvaluator {
   name: string;
@@ -176,6 +177,33 @@ export const SkillEvalSection: React.FC<SkillEvalSectionProps> = ({
   onApplyImprovement,
 }) => {
   const queryClient = useQueryClient();
+  const {
+    services: { notifications },
+  } = useKibana();
+
+  // Extracts a readable message from a Kibana http fetch error. The server
+  // puts the real message on `body.message`; falls back to the generic
+  // Error.message so we never silently swallow a failure.
+  const getErrorMessage = useCallback((err: unknown): string => {
+    const httpErr = err as IHttpFetchError<ResponseErrorBody> | undefined;
+    return (
+      httpErr?.body?.message ||
+      (err instanceof Error ? err.message : undefined) ||
+      i18n.translate('xpack.agentBuilder.skills.eval.unknownError', {
+        defaultMessage: 'Unknown error',
+      })
+    );
+  }, []);
+
+  const showErrorToast = useCallback(
+    (titleMessage: string, err: unknown) => {
+      notifications?.toasts.addDanger({
+        title: titleMessage,
+        text: getErrorMessage(err),
+      });
+    },
+    [notifications, getErrorMessage]
+  );
 
   // ─── Local state ──────────────────────────────────────────────
   const [selectedConnectorId, setSelectedConnectorId] = useState<string>('');
@@ -527,6 +555,14 @@ export const SkillEvalSection: React.FC<SkillEvalSectionProps> = ({
       queryClient.invalidateQueries({ queryKey: ['evals-dataset-status', skillId] });
       queryClient.invalidateQueries({ queryKey: ['evals-datasets-list'] });
     },
+    onError: (err) => {
+      showErrorToast(
+        i18n.translate('xpack.agentBuilder.skills.eval.generateDatasetErrorTitle', {
+          defaultMessage: 'Failed to generate evaluation dataset',
+        }),
+        err
+      );
+    },
   });
 
   // ─── Run eval mutation ────────────────────────────────────────
@@ -571,6 +607,14 @@ export const SkillEvalSection: React.FC<SkillEvalSectionProps> = ({
     onSuccess: (result) => {
       setActiveRunId(result.run_id);
       setDroppedEvaluators(result.dropped_evaluators ?? []);
+    },
+    onError: (err) => {
+      showErrorToast(
+        i18n.translate('xpack.agentBuilder.skills.eval.runEvalErrorTitle', {
+          defaultMessage: 'Failed to start evaluation run',
+        }),
+        err
+      );
     },
   });
 
@@ -673,6 +717,14 @@ export const SkillEvalSection: React.FC<SkillEvalSectionProps> = ({
     onSuccess: (data) => {
       setImprovementSuggestions(data);
     },
+    onError: (err) => {
+      showErrorToast(
+        i18n.translate('xpack.agentBuilder.skills.eval.suggestImprovementsErrorTitle', {
+          defaultMessage: 'Failed to suggest improvements',
+        }),
+        err
+      );
+    },
   });
 
   // Auto-trigger improvement suggestions when eval completes
@@ -719,6 +771,14 @@ export const SkillEvalSection: React.FC<SkillEvalSectionProps> = ({
     },
     onSuccess: (data) => {
       setGeneratedImprovement(data);
+    },
+    onError: (err) => {
+      showErrorToast(
+        i18n.translate('xpack.agentBuilder.skills.eval.generateImprovementErrorTitle', {
+          defaultMessage: 'Failed to generate improvement',
+        }),
+        err
+      );
     },
   });
 
@@ -942,6 +1002,23 @@ export const SkillEvalSection: React.FC<SkillEvalSectionProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFormRow>
+
+      {generateDatasetMutation.isError && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiCallOut
+            size="s"
+            color="danger"
+            iconType="warning"
+            title={i18n.translate('xpack.agentBuilder.skills.eval.generateDatasetErrorTitle', {
+              defaultMessage: 'Failed to generate evaluation dataset',
+            })}
+            data-test-subj="agentBuilderSkillGenerateDatasetError"
+          >
+            <p>{getErrorMessage(generateDatasetMutation.error)}</p>
+          </EuiCallOut>
+        </>
+      )}
 
       {/* Dataset preview accordion */}
       {showPreview && selectedDatasetId && (
