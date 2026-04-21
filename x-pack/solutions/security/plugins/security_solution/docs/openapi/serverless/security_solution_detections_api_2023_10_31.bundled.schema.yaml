@@ -1712,7 +1712,7 @@ paths:
                               eventAction: trigger
                               severity: critical
                               summary: The message body
-                              timestamp: 2023-10-31
+                              timestamp: '2023-10-31T00:00:00.000Z'
                   ids:
                     - 9e946bfc-3118-4c77-bb25-67d781191921
               example27:
@@ -3087,8 +3087,8 @@ paths:
                             should: []
                         - range:
                             '@timestamp':
-                              gte: 2025-01-17T08:00:00
-                              lte: 2025-01-18T07:59:59.999Z
+                              gte: '2025-01-17T08:00:00.000Z'
+                              lte: '2025-01-18T07:59:59.999Z'
                   runtime_mappings: {}
                   size: 0
             schema:
@@ -3175,8 +3175,8 @@ paths:
                       filter:
                         - '@timestamp':
                             format: strict_date_optional_time
-                            gte: 2024-10-23T07:00:00
-                            lte: 2025-01-21T20:12:11.704Z
+                            gte: '2024-10-23T07:00:00.000Z'
+                            lte: '2025-01-21T20:12:11.704Z'
                           range: null
                         - bool:
                             filter:
@@ -3186,8 +3186,8 @@ paths:
                                       kibana.alert.workflow_status: open
                                   - '@timestamp':
                                       format: strict_date_optional_time
-                                      gte: 2024-10-23T07:00:00
-                                      lte: 2025-01-21T20:12:11.704Z
+                                      gte: '2024-10-23T07:00:00.000Z'
+                                      lte: '2025-01-21T20:12:11.704Z'
                                     range: null
                                 must: []
                                 must_not:
