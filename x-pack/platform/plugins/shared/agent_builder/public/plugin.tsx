@@ -65,6 +65,7 @@ import {
   clearSidebarRuntimeContext,
 } from './sidebar';
 import { createVisualizationAttachmentDefinition } from './application/components/attachments/visualization_attachment';
+import { InlineEmbeddableConversation } from './embeddable/inline_embeddable_conversation';
 
 export class AgentBuilderPlugin
   implements
@@ -238,6 +239,11 @@ export class AgentBuilderPlugin
       });
 
     const agentBuilderService: AgentBuilderPluginStart = {
+      getEmbeddableConversation: () => {
+        return (props: EmbeddableConversationProps) => (
+          <InlineEmbeddableConversation {...props} coreStart={core} services={internalServices} />
+        );
+      },
       agents: createPublicAgentsContract({ agentService }),
       attachments: createPublicAttachmentContract({ attachmentsService }),
       tools: createPublicToolContract({ toolsService }),
