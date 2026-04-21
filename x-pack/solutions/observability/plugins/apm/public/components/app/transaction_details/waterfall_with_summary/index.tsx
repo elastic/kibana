@@ -31,6 +31,7 @@ import { OpenInDiscover } from '../../../shared/links/discover_links/open_in_dis
 import {
   getTraceParentChildrenMap,
   getRootItemOrFallback,
+  getSubtreeIds,
 } from '../../../shared/trace_waterfall/use_trace_waterfall';
 
 interface Props<TSample extends {}> {
@@ -117,6 +118,14 @@ export function WaterfallWithSummary<TSample extends {}>({
   const entryTransaction = useUnified
     ? unifiedWaterfallFetchResult.entryTransaction
     : waterfallFetchResult.entryTransaction;
+
+  const contextSpanIds = useMemo(() => {
+    if (!entryTransaction || unifiedWaterfallFetchResult.traceItems.length === 0) {
+      return undefined;
+    }
+    const parentChildMap = getTraceParentChildrenMap(unifiedWaterfallFetchResult.traceItems, false);
+    return getSubtreeIds(parentChildMap, entryTransaction.transaction.id);
+  }, [entryTransaction, unifiedWaterfallFetchResult.traceItems]);
 
   const unifiedRootTransactionDuration = useMemo(() => {
     if (!useUnified || unifiedWaterfallFetchResult.traceItems.length === 0) {
@@ -262,6 +271,7 @@ export function WaterfallWithSummary<TSample extends {}>({
           rangeTo={rangeTo}
           isOpen={isFullTraceFlyoutOpen}
           onClose={() => setIsFullTraceFlyoutOpen(false)}
+          contextSpanIds={contextSpanIds}
           renderDetailFlyout={() => null}
         />
       )}
