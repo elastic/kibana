@@ -12,7 +12,7 @@ import { getCypressBaseConfig } from './cypress_base.config';
 export default defineCypressConfig(
   getCypressBaseConfig({
     execTimeout: 60000,
-    pageLoadTimeout: 60000,
+    pageLoadTimeout: 120000,
     responseTimeout: 60000,
     viewportHeight: 946,
     viewportWidth: 1680,

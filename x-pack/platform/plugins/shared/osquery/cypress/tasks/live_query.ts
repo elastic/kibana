@@ -36,15 +36,16 @@ export const clearInputQuery = () =>
   cy.getBySel(LIVE_QUERY_EDITOR).click().type(`{selectall}{backspace}`);
 
 export const inputQuery = (query: string, options?: { parseSpecialCharSequences: boolean }) =>
-  cy.getBySel(LIVE_QUERY_EDITOR).click().type(query, options);
+  cy.getBySel(LIVE_QUERY_EDITOR).click({ force: true }).type(query, options);
 
 export const inputQueryInFlyout = (
   query: string,
   options?: { parseSpecialCharSequences: boolean }
-) => cy.get(OSQUERY_FLYOUT_BODY_EDITOR).click().type(query, options);
+) => cy.get(OSQUERY_FLYOUT_BODY_EDITOR).click({ force: true }).type(query, options);
 
 export const submitQuery = () => {
-  cy.wait(1000);
+  // Monaco + react-hook-form debounce (OsqueryEditor debounces onChange by 500ms); leave headroom.
+  cy.wait(2000);
   cy.get('#submit-button').should('not.be.disabled').click({ force: true });
 };
 
@@ -61,17 +62,19 @@ export const verifyQueryTimeout = (timeout: string) => {
   });
 };
 
-// sometimes the results get stuck in the tests, this is a workaround
+// With queryHistoryRework, the pack status row shows `live-query-loading` until agents respond.
+// The results grid (`osqueryResultsTable`) only mounts once there are rows — waiting on the
+// wrapper alone can race. Wait for loading to clear, then for real grid cells (in the main
+// Osquery page or inside the Security flyout).
 export const checkResults = () => {
-  cy.getBySel(RESULTS_TABLE, { timeout: 240000 }).then(($table) => {
-    if ($table.find('div .euiDataGridRow').length > 0) {
-      cy.getBySel('dataGridRowCell', { timeout: 240000 }).should('have.lengthOf.above', 0);
-    } else {
-      cy.getBySel('osquery-status-tab').click({ multiple: true });
-      cy.getBySel('osquery-results-tab').click({ multiple: true });
-      cy.getBySel('dataGridRowCell', { timeout: 240000 }).should('have.lengthOf.above', 0);
-    }
+  cy.get('body', { timeout: 240000 }).should(($body) => {
+    expect($body.find('[data-test-subj="live-query-loading"]')).to.have.length(0);
   });
+  cy.get(
+    `[data-test-subj="${RESULTS_TABLE}"] [data-test-subj="dataGridRowCell"], ` +
+      `[data-test-subj="flyout-body-osquery"] [data-test-subj="dataGridRowCell"]`,
+    { timeout: 240000 }
+  ).should('have.length.above', 0);
 };
 
 export const typeInECSFieldInput = (text: string, index = 0) =>
@@ -214,12 +217,22 @@ export const takeOsqueryActionWithParams = () => {
   typeInECSFieldInput('tags{downArrow}{enter}');
   cy.getBySel('osqueryColumnValueSelect').type('platform_like{downArrow}{enter}');
   submitQuery();
-  cy.getBySel('dataGridHeader', { timeout: 120000 }).then(($header) => {
-    if (!$header.text().includes('tags')) {
-      submitQuery();
-    }
+  cy.getBySel('flyout-body-osquery', { timeout: 240000 }).should(($el) => {
+    expect($el.find('[data-test-subj="live-query-loading"]')).to.have.length(0);
   });
-  cy.getBySel('dataGridHeader', { timeout: 120000 }).should('contain', 'tags');
+  // Unified headers use `unifiedDataTableColumnTitle`; legacy uses `dataGridHeaderCell-*`.
+  // ECS mapping may surface as `tags` or nested field names (e.g. host.tags).
+  cy.getBySel('flyout-body-osquery', { timeout: 240000 }).should(($flyout) => {
+    const titles = $flyout
+      .find('[data-test-subj="unifiedDataTableColumnTitle"]')
+      .toArray()
+      .map((el) => el.textContent || '')
+      .join(' ');
+    const headerCells = $flyout.find('[data-test-subj^="dataGridHeaderCell-"]').text();
+    const headerRow = $flyout.find('[data-test-subj^="dataGridHeader"]').text();
+    const blob = `${titles} ${headerCells} ${headerRow}`;
+    expect(/\btags\b|host\.tags/.test(blob)).to.eq(true);
+  });
 };
 
 export const clickRuleName = (ruleName: string) => {

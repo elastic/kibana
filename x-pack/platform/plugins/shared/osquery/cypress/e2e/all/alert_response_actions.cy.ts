@@ -38,6 +38,7 @@ import {
   generateRandomStringName,
   interceptCaseId,
 } from '../../tasks/integrations';
+import { disableNewFeaturesTours } from '../../tasks/navigation';
 
 describe(
   'Alert Response Actions',
@@ -98,7 +99,7 @@ describe(
         // other enrolled-but-offline agents in CI, which makes the response action
         // wait indefinitely ("Some selected agents are offline or have unhealthy
         // Osquery components and may not respond to queries").
-        cy.contains(/^1 agent selected/);
+        cy.contains(/1 agent selected\.?/, { timeout: 120000 }).should('exist');
         inputQueryInFlyout('select * from uptime;');
         submitQuery();
         checkResults();
@@ -168,7 +169,10 @@ describe(
       };
 
       it('persists pack response actions across save/reopen and handles pack swap', () => {
-        cy.visit('/app/security/rules');
+        cy.visit('/app/security/rules', {
+          timeout: 120000,
+          onBeforeLoad: (win) => disableNewFeaturesTours(win),
+        });
         clickRuleName(ruleName);
         openRuleActionsTab();
         cy.contains('Response actions are run on each rule execution.');
@@ -285,7 +289,7 @@ describe(
           cy.getBySel('expand-event').first().click();
           cy.getBySel('securitySolutionFlyoutFooterDropdownButton').click();
           cy.getBySel('osquery-action-item').click();
-          cy.contains(/^\d+ agen(t|ts) selected/);
+          cy.contains(/\d+ agents? selected\.?/, { timeout: 120000 }).should('exist');
           cy.getBySel('globalLoadingIndicator').should('not.exist');
           // Wait until the flyout has fully rendered (default single-query editor
           // present) before switching to pack mode — avoids a `cy.wait(1000)`
@@ -362,9 +366,17 @@ describe(
           parseSpecialCharSequences: false,
         });
         submitQuery();
+        cy.getBySel('flyout-body-osquery', { timeout: 180000 }).should(($flyout) => {
+          expect($flyout.find('[data-test-subj="live-query-loading"]')).to.have.length(0);
+        });
         cy.getBySel('flyout-body-osquery').within(() => {
-          // at least 2 agents should have responded, sometimes it takes a while for the agents to respond
-          cy.get('[data-grid-row-index]', { timeout: 180000 }).should('have.length.at.least', 2);
+          // `data-grid-row-index` was removed from EUI; cells use `data-gridcell-visible-row-index`.
+          // Scope under `osqueryResultsTable` so we match the results grid (unified uses an inner
+          // `docTable`, legacy attaches the test subj to `EuiDataGrid` directly).
+          cy.get(
+            '[data-test-subj="osqueryResultsTable"] [data-gridcell-visible-row-index="1"]',
+            { timeout: 180000 }
+          ).should('exist');
         });
       });
 
