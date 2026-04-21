@@ -539,10 +539,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Whether Elastic Workflows and related experiences are enabled.' },
   },
-  'workflows:aiAgent:enabled': {
-    type: 'boolean',
-    _meta: { description: 'Whether AI-powered workflow authoring assistance is enabled.' },
-  },
   'banners:placement': {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
@@ -762,11 +758,23 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Enable the Streams management Overview tab',
     },
   },
+  'observability:streamsEnableDraftStreams': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable draft streams with read-time ES|QL views',
+    },
+  },
   'observability:streamsSigEventsIndexPatterns': {
     type: 'keyword',
     _meta: {
       description:
         'Comma-separated index patterns used for Significant Events stream filtering and analysis.',
+    },
+  },
+  'observability:streamsEnableMemory': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable memory in Streams',
     },
   },
   'observability:enableDiagnosticMode': {
@@ -812,6 +820,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'long',
     _meta: {
       description: 'Non-default value of setting.',
+    },
+  },
+  'genAiSettings:tokenUsageTracking': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable token usage tracking in Kibana',
     },
   },
 };

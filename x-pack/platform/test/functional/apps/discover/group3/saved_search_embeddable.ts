@@ -275,35 +275,43 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.existOrFail('docTable');
     });
 
-    it('should show deleted-tab warning in view mode for read-only users', async () => {
-      const savedSearchTitle = 'Discover embeddable deleted tab read only';
-      const dashboardName = 'Dashboard deleted tab read only';
+    describe('read-only user tests', function () {
+      // FIPS mode sets defaultRoles to superuser/kibana_admin so testUser.setRoles() cannot
+      // reduce privileges to read-only, causing the wrong error message variant to appear
+      this.tags('skipFIPS');
 
-      await addSearchEmbeddableToDashboard(savedSearchTitle);
-      await discover.selectEmbeddableTab('Filtered tab');
+      it('should show deleted-tab warning in view mode for read-only users', async () => {
+        const savedSearchTitle = 'Discover embeddable deleted tab read only';
+        const dashboardName = 'Dashboard deleted tab read only';
 
-      await dashboard.saveDashboard(dashboardName, {
-        saveAsNew: true,
-        waitDialogIsClosed: true,
-        exitFromEditMode: true,
+        await addSearchEmbeddableToDashboard(savedSearchTitle);
+        await discover.selectEmbeddableTab('Filtered tab');
+
+        await dashboard.saveDashboard(dashboardName, {
+          saveAsNew: true,
+          waitDialogIsClosed: true,
+          exitFromEditMode: true,
+        });
+
+        await removeFilteredTabFromSavedSearch(savedSearchTitle);
+        await dashboard.navigateToApp();
+        await dashboard.gotoDashboardLandingPage();
+
+        try {
+          await security.testUser.setRoles(['test_logstash_reader', 'global_dashboard_read']);
+          await dashboard.loadSavedDashboard(dashboardName);
+          await header.waitUntilLoadingHasFinished();
+          await dashboard.waitForRenderComplete();
+
+          const viewModeCalloutText = await getDeletedTabCalloutText();
+          expect(viewModeCalloutText).to.contain(
+            "Contact one of the dashboard's authors to fix it."
+          );
+          await testSubjects.missingOrFail('docTable');
+        } finally {
+          await security.testUser.restoreDefaults();
+        }
       });
-
-      await removeFilteredTabFromSavedSearch(savedSearchTitle);
-      await dashboard.navigateToApp();
-      await dashboard.gotoDashboardLandingPage();
-
-      try {
-        await security.testUser.setRoles(['test_logstash_reader', 'global_dashboard_read']);
-        await dashboard.loadSavedDashboard(dashboardName);
-        await header.waitUntilLoadingHasFinished();
-        await dashboard.waitForRenderComplete();
-
-        const viewModeCalloutText = await getDeletedTabCalloutText();
-        expect(viewModeCalloutText).to.contain("Contact one of the dashboard's authors to fix it.");
-        await testSubjects.missingOrFail('docTable');
-      } finally {
-        await security.testUser.restoreDefaults();
-      }
     });
   });
 }

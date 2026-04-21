@@ -46,7 +46,7 @@ export const strings = {
   getProjectPickerTourContent: () =>
     i18n.translate('cpsUtils.projectPicker.tour.content', {
       defaultMessage:
-        'Your searches now include data from this project and any linked projects by default. Use this selector to adjust the scope of your searches, or set a different default scope from your space settings.',
+        'Your searches now include data from this project and all linked projects by default. Use this selector to toggle your search scope between all projects or just this one. You can change the default scope in your space settings.',
     }),
   getProjectPickerTourCloseButton: () =>
     i18n.translate('cpsUtils.projectPicker.tour.closeButton', {
@@ -59,7 +59,8 @@ export const strings = {
     }),
   getProjectPickerReadonlyCallout: () =>
     i18n.translate('cpsUtils.projectPicker.readonlyCallout', {
-      defaultMessage: 'This page inherits its CPS scope from the space settings.',
+      defaultMessage:
+        'Your default CPS scope controls which linked projects are searched. You can adjust it for your space, or override it for individual queries.',
     }),
   getProjectPickerReadonlyLensCallout: () =>
     i18n.translate('cpsUtils.projectPicker.readonlyLensCallout', {

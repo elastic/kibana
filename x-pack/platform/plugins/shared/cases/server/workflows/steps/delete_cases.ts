@@ -18,20 +18,20 @@ export const deleteCasesStepDefinition = (
   createServerStepDefinition({
     ...deleteCasesStepCommonDefinition,
     handler: async (context) => {
-      const input = deleteCasesStepCommonDefinition.inputSchema.parse(context.input);
+      const { case_ids } = context.input;
 
       try {
         const casesClient = await getCasesClientFromStepsContext(context, getCasesClient);
-        await casesClient.cases.delete(input.case_ids);
+        await casesClient.cases.delete(case_ids);
 
         const output = deleteCasesStepCommonDefinition.outputSchema.parse({
-          case_ids: input.case_ids,
+          case_ids,
         });
 
         return { output };
       } catch (error) {
         return {
-          error: new Error(DELETE_CASES_FAILED_MESSAGE(input.case_ids, getErrorMessage(error))),
+          error: new Error(DELETE_CASES_FAILED_MESSAGE(case_ids, getErrorMessage(error))),
         };
       }
     },

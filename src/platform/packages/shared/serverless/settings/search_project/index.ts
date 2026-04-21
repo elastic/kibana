@@ -19,10 +19,7 @@ import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
 } from '@kbn/management-settings-ids';
 import { ENABLE_DOCKED_CONSOLE_UI_SETTING_ID } from '@kbn/dev-tools-plugin/common';
-import {
-  WORKFLOWS_AI_AGENT_SETTING_ID,
-  WORKFLOWS_UI_SETTING_ID,
-} from '@kbn/workflows/common/constants';
+import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
 
 export const SEARCH_PROJECT_SETTINGS = [
   COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX_ID,
@@ -35,8 +32,6 @@ export const SEARCH_PROJECT_SETTINGS = [
   AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
-  // These settings are temporary, will be removed on 9.4.0 release.
-  // WORKFLOWS_AI_AGENT_SETTING_ID only works when WORKFLOWS_UI_SETTING_ID is enabled.
+  // This setting is temporary, will be removed on 9.4.0 release.
   WORKFLOWS_UI_SETTING_ID,
-  WORKFLOWS_AI_AGENT_SETTING_ID,
 ];

@@ -7,15 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DatasetTypeESQL } from '../dataset';
-import type { XYState, XYStateESQL } from './xy';
-import { statisticsOptionsSize, statisticsSchema, xyStateSchema } from './xy';
+import type { TypeOf } from '@kbn/config-schema';
+import type { DataSourceTypeESQL } from '../data_source';
+import type { xyDataLayerSharedSchema, XYConfig } from './xy';
+import { statisticsOptionsSize, statisticsSchema, xyConfigSchema } from './xy';
+import {
+  AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+  AS_CODE_DATA_VIEW_SPEC_TYPE,
+} from '@kbn/as-code-data-views-schema';
 
 describe('XY', () => {
   const minimalLayer = {
-    dataset: { type: 'dataView', id: 'myDataView' as const },
-    type: 'bar' as const,
-    y: [{ operation: 'count' as const }],
+    data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
+    type: 'bar',
+    y: [{ operation: 'count' }],
   };
   const universalTypes = [
     'bar',
@@ -25,14 +30,14 @@ describe('XY', () => {
     'area_stacked',
     'bar_horizontal',
     'bar_horizontal_stacked',
-  ] as const;
+  ] satisfies TypeOf<typeof xyDataLayerSharedSchema.type>[];
 
   const typesWithBreakdown = [
     'bar_percentage',
     'area_percentage',
     'bar_horizontal_percentage',
-  ] as const;
-  const anyType = [...universalTypes, ...typesWithBreakdown] as const;
+  ] satisfies TypeOf<typeof xyDataLayerSharedSchema.type>[];
+  const anyType = [...universalTypes, ...typesWithBreakdown];
   describe('minimal xy charts', () => {
     it.each([
       'bar',
@@ -42,32 +47,34 @@ describe('XY', () => {
       'area_stacked',
       'bar_horizontal',
       'bar_horizontal_stacked',
-    ] as const)('should pass validation for simple %s', (type) => {
-      expect(() =>
-        xyStateSchema.validate({
+    ] satisfies TypeOf<typeof xyDataLayerSharedSchema.type>[])(
+      'should pass validation for simple %s',
+      (type) => {
+        const input = {
           type: 'xy',
           title: `${type} Chart`,
           layers: [
             {
-              dataset: { type: 'dataView', id: 'myDataView' },
+              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
               type,
               ignore_global_filters: false,
               sampling: 1,
               y: [{ operation: 'count', empty_as_null: false }],
             },
           ],
-        } satisfies XYState)
-      ).not.toThrow();
-    });
+        } satisfies XYConfig;
+        expect(() => xyConfigSchema.validate(input)).not.toThrow();
+      }
+    );
 
     it.each(anyType)('should pass validation for %s with breakdown', (type) => {
       expect(() =>
-        xyStateSchema.validate({
+        xyConfigSchema.validate({
           type: 'xy',
           title: `${type} Chart`,
           layers: [
             {
-              dataset: { type: 'dataView', id: 'myDataView' },
+              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
               type,
               ignore_global_filters: false,
               sampling: 1,
@@ -75,7 +82,7 @@ describe('XY', () => {
               breakdown_by: { operation: 'terms', fields: ['product'], limit: 5 },
             },
           ],
-        } satisfies XYState)
+        } satisfies XYConfig)
       ).not.toThrow();
     });
 
@@ -83,12 +90,12 @@ describe('XY', () => {
       'should pass validation for a date histogram %s with breakdown with multiple terms',
       (type) => {
         expect(() =>
-          xyStateSchema.validate({
+          xyConfigSchema.validate({
             type: 'xy',
             title: `${type} Chart`,
             layers: [
               {
-                dataset: { type: 'dataView', id: 'myDataView' },
+                data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
                 type,
                 ignore_global_filters: false,
                 sampling: 1,
@@ -103,19 +110,19 @@ describe('XY', () => {
                 breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
               },
             ],
-          } satisfies XYState)
+          } satisfies XYConfig)
         ).not.toThrow();
       }
     );
 
     it.each(anyType)('should pass validation in ES|QL mode as %s chart', (type) => {
       expect(() =>
-        xyStateSchema.validate({
+        xyConfigSchema.validate({
           type: 'xy',
           title: `${type} Chart`,
           layers: [
             {
-              dataset: {
+              data_source: {
                 type: 'esql',
                 query:
                   'FROM kibana_simple_logs_data | STATS count = count() BY buckets = BUCKET(3 hours, order_date), product',
@@ -128,18 +135,18 @@ describe('XY', () => {
               breakdown_by: { column: 'product' },
             },
           ],
-        } satisfies XYState)
+        } satisfies XYConfig)
       ).not.toThrow();
     });
 
     it.each(anyType)('should support reference lines in %s charts', (type) => {
       expect(() =>
-        xyStateSchema.validate({
+        xyConfigSchema.validate({
           type: 'xy',
           title: `${type} Chart`,
           layers: [
             {
-              dataset: { type: 'dataView', id: 'myDataView' },
+              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
               type,
               ignore_global_filters: false,
               sampling: 1,
@@ -158,8 +165,8 @@ describe('XY', () => {
               },
             },
             {
-              dataset: { type: 'dataView', id: 'myDataView' },
-              type: 'referenceLines',
+              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
+              type: 'reference_lines',
               ignore_global_filters: false,
               sampling: 1,
               thresholds: [
@@ -173,18 +180,18 @@ describe('XY', () => {
               ],
             },
           ],
-        } satisfies XYState)
+        } satisfies XYConfig)
       ).not.toThrow();
     });
 
     it.each(anyType)('should support annotations in %s charts', (type) => {
       expect(() =>
-        xyStateSchema.validate({
+        xyConfigSchema.validate({
           type: 'xy',
           title: `${type} Chart`,
           layers: [
             {
-              dataset: { type: 'dataView', id: 'myDataView' },
+              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
               type,
               ignore_global_filters: false,
               sampling: 1,
@@ -201,9 +208,9 @@ describe('XY', () => {
             {
               type: 'annotations',
               ignore_global_filters: false,
-              dataset: {
-                type: 'dataView',
-                id: 'metrics-*',
+              data_source: {
+                type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+                ref_id: 'metrics-*',
               },
               events: [
                 {
@@ -219,7 +226,7 @@ describe('XY', () => {
               ],
             },
           ],
-        } satisfies XYState)
+        } satisfies XYConfig)
       ).not.toThrow();
     });
   });
@@ -232,12 +239,12 @@ describe('XY', () => {
       'should handle multiple metric in multiple layers with %s + %s',
       (type1, type2) => {
         expect(() =>
-          xyStateSchema.validate({
+          xyConfigSchema.validate({
             type: 'xy',
             title: `Mixed Chart`,
             layers: [
               {
-                dataset: { type: 'dataView', id: 'companyAIndex' },
+                data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'companyAIndex' },
                 type: type1,
                 ignore_global_filters: false,
                 sampling: 1,
@@ -255,7 +262,7 @@ describe('XY', () => {
                 breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
               },
               {
-                dataset: { type: 'dataView', id: 'companyBIndex' },
+                data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'companyBIndex' },
                 type: type2,
                 ignore_global_filters: false,
                 sampling: 1,
@@ -273,7 +280,7 @@ describe('XY', () => {
                 breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
               },
             ],
-          } satisfies XYState)
+          } satisfies XYConfig)
         ).not.toThrow();
       }
     );
@@ -282,12 +289,12 @@ describe('XY', () => {
       'should handle multiple metric in multiple layers %s + %s with reference lines and annotations',
       (type1, type2) => {
         expect(() =>
-          xyStateSchema.validate({
+          xyConfigSchema.validate({
             type: 'xy',
             title: `Mixed Chart`,
             layers: [
               {
-                dataset: { type: 'dataView', id: 'companyAIndex' },
+                data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'companyAIndex' },
                 type: type1,
                 ignore_global_filters: false,
                 sampling: 1,
@@ -305,7 +312,7 @@ describe('XY', () => {
                 breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
               },
               {
-                dataset: { type: 'dataView', id: 'companyBIndex' },
+                data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'companyBIndex' },
                 type: type2,
                 ignore_global_filters: false,
                 sampling: 1,
@@ -323,8 +330,8 @@ describe('XY', () => {
                 breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
               },
               {
-                dataset: { type: 'dataView', id: 'myDataView' },
-                type: 'referenceLines',
+                data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
+                type: 'reference_lines',
                 ignore_global_filters: false,
                 sampling: 1,
                 thresholds: [
@@ -347,9 +354,9 @@ describe('XY', () => {
               {
                 type: 'annotations',
                 ignore_global_filters: false,
-                dataset: {
-                  type: 'dataView',
-                  id: 'metrics-*',
+                data_source: {
+                  type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+                  ref_id: 'metrics-*',
                 },
                 events: [
                   {
@@ -399,21 +406,21 @@ describe('XY', () => {
                 ],
               },
             ],
-          } satisfies XYState)
+          } satisfies XYConfig)
         ).not.toThrow();
       }
     );
 
     it.each(anyType.map((type) => anyType.map((anotherType) => [type, anotherType])).flat(1))(
-      'should handle multiple metric in multiple layers %s + %s with reference lines and annotations with mixed datasets',
+      'should handle multiple metric in multiple layers %s + %s with reference lines and annotations (DSL layers only)',
       (type1, type2) => {
         expect(() =>
-          xyStateSchema.validate({
+          xyConfigSchema.validate({
             type: 'xy',
             title: `Mixed Chart`,
             layers: [
               {
-                dataset: { type: 'dataView', id: 'companyAIndex' },
+                data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'companyAIndex' },
                 type: type1,
                 ignore_global_filters: false,
                 sampling: 1,
@@ -441,17 +448,40 @@ describe('XY', () => {
                 },
               },
               {
-                dataset: { type: 'esql', query: 'FROM company_index' },
+                data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'companyBIndex' },
                 type: type2,
                 ignore_global_filters: false,
                 sampling: 1,
-                x: { column: 'order_date' },
-                y: [{ column: 'value' }, { column: 'price' }],
-                breakdown_by: { column: 'product' },
+                x: {
+                  operation: 'date_histogram',
+                  field: 'order_date',
+                  include_empty_rows: false,
+                  suggested_interval: 'auto',
+                  use_original_time_range: true,
+                  drop_partial_intervals: false,
+                },
+                y: [
+                  { operation: 'count', empty_as_null: false },
+                  { operation: 'average', field: 'price' },
+                ],
+                breakdown_by: {
+                  operation: 'terms',
+                  fields: ['product', 'category'],
+                  limit: 5,
+                  rank_by: {
+                    direction: 'desc',
+                    metric_index: 0,
+                    type: 'metric',
+                  },
+                },
               },
               {
-                dataset: { type: 'index', index: 'companyIndex', time_field: '@timestamp' },
-                type: 'referenceLines',
+                data_source: {
+                  type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+                  index_pattern: 'companyIndex',
+                  time_field: '@timestamp',
+                },
+                type: 'reference_lines',
                 ignore_global_filters: false,
                 sampling: 1,
                 thresholds: [
@@ -461,7 +491,6 @@ describe('XY', () => {
                     label: 'Median Price',
                     color: { type: 'static', color: 'red' },
                     text: { visible: true },
-                    axis: 'left',
                   },
                   {
                     operation: 'average',
@@ -469,16 +498,15 @@ describe('XY', () => {
                     label: 'Average Price',
                     color: { type: 'static', color: 'blue' },
                     text: { visible: false },
-                    axis: 'left',
                   },
                 ],
               },
               {
                 type: 'annotations',
                 ignore_global_filters: false,
-                dataset: {
-                  type: 'dataView',
-                  id: 'metrics-*',
+                data_source: {
+                  type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+                  ref_id: 'metrics-*',
                 },
                 events: [
                   {
@@ -531,7 +559,7 @@ describe('XY', () => {
                 ],
               },
             ],
-          } satisfies XYState)
+          } satisfies XYConfig)
         ).not.toThrow();
       }
     );
@@ -540,23 +568,23 @@ describe('XY', () => {
   describe('invalid xy charts', () => {
     it('should throw for no layers', () => {
       expect(() =>
-        xyStateSchema.validate({
+        xyConfigSchema.validate({
           type: 'xy',
           title: `Faulty Chart`,
           layers: [],
-        } satisfies XYState)
+        } satisfies XYConfig)
       ).toThrow();
     });
 
-    it('should not let mix esql dataset with dsl operations', () => {
+    it('should not let mix esql data_source with dsl operations', () => {
       expect(() =>
-        xyStateSchema.validate({
+        xyConfigSchema.validate({
           type: 'xy',
           title: `Faulty Chart`,
           layers: [
             // @ts-expect-error - mixing not allowed
             {
-              dataset: { type: 'esql', query: 'FROM company_index' },
+              data_source: { type: 'esql', query: 'FROM company_index' },
               type: 'bar',
               ignore_global_filters: false,
               sampling: 1,
@@ -574,18 +602,18 @@ describe('XY', () => {
               breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
             },
           ],
-        } satisfies XYState)
+        } satisfies XYConfig)
       ).toThrow();
     });
 
     it('should not let esql annotations', () => {
       expect(() =>
-        xyStateSchema.validate({
+        xyConfigSchema.validate({
           type: 'xy',
           title: `Faulty Chart`,
           layers: [
             {
-              dataset: { type: 'dataView', id: 'myDataView' },
+              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
               type: 'bar',
               ignore_global_filters: false,
               sampling: 1,
@@ -602,11 +630,11 @@ describe('XY', () => {
               type: 'annotations',
               ignore_global_filters: false,
               // @ts-expect-error - mixing not allowed
-              dataset: {
+              data_source: {
                 type: 'esql',
                 query:
                   'FROM kibana_simple_logs_data | EVAL timestamp = order_date | FILTER product == "xyz" ',
-              } satisfies DatasetTypeESQL,
+              } satisfies DataSourceTypeESQL,
               events: [
                 {
                   type: 'point',
@@ -621,13 +649,47 @@ describe('XY', () => {
               ],
             },
           ],
-        } satisfies XYState | XYStateESQL)
+        } satisfies XYConfig)
+      ).toThrow();
+    });
+
+    it('should reject mixing ES|QL and DSL layers in one chart', () => {
+      expect(() =>
+        xyConfigSchema.validate({
+          type: 'xy',
+          title: 'Mixed mode chart',
+          layers: [
+            {
+              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'companyAIndex' },
+              type: 'bar',
+              ignore_global_filters: false,
+              sampling: 1,
+              x: {
+                operation: 'date_histogram',
+                field: 'order_date',
+                include_empty_rows: false,
+                suggested_interval: 'auto',
+                use_original_time_range: true,
+                drop_partial_intervals: false,
+              },
+              y: [{ operation: 'count', empty_as_null: false }],
+            },
+            {
+              dataset: { type: 'esql', query: 'FROM company_index' },
+              type: 'line',
+              ignore_global_filters: false,
+              sampling: 1,
+              x: { operation: 'value', column: 'order_date' },
+              y: [{ operation: 'value', column: 'value' }],
+            },
+          ],
+        } as XYConfig)
       ).toThrow();
     });
 
     it('should reject list legend layout for left positions', () => {
       expect(() =>
-        xyStateSchema.validate({
+        xyConfigSchema.validate({
           type: 'xy',
           title: 'Invalid list legend position',
           legend: {
@@ -635,56 +697,32 @@ describe('XY', () => {
             position: 'left',
             layout: {
               type: 'list',
-              truncate: {
-                max_pixels: 300,
-              },
             },
           },
           layers: [minimalLayer],
         })
       ).toThrowErrorMatchingInlineSnapshot(`
-        "[legend]: types that failed validation:
-        - [legend.0.position]: types that failed validation:
-         - [legend.position.0]: expected value to equal [top]
-         - [legend.position.1]: expected value to equal [bottom]
-        - [legend.1.layout.type]: expected value to equal [grid]
-        - [legend.2.placement]: expected value to equal [inside]"
-      `);
-    });
-
-    it('should not allow both truncation values at the same time', () => {
-      expect(() =>
-        xyStateSchema.validate({
-          type: 'xy',
-          title: 'Valid list legend truncation',
-          legend: {
-            visibility: 'visible',
-            position: 'bottom',
-            layout: {
-              type: 'list',
-              truncate: {
-                max_lines: 2,
-                max_pixels: 320,
-              },
-            },
-          },
-          layers: [minimalLayer],
-        })
-      ).toThrowErrorMatchingInlineSnapshot(`
-        "[legend]: types that failed validation:
-        - [legend.0.layout]: types that failed validation:
-         - [legend.layout.0.type]: expected value to equal [grid]
-         - [legend.layout.1.truncate.max_lines]: Additional properties are not allowed ('max_lines' was unexpected)
-        - [legend.1.layout.type]: expected value to equal [grid]
-        - [legend.2.placement]: expected value to equal [inside]"
+        "types that failed validation:
+        - [0.legend]: types that failed validation:
+         - [legend.0.position]: types that failed validation:
+          - [legend.position.0]: expected value to equal [top]
+          - [legend.position.1]: expected value to equal [bottom]
+         - [legend.1.layout.type]: expected value to equal [grid]
+         - [legend.2.placement]: expected value to equal [inside]
+        - [1.legend]: types that failed validation:
+         - [legend.0.position]: types that failed validation:
+          - [legend.position.0]: expected value to equal [top]
+          - [legend.position.1]: expected value to equal [bottom]
+         - [legend.1.layout.type]: expected value to equal [grid]
+         - [legend.2.placement]: expected value to equal [inside]"
       `);
     });
   });
 
   describe('legend layout schema', () => {
-    it('should allow list legend layout for top/bottom with truncate.max_pixels', () => {
+    it('should allow list legend layout for top/bottom', () => {
       expect(() =>
-        xyStateSchema.validate({
+        xyConfigSchema.validate({
           type: 'xy',
           title: 'Valid list legend',
           legend: {
@@ -692,9 +730,6 @@ describe('XY', () => {
             position: 'bottom',
             layout: {
               type: 'list',
-              truncate: {
-                max_pixels: 320,
-              },
             },
           },
           layers: [minimalLayer],

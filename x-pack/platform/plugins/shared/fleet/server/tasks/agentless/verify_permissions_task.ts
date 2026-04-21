@@ -26,9 +26,9 @@ import { throwIfAborted } from '../utils';
 
 const TASK_TYPE = 'fleet:verify_permissions';
 const TASK_TITLE = 'OTel Verify Permission Task';
-const TASK_TIMEOUT = '5m';
+const TASK_TIMEOUT = '1d';
 const TASK_ID = `${TASK_TYPE}:1.0.0`;
-const TASK_INTERVAL = '5m';
+const TASK_INTERVAL = '12h';
 export const VERIFY_PERMISSIONS_TASK = '[OTel Verify Permissions Task]';
 const VERIFICATION_TTL_MS = 5 * 60 * 1000;
 const ELIGIBILITY_WINDOW_MS = 5 * 60 * 1000;
@@ -76,7 +76,7 @@ export async function scheduleVerifyPermissionsTask(taskManager: TaskManagerStar
 }
 
 /*
- * Task flow (runs every 5 minutes):
+ * Task flow (runs every 12 hours):
  *
  * Phase 1 - Cleanup: Delete stale verifier policies. A policy is deleted when:
  *           - TTL expired: has agents but the oldest enrollment exceeds TTL.

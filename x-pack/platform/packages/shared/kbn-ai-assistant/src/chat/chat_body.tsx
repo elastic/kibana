@@ -57,7 +57,6 @@ import { useLicense } from '../hooks/use_license';
 import { PromptEditor } from '../prompt_editor/prompt_editor';
 import { useKibana } from '../hooks/use_kibana';
 import { ChatBanner } from './chat_banner';
-import { DefaultExperienceCallout } from './default_experience_callout';
 import { useConversationContextMenu, useScopes } from '../hooks';
 
 const fullHeightClassName = css`
@@ -135,7 +134,7 @@ export function ChatBody({
   refreshConversations,
   updateDisplayedConversation,
   onConversationDuplicate,
-  navigateToConnectorsManagementApp,
+  navigateToModelManagementApp,
 }: {
   connectors: ReturnType<typeof useGenAIConnectors>;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username' | 'profile_uid'>;
@@ -153,7 +152,7 @@ export function ChatBody({
   setIsUpdatingConversationList: (isUpdating: boolean) => void;
   refreshConversations: () => void;
   updateDisplayedConversation: (id?: string) => void;
-  navigateToConnectorsManagementApp: (application: ApplicationStart) => void;
+  navigateToModelManagementApp: (application: ApplicationStart) => void;
 }) {
   const license = useLicense();
   const hasCorrectLicense = license?.hasAtLeast('enterprise');
@@ -727,15 +726,11 @@ export function ChatBody({
           copyUrl={copyUrl}
           deleteConversation={deleteConversation}
           handleArchiveConversation={handleArchiveConversation}
-          isConversationApp={!showLinkToConversationsApp}
-          navigateToConnectorsManagementApp={navigateToConnectorsManagementApp}
+          navigateToModelManagementApp={navigateToModelManagementApp}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiHorizontalRule margin="none" />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <DefaultExperienceCallout isConversationApp={!showLinkToConversationsApp} />
       </EuiFlexItem>
       {footer}
     </EuiFlexGroup>

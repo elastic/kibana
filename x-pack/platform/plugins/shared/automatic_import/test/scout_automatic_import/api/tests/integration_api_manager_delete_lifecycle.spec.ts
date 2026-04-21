@@ -26,7 +26,7 @@ apiTest.describe(
     apiTest(
       'DELETE /integrations/{id}: returns 200 with result for manager',
       async ({ apiClient, apiServices }) => {
-        const integrationId = 'scout-delete-test';
+        const integrationId = 'scout_delete_test';
         await apiServices.autoImport.createIntegration(integrationId, 'Scout Delete Test');
 
         const response = await apiClient.delete(`${INTEGRATION_API_BASE_PATH}/${integrationId}`, {
@@ -57,7 +57,7 @@ apiTest.describe(
     apiTest(
       'lifecycle: integration appears in list after creation and is absent after deletion',
       async ({ apiClient, apiServices }) => {
-        const integrationId = 'scout-lifecycle-test';
+        const integrationId = 'scout_lifecycle_test';
 
         try {
           const createResponse = await apiClient.put(INTEGRATION_API_BASE_PATH, {

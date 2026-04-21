@@ -627,6 +627,8 @@ export const getSavedObjectTypes = (
           service_token: { type: 'keyword', index: false },
           config: { type: 'flattened' },
           config_yaml: { type: 'text' },
+          otel_exporter_config_yaml: { type: 'text' },
+          otel_disable_beatsauth: { type: 'boolean' },
           is_preconfigured: { type: 'boolean', index: false },
           is_internal: { type: 'boolean', index: false },
           ssl: { type: 'binary' },
@@ -833,6 +835,46 @@ export const getSavedObjectTypes = (
               addedMappings: {},
             },
           ],
+        },
+        '9': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                otel_exporter_config_yaml: { type: 'text' },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: (unknownAttributes: unknown) => {
+              const { otel_exporter_config_yaml: _, ...rest } = unknownAttributes as Record<
+                string,
+                unknown
+              >;
+              return rest;
+            },
+            create: schema.object({}, { unknowns: 'allow' }),
+          },
+        },
+        '10': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                otel_disable_beatsauth: { type: 'boolean' },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: (unknownAttributes: unknown) => {
+              const { otel_disable_beatsauth: _, ...rest } = unknownAttributes as Record<
+                string,
+                unknown
+              >;
+              return rest;
+            },
+            create: schema.object({}, { unknowns: 'allow' }),
+          },
         },
       },
       migrations: {

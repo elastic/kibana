@@ -86,12 +86,18 @@ export class SearchInferenceEndpointsPlugin
       return pluginsStart.inference.getConnectorList(request);
     };
 
+    const getConnectorById = async (id: string, request: KibanaRequest) => {
+      const [, pluginsStart] = await core.getStartServices();
+      return pluginsStart.inference.getConnectorById(id, request);
+    };
+
     defineRoutes({
       logger: this.logger,
       router,
       featureRegistry: this.featureRegistry,
       getForFeature,
       getConnectorList,
+      getConnectorById,
     });
 
     plugins.features.registerKibanaFeature({

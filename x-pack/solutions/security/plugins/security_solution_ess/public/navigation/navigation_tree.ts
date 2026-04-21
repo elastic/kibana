@@ -66,7 +66,9 @@ export const createNavigationTree = (
         link: securityLink(SecurityPageName.cloudSecurityPostureFindings),
       },
       defaultNavigationTree.cases(),
-      defaultNavigationTree.entityAnalytics(),
+      defaultNavigationTree.entityAnalytics(
+        services.experimentalFeatures?.entityAnalyticsNewHomePageEnabled
+      ),
       defaultNavigationTree.explore(),
       defaultNavigationTree.investigations(),
       {
@@ -203,6 +205,7 @@ export const createNavigationTree = (
                   renderAs: 'panelOpener' as const,
                   children: [
                     { link: 'management:rules' as const },
+                    { link: 'management:episodes' as const },
                     { link: 'management:notification_policies' as const },
                   ],
                 },

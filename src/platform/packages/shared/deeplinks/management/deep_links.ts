@@ -45,6 +45,7 @@ export type ManagementId =
   | 'dataViews'
   | 'data_quality'
   | 'data_usage'
+  | 'episodes'
   | 'content_connectors'
   | 'filesManagement'
   | 'license_management'

@@ -15,6 +15,7 @@ required:
   - duration
   - external_service
   - id
+  - observables
   - owner
   - settings
   - severity
@@ -23,6 +24,7 @@ required:
   - title
   - totalAlerts
   - totalComment
+  - total_observables
   - updated_at
   - updated_by
   - version
@@ -89,6 +91,11 @@ properties:
   id:
     type: string
     example: 66b9aa00-94fa-11ea-9f74-e7e108796192
+  observables:
+    type: array
+    description: Observables attached to the case.
+    items:
+      $ref: 'case_observable.yaml'
   owner:
     $ref: 'owner.yaml'
   settings:
@@ -113,6 +120,11 @@ properties:
     type: integer
     description: The number of user comments on the case. Use the find case comments API to retrieve comment content.
     example: 1
+  total_observables:
+    type: integer
+    nullable: true
+    description: The number of observables attached to the case.
+    example: 0
   totalEvents:
     type: integer
     description: The number of events attached to the case.

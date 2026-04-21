@@ -77,20 +77,53 @@ export class SearchSessionsService extends FtrService {
     );
   }
 
+  public async openCompletedSearchFromToast() {
+    await this.retry.try(async () => {
+      const link = await this.testSubjects.find('backgroundSearchCompletedToastLink');
+      if (!link) throw new Error('Background search completed toast link not found');
+      await link.click();
+    });
+    // After clicking the link, the toast is no longer needed
+    await this.dismissSuccessToast();
+  }
+
+  private async dismissSuccessToast() {
+    const successToast = await this.getSuccessToast();
+    if (!successToast) return;
+    const closeBtn = await successToast.findByTestSubject('toastCloseButton');
+    await closeBtn.click();
+  }
+
+  private async getSuccessToast() {
+    const toasts = await this.toasts.getAll();
+    for (const toast of toasts) {
+      const text = await toast.getVisibleText();
+      if (text.includes('Background search completed')) {
+        return toast;
+      }
+    }
+    return null;
+  }
+
   public async openFlyoutFromToast() {
     await this.expectSearchSavedToast();
     await this.testSubjects.click('backgroundSearchToastLink');
   }
 
   public async openFlyout() {
-    // The button is not visible because it's in the overflow menu
     await this.retry.try(async () => {
-      if (!(await this.testSubjects.exists(BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT))) {
+      // 1. The background search button is already visible so we are ready to go
+      if (await this.testSubjects.exists(BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT)) return;
+      // 2. The button is not visible but the overflow menu is, so we can try to open it.
+      if (await this.testSubjects.exists(APP_MENU_OVERFLOW_BUTTON)) {
         await this.testSubjects.click(APP_MENU_OVERFLOW_BUTTON);
+        await this.testSubjects.existOrFail(BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT);
+        return;
       }
+      // 3. Neither is visible so we fail to try again
+      throw new Error('Background search button not found');
     });
 
-    await this.testSubjects.existOrFail(BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT);
     await this.testSubjects.click(BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT);
     await this.expectManagementTable();
   }

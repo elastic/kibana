@@ -86,12 +86,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Entity Analytics: Disables the Risk Score AI Assistant tool.
    */
   riskScoreAssistantToolDisabled: false,
-
-  /**
-   * Entity Analytics: Disables the Risk Score AI Assistant tool.
-   */
-  entityDetailsHighlightsEnabled: true,
-
   /**
    * Enables the new Entity Analytics home page experience.
    */
@@ -105,13 +99,6 @@ export const allowedExperimentalValues = Object.freeze({
   leadGenerationEnabled: false,
 
   /**
-   * Enables lead generation details: the "i" icon on lead cards/list items
-   * and the "How this lead was generated" flyout.
-   * Requires `leadGenerationEnabled` to also be true.
-   */
-  leadGenerationDetailsEnabled: false,
-
-  /**
    * disables ES|QL rules
    */
   esqlRulesDisabled: false,
@@ -120,11 +107,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables gap reason display in the gaps table and reason-based filtering.
    */
   gapReasonDetectionEnabled: false,
-
-  /**
-   * Enables the redesigned execution results table on the rule details page
-   */
-  newExecutionResultsTableEnabled: true,
 
   /**
    * Adds a new option to filter descendants of a process for Management / Trusted Apps
@@ -140,7 +122,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables AI rule creation feature
    */
-  aiRuleCreationEnabled: false,
+  aiRuleCreationEnabled: true,
 
   /**
    * Disables the siem migrations feature

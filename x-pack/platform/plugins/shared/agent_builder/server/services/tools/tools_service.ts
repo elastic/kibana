@@ -28,10 +28,12 @@ import { isEnabledDefinition } from './tool_types/definitions';
 import { createPersistedProviderFn } from './persisted';
 import { createToolRegistry } from './tool_registry';
 import { createToolHealthClient } from './health';
+import type { AgentBuilderConfig } from '../../config';
 
 export interface ToolsServiceSetupDeps {
   logger: Logger;
   workflowsManagement?: WorkflowsServerPluginSetup;
+  config: AgentBuilderConfig;
 }
 
 export interface ToolsServiceStartDeps {
@@ -75,9 +77,17 @@ export class ToolsService {
     savedObjects,
     actions,
   }: ToolsServiceStartDeps): ToolsServiceStart {
-    const { logger, workflowsManagement } = this.setupDeps!;
+    const { logger, workflowsManagement, config } = this.setupDeps!;
 
-    const toolTypes = getToolTypeDefinitions({ workflowsManagement, actions });
+    const toolTypes = getToolTypeDefinitions({
+      workflowsManagement,
+      actions,
+      indexSearchDeps: {
+        uiSettings,
+        savedObjects,
+        topSnippetsDefaults: config.topSnippets,
+      },
+    });
 
     // Compute the set of tool types that have health tracking enabled
     const healthTrackedToolTypes = new Set(

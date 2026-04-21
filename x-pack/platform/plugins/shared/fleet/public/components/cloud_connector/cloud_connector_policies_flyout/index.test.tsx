@@ -161,7 +161,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
     expect(
       screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.EMPTY_STATE)
     ).toBeInTheDocument();
-    expect(screen.getByText('No integrations using this cloud connector')).toBeInTheDocument();
+    expect(screen.getByText('No integrations using this federated identity')).toBeInTheDocument();
   });
 
   it('should show loading state', () => {
@@ -278,7 +278,27 @@ describe('CloudConnectorPoliciesFlyout', () => {
 
     expect(
       screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IDENTIFIER_TEXT)
-    ).toHaveTextContent('Cloud Connector ID: subscription-123');
+    ).toHaveTextContent('Federated Identity ID: subscription-123');
+  });
+
+  it('should display GCP service account email with Service Account Email label', () => {
+    renderFlyout({
+      provider: 'gcp',
+      cloudConnectorVars: {
+        'gcp.credentials.service_account_email': {
+          value: 'cspm-sa@my-project.iam.gserviceaccount.com',
+        },
+        'gcp.credentials.audience': {
+          value:
+            '//iam.googleapis.com/projects/123/locations/global/workloadIdentityPools/pool/providers/provider',
+        },
+        gcp_credentials_cloud_connector_id: { value: { isSecretRef: true, id: 'secret-1' } },
+      },
+    });
+
+    expect(
+      screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IDENTIFIER_TEXT)
+    ).toHaveTextContent('Service Account Email: cspm-sa@my-project.iam.gserviceaccount.com');
   });
 
   describe('pagination', () => {
@@ -403,7 +423,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
       await user.paste('a'.repeat(256));
 
       expect(
-        screen.getByText('Cloud Connector Name must be 255 characters or less')
+        screen.getByText('Federated Identity Name must be 255 characters or less')
       ).toBeInTheDocument();
     });
 
@@ -435,7 +455,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
 
       await user.clear(nameInput);
 
-      expect(screen.getByText('Cloud Connector Name is required')).toBeInTheDocument();
+      expect(screen.getByText('Federated Identity Name is required')).toBeInTheDocument();
     });
 
     it('should keep save button disabled when name is empty', async () => {
@@ -470,9 +490,9 @@ describe('CloudConnectorPoliciesFlyout', () => {
       await user.paste('Valid New Name');
 
       expect(saveButton).toBeEnabled();
-      expect(screen.queryByText('Cloud Connector Name is required')).not.toBeInTheDocument();
+      expect(screen.queryByText('Federated Identity Name is required')).not.toBeInTheDocument();
       expect(
-        screen.queryByText('Cloud Connector Name must be 255 characters or less')
+        screen.queryByText('Federated Identity Name must be 255 characters or less')
       ).not.toBeInTheDocument();
     });
 
@@ -493,7 +513,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
 
       expect(saveButton).toBeEnabled();
       expect(
-        screen.queryByText('Cloud Connector Name must be 255 characters or less')
+        screen.queryByText('Federated Identity Name must be 255 characters or less')
       ).not.toBeInTheDocument();
     });
   });
@@ -623,7 +643,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
       await user.click(deleteButton);
 
       // Click confirm button in modal
-      const confirmButton = screen.getByText('Delete connector');
+      const confirmButton = screen.getByText('Delete identity');
       await user.click(confirmButton);
 
       expect(mockDeleteMutate).toHaveBeenCalledWith({});

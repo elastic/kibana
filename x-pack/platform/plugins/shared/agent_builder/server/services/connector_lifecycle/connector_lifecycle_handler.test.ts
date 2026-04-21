@@ -56,7 +56,6 @@ const createBaseParams = (overrides = {}) => ({
   request: {} as any,
   services: { scopedClusterClient: {} as any },
   wasSuccessful: true,
-  workflowTemplates: [] as string[],
   ...overrides,
 });
 

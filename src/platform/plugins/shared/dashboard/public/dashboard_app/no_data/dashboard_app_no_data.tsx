@@ -20,6 +20,7 @@ import { withSuspense } from '@kbn/shared-ux-utility';
 import type { LensSerializedState } from '@kbn/lens-plugin/public';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import {
   coreServices,
   dataService,
@@ -103,7 +104,7 @@ export const DashboardAppNoDataPage = ({
             .navigateToWithEmbeddablePackages<LensSerializedState>('dashboards', {
               state: [
                 {
-                  type: 'lens',
+                  type: LENS_EMBEDDABLE_TYPE,
                   serializedState: {
                     attributes: getLensAttributesFromSuggestion({
                       filters: [],

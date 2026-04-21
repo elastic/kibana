@@ -15,22 +15,23 @@ export const dashboardManagementSkill = defineSkillType({
   id: 'dashboard-management',
   name: 'dashboard-management',
   basePath: 'skills/platform/dashboard',
-  experimental: true,
   description:
-    'Compose and update in-memory Kibana dashboards using ordered operations, visualization attachments, and inline visualization editing.',
+    'Compose and update Kibana dashboards, involving panel creation, layout, and inline visualization editing.',
   content: `## When to Use This Skill
 
 Use this skill when:
 - A user asks to find, list, inspect, or modify existing Kibana dashboards.
 - A user asks to create a dashboard from one or more visualizations.
-- A user asks to update an in-memory dashboard created earlier in the conversation.
+- A user asks to update a dashboard created earlier in the conversation.
 - A request involves dashboard metadata, markdown, panel, or section changes.
 
 Do **not** use this skill when:
-- The user asks for a standalone visualization rather than a dashboard.
+- The user asks for a standalone visualization and does not mention a dashboard context.
 - The user needs help exploring data, fields, or query logic.
 
 ## Core Instructions
+
+Every dashboard MUST have a non-empty \`title\`. If the attached dashboard's title is empty, missing, or \`"User Dashboard"\`, your first operation MUST be \`set_metadata\` with a title you invent from its contents.
 
 For dashboard discovery:
 - When a user asks what dashboards are available, search for existing saved dashboards with \`platform.core.sml_search\`.
@@ -58,7 +59,7 @@ For a new dashboard:
 
 For an existing dashboard:
 - Reuse \`data.dashboardAttachment.id\` from the latest dashboard tool result as \`dashboardAttachmentId\`.
-- Use \`remove_panels\` to remove existing panels by \`uid\`.
+- Use \`remove_panels\` to remove existing panels by \`id\`.
 - Use \`create_visualization_panels\` to add new Lens visualization panels inline.
 - Use \`edit_visualization_panels\` only to change existing ES|QL-backed Lens visualization panels in place by \`panelId\`.
 - If a requested change targets a DSL, form-based, or other non-ES|QL panel, explicitly tell the user direct editing is not supported and ask for confirmation before replacing that panel with a newly created ES|QL-based Lens panel.
@@ -76,13 +77,13 @@ Supported operations:
 - \`edit_visualization_panels\`: update existing ES|QL-backed Lens visualization panels by \`panelId\`, preserving their current placement.
 - \`update_panel_layouts\`: resize, reposition, or move existing panels by \`panelId\` by updating \`grid\` and optionally changing \`sectionId\`.
 - \`add_section\`: create a new section with its own \`grid.y\`, and optionally create that section's initial inline Lens visualization panels with \`panels\`. Those nested panel grids are section-relative and do not need a \`sectionId\`.
-- \`remove_section\`: remove a section by \`uid\` with \`panelAction: "promote" | "delete"\`.
-- \`remove_panels\`: remove existing panels by \`uid\`.
+- \`remove_section\`: remove a section by \`id\` with \`panelAction: "promote" | "delete"\`.
+- \`remove_panels\`: remove existing panels by \`id\`.
 
 After a successful call:
-- Render the dashboard attachment inline so the user can see and interact with the dashboard card. Do NOT render individual visualization attachments inline during dashboard composition - only the final dashboard attachment should be rendered.
+- Render only the final dashboard attachment inline, as the last part of your response, after any text. Never render individual visualization attachments during dashboard composition.
 - Remember \`data.dashboardAttachment.id\` for follow-up updates.
-- Use returned \`uid\` values for future panel removals.
+- Use returned \`id\` values for future panel removals.
 - Use returned \`sectionId\` values for future section-targeted changes.
 - If \`data.failures\` is present, explain which attachments failed and why.
 
@@ -93,7 +94,7 @@ After a successful call:
 - \`create_visualization_panels\` and \`edit_visualization_panels\` work directly on dashboard panels and do not create standalone visualization attachments.
 - A successful dashboard call returns a dashboard attachment in \`data.dashboardAttachment\`.
 - Use \`data.dashboardAttachment.id\` as \`dashboardAttachmentId\` when updating that dashboard later.
-- Never invent \`dashboardAttachmentId\`, \`uid\`, or \`sectionId\`. Reuse the values returned by prior tool results.
+- Never invent \`dashboardAttachmentId\`, \`id\`, or \`sectionId\`. Reuse the values returned by prior tool results.
 
 ${dashboardCompositionPrompt}
 

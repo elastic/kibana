@@ -45,7 +45,8 @@ export const SearchEventsInputSchema = z.object({
     ),
   maxResults: z
     .number()
-    .optional()
+    .min(1)
+    .max(2500)
     .default(50)
     .describe('Maximum number of events to return (1-2500, default 50)'),
   orderBy: z
@@ -60,7 +61,10 @@ export const SearchEventsInputSchema = z.object({
 export type SearchEventsInput = z.infer<typeof SearchEventsInputSchema>;
 
 export const GetEventInputSchema = z.object({
-  eventId: z.string().min(1).describe('The ID of the event to retrieve'),
+  eventId: z
+    .string()
+    .min(1)
+    .describe('The ID of the event to retrieve. Use event IDs from search or list results.'),
   calendarId: z
     .preprocess((val) => (val === '' ? undefined : val), z.string().optional())
     .default('primary')
@@ -71,7 +75,12 @@ export const GetEventInputSchema = z.object({
 export type GetEventInput = z.infer<typeof GetEventInputSchema>;
 
 export const ListCalendarsInputSchema = z.object({
-  pageToken: z.string().optional().describe('Token for pagination'),
+  pageToken: z
+    .string()
+    .optional()
+    .describe(
+      "Pagination token. Pass the 'nextPageToken' value from a previous response to get the next page."
+    ),
 });
 export type ListCalendarsInput = z.infer<typeof ListCalendarsInputSchema>;
 
@@ -96,10 +105,16 @@ export const ListEventsInputSchema = z.object({
     ),
   maxResults: z
     .number()
-    .optional()
+    .min(1)
+    .max(2500)
     .default(50)
     .describe('Maximum number of events to return (1-2500, default 50)'),
-  pageToken: z.string().optional().describe('Token for pagination'),
+  pageToken: z
+    .string()
+    .optional()
+    .describe(
+      "Pagination token. Pass the 'nextPageToken' value from a previous response to get the next page."
+    ),
   orderBy: z
     .preprocess(
       (val) => (val === '' ? undefined : val),

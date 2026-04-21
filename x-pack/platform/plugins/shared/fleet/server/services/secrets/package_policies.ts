@@ -13,6 +13,7 @@ import type { NewPackagePolicy, RegistryStream, UpdatePackagePolicy } from '../.
 import { SO_SEARCH_LIMIT } from '../../../common';
 import {
   doesPackageHaveIntegrations,
+  getInputEffectiveName,
   getNormalizedDataStreams,
   getNormalizedInputs,
 } from '../../../common/services';
@@ -391,7 +392,9 @@ function _getInputSecretPaths(
     if (input.streams.length) {
       input.streams.forEach((stream, streamIndex) => {
         const streamVarDefs =
-          streamSecretVarDefsByDatasetAndInput[`${stream.data_stream.dataset}-${input.type}`];
+          streamSecretVarDefsByDatasetAndInput[
+            `${stream.data_stream.dataset}-${getInputEffectiveName(input)}`
+          ];
         if (streamVarDefs && Object.keys(streamVarDefs).length) {
           Object.entries(stream.vars || {}).forEach(([name, configEntry]) => {
             if (streamVarDefs[name]) {

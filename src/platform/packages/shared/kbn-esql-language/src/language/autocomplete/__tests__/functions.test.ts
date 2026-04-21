@@ -475,6 +475,17 @@ describe('functions arg suggestions', () => {
       expect(fieldSuggestions.length).toBeGreaterThan(0);
     });
 
+    it('IN operator with a started list: keeps suggestions and does not leak marker text', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM index | WHERE integerField IN (1, /)');
+
+      expect(suggestions.length).toBeGreaterThan(0);
+      suggestions.forEach(({ label, text }) => {
+        expect(label).not.toContain('marker_esql_editor');
+        expect(text).not.toContain('marker_esql_editor');
+      });
+    });
+
     it('unary NOT operator in WHERE: suggests boolean fields and boolean-returning functions', async () => {
       const { suggest } = await setup();
       const suggestions = await suggest('FROM index | WHERE NOT /');

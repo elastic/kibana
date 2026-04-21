@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { of } from 'rxjs';
 import type { ServerlessPluginStart } from './types';
 
-const startMock = (): ServerlessPluginStart => ({
+const startMock = (): jest.Mocked<ServerlessPluginStart> => ({
   initNavigation: jest.fn(),
   setBreadcrumbs: jest.fn(),
-  getNavigationCards: jest.fn(),
+  getNavigationCards$: jest.fn().mockReturnValue(of(undefined)),
 });
 
 export const serverlessMock = {

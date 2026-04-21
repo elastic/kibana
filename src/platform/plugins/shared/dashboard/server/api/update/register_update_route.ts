@@ -12,12 +12,12 @@ import type { RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { schema } from '@kbn/config-schema';
 import { once } from 'lodash';
-import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
 import { getRouteConfig } from '../get_route_config';
 import { getUpdateRequestBodySchema, getUpdateResponseBodySchema } from './schemas';
 import { update } from './update';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { telemetryHandler } from '../telemetry_handler';
+import { writeErrorHandler } from '../write_error_handler';
 
 export function registerUpdateRoute(
   router: VersionedRouter<RequestHandlerContext>,
@@ -27,8 +27,8 @@ export function registerUpdateRoute(
   const { basePath, routeConfig, routeVersion } = getRouteConfig(isDashboardAppRequest);
   const updateRoute = router.put({
     path: `${basePath}/{id}`,
-    summary: `Upsert dashboard`,
     ...routeConfig,
+    summary: `Upsert a dashboard`,
   });
 
   // Do not call getDashboardStateSchema when registering route.
@@ -44,7 +44,9 @@ export function registerUpdateRoute(
       validate: () => ({
         request: {
           params: schema.object({
-            id: asCodeIdSchema,
+            // Can not validate id at route level
+            // existing dashboards may have invalid "as code" ids
+            id: schema.string(),
           }),
           body: getUpdateRequestBodySchema(isDashboardAppRequest),
         },
@@ -56,6 +58,9 @@ export function registerUpdateRoute(
           201: {
             body: () => getUpdateResponseBodySchema(isDashboardAppRequest),
             description: 'created',
+          },
+          400: {
+            description: 'invalid request',
           },
           403: {
             description: 'forbidden',
@@ -77,10 +82,7 @@ export function registerUpdateRoute(
             ? res.created({ body: result })
             : res.ok({ body: result });
         } catch (e) {
-          if (e.isBoom && e.output.statusCode === 403) {
-            return res.forbidden({ body: { message: e.message } });
-          }
-          return res.badRequest({ body: { message: e.message } });
+          return writeErrorHandler(e, res);
         }
       })
   );

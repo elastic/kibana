@@ -11,14 +11,14 @@ import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
 import type { FilterManager } from '@kbn/data-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import type {
-  VisualizationState,
-  DatasourceStates,
-  DatasourceMap,
-  VisualizationMap,
-  Datasource,
-  LensDocument,
-  Visualization,
+import {
+  type VisualizationState,
+  type DatasourceStates,
+  type DatasourceMap,
+  type VisualizationMap,
+  type Datasource,
+  type LensDocument,
+  type Visualization,
 } from '@kbn/lens-common';
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 import { INDEX_PATTERN_TYPE } from '../../common/constants';
