@@ -633,8 +633,6 @@ Alternatively, use 2 numbers in milliseconds or [ISO 8601](https://en.wikipedia.
 
 ## Documentation
 
-###LG TODO update this section to use OAS
-
 **Public HTTP APIs must have reference documentation**
 
 See our current reference documentation [here](https://www.elastic.co/docs/api/doc/kibana/). This is compiled from our OpenAPI spec.
@@ -644,8 +642,6 @@ See [this tutorial](../../tutorials/generating-oas-for-http-apis.md) about the c
 Every public API should be documented inside the [docs/api](https://github.com/elastic/kibana/tree/main/docs/api) folder in asciidoc (this content will eventually be migrated to mdx to support the new docs system). If a public REST API is undocumented, you should either document it, or make it internal.
 
 ### Release tags
-
-###LG TODO link to OAS?
 
 Every public API should have a release tag specified at the top of its documentation page. Release tags are not applicable to internal APIs, as we make no guarantees on those.
 

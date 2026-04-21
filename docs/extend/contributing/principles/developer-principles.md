@@ -51,7 +51,7 @@ Additionally, since all merged code should be release-ready, it's imperative tha
 
 A feature that requires manual QA to ensure it continues to work is worse than not having that feature at all.
 
-###LG TODO we should link to some documentation about our testing strategy here, and maybe even some documentation about how to write good tests in the context of our project.
+See [Testing Kibana plugins](../../testing/index.md) for the testing pyramid we follow, along with guides for writing unit, integration, and end-to-end tests.
 
 ## Organize by domain
 

@@ -18,12 +18,19 @@ Kibana ships with sample data that you can install at the click of the button. I
 
 ![Sample Data](../assets/sample_data.png)
 
-## CSV upload
-###LG TODO let's update this.
+## Upload a file
 
-1. If you don't have any data, navigate to Stack Management > Index Patterns and click the link to the uploader. If you do have data, navigate to the **Machine Learning** application.
-2. Click on the **Data Visualizer** tab.
-3. Click on **Select file** in the **Import data** container.
+Kibana can import CSV, NDJSON, log files, GeoJSON, and shapefiles through the **Upload a file** feature (provided by the File Upload and Data Visualizer plugins). Where the entry point appears depends on the solution view:
+
+- **Classic navigation**: From the home page, click **Add data**, then open the **Upload file** tab. The feature is also reachable from **Machine Learning → Data Visualizer**, and from the empty state shown when creating a data view with no matching indices.
+- **Search solution**: Use the **Add data** button on the Getting Started page, or the "Get started with Elasticsearch" card on the Search home page.
+- **Observability solution**: Launch the **Onboarding** flow and select the **Upload a file** card.
+- **Security solution**: The generic file upload is not surfaced in the Security nav. Security provides its own domain-specific uploaders (asset criticality, entity resolution, SIEM migration lookups).
+
+These entry points all route to one of two URLs:
+
+- `/app/home#/tutorial_directory/fileDataViz`
+- `/app/ml/filedatavisualizer`
 
 ![CSV Upload](../assets/ml_csv_upload.png)
 

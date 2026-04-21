@@ -9,23 +9,36 @@ Docs should be written during development and accompany PRs when relevant. There
 
 ## End-user documentation
 
-User-facing features should be documented in Markdown at [https://github.com/elastic/kibana/tree/main/docs](https://github.com/elastic/kibana/tree/main/docs)
+User-facing features are documented in Markdown under [docs/](https://github.com/elastic/kibana/tree/main/docs) and published to [elastic.co/docs](https://www.elastic.co/docs) via the [Elastic Docs v3](https://www.elastic.co/docs/contribute-docs) system. Authoring and syntax guidance lives in the [contributor docs](https://www.elastic.co/docs/contribute-docs), and the tooling itself is documented at [elastic.github.io/docs-builder](https://elastic.github.io/docs-builder/).
 
-###LG TODO update this to reflect reality of docsv3
-To build the docs, you must clone the [elastic/docs](https://github.com/elastic/docs) repo as a sibling of your Kibana repo. Follow the instructions in that project’s [README](https://github.com/elastic/docs#readme) for getting the docs tooling set up.
+To preview docs locally, install `docs-builder` and run it from the Kibana repo root.
 
-To build the docs:
+Install:
 
 ```bash
-node scripts/docs.js --open
+curl -sL https://ela.st/docs-builder-install | sh
+```
+
+Run a one-off build to surface warnings and errors:
+
+```bash
+docs-builder
+```
+
+Start a live-preview server at [http://localhost:3000](http://localhost:3000):
+
+```bash
+docs-builder serve
 ```
 
 ## REST APIs
-###LG TODO we use OAS now.
-REST APIs should be documented using the following formats:
 
-- [API doc template](https://raw.githubusercontent.com/elastic/docs/master/shared/api-ref-ex.asciidoc)
-- [API object definition template](https://raw.githubusercontent.com/elastic/docs/master/shared/api-definitions-ex.asciidoc)
+REST APIs are documented via OpenAPI Spec (OAS) generated directly from the route registration code. Define your route schemas with `@kbn/config-schema` or `@kbn/zod`, and the generated OAS will flow through `scripts/capture_oas_snapshot.js` into the published bundles at [elastic.co/docs/api/doc/kibana](https://www.elastic.co/docs/api/doc/kibana/) (ESS) and [elastic.co/docs/api/doc/serverless](https://www.elastic.co/docs/api/doc/serverless/) (Serverless).
+
+Start here:
+
+- [Generating OAS for HTTP APIs](../../tutorials/generating-oas-for-http-apis.md) — how to register routes, attach schemas and examples, capture the OAS snapshot, and get your path included in the published bundle.
+- [Guidelines for HTTP API design in Kibana](../api-design/guidelines-for-http-api-design-in-kibana.md) — schema patterns that produce clean OAS, plus documentation, security, and versioning requirements for public APIs.
 
 ## Developer documentation
 
@@ -57,10 +70,6 @@ When a developer first lands in our docs, think about their journey. Introduce b
 #### Think outside-in
 
 It's easy to forget what it felt like to first write code in Kibana, but do your best to frame these docs "outside-in". Don't use esoteric, internal language unless a definition is documented and linked. The fresh eyes of a new hire can be a great asset.
-
-## API documentation
-
-Coming soon. ###LG TODO need to figure out API Documentation
 
 ### Code comments
 

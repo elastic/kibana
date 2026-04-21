@@ -27,9 +27,7 @@ This contains the base configuration file, `kibana.yml`. If you want to tweak an
 
 ## [docs](https://github.com/elastic/{{kib}}/tree/main/docs)
 
-Every folder in here _except_ the [development one](https://github.com/elastic/kibana/tree/main/docs/development) contains manually generated Markdown docs that end up hosted in our [public documentation site](https://www.elastic.co/guide/).
-
-The `development` folder contains markdown that is auto-generated with our legacy API docs tool. We are aiming to remove it shortly after 8.0FF. ### LG TODO let's remove this...
+This folder contains manually generated Markdown docs that end up hosted in our [public documentation site](https://www.elastic.co/guide/).
 
 ## [examples](https://github.com/elastic/kibana/tree/main/examples)
 

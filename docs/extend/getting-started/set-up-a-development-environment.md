@@ -80,8 +80,7 @@ yarn start --no-base-path
 
 You can also set it explicitly via [`server.basePath`](/reference/configuration-reference/general-settings.md#server-basePath) and [`server.rewriteBasePath`](/reference/configuration-reference/general-settings.md#server-rewriteBasePath) in `config/kibana.dev.yml`.
 
-## Run in serverless mode
-### LG TODO: Can non-employees even do this??
+## Elasticians: Run in serverless mode
 
 To develop against serverless projects, you need to start both Elasticsearch and Kibana in serverless mode with matching project types.
 
