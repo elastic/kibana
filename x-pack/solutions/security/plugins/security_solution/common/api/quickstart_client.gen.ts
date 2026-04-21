@@ -614,7 +614,7 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
       .request<ApplyEntityEngineDataviewIndicesResponse>({
         path: '/internal/entity_store/engines/apply_dataview_indices',
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'POST',
       })
@@ -1147,7 +1147,7 @@ For detailed information on Kibana actions and alerting, and additional API call
       .request<DeleteEntityEngineResponse>({
         path: replaceParams('/internal/entity_store/engines/{entityType}', props.params),
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'DELETE',
 
@@ -1161,7 +1161,7 @@ For detailed information on Kibana actions and alerting, and additional API call
       .request<DeleteEntityEnginesResponse>({
         path: '/internal/entity_store/engines',
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'DELETE',
 
@@ -1274,7 +1274,7 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .request<DeleteSingleEntityResponse>({
         path: replaceParams('/internal/entity_store/entities/{entityType}', props.params),
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'DELETE',
         body: props.body,
@@ -1955,7 +1955,7 @@ finalize it.
       .request<GetEntityEngineResponse>({
         path: replaceParams('/internal/entity_store/engines/{entityType}', props.params),
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'GET',
       })
@@ -1982,7 +1982,7 @@ finalize it.
       .request<GetEntityStoreStatusResponse>({
         path: '/internal/entity_store/status',
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'GET',
 
@@ -2378,7 +2378,7 @@ finalize it.
       .request<InitEntityEngineResponse>({
         path: replaceParams('/internal/entity_store/engines/{entityType}/init', props.params),
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'POST',
         body: props.body,
@@ -2394,7 +2394,7 @@ finalize it.
       .request<InitEntityStoreResponse>({
         path: '/internal/entity_store/enable',
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'POST',
         body: props.body,
@@ -2562,7 +2562,7 @@ Each row will match up to 10,000 entities.
       .request<ListEntitiesResponse>({
         path: '/internal/entity_store/entities/list',
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'GET',
 
@@ -2579,7 +2579,7 @@ Each row will match up to 10,000 entities.
       .request<ListEntityEnginesResponse>({
         path: '/internal/entity_store/engines',
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'GET',
       })
@@ -3254,7 +3254,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .request<StartEntityEngineResponse>({
         path: replaceParams('/internal/entity_store/engines/{entityType}/start', props.params),
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'POST',
       })
@@ -3303,7 +3303,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .request<StopEntityEngineResponse>({
         path: replaceParams('/internal/entity_store/engines/{entityType}/stop', props.params),
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'POST',
       })
@@ -3621,7 +3621,7 @@ The creation is asynchronous. The time for a document to be present in the  fina
       .request({
         path: '/internal/entity_store/entities/bulk',
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'PUT',
         body: props.body,
@@ -3642,7 +3642,7 @@ If the specified entity already exists, it is updated with the provided values. 
       .request<UpsertEntityResponse>({
         path: replaceParams('/internal/entity_store/entities/{entityType}', props.params),
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'PUT',
         body: props.body,
