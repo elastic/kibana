@@ -55,3 +55,12 @@ export const METRICS_EXPERIENCE_PRODUCT_FEATURE_ID = 'discover:metrics-experienc
  * When disabled, panel state is stored and loaded as-is (pre-transform behavior).
  */
 export const EMBEDDABLE_TRANSFORMS_FEATURE_FLAG_KEY = 'discover.embeddableTransforms';
+
+/** Advanced Settings id (when registered by the Discover server plugin). */
+export const ENTITY_FLYOUT_SIMULATION_UI_SETTING = 'discover:entityFlyoutSimulation';
+
+/**
+ * Browser-only override for demos: `localStorage.setItem('discoverEntityFlyoutSimulation', 'true')`
+ * then reload. Takes precedence over Advanced Settings when set to true/false/1/0.
+ */
+export const ENTITY_FLYOUT_SIMULATION_LOCAL_STORAGE_KEY = 'discoverEntityFlyoutSimulation';

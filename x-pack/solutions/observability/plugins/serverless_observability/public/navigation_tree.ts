@@ -95,8 +95,44 @@ export const createNavigationTree = ({
       },
       ...filterForFeatureAvailability(
         {
-          link: 'streams' as const,
+          id: 'streams',
+          title: i18n.translate('xpack.serverlessObservability.nav.streams', {
+            defaultMessage: 'Streams',
+          }),
+          renderAs: 'panelOpener',
           icon: 'productStreamsWired',
+          children: [
+            {
+              link: 'streams:all_streams',
+              title: i18n.translate('xpack.serverlessObservability.nav.streams.allStreams', {
+                defaultMessage: 'All streams',
+              }),
+              getIsActive: ({ pathNameSerialized, prepend }) => {
+                const base = prepend('/app/streams');
+                if (!pathNameSerialized.startsWith(base)) {
+                  return false;
+                }
+                const rest = pathNameSerialized.slice(base.length);
+                return rest === '' || rest === '/';
+              },
+            },
+            {
+              link: 'streams:sig_events',
+              title: i18n.translate('xpack.serverlessObservability.nav.streams.sigEvents', {
+                defaultMessage: 'Sig events',
+              }),
+              getIsActive: ({ pathNameSerialized, prepend }) =>
+                pathNameSerialized.startsWith(prepend('/app/streams/_discovery')),
+            },
+            {
+              link: 'streams:manage_entity_types',
+              title: i18n.translate('xpack.serverlessObservability.nav.streams.manageEntityTypes', {
+                defaultMessage: 'Manage entity types',
+              }),
+              getIsActive: ({ pathNameSerialized, prepend }) =>
+                pathNameSerialized.startsWith(prepend('/app/streams/entity-types')),
+            },
+          ],
         },
         streamsAvailable
       ),

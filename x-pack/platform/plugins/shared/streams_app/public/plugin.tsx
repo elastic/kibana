@@ -109,6 +109,29 @@ export class StreamsAppPlugin
       appRoute: '/app/streams',
       category: DEFAULT_APP_CATEGORIES.management,
       order: 10000,
+      deepLinks: [
+        {
+          id: 'all_streams',
+          title: i18n.translate('xpack.streams.deepLink.allStreamsTitle', {
+            defaultMessage: 'All streams',
+          }),
+          path: '/',
+        },
+        {
+          id: 'sig_events',
+          title: i18n.translate('xpack.streams.deepLink.sigEventsTitle', {
+            defaultMessage: 'Sig events',
+          }),
+          path: '/_discovery/streams',
+        },
+        {
+          id: 'manage_entity_types',
+          title: i18n.translate('xpack.streams.deepLink.manageEntityTypesTitle', {
+            defaultMessage: 'Manage entity types',
+          }),
+          path: '/entity-types',
+        },
+      ],
       updater$: from(startServicesPromise).pipe(
         switchMap(([_, pluginsStart]) =>
           pluginsStart.streams.navigationStatus$.pipe(

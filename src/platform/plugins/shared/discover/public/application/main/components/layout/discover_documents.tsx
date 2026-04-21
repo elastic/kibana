@@ -91,6 +91,9 @@ import { DiscoverGridFlyout } from '../../../../components/discover_grid_flyout'
 import type { CascadedDocumentsContext } from './cascaded_documents';
 import { isCascadedDocumentsVisible } from './cascaded_documents';
 import { SaveDiscoverTableButton } from './save_discover_table_button';
+import { getServiceNameCell } from '../../../../components/data_types/logs/service_name_cell';
+import { readEntityFlyoutSimulationEnabled } from '../../../../components/entity_flyout_simulation/is_entity_flyout_simulation_enabled';
+import { SERVICE_NAME_FIELDS } from '../../../../../common/data_types/logs/constants';
 
 // export needs for testing
 export const onResize = (
@@ -429,8 +432,17 @@ function DiscoverDocumentsComponent({
   const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
   const cellRenderers = useMemo(() => {
     const getCellRenderers = getCellRenderersAccessor(() => ({}));
-    return getCellRenderers(cellRendererParams);
-  }, [cellRendererParams, getCellRenderersAccessor]);
+    const fromProfile = getCellRenderers(cellRendererParams);
+    if (!readEntityFlyoutSimulationEnabled(services.uiSettings)) {
+      return fromProfile;
+    }
+    const simulationRenderers: Record<string, ReturnType<typeof getServiceNameCell>> = {};
+    for (const field of SERVICE_NAME_FIELDS) {
+      simulationRenderers[field] = getServiceNameCell(field, cellRendererParams);
+      simulationRenderers[`${field}.keyword`] = getServiceNameCell(`${field}.keyword`, cellRendererParams);
+    }
+    return { ...fromProfile, ...simulationRenderers };
+  }, [cellRendererParams, getCellRenderersAccessor, services.uiSettings]);
 
   const callouts = useMemo(
     () => <SearchResponseWarningsCallout warnings={documentState.interceptedWarnings ?? []} />,

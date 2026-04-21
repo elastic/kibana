@@ -17,6 +17,8 @@ import { DataGridDensity } from '@kbn/unified-data-table';
 import { getServiceNameCell } from './service_name_cell';
 import type { CellRenderersExtensionParams } from '../../../context_awareness';
 
+const mockEntityFlyoutSimulationSetting = 'discover:entityFlyoutSimulation';
+
 const core = {
   application: {
     capabilities: {
@@ -34,7 +36,13 @@ jest.mock('../../../hooks/use_discover_services', () => {
   const originalModule = jest.requireActual('../../../hooks/use_discover_services');
   return {
     ...originalModule,
-    useDiscoverServices: () => ({ core, share: {} }),
+    useDiscoverServices: () => ({
+      core,
+      share: {},
+      uiSettings: {
+        get: (key: string) => (key === mockEntityFlyoutSimulationSetting ? false : true),
+      },
+    }),
   };
 });
 

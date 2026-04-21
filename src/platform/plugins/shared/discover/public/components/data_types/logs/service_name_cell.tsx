@@ -9,20 +9,27 @@
 
 import React from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import { dynamic } from '@kbn/shared-ux-utility';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { css } from '@emotion/react';
 import {
+  escapeAndPreserveHighlightTags,
   formatFieldValue,
   getFieldValue,
   OTEL_RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE,
 } from '@kbn/discover-utils';
-import { FieldBadgeWithActions } from '@kbn/discover-contextual-components/src/data_types/logs/components/cell_actions_popover';
+import {
+  CellActionsPopover,
+  FieldBadgeWithActions,
+} from '@kbn/discover-contextual-components/src/data_types/logs/components/cell_actions_popover';
+import { i18n } from '@kbn/i18n';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
 import type { CellRenderersExtensionParams } from '../../../context_awareness';
 import { AGENT_NAME_FIELD } from '../../../../common/data_types/logs/constants';
+import { useEntityFlyoutSimulation } from '../../entity_flyout_simulation/entity_flyout_simulation_context';
+import { readEntityFlyoutSimulationEnabled } from '../../entity_flyout_simulation/is_entity_flyout_simulation_enabled';
 
 const AgentIcon = dynamic(() => import('@kbn/custom-icons/src/components/agent_icon'));
 const dataTestSubj = 'serviceNameCell';
@@ -31,39 +38,51 @@ const agentIconStyle = ({ euiTheme }: UseEuiTheme) => css`
   margin-right: ${euiTheme.size.xs};
 `;
 
-export const getServiceNameCell =
-  (serviceNameField: string, { actions }: CellRenderersExtensionParams) =>
-  (props: DataGridCellValueElementProps) => {
-    const { core, share } = useDiscoverServices();
-    const serviceNameValue = getFieldValue(props.row, serviceNameField);
-    const field = props.dataView.getFieldByName(serviceNameField);
-    const agentName = getFieldValue(props.row, AGENT_NAME_FIELD) as AgentName;
-    const otelSdkLanguage = getFieldValue(
-      props.row,
-      OTEL_RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE
-    ) as AgentName | undefined;
+interface ServiceNameCellContentProps {
+  serviceNameField: string;
+  actions: CellRenderersExtensionParams['actions'];
+  cellProps: DataGridCellValueElementProps;
+}
 
-    if (!serviceNameValue) {
-      return <span data-test-subj={`${dataTestSubj}-empty`}>-</span>;
-    }
+function ServiceNameCellContent({
+  serviceNameField,
+  actions,
+  cellProps,
+}: ServiceNameCellContentProps) {
+  const { core, share, uiSettings } = useDiscoverServices();
+  const isEntityFlyoutSimulation = readEntityFlyoutSimulationEnabled(uiSettings);
+  const entityFlyoutSimulation = useEntityFlyoutSimulation();
 
-    const agentNameIcon = otelSdkLanguage || agentName;
+  const serviceNameValue = getFieldValue(cellProps.row, serviceNameField);
+  const field = cellProps.dataView.getFieldByName(serviceNameField);
+  const agentName = getFieldValue(cellProps.row, AGENT_NAME_FIELD) as AgentName;
+  const otelSdkLanguage = getFieldValue(
+    cellProps.row,
+    OTEL_RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE
+  ) as AgentName | undefined;
 
-    const getIcon = () => (
-      <EuiToolTip position="left" content={agentNameIcon} repositionOnScroll={true}>
-        <AgentIcon agentName={agentNameIcon} size="m" css={agentIconStyle} />
-      </EuiToolTip>
-    );
+  if (!serviceNameValue) {
+    return <span data-test-subj={`${dataTestSubj}-empty`}>-</span>;
+  }
 
-    const value = formatFieldValue(
-      serviceNameValue,
-      props.row.raw,
-      props.fieldFormats,
-      props.dataView,
-      field,
-      'html'
-    );
+  const agentNameIcon = otelSdkLanguage || agentName;
 
+  const getIcon = () => (
+    <EuiToolTip position="left" content={agentNameIcon} repositionOnScroll={true}>
+      <AgentIcon agentName={agentNameIcon} size="m" css={agentIconStyle} />
+    </EuiToolTip>
+  );
+
+  const value = formatFieldValue(
+    serviceNameValue,
+    cellProps.row.raw,
+    cellProps.fieldFormats,
+    cellProps.dataView,
+    field,
+    'html'
+  );
+
+  if (!isEntityFlyoutSimulation || !entityFlyoutSimulation) {
     return (
       <FieldBadgeWithActions
         onFilter={actions.addFilter}
@@ -76,4 +95,68 @@ export const getServiceNameCell =
         share={share}
       />
     );
-  };
+  }
+
+  return (
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiToolTip
+          position="top"
+          content={i18n.translate('discover.entitySimulation.openEntityFlyoutTooltip', {
+            defaultMessage: 'Open simulated entity details (demo)',
+          })}
+          repositionOnScroll={true}
+        >
+          <EuiButtonEmpty
+            size="xs"
+            data-test-subj={`${dataTestSubj}-entitySimulationLink`}
+            onClick={() => entityFlyoutSimulation.openEntityFlyout(String(serviceNameValue))}
+          >
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>{getIcon()}</EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <span
+                  // eslint-disable-next-line react/no-danger
+                  dangerouslySetInnerHTML={{
+                    __html: escapeAndPreserveHighlightTags(value),
+                  }}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiButtonEmpty>
+        </EuiToolTip>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <CellActionsPopover
+          onFilter={actions.addFilter}
+          property={field}
+          name={serviceNameField}
+          value={value}
+          rawValue={serviceNameValue}
+          renderPopoverTrigger={({ popoverTriggerProps }) => (
+            <EuiButtonIcon
+              display="empty"
+              size="xs"
+              iconType="filter"
+              aria-label={i18n.translate('discover.entitySimulation.fieldFilterActions', {
+                defaultMessage: 'Filter actions for {field}',
+                values: { field: serviceNameField },
+              })}
+              {...popoverTriggerProps}
+            />
+          )}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+}
+
+export const getServiceNameCell =
+  (serviceNameField: string, { actions }: CellRenderersExtensionParams) =>
+  (cellProps: DataGridCellValueElementProps) => (
+    <ServiceNameCellContent
+      serviceNameField={serviceNameField}
+      actions={actions}
+      cellProps={cellProps}
+    />
+  );

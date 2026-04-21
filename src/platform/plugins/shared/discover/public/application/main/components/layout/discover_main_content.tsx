@@ -7,19 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiSpacer,
+} from '@elastic/eui';
 import { type DropType, DropOverlayWrapper, Droppable } from '@kbn/dom-drag-drop';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { BehaviorSubject } from 'rxjs';
 import { VIEW_MODE } from '../../../../../common/constants';
+import {
+  applyEntityFlyoutSimulationFromUrl,
+  readEntityFlyoutSimulationEnabled,
+} from '../../../../components/entity_flyout_simulation/is_entity_flyout_simulation_enabled';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DocumentViewModeToggle } from '../../../../components/view_mode_toggle';
 import { FieldStatisticsTab } from '../field_stats_table';
 import { DiscoverDocuments } from './discover_documents';
+import { EntityFlyoutSimulationProvider } from '../../../../components/entity_flyout_simulation/entity_flyout_simulation_context';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
 import { useAppStateSelector } from '../../state_management/redux';
 import { PanelsToggle } from '../../../../components/panels_toggle';
@@ -73,7 +84,15 @@ export const DiscoverMainContent = ({
   sidebarToggleState$,
   isChartAvailable,
 }: DiscoverMainContentProps) => {
-  const { trackUiMetric } = useDiscoverServices();
+  const { trackUiMetric, uiSettings } = useDiscoverServices();
+  const [, setDiscoverRerenderToken] = useState(0);
+
+  useEffect(() => {
+    applyEntityFlyoutSimulationFromUrl();
+    setDiscoverRerenderToken((n) => n + 1);
+  }, []);
+
+  const entityFlyoutSimulationActive = readEntityFlyoutSimulationEnabled(uiSettings);
   const dispatch = useInternalStateDispatch();
   const getState = useInternalStateGetState();
   const currentTabId = useCurrentTabSelector((tab) => tab.id);
@@ -155,6 +174,29 @@ export const DiscoverMainContent = ({
 
   const viewModeToggle = useMemo(() => renderViewModeToggle(), [renderViewModeToggle]);
 
+  const entitySimulationBanner =
+    viewMode === VIEW_MODE.DOCUMENT_LEVEL && entityFlyoutSimulationActive ? (
+      <EuiFlexItem grow={false}>
+        <EuiCallOut
+          size="s"
+          color="success"
+          iconType="beaker"
+          data-test-subj="entityFlyoutSimulationBanner"
+          title={i18n.translate('discover.entitySimulation.activeBannerTitle', {
+            defaultMessage: 'Entity flyout simulation is on',
+          })}
+        >
+          <p>
+            {i18n.translate('discover.entitySimulation.activeBannerBodyMain', {
+              defaultMessage:
+                'Add the service.name field as its own column (Available fields → service.name → Add column). Clicks on the name inside the Summary column do not open this flyout — use the dedicated service.name column. You should see a small filter icon next to the value there.',
+            })}
+          </p>
+        </EuiCallOut>
+        <EuiSpacer size="s" />
+      </EuiFlexItem>
+    ) : null;
+
   return (
     <Droppable
       dropTypes={isDropAllowed ? DROP_PROPS.types : undefined}
@@ -171,13 +213,16 @@ export const DiscoverMainContent = ({
           data-test-subj="dscMainContent"
         >
           {showChart && isChartAvailable && <EuiHorizontalRule margin="none" />}
+          {entitySimulationBanner}
           {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
-            <DiscoverDocuments
-              viewModeToggle={viewModeToggle}
-              dataView={dataView}
-              onAddFilter={onAddFilter}
-              onFieldEdited={!isEsqlMode ? onFieldEdited : undefined}
-            />
+            <EntityFlyoutSimulationProvider>
+              <DiscoverDocuments
+                viewModeToggle={viewModeToggle}
+                dataView={dataView}
+                onAddFilter={onAddFilter}
+                onFieldEdited={!isEsqlMode ? onFieldEdited : undefined}
+              />
+            </EntityFlyoutSimulationProvider>
           ) : null}
           {viewMode === VIEW_MODE.AGGREGATED_LEVEL ? (
             <>

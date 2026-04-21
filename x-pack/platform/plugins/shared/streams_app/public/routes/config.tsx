@@ -17,6 +17,7 @@ import { StreamListView } from '../components/stream_list_view';
 import { StreamDetailRoot } from '../components/stream_root';
 import { StreamDetailManagement } from '../components/stream_management/data_management/stream_detail_management';
 import { SignificantEventsDiscoveryPage } from '../components/sig_events/significant_events_discovery/page';
+import { ManageEntityTypesPage } from '../components/manage_entity_types/manage_entity_types_page';
 
 /**
  * Optional time range query params.
@@ -88,6 +89,21 @@ const streamsAppRoutes = {
             ]),
           },
         },
+      },
+      '/entity-types': {
+        element: (
+          <StreamsAppRouterBreadcrumb
+            title={i18n.translate('xpack.streams.manageEntityTypes.breadcrumbTitle', {
+              defaultMessage: 'Manage entity types',
+            })}
+            path="/entity-types"
+          >
+            <ManageEntityTypesPage />
+          </StreamsAppRouterBreadcrumb>
+        ),
+        params: t.partial({
+          query: timeRangeQueryParams,
+        }),
       },
       '/{key}': {
         element: (

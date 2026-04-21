@@ -29,7 +29,11 @@ import {
   SHOW_FIELD_STATISTICS,
   ROW_HEIGHT_OPTION,
 } from '@kbn/discover-utils';
-import { DEFAULT_ROWS_PER_PAGE, ROWS_PER_PAGE_OPTIONS } from '../common/constants';
+import {
+  DEFAULT_ROWS_PER_PAGE,
+  ENTITY_FLYOUT_SIMULATION_UI_SETTING,
+  ROWS_PER_PAGE_OPTIONS,
+} from '../common/constants';
 
 export const getUiSettings: (
   docLinks: DocLinksServiceSetup,
@@ -253,5 +257,17 @@ export const getUiSettings: (
         'The number of lines to allow in a row. A value of -1 automatically adjusts the row height to fit the contents. A value of 0 displays the content in a single line.',
     }),
     schema: schema.number({ min: -1 }),
+  },
+  [ENTITY_FLYOUT_SIMULATION_UI_SETTING]: {
+    name: i18n.translate('discover.advancedSettings.entityFlyoutSimulationTitle', {
+      defaultMessage: 'Entity flyout simulation (experimental)',
+    }),
+    value: false,
+    description: i18n.translate('discover.advancedSettings.entityFlyoutSimulationText', {
+      defaultMessage:
+        'When enabled, clicking a service name in the logs document table opens a simulated entity details flyout. You can also set localStorage key discoverEntityFlyoutSimulation to true without using this setting.',
+    }),
+    category: ['discover'],
+    schema: schema.boolean(),
   },
 });
