@@ -12,6 +12,7 @@ import type { DetectionMetrics } from './types';
 import { getMlJobMetrics } from './ml_jobs/get_metrics';
 import { getRuleMetrics } from './rules/get_metrics';
 import {
+  getInitialAiCreatedRulesUsage,
   getInitialEventLogUsage,
   getInitialRuleCustomizationStatus,
   getInitialRuleUpgradeStatus,
@@ -63,6 +64,7 @@ export const getDetectionsMetrics = async ({
             detection_rule_status: getInitialEventLogUsage(),
             elastic_detection_rule_upgrade_status: getInitialRuleUpgradeStatus(),
             elastic_detection_rule_customization_status: getInitialRuleCustomizationStatus(),
+            ai_created_rules: getInitialAiCreatedRulesUsage(),
             spaces_usage: getInitialSpacesUsage(),
           },
     legacy_siem_signals:

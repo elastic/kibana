@@ -56,29 +56,41 @@ const getDefaultActionParts = (context: ColumnBuilderContext): ParsedPart[] => {
   const parts: ParsedPart[] = [];
   const { itemConfig, isReadOnly } = context;
 
-  if (isReadOnly) {
-    return parts;
+  // Edit and delete actions are suppressed in read-only mode, but inspect
+  // (view details) is always available when the content editor is enabled —
+  // matching the existing TableListView behavior where "View details" is
+  // shown regardless of read-only state.
+  if (!isReadOnly) {
+    const hasEdit = itemConfig?.getEditUrl || itemConfig?.onEdit;
+    const hasDelete = itemConfig?.onDelete;
+
+    if (hasEdit) {
+      parts.push({
+        type: 'part',
+        part: 'action',
+        preset: 'edit',
+        instanceId: 'edit',
+        attributes: {},
+      });
+    }
+
+    if (hasDelete) {
+      parts.push({
+        type: 'part',
+        part: 'action',
+        preset: 'delete',
+        instanceId: 'delete',
+        attributes: {},
+      });
+    }
   }
 
-  const hasEdit = itemConfig?.getEditUrl || itemConfig?.onEdit;
-  const hasDelete = itemConfig?.onDelete;
-
-  if (hasEdit) {
+  if (itemConfig?.onInspect) {
     parts.push({
       type: 'part',
       part: 'action',
-      preset: 'edit',
-      instanceId: 'edit',
-      attributes: {},
-    });
-  }
-
-  if (hasDelete) {
-    parts.push({
-      type: 'part',
-      part: 'action',
-      preset: 'delete',
-      instanceId: 'delete',
+      preset: 'inspect',
+      instanceId: 'inspect',
       attributes: {},
     });
   }
