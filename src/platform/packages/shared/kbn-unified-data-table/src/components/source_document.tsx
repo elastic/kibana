@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-<<<<<<< discover_esql_source_column
-import React, { Fragment, useMemo } from 'react';
-=======
-import React, { Fragment, type ReactNode } from 'react';
->>>>>>> main
+import React, { Fragment, useMemo, type ReactNode } from 'react';
 import { css } from '@emotion/react';
 import type {
   DataTableColumnsMeta,
@@ -22,11 +18,7 @@ import type {
 } from '@kbn/discover-utils/src/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-<<<<<<< discover_esql_source_column
-import { buildDataTableRecord, formatFieldValue, formatHit } from '@kbn/discover-utils';
-=======
-import { formatFieldValueReact, formatHitReact } from '@kbn/discover-utils';
->>>>>>> main
+import { buildDataTableRecord, formatFieldValueReact, formatHitReact } from '@kbn/discover-utils';
 import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import {
   EuiDescriptionList,
@@ -78,21 +70,15 @@ export function SourceDocument({
   );
 
   const pairs: FormattedHit = useTopLevelObjectColumns
-<<<<<<< discover_esql_source_column
-    ? getTopLevelObjectPairs(
-        effectiveRow.raw,
-=======
     ? getTopLevelObjectPairsReact(
-        row.raw,
->>>>>>> main
+        effectiveRow.raw,
         columnId,
         dataView,
         shouldShowFieldHandler,
         fieldFormats,
         columnsMeta
       ).slice(0, maxEntries)
-<<<<<<< discover_esql_source_column
-    : formatHit(
+    : formatHitReact(
         effectiveRow,
         dataView,
         shouldShowFieldHandler,
@@ -100,9 +86,6 @@ export function SourceDocument({
         fieldFormats,
         columnsMeta
       );
-=======
-    : formatHitReact(row, dataView, shouldShowFieldHandler, maxEntries, fieldFormats, columnsMeta);
->>>>>>> main
 
   return (
     <EuiDescriptionList
