@@ -128,7 +128,7 @@ export function QueryStreamDetailManagement({
     ),
   };
 
-  const defaultTab = overviewPage.enabled ? 'overview' : 'schema';
+  const defaultTab = overviewPage.enabled ? 'overview' : 'partitioning';
 
   if (!isValidManagementSubTab(tab, overviewPage.enabled) || !tabs[tab]?.content) {
     return (
