@@ -14,7 +14,13 @@ import { EntityAttachmentInlineContent } from './entity_attachment_inline_conten
 
 jest.mock('./entity_card/entity_card', () => ({
   EntityCard: (props: Record<string, unknown>) => (
-    <div data-test-subj="entityCardMock">{JSON.stringify(props.identifier)}</div>
+    <div
+      data-test-subj="entityCardMock"
+      data-watchlists-enabled={String(props.watchlistsEnabled)}
+      data-privmon-modifier-enabled={String(props.privmonModifierEnabled)}
+    >
+      {JSON.stringify(props.identifier)}
+    </div>
   ),
 }));
 
@@ -28,6 +34,7 @@ jest.mock('./entity_table/entity_table', () => ({
 
 const experimentalFeatures = {
   entityAnalyticsWatchlistEnabled: true,
+  enableRiskScorePrivmonModifier: true,
 } as unknown as ExperimentalFeatures;
 
 const attachment = (data: unknown): EntityAttachment =>
@@ -79,5 +86,12 @@ describe('EntityAttachmentInlineContent', () => {
     expect(screen.getByTestId('entityAttachmentEmpty')).toBeInTheDocument();
     expect(screen.queryByTestId('entityCardMock')).not.toBeInTheDocument();
     expect(screen.queryByTestId('entityTableMock')).not.toBeInTheDocument();
+  });
+
+  it('forwards watchlist and privmon modifier flags to the EntityCard', () => {
+    renderDispatcher({ identifierType: 'host', identifier: 'alpha' });
+    const card = screen.getByTestId('entityCardMock');
+    expect(card.getAttribute('data-watchlists-enabled')).toBe('true');
+    expect(card.getAttribute('data-privmon-modifier-enabled')).toBe('true');
   });
 });

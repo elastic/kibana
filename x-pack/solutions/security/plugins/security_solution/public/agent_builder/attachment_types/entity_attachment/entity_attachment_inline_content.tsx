@@ -66,6 +66,7 @@ export const EntityAttachmentInlineContent: React.FC<EntityAttachmentInlineConte
   }
 
   const watchlistsEnabled = experimentalFeatures.entityAnalyticsWatchlistEnabled;
+  const privmonModifierEnabled = experimentalFeatures.enableRiskScorePrivmonModifier;
 
   return (
     <QueryClientProvider client={entityAttachmentQueryClient}>
@@ -73,6 +74,7 @@ export const EntityAttachmentInlineContent: React.FC<EntityAttachmentInlineConte
         <EntityCard
           identifier={parsed.entities[0]}
           watchlistsEnabled={watchlistsEnabled}
+          privmonModifierEnabled={privmonModifierEnabled}
           setComposerContent={setComposerContent}
         />
       ) : (

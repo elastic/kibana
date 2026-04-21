@@ -5,21 +5,26 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiCallOut, EuiPanel, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import { useEntityForAttachment } from '../use_entity_for_attachment';
 import type { EntityAttachmentIdentifier } from '../types';
 import { IdentityHeader } from './identity_header';
-import { RiskSummaryRow } from './risk_summary_row';
-import { KeyFieldsList } from './key_fields_list';
-import { WatchlistsList } from './watchlists_list';
+import { EntitySummaryGridMini } from './entity_summary_grid';
+import { RiskSummaryMini } from './risk_summary_mini';
+import { ResolutionMini } from './resolution_mini';
 import { EntityCardActions } from './entity_card_actions';
+import {
+  getResolutionGroupPrompt,
+  getRiskContributionsPrompt,
+} from '../prompts';
 
 interface EntityCardProps {
   identifier: EntityAttachmentIdentifier;
   watchlistsEnabled: boolean;
+  privmonModifierEnabled: boolean;
   setComposerContent?: (text: string) => void;
 }
 
@@ -39,12 +44,31 @@ const identifierTypeToEntityType = (
   }
 };
 
+/**
+ * Rich entity card shown inside an agent chat message. When the entity is
+ * in the entity store, we mirror the user/host details flyout layout
+ * (identity header → summary grid → risk summary → resolution group),
+ * rebuilt with lightweight hooks so the card stays decoupled from the
+ * Security Solution Redux/expandable-flyout providers.
+ *
+ * Actions are prefill-only: the chips set the composer content via
+ * `setComposerContent` and let the user press Enter to send.
+ */
 export const EntityCard: React.FC<EntityCardProps> = ({
   identifier,
   watchlistsEnabled,
+  privmonModifierEnabled,
   setComposerContent,
 }) => {
   const { isLoading, error, data } = useEntityForAttachment(identifier);
+
+  const handleViewRiskContributions = useCallback(() => {
+    setComposerContent?.(getRiskContributionsPrompt(identifier));
+  }, [setComposerContent, identifier]);
+
+  const handleViewResolutionGroup = useCallback(() => {
+    setComposerContent?.(getResolutionGroupPrompt(identifier));
+  }, [setComposerContent, identifier]);
 
   if (isLoading && !data) {
     return (
@@ -63,6 +87,7 @@ export const EntityCard: React.FC<EntityCardProps> = ({
     lastSeen: null as string | null,
     riskScore: undefined as number | undefined,
     riskLevel: undefined,
+    riskStats: undefined,
     assetCriticality: undefined,
     watchlistIds: [] as string[],
     sources: [] as string[],
@@ -107,6 +132,7 @@ export const EntityCard: React.FC<EntityCardProps> = ({
   }
 
   const resolved = data ?? fallback;
+  const source = resolved.sources[0];
 
   return (
     <EuiPanel
@@ -121,15 +147,49 @@ export const EntityCard: React.FC<EntityCardProps> = ({
         isEntityInStore={resolved.isEntityInStore}
         hasLastSeenDate={Boolean(resolved.lastSeen)}
         assetCriticality={resolved.assetCriticality}
+        riskLevel={resolved.riskLevel}
       />
-      <RiskSummaryRow riskScore={resolved.riskScore} riskLevel={resolved.riskLevel} />
-      <KeyFieldsList
-        firstSeen={resolved.firstSeen}
-        lastSeen={resolved.lastSeen}
-        sources={resolved.sources}
-        entityId={resolved.entityId}
-      />
-      {watchlistsEnabled && <WatchlistsList watchlistIds={resolved.watchlistIds} />}
+      {resolved.isEntityInStore && (
+        <>
+          <EuiSpacer size="s" />
+          <EntitySummaryGridMini
+            entityId={resolved.entityId}
+            source={source}
+            assetCriticality={resolved.assetCriticality}
+            watchlistIds={resolved.watchlistIds}
+            watchlistsEnabled={watchlistsEnabled}
+          />
+          {(resolved.riskStats || resolved.riskScore != null) && (
+            <>
+              <EuiSpacer size="m" />
+              <RiskSummaryMini
+                entityType={resolved.entityType}
+                displayName={resolved.displayName}
+                riskScore={resolved.riskScore}
+                riskLevel={resolved.riskLevel}
+                riskStats={resolved.riskStats}
+                privmonModifierEnabled={privmonModifierEnabled}
+                watchlistEnabled={watchlistsEnabled}
+                onViewRiskContributions={
+                  setComposerContent ? handleViewRiskContributions : undefined
+                }
+              />
+            </>
+          )}
+          {resolved.entityId && (
+            <>
+              <EuiSpacer size="m" />
+              <ResolutionMini
+                entityStoreEntityId={resolved.entityId}
+                currentEntityStoreEntityId={resolved.entityId}
+                onViewResolutionGroup={
+                  setComposerContent ? handleViewResolutionGroup : undefined
+                }
+              />
+            </>
+          )}
+        </>
+      )}
       <EntityCardActions identifier={identifier} setComposerContent={setComposerContent} />
     </EuiPanel>
   );

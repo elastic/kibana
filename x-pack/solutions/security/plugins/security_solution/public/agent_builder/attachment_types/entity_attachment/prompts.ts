@@ -88,3 +88,89 @@ export const getContinueConversationBulkPrompt = (
     }
   );
 };
+
+/**
+ * Resolves a human-friendly entity type label for use inside prompt strings.
+ * Falls back to the generic "entity" word so unknown identifier types still
+ * produce a sensible sentence.
+ */
+const getEntityTypeLabel = (identifierType: EntityAttachmentIdentifier['identifierType']): string => {
+  switch (identifierType) {
+    case 'host':
+      return 'host';
+    case 'user':
+      return 'user';
+    case 'service':
+      return 'service';
+    case 'generic':
+    default:
+      return 'entity';
+  }
+};
+
+/**
+ * Prompt used when the user wants a breakdown of the current entity's risk
+ * contributions (alerts, asset criticality, watchlists) in chat. Designed
+ * so that even a plain-text agent response is immediately useful while
+ * server-side tools may enrich with `<visualization>` / `<render_attachment>`.
+ */
+export const getRiskContributionsPrompt = (identifier: EntityAttachmentIdentifier): string => {
+  const typeLabel = getEntityTypeLabel(identifier.identifierType);
+  return i18n.translate(
+    'xpack.securitySolution.agentBuilder.entityAttachment.riskContributions.prompt',
+    {
+      defaultMessage:
+        'Show the risk contributions for {type} {identifier}. Break down by category (alerts, asset criticality, watchlists) and list the contributing alerts with their scores.',
+      values: { type: typeLabel, identifier: identifier.identifier },
+    }
+  );
+};
+
+/**
+ * Prompt used when the user wants to change the asset criticality of the
+ * current entity. The agent should recommend a level and walk them through
+ * applying it without requiring any in-card modal.
+ */
+export const getChangeAssetCriticalityPrompt = (identifier: EntityAttachmentIdentifier): string => {
+  const typeLabel = getEntityTypeLabel(identifier.identifierType);
+  return i18n.translate(
+    'xpack.securitySolution.agentBuilder.entityAttachment.changeAssetCriticality.prompt',
+    {
+      defaultMessage:
+        'I want to change the asset criticality for {type} {identifier}. Explain the available levels, recommend a level based on recent activity, and guide me through applying it.',
+      values: { type: typeLabel, identifier: identifier.identifier },
+    }
+  );
+};
+
+/**
+ * Prompt used when the user wants to inspect the current entity's resolution
+ * group (target identity, aliases, risk scores) directly in chat.
+ */
+export const getResolutionGroupPrompt = (identifier: EntityAttachmentIdentifier): string => {
+  const typeLabel = getEntityTypeLabel(identifier.identifierType);
+  return i18n.translate(
+    'xpack.securitySolution.agentBuilder.entityAttachment.resolutionGroup.prompt',
+    {
+      defaultMessage:
+        "Show me the resolution group for {type} {identifier}: target identity, aliases, each record's data source, and their risk scores. Highlight any score drift between the target and its aliases.",
+      values: { type: typeLabel, identifier: identifier.identifier },
+    }
+  );
+};
+
+/**
+ * Prompt used when the user wants an entity graph view (related hosts,
+ * users, processes, and notable interactions) for the current entity.
+ */
+export const getCheckGraphPrompt = (identifier: EntityAttachmentIdentifier): string => {
+  const typeLabel = getEntityTypeLabel(identifier.identifierType);
+  return i18n.translate(
+    'xpack.securitySolution.agentBuilder.entityAttachment.checkGraph.prompt',
+    {
+      defaultMessage:
+        'Show the entity graph neighborhood for {type} {identifier} over the last 24 hours — related hosts, users, processes, and notable interactions.',
+      values: { type: typeLabel, identifier: identifier.identifier },
+    }
+  );
+};

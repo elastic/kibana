@@ -12,7 +12,7 @@ import { useQuery } from '@kbn/react-query';
 import { ENTITY_STORE_ROUTES } from '@kbn/entity-store/common';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
-import type { RiskSeverity } from '../../../../common/search_strategy';
+import type { RiskSeverity, RiskStats } from '../../../../common/search_strategy';
 import type { EntityAttachmentIdentifier } from './types';
 
 export interface EntityForAttachment {
@@ -24,6 +24,12 @@ export interface EntityForAttachment {
   lastSeen: string | null;
   riskScore?: number;
   riskLevel?: RiskSeverity;
+  /**
+   * Full risk breakdown as stored on the entity store record. Used to feed the
+   * chat card's risk summary table without running a second search-strategy
+   * call (which would require Redux state not present in Agent Builder).
+   */
+  riskStats?: RiskStats;
   assetCriticality?: CriticalityLevelWithUnassigned;
   watchlistIds: string[];
   sources: string[];
@@ -43,7 +49,7 @@ interface EntityRecordShape {
     source?: string;
     attributes?: { watchlists?: string[] };
     lifecycle?: { first_seen?: string; last_activity?: string };
-    risk?: {
+    risk?: Partial<RiskStats> & {
       calculated_level?: string;
       calculated_score?: number;
       calculated_score_norm?: number;
@@ -119,6 +125,14 @@ const shapeRecord = (
   const assetCriticality =
     (assetField?.criticality as CriticalityLevelWithUnassigned | null | undefined) ?? undefined;
 
+  const riskStats = entityField?.risk
+    ? ({
+        ...entityField.risk,
+        rule_risks: (entityField.risk as { rule_risks?: unknown[] }).rule_risks ?? [],
+        multipliers: (entityField.risk as { multipliers?: unknown[] }).multipliers ?? [],
+      } as RiskStats)
+    : undefined;
+
   return {
     entityType: toEntityType(identifier.identifierType),
     displayName: entityField?.name ?? identifier.identifier,
@@ -128,6 +142,7 @@ const shapeRecord = (
     lastSeen: entityField?.lifecycle?.last_activity ?? null,
     riskScore,
     riskLevel,
+    riskStats,
     assetCriticality,
     watchlistIds: entityField?.attributes?.watchlists?.slice() ?? [],
     sources: entityField?.source ? [entityField.source] : [],

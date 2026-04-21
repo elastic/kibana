@@ -11,8 +11,10 @@ import { i18n } from '@kbn/i18n';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import { EntityIconByType } from '../../../../entity_analytics/components/entity_store/helpers';
 import { EntitySourceBadge } from '../../../../flyout/entity_details/shared/components/entity_source_badge';
+import { RiskLevelBadge } from '../../../../flyout/entity_details/shared/components/risk_level_badge';
 import { AssetCriticalityBadge } from '../../../../entity_analytics/components/asset_criticality/asset_criticality_badge';
 import type { CriticalityLevelWithUnassigned } from '../../../../../common/entity_analytics/asset_criticality/types';
+import type { RiskSeverity } from '../../../../../common/search_strategy';
 
 const ENTITY_TYPE_LABEL: Record<EntityType, string> = {
   [EntityType.host]: i18n.translate(
@@ -39,6 +41,7 @@ interface IdentityHeaderProps {
   isEntityInStore: boolean;
   hasLastSeenDate: boolean;
   assetCriticality?: CriticalityLevelWithUnassigned;
+  riskLevel?: RiskSeverity;
 }
 
 export const IdentityHeader: React.FC<IdentityHeaderProps> = ({
@@ -47,6 +50,7 @@ export const IdentityHeader: React.FC<IdentityHeaderProps> = ({
   isEntityInStore,
   hasLastSeenDate,
   assetCriticality,
+  riskLevel,
 }) => {
   return (
     <EuiFlexGroup
@@ -80,6 +84,11 @@ export const IdentityHeader: React.FC<IdentityHeaderProps> = ({
               data-test-subj="entityAttachmentSourceBadge"
             />
           </EuiFlexItem>
+          {riskLevel && (
+            <EuiFlexItem grow={false} data-test-subj="entityAttachmentRiskLevelBadge">
+              <RiskLevelBadge riskLevel={riskLevel} />
+            </EuiFlexItem>
+          )}
           {assetCriticality && assetCriticality !== 'unassigned' && (
             <EuiFlexItem grow={false}>
               <AssetCriticalityBadge
