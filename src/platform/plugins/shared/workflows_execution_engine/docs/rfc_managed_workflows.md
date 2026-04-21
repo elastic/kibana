@@ -301,6 +301,7 @@ Extend the existing `.workflows-workflows` index and document model with new fie
 | `managed` | `boolean` | `true` for managed workflows, `false` (default) for user workflows. Not user-settable. |
 | `managedBy` | `string \| null` | Plugin ID that owns this workflow (e.g., `securityInsights`, `streams`). `null` for user workflows. Used for ownership tracking, reconciliation, and cleanup. |
 | `definitionHash` | `string \| null` | SHA-256 of the YAML definition. Used for reconciliation (create-if-absent, update-if-changed). `null` for user workflows. |
+| `originSystemWorkflowId` | `string \| null` | The registered system workflow ID this instance was created from. For workflows provisioned at startup with a deterministic ID, this equals the workflow's own ID. For post-start workflows that may be created multiple times with caller-provided or generated IDs (see [Open Questions > Post-start #2](#post-start)), this field links the instance back to the registered definition. Used together with `definitionHash` to detect version changes and apply reconciliation (updates, cleanup) across all instances of the same system workflow. `null` for user workflows. |
 
 `defaultEnabled` and `preserveEnabledState` are **not** stored on the document — they live in the in-memory registration only. During reconciliation, the platform reads these values from the registered workflow definition and acts accordingly. This keeps the storage model lean and avoids persisting registration-time metadata that may change between releases.
 
@@ -310,6 +311,7 @@ New mapping additions (in `workflow_storage.ts`):
 managed: types.boolean({}),
 managedBy: types.keyword({}),
 definitionHash: types.keyword({ index: false }),
+originSystemWorkflowId: types.keyword({}),
 ```
 
 - **Reads:** One index; list/detail APIs filter or label using `managed` (e.g., hide managed by default).
