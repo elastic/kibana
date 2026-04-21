@@ -7,7 +7,12 @@
 
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { isInferenceProviderError, type InferenceConnector } from '@kbn/inference-common';
-import { type IdentifyFeaturesResult, getStreamTypeFromDefinition } from '@kbn/streams-schema';
+import {
+  type IdentifyFeaturesResult,
+  type IterationResult,
+  type Feature,
+  getStreamTypeFromDefinition,
+} from '@kbn/streams-schema';
 import { v4 as uuid } from 'uuid';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { Logger, LogMeta } from '@kbn/logging';
@@ -21,12 +26,10 @@ import { cancellableTask } from '../../cancellable_task';
 import { isDefinitionNotFoundError } from '../../../streams/errors/definition_not_found_error';
 import {
   buildTelemetry,
-  createEmptyAccumulatedState,
   deriveSuccessCount,
   deriveTotalTokensUsed,
   identifyInferredFeatures,
   identifyComputedFeatures,
-  type AccumulatedIterationState,
 } from '../../../sig_events/features';
 
 export interface FeaturesIdentificationTaskParams {
@@ -46,11 +49,11 @@ function isCancellationError(message: string): boolean {
   return message.includes('ERR_CANCELED') || message.includes('Request was aborted');
 }
 
-function buildTaskResult(state: AccumulatedIterationState, durationMs: number) {
+function buildTaskResult(iterationResults: IterationResult[], durationMs: number) {
   return {
     durationMs,
-    iterations: state.iterationResults,
-    totalTokensUsed: deriveTotalTokensUsed(state.iterationResults),
+    iterations: iterationResults,
+    totalTokensUsed: deriveTotalTokensUsed(iterationResults),
   };
 }
 
@@ -118,7 +121,8 @@ async function runFeaturesIdentification(
   taskLogger.debug(`Using connector ${connectorId} for knowledge indicator extraction`);
 
   let hasTrackedIteration = false;
-  let state: AccumulatedIterationState = createEmptyAccumulatedState();
+  const iterationResults: IterationResult[] = [];
+  let discoveredFeatures: Feature[] = [];
 
   try {
     const stream = await streamsClient.getStream(streamName);
@@ -166,7 +170,7 @@ async function runFeaturesIdentification(
       taskLogger.debug(
         () =>
           `Iteration ${i + 1}/${maxIterations}: ` +
-          `${state.discoveredFeatures.length} features known, starting iteration`
+          `${discoveredFeatures.length} features known, starting iteration`
       );
 
       const result = await identifyInferredFeatures({
@@ -181,7 +185,7 @@ async function runFeaturesIdentification(
         start,
         end,
         runId,
-        state,
+        iteration: i + 1,
         tuning,
         diverseOffset,
         trackFeaturesIdentified,
@@ -197,10 +201,11 @@ async function runFeaturesIdentification(
       }
       diverseOffset = result.nextDiverseOffset;
 
-      state = result.state;
+      iterationResults.push(result.iterationResult);
+      discoveredFeatures = result.discoveredFeatures;
     }
 
-    if (state.iterationResults.length > 0 && deriveSuccessCount(state.iterationResults) === 0) {
+    if (iterationResults.length > 0 && deriveSuccessCount(iterationResults) === 0) {
       throw new Error(`All iterations failed for stream ${streamName}`);
     }
 
@@ -208,12 +213,12 @@ async function runFeaturesIdentification(
       taskLogger.warn(`Computed features generation failed: ${parseError(err).message}`);
       return [] as Awaited<ReturnType<typeof identifyComputedFeatures>>;
     });
-    const allFeatures = [...state.discoveredFeatures, ...reconciledComputedFeatures];
+    const allFeatures = [...discoveredFeatures, ...reconciledComputedFeatures];
 
     await taskClient.complete<FeaturesIdentificationTaskParams, IdentifyFeaturesResult>(
       _task,
       taskParams,
-      { ...buildTaskResult(state, taskDurationMs()), features: allFeatures }
+      { ...buildTaskResult(iterationResults, taskDurationMs()), features: allFeatures }
     );
   } catch (error) {
     if (isDefinitionNotFoundError(error)) {
@@ -240,7 +245,7 @@ async function runFeaturesIdentification(
       _task,
       taskParams,
       errorMessage,
-      { ...buildTaskResult(state, taskDurationMs()), features: [] }
+      { ...buildTaskResult(iterationResults, taskDurationMs()), features: [] }
     );
 
     if (!hasTrackedIteration) {
