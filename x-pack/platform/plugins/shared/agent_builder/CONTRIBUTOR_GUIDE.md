@@ -767,17 +767,6 @@ This is useful when the surrounding application wants to attach page context onl
 
 A **pending attachment** is a client-only attachment attached to the active conversation that has not yet been persisted to a round; it lives in the chat UI until the user submits the next message, at which point it is sent with that round and persisted.
 
-Not every API on the start contract applies to both chat surfaces. Use this table to check scope before wiring something up:
-
-| API                               | Sidebar | Full-page chat | Notes                                                              |
-| --------------------------------- | :-----: | :------------: | ------------------------------------------------------------------ |
-| `setChatConfig(...)`              |   ✅    |       ❌       | Configures the next (or active) sidebar open.                      |
-| `clearChatConfig()`               |   ✅    |       ❌       | Clears the runtime sidebar config.                                 |
-| `events.ui.sidebarOpen$`          |   ✅    |       ❌       | Tracks sidebar open state only.                                    |
-| `events.ui.activeConversation$`   |   ✅    |       ✅       | Emits for both sidebar and routed/full-page chat.                  |
-| `addAttachment(...)`              |   ✅    |       ❌       | Silently ignored when no sidebar is open.                          |
-| `updateAttachmentOrigin(...)`     |   ✅    |       ✅       | Conversation-scoped — works regardless of which surface is active. |
-
 ### `setChatConfig(...)`
 
 > **Scope:** sidebar only.
@@ -816,6 +805,37 @@ agentBuilder.setChatConfig({
   ],
 });
 ```
+
+### `addAttachment(...)`
+
+> **Scope:** sidebar only. If no sidebar is open, the call is silently ignored.
+
+`addAttachment(...)` adds or updates a pending attachment in the active sidebar conversation.
+
+```ts
+agentBuilder.addAttachment({
+  id: 'my-pending-context',
+  type: 'my_type',
+  data: { ... },
+  origin: 'saved-object-id',
+});
+```
+
+Pending attachments added through `agentBuilder.addAttachment(...)` can include an `origin` string, just like other attachment inputs sent to the Agent Builder APIs. Use this when your pending attachment already corresponds to a persistent resource (for example, a saved object-backed dashboard or visualization), and your attachment type expects `origin` to be present.
+
+### `updateAttachmentOrigin(...)`
+
+Use `updateAttachmentOrigin(...)` when you need to update an attachment's `origin` from outside the attachment UI itself.
+
+```ts
+await agentBuilder.updateAttachmentOrigin(conversationId, attachmentId, savedObjectId);
+```
+
+This is useful when the save workflow completes somewhere else in your plugin, but you still know which conversation attachment should be linked to the newly created persistent resource.
+
+## Events
+
+The `agentBuilder` start contract exposes observables on the `events.ui` namespace that let plugins react to the chat surface lifecycle (sidebar open state and the currently bound conversation). All observables are backed by a `BehaviorSubject`: new subscribers receive the current value immediately.
 
 ### `events.ui.sidebarOpen$`
 
@@ -893,33 +913,6 @@ class MyPlugin {
   }
 }
 ```
-
-### `addAttachment(...)`
-
-> **Scope:** sidebar only. If no sidebar is open, the call is silently ignored.
-
-`addAttachment(...)` adds or updates a pending attachment in the active sidebar conversation.
-
-```ts
-agentBuilder.addAttachment({
-  id: 'my-pending-context',
-  type: 'my_type',
-  data: { ... },
-  origin: 'saved-object-id',
-});
-```
-
-Pending attachments added through `agentBuilder.addAttachment(...)` can include an `origin` string, just like other attachment inputs sent to the Agent Builder APIs. Use this when your pending attachment already corresponds to a persistent resource (for example, a saved object-backed dashboard or visualization), and your attachment type expects `origin` to be present.
-
-### `updateAttachmentOrigin(...)`
-
-Use `updateAttachmentOrigin(...)` when you need to update an attachment's `origin` from outside the attachment UI itself.
-
-```ts
-await agentBuilder.updateAttachmentOrigin(conversationId, attachmentId, savedObjectId);
-```
-
-This is useful when the save workflow completes somewhere else in your plugin, but you still know which conversation attachment should be linked to the newly created persistent resource.
 
 ## Registering skills
 
