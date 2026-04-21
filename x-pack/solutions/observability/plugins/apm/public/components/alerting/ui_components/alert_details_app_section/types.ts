@@ -8,12 +8,34 @@
 import type { Rule } from '@kbn/alerting-plugin/common';
 import type { TopAlert } from '@kbn/observability-plugin/public';
 import type { TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
+import { ApmRuleType } from '@kbn/rule-data-utils';
 import type {
   SERVICE_NAME,
   TRANSACTION_TYPE,
   SERVICE_ENVIRONMENT,
   TRANSACTION_NAME,
 } from '../../../../../common/es_fields/apm';
+
+export type ChartId = 'latency' | 'failedTransactionRate' | 'throughput';
+
+interface ChartLayout {
+  primary: ChartId;
+  secondary: [ChartId, ChartId];
+}
+
+export const DEFAULT_LAYOUT: ChartLayout = {
+  primary: 'latency',
+  secondary: ['throughput', 'failedTransactionRate'],
+};
+
+export const RULE_TYPE_CHART_LAYOUTS: Partial<Record<ApmRuleType, ChartLayout>> = {
+  [ApmRuleType.TransactionDuration]: DEFAULT_LAYOUT,
+  [ApmRuleType.TransactionErrorRate]: {
+    primary: 'failedTransactionRate',
+    secondary: ['throughput', 'latency'],
+  },
+};
+
 export interface AlertDetailsAppSectionProps {
   rule: Rule<{
     environment: string;

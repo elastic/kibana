@@ -15,6 +15,7 @@ import { withMinimumLicense } from '../../../utils/with_minimum_license';
 import { GetWatchlistRequestParams as WatchlistIdParams } from '../../../../../../common/api/entity_analytics/watchlists/management/get.gen';
 import { WatchlistConfigClient } from '../watchlist_config';
 import { getRequestSavedObjectClient } from '../../shared/utils';
+import { createEntitySourcesService } from '../../entity_sources/entity_sources_service';
 
 interface DeleteWatchlistResponse {
   deleted: true;
@@ -50,10 +51,25 @@ export const deleteWatchlistRoute = (
             const secSol = await context.securitySolution;
             const core = await context.core;
 
+            const namespace = secSol.getSpaceId();
+            const soClient = getRequestSavedObjectClient(core);
+            const esClient = core.elasticsearch.client.asCurrentUser;
+
+            const entitySourcesService = createEntitySourcesService({
+              namespace,
+              soClient,
+              esClient,
+              logger,
+            });
+
+            // Clean up entities from the watchlist index and entity store before
+            // removing the saved objects, so we can still resolve the watchlist name.
+            await entitySourcesService.deleteWatchlistEntities(request.params.id);
+
             const watchlistClient = new WatchlistConfigClient({
-              namespace: secSol.getSpaceId(),
-              soClient: getRequestSavedObjectClient(core),
-              esClient: core.elasticsearch.client.asCurrentUser,
+              namespace,
+              soClient,
+              esClient,
               logger,
             });
             await watchlistClient.delete(request.params.id);
