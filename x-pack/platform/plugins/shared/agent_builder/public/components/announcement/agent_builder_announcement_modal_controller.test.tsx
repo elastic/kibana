@@ -44,7 +44,7 @@ function buildServices({
   announcementSeenInProfile?: boolean;
   spaceId?: string;
   userProfileEnabled?: boolean;
-  /** Overrides the JSON stored in user profile for per-space dismissal (default derives from announcementSeenInProfile). */
+  /** Overrides legacy per-space JSON in user profile (when set, takes precedence over announcementSeenInProfile). */
   agentBuilderSeenJson?: string;
   chatExperienceCapabilities?: Capabilities;
   chatExperience?: AIChatExperience;
@@ -53,17 +53,18 @@ function buildServices({
   const reportEvent = jest.fn();
   const navigateToApp = jest.fn();
   const partialUpdate = jest.fn().mockResolvedValue(undefined);
-  const seenJson =
-    agentBuilderSeenJson ??
-    (announcementSeenInProfile ? JSON.stringify({ [spaceId]: true }) : JSON.stringify({}));
+  const userSettings =
+    agentBuilderSeenJson !== undefined
+      ? { agentBuilderAnnouncementModalSeenBySpaceJson: agentBuilderSeenJson }
+      : announcementSeenInProfile
+      ? { agentBuilderAnnouncementModalSeen: true as const }
+      : { agentBuilderAnnouncementModalSeenBySpaceJson: JSON.stringify({}) };
 
   const userProfile = {
     getEnabled$: () => of(userProfileEnabled),
     getCurrent: jest.fn().mockResolvedValue({
       data: {
-        userSettings: {
-          agentBuilderAnnouncementModalSeenBySpaceJson: seenJson,
-        },
+        userSettings,
       },
     }),
     partialUpdate,
@@ -186,7 +187,7 @@ describe('AgentBuilderAnnouncementModalController', () => {
     });
   });
 
-  it('shows the modal after switching to a space where the announcement was not dismissed', async () => {
+  it('does not show the modal again after switching space when dismissal was recorded for another space (legacy profile)', async () => {
     const spaceA = 'space-a';
     const spaceB = 'space-b';
     const { services, space$ } = buildServices({
@@ -206,7 +207,9 @@ describe('AgentBuilderAnnouncementModalController', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByTestId('agentBuilderAnnouncementContinueButton')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('agentBuilderAnnouncementContinueButton')
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -224,7 +227,7 @@ describe('AgentBuilderAnnouncementModalController', () => {
     await waitFor(() => {
       expect(partialUpdate).toHaveBeenCalledWith({
         userSettings: {
-          agentBuilderAnnouncementModalSeenBySpaceJson: JSON.stringify({ [SPACE_ID]: true }),
+          agentBuilderAnnouncementModalSeen: true,
         },
       });
     });
@@ -247,7 +250,11 @@ describe('AgentBuilderAnnouncementModalController', () => {
     await user.click(screen.getByTestId('agentBuilderAnnouncementRevertButton'));
 
     await waitFor(() => {
-      expect(partialUpdate).toHaveBeenCalled();
+      expect(partialUpdate).toHaveBeenCalledWith({
+        userSettings: {
+          agentBuilderAnnouncementModalSeen: true,
+        },
+      });
     });
     expect(reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.OptOut, {
       source: 'agent_builder_nav_control',
