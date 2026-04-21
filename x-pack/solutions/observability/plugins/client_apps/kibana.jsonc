@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/client-apps-plugin",
+  "owner": ["@elastic/observability-android"],
+  "group": "observability",
+  "visibility": "private",
+  "plugin": {
+    "id": "clientApps",
+    "browser": true,
+    "server": true,
+    "configPath": ["xpack", "clientApps"],
+    "requiredPlugins": [],
+    "optionalPlugins": []
+  }
+}
