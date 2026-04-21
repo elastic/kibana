@@ -8,6 +8,10 @@ metadata:
     - url: 'https://buildkite.com/elastic/kibana-renovate-reviewer-sync'
       title: Pipeline link
 spec:
+  # TODO(ownership): `group:kibana-operations` and the `teams:` access levels below are
+  # placeholders until we agree on which team owns this weekly signal. The runtime paths
+  # that actually ping a team live in `.buildkite/scripts/steps/renovate_reviewer_sync.sh`
+  # (PR label, computed reviewers) and can be adjusted independently of this metadata.
   type: buildkite-pipeline
   owner: 'group:kibana-operations'
   system: buildkite
@@ -32,7 +36,6 @@ spec:
         trigger_mode: none
         build_tags: false
         prefix_pull_request_fork_branch_names: false
-        skip_pull_request_builds_for_existing_commits: true
       teams:
         kibana-operations:
           access_level: MANAGE_BUILD_AND_READ

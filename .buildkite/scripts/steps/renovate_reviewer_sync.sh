@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# TODO(ownership): the Backstage owner (`group:kibana-operations`), the
+# `Team:Kibana Operations` label added to the bot PR below, and the team
+# access levels in `.buildkite/pipeline-resource-definitions/kibana-renovate-reviewer-sync.yml`
+# are placeholders pending a decision on which team owns this weekly signal.
+# The runtime paths that actually ping a team (fallback reviewer, always-added
+# reviewer) have been removed so only CODEOWNERS-derived reviewers are pinged.
+
 GIT_SCOPE="renovate.json"
 
 KIBANA_MACHINE_USERNAME="kibanamachine"
@@ -96,12 +103,14 @@ const slice = details.slice(0, lim);
 
 const fmt = (d) => {
   const idx = typeof d.index === 'number' ? d.index : '?';
+  const groupName = typeof d.groupName === 'string' && d.groupName.length > 0 ? d.groupName : null;
+  const header = groupName ? `"${groupName}"` : `rule[${idx}]`;
   const mode = typeof d.mode === 'string' ? d.mode : 'unknown';
   const pkgs = Array.isArray(d.packages) ? d.packages : [];
   const before = Array.isArray(d.before) ? d.before : [];
   const pkgsStr = pkgs.length <= 6 ? pkgs.join(', ') : `${pkgs.slice(0, 6).join(', ')}, …(+${pkgs.length - 6})`;
   const beforeStr = before.length === 0 ? '(no reviewers set)' : before.join(', ');
-  return `rule[${idx}] (${mode}) packages: ${pkgsStr} | existing reviewers: ${beforeStr}`;
+  return `${header} (${mode}) packages: ${pkgsStr} | existing reviewers: ${beforeStr}`;
 };
 
 process.stdout.write(slice.map(fmt).join('\n'));
@@ -134,26 +143,36 @@ NODE
 }
 
 node_print_requested_reviewers () {
-  # Reads `gh pr view --json reviewRequests` from stdin and prints one reviewer login per line.
-  node - <<'NODE'
+  # Reads `gh pr view --json reviewRequests` from stdin and prints one reviewer per line in the
+  # same format `node_print_reviewers` emits, so the two sets can be set-differenced:
+  #   - teams  -> `elastic/<slug>`   (gh returns `slug` without the org prefix for teams)
+  #   - users  -> `<login>`
+  #
+  # Note: we pass the script via process substitution (`<(cat <<NODE ... NODE)`) rather than
+  # `node - <<NODE`. The latter would make the heredoc itself be node's stdin, leaving the
+  # caller's piped JSON unreadable.
+  node <(cat <<'NODE'
 let input = '';
 process.stdin.setEncoding('utf8');
 process.stdin.on('data', (c) => (input += c));
 process.stdin.on('end', () => {
   const data = input.trim() ? JSON.parse(input) : {};
   const reqs = Array.isArray(data.reviewRequests) ? data.reviewRequests : [];
-  const logins = reqs
+  const entries = reqs
     .map((r) => {
       if (!r || typeof r !== 'object') return null;
-      // Teams appear as `{ slug: "elastic/<team>" }`, users as `{ login: "<user>" }`.
-      if (typeof r.slug === 'string') return r.slug;
+      // `slug` identifies teams (bare slug, e.g. `kibana-operations`); `login` identifies users.
+      // Prefix team slugs with `elastic/` so they match the format used by the computed set and
+      // by `gh pr edit --add-reviewer`.
+      if (typeof r.slug === 'string') return `elastic/${r.slug}`;
       if (typeof r.login === 'string') return r.login;
       return null;
     })
     .filter(Boolean);
-  process.stdout.write(logins.join('\n'));
+  process.stdout.write(entries.join('\n'));
 });
 NODE
+)
 }
 
 node_print_mentions () {
@@ -192,7 +211,11 @@ compute_new_reviewers_to_request () {
   local existing_reviewers
   existing_reviewers="$(gh pr view "$pr_number" --json reviewRequests 2>/dev/null | node_print_requested_reviewers || true)"
 
-  # Use sorted set difference: computed - existing
+  # Use sorted set difference: computed - existing.
+  # The computed side is a space-separated string; we intentionally word-split it into one
+  # line per reviewer. The existing side is already newline-separated from
+  # `node_print_requested_reviewers`, so it stays quoted.
+  # shellcheck disable=SC2086
   comm -23 \
     <(printf '%s\n' $computed_reviewers | sort -u) \
     <(printf '%s\n' "${existing_reviewers:-}" | sort -u)
@@ -241,14 +264,23 @@ main () {
   .buildkite/scripts/bootstrap.sh
 
   # Ensure we're on a clean, up-to-date `main` before generating reports and applying changes.
+  # Fetch/checkout are best-effort (the agent already starts on main), but `reset --hard` must
+  # succeed — a silent failure here would let us operate on stale state.
   git fetch origin main >/dev/null 2>&1 || true
   git checkout main >/dev/null 2>&1 || true
-  git reset --hard origin/main >/dev/null 2>&1 || true
+  git reset --hard origin/main >/dev/null
 
   report_main_step "Analyzing renovate reviewer drift + missing coverage"
 
   REPORT_JSON="$(mktemp)"
-  node scripts/sync_renovate_reviewers.js --report-json "$REPORT_JSON"
+  trap 'rm -f "$REPORT_JSON"' EXIT
+
+  # Single full-repo scan: `--write` applies managed (`mode=sync`) drift to renovate.json
+  # (no-op when nothing to apply — the serializer re-writes the file byte-identically) and
+  # `--report-json` captures the full report we use for metrics, annotation, and reviewer
+  # selection below. `git diff --exit-code` on `$GIT_SCOPE` is the source of truth for
+  # whether any real changes were applied.
+  node scripts/sync_renovate_reviewers.js --write --report-json "$REPORT_JSON"
 
   # shellcheck disable=SC2046
   eval "$(node_report_metrics "$REPORT_JSON")"
@@ -299,18 +331,15 @@ main () {
   fi
 
   pr_url=""
-  if [ "$has_managed_drift" = "true" ]; then
-    report_main_step "Managed drift detected. Applying updates"
-    node scripts/sync_renovate_reviewers.js --write --report-json "$REPORT_JSON"
-  fi
 
-  set +e
-  git diff --exit-code --quiet "$GIT_SCOPE"
-  if [ $? -eq 0 ]; then
+  # `--write` already applied any managed drift (or was a no-op). If the working tree is
+  # clean, there's nothing to commit — we still surface untracked / no-computed-reviewers
+  # signals via an error-styled annotation so they don't go silent. `git diff --exit-code`
+  # returns 0 when clean; used directly in `if`, it doesn't trip `set -e`.
+  if git diff --exit-code --quiet "$GIT_SCOPE"; then
     if [ "$has_managed_drift" = "true" ]; then
       echo "No changes in $GIT_SCOPE after applying updates."
     fi
-    # Even if there's no managed-drift change to commit, missing coverage / no-computed-reviewers should still be visible.
     if [ "$has_untracked" = "true" ] || [ "$has_no_computed_reviewers" = "true" ]; then
       buildkite_annotate "$annotation" "error"
       exit 1
@@ -318,7 +347,6 @@ main () {
     buildkite_annotate "$annotation" "success"
     exit 0
   fi
-  set -e
 
   report_main_step "Differences found. Checking for an existing pull request."
 
@@ -327,12 +355,17 @@ main () {
 
   PR_TITLE='[Renovate] Sync reviewers for managed rules'
   PR_BODY=$'This PR syncs `renovate.json` `packageRules[*].reviewers` for rules explicitly opted in via:\n\n- `x_kbn_reviewer_sync.mode: \"sync\"`\n\nThis is generated automatically and is intended to be non-disruptive (report-only rules are not updated).\n'
+  if [ -n "${BUILDKITE_BUILD_URL:-}" ]; then
+    PR_BODY+=$'\nGenerated by '"${BUILDKITE_BUILD_URL}"$'\n'
+  fi
 
-  existing_pr_number="$(gh pr list --search "$PR_TITLE" --state open --author "$KIBANA_MACHINE_USERNAME" --limit 1 --json number -q '.[0].number' || true)"
-  existing_pr_url="$(gh pr list --search "$PR_TITLE" --state open --author "$KIBANA_MACHINE_USERNAME" --limit 1 --json url -q '.[0].url' || true)"
-  existing_pr_branch="$(gh pr list --search "$PR_TITLE" --state open --author "$KIBANA_MACHINE_USERNAME" --limit 1 --json headRefName -q '.[0].headRefName' || true)"
+  # Single lookup — pull all fields we need in one API call.
+  existing_pr_json="$(gh pr list --search "$PR_TITLE" --state open --author "$KIBANA_MACHINE_USERNAME" --limit 1 --json number,url,headRefName 2>/dev/null || echo '[]')"
+  existing_pr_number="$(echo "$existing_pr_json" | jq -r '.[0].number // empty')"
+  existing_pr_url="$(echo "$existing_pr_json" | jq -r '.[0].url // empty')"
+  existing_pr_branch="$(echo "$existing_pr_json" | jq -r '.[0].headRefName // empty')"
 
-  if [ -n "${existing_pr_number:-}" ] && [ "${existing_pr_number:-}" != "null" ]; then
+  if [ -n "${existing_pr_number:-}" ]; then
     echo "Existing PR found (#$existing_pr_number). Updating it."
     pr_url="$existing_pr_url"
     BRANCH_NAME="$existing_pr_branch"
@@ -343,9 +376,6 @@ main () {
 
   reviewers="$(node_print_reviewers "$REPORT_JSON" || true)"
   mentions="$(node_print_mentions "$REPORT_JSON" || true)"
-  if [ -z "${reviewers:-}" ]; then
-    reviewers="elastic/kibana-operations"
-  fi
   if [ -n "${mentions:-}" ]; then
     PR_BODY+=$'\n\nReview requested from computed owners: '"$mentions"$'\n'
   fi
@@ -363,7 +393,7 @@ main () {
   git fetch origin "$BRANCH_NAME" >/dev/null 2>&1 || true
   git push origin "$BRANCH_NAME" --force-with-lease
 
-  if [ -n "${existing_pr_number:-}" ] && [ "${existing_pr_number:-}" != "null" ]; then
+  if [ -n "${existing_pr_number:-}" ]; then
     report_main_step "Updating pull request body"
     gh pr edit "$existing_pr_number" --body "$PR_BODY" >/dev/null 2>&1 || true
     pr_number="$existing_pr_number"
@@ -380,14 +410,17 @@ main () {
     pr_number="${pr_url##*/}"
   fi
 
+  # TODO(ownership): `Team:Kibana Operations` is a placeholder until we agree on which team
+  # owns this weekly signal. The label is metadata only (changeable later) — the runtime
+  # pings below are driven purely by CODEOWNERS-derived reviewers.
   best_effort_add_labels "$pr_number" 'release_note:skip' 'backport:skip' 'Team:Kibana Operations'
 
-  # Best-effort: request reviews from computed teams; never fail the job due to reviewer issues.
-  # For an existing PR, only request newly-introduced reviewers to avoid re-pinging the same teams weekly.
-  reviewers_all="elastic/kibana-operations $reviewers"
-  reviewers_to_request="$reviewers_all"
-  if [ -n "${existing_pr_number:-}" ] && [ "${existing_pr_number:-}" != "null" ]; then
-    reviewers_to_request="$(compute_new_reviewers_to_request "$pr_number" "$reviewers_all" || true)"
+  # Best-effort: request reviews from CODEOWNERS-derived teams; never fail the job due to
+  # reviewer issues. For an existing PR, only request newly-introduced reviewers to avoid
+  # re-pinging the same teams weekly.
+  reviewers_to_request="$reviewers"
+  if [ -n "${existing_pr_number:-}" ]; then
+    reviewers_to_request="$(compute_new_reviewers_to_request "$pr_number" "$reviewers" || true)"
   fi
 
   if [ -n "${reviewers_to_request:-}" ]; then
