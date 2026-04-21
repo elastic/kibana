@@ -139,8 +139,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
   );
   const [selectedStatuses, setSelectedStatuses] = useState<SloStatusFilter[]>([]);
   const [isStatusPopoverOpen, setIsStatusPopoverOpen] = useState(false);
-  const [selectedSloId, setSelectedSloId] = useState<string | null>(null);
-  const [selectedSloInstanceId, setSelectedSloInstanceId] = useState<string | undefined>(undefined);
+  const [selectedSlo, setSelectedSlo] = useState<SLOWithSummaryResponse | null>(null);
   const [selectedSloTabId, setSelectedSloTabId] = useState<SloTabId | undefined>(undefined);
   const [page, setPage] = useState(0);
   const [perPage, setPerPage] = useState(10);
@@ -200,14 +199,12 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
   );
 
   const handleActiveAlertsClick = useCallback((sloItem: SLOWithSummaryResponse) => {
+    setSelectedSlo(null);
     setSelectedSloTabId(undefined);
-    setSelectedSloId(null);
-    setSelectedSloInstanceId(undefined);
 
     requestAnimationFrame(() => {
+      setSelectedSlo(sloItem);
       setSelectedSloTabId(ALERTS_TAB_ID);
-      setSelectedSloId(sloItem.id);
-      setSelectedSloInstanceId(sloItem.instanceId);
     });
   }, []);
 
@@ -277,19 +274,15 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
   }, []);
 
   const handleSloClick = useCallback((sloItem: SLOWithSummaryResponse) => {
-    setSelectedSloId(null);
-    setSelectedSloInstanceId(undefined);
+    setSelectedSlo(null);
     setSelectedSloTabId(undefined);
-
     requestAnimationFrame(() => {
-      setSelectedSloId(sloItem.id);
-      setSelectedSloInstanceId(sloItem.instanceId);
+      setSelectedSlo(sloItem);
     });
   }, []);
 
   const handleCloseSloDetails = useCallback(() => {
-    setSelectedSloId(null);
-    setSelectedSloInstanceId(undefined);
+    setSelectedSlo(null);
     setSelectedSloTabId(undefined);
   }, []);
 
@@ -695,10 +688,10 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
           </>
         )}
       </EuiFlyoutBody>
-      {selectedSloId && sloPlugin?.getSLODetailsFlyout && (
+      {selectedSlo && sloPlugin?.getSLODetailsFlyout && (
         <sloPlugin.getSLODetailsFlyout
-          sloId={selectedSloId}
-          sloInstanceId={selectedSloInstanceId}
+          sloId={selectedSlo.id}
+          sloInstanceId={selectedSlo.instanceId}
           onClose={handleCloseSloDetails}
           size="m"
           hideFooter
