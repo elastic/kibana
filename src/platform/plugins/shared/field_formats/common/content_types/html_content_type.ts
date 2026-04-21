@@ -11,6 +11,10 @@ import { escape, isFunction } from 'lodash';
 import type { IFieldFormat, HtmlContextTypeConvert, FieldFormatsContentType } from '../types';
 import { getHighlightHtml, checkForMissingValueHtml } from '../utils';
 
+/**
+ * @deprecated Use `FieldFormat.reactConvert()` instead. The HTML content type is being phased out
+ * in favor of React-based rendering, which avoids `dangerouslySetInnerHTML`.
+ */
 export const HTML_CONTEXT_TYPE: FieldFormatsContentType = 'html';
 
 const getConvertFn = (

@@ -166,10 +166,10 @@
         },
         {
           "parentPluginId": "serverless",
-          "id": "def-public.ServerlessPluginStart.getNavigationCards",
+          "id": "def-public.ServerlessPluginStart.getNavigationCards$",
           "type": "Function",
           "tags": [],
-          "label": "getNavigationCards",
+          "label": "getNavigationCards$",
           "description": [],
           "signature": [
             "(roleManagementEnabled?: boolean | undefined, extendCardNavDefinitions?: Record<string, ",
@@ -180,7 +180,9 @@
               "section": "def-common.CardNavExtensionDefinition",
               "text": "CardNavExtensionDefinition"
             },
-            "> | undefined) => Record<string, ",
+            "> | undefined) => ",
+            "Observable",
+            "<Record<string, ",
             {
               "pluginId": "@kbn/management-cards-navigation",
               "scope": "common",
@@ -188,7 +190,7 @@
               "section": "def-common.CardNavExtensionDefinition",
               "text": "CardNavExtensionDefinition"
             },
-            "> | undefined"
+            "> | undefined>"
           ],
           "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
           "lineNumber": 27,
@@ -198,7 +200,7 @@
           "children": [
             {
               "parentPluginId": "serverless",
-              "id": "def-public.ServerlessPluginStart.getNavigationCards.$1",
+              "id": "def-public.ServerlessPluginStart.getNavigationCards$.$1",
               "type": "CompoundType",
               "tags": [],
               "label": "roleManagementEnabled",
@@ -215,7 +217,7 @@
             },
             {
               "parentPluginId": "serverless",
-              "id": "def-public.ServerlessPluginStart.getNavigationCards.$2",
+              "id": "def-public.ServerlessPluginStart.getNavigationCards$.$2",
               "type": "Object",
               "tags": [],
               "label": "extendCardNavDefinitions",

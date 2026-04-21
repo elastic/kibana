@@ -17,6 +17,85 @@ import type { AttachmentType } from '@kbn/streams-plugin/server/lib/streams/atta
 import type { ContentPackIncludedObjects, ContentPackManifest } from '@kbn/content-packs-schema';
 import type { StreamsSupertestRepositoryClient } from './repository_client';
 
+// ---------------------------------------------------------------------------
+// Elasticsearch resource helpers
+// ---------------------------------------------------------------------------
+
+export interface EsqlView {
+  name: string;
+  query: string;
+}
+
+export async function getEsqlView(esClient: Client, viewName: string): Promise<EsqlView> {
+  const encoded = encodeURIComponent(viewName);
+  const response = await esClient.transport.request<{ views: EsqlView[] }>({
+    method: 'GET',
+    path: `/_query/view/${encoded}`,
+  });
+  return response.views[0];
+}
+
+export async function createEsqlView(
+  esClient: Client,
+  viewName: string,
+  query: string
+): Promise<void> {
+  const encoded = encodeURIComponent(viewName);
+  await esClient.transport.request({
+    method: 'PUT',
+    path: `/_query/view/${encoded}`,
+    body: { query },
+  });
+}
+
+export async function deleteEsqlView(esClient: Client, viewName: string): Promise<void> {
+  const encoded = encodeURIComponent(viewName);
+  try {
+    await esClient.transport.request({
+      method: 'DELETE',
+      path: `/_query/view/${encoded}`,
+    });
+  } catch {
+    // Ignore if view doesn't exist
+  }
+}
+
+export async function esqlViewExists(esClient: Client, viewName: string): Promise<boolean> {
+  const encoded = encodeURIComponent(viewName);
+  return esClient.transport
+    .request({ method: 'GET', path: `/_query/view/${encoded}` })
+    .then(() => true)
+    .catch(() => false);
+}
+
+export async function dataStreamExists(esClient: Client, name: string): Promise<boolean> {
+  return esClient.indices
+    .getDataStream({ name })
+    .then(() => true)
+    .catch(() => false);
+}
+
+export async function ingestPipelineExists(esClient: Client, id: string): Promise<boolean> {
+  return esClient.ingest
+    .getPipeline({ id })
+    .then(() => true)
+    .catch(() => false);
+}
+
+export async function componentTemplateExists(esClient: Client, name: string): Promise<boolean> {
+  return esClient.cluster
+    .getComponentTemplate({ name })
+    .then((r) => r.component_templates.length > 0)
+    .catch(() => false);
+}
+
+export async function indexTemplateExists(esClient: Client, name: string): Promise<boolean> {
+  return esClient.indices
+    .getIndexTemplate({ name })
+    .then((r) => r.index_templates.length > 0)
+    .catch(() => false);
+}
+
 export async function enableStreams(client: StreamsSupertestRepositoryClient) {
   await client.fetch('POST /api/streams/_enable 2023-10-31').expect(200);
 }
@@ -32,6 +111,21 @@ export async function indexDocument(
   refresh: Refresh = 'wait_for'
 ) {
   const response = await esClient.index({ index, document, refresh });
+  return response;
+}
+
+export async function executeEsql(
+  esClient: Client,
+  query: string
+): Promise<{ columns: Array<{ name: string; type: string }>; values: unknown[][] }> {
+  const response = await esClient.transport.request<{
+    columns: Array<{ name: string; type: string }>;
+    values: unknown[][];
+  }>({
+    method: 'POST',
+    path: '/_query',
+    body: { query },
+  });
   return response;
 }
 

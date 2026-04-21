@@ -20,7 +20,6 @@ dependsOn:
   - '@kbn/i18n-react'
   - '@kbn/test-jest-helpers'
   - '@kbn/i18n'
-  - '@kbn/feedback-registry'
 tags:
   - shared-browser
   - package

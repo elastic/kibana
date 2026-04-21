@@ -321,14 +321,6 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
                   <EuiCard
                     display="plain"
                     hasBorder
-                    betaBadgeProps={{
-                      label: i18n.translate(
-                        'aiAssistantManagementSelection.headerButton.betaLabel',
-                        {
-                          defaultMessage: 'BETA',
-                        }
-                      ),
-                    }}
                     selectable={{
                       isSelected: selectedType === AIChatExperience.Agent,
                       onClick: () => setSelectedType(AIChatExperience.Agent),

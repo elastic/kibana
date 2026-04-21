@@ -35,11 +35,20 @@ describe('useBrowseIntegrationHook', () => {
     (useSetUrlCategory as jest.Mock).mockReturnValue(mockSetUrlCategory);
   });
 
-  const mockUseAvailablePackages = (cards: IntegrationCardItem[] = []) => {
+  const mockUseAvailablePackages = (
+    cards: IntegrationCardItem[] = [],
+    {
+      allCategories = [],
+      mainCategories = [],
+    }: {
+      allCategories?: Array<{ id: string; title: string; count: number; parent_id?: string }>;
+      mainCategories?: Array<{ id: string; title: string; count: number }>;
+    } = {}
+  ) => {
     (useAvailablePackages as jest.Mock).mockReturnValue({
       initialSelectedCategory: '',
-      allCategories: [],
-      mainCategories: [],
+      allCategories,
+      mainCategories,
       isLoading: false,
       isLoadingCategories: false,
       isLoadingAllPackages: false,
@@ -173,6 +182,141 @@ describe('useBrowseIntegrationHook', () => {
       );
 
       expect(result.current.filteredCards.map((c) => c.name)).toEqual(['Zebra', 'MySQL', 'Apache']);
+    });
+  });
+
+  describe('Category counts update with filters', () => {
+    it('updates category counts when setup method filter is applied', () => {
+      const cards = [
+        {
+          id: '1',
+          name: 'AWS CloudTrail',
+          categories: ['security', 'cloud'],
+          supportsAgentless: true,
+          type: 'integration',
+        },
+        {
+          id: '2',
+          name: 'AWS S3',
+          categories: ['cloud'],
+          supportsAgentless: true,
+          type: 'integration',
+        },
+        {
+          id: '3',
+          name: 'Nginx',
+          categories: ['web'],
+          supportsAgentless: false,
+          type: 'integration',
+        },
+        {
+          id: '4',
+          name: 'Apache',
+          categories: ['web', 'security'],
+          supportsAgentless: false,
+          type: 'integration',
+        },
+      ];
+
+      const allCategories = [
+        { id: '', title: 'All categories', count: 4 },
+        { id: 'cloud', title: 'Cloud', count: 2 },
+        { id: 'security', title: 'Security', count: 2 },
+        { id: 'web', title: 'Web', count: 2 },
+      ];
+      const mainCategories = allCategories;
+
+      mockUseAvailablePackages(cards as IntegrationCardItem[], { allCategories, mainCategories });
+      (useUrlFilters as jest.Mock).mockReturnValue({
+        q: undefined,
+        sort: undefined,
+        status: undefined,
+        setupMethod: ['agentless'],
+      });
+
+      const { result } = renderHook(() =>
+        useBrowseIntegrationHook({ prereleaseIntegrationsEnabled: false })
+      );
+
+      // Only 2 agentless cards, so counts should reflect that
+      expect(result.current.filteredCards).toHaveLength(2);
+      expect(result.current.mainCategories).toEqual([
+        { id: '', title: 'All categories', count: 2 },
+        { id: 'cloud', title: 'Cloud', count: 2 },
+        { id: 'security', title: 'Security', count: 1 },
+        { id: 'web', title: 'Web', count: 0 },
+      ]);
+    });
+
+    it('updates category counts when signal filter is applied', () => {
+      const cards = [
+        { id: '1', name: 'Integration 1', categories: ['security'], signalTypes: ['logs'] },
+        {
+          id: '2',
+          name: 'Integration 2',
+          categories: ['security', 'cloud'],
+          signalTypes: ['metrics'],
+        },
+        { id: '3', name: 'Integration 3', categories: ['cloud'], signalTypes: ['logs', 'metrics'] },
+      ];
+
+      const allCategories = [
+        { id: '', title: 'All categories', count: 3 },
+        { id: 'cloud', title: 'Cloud', count: 2 },
+        { id: 'security', title: 'Security', count: 2 },
+      ];
+      const mainCategories = allCategories;
+
+      mockUseAvailablePackages(cards as IntegrationCardItem[], { allCategories, mainCategories });
+      (useUrlFilters as jest.Mock).mockReturnValue({
+        q: undefined,
+        sort: undefined,
+        status: undefined,
+        signal: ['logs'],
+      });
+
+      const { result } = renderHook(() =>
+        useBrowseIntegrationHook({ prereleaseIntegrationsEnabled: false })
+      );
+
+      // Cards 1 and 3 have 'logs' signal
+      expect(result.current.filteredCards).toHaveLength(2);
+      expect(result.current.mainCategories).toEqual([
+        { id: '', title: 'All categories', count: 2 },
+        { id: 'cloud', title: 'Cloud', count: 1 },
+        { id: 'security', title: 'Security', count: 1 },
+      ]);
+    });
+
+    it('shows unfiltered counts when no filters are applied', () => {
+      const cards = [
+        { id: '1', name: 'Integration 1', categories: ['security'] },
+        { id: '2', name: 'Integration 2', categories: ['cloud'] },
+      ];
+
+      const allCategories = [
+        { id: '', title: 'All categories', count: 2 },
+        { id: 'cloud', title: 'Cloud', count: 1 },
+        { id: 'security', title: 'Security', count: 1 },
+      ];
+      const mainCategories = allCategories;
+
+      mockUseAvailablePackages(cards as IntegrationCardItem[], { allCategories, mainCategories });
+      (useUrlFilters as jest.Mock).mockReturnValue({
+        q: undefined,
+        sort: undefined,
+        status: undefined,
+      });
+
+      const { result } = renderHook(() =>
+        useBrowseIntegrationHook({ prereleaseIntegrationsEnabled: false })
+      );
+
+      expect(result.current.mainCategories).toEqual([
+        { id: '', title: 'All categories', count: 2 },
+        { id: 'cloud', title: 'Cloud', count: 1 },
+        { id: 'security', title: 'Security', count: 1 },
+      ]);
     });
   });
 
