@@ -180,9 +180,7 @@ export const useDimensionsSelector = ({
   }, [onChange, debouncedOnChange]);
 
   const buttonLabel = useMemo<ReactElement>(
-    () => (
-      <DimensionsButtonLabel count={localSelectedDimensions.length} isLoading={isLoading} />
-    ),
+    () => <DimensionsButtonLabel count={localSelectedDimensions.length} isLoading={isLoading} />,
     [localSelectedDimensions.length, isLoading]
   );
 
@@ -193,10 +191,7 @@ export const useDimensionsSelector = ({
 
   const popoverContentBelowSearch = useMemo<ReactElement>(
     () => (
-      <DimensionsPopoverFooter
-        count={localSelectedDimensions.length}
-        onClear={handleClearAll}
-      />
+      <DimensionsPopoverFooter count={localSelectedDimensions.length} onClear={handleClearAll} />
     ),
     [localSelectedDimensions.length, handleClearAll]
   );
