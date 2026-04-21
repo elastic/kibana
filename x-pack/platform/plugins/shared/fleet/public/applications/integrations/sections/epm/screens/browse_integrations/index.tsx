@@ -145,6 +145,7 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
                 isLoading={isLoadingCreatedIntegrations}
                 isError={isCreatedIntegrationsError}
                 onRefetch={refetchCreatedIntegrations}
+                prereleaseIntegrationsEnabled={prereleaseIntegrationsEnabled}
               />
             ) : filteredCards.length === 0 && !isLoading ? (
               <NoDataPrompt />
