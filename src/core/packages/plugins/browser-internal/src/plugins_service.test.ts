@@ -27,6 +27,7 @@ import {
 } from './plugins_service';
 
 import type { InjectedMetadataPlugin } from '@kbn/core-injected-metadata-common-internal';
+import { hotkeysServiceMock } from '@kbn/core-hotkeys-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
@@ -92,6 +93,7 @@ describe('PluginsService', () => {
       application: applicationServiceMock.createInternalSetupContract(),
       fatalErrors: fatalErrorsServiceMock.createSetupContract(),
       executionContext: executionContextServiceMock.createSetupContract(),
+      hotkeys: hotkeysServiceMock.createSetupContract(),
       http: httpServiceMock.createSetupContract(),
       injectedMetadata: injectedMetadataServiceMock.createStartContract(),
       notifications: notificationServiceMock.createSetupContract(),
@@ -119,6 +121,7 @@ describe('PluginsService', () => {
       application: applicationServiceMock.createInternalStartContract(),
       docLinks: docLinksServiceMock.createStartContract(),
       executionContext: executionContextServiceMock.createStartContract(),
+      hotkeys: hotkeysServiceMock.createStartContract(),
       http: httpServiceMock.createStartContract(),
       chrome: chromeServiceMock.createStartContract(),
       i18n: i18nServiceMock.createStartContract(),

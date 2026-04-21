@@ -31,6 +31,7 @@ dependsOn:
   - '@kbn/core-i18n-browser-mocks'
   - '@kbn/core-injected-metadata-browser-mocks'
   - '@kbn/core-theme-browser-mocks'
+  - '@kbn/core-hotkeys-browser-mocks'
   - '@kbn/core-notifications-browser-mocks'
   - '@kbn/core-application-browser-mocks'
   - '@kbn/core-overlays-browser-mocks'

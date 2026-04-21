@@ -14,6 +14,7 @@ import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
+import { hotkeysServiceMock } from '@kbn/core-hotkeys-browser-mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
@@ -72,6 +73,12 @@ export const NotificationServiceConstructor = jest
   .mockImplementation(() => MockNotificationsService);
 jest.doMock('@kbn/core-notifications-browser-internal', () => ({
   NotificationsService: NotificationServiceConstructor,
+}));
+
+export const MockHotkeysService = hotkeysServiceMock.create();
+export const HotkeysServiceConstructor = jest.fn().mockImplementation(() => MockHotkeysService);
+jest.doMock('@kbn/core-hotkeys-browser-internal', () => ({
+  HotkeysService: HotkeysServiceConstructor,
 }));
 
 export const MockHttpService = httpServiceMock.create();
