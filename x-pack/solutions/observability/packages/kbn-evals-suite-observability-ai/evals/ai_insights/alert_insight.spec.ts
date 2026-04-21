@@ -16,8 +16,8 @@ import {
 import { getAlertScenarios, type AlertScenario } from '../../src/scenarios/alert_scenarios';
 import { evaluate } from './evaluate_ai_insights';
 
-const ALERT_CREATION_WAIT_MS = 3000;
-const INDEX_REFRESH_WAIT_MS = 2500;
+const ALERT_POLL_INTERVAL_MS = 1000;
+const ALERT_POLL_TIMEOUT_MS = 60_000;
 
 const scenarios = getAlertScenarios();
 
@@ -57,32 +57,38 @@ function createScenarioTest(scenario: AlertScenario) {
         path: `/internal/alerting/rule/${ruleId}/_run_soon`,
       });
 
-      log.info('Waiting for alert to be created');
-      await new Promise((resolve) => setTimeout(resolve, ALERT_CREATION_WAIT_MS));
+      log.info('Polling for alert to be created');
+      const deadline = Date.now() + ALERT_POLL_TIMEOUT_MS;
 
-      await esClient.indices.refresh({ index: scenario.alertRule.alertsIndex });
+      while (Date.now() < deadline) {
+        await new Promise((resolve) => setTimeout(resolve, ALERT_POLL_INTERVAL_MS));
+        await esClient.indices.refresh({ index: scenario.alertRule.alertsIndex });
 
-      log.debug('Waiting to make sure all indices are refreshed');
-      await new Promise((resolve) => setTimeout(resolve, INDEX_REFRESH_WAIT_MS));
-      const alertsResponse = await esClient.search({
-        index: scenario.alertRule.alertsIndex,
-        query: {
-          bool: {
-            filter: [
-              { term: { 'kibana.alert.rule.uuid': ruleId } },
-              { term: { 'kibana.alert.status': 'active' } },
-            ],
+        const alertsResponse = await esClient.search({
+          index: scenario.alertRule.alertsIndex,
+          query: {
+            bool: {
+              filter: [
+                { term: { 'kibana.alert.rule.uuid': ruleId } },
+                { term: { 'kibana.alert.status': 'active' } },
+              ],
+            },
           },
-        },
-        size: 1,
-      });
+          size: 1,
+        });
 
-      const alertDoc = alertsResponse.hits.hits[0];
-      if (!alertDoc) {
-        throw new Error(`No alert found for rule ${ruleId} in scenario ${scenario.id}`);
+        const alertDoc = alertsResponse.hits.hits[0];
+        if (alertDoc) {
+          alertId = alertDoc._id as string;
+          log.info(`Found alert with ID: ${alertId}`);
+          return;
+        }
+        log.debug('Alert not yet available, retrying...');
       }
-      alertId = alertDoc._id as string;
-      log.info(`Found alert with ID: ${alertId}`);
+
+      throw new Error(
+        `No alert found for rule ${ruleId} in scenario ${scenario.id} after ${ALERT_POLL_TIMEOUT_MS}ms`
+      );
     });
 
     evaluate(
