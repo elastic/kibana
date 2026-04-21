@@ -233,12 +233,12 @@ describe('LogsExtractionClient', () => {
         'user',
         expect.objectContaining({
           logExtractionState: expect.objectContaining({
-            paginationTimestamp: undefined,
-            paginationId: undefined,
-            logsPageCursorStartTimestamp: undefined,
-            logsPageCursorStartId: undefined,
-            logsPageCursorEndTimestamp: undefined,
-            logsPageCursorEndId: undefined,
+            paginationTimestamp: null,
+            paginationId: null,
+            logsPageCursorStartTimestamp: null,
+            logsPageCursorStartId: null,
+            logsPageCursorEndTimestamp: null,
+            logsPageCursorEndId: null,
             lastExecutionTimestamp: expect.any(String),
           }),
         })
@@ -270,12 +270,12 @@ describe('LogsExtractionClient', () => {
         'user',
         expect.objectContaining({
           logExtractionState: expect.objectContaining({
-            paginationTimestamp: undefined,
-            paginationId: undefined,
-            logsPageCursorStartTimestamp: undefined,
-            logsPageCursorStartId: undefined,
-            logsPageCursorEndTimestamp: undefined,
-            logsPageCursorEndId: undefined,
+            paginationTimestamp: null,
+            paginationId: null,
+            logsPageCursorStartTimestamp: null,
+            logsPageCursorStartId: null,
+            logsPageCursorEndTimestamp: null,
+            logsPageCursorEndId: null,
             lastExecutionTimestamp: expect.any(String),
           }),
         })
@@ -788,16 +788,37 @@ describe('LogsExtractionClient', () => {
         'user',
         expect.objectContaining({
           logExtractionState: expect.objectContaining({
-            paginationTimestamp: undefined,
-            paginationId: undefined,
-            logsPageCursorStartTimestamp: undefined,
-            logsPageCursorStartId: undefined,
-            logsPageCursorEndTimestamp: undefined,
-            logsPageCursorEndId: undefined,
+            paginationTimestamp: null,
+            paginationId: null,
+            logsPageCursorStartTimestamp: null,
+            logsPageCursorStartId: null,
+            logsPageCursorEndTimestamp: null,
+            logsPageCursorEndId: null,
             lastExecutionTimestamp: expect.any(String),
           }),
           error: { message: ccsError.message, action: 'extractLogs' },
         })
+      );
+    });
+
+    it('should clear a previous error after a successful extraction', async () => {
+      const mockDataView = {
+        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+      };
+
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue({
+        ...createMockEngineDescriptor('user'),
+        error: { message: 'previous error', action: 'extractLogs' as const },
+      } as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>);
+      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
+      mockExecuteEsqlQuery.mockResolvedValue(mockLogPaginationCursorProbeEmpty());
+      mockIngestEntities.mockResolvedValue(undefined);
+
+      await client.extractLogs('user');
+
+      expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith(
+        'user',
+        expect.objectContaining({ error: null })
       );
     });
 
@@ -855,12 +876,12 @@ describe('LogsExtractionClient', () => {
         'host',
         expect.objectContaining({
           logExtractionState: expect.objectContaining({
-            paginationTimestamp: undefined,
-            paginationId: undefined,
-            logsPageCursorStartTimestamp: undefined,
-            logsPageCursorStartId: undefined,
-            logsPageCursorEndTimestamp: undefined,
-            logsPageCursorEndId: undefined,
+            paginationTimestamp: null,
+            paginationId: null,
+            logsPageCursorStartTimestamp: null,
+            logsPageCursorStartId: null,
+            logsPageCursorEndTimestamp: null,
+            logsPageCursorEndId: null,
             lastExecutionTimestamp: expect.any(String),
           }),
         })
