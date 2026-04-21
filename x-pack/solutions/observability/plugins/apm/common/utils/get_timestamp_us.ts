@@ -6,6 +6,7 @@
  */
 
 import type { TimestampUs } from '@kbn/apm-types';
+import { isFiniteNumber } from './is_finite_number';
 
 interface DocumentWithTimestampUs {
   timestamp: TimestampUs;
@@ -13,8 +14,9 @@ interface DocumentWithTimestampUs {
 
 /**
  * Safely extracts `timestamp.us` from an APM document,
- * returning 0 when the field is missing.
+ * returning 0 when the field is missing or not a valid number.
  */
 export const getTimestampUs = (document?: DocumentWithTimestampUs): number => {
-  return document?.timestamp?.us ?? 0;
+  const value = Number(document?.timestamp?.us);
+  return isFiniteNumber(value) ? value : 0;
 };
