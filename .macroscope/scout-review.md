@@ -52,7 +52,7 @@ Post detailed findings as inline PR comments on the offending line. Each inline 
 </details>
 ​```
 
-- **Severity emoji:** 🔴 Blocker, 🟡 Major, 🔵 Minor, ⚪ Nit
+- **Severity emoji:** 🟡 Major, 🔵 Minor, ⚪ Nit (blocking issues reported by the reviewer skill should be treated as "major")
 - State the rule violated as a **Markdown link** whose text is the section heading from the matching best practices document and whose URL is the section-scoped URL (see routing below). The link is required, not optional.
 - **Overview:** plain prose, no code. A developer skimming the PR should grasp what's wrong and whether to act on it without expanding.
 - **Details:** everything else — reasoning, code snippets, suggested diffs, links to related rules.
@@ -85,31 +85,21 @@ Do **not** use bare parenthetical labels like `(best practices)` or `(ui best pr
 
 Post one summary comment per PR with a `## Scout Test Review` header. On re-runs, edit it in place — never post a second one.
 
-The summary has three parts:
+The summary has two parts:
 
 **1. Current status (always present)**
 
 One line stating what was found on the latest review. Examples:
 
 - `Found 2 issues (1 🟡 Major, 1 🔵 Minor). See inline comments for details.`
-- `Found 1 issue (1 🔴 Blocker). See inline comments for details.`
-- `No issues found. ✅`
-- `Skipped — no Scout test files changed.`
+- `Found 1 issue (1 🟡 Major). See inline comments for details.`
+- `No issues found ✅`
+- `All issues resolved ✅`
 
-**2. Review log (append-only)**
-
-A running list under a `### Review log` subheading, one entry per review pass. Each entry: a commit SHA (preferred) or timestamp, then a one-line note on what changed since the previous pass. Examples:
-
-- `- abc1234 — Initial review. 2 issues found.`
-- `- def5678 — 1 issue resolved, 1 remaining. New assertion in dataset_quality.spec.ts looks good.`
-- `- 9ab0123 — All issues resolved. ✅`
-
-Log entries should be factual and diff-focused — what changed, what's new, what's gone. Skip praise and general commentary. If a re-run happens but no in-scope files changed in the new commit, don't append a log entry.
-
-**3. Footer (always present, verbatim)**
+**2. Footer (always present, verbatim)**
 
 ​`markdown
-<sup>This review is experimental. Share your feedback in the [#appex-qa](https://elastic.slack.com/archives/C04HT4P1YS3) channel.</sup>
+<sup>Share feedback in the [#appex-qa](https://elastic.slack.com/archives/C04HT4P1YS3) channel.</sup>
 ​`
 
 **Summary comment template:**
@@ -120,11 +110,6 @@ Log entries should be factual and diff-focused — what changed, what's new, wha
 
 <current status line>
 
-### Review log
-
-- <sha> — <one-line note>
-- <sha> — <one-line note>
-
 <footer>
 ​```
 
@@ -132,7 +117,5 @@ Log entries should be factual and diff-focused — what changed, what's new, wha
 
 On each re-run:
 
-1. **Update the status line** to reflect the current state of the PR, not a cumulative total. If the developer fixed an issue, it's no longer in the count.
-2. **Append one new entry to the review log.** Do not rewrite or remove old entries — the log is a trail, not a snapshot.
-3. **Do not duplicate inline comments** on lines you've already commented on, unless the code on that line has changed. If a previous inline comment's issue has been resolved, leave the comment as-is (GitHub will mark it outdated automatically).
-4. **If the log grows past ~5 entries**, collapse older entries into a `<details>` block at the bottom of the log so the recent activity stays visible.
+1. **Update the status line** to reflect the current state of the PR. If the developer fixed an issue, it's no longer in the count. If the developer fixed all issues, "All issues resolved ✅"
+2. **Do not duplicate inline comments** on lines you've already commented on, unless the code on that line has changed (update the existing comment).
