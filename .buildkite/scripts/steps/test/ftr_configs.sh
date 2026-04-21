@@ -91,7 +91,6 @@ while read -r config; do
   set +e;
   node ./scripts/functional_tests \
     --bail \
-    --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
     --config="$config" \
     "$EXTRA_ARGS"
   lastCode=$?
