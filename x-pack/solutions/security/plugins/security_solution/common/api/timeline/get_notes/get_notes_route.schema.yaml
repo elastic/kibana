@@ -144,7 +144,7 @@ components:
             type: string
         - type: string
     SavedObjectIds:
-      description: One Timeline saved object id or an array of ids.
+      description: One Timeline saved object ID or an array of IDs.
       oneOf:
         - type: array
           items:
