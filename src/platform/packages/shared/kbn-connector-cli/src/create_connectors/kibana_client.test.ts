@@ -40,7 +40,7 @@ describe('detectKibana', () => {
       if (req.url === '/api/status') {
         res.writeHead(200);
         res.end('{}');
-      } else if (req.url === '/api/security/v1/me') {
+      } else if (req.url === '/internal/security/me') {
         const auth = req.headers.authorization;
         if (auth === 'Basic ' + Buffer.from('elastic:changeme').toString('base64')) {
           res.writeHead(200);

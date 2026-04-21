@@ -53,7 +53,7 @@ async function tryKibana(url: string, auth: string): Promise<boolean> {
   }
 
   try {
-    const { statusCode } = await request(`${url}/api/security/v1/me`, {
+    const { statusCode } = await request(`${url}/internal/security/me`, {
       method: 'GET',
       headers: {
         Authorization: `Basic ${Buffer.from(auth).toString('base64')}`,
@@ -61,7 +61,7 @@ async function tryKibana(url: string, auth: string): Promise<boolean> {
         'x-elastic-internal-origin': 'Kibana',
       },
     });
-    return statusCode !== 0 && statusCode !== 401;
+    return statusCode === 200;
   } catch {
     return false;
   }
