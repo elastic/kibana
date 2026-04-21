@@ -7,23 +7,14 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  EuiButton,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiFlyoutHeader,
-  euiFullHeight,
   EuiIcon,
   EuiLink,
   EuiSpacer,
   EuiText,
   EuiTextAlign,
-  EuiTitle,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
@@ -33,22 +24,8 @@ import { UserProfilesSelectable } from '@kbn/user-profile-components';
 import { useBulkGetProfiles } from '../../hooks/use_bulk_get_profiles';
 import { useCreateAlertAction } from '../../hooks/use_create_alert_action';
 import { useSuggestedProfiles } from '../../hooks/use_suggested_profiles';
-import {
-  ASSIGNEE_FLYOUT_CANCEL,
-  ASSIGNEE_FLYOUT_CURRENT_PROFILE_ERROR_TITLE,
-  ASSIGNEE_FLYOUT_EMPTY_LIST_HELP,
-  ASSIGNEE_FLYOUT_EMPTY_LIST_TITLE,
-  ASSIGNEE_FLYOUT_NO_MATCHES_LEARN_PRIVILEGES,
-  ASSIGNEE_FLYOUT_NO_MATCHES_MODIFY_SEARCH,
-  ASSIGNEE_FLYOUT_NO_MATCHES_USER_TITLE,
-  ASSIGNEE_FLYOUT_SAVE,
-  ASSIGNEE_FLYOUT_SAVE_ERROR_TITLE,
-  ASSIGNEE_FLYOUT_SAVE_SUCCESS,
-  ASSIGNEE_FLYOUT_SEARCH_PLACEHOLDER,
-  ASSIGNEE_FLYOUT_SUGGEST_ERROR_TITLE,
-  ASSIGNEE_FLYOUT_TITLE,
-  getAssigneeFlyoutSubtitle,
-} from './translations';
+import { EpisodeActionFlyout, EpisodeActionFlyoutFooter } from './episode_action_flyout_layout';
+import * as i18n from './translations';
 
 function AssigneeFlyoutEmptyListMessage() {
   return (
@@ -66,21 +43,16 @@ function AssigneeFlyoutEmptyListMessage() {
       <EuiFlexItem grow={false}>
         <EuiTextAlign textAlign="center">
           <EuiText size="s" color="default">
-            <strong>{ASSIGNEE_FLYOUT_EMPTY_LIST_TITLE}</strong>
+            <strong>{i18n.ASSIGNEE_FLYOUT_EMPTY_LIST_TITLE}</strong>
             <br />
           </EuiText>
           <EuiText size="s" color="subdued">
-            {ASSIGNEE_FLYOUT_EMPTY_LIST_HELP}
+            {i18n.ASSIGNEE_FLYOUT_EMPTY_LIST_HELP}
           </EuiText>
         </EuiTextAlign>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-}
-
-/** Mirrors Cases `EmptyMessage` (renders nothing) while user search is loading. */
-function AssigneeFlyoutNoMatchesLoadingPlaceholder() {
-  return null;
 }
 
 function AssigneeFlyoutNoMatchesMessage() {
@@ -101,14 +73,14 @@ function AssigneeFlyoutNoMatchesMessage() {
       <EuiFlexItem grow={false}>
         <EuiTextAlign textAlign="center">
           <EuiText size="s" color="default">
-            <strong>{ASSIGNEE_FLYOUT_NO_MATCHES_USER_TITLE}</strong>
+            <strong>{i18n.ASSIGNEE_FLYOUT_NO_MATCHES_USER_TITLE}</strong>
             <br />
           </EuiText>
           <EuiText size="s" color="subdued">
-            {ASSIGNEE_FLYOUT_NO_MATCHES_MODIFY_SEARCH}
+            {i18n.ASSIGNEE_FLYOUT_NO_MATCHES_MODIFY_SEARCH}
             <br />
             <EuiLink href={docLinks.links.cases.casesPermissions} target="_blank">
-              {ASSIGNEE_FLYOUT_NO_MATCHES_LEARN_PRIVILEGES}
+              {i18n.ASSIGNEE_FLYOUT_NO_MATCHES_LEARN_PRIVILEGES}
             </EuiLink>
           </EuiText>
         </EuiTextAlign>
@@ -116,14 +88,6 @@ function AssigneeFlyoutNoMatchesMessage() {
     </EuiFlexGroup>
   );
 }
-
-const flyoutBodyCss = css`
-  ${euiFullHeight()}
-
-  .euiFlyoutBody__overflowContent {
-    ${euiFullHeight()}
-  }
-`;
 
 export interface EditEpisodeAssigneeFlyoutProps {
   episodeId: string;
@@ -158,7 +122,7 @@ export function EditEpisodeAssigneeFlyout({
     userProfile,
     uids: lastAssigneeUid ? [lastAssigneeUid] : [],
     toasts,
-    errorTitle: ASSIGNEE_FLYOUT_CURRENT_PROFILE_ERROR_TITLE,
+    errorTitle: i18n.ASSIGNEE_FLYOUT_CURRENT_PROFILE_ERROR_TITLE,
   });
 
   const currentProfile = useMemo(
@@ -170,15 +134,11 @@ export function EditEpisodeAssigneeFlyout({
     currentProfile ?? null
   );
 
-  useEffect(() => {
-    setSelectedProfile(currentProfile ?? null);
-  }, [currentProfile]);
-
   const { data: suggestions, isFetching: isSuggestLoading } = useSuggestedProfiles({
     userProfile,
     searchTerm: debouncedSearch,
     toasts,
-    errorTitle: ASSIGNEE_FLYOUT_SUGGEST_ERROR_TITLE,
+    errorTitle: i18n.ASSIGNEE_FLYOUT_SUGGEST_ERROR_TITLE,
   });
 
   const suggestOptions = useMemo(() => {
@@ -205,87 +165,63 @@ export function EditEpisodeAssigneeFlyout({
       },
       {
         onSuccess: () => {
-          toasts.addSuccess(ASSIGNEE_FLYOUT_SAVE_SUCCESS);
+          toasts.addSuccess(i18n.ASSIGNEE_FLYOUT_SAVE_SUCCESS);
           onClose();
         },
         onError: (err) => {
           toasts.addError(err instanceof Error ? err : new Error(String(err)), {
-            title: ASSIGNEE_FLYOUT_SAVE_ERROR_TITLE,
+            title: i18n.ASSIGNEE_FLYOUT_SAVE_ERROR_TITLE,
           });
         },
       }
     );
   }, [createAssignAction, episodeId, groupHash, onClose, selectedProfile, toasts]);
 
-  const subtitle = useMemo(() => getAssigneeFlyoutSubtitle(episodeId), [episodeId]);
+  const subtitle = useMemo(() => i18n.getAssigneeFlyoutSubtitle(episodeId), [episodeId]);
 
   return (
-    <EuiFlyout
-      ownFocus
+    <EpisodeActionFlyout
       onClose={onClose}
-      aria-labelledby="alertingV2EditEpisodeAssigneeFlyoutTitle"
-      data-test-subj="alertingV2EditEpisodeAssigneeFlyout"
-      size="s"
-      paddingSize="m"
-    >
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
-          <h2 id="alertingV2EditEpisodeAssigneeFlyoutTitle">{ASSIGNEE_FLYOUT_TITLE}</h2>
-        </EuiTitle>
+      dataTestSubj="alertingV2EditEpisodeAssigneeFlyout"
+      ariaLabelledBy="alertingV2EditEpisodeAssigneeFlyoutTitle"
+      titleId="alertingV2EditEpisodeAssigneeFlyoutTitle"
+      title={i18n.ASSIGNEE_FLYOUT_TITLE}
+      subtitle={
         <EuiText color="subdued" size="s">
           <p>{subtitle}</p>
         </EuiText>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody css={flyoutBodyCss}>
-        <UserProfilesSelectable<UserProfileWithAvatar>
-          data-test-subj="alertingV2EditEpisodeAssigneeSelectable"
-          height={360}
-          singleSelection
-          defaultOptions={currentProfile ? [currentProfile] : []}
-          selectedOptions={selectedProfile ? [selectedProfile] : []}
-          options={suggestOptions}
-          isLoading={isSuggestLoading}
-          emptyMessage={<AssigneeFlyoutEmptyListMessage />}
-          noMatchesMessage={
-            !isSuggestLoading ? (
-              <AssigneeFlyoutNoMatchesMessage />
-            ) : (
-              <AssigneeFlyoutNoMatchesLoadingPlaceholder />
-            )
-          }
-          onSearchChange={(term) => setSearchInput(term)}
-          onChange={(next) => {
-            const picked = next.filter((v): v is UserProfileWithAvatar => Boolean(v));
-            setSelectedProfile(picked[0] ?? null);
-          }}
-          searchPlaceholder={ASSIGNEE_FLYOUT_SEARCH_PLACEHOLDER}
+      }
+      footer={
+        <EpisodeActionFlyoutFooter
+          onClose={onClose}
+          onPrimaryClick={handleSave}
+          cancelLabel={i18n.ASSIGNEE_FLYOUT_CANCEL}
+          primaryLabel={i18n.ASSIGNEE_FLYOUT_SAVE}
+          cancelTestSubj="alertingV2EditEpisodeAssigneeCancel"
+          primaryTestSubj="alertingV2EditEpisodeAssigneeSave"
+          isPrimaryLoading={isSaving}
+          isPrimaryDisabled={!selectedProfile}
+          isCancelDisabled={isSaving}
         />
-      </EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              onClick={onClose}
-              flush="left"
-              isDisabled={isSaving}
-              data-test-subj="alertingV2EditEpisodeAssigneeCancel"
-            >
-              {ASSIGNEE_FLYOUT_CANCEL}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              onClick={handleSave}
-              isLoading={isSaving}
-              isDisabled={!selectedProfile}
-              data-test-subj="alertingV2EditEpisodeAssigneeSave"
-            >
-              {ASSIGNEE_FLYOUT_SAVE}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
-    </EuiFlyout>
+      }
+    >
+      <UserProfilesSelectable<UserProfileWithAvatar>
+        data-test-subj="alertingV2EditEpisodeAssigneeSelectable"
+        height={360}
+        singleSelection
+        defaultOptions={currentProfile ? [currentProfile] : []}
+        selectedOptions={selectedProfile ? [selectedProfile] : []}
+        options={suggestOptions}
+        isLoading={isSuggestLoading}
+        emptyMessage={<AssigneeFlyoutEmptyListMessage />}
+        noMatchesMessage={!isSuggestLoading ? <AssigneeFlyoutNoMatchesMessage /> : undefined}
+        onSearchChange={(term) => setSearchInput(term)}
+        onChange={(next) => {
+          const picked = next.filter((v): v is UserProfileWithAvatar => Boolean(v));
+          setSelectedProfile(picked[0] ?? null);
+        }}
+        searchPlaceholder={i18n.ASSIGNEE_FLYOUT_SEARCH_PLACEHOLDER}
+      />
+    </EpisodeActionFlyout>
   );
 }

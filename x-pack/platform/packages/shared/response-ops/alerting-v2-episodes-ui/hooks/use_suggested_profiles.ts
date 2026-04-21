@@ -39,7 +39,6 @@ export function useSuggestedProfiles({
       userProfile.suggest(ALERTING_V2_INTERNAL_SUGGEST_USER_PROFILES_API_PATH, {
         name: trimmedSearch,
         size: 20,
-        dataPath: 'avatar',
       }) as Promise<UserProfileWithAvatar[]>,
     enabled: trimmedSearch.length > 0,
     retry: 1,

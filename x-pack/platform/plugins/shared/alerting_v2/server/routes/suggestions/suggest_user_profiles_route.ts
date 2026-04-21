@@ -12,15 +12,16 @@ import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import type { AlertingServerStartDependencies } from '../../types';
+import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_INTERNAL_SUGGEST_USER_PROFILES_API_PATH } from '../constants';
 
+const ROUTE_AUTH_PRIVILEGES = [ALERTING_V2_API_PRIVILEGES.alerts.read] as const;
+
 const suggestUserProfilesBodySchema = schema.object({
   name: schema.string(),
   size: schema.maybe(schema.number({ min: 0, max: 100 })),
-  /** Must match what the browser `userProfile.suggest` sends (serialized params). */
-  dataPath: schema.maybe(schema.string()),
 });
 
 type SuggestUserProfilesBody = TypeOf<typeof suggestUserProfilesBodySchema>;
@@ -35,13 +36,12 @@ type SuggestUserProfilesBody = TypeOf<typeof suggestUserProfilesBodySchema>;
  *
  * In browser APIs, userProfile.suggest requires a path argument (your app’s route), not just params.
  *
- * The critical requiredPrivileges filter must be decided server-side (space + app privileges); it should not be client-controlled.
+ * Optional post-filtering via `requiredPrivileges` on `userProfiles.suggest` is server-only; this route relies on HTTP authz instead so ES matches are not dropped by a second privileges pass.
  *
  * So we need an app route that:
  * - accepts only safe inputs (name, size, dataPath — same shape as browser suggest params)
- * - computes space + required privileges on the server
  * - calls security.userProfiles.suggest(...)
- * - enforces authz (suggestUserProfiles) and internal access
+ * - enforces authz (read alert episodes) and internal access
  *
  * So the new route is basically the secure “adapter” between UI search and the security suggest service.
  **/
@@ -51,7 +51,7 @@ export class SuggestUserProfilesRoute extends BaseAlertingRoute {
   static path = ALERTING_V2_INTERNAL_SUGGEST_USER_PROFILES_API_PATH;
   static security: RouteSecurity = {
     authz: {
-      requiredPrivileges: ['suggestUserProfiles'],
+      requiredPrivileges: [...ROUTE_AUTH_PRIVILEGES],
     },
   };
   static routeOptions = {
@@ -72,25 +72,17 @@ export class SuggestUserProfilesRoute extends BaseAlertingRoute {
     @inject(Request)
     private readonly request: KibanaRequest<unknown, unknown, SuggestUserProfilesBody>,
     @inject(PluginStart<AlertingServerStartDependencies['security']>('security'))
-    private readonly securityStart: AlertingServerStartDependencies['security'],
-    @inject(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'))
-    private readonly spacesStart: AlertingServerStartDependencies['spaces']
+    private readonly securityStart: AlertingServerStartDependencies['security']
   ) {
     super(ctx);
   }
 
   protected async execute() {
-    const { name, size, dataPath } = this.request.body;
+    const { name, size } = this.request.body;
     const profiles = await this.securityStart.userProfiles.suggest({
       name,
       size,
-      dataPath: dataPath ?? 'avatar',
-      requiredPrivileges: {
-        spaceId: this.spacesStart.spacesService.getSpaceId(this.request),
-        privileges: {
-          kibana: [this.securityStart.authz.actions.login],
-        },
-      },
+      dataPath: 'avatar',
     });
 
     return this.ctx.response.ok({ body: profiles });

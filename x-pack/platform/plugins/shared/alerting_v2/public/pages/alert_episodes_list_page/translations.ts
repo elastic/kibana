@@ -35,3 +35,21 @@ export const EPISODES_LIST_COLUMN_ASSIGNEES = i18n.translate(
     defaultMessage: 'Assignee',
   }
 );
+
+export const EPISODES_ASSIGNEE_EMPTY = i18n.translate('xpack.alertingV2.episodes.assignees.empty', {
+  defaultMessage: '—',
+});
+
+export const EPISODES_ASSIGNEE_PROFILE_LOAD_ERROR = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.profileLoadError',
+  {
+    defaultMessage: 'Could not load profile',
+  }
+);
+
+export const EPISODES_ASSIGNEE_UNKNOWN_USER = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.unknownUser',
+  {
+    defaultMessage: 'Unknown user',
+  }
+);

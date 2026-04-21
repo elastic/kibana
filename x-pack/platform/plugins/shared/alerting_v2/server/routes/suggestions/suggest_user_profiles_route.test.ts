@@ -7,7 +7,6 @@
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
-import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import { createRouteDependencies } from '../test_utils';
 import { SuggestUserProfilesRoute } from './suggest_user_profiles_route';
 
@@ -16,9 +15,6 @@ const requestWithDataPath = httpServerMock.createKibanaRequest({
   body: { name: 'john', size: 10, dataPath: 'avatar' },
 });
 const securityStart = securityMock.createStart();
-const spacesStart = spacesMock.createStart();
-
-spacesStart.spacesService.getSpaceId.mockReturnValue('default');
 
 describe('SuggestUserProfilesRoute', () => {
   it('returns suggested profiles for current space', async () => {
@@ -26,7 +22,7 @@ describe('SuggestUserProfilesRoute', () => {
 
     securityStart.userProfiles.suggest.mockResolvedValue([{ uid: 'u-1' } as any]);
 
-    const route = new SuggestUserProfilesRoute(ctx, request, securityStart, spacesStart);
+    const route = new SuggestUserProfilesRoute(ctx, request, securityStart);
 
     await route.handle();
 
@@ -34,12 +30,6 @@ describe('SuggestUserProfilesRoute', () => {
       name: 'john',
       size: 10,
       dataPath: 'avatar',
-      requiredPrivileges: {
-        spaceId: 'default',
-        privileges: {
-          kibana: [securityStart.authz.actions.login],
-        },
-      },
     });
     expect(ctx.response.ok).toHaveBeenCalledWith({ body: [{ uid: 'u-1' }] });
   });
@@ -49,12 +39,7 @@ describe('SuggestUserProfilesRoute', () => {
 
     securityStart.userProfiles.suggest.mockResolvedValue([]);
 
-    const route = new SuggestUserProfilesRoute(
-      ctx,
-      requestWithDataPath,
-      securityStart,
-      spacesStart
-    );
+    const route = new SuggestUserProfilesRoute(ctx, requestWithDataPath, securityStart);
 
     await route.handle();
 
@@ -68,7 +53,7 @@ describe('SuggestUserProfilesRoute', () => {
 
     securityStart.userProfiles.suggest.mockRejectedValue(new Error('boom'));
 
-    const route = new SuggestUserProfilesRoute(ctx, request, securityStart, spacesStart);
+    const route = new SuggestUserProfilesRoute(ctx, request, securityStart);
 
     await route.handle();
 

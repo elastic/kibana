@@ -289,13 +289,12 @@ export const TAGS_ACTION_SELECT_NONE = i18n.translate(
 );
 
 /** --- Edit episode assignee flyout --- */
-/** Matches Cases `noSelectedAssigneesTitle` with `totalCases = 1`. */
 export const ASSIGNEE_FLYOUT_EMPTY_LIST_TITLE = i18n.translate(
   'xpack.alertingV2.episodes.assignees.flyout.emptyListTitle',
   {
     defaultMessage:
-      'The selected {totalCases, plural, =1 {case does} other {cases do}} not have any assigned users',
-    values: { totalCases: 1 },
+      'The selected {totalEpisodes, plural, =1 {episode does} other {episodes do}} not have any assigned users',
+    values: { totalEpisodes: 1 },
   }
 );
 

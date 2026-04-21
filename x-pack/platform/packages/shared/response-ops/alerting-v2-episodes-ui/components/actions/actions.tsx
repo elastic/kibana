@@ -20,7 +20,7 @@ import { css } from '@emotion/react';
 import { AlertEpisodeAcknowledgeActionButton } from './acknowledge_action_button';
 import { AlertEpisodeSnoozeActionButton } from './snooze_action_button';
 import type { EpisodeActionState, AlertEpisodeGroupAction } from '../../types/action';
-import { AlertEpisodeTagsFlyout } from './alert_episode_tags_flyout';
+import { AlertEpisodeTagsFlyout } from './edit_episode_tags_flyout';
 import { EditEpisodeAssigneeFlyout } from './edit_episode_assignee_flyout';
 import { AlertEpisodeResolveActionButton } from './resolve_action_button';
 import { AlertEpisodeTagsMenuItem } from './tags_action_button';

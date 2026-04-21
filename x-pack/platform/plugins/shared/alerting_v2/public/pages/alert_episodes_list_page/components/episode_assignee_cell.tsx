@@ -6,11 +6,13 @@
  */
 
 import React from 'react';
-import { EuiLoadingSpinner, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { useQuery } from '@kbn/react-query';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { UserAvatar, UserToolTip } from '@kbn/user-profile-components';
+
+import * as i18n from '../translations';
 
 export interface EpisodeAssigneeCellProps {
   assigneeUid: string | null | undefined;
@@ -33,9 +35,7 @@ export function EpisodeAssigneeCell({ assigneeUid, userProfile }: EpisodeAssigne
   if (!assigneeUid) {
     return (
       <EuiText color="subdued" size="s">
-        {i18n.translate('xpack.alertingV2.episodes.assignees.empty', {
-          defaultMessage: '—',
-        })}
+        {i18n.EPISODES_ASSIGNEE_EMPTY}
       </EuiText>
     );
   }
@@ -47,27 +47,43 @@ export function EpisodeAssigneeCell({ assigneeUid, userProfile }: EpisodeAssigne
   if (isError) {
     return (
       <EuiText color="danger" size="s" title={assigneeUid}>
-        {i18n.translate('xpack.alertingV2.episodes.assignees.profileLoadError', {
-          defaultMessage: 'Could not load profile',
-        })}
+        {i18n.EPISODES_ASSIGNEE_PROFILE_LOAD_ERROR}
       </EuiText>
     );
   }
 
-  const profile = data?.[0];
+  const profile = data?.[0] as UserProfileWithAvatar;
+
   if (!profile) {
     return (
       <EuiText color="subdued" size="s" title={assigneeUid}>
-        {i18n.translate('xpack.alertingV2.episodes.assignees.unknownUser', {
-          defaultMessage: 'Unknown user',
-        })}
+        {i18n.EPISODES_ASSIGNEE_UNKNOWN_USER}
       </EuiText>
     );
   }
 
+  const user = profile.user;
+  const username = user.username;
+  const avatar = profile.data?.avatar;
+
   return (
-    <UserToolTip user={profile.user} avatar={profile.data?.avatar}>
-      <UserAvatar user={profile.user} avatar={profile.data?.avatar} size="s" />
+    <UserToolTip user={user} avatar={avatar} position="top" delay="regular">
+      <EuiFlexGroup
+        gutterSize="xs"
+        alignItems="center"
+        responsive={false}
+        css={{ minWidth: 0 }}
+        data-test-subj="alertingV2EpisodeAssigneeCell"
+      >
+        <EuiFlexItem grow={false}>
+          <UserAvatar user={user} avatar={avatar} size="s" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
+          <EuiText size="s" className="eui-textTruncate" title={username}>
+            {username}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </UserToolTip>
   );
 }
