@@ -35,7 +35,7 @@ paths:
                   properties:
                     noteId:
                       type: string
-                      description: Saved object id of the note to delete.
+                      description: Saved object ID of the note to delete.
                 - type: object
                   required: [noteIds]
                   nullable: true
