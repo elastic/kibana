@@ -458,7 +458,7 @@ export const createTestTracks: Command<void> = {
         throw createFlagError(`Expected '${moduleFilterPathPath}' to contain a JSON array.`);
       }
 
-      parsed.forEach(moduleIds.add);
+      parsed.forEach((id) => moduleIds.add(id));
       log.info(
         `Limiting test load selection to the following modules: ${Array.from(moduleIds).join(', ')}`
       );
