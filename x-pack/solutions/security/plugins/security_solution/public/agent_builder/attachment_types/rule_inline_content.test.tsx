@@ -69,9 +69,10 @@ describe('ThresholdDetails', () => {
       threshold: { field: 'source.ip', value: 5 },
     } as unknown as RuleResponse;
 
-    render(<ThresholdDetails rule={rule} />);
+    const { container } = render(<ThresholdDetails rule={rule} />);
+    const text = container.textContent ?? '';
 
-    expect(screen.getByText('Threshold')).toBeInTheDocument();
+    expect(text).toContain('Threshold');
     expect(screen.getByText(/Results aggregated by/)).toBeInTheDocument();
     expect(screen.getByText(/source\.ip/)).toBeInTheDocument();
     expect(screen.getByText(/>= 5/)).toBeInTheDocument();
@@ -187,11 +188,12 @@ describe('ThreatMatchDetails', () => {
       ],
     } as unknown as RuleResponse;
 
-    render(<ThreatMatchDetails rule={rule} />);
+    const { container } = render(<ThreatMatchDetails rule={rule} />);
+    const text = container.textContent ?? '';
 
-    expect(screen.getByText('Indicator index patterns')).toBeInTheDocument();
-    expect(screen.getByText('filebeat-*')).toBeInTheDocument();
-    expect(screen.getByText('logs-ti*')).toBeInTheDocument();
+    expect(text).toContain('Indicator index patterns');
+    expect(text).toContain('filebeat-*');
+    expect(text).toContain('logs-ti*');
   });
 
   it('renders threat query in code block', () => {
@@ -224,10 +226,11 @@ describe('ThreatMatchDetails', () => {
       ],
     } as unknown as RuleResponse;
 
-    render(<ThreatMatchDetails rule={rule} />);
+    const { container } = render(<ThreatMatchDetails rule={rule} />);
+    const text = container.textContent ?? '';
 
-    expect(screen.getByText('Indicator mapping')).toBeInTheDocument();
-    expect(screen.getByText(/source\.ip MATCHES threat\.indicator\.ip/)).toBeInTheDocument();
+    expect(text).toContain('Indicator mapping');
+    expect(text).toContain('source.ip MATCHES threat.indicator.ip');
   });
 
   it('renders multiple entries within one mapping group with AND', () => {
@@ -316,10 +319,11 @@ describe('MachineLearningDetails', () => {
       anomaly_threshold: 75,
     } as unknown as RuleResponse;
 
-    render(<MachineLearningDetails rule={rule} />);
+    const { container } = render(<MachineLearningDetails rule={rule} />);
+    const text = container.textContent ?? '';
 
-    expect(screen.getByText('Machine Learning job')).toBeInTheDocument();
-    expect(screen.getByText('v3_linux_anomalous_network_activity')).toBeInTheDocument();
+    expect(text).toContain('Machine Learning job');
+    expect(text).toContain('v3_linux_anomalous_network_activity');
   });
 
   it('renders anomaly threshold via reused AnomalyThreshold component', () => {
@@ -330,10 +334,11 @@ describe('MachineLearningDetails', () => {
       anomaly_threshold: 75,
     } as unknown as RuleResponse;
 
-    render(<MachineLearningDetails rule={rule} />);
+    const { container } = render(<MachineLearningDetails rule={rule} />);
+    const text = container.textContent ?? '';
 
-    expect(screen.getByText('Anomaly score threshold')).toBeInTheDocument();
-    expect(screen.getByText('75')).toBeInTheDocument();
+    expect(text).toContain('Anomaly score threshold');
+    expect(text).toContain('75');
   });
 
   it('renders multiple ML job IDs as badges', () => {
@@ -344,12 +349,13 @@ describe('MachineLearningDetails', () => {
       anomaly_threshold: 50,
     } as unknown as RuleResponse;
 
-    render(<MachineLearningDetails rule={rule} />);
+    const { container } = render(<MachineLearningDetails rule={rule} />);
+    const text = container.textContent ?? '';
 
-    expect(screen.getByText('job_one')).toBeInTheDocument();
-    expect(screen.getByText('job_two')).toBeInTheDocument();
-    expect(screen.getByText('job_three')).toBeInTheDocument();
-    expect(screen.getByText('50')).toBeInTheDocument();
+    expect(text).toContain('job_one');
+    expect(text).toContain('job_two');
+    expect(text).toContain('job_three');
+    expect(text).toContain('50');
   });
 
   it('renders anomaly threshold of 0', () => {
@@ -387,10 +393,11 @@ describe('NewTermsDetails', () => {
       history_window_start: 'now-7d',
     } as unknown as RuleResponse;
 
-    render(<NewTermsDetails rule={rule} />);
+    const { container } = render(<NewTermsDetails rule={rule} />);
+    const text = container.textContent ?? '';
 
-    expect(screen.getByText('Fields')).toBeInTheDocument();
-    expect(screen.getByText('host.name')).toBeInTheDocument();
+    expect(text).toContain('Fields');
+    expect(text).toContain('host.name');
   });
 
   it('renders history window via reused HistoryWindowSize (date math converted to duration)', () => {
@@ -402,10 +409,11 @@ describe('NewTermsDetails', () => {
       history_window_start: 'now-7d',
     } as unknown as RuleResponse;
 
-    render(<NewTermsDetails rule={rule} />);
+    const { container } = render(<NewTermsDetails rule={rule} />);
+    const text = container.textContent ?? '';
 
-    expect(screen.getByText('History Window Size')).toBeInTheDocument();
-    expect(screen.getByText('7d')).toBeInTheDocument();
+    expect(text).toContain('History Window Size');
+    expect(text).toContain('7d');
   });
 
   it('renders multiple new terms fields', () => {
@@ -460,10 +468,11 @@ describe('SavedQueryDetails', () => {
       saved_id: 'my-saved-query-id',
     } as unknown as RuleResponse;
 
-    render(<SavedQueryDetails rule={rule} />);
+    const { container } = render(<SavedQueryDetails rule={rule} />);
+    const text = container.textContent ?? '';
 
-    expect(screen.getByText('Saved query name')).toBeInTheDocument();
-    expect(screen.getByText('my-saved-query-id')).toBeInTheDocument();
+    expect(text).toContain('Saved query name');
+    expect(text).toContain('my-saved-query-id');
   });
 
   it('returns null for non-saved_query rule types', () => {
@@ -722,8 +731,8 @@ describe('RuleInlineContent integration', () => {
       ],
     });
 
-    expect(screen.getByText('Rule Type:')).toBeInTheDocument();
     const allText = container.textContent ?? '';
+    expect(allText).toContain('Rule type');
     expect(allText).toContain('Indicator Match');
   });
 
@@ -779,7 +788,7 @@ describe('RuleInlineContent integration', () => {
   });
 
   it('renders threat_match rule with type-specific section', () => {
-    renderInlineContent({
+    const { container } = renderInlineContent({
       ...baseRule,
       type: 'threat_match',
       query: '*:*',
@@ -790,27 +799,29 @@ describe('RuleInlineContent integration', () => {
       ],
     });
 
+    const allText = container.textContent ?? '';
     expect(screen.getByText('Custom query')).toBeInTheDocument();
-    expect(screen.getByText('Indicator index patterns')).toBeInTheDocument();
-    expect(screen.getByText('filebeat-*')).toBeInTheDocument();
-    expect(screen.getByText(/source\.ip MATCHES threat\.indicator\.ip/)).toBeInTheDocument();
+    expect(allText).toContain('Indicator index patterns');
+    expect(allText).toContain('filebeat-*');
+    expect(allText).toContain('source.ip MATCHES threat.indicator.ip');
   });
 
   it('renders machine_learning rule with type-specific section', () => {
-    renderInlineContent({
+    const { container } = renderInlineContent({
       ...baseRule,
       type: 'machine_learning',
       machine_learning_job_id: 'v3_linux_anomalous_network_activity',
       anomaly_threshold: 75,
     });
 
-    expect(screen.getByText('Machine Learning job')).toBeInTheDocument();
-    expect(screen.getByText('v3_linux_anomalous_network_activity')).toBeInTheDocument();
-    expect(screen.getByText('75')).toBeInTheDocument();
+    const allText = container.textContent ?? '';
+    expect(allText).toContain('Machine Learning job');
+    expect(allText).toContain('v3_linux_anomalous_network_activity');
+    expect(allText).toContain('75');
   });
 
   it('renders new_terms rule with type-specific section', () => {
-    renderInlineContent({
+    const { container } = renderInlineContent({
       ...baseRule,
       type: 'new_terms',
       query: '*:*',
@@ -818,10 +829,11 @@ describe('RuleInlineContent integration', () => {
       history_window_start: 'now-7d',
     });
 
+    const allText = container.textContent ?? '';
     expect(screen.getByText('Custom query')).toBeInTheDocument();
-    expect(screen.getByText('Fields')).toBeInTheDocument();
-    expect(screen.getByText('host.name')).toBeInTheDocument();
-    expect(screen.getByText('7d')).toBeInTheDocument();
+    expect(allText).toContain('Fields');
+    expect(allText).toContain('host.name');
+    expect(allText).toContain('7d');
   });
 
   it('renders eql rule with type-specific section', () => {
@@ -881,16 +893,17 @@ describe('RuleInlineContent integration', () => {
   });
 
   it('renders saved_query rule with saved query name', () => {
-    renderInlineContent({
+    const { container } = renderInlineContent({
       ...baseRule,
       type: 'saved_query',
       saved_id: 'my-saved-query',
     });
 
-    expect(screen.getByText('Saved query name')).toBeInTheDocument();
-    expect(screen.getByText('my-saved-query')).toBeInTheDocument();
-    expect(screen.queryByText('Indicator index patterns')).not.toBeInTheDocument();
-    expect(screen.queryByText('Machine Learning job')).not.toBeInTheDocument();
+    const allText = container.textContent ?? '';
+    expect(allText).toContain('Saved query name');
+    expect(allText).toContain('my-saved-query');
+    expect(allText).not.toContain('Indicator index patterns');
+    expect(allText).not.toContain('Machine Learning job');
   });
 
   it('renders type-specific section between query and tags for threshold rule', () => {

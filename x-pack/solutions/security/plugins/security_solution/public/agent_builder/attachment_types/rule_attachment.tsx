@@ -54,6 +54,7 @@ import {
   THREAT_MAPPING_FIELD_LABEL,
   NEW_TERMS_FIELDS_FIELD_LABEL,
   HISTORY_WINDOW_SIZE_FIELD_LABEL,
+  RULE_TYPE_FIELD_LABEL,
 } from '../../detection_engine/rule_management/components/rule_details/translations';
 import {
   QUERY_LABEL,
@@ -63,6 +64,13 @@ import {
   SAVED_QUERY_NAME_LABEL,
   THREAT_QUERY_LABEL,
   FILTERS_LABEL,
+  ML_TYPE_DESCRIPTION,
+  EQL_TYPE_DESCRIPTION,
+  QUERY_TYPE_DESCRIPTION,
+  THRESHOLD_TYPE_DESCRIPTION,
+  THREAT_MATCH_TYPE_DESCRIPTION,
+  NEW_TERMS_TYPE_DESCRIPTION,
+  ESQL_TYPE_DESCRIPTION,
 } from '../../detection_engine/rule_creation_ui/components/description_step/translations';
 
 type RuleAttachment = Attachment<string, { text: string; attachmentLabel?: string }>;
@@ -122,15 +130,26 @@ const TagsBadgeList: React.FC<{ tags: string[] }> = ({ tags }) => (
   </EuiFlexGroup>
 );
 
-const RULE_TYPE_LABELS: Record<string, string> = {
-  esql: 'ES|QL',
-  eql: 'EQL',
-  query: 'Query',
-  saved_query: 'Saved Query',
-  threshold: 'Threshold',
-  threat_match: 'Indicator Match',
-  machine_learning: 'Machine Learning',
-  new_terms: 'New Terms',
+const getRuleTypeLabel = (ruleType: string): string => {
+  switch (ruleType) {
+    case 'machine_learning':
+      return ML_TYPE_DESCRIPTION;
+    case 'query':
+    case 'saved_query':
+      return QUERY_TYPE_DESCRIPTION;
+    case 'eql':
+      return EQL_TYPE_DESCRIPTION;
+    case 'threshold':
+      return THRESHOLD_TYPE_DESCRIPTION;
+    case 'threat_match':
+      return THREAT_MATCH_TYPE_DESCRIPTION;
+    case 'new_terms':
+      return NEW_TERMS_TYPE_DESCRIPTION;
+    case 'esql':
+      return ESQL_TYPE_DESCRIPTION;
+    default:
+      return ruleType;
+  }
 };
 
 const ScheduleDisplay: React.FC<{ interval: string; from?: string }> = ({ interval, from }) => {
@@ -183,7 +202,6 @@ const IndexPatterns: React.FC<{ patterns: string[] }> = ({ patterns }) => (
         </EuiFlexItem>
       ))}
     </EuiFlexGroup>
-    <EuiSpacer size="s" />
   </>
 );
 
@@ -265,7 +283,6 @@ export const FiltersDisplay: React.FC<{ filters: unknown[] }> = ({ filters }) =>
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>
-      <EuiSpacer size="s" />
     </>
   );
 };
@@ -276,14 +293,13 @@ export const ThresholdDetails: React.FC<{ rule: RuleResponse }> = ({ rule }) => 
   }
 
   return (
-    <>
-      <SectionHeading>{THRESHOLD_FIELD_LABEL}</SectionHeading>
-      <EuiSpacer size="xs" />
-      <EuiText size="s">
-        <ThresholdDisplay threshold={rule.threshold} />
-      </EuiText>
-      <EuiSpacer size="s" />
-    </>
+    <EuiText size="s">
+      <strong>
+        {THRESHOLD_FIELD_LABEL}
+        {':'}
+      </strong>{' '}
+      <ThresholdDisplay threshold={rule.threshold} />
+    </EuiText>
   );
 };
 
@@ -297,21 +313,24 @@ export const ThreatMatchDetails: React.FC<{ rule: RuleResponse }> = ({ rule }) =
       <SectionHeading>{THREAT_INDEX_FIELD_LABEL}</SectionHeading>
       <EuiSpacer size="xs" />
       <ThreatIndexDisplay threatIndex={rule.threat_index} />
-      <EuiSpacer size="xs" />
       {rule.threat_query && (
         <>
+          <EuiSpacer size="xs" />
           <SectionHeading>{THREAT_QUERY_LABEL}</SectionHeading>
           <EuiSpacer size="xs" />
           <EuiCodeBlock fontSize="s" paddingSize="s" overflowHeight={100} isCopyable>
             {rule.threat_query}
           </EuiCodeBlock>
-          <EuiSpacer size="xs" />
         </>
       )}
-      <SectionHeading>{THREAT_MAPPING_FIELD_LABEL}</SectionHeading>
       <EuiSpacer size="xs" />
-      <EuiText size="s">{constructThreatMappingDescription(rule.threat_mapping)}</EuiText>
-      <EuiSpacer size="s" />
+      <EuiText size="s">
+        <strong>
+          {THREAT_MAPPING_FIELD_LABEL}
+          {':'}
+        </strong>{' '}
+        {constructThreatMappingDescription(rule.threat_mapping)}
+      </EuiText>
     </>
   );
 };
@@ -326,14 +345,21 @@ export const MachineLearningDetails: React.FC<{ rule: RuleResponse }> = ({ rule 
 
   return (
     <>
-      <SectionHeading>{MACHINE_LEARNING_JOB_ID_FIELD_LABEL}</SectionHeading>
+      <EuiText size="s">
+        <strong>
+          {MACHINE_LEARNING_JOB_ID_FIELD_LABEL}
+          {':'}
+        </strong>{' '}
+        {jobIds.join(', ')}
+      </EuiText>
       <EuiSpacer size="xs" />
-      <TagsBadgeList tags={jobIds} />
-      <EuiSpacer size="xs" />
-      <SectionHeading>{ANOMALY_THRESHOLD_FIELD_LABEL}</SectionHeading>
-      <EuiSpacer size="xs" />
-      <AnomalyThresholdDisplay anomalyThreshold={rule.anomaly_threshold} />
-      <EuiSpacer size="s" />
+      <EuiText size="s">
+        <strong>
+          {ANOMALY_THRESHOLD_FIELD_LABEL}
+          {':'}
+        </strong>{' '}
+        <AnomalyThresholdDisplay anomalyThreshold={rule.anomaly_threshold} />
+      </EuiText>
     </>
   );
 };
@@ -345,14 +371,21 @@ export const NewTermsDetails: React.FC<{ rule: RuleResponse }> = ({ rule }) => {
 
   return (
     <>
-      <SectionHeading>{NEW_TERMS_FIELDS_FIELD_LABEL}</SectionHeading>
+      <EuiText size="s">
+        <strong>
+          {NEW_TERMS_FIELDS_FIELD_LABEL}
+          {':'}
+        </strong>{' '}
+        <NewTermsFieldsDisplay newTermsFields={rule.new_terms_fields} />
+      </EuiText>
       <EuiSpacer size="xs" />
-      <NewTermsFieldsDisplay newTermsFields={rule.new_terms_fields} />
-      <EuiSpacer size="xs" />
-      <SectionHeading>{HISTORY_WINDOW_SIZE_FIELD_LABEL}</SectionHeading>
-      <EuiSpacer size="xs" />
-      <HistoryWindowSize historyWindowStart={rule.history_window_start} />
-      <EuiSpacer size="s" />
+      <EuiText size="s">
+        <strong>
+          {HISTORY_WINDOW_SIZE_FIELD_LABEL}
+          {':'}
+        </strong>{' '}
+        <HistoryWindowSize historyWindowStart={rule.history_window_start} />
+      </EuiText>
     </>
   );
 };
@@ -363,12 +396,13 @@ export const SavedQueryDetails: React.FC<{ rule: RuleResponse }> = ({ rule }) =>
   }
 
   return (
-    <>
-      <SectionHeading>{SAVED_QUERY_NAME_LABEL}</SectionHeading>
-      <EuiSpacer size="xs" />
-      <EuiText size="s">{rule.saved_id}</EuiText>
-      <EuiSpacer size="s" />
-    </>
+    <EuiText size="s">
+      <strong>
+        {SAVED_QUERY_NAME_LABEL}
+        {':'}
+      </strong>{' '}
+      {rule.saved_id}
+    </EuiText>
   );
 };
 
@@ -479,21 +513,18 @@ const RuleInlineContent: React.FC<AttachmentRenderProps<RuleAttachment>> = ({ at
   return (
     <EuiPanel paddingSize="m" hasShadow={false} hasBorder={false}>
       {rule.type && (
-        <>
-          <EuiText size="s">
-            <strong>
-              {i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.ruleTypeLabel', {
-                defaultMessage: 'Rule Type:',
-              })}
-            </strong>{' '}
-            {RULE_TYPE_LABELS[rule.type] ?? rule.type}
-          </EuiText>
-          <EuiSpacer size="s" />
-        </>
+        <EuiText size="s">
+          <strong>
+            {RULE_TYPE_FIELD_LABEL}
+            {':'}
+          </strong>{' '}
+          {getRuleTypeLabel(rule.type)}
+        </EuiText>
       )}
 
       {rule.description && (
         <>
+          <EuiSpacer size="s" />
           <SectionHeading>
             {i18n.translate(
               'xpack.securitySolution.agentBuilder.ruleAttachment.descriptionHeading',
@@ -502,12 +533,12 @@ const RuleInlineContent: React.FC<AttachmentRenderProps<RuleAttachment>> = ({ at
           </SectionHeading>
           <EuiSpacer size="xs" />
           <EuiText size="s">{rule.description}</EuiText>
-          <EuiSpacer size="s" />
         </>
       )}
 
       {query && (
         <>
+          <EuiSpacer size="s" />
           <SectionHeading>{getQueryLabel(rule)}</SectionHeading>
           <EuiSpacer size="xs" />
           <EuiCodeBlock
@@ -519,18 +550,29 @@ const RuleInlineContent: React.FC<AttachmentRenderProps<RuleAttachment>> = ({ at
           >
             {query}
           </EuiCodeBlock>
-          <EuiSpacer size="s" />
         </>
       )}
 
-      {index && index.length > 0 && <IndexPatterns patterns={index} />}
+      {index && index.length > 0 && (
+        <>
+          <EuiSpacer size="xs" />
+          <IndexPatterns patterns={index} />
+        </>
+      )}
 
-      {filters && filters.length > 0 && <FiltersDisplay filters={filters} />}
+      {filters && filters.length > 0 && (
+        <>
+          <EuiSpacer size="xs" />
+          <FiltersDisplay filters={filters} />
+        </>
+      )}
 
+      <EuiSpacer size="xs" />
       <RuleTypeDetails rule={rule} />
 
       {rule.tags && rule.tags.length > 0 && (
         <>
+          <EuiSpacer size="xs" />
           <SectionHeading>
             {i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.tagsHeading', {
               defaultMessage: 'Tags',
@@ -538,15 +580,15 @@ const RuleInlineContent: React.FC<AttachmentRenderProps<RuleAttachment>> = ({ at
           </SectionHeading>
           <EuiSpacer size="xs" />
           <TagsBadgeList tags={rule.tags} />
-          <EuiSpacer size="s" />
         </>
       )}
 
+      <EuiSpacer size="xs" />
       <SeverityRiskScore severity={rule.severity} riskScore={rule.risk_score} />
 
       {interval && (
         <>
-          <EuiSpacer size="s" />
+          <EuiSpacer size="xs" />
           <ScheduleDisplay interval={interval} from={from} />
         </>
       )}
