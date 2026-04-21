@@ -1460,7 +1460,7 @@ groups:
           self: ga
           serverless: unavailable
 
-      - setting: "observability:profilingPervCPUWattX86"
+      - setting: "observability:profilingPerVCPUWattX86"
         id: observability-profiling-per-vcpu-watt-x86
         description: |
           The average amortized per-core power consumption (based on 100% CPU utilization) for x86 architecture.
