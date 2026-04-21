@@ -19,6 +19,7 @@ import type {
   GetRuleResponseV1,
 } from '../../../../../../common/routes/rule/apis/get/external';
 import {
+  getRuleParamsExamplesV1,
   getRuleRequestParamsSchemaV1,
   getRuleResponseSchemaV1,
 } from '../../../../../../common/routes/rule/apis/get/external';
@@ -35,6 +36,7 @@ export const getRuleRoute = (
         access: 'public',
         summary: `Get rule details`,
         tags: ['oas-tag:alerting'],
+        oasOperationObject: getRuleParamsExamplesV1,
       },
       security: DEFAULT_ALERTING_ROUTE_SECURITY,
       validate: {

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-export { getRuleRequestParamsSchema } from './schemas/latest';
+export { getRuleRequestParamsSchema, getRuleParamsExamples } from './schemas/latest';
 export type { GetRuleRequestParams, GetRuleResponse } from './types/latest';
 
 export {
   getRuleRequestParamsSchema as getRuleRequestParamsSchemaV1,
   getRuleResponseSchema as getRuleResponseSchemaV1,
+  getRuleParamsExamples as getRuleParamsExamplesV1,
 } from './schemas/v1';
 export type {
   GetRuleRequestParams as GetRuleRequestParamsV1,

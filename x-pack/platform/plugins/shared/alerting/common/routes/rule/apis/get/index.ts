@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { getRuleRequestParamsSchema } from './external/schemas/latest';
+export { getRuleRequestParamsSchema, getRuleParamsExamples } from './external/schemas/latest';
 export type { GetRuleRequestParams, GetRuleResponse } from './external/types/latest';
 
 export {
