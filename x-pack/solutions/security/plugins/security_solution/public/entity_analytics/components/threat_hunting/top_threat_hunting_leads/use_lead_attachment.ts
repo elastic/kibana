@@ -6,7 +6,6 @@
  */
 
 import { useCallback } from 'react';
-import { THREAT_HUNTING_AGENT_ID } from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
 import { LEAD_ATTACHMENT_PROMPT } from '../../../../agent_builder/components/prompts';
 import type { HuntingLead } from './types';
@@ -60,7 +59,6 @@ export const useLeadAttachment = () => {
         newConversation: true,
         initialMessage: buildLeadPrompt(lead),
         sessionTag: 'security',
-        agentId: THREAT_HUNTING_AGENT_ID,
       });
     },
     [agentBuilder]

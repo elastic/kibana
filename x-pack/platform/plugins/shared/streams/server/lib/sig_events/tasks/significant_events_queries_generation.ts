@@ -65,11 +65,14 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                 streamsClient,
                 inferenceClient,
                 soClient,
-                featureClient,
+                getFeatureClient,
+                getQueryClient,
                 scopedClusterClient,
               } = await taskContext.getScopedClients({
                 request: runContext.fakeRequest,
               });
+
+              const featureClient = await getFeatureClient();
 
               const taskLogger = taskContext.logger.get('significant_events_queries_generation');
               const connectorId =
@@ -86,6 +89,7 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                 const stream = await streamsClient.getStream(streamName);
 
                 const esClient = scopedClusterClient.asCurrentUser;
+                const queryClient = await getQueryClient();
 
                 const promptsConfigService = new PromptsConfigService({
                   soClient,
@@ -98,14 +102,13 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                   {
                     definition: stream,
                     connectorId,
-                    start,
-                    end,
                     systemPrompt: significantEventsPromptOverride,
                   },
                   {
                     inferenceClient,
                     esClient,
                     featureClient,
+                    queryClient,
                     logger: taskContext.logger.get('significant_events_generation'),
                     signal: runContext.abortController.signal,
                   }

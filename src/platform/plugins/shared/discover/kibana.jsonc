@@ -34,6 +34,7 @@
       "contentManagement"
     ],
     "optionalPlugins": [
+      "agentBuilder",
       "dataVisualizer",
       "home",
       "share",
@@ -57,7 +58,6 @@
       "kibanaUtils",
       "kibanaReact",
       "unifiedSearch",
-      "savedObjects",
       "presentationPanel",
       "presentationUtil",
       "esql"

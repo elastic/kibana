@@ -9,8 +9,6 @@ import crypto from 'crypto';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { dump } from 'js-yaml';
-
 import type { PackagePolicy, AgentPolicy } from '../../types';
 import {
   sendGetOneAgentPolicy,
@@ -37,7 +35,7 @@ import { sendCreateStandaloneAgentAPIKey } from '../../hooks';
 
 import type { FullAgentPolicy } from '../../../common';
 
-import { fullAgentPolicyToYaml } from '../../services';
+import { getYamlFormatters } from '../../services/yaml_formatters';
 
 import type {
   K8sMode,
@@ -300,14 +298,16 @@ export function useFetchFullPolicy(agentPolicy: AgentPolicy | undefined, isK8s?:
       if (typeof fullAgentPolicy === 'string') {
         return;
       }
-      setYaml(fullAgentPolicyToYaml(fullAgentPolicy, dump, apiKey));
+      getYamlFormatters().then((formatters) => {
+        setYaml(formatters.fullAgentPolicyToYaml(fullAgentPolicy, apiKey));
+      });
     }
   }, [apiKey, fullAgentPolicy, isK8s]);
 
   const downloadYaml = useMemo(
     () => () => {
       const link = document.createElement('a');
-      link.href = `data:text/x-yaml;charset=utf-8,${yaml}`;
+      link.href = `data:text/x-yaml;charset=utf-8,${encodeURIComponent(yaml)}`;
       link.download = `elastic-agent.yml`;
       link.click();
     },
