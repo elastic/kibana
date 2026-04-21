@@ -2647,7 +2647,7 @@
       "matchDepNames": ["patch-package"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Kibana Operations"],
+      "addLabels": ["Team:Operations"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     }
