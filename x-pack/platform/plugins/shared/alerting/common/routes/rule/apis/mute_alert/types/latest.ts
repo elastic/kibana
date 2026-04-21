@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export type { MuteAlertRequestParams } from './v1';
+export type { MuteAlertRequestBody, MuteAlertRequestParams, MuteAlertRequestQuery } from './v1';

@@ -4,4 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export { muteAlertParamsSchema, muteAlertQuerySchema, muteAlertBodySchema } from './v1';
+
+import type { TypeOf } from '@kbn/config-schema';
+import type { unsnoozeAlertParamsSchema } from '../schemas';
+
+export type UnsnoozeAlertParams = TypeOf<typeof unsnoozeAlertParamsSchema>;

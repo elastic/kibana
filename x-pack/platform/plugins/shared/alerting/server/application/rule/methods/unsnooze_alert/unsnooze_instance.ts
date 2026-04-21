@@ -1,0 +1,99 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import Boom from '@hapi/boom';
+import { updateRuleSo } from '../../../../data/rule/methods/update_rule_so';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import type { RawRule } from '../../../../saved_objects/schemas/raw_rule';
+import { AlertingAuthorizationEntity, WriteOperations } from '../../../../authorization';
+import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
+import { updateMeta } from '../../../../rules_client/lib';
+import { RuleAuditAction, ruleAuditEvent } from '../../../../rules_client/common/audit_events';
+import { removePerAlertSnoozeEntry } from '../../../../rules_client/common/per_alert_snooze_utils';
+import type { RulesClientContext } from '../../../../rules_client/types';
+import { unsnoozeAlertParamsSchema } from './schemas';
+import type { UnsnoozeAlertParams } from './types';
+
+export async function unsnoozeInstance(
+  context: RulesClientContext,
+  params: UnsnoozeAlertParams
+): Promise<void> {
+  const ruleId = params.alertId;
+  try {
+    unsnoozeAlertParamsSchema.validate(params);
+  } catch (error) {
+    throw Boom.badRequest(`Failed to validate params: ${error.message}`);
+  }
+
+  return await retryIfConflicts(
+    context.logger,
+    `rulesClient.unsnoozeInstance('${ruleId}')`,
+    async () => await unsnoozeInstanceWithOCC(context, params)
+  );
+}
+
+async function unsnoozeInstanceWithOCC(
+  context: RulesClientContext,
+  { alertId: ruleId, alertInstanceId }: UnsnoozeAlertParams
+) {
+  const { attributes, version } = await context.unsecuredSavedObjectsClient.get<RawRule>(
+    RULE_SAVED_OBJECT_TYPE,
+    ruleId
+  );
+
+  try {
+    await context.authorization.ensureAuthorized({
+      ruleTypeId: attributes.alertTypeId,
+      consumer: attributes.consumer,
+      operation: WriteOperations.Unsnooze,
+      entity: AlertingAuthorizationEntity.Rule,
+    });
+
+    if (attributes.actions.length) {
+      await context.actionsAuthorization.ensureAuthorized({ operation: 'execute' });
+    }
+  } catch (error) {
+    context.auditLogger?.log(
+      ruleAuditEvent({
+        action: RuleAuditAction.UNSNOOZE,
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId, name: attributes.name },
+        error,
+      })
+    );
+    throw error;
+  }
+
+  context.auditLogger?.log(
+    ruleAuditEvent({
+      action: RuleAuditAction.UNSNOOZE,
+      outcome: 'unknown',
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId, name: attributes.name },
+    })
+  );
+
+  context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
+
+  const snoozedInstances = removePerAlertSnoozeEntry({
+    snoozedInstances: attributes.snoozedInstances,
+    alertInstanceId,
+  });
+
+  if (snoozedInstances.length === (attributes.snoozedInstances ?? []).length) {
+    return;
+  }
+
+  await updateRuleSo({
+    savedObjectsClient: context.unsecuredSavedObjectsClient,
+    savedObjectsUpdateOptions: { version },
+    id: ruleId,
+    updateRuleAttributes: updateMeta(context, {
+      snoozedInstances,
+      updatedBy: await context.getUserName(),
+      updatedAt: new Date().toISOString(),
+    }),
+  });
+}

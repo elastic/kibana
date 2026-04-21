@@ -43,6 +43,7 @@ const alertsService = {
   createAlertsClient: jest.fn(),
   muteAlertInstance: jest.fn(),
   unmuteAlertInstance: jest.fn(),
+  getAlertSnoozeSnapshot: jest.fn(),
   muteAllAlerts: jest.fn(),
   unmuteAllAlerts: jest.fn(),
   getContextInitializationPromise: jest.fn(),
@@ -86,6 +87,8 @@ beforeEach(() => {
   (auditLogger.log as jest.Mock).mockClear();
   alertsService.muteAlertInstance.mockClear();
   alertsService.unmuteAlertInstance.mockClear();
+  alertsService.getAlertSnoozeSnapshot.mockClear();
+  alertsService.getAlertSnoozeSnapshot.mockResolvedValue({ 'host.name': 'web-01' });
   (rulesClientParams.getAlertIndicesAlias as jest.Mock).mockReturnValue(['.alerts-default']);
 });
 
@@ -182,6 +185,76 @@ describe('muteInstance()', () => {
     });
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(alertsService.muteAlertInstance).not.toHaveBeenCalled();
+  });
+
+  test('writes a conditional snooze entry when a body is provided', async () => {
+    const rulesClient = new RulesClient(rulesClientParams);
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: RULE_SAVED_OBJECT_TYPE,
+      attributes: {
+        actions: [],
+        schedule: { interval: '10s' },
+        alertTypeId: '2',
+        enabled: true,
+        scheduledTaskId: 'task-123',
+        mutedInstanceIds: ['still-muted'],
+        snoozedInstances: [
+          {
+            instanceId: 'existing-snooze',
+            snoozedAt: '2026-04-14T10:00:00.000Z',
+            snoozedBy: 'elastic',
+          },
+        ],
+      },
+      version: '123',
+      references: [],
+    });
+
+    await rulesClient.muteInstance({
+      params: { alertId: '1', alertInstanceId: '2' },
+      query: { validateAlertsExistence: false },
+      body: {
+        expiresAt: '2026-04-14T12:00:00.000Z',
+        conditions: [{ type: 'field_change', field: 'host.name' }],
+        conditionOperator: 'all',
+      },
+    });
+
+    expect(alertsService.getAlertSnoozeSnapshot).toHaveBeenCalledWith({
+      indices: ['.alerts-default'],
+      alertId: '2',
+      ruleId: '1',
+      fields: ['host.name'],
+    });
+    expect(alertsService.muteAlertInstance).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      '1',
+      {
+        snoozedInstances: [
+          {
+            instanceId: 'existing-snooze',
+            snoozedAt: '2026-04-14T10:00:00.000Z',
+            snoozedBy: 'elastic',
+          },
+          {
+            instanceId: '2',
+            expiresAt: '2026-04-14T12:00:00.000Z',
+            conditions: [{ type: 'field_change', field: 'host.name' }],
+            conditionOperator: 'all',
+            snoozeSnapshot: { 'host.name': 'web-01' },
+            snoozedAt: '2019-02-12T21:01:22.479Z',
+            snoozedBy: 'elastic',
+          },
+        ],
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        updatedBy: 'elastic',
+      },
+      {
+        version: '123',
+      }
+    );
   });
 
   describe('authorization', () => {
