@@ -12,6 +12,7 @@ import { formatResource } from '../index_explorer';
 
 import {
   naturalLanguageSearchToolName as nlTool,
+  noMatchingResourceToolName as noMatchTool,
   relevanceSearchToolName as relevanceTool,
 } from './inner_tools';
 
@@ -34,6 +35,7 @@ export const getSearchDispatcherPrompt = ({
 - You MUST call exactly ONE tool. Do NOT respond with text.
 - Do NOT ask clarifying questions. Make your best judgment.
 - The \`index\` parameter MUST be the name of one of the available resources listed below.
+- Call \`${noMatchTool}\` only when no listed resource can plausibly answer the query.
 
 ## Tool Selection Guidance
 
@@ -44,6 +46,9 @@ Examples: "find information about our Q3 earnings report", "search for documents
 ### '${nlTool}' (structured/analytical search)
 Use for filtering by specific values, aggregations, calculations, sorting, counting, entity lookups by ID, or any structured data analysis. If the resource's field metadata explicitly shows it has no text or semantic_text fields, always use this tool. If field metadata is missing or unknown (e.g. for aliases), use your best judgment based on the query intent.
 Examples: "what is the average order value?", "find the customer with ID 914255", "how many errors were logged in the past hour?"
+
+### '${noMatchTool}' (escape hatch)
+Use ONLY when none of the listed resources can plausibly answer the query. Call with no arguments.
 
 ${customInstructions ? `## Additional Instructions\n\n${customInstructions}\n` : ''}
 ## Available Resources

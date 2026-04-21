@@ -141,6 +141,36 @@ const createDatastreamSummaries = async ({
 };
 
 /**
+ * Builds resource descriptors for a pre-fetched set of search sources.
+ * Splits the work per source type and optionally skips aliases / data streams.
+ */
+const buildResourceDescriptors = async ({
+  sources,
+  includeAliases,
+  includeDatastream,
+  esClient,
+}: {
+  sources: Awaited<ReturnType<typeof listSearchSources>>;
+  includeAliases: boolean;
+  includeDatastream: boolean;
+  esClient: ElasticsearchClient;
+}): Promise<ResourceDescriptor[]> => {
+  const resources: ResourceDescriptor[] = [];
+  if (sources.indices.length > 0) {
+    resources.push(...(await createIndexSummaries({ indices: sources.indices, esClient })));
+  }
+  if (sources.data_streams.length > 0 && includeDatastream) {
+    resources.push(
+      ...(await createDatastreamSummaries({ datastreams: sources.data_streams, esClient }))
+    );
+  }
+  if (sources.aliases.length > 0 && includeAliases) {
+    resources.push(...(await createAliasSummaries({ aliases: sources.aliases })));
+  }
+  return resources;
+};
+
+/**
  * Gathers resource descriptors (with field names and types) for all resources
  * matching the given pattern.
  */
@@ -163,24 +193,7 @@ export const gatherResourceDescriptors = async ({
     includeKibanaIndices: indexPattern !== '*',
   });
 
-  const resources: ResourceDescriptor[] = [];
-  if (sources.indices.length > 0) {
-    const indexDescriptors = await createIndexSummaries({ indices: sources.indices, esClient });
-    resources.push(...indexDescriptors);
-  }
-  if (sources.data_streams.length > 0 && includeDatastream) {
-    const dsDescriptors = await createDatastreamSummaries({
-      datastreams: sources.data_streams,
-      esClient,
-    });
-    resources.push(...dsDescriptors);
-  }
-  if (sources.aliases.length > 0 && includeAliases) {
-    const aliasDescriptors = await createAliasSummaries({ aliases: sources.aliases });
-    resources.push(...aliasDescriptors);
-  }
-
-  return resources;
+  return buildResourceDescriptors({ sources, includeAliases, includeDatastream, esClient });
 };
 
 export const indexExplorer = async ({
@@ -236,22 +249,12 @@ export const indexExplorer = async ({
     };
   }
 
-  const resources: ResourceDescriptor[] = [];
-  if (indexCount > 0) {
-    const indexDescriptors = await createIndexSummaries({ indices: sources.indices, esClient });
-    resources.push(...indexDescriptors);
-  }
-  if (dataStreamCount > 0 && includeDatastream) {
-    const dsDescriptors = await createDatastreamSummaries({
-      datastreams: sources.data_streams,
-      esClient,
-    });
-    resources.push(...dsDescriptors);
-  }
-  if (aliasCount > 0 && includeAliases) {
-    const aliasDescriptors = await createAliasSummaries({ aliases: sources.aliases });
-    resources.push(...aliasDescriptors);
-  }
+  const resources = await buildResourceDescriptors({
+    sources,
+    includeAliases,
+    includeDatastream,
+    esClient,
+  });
 
   const selectedResources = await selectResources({
     resources,

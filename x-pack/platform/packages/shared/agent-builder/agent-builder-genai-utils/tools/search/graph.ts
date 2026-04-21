@@ -8,7 +8,7 @@
 import { StateGraph, Annotation } from '@langchain/langgraph';
 import type { TimeRange } from '@kbn/agent-builder-common';
 import type { BaseMessage } from '@langchain/core/messages';
-import { isToolMessage } from '@langchain/core/messages';
+import { ToolMessage } from '@langchain/core/messages';
 import { messagesStateReducer } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { ScopedModel, ToolEventEmitter, ToolHandlerResult } from '@kbn/agent-builder-server';
@@ -19,6 +19,7 @@ import { gatherResourceDescriptors } from '../index_explorer';
 import { listSearchSources } from '../steps/list_search_sources';
 import {
   createNaturalLanguageSearchTool,
+  createNoMatchingResourceTool,
   createRelevanceSearchTool,
   naturalLanguageSearchToolName,
 } from './inner_tools';
@@ -80,11 +81,12 @@ export const createSearchToolGraph = ({
       customInstructions: state.customInstructions,
       timeRange: state.timeRange,
     });
-    return [relevanceTool, nlSearchTool];
+    const noMatchTool = createNoMatchingResourceTool();
+    return [relevanceTool, nlSearchTool, noMatchTool];
   };
 
   const selectAndDispatch = async (state: StateType) => {
-    events?.reportProgress(progressMessages.selectingTarget());
+    events?.reportProgress(progressMessages.dispatchingSearch());
 
     if (isPatternTargetEnabled(state)) {
       const sources = await listSearchSources({
@@ -124,10 +126,6 @@ export const createSearchToolGraph = ({
       return { error: 'Could not find any matching resources' };
     }
 
-    events?.reportProgress(
-      progressMessages.resolvingSearchStrategy({ target: state.targetPattern ?? '*' })
-    );
-
     const tools = getTools(state);
     const searchModel = model.chatModel.bindTools(tools, { tool_choice: 'any' }).withConfig({
       tags: ['agent-builder-search-tool'],
@@ -145,7 +143,7 @@ export const createSearchToolGraph = ({
   };
 
   const routeAfterDispatch = (state: StateType) => {
-    if (state.error || state.messages.length === 0) {
+    if (state.error) {
       return '__end__';
     }
     return 'execute_tool';
@@ -179,7 +177,7 @@ export const createSearchToolGraph = ({
 };
 
 const extractToolResults = (message: BaseMessage): ToolHandlerResult[] => {
-  if (!isToolMessage(message)) {
+  if (!ToolMessage.isInstance(message)) {
     throw new Error(`Trying to extract tool results for non-tool result`);
   }
   if (message.artifact) {
