@@ -117,6 +117,7 @@ export const getESQLControlFactory = <
         isDuplicable: false,
         isPinnable: true,
         canBeRelatedPanelsIndicator: true,
+        indicateRelatedPanelsOptions: { relatedByFilter: false },
         tooltipLabel$,
         isEditingEnabled: () => true,
         getTypeDisplayName: () => VariableControlsStrings.displayName,
@@ -152,8 +153,15 @@ export const getESQLControlFactory = <
       }) as ESQLControlApi<State>;
 
       const componentApi: ESQLOptionsListComponentApi = {
-        ...pick(api, ['dataLoading$', 'label$', 'type', 'parentApi', 'tooltipLabel$']),
-        canBeRelatedPanelsIndicator: true,
+        ...pick(api, [
+          'dataLoading$',
+          'label$',
+          'type',
+          'parentApi',
+          'tooltipLabel$',
+          'canBeRelatedPanelsIndicator',
+          'indicateRelatedPanelsOptions',
+        ]),
         ...selections.internalApi,
         uuid,
         setDataLoading,

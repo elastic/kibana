@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { PublishingSubject, ViewMode } from '@kbn/presentation-publishing';
+import type { CanBeRelatedPanelsIndicator, PublishingSubject, ViewMode } from '@kbn/presentation-publishing';
 import { apiAppliesFilters, apiHasUseGlobalFiltersSetting } from '@kbn/presentation-publishing';
 import type { Observable, Subscription } from 'rxjs';
 import { BehaviorSubject, combineLatest, filter, map, of, switchMap } from 'rxjs';
@@ -25,6 +25,9 @@ interface SectionFilterEntry {
   appliesFilters: Set<string>;
   doesNotApplyFilters: Set<string>;
 }
+
+type RelationQueryOptions = Partial<CanBeRelatedPanelsIndicator['indicateRelatedPanelOptions']>>
+
 const getBlankSectionFilterEntry = () =>
   ({
     appliesFilters: new Set(),
@@ -59,7 +62,9 @@ export const initializeRelatedPanelsManager = ({
 }) => {
   const { focusedPanelId$ } = trackPanel;
   const { children$, layout$, getDashboardPanelFromId } = layoutManager.api;
-  const arePanelsRelated$ = new BehaviorSubject<(a: string, b: string) => boolean>(() => false);
+  const arePanelsRelated$ = new BehaviorSubject<
+    (a: string, b: string, options?: RelationQueryOptions) => boolean
+  >(() => false);
 
   const indicateRelatedPanelsId$ = new BehaviorSubject<string | undefined>(
     backupService.getIndicateRelatedPanelsId(savedObjectId$.value)
@@ -146,10 +151,16 @@ export const initializeRelatedPanelsManager = ({
         esqlVariablesWithUUIDs,
         esqlQueriesWithUUIDs,
       });
-      arePanelsRelated$.next((a: string, b: string) => {
+      arePanelsRelated$.next((a: string, b: string, options?: RelationQueryOptions) => {
+        const { relatedByESQL, relatedByFilter } = {
+          // If unset, default each relationship type to true
+          relatedByESQL: true,
+          relatedByFilter: true,
+          ...(options ?? {}),
+        };
         const relatedPanelUUIDs = new Set([
-          ...(filterRelatedPanels.get(b) ?? []),
-          ...(esqlRelatedPanels.get(b) ?? []),
+          ...(relatedByFilter ? filterRelatedPanels.get(b) ?? [] : []),
+          ...(relatedByESQL ? esqlRelatedPanels.get(b) ?? [] : []),
         ]);
         return relatedPanelUUIDs.has(a);
       });
@@ -162,13 +173,13 @@ export const initializeRelatedPanelsManager = ({
   };
 
   const relatedPanelIdSubscriptions = new Set<Subscription>();
-  const getRelatedPanelIds$ = (panelId: string) => {
+  const getRelatedPanelIds$ = (panelId: string, options?: RelationQueryOptions) => {
     const relatedPanelIds$ = new BehaviorSubject<string[]>([]);
     const subscription = combineLatest([arePanelsRelated$, children$])
       .pipe(
         map(([arePanelsRelated, children]) => {
           return Object.keys(children).filter(
-            (id) => id !== panelId && arePanelsRelated(id, panelId)
+            (id) => id !== panelId && arePanelsRelated(id, panelId, options)
           );
         })
       )

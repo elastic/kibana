@@ -8,6 +8,7 @@
  */
 
 import type { BehaviorSubject } from 'rxjs';
+import type { CanBeRelatedPanelsIndicator } from './panel_capabilities';
 
 /**
  * This API can indicate panels related to a certain child panel. We are calling this "indicating" because "highlight" refers to something else and
@@ -16,7 +17,10 @@ import type { BehaviorSubject } from 'rxjs';
 export interface CanIndicateRelatedPanels {
   setIndicateRelatedPanelsId: (panelId?: string) => void;
   indicateRelatedPanelsId$: BehaviorSubject<string | undefined>;
-  getRelatedPanelIds$: (panelId: string) => BehaviorSubject<string[]>;
+  getRelatedPanelIds$: (
+    panelId: string,
+    options?: CanBeRelatedPanelsIndicator['indicateRelatedPanelOptions']
+  ) => BehaviorSubject<string[]>;
 }
 
 /**
