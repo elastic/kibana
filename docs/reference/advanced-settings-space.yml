@@ -1092,7 +1092,7 @@ groups:
         description: |
           Sources to use for logs data. If the data of these indices is not logs data, you can experience degraded functionality. Changes to this setting can potentially impact the sources queried in Log Threshold rules.
         datatype: string
-        default: "logs*, -logstash*, filebeat-*`"
+        default: "logs*, -logstash*, filebeat-*"
         applies_to:
           ech: ga
           ece: ga
