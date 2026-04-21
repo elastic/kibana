@@ -9,7 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/core/server';
 
 import { isMissingRequiredFields } from './is_missing_required_fields';
-import type { AttackDiscoveryApiAlert } from '../../schemas';
+import type { AttackDiscoveryApiAlert } from '../../schemas/attack_discovery/attack_discovery_api_alert.gen';
 import type { AttackDiscoveryAlertDocument } from '../../schedules/types';
 import { transformAttackDiscoveryAlertDocumentToApi } from './transform_attack_discovery_alert_document_to_api';
 

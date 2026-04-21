@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { InterruptType, InterruptValue } from '../schemas';
-import { InterruptResumeValue } from '../schemas';
+import type { InterruptType, InterruptValue } from '../schemas/conversations/common_attributes.gen';
+import { InterruptResumeValue } from '../schemas/conversations/common_attributes.gen';
 
 /**
  * Light wrapper around the `interrupt` helper method from @langchain/langgraph.

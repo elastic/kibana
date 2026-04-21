@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Replacements } from '../../schemas';
+import type { Replacements } from '../../schemas/conversations/common_attributes.gen';
 import type { AnonymizationFieldResponse } from '../../schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import { isAllowed } from '../helpers';
 import type { AnonymizedData, GetAnonymizedValues } from '../types';

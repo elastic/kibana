@@ -12,7 +12,7 @@ import {
   getMarkdownFields,
   getMarkdownWithOriginalValues,
 } from '.';
-import type { AttackDiscovery } from '../../schemas';
+import type { AttackDiscovery } from '../../schemas/attack_discovery/common_attributes.gen';
 
 export const mockAttackDiscovery: AttackDiscovery = {
   alertIds: [

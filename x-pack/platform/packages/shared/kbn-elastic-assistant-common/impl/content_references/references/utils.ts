@@ -7,7 +7,8 @@
 
 import type { BaseMessage } from '@langchain/core/messages';
 import { knowledgeBaseReference } from '.';
-import type { ContentReference, DocumentEntry } from '../../schemas';
+import type { ContentReference } from '../../schemas/conversations/common_attributes.gen';
+import type { DocumentEntry } from '../../schemas/knowledge_base/entries/common_attributes.gen';
 import type { ContentReferenceBlock, ContentReferenceId, ContentReferencesStore } from '../types';
 
 /**

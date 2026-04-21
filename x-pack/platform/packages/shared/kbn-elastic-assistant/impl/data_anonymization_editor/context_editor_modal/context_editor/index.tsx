@@ -10,7 +10,7 @@ import type { EuiSearchBarProps, EuiTableSelectionType } from '@elastic/eui';
 import React, { useMemo, useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import type { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/types/anonymization_fields/find_anonymization_fields_route.gen';
 import styled from '@emotion/styled';
 import type { BatchUpdateListItem, ContextEditorRow } from '../../context_editor/types';
 import { FIELDS } from '../../context_editor/types';

@@ -18,7 +18,7 @@ import {
   ALERT_WORKFLOW_STATUS_UPDATED_AT,
 } from '@kbn/rule-data-utils';
 
-import type { AttackDiscoveryApiAlert } from '../../../..';
+import type { AttackDiscoveryApiAlert } from '../../../schemas/attack_discovery/attack_discovery_api_alert.gen';
 import { getMarkdownFields } from '../../../..';
 import type { AttackDiscoveryAlertDocument } from '../../../schedules/types';
 import {

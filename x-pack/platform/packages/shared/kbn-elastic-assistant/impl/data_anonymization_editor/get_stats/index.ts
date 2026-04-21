@@ -8,7 +8,7 @@
 import type { Replacements } from '@kbn/elastic-assistant-common';
 import { isAllowed, isAnonymized, isDenied } from '@kbn/elastic-assistant-common';
 
-import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/types/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import type { Stats } from '../helpers';
 
 export const getStats = ({

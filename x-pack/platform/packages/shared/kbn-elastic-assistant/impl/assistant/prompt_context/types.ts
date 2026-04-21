@@ -6,7 +6,7 @@
  */
 
 import type { Replacements } from '@kbn/elastic-assistant-common';
-import type { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/types/anonymization_fields/find_anonymization_fields_route.gen';
 import type { ReactNode } from 'react';
 
 /**

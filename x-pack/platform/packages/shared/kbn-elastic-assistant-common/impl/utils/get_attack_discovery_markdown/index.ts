@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { AttackDiscovery, Replacements } from '../../schemas';
+import type { AttackDiscovery } from '../../schemas/attack_discovery/common_attributes.gen';
+import type { Replacements } from '../../schemas/conversations/common_attributes.gen';
 import { getTacticLabel, getTacticMetadata } from '../attack_discovery_helpers';
 
 export const getMarkdownFields = (markdown: string): string => {

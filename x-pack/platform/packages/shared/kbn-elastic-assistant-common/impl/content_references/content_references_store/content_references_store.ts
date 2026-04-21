@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ContentReference } from '../../schemas';
+import type { ContentReference } from '../../schemas/conversations/common_attributes.gen';
 import type { ContentReferencesStore, Options } from '../types';
 
 const CONTENT_REFERENCE_ID_ALPHABET =

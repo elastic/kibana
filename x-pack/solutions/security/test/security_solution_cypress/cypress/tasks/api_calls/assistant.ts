@@ -10,7 +10,7 @@ import type {
   PerformPromptsBulkActionRequestBody,
   PerformPromptsBulkActionResponse,
   PromptCreateProps,
-} from '@kbn/elastic-assistant-common/impl/schemas';
+} from '@kbn/elastic-assistant-common/types/prompts/bulk_crud_prompts_route.gen';
 import { deleteAllDocuments } from './elasticsearch';
 import { getMockConversation, getMockCreatePrompt } from '../../objects/assistant';
 import { getSpaceUrl } from '../space';

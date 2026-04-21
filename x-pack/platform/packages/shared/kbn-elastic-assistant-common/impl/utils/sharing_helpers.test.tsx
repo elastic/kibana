@@ -10,7 +10,8 @@ import {
   getConversationSharedState,
   getIsConversationOwner,
 } from './sharing_helpers';
-import type { ConversationResponse, User } from '../schemas';
+import type { ConversationResponse } from '../schemas/conversations/common_attributes.gen';
+import type { User } from '../schemas/common_attributes.gen';
 export const alertConvo: Pick<ConversationResponse, 'id' | 'users' | 'createdBy'> = {
   users: [{ name: 'elastic' }],
   id: 'convo1',

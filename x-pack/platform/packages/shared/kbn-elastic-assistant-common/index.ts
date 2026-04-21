@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-// Schema constants
-
-export * from './impl/schemas';
-
 export { defaultAssistantFeatures } from './impl/capabilities';
 export type { AssistantFeatures } from './impl/capabilities';
 
@@ -112,3 +108,121 @@ export { transformAttackDiscoveryScheduleCreatePropsToApi } from './impl/utils/t
 export { transformAttackDiscoveryScheduleUpdatePropsToApi } from './impl/utils/transform_attack_discovery_schedule_update_props_to_api';
 export { transformAttackDiscoveryScheduleCreatePropsFromApi } from './impl/utils/transform_attack_discovery_schedule_create_props_from_api';
 export { transformAttackDiscoveryScheduleUpdatePropsFromApi } from './impl/utils/transform_attack_discovery_schedule_update_props_from_api';
+
+// ─── Explicit schema type re-exports (replaces removed `export * from './impl/schemas'`) ───
+// These use the pure-TypeScript `types/` gen files (no Zod at runtime) so importing from
+// the root package no longer eagerly loads all Zod schemas.
+
+// Common attributes
+export type { User, ScreenContext, PromptIds } from './types/common_attributes.gen';
+
+// Conversations — common attributes
+export type {
+  ApiConfig,
+  ConversationCategory,
+  ConversationCreateProps,
+  ConversationResponse,
+  ConversationUpdateProps,
+  InterruptResumeValue,
+  Message,
+  MessageMetadata,
+  MessageRole,
+  Replacements,
+} from './types/conversations/common_attributes.gen';
+
+// Conversations — runtime enum (value, not just type)
+export { ProviderEnum } from './impl/schemas/conversations/common_attributes.gen';
+
+// Conversations — crud routes
+export type { DeleteAllConversationsResponse } from './types/conversations/crud_conversation_route.gen';
+
+// Anonymization fields
+export type { FindAnonymizationFieldsResponse } from './types/anonymization_fields/find_anonymization_fields_route.gen';
+
+// Capabilities
+export type { GetCapabilitiesResponse } from './types/capabilities/get_capabilities_route.gen';
+
+// Evaluation
+export type { GetEvaluateResponse } from './types/evaluation/get_evaluate_route.gen';
+// PostEvaluateRequestBodyInput uses z.input<> which makes optional-with-default fields
+// optional in input — use the impl/schemas type to preserve that behaviour.
+export type { PostEvaluateRequestBodyInput } from './impl/schemas/evaluation/post_evaluate_route.gen';
+export type { PostEvaluateResponse } from './types/evaluation/post_evaluate_route.gen';
+
+// Prompts
+export type { PromptResponse } from './types/prompts/bulk_crud_prompts_route.gen';
+export type { FindPromptsResponse } from './types/prompts/find_prompts_route.gen';
+
+// Prompts — runtime enum (value)
+export { PromptTypeEnum } from './impl/schemas/prompts/bulk_crud_prompts_route.gen';
+
+// Security AI prompts
+// FindSecurityAIPromptsRequestQuery uses z.infer<> (type alias, not interface) so it is
+// assignable to HttpFetchQuery — must be exported from impl/schemas, not types/.
+export type { FindSecurityAIPromptsRequestQuery } from './impl/schemas/security_ai_prompts/find_prompts_route.gen';
+export type { FindSecurityAIPromptsResponse } from './types/security_ai_prompts/find_prompts_route.gen';
+
+// Defend insights — DefendInsightType and DefendInsightStatusEnum are used as Zod schema
+// runtime values (.enum accessor); DefendInsight is type-only.
+export {
+  DefendInsightType,
+  DefendInsightStatusEnum,
+} from './impl/schemas/defend_insights/common_attributes.gen';
+export type { DefendInsight } from './types/defend_insights/common_attributes.gen';
+
+// Users
+export type { SuggestUsersResponse } from './types/users/suggest_route.gen';
+
+// Knowledge base
+// CreateKnowledgeBaseRequestParams and ReadKnowledgeBaseRequestParams are Zod schemas
+// used as runtime values with buildRouteValidationWithZod — must be value exports.
+export {
+  CreateKnowledgeBaseRequestParams,
+  ReadKnowledgeBaseRequestParams,
+} from './impl/schemas/knowledge_base/overrides.gen_overrides';
+export type {
+  CreateKnowledgeBaseResponse,
+  ReadKnowledgeBaseResponse,
+} from './types/knowledge_base/crud_kb_route.gen';
+
+// DocumentEntryType, IndexEntryType, KnowledgeBaseEntryCreateProps, KnowledgeBaseEntryResponse
+// are used as runtime Zod schema values (e.g. `.value`, `.parse`) — must be value exports.
+export {
+  DocumentEntryType,
+  IndexEntryType,
+  KnowledgeBaseEntryCreateProps,
+  KnowledgeBaseEntryResponse,
+} from './impl/schemas/knowledge_base/entries/common_attributes.gen';
+// DocumentEntry and IndexEntry use z.infer<> (type alias, not interface); also,
+// namespace is required in the Zod-inferred type (BaseDefaultableFields.required()) which
+// matches KnowledgeBaseEntryResponse — must come from impl/schemas.
+export type {
+  DocumentEntry,
+  IndexEntry,
+} from './impl/schemas/knowledge_base/entries/common_attributes.gen';
+
+export type {
+  KnowledgeBaseEntryBulkActionBase,
+  KnowledgeBaseEntryBulkCrudActionResponse,
+  PerformKnowledgeBaseEntryBulkActionRequestBody,
+} from './types/knowledge_base/entries/bulk_crud_knowledge_base_entries_route.gen';
+
+// FindKnowledgeBaseEntriesRequestQuery uses z.infer<> (type alias, not interface) so it is
+// assignable to HttpFetchQuery — must be exported from impl/schemas, not types/.
+// FindKnowledgeBaseEntriesResponse must also come from impl/schemas so its embedded
+// KnowledgeBaseEntryResponse is structurally consistent with the root export (namespace required).
+export type {
+  FindKnowledgeBaseEntriesRequestQuery,
+  FindKnowledgeBaseEntriesResponse,
+} from './impl/schemas/knowledge_base/entries/find_knowledge_base_entries_route.gen';
+
+// Attack Discovery
+export type {
+  AttackDiscovery,
+  AttackDiscoveryStatus,
+  AttackDiscoveryStats,
+} from './types/attack_discovery/common_attributes.gen';
+
+export type { PostAttackDiscoveryGenerateRequestBody } from './types/attack_discovery/routes/public/post/post_attack_discovery_generate.gen';
+// PostAttackDiscoveryGenerateResponse is used as a Zod schema value (.safeParse) — must be a value export.
+export { PostAttackDiscoveryGenerateResponse } from './impl/schemas/attack_discovery/routes/public/post/post_attack_discovery_generate.gen';

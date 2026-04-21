@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { ContentReference, ContentReferences } from '../schemas';
+import type {
+  ContentReference,
+  ContentReferences,
+} from '../schemas/conversations/common_attributes.gen';
 
 export type ContentReferenceId = string;
 export type ContentReferenceTypes = ContentReference['type'];

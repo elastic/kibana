@@ -12,7 +12,7 @@ import {
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import { bulkUpdatePrompts } from './bulk_update_prompts';
-import { PromptTypeEnum } from '@kbn/elastic-assistant-common/impl/schemas';
+import { PromptTypeEnum } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 
 const prompt1 = {
   id: 'field1',

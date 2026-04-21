@@ -7,7 +7,7 @@
 
 import { invert } from 'lodash/fp';
 import { v4 } from 'uuid';
-import type { Replacements } from '../../schemas';
+import type { Replacements } from '../../schemas/conversations/common_attributes.gen';
 
 export const getAnonymizedValue = ({
   currentReplacements,

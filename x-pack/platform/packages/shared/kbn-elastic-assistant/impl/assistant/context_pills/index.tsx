@@ -9,7 +9,7 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/
 import { sortBy } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 
-import type { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/types/anonymization_fields/find_anonymization_fields_route.gen';
 import { getNewSelectedPromptContext } from '../../data_anonymization/get_new_selected_prompt_context';
 import type { PromptContext, SelectedPromptContext } from '../prompt_context/types';
 

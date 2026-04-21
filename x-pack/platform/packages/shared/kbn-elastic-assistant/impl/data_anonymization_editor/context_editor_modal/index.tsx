@@ -29,7 +29,7 @@ import { css } from '@emotion/react';
 import type {
   AnonymizationFieldResponse,
   PerformAnonymizationFieldsBulkActionRequestBody,
-} from '@kbn/elastic-assistant-common/impl/schemas';
+} from '@kbn/elastic-assistant-common/types/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import { find, uniqBy } from 'lodash';
 import { Stats } from '../stats';
 import * as i18n from '../../data_anonymization/settings/anonymization_settings/translations';

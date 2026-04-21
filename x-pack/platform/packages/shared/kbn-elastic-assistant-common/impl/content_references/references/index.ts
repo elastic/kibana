@@ -12,7 +12,7 @@ import type {
   ProductDocumentationContentReference,
   EsqlContentReference,
   HrefContentReference,
-} from '../../schemas';
+} from '../../schemas/conversations/common_attributes.gen';
 import type { ContentReferenceId } from '../types';
 
 /**

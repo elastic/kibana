@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FindPromptsResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { FindPromptsResponse } from '@kbn/elastic-assistant-common/types/prompts/find_prompts_route.gen';
 import { useQuery } from '@kbn/react-query';
 import { API_VERSIONS, ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND } from '@kbn/elastic-assistant-common';
 import { useAssistantContext } from '../../../assistant_context';

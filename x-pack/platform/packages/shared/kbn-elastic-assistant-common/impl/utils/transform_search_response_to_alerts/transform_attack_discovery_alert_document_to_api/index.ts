@@ -20,7 +20,7 @@ import {
 import moment from 'moment';
 import { pipe } from 'lodash/fp';
 
-import type { AttackDiscoveryApiAlert } from '../../../schemas';
+import type { AttackDiscoveryApiAlert } from '../../../schemas/attack_discovery/attack_discovery_api_alert.gen';
 import { transformInternalReplacements } from '../../attack_discovery_helpers';
 import { getMarkdownFields } from '../../get_attack_discovery_markdown';
 import {

@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { FindPromptsResponse, PromptResponse } from '@kbn/elastic-assistant-common';
 import { PromptTypeEnum } from '@kbn/elastic-assistant-common';
-import type { PerformPromptsBulkActionRequestBody as PromptsPerformBulkActionRequestBody } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { PerformPromptsBulkActionRequestBody as PromptsPerformBulkActionRequestBody } from '@kbn/elastic-assistant-common/types/prompts/bulk_crud_prompts_route.gen';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { EuiSetColorMethod } from '@elastic/eui/src/services/color_picker/color_picker';
 import type { IToasts } from '@kbn/core-notifications-browser';

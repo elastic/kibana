@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { AttackDiscovery, Replacements } from '../..';
+import type { AttackDiscovery } from '../schemas/attack_discovery/common_attributes.gen';
+import type { Replacements } from '../schemas/conversations/common_attributes.gen';
 import * as i18n from './translations';
 
 export const RECONNAISSANCE = 'Reconnaissance';

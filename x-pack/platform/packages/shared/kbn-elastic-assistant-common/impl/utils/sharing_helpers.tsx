@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { ConversationResponse, User } from '../schemas';
+import type { ConversationResponse } from '../schemas/conversations/common_attributes.gen';
+import type { User } from '../schemas/common_attributes.gen';
 export enum ConversationSharedState {
   // shared with all users in the space
   SHARED = 'shared',

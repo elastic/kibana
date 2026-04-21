@@ -10,7 +10,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ApiConfig, FindPromptsResponse, PromptResponse } from '@kbn/elastic-assistant-common';
 import { PromptTypeEnum } from '@kbn/elastic-assistant-common';
 import type { HttpSetup } from '@kbn/core-http-browser';
-import type { PerformPromptsBulkActionRequestBody as PromptsPerformBulkActionRequestBody } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { PerformPromptsBulkActionRequestBody as PromptsPerformBulkActionRequestBody } from '@kbn/elastic-assistant-common/types/prompts/bulk_crud_prompts_route.gen';
 import type { InfiniteData, QueryObserverResult } from '@kbn/react-query';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import type { AIConnector } from '../../../connectorland/connector_selector';

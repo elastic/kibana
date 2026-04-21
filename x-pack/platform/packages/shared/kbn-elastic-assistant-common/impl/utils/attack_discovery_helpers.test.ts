@@ -22,7 +22,7 @@ import {
   transformInternalReplacements,
 } from './attack_discovery_helpers';
 import * as i18n from './translations';
-import type { AttackDiscovery } from '../..';
+import type { AttackDiscovery } from '../schemas/attack_discovery/common_attributes.gen';
 
 const mockAttackDiscovery: AttackDiscovery = {
   alertIds: [

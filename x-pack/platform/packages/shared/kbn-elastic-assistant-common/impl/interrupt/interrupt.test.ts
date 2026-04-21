@@ -14,7 +14,7 @@ import {
   StateGraph,
 } from '@langchain/langgraph';
 import { typedInterrupt } from './interrupt';
-import type { SelectOptionInterruptResumeValue } from '../schemas';
+import type { SelectOptionInterruptResumeValue } from '../schemas/conversations/common_attributes.gen';
 
 describe('typedInterrupt', () => {
   beforeAll(() => {

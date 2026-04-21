@@ -2896,60 +2896,37 @@ module.exports = {
     },
 
     /**
-     * Prevent client-side code from pulling in heavy Zod schemas via the impl/schemas barrel.
-     * Use deep @kbn/elastic-assistant-common/types/<path>.gen imports or
-     * @kbn/elastic-assistant-common/constants instead.
+     * Prevent code from importing the deleted @kbn/elastic-assistant-common/impl/schemas barrel.
+     * The barrel has been removed to prevent eager Zod schema evaluation.
+     *
+     * For client-side code: use @kbn/elastic-assistant-common/types/<path>.gen imports.
+     * For server-side code: use @kbn/elastic-assistant-common/impl/schemas/<path>.gen imports.
+     * For constants: use @kbn/elastic-assistant-common/constants.
+     *
+     * Uses `paths` (exact match) to avoid matching deep .gen file paths.
      */
     {
       files: [
         'x-pack/solutions/security/plugins/security_solution/public/**/*.{ts,tsx}',
         'x-pack/solutions/security/plugins/elastic_assistant/public/**/*.{ts,tsx}',
-      ],
-      rules: {
-        'no-restricted-imports': [
-          'warn',
-          {
-            patterns: [
-              {
-                group: [
-                  '@kbn/elastic-assistant-common/impl/schemas',
-                  '@kbn/elastic-assistant-common/impl/schemas/index',
-                ],
-                message:
-                  'Use deep @kbn/elastic-assistant-common/types/<path>.gen imports or @kbn/elastic-assistant-common/constants instead.',
-              },
-            ],
-          },
-        ],
-      },
-    },
-
-    /**
-     * Prevent server-side code from pulling in heavy Zod schemas via the impl/schemas barrel.
-     * Use deep @kbn/elastic-assistant-common/impl/schemas/<path>.gen imports or
-     * @kbn/elastic-assistant-common/constants instead.
-     *
-     * Uses `paths` (exact match) instead of `patterns` to avoid matching deep gen file paths.
-     */
-    {
-      files: [
         'x-pack/solutions/security/plugins/elastic_assistant/server/**/*.{ts,tsx}',
         'x-pack/solutions/security/plugins/security_solution/server/**/*.{ts,tsx}',
+        'x-pack/platform/packages/shared/kbn-elastic-assistant/**/*.{ts,tsx}',
       ],
       rules: {
         'no-restricted-imports': [
-          'warn',
+          'error',
           {
             paths: [
               {
                 name: '@kbn/elastic-assistant-common/impl/schemas',
                 message:
-                  'Use deep @kbn/elastic-assistant-common/impl/schemas/<path>.gen imports or @kbn/elastic-assistant-common/constants instead.',
+                  'The impl/schemas barrel has been deleted. Use deep @kbn/elastic-assistant-common/types/<path>.gen (client) or @kbn/elastic-assistant-common/impl/schemas/<path>.gen (server) imports instead.',
               },
               {
                 name: '@kbn/elastic-assistant-common/impl/schemas/index',
                 message:
-                  'Use deep @kbn/elastic-assistant-common/impl/schemas/<path>.gen imports or @kbn/elastic-assistant-common/constants instead.',
+                  'The impl/schemas barrel has been deleted. Use deep @kbn/elastic-assistant-common/types/<path>.gen (client) or @kbn/elastic-assistant-common/impl/schemas/<path>.gen (server) imports instead.',
               },
             ],
           },
