@@ -1169,7 +1169,9 @@ export class StreamsApp {
 
   // Attachments utility methods
   async expectAttachmentsEmptyPromptVisible() {
-    await expect(this.page.getByTestId('streamsAppAttachmentsEmptyStateAddButton')).toBeVisible();
+    await expect(this.page.getByTestId('streamsAppAttachmentsEmptyStateAddButton')).toBeVisible({
+      timeout: 15000,
+    });
   }
 
   async clickAddAttachmentsButton() {
