@@ -11,6 +11,5 @@ export const OBSERVABILITY_SIGEVENTS_OVERVIEW_FEATURE_FLAG =
 
 /**
  * Fallback when the flag is unset and no override exists.
- * Defaults to false (disabled) since this is a new experimental feature.
  */
-export const OBSERVABILITY_SIGEVENTS_OVERVIEW_DEFAULT = false;
+export const OBSERVABILITY_SIGEVENTS_OVERVIEW_DEFAULT = true;
