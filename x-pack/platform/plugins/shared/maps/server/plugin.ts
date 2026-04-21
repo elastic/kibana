@@ -268,6 +268,7 @@ export class MapsPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
     setupEmbeddable(plugins.embeddable, getFilterMigrations, getDataViewMigrations);
 
     plugins.embeddable.registerTransforms(MAP_SAVED_OBJECT_TYPE, {
+      title: 'Map',
       getTransforms,
     });
 
