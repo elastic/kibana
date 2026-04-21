@@ -8,6 +8,8 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { TransportResult } from '@elastic/elasticsearch';
+import { errors } from '@elastic/elasticsearch';
 import type { StorageTransportOptions } from '../..';
 import { StorageIndexAdapter, type StorageSettings } from '../..';
 
@@ -184,7 +186,39 @@ describe('StorageIndexAdapter - transport options forwarding', () => {
     );
   });
 
-  it('omits index template settings on serverless', async () => {
+  it('omits index template settings when isServerless option is true', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings, {
+      isServerless: true,
+    });
+    const client = adapter.getClient();
+
+    await client.index({ id: 'doc1', document: { foo: 'bar' } });
+
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        template: expect.not.objectContaining({ settings: expect.anything() }),
+      })
+    );
+  });
+
+  it('includes index template settings when isServerless option is false', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings, {
+      isServerless: false,
+    });
+    const client = adapter.getClient();
+
+    await client.index({ id: 'doc1', document: { foo: 'bar' } });
+
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        template: expect.objectContaining({
+          settings: expect.objectContaining({ auto_expand_replicas: '0-1' }),
+        }),
+      })
+    );
+  });
+
+  it('omits settings when info() reports serverless and isServerless is not provided', async () => {
     (esClient.info as jest.Mock).mockResolvedValue({
       version: { build_flavor: 'serverless' },
     });
@@ -202,10 +236,74 @@ describe('StorageIndexAdapter - transport options forwarding', () => {
     );
   });
 
-  it('caches the serverless detection across writes', async () => {
-    (esClient.info as jest.Mock).mockResolvedValue({
-      version: { build_flavor: 'serverless' },
+  it('does not call info() when isServerless option is provided', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings, {
+      isServerless: true,
     });
+    const client = adapter.getClient();
+
+    await client.index({ id: 'doc1', document: { foo: 'bar' } });
+
+    expect(esClient.info).not.toHaveBeenCalled();
+  });
+
+  it('retries without settings when both info() and isServerless are unavailable', async () => {
+    (esClient.info as jest.Mock).mockRejectedValue(new Error('forbidden'));
+
+    const serverlessError = new errors.ResponseError({
+      statusCode: 400,
+      headers: {},
+      warnings: [],
+      meta: {} as any,
+      body: {
+        error: {
+          type: 'illegal_argument_exception',
+          reason:
+            'Settings [index.auto_expand_replicas,index.number_of_shards] are not available when running in serverless mode',
+        },
+      },
+    } as TransportResult);
+    (esClient.indices.putIndexTemplate as jest.Mock).mockRejectedValueOnce(serverlessError);
+
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    await client.index({ id: 'doc1', document: { foo: 'bar' } });
+
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledTimes(2);
+    expect(esClient.indices.putIndexTemplate).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        template: expect.objectContaining({
+          settings: expect.objectContaining({ auto_expand_replicas: '0-1' }),
+        }),
+      })
+    );
+    expect(esClient.indices.putIndexTemplate).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        template: expect.not.objectContaining({ settings: expect.anything() }),
+      })
+    );
+  });
+
+  it('skips settings on subsequent writes after reactive serverless detection', async () => {
+    (esClient.info as jest.Mock).mockRejectedValue(new Error('forbidden'));
+
+    const serverlessError = new errors.ResponseError({
+      statusCode: 400,
+      headers: {},
+      warnings: [],
+      meta: {} as any,
+      body: {
+        error: {
+          type: 'illegal_argument_exception',
+          reason:
+            'Settings [index.auto_expand_replicas,index.number_of_shards] are not available when running in serverless mode',
+        },
+      },
+    } as TransportResult);
+    (esClient.indices.putIndexTemplate as jest.Mock).mockRejectedValueOnce(serverlessError);
 
     const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
     const client = adapter.getClient();
@@ -213,21 +311,11 @@ describe('StorageIndexAdapter - transport options forwarding', () => {
     await client.index({ id: 'doc1', document: { foo: 'bar' } });
     await client.index({ id: 'doc2', document: { foo: 'baz' } });
 
-    expect(esClient.info).toHaveBeenCalledTimes(1);
-    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledTimes(2);
-  });
-
-  it('includes index template settings on non-serverless', async () => {
-    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
-    const client = adapter.getClient();
-
-    await client.index({ id: 'doc1', document: { foo: 'bar' } });
-
-    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledTimes(3);
+    expect(esClient.indices.putIndexTemplate).toHaveBeenNthCalledWith(
+      3,
       expect.objectContaining({
-        template: expect.objectContaining({
-          settings: expect.objectContaining({ auto_expand_replicas: '0-1' }),
-        }),
+        template: expect.not.objectContaining({ settings: expect.anything() }),
       })
     );
   });
