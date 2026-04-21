@@ -51,6 +51,12 @@ export default ({ getService }: FtrProviderContext): void => {
       runMaintainer: async () => {
         throw new Error('Preview API tests do not use maintainer route runMaintainer');
       },
+      runMaintainerSync: async () => {
+        throw new Error('Preview API tests do not use maintainer route runMaintainerSync');
+      },
+      startMaintainer: async () => {
+        throw new Error('Preview API tests do not use maintainer route startMaintainer');
+      },
     },
   });
   const setEntityStoreV2Setting = async (enabled: boolean) => {
