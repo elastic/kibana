@@ -34,7 +34,7 @@ import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { QUERY_TYPE_MATCH, QUERY_TYPE_STATS } from '@kbn/streams-schema';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FlyoutMetadataCard } from '../../../../flyout_components/flyout_metadata_card';
 import { FlyoutToolbarHeader } from '../../../../flyout_components/flyout_toolbar_header';
 import type { SignificantEventItem } from '../../../../../hooks/sig_events/use_fetch_significant_events';
@@ -80,6 +80,11 @@ export function QueryDetailsFlyout({
   });
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+
+  useEffect(() => {
+    setIsActionsPopoverOpen(false);
+    setIsDeleteModalVisible(false);
+  }, [item.query.id]);
 
   const queryType = item.query.type ?? QUERY_TYPE_MATCH;
   const hasDetectedOccurrences = item.occurrences?.some((point) => point.y > 0) ?? false;
@@ -383,7 +388,7 @@ const NO_OCCURRENCES_DESCRIPTION = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.noOccurrencesDescription',
   {
     defaultMessage:
-      'No events detected. Either leave the query as-is to display future events or modify the query to refine detection.',
+      'No events detected yet. Leave the query as-is to display future events, or use the Open in Discover action to explore further.',
   }
 );
 
