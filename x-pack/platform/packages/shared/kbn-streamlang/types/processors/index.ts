@@ -746,7 +746,7 @@ export const enrichProcessorSchema = processorBaseWithWhereSchema.extend({
 }) satisfies z.Schema<EnrichProcessor>;
 
 /**
- * User agent processor - Extract details from browser user agent strings
+ * User agent processor
  */
 
 export const userAgentProperties = ['name', 'os', 'device', 'original', 'version'] as const;
@@ -765,17 +765,17 @@ export interface UserAgentProcessor extends ProcessorBaseWithWhere {
 
 export const userAgentProcessorSchema = processorBaseWithWhereSchema.extend({
   action: z.literal('user_agent'),
-  from: StreamlangSourceField.describe('Source field containing the user agent string'),
-  to: z.optional(StreamlangTargetField).describe('Target field for extracted user agent info'),
+  from: StreamlangSourceField.describe('The field containing the user agent string'),
+  to: z.optional(StreamlangTargetField).describe('The field that will be filled with the user agent details'),
   regex_file: z
     .optional(NonEmptyString)
-    .describe('Custom regex file name in ES config/ingest-user-agent'),
+    .describe('Custom regex file name containing the regular expressions for parsing the user agent string'),
   properties: z
     .optional(z.array(z.enum(userAgentProperties)))
     .describe('Specific properties to extract (defaults to all)'),
   extract_device_type: z
     .optional(z.boolean())
-    .describe('Extract device type (desktop, mobile, etc.)'),
+    .describe('Extracts device type from the user agent string'),
   ignore_missing: z.optional(z.boolean()).describe('Skip processing when source field is missing'),
 }) satisfies z.Schema<UserAgentProcessor>;
 
