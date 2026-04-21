@@ -803,7 +803,7 @@ const googleaistudioConnector = {
 
 describe('ConnectorFields renders', () => {
   test('openai provider fields are rendered', async () => {
-    const { getAllByTestId, container } = render(
+    const { getAllByTestId } = render(
       <ConnectorFormTestProvider connector={openAiConnector}>
         <ConnectorFields readOnly={false} isEdit={true} registerPreSubmitValidator={() => {}} />
       </ConnectorFormTestProvider>
