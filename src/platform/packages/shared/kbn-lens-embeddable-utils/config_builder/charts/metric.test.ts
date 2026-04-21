@@ -140,7 +140,6 @@ test('generates metric chart config with trendline', async () => {
               },
               "layer_0_trendline": Object {
                 "columnOrder": Array [
-                  "metric_formula_accessor",
                   "x_date_histogram",
                   "metric_formula_accessor_trendline",
                 ],
