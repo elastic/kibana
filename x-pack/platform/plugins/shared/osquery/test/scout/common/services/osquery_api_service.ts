@@ -19,32 +19,29 @@ const FLEET_WRAPPER_HEADERS = {
 
 export interface OsqueryApiService {
   packs: {
-    create: (body: Record<string, unknown>, spaceOverride?: string) => Promise<any>;
-    get: (id: string, spaceOverride?: string) => Promise<any>;
-    delete: (id: string, spaceOverride?: string) => Promise<void>;
-    /** Lists osquery_manager package policies via the internal Fleet wrapper (pack config assertions). Not space-prefixed — internal route is not registered under `/s/{space}`. */
+    create: (body: Record<string, unknown>, space?: string) => Promise<any>;
+    get: (id: string) => Promise<any>;
+    delete: (id: string, space?: string) => Promise<void>;
+    /** Lists osquery_manager package policies via the internal Fleet wrapper (pack config assertions). */
     listFleetWrapperPackagePolicies: () => Promise<any>;
   };
   savedQueries: {
-    create: (body: Record<string, unknown>, spaceOverride?: string) => Promise<any>;
-    delete: (id: string, spaceOverride?: string) => Promise<void>;
+    create: (body: Record<string, unknown>) => Promise<any>;
+    delete: (id: string) => Promise<void>;
   };
   liveQueries: {
-    create: (body: Record<string, unknown>, spaceOverride?: string) => Promise<any>;
-    getDetails: (id: string, spaceOverride?: string) => Promise<any>;
-    getResults: (id: string, actionId: string, spaceOverride?: string) => Promise<any>;
+    create: (body: Record<string, unknown>) => Promise<any>;
+    getDetails: (id: string) => Promise<any>;
+    getResults: (id: string, actionId: string) => Promise<any>;
   };
 }
 
 export const getOsqueryApiService = ({
   kbnClient,
   log,
-  spaceId,
 }: {
   kbnClient: KbnClient;
   log: ScoutLogger;
-  /** When set (Scout UI parallel `scoutSpace.id`), all Osquery HTTP paths use `/s/{id}/...` unless a per-call override is passed. Omit for default-space API tests. */
-  spaceId?: string;
 }): OsqueryApiService => {
   const headers = {
     'elastic-api-version': OSQUERY_API_VERSION,
@@ -53,40 +50,38 @@ export const getOsqueryApiService = ({
   const buildPath = (basePath: string, space?: string) =>
     space && space !== 'default' ? `/s/${space}${basePath}` : basePath;
 
-  const resolveSpace = (override?: string) => override ?? spaceId;
-
   return {
     packs: {
-      create: async (body: Record<string, unknown>, spaceOverride?: string) =>
+      create: async (body: Record<string, unknown>, space?: string) =>
         await measurePerformanceAsync(
           log,
           'osquery.packs.create',
           async () =>
             await kbnClient.request({
               method: 'POST',
-              path: buildPath(OSQUERY_PACKS_URL, resolveSpace(spaceOverride)),
+              path: buildPath(OSQUERY_PACKS_URL, space),
               headers,
               body,
             })
         ),
 
-      get: async (id: string, spaceOverride?: string) =>
+      get: async (id: string) =>
         await measurePerformanceAsync(
           log,
           `osquery.packs.get [${id}]`,
           async () =>
             await kbnClient.request({
               method: 'GET',
-              path: `${buildPath(OSQUERY_PACKS_URL, resolveSpace(spaceOverride))}/${id}`,
+              path: `${OSQUERY_PACKS_URL}/${id}`,
               headers,
             })
         ),
 
-      delete: async (id: string, spaceOverride?: string) => {
+      delete: async (id: string, space?: string) => {
         await measurePerformanceAsync(log, `osquery.packs.delete [${id}]`, async () => {
           await kbnClient.request({
             method: 'DELETE',
-            path: `${buildPath(OSQUERY_PACKS_URL, resolveSpace(spaceOverride))}/${id}`,
+            path: `${buildPath(OSQUERY_PACKS_URL, space)}/${id}`,
             headers,
             ignoreErrors: [404],
           });
@@ -94,34 +89,37 @@ export const getOsqueryApiService = ({
       },
 
       listFleetWrapperPackagePolicies: async () =>
-        await measurePerformanceAsync(log, 'osquery.packs.listFleetWrapperPackagePolicies', async () =>
-          kbnClient.request({
-            method: 'GET',
-            path: '/internal/osquery/fleet_wrapper/package_policies',
-            headers: { ...headers, ...FLEET_WRAPPER_HEADERS },
-          })
+        await measurePerformanceAsync(
+          log,
+          'osquery.packs.listFleetWrapperPackagePolicies',
+          async () =>
+            kbnClient.request({
+              method: 'GET',
+              path: '/internal/osquery/fleet_wrapper/package_policies',
+              headers: { ...headers, ...FLEET_WRAPPER_HEADERS },
+            })
         ),
     },
 
     savedQueries: {
-      create: async (body: Record<string, unknown>, spaceOverride?: string) =>
+      create: async (body: Record<string, unknown>) =>
         await measurePerformanceAsync(
           log,
           'osquery.savedQueries.create',
           async () =>
             await kbnClient.request({
               method: 'POST',
-              path: buildPath(OSQUERY_SAVED_QUERIES_URL, resolveSpace(spaceOverride)),
+              path: OSQUERY_SAVED_QUERIES_URL,
               headers,
               body,
             })
         ),
 
-      delete: async (id: string, spaceOverride?: string) => {
+      delete: async (id: string) => {
         await measurePerformanceAsync(log, `osquery.savedQueries.delete [${id}]`, async () => {
           await kbnClient.request({
             method: 'DELETE',
-            path: `${buildPath(OSQUERY_SAVED_QUERIES_URL, resolveSpace(spaceOverride))}/${id}`,
+            path: `${OSQUERY_SAVED_QUERIES_URL}/${id}`,
             headers,
             ignoreErrors: [404],
           });
@@ -130,39 +128,39 @@ export const getOsqueryApiService = ({
     },
 
     liveQueries: {
-      create: async (body: Record<string, unknown>, spaceOverride?: string) =>
+      create: async (body: Record<string, unknown>) =>
         await measurePerformanceAsync(
           log,
           'osquery.liveQueries.create',
           async () =>
             await kbnClient.request({
               method: 'POST',
-              path: buildPath(OSQUERY_LIVE_QUERIES_URL, resolveSpace(spaceOverride)),
+              path: OSQUERY_LIVE_QUERIES_URL,
               headers,
               body,
             })
         ),
 
-      getDetails: async (id: string, spaceOverride?: string) =>
+      getDetails: async (id: string) =>
         await measurePerformanceAsync(
           log,
           `osquery.liveQueries.getDetails [${id}]`,
           async () =>
             await kbnClient.request({
               method: 'GET',
-              path: `${buildPath(OSQUERY_LIVE_QUERIES_URL, resolveSpace(spaceOverride))}/${id}`,
+              path: `${OSQUERY_LIVE_QUERIES_URL}/${id}`,
               headers,
             })
         ),
 
-      getResults: async (id: string, actionId: string, spaceOverride?: string) =>
+      getResults: async (id: string, actionId: string) =>
         await measurePerformanceAsync(
           log,
           `osquery.liveQueries.getResults [${id}/${actionId}]`,
           async () =>
             await kbnClient.request({
               method: 'GET',
-              path: `${buildPath(OSQUERY_LIVE_QUERIES_URL, resolveSpace(spaceOverride))}/${id}/results/${actionId}`,
+              path: `${OSQUERY_LIVE_QUERIES_URL}/${id}/results/${actionId}`,
               headers,
             })
         ),

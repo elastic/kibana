@@ -6,7 +6,6 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { tags } from '@kbn/scout';
 import { uiTest as test } from '../fixtures';
 import {
   buildOsqueryAlertTestRule,
@@ -16,8 +15,6 @@ import {
 import { getMinimalPack } from '../../api/fixtures/constants';
 
 const localTags = ['@local-stateful-classic', '@local-serverless-security_complete'];
-
-test.describe.configure({ mode: 'serial' });
 
 test.describe('Pack-based Osquery response actions in the rule editor', { tag: localTags }, () => {
   let ruleId: string;
@@ -48,8 +45,18 @@ test.describe('Pack-based Osquery response actions in the rule editor', { tag: l
       description: 'scout',
       shards: {},
       queries: {
-        mem: { ecs_mapping: {}, interval: 3600, platform: 'linux', query: 'SELECT * FROM memory_info;' },
-        sys: { ecs_mapping: {}, interval: 3600, platform: 'linux,windows,darwin', query: 'SELECT * FROM system_info;' },
+        mem: {
+          ecs_mapping: {},
+          interval: 3600,
+          platform: 'linux',
+          query: 'SELECT * FROM memory_info;',
+        },
+        sys: {
+          ecs_mapping: {},
+          interval: 3600,
+          platform: 'linux,windows,darwin',
+          query: 'SELECT * FROM system_info;',
+        },
         opera: {
           ecs_mapping: {},
           interval: 10,
@@ -73,7 +80,11 @@ test.describe('Pack-based Osquery response actions in the rule editor', { tag: l
     await apiServices.osquery.packs.delete(multiQueryPackId);
   });
 
-  test('persists pack response actions and expands queries on save', async ({ browserAuth, page, pageObjects }) => {
+  test('persists pack response actions and expands queries on save', async ({
+    browserAuth,
+    page,
+    pageObjects,
+  }) => {
     test.setTimeout(300_000);
     await browserAuth.loginAsAdmin();
 
@@ -82,8 +93,7 @@ test.describe('Pack-based Osquery response actions in the rule editor', { tag: l
     await pageObjects.osqueryRuleEditor.goToActionsTab();
 
     const savePromise = page.waitForResponse(
-      (resp) =>
-        resp.url().includes('detection_engine/rules') && resp.request().method() === 'PUT',
+      (resp) => resp.url().includes('detection_engine/rules') && resp.request().method() === 'PUT',
       { timeout: 60_000 }
     );
 
@@ -98,7 +108,7 @@ test.describe('Pack-based Osquery response actions in the rule editor', { tag: l
     const firstBody = JSON.parse(firstPostData ?? '{}') as {
       response_actions?: Array<{ params?: { queries?: unknown[] } }>;
     };
-    expect(firstBody.response_actions?.[0]?.params?.queries).toEqual([
+    expect(firstBody.response_actions?.[0]?.params?.queries).toStrictEqual([
       {
         interval: 3600,
         query: 'select * from uptime;',
@@ -107,14 +117,16 @@ test.describe('Pack-based Osquery response actions in the rule editor', { tag: l
     ]);
 
     await pageObjects.osqueryRuleEditor.goToActionsTab();
-    await pageObjects.osqueryRuleEditor.responseActionItem(0).getByTestId('comboBoxSearchInput').waitFor({ state: 'visible' });
-    await expect(pageObjects.osqueryRuleEditor.responseActionItem(0).getByTestId('comboBoxSearchInput')).toHaveValue(
-      singleQueryPackName
-    );
+    await pageObjects.osqueryRuleEditor
+      .responseActionItem(0)
+      .getByTestId('comboBoxSearchInput')
+      .waitFor({ state: 'visible' });
+    await expect(
+      pageObjects.osqueryRuleEditor.responseActionItem(0).getByTestId('comboBoxSearchInput')
+    ).toHaveValue(singleQueryPackName);
 
     const secondSavePromise = page.waitForResponse(
-      (resp) =>
-        resp.url().includes('detection_engine/rules') && resp.request().method() === 'PUT',
+      (resp) => resp.url().includes('detection_engine/rules') && resp.request().method() === 'PUT',
       { timeout: 60_000 }
     );
 
@@ -126,7 +138,7 @@ test.describe('Pack-based Osquery response actions in the rule editor', { tag: l
     const secondBody = JSON.parse(secondPostData ?? '{}') as {
       response_actions?: Array<{ params?: { queries?: unknown[] } }>;
     };
-    expect(secondBody.response_actions?.[0]?.params?.queries).toEqual([
+    expect(secondBody.response_actions?.[0]?.params?.queries).toStrictEqual([
       {
         interval: 3600,
         query: 'SELECT * FROM memory_info;',

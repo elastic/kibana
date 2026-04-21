@@ -77,7 +77,9 @@ export class PackFormPage {
     await editor.click();
     await this.page.evaluate((q: string) => {
       const w = window as unknown as {
-        MonacoEnvironment?: { monaco?: { editor: { getModels: () => Array<{ setValue: (v: string) => void }> } } };
+        MonacoEnvironment?: {
+          monaco?: { editor: { getModels: () => Array<{ setValue: (v: string) => void }> } };
+        };
       };
       const models = w.MonacoEnvironment?.monaco?.editor.getModels() ?? [];
       for (const m of models) {

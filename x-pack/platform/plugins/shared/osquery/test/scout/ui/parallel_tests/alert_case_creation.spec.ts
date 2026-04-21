@@ -6,7 +6,6 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { tags } from '@kbn/scout';
 import { uiTest as test } from '../fixtures';
 import {
   buildOsqueryAlertTestRule,
@@ -32,7 +31,8 @@ test.describe('Alert flyout Osquery case creation', { tag: localTags }, () => {
         q1: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
       },
     });
-    packId = (pack.data as { data: { saved_object_id: string; name: string } }).data.saved_object_id;
+    packId = (pack.data as { data: { saved_object_id: string; name: string } }).data
+      .saved_object_id;
     packName = (pack.data as { data: { saved_object_id: string; name: string } }).data.name;
 
     const rule = buildOsqueryAlertTestRule({ includeResponseActions: true });
@@ -58,15 +58,24 @@ test.describe('Alert flyout Osquery case creation', { tag: localTags }, () => {
     await pageObjects.osqueryAlertFlyout.expandFirstAlert();
     await pageObjects.osqueryAlertFlyout.openTakeActionMenu();
     await pageObjects.osqueryAlertFlyout.chooseOsqueryAction();
-    await page.testSubj.locator('flyout-body-osquery').locator('.kibanaCodeEditor').waitFor({ state: 'visible', timeout: 60_000 });
+    await page.testSubj
+      .locator('flyout-body-osquery')
+      .locator('.kibanaCodeEditor')
+      .waitFor({ state: 'visible', timeout: 60_000 });
     await page.getByText('Run a set of queries in a pack').click();
     await page.testSubj.locator('select-live-pack').click();
-    await page.testSubj.locator('select-live-pack').getByTestId('comboBoxSearchInput').fill(packName);
+    await page.testSubj
+      .locator('select-live-pack')
+      .getByTestId('comboBoxSearchInput')
+      .fill(packName);
     await page.keyboard.press('ArrowDown');
     await page.keyboard.press('Enter');
     await pageObjects.osqueryAlertFlyout.clickSubmitInFlyout();
-    await page.testSubj.locator('osqueryResultsTable').waitFor({ state: 'visible', timeout: 180_000 });
+    await page.testSubj
+      .locator('osqueryResultsTable')
+      .waitFor({ state: 'visible', timeout: 180_000 });
 
+    // eslint-disable-next-line playwright/no-nth-methods -- the live-query results panel renders several "Add to Case" labelled controls (header + per-row); first-match targets the aggregate header action driving the new-case flow
     await page.getByLabel('Add to Case').first().click();
     await pageObjects.osqueryCasesPage.openCreateCaseFlyoutFromFilterBar();
     const caseTitle = `scout-case-${Date.now()}`;

@@ -26,7 +26,9 @@ test.describe('Inventory host Osquery tab', { tag: statefulLocalOnly }, () => {
 
     const hostname = 'scout-osquery-agent-0';
     await pageObjects.osqueryInventoryHostOsquery.gotoHostOsqueryTab('default', hostname);
-    await pageObjects.osqueryInventoryHostOsquery.submitSimpleEmbeddedQuery('select * from uptime limit 1;');
+    await pageObjects.osqueryInventoryHostOsquery.submitSimpleEmbeddedQuery(
+      'select * from uptime limit 1;'
+    );
 
     await expect(page.testSubj.locator('osqueryResultsTable')).toBeVisible({ timeout: 180_000 });
   });

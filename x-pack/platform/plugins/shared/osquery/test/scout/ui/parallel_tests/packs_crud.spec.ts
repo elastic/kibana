@@ -6,7 +6,6 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { tags } from '@kbn/scout';
 import { uiTest as test } from '../fixtures';
 import { getMinimalSavedQuery } from '../../api/fixtures/constants';
 
@@ -55,18 +54,23 @@ test.describe('Pack CRUD from UI', { tag: localTags }, () => {
     await pageObjects.osqueryPackForm.saveNewPack();
     await expect(page.getByText(`Successfully created "${packName}" pack`)).toBeVisible();
 
+    interface FleetPolicyItem {
+      name?: string;
+      inputs?: Array<{
+        config?: { osquery?: { value?: { packs?: Record<string, unknown> } } };
+      }>;
+    }
     const policiesResponse = await apiServices.osquery.packs.listFleetWrapperPackagePolicies();
-    const listBody = policiesResponse.data as { items?: unknown[] };
+    const listBody = policiesResponse.data as { items?: FleetPolicyItem[] };
     const items = listBody.items ?? [];
-    const policyForDefault = items.find(
-      (p: { name?: string }) => typeof p === 'object' && p !== null && p.name === 'Policy for Default policy'
-    ) as { inputs?: Array<{ config?: { osquery?: { value?: { packs?: Record<string, unknown> } } } }> } | undefined;
+    const policyForDefault = items.find((p) => p.name === 'Policy for Default policy');
 
     expect(policyForDefault).toBeDefined();
     const packKey = `default--${packName}`;
     const packs = policyForDefault?.inputs?.[0]?.config?.osquery?.value?.packs ?? {};
     expect(packs).toHaveProperty(packKey);
-    const queries = (packs as Record<string, { queries?: Record<string, unknown> }>)[packKey]?.queries;
+    const queries = (packs as Record<string, { queries?: Record<string, unknown> }>)[packKey]
+      ?.queries;
     expect(queries).toBeDefined();
     expect(Object.keys(queries ?? {}).length).toBeGreaterThan(0);
 
@@ -78,13 +82,18 @@ test.describe('Pack CRUD from UI', { tag: localTags }, () => {
     await expect(page.getByText(/Successfully deleted/)).toBeVisible();
   });
 
-  test('edits pack queries from the UI', async ({ browserAuth, page, pageObjects, apiServices }) => {
+  test('edits pack queries from the UI', async ({
+    browserAuth,
+    page,
+    pageObjects,
+    apiServices,
+  }) => {
     test.setTimeout(300_000);
     await browserAuth.loginAsAdmin();
 
     const policiesResponse = await apiServices.osquery.packs.listFleetWrapperPackagePolicies();
-    const firstPolicyId = (policiesResponse.data as { items: Array<{ policy_ids: string[] }> }).items[0]
-      ?.policy_ids?.[0];
+    const firstPolicyId = (policiesResponse.data as { items: Array<{ policy_ids: string[] }> })
+      .items[0]?.policy_ids?.[0];
     expect(firstPolicyId).toBeDefined();
 
     const packName = `scout-pack-edit-${Date.now()}`;

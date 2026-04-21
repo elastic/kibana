@@ -6,7 +6,6 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { tags } from '@kbn/scout';
 import { uiTest as test } from '../fixtures';
 
 const localTags = ['@local-stateful-classic', '@local-serverless-security_complete'];
@@ -23,8 +22,8 @@ test.describe('Pack agent-triggered results', { tag: localTags }, () => {
     await browserAuth.loginAsAdmin();
 
     const policiesResponse = await apiServices.osquery.packs.listFleetWrapperPackagePolicies();
-    const firstPolicyId = (policiesResponse.data as { items: Array<{ policy_ids: string[] }> }).items[0]
-      ?.policy_ids?.[0];
+    const firstPolicyId = (policiesResponse.data as { items: Array<{ policy_ids: string[] }> })
+      .items[0]?.policy_ids?.[0];
     expect(firstPolicyId).toBeDefined();
 
     const packName = `scout-fast-pack-${Date.now()}`;
@@ -47,7 +46,9 @@ test.describe('Pack agent-triggered results', { tag: localTags }, () => {
     await pageObjects.osqueryPackForm.waitForDocsLoadingGone();
 
     await expect(page.testSubj.locator('last-results-date')).toBeVisible({ timeout: 360_000 });
-    await expect(page.testSubj.locator('docs-count-badge')).toContainText('1', { timeout: 360_000 });
+    await expect(page.testSubj.locator('docs-count-badge')).toContainText('1', {
+      timeout: 360_000,
+    });
 
     await apiServices.osquery.packs.delete(packId);
   });

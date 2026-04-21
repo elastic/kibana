@@ -6,7 +6,6 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { tags } from '@kbn/scout';
 import { uiTest as test } from '../fixtures';
 import { getMinimalSavedQuery } from '../../api/fixtures/constants';
 
@@ -41,8 +40,8 @@ test.describe('Pack Fleet policy sync', { tag: localTags }, () => {
     await browserAuth.loginAsAdmin();
 
     const policiesResponse = await apiServices.osquery.packs.listFleetWrapperPackagePolicies();
-    const firstPolicyId = (policiesResponse.data as { items: Array<{ policy_ids: string[] }> }).items[0]
-      ?.policy_ids?.[0];
+    const firstPolicyId = (policiesResponse.data as { items: Array<{ policy_ids: string[] }> })
+      .items[0]?.policy_ids?.[0];
     expect(firstPolicyId).toBeDefined();
 
     const packName = `scout-policy-pack-${Date.now()}`;
@@ -72,13 +71,18 @@ test.describe('Pack Fleet policy sync', { tag: localTags }, () => {
     await apiServices.osquery.packs.delete(packId);
   });
 
-  test('duplicates a pack from the kebab menu with a -copy suffix', async ({ browserAuth, page, pageObjects, apiServices }) => {
+  test('duplicates a pack from the kebab menu with a -copy suffix', async ({
+    browserAuth,
+    page,
+    pageObjects,
+    apiServices,
+  }) => {
     test.setTimeout(300_000);
     await browserAuth.loginAsAdmin();
 
     const policiesResponse = await apiServices.osquery.packs.listFleetWrapperPackagePolicies();
-    const firstPolicyId = (policiesResponse.data as { items: Array<{ policy_ids: string[] }> }).items[0]
-      ?.policy_ids?.[0];
+    const firstPolicyId = (policiesResponse.data as { items: Array<{ policy_ids: string[] }> })
+      .items[0]?.policy_ids?.[0];
     expect(firstPolicyId).toBeDefined();
 
     const packName = `scout-dup-${Date.now()}`;
@@ -102,7 +106,9 @@ test.describe('Pack Fleet policy sync', { tag: localTags }, () => {
 
     const list = await apiServices.osquery.packs.listFleetWrapperPackagePolicies();
     const names = (list.data as { items: Array<{ name?: string }> }).items.map((i) => i.name);
-    expect(names.some((n) => n?.includes(`${packName}-copy`) || n?.includes(packName))).toBeTruthy();
+    expect(
+      names.some((n) => n?.includes(`${packName}-copy`) || n?.includes(packName))
+    ).toBeTruthy();
 
     await apiServices.osquery.packs.delete(packId);
   });

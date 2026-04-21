@@ -6,7 +6,6 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { tags } from '@kbn/scout';
 import { uiTest as test } from '../fixtures';
 import {
   buildOsqueryAlertTestRule,
@@ -15,8 +14,6 @@ import {
 } from '../helpers/detection_rule_lifecycle';
 
 const localTags = ['@local-stateful-classic', '@local-serverless-security_complete'];
-
-test.describe.configure({ mode: 'serial' });
 
 test.describe('Alert flyout take action and investigation guide', { tag: localTags }, () => {
   let ruleId: string;
@@ -49,7 +46,9 @@ test.describe('Alert flyout take action and investigation guide', { tag: localTa
     await expect(pageObjects.osqueryRuleEditor.responseActionItem(0)).toContainText(
       "SELECT * FROM os_version where name='{{host.os.name}}';"
     );
-    await expect(pageObjects.osqueryRuleEditor.responseActionItem(1)).toContainText('select * from users');
+    await expect(pageObjects.osqueryRuleEditor.responseActionItem(1)).toContainText(
+      'select * from users'
+    );
     await pageObjects.osqueryRuleEditor.clickSaveChanges();
     await expect(page.getByText(`${ruleName} was saved`)).toBeVisible();
     await pageObjects.osqueryRuleEditor.dismissToastIfVisible();
@@ -69,7 +68,9 @@ test.describe('Alert flyout take action and investigation guide', { tag: localTa
     await pageObjects.osqueryAlertFlyout.chooseOsqueryAction();
     await pageObjects.osqueryAlertFlyout.inputFlyoutQuery('select * from uptime;');
     await pageObjects.osqueryAlertFlyout.clickSubmitInFlyout();
-    await page.testSubj.locator('osqueryResultsTable').waitFor({ state: 'visible', timeout: 180_000 });
+    await page.testSubj
+      .locator('osqueryResultsTable')
+      .waitFor({ state: 'visible', timeout: 180_000 });
 
     const { violations } = await page.checkA11y({
       include: ['[data-test-subj="flyout-body-osquery"]'],
@@ -82,7 +83,9 @@ test.describe('Alert flyout take action and investigation guide', { tag: localTa
     await pageObjects.osqueryRuleEditor.dismissToastIfVisible();
     await pageObjects.osqueryAlertFlyout.clickCancelInFlyout();
     await page.testSubj.locator('timeline-bottom-bar').getByText('Untitled timeline').click();
-    await expect(page.testSubj.locator('draggableWrapperKeyboardHandler')).toContainText('action_id:');
+    await expect(page.testSubj.locator('draggableWrapperKeyboardHandler')).toContainText(
+      'action_id:'
+    );
   });
 
   test('persists investigation guide suggestions after saving the rule twice', async ({

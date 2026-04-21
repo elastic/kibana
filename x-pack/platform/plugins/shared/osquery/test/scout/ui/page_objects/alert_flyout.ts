@@ -6,7 +6,6 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
-import { waitForKibanaChromeLoadingFinished } from '../../common/wait_for_kibana_loading_finished';
 
 const FLYOUT_OSQUERY_EDITOR = 'flyout-body-osquery';
 
@@ -20,7 +19,9 @@ export class AlertFlyoutPage {
 
   constructor(private readonly page: ScoutPage) {
     this.expandEventButton = this.page.testSubj.locator('expand-event');
-    this.flyoutFooterDropdown = this.page.testSubj.locator('securitySolutionFlyoutFooterDropdownButton');
+    this.flyoutFooterDropdown = this.page.testSubj.locator(
+      'securitySolutionFlyoutFooterDropdownButton'
+    );
     this.osqueryActionItem = this.page.testSubj.locator('osquery-action-item');
     this.investigationGuideButton = this.page.testSubj.locator(
       'securitySolutionFlyoutInvestigationGuideButton'
@@ -29,12 +30,8 @@ export class AlertFlyoutPage {
     this.sendAlertToTimelineButton = this.page.testSubj.locator('send-alert-to-timeline-button');
   }
 
-  async waitForAlertsChrome(): Promise<void> {
-    await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
-    await this.page.testSubj.locator('globalLoadingIndicator').waitFor({ state: 'hidden' }).catch(() => {});
-  }
-
   async expandFirstAlert(): Promise<void> {
+    // eslint-disable-next-line playwright/no-nth-methods -- the helper's purpose is to expand the first alert row; scoping is handled by the `openRuleAlertsView` navigation that precedes this call
     await this.expandEventButton.first().click();
   }
 
@@ -51,7 +48,9 @@ export class AlertFlyoutPage {
   }
 
   async doubleClickInvestigationGuideQuery(label: string): Promise<void> {
-    await this.page.getByText(label, { exact: false }).waitFor({ state: 'visible', timeout: 30_000 });
+    await this.page
+      .getByText(label, { exact: false })
+      .waitFor({ state: 'visible', timeout: 30_000 });
     await this.page.getByText(label, { exact: false }).dblclick({ force: true });
   }
 
@@ -73,7 +72,10 @@ export class AlertFlyoutPage {
     await this.page.keyboard.press('ArrowDown');
     await this.page.keyboard.press('Enter');
     await this.page.keyboard.press('Escape').catch(() => {});
-    await this.page.getByText('All agents').waitFor({ state: 'visible', timeout: 15_000 }).catch(() => {});
+    await this.page
+      .getByText('All agents')
+      .waitFor({ state: 'visible', timeout: 15_000 })
+      .catch(() => {});
   }
 
   async clickSubmitInFlyout(): Promise<void> {
@@ -82,7 +84,10 @@ export class AlertFlyoutPage {
   }
 
   async clickAddToTimeline(): Promise<void> {
-    await this.page.getByText('Add to Timeline investigation').waitFor({ state: 'visible', timeout: 180_000 });
+    await this.page
+      .getByText('Add to Timeline investigation')
+      .waitFor({ state: 'visible', timeout: 180_000 });
+    // eslint-disable-next-line playwright/no-nth-methods -- the live-query results table renders several add-to-timeline buttons (one per row); clicking the first attaches the aggregate action used by the flyout flow
     await this.page.testSubj.locator('add-to-timeline').first().click();
   }
 

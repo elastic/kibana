@@ -16,24 +16,29 @@ export class RuleEditorPage {
   async navigateToRuleEdit(ruleId: string): Promise<void> {
     await this.page.gotoApp(`security/rules/id/${ruleId}/edit`);
     await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
-    await this.page.testSubj.locator('globalLoadingIndicator').waitFor({ state: 'hidden' }).catch(() => {});
   }
 
   async navigateToRulesList(): Promise<void> {
     await this.page.gotoApp('security/rules');
     await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
-    await this.page.testSubj.locator('globalLoadingIndicator').waitFor({ state: 'hidden' }).catch(() => {});
   }
 
   async openRuleByName(ruleName: string): Promise<void> {
-    await this.page.locator(`a[data-test-subj="ruleName"]`).filter({ hasText: ruleName }).click({ force: true });
+    await this.page
+      .locator(`a[data-test-subj="ruleName"]`)
+      .filter({ hasText: ruleName })
+      .click({ force: true });
   }
 
   async openRuleAlertsView(ruleName: string): Promise<void> {
     await this.navigateToRulesList();
     await this.openRuleByName(ruleName);
     await this.goToAlertsTab();
-    await this.page.testSubj.locator('expand-event').first().waitFor({ state: 'visible', timeout: 120_000 });
+
+    const expandEvent = this.page.testSubj.locator('expand-event');
+    // eslint-disable-next-line playwright/no-nth-methods -- waits for the first alert row to render; any row appearing is sufficient readiness for the caller which will then expand it
+    const firstAlert = expandEvent.first();
+    await firstAlert.waitFor({ state: 'visible', timeout: 120_000 });
   }
 
   async goToAlertsTab(): Promise<void> {
@@ -42,7 +47,6 @@ export class RuleEditorPage {
 
   async openRuleSettingsFromAlerts(): Promise<void> {
     await this.page.testSubj.locator('editRuleSettingsLink').click();
-    await this.page.testSubj.locator('globalLoadingIndicator').waitFor({ state: 'hidden' }).catch(() => {});
   }
 
   async closeDatePickerTabIfVisible(): Promise<void> {
@@ -55,8 +59,10 @@ export class RuleEditorPage {
   async goToActionsTab(): Promise<void> {
     await this.closeDatePickerTabIfVisible();
     await this.page.testSubj.locator('edit-rule-actions-tab').click();
-    await this.page.testSubj.locator('globalLoadingIndicator').waitFor({ state: 'hidden' }).catch(() => {});
-    await this.page.getByText('Loading connectors...').waitFor({ state: 'hidden' }).catch(() => {});
+    await this.page
+      .getByText('Loading connectors...')
+      .waitFor({ state: 'hidden' })
+      .catch(() => {});
   }
 
   async clickAddOsqueryResponseAction(): Promise<void> {
@@ -95,11 +101,15 @@ export class RuleEditorPage {
   }
 
   async waitForInvestigationGuideBlockVisible(): Promise<void> {
-    await this.page.testSubj.locator('osquery-investigation-guide-text').waitFor({ state: 'visible', timeout: 60_000 });
+    await this.page.testSubj
+      .locator('osquery-investigation-guide-text')
+      .waitFor({ state: 'visible', timeout: 60_000 });
   }
 
   async waitForInvestigationGuideBlockHidden(): Promise<void> {
-    await this.page.testSubj.locator('osquery-investigation-guide-text').waitFor({ state: 'hidden', timeout: 60_000 });
+    await this.page.testSubj
+      .locator('osquery-investigation-guide-text')
+      .waitFor({ state: 'hidden', timeout: 60_000 });
   }
 
   async clickSaveRule(): Promise<void> {

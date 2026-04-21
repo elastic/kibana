@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { PlaywrightTestConfig } from 'playwright/test';
 import { createPlaywrightConfig } from '@kbn/scout';
 
 /** Fleet + agent enrollment + osquery warm-up can exceed the default 3m setup project budget. */
@@ -28,7 +27,7 @@ const projects = baseConfig.projects?.map((project) => {
   return project;
 });
 
-const config: PlaywrightTestConfig = {
+const config: typeof baseConfig = {
   ...baseConfig,
   projects,
 };
