@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { FlattenRecord, ProcessingSimulationResponse } from '@kbn/streams-schema';
+import type {
+  FlattenRecord,
+  ProcessingSimulationResponse,
+  SimulationError,
+} from '@kbn/streams-schema';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 
 export interface SimulationFeedback {
@@ -85,12 +89,10 @@ export async function buildSimulationFeedback({
 
   const errors: string[] = [...processorFailures, ...uniqueErrors];
 
-  if (temporaryFields.length > 0) {
-    errors.push(
-      `Temporary fields still present after pipeline: ${temporaryFields.join(', ')}. ` +
-        `Add 'remove' processors to clean these up.`
-    );
-  }
+  // temporary_fields are informational only — they're surfaced in the
+  // `temporary_fields` array for the LLM to act on, but do NOT gate `valid`.
+  // This prevents burning a simulation step when upstream parsing creates
+  // custom.* fields that are always present on the first iteration.
 
   return {
     valid: errors.length === 0,
@@ -99,6 +101,14 @@ export async function buildSimulationFeedback({
     processors,
     temporary_fields: temporaryFields,
   };
+}
+
+/** Extracts the processor_id from a SimulationError if available. */
+function getErrorProcessorId(error: SimulationError): string | undefined {
+  if ('processor_id' in error && typeof error.processor_id === 'string') {
+    return error.processor_id;
+  }
+  return undefined;
 }
 
 function buildPerProcessorBreakdown(
@@ -121,26 +131,34 @@ function buildPerProcessorBreakdown(
   for (const doc of simulationResult.documents) {
     if (!doc.errors || doc.errors.length === 0) continue;
 
-    const processedBy = doc.processed_by ?? [];
     for (const error of doc.errors) {
       const key = `${error.type}: ${error.message}`;
-      for (const processorId of processedBy) {
-        if (!result[processorId]) continue;
-        if (!errorMap.has(processorId)) {
-          errorMap.set(processorId, new Map());
-        }
-        const inner = errorMap.get(processorId)!;
-        inner.set(key, (inner.get(key) ?? 0) + 1);
-      }
+      // Use error.processor_id when available (authoritative attribution)
+      const attributedProcessorId = getErrorProcessorId(error);
 
-      if (processedBy.length === 0) {
-        for (const processorId of Object.keys(result)) {
+      if (attributedProcessorId) {
+        // Error carries its own processor_id — attribute directly
+        if (!result[attributedProcessorId]) continue;
+        if (!errorMap.has(attributedProcessorId)) {
+          errorMap.set(attributedProcessorId, new Map());
+        }
+        const inner = errorMap.get(attributedProcessorId)!;
+        inner.set(key, (inner.get(key) ?? 0) + 1);
+      } else {
+        // Error type doesn't carry processor_id (e.g. field_mapping_failure)
+        // Fall back to processed_by, but only attribute to processors that actually
+        // appear in the processors_metrics (i.e. are part of this pipeline)
+        const processedBy = doc.processed_by ?? [];
+        for (const processorId of processedBy) {
+          if (!result[processorId]) continue;
           if (!errorMap.has(processorId)) {
             errorMap.set(processorId, new Map());
           }
           const inner = errorMap.get(processorId)!;
           inner.set(key, (inner.get(key) ?? 0) + 1);
         }
+        // When processed_by is empty and no processor_id, the error is unattributed —
+        // do NOT spray it across every processor
       }
     }
   }
@@ -204,7 +222,6 @@ function getUniqueDocumentErrorsWithAttribution(
   for (const doc of simulationResult.documents) {
     if (!doc.errors || doc.errors.length === 0) continue;
 
-    const processorIds = doc.processed_by ?? [];
     for (const error of doc.errors) {
       const key = `${error.type}: ${error.message}`;
       if (!errorMap.has(key)) {
@@ -212,8 +229,19 @@ function getUniqueDocumentErrorsWithAttribution(
       }
       const entry = errorMap.get(key)!;
       entry.count++;
-      for (const id of processorIds) {
-        entry.processorIds.add(id);
+
+      // Use error.processor_id when available (authoritative attribution)
+      const attributedProcessorId = getErrorProcessorId(error);
+      if (attributedProcessorId) {
+        entry.processorIds.add(attributedProcessorId);
+      } else {
+        // Fall back to processed_by for error types without processor_id
+        const processedBy = doc.processed_by ?? [];
+        for (const id of processedBy) {
+          entry.processorIds.add(id);
+        }
+        // When processed_by is empty and no processor_id, the error is unattributed —
+        // do NOT spray it across every processor
       }
     }
   }

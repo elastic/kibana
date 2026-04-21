@@ -52,11 +52,9 @@ Object {
 }
 `;
 
-exports[`buildSimulationFeedback reports temporary fields and marks invalid 1`] = `
+exports[`buildSimulationFeedback reports temporary fields as informational without gating valid 1`] = `
 Object {
-  "errors": Array [
-    "Temporary fields still present after pipeline: custom.timestamp. Add 'remove' processors to clean these up.",
-  ],
+  "errors": Array [],
   "metrics": Object {
     "fields": Array [
       "message (text) - 1 distinct value (\`hello\`)",
@@ -68,7 +66,7 @@ Object {
   "temporary_fields": Array [
     "custom.timestamp",
   ],
-  "valid": false,
+  "valid": true,
 }
 `;
 

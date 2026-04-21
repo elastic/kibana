@@ -12,6 +12,7 @@ import type { Streams } from '@kbn/streams-schema';
 import type { ProcessingSimulationResponse } from '@kbn/streams-schema';
 import type { StreamlangDSL } from '@kbn/streamlang';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
+import type { SimulationFeedback } from './build_simulation_feedback';
 import {
   pipelineDefinitionSchema,
   postParsePipelineDefinitionSchema,
@@ -83,7 +84,7 @@ async function invokeSimulateCallback(toolCallbacks: Record<string, Function>, p
       arguments: { pipeline },
     },
   });
-  return toolResult.response;
+  return toolResult.response as SimulationFeedback;
 }
 
 describe('suggestProcessingPipeline workflow', () => {
@@ -266,7 +267,7 @@ describe('suggestProcessingPipeline workflow', () => {
   });
 
   it('simulate_pipeline callback returns processors and temporary_fields in response', async () => {
-    let capturedToolResponse: unknown;
+    let capturedToolResponse!: SimulationFeedback;
 
     const simulatePipeline = jest.fn().mockImplementation(() =>
       Promise.resolve(
@@ -329,7 +330,7 @@ describe('suggestProcessingPipeline workflow', () => {
   });
 
   it('no longer rejects pipelines based on aggregate 80% parse rate gate', async () => {
-    let capturedToolResponse: unknown;
+    let capturedToolResponse!: SimulationFeedback;
 
     const simulatePipeline = jest.fn().mockImplementation(() =>
       Promise.resolve(
@@ -401,17 +402,15 @@ describe('suggestProcessingPipeline workflow', () => {
       mappedFields: {},
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect((capturedToolResponse as any).metrics.parse_rate).toBe(50);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect((capturedToolResponse as any).errors).not.toContainEqual(
+    expect(capturedToolResponse.metrics.parse_rate).toBe(50);
+    expect(capturedToolResponse.errors).not.toContainEqual(
       expect.stringContaining('Parse rate is too low')
     );
     expect(capturedToolResponse).toMatchSnapshot();
   });
 
   it('simulate_pipeline callback returns formatted Zod errors for invalid pipeline', async () => {
-    let capturedToolResponse: unknown;
+    let capturedToolResponse!: SimulationFeedback;
 
     const simulatePipeline = jest.fn();
 
@@ -447,8 +446,7 @@ describe('suggestProcessingPipeline workflow', () => {
     });
 
     expect(simulatePipeline).not.toHaveBeenCalled();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect((capturedToolResponse as any).valid).toBe(false);
+    expect(capturedToolResponse.valid).toBe(false);
     expect(capturedToolResponse).toMatchSnapshot();
   });
 });

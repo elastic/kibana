@@ -171,7 +171,7 @@ export async function suggestProcessingPipeline({
           return {
             response: {
               valid: feedback.valid,
-              errors: feedback.errors.length > 0 ? feedback.errors : undefined,
+              errors: feedback.errors,
               metrics: feedback.metrics,
               processors: feedback.processors,
               temporary_fields: feedback.temporary_fields,
@@ -307,60 +307,6 @@ export async function fetchMappedFieldsForStreamProcessingSuggestions(
   streamIndexName: string
 ) {
   return getMappedFields(esClient, streamIndexName);
-}
-
-export function getUniqueDocumentErrors(simulationResult: ProcessingSimulationResponse): string[] {
-  if (!simulationResult.documents || simulationResult.documents.length === 0) {
-    return [];
-  }
-
-  const errorMap = new Map<string, { count: number; type: string; exampleDoc?: FlattenRecord }>();
-
-  for (const doc of simulationResult.documents) {
-    if (doc.errors && doc.errors.length > 0) {
-      for (const error of doc.errors) {
-        const key = `${error.type}: ${error.message}`;
-        if (!errorMap.has(key)) {
-          errorMap.set(key, {
-            count: 1,
-            type: error.type,
-            exampleDoc: doc.value,
-          });
-        } else {
-          errorMap.get(key)!.count++;
-        }
-      }
-    }
-  }
-
-  const uniqueErrors: string[] = [];
-  const maxErrors = 5;
-  const maxErrorLength = 250;
-  let errorIndex = 0;
-
-  for (const [errorKey, errorInfo] of errorMap.entries()) {
-    if (errorIndex >= maxErrors) {
-      break;
-    }
-
-    const countStr = errorInfo.count > 1 ? ` (occurred in ${errorInfo.count} documents)` : '';
-    const fullError = `${errorKey}${countStr}`;
-
-    const truncatedError =
-      fullError.length > maxErrorLength
-        ? `${fullError.substring(0, maxErrorLength)}...`
-        : fullError;
-
-    uniqueErrors.push(truncatedError);
-    errorIndex++;
-  }
-
-  const remainingErrors = errorMap.size - maxErrors;
-  if (remainingErrors > 0) {
-    uniqueErrors.push(`... and ${remainingErrors} more error(s)`);
-  }
-
-  return uniqueErrors;
 }
 
 async function getMappedFields(esClient: ElasticsearchClient, index: string) {

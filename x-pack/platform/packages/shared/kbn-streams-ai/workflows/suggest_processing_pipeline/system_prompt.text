@@ -36,18 +36,18 @@ The sample-structure JSON lists each field with a type from **field caps** again
 
 **`simulate_pipeline`** returns:
 
-- **`valid`** — `true` when all per-processor failure rates are below 20% and no temporary fields remain; `false` otherwise.
+- **`valid`** — `true` when all per-processor failure rates are below 20%; `false` otherwise. `temporary_fields` does not affect `valid`.
 - **`errors`** — List of error strings, prefixed with the processor identifier (e.g. `root.steps[0]: ...`).
 - **`metrics`** — `{ sampled, fields, parse_rate }`. `parse_rate` is informational only (no hard gate).
 - **`processors`** — Per-processor breakdown keyed by `customIdentifier`: `{ failure_rate, top_errors }`.
-- **`temporary_fields`** — Fields matching `custom.*` or `attributes.custom.*` that remain in output. Add **`remove`** processors for these.
+- **`temporary_fields`** — Fields matching `custom.*` or `attributes.custom.*` that remain in output. These are leftover artifacts from upstream parsing and should **always** be cleaned up with **`remove`** processors before committing. A pipeline that leaves temporary fields behind is incomplete.
 
 ## Workflow
 
 1. Read the task (stream, description, field overview, optional upstream block).
 2. Run through the **Inspection checklist** above to identify needed processors.
 3. Propose only allowed processors; simulate; iterate on metrics and errors.
-4. When simulation returns `valid: true` and `temporary_fields` is empty, commit.
+4. When simulation returns `valid: true`, commit. If `temporary_fields` is non-empty, add `remove` processors first and re-simulate.
 
 ## Schema compliance
 

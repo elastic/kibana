@@ -1,8 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[
-  `suggestProcessingPipeline workflow no longer rejects pipelines based on aggregate 80% parse rate gate 1`
-] = `
+exports[`suggestProcessingPipeline workflow no longer rejects pipelines based on aggregate 80% parse rate gate 1`] = `
 Object {
   "errors": Array [
     "Processor \\"root.steps[0]\\" has a failure rate of 50.00% (maximum allowed: 20%). Review the processor configuration.",
@@ -28,9 +26,7 @@ Object {
 }
 `;
 
-exports[
-  `suggestProcessingPipeline workflow returns only agent-committed steps (orchestrator merges seed parsing separately) 1`
-] = `
+exports[`suggestProcessingPipeline workflow returns only agent-committed steps (orchestrator merges seed parsing separately) 1`] = `
 Object {
   "metadata": Object {
     "maxSteps": 2,
@@ -51,9 +47,7 @@ Object {
 }
 `;
 
-exports[
-  `suggestProcessingPipeline workflow simulate_pipeline callback returns formatted Zod errors for invalid pipeline 1`
-] = `
+exports[`suggestProcessingPipeline workflow simulate_pipeline callback returns formatted Zod errors for invalid pipeline 1`] = `
 Object {
   "errors": Array [
     "Step 0 (date): from: Invalid input: expected string, received number",
@@ -66,13 +60,9 @@ Object {
 }
 `;
 
-exports[
-  `suggestProcessingPipeline workflow simulate_pipeline callback returns processors and temporary_fields in response 1`
-] = `
+exports[`suggestProcessingPipeline workflow simulate_pipeline callback returns processors and temporary_fields in response 1`] = `
 Object {
-  "errors": Array [
-    "Temporary fields still present after pipeline: custom.timestamp. Add 'remove' processors to clean these up.",
-  ],
+  "errors": Array [],
   "metrics": Object {
     "fields": Array [
       "message (unmapped) - 1 distinct value (\`ok\`)",
@@ -90,13 +80,11 @@ Object {
   "temporary_fields": Array [
     "custom.timestamp",
   ],
-  "valid": false,
+  "valid": true,
 }
 `;
 
-exports[
-  `suggestProcessingPipeline workflow uses full processor schema when agentPipelineSchema is the default 1`
-] = `
+exports[`suggestProcessingPipeline workflow uses full processor schema when agentPipelineSchema is the default 1`] = `
 Object {
   "metadata": Object {
     "maxSteps": 2,

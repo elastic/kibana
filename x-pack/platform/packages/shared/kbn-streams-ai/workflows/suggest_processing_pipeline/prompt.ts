@@ -68,7 +68,7 @@ export const SuggestIngestPipelinePrompt = createPrompt({
       },
       commit_pipeline: {
         description:
-          'Finalize the pipeline after simulation passes (valid: true, no temporary_fields). Only commit { "steps": [] } after verifying the Inspection checklist in the system prompt—all five checks must pass.',
+          'Finalize the pipeline after simulation passes (valid: true) and all temporary fields are cleaned up. Only commit { "steps": [] } after verifying the Inspection checklist in the system prompt—all five checks must pass.',
         schema: {
           type: 'object',
           properties: {
