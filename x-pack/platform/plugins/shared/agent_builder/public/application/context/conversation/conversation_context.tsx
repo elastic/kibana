@@ -14,6 +14,9 @@ interface ConversationContextValue {
   conversationId?: string;
   shouldStickToBottom?: boolean;
   isEmbeddedContext: boolean;
+  hideWelcomeTitle?: boolean;
+  initialTitle?: string;
+  hideCloseButton?: boolean;
   sessionTag?: string;
   agentId?: string;
   initialMessage?: string;

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type React from 'react';
 import type { LensPublicSetup, LensPublicStart } from '@kbn/lens-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type {
@@ -32,11 +31,13 @@ import type { AIAssistantManagementSelectionPluginPublicStart } from '@kbn/ai-as
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { AttachmentInput, UpdateOriginResponse } from '@kbn/agent-builder-common/attachments';
+import type React from 'react';
 import type { EvalsPublicStart } from '@kbn/evals-plugin/public';
 import type { EmbeddableConversationProps } from './embeddable/types';
 import type { OpenConversationSidebarOptions } from './sidebar/types';
 
 export type { EmbeddableConversationProps };
+
 export interface ConversationSidebarRef {
   close(): void;
 }
