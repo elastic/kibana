@@ -6,13 +6,14 @@
  */
 
 import type { ScoutPage } from '@kbn/scout';
+import { waitForKibanaChromeLoadingFinished } from '../../common/wait_for_kibana_loading_finished';
 
 export class SavedQueryPage {
   constructor(private readonly page: ScoutPage) {}
 
   async navigateToList(): Promise<void> {
     await this.page.gotoApp('osquery', { hash: '/saved_queries' });
-    await this.page.waitForLoadingIndicatorHidden().catch(() => {});
+    await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
     await this.page.testSubj
       .locator('savedQueriesTable')
       .waitFor({ state: 'visible', timeout: 30_000 });

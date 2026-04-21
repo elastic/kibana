@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PlaywrightTestConfig } from 'playwright/test';
 import { createPlaywrightConfig } from '@kbn/scout';
 
 /** Fleet + agent enrollment + osquery warm-up can exceed the default 3m setup project budget. */
@@ -16,13 +17,17 @@ const baseConfig = createPlaywrightConfig({
   runGlobalSetup: true,
 });
 
-export default {
-  ...baseConfig,
-  projects: baseConfig.projects?.map((project) => {
-    if (typeof project === 'object' && project?.name?.startsWith('setup-')) {
-      return { ...project, timeout: OSQUERY_UI_GLOBAL_SETUP_TIMEOUT_MS };
-    }
+const projects = baseConfig.projects?.map((project) => {
+  if (typeof project === 'object' && project?.name?.startsWith('setup-')) {
+    return { ...project, timeout: OSQUERY_UI_GLOBAL_SETUP_TIMEOUT_MS };
+  }
 
-    return project;
-  }),
+  return project;
+});
+
+const config: PlaywrightTestConfig = {
+  ...baseConfig,
+  projects,
 };
+
+export default config;

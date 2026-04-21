@@ -7,8 +7,10 @@
 
 import type { Locator, ScoutPage } from '@kbn/scout';
 import { OSQUERY_UI_RESULTS_TIMEOUT_MS } from '../../common/constants';
+import { waitForKibanaChromeLoadingFinished } from '../../common/wait_for_kibana_loading_finished';
 
-interface WindowWithMonaco extends Window {
+/** Narrow shape for Monaco editor access in `page.evaluate`; omit conflicts with `Window.MonacoEnvironment` from monaco-editor typings. */
+type WindowWithMonaco = Omit<Window, 'MonacoEnvironment'> & {
   MonacoEnvironment?: {
     monaco?: {
       editor: {
@@ -16,7 +18,7 @@ interface WindowWithMonaco extends Window {
       };
     };
   };
-}
+};
 
 async function dismissVisibleToasts(page: ScoutPage): Promise<void> {
   const closeButtons = await page.testSubj
@@ -67,7 +69,7 @@ export class LiveQueryFormPage {
   }
 
   async selectAllAgents(): Promise<void> {
-    await this.page.waitForLoadingIndicatorHidden().catch(() => {});
+    await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
 
     const agentInput = this.agentSelection.getByTestId('comboBoxSearchInput');
     await agentInput.waitFor({ state: 'visible', timeout: 15_000 });
@@ -128,7 +130,7 @@ export class LiveQueryFormPage {
   }
 
   async submitQuery(): Promise<void> {
-    await this.page.waitForLoadingIndicatorHidden().catch(() => {});
+    await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
 
     await this.submitButton.waitFor({ state: 'visible' });
     await this.submitButton.scrollIntoViewIfNeeded();
@@ -204,10 +206,10 @@ export class LiveQueryFormPage {
               await resultsTab.click();
             }
           } else {
-            await this.page.waitForLoadingIndicatorHidden().catch(() => {});
+            await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
           }
         } catch {
-          await this.page.waitForLoadingIndicatorHidden().catch(() => {});
+          await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
         }
       }
     }

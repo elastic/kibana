@@ -6,6 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
+import { waitForKibanaChromeLoadingFinished } from '../../common/wait_for_kibana_loading_finished';
 
 export class EcsMappingEditorPage {
   constructor(private readonly page: ScoutPage) {}
@@ -29,7 +30,7 @@ export class EcsMappingEditorPage {
 
     for (let attempt = 0; attempt < 5; attempt++) {
       await searchInput.click();
-      await this.page.waitForLoadingIndicatorHidden().catch(() => {});
+      await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
       await searchInput.fill('');
       await searchInput.pressSequentially(cleanText);
 
@@ -40,7 +41,7 @@ export class EcsMappingEditorPage {
         return;
       } catch {
         await searchInput.press('Escape');
-        await this.page.waitForLoadingIndicatorHidden().catch(() => {});
+        await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
       }
     }
 
@@ -59,7 +60,7 @@ export class EcsMappingEditorPage {
 
     for (let attempt = 0; attempt < 5; attempt++) {
       await searchInput.click();
-      await this.page.waitForLoadingIndicatorHidden().catch(() => {});
+      await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
       await searchInput.fill('');
       await searchInput.pressSequentially(cleanText);
 
@@ -76,7 +77,7 @@ export class EcsMappingEditorPage {
         return;
       } catch {
         await searchInput.press('Escape');
-        await this.page.waitForLoadingIndicatorHidden().catch(() => {});
+        await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
       }
     }
 
