@@ -34,6 +34,7 @@ import type {
   ChatCompleteResponse,
   FunctionCallingMode,
   InferenceClient,
+  InferenceConnector,
 } from '@kbn/inference-common';
 import { ToolChoiceType } from '@kbn/inference-common';
 import type { AnalyticsServiceStart } from '@kbn/core/server';
@@ -99,6 +100,7 @@ export class ObservabilityAIAssistantClient {
         asInternalUser: ElasticsearchClient;
         asCurrentUser: ElasticsearchClient;
       };
+      getConnectorById: (connectorId: string) => Promise<InferenceConnector>;
       inferenceClient: InferenceClient;
       logger: Logger;
       user?: {
@@ -281,12 +283,7 @@ export class ObservabilityAIAssistantClient {
       );
 
       const connector$ = defer(() =>
-        from(
-          this.dependencies.actionsClient.get({
-            id: connectorId,
-            throwIfSystemAction: true,
-          })
-        ).pipe(
+        from(this.dependencies.getConnectorById(connectorId)).pipe(
           catchError((error) => {
             this.dependencies.logger.debug(
               `Failed to fetch connector for analytics: ${error.message}`

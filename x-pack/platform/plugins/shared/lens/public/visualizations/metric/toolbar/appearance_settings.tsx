@@ -9,10 +9,17 @@ import type { ReactNode } from 'react';
 import React from 'react';
 
 import type { EuiButtonGroupOptionProps } from '@elastic/eui';
-import { EuiFormRow, EuiFieldText, EuiButtonGroup, EuiHorizontalRule, EuiText } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiFieldText,
+  EuiButtonGroup,
+  EuiHorizontalRule,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDebouncedValue } from '@kbn/visualization-utils';
-import { hasIcon } from '@kbn/visualization-ui-components';
+import { hasIcon, IconSelect } from '@kbn/visualization-ui-components';
 import type {
   MetricVisualizationState,
   PrimaryMetricFontSize,
@@ -26,6 +33,8 @@ import {
   LENS_LEGACY_METRIC_STATE_DEFAULTS,
   LENS_METRIC_STATE_DEFAULTS,
 } from '@kbn/lens-common';
+
+import { metricIconsSet } from '../../../shared_components/icon_set';
 
 /** Get default layout config based on primary metric position */
 const getDefaultLayoutConfig = (
@@ -62,10 +71,14 @@ export function MetricAppearanceSettings({
   const hasMetricIcon = hasIcon(state.icon);
 
   const disabledStates = {
-    subtitle: !!state.breakdownByAccessor,
+    subtitle:
+      !!state.breakdownByAccessor &&
+      i18n.translate('xpack.lens.metric.appearancePopover.subtitle.tooltip', {
+        defaultMessage: 'Not supported with break down by',
+      }),
     secondaryAlign: !hasSecondaryMetric,
     iconAlign: !hasMetricIcon,
-  };
+  } satisfies Record<string, boolean | string>;
 
   return (
     <>
@@ -180,6 +193,56 @@ export function MetricAppearanceSettings({
           defaultMessage: 'Other',
         })}
       >
+        {/* Duplicate setting from dimension editor */}
+        <EuiFormRow
+          display="columnCompressed"
+          fullWidth
+          label={i18n.translate('xpack.lens.metric.icon', {
+            defaultMessage: 'Icon decoration',
+          })}
+        >
+          <IconSelect
+            customIconSet={metricIconsSet}
+            value={state?.icon}
+            onChange={(newIcon) => {
+              if (state.icon === newIcon) return;
+
+              // If no icon selected, remove icon and iconAlign properties from the state
+              if (newIcon === 'empty') {
+                const { icon, iconAlign, ...restState } = state;
+                setState({ ...restState });
+                return;
+              }
+
+              // If both icon and iconAlign are set, only update icon
+              if (state.icon && state.iconAlign) {
+                setState({
+                  ...state,
+                  icon: newIcon,
+                });
+                return;
+              }
+
+              // If icon is set but iconAlign is missing, set legacy align
+              // same check as in x-pack/platform/plugins/shared/lens/public/visualizations/metric/to_expression.ts
+              if (state.icon && !state.iconAlign) {
+                setState({
+                  ...state,
+                  icon: newIcon,
+                  iconAlign: LENS_LEGACY_METRIC_STATE_DEFAULTS.iconAlign,
+                });
+                return;
+              }
+
+              // If icon is missing, always set iconAlign to the default
+              setState({
+                ...state,
+                icon: newIcon,
+                iconAlign: LENS_METRIC_STATE_DEFAULTS.iconAlign,
+              });
+            }}
+          />
+        </EuiFormRow>
         <AppearanceOption
           label={i18n.translate('xpack.lens.metric.appearancePopover.iconPosition', {
             defaultMessage: 'Icon position',
@@ -216,7 +279,7 @@ function SubtitleOption({
 }: {
   value?: string;
   onChange: (subtitle: string) => void;
-  isDisabled: boolean;
+  isDisabled: boolean | string;
 }) {
   const { inputValue, handleInputChange } = useDebouncedValue<string>(
     { onChange, value },
@@ -230,14 +293,17 @@ function SubtitleOption({
       })}
       fullWidth
       display="columnCompressed"
-      isDisabled={isDisabled}
+      isDisabled={!!isDisabled}
     >
-      <EuiFieldText
-        compressed
-        data-test-subj="lens-metric-appearance-subtitle-field"
-        value={inputValue}
-        onChange={({ target: { value: newValue } }) => handleInputChange(newValue)}
-      />
+      <EuiToolTip display="block" content={isDisabled}>
+        <EuiFieldText
+          compressed
+          disabled={!!isDisabled}
+          data-test-subj="lens-metric-appearance-subtitle-field"
+          value={inputValue}
+          onChange={({ target: { value: newValue } }) => handleInputChange(newValue)}
+        />
+      </EuiToolTip>
     </EuiFormRow>
   );
 }
