@@ -33,6 +33,7 @@ interface GenerateSplitButtonProps {
   onRunQueriesOnly: () => void;
   isRunDisabled: boolean;
   isConfigDisabled: boolean;
+  isLoading?: boolean;
 }
 
 export const GenerateSplitButton = ({
@@ -47,6 +48,7 @@ export const GenerateSplitButton = ({
   onRunQueriesOnly,
   isRunDisabled,
   isConfigDisabled,
+  isLoading,
 }: GenerateSplitButtonProps) => {
   const featuresConnector = useMemo(
     () => allConnectors.find((c) => c.connectorId === config.connectors.features),
@@ -154,6 +156,7 @@ export const GenerateSplitButton = ({
       buildPanels={buildPanels}
       error={connectorError}
       errorTitle={CONNECTOR_LOAD_ERROR}
+      isLoading={isLoading}
       data-test-subj="significant_events_generate_split_button"
     />
   );
