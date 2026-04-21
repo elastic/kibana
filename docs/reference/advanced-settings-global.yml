@@ -54,7 +54,7 @@ groups:
       - setting: "xpackCustomBranding:customizedLogo"
         id: organization-name
         description: |
-          The custom text that appears in the header of all {{product.kibana}} pages. Images must have a transparent background, and 200x84 pixels or smaller.
+          The custom image that replaces the text next to the logo in the header of all {{product.kibana}} pages. Images look best when they are no larger than 200 x 84 pixels and have a transparent background.
         datatype: string
         applies_to:
           stack: ga
