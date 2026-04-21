@@ -92,7 +92,11 @@ export class GenAiSettingsPlugin
       this.licensingSubscription = licensing.license$.subscribe((license) => {
         const hasEnterpriseLicense = license.hasAtLeast('enterprise');
 
-        if (this.registeredApp && hasEnterpriseLicense && (hasConnectorsReadPrivilege || hasAnonymizationPrivilege)) {
+        if (
+          this.registeredApp &&
+          hasEnterpriseLicense &&
+          (hasConnectorsReadPrivilege || hasAnonymizationPrivilege)
+        ) {
           this.registeredApp.enable();
         } else {
           this.registeredApp.disable();
