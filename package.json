@@ -1618,6 +1618,7 @@
     "@kbn/cli-dev-mode": "link:packages/kbn-cli-dev-mode",
     "@kbn/code-editor-mock": "link:src/platform/packages/shared/shared-ux/code_editor/mocks",
     "@kbn/code-owners": "link:src/platform/packages/private/kbn-code-owners",
+    "@kbn/connector-cli": "link:src/platform/packages/shared/kbn-connector-cli",
     "@kbn/content-list-docs": "link:src/platform/packages/shared/content-management/content_list/kbn-content-list-docs",
     "@kbn/content-list-mock-data": "link:src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data",
     "@kbn/content-management-storybook": "link:src/platform/packages/shared/content-management/kbn-content-management-storybook",
