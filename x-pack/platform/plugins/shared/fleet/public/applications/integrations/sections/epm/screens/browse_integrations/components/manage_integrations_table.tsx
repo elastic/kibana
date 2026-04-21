@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
@@ -22,6 +22,7 @@ import {
   EuiSelectable,
   EuiInMemoryTable,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
   EuiCallOut,
 } from '@elastic/eui';
@@ -98,7 +99,8 @@ export const ManageIntegrationsTable: React.FC<{
   isLoading: boolean;
   isError: boolean;
   onRefetch: () => void;
-}> = ({ integrations, isLoading, isError, onRefetch }) => {
+  prereleaseIntegrationsEnabled: boolean;
+}> = ({ integrations, isLoading, isError, onRefetch, prereleaseIntegrationsEnabled }) => {
   const [isActionsFilterOpen, setIsActionsFilterOpen] = useState(false);
   const [isStatusFilterOpen, setIsStatusFilterOpen] = useState(false);
   const [selectedActions, setSelectedActions] = useState<string[]>([]);
@@ -108,7 +110,9 @@ export const ManageIntegrationsTable: React.FC<{
   const [isBulkInstalling, setIsBulkInstalling] = useState(false);
 
   const queryClient = useQueryClient();
-  const { data: packagesData } = useGetPackagesQuery({});
+  const { data: packagesData } = useGetPackagesQuery({
+    prerelease: prereleaseIntegrationsEnabled,
+  });
   const installedPackageVersions = useMemo(
     () =>
       new Map(
@@ -127,16 +131,13 @@ export const ManageIntegrationsTable: React.FC<{
     userProfile: userProfileService,
   } = useStartServices();
 
-  const hasReportedView = useRef(false);
   useEffect(() => {
-    if (!isLoading && !hasReportedView.current) {
-      (automaticImport?.telemetry as AutomaticImportTelemetry)?.reportEvent(
-        'automatic_import_manage_integrations_table_viewed',
-        {}
-      );
-      hasReportedView.current = true;
-    }
-  }, [isLoading, automaticImport]);
+    (automaticImport?.telemetry as AutomaticImportTelemetry)?.reportEvent(
+      'automatic_import_manage_integrations_table_viewed',
+      {}
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const integrationsWithActions = useMemo(() => {
     return integrations.map((item) => {
@@ -190,7 +191,10 @@ export const ManageIntegrationsTable: React.FC<{
     return [...new Set(uids)];
   }, [integrations]);
 
-  const { data: userProfiles = new Map<string, UserProfileWithAvatar>() } = useQuery(
+  const {
+    data: userProfiles = new Map<string, UserProfileWithAvatar>(),
+    isLoading: isProfilesLoading,
+  } = useQuery(
     ['manage-integrations-user-profiles', ...uniqueProfileUids],
     async () => {
       const profiles = await userProfileService.bulkGet<{
@@ -302,7 +306,7 @@ export const ManageIntegrationsTable: React.FC<{
         window.URL.revokeObjectURL(url);
         (automaticImport?.telemetry as AutomaticImportTelemetry)?.reportEvent(
           'automatic_import_integration_download_zip_clicked',
-          {}
+          { integrationId }
         );
       } catch (error) {
         notifications.toasts.addError(error as Error, {
@@ -358,7 +362,9 @@ export const ManageIntegrationsTable: React.FC<{
           `/api/automatic_import/integrations/${encodeURIComponent(integrationId)}/download`,
           {
             version: '1',
-            headers: { Accept: 'application/zip' },
+            headers: {
+              Accept: 'application/zip',
+            },
             query: { intent: 'install' },
           }
         );
@@ -422,7 +428,7 @@ export const ManageIntegrationsTable: React.FC<{
     }
   }, [selectedItems, installToCluster, installedPackageVersions]);
 
-  const hasApprovedSelected = selectedItems.some((item) => item.status === 'approved');
+  const canBulkInstall = selectedItems.every((item) => item.status === 'approved');
 
   const columns = useMemo<Array<EuiBasicTableColumn<CreatedIntegrationRow>>>(
     () => [
@@ -487,6 +493,9 @@ export const ManageIntegrationsTable: React.FC<{
         ),
         width: '16%',
         render: (_createdBy: string, item: CreatedIntegrationRow) => {
+          if (isProfilesLoading && item.createdByProfileUid) {
+            return <EuiLoadingSpinner size="s" />;
+          }
           const profile = item.createdByProfileUid
             ? userProfiles.get(item.createdByProfileUid)
             : undefined;
@@ -650,6 +659,7 @@ export const ManageIntegrationsTable: React.FC<{
       euiTheme.size.s,
       euiTheme.size.m,
       userProfiles,
+      isProfilesLoading,
     ]
   );
   const actionsOptions: EuiSelectableOption[] = [
@@ -816,22 +826,37 @@ export const ManageIntegrationsTable: React.FC<{
               />
             </EuiButton>
           </EuiFlexItem>
-          {hasApprovedSelected && (
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                size="s"
-                iconType="exportAction"
-                isLoading={isBulkInstalling}
-                onClick={handleBulkInstall}
-                data-test-subj="manageIntegrationsBulkInstallBtn"
-              >
-                <FormattedMessage
-                  id="xpack.fleet.epmList.manageIntegrations.bulkInstall"
-                  defaultMessage="Install"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              content={
+                !canBulkInstall
+                  ? i18n.translate(
+                      'xpack.fleet.epmList.manageIntegrations.bulkInstallDisabledTooltip',
+                      {
+                        defaultMessage:
+                          'Not all selected integrations are approved. Deselect unapproved integrations to install.',
+                      }
+                    )
+                  : undefined
+              }
+            >
+              <span>
+                <EuiButton
+                  size="s"
+                  iconType="exportAction"
+                  isLoading={isBulkInstalling}
+                  isDisabled={!canBulkInstall}
+                  onClick={handleBulkInstall}
+                  data-test-subj="manageIntegrationsBulkInstallBtn"
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.epmList.manageIntegrations.bulkInstall"
+                    defaultMessage="Install"
+                  />
+                </EuiButton>
+              </span>
+            </EuiToolTip>
+          </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
         <EuiText size="s">

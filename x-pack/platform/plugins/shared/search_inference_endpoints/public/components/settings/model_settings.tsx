@@ -18,7 +18,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { Location } from 'history';
 import { useHistory } from 'react-router-dom';
-import * as translations from '../../../common/translations';
 import { docLinks } from '../../../common/doc_links';
 import { FeatureSection } from './feature_section';
 import { DefaultModelSection } from './default_model_section';
@@ -28,6 +27,7 @@ import { UnsavedChangesModal } from './unsaved_changes_modal';
 import { useModelSettingsForm } from './use_model_settings_form';
 import { useDefaultModelSettings } from '../../hooks/use_default_model_settings';
 import { useConnectors } from '../../hooks/use_connectors';
+import { useKibana } from '../../hooks/use_kibana';
 
 export const ModelSettings: React.FC = () => {
   const {
@@ -43,7 +43,10 @@ export const ModelSettings: React.FC = () => {
   } = useModelSettingsForm();
 
   const defaultModelSettings = useDefaultModelSettings();
-  const { connectors, loading: connectorsLoading } = useConnectors();
+  const { data: connectors, isLoading: connectorsLoading } = useConnectors();
+  const {
+    services: { application, http },
+  } = useKibana();
 
   const isDirty = isFeatureDirty || defaultModelSettings.isDirty;
   const isSaving = isFeatureSaving;
@@ -86,10 +89,14 @@ export const ModelSettings: React.FC = () => {
     unblockRef.current?.();
     unblockRef.current = null;
     if (pendingLocation) {
-      history.push(pendingLocation);
+      const url =
+        http.basePath.prepend(pendingLocation.pathname) +
+        pendingLocation.search +
+        pendingLocation.hash;
+      application.navigateToUrl(url, { state: pendingLocation.state });
     }
     setPendingLocation(null);
-  }, [history, pendingLocation, defaultModelSettings]);
+  }, [application, http.basePath, pendingLocation, defaultModelSettings]);
 
   const handleResetConfirm = useCallback(() => {
     if (!resetParentKey) return;
@@ -121,7 +128,9 @@ export const ModelSettings: React.FC = () => {
     <>
       <EuiPageTemplate.Header
         data-test-subj="modelSettingsPageHeader"
-        pageTitle={translations.SETTINGS_TITLE}
+        pageTitle={i18n.translate('xpack.searchInferenceEndpoints.settings.title', {
+          defaultMessage: 'Feature settings',
+        })}
         bottomBorder
         paddingSize="none"
         restrictWidth={true}
@@ -133,7 +142,9 @@ export const ModelSettings: React.FC = () => {
             isDisabled={!isDirty}
             data-test-subj="save-settings-button"
           >
-            {translations.SETTINGS_SAVE_BUTTON}
+            {i18n.translate('xpack.searchInferenceEndpoints.settings.saveButton', {
+              defaultMessage: 'Save settings',
+            })}
           </EuiButton>,
           <EuiButtonEmpty
             iconType="popout"
@@ -144,7 +155,9 @@ export const ModelSettings: React.FC = () => {
             data-test-subj="settings-api-documentation"
             href={docLinks.createInferenceEndpoint}
           >
-            {translations.API_DOCUMENTATION_LINK}
+            {i18n.translate('xpack.searchInferenceEndpoints.apiDocumentationLink', {
+              defaultMessage: 'API Documentation',
+            })}
           </EuiButtonEmpty>,
         ]}
       />
@@ -193,8 +206,24 @@ export const ModelSettings: React.FC = () => {
             {sections.length === 0 ? (
               <EuiEmptyPrompt
                 iconType="gear"
-                title={<h2>{translations.SETTINGS_NO_FEATURES_TITLE}</h2>}
-                body={<p>{translations.SETTINGS_NO_FEATURES_DESCRIPTION}</p>}
+                title={
+                  <h2>
+                    {i18n.translate('xpack.searchInferenceEndpoints.settings.noFeatures.title', {
+                      defaultMessage: 'No features registered',
+                    })}
+                  </h2>
+                }
+                body={
+                  <p>
+                    {i18n.translate(
+                      'xpack.searchInferenceEndpoints.settings.noFeatures.description',
+                      {
+                        defaultMessage:
+                          'No features have been registered for inference settings in this project.',
+                      }
+                    )}
+                  </p>
+                }
                 data-test-subj="settings-no-features"
               />
             ) : (

@@ -27,7 +27,6 @@ dependsOn:
   - '@kbn/security-api-integration-helpers'
   - '@kbn/security-plugin'
   - '@kbn/telemetry-plugin'
-  - '@kbn/maps-vector-tile-utils'
   - '@kbn/data-views-plugin'
   - '@kbn/core-saved-objects-server'
   - '@kbn/security-plugin-types-common'
@@ -182,8 +181,6 @@ fileGroups:
   src:
     - index.d.ts
     - '**/*'
-    - ./api_integration/apis/logstash/pipeline/fixtures/*.json
-    - ./api_integration/apis/logstash/pipelines/fixtures/*.json
     - ./api_integration/apis/telemetry/fixtures/*.json
     - ./monitoring_api_integration/fixtures/**/*.json
     - '!target/**/*'

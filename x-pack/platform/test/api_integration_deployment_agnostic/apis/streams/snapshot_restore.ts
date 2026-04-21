@@ -173,6 +173,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           queries: [
             {
               id: 'slow-requests',
+              type: 'match' as const,
               title: 'Slow Requests',
               description: '',
               esql: {

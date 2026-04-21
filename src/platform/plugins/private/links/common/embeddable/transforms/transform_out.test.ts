@@ -190,7 +190,7 @@ describe('transformOut', () => {
     ];
     expect(transformOut(byReferenceState, references)).toMatchInlineSnapshot(`
       Object {
-        "savedObjectId": "820b40ee-307f-427a-ab61-5a5cdc5af7cd",
+        "ref_id": "820b40ee-307f-427a-ab61-5a5cdc5af7cd",
         "title": "Custom title",
       }
     `);

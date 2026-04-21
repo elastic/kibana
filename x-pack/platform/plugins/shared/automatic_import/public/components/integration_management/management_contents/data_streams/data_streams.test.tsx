@@ -189,27 +189,7 @@ describe('DataStreams', () => {
       fireEvent.click(getByTestId('addDataStreamButton'));
 
       expect(mockReportDataStreamFlyoutOpened).toHaveBeenCalledWith(
-        expect.objectContaining({ isFirstDataStream: true })
-      );
-    });
-
-    it('should report isFirstDataStream as false when integration already has data streams', () => {
-      mockUseGetIntegrationById.mockReturnValue({
-        integration: {
-          title: 'My Integration',
-          dataStreams: [{ dataStreamId: 'ds-1', title: 'Existing' }],
-        },
-        isLoading: false,
-      });
-
-      const { getByTestId } = renderDataStreams('test-id');
-
-      fireEvent.click(getByTestId('addDataStreamButton'));
-
-      expect(mockReportDataStreamFlyoutOpened).toHaveBeenCalledWith(
-        expect.objectContaining({
-          isFirstDataStream: false,
-        })
+        expect.objectContaining({ integrationId: 'test-id' })
       );
     });
   });
@@ -250,6 +230,19 @@ describe('DataStreams', () => {
     it('disables add data stream when description is empty', () => {
       mockUseIntegrationForm.mockReturnValue({
         formData: { title: 'Has title', description: '   ' },
+      });
+      mockUseGetIntegrationById.mockReturnValue({
+        integration: undefined,
+        isLoading: false,
+      });
+
+      const { getByTestId } = renderDataStreams();
+      expect(getByTestId('addDataStreamButton')).toBeDisabled();
+    });
+
+    it('disables add data stream when integration name has only one character', () => {
+      mockUseIntegrationForm.mockReturnValue({
+        formData: { title: 'A', description: 'Valid description' },
       });
       mockUseGetIntegrationById.mockReturnValue({
         integration: undefined,

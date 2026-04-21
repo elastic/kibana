@@ -28,22 +28,22 @@ const action2: ActionDefinition = {
 
 test('returns actions set on trigger', async () => {
   const { setup, doStart } = uiActionsPluginMock.createPlugin();
-  setup.registerAction(action1);
-  setup.registerAction(action2);
+  setup.registerActionAsync('action1', async () => action1);
+  setup.registerActionAsync('action2', async () => action2);
 
   const start = doStart();
   const list0 = await start.getTriggerActions(ON_OPEN_PANEL_MENU);
 
   expect(list0).toHaveLength(0);
 
-  setup.addTriggerAction(ON_OPEN_PANEL_MENU, action1);
+  setup.addTriggerActionAsync(ON_OPEN_PANEL_MENU, 'action1', async () => action1);
   const list1 = await start.getTriggerActions(ON_OPEN_PANEL_MENU);
 
   expect(list1).toHaveLength(1);
   expect(list1[0]).toBeInstanceOf(ActionInternal);
   expect(list1[0].id).toBe(action1.id);
 
-  setup.addTriggerAction(ON_OPEN_PANEL_MENU, action2);
+  setup.addTriggerActionAsync(ON_OPEN_PANEL_MENU, 'action2', async () => action2);
   const list2 = await start.getTriggerActions(ON_OPEN_PANEL_MENU);
 
   expect(list2).toHaveLength(2);

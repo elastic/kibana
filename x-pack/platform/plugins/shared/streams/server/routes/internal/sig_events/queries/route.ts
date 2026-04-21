@@ -45,8 +45,14 @@ export const getUnbackedQueriesCountRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: z.object({}),
-  handler: async ({ request, getScopedClients, server }): Promise<{ count: number }> => {
+  params: z.object({
+    query: z
+      .object({
+        minSeverityScore: z.coerce.number().int().min(0).max(100).optional(),
+      })
+      .optional(),
+  }),
+  handler: async ({ params, request, getScopedClients, server }): Promise<{ count: number }> => {
     const { getQueryClient, licensing, uiSettingsClient } = await getScopedClients({
       request,
     });
@@ -54,11 +60,19 @@ export const getUnbackedQueriesCountRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const queryClient = await getQueryClient();
-    const count = await queryClient.getUnbackedQueriesCount();
+    const minSeverityScore = params?.query?.minSeverityScore;
+    const count = await queryClient.countPromotableUnbackedQueries({ minSeverityScore });
     return { count };
   },
 });
 
+/**
+ * Promotes unbacked queries to rule-backed status. Returns
+ * `{ promoted, skipped_stats }`. Since STATS queries are filtered at
+ * candidate selection (see `QueryClient.promoteUnbackedQueries`),
+ * `skipped_stats` is reliably `0` on this route and is retained only for
+ * response-shape stability.
+ */
 export const promoteUnbackedQueriesRoute = createServerRoute({
   endpoint: 'POST /internal/streams/queries/_promote',
   options: {
@@ -76,6 +90,7 @@ export const promoteUnbackedQueriesRoute = createServerRoute({
     body: z
       .object({
         queryIds: z.array(z.string()).optional(),
+        minSeverityScore: z.number().int().min(0).max(100).optional(),
       })
       .nullish(),
   }),
@@ -84,8 +99,7 @@ export const promoteUnbackedQueriesRoute = createServerRoute({
     request,
     getScopedClients,
     server,
-    logger,
-  }): Promise<{ promoted: number }> => {
+  }): Promise<{ promoted: number; skipped_stats: number }> => {
     const { getQueryClient, streamsClient, licensing, uiSettingsClient } = await getScopedClients({
       request,
     });
@@ -93,40 +107,15 @@ export const promoteUnbackedQueriesRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const queryClient = await getQueryClient();
-    const all = await queryClient.getAllUnbackedQueries();
-    const requestedQueryIds = params?.body?.queryIds ?? [];
-
-    let toPromote = all;
-
-    if (requestedQueryIds.length > 0) {
-      const uniqueRequestedQueryIds = new Set(requestedQueryIds);
-
-      toPromote = all.filter((query) => uniqueRequestedQueryIds.has(query.query.id));
-    }
-
-    const byStream = toPromote.reduce<Record<string, string[]>>((acc, link) => {
-      const stream = link.stream_name;
-      if (!acc[stream]) acc[stream] = [];
-      acc[stream].push(link.query.id);
-      return acc;
-    }, {});
-
-    const streamDefinitions = await streamsClient.listStreams();
-    const streamDefinitionsByName = new Map(
-      streamDefinitions.map((streamDefinition) => [streamDefinition.name, streamDefinition])
+    const streamDefinitions = new Map(
+      (await streamsClient.listStreams()).map((definition) => [definition.name, definition])
     );
 
-    let promoted = 0;
-    for (const [streamName, queryIds] of Object.entries(byStream)) {
-      const definition = streamDefinitionsByName.get(streamName);
-      if (!definition) {
-        logger.warn(`Skipping promotion for missing stream ${streamName}`);
-        continue;
-      }
-      const result = await queryClient.promoteQueries(definition, queryIds);
-      promoted += result.promoted;
-    }
-    return { promoted };
+    return queryClient.promoteUnbackedQueries({
+      queryIds: params?.body?.queryIds,
+      minSeverityScore: params?.body?.minSeverityScore,
+      streamDefinitions,
+    });
   },
 });
 
