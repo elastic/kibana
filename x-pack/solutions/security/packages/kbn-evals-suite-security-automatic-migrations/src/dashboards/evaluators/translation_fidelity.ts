@@ -21,11 +21,10 @@ export function createTranslationFidelityEvaluator(
         return { score: 0, label: 'FAIL', explanation: 'No translated dashboards in output' };
       }
 
-      if (!input?.original_dashboard_export?.result) {
+      const sourceSpl = input?.original_dashboard_export?.result?.['eai:data'];
+      if (!sourceSpl) {
         return { score: null, label: 'N/A', explanation: 'No source dashboard in input' };
       }
-
-      const sourceSpl = input.original_dashboard_export.result['eai:data'];
       const translatedQueries = extractEsqlQueries(output);
 
       if (translatedQueries.length === 0) {
