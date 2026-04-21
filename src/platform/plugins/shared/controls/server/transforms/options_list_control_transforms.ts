@@ -27,6 +27,7 @@ const OPTIONS_LIST_LEGACY_REF_NAMES = [
 
 export const registerOptionsListControlTransforms = (embeddable: EmbeddableSetup) => {
   embeddable.registerTransforms(OPTIONS_LIST_CONTROL, {
+    title: 'Options list control',
     getSchema: () => optionsListDSLControlSchema,
     getTransforms: () => ({
       transformIn: (state: OptionsListDSLControlState) => {

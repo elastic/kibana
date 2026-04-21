@@ -3187,6 +3187,10 @@
     "dynamic": false,
     "properties": {}
   },
+  "lead-generation-config": {
+    "dynamic": false,
+    "properties": {}
+  },
   "legacy-url-alias": {
     "dynamic": false,
     "properties": {
@@ -4996,6 +5000,16 @@
       },
       "name": {
         "type": "text"
+      },
+      "range": {
+        "properties": {
+          "end": {
+            "type": "keyword"
+          },
+          "start": {
+            "type": "keyword"
+          }
+        }
       },
       "type": {
         "type": "keyword"
