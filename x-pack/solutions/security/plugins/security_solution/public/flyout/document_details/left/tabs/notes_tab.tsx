@@ -7,7 +7,14 @@
 
 import React, { memo, useMemo } from 'react';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
-import { NotesDetails } from '../../../../flyout_v2/notes';
+import { useSelector } from 'react-redux';
+import { EuiPanel, EuiSpacer } from '@elastic/eui';
+import { NotesRemoteCallout } from '../../../../flyout_v2/notes/components/notes_remote_callout';
+import type { State } from '../../../../common/store';
+import { timelineSelectors } from '../../../../timelines/store';
+import { TimelineId } from '../../../../../common/types';
+import { useTimelineConfig } from '../../../../flyout_v2/notes/hooks/use_timeline_config';
+import { NotesDetailsContent } from '../../../../flyout_v2/notes/components/notes_details_content';
 import { useDocumentDetailsContext } from '../../shared/context';
 
 /**
@@ -16,8 +23,21 @@ import { useDocumentDetailsContext } from '../../shared/context';
 export const NotesTab = memo(() => {
   const { searchHit } = useDocumentDetailsContext();
   const hit = useMemo(() => buildDataTableRecord(searchHit as unknown as EsHitRecord), [searchHit]);
+  const eventId = hit.raw._id ?? '';
 
-  return <NotesDetails hit={hit} />;
+  const isTimelineOpen = useSelector(
+    (state: State) => timelineSelectors.selectTimelineById(state, TimelineId.active)?.show ?? false
+  );
+  const timelineConfig = useTimelineConfig(eventId, isTimelineOpen);
+
+  return (
+    <EuiPanel hasBorder={false} hasShadow={false}>
+      <NotesRemoteCallout hit={hit}>
+        <EuiSpacer size="m" />
+      </NotesRemoteCallout>
+      <NotesDetailsContent hit={hit} timelineConfig={timelineConfig} hideTimelineIcon={false} />
+    </EuiPanel>
+  );
 });
 
 NotesTab.displayName = 'NotesTab';

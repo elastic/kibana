@@ -57,13 +57,19 @@ describe('AgentBuilderAnnouncementModal', () => {
     expect(defaultProps.onContinue).toHaveBeenCalled();
   });
 
-  it('hides revert and shows read-only copy when canRevertToAssistant is false', () => {
+  it('hides revert, omits bullets and history callout, and shows documentation link when canRevertToAssistant is false', () => {
     renderWithEui(<AgentBuilderAnnouncementModal {...defaultProps} canRevertToAssistant={false} />);
 
     expect(screen.queryByTestId('agentBuilderAnnouncementRevertButton')).not.toBeInTheDocument();
-    expect(
-      screen.getByText(/Only a user with permission to change space-level Gen AI settings/i)
-    ).toBeInTheDocument();
+    expect(screen.queryByText('What to expect:')).not.toBeInTheDocument();
+    expect(screen.queryByText('Need your history?')).not.toBeInTheDocument();
+    expect(screen.getByTestId('agentBuilderAnnouncementLearnMoreCallout')).toBeInTheDocument();
+    const docLink = screen.getByTestId('agentBuilderAnnouncementDocumentationLink');
+    expect(docLink).toHaveAttribute(
+      'href',
+      'https://www.elastic.co/docs/explore-analyze/ai-features/elastic-agent-builder'
+    );
+    expect(screen.getByText(/Learn more in our/i)).toBeInTheDocument();
     expect(screen.getByTestId('agentBuilderAnnouncementContinueButton')).toHaveTextContent(
       'Got it'
     );

@@ -12,6 +12,7 @@ import {
   getOriginalAlertIds,
   type Replacements,
 } from '@kbn/elastic-assistant-common';
+import { i18n as i18nTranslate } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
   EuiContextMenu,
@@ -61,7 +62,7 @@ const TakeActionComponent: React.FC<Props> = ({
   );
 
   const {
-    services: { cases },
+    services: { cases, evals },
   } = useKibana();
   const { hasSearchAILakeConfigurations } = useAssistantAvailability();
 
@@ -229,6 +230,53 @@ const TakeActionComponent: React.FC<Props> = ({
 
   const isAddToChatDisabled = !hasValidAgentBuilderLicense;
 
+  const addToDatasetAction = useMemo(() => {
+    if (!evals?.getAddToDatasetAction) return null;
+
+    return evals.getAddToDatasetAction({
+      label: i18n.ADD_TO_DATASET,
+      title: i18n.ADD_TO_DATASET,
+      onBeforeOpen: closePopover,
+      initialExamples: attackDiscoveries.map((ad, index) => {
+        const title =
+          ad.title && ad.title.trim().length > 0
+            ? ad.title.trim()
+            : i18nTranslate.translate(
+                'xpack.securitySolution.attackDiscovery.attackDiscoveryPanel.actions.takeAction.addToDatasetFallbackTitle',
+                {
+                  defaultMessage: 'Attack discovery {index}',
+                  values: { index: index + 1 },
+                }
+              );
+
+        return {
+          label: title,
+          input: {
+            attackDiscovery: {
+              id: ad.id,
+              title: ad.title,
+              alertIds: ad.alertIds,
+              detailsMarkdown: ad.detailsMarkdown,
+              summaryMarkdown: ad.summaryMarkdown,
+              ...(replacements != null ? { replacements } : {}),
+            },
+          },
+          output: {
+            title: ad.title,
+            summaryMarkdown: ad.summaryMarkdown,
+            detailsMarkdown: ad.detailsMarkdown,
+          },
+          metadata: {
+            source: 'security_attack_discovery',
+            attack_discovery_id: ad.id ?? null,
+            attack_discovery_ids: attackDiscoveryIds,
+          },
+          selected: true,
+        };
+      }),
+    });
+  }, [attackDiscoveries, attackDiscoveryIds, closePopover, evals, replacements]);
+
   const { items: runWorkflowItems, panels: runWorkflowPanels } =
     useAttackRunWorkflowContextMenuItems({
       attacksForWorkflowRun: attackDiscoveries.map((ad) => {
@@ -345,6 +393,18 @@ const TakeActionComponent: React.FC<Props> = ({
           ]
       : [];
 
+    const datasetItems =
+      addToDatasetAction != null
+        ? [
+            {
+              'data-test-subj': 'addToDataset',
+              key: 'addToDataset',
+              name: addToDatasetAction.label,
+              onClick: addToDatasetAction.onClick,
+            },
+          ]
+        : [];
+
     return [
       ...markAsOpenItem,
       ...markAsAcknowledgedItem,
@@ -352,6 +412,7 @@ const TakeActionComponent: React.FC<Props> = ({
       ...runWorkflowItems,
       ...caseItems,
       ...aiItems,
+      ...datasetItems,
     ];
   }, [
     attackDiscoveries,
@@ -367,6 +428,7 @@ const TakeActionComponent: React.FC<Props> = ({
     onViewInAiAssistant,
     onUpdateWorkflowStatus,
     runWorkflowItems,
+    addToDatasetAction,
   ]);
 
   const panels: EuiContextMenuPanelDescriptor[] = useMemo(
