@@ -365,9 +365,9 @@ The UI additionally disables edit/delete/disable controls for managed workflows 
 | Route | Change |
 |-------|--------|
 | `GET /api/workflows` | Add `includeManaged` query param (default `false`). When `false`, add `term: { managed: false }` to the ES query. |
-| `PUT /api/workflows/workflow/{id}` | Load document, check `managed`. If `true` and no `force`, reject `403`. |
-| `DELETE /api/workflows/workflow/{id}` | Same managed check. |
-| `DELETE /api/workflows` (bulk) | Check each ID. |
+| `PUT /api/workflows/workflow/{id}` | Load document, check `managed`. If `true`, only the `enabled` field is editable (requires `force` flag). All other mutations are rejected `403` unconditionally — `force` does not override. |
+| `DELETE /api/workflows/workflow/{id}` | If `managed`, reject `403` unconditionally. Managed workflows cannot be deleted by users. |
+| `DELETE /api/workflows` (bulk) | Check each ID. Reject any managed workflow in the batch. |
 | `POST /api/workflows/workflow/{id}/clone` | Set `managed: false`, `managedBy: null`, `definitionHash: null` on the clone. Allow even if source is managed. |
 | `GET /api/workflows/workflow/{workflowId}/executions` | Add `includeManaged` filter (executions reference `workflowId`, so filter by joining on the workflow's `managed` flag or denormalizing `managed` onto execution docs). |
 
