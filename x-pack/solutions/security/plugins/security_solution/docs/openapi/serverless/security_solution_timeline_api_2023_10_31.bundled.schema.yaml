@@ -370,6 +370,14 @@ paths:
                 value:
                   savedObjectIds:
                     - 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+              deleteWithSearches:
+                summary: Delete Timelines and their linked saved searches
+                value:
+                  savedObjectIds:
+                    - 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                    - 6ce1b592-84e3-4b4a-9552-f189d4b82075
+                  searchIds:
+                    - 2c1b8f02-9ad6-4e33-8f6a-2c6b7d0a1f11
             schema:
               type: object
               properties:
@@ -413,7 +421,7 @@ paths:
       description: Get the details of an existing saved Timeline or Timeline template.
       operationId: GetTimeline
       parameters:
-        - description: The `savedObjectId` of the template timeline to retrieve
+        - description: The `savedObjectId` of the Timeline template to retrieve.
           in: query
           name: template_timeline_id
           schema:
@@ -520,7 +528,7 @@ paths:
                 type: object
                 properties:
                   body:
-                    description: The error message
+                    description: The error message.
                     example: update timeline error
                     type: string
                   statusCode:
@@ -1065,9 +1073,7 @@ paths:
                   statusCode:
                     example: 404
                     type: number
-          description: >-
-            Indicates that we were unable to locate the saved object client
-            necessary to handle the import.
+          description: Not found response.
         '409':
           content:
             application/json:
@@ -1238,8 +1244,8 @@ paths:
       operationId: GetTimelines
       parameters:
         - description: >-
-            If true, only timelines that are marked as favorites by the user are
-            returned.
+            If `true`, only Timelines that the current user has marked as
+            favorite are returned.
           in: query
           name: only_user_favorite
           schema:
@@ -1361,16 +1367,16 @@ paths:
                   summary: Error response body
                   value:
                     body: get timeline error
-                    statusCode: 405
+                    statusCode: 400
               schema:
                 type: object
                 properties:
                   body:
-                    description: The error message
+                    description: The error message.
                     example: get timeline error
                     type: string
                   statusCode:
-                    example: 405
+                    example: 400
                     type: number
           description: Bad Request response.
       summary: Get Timelines or Timeline templates
