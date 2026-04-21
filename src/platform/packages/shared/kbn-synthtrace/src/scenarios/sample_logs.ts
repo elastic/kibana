@@ -21,25 +21,13 @@ import { castArray } from 'lodash';
 import type { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
 
-// ── Realistic per-document metadata generation ────────────────────────────────
-// Adds natural variation that real production systems exhibit (different host
-// instances, PIDs, trace IDs, availability zones) while keeping the signal
-// fields (service.name, data_layer, etc.) constant per system.
+// ── Realistic messy per-document metadata ─────────────────────────────────────
+// Simulates the noise, partial overlap, and inconsistency of real production
+// environments: shared hosts, cross-service traces, sparse fields, ambiguous
+// tags — while keeping the signal fields (service.name, data_layer, etc.)
+// constant per system so the LLM must see through the mess.
 
 type ServiceTheme = 'batch' | 'proxy' | 'mobile' | 'cloud' | 'stream' | 'infra' | 'homog';
-
-/** Realistic host instance naming patterns per service theme. */
-const HOST_POOLS: Record<ServiceTheme, string[]> = {
-  batch: ['dp-batch-01', 'dp-batch-02', 'dp-batch-03', 'dp-batch-04'],
-  proxy: ['proxy-edge-01', 'proxy-edge-02', 'proxy-edge-03'],
-  mobile: ['mobile-gw-01', 'mobile-gw-02'],
-  cloud: ['nova-compute-01', 'nova-compute-02', 'nova-compute-03'],
-  stream: ['dp-stream-01', 'dp-stream-02', 'dp-stream-03'],
-  infra: ['infra-mon-01', 'infra-mon-02', 'infra-mon-03', 'infra-mon-04'],
-  homog: ['syslog-01', 'syslog-02'],
-};
-
-const AVAILABILITY_ZONES = ['us-east-1a', 'us-east-1b', 'us-east-1c'] as const;
 
 function pickRandom<T>(choices: readonly T[] | T[]): T {
   return choices[Math.floor(Math.random() * choices.length)];
@@ -53,21 +41,86 @@ function randomHex(len: number): string {
   return hex;
 }
 
-function buildPerDocMetadata(system: string, theme: ServiceTheme): Record<string, unknown> {
-  return {
-    'host.hostname': pickRandom(HOST_POOLS[theme]),
-    'process.pid': Math.floor(Math.random() * 60000) + 1000,
-    'trace.id': randomHex(32),
-    'container.id': randomHex(12),
-    'cloud.availability_zone': pickRandom(AVAILABILITY_ZONES),
-  };
+// ── Host pools with intentional overlap ──────────────────────────────────────
+// Some hosts are "shared" across themes (multi-tenant k8s nodes), creating
+// ambiguity: seeing host.hostname=dp-worker-03 doesn't tell you which service
+// owns the log. Each theme also has dedicated hosts that lean towards it.
+
+const SHARED_HOSTS = ['dp-worker-01', 'dp-worker-02', 'dp-worker-03', 'dp-worker-04'];
+
+const DEDICATED_HOSTS: Record<ServiceTheme, string[]> = {
+  batch: ['dp-batch-01', 'dp-batch-02'],
+  proxy: ['proxy-edge-01', 'proxy-edge-02'],
+  mobile: ['mobile-gw-01', 'mobile-gw-02'],
+  cloud: ['nova-compute-01', 'nova-compute-02'],
+  stream: ['dp-stream-01', 'dp-stream-02'],
+  infra: ['infra-mon-01', 'infra-mon-02'],
+  homog: ['syslog-01', 'syslog-02'],
+};
+
+// ── Cross-service trace IDs (distributed traces) ────────────────────────────
+// A small pool of trace IDs is shared across ALL themes. When a doc picks one
+// of these, it simulates a request that hops between services, making trace.id
+// useless as a discriminator.
+
+const CROSS_SERVICE_TRACES = Array.from({ length: 8 }, () => randomHex(32));
+
+// ── Sparse / inconsistent fields ─────────────────────────────────────────────
+// Real environments have missing fields: some hosts don't report container.id,
+// some logs lack a deployment version, etc.
+
+const DEPLOYMENT_VERSIONS = ['v2.1.0', 'v2.1.1', 'v2.2.0', 'v2.3.0-rc1'] as const;
+
+// A few container IDs that appear in multiple themes (pods rescheduled)
+const SHARED_CONTAINER_IDS = Array.from({ length: 4 }, () => randomHex(12));
+
+function buildPerDocMetadata(theme: ServiceTheme): Record<string, unknown> {
+  const metadata: Record<string, unknown> = {};
+
+  // ── host.hostname: ~60% dedicated, ~40% shared (ambiguous) ──
+  if (Math.random() < 0.6) {
+    metadata['host.hostname'] = pickRandom(DEDICATED_HOSTS[theme]);
+  } else {
+    metadata['host.hostname'] = pickRandom(SHARED_HOSTS);
+  }
+
+  // ── process.pid: always present ──
+  metadata['process.pid'] = Math.floor(Math.random() * 60000) + 1000;
+
+  // ── trace.id: ~15% cross-service (shared), ~85% unique ──
+  if (Math.random() < 0.15) {
+    metadata['trace.id'] = pickRandom(CROSS_SERVICE_TRACES);
+  } else {
+    metadata['trace.id'] = randomHex(32);
+  }
+
+  // ── container.id: ~70% present; of those, ~20% are shared containers ──
+  if (Math.random() < 0.7) {
+    if (Math.random() < 0.2) {
+      metadata['container.id'] = pickRandom(SHARED_CONTAINER_IDS);
+    } else {
+      metadata['container.id'] = randomHex(12);
+    }
+  }
+
+  // ── cloud.availability_zone: always present, shared across themes ──
+  metadata['cloud.availability_zone'] = pickRandom(['us-east-1a', 'us-east-1b', 'us-east-1c']);
+
+  // ── deployment.version: ~60% present, shared across themes ──
+  if (Math.random() < 0.6) {
+    metadata['deployment.version'] = pickRandom(DEPLOYMENT_VERSIONS);
+  }
+
+  // ── environment: universal tag — completely useless for partitioning ──
+  metadata['environment'] = 'production';
+
+  return metadata;
 }
 
 /**
- * Wrap a base metadata override with per-document realistic variation.
- * The base fields (service.name, host.name, data_layer, etc.) stay constant;
- * noise fields (host.hostname, process.pid, trace.id, container.id,
- * cloud.availability_zone) vary per document.
+ * Wrap a base metadata override with per-document realistic noise.
+ * Signal fields (service.name, host.name, data_layer, etc.) stay constant;
+* noise fields vary per document with intentional overlap and sparsity.
  */
 function withPerDocMetadata(
   base: Record<string, unknown>,
@@ -76,7 +129,7 @@ function withPerDocMetadata(
 ): MetadataOverride {
   return (_docIndex: number, _logLine: string) => ({
     ...base,
-    ...buildPerDocMetadata(system, theme),
+    ...buildPerDocMetadata(theme),
   });
 }
 
