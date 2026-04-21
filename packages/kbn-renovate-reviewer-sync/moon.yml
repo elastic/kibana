@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/repo-info'
   - '@kbn/dev-cli-runner'
+  - '@kbn/dev-cli-errors'
 tags:
   - shared-common
   - package

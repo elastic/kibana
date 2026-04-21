@@ -206,9 +206,22 @@ export interface GenerateRenovateCodeownersLog {
   info: (...args: any[]) => void;
   success: (...args: any[]) => void;
   write: (...args: any[]) => void;
+  verbose: (...args: any[]) => void;
 }
 
 export type GenerateRenovateCodeownersMode = 'dry-run' | 'write' | 'check';
+
+/**
+ * Runtime-enumerable set of valid modes. Kept in sync with
+ * `GenerateRenovateCodeownersMode`. Used both for the orchestrator's runtime
+ * validation and for tests / programmatic callers that want to enumerate the
+ * accepted modes without duplicating the literal list.
+ */
+export const GENERATE_RENOVATE_CODEOWNERS_MODES: readonly GenerateRenovateCodeownersMode[] = [
+  'dry-run',
+  'write',
+  'check',
+];
 
 export interface GenerateRenovateCodeownersOptions {
   mode: GenerateRenovateCodeownersMode;
@@ -306,12 +319,41 @@ export async function generateRenovateCodeowners(
   const discoverFiles =
     deps.discoverFiles ?? ((onProgress) => discoverFilesViaGitGrep(repoRoot, onProgress));
 
+  // Runtime-validate the mode. The TS type `GenerateRenovateCodeownersMode`
+  // guards compile-time callers, but a JS caller or anything reaching us via
+  // `any` could slip an unknown string through — which would silently fall
+  // into `dry-run` semantics (`applyChanges = mode === 'write'`). Fail loudly
+  // instead so the bug surfaces at the boundary.
+  if (!GENERATE_RENOVATE_CODEOWNERS_MODES.includes(options.mode)) {
+    throw new Error(
+      `Invalid mode "${String(
+        options.mode
+      )}". Expected one of: ${GENERATE_RENOVATE_CODEOWNERS_MODES.join(', ')}.`
+    );
+  }
+
+  // Runtime-validate workerCount so bad input (0, NaN, negatives, non-integers)
+  // errors out here with a targeted message instead of deferring to a
+  // downstream "All worker threads have died" once `WorkerPool` is built with
+  // an empty workers array.
+  if (!Number.isInteger(workerCount) || workerCount < 1) {
+    throw new Error(
+      `Invalid workerCount ${String(workerCount)}. Expected a positive integer (>= 1).`
+    );
+  }
+
   const packageJsonPath = join(repoRoot, PACKAGE_JSON_FILENAME);
   const renovateConfigPath = join(repoRoot, RENOVATE_CONFIG_FILENAME);
   const codeOwnersPath = join(repoRoot, CODE_OWNERS_RELATIVE_PATH);
 
   const mode = options.mode;
   const applyChanges = mode === 'write';
+
+  // Phase-level timings surface at `--verbose`. The flag is advertised by
+  // `@kbn/dev-cli-runner` regardless of usage, so we give it something real
+  // to show — otherwise the listing in `--help` is a lie. Kept at `verbose`
+  // (not `info`) so the default output stays uncluttered.
+  const totalStartedMs = Date.now();
 
   log.info(`🔍 Syncing renovate.json reviewers based on actual code usage...\n`);
 
@@ -340,6 +382,7 @@ export async function generateRenovateCodeowners(
   }, 250);
   discoveryInterval.unref?.();
 
+  const discoveryStartedMs = Date.now();
   let rawFiles: string[];
   try {
     rawFiles = await discoverFiles((n) => {
@@ -351,6 +394,7 @@ export async function generateRenovateCodeowners(
     // cleanly on their own row. The write is narrow-enough to not flicker.
     if (discoveredCount > 0) log.write(`\x1b[2K\r`);
   }
+  const discoveryDurationMs = Date.now() - discoveryStartedMs;
 
   const filesArray = rawFiles.filter(shouldScanFile);
   const totalFiles = filesArray.length;
@@ -358,6 +402,9 @@ export async function generateRenovateCodeowners(
   log.info(`  Found ${totalFiles} files with imports`);
   log.info(`  Using ${workerCount} worker threads for parallel processing`);
   log.info(`  Processing ${totalFiles} files concurrently\n`);
+  log.verbose(
+    `⏱ Discovery: ${discoveryDurationMs}ms — ${rawFiles.length} raw match(es), ${totalFiles} after scan-scope filter`
+  );
 
   let processedFiles = 0;
   const progressInterval = setInterval(() => {
@@ -435,6 +482,7 @@ export async function generateRenovateCodeowners(
     });
   }
 
+  const processingStartedMs = Date.now();
   try {
     workerPool = createWorkerPool({ workerCount, repoRoot, codeOwnersPath });
 
@@ -544,6 +592,13 @@ export async function generateRenovateCodeowners(
     }
 
     log.info(`\n✓ Processed ${actualProcessed} files`);
+
+    const processingDurationMs = Date.now() - processingStartedMs;
+    const filesPerSec =
+      processingDurationMs > 0 ? Math.round((actualProcessed / processingDurationMs) * 1000) : 0;
+    log.verbose(
+      `⏱ Processing: ${processingDurationMs}ms — ${actualProcessed} files across ${workerCount} workers (${filesPerSec} files/sec)`
+    );
   } finally {
     clearInterval(progressInterval);
     if (workerPool) {
@@ -572,6 +627,7 @@ export async function generateRenovateCodeowners(
   log.info(`✓ Found ${packagesWithUsage} packages used in code`);
   log.info(`✓ Found ${packagesWithoutUsage} packages not found in code\n`);
 
+  const reportStartedMs = Date.now();
   const renovateConfig: RenovateConfig = JSON.parse(readFile(renovateConfigPath));
 
   const report = syncReviewersInConfig({
@@ -580,6 +636,7 @@ export async function generateRenovateCodeowners(
     packageToTeams: packageToTeamsArray,
     applyChanges,
   });
+  const reportDurationMs = Date.now() - reportStartedMs;
 
   const reportOnlyDriftCount = report.ruleDrift.length;
   const missingCount = report.packagesUsedButNotCovered.length;
@@ -658,6 +715,9 @@ export async function generateRenovateCodeowners(
   } else {
     log.success(`✅ Dry run complete (no files written)`);
   }
+
+  log.verbose(`⏱ Report generation: ${reportDurationMs}ms`);
+  log.verbose(`⏱ Total wall-clock: ${Date.now() - totalStartedMs}ms`);
 
   if (mode === 'check' && report.managedSyncNeeded > 0) {
     // Non-zero exit in check mode only for explicitly-managed rules.

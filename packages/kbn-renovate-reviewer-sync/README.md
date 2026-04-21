@@ -6,11 +6,11 @@ This tool syncs `renovate.json` `packageRules[*].reviewers` by grepping imports 
 
 The generator uses a multi-stage process optimized for performance and memory efficiency:
 
-1.  **Discovery**: Uses `git grep` to instantly find files containing `import`, `require`, or `export ... from`.
-2.  **Parallel Processing**: Spawns a pool of worker threads (max 6) to process files in parallel.
+1.  **Discovery**: Streams a single `git grep` pass with a combined `import`/`require`/`export ... from` regex to pre-filter candidate files, emitting a live file count while paths arrive so the phase is never silent on large repos.
+2.  **Parallel Processing**: Spawns a pool of worker threads (defaults to `max(1, cpus - 1)`) to process files in parallel. Each worker reads files asynchronously with bounded concurrency (`UV_THREADPOOL_SIZE` is bumped if unset).
 3.  **Analysis**:
-    - **Codeowners**: Each worker parses `CODEOWNERS` once and matches file paths to teams.
-    - **Imports**: Extracts package names from file content using regex.
+    - **Codeowners**: Each worker compiles `CODEOWNERS` once into a path-segment trie + glob list for fast per-file lookups.
+    - **Imports**: Extracts package names from file content with a single combined regex.
 4.  **Rule mode**: For each Renovate rule, decide whether it is report-only, managed, or pinned.
 5.  **Sync / Report**: Depending on rule mode, either update reviewers, report drift, or do nothing.
 
@@ -36,7 +36,7 @@ The generator uses a multi-stage process optimized for performance and memory ef
            ├───► Loop 1 ─────┐
            ├───► Loop 2 ──┐  │
            │     ...      │  │
-           └───► Loop N ──┼──┼──► Worker Pool (Max 6 Threads)
+           └───► Loop N ──┼──┼──► Worker Pool (max(1, cpus - 1) threads)
                           │  │
                           ▼  ▼
                 ┌──────────────────────────┐
@@ -120,15 +120,46 @@ The generator uses a multi-stage process optimized for performance and memory ef
 
 ## Performance
 
-- **Discovery**: `git grep` avoids scanning 100k+ files in Node.js.
-- **Concurrency**: Pull-based load balancing keeps workers 100% busy without memory spikes.
-- **Memory**: Workers are capped at 6 to prevent OOM/Swapping on standard machines. Large files (>2MB) are skipped.
+- **Discovery**: a single streamed `git grep` pass collapses three regex alternatives into one, so the working tree is walked once instead of three times.
+- **Concurrency**: pull-based load balancing keeps workers 100% busy; the pool defaults to `max(1, cpus - 1)` so one core stays free for the orchestrator and libuv reactor.
+- **CODEOWNERS lookup**: compiled once into a path-segment trie (literal prefixes) + a linear list for glob patterns, replacing per-entry `ignore().add()` construction. Largest single contributor to the speed-up below.
+- **I/O**: each worker reads files with `fs.promises.readFile` bounded to 16 concurrent reads, and `UV_THREADPOOL_SIZE` is bumped to match (unless the user has set it explicitly).
+- **Memory**: large files (> 2 MB) are skipped. The concurrent-loop pattern keeps only a small bounded set of in-flight file promises per worker.
+
+Full-repo dry-run on Kibana: **~102s → ~10s** (~7x) after the changes above.
 
 ## Usage
 
 ```bash
+# Dry-run (default): prints the would-be changes but writes nothing.
 node scripts/sync_renovate_reviewers.js
+
+# Write mode: persists changes to renovate.json for rules with x_kbn_reviewer_sync.mode=sync.
+node scripts/sync_renovate_reviewers.js --write
+
+# Check mode: non-zero exit if any managed rule is out of sync; never writes.
+node scripts/sync_renovate_reviewers.js --check
+
+# Emit a JSON report alongside any mode:
+node scripts/sync_renovate_reviewers.js --report-json ./reviewer-sync-report.json
+
+# Phase timings at verbose level:
+node scripts/sync_renovate_reviewers.js --verbose
 ```
+
+### CLI flags
+
+| Flag | Effect |
+| --- | --- |
+| `--write` | Write updates back to `renovate.json`. Mutually exclusive with `--check`. |
+| `--check` | Exit non-zero if managed rules are out of sync; no write. Mutually exclusive with `--write`. |
+| `--report-json PATH` | Write a JSON report to `PATH`. Relative paths are resolved against the current working directory. Passing `--report-json` without a path is an error — it used to silently produce no report. |
+| `--verbose`, `-v` | Emit per-phase timings (`⏱ Discovery`, `⏱ Processing`, `⏱ Report generation`, `⏱ Total wall-clock`). |
+| `--silent` | Suppress all output, including the live-scan tick. The JSON report (if `--report-json` is passed) is still written. |
+
+Environment:
+
+- `UV_THREADPOOL_SIZE`: size of the libuv thread pool. The tool sets it to `16` when unset so async file reads inside each worker don't serialize through the default 4-slot pool. Explicit user values are preserved.
 
 ## Rule modes (opt-in)
 

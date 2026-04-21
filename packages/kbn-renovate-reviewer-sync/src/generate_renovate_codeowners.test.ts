@@ -19,6 +19,7 @@ import {
   formatRuleHeader,
   diffTeamSets,
   generateRenovateCodeowners,
+  GENERATE_RENOVATE_CODEOWNERS_MODES,
 } from './generate_renovate_codeowners';
 import type {
   GenerateRenovateCodeownersDeps,
@@ -115,14 +116,17 @@ const buildLog = (): GenerateRenovateCodeownersLog & {
   infoLines: string[];
   successLines: string[];
   rawWrites: string[];
+  verboseLines: string[];
 } => {
   const infoLines: string[] = [];
   const successLines: string[] = [];
   const rawWrites: string[] = [];
+  const verboseLines: string[] = [];
   return {
     infoLines,
     successLines,
     rawWrites,
+    verboseLines,
     info: (...args: any[]) => {
       infoLines.push(args.join(' '));
     },
@@ -131,6 +135,9 @@ const buildLog = (): GenerateRenovateCodeownersLog & {
     },
     write: (...args: any[]) => {
       rawWrites.push(args.join(''));
+    },
+    verbose: (...args: any[]) => {
+      verboseLines.push(args.join(' '));
     },
   };
 };
@@ -1084,6 +1091,129 @@ describe('generateRenovateCodeowners', () => {
       const combined = log.infoLines.join('\n');
       expect(combined).toContain('   🔸 rule[0] (1 pkgs): 1 -> 1 teams');
       expect(combined).not.toContain('rule[0] "');
+    });
+  });
+
+  describe('WHEN inputs fail the runtime-validation gate', () => {
+    // The orchestrator is an internal DI API, but its `options.mode` and
+    // `deps.workerCount` end up as `any`-typed for anything reaching us via
+    // `.js` or `any` (scripts, ad-hoc REPL usage, wrapper tools). A bad value
+    // used to produce late/surprising failures ("All worker threads have died"
+    // for workerCount=0; silent dry-run for `mode: 'apply'`). These guards
+    // short-circuit at the boundary with a targeted message and must fire
+    // before any file I/O, worker spawn, or report emission.
+
+    it('SHOULD reject an unknown mode string before any side effect', async () => {
+      setup = setupRepo({
+        packageJson: { dependencies: { lodash: '1' } },
+        renovateConfig: { packageRules: [] },
+      });
+      const pool = new FakeWorkerPool();
+      const log = buildLog();
+      const exitCodes: number[] = [];
+
+      await expect(
+        generateRenovateCodeowners(
+          log,
+          { mode: 'apply' } as unknown as GenerateRenovateCodeownersOptions,
+          {
+            repoRoot: setup.repoRoot,
+            discoverFiles: () => ['src/a.ts'],
+            createWorkerPool: () => pool,
+            workerCount: 2,
+            setExitCode: (code) => exitCodes.push(code),
+            installSignalHandlers: false,
+          }
+        )
+      ).rejects.toThrow(
+        `Invalid mode "apply". Expected one of: ${GENERATE_RENOVATE_CODEOWNERS_MODES.join(', ')}.`
+      );
+
+      // Validation must fire before the orchestrator even logs its intro
+      // line, let alone reads package.json or dispatches to the pool.
+      expect(log.infoLines).toEqual([]);
+      expect(pool.processed).toEqual([]);
+      expect(pool.shutdownCalls).toBe(0);
+      expect(exitCodes).toEqual([]);
+    });
+
+    it.each([0, -1, 1.5, Number.NaN])(
+      'SHOULD reject a non-positive-integer workerCount (%p) before any side effect',
+      async (badCount) => {
+        setup = setupRepo({
+          packageJson: { dependencies: { lodash: '1' } },
+          renovateConfig: { packageRules: [] },
+        });
+        const pool = new FakeWorkerPool();
+        const log = buildLog();
+        const exitCodes: number[] = [];
+
+        await expect(
+          generateRenovateCodeowners(
+            log,
+            { mode: 'dry-run' },
+            {
+              repoRoot: setup.repoRoot,
+              discoverFiles: () => ['src/a.ts'],
+              createWorkerPool: () => pool,
+              workerCount: badCount,
+              setExitCode: (code) => exitCodes.push(code),
+              installSignalHandlers: false,
+            }
+          )
+        ).rejects.toThrow(
+          new RegExp(
+            `^Invalid workerCount ${String(badCount).replace(
+              /[.*+?^${}()|[\]\\]/g,
+              '\\$&'
+            )}\\. Expected a positive integer \\(>= 1\\)\\.$`
+          )
+        );
+
+        expect(log.infoLines).toEqual([]);
+        expect(pool.processed).toEqual([]);
+        expect(pool.shutdownCalls).toBe(0);
+        expect(exitCodes).toEqual([]);
+      }
+    );
+  });
+
+  describe('WHEN --verbose is effectively on (log.verbose receives output)', () => {
+    // `--verbose` used to be an advertising-reality gap: dev-cli-runner adds
+    // the flag automatically, but the orchestrator emitted nothing through
+    // `log.verbose`. Phase-timing lines close that gap without cluttering the
+    // default output.
+
+    it('SHOULD emit phase-timing lines for discovery, processing, report, and total', async () => {
+      setup = setupRepo({
+        packageJson: { dependencies: { lodash: '1' } },
+        renovateConfig: { packageRules: [] },
+      });
+      const pool = new FakeWorkerPool();
+      pool.results.set('src/a.ts', { imports: ['lodash'], teams: ['@elastic/kibana-core'] });
+
+      const { log } = await runOrchestrator({
+        setup,
+        options: { mode: 'dry-run' },
+        files: ['src/a.ts'],
+        pool,
+      });
+
+      const verbose = log.verboseLines.join('\n');
+      expect(verbose).toMatch(
+        /⏱ Discovery: \d+ms — \d+ raw match\(es\), \d+ after scan-scope filter/
+      );
+      expect(verbose).toMatch(
+        /⏱ Processing: \d+ms — \d+ files across \d+ workers \(\d+ files\/sec\)/
+      );
+      expect(verbose).toMatch(/⏱ Report generation: \d+ms/);
+      expect(verbose).toMatch(/⏱ Total wall-clock: \d+ms/);
+
+      // The default (info) output must stay free of timing noise — the whole
+      // point of routing them through `log.verbose` is to keep baseline runs
+      // uncluttered.
+      const info = log.infoLines.join('\n');
+      expect(info).not.toMatch(/⏱ /);
     });
   });
 });
