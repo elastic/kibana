@@ -73,7 +73,7 @@ const generateQueriesRoute = createServerRoute({
 
     const [featureClient, queryClient] = await Promise.all([getFeatureClient(), getQueryClient()]);
 
-    const result = await generateSignificantEventsQueries(
+    const { queries, tokensUsed } = await generateSignificantEventsQueries(
       { streamName, connectorId, maxExistingQueriesForContext },
       {
         streamsClient,
@@ -91,7 +91,7 @@ const generateQueriesRoute = createServerRoute({
       }
     );
 
-    return { queries: result.queries, tokensUsed: result.tokensUsed };
+    return { queries, tokensUsed };
   },
 });
 

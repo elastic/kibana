@@ -124,10 +124,8 @@ export async function generateSignificantEventsQueries(
       try {
         const connector = await inferenceClient.getConnectorById(connectorId);
         throw new Error(formatInferenceProviderError(error, connector));
-      } catch (enrichError) {
-        if (enrichError !== error) {
-          throw enrichError;
-        }
+      } catch {
+        // Connector lookup failed — throw the original inference error
       }
     }
     throw error;
