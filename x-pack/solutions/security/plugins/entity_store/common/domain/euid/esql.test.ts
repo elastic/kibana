@@ -255,6 +255,10 @@ describe('getFieldEvaluationsEsql', () => {
     expect(result).toContain(
       '(_src_entity_namespace IS NULL OR _src_entity_namespace == ""), "unknown"'
     );
+    expect(result).toContain('cloud.provider');
+    expect(result).toContain('"aws"');
+    expect(result).toContain('"gcp"');
+    expect(result).toContain('"entra_id"');
     expect(result).not.toContain('_fe_inner_entity_namespace');
     expect(result).not.toContain('entity.confidence');
     expect(result).not.toContain('_src_entity_confidence');

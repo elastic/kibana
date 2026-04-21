@@ -236,6 +236,36 @@ describe('applyFieldEvaluations', () => {
       'entity.namespace': 'local',
     });
   });
+
+  it('should map cloud.provider to aws, gcp, or entra_id when event.kind is asset and local namespace gate does not match', () => {
+    const assetCloudBase = {
+      user: { name: 'inventory-user' },
+      event: { kind: 'asset', module: 'asset_inventory' },
+    };
+    expect(
+      applyFieldEvaluations({ ...assetCloudBase, cloud: { provider: 'aws' } }, userEvaluations)
+    ).toEqual({ 'entity.namespace': 'aws' });
+    expect(
+      applyFieldEvaluations({ ...assetCloudBase, cloud: { provider: 'gcp' } }, userEvaluations)
+    ).toEqual({ 'entity.namespace': 'gcp' });
+    expect(
+      applyFieldEvaluations({ ...assetCloudBase, cloud: { provider: 'azure' } }, userEvaluations)
+    ).toEqual({ 'entity.namespace': 'entra_id' });
+  });
+
+  it('should prefer local namespace over cloud.provider when asset event satisfies local namespace gate', () => {
+    expect(
+      applyFieldEvaluations(
+        {
+          user: { name: 'alice' },
+          host: { id: 'host-1' },
+          event: { kind: 'asset', module: 'asset_inventory' },
+          cloud: { provider: 'aws' },
+        },
+        userEvaluations
+      )
+    ).toEqual({ 'entity.namespace': USER_ENTITY_NAMESPACE.Local });
+  });
 });
 
 describe('shared entity.source field evaluation', () => {
@@ -389,6 +419,23 @@ describe('getSourceMatchSpec', () => {
       type: 'condition',
       condition: expect.objectContaining({
         and: expect.any(Array),
+      }),
+    });
+  });
+
+  it('should return condition spec when asset + cloud.provider whenClause wins', () => {
+    const doc = {
+      user: { name: 'u' },
+      event: { kind: 'asset', module: 'x' },
+      cloud: { provider: 'gcp' },
+    };
+    expect(getSourceMatchSpec(doc, userEval)).toEqual({
+      type: 'condition',
+      condition: expect.objectContaining({
+        and: expect.arrayContaining([
+          expect.objectContaining({ field: 'event.kind', includes: 'asset' }),
+          expect.objectContaining({ field: 'cloud.provider', eq: 'gcp' }),
+        ]),
       }),
     });
   });
