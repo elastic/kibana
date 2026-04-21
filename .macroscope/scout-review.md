@@ -117,5 +117,5 @@ One line stating what was found on the latest review. Examples:
 
 On each re-run:
 
-1. **Update the status line** to reflect the current state of the PR. If the developer fixed an issue, it's no longer in the count.
+1. **Update the status line** to reflect the current state of the PR. If the developer fixed an issue, it's no longer in the count. If the developer fixed all issues, "All issues resolved ✅"
 2. **Do not duplicate inline comments** on lines you've already commented on, unless the code on that line has changed (update the existing comment).
