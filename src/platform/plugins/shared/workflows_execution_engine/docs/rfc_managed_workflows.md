@@ -119,6 +119,24 @@ These are capabilities that interact with or are prerequisites for managed workf
 
 ---
 
+## Clarifications
+
+### Managed workflow vs. workflow template
+
+A managed workflow and a workflow template both ship a pre-built definition, but they differ in ownership after installation:
+
+| | **Managed workflow** | **Workflow template** |
+|---|---|---|
+| **Definition ownership** | Platform keeps it in sync with what the product team ships. | User owns the definition after installation — free to edit. |
+| **Reconciliation** | Create-if-absent, update-if-changed, orphan cleanup on every startup. | Installed once. No ongoing sync — the user's edits are authoritative. |
+| **Versioning** | New versions shipped by the team automatically replace the previous version (preserving user's enabled state). | New template versions may be offered as an upgrade, but the user decides whether to apply. |
+| **Read-only** | Yes (server-side enforced). Users clone to customize. | No — the installed instance is a regular user-owned workflow. |
+| **Litmus test** | Does the platform keep the definition in sync with what the product team ships? **Yes.** | **No** — the user owns it after installation. |
+
+This RFC covers managed workflows only. Templates are a separate initiative (see [Related Initiatives > Workflow Template Library](#related-initiatives)) and out of scope. A managed workflow that ships disabled and requires user enablement is still a managed workflow — it remains reconciled, versioned, and protected. The distinction matters because teams may be tempted to use managed workflows as templates; this table clarifies which pattern to use.
+
+---
+
 ## Open Questions
 
 ### Registration
@@ -129,16 +147,19 @@ These are capabilities that interact with or are prerequisites for managed workf
    - **`workflows_extensions`** — Already depended on by consuming plugins. Lighter dependency. But it has no access to Elasticsearch, no CRUD capabilities, and no space awareness — adding lifecycle management would bloat its responsibility.
    - **Dedicated package** — A new lightweight package (e.g., `@kbn/workflows-registration`) that holds only the registration contract and in-memory registry. Plugins depend on the package (no plugin dependency at all). `workflows_management` consumes the registry at `start()` for provisioning. Cleanest dependency graph, but adds a new package.
 
-2. **Should post-start registration be supported?**
-   Registering workflows dynamically in response to user actions (e.g., a button click that installs a workflow, or a form that customizes it). Creation and deletion are straightforward — the plugin calls the API at runtime, and cleanup on uninstall uses `managedBy`. The hard part is **updates**: how does the startup reconciliation (create-if-absent, update-if-changed) apply to a workflow that didn't exist at startup?
+2. **Post-start registration — what are the use cases and how should it work?**
+   Post-start registration means installing a managed workflow on demand (e.g., user action, feature activation) rather than at plugin startup. Two distinct use cases exist:
 
-   Three possible approaches:
+   - **On-demand registration of a constant, read-only workflow.** The workflow YAML is predefined and immutable — the only question is *when* to install it, not *what* to install. Example: a feature that activates a managed workflow when the user enables it from the product UI. The workflow itself doesn't change.
+   - **Registration with a customized YAML.** The workflow structure is predefined, but some configuration values (e.g., connector ID, rule ID) are only known at runtime. This is a Mutability concern — see [question #4](#mutability) for the overrides mechanism that addresses this without requiring full partial editability.
 
-   - **Option A: Updates are the solution team's responsibility.** The platform provisions post-start workflows on demand but does not reconcile them on restart. The owning plugin manages its own update logic. Simple for the platform, but pushes lifecycle complexity to consumers.
+   For the first use case (constant workflows), the workflow can still be read-only, based on a predefined YAML, just installed on demand instead of at `setup()`.
 
-   - **Option B: Register disabled, enable post-start.** The workflow is registered at `setup()` like any other managed workflow (known to the platform, reconciled on startup), but with `enabled: false`. The solution team enables it post-start when needed (e.g., user action, feature activation). This keeps the workflow in the standard lifecycle — hash-based reconciliation works, the approval gate applies — and only the enablement is dynamic.
+   **Two approaches for read-only post-start workflows:**
 
-   - **Option C: Template workflows with runtime constants.** For workflows whose structure is static but whose configuration is dynamic (e.g., a connector ID or rule ID that is only known after an entity is created), register the workflow at `setup()` with a `template` flag and template placeholders in the YAML. The workflow is known to the platform but not provisioned until needed. Post-start, when the plugin creates a concrete instance, it provides runtime values that populate the placeholders. These values are stored in a separate `constants` field on the workflow document — not part of the YAML — so the definition hash is unaffected. The engine renders constants into the YAML at execution time. Updates to the YAML template flow through the standard reconciliation mechanism (same hash logic), and changes to constants are a separate, lightweight mutation that doesn't touch the managed definition.
+   - **Option A: Register disabled at startup, enable on demand.** The workflow is registered at `setup()` like any other managed workflow (known to the platform, reconciled on startup), but with `enabled: false` (see R3). The solution team enables it post-start when needed. This keeps the workflow in the standard lifecycle — hash-based reconciliation works, the approval gate applies — and only the enablement is dynamic. Simplest approach, no new mechanisms needed.
+
+   - **Option B: Deferred provisioning via `provisionOnStart: false`.** A new field on `ManagedWorkflowRegistration` (default `true`). When `false`, the workflow is registered in the in-memory registry at `setup()` (known to the platform, approval gate applies) but not provisioned to storage on startup. The team triggers provisioning post-start by calling a `registerManagedWorkflow(id)` API. Once provisioned, all future reconciliation (updates, cleanup) works normally via the standard hash-based lifecycle. This avoids creating a disabled workflow document that sits unused, while keeping the workflow known and reconcilable.
 
    The first delivery should at minimum be designed to not preclude these approaches.
 
@@ -151,10 +172,10 @@ These are capabilities that interact with or are prerequisites for managed workf
 
    The simplest approach is the reserved prefix — it keeps the API surface unchanged for users while guaranteeing no collisions. Human-readable, caller-provided custom IDs are already supported by the platform; managed workflows use this existing capability with the added prefix convention.
 
-### Mutability
+### <a id="mutability"></a>Mutability
 
-4. <a id="mutability"></a>**Can users modify any part of the definition?**
-   E.g., the scheduling interval, connector ID, etc. The current position is "fully read-only," but partial mutability is a realistic future need.
+4. **Can users modify any part of the definition?**
+   E.g., the scheduling interval, connector ID, etc. The current position is "fully read-only," but partial mutability is a realistic future need. Note: partial editability with ongoing updates is effectively a hybrid between managed workflows and workflow templates (see [Clarifications > Managed workflow vs. workflow template](#managed-workflow-vs-workflow-template)) — the platform keeps the definition in sync, but the user also owns parts of it. This blurs the boundary and introduces the upgrade conflict problem below.
 
    **How it could work:** The registering plugin declares which properties are user-editable (an allowlist). The platform enforces the allowlist at the service layer — user mutations that touch non-allowlisted fields are rejected, allowlisted field changes are persisted.
 
@@ -163,7 +184,9 @@ These are capabilities that interact with or are prerequisites for managed workf
    - **Preserve user edits and merge?** Apply the new definition but keep the user's values for allowlisted fields. Complex — requires field-level merge logic, and the new definition may not be compatible with the old user values.
    - **Skip the update?** Leave the user's version in place. The workflow drifts from what the plugin intended. Risky.
 
-   None of these options are clean. This is the core reason partial editability is deferred.
+   None of these options are clean. This is the core reason partial editability is deferred — it requires solving the managed/template hybrid problem, which is out of scope for the first delivery.
+
+   **Overrides mechanism (alternative to full editability):** For workflows whose structure is static but whose configuration is dynamic (e.g., a connector ID or rule ID only known after an entity is created), the YAML can contain template placeholders. When the workflow is provisioned, the caller provides the custom values that populate the placeholders. These values are stored in a separate `overrides` field on the workflow document and rendered into the YAML at creation time. The `definitionHash` is computed from the template YAML (not the rendered output), so it remains unaffected by overrides. When a new version is delivered, the platform reads the existing overrides and renders them into the new YAML before storing — the hash tracks the latest template version. This preserves the full lifecycle process since the workflow version is identified based on the hash, and overrides are orthogonal to versioning.
 
    **Recommended first-phase approach:** For the first delivery, the enable/disable toggle is the only user-permitted mutation on managed workflows (see R3). For any other customization, the user should:
    1. Clone the managed workflow into a user-owned copy.
@@ -173,7 +196,7 @@ These are capabilities that interact with or are prerequisites for managed workf
 
    This keeps the managed workflow definition clean (no merge conflicts), gives users full editing power on the clone, and the user stays in control of the enabled state across upgrades.
 
-5. <a id="initial-enabled-state"></a>**~~Should managed workflows support being registered as disabled by default?~~** — **Resolved.**
+5. **~~Should managed workflows support being registered as disabled by default?~~** — **Resolved.**
    Yes. The `ManagedWorkflowRegistration` contract includes an `enabled` option (default `true`, settable to `false`). This covers both always-on patterns and opt-in patterns where a product feature activates the workflow on the user's behalf. The enable/disable toggle is a user-permitted mutation — not gated behind `--force`. On reconciliation, the platform preserves the user's current enabled state unless the registering team forces a reset (e.g., a critical fix that must be active). See R3.
 
 6. **~~Should a `--force` flag allow overriding read-only?~~** — **Resolved.**
@@ -192,22 +215,7 @@ These are capabilities that interact with or are prerequisites for managed workf
 ### Cloning
 
 10. **When a managed workflow is cloned, what happens to the original?**
-    The managed workflow remains active and unchanged — it cannot be disabled. The clone is independent. UX should make clear that the user now has two workflows with the same logic.
-
-### Scope
-
-11. **Managed workflow vs. workflow template — where is the boundary?**
-    A managed workflow and a workflow template both ship a pre-built definition, but they differ in ownership after installation:
-
-    | | **Managed workflow** | **Workflow template** |
-    |---|---|---|
-    | **Definition ownership** | Platform keeps it in sync with what the product team ships. | User owns the definition after installation — free to edit. |
-    | **Reconciliation** | Create-if-absent, update-if-changed, orphan cleanup on every startup. | Installed once. No ongoing sync — the user's edits are authoritative. |
-    | **Versioning** | New versions shipped by the team automatically replace the previous version (preserving user's enabled state). | New template versions may be offered as an upgrade, but the user decides whether to apply. |
-    | **Read-only** | Yes (server-side enforced). Users clone to customize. | No — the installed instance is a regular user-owned workflow. |
-    | **Litmus test** | Does the platform keep the definition in sync with what the product team ships? **Yes.** | **No** — the user owns it after installation. |
-
-    This RFC covers managed workflows only. Templates are a separate initiative and out of scope. A managed workflow that ships disabled and requires user enablement is still a managed workflow — it remains reconciled, versioned, and protected. The distinction matters because teams may be tempted to use managed workflows as templates; this table clarifies which pattern to use.
+    The managed workflow remains unchanged. The clone is a fully independent user-owned workflow. UX should make clear that the user now has two workflows with the same logic. The user can disable the original if they want only the clone to run.
 
 ---
 
