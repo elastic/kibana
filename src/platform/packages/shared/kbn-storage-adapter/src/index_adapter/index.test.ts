@@ -8,6 +8,8 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { TransportResult } from '@elastic/elasticsearch';
+import { errors } from '@elastic/elasticsearch';
 import type { StorageTransportOptions } from '../..';
 import { StorageIndexAdapter, type StorageSettings } from '../..';
 
@@ -177,6 +179,75 @@ describe('StorageIndexAdapter - transport options forwarding', () => {
             number_of_shards: 1,
           }),
         }),
+      })
+    );
+  });
+
+  it('retries index template without settings on serverless ES', async () => {
+    const serverlessError = new errors.ResponseError({
+      statusCode: 400,
+      headers: {},
+      warnings: [],
+      meta: {} as any,
+      body: {
+        error: {
+          type: 'illegal_argument_exception',
+          reason:
+            'Settings [index.auto_expand_replicas,index.number_of_shards] are not available when running in serverless mode',
+        },
+      },
+    } as TransportResult);
+    (esClient.indices.putIndexTemplate as jest.Mock).mockRejectedValueOnce(serverlessError);
+
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    await client.index({ id: 'doc1', document: { foo: 'bar' } });
+
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledTimes(2);
+    expect(esClient.indices.putIndexTemplate).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        template: expect.objectContaining({
+          settings: expect.objectContaining({ auto_expand_replicas: '0-1' }),
+        }),
+      })
+    );
+    expect(esClient.indices.putIndexTemplate).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        template: expect.not.objectContaining({ settings: expect.anything() }),
+      })
+    );
+  });
+
+  it('skips settings on subsequent writes after serverless detection', async () => {
+    const serverlessError = new errors.ResponseError({
+      statusCode: 400,
+      headers: {},
+      warnings: [],
+      meta: {} as any,
+      body: {
+        error: {
+          type: 'illegal_argument_exception',
+          reason:
+            'Settings [index.auto_expand_replicas,index.number_of_shards] are not available when running in serverless mode',
+        },
+      },
+    } as TransportResult);
+    (esClient.indices.putIndexTemplate as jest.Mock).mockRejectedValueOnce(serverlessError);
+
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    await client.index({ id: 'doc1', document: { foo: 'bar' } });
+    await client.index({ id: 'doc2', document: { foo: 'baz' } });
+
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledTimes(3);
+    expect(esClient.indices.putIndexTemplate).toHaveBeenNthCalledWith(
+      3,
+      expect.objectContaining({
+        template: expect.not.objectContaining({ settings: expect.anything() }),
       })
     );
   });

@@ -84,6 +84,14 @@ function isNotFoundError(error: Error): error is errors.ResponseError & { status
   return isResponseError(error) && error.statusCode === 404;
 }
 
+function isServerlessSettingsError(error: unknown): boolean {
+  if (!isResponseError(error as Error)) {
+    return false;
+  }
+  const reason: string = (error as errors.ResponseError).body?.error?.reason ?? '';
+  return reason.includes('not available when running in serverless mode');
+}
+
 /*
  * When calling into Elasticsearch, the stack trace is lost.
  * If we create an error before calling, and append it to
@@ -136,8 +144,14 @@ export class StorageIndexAdapter<
   TStorageSettings extends IndexStorageSettings,
   TApplicationType extends Partial<StorageDocumentOf<TStorageSettings>>
 > {
+  private static readonly INDEX_SETTINGS = {
+    auto_expand_replicas: '0-1',
+    number_of_shards: 1,
+  } as const;
+
   private readonly logger: Logger;
   private updateMappingsPromise: Promise<void> | undefined;
+  private isServerless: boolean | undefined;
 
   constructor(
     private readonly esClient: ElasticsearchClient,
@@ -159,39 +173,59 @@ export class StorageIndexAdapter<
   private async createOrUpdateIndexTemplate(): Promise<void> {
     const version = getSchemaVersion(this.storage);
 
-    const template: IndicesPutIndexTemplateIndexTemplateMapping = {
-      settings: {
-        auto_expand_replicas: '0-1',
-        number_of_shards: 1,
-      },
-      mappings: {
-        _meta: {
-          version,
-        },
-        dynamic: 'strict',
-        properties: {
-          ...mapValues(this.storage.schema.properties, toElasticsearchMappingProperty),
-        },
-      },
-      aliases: {
-        [getAliasName(this.storage.name)]: {
-          is_write_index: true,
-        },
+    const mappings: IndicesPutIndexTemplateIndexTemplateMapping['mappings'] = {
+      _meta: { version },
+      dynamic: 'strict',
+      properties: {
+        ...mapValues(this.storage.schema.properties, toElasticsearchMappingProperty),
       },
     };
 
-    await wrapEsCall(
-      this.esClient.indices.putIndexTemplate({
-        name: getIndexTemplateName(this.storage.name),
-        create: false,
-        allow_auto_create: false,
-        index_patterns: getIndexPattern(this.storage.name),
-        _meta: {
-          version,
-        },
-        template,
-      })
-    ).catch(catchConflictError);
+    const aliases: IndicesPutIndexTemplateIndexTemplateMapping['aliases'] = {
+      [getAliasName(this.storage.name)]: {
+        is_write_index: true,
+      },
+    };
+
+    const baseRequest = {
+      name: getIndexTemplateName(this.storage.name),
+      create: false as const,
+      allow_auto_create: false as const,
+      index_patterns: getIndexPattern(this.storage.name),
+      _meta: { version },
+    };
+
+    const putTemplate = (includeSettings: boolean) =>
+      wrapEsCall(
+        this.esClient.indices.putIndexTemplate({
+          ...baseRequest,
+          template: {
+            ...(includeSettings ? { settings: StorageIndexAdapter.INDEX_SETTINGS } : {}),
+            mappings,
+            aliases,
+          },
+        })
+      ).catch(catchConflictError);
+
+    if (this.isServerless) {
+      await putTemplate(false);
+      return;
+    }
+
+    try {
+      await putTemplate(true);
+      this.isServerless = false;
+    } catch (error) {
+      if (isServerlessSettingsError(error)) {
+        this.isServerless = true;
+        this.logger.debug(
+          'Index settings are unavailable (serverless ES); retrying template without settings'
+        );
+        await putTemplate(false);
+      } else {
+        throw error;
+      }
+    }
   }
 
   private async getExistingIndexTemplate(): Promise<IndicesIndexTemplate | undefined> {
