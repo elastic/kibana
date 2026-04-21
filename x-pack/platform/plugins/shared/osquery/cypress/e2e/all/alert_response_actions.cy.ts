@@ -40,7 +40,8 @@ import {
 } from '../../tasks/integrations';
 import { disableNewFeaturesTours } from '../../tasks/navigation';
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/264525
+describe.skip(
   'Alert Response Actions',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {

@@ -15,6 +15,7 @@ import type {
   ModelCallInfo,
 } from '@kbn/agent-builder-server/runner';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import { getConnectorProvider, getConnectorModel } from '@kbn/inference-common';
 import type { InferenceCompleteCallbackHandler } from '@kbn/inference-common/src/chat_complete';
 import type { TrackingService } from '../../../telemetry';
@@ -28,6 +29,7 @@ export interface CreateModelProviderOpts {
   trackingService?: TrackingService;
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
+  searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
 }
 
 export type CreateModelProviderFactoryFn = (
@@ -58,6 +60,7 @@ export const createModelProvider = ({
   trackingService,
   uiSettings,
   savedObjects,
+  searchInferenceEndpoints,
 }: CreateModelProviderOpts): ModelProvider => {
   const getDefaultConnectorId = async () => {
     const resolvedConnectorId = await resolveSelectedConnectorId({
@@ -66,6 +69,7 @@ export const createModelProvider = ({
       request,
       connectorId: defaultConnectorId,
       inference,
+      searchInferenceEndpoints,
     });
     if (!resolvedConnectorId) {
       throw new Error('No connector available');

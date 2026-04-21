@@ -1795,7 +1795,6 @@
     "@kbn/security-api-integration-helpers": "link:x-pack/platform/test/security_api_integration/packages/helpers",
     "@kbn/security-labs-artifact-builder": "link:x-pack/packages/ai-infra/security-labs-artifact-builder",
     "@kbn/security-solution-test-api-clients": "link:x-pack/solutions/security/packages/test-api-clients",
-    "@kbn/serverless-storybook-config": "link:src/platform/packages/shared/serverless/storybook/config",
     "@kbn/set-map": "link:packages/kbn-set-map",
     "@kbn/shared-ux-card-no-data-mocks": "link:src/platform/packages/shared/shared-ux/card/no_data/mocks",
     "@kbn/shared-ux-file-image-mocks": "link:src/platform/packages/shared/shared-ux/file/image/mocks",
