@@ -10,8 +10,8 @@ import React from 'react';
 import { css } from '@emotion/react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiMarkdownFormat, useEuiTheme } from '@elastic/eui';
-import type { EndpointAttachmentProps } from './types';
-import { getEndpointMetadata } from './types';
+import type { UnifiedReferenceAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
+import type { EndpointMetadata } from './types';
 
 export const getContentWrapperCss = (euiTheme: EuiThemeComputed<{}>) => css`
   padding: ${`${euiTheme.size.m} ${euiTheme.size.l}`};
@@ -21,10 +21,12 @@ export const getContentWrapperCss = (euiTheme: EuiThemeComputed<{}>) => css`
   -webkit-box-orient: vertical;
 `;
 
-const AttachmentContentChildren = (props: EndpointAttachmentProps) => {
+type Props = Pick<UnifiedReferenceAttachmentViewProps, 'metadata'>;
+
+const AttachmentContentChildren = ({ metadata }: Props) => {
   const { euiTheme } = useEuiTheme();
-  const metadata = getEndpointMetadata(props);
-  const comment = metadata?.comment ?? '';
+  const endpointMetadata = metadata as EndpointMetadata | undefined;
+  const comment = endpointMetadata?.comment ?? '';
 
   return comment.trim().length > 0 ? (
     <div css={getContentWrapperCss(euiTheme)}>

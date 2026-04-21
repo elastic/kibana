@@ -8,18 +8,20 @@
 import { EuiLink } from '@elastic/eui';
 import { useNavigation } from '@kbn/security-solution-navigation/src/navigation';
 import React, { useCallback, useMemo } from 'react';
+import type { UnifiedReferenceAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 
 import { ISOLATED_HOST, RELEASED_HOST, OTHER_ENDPOINTS } from '../../pages/translations';
-import type { EndpointAttachmentProps } from './types';
-import { getEndpointMetadata } from './types';
+import type { EndpointMetadata } from './types';
 import { getEndpointDetailsPath } from '../../../management/common/routing';
 
-const AttachmentContentEvent = (props: EndpointAttachmentProps) => {
+type Props = Pick<UnifiedReferenceAttachmentViewProps, 'metadata'>;
+
+const AttachmentContentEvent = ({ metadata }: Props) => {
   const { getAppUrl, navigateTo } = useNavigation();
 
-  const metadata = getEndpointMetadata(props);
-  const command = metadata?.command ?? '';
-  const targets = useMemo(() => metadata?.targets ?? [], [metadata?.targets]);
+  const endpointMetadata = metadata as EndpointMetadata | undefined;
+  const command = endpointMetadata?.command ?? '';
+  const targets = useMemo(() => endpointMetadata?.targets ?? [], [endpointMetadata?.targets]);
 
   const endpointDetailsHref = getAppUrl({
     path: getEndpointDetailsPath({

@@ -68,7 +68,7 @@ import { LazyCustomCriblExtension } from './security_integrations/cribl/componen
 import type { SecurityAppStore } from './common/store/types';
 import { PluginContract } from './plugin_contract';
 import { PluginServices } from './plugin_services';
-import { getEndpointUnifiedAttachment } from './cases/attachments/endpoint/unified_attachment';
+import { getEndpointUnifiedAttachment } from './cases/attachments/endpoint';
 import { getEventType } from './cases/attachments/event';
 import { isSecuritySolutionAccessible } from './helpers_access';
 import { generateIndicatorAttachmentType } from './cases/attachments/indicator/utils/attachments';

@@ -12,6 +12,7 @@ import type {
   UnifiedReferenceAttachmentViewProps,
 } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import { SECURITY_ENDPOINT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
+import type { EndpointMetadata } from './types';
 
 const LazyEvent = lazy(() => import('./endpoint_event'));
 const LazyChildren = lazy(() => import('./endpoint_children'));
@@ -27,7 +28,8 @@ export const getEndpointUnifiedAttachment = (): UnifiedReferenceAttachmentType =
   icon: 'lockOpen',
   displayName: 'Endpoint',
   getAttachmentViewObject: (props) => {
-    const iconType = props.metadata?.command === 'isolate' ? 'lock' : 'lockOpen';
+    const metadata = props.metadata as EndpointMetadata | undefined;
+    const iconType = metadata?.command === 'isolate' ? 'lock' : 'lockOpen';
 
     return {
       event: getEventContent(props),
