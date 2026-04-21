@@ -132,7 +132,6 @@ describe('formatResource', () => {
     expect(result).toContain('[and 5 more]');
     expect(result).not.toContain('field11');
   });
-
 });
 
 describe('indexExplorer', () => {
