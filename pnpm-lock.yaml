@@ -1318,6 +1318,9 @@ importers:
       '@kbn/core-history-block-plugin':
         specifier: workspace:*
         version: link:src/platform/test/plugin_functional/plugins/core_history_block
+      '@kbn/core-hotkeys-browser':
+        specifier: workspace:*
+        version: link:src/core/packages/hotkeys/browser
       '@kbn/core-http-browser':
         specifier: workspace:*
         version: link:src/core/packages/http/browser
@@ -4249,6 +4252,9 @@ importers:
       '@swc/helpers':
         specifier: 0.5.19
         version: 0.5.19
+      '@tanstack/hotkeys':
+        specifier: 0.7.1
+        version: 0.7.1
       '@tanstack/react-query':
         specifier: 4.29.12
         version: 4.29.12(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -7265,6 +7271,8 @@ importers:
   src/core/packages/feature-flags/server-internal: {}
 
   src/core/packages/feature-flags/server-mocks: {}
+
+  src/core/packages/hotkeys/browser: {}
 
   src/core/packages/http/browser: {}
 
@@ -14799,6 +14807,10 @@ packages:
     resolution: {integrity: sha512-4BAffykYOgO+5nzBWYwE3W90sBgLJoUPRWWcL8wlyiM8IB8ipJz3UMJ9KXQd1RKQXpKp8Tutn80HZtWsu2u76w==}
     engines: {node: '>=10'}
 
+  '@tanstack/hotkeys@0.7.1':
+    resolution: {integrity: sha512-YHVO1z6wnvUCu7bg870Kv5k2D+FIuIOSIcbN0dAmTTsJ3mLMDLwcTVx0qVaq+SZp1B514JJTqGVstvUp85yIpQ==}
+    engines: {node: '>=18'}
+
   '@tanstack/match-sorter-utils@8.19.4':
     resolution: {integrity: sha512-Wo1iKt2b9OT7d+YGhvEPD3DXvPv2etTusIMhMUoG7fbhmxcXCtIjJDEygy91Y2JFlwGyjqiBPRozme7UD8hoqg==}
     engines: {node: '>=12'}
@@ -14837,6 +14849,9 @@ packages:
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+
+  '@tanstack/store@0.9.3':
+    resolution: {integrity: sha512-8reSzl/qGWGGVKhBoxXPMWzATSbZLZFWhwBAFO9NAyp0TxzfBP0mIrGb8CP8KrQTmvzXlR/vFPPUrHTLBGyFyw==}
 
   '@tanstack/table-core@8.21.3':
     resolution: {integrity: sha512-ldZXEhOBb8Is7xLs01fR3YEc3DERiz5silj8tnGkFZytt1abEvl/GhUmCE0PMLaMPTa3Jk4HbKmRlHmu+gCftg==}
@@ -32223,6 +32238,10 @@ snapshots:
     dependencies:
       defer-to-connect: 2.0.1
 
+  '@tanstack/hotkeys@0.7.1':
+    dependencies:
+      '@tanstack/store': 0.9.3
+
   '@tanstack/match-sorter-utils@8.19.4':
     dependencies:
       remove-accents: 0.5.0
@@ -32257,6 +32276,8 @@ snapshots:
       '@tanstack/virtual-core': 3.13.12
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
+
+  '@tanstack/store@0.9.3': {}
 
   '@tanstack/table-core@8.21.3': {}
 
