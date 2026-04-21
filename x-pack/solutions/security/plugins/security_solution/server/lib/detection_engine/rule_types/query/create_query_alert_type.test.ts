@@ -82,6 +82,9 @@ describe('Custom Query Alerts', () => {
     licensing,
     scheduleNotificationResponseActionsService: () => null,
     endpointAppContextService: createMockEndpointAppContextService(),
+    getEntityStore: jest.fn().mockResolvedValue({
+      createCRUDClient: jest.fn().mockReturnValue({ listEntities: jest.fn() }),
+    }),
   });
 
   afterEach(() => {
