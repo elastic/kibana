@@ -51,7 +51,8 @@ export const args = ({
     // Skip first run wizards
     '--no-first-run',
     `--user-data-dir=${userDataDir}`,
-    '--headless',
+    // see: https://developer.chrome.com/blog/supercharge-web-ai-testing
+    '--headless=new',
     '--hide-scrollbars',
     // allow screenshot clip region to go outside of the viewport
     `--mainFrameClipsContent=false`,
@@ -83,7 +84,13 @@ export const args = ({
   if (os.arch() === 'arm64' && process.platform === 'darwin') {
     flags.push('--enable-gpu');
   } else {
-    flags.push('--disable-gpu');
+    // see: https://developer.chrome.com/blog/supercharge-web-ai-testing
+    flags.push(
+      '--use-angle=vulkan',
+      '--enable-features=Vulkan',
+      '--disable-vulkan-surface',
+      '--enable-unsafe-webgpu'
+    );
   }
 
   return [...flags, 'about:blank'];
