@@ -79,9 +79,14 @@ export class WorkflowManagementAuditLog {
   private security?: SecurityServiceStart;
 
   constructor(private readonly deps: WorkflowManagementAuditLogDeps) {
-    this.deps.service.getCoreStart().then((coreStart) => {
-      this.security = coreStart.security; // security service is initialized
-    });
+    this.deps.service
+      .getCoreStart()
+      .then((coreStart) => {
+        this.security = coreStart.security; // security service is initialized
+      })
+      .catch(() => {
+        // Best-effort: do not fail requests if audit logging fails
+      });
   }
 
   private log(request: KibanaRequest, event: AuditEvent): void {
