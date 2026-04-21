@@ -169,9 +169,8 @@ components:
             result_counts:
               type: object
               description: >
-                Aggregated result count statistics for the query. Present when the
-                resultCountsEnabled experimental feature is on and the aggregation
-                succeeds; omitted on aggregation failure. Single-query actions include
+                Aggregated result count statistics for the query. May be omitted
+                when aggregation data is unavailable. Single-query actions include
                 responded_agents; pack actions include queries_with_results and
                 queries_total instead.
               properties:
