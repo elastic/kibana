@@ -38,23 +38,20 @@ export function mapPackageReleaseToIntegrationCardRelease(
 }
 
 /**
- * Returns the agentless-specific release when it should override the package semver release,
- * or `undefined` if no agentless override applies.
- * Covers three contexts: only-agentless deployment, agentless-is-default deployment,
- * and an explicit agentless filter view (`options.isAgentlessContext`).
+ * Returns the agentless-specific release when an agentless context applies,
+ * or `undefined` if no agentless context applies.
  */
 export function getAgentlessReleaseOverride(
   packageInfo?: PackageWithDeploymentInfo,
   integrationToEnable?: string,
   options?: { isAgentlessContext?: boolean }
-): Exclude<AgentlessDeploymentReleaseStatus, AgentlessDeploymentReleaseStatus.GA> | undefined {
+): AgentlessDeploymentReleaseStatus | undefined {
   if (
     isOnlyAgentlessIntegration(packageInfo, integrationToEnable) ||
     isDefaultAgentlessIntegration(packageInfo, integrationToEnable) ||
     options?.isAgentlessContext
   ) {
-    const release = getAgentlessRelease(packageInfo, integrationToEnable);
-    if (release !== undefined && release !== AgentlessDeploymentReleaseStatus.GA) return release;
+    return getAgentlessRelease(packageInfo, integrationToEnable);
   }
   return undefined;
 }
@@ -62,14 +59,14 @@ export function getAgentlessReleaseOverride(
 /**
  * Resolves the full effective release label for a package, incorporating an agentless-specific
  * override when relevant and falling back to the semver-derived release otherwise.
+ * GA agentless defers to package semver so a beta semver version still shows its badge.
  */
 export function resolveEffectiveRelease(
   packageInfo?: PackageWithDeploymentInfo & { version?: string },
   integrationToEnable?: string,
   options?: { isAgentlessContext?: boolean }
 ): IntegrationCardReleaseLabel {
-  if (!packageInfo) return 'ga';
   const override = getAgentlessReleaseOverride(packageInfo, integrationToEnable, options);
-  if (override !== undefined) return override;
-  return getPackageReleaseLabel(packageInfo.version ?? '');
+  if (override !== undefined && override !== AgentlessDeploymentReleaseStatus.GA) return override;
+  return getPackageReleaseLabel(packageInfo?.version ?? '');
 }
