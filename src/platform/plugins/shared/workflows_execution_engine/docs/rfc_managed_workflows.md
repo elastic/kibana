@@ -156,7 +156,7 @@ These are capabilities that interact with or are prerequisites for managed workf
 ### Mutability
 
 4. <a id="mutability"></a>**Can users modify any part of the definition?**
-   E.g., the scheduling interval, connector ID, or enable/disable toggle. The current position is "fully read-only," but partial mutability is a realistic future need.
+   E.g., the scheduling interval, connector ID, etc. The current position is "fully read-only," but partial mutability is a realistic future need.
 
    **How it could work:** The registering plugin declares which properties are user-editable (an allowlist). The platform enforces the allowlist at the service layer — user mutations that touch non-allowlisted fields are rejected, allowlisted field changes are persisted.
 
@@ -167,13 +167,13 @@ These are capabilities that interact with or are prerequisites for managed workf
 
    None of these options are clean. This is the core reason partial editability is deferred.
 
-   **Recommended first-phase approach:** For the first delivery, only the enable/disable state is editable, and only via the `--force` flag (see #5 below). For any other customization, the user should:
+   **Recommended first-phase approach:** For the first delivery, the enable/disable toggle is the only user-permitted mutation on managed workflows (see R3). For any other customization, the user should:
    1. Clone the managed workflow into a user-owned copy.
    2. Edit whatever is needed on the clone.
-   3. Disable the original managed workflow (via `--force`).
-   4. When a new version of the managed workflow ships, the platform re-enables the updated original during reconciliation. The user can then clone and edit again if needed.
+   3. Disable the original managed workflow.
+   4. When a new version ships, the platform updates the definition but preserves the user's enabled state (the original stays disabled). The user can re-enable the updated original, clone and edit again if needed.
 
-   This keeps the managed workflow definition clean (no merge conflicts), gives users full editing power on the clone, and the reconciliation safety net restores the original on upgrade.
+   This keeps the managed workflow definition clean (no merge conflicts), gives users full editing power on the clone, and the user stays in control of the enabled state across upgrades.
 
 5. <a id="initial-enabled-state"></a>**~~Should managed workflows support being registered as disabled by default?~~** — **Resolved.**
    Yes. The `ManagedWorkflowRegistration` contract includes an `enabled` option (default `true`, settable to `false`). This covers both always-on patterns and opt-in patterns where a product feature activates the workflow on the user's behalf. The enable/disable toggle is a user-permitted mutation — not gated behind `--force`. On reconciliation, the platform preserves the user's current enabled state unless the registering team forces a reset (e.g., a critical fix that must be active). See R3.
@@ -297,6 +297,8 @@ Extend the existing `.workflows-workflows` index and document model with new fie
 | `managed` | `boolean` | `true` for managed workflows, `false` (default) for user workflows. Not user-settable. |
 | `managedBy` | `string \| null` | Plugin ID that owns this workflow (e.g., `securityInsights`, `streams`). `null` for user workflows. Used for ownership tracking, reconciliation, and cleanup. |
 | `definitionHash` | `string \| null` | SHA-256 of the YAML definition. Used for reconciliation (create-if-absent, update-if-changed). `null` for user workflows. |
+| `defaultEnabled` | `boolean` | The enabled state declared at registration time (`true` by default). Stored on the document so reconciliation knows the registering team's intent. |
+| `preserveEnabledState` | `boolean` | Whether to preserve the user's current `enabled` value when a new version is reconciled. `true` (default) means the user's choice survives upgrades. `false` means reconciliation resets `enabled` to `defaultEnabled` on every update — used for critical fixes that must be active. |
 
 New mapping additions (in `workflow_storage.ts`):
 
@@ -304,6 +306,8 @@ New mapping additions (in `workflow_storage.ts`):
 managed: types.boolean({}),
 managedBy: types.keyword({}),
 definitionHash: types.keyword({ index: false }),
+defaultEnabled: types.boolean({}),
+preserveEnabledState: types.boolean({}),
 ```
 
 - **Reads:** One index; list/detail APIs filter or label using `managed` (e.g., hide managed by default).
@@ -434,6 +438,15 @@ interface ManagedWorkflowRegistration {
   pluginId: string;
   /** The workflow YAML definition. */
   yaml: string;
+  /** Initial enabled state. Defaults to true (active immediately). Set to false for opt-in patterns. */
+  enabled?: boolean;
+  /**
+   * Whether to preserve the user's current enabled state when a new version is reconciled.
+   * Defaults to true — the user's choice survives upgrades.
+   * Set to false to force-reset enabled to the registered default on every update
+   * (e.g., a critical fix that must be active).
+   */
+  preserveEnabledState?: boolean;
   /**
    * Optional pre-install hook called per space during provisioning.
    * Receives the full provisioning context (space, license, deployment info, etc.).
@@ -566,9 +579,9 @@ function computeDefinitionHash(yaml: string): string {
 For each registered managed workflow, for each space:
 
 1. Query `.workflows-workflows` by `id` + `spaceId`.
-2. If not found → **create** with `managed: true`, `managedBy: pluginId`, `definitionHash: hash`.
+2. If not found → **create** with `managed: true`, `managedBy: pluginId`, `definitionHash: hash`, `enabled: registration.enabled ?? true`, `defaultEnabled: registration.enabled ?? true`, `preserveEnabledState: registration.preserveEnabledState ?? true`.
 3. If found and `definitionHash` matches → **skip** (no I/O).
-4. If found and `definitionHash` differs → **update** the `yaml`, `definition`, `definitionHash`, `lastUpdatedBy: 'system'`. This is the privileged update path — it bypasses the managed read-only check because it's an internal operation, not a user request.
+4. If found and `definitionHash` differs → **update** the `yaml`, `definition`, `definitionHash`, `defaultEnabled`, `preserveEnabledState`, `lastUpdatedBy: 'system'`. For the `enabled` field: if `preserveEnabledState` is `true`, keep the existing document's `enabled` value (user's choice survives). If `false`, reset `enabled` to `defaultEnabled` (registering team forces a state).
 5. If found but `managed: false` → This shouldn't happen (ID collision between user workflow and managed workflow). Log a warning and skip. The caller-provided deterministic ID (R17) makes this unlikely but not impossible.
 
 **Cleanup on unregistration (R14):**
