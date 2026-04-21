@@ -21,6 +21,7 @@ import {
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { InferenceConnector } from '@kbn/inference-common';
+import { NO_DEFAULT_MODEL } from '../../../common/constants';
 import { useConnectors } from '../../hooks/use_connectors';
 import type { UseDefaultModelSettingsReturn } from '../../hooks/use_default_model_settings';
 import type { DefaultModelValidationResult } from '../../hooks/use_default_model_validation';
@@ -29,6 +30,13 @@ interface Props {
   defaultModelSettings: UseDefaultModelSettingsReturn;
   validation: DefaultModelValidationResult;
 }
+
+const NoDefaultOption: EuiComboBoxOptionOption<string> = {
+  label: i18n.translate('xpack.searchInferenceEndpoints.settings.defaultModel.noDefault', {
+    defaultMessage: 'No default model',
+  }),
+  value: NO_DEFAULT_MODEL,
+};
 
 const getOptions = (connectors?: InferenceConnector[]): EuiComboBoxOptionOption<string>[] => {
   const preconfigured =
@@ -42,6 +50,7 @@ const getOptions = (connectors?: InferenceConnector[]): EuiComboBoxOptionOption<
       .map((c) => ({ label: c.name, value: c.connectorId })) ?? [];
 
   return [
+    NoDefaultOption,
     {
       label: i18n.translate(
         'xpack.searchInferenceEndpoints.settings.defaultModel.preconfiguredGroup',
@@ -82,18 +91,16 @@ export const DefaultModelSection: React.FC<Props> = ({ defaultModelSettings, val
 
   const options = useMemo(() => getOptions(connectors), [connectors]);
   const selectedOptions = useMemo(
-    () => (state.enableAi ? getSelectedOptions(state.defaultModelId, options) : []),
-    [state.enableAi, state.defaultModelId, options]
+    () => getSelectedOptions(state.defaultModelId, options),
+    [state.defaultModelId, options]
   );
 
   const onChangeDefaultModel = (selected: EuiComboBoxOptionOption<string>[]) => {
-    const value = selected[0]?.value;
-    if (value !== undefined) {
-      setDefaultModelId(value);
-    }
+    // Picking the explicit "No default model" option OR clicking the combobox
+    // clear button both collapse to NO_DEFAULT_MODEL, which keeps story 3
+    // ("AI on, no default, customize per feature") reachable.
+    setDefaultModelId(selected[0]?.value ?? NO_DEFAULT_MODEL);
   };
-
-  const showConfiguration = state.enableAi;
 
   return (
     <EuiSplitPanel.Outer grow hasBorder hasShadow={false}>
@@ -140,67 +147,58 @@ export const DefaultModelSection: React.FC<Props> = ({ defaultModelSettings, val
           </EuiFormRow>
         </EuiDescribedFormGroup>
 
-        {showConfiguration && (
-          <>
-            <EuiHorizontalRule margin="l" />
-            <EuiDescribedFormGroup
-              data-test-subj="defaultModelSection"
-              fullWidth
-              gutterSize="xl"
-              title={
-                <EuiTitle size="xs">
-                  <h3 data-test-subj="defaultModelTitle">
-                    {i18n.translate('xpack.searchInferenceEndpoints.settings.defaultModel.title', {
-                      defaultMessage: 'Default model',
-                    })}
-                  </h3>
-                </EuiTitle>
-              }
-              description={
-                <p>
-                  {i18n.translate(
-                    'xpack.searchInferenceEndpoints.settings.defaultModel.description',
-                    {
-                      defaultMessage:
-                        'Choose a default inference model for all AI features. Individual features can override this with their own model below.',
-                    }
-                  )}
-                </p>
-              }
-            >
-              <EuiFormRow
-                fullWidth
-                label={i18n.translate(
-                  'xpack.searchInferenceEndpoints.settings.defaultModel.label',
-                  {
-                    defaultMessage: 'Default model',
-                  }
-                )}
-                isInvalid={validation.errors.length > 0}
-                error={validation.errors}
-              >
-                <EuiComboBox
-                  data-test-subj="defaultModelComboBox"
-                  placeholder={i18n.translate(
-                    'xpack.searchInferenceEndpoints.settings.defaultModel.placeholder',
-                    {
-                      defaultMessage: 'Select a default model',
-                    }
-                  )}
-                  singleSelection={{ asPlainText: true }}
-                  options={options}
-                  selectedOptions={selectedOptions}
-                  onChange={onChangeDefaultModel}
-                  isLoading={connectorsLoading}
-                  isInvalid={validation.errors.length > 0}
-                />
-              </EuiFormRow>
-            </EuiDescribedFormGroup>
-          </>
-        )}
+        <EuiHorizontalRule margin="l" />
+        <EuiDescribedFormGroup
+          data-test-subj="defaultModelSection"
+          fullWidth
+          gutterSize="xl"
+          title={
+            <EuiTitle size="xs">
+              <h3 data-test-subj="defaultModelTitle">
+                {i18n.translate('xpack.searchInferenceEndpoints.settings.defaultModel.title', {
+                  defaultMessage: 'Default model',
+                })}
+              </h3>
+            </EuiTitle>
+          }
+          description={
+            <p>
+              {i18n.translate('xpack.searchInferenceEndpoints.settings.defaultModel.description', {
+                defaultMessage:
+                  'Choose a default inference model for all AI features. Individual features can override this with their own model below.',
+              })}
+            </p>
+          }
+        >
+          <EuiFormRow
+            fullWidth
+            label={i18n.translate('xpack.searchInferenceEndpoints.settings.defaultModel.label', {
+              defaultMessage: 'Default model',
+            })}
+            isInvalid={state.enableAi && validation.errors.length > 0}
+            error={state.enableAi ? validation.errors : undefined}
+          >
+            <EuiComboBox
+              data-test-subj="defaultModelComboBox"
+              isDisabled={!state.enableAi}
+              placeholder={i18n.translate(
+                'xpack.searchInferenceEndpoints.settings.defaultModel.placeholder',
+                {
+                  defaultMessage: 'Select a default model',
+                }
+              )}
+              singleSelection={{ asPlainText: true }}
+              options={options}
+              selectedOptions={selectedOptions}
+              onChange={onChangeDefaultModel}
+              isLoading={connectorsLoading}
+              isInvalid={state.enableAi && validation.errors.length > 0}
+            />
+          </EuiFormRow>
+        </EuiDescribedFormGroup>
       </EuiSplitPanel.Inner>
 
-      {showConfiguration && (
+      {state.enableAi && (
         <EuiSplitPanel.Inner grow={false} color="subdued" paddingSize="l">
           <EuiFlexGroup
             alignItems="center"

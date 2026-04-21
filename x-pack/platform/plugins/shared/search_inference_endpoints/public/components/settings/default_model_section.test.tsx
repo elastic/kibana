@@ -86,7 +86,7 @@ describe('DefaultModelSection', () => {
     expect(screen.getByTestId('disallowOtherModelsCheckbox')).toBeInTheDocument();
   });
 
-  it('hides combo box and hide-selection switch when AI is disabled', () => {
+  it('keeps the default-model section visible but disables the combobox when AI is off, and hides the hide-selection switch', () => {
     const settings = createMockSettings({
       state: { enableAi: false, defaultModelId: NO_DEFAULT_MODEL, disallowOtherModels: true },
     });
@@ -97,8 +97,12 @@ describe('DefaultModelSection', () => {
       </Wrapper>
     );
 
-    expect(screen.queryByTestId('defaultModelTitle')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('defaultModelComboBox')).not.toBeInTheDocument();
+    expect(screen.getByTestId('defaultModelTitle')).toBeInTheDocument();
+    const combo = screen.getByTestId('defaultModelComboBox');
+    expect(combo).toBeInTheDocument();
+    // EuiComboBox exposes a search input internally; when isDisabled is true it
+    // marks the input as disabled.
+    expect(combo.querySelector('input')).toBeDisabled();
     expect(screen.queryByTestId('disallowOtherModelsCheckbox')).not.toBeInTheDocument();
   });
 
@@ -139,7 +143,7 @@ describe('DefaultModelSection', () => {
     ).toBeInTheDocument();
   });
 
-  it('combobox does not include a "No default model" option', () => {
+  it('combobox exposes an explicit "No default model" option so AI on / no default stays reachable', () => {
     render(
       <Wrapper>
         <DefaultModelSection
@@ -149,7 +153,24 @@ describe('DefaultModelSection', () => {
       </Wrapper>
     );
 
-    expect(screen.queryByText('No default model')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('defaultModelComboBox'));
+    expect(screen.getByRole('option', { name: 'No default model' })).toBeInTheDocument();
+  });
+
+  it('picking "No default model" sets the default back to NO_DEFAULT_MODEL', () => {
+    const setDefaultModelId = jest.fn();
+    const settings = createMockSettings({ setDefaultModelId });
+
+    render(
+      <Wrapper>
+        <DefaultModelSection defaultModelSettings={settings} validation={validValidation} />
+      </Wrapper>
+    );
+
+    fireEvent.click(screen.getByTestId('defaultModelComboBox'));
+    fireEvent.click(screen.getByRole('option', { name: 'No default model' }));
+
+    expect(setDefaultModelId).toHaveBeenCalledWith(NO_DEFAULT_MODEL);
   });
 
   it('calls setDisallowOtherModels when hide-selection switch is toggled', () => {

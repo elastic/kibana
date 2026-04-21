@@ -88,7 +88,24 @@ test.describe(
       });
     });
 
-    test('turning off the master AI toggle collapses the default-model section and feature sections', async ({
+    test('combobox exposes "No default model" so AI can stay on with no default set', async ({
+      pageObjects,
+    }) => {
+      const { featureSettings } = pageObjects;
+
+      await test.step('default model combobox is visible', async () => {
+        await expect(featureSettings.defaultModelComboBox).toBeVisible();
+      });
+
+      await test.step('opening the combobox reveals the "No default model" option', async () => {
+        await featureSettings.defaultModelComboBox.click();
+        await expect(
+          featureSettings.content.getByRole('option', { name: 'No default model' })
+        ).toBeVisible();
+      });
+    });
+
+    test('turning off the master AI toggle disables the default-model combobox and hides the per-feature controls', async ({
       pageObjects,
     }) => {
       const { featureSettings } = pageObjects;
@@ -103,8 +120,12 @@ test.describe(
         await featureSettings.enableAiSwitch.click();
       });
 
-      await test.step('default-model controls and feature sections are hidden', async () => {
-        await expect(featureSettings.defaultModelSection).toBeHidden();
+      await test.step('default-model section stays visible but combobox is disabled', async () => {
+        await expect(featureSettings.defaultModelSection).toBeVisible();
+        await expect(featureSettings.defaultModelComboBox.locator('input')).toBeDisabled();
+      });
+
+      await test.step('hide-selection switch and feature sections are gone', async () => {
         await expect(featureSettings.disallowOtherModelsCheckbox).toBeHidden();
         await expect(featureSettings.allFeatureSections).toHaveCount(0);
       });
