@@ -79,15 +79,15 @@ A first-class **managed workflow** concept where plugins can declare bundled wor
 | **S1** | **Version/hash tracking** | Track a content hash so the platform can determine if updates are needed without fetching and string-comparing full YAML. Also drives the reconciliation lifecycle (create-if-absent, update-if-changed, skip-if-matching) — see [Lifecycle](#4-lifecycle-provisioning-updates-cleanup). | Security (andrew-goldstein) |
 | **S2** | **Caller-provided execution ID** | Support a caller-specified unique execution ID for correlation and deduplication. | O11y (ruflin, cesco-f) |
 | **S3** | **Caller-provided execution metadata** | Allow callers to attach arbitrary metadata to an execution for debugging and correlation. | — |
+| **S4** | **Plugin-controlled install decision** | `shouldInstall(ctx)` hook called during provisioning with the full context (space, license tier, deployment type, feature flags, etc.). The registering plugin decides whether to install the workflow based on any condition. Enables per-space decisions, tier gating, deployment-type filtering, and progressive rollout without separate mechanisms. | Security AB (KDKHD) |
 
 ### Nice to Have / Deferred
 
 | # | Requirement | Details | Requested By |
 |---|-------------|---------|--------------|
 | **N1** | **Post-start / dynamic registration** | Support registration after plugin `start()`, not just `setup()`. Enables user-action-triggered managed workflows. Creation and deletion are straightforward (plugin calls an API; cleanup uses `managedBy` on uninstall). Updates are harder — see [Open Questions > Post-start lifecycle](#post-start-lifecycle) for approaches. | Security AB (KDKHD) |
-| **N2** | **Plugin-controlled install decision** | `shouldInstallWorkflow({ spaceId, ...ctx })` hook to decide per-space whether to install. | Security AB (KDKHD) |
 | **N3** | **Registration health / introspection** | Registry view: what's registered, what's installed per space, version/hash. | Security AB (KDKHD) |
-| **N4** | **Standardized gating + rollout controls** | Feature flags for progressive enablement of managed workflows. Achievable via N2 — the `shouldInstall` hook receives the full provisioning context (feature flags, space, deployment type, etc.), so the registering plugin can gate installation on any condition without a separate rollout mechanism. | Security AB (KDKHD) |
+| **N4** | **Standardized gating + rollout controls** | Feature flags for progressive enablement of managed workflows. Achievable via S4 — the `shouldInstall` hook receives the full provisioning context (feature flags, space, deployment type, etc.), so the registering plugin can gate installation on any condition without a separate rollout mechanism. | Security AB (KDKHD) |
 | **N5** | **Out-of-band updates** | Update managed workflow definitions outside of Kibana release cycles. Related to integration-based distribution (N7). | Security AB (KDKHD) |
 | **N6** | **Type safety for code-defined workflows** | TypeScript types for workflow definitions in code. For the first delivery, workflow registration validates the YAML at startup, and the approval gate's Scout tests provide compile-time coverage. | Security AB (KDKHD) |
 | **N7** | **Integration-based distribution** | Ship managed workflows as part of integrations. Registration happens through the integration lifecycle (install/uninstall). | O11y (ruflin), Search (pgayvallet) |
