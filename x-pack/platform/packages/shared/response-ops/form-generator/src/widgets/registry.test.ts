@@ -10,7 +10,9 @@ import { getWidgetComponent } from './registry';
 import { WidgetType } from './types';
 import { getMeta, addMeta } from '../schema_connector_metadata';
 import { TextWidget } from './components/text_widget';
+import { TextareaWidget } from './components/textarea_widget';
 import { PasswordWidget } from './components/password_widget';
+import { SecretTextareaWidget } from './components/secret_textarea_widget';
 import { HiddenWidget } from './components/hidden_widget';
 
 describe('Widget Registry', () => {
@@ -155,6 +157,30 @@ describe('Widget Registry', () => {
       const component = getWidgetComponent(schema);
 
       expect(component).toBe(HiddenWidget);
+    });
+
+    it('should use TextareaWidget when widget: textarea is explicitly set', () => {
+      const schema = z.string();
+      addMeta(schema, { widget: WidgetType.Textarea });
+      const component = getWidgetComponent(schema);
+
+      expect(component).toBe(TextareaWidget);
+    });
+
+    it('should use SecretTextareaWidget when widget: secretTextarea is explicitly set', () => {
+      const schema = z.string();
+      addMeta(schema, { widget: WidgetType.SecretTextarea });
+      const component = getWidgetComponent(schema);
+
+      expect(component).toBe(SecretTextareaWidget);
+    });
+
+    it('should prefer explicit widget: secretTextarea over default sensitive routing', () => {
+      const schema = z.string();
+      addMeta(schema, { sensitive: true, widget: WidgetType.SecretTextarea });
+      const component = getWidgetComponent(schema);
+
+      expect(component).toBe(SecretTextareaWidget);
     });
   });
 

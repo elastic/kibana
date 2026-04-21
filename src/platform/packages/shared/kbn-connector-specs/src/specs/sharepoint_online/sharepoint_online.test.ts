@@ -132,6 +132,22 @@ describe('SharepointOnline', () => {
         },
       });
     });
+
+    it('supports oauth_entra_client_certificate with Microsoft defaults', () => {
+      const certType = (
+        SharepointOnline.auth?.types as Array<
+          string | { type: string; defaults?: Record<string, unknown> }
+        >
+      ).find((t) => typeof t === 'object' && t.type === 'oauth_entra_client_certificate');
+      expect(certType).toBeDefined();
+      expect(certType).toMatchObject({
+        type: 'oauth_entra_client_certificate',
+        defaults: {
+          scope: 'https://graph.microsoft.com/.default',
+          tokenUrl: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
+        },
+      });
+    });
   });
 
   describe('getAllSites action', () => {
@@ -182,6 +198,30 @@ describe('SharepointOnline', () => {
       );
       expect(result).toEqual(mockResponse.data);
       expect(result.value).toHaveLength(2);
+    });
+
+    it('should treat oauth_entra_client_certificate as app-only (uses /sites/getAllSites)', async () => {
+      const certContext = {
+        ...mockContext,
+        secrets: { authType: 'oauth_entra_client_certificate' },
+      } as unknown as ActionContext;
+
+      const mockResponse = { data: { value: [] } };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      await SharepointOnline.actions.getAllSites.handler(certContext, {});
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://graph.microsoft.com/v1.0/sites/getAllSites/',
+        {
+          params: {
+            $select: 'id,displayName,webUrl,siteCollection',
+          },
+        }
+      );
+      expect(mockContext.log.debug).toHaveBeenCalledWith(
+        'SharePoint listing all sites (app-only auth)'
+      );
     });
 
     it('should fall back to /sites?search= with delegated auth', async () => {
@@ -1059,6 +1099,37 @@ describe('SharepointOnline', () => {
       );
       expect(result).toEqual(mockResponse.data);
       expect(result.value[0].hitsContainers[0].hits).toHaveLength(1);
+    });
+
+    it('should search with oauth_entra_client_certificate treating it as app-only (includes region)', async () => {
+      const certSearchContext = {
+        ...mockContext,
+        secrets: { authType: 'oauth_entra_client_certificate' },
+      } as unknown as ActionContext;
+
+      const mockResponse = {
+        data: { value: [{ hitsContainers: [{ hits: [], total: 0 }] }] },
+      };
+      mockClient.post.mockResolvedValue(mockResponse);
+
+      await SharepointOnline.actions.search.handler(certSearchContext, {
+        query: 'test document',
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://graph.microsoft.com/v1.0/search/query',
+        {
+          requests: [
+            {
+              entityTypes: ['site'],
+              query: {
+                queryString: 'test document',
+              },
+              region: 'NAM',
+            },
+          ],
+        }
+      );
     });
 
     it('should search with delegated auth (omits region)', async () => {

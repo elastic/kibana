@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { constants, createVerify } from 'crypto';
+import { constants, createPrivateKey, createVerify } from 'crypto';
 import {
   buildClientAssertion,
   computeCertificateThumbprint,
@@ -64,6 +64,17 @@ XdrjUG57ieFN1nGLViofieM=
 
 const TOKEN_URL = 'https://login.microsoftonline.com/test-tenant/oauth2/v2.0/token';
 const CLIENT_ID = 'test-client-id';
+const TEST_PASSPHRASE = 'secret-passphrase';
+
+// Derive a passphrase-protected PEM from TEST_KEY so the signature keypair stays consistent.
+const TEST_KEY_ENCRYPTED = createPrivateKey({ key: TEST_KEY, format: 'pem' })
+  .export({
+    type: 'pkcs8',
+    format: 'pem',
+    cipher: 'aes-256-cbc',
+    passphrase: TEST_PASSPHRASE,
+  })
+  .toString();
 
 describe('buildClientAssertion', () => {
   describe('CLIENT_ASSERTION_TYPE', () => {
@@ -177,16 +188,14 @@ describe('buildClientAssertion', () => {
       const signaturePadded = signatureB64.replace(/-/g, '+').replace(/_/g, '/');
       const signature = Buffer.from(signaturePadded, 'base64');
 
-      const isValid = createVerify('sha256')
-        .update(signingInput)
-        .verify(
-          {
-            key: TEST_CERT,
-            padding: constants.RSA_PKCS1_PSS_PADDING,
-            saltLength: constants.RSA_PSS_SALTLEN_DIGEST,
-          },
-          signature
-        );
+      const isValid = createVerify('sha256').update(signingInput).verify(
+        {
+          key: TEST_CERT,
+          padding: constants.RSA_PKCS1_PSS_PADDING,
+          saltLength: constants.RSA_PSS_SALTLEN_DIGEST,
+        },
+        signature
+      );
       expect(isValid).toBe(true);
     });
 
@@ -204,16 +213,14 @@ describe('buildClientAssertion', () => {
       const signaturePadded = signatureB64.replace(/-/g, '+').replace(/_/g, '/');
       const signature = Buffer.from(signaturePadded, 'base64');
 
-      const isValid = createVerify('sha256')
-        .update(signingInput)
-        .verify(
-          {
-            key: TEST_CERT,
-            padding: constants.RSA_PKCS1_PSS_PADDING,
-            saltLength: constants.RSA_PSS_SALTLEN_DIGEST,
-          },
-          signature
-        );
+      const isValid = createVerify('sha256').update(signingInput).verify(
+        {
+          key: TEST_CERT,
+          padding: constants.RSA_PKCS1_PSS_PADDING,
+          saltLength: constants.RSA_PSS_SALTLEN_DIGEST,
+        },
+        signature
+      );
       expect(isValid).toBe(true);
     });
 
@@ -238,6 +245,65 @@ describe('buildClientAssertion', () => {
           privateKey: 'not-a-key',
         })
       ).toThrow('Invalid PEM');
+    });
+
+    it('should sign with a passphrase-protected private key', () => {
+      const jwt = buildClientAssertion({
+        tokenUrl: TOKEN_URL,
+        clientId: CLIENT_ID,
+        certificate: TEST_CERT,
+        privateKey: TEST_KEY_ENCRYPTED,
+        passphrase: TEST_PASSPHRASE,
+      });
+
+      const [headerB64, payloadB64, signatureB64] = jwt.split('.');
+      const signingInput = `${headerB64}.${payloadB64}`;
+      const signaturePadded = signatureB64.replace(/-/g, '+').replace(/_/g, '/');
+      const signature = Buffer.from(signaturePadded, 'base64');
+
+      const isValid = createVerify('sha256').update(signingInput).verify(
+        {
+          key: TEST_CERT,
+          padding: constants.RSA_PKCS1_PSS_PADDING,
+          saltLength: constants.RSA_PSS_SALTLEN_DIGEST,
+        },
+        signature
+      );
+      expect(isValid).toBe(true);
+    });
+
+    it('should throw when a passphrase-protected key is used without a passphrase', () => {
+      expect(() =>
+        buildClientAssertion({
+          tokenUrl: TOKEN_URL,
+          clientId: CLIENT_ID,
+          certificate: TEST_CERT,
+          privateKey: TEST_KEY_ENCRYPTED,
+        })
+      ).toThrow();
+    });
+
+    it('should throw when a passphrase is wrong', () => {
+      expect(() =>
+        buildClientAssertion({
+          tokenUrl: TOKEN_URL,
+          clientId: CLIENT_ID,
+          certificate: TEST_CERT,
+          privateKey: TEST_KEY_ENCRYPTED,
+          passphrase: 'wrong-passphrase',
+        })
+      ).toThrow();
+    });
+
+    it('should throw on invalid certificate PEM', () => {
+      expect(() =>
+        buildClientAssertion({
+          tokenUrl: TOKEN_URL,
+          clientId: CLIENT_ID,
+          certificate: 'not-a-cert',
+          privateKey: TEST_KEY,
+        })
+      ).toThrow('Invalid PEM certificate');
     });
 
     it('should generate unique jti for each assertion', () => {

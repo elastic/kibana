@@ -11,7 +11,9 @@ import type { FormConfig, ResolvedMetaFunctions } from '../form';
 
 export enum WidgetType {
   Text = 'text',
+  Textarea = 'textarea',
   Password = 'password',
+  SecretTextarea = 'secretTextarea',
   Select = 'select',
   FormFieldset = 'formFieldset',
   Hidden = 'hidden',

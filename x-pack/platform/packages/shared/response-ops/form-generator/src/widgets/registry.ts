@@ -11,15 +11,19 @@ import { WidgetType } from './types';
 import { getMeta as defaultGetMeta, setMeta as defaultSetMeta } from '../schema_connector_metadata';
 import type { GetMetaFn, SetMetaFn } from '../meta_types';
 import { TextWidget } from './components/text_widget';
+import { TextareaWidget } from './components/textarea_widget';
 import { SelectWidget } from './components/select_widget';
 import { PasswordWidget } from './components/password_widget';
+import { SecretTextareaWidget } from './components/secret_textarea_widget';
 import { DiscriminatedUnionWidget } from './components/discriminated_union_widget';
 import { HiddenWidget } from './components/hidden_widget';
 import { ObjectWidget } from './components/object_widget';
 
 const WIDGET_REGISTRY = {
   [WidgetType.Text]: TextWidget,
+  [WidgetType.Textarea]: TextareaWidget,
   [WidgetType.Password]: PasswordWidget,
+  [WidgetType.SecretTextarea]: SecretTextareaWidget,
   [WidgetType.Select]: SelectWidget,
   [WidgetType.FormFieldset]: DiscriminatedUnionWidget,
   [WidgetType.Hidden]: HiddenWidget,

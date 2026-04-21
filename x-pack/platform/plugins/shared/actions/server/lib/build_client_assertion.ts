@@ -5,6 +5,35 @@
  * 2.0.
  */
 
+/**
+ * JWT client assertion builder for OAuth2 client_credentials with a certificate.
+ * Scoped to Microsoft Entra ID.
+ *
+ * Relationship to ./create_jwt_assertion.ts
+ * ------------------------------------------
+ * `create_jwt_assertion.ts` is the pre-existing, generic JWT helper used by
+ * ServiceNow-style connectors. It signs with RS256, supports an optional `kid`
+ * header, and takes a 3600s default lifetime. We deliberately do not call into
+ * it here because the Entra cert flow needs different primitives:
+ *
+ *   1. algorithm:  Entra expects PS256 (RSA-PSS) while create_jwt_assertion uses
+ *                  RS256. Swapping the alg per-caller there would require
+ *                  threading another argument through every existing consumer.
+ *   2. x5t#S256:   Entra binds the assertion to the uploaded cert via an
+ *                  x5t#S256 header (base64url SHA-256 of the DER bytes).
+ *                  create_jwt_assertion emits `kid` at most.
+ *   3. no `kid`:   Entra ignores `kid` when x5t#S256 is present.
+ *
+ * These three points are the "generalization knobs" a future
+ * `oauth_private_key_jwt` auth type would need to parameterize in order to
+ * support providers beyond Entra (Okta, Auth0, Google, etc.). When a second
+ * consumer appears, promote:
+ *   - `alg`                   (e.g. 'PS256' | 'RS256' | 'ES256')
+ *   - `certificateBinding`    ('x5t#S256' | 'x5c' | 'kid' | 'none')
+ *   - `lifetimeSec`           (currently hard-coded to 600s)
+ * into arguments, and replace this module with a backend-agnostic builder that
+ * both consumers share.
+ */
 import { constants, createHash, createSign, randomUUID } from 'crypto';
 import { CLIENT_ASSERTION_TYPE } from '@kbn/connector-specs';
 
@@ -65,15 +94,10 @@ export interface BuildClientAssertionOpts {
 
 /**
  * Builds and signs a JWT client assertion for the OAuth2 client_credentials
- * flow with certificate-based authentication (Microsoft Entra ID).
+ * flow with certificate-based authentication. Microsoft Entra ID only.
  *
- * Uses x5t#S256 (SHA-256 thumbprint) per RFC 7515 section 4.1.8.
- *
- * BREAKING: Changed from RS256 (PKCS#1 v1.5) to PS256 (RSA-PSS + SHA-256)
- * to align with Microsoft Entra ID recommendations. Existing connectors
- * deployed under the previous RS256 implementation will need to be
- * re-configured, as assertions signed with the old algorithm will no
- * longer validate against the new signature scheme.
+ * Header uses x5t#S256 (RFC 7515 §4.1.8) and alg PS256 (RSA-PSS + SHA-256).
+ * See the file header for the rationale and for generalization knobs.
  */
 export function buildClientAssertion({
   tokenUrl,

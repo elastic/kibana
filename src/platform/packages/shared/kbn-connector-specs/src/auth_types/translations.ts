@@ -138,42 +138,57 @@ export const OAUTH_AUTHORIZATION_URL_LABEL = i18n.translate(
   }
 );
 
-export const OAUTH_CERT_LABEL = i18n.translate('connectorSpecs.oauthClientCertificate.label', {
-  defaultMessage: 'OAuth Client Certificate',
+export const OAUTH_CERT_LABEL = i18n.translate('connectorSpecs.oauthEntraClientCertificate.label', {
+  defaultMessage: 'OAuth Client Certificate (Microsoft Entra)',
 });
 
 export const OAUTH_CERT_CERTIFICATE_LABEL = i18n.translate(
-  'connectorSpecs.oauthClientCertificate.certificate.label',
+  'connectorSpecs.oauthEntraClientCertificate.certificate.label',
   {
     defaultMessage: 'Certificate (PEM)',
   }
 );
 
 export const OAUTH_CERT_PRIVATE_KEY_LABEL = i18n.translate(
-  'connectorSpecs.oauthClientCertificate.privateKey.label',
+  'connectorSpecs.oauthEntraClientCertificate.privateKey.label',
   {
     defaultMessage: 'Private key (PEM)',
   }
 );
 
 export const OAUTH_CERT_PRIVATE_KEY_REQUIRED_MESSAGE = i18n.translate(
-  'connectorSpecs.oauthClientCertificate.privateKey.requiredMessage',
+  'connectorSpecs.oauthEntraClientCertificate.privateKey.requiredMessage',
   {
     defaultMessage: 'Private key is required',
   }
 );
 
 export const OAUTH_CERT_CERTIFICATE_REQUIRED_MESSAGE = i18n.translate(
-  'connectorSpecs.oauthClientCertificate.certificate.requiredMessage',
+  'connectorSpecs.oauthEntraClientCertificate.certificate.requiredMessage',
   {
     defaultMessage: 'Certificate is required',
   }
 );
 
 export const OAUTH_CERT_PASSPHRASE_LABEL = i18n.translate(
-  'connectorSpecs.oauthClientCertificate.passphrase.label',
+  'connectorSpecs.oauthEntraClientCertificate.passphrase.label',
   {
     defaultMessage: 'Private key passphrase',
+  }
+);
+
+export const OAUTH_CERT_CERTIFICATE_INVALID_PEM_MESSAGE = i18n.translate(
+  'connectorSpecs.oauthEntraClientCertificate.certificate.invalidPemMessage',
+  {
+    defaultMessage: 'Certificate must be in PEM format (-----BEGIN CERTIFICATE-----)',
+  }
+);
+
+export const OAUTH_CERT_PRIVATE_KEY_INVALID_PEM_MESSAGE = i18n.translate(
+  'connectorSpecs.oauthEntraClientCertificate.privateKey.invalidPemMessage',
+  {
+    defaultMessage:
+      'Private key must be in PEM format (-----BEGIN PRIVATE KEY-----, -----BEGIN RSA PRIVATE KEY-----, or -----BEGIN ENCRYPTED PRIVATE KEY-----)',
   }
 );
 
