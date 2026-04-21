@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import type { Replacements } from '@kbn/elastic-assistant-common';
+import type { Replacements } from '@kbn/elastic-assistant-common/types/conversations/common_attributes.gen';
 import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
 import {
   getCombinedMessage,

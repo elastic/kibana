@@ -7,11 +7,8 @@
 
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenu } from '@elastic/eui';
-import {
-  type AttackDiscoveryAlert,
-  getAttackDiscoveryMarkdown,
-  getOriginalAlertIds,
-} from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common/types/attack_discovery/attack_discovery_alert.gen';
+import { getAttackDiscoveryMarkdown, getOriginalAlertIds } from '@kbn/elastic-assistant-common';
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../common/lib/kibana';

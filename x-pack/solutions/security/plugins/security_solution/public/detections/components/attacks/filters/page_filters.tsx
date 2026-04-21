@@ -12,7 +12,7 @@ import type { AlertFilterControlsProps } from '@kbn/alerts-ui-shared/src/alert_f
 import { AlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
 import { useHistory } from 'react-router-dom';
 import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
-import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
+import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common/constants';
 import type { DataView } from '@kbn/data-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { URL_PARAM_KEY } from '../../../../common/hooks/use_url_state';

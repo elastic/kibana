@@ -10,7 +10,7 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
 
 import { AssistantAvatar } from '@kbn/ai-assistant-icon';
-import type { Replacements } from '@kbn/elastic-assistant-common';
+import type { Replacements } from '@kbn/elastic-assistant-common/types/conversations/common_attributes.gen';
 import {
   getCurrentConversationOwner,
   replaceAnonymizedValuesWithOriginalValues,

@@ -8,7 +8,7 @@ import type {
   GetAllConnectorsResponse,
   ConnectorResponse,
 } from '@kbn/actions-plugin/common/routes/connector/response';
-import { DEFEND_INSIGHTS } from '@kbn/elastic-assistant-common';
+import { DEFEND_INSIGHTS } from '@kbn/elastic-assistant-common/constants';
 import { request } from './common';
 import { WorkflowInsightActionType } from '../../../../common/endpoint/types/workflow_insights';
 import {

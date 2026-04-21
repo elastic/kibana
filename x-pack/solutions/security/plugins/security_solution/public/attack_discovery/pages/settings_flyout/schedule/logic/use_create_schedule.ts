@@ -6,11 +6,9 @@
  */
 
 import { useMutation } from '@kbn/react-query';
-import type {
-  AttackDiscoveryScheduleCreateProps,
-  CreateAttackDiscoverySchedulesResponse,
-} from '@kbn/elastic-assistant-common';
-import { ATTACK_DISCOVERY_SCHEDULES } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryScheduleCreateProps } from '@kbn/elastic-assistant-common/types/attack_discovery/routes/public/schedules/schedules.gen';
+import type { CreateAttackDiscoverySchedulesResponse } from '@kbn/elastic-assistant-common/types/attack_discovery/routes/public/schedules/crud_attack_discovery_schedules_route.gen';
+import { ATTACK_DISCOVERY_SCHEDULES } from '@kbn/elastic-assistant-common/constants';
 
 import * as i18n from './translations';
 import { createAttackDiscoverySchedule } from '../api';

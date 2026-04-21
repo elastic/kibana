@@ -10,7 +10,7 @@ import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../../../common/hooks/use_app_toasts.mock';
 import { renderQuery } from '../../../../../management/hooks/test_utils';
 import { findAttackDiscoverySchedule } from '../api';
-import type { FindAttackDiscoverySchedulesResponse } from '@kbn/elastic-assistant-common';
+import type { FindAttackDiscoverySchedulesResponse } from '@kbn/elastic-assistant-common/types/attack_discovery/routes/public/schedules/get/find_attack_discovery_schedules_route.gen';
 
 jest.mock('../api');
 jest.mock('../../../../../common/hooks/use_app_toasts');

@@ -19,10 +19,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import {
-  replaceAnonymizedValuesWithOriginalValues,
-  type Replacements,
-} from '@kbn/elastic-assistant-common';
+import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
+import type { Replacements } from '@kbn/elastic-assistant-common/types/conversations/common_attributes.gen';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';

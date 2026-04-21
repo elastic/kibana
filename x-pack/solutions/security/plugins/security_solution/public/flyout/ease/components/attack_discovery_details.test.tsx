@@ -14,7 +14,7 @@ import {
   ATTACK_DISCOVERY_DETAILS_CONTAINER_TEST_ID,
   AttackDiscoveryDetails,
 } from './attack_discovery_details';
-import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
+import type { AttackDiscovery } from '@kbn/elastic-assistant-common/types/attack_discovery/common_attributes.gen';
 
 const attackDiscovery: AttackDiscovery = {
   alertIds: ['a', 'b', 'c'],

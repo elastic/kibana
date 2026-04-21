@@ -13,7 +13,7 @@ import {
   VIEW_IN_AI_ASSISTANT_TEST_ID,
 } from './attack_ai_assistant_button';
 import { TestProviders } from '../../../../../common/mock/test_providers';
-import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common/types/attack_discovery/attack_discovery_alert.gen';
 import { useAgentBuilderAvailability } from '../../../../../agent_builder/hooks/use_agent_builder_availability';
 import { useAttackDiscoveryAttachment } from '../../../../../attack_discovery/pages/results/use_attack_discovery_attachment';
 import { useViewInAiAssistant } from '../../../../../attack_discovery/pages/results/attack_discovery_panel/view_in_ai_assistant/use_view_in_ai_assistant';

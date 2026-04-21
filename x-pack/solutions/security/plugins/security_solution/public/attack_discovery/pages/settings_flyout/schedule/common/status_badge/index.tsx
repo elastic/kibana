@@ -9,7 +9,7 @@ import React from 'react';
 
 import { EuiHealth, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
-import type { AttackDiscoverySchedule } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoverySchedule } from '@kbn/elastic-assistant-common/types/attack_discovery/routes/public/schedules/schedules.gen';
 
 import {
   getExecutionStatusHealthColor,

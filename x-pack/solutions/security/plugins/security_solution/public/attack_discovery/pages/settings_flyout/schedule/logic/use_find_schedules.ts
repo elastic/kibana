@@ -7,11 +7,9 @@
 
 import { useCallback } from 'react';
 import { useQuery, useQueryClient } from '@kbn/react-query';
-import {
-  ATTACK_DISCOVERY_SCHEDULES_FIND,
-  transformAttackDiscoveryScheduleFromApi,
-} from '@kbn/elastic-assistant-common';
-import type { AttackDiscoverySchedule } from '@kbn/elastic-assistant-common';
+import { ATTACK_DISCOVERY_SCHEDULES_FIND } from '@kbn/elastic-assistant-common/constants';
+import { transformAttackDiscoveryScheduleFromApi } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoverySchedule } from '@kbn/elastic-assistant-common/types/attack_discovery/routes/public/schedules/schedules.gen';
 
 import * as i18n from './translations';
 import { findAttackDiscoverySchedule } from '../api';

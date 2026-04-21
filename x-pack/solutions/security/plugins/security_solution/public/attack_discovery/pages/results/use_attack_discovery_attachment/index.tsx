@@ -6,12 +6,10 @@
  */
 
 import { useMemo } from 'react';
-import {
-  type AttackDiscovery,
-  type AttackDiscoveryAlert,
-  getAttackDiscoveryMarkdown,
-  type Replacements,
-} from '@kbn/elastic-assistant-common';
+import type { AttackDiscovery } from '@kbn/elastic-assistant-common/types/attack_discovery/common_attributes.gen';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common/types/attack_discovery/attack_discovery_alert.gen';
+import { getAttackDiscoveryMarkdown } from '@kbn/elastic-assistant-common';
+import type { Replacements } from '@kbn/elastic-assistant-common/types/conversations/common_attributes.gen';
 import { i18n } from '@kbn/i18n';
 import { SecurityAgentBuilderAttachments } from '../../../../../common/constants';
 import { ATTACK_DISCOVERY_ATTACHMENT_PROMPT } from '../../../../agent_builder/components/prompts';

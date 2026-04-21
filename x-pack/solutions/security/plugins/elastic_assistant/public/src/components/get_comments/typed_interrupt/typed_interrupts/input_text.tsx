@@ -10,7 +10,7 @@ import React from 'react';
 import type {
   InputTextInterruptValue,
   InputTextInterruptResumeValue,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/types/conversations/common_attributes.gen';
 import { EuiBadge, EuiButton, EuiFieldText, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 

@@ -10,7 +10,7 @@ import type { EuiDescriptionListProps } from '@elastic/eui';
 import { EuiDescriptionList, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { formatDuration } from '@kbn/alerting-plugin/common';
 import type { Filter } from '@kbn/es-query';
-import type { AttackDiscoverySchedule } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoverySchedule } from '@kbn/elastic-assistant-common/types/attack_discovery/routes/public/schedules/schedules.gen';
 
 import * as i18n from './translations';
 import { Filters } from './filters';

@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
-import type { Replacements } from '@kbn/elastic-assistant-common';
+import type { Replacements } from '@kbn/elastic-assistant-common/types/conversations/common_attributes.gen';
 import React from 'react';
 
 import { AccordionTitle } from './accordion_title';

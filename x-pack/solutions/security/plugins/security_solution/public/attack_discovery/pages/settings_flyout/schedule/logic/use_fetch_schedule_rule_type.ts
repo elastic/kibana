@@ -9,7 +9,7 @@ import { camelCase, mapKeys } from 'lodash';
 import { useQuery } from '@kbn/react-query';
 import type { RuleType } from '@kbn/triggers-actions-ui-types';
 
-import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
+import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common/constants';
 import * as i18n from './translations';
 import { DEFAULT_QUERY_OPTIONS } from './constants';
 import { ALERTING_RULE_TYPES_URL, fetchRuleTypes } from '../api';

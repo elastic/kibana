@@ -9,7 +9,7 @@ import moment from 'moment';
 
 import { getAverageIntervalSeconds, getTimerPrefix } from './helpers';
 import { APPROXIMATE_TIME_REMAINING, ABOVE_THE_AVERAGE_TIME } from '../translations';
-import type { GenerationInterval } from '@kbn/elastic-assistant-common';
+import type { GenerationInterval } from '@kbn/elastic-assistant-common/types/attack_discovery/common_attributes.gen';
 
 describe('helpers', () => {
   describe('getAverageIntervalSeconds', () => {

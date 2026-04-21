@@ -11,12 +11,9 @@ import { useQueryClient, QueryClient, QueryClientProvider } from '@kbn/react-que
 import type { HttpSetup } from '@kbn/core/public';
 import React from 'react';
 
-import {
-  API_VERSIONS,
-  ATTACK_DISCOVERY_FIND,
-  transformAttackDiscoveryAlertFromApi,
-} from '@kbn/elastic-assistant-common';
-import type { AttackDiscoveryFindResponse } from '@kbn/elastic-assistant-common';
+import { API_VERSIONS, ATTACK_DISCOVERY_FIND } from '@kbn/elastic-assistant-common/constants';
+import { transformAttackDiscoveryAlertFromApi } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryFindResponse } from '@kbn/elastic-assistant-common/types/attack_discovery/routes/public/get/find_attack_discoveries_route.gen';
 
 import { useFindAttackDiscoveries, useInvalidateFindAttackDiscoveries } from '.';
 import { ERROR_FINDING_ATTACK_DISCOVERIES } from './translations';

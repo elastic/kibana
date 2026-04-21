@@ -7,7 +7,8 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
+import type { AttackDiscovery } from '@kbn/elastic-assistant-common/types/attack_discovery/common_attributes.gen';
+import type { Replacements } from '@kbn/elastic-assistant-common/types/conversations/common_attributes.gen';
 import React, { useMemo } from 'react';
 
 import { AlertsBadge } from './alerts_badge';

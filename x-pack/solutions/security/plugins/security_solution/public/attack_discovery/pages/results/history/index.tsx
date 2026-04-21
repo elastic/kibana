@@ -14,7 +14,8 @@ import {
   HISTORY_QUERY_LOCAL_STORAGE_KEY,
   useAssistantContext,
 } from '@kbn/elastic-assistant';
-import type { AttackDiscoveryAlert, Replacements } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common/types/attack_discovery/attack_discovery_alert.gen';
+import type { Replacements } from '@kbn/elastic-assistant-common/types/conversations/common_attributes.gen';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 

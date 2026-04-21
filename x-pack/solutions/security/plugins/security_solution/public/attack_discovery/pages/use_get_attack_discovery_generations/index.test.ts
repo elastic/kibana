@@ -12,7 +12,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 
 import { useGetAttackDiscoveryGenerations, useInvalidateGetAttackDiscoveryGenerations } from '.';
-import { ATTACK_DISCOVERY_GENERATIONS } from '@kbn/elastic-assistant-common';
+import { ATTACK_DISCOVERY_GENERATIONS } from '@kbn/elastic-assistant-common/constants';
 import { ERROR_RETRIEVING_ATTACK_DISCOVERY_GENERATIONS } from './translations';
 
 const mockAddError = jest.fn();

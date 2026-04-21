@@ -7,10 +7,8 @@
 
 import React, { useMemo } from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import {
-  replaceAnonymizedValuesWithOriginalValues,
-  type AttackDiscoveryAlert,
-} from '@kbn/elastic-assistant-common';
+import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common/types/attack_discovery/attack_discovery_alert.gen';
 import { i18n } from '@kbn/i18n';
 
 import { RuleStatus } from '../../../../../timelines/components/timeline/body/renderers/rule_status';

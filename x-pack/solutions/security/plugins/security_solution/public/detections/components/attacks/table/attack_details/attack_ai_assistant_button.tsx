@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common/types/attack_discovery/attack_discovery_alert.gen';
 import { AiButton } from '@kbn/shared-ux-ai-components';
 import { useViewInAiAssistant } from '../../../../../attack_discovery/pages/results/attack_discovery_panel/view_in_ai_assistant/use_view_in_ai_assistant';
 import { VIEW_IN_AI_ASSISTANT } from '../../../../../attack_discovery/pages/results/attack_discovery_panel/view_in_ai_assistant/translations';

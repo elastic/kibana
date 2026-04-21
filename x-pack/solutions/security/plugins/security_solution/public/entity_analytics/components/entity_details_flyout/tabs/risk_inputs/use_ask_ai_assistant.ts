@@ -7,7 +7,7 @@
 
 import { useMemo, useCallback } from 'react';
 import { useAssistantOverlay } from '@kbn/elastic-assistant';
-import { type Replacements } from '@kbn/elastic-assistant-common';
+import type { Replacements } from '@kbn/elastic-assistant-common/types/conversations/common_attributes.gen';
 
 import { useAssistantAvailability } from '../../../../../assistant/use_assistant_availability';
 

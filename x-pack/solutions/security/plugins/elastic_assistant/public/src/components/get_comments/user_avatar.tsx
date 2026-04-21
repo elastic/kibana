@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiAvatar } from '@elastic/eui';
-import type { User } from '@kbn/elastic-assistant-common';
+import type { User } from '@kbn/elastic-assistant-common/types/common_attributes.gen';
 import { UserAvatar } from '@kbn/user-profile-components';
 import { useUserProfile } from './use_user_profile';
 import * as i18n from './translations';

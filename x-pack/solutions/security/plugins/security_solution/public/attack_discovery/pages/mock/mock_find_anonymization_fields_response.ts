@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/types';
 
 export const mockFindAnonymizationFieldsResponse: FindAnonymizationFieldsResponse = {
   perPage: 1000,

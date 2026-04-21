@@ -11,7 +11,7 @@ import type {
   InterruptResumeValue,
   SelectOptionInterruptResumeValue,
   InputTextInterruptResumeValue,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/types/conversations/common_attributes.gen';
 import React from 'react';
 import { SelectOption } from './typed_interrupts/select_option';
 import { InputText } from './typed_interrupts/input_text';

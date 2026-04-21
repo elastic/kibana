@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AttackDiscoverySchedule } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoverySchedule } from '@kbn/elastic-assistant-common/types/attack_discovery/routes/public/schedules/schedules.gen';
 import { AttackDiscoverySchedule as AttackDiscoveryScheduleSchema } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/routes/public/schedules/schedules.gen';
 
 /**

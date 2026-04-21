@@ -6,7 +6,7 @@
  */
 
 import type { AIConnector } from '@kbn/elastic-assistant';
-import type { GetAttackDiscoveryGenerationsResponse } from '@kbn/elastic-assistant-common';
+import type { GetAttackDiscoveryGenerationsResponse } from '@kbn/elastic-assistant-common/types/attack_discovery/routes/public/get/get_attack_discovery_generations_route.gen';
 import { EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
 

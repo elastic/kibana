@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MessageRole } from '@kbn/elastic-assistant-common';
+import type { MessageRole } from '@kbn/elastic-assistant-common/types/conversations/common_attributes.gen';
 import { OpenAiProviderType } from '@kbn/connector-schemas/openai/constants';
 import { getComments } from '.';
 

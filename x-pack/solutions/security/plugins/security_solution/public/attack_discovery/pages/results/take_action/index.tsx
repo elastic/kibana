@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import {
-  type AttackDiscovery,
-  type AttackDiscoveryAlert,
-  getAttackDiscoveryMarkdown,
-  getOriginalAlertIds,
-  type Replacements,
-} from '@kbn/elastic-assistant-common';
+import type { AttackDiscovery } from '@kbn/elastic-assistant-common/types/attack_discovery/common_attributes.gen';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common/types/attack_discovery/attack_discovery_alert.gen';
+import { getAttackDiscoveryMarkdown, getOriginalAlertIds } from '@kbn/elastic-assistant-common';
+import type { Replacements } from '@kbn/elastic-assistant-common/types/conversations/common_attributes.gen';
 import { i18n as i18nTranslate } from '@kbn/i18n';
 import {
   EuiButtonEmpty,

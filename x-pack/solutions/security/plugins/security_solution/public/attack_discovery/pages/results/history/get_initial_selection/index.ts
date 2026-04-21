@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common/types/attack_discovery/attack_discovery_alert.gen';
 
 export const getInitialSelection = (
   attackDiscoveries: AttackDiscoveryAlert[]

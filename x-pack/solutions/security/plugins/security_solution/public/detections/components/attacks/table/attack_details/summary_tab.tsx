@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
-import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common/types/attack_discovery/attack_discovery_alert.gen';
 import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
 import { TableId } from '@kbn/securitysolution-data-table';
 

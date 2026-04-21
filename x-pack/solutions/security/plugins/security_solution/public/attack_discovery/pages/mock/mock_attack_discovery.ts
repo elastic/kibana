@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
+import type { AttackDiscovery } from '@kbn/elastic-assistant-common/types/attack_discovery/common_attributes.gen';
 
 export const mockAttackDiscovery: AttackDiscovery = {
   alertIds: [

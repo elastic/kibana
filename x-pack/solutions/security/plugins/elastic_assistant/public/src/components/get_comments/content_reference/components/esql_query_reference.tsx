@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EsqlContentReference } from '@kbn/elastic-assistant-common';
+import type { EsqlContentReference } from '@kbn/elastic-assistant-common/types/conversations/common_attributes.gen';
 import React, { useCallback } from 'react';
 import { EuiLink } from '@elastic/eui';
 import type { ResolvedContentReferenceNode } from '../content_reference_parser';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AttackDiscoveryApiSchedule } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryApiSchedule } from '@kbn/elastic-assistant-common/types/attack_discovery/routes/public/schedules/schedules_api.gen';
 import { useGetAttackDiscoverySchedule } from './use_get_schedule';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../../../common/hooks/use_app_toasts.mock';

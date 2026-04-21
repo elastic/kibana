@@ -15,7 +15,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common/types/attack_discovery/attack_discovery_alert.gen';
 import { css } from '@emotion/react';
 import { useAssistantContext } from '@kbn/elastic-assistant';
 import { AttackDiscoveryPanel } from './attack_discovery_panel';

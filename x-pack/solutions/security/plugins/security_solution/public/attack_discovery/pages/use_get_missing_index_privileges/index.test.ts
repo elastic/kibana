@@ -11,7 +11,7 @@ import React from 'react';
 import {
   API_VERSIONS,
   ATTACK_DISCOVERY_INTERNAL_MISSING_PRIVILEGES,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/constants';
 
 import { useGetMissingIndexPrivileges } from '.';
 import * as i18n from './translations';

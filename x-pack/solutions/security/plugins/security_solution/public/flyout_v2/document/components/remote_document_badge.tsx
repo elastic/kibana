@@ -16,7 +16,7 @@ import { ALERT_RULE_TYPE_ID, EVENT_KIND } from '@kbn/rule-data-utils';
 import {
   ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID,
   ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/constants';
 import { EventKind } from '../constants/event_kinds';
 import { useKibana } from '../../../common/lib/kibana';
 

@@ -7,11 +7,11 @@
 
 import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common/types/attack_discovery/attack_discovery_alert.gen';
+import type { AttackDiscoveryAlertDocument } from '@kbn/elastic-assistant-common';
 import {
-  type AttackDiscoveryAlert,
   transformAttackDiscoveryAlertDocumentToApi,
   transformAttackDiscoveryAlertFromApi,
-  type AttackDiscoveryAlertDocument,
 } from '@kbn/elastic-assistant-common';
 import { useMemo } from 'react';
 import type { SearchHit } from '../../../../common/search_strategy';

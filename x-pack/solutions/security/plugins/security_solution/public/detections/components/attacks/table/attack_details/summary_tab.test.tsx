@@ -19,7 +19,7 @@ import {
   INVESTIGATE_IN_TIMELINE_LABEL_TEST_ID,
 } from './summary_tab';
 import { TestProviders } from '../../../../../common/mock/test_providers';
-import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common/types/attack_discovery/attack_discovery_alert.gen';
 import { getTacticMetadata } from '../../../../../attack_discovery/helpers';
 import { AttackDiscoveryMarkdownFormatter } from '../../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter';
 import { AttackChain } from '../../../../../attack_discovery/pages/results/attack_discovery_panel/tabs/attack_discovery_tab/attack/attack_chain';

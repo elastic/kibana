@@ -9,8 +9,8 @@ import { useQuery } from '@kbn/react-query';
 import {
   API_VERSIONS,
   ATTACK_DISCOVERY_INTERNAL_MISSING_PRIVILEGES,
-} from '@kbn/elastic-assistant-common';
-import type { GetAttackDiscoveryMissingPrivilegesInternalResponse } from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/constants';
+import type { GetAttackDiscoveryMissingPrivilegesInternalResponse } from '@kbn/elastic-assistant-common/types/attack_discovery/routes/internal/privileges/get_missing_privileges.gen';
 
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { KibanaServices } from '../../../common/lib/kibana';

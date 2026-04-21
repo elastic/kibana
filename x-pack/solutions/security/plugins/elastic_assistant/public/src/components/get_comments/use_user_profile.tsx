@@ -7,7 +7,7 @@
 
 import { useQuery } from '@kbn/react-query';
 import type { UserProfileAvatarData } from '@kbn/user-profile-components';
-import type { User } from '@kbn/elastic-assistant-common';
+import type { User } from '@kbn/elastic-assistant-common/types/common_attributes.gen';
 import type { UserProfile } from '@kbn/core-user-profile-common';
 import { useKibana } from '../../context/typed_kibana_context/typed_kibana_context';
 export interface UserProfileWithAvatar extends UserProfile {

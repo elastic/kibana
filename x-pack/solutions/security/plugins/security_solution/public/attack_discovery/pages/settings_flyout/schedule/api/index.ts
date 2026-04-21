@@ -13,24 +13,28 @@ import type { RuleType } from '@kbn/triggers-actions-ui-types';
 import type {
   AttackDiscoveryScheduleCreateProps,
   AttackDiscoveryScheduleUpdateProps,
+} from '@kbn/elastic-assistant-common/types/attack_discovery/routes/public/schedules/schedules.gen';
+import type {
   CreateAttackDiscoverySchedulesResponse,
   DeleteAttackDiscoverySchedulesResponse,
   DisableAttackDiscoverySchedulesResponse,
   EnableAttackDiscoverySchedulesResponse,
-  FindAttackDiscoverySchedulesResponse,
   GetAttackDiscoverySchedulesResponse,
   UpdateAttackDiscoverySchedulesResponse,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/types/attack_discovery/routes/public/schedules/crud_attack_discovery_schedules_route.gen';
+import type { FindAttackDiscoverySchedulesResponse } from '@kbn/elastic-assistant-common/types/attack_discovery/routes/public/schedules/get/find_attack_discovery_schedules_route.gen';
 import {
   transformAttackDiscoveryScheduleCreatePropsToApi,
   transformAttackDiscoveryScheduleUpdatePropsToApi,
+} from '@kbn/elastic-assistant-common';
+import {
   ATTACK_DISCOVERY_SCHEDULES,
   ATTACK_DISCOVERY_SCHEDULES_BY_ID,
   ATTACK_DISCOVERY_SCHEDULES_BY_ID_DISABLE,
   ATTACK_DISCOVERY_SCHEDULES_BY_ID_ENABLE,
   ATTACK_DISCOVERY_SCHEDULES_FIND,
   API_VERSIONS,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/constants';
 import { KibanaServices } from '../../../../../common/lib/kibana';
 
 export const ALERTING_RULE_TYPES_URL = `${BASE_ALERTING_API_PATH}/rule_types` as const;

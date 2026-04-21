@@ -7,7 +7,7 @@
 
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
+import type { AttackDiscovery } from '@kbn/elastic-assistant-common/types/attack_discovery/common_attributes.gen';
 import { EuiSpacer } from '@elastic/eui';
 import { useExpandSection } from '../../../flyout_v2/shared/hooks/use_expand_section';
 import { ExpandableSection } from '../../../flyout_v2/shared/components/expandable_section';

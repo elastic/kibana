@@ -6,7 +6,8 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import type { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
+import type { AttackDiscovery } from '@kbn/elastic-assistant-common/types/attack_discovery/common_attributes.gen';
+import type { Replacements } from '@kbn/elastic-assistant-common/types/conversations/common_attributes.gen';
 import React from 'react';
 
 import { AttackDiscoveryTab } from './attack_discovery_tab';

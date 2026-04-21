@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { AttackDiscovery, AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
+import type { AttackDiscovery } from '@kbn/elastic-assistant-common/types/attack_discovery/common_attributes.gen';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common/types/attack_discovery/attack_discovery_alert.gen';
 
 export const isAttackDiscoveryAlert = (
   obj: AttackDiscovery | AttackDiscoveryAlert

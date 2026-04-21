@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { act, render, screen, within } from '@testing-library/react';
-import type { AttackDiscoverySchedule } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoverySchedule } from '@kbn/elastic-assistant-common/types/attack_discovery/routes/public/schedules/schedules.gen';
 
 import { Header } from '.';
 import { TestProviders } from '../../../../../../common/mock';

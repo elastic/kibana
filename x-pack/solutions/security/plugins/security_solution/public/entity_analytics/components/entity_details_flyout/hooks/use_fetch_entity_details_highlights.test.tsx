@@ -6,7 +6,8 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import type { AnonymizationFieldResponse, Replacements } from '@kbn/elastic-assistant-common';
+import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/types/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import type { Replacements } from '@kbn/elastic-assistant-common/types/conversations/common_attributes.gen';
 import { useFetchEntityDetailsHighlights } from './use_fetch_entity_details_highlights';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import type { EntityHighlightsResponse } from '../types';

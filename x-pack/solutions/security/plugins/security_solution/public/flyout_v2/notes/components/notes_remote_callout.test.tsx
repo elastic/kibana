@@ -12,7 +12,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import {
   ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID,
   ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/constants';
 import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import {
   LINKED_PROJECT_ATTACK_NOTES_MESSAGE,

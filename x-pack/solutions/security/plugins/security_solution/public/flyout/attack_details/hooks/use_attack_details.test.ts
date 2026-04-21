@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common/types/attack_discovery/attack_discovery_alert.gen';
 import {
   transformAttackDiscoveryAlertDocumentToApi,
   transformAttackDiscoveryAlertFromApi,

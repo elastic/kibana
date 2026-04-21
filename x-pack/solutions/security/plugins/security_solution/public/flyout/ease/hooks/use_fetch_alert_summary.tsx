@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { FindAlertSummaryResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { FindAlertSummaryResponse } from '@kbn/elastic-assistant-common/types';
 import { useQuery } from '@kbn/react-query';
 import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL_FIND,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/constants';
 import { useAssistantContext } from '@kbn/elastic-assistant';
 
 export interface UseFetchAlertSummaryParams {

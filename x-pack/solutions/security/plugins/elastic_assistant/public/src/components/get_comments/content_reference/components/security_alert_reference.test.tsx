@@ -12,7 +12,7 @@ import { SecurityAlertReference } from './security_alert_reference';
 import { useKibana } from '../../../../context/typed_kibana_context/typed_kibana_context';
 import { useAssistantContext } from '@kbn/elastic-assistant';
 import type { ResolvedContentReferenceNode } from '../content_reference_parser';
-import type { SecurityAlertContentReference } from '@kbn/elastic-assistant-common';
+import type { SecurityAlertContentReference } from '@kbn/elastic-assistant-common/types/conversations/common_attributes.gen';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { URL_PARAM_KEY } from '../../../../hooks/navigate_to_alerts_page_with_filters/constants';
 import { SECURITY_ALERT_REFERENCE_LABEL } from './translations';

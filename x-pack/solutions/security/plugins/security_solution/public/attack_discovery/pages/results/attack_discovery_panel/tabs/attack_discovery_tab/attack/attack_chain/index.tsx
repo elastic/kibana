@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { memo, useMemo } from 'react';
 
-import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
+import type { AttackDiscovery } from '@kbn/elastic-assistant-common/types/attack_discovery/common_attributes.gen';
 import { getTacticMetadata } from '@kbn/elastic-assistant-common/impl/utils/attack_discovery_helpers';
 import { Tactic } from './tactic';
 import { TacticVerticalRow } from './tactic_vertical_row';

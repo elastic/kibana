@@ -10,7 +10,7 @@ import React from 'react';
 import type {
   SelectOptionInterruptValue,
   SelectOptionInterruptResumeValue,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/types/conversations/common_attributes.gen';
 import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiSpacer, EuiBadge } from '@elastic/eui';
 
 interface Props {

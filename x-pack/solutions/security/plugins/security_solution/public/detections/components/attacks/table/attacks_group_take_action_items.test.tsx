@@ -17,7 +17,7 @@ import { useAttackTagsContextMenuItems } from '../../../hooks/attacks/bulk_actio
 import { useAttackInvestigateInTimelineContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_investigate_in_timeline_context_menu_items';
 import { useAttackCaseContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_case_context_menu_items';
 import { useAttackRunWorkflowContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_run_workflow_context_menu_items';
-import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common/types/attack_discovery/attack_discovery_alert.gen';
 
 jest.mock(
   '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_view_in_ai_assistant_context_menu_items'

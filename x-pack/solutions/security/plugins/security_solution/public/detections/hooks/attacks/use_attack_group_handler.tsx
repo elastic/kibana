@@ -9,7 +9,7 @@ import { useCallback, useMemo } from 'react';
 import { isArray } from 'lodash/fp';
 import type { RawBucket } from '@kbn/grouping/src';
 import { useAssistantContext } from '@kbn/elastic-assistant';
-import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common/types/attack_discovery/attack_discovery_alert.gen';
 
 import { ALERT_ATTACK_IDS } from '../../../../common/field_maps/field_names';
 import { useFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';

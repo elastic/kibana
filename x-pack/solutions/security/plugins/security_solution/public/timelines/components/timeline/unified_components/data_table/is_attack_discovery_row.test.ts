@@ -9,7 +9,7 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import {
   ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID,
   ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/constants';
 import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import type { TimelineItem } from '../../../../../../common/search_strategy';
 import { isAttackDiscoveryRow } from './is_attack_discovery_row';

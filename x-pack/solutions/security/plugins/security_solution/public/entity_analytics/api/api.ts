@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common';
+import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/types/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import {
   API_VERSIONS as ENTITY_STORE_API_VERSIONS,
   type EntityMaintainerResponseItem,

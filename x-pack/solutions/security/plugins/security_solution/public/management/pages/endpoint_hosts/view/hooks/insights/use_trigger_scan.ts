@@ -6,8 +6,8 @@
  */
 
 import { useMutation } from '@kbn/react-query';
-import type { DefendInsightsResponse } from '@kbn/elastic-assistant-common';
-import { API_VERSIONS, DEFEND_INSIGHTS } from '@kbn/elastic-assistant-common';
+import type { DefendInsightsResponse } from '@kbn/elastic-assistant-common/types/defend_insights/common_attributes.gen';
+import { API_VERSIONS, DEFEND_INSIGHTS } from '@kbn/elastic-assistant-common/constants';
 import { useFetchAnonymizationFields } from '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields';
 import type { WorkflowInsightType } from '../../../../../../../common/endpoint/types/workflow_insights';
 import { useKibana, useToasts } from '../../../../../../common/lib/kibana';

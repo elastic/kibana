@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { GetAttackDiscoveryGenerationsResponse } from '@kbn/elastic-assistant-common';
+import type { GetAttackDiscoveryGenerationsResponse } from '@kbn/elastic-assistant-common/types/attack_discovery/routes/public/get/get_attack_discovery_generations_route.gen';
 
 export const getMockGenerations = (): GetAttackDiscoveryGenerationsResponse => ({
   generations: [

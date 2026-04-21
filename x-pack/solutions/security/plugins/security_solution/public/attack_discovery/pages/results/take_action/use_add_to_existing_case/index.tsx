@@ -8,7 +8,8 @@
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentWithoutOwner } from '@kbn/cases-plugin/public/types';
 import { useAssistantContext } from '@kbn/elastic-assistant';
-import { getOriginalAlertIds, type Replacements } from '@kbn/elastic-assistant-common';
+import { getOriginalAlertIds } from '@kbn/elastic-assistant-common';
+import type { Replacements } from '@kbn/elastic-assistant-common/types/conversations/common_attributes.gen';
 import { useCallback } from 'react';
 
 import { useKibana } from '../../../../../common/lib/kibana';

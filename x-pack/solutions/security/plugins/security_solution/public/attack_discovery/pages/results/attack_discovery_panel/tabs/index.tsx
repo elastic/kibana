@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
+import type { AttackDiscovery } from '@kbn/elastic-assistant-common/types/attack_discovery/common_attributes.gen';
+import type { Replacements } from '@kbn/elastic-assistant-common/types/conversations/common_attributes.gen';
 import { EuiTabs, EuiTab } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 

@@ -8,7 +8,7 @@
 import { useLocation } from 'react-router-dom';
 import React, { memo, useCallback } from 'react';
 import { EuiButtonEmpty, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common/types/attack_discovery/attack_discovery_alert.gen';
 import { css } from '@emotion/react';
 import { useNavigateTo } from '@kbn/security-solution-navigation';
 import { i18n } from '@kbn/i18n';

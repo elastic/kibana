@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AttackDiscoverySchedule } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoverySchedule } from '@kbn/elastic-assistant-common/types/attack_discovery/routes/public/schedules/schedules.gen';
 
 export const mockFindAttackDiscoverySchedules: {
   schedules: AttackDiscoverySchedule[];

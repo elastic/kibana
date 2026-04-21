@@ -7,7 +7,7 @@
 
 import { renderHook, act } from '@testing-library/react';
 import { useTriggerScan } from './use_trigger_scan';
-import { API_VERSIONS, DEFEND_INSIGHTS } from '@kbn/elastic-assistant-common';
+import { API_VERSIONS, DEFEND_INSIGHTS } from '@kbn/elastic-assistant-common/constants';
 
 const mockHttpPost = jest.fn();
 

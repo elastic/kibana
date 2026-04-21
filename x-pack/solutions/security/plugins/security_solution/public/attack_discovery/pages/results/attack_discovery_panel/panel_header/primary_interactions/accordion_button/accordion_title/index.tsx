@@ -7,10 +7,8 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSkeletonTitle, EuiTitle } from '@elastic/eui';
 import { css } from '@emotion/react';
-import {
-  replaceAnonymizedValuesWithOriginalValues,
-  type Replacements,
-} from '@kbn/elastic-assistant-common';
+import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
+import type { Replacements } from '@kbn/elastic-assistant-common/types/conversations/common_attributes.gen';
 import React, { useMemo } from 'react';
 
 interface Props {

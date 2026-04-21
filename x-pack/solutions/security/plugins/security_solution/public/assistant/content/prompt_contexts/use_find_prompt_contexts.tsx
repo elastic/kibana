@@ -8,7 +8,7 @@
 import { useFindPrompts } from '@kbn/elastic-assistant';
 import type { HttpHandler } from '@kbn/core-http-browser';
 import type { IToasts } from '@kbn/core-notifications-browser';
-import type { FindSecurityAIPromptsRequestQuery } from '@kbn/elastic-assistant-common';
+import type { FindSecurityAIPromptsRequestQuery } from '@kbn/elastic-assistant-common/types/security_ai_prompts/find_prompts_route.gen';
 import { DATA_QUALITY_SUGGESTED_USER_PROMPT } from '@kbn/ecs-data-quality-dashboard';
 import { EXPLAIN_THEN_SUMMARIZE_RULE_DETAILS } from '../../../detection_engine/common/translations';
 import { EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE } from '../prompts/user/translations';

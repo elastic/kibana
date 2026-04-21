@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
+import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common/constants';
 
 export const dsl = {
   isAttack: (): estypes.QueryDslQueryContainer => ({

@@ -7,7 +7,11 @@
 
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { HttpSetup } from '@kbn/core-http-browser';
-import type { User, Message, ConversationCreateProps } from '@kbn/elastic-assistant-common';
+import type { User } from '@kbn/elastic-assistant-common/types/common_attributes.gen';
+import type {
+  Message,
+  ConversationCreateProps,
+} from '@kbn/elastic-assistant-common/types/conversations/common_attributes.gen';
 import { parse } from '@kbn/datemath';
 import { bulkUpdateConversations } from '@kbn/elastic-assistant';
 import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugin/public/common/constants';

@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import type { AttackDiscoverySchedule } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoverySchedule } from '@kbn/elastic-assistant-common/types/attack_discovery/routes/public/schedules/schedules.gen';
 import * as i18n from './translations';
 import type { TableColumn } from './constants';
 import { StatusBadge } from '../../common/status_badge';

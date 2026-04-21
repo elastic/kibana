@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ContentReference } from '@kbn/elastic-assistant-common';
+import type { ContentReference } from '@kbn/elastic-assistant-common/types/conversations/common_attributes.gen';
 import { ContentReferenceComponentFactory } from './content_reference_component_factory';
 import React from 'react';
 import { render, screen } from '@testing-library/react';

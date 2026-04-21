@@ -11,11 +11,11 @@ import type { HttpSetup, IToasts } from '@kbn/core/public';
 import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL_BULK_ACTION,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/constants';
 import type {
   PerformAlertSummaryBulkActionRequestBody,
   PerformAlertSummaryBulkActionResponse,
-} from '@kbn/elastic-assistant-common/impl/schemas';
+} from '@kbn/elastic-assistant-common/types';
 import { useAssistantContext } from '@kbn/elastic-assistant';
 
 interface BulkUpdateAlertSummaryProps {

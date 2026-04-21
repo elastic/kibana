@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ProductDocumentationContentReference } from '@kbn/elastic-assistant-common';
+import type { ProductDocumentationContentReference } from '@kbn/elastic-assistant-common/types/conversations/common_attributes.gen';
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
 import type { ResolvedContentReferenceNode } from '../content_reference_parser';

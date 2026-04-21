@@ -6,15 +6,10 @@
  */
 
 import type { HttpSetup, IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
-import type {
-  AttackDiscoveryFindResponse,
-  AttackDiscoveryFindInternalResponse,
-} from '@kbn/elastic-assistant-common';
-import {
-  API_VERSIONS,
-  ATTACK_DISCOVERY_FIND,
-  transformAttackDiscoveryAlertFromApi,
-} from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryFindResponse } from '@kbn/elastic-assistant-common/types/attack_discovery/routes/public/get/find_attack_discoveries_route.gen';
+import type { AttackDiscoveryFindInternalResponse } from '@kbn/elastic-assistant-common/types/attack_discovery/attack_discovery_find_internal_response.gen';
+import { API_VERSIONS, ATTACK_DISCOVERY_FIND } from '@kbn/elastic-assistant-common/constants';
+import { transformAttackDiscoveryAlertFromApi } from '@kbn/elastic-assistant-common';
 import type { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@kbn/react-query';
 import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useCallback, useRef } from 'react';

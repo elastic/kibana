@@ -7,11 +7,9 @@
 
 import { useMemo, useCallback } from 'react';
 import { useAssistantOverlay } from '@kbn/elastic-assistant';
-import {
-  getAttackDiscoveryMarkdown,
-  type AttackDiscovery,
-  type Replacements,
-} from '@kbn/elastic-assistant-common';
+import { getAttackDiscoveryMarkdown } from '@kbn/elastic-assistant-common';
+import type { AttackDiscovery } from '@kbn/elastic-assistant-common/types/attack_discovery/common_attributes.gen';
+import type { Replacements } from '@kbn/elastic-assistant-common/types/conversations/common_attributes.gen';
 import { useAssistantAvailability } from '../../../../../assistant/use_assistant_availability';
 
 /**

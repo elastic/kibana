@@ -6,11 +6,8 @@
  */
 
 import { useAssistantContext } from '@kbn/elastic-assistant';
-import {
-  API_VERSIONS,
-  ATTACK_DISCOVERY_GENERATE,
-  PostAttackDiscoveryGenerateResponse,
-} from '@kbn/elastic-assistant-common';
+import { API_VERSIONS, ATTACK_DISCOVERY_GENERATE } from '@kbn/elastic-assistant-common/constants';
+import { PostAttackDiscoveryGenerateResponse } from '@kbn/elastic-assistant-common';
 import { isEmpty } from 'lodash/fp';
 import { useCallback, useState } from 'react';
 import { useFetchAnonymizationFields } from '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields';

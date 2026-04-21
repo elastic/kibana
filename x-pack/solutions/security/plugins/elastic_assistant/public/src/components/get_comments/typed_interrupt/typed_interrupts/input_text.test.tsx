@@ -10,7 +10,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import type {
   InputTextInterruptValue,
   InputTextInterruptResumeValue,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/types/conversations/common_attributes.gen';
 import { InputText } from './input_text';
 import { I18nProvider } from '@kbn/i18n-react';
 

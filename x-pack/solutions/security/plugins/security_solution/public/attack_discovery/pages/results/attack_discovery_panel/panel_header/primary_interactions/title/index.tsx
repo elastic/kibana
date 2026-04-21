@@ -15,12 +15,10 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import {
-  ATTACK_DISCOVERY_AD_HOC_RULE_ID,
-  type AttackDiscovery,
-  type AttackDiscoveryAlert,
-  type Replacements,
-} from '@kbn/elastic-assistant-common';
+import { ATTACK_DISCOVERY_AD_HOC_RULE_ID } from '@kbn/elastic-assistant-common/constants';
+import type { AttackDiscovery } from '@kbn/elastic-assistant-common/types/attack_discovery/common_attributes.gen';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common/types/attack_discovery/attack_discovery_alert.gen';
+import type { Replacements } from '@kbn/elastic-assistant-common/types/conversations/common_attributes.gen';
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
 

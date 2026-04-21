@@ -8,7 +8,7 @@
 import type {
   AttackDiscoverySchedule,
   AttackDiscoveryScheduleCreateProps,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/types/attack_discovery/routes/public/schedules/schedules.gen';
 
 export const mockAttackDiscoverySchedule: AttackDiscoverySchedule = {
   id: 'ffaa0a8a-3c35-4166-9f73-70baac2b6b42',

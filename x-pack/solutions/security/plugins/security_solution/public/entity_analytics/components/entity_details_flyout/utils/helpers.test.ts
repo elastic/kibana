@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Replacements } from '@kbn/elastic-assistant-common';
+import type { Replacements } from '@kbn/elastic-assistant-common/types/conversations/common_attributes.gen';
 import { getAnonymizedEntityIdentifier } from './helpers';
 
 describe('getAnonymizedEntityIdentifier', () => {

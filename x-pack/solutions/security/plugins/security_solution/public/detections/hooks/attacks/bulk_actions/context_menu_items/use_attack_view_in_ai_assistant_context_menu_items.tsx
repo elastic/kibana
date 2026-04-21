@@ -7,10 +7,8 @@
 
 import { useCallback, useMemo } from 'react';
 import { useAssistantContext } from '@kbn/elastic-assistant';
-import {
-  getAttackDiscoveryMarkdown,
-  type AttackDiscoveryAlert,
-} from '@kbn/elastic-assistant-common';
+import { getAttackDiscoveryMarkdown } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common/types/attack_discovery/attack_discovery_alert.gen';
 import type { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
 
 import { useReportAddToChat } from '../../../../../agent_builder/hooks/use_report_add_to_chat';

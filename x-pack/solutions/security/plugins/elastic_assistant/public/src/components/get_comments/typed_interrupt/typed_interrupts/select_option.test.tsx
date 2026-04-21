@@ -10,7 +10,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import type {
   SelectOptionInterruptValue,
   SelectOptionInterruptResumeValue,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/types/conversations/common_attributes.gen';
 import { SelectOption } from './select_option';
 
 describe('SelectOption', () => {

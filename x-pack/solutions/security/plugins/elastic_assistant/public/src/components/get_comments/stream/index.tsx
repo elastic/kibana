@@ -11,7 +11,7 @@ import type {
   InterruptResumeValue,
   InterruptValue,
   MessageRole,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/types/conversations/common_attributes.gen';
 import type { ResumeGraphFunction } from '@kbn/elastic-assistant/impl/assistant_context/types';
 import type { ContentMessage } from '..';
 import { useStream } from './use_stream';

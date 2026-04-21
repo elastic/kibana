@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common/types/attack_discovery/attack_discovery_alert.gen';
 import { AnonymizationSettingsManagement } from '@kbn/elastic-assistant/impl/data_anonymization/settings/anonymization_settings_management';
 import { SelectedActions } from './selected_actions';
 import { SummaryCount } from './summary_count';

@@ -8,8 +8,8 @@
 import {
   ATTACK_DISCOVERY_GENERATIONS_BY_ID_DISMISS,
   API_VERSIONS,
-} from '@kbn/elastic-assistant-common';
-import { type PostAttackDiscoveryGenerationsDismissResponse } from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/constants';
+import type { PostAttackDiscoveryGenerationsDismissResponse } from '@kbn/elastic-assistant-common/types/attack_discovery/routes/public/post/post_attack_discovery_generations_dismiss.route.gen';
 import { replaceParams } from '@kbn/openapi-common/shared';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import '@kbn/react-query/mock';

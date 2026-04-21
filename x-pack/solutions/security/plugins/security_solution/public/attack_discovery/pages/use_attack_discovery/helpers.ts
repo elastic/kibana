@@ -6,7 +6,7 @@
  */
 
 import type { TraceOptions } from '@kbn/elastic-assistant/impl/assistant/types';
-import type { PostAttackDiscoveryGenerateRequestBody } from '@kbn/elastic-assistant-common';
+import type { PostAttackDiscoveryGenerateRequestBody } from '@kbn/elastic-assistant-common/types/attack_discovery/routes/public/post/post_attack_discovery_generate.gen';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import type { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { isEmpty } from 'lodash/fp';

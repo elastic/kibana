@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { PostAttackDiscoveryGenerationsDismissResponse } from '@kbn/elastic-assistant-common';
+import type { PostAttackDiscoveryGenerationsDismissResponse } from '@kbn/elastic-assistant-common/types/attack_discovery/routes/public/post/post_attack_discovery_generations_dismiss.route.gen';
 import {
   ATTACK_DISCOVERY_GENERATIONS_BY_ID_DISMISS,
   API_VERSIONS,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/constants';
 import { replaceParams } from '@kbn/openapi-common/shared';
 import { useMutation } from '@kbn/react-query';
 

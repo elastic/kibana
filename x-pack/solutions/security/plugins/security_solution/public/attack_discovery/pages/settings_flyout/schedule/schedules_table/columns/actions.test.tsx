@@ -8,7 +8,7 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { EuiTableFieldDataColumnType } from '@elastic/eui';
-import type { AttackDiscoverySchedule } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoverySchedule } from '@kbn/elastic-assistant-common/types/attack_discovery/routes/public/schedules/schedules.gen';
 
 import { createActionsColumn } from './actions';
 import { TestProviders } from '../../../../../../common/mock';

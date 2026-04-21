@@ -7,7 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { AttackDiscoverySchedule } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoverySchedule } from '@kbn/elastic-assistant-common/types/attack_discovery/routes/public/schedules/schedules.gen';
 
 import * as i18n from './translations';
 import type { TableColumn } from './constants';

@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { useCallback, useState } from 'react';
-import type { AnonymizationFieldResponse, Replacements } from '@kbn/elastic-assistant-common';
+import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/types/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import type { Replacements } from '@kbn/elastic-assistant-common/types/conversations/common_attributes.gen';
 import type { ToolSchema } from '@kbn/inference-common';
 import { isInferenceRequestAbortedError } from '@kbn/inference-common';
 import { i18n } from '@kbn/i18n';

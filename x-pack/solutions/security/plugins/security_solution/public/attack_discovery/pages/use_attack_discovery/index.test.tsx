@@ -6,7 +6,7 @@
  */
 
 import { useFetchAnonymizationFields } from '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields';
-import { API_VERSIONS, ATTACK_DISCOVERY_GENERATE } from '@kbn/elastic-assistant-common';
+import { API_VERSIONS, ATTACK_DISCOVERY_GENERATE } from '@kbn/elastic-assistant-common/constants';
 import { renderHook, act } from '@testing-library/react';
 import React from 'react';
 

@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common/types/attack_discovery/attack_discovery_alert.gen';
 import type { Filter } from '@kbn/es-query';
 import { EuiSpacer, EuiTabs, EuiTab, EuiNotificationBadge } from '@elastic/eui';
 

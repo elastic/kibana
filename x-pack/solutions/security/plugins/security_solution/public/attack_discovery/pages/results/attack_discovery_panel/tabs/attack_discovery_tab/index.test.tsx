@@ -9,7 +9,7 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { AttackDiscoveryTab } from '.';
-import type { Replacements } from '@kbn/elastic-assistant-common';
+import type { Replacements } from '@kbn/elastic-assistant-common/types/conversations/common_attributes.gen';
 import { TestProviders } from '../../../../../../common/mock';
 import { mockAttackDiscovery } from '../../../../mock/mock_attack_discovery';
 import { ATTACK_CHAIN, DETAILS, SUMMARY } from './translations';

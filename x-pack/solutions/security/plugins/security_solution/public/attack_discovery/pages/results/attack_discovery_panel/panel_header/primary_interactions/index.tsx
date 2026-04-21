@@ -6,11 +6,9 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import {
-  type AttackDiscovery,
-  type AttackDiscoveryAlert,
-  type Replacements,
-} from '@kbn/elastic-assistant-common';
+import type { AttackDiscovery } from '@kbn/elastic-assistant-common/types/attack_discovery/common_attributes.gen';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common/types/attack_discovery/attack_discovery_alert.gen';
+import type { Replacements } from '@kbn/elastic-assistant-common/types/conversations/common_attributes.gen';
 import { css } from '@emotion/react';
 import React from 'react';
 

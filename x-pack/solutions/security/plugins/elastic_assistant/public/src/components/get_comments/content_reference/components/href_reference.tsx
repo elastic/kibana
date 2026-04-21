@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { HrefContentReference } from '@kbn/elastic-assistant-common';
+import type { HrefContentReference } from '@kbn/elastic-assistant-common/types/conversations/common_attributes.gen';
 import React from 'react';
 import { EuiLink, euiTextTruncate } from '@elastic/eui';
 import { css } from '@emotion/react';

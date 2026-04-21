@@ -2532,6 +2532,20 @@ module.exports = {
     },
 
     /**
+     * Elastic Assistant Common: scripts files
+     */
+    {
+      files: ['x-pack/platform/packages/shared/kbn-elastic-assistant-common/scripts/**/*.{js,ts}'],
+      rules: {
+        'import/no-nodejs-modules': 'off',
+        'no-console': 'off',
+        'no-continue': 'off',
+        '@typescript-eslint/no-non-null-assertion': 'off',
+        'no-process-exit': 'off',
+      },
+    },
+
+    /**
      * Disallow `export *` syntax in plugin/core public/server/common index files and instead
      * require that plugins/core explicitly export the APIs that should be accessible outside the plugin.
      *
@@ -2875,6 +2889,35 @@ module.exports = {
             ],
             disallowedMessage:
               'Use `@kbn/fs` for file write operations instead of direct `fs` in production code',
+          },
+        ],
+      },
+    },
+
+    /**
+     * Prevent client-side code from pulling in heavy Zod schemas via the impl/schemas barrel.
+     * Use deep @kbn/elastic-assistant-common/types/<path>.gen imports or
+     * @kbn/elastic-assistant-common/constants instead.
+     */
+    {
+      files: [
+        'x-pack/solutions/security/plugins/security_solution/public/**/*.{ts,tsx}',
+        'x-pack/solutions/security/plugins/elastic_assistant/public/**/*.{ts,tsx}',
+      ],
+      rules: {
+        'no-restricted-imports': [
+          'warn',
+          {
+            patterns: [
+              {
+                group: [
+                  '@kbn/elastic-assistant-common/impl/schemas',
+                  '@kbn/elastic-assistant-common/impl/schemas/index',
+                ],
+                message:
+                  'Use deep @kbn/elastic-assistant-common/types/<path>.gen imports or @kbn/elastic-assistant-common/constants instead.',
+              },
+            ],
           },
         ],
       },

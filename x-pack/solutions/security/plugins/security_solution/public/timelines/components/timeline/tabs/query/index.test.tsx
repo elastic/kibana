@@ -13,7 +13,7 @@ import { TimelineId } from '../../../../../../common/types/timeline';
 import { useTimelineEventsDetails } from '../../../../containers/details';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { mockSourcererScope } from '../../../../../sourcerer/containers/mocks';
-import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
+import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common/constants';
 import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import {

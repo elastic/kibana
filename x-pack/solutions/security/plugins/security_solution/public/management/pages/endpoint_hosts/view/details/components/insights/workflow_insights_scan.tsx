@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ReadKnowledgeBaseResponse } from '@kbn/elastic-assistant-common';
+import type { ReadKnowledgeBaseResponse } from '@kbn/elastic-assistant-common/types/knowledge_base/crud_kb_route.gen';
 import React, { useCallback, useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { some } from 'lodash';

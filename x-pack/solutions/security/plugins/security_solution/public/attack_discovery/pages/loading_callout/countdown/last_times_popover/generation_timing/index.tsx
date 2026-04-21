@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { GenerationInterval } from '@kbn/elastic-assistant-common';
+import type { GenerationInterval } from '@kbn/elastic-assistant-common/types/attack_discovery/common_attributes.gen';
 import moment from 'moment';
 import React from 'react';
 

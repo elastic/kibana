@@ -4,15 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { DefendInsightsResponse } from '@kbn/elastic-assistant-common';
+import type { DefendInsightsResponse } from '@kbn/elastic-assistant-common/types/defend_insights/common_attributes.gen';
+import { DefendInsightStatusEnum } from '@kbn/elastic-assistant-common';
 import type { Moment } from 'moment';
 import moment from 'moment';
 import { useQuery } from '@kbn/react-query';
-import {
-  API_VERSIONS,
-  DEFEND_INSIGHTS,
-  DefendInsightStatusEnum,
-} from '@kbn/elastic-assistant-common';
+import { API_VERSIONS, DEFEND_INSIGHTS } from '@kbn/elastic-assistant-common/constants';
 import type { WorkflowInsightType } from '../../../../../../../common/endpoint/types/workflow_insights';
 
 import { WORKFLOW_INSIGHTS } from '../../translations';

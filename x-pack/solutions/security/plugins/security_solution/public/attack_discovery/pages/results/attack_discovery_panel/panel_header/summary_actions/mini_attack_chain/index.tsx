@@ -9,7 +9,7 @@ import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
-import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
+import type { AttackDiscovery } from '@kbn/elastic-assistant-common/types/attack_discovery/common_attributes.gen';
 import { getTacticMetadata } from '../../../../../../helpers';
 import { ATTACK_CHAIN_TOOLTIP } from './translations';
 

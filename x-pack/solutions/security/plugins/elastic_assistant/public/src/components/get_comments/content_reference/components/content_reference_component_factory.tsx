@@ -13,7 +13,7 @@ import type {
   ProductDocumentationContentReference,
   SecurityAlertContentReference,
   SecurityAlertsPageContentReference,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/types/conversations/common_attributes.gen';
 import React from 'react';
 import type {
   ContentReferenceNode,

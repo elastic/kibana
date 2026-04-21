@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
+import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common/constants';
 
 import { useGroupStats } from './use_group_stats';
 

@@ -7,11 +7,8 @@
 
 import { renderHook } from '@testing-library/react';
 import { useFetchLatestScan } from './use_fetch_ongoing_tasks';
-import {
-  API_VERSIONS,
-  DEFEND_INSIGHTS,
-  DefendInsightStatusEnum,
-} from '@kbn/elastic-assistant-common';
+import { API_VERSIONS, DEFEND_INSIGHTS } from '@kbn/elastic-assistant-common/constants';
+import { DefendInsightStatusEnum } from '@kbn/elastic-assistant-common';
 
 const mockHttpGet = jest.fn();
 const mockAddDanger = jest.fn();

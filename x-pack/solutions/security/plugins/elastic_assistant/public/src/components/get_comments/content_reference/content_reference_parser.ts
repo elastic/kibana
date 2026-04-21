@@ -6,7 +6,8 @@
  */
 
 import type { RemarkTokenizer } from '@elastic/eui';
-import type { ContentReference, ContentReferenceBlock } from '@kbn/elastic-assistant-common';
+import type { ContentReference } from '@kbn/elastic-assistant-common/types/conversations/common_attributes.gen';
+import type { ContentReferenceBlock } from '@kbn/elastic-assistant-common';
 import type { Plugin } from 'unified';
 import type { Node } from 'unist';
 import type { StreamingOrFinalContentReferences } from './components/content_reference_component_factory';

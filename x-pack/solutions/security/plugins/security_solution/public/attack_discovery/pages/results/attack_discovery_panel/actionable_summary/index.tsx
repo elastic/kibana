@@ -6,11 +6,9 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import {
-  type AttackDiscovery,
-  replaceAnonymizedValuesWithOriginalValues,
-  type Replacements,
-} from '@kbn/elastic-assistant-common';
+import type { AttackDiscovery } from '@kbn/elastic-assistant-common/types/attack_discovery/common_attributes.gen';
+import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
+import type { Replacements } from '@kbn/elastic-assistant-common/types/conversations/common_attributes.gen';
 import React, { useMemo } from 'react';
 
 import { SECURITY_FEATURE_ID } from '../../../../../../common';

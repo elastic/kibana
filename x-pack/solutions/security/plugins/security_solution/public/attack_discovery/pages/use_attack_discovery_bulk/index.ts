@@ -8,8 +8,8 @@
 import type {
   PostAttackDiscoveryBulkRequestBody,
   PostAttackDiscoveryBulkResponse,
-} from '@kbn/elastic-assistant-common';
-import { ATTACK_DISCOVERY_BULK, API_VERSIONS } from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/types/attack_discovery/routes/public/post/post_attack_discovery_bulk_route.gen';
+import { ATTACK_DISCOVERY_BULK, API_VERSIONS } from '@kbn/elastic-assistant-common/constants';
 import { useMutation } from '@kbn/react-query';
 import { useCallback } from 'react';
 

@@ -10,17 +10,19 @@ import { replaceParams } from '@kbn/openapi-common/shared';
 import type {
   AttackDiscoveryScheduleCreateProps,
   AttackDiscoveryScheduleUpdateProps,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/types/attack_discovery/routes/public/schedules/schedules.gen';
 import {
   transformAttackDiscoveryScheduleCreatePropsToApi,
   transformAttackDiscoveryScheduleUpdatePropsToApi,
+} from '@kbn/elastic-assistant-common';
+import {
   ATTACK_DISCOVERY_SCHEDULES,
   ATTACK_DISCOVERY_SCHEDULES_BY_ID,
   ATTACK_DISCOVERY_SCHEDULES_BY_ID_DISABLE,
   ATTACK_DISCOVERY_SCHEDULES_BY_ID_ENABLE,
   ATTACK_DISCOVERY_SCHEDULES_FIND,
   API_VERSIONS,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/constants';
 
 import {
   ALERTING_RULE_TYPES_URL,
