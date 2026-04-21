@@ -29,6 +29,8 @@ export interface OsqueryApiService {
   };
   savedQueries: {
     create: (body: Record<string, unknown>) => Promise<any>;
+    /** Lists saved queries so UI-driven creates can be resolved back to a saved-object id for cleanup. */
+    list: () => Promise<any>;
     delete: (id: string) => Promise<void>;
   };
   liveQueries: {
@@ -126,6 +128,19 @@ export const getOsqueryApiService = ({
               path: OSQUERY_SAVED_QUERIES_URL,
               headers,
               body,
+            })
+        ),
+
+      list: async () =>
+        await measurePerformanceAsync(
+          log,
+          'osquery.savedQueries.list',
+          async () =>
+            await kbnClient.request({
+              method: 'GET',
+              path: OSQUERY_SAVED_QUERIES_URL,
+              headers,
+              query: { pageSize: 100 },
             })
         ),
 

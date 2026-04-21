@@ -127,4 +127,57 @@ test.describe('Pack CRUD from UI', { tag: localTags }, () => {
 
     await apiServices.osquery.packs.delete(packId);
   });
+
+  test('deletes a pack from the edit page', async ({
+    browserAuth,
+    page,
+    pageObjects,
+    apiServices,
+  }) => {
+    test.setTimeout(300_000);
+    await browserAuth.loginAsAdmin();
+
+    // Seed via API so the test focuses on the UI delete flow rather than the
+    // create flow that is already covered by the first test in this file.
+    const policiesResponse = await apiServices.osquery.packs.listFleetWrapperPackagePolicies();
+    const firstPolicyId = (policiesResponse.data as { items: Array<{ policy_ids: string[] }> })
+      .items[0]?.policy_ids?.[0];
+    expect(firstPolicyId).toBeDefined();
+
+    const packName = `scout-pack-delete-${Date.now()}`;
+    const created = await apiServices.osquery.packs.create({
+      name: packName,
+      enabled: true,
+      description: 'scout delete',
+      shards: {},
+      policy_ids: [firstPolicyId!],
+      queries: {
+        [savedQueryLabel]: {
+          ecs_mapping: {},
+          interval: 60,
+          query: 'select * from uptime;',
+        },
+      },
+    });
+    const packId = (created.data as { data: { saved_object_id: string } }).data.saved_object_id;
+
+    try {
+      await pageObjects.osqueryPackForm.navigateToPacksList();
+      await pageObjects.osqueryPackForm.setPagination50Rows();
+      await pageObjects.osqueryPackForm.openPackFromList(packName);
+      await pageObjects.osqueryPackForm.openEditPack();
+
+      await page.getByRole('button', { name: /^Delete pack$/ }).click();
+      await page.getByRole('button', { name: 'Confirm' }).click();
+
+      await expect(page.getByText(/Successfully deleted/)).toBeVisible({ timeout: 30_000 });
+      await pageObjects.osqueryPackForm.navigateToPacksList();
+      await pageObjects.osqueryPackForm.setPagination50Rows();
+      await expect(page.getByRole('link', { name: packName })).toBeHidden();
+    } finally {
+      // Idempotent — the delete endpoint ignores 404 so this is a safety net
+      // for cases where the UI flow partially completed before asserting.
+      await apiServices.osquery.packs.delete(packId);
+    }
+  });
 });
