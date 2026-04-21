@@ -13,7 +13,7 @@ paths:
       operationId: DeleteNote
       summary: Delete one or more notes
       description: |
-        Deletes notes by saved object id. Send either `noteId` (single id) or `noteIds` (array of ids) in the JSON body.
+        Deletes notes by saved object ID. Send either `noteId` (single ID) or `noteIds` (array of IDs) in the JSON body.
 
         The response has HTTP 200 with an empty body on success.
 
