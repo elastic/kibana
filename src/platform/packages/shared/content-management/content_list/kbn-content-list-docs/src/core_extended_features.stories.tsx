@@ -24,6 +24,7 @@ import {
   mockTagsService,
   mockContentListUserProfilesServices,
   StateDiagnosticPanel,
+  useInspectFlyout,
 } from './stories_helpers';
 
 // =============================================================================
@@ -65,8 +66,11 @@ const { Filters } = ContentListToolbar;
  * - [x] Starred column — star icon toggle per row
  * - [x] Starred filter — toggle to show only starred items
  * - [x] Created By filter — include/exclude by user (PR 10)
+ * - [x] Content editor — "View details" row action via `item.onInspect` (PR 12)
  */
 const CoreTagsStarredFeaturesWrapper = () => {
+  const { onInspect, flyout } = useInspectFlyout();
+
   const labels = useMemo(
     () => ({
       entity: 'dashboard',
@@ -111,8 +115,9 @@ const CoreTagsStarredFeaturesWrapper = () => {
       onDelete: async (_items: ContentListItem[]) => {
         await new Promise((resolve) => setTimeout(resolve, 300));
       },
+      onInspect,
     }),
-    []
+    [onInspect]
   );
 
   const tableChildren = useMemo(
@@ -123,6 +128,7 @@ const CoreTagsStarredFeaturesWrapper = () => {
         <Column.CreatedBy />
         <Column.UpdatedAt />
         <Column.Actions>
+          <Action.Inspect />
           <Action.Delete />
         </Column.Actions>
       </>
@@ -205,6 +211,7 @@ const CoreTagsStarredFeaturesWrapper = () => {
           <StateDiagnosticPanel defaultOpen element={displayElement} />
         </EuiFlexItem>
       </EuiFlexGroup>
+      {flyout}
     </ContentListProvider>
   );
 };

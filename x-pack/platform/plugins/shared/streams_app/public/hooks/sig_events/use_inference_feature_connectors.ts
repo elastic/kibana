@@ -40,26 +40,25 @@ export interface UseInferenceFeatureConnectorsResult {
 export function useInferenceFeatureConnectors(
   featureId: string
 ): UseInferenceFeatureConnectorsResult {
-  const { core } = useKibana();
-  const { http, notifications } = core;
-
   const {
-    data: aiConnectors,
-    isLoading,
-    error,
-  } = useLoadConnectors({ http, toasts: notifications.toasts, featureId });
+    core: {
+      http,
+      notifications: { toasts },
+    },
+  } = useKibana();
+
+  const query = useLoadConnectors({ http, toasts, featureId });
+  const aiConnectors = query.data;
 
   const connectors = useMemo<InferenceConnector[]>(
     () => (aiConnectors?.length ? aiConnectors.map(toInferenceConnector) : EMPTY_CONNECTORS),
     [aiConnectors]
   );
 
-  const resolvedConnectorId = aiConnectors?.[0]?.id;
-
   return {
     connectors,
-    resolvedConnectorId,
-    loading: isLoading,
-    error: error ?? undefined,
+    resolvedConnectorId: aiConnectors?.[0]?.id,
+    loading: query.isLoading || query.isFetching,
+    error: query.error ?? undefined,
   };
 }

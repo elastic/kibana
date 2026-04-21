@@ -9737,6 +9737,8 @@
             "signature": [
               "(includedHiddenTypes?: string[] | undefined, extensions?: ",
               "SavedObjectsExtensions",
+              " | undefined, serverTiming?: ",
+              "RequestTiming",
               " | undefined) => ",
               "ISavedObjectsRepository"
             ],
@@ -9759,7 +9761,7 @@
                   "string[] | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/server/src/client_factory.ts",
-                "lineNumber": 115,
+                "lineNumber": 116,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -9779,7 +9781,27 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/server/src/client_factory.ts",
-                "lineNumber": 116,
+                "lineNumber": 117,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.SavedObjectsRepositoryFactory.createInternalRepository.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "serverTiming",
+                "description": [
+                  "- Optional server timing API for observability purposes only (not used for authentication)."
+                ],
+                "signature": [
+                  "RequestTiming",
+                  " | undefined"
+                ],
+                "path": "src/core/packages/saved-objects/server/src/client_factory.ts",
+                "lineNumber": 118,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
