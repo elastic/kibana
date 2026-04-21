@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { XYState } from '../../../schema';
+import type { XYConfig } from '../../../schema';
 import { convertLegendToAPIFormat, convertLegendToStateFormat } from './legend';
 import type { XYVisualizationState } from '@kbn/lens-common';
 
 describe('XY Legend Transforms', () => {
-  type ApiLegend = NonNullable<XYState['legend']>;
+  type ApiLegend = NonNullable<XYConfig['legend']>;
   type StateLegend = XYVisualizationState['legend'];
 
   const roundTripLegend = (stateLegend: StateLegend) => {

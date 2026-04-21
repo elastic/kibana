@@ -131,7 +131,6 @@ export class AutomaticImportService {
   private taskManagerSetup: TaskManagerSetupContract;
   private taskManagerService: TaskManagerService;
   private logger: Logger;
-
   constructor(
     loggerFactory: LoggerFactory,
     savedObjectsServiceSetup: SavedObjectsServiceSetup,
