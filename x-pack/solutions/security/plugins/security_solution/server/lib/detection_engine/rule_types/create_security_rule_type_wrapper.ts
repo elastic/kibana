@@ -472,7 +472,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             );
             const suppressedAlertsCount = result.suppressedAlertsCount ?? 0;
 
-            // DEBUG: raw timing arrays prior to sum+round, for flake investigation.
+            // DEBUG: raw timing arrays prior to sum+round, for flake investigation. (run 3)
             logger.info(
               `[debug] ruleType=${rule.ruleTypeId} ` +
                 `searchAfterTimes=${JSON.stringify(result.searchAfterTimes)} ` +
