@@ -59,6 +59,7 @@ export const transformRuleDomainToRule = <Params extends RuleParams = never>(
   };
 
   if (isPublic) {
+    delete rule.snoozedInstances;
     delete rule.snoozeSchedule;
     delete rule.activeSnoozes;
     delete rule.isSnoozedUntil;

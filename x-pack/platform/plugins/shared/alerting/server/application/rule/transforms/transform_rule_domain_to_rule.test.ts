@@ -152,7 +152,6 @@ describe('transformRuleDomainToRule', () => {
       updatedAt: new Date('2019-02-12T21:01:22.479Z'),
       muteAll: false,
       mutedInstanceIds: [],
-      snoozedInstances,
       scheduledTaskId: 'task-123',
       executionStatus: {
         lastExecutionDate: new Date('2019-02-12T21:01:22.479Z'),
@@ -168,6 +167,14 @@ describe('transformRuleDomainToRule', () => {
         statusChangeThreshold: 20,
       },
     });
+  });
+
+  it('should not expose snoozedInstances if isPublic is true', () => {
+    const result = transformRuleDomainToRule(rule, {
+      isPublic: true,
+    });
+
+    expect(result).not.toHaveProperty('snoozedInstances');
   });
 
   it('should include legacy id if includeLegacyId is true', () => {

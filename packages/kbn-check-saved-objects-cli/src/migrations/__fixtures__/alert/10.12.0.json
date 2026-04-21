@@ -15,6 +15,7 @@
       "createdAt": "string",
       "muteAll": "boolean",
       "mutedInstanceIds": "array",
+      "snoozedInstances": "array?",
       "throttle": "string?|null",
       "revision": "number",
       "running": "boolean?|null",
