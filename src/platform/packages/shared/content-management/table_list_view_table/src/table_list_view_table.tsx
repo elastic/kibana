@@ -29,10 +29,7 @@ import {
   ManagedAvatarTip,
   NoCreatorTip,
 } from '@kbn/content-management-user-profiles';
-import type {
-  OpenContentEditorParams,
-  SavedObjectsReference,
-} from '@kbn/content-management-content-editor';
+import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import type { RecentlyAccessed } from '@kbn/recently-accessed';
 import {
@@ -542,9 +539,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
 
   const inspectItem = useCallback(
     (item: T) => {
-      const tags = getTagIdsFromReferences(item.references).map((_id) => {
-        return item.references.find(({ id: refId }) => refId === _id) as SavedObjectsReference;
-      });
+      const tags = getTagIdsFromReferences(item.references);
 
       const close = openContentEditor({
         item: {

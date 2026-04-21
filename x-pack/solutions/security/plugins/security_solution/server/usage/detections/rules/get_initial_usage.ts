@@ -6,6 +6,7 @@
  */
 
 import type {
+  AiCreatedRulesUsage,
   EventLogStatusMetric,
   MaxAvgMin,
   RulesTypeUsage,
@@ -178,6 +179,12 @@ export const getInitialRuleUpgradeStatus = (): UpgradeableRulesSummary => ({
 
 export const getInitialRuleDeprecatedStatus = (): DeprecatedRulesSummary => ({
   total: 0,
+});
+
+export const getInitialAiCreatedRulesUsage = (): AiCreatedRulesUsage => ({
+  total: 0,
+  enabled: 0,
+  disabled: 0,
 });
 
 export const getInitialRuleCustomizationStatus = (): RuleCustomizationCounts => ({

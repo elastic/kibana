@@ -11,6 +11,10 @@ import type {
   AgentBuilderTelemetryEventsMap,
 } from '@kbn/agent-builder-common/telemetry';
 import type {
+  RuleCreationEventTypes,
+  RuleCreationTelemetryEventsMap,
+} from './events/rule_creation/types';
+import type {
   AlertsEventTypes,
   AlertsGroupingTelemetryEventsMap,
 } from './events/alerts_grouping/types';
@@ -69,6 +73,7 @@ import type {
   TrialCompanionTelemetryEventsMap,
 } from './events/trial_companion/types';
 
+export * from './events/rule_creation/types';
 export * from './events/app/types';
 export * from './events/attacks/types';
 export * from './events/alerts_grouping/types';
@@ -88,7 +93,9 @@ export interface TelemetryServiceSetupParams {
 }
 
 // Combine all event type data
-export type TelemetryEventTypeData<T extends TelemetryEventTypes> = T extends AlertsEventTypes
+export type TelemetryEventTypeData<T extends TelemetryEventTypes> = T extends RuleCreationEventTypes
+  ? RuleCreationTelemetryEventsMap[T]
+  : T extends AlertsEventTypes
   ? AlertsGroupingTelemetryEventsMap[T]
   : T extends PreviewRuleEventTypes
   ? PreviewRuleTelemetryEventsMap[T]
@@ -129,6 +136,7 @@ export type TelemetryEventTypeData<T extends TelemetryEventTypes> = T extends Al
   : never;
 
 export type TelemetryEventTypes =
+  | RuleCreationEventTypes
   | AlertsEventTypes
   | PreviewRuleEventTypes
   | EntityEventTypes
