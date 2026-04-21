@@ -9,7 +9,7 @@ Scout is Kibana’s **modern UI and API test framework** built on [Playwright](h
 ## Start here [scout-start-here]
 
 - [Getting started](./scout/getting-started.md)
-- [Best practices](./scout/best-practices.md)
+- [Best practices](./scout/best-practices.md) (see also [UI test best practices](./scout/ui-best-practices.md) and [API test best practices](./scout/api-best-practices.md))
 - [UI testing](./scout/ui-testing.md)
 - [API testing](./scout/api-testing.md)
 
