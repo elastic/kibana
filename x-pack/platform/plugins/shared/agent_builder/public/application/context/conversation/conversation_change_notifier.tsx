@@ -44,7 +44,7 @@ export const ConversationChangeNotifier: React.FC<ConversationChangeNotifierProp
     }
 
     if (isFetched && conversation) {
-      onConversationChange({ id: conversationId, attachments: conversation.attachments });
+      onConversationChange({ id: conversationId, conversation });
     }
   }, [conversationId, conversation, isError, isFetched, onConversationChange]);
 

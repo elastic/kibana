@@ -6,20 +6,20 @@
  */
 
 import type { Observable } from 'rxjs';
-import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import type { Conversation } from '@kbn/agent-builder-common';
 import type { BrowserChatEvent } from './events';
 
-export interface EmbeddableConversationChange {
+export interface ActiveConversation {
   /**
    * Active conversation id, if one already exists.
    * Undefined means we're currently in a new conversation.
    */
   id?: string;
   /**
-   * Existing attachments in the conversation we changed to.
-   * Only present when switching to an existing conversation (when id is defined).
+   * The currently bound conversation, when it has been successfully fetched.
+   * Undefined while the conversation is new, still loading, or failed to load.
    */
-  attachments?: VersionedAttachment[];
+  conversation?: Conversation;
 }
 
 export interface ChatUiEventsContract {
@@ -29,7 +29,7 @@ export interface ChatUiEventsContract {
    *
    * Backed by a `BehaviorSubject`: new subscribers receive the current value immediately.
    */
-  activeConversation$: Observable<EmbeddableConversationChange | null>;
+  activeConversation$: Observable<ActiveConversation | null>;
 }
 
 /**

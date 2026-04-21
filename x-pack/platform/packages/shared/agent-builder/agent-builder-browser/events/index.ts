@@ -9,5 +9,5 @@ export type { BrowserChatEvent } from './events';
 export type {
   EventsServiceStartContract,
   ChatUiEventsContract,
-  EmbeddableConversationChange,
+  ActiveConversation,
 } from './contract';

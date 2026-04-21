@@ -57,7 +57,7 @@ import type {
   AgentBuilderStartDependencies,
   ConversationSidebarRef,
 } from './types';
-import type { EmbeddableConversationChange, EmbeddableConversationProps } from './embeddable/types';
+import type { ActiveConversation, EmbeddableConversationProps } from './embeddable/types';
 import type { OpenConversationSidebarOptions } from './sidebar/types';
 import {
   setSidebarServices,
@@ -89,7 +89,7 @@ export class AgentBuilderPlugin
     addAttachment: (attachment: AttachmentInput) => void;
     invalidateConversation: () => void;
   } | null = null;
-  private activeConversationState$ = new BehaviorSubject<EmbeddableConversationChange | null>(null);
+  private activeConversationState$ = new BehaviorSubject<ActiveConversation | null>(null);
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private experimentalDeepLinksSubscription?: Subscription;
 
@@ -168,7 +168,7 @@ export class AgentBuilderPlugin
 
     const hasAgentBuilder = core.application.capabilities.agentBuilder?.show === true;
     const sidebar = core.chrome.sidebar.getApp('agentBuilder');
-    const notifyConversationChange = (conversation: EmbeddableConversationChange) => {
+    const notifyConversationChange = (conversation: ActiveConversation) => {
       this.activeConversationState$.next(conversation);
     };
 

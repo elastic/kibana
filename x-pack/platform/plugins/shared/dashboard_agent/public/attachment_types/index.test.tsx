@@ -15,10 +15,16 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
-import type { ChatEvent, RoundCompleteEvent, ConversationRound } from '@kbn/agent-builder-common';
+import type {
+  ChatEvent,
+  Conversation,
+  RoundCompleteEvent,
+  ConversationRound,
+} from '@kbn/agent-builder-common';
 import { ChatEventType } from '@kbn/agent-builder-common';
 import { ATTACHMENT_REF_OPERATION } from '@kbn/agent-builder-common/attachments';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
 import { registerDashboardAttachmentUiDefinition } from '.';
 
 jest.mock('@kbn/dashboard-plugin/public', () => ({
@@ -63,6 +69,20 @@ const createMockVersionedAttachment = (
     : [],
   current_version: hasVersions ? 1 : 0,
   origin,
+});
+
+const createMockConversation = (
+  id: string,
+  attachments: VersionedAttachment[] | undefined
+): Conversation => ({
+  id,
+  agent_id: 'test-agent',
+  user: { id: 'user-1', name: 'user-1' },
+  title: 'Test conversation',
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+  rounds: [],
+  attachments,
 });
 
 const toVersionedDashboardAttachment = (
@@ -180,14 +200,8 @@ describe('registerDashboardAttachmentUiDefinition', () => {
     const findDashboardsService = jest.fn().mockResolvedValue({
       findById: jest.fn().mockResolvedValue({ status: 'success' }),
     });
-    const activeConversation$ = new BehaviorSubject<{
-      id?: string;
-      attachments?: VersionedAttachment[];
-    } | null>(null);
-    const emitConversationChange = (change: {
-      id?: string;
-      attachments?: VersionedAttachment[];
-    }) => {
+    const activeConversation$ = new BehaviorSubject<ActiveConversation | null>(null);
+    const emitConversationChange = (change: ActiveConversation) => {
       activeConversation$.next(change);
     };
 
@@ -250,7 +264,9 @@ describe('registerDashboardAttachmentUiDefinition', () => {
     deps.dashboardAppClientApi$.next(api);
     deps.emitConversationChange({
       id: conversationId,
-      attachments: [toVersionedDashboardAttachment(getAttachment())],
+      conversation: createMockConversation(conversationId, [
+        toVersionedDashboardAttachment(getAttachment()),
+      ]),
     });
 
     return () => {
@@ -298,10 +314,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
         events: {
           chat$: new Subject<ChatEvent>(),
           ui: {
-            activeConversation$: new BehaviorSubject<{
-              id?: string;
-              attachments?: VersionedAttachment[];
-            } | null>(null).asObservable(),
+            activeConversation$: new BehaviorSubject<ActiveConversation | null>(null).asObservable(),
           },
         },
       } as unknown as AgentBuilderPluginStart,
@@ -438,7 +451,10 @@ describe('registerDashboardAttachmentUiDefinition', () => {
     it('does not attach the dashboard when navigating to a dashboard with an existing conversation already open', () => {
       const mockApi = createMockDashboardApi();
 
-      deps.emitConversationChange({ id: 'conversation-1', attachments: [] });
+      deps.emitConversationChange({
+        id: 'conversation-1',
+        conversation: createMockConversation('conversation-1', []),
+      });
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
 
       expect(deps.addAttachment).not.toHaveBeenCalled();
@@ -447,7 +463,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
     it('attaches the dashboard when navigating to a dashboard with a new conversation already open', () => {
       const mockApi = createMockDashboardApi();
 
-      deps.emitConversationChange({ id: undefined, attachments: undefined });
+      deps.emitConversationChange({ id: undefined });
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
 
       expect(deps.addAttachment).toHaveBeenCalledWith(
@@ -462,7 +478,10 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       const mockApi = createMockDashboardApi();
 
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
-      deps.emitConversationChange({ id: 'conversation-1', attachments: [] });
+      deps.emitConversationChange({
+        id: 'conversation-1',
+        conversation: createMockConversation('conversation-1', []),
+      });
 
       expect(deps.addAttachment).not.toHaveBeenCalled();
     });
@@ -471,7 +490,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       const mockApi = createMockDashboardApi();
 
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
-      deps.emitConversationChange({ id: undefined, attachments: undefined });
+      deps.emitConversationChange({ id: undefined });
 
       expect(deps.addAttachment).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -486,7 +505,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
 
       deps.currentAppId$.next(null);
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
-      deps.emitConversationChange({ id: undefined, attachments: undefined });
+      deps.emitConversationChange({ id: undefined });
 
       expect(deps.addAttachment).not.toHaveBeenCalled();
 

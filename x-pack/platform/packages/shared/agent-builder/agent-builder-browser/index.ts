@@ -20,7 +20,7 @@ export type {
   EventsServiceStartContract,
   ChatUiEventsContract,
   BrowserChatEvent,
-  EmbeddableConversationChange,
+  ActiveConversation,
 } from './events';
 export { WorkflowComboBox } from './workflow_combo_box';
 export type { WorkflowComboBoxProps, WorkflowComboBoxOption } from './workflow_combo_box';

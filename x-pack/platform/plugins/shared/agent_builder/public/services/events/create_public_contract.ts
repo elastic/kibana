@@ -7,7 +7,7 @@
 
 import type { Observable } from 'rxjs';
 import type {
-  EmbeddableConversationChange,
+  ActiveConversation,
   EventsServiceStartContract,
 } from '@kbn/agent-builder-browser/events';
 import type { EventsService } from './events_service';
@@ -17,7 +17,7 @@ export const createPublicEventsContract = ({
   activeConversation$,
 }: {
   eventsService: EventsService;
-  activeConversation$: Observable<EmbeddableConversationChange | null>;
+  activeConversation$: Observable<ActiveConversation | null>;
 }): EventsServiceStartContract => {
   return {
     chat$: eventsService.obs$,

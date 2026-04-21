@@ -856,12 +856,12 @@ useEffect(() => {
 
 Use `events.ui.activeConversation$` when you need to react to the conversation currently bound to the active chat surface (both the embeddable sidebar and the full-page routed chat).
 
-It is an `Observable<EmbeddableConversationChange | null>` backed by a `BehaviorSubject`: new subscribers receive the current value immediately, subsequent emissions fire whenever the binding changes, and it emits `null` when no chat surface is currently bound.
+It is an `Observable<ActiveConversation | null>` backed by a `BehaviorSubject`: new subscribers receive the current value immediately, subsequent emissions fire whenever the binding changes, and it emits `null` when no chat surface is currently bound.
 
 The non-null payload is:
 
 - `id?: string` - the currently bound conversation id, or `undefined` when the chat is currently bound to a new conversation
-- `attachments?: VersionedAttachment[]` - existing attachments when the chat switches to an existing conversation
+- `conversation?: Conversation` - the fully loaded conversation when it has been successfully fetched (undefined for new conversations, while loading, or on fetch errors)
 
 ```ts
 class MyPlugin {
@@ -874,7 +874,7 @@ class MyPlugin {
         return;
       }
 
-      const { id, attachments } = change;
+      const { id, conversation } = change;
 
       if (!id) {
         agentBuilder.addAttachment({
@@ -885,7 +885,7 @@ class MyPlugin {
         return;
       }
 
-      const hasMyAttachment = attachments?.some(
+      const hasMyAttachment = conversation?.attachments?.some(
         (attachment) => attachment.id === 'my-pending-context'
       );
 

@@ -7,18 +7,18 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
-import type { EmbeddableConversationChange } from '@kbn/agent-builder-browser/events';
+import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { AgentBuilderInternalService } from '../services';
 
-export type { EmbeddableConversationChange };
+export type { ActiveConversation };
 
 export interface EmbeddableConversationDependencies {
   services: AgentBuilderInternalService;
   coreStart: CoreStart;
 }
 
-export type ConversationChangeHandler = (conversation: EmbeddableConversationChange) => void;
+export type ConversationChangeHandler = (conversation: ActiveConversation) => void;
 
 export interface EmbeddableConversationProps {
   /**
