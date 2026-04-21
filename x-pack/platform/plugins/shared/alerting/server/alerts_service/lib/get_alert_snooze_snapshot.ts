@@ -50,7 +50,13 @@ export async function getAlertSnoozeSnapshot({
     }
 
     return fields.reduce<Record<string, unknown>>((snapshot, field) => {
-      snapshot[field] = Object.prototype.hasOwnProperty.call(source, field) ? source[field] : null;
+      const value = field.split('.').reduce<unknown>((obj, key) => {
+        if (obj && typeof obj === 'object' && Object.prototype.hasOwnProperty.call(obj, key)) {
+          return (obj as Record<string, unknown>)[key];
+        }
+        return null;
+      }, source);
+      snapshot[field] = value;
       return snapshot;
     }, {});
   } catch (error) {

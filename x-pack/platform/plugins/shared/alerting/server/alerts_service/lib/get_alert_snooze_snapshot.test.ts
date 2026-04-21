@@ -48,8 +48,8 @@ describe('getAlertSnoozeSnapshot', () => {
             _index: 'test-index',
             _id: 'test-alert-id',
             _source: {
-              'host.name': 'web-01',
-              'kibana.alert.severity': 'high',
+              host: { name: 'web-01' },
+              kibana: { alert: { severity: 'high' } },
             },
           },
         ],
@@ -112,7 +112,7 @@ describe('getAlertSnoozeSnapshot', () => {
             _index: 'test-index',
             _id: 'test-alert-id',
             _source: {
-              'host.name': 'web-01',
+              host: { name: 'web-01' },
             },
           },
         ],

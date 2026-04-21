@@ -71,8 +71,6 @@ export const muteAlertRoute = (
         const query: MuteAlertRequestQueryV1 = req.query || {};
         const body: MuteAlertRequestBodyV1 | undefined = req.body ?? undefined;
 
-        console.log('mute alert route body', { params, query, ...body });
-
         try {
           await rulesClient.muteInstance({
             params: transformRequestParamsToApplicationV1(params),

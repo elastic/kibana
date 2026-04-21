@@ -160,13 +160,6 @@ async function muteInstanceWithOCC(
       updatedBy,
       updatedAt,
     };
-
-    console.log('conditional snooze payload', {
-      snapshotFields,
-      snoozedInstance,
-      savedSnoozeSnapshot: snoozedInstance.snoozeSnapshot,
-      conditions: [...(body?.conditions ?? [])],
-    });
   } else {
     if (validateAlertsExistence) {
       await ensureAlertExists();
