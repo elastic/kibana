@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import {
   ContentListProvider,
   type FindItemsResult,
@@ -80,6 +80,99 @@ describe('NameCellTitle', () => {
     );
 
     expect(screen.getByText('No Link Item')).toBeInTheDocument();
+    expect(screen.queryByTestId('content-list-table-item-link')).not.toBeInTheDocument();
+  });
+
+  it('renders as a link and calls `onClick` when provided without `getHref`', () => {
+    const Wrapper = createWrapper();
+    const item = createItem({ title: 'Clickable Item' });
+    const handleClick = jest.fn();
+
+    render(
+      <Wrapper>
+        <NameCellTitle item={item} onClick={handleClick} />
+      </Wrapper>
+    );
+
+    fireEvent.click(screen.getByTestId('content-list-table-item-link'));
+
+    expect(handleClick).toHaveBeenCalledWith(item);
+  });
+
+  it('ignores `getHref` by default when `onClick` is provided', () => {
+    const Wrapper = createWrapper({ getHref: (item) => `/view/${item.id}` });
+    const item = createItem({ title: 'Linked Clickable Item' });
+    const handleClick = jest.fn();
+
+    render(
+      <Wrapper>
+        <NameCellTitle item={item} onClick={handleClick} />
+      </Wrapper>
+    );
+
+    const link = screen.getByTestId('content-list-table-item-link');
+    fireEvent.click(link);
+
+    expect(link).not.toHaveAttribute('href');
+    expect(handleClick).toHaveBeenCalledWith(item);
+  });
+
+  it('uses `getHref` with `onClick` when `useHref` is true', () => {
+    const Wrapper = createWrapper({ getHref: (item) => `/view/${item.id}` });
+    const item = createItem({ title: 'Linked Clickable Item' });
+    const handleClick = jest.fn();
+
+    render(
+      <Wrapper>
+        <NameCellTitle item={item} onClick={handleClick} useHref />
+      </Wrapper>
+    );
+
+    const link = screen.getByTestId('content-list-table-item-link');
+    const clickEvent = new MouseEvent('click', { bubbles: true, cancelable: true });
+
+    fireEvent(link, clickEvent);
+
+    expect(link).toHaveAttribute('href', '/view/1');
+    expect(clickEvent.defaultPrevented).toBe(true);
+    expect(handleClick).toHaveBeenCalledWith(item);
+  });
+
+  it('allows modified clicks to use `getHref` when `useHref` is true', () => {
+    const Wrapper = createWrapper({ getHref: (item) => `/view/${item.id}` });
+    const item = createItem({ title: 'Linked Clickable Item' });
+    const handleClick = jest.fn();
+
+    render(
+      <Wrapper>
+        <NameCellTitle item={item} onClick={handleClick} useHref />
+      </Wrapper>
+    );
+
+    const link = screen.getByTestId('content-list-table-item-link');
+    const clickEvent = new MouseEvent('click', {
+      bubbles: true,
+      cancelable: true,
+      metaKey: true,
+    });
+
+    fireEvent(link, clickEvent);
+
+    expect(link).toHaveAttribute('href', '/view/1');
+    expect(clickEvent.defaultPrevented).toBe(false);
+    expect(handleClick).not.toHaveBeenCalled();
+  });
+
+  it('renders as plain text when `useHref` is false and `onClick` is omitted', () => {
+    const Wrapper = createWrapper({ getHref: (item) => `/view/${item.id}` });
+
+    render(
+      <Wrapper>
+        <NameCellTitle item={createItem({ title: 'Plain Item' })} useHref={false} />
+      </Wrapper>
+    );
+
+    expect(screen.getByText('Plain Item')).toBeInTheDocument();
     expect(screen.queryByTestId('content-list-table-item-link')).not.toBeInTheDocument();
   });
 });
