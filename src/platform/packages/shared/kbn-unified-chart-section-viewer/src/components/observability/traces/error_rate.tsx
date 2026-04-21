@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import type { LensYBoundsConfig } from '@kbn/lens-embeddable-utils/config_builder/types';
+import type { LensYBoundsConfig } from '@kbn/lens-embeddable-utils';
 import { useTraceMetricsContext } from './context/trace_metrics_context';
 import { Chart } from '../../chart';
 import { useChartLayersFromEsql } from '../../chart/hooks/use_chart_layers_from_esql';

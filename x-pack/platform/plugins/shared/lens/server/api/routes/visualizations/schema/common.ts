@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { lensApiStateSchemaNoESQL } from '@kbn/lens-embeddable-utils';
+import { lensApiConfigSchemaNoESQL } from '@kbn/lens-embeddable-utils';
 import { asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
 
 import { lensCommonSavedObjectSchemaV2 } from '../../../../content_management';
@@ -19,7 +19,7 @@ const savedObjectProps = lensCommonSavedObjectSchemaV2.getPropSchemas();
 export const lensResponseItemSchema = schema.object(
   {
     id: savedObjectProps.id,
-    data: lensApiStateSchemaNoESQL,
+    data: lensApiConfigSchemaNoESQL,
     meta: asCodeMetaSchema,
   },
   { unknowns: 'forbid', meta: { id: 'lensResponseItem', title: 'Visualization Response' } }
