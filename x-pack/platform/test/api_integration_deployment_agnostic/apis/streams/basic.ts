@@ -163,6 +163,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
       });
 
+      it(`does not materialize backing data streams for wired root streams`, async () => {
+        for (const streamName of ['logs.ecs', 'logs.otel']) {
+          await esClient.indices.getDataStream({ name: streamName }).then(
+            () => {
+              throw new Error(`Expected ${streamName} data stream to not exist`);
+            },
+            (err) => {
+              expect(err.meta?.body?.error?.type).to.eql('index_not_found_exception');
+            }
+          );
+        }
+      });
+
       describe('after enabling', () => {
         before(async () => {
           // need to disable and enable streams to ensure the views setting is picked up
@@ -189,6 +202,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           expect(wiredStatus.logs).to.eql(false);
           expect(wiredStatus['logs.otel']).to.eql(true);
           expect(wiredStatus['logs.ecs']).to.eql(true);
+        });
+
+        it(`materializes backing data streams for wired root streams`, async () => {
+          for (const streamName of ['logs.ecs', 'logs.otel']) {
+            const response = await esClient.indices.getDataStream({ name: streamName });
+            expect(response.data_streams).to.have.length(1);
+            expect(response.data_streams[0].name).to.be(streamName);
+          }
         });
 
         it('includes create_snapshot_repository in stream privileges', async () => {
