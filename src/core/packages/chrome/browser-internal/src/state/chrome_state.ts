@@ -81,6 +81,9 @@ export interface ChromeState {
 
   /** Feedback handler registered by the feedback plugin */
   feedbackHandler: State<(() => void) | undefined>;
+
+  /** Newsfeed handler registered by the newsfeed plugin */
+  newsfeedHandler: State<{ open: () => void; hasNew$: Observable<boolean> } | undefined>;
 }
 
 export interface ChromeStateDeps {
@@ -131,6 +134,11 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
   // Feedback
   const feedbackHandler = createState<(() => void) | undefined>(undefined);
 
+  // Newsfeed
+  const newsfeedHandler = createState<
+    { open: () => void; hasNew$: Observable<boolean> } | undefined
+  >(undefined);
+
   return {
     visibility,
     style,
@@ -159,5 +167,6 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
       globalMenuLinks: globalHelpMenuLinks,
     },
     feedbackHandler,
+    newsfeedHandler,
   };
 }

@@ -8,7 +8,7 @@
  */
 
 import React, { type ReactNode } from 'react';
-import { distinctUntilChanged, map, shareReplay } from 'rxjs';
+import { type Observable, distinctUntilChanged, map, shareReplay } from 'rxjs';
 import type { ChromeNextAiButton } from '@kbn/core-chrome-browser';
 import type { RecentlyAccessedService } from '@kbn/recently-accessed';
 import { SidebarServiceProvider } from '@kbn/core-chrome-sidebar-context';
@@ -214,6 +214,14 @@ export function createChromeApi({ state, services, sidebar }: ChromeApiDeps): In
       };
     },
     getFeedbackHandler$: () => state.feedbackHandler.$,
+
+    registerNewsfeedHandler: (handler: { open: () => void; hasNew$: Observable<boolean> }) => {
+      state.newsfeedHandler.set(handler);
+      return () => {
+        state.newsfeedHandler.update((current) => (current === handler ? undefined : current));
+      };
+    },
+    getNewsfeedHandler$: () => state.newsfeedHandler.$,
   };
 
   return chromeStart;

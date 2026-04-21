@@ -171,6 +171,8 @@ const createStartContractMock = () => {
     getBreadcrumbsBadges$: jest.fn().mockReturnValue(new BehaviorSubject([])),
     getFeedbackHandler$: jest.fn().mockReturnValue(new BehaviorSubject(undefined)),
     registerFeedbackHandler: jest.fn().mockReturnValue(() => {}),
+    getNewsfeedHandler$: jest.fn().mockReturnValue(new BehaviorSubject(undefined)),
+    registerNewsfeedHandler: jest.fn().mockReturnValue(() => {}),
   });
 
   return startContract;
