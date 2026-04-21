@@ -654,14 +654,19 @@ The top values of a specified field ranked by the chosen metric.
       };
     }
 
-    const getEffectiveLabel = (column: GenericIndexPatternColumn) => {
-      return column.customLabel || column.label
-        ? column.label
-        : operationDefinitionMap[column.operationType]?.getDefaultLabel(
+    const getEffectiveLabel = (column: GenericIndexPatternColumn): string => {
+      if (column.customLabel) {
+        return column.label;
+      }
+      return (
+        (column.label ||
+          operationDefinitionMap[column.operationType]?.getDefaultLabel(
             column,
             layer.columns,
             indexPattern
-          ) ?? '';
+          )) ??
+        ''
+      );
     };
 
     const orderOptions = Object.entries(layer.columns)
