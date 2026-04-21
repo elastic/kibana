@@ -312,13 +312,22 @@ export function LayerPanel(props: LayerPanelProps) {
       layerDatasource?.LayerSettingsComponent
   );
 
+  const layerSettingsLabel = isTextBasedLanguage
+    ? i18n.translate('xpack.lens.editorFrame.esqlLayerSettingsTitle', {
+        defaultMessage: 'Settings',
+      })
+    : i18n.translate('xpack.lens.editorFrame.layerSettingsTitle', {
+        defaultMessage: 'Layer settings',
+      });
+
   const layerSettingsAction = useMemo(
     () =>
       getOpenLayerSettingsAction({
         openLayerSettings: () => setPanelSettingsOpen(true),
         hasLayerSettings,
+        label: layerSettingsLabel,
       }),
-    [hasLayerSettings]
+    [hasLayerSettings, layerSettingsLabel]
   );
 
   const layerActions = useMemo(() => {
@@ -759,9 +768,7 @@ export function LayerPanel(props: LayerPanelProps) {
         <FlyoutContainer
           panelRef={(el) => (settingsPanelRef.current = el)}
           isFullscreen={false}
-          label={i18n.translate('xpack.lens.editorFrame.layerSettingsTitle', {
-            defaultMessage: 'Layer settings',
-          })}
+          label={layerSettingsLabel}
           isOpen={isPanelSettingsOpen}
           handleClose={() => {
             setPanelSettingsOpen(false);

@@ -12,10 +12,13 @@ import { FIRST_ACTION_ORDER } from './order_bounds';
 export const getOpenLayerSettingsAction = (props: {
   openLayerSettings: () => void;
   hasLayerSettings: boolean;
+  label?: string;
 }): LayerAction => {
-  const displayName = i18n.translate('xpack.lens.layerActions.layerSettingsAction', {
-    defaultMessage: 'Layer settings',
-  });
+  const displayName =
+    props.label ??
+    i18n.translate('xpack.lens.layerActions.layerSettingsAction', {
+      defaultMessage: 'Layer settings',
+    });
 
   return {
     displayName,
