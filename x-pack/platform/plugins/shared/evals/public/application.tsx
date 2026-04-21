@@ -27,7 +27,6 @@ import { ExplorationDashboard } from './pages/aesop/exploration_dashboard';
 import { ExecutionDetailPage } from './pages/aesop/execution_detail';
 import { AesopErrorBoundary } from './pages/aesop/components/aesop_error_boundary';
 import { EvaluatorCatalogPage } from './pages/evaluators';
-import { ComparisonDashboard } from './pages/comparison';
 import { SkillPerformanceDashboard } from './pages/monitoring';
 import { SuitesListPage } from './pages/suites_list';
 
@@ -81,10 +80,6 @@ const evaluatorsTabLabel = i18n.translate('xpack.evals.navigation.evaluators', {
   defaultMessage: 'Evaluators',
 });
 
-const comparisonTabLabel = i18n.translate('xpack.evals.navigation.comparison', {
-  defaultMessage: 'Comparison',
-});
-
 const monitoringTabLabel = i18n.translate('xpack.evals.navigation.monitoring', {
   defaultMessage: 'Monitoring',
 });
@@ -136,10 +131,6 @@ const aesopExecutionDetailBreadcrumbLabel = i18n.translate(
 
 const evaluatorsBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.evaluators', {
   defaultMessage: 'Evaluators',
-});
-
-const comparisonBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.comparison', {
-  defaultMessage: 'Comparison',
 });
 
 const monitoringBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.monitoring', {
@@ -262,10 +253,6 @@ const getBreadcrumbs = ({
     return [{ text: evaluatorsBreadcrumbLabel }];
   }
 
-  if (pathname.startsWith('/comparison')) {
-    return [{ text: comparisonBreadcrumbLabel }];
-  }
-
   if (pathname.startsWith('/monitoring')) {
     return [{ text: monitoringBreadcrumbLabel }];
   }
@@ -285,7 +272,6 @@ const EvalsNavigation: React.FC<{ aesopEnabled: boolean }> = ({ aesopEnabled }) 
   const isRemotesSelected = pathname.startsWith(REMOTES_PATH);
   const isAESOPSelected = aesopEnabled && pathname.startsWith('/aesop');
   const isEvaluatorsSelected = pathname === '/evaluators';
-  const isComparisonSelected = pathname.startsWith('/comparison');
   const isMonitoringSelected = pathname.startsWith('/monitoring');
   const isSuitesSelected = pathname === '/suites';
   const isRunsSelected =
@@ -294,7 +280,6 @@ const EvalsNavigation: React.FC<{ aesopEnabled: boolean }> = ({ aesopEnabled }) 
     !isRemotesSelected &&
     !isAESOPSelected &&
     !isEvaluatorsSelected &&
-    !isComparisonSelected &&
     !isMonitoringSelected &&
     !isSuitesSelected;
 
@@ -324,10 +309,6 @@ const EvalsNavigation: React.FC<{ aesopEnabled: boolean }> = ({ aesopEnabled }) 
         )}
         <EuiTab isSelected={isEvaluatorsSelected} onClick={() => history.push('/evaluators')}>
           {evaluatorsTabLabel}
-          <TechPreviewBadge />
-        </EuiTab>
-        <EuiTab isSelected={isComparisonSelected} onClick={() => history.push('/comparison')}>
-          {comparisonTabLabel}
           <TechPreviewBadge />
         </EuiTab>
         <EuiTab isSelected={isMonitoringSelected} onClick={() => history.push('/monitoring')}>
@@ -408,8 +389,6 @@ export const EvalsApp: React.FC<{
                 </Route>
               )}
               <Route exact path="/evaluators" component={EvaluatorCatalogPage} />
-              <Route exact path="/comparison" component={ComparisonDashboard} />
-              <Route path="/comparison/:id" component={ComparisonDashboard} />
               <Route exact path="/monitoring" component={SkillPerformanceDashboard} />
               <Route path="/monitoring/:skillId" component={SkillPerformanceDashboard} />
               <Route exact path="/suites" component={SuitesListPage} />
