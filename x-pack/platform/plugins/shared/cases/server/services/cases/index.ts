@@ -277,7 +277,7 @@ export class CasesService {
   }: {
     caseOptions: SavedObjectFindOptionsKueryNode;
     namespaces: string[];
-    extendedFieldFilters?: ResolvedExtendedFieldFilter[];
+    extendedFieldFilters?: ResolvedExtendedFieldFilter[][];
   }): Promise<CasesMapWithPageInfo> {
     const caseIdsByAttachmentSearch = await this.getCaseIdsByAttachmentSearch(
       namespaces,

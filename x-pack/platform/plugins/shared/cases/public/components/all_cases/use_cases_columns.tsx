@@ -289,10 +289,12 @@ export const useCasesColumns = ({
       extendedFields: {
         minWidth: '10em',
         width: '14em',
-        field: casesColumnsConfig.extendedFields.field,
         name: casesColumnsConfig.extendedFields.name,
-        render: (extendedFields: CaseUI['extendedFields']) => (
-          <ExtendedFieldsColumnCell extendedFields={extendedFields} />
+        render: (theCase: CaseUI) => (
+          <ExtendedFieldsColumnCell
+            extendedFields={theCase.extendedFields}
+            extendedFieldsLabels={theCase.extendedFieldsLabels}
+          />
         ),
       },
       severity: {

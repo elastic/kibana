@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { css } from '@emotion/react';
-import { EuiToolTip } from '@elastic/eui';
+import { EuiToolTip, useEuiTheme } from '@elastic/eui';
 
 import type { CaseUI } from '../../../common/ui/types';
 import { getEmptyCellValue } from '../empty_value';
@@ -17,12 +16,15 @@ const MAX_INLINE_EXTENDED_FIELD_LABELS = 2;
 
 export interface ExtendedFieldsColumnCellProps {
   extendedFields: CaseUI['extendedFields'];
+  extendedFieldsLabels: CaseUI['extendedFieldsLabels'];
 }
 
 export const ExtendedFieldsColumnCell: React.FC<ExtendedFieldsColumnCellProps> = ({
   extendedFields,
+  extendedFieldsLabels,
 }) => {
-  const labels = getExtendedFieldDisplayLabels(extendedFields);
+  const { euiTheme } = useEuiTheme();
+  const labels = getExtendedFieldDisplayLabels(extendedFields, extendedFieldsLabels);
 
   if (labels.length === 0) {
     return getEmptyCellValue();
@@ -34,12 +36,7 @@ export const ExtendedFieldsColumnCell: React.FC<ExtendedFieldsColumnCellProps> =
   }`;
 
   const listContent = (
-    <ul
-      css={css`
-        margin: 0;
-        padding-left: 1.25em;
-      `}
-    >
+    <ul css={{ margin: 0, paddingLeft: euiTheme.size.base }}>
       {labels.map((label, index) => (
         <li key={`${label}-${index}`}>{label}</li>
       ))}
@@ -54,9 +51,7 @@ export const ExtendedFieldsColumnCell: React.FC<ExtendedFieldsColumnCellProps> =
       position="left"
     >
       <span
-        css={css`
-          cursor: default;
-        `}
+        css={{ cursor: 'default' }}
         data-test-subj="case-table-column-extended-fields"
         tabIndex={0}
       >

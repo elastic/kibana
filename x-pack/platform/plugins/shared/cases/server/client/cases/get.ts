@@ -54,6 +54,7 @@ import type {
 } from '../../common/types/case';
 import { CaseRt } from '../../../common/types/domain';
 import type { AttachmentMode } from '../../../common/types/domain/attachment/v2';
+import { enrichCasesWithFieldLabels } from './utils';
 
 /**
  * Parameters for finding cases IDs using an alert ID
@@ -202,7 +203,7 @@ export const get = async (
   clientArgs: CasesClientArgs
 ): Promise<Case> => {
   const {
-    services: { caseService, attachmentService },
+    services: { caseService, attachmentService, templatesService },
     logger,
     authorization,
   } = clientArgs;
@@ -221,18 +222,18 @@ export const get = async (
       const commentStats = await attachmentService.getter.getCaseAttatchmentStats({
         caseIds: [theCase.id],
       });
-      return decodeOrThrow(CaseRt)(
-        flattenCaseSavedObject({
-          savedObject: theCase,
-          ...(commentStats.has(theCase.id)
-            ? {
-                totalAlerts: commentStats.get(theCase.id)?.alerts,
-                totalComment: commentStats.get(theCase.id)?.userComments,
-                totalEvents: commentStats.get(theCase.id)?.events,
-              }
-            : {}),
-        })
-      );
+      const flatCase = flattenCaseSavedObject({
+        savedObject: theCase,
+        ...(commentStats.has(theCase.id)
+          ? {
+              totalAlerts: commentStats.get(theCase.id)?.alerts,
+              totalComment: commentStats.get(theCase.id)?.userComments,
+              totalEvents: commentStats.get(theCase.id)?.events,
+            }
+          : {}),
+      });
+      const [enriched] = await enrichCasesWithFieldLabels([flatCase], templatesService);
+      return decodeOrThrow(CaseRt)(enriched);
     }
 
     const theComments = (await caseService.getAllCaseComments({
@@ -252,7 +253,8 @@ export const get = async (
       totalEvents: countEventsForID({ comments: theComments }),
     });
 
-    return decodeOrThrow(CaseRt)(res);
+    const [enriched] = await enrichCasesWithFieldLabels([res], templatesService);
+    return decodeOrThrow(CaseRt)(enriched);
   } catch (error) {
     throw createCaseError({ message: `Failed to get case id: ${id}: ${error}`, error, logger });
   }

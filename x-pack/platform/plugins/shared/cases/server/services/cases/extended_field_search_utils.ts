@@ -19,6 +19,7 @@ export interface ResolvedExtendedFieldFilter {
   value: string;
   esType: string;
   control: string;
+  templateIds: string[];
 }
 
 type RuntimeType = 'keyword' | 'long' | 'double' | 'date';
@@ -103,34 +104,54 @@ const buildPainlessScript = (
   }
 };
 
-/**
- * Resolves user-typed label:value filters against template field metadata
- * to produce storage keys and ES types for query construction.
- */
 export const resolveExtendedFieldFilters = (
   extendedFieldFilters: ExtendedFieldFilter[],
-  templates: Array<Pick<Template, 'fieldNames'>>
-): ResolvedExtendedFieldFilter[] => {
-  const labelToMeta = new Map<string, { storageKey: string; esType: string; control: string }>();
+  templates: Array<Pick<Template, 'fieldNames' | 'templateId'>>
+): ResolvedExtendedFieldFilter[][] => {
+  // labelKey → storageKey → { meta, templateIds[] }
+  const labelToMetas = new Map<
+    string,
+    Map<string, { storageKey: string; esType: string; control: string; templateIds: string[] }>
+  >();
 
   for (const template of templates) {
     for (const field of template.fieldNames ?? []) {
-      labelToMeta.set(field.label.toLowerCase(), {
-        storageKey: `${field.name}_as_${field.type}`,
-        esType: field.type,
-        control: field.control,
-      });
+      const labelKey = field.label.toLowerCase();
+      const storageKey = `${field.name}_as_${field.type}`;
+
+      let byStorageKey = labelToMetas.get(labelKey);
+      if (byStorageKey == null) {
+        byStorageKey = new Map();
+        labelToMetas.set(labelKey, byStorageKey);
+      }
+
+      let entry = byStorageKey.get(storageKey);
+      if (entry == null) {
+        entry = {
+          storageKey,
+          esType: field.type,
+          control: field.control,
+          templateIds: [],
+        };
+        byStorageKey.set(storageKey, entry);
+      }
+
+      entry.templateIds.push(template.templateId);
     }
   }
 
-  return extendedFieldFilters
-    .map(({ label, value }) => {
-      const meta = labelToMeta.get(label.toLowerCase());
-      return meta
-        ? { storageKey: meta.storageKey, value, esType: meta.esType, control: meta.control }
-        : null;
-    })
-    .filter((f): f is ResolvedExtendedFieldFilter => f !== null);
+  return extendedFieldFilters.flatMap(({ label, value }) => {
+    const metas = labelToMetas.get(label.toLowerCase());
+    if (metas == null) return [];
+    const group = [...metas.values()].map((meta) => ({
+      storageKey: meta.storageKey,
+      value,
+      esType: meta.esType,
+      control: meta.control,
+      templateIds: meta.templateIds,
+    }));
+    return group.length > 0 ? [group] : [];
+  });
 };
 
 /** Parses a date string (MM/DD/YYYY, YYYY-MM-DD, or ISO 8601) into a full-day UTC range [gte, lt). */
@@ -164,13 +185,13 @@ export const parseDateFilterToRange = (value: string): { gte: string; lt: string
   return { gte: start.toISOString(), lt: end.toISOString() };
 };
 
-/** Builds ES runtime field mappings for each resolved extended field filter. */
+/** Builds ES runtime field mappings for each resolved extended field filter group. */
 export const buildExtendedFieldRuntimeMappings = (
-  resolvedFilters: ResolvedExtendedFieldFilter[]
+  resolvedFilterGroups: ResolvedExtendedFieldFilter[][]
 ): Record<string, estypes.MappingRuntimeField> => {
   const runtimeMappings: Record<string, estypes.MappingRuntimeField> = {};
 
-  for (const { storageKey, esType, control } of resolvedFilters) {
+  for (const { storageKey, esType, control } of resolvedFilterGroups.flat()) {
     // DATE_PICKER emits a raw ISO string, so use keyword (not date) to avoid epoch-ms conversion.
     const runtimeType = control === DATE_PICKER ? 'keyword' : mapToRuntimeType(esType);
     runtimeMappings[`ef_${storageKey}`] = {
@@ -184,21 +205,47 @@ export const buildExtendedFieldRuntimeMappings = (
   return runtimeMappings;
 };
 
-/** Builds filter clauses for each resolved extended field filter (range for dates, term otherwise). */
+const buildSingleFilterClause = ({
+  storageKey,
+  value,
+  esType,
+  control,
+  templateIds,
+}: ResolvedExtendedFieldFilter): estypes.QueryDslQueryContainer | null => {
+  const fieldName = `ef_${storageKey}`;
+
+  let valueClause: estypes.QueryDslQueryContainer;
+  if (control === DATE_PICKER) {
+    const range = parseDateFilterToRange(value);
+    if (range == null) return null;
+    valueClause = { range: { [fieldName]: range } };
+  } else {
+    const runtimeType = mapToRuntimeType(esType);
+    const typedValue = runtimeType === 'long' || runtimeType === 'double' ? Number(value) : value;
+    valueClause = { term: { [fieldName]: { value: typedValue } } };
+  }
+
+  const templateFilter: estypes.QueryDslQueryContainer = {
+    terms: { 'cases.template.id': templateIds },
+  };
+
+  return { bool: { filter: [valueClause, templateFilter] } };
+};
+
 export const buildExtendedFieldFilterClauses = (
-  resolvedFilters: ResolvedExtendedFieldFilter[]
+  resolvedFilterGroups: ResolvedExtendedFieldFilter[][]
 ): estypes.QueryDslQueryContainer[] =>
-  resolvedFilters.flatMap(
-    ({ storageKey, value, esType, control }): estypes.QueryDslQueryContainer[] => {
-      const fieldName = `ef_${storageKey}`;
+  resolvedFilterGroups.flatMap((group): estypes.QueryDslQueryContainer[] => {
+    const clauses = group.flatMap((filter) => {
+      const clause = buildSingleFilterClause(filter);
+      return clause != null ? [clause] : [];
+    });
 
-      if (control === DATE_PICKER) {
-        const range = parseDateFilterToRange(value);
-        return range ? [{ range: { [fieldName]: range } }] : [];
-      }
+    if (clauses.length === 0) return [];
 
-      const runtimeType = mapToRuntimeType(esType);
-      const typedValue = runtimeType === 'long' ? Number(value) : value;
-      return [{ term: { [fieldName]: { value: typedValue } } }];
-    }
-  );
+    // Multiple entries in the same group mean the same label resolves to different storage keys
+    // across templates — OR them so any matching template's case is returned.
+    if (clauses.length === 1) return clauses;
+
+    return [{ bool: { should: clauses, minimum_should_match: 1 } }];
+  });

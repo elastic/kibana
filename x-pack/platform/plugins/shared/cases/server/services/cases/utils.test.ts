@@ -412,13 +412,30 @@ describe('constructSearchQuery with extendedFieldFilters', () => {
     const result = constructSearchQuery({
       caseIds: [],
       extendedFieldFilters: [
-        { storageKey: 'priority_as_keyword', value: 'high', esType: 'keyword', control: 'TEXT' },
+        [
+          {
+            storageKey: 'priority_as_keyword',
+            value: 'high',
+            esType: 'keyword',
+            control: 'TEXT',
+            templateIds: ['tmpl-a'],
+          },
+        ],
       ],
     });
 
     expect(result).toEqual({
       bool: {
-        filter: [{ term: { ef_priority_as_keyword: { value: 'high' } } }],
+        filter: [
+          {
+            bool: {
+              filter: [
+                { term: { ef_priority_as_keyword: { value: 'high' } } },
+                { terms: { 'cases.template.id': ['tmpl-a'] } },
+              ],
+            },
+          },
+        ],
       },
     });
   });
@@ -429,7 +446,15 @@ describe('constructSearchQuery with extendedFieldFilters', () => {
       searchFields: [`${CASE_SAVED_OBJECT}.title`],
       caseIds: [],
       extendedFieldFilters: [
-        { storageKey: 'priority_as_keyword', value: 'high', esType: 'keyword', control: 'TEXT' },
+        [
+          {
+            storageKey: 'priority_as_keyword',
+            value: 'high',
+            esType: 'keyword',
+            control: 'TEXT',
+            templateIds: ['tmpl-a'],
+          },
+        ],
       ],
     });
 
@@ -437,23 +462,53 @@ describe('constructSearchQuery with extendedFieldFilters', () => {
     const filter = result!.bool!.filter as Array<Record<string, unknown>>;
     expect(filter).toHaveLength(2);
     expect(filter[0]).toHaveProperty('bool.should');
-    expect(filter[1]).toEqual({ term: { ef_priority_as_keyword: { value: 'high' } } });
+    expect(filter[1]).toHaveProperty('bool.filter');
   });
 
   it('handles multiple extended field filters with AND semantics', () => {
     const result = constructSearchQuery({
       caseIds: [],
       extendedFieldFilters: [
-        { storageKey: 'priority_as_keyword', value: 'high', esType: 'keyword', control: 'TEXT' },
-        { storageKey: 'region_as_keyword', value: 'emea', esType: 'keyword', control: 'TEXT' },
+        [
+          {
+            storageKey: 'priority_as_keyword',
+            value: 'high',
+            esType: 'keyword',
+            control: 'TEXT',
+            templateIds: ['tmpl-a'],
+          },
+        ],
+        [
+          {
+            storageKey: 'region_as_keyword',
+            value: 'emea',
+            esType: 'keyword',
+            control: 'TEXT',
+            templateIds: ['tmpl-a'],
+          },
+        ],
       ],
     });
 
     expect(result).toEqual({
       bool: {
         filter: [
-          { term: { ef_priority_as_keyword: { value: 'high' } } },
-          { term: { ef_region_as_keyword: { value: 'emea' } } },
+          {
+            bool: {
+              filter: [
+                { term: { ef_priority_as_keyword: { value: 'high' } } },
+                { terms: { 'cases.template.id': ['tmpl-a'] } },
+              ],
+            },
+          },
+          {
+            bool: {
+              filter: [
+                { term: { ef_region_as_keyword: { value: 'emea' } } },
+                { terms: { 'cases.template.id': ['tmpl-a'] } },
+              ],
+            },
+          },
         ],
       },
     });

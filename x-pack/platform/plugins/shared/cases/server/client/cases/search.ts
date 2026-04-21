@@ -24,6 +24,7 @@ import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { CasesSearchParams } from '../types';
 import { validateSearchCasesCustomFields } from './validators';
 import { resolveExtendedFieldFilters } from '../../services/cases/extended_field_search_utils';
+import { enrichCasesWithFieldLabels } from './utils';
 
 /**
  * Retrieves a case and optionally its comments.
@@ -169,6 +170,8 @@ export const search = async (
       countInProgressCases: statusStats['in-progress'],
       countClosedCases: statusStats.closed,
     });
+
+    res.cases = await enrichCasesWithFieldLabels(res.cases, templatesService);
 
     return decodeOrThrow(CasesFindResponseRt)(res);
   } catch (error) {

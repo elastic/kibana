@@ -26,6 +26,7 @@ import type {
   Observable,
   User,
 } from '../../../common/types/domain';
+import type { TemplatesService } from '../../services';
 import { AttachmentType, CaseStatuses, UserActionTypes } from '../../../common/types/domain';
 import type {
   CasePostRequest,
@@ -679,4 +680,61 @@ export const processObservables = (
       updatedAt: new Date().toISOString(),
     });
   }
+};
+
+export const enrichCasesWithFieldLabels = async (
+  cases: Case[],
+  templatesService: TemplatesService
+): Promise<Case[]> => {
+  type EligibleCase = Case & {
+    template: NonNullable<Case['template']>;
+    extended_fields: NonNullable<Case['extended_fields']>;
+  };
+  const isEligible = (c: Case): c is EligibleCase =>
+    c.template?.id != null && c.extended_fields != null;
+
+  const eligibleCases = cases.filter(isEligible);
+
+  if (eligibleCases.length === 0) {
+    return cases;
+  }
+
+  const uniqueTemplateKeys = [
+    ...new Map(
+      eligibleCases.map((c) => [`${c.template.id}:${c.template.version}`, c.template])
+    ).values(),
+  ];
+
+  const templateResults = await Promise.all(
+    uniqueTemplateKeys.map(({ id, version }) => templatesService.getTemplate(id, String(version)))
+  );
+
+  const labelsByTemplateKey = templateResults.reduce<Map<string, Record<string, string>>>(
+    (byKey, templateSO) => {
+      if (templateSO == null) return byKey;
+      const fieldKeyToLabel = Object.fromEntries(
+        (templateSO.attributes.fieldNames ?? []).map((field) => [
+          `${field.name}_as_${field.type}`,
+          field.label,
+        ])
+      );
+      byKey.set(
+        `${templateSO.attributes.templateId}:${templateSO.attributes.templateVersion}`,
+        fieldKeyToLabel
+      );
+      return byKey;
+    },
+    new Map()
+  );
+
+  const enrichedCasesById = new Map(
+    eligibleCases.flatMap((c) => {
+      const fieldKeyToLabel = labelsByTemplateKey.get(`${c.template.id}:${c.template.version}`);
+      return fieldKeyToLabel != null
+        ? [[c.id, { ...c, extended_fields_labels: fieldKeyToLabel }]]
+        : [];
+    })
+  );
+
+  return cases.map((c) => enrichedCasesById.get(c.id) ?? c);
 };

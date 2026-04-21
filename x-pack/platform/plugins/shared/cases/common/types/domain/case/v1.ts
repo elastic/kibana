@@ -7,7 +7,7 @@
 
 import * as rt from 'io-ts';
 import { CaseStatuses } from '@kbn/cases-components/src/status/types';
-import { CASE_EXTENDED_FIELDS } from '../../../constants';
+import { CASE_EXTENDED_FIELDS, CASE_EXTENDED_FIELDS_LABELS } from '../../../constants';
 import { ExternalServiceRt } from '../external_service/v1';
 import { CaseAssigneesRt, UserRt } from '../user/v1';
 import { CaseConnectorRt } from '../connector/v1';
@@ -164,6 +164,7 @@ export const CaseAttributesRt = rt.intersection([
       time_to_resolve: rt.union([rt.number, rt.null]),
       template: rt.union([rt.null, CaseTemplate]),
       [CASE_EXTENDED_FIELDS]: rt.record(rt.string, rt.string),
+      [CASE_EXTENDED_FIELDS_LABELS]: rt.record(rt.string, rt.string),
     })
   ),
 ]);

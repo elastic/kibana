@@ -36,7 +36,9 @@ import {
   getTimingMetricsForUpdate,
   isObservable,
   processObservables,
+  enrichCasesWithFieldLabels,
 } from './utils';
+import { createTemplatesServiceMock } from '../../services/mocks';
 import type {
   CaseCustomFields,
   CustomFieldsConfiguration,
@@ -2147,5 +2149,172 @@ describe('processObservables', () => {
     expect(observablesMap.get('ip-127.0.0.1')).toBeDefined();
     expect(observablesMap.get('ip-127.0.0.1')).toEqual(mockObservable);
     expect(observablesMap.size).toBe(1);
+  });
+});
+
+describe('enrichCasesWithFieldLabels', () => {
+  const baseCase = flattenCaseSavedObject({ savedObject: mockCases[0], totalComment: 0 });
+
+  const caseWithTemplate = {
+    ...baseCase,
+    template: { id: 'template-id-1', version: 1 },
+    extended_fields: { priority_as_keyword: 'high', effort_as_integer: '3' },
+  };
+
+  const templateSO = {
+    id: 'so-id',
+    type: 'cases-template',
+    references: [],
+    attributes: {
+      templateId: 'template-id-1',
+      name: 'My Template',
+      owner: 'cases',
+      definition: '',
+      templateVersion: 1,
+      deletedAt: null,
+      fieldNames: [
+        { name: 'priority', label: 'Priority Level', type: 'keyword', control: 'INPUT_TEXT' },
+        { name: 'effort', label: 'Effort Points', type: 'integer', control: 'INPUT_NUMBER' },
+      ],
+    },
+  };
+
+  it('populates extended_fields_labels from the matched template fieldNames', async () => {
+    const templatesService = createTemplatesServiceMock();
+    (templatesService.getTemplate as jest.Mock).mockResolvedValue(templateSO);
+
+    const result = await enrichCasesWithFieldLabels([caseWithTemplate], templatesService);
+
+    expect(result[0].extended_fields_labels).toEqual({
+      priority_as_keyword: 'Priority Level',
+      effort_as_integer: 'Effort Points',
+    });
+  });
+
+  it('returns case unchanged when it has no template reference', async () => {
+    const templatesService = createTemplatesServiceMock();
+
+    const result = await enrichCasesWithFieldLabels([baseCase], templatesService);
+
+    expect(result[0]).toEqual(baseCase);
+    expect(templatesService.getTemplate).not.toHaveBeenCalled();
+  });
+
+  it('returns case unchanged when it has no extended_fields', async () => {
+    const templatesService = createTemplatesServiceMock();
+    const caseNoExtFields = { ...baseCase, template: { id: 'template-id-1', version: 1 } };
+
+    const result = await enrichCasesWithFieldLabels([caseNoExtFields], templatesService);
+
+    expect(result[0]).toEqual(caseNoExtFields);
+    expect(templatesService.getTemplate).not.toHaveBeenCalled();
+  });
+
+  it('omits extended_fields_labels when the referenced template is not found (deleted)', async () => {
+    const templatesService = createTemplatesServiceMock();
+    (templatesService.getTemplate as jest.Mock).mockResolvedValue(undefined);
+
+    const result = await enrichCasesWithFieldLabels([caseWithTemplate], templatesService);
+
+    expect(result[0].extended_fields_labels).toBeUndefined();
+  });
+
+  it('batches template lookups — calls getTemplate once per unique templateId+version pair', async () => {
+    const templatesService = createTemplatesServiceMock();
+    (templatesService.getTemplate as jest.Mock).mockResolvedValue(templateSO);
+
+    const secondCase = {
+      ...caseWithTemplate,
+      id: 'mock-id-2',
+    };
+
+    await enrichCasesWithFieldLabels([caseWithTemplate, secondCase], templatesService);
+
+    expect(templatesService.getTemplate).toHaveBeenCalledTimes(1);
+    expect(templatesService.getTemplate).toHaveBeenCalledWith('template-id-1', '1');
+  });
+
+  it('fetches different template versions separately for the same templateId', async () => {
+    const templatesService = createTemplatesServiceMock();
+
+    const templateSOv2 = {
+      ...templateSO,
+      attributes: {
+        ...templateSO.attributes,
+        templateVersion: 2,
+        fieldNames: [
+          { name: 'priority', label: 'Priority Level v2', type: 'keyword', control: 'INPUT_TEXT' },
+        ],
+      },
+    };
+
+    (templatesService.getTemplate as jest.Mock).mockImplementation(
+      (_id: string, version: string) => {
+        if (version === '1') return Promise.resolve(templateSO);
+        if (version === '2') return Promise.resolve(templateSOv2);
+        return Promise.resolve(undefined);
+      }
+    );
+
+    const caseV2 = {
+      ...caseWithTemplate,
+      id: 'mock-id-2',
+      template: { id: 'template-id-1', version: 2 },
+    };
+
+    const result = await enrichCasesWithFieldLabels([caseWithTemplate, caseV2], templatesService);
+
+    expect(result[0].extended_fields_labels).toEqual({
+      priority_as_keyword: 'Priority Level',
+      effort_as_integer: 'Effort Points',
+    });
+    expect(result[1].extended_fields_labels).toEqual({
+      priority_as_keyword: 'Priority Level v2',
+    });
+    expect(templatesService.getTemplate).toHaveBeenCalledTimes(2);
+    expect(templatesService.getTemplate).toHaveBeenCalledWith('template-id-1', '1');
+    expect(templatesService.getTemplate).toHaveBeenCalledWith('template-id-1', '2');
+  });
+
+  it('handles multiple cases with different templateIds independently', async () => {
+    const templatesService = createTemplatesServiceMock();
+
+    const templateSO2 = {
+      ...templateSO,
+      attributes: {
+        ...templateSO.attributes,
+        templateId: 'template-id-2',
+        templateVersion: 1,
+        fieldNames: [
+          { name: 'severity', label: 'Severity Label', type: 'keyword', control: 'SELECT_BASIC' },
+        ],
+      },
+    };
+
+    (templatesService.getTemplate as jest.Mock).mockImplementation(
+      (id: string, _version: string) => {
+        if (id === 'template-id-1') return Promise.resolve(templateSO);
+        if (id === 'template-id-2') return Promise.resolve(templateSO2);
+        return Promise.resolve(undefined);
+      }
+    );
+
+    const caseTwo = {
+      ...caseWithTemplate,
+      id: 'mock-id-2',
+      template: { id: 'template-id-2', version: 1 },
+      extended_fields: { severity_as_keyword: 'critical' },
+    };
+
+    const result = await enrichCasesWithFieldLabels([caseWithTemplate, caseTwo], templatesService);
+
+    expect(result[0].extended_fields_labels).toEqual({
+      priority_as_keyword: 'Priority Level',
+      effort_as_integer: 'Effort Points',
+    });
+    expect(result[1].extended_fields_labels).toEqual({
+      severity_as_keyword: 'Severity Label',
+    });
+    expect(templatesService.getTemplate).toHaveBeenCalledTimes(2);
   });
 });

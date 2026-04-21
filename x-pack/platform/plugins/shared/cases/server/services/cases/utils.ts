@@ -86,7 +86,7 @@ export const constructSearchQuery = ({
   search?: string;
   searchFields?: string[];
   caseIds: string[];
-  extendedFieldFilters?: ResolvedExtendedFieldFilter[];
+  extendedFieldFilters?: ResolvedExtendedFieldFilter[][];
 }): estypes.QueryDslQueryContainer | undefined => {
   const caseSearchFields = searchFields?.filter((field) =>
     DEFAULT_CASE_SEARCH_FIELDS.includes(field)

@@ -15,6 +15,7 @@ import {
 describe('resolveExtendedFieldFilters', () => {
   const templates = [
     {
+      templateId: 'tmpl-a',
       fieldNames: [
         { name: 'priority', label: 'Priority', type: 'keyword', control: 'SELECT_BASIC' },
         { name: 'region', label: 'Region', type: 'keyword', control: 'SELECT_BASIC' },
@@ -28,6 +29,7 @@ describe('resolveExtendedFieldFilters', () => {
       ],
     },
     {
+      templateId: 'tmpl-b',
       fieldNames: [
         { name: 'due_date', label: 'Due Date', type: 'date', control: 'DATE_PICKER' },
         { name: 'score', label: 'Score', type: 'double', control: 'INPUT_NUMBER' },
@@ -35,7 +37,7 @@ describe('resolveExtendedFieldFilters', () => {
     },
   ];
 
-  it('resolves labels to storage keys', () => {
+  it('resolves labels to storage keys, returning one group per user label', () => {
     const result = resolveExtendedFieldFilters(
       [
         { label: 'Priority', value: 'high' },
@@ -45,18 +47,24 @@ describe('resolveExtendedFieldFilters', () => {
     );
 
     expect(result).toEqual([
-      {
-        storageKey: 'priority_as_keyword',
-        value: 'high',
-        esType: 'keyword',
-        control: 'SELECT_BASIC',
-      },
-      {
-        storageKey: 'region_as_keyword',
-        value: 'emea',
-        esType: 'keyword',
-        control: 'SELECT_BASIC',
-      },
+      [
+        {
+          storageKey: 'priority_as_keyword',
+          value: 'high',
+          esType: 'keyword',
+          control: 'SELECT_BASIC',
+          templateIds: ['tmpl-a'],
+        },
+      ],
+      [
+        {
+          storageKey: 'region_as_keyword',
+          value: 'emea',
+          esType: 'keyword',
+          control: 'SELECT_BASIC',
+          templateIds: ['tmpl-a'],
+        },
+      ],
     ]);
   });
 
@@ -64,12 +72,15 @@ describe('resolveExtendedFieldFilters', () => {
     const result = resolveExtendedFieldFilters([{ label: 'PRIORITY', value: 'high' }], templates);
 
     expect(result).toEqual([
-      {
-        storageKey: 'priority_as_keyword',
-        value: 'high',
-        esType: 'keyword',
-        control: 'SELECT_BASIC',
-      },
+      [
+        {
+          storageKey: 'priority_as_keyword',
+          value: 'high',
+          esType: 'keyword',
+          control: 'SELECT_BASIC',
+          templateIds: ['tmpl-a'],
+        },
+      ],
     ]);
   });
 
@@ -77,7 +88,15 @@ describe('resolveExtendedFieldFilters', () => {
     const result = resolveExtendedFieldFilters([{ label: 'effort level', value: '5' }], templates);
 
     expect(result).toEqual([
-      { storageKey: 'effort_as_integer', value: '5', esType: 'integer', control: 'INPUT_NUMBER' },
+      [
+        {
+          storageKey: 'effort_as_integer',
+          value: '5',
+          esType: 'integer',
+          control: 'INPUT_NUMBER',
+          templateIds: ['tmpl-a'],
+        },
+      ],
     ]);
   });
 
@@ -88,12 +107,15 @@ describe('resolveExtendedFieldFilters', () => {
     );
 
     expect(result).toEqual([
-      {
-        storageKey: 'components_as_keyword',
-        value: 'api',
-        esType: 'keyword',
-        control: 'CHECKBOX_GROUP',
-      },
+      [
+        {
+          storageKey: 'components_as_keyword',
+          value: 'api',
+          esType: 'keyword',
+          control: 'CHECKBOX_GROUP',
+          templateIds: ['tmpl-a'],
+        },
+      ],
     ]);
   });
 
@@ -107,12 +129,15 @@ describe('resolveExtendedFieldFilters', () => {
     );
 
     expect(result).toEqual([
-      {
-        storageKey: 'priority_as_keyword',
-        value: 'high',
-        esType: 'keyword',
-        control: 'SELECT_BASIC',
-      },
+      [
+        {
+          storageKey: 'priority_as_keyword',
+          value: 'high',
+          esType: 'keyword',
+          control: 'SELECT_BASIC',
+          templateIds: ['tmpl-a'],
+        },
+      ],
     ]);
   });
 
@@ -130,6 +155,7 @@ describe('resolveExtendedFieldFilters', () => {
       [{ label: 'reviewers', value: 'elastic' }],
       [
         {
+          templateId: 'tmpl-c',
           fieldNames: [
             { name: 'reviewers', label: 'Reviewers', type: 'keyword', control: 'USER_PICKER' },
           ],
@@ -138,22 +164,100 @@ describe('resolveExtendedFieldFilters', () => {
     );
 
     expect(result).toEqual([
-      {
-        storageKey: 'reviewers_as_keyword',
-        value: 'elastic',
-        esType: 'keyword',
-        control: 'USER_PICKER',
-      },
+      [
+        {
+          storageKey: 'reviewers_as_keyword',
+          value: 'elastic',
+          esType: 'keyword',
+          control: 'USER_PICKER',
+          templateIds: ['tmpl-c'],
+        },
+      ],
     ]);
   });
 
   it('handles templates with no fieldNames', () => {
     const result = resolveExtendedFieldFilters(
       [{ label: 'Priority', value: 'high' }],
-      [{ fieldNames: undefined }]
+      [{ templateId: 'tmpl-x', fieldNames: undefined }]
     );
 
     expect(result).toEqual([]);
+  });
+
+  it('groups multiple storage keys under one label when different templates share the same label but different names', () => {
+    // "Estimate" appears in two templates with different field names.
+    // Searching by "Estimate" should OR both storage keys so all three cases are returned.
+    const result = resolveExtendedFieldFilters(
+      [{ label: 'Estimate', value: '3' }],
+      [
+        {
+          templateId: 'tmpl-x',
+          fieldNames: [
+            { name: 'effort', label: 'Estimate', type: 'integer', control: 'INPUT_NUMBER' },
+          ],
+        },
+        {
+          templateId: 'tmpl-y',
+          fieldNames: [
+            { name: 'story_points', label: 'Estimate', type: 'integer', control: 'INPUT_NUMBER' },
+          ],
+        },
+        {
+          templateId: 'tmpl-z',
+          fieldNames: [
+            { name: 'effort', label: 'Estimate', type: 'integer', control: 'INPUT_NUMBER' },
+          ],
+        },
+      ]
+    );
+
+    // tmpl-x and tmpl-z share the same storage key so they merge into one entry; tmpl-y has its own.
+    expect(result).toHaveLength(1);
+    const group = result[0];
+    expect(group).toHaveLength(2);
+    expect(group).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          storageKey: 'effort_as_integer',
+          templateIds: expect.arrayContaining(['tmpl-x', 'tmpl-z']),
+        }),
+        expect.objectContaining({
+          storageKey: 'story_points_as_integer',
+          templateIds: ['tmpl-y'],
+        }),
+      ])
+    );
+  });
+
+  it('scopes templateIds correctly when same label AND same field name appear in multiple templates', () => {
+    // Same label + same storage key → merged into one entry with both templateIds collected.
+    const result = resolveExtendedFieldFilters(
+      [{ label: 'Priority', value: 'high' }],
+      [
+        {
+          templateId: 'tmpl-1',
+          fieldNames: [
+            { name: 'prio', label: 'Priority', type: 'keyword', control: 'SELECT_BASIC' },
+          ],
+        },
+        {
+          templateId: 'tmpl-2',
+          fieldNames: [
+            { name: 'prio', label: 'Priority', type: 'keyword', control: 'SELECT_BASIC' },
+          ],
+        },
+      ]
+    );
+
+    expect(result).toEqual([
+      [
+        expect.objectContaining({
+          storageKey: 'prio_as_keyword',
+          templateIds: expect.arrayContaining(['tmpl-1', 'tmpl-2']),
+        }),
+      ],
+    ]);
   });
 });
 
@@ -194,12 +298,15 @@ describe('parseDateFilterToRange', () => {
 describe('buildExtendedFieldRuntimeMappings', () => {
   it('builds keyword runtime field that auto-detects JSON arrays', () => {
     const mappings = buildExtendedFieldRuntimeMappings([
-      {
-        storageKey: 'priority_as_keyword',
-        value: 'high',
-        esType: 'keyword',
-        control: 'SELECT_BASIC',
-      },
+      [
+        {
+          storageKey: 'priority_as_keyword',
+          value: 'high',
+          esType: 'keyword',
+          control: 'SELECT_BASIC',
+          templateIds: ['tmpl-a'],
+        },
+      ],
     ]);
 
     const src = (mappings.ef_priority_as_keyword.script as { source: string })?.source ?? '';
@@ -213,7 +320,15 @@ describe('buildExtendedFieldRuntimeMappings', () => {
 
   it('builds long runtime field for integer type', () => {
     const mappings = buildExtendedFieldRuntimeMappings([
-      { storageKey: 'effort_as_integer', value: '5', esType: 'integer', control: 'INPUT_NUMBER' },
+      [
+        {
+          storageKey: 'effort_as_integer',
+          value: '5',
+          esType: 'integer',
+          control: 'INPUT_NUMBER',
+          templateIds: ['tmpl-a'],
+        },
+      ],
     ]);
 
     expect(mappings).toEqual({
@@ -228,7 +343,15 @@ describe('buildExtendedFieldRuntimeMappings', () => {
 
   it('builds double runtime field for float type', () => {
     const mappings = buildExtendedFieldRuntimeMappings([
-      { storageKey: 'score_as_double', value: '3.5', esType: 'double', control: 'INPUT_NUMBER' },
+      [
+        {
+          storageKey: 'score_as_double',
+          value: '3.5',
+          esType: 'double',
+          control: 'INPUT_NUMBER',
+          templateIds: ['tmpl-b'],
+        },
+      ],
     ]);
 
     expect(mappings).toEqual({
@@ -243,12 +366,15 @@ describe('buildExtendedFieldRuntimeMappings', () => {
 
   it('builds date runtime field as keyword type that emits the raw ISO string', () => {
     const mappings = buildExtendedFieldRuntimeMappings([
-      {
-        storageKey: 'due_date_as_date',
-        value: '2025-01-01',
-        esType: 'date',
-        control: 'DATE_PICKER',
-      },
+      [
+        {
+          storageKey: 'due_date_as_date',
+          value: '2025-01-01',
+          esType: 'date',
+          control: 'DATE_PICKER',
+          templateIds: ['tmpl-b'],
+        },
+      ],
     ]);
 
     expect(mappings.ef_due_date_as_date.type).toBe('keyword');
@@ -259,12 +385,15 @@ describe('buildExtendedFieldRuntimeMappings', () => {
 
   it('builds DATE_PICKER runtime field as keyword type that emits the raw ISO string', () => {
     const mappings = buildExtendedFieldRuntimeMappings([
-      {
-        storageKey: 'start_date_as_date',
-        value: '01/01/2024',
-        esType: 'date',
-        control: 'DATE_PICKER',
-      },
+      [
+        {
+          storageKey: 'start_date_as_date',
+          value: '01/01/2024',
+          esType: 'date',
+          control: 'DATE_PICKER',
+          templateIds: ['tmpl-a'],
+        },
+      ],
     ]);
 
     expect(mappings.ef_start_date_as_date.type).toBe('keyword');
@@ -279,12 +408,15 @@ describe('buildExtendedFieldRuntimeMappings', () => {
 
   it('builds USER_PICKER runtime field that extracts name values from {uid,name} objects', () => {
     const mappings = buildExtendedFieldRuntimeMappings([
-      {
-        storageKey: 'reviewers_as_keyword',
-        value: 'elastic',
-        esType: 'keyword',
-        control: 'USER_PICKER',
-      },
+      [
+        {
+          storageKey: 'reviewers_as_keyword',
+          value: 'elastic',
+          esType: 'keyword',
+          control: 'USER_PICKER',
+          templateIds: ['tmpl-c'],
+        },
+      ],
     ]);
 
     const src = (mappings.ef_reviewers_as_keyword.script as { source: string })?.source ?? '';
@@ -300,12 +432,15 @@ describe('buildExtendedFieldRuntimeMappings', () => {
 
   it('builds checkbox runtime field that reads _source and emits individual array elements', () => {
     const mappings = buildExtendedFieldRuntimeMappings([
-      {
-        storageKey: 'components_as_keyword',
-        value: 'api',
-        esType: 'keyword',
-        control: 'CHECKBOX_GROUP',
-      },
+      [
+        {
+          storageKey: 'components_as_keyword',
+          value: 'api',
+          esType: 'keyword',
+          control: 'CHECKBOX_GROUP',
+          templateIds: ['tmpl-a'],
+        },
+      ],
     ]);
 
     const src = (mappings.ef_components_as_keyword.script as { source: string })?.source ?? '';
@@ -316,15 +451,26 @@ describe('buildExtendedFieldRuntimeMappings', () => {
     expect(src).not.toContain('?.');
   });
 
-  it('builds multiple runtime fields', () => {
+  it('builds multiple runtime fields from multiple groups', () => {
     const mappings = buildExtendedFieldRuntimeMappings([
-      {
-        storageKey: 'priority_as_keyword',
-        value: 'high',
-        esType: 'keyword',
-        control: 'SELECT_BASIC',
-      },
-      { storageKey: 'effort_as_integer', value: '5', esType: 'integer', control: 'INPUT_NUMBER' },
+      [
+        {
+          storageKey: 'priority_as_keyword',
+          value: 'high',
+          esType: 'keyword',
+          control: 'SELECT_BASIC',
+          templateIds: ['tmpl-a'],
+        },
+      ],
+      [
+        {
+          storageKey: 'effort_as_integer',
+          value: '5',
+          esType: 'integer',
+          control: 'INPUT_NUMBER',
+          templateIds: ['tmpl-a'],
+        },
+      ],
     ]);
 
     expect(Object.keys(mappings)).toEqual(['ef_priority_as_keyword', 'ef_effort_as_integer']);
@@ -332,59 +478,133 @@ describe('buildExtendedFieldRuntimeMappings', () => {
 });
 
 describe('buildExtendedFieldFilterClauses', () => {
-  it('builds term queries for keyword fields', () => {
+  it('builds a scoped bool.filter clause for a single keyword field', () => {
     const clauses = buildExtendedFieldFilterClauses([
-      {
-        storageKey: 'priority_as_keyword',
-        value: 'high',
-        esType: 'keyword',
-        control: 'SELECT_BASIC',
-      },
-    ]);
-
-    expect(clauses).toEqual([{ term: { ef_priority_as_keyword: { value: 'high' } } }]);
-  });
-
-  it('builds term queries with numeric value for integer fields', () => {
-    const clauses = buildExtendedFieldFilterClauses([
-      { storageKey: 'effort_as_integer', value: '5', esType: 'integer', control: 'INPUT_NUMBER' },
-    ]);
-
-    expect(clauses).toEqual([{ term: { ef_effort_as_integer: { value: 5 } } }]);
-  });
-
-  it('builds term query for CHECKBOX_GROUP (runtime field emits individual items)', () => {
-    const clauses = buildExtendedFieldFilterClauses([
-      {
-        storageKey: 'components_as_keyword',
-        value: 'api',
-        esType: 'keyword',
-        control: 'CHECKBOX_GROUP',
-      },
-    ]);
-
-    // The runtime field emits individual items, so a term query on "api" will match
-    // cases where "api" is one of the selected checkboxes
-    expect(clauses).toEqual([{ term: { ef_components_as_keyword: { value: 'api' } } }]);
-  });
-
-  it('builds range query for DATE_PICKER using MM/DD/YYYY input', () => {
-    const clauses = buildExtendedFieldFilterClauses([
-      {
-        storageKey: 'start_date_as_date',
-        value: '01/01/2024',
-        esType: 'date',
-        control: 'DATE_PICKER',
-      },
+      [
+        {
+          storageKey: 'priority_as_keyword',
+          value: 'high',
+          esType: 'keyword',
+          control: 'SELECT_BASIC',
+          templateIds: ['tmpl-a'],
+        },
+      ],
     ]);
 
     expect(clauses).toEqual([
       {
-        range: {
-          ef_start_date_as_date: {
-            gte: '2024-01-01T00:00:00.000Z',
-            lt: '2024-01-02T00:00:00.000Z',
-          },
+        bool: {
+          filter: [
+            { term: { ef_priority_as_keyword: { value: 'high' } } },
+            { terms: { 'cases.template.id': ['tmpl-a'] } },
+          ],
+        },
+      },
+    ]);
+  });
+
+  it('builds term queries with numeric value for integer fields', () => {
+    const clauses = buildExtendedFieldFilterClauses([
+      [
+        {
+          storageKey: 'effort_as_integer',
+          value: '5',
+          esType: 'integer',
+          control: 'INPUT_NUMBER',
+          templateIds: ['tmpl-a'],
+        },
+      ],
+    ]);
+
+    expect(clauses).toEqual([
+      {
+        bool: {
+          filter: [
+            { term: { ef_effort_as_integer: { value: 5 } } },
+            { terms: { 'cases.template.id': ['tmpl-a'] } },
+          ],
+        },
+      },
+    ]);
+  });
+
+  it('builds term queries with numeric value for double fields', () => {
+    const clauses = buildExtendedFieldFilterClauses([
+      [
+        {
+          storageKey: 'score_as_double',
+          value: '3.5',
+          esType: 'double',
+          control: 'INPUT_NUMBER',
+          templateIds: ['tmpl-b'],
+        },
+      ],
+    ]);
+
+    expect(clauses).toEqual([
+      {
+        bool: {
+          filter: [
+            { term: { ef_score_as_double: { value: 3.5 } } },
+            { terms: { 'cases.template.id': ['tmpl-b'] } },
+          ],
+        },
+      },
+    ]);
+  });
+
+  it('builds term query for CHECKBOX_GROUP (runtime field emits individual items)', () => {
+    const clauses = buildExtendedFieldFilterClauses([
+      [
+        {
+          storageKey: 'components_as_keyword',
+          value: 'api',
+          esType: 'keyword',
+          control: 'CHECKBOX_GROUP',
+          templateIds: ['tmpl-a'],
+        },
+      ],
+    ]);
+
+    expect(clauses).toEqual([
+      {
+        bool: {
+          filter: [
+            { term: { ef_components_as_keyword: { value: 'api' } } },
+            { terms: { 'cases.template.id': ['tmpl-a'] } },
+          ],
+        },
+      },
+    ]);
+  });
+
+  it('builds range query for DATE_PICKER using MM/DD/YYYY input', () => {
+    const clauses = buildExtendedFieldFilterClauses([
+      [
+        {
+          storageKey: 'start_date_as_date',
+          value: '01/01/2024',
+          esType: 'date',
+          control: 'DATE_PICKER',
+          templateIds: ['tmpl-a'],
+        },
+      ],
+    ]);
+
+    expect(clauses).toEqual([
+      {
+        bool: {
+          filter: [
+            {
+              range: {
+                ef_start_date_as_date: {
+                  gte: '2024-01-01T00:00:00.000Z',
+                  lt: '2024-01-02T00:00:00.000Z',
+                },
+              },
+            },
+            { terms: { 'cases.template.id': ['tmpl-a'] } },
+          ],
         },
       },
     ]);
@@ -392,21 +612,31 @@ describe('buildExtendedFieldFilterClauses', () => {
 
   it('builds range query for DATE_PICKER using YYYY-MM-DD input', () => {
     const clauses = buildExtendedFieldFilterClauses([
-      {
-        storageKey: 'start_date_as_date',
-        value: '2024-01-01',
-        esType: 'date',
-        control: 'DATE_PICKER',
-      },
+      [
+        {
+          storageKey: 'start_date_as_date',
+          value: '2024-01-01',
+          esType: 'date',
+          control: 'DATE_PICKER',
+          templateIds: ['tmpl-a'],
+        },
+      ],
     ]);
 
     expect(clauses).toEqual([
       {
-        range: {
-          ef_start_date_as_date: {
-            gte: '2024-01-01T00:00:00.000Z',
-            lt: '2024-01-02T00:00:00.000Z',
-          },
+        bool: {
+          filter: [
+            {
+              range: {
+                ef_start_date_as_date: {
+                  gte: '2024-01-01T00:00:00.000Z',
+                  lt: '2024-01-02T00:00:00.000Z',
+                },
+              },
+            },
+            { terms: { 'cases.template.id': ['tmpl-a'] } },
+          ],
         },
       },
     ]);
@@ -414,12 +644,15 @@ describe('buildExtendedFieldFilterClauses', () => {
 
   it('drops DATE_PICKER filter when the date value cannot be parsed', () => {
     const clauses = buildExtendedFieldFilterClauses([
-      {
-        storageKey: 'start_date_as_date',
-        value: 'not-a-date',
-        esType: 'date',
-        control: 'DATE_PICKER',
-      },
+      [
+        {
+          storageKey: 'start_date_as_date',
+          value: 'not-a-date',
+          esType: 'date',
+          control: 'DATE_PICKER',
+          templateIds: ['tmpl-a'],
+        },
+      ],
     ]);
 
     expect(clauses).toHaveLength(0);
@@ -427,35 +660,142 @@ describe('buildExtendedFieldFilterClauses', () => {
 
   it('builds term query for USER_PICKER (runtime field emits name values from {uid,name} objects)', () => {
     const clauses = buildExtendedFieldFilterClauses([
-      {
-        storageKey: 'reviewers_as_keyword',
-        value: 'elastic',
-        esType: 'keyword',
-        control: 'USER_PICKER',
-      },
+      [
+        {
+          storageKey: 'reviewers_as_keyword',
+          value: 'elastic',
+          esType: 'keyword',
+          control: 'USER_PICKER',
+          templateIds: ['tmpl-c'],
+        },
+      ],
     ]);
 
-    expect(clauses).toEqual([{ term: { ef_reviewers_as_keyword: { value: 'elastic' } } }]);
+    expect(clauses).toEqual([
+      {
+        bool: {
+          filter: [
+            { term: { ef_reviewers_as_keyword: { value: 'elastic' } } },
+            { terms: { 'cases.template.id': ['tmpl-c'] } },
+          ],
+        },
+      },
+    ]);
   });
 
-  it('builds multiple AND-combined filter clauses', () => {
+  it('AND-combines clauses from different label groups', () => {
     const clauses = buildExtendedFieldFilterClauses([
-      {
-        storageKey: 'priority_as_keyword',
-        value: 'high',
-        esType: 'keyword',
-        control: 'SELECT_BASIC',
-      },
-      {
-        storageKey: 'region_as_keyword',
-        value: 'emea',
-        esType: 'keyword',
-        control: 'SELECT_BASIC',
-      },
+      [
+        {
+          storageKey: 'priority_as_keyword',
+          value: 'high',
+          esType: 'keyword',
+          control: 'SELECT_BASIC',
+          templateIds: ['tmpl-a'],
+        },
+      ],
+      [
+        {
+          storageKey: 'region_as_keyword',
+          value: 'emea',
+          esType: 'keyword',
+          control: 'SELECT_BASIC',
+          templateIds: ['tmpl-a'],
+        },
+      ],
     ]);
 
+    // Two separate filter clauses — query builder wraps them in bool.filter (AND)
     expect(clauses).toHaveLength(2);
-    expect(clauses[0]).toEqual({ term: { ef_priority_as_keyword: { value: 'high' } } });
-    expect(clauses[1]).toEqual({ term: { ef_region_as_keyword: { value: 'emea' } } });
+    expect(clauses[0]).toEqual({
+      bool: {
+        filter: [
+          { term: { ef_priority_as_keyword: { value: 'high' } } },
+          { terms: { 'cases.template.id': ['tmpl-a'] } },
+        ],
+      },
+    });
+    expect(clauses[1]).toEqual({
+      bool: {
+        filter: [
+          { term: { ef_region_as_keyword: { value: 'emea' } } },
+          { terms: { 'cases.template.id': ['tmpl-a'] } },
+        ],
+      },
+    });
+  });
+
+  it('OR-combines entries within the same label group (same label, different field names across templates)', () => {
+    // "Estimate" maps to two storage keys from different templates.
+    // The resulting clause should be a bool.should so a case matching either is returned.
+    const clauses = buildExtendedFieldFilterClauses([
+      [
+        {
+          storageKey: 'effort_as_integer',
+          value: '3',
+          esType: 'integer',
+          control: 'INPUT_NUMBER',
+          templateIds: ['tmpl-x', 'tmpl-z'],
+        },
+        {
+          storageKey: 'story_points_as_integer',
+          value: '3',
+          esType: 'integer',
+          control: 'INPUT_NUMBER',
+          templateIds: ['tmpl-y'],
+        },
+      ],
+    ]);
+
+    expect(clauses).toEqual([
+      {
+        bool: {
+          should: [
+            {
+              bool: {
+                filter: [
+                  { term: { ef_effort_as_integer: { value: 3 } } },
+                  { terms: { 'cases.template.id': ['tmpl-x', 'tmpl-z'] } },
+                ],
+              },
+            },
+            {
+              bool: {
+                filter: [
+                  { term: { ef_story_points_as_integer: { value: 3 } } },
+                  { terms: { 'cases.template.id': ['tmpl-y'] } },
+                ],
+              },
+            },
+          ],
+          minimum_should_match: 1,
+        },
+      },
+    ]);
+  });
+
+  it('does not add an extra should wrapper when a group has only one entry', () => {
+    const clauses = buildExtendedFieldFilterClauses([
+      [
+        {
+          storageKey: 'priority_as_keyword',
+          value: 'high',
+          esType: 'keyword',
+          control: 'SELECT_BASIC',
+          templateIds: ['tmpl-a'],
+        },
+      ],
+    ]);
+
+    // Single entry — no should wrapper
+    expect(clauses[0]).not.toHaveProperty('bool.should');
+    expect(clauses[0]).toEqual({
+      bool: {
+        filter: [
+          { term: { ef_priority_as_keyword: { value: 'high' } } },
+          { terms: { 'cases.template.id': ['tmpl-a'] } },
+        ],
+      },
+    });
   });
 });

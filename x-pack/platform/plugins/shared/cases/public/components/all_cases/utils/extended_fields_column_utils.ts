@@ -9,18 +9,18 @@ import { startCase } from 'lodash';
 
 import type { CaseUI } from '../../../../common/ui/types';
 
-/** Keys are camelCase(`${name}_as_${type}`), e.g. `summaryAsKeyword` → label "Summary". */
 export const labelFromExtendedFieldKey = (key: string): string =>
-  startCase(key.replace(/As[A-Z][a-zA-Z0-9]*$/, ''));
+  startCase(key.replace(/_as_[a-z0-9_]+$/, '').replace(/As[A-Z][a-zA-Z0-9]*$/, ''));
 
 export const getExtendedFieldDisplayLabels = (
-  extendedFields: CaseUI['extendedFields'] | undefined
+  extendedFields: CaseUI['extendedFields'] | undefined,
+  extendedFieldsLabels: CaseUI['extendedFieldsLabels'] | undefined
 ): string[] => {
   if (!extendedFields) {
     return [];
   }
 
-  return Object.keys(extendedFields)
-    .map((key) => labelFromExtendedFieldKey(key))
-    .sort((a, b) => a.localeCompare(b));
+  return Object.keys(extendedFields).map(
+    (key) => extendedFieldsLabels?.[key] ?? labelFromExtendedFieldKey(key)
+  );
 };

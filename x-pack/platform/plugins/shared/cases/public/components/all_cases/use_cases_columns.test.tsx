@@ -781,9 +781,7 @@ describe('useCasesColumns ', () => {
         }
       );
 
-      const extendedColumn = result.current.columns.find(
-        (col) => 'field' in col && col.field === 'extendedFields'
-      );
+      const extendedColumn = result.current.columns.find((col) => col.name === 'Extended fields');
 
       expect(extendedColumn).toBeDefined();
       expect(extendedColumn?.name).toBe('Extended fields');
