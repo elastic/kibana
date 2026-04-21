@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useDebouncedValue } from '@kbn/react-hooks';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -27,14 +28,24 @@ import { useSuggestedProfiles } from '../../hooks/use_suggested_profiles';
 import { EpisodeActionFlyout, EpisodeActionFlyoutFooter } from './episode_action_flyout_layout';
 import * as i18n from './translations';
 
-function AssigneeFlyoutEmptyListMessage() {
+const SUGGEST_SEARCH_DEBOUNCE_MS = 300;
+
+function AssigneeFlyoutSelectableMessage({
+  'data-test-subj': dataTestSubj,
+  title,
+  body,
+}: {
+  'data-test-subj': string;
+  title: string;
+  body: React.ReactNode;
+}) {
   return (
     <EuiFlexGroup
       alignItems="center"
       gutterSize="none"
       direction="column"
       justifyContent="spaceAround"
-      data-test-subj="alertingV2EditEpisodeAssigneeEmptyList"
+      data-test-subj={dataTestSubj}
     >
       <EuiFlexItem grow={false}>
         <EuiIcon type="user" size="xl" aria-hidden={true} />
@@ -43,11 +54,11 @@ function AssigneeFlyoutEmptyListMessage() {
       <EuiFlexItem grow={false}>
         <EuiTextAlign textAlign="center">
           <EuiText size="s" color="default">
-            <strong>{i18n.ASSIGNEE_FLYOUT_EMPTY_LIST_TITLE}</strong>
+            <strong>{title}</strong>
             <br />
           </EuiText>
           <EuiText size="s" color="subdued">
-            {i18n.ASSIGNEE_FLYOUT_EMPTY_LIST_HELP}
+            {body}
           </EuiText>
         </EuiTextAlign>
       </EuiFlexItem>
@@ -55,37 +66,33 @@ function AssigneeFlyoutEmptyListMessage() {
   );
 }
 
+function AssigneeFlyoutEmptyListMessage() {
+  return (
+    <AssigneeFlyoutSelectableMessage
+      data-test-subj="alertingV2EditEpisodeAssigneeEmptyList"
+      title={i18n.ASSIGNEE_FLYOUT_EMPTY_LIST_TITLE}
+      body={i18n.ASSIGNEE_FLYOUT_EMPTY_LIST_HELP}
+    />
+  );
+}
+
 function AssigneeFlyoutNoMatchesMessage() {
   const { docLinks } = useKibana<CoreStart>().services;
 
   return (
-    <EuiFlexGroup
-      alignItems="center"
-      gutterSize="none"
-      direction="column"
-      justifyContent="spaceAround"
+    <AssigneeFlyoutSelectableMessage
       data-test-subj="alertingV2EditEpisodeAssigneeNoMatches"
-    >
-      <EuiFlexItem grow={false}>
-        <EuiIcon type="user" size="xl" aria-hidden={true} />
-        <EuiSpacer size="xs" />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiTextAlign textAlign="center">
-          <EuiText size="s" color="default">
-            <strong>{i18n.ASSIGNEE_FLYOUT_NO_MATCHES_USER_TITLE}</strong>
-            <br />
-          </EuiText>
-          <EuiText size="s" color="subdued">
-            {i18n.ASSIGNEE_FLYOUT_NO_MATCHES_MODIFY_SEARCH}
-            <br />
-            <EuiLink href={docLinks.links.cases.casesPermissions} target="_blank">
-              {i18n.ASSIGNEE_FLYOUT_NO_MATCHES_LEARN_PRIVILEGES}
-            </EuiLink>
-          </EuiText>
-        </EuiTextAlign>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      title={i18n.ASSIGNEE_FLYOUT_NO_MATCHES_USER_TITLE}
+      body={
+        <>
+          {i18n.ASSIGNEE_FLYOUT_NO_MATCHES_MODIFY_SEARCH}
+          <br />
+          <EuiLink href={docLinks.links.cases.casesPermissions} target="_blank">
+            {i18n.ASSIGNEE_FLYOUT_NO_MATCHES_LEARN_PRIVILEGES}
+          </EuiLink>
+        </>
+      }
+    />
   );
 }
 
@@ -106,21 +113,9 @@ export function EditEpisodeAssigneeFlyout({
   const toasts = notifications.toasts;
 
   const [searchInput, setSearchInput] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const debouncedSearch = useDebouncedValue(searchInput, SUGGEST_SEARCH_DEBOUNCE_MS);
   const [selectedProfile, setSelectedProfile] = useState<UserProfileWithAvatar | null>(null);
   const selectionTouchedRef = useRef(false);
-
-  useEffect(() => {
-    selectionTouchedRef.current = false;
-    setSearchInput('');
-    setDebouncedSearch('');
-    setSelectedProfile(null);
-  }, [episodeId, groupHash, lastAssigneeUid]);
-
-  useEffect(() => {
-    const handle = window.setTimeout(() => setDebouncedSearch(searchInput), 300);
-    return () => window.clearTimeout(handle);
-  }, [searchInput]);
 
   const { data: currentProfiles } = useBulkGetProfiles({
     userProfile,
@@ -229,9 +224,7 @@ export function EditEpisodeAssigneeFlyout({
         onSearchChange={(term) => setSearchInput(term)}
         onChange={(next) => {
           selectionTouchedRef.current = true;
-          const picked = next.filter(
-            (v): v is UserProfileWithAvatar => v !== null && v !== undefined
-          );
+          const picked = next.filter((v) => v !== null && v !== undefined);
           setSelectedProfile(picked[0] ?? null);
         }}
         nullOptionLabel={i18n.ASSIGNEE_FLYOUT_NO_ASSIGNEE_OPTION}

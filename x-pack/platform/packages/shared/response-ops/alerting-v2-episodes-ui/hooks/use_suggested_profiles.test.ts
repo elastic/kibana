@@ -66,7 +66,6 @@ describe('useSuggestedProfiles', () => {
     expect(suggest).toHaveBeenCalledWith(ALERTING_V2_INTERNAL_SUGGEST_USER_PROFILES_API_PATH, {
       name: 'alice',
       size: 20,
-      dataPath: 'avatar',
     });
     expect(result.current.data).toEqual(profiles);
   });
