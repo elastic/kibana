@@ -959,16 +959,11 @@ paths:
       x-state: Technical Preview
   /api/entity_analytics/watchlists/{watchlist_id}/entities/assign:
     post:
-      description: >
-        Assigns the provided entities to the specified watchlist using a
-        "manual" source label.
-
+      description: |
+        Assigns the provided entities to the specified watchlist using a "manual" source label.
         The entities must already exist in the entity store.
 
-
-        If an entity is already on the watchlist, no new document is created —
-        the "manual" label
-
+        If an entity is already on the watchlist, no new document is created — the "manual" label
         is added to its existing source labels instead.
       operationId: AssignWatchlistEntities
       parameters:
@@ -1123,9 +1118,7 @@ paths:
                       $ref: '#/components/schemas/WatchlistEntityUnassignResponseItem'
                     type: array
                   not_found:
-                    description: >-
-                      Number of entities not found in the manual watchlist
-                      assignment
+                    description: Number of entities not found in the manual watchlist assignment
                     example: 1
                     type: integer
                   successful:
@@ -1355,9 +1348,8 @@ paths:
             application/json:
               examples:
                 listEntityEnginesExample:
-                  description: >-
-                    Returns a list with one running host engine and one stopped
-                    user engine.
+                  description: Returns a list with one running host engine and one stopped user
+                    engine.
                   summary: Two engines installed
                   value:
                     count: 2
@@ -1548,8 +1540,7 @@ paths:
             application/json:
               examples:
                 initEntityEngineExample:
-                  description: >-
-                    A host engine was successfully initialized and is now in the
+                  description: A host engine was successfully initialized and is now in the
                     installing state.
                   summary: Host engine initialized
                   value:
@@ -1590,9 +1581,7 @@ paths:
             application/json:
               examples:
                 startEntityEngineExample:
-                  description: >-
-                    The engine was successfully started and is now processing
-                    data.
+                  description: The engine was successfully started and is now processing data.
                   summary: Engine started successfully
                   value:
                     started: true
@@ -1626,9 +1615,8 @@ paths:
             application/json:
               examples:
                 stopEntityEngineExample:
-                  description: >-
-                    The engine was successfully stopped and is no longer
-                    processing data.
+                  description: The engine was successfully stopped and is no longer processing
+                    data.
                   summary: Engine stopped successfully
                   value:
                     stopped: true
@@ -1726,9 +1714,7 @@ paths:
             application/json:
               examples:
                 serverErrorExample:
-                  description: >-
-                    An unexpected error occurred while applying data view
-                    indices.
+                  description: An unexpected error occurred while applying data view indices.
                   summary: Internal server error
                   value:
                     body: An internal error occurred while updating engine indices
@@ -1766,14 +1752,8 @@ paths:
               type: object
               properties:
                 id:
-<<<<<<< migrate-js-yaml-to-yaml--elastic-security-detection-rule-management
                   description: Identifier of the entity to be deleted, commonly entity.id value.
-=======
-                  description: >-
-                    Identifier of the entity to be deleted, commonly entity.id
-                    value.
                   example: arn:aws:iam::123456789012:user/jane.doe
->>>>>>> main
                   type: string
               required:
                 - id
@@ -1785,9 +1765,8 @@ paths:
             application/json:
               examples:
                 deleteEntityExample:
-                  description: >-
-                    The entity was found and successfully removed from the
-                    latest index.
+                  description: The entity was found and successfully removed from the latest
+                    index.
                   summary: Entity deleted
                   value:
                     deleted: true
@@ -1981,15 +1960,9 @@ paths:
         including component-level health details.
       operationId: GetEntityStoreStatus
       parameters:
-<<<<<<< migrate-js-yaml-to-yaml--elastic-security-detection-rule-management
-        - description: If true returns a detailed status of the engine including all it's
-            components
-=======
-        - description: >-
-            If true, returns a detailed status of each engine including all its
+        - description: If true, returns a detailed status of each engine including all its
             components.
           example: true
->>>>>>> main
           in: query
           name: include_components
           schema:
@@ -2036,9 +2009,8 @@ paths:
                         - type: object
                           properties:
                             components:
-                              description: >-
-                                Detailed component-level status. Only included
-                                when include_components is true.
+                              description: Detailed component-level status. Only included when
+                                include_components is true.
                               items:
                                 $ref: '#/components/schemas/EngineComponentStatus'
                               type: array
@@ -2429,17 +2401,14 @@ components:
           description: End of the lookback period (date math or ISO string, e.g. "now")
           type: string
         start:
-          description: >-
-            Start of the lookback period (date math or ISO string, e.g.
+          description: Start of the lookback period (date math or ISO string, e.g.
             "now-10d")
           type: string
       required:
         - start
         - end
     EngineComponentResource:
-      description: >-
-        The type of Elasticsearch or Kibana resource backing an engine
-        component.
+      description: The type of Elasticsearch or Kibana resource backing an engine component.
       enum:
         - entity_engine
         - entity_definition
@@ -2454,8 +2423,7 @@ components:
         - ilm_policy
       type: string
     EngineComponentStatus:
-      description: >-
-        Status of an individual Elasticsearch or Kibana resource backing an
+      description: Status of an individual Elasticsearch or Kibana resource backing an
         engine.
       type: object
       properties:
@@ -2692,8 +2660,7 @@ components:
               description: Whether the entity is classified as an asset.
               type: boolean
             managed:
-              description: >-
-                Whether the entity is managed (for example, via a directory
+              description: Whether the entity is managed (for example, via a directory
                 service).
               type: boolean
             mfa_enabled:
@@ -3000,9 +2967,8 @@ components:
         - entity
     HostEntity:
       additionalProperties: false
-      description: >-
-        An entity record representing a host, stored in the Entity Store latest
-        index.
+      description: An entity record representing a host, stored in the Entity Store
+        latest index.
       type: object
       properties:
         '@timestamp':
@@ -3064,9 +3030,8 @@ components:
               type: string
             os:
               additionalProperties: false
-              description: >-
-                Elastic Common Schema (ECS) host.os fields collected on the
-                entity latest index.
+              description: Elastic Common Schema (ECS) host.os fields collected on the entity
+                latest index.
               type: object
               properties:
                 family:
@@ -3560,9 +3525,8 @@ components:
           $ref: '#/components/schemas/EntitySourceType'
     UserEntity:
       additionalProperties: false
-      description: >-
-        An entity record representing a user, stored in the Entity Store latest
-        index.
+      description: An entity record representing a user, stored in the Entity Store
+        latest index.
       type: object
       properties:
         '@timestamp':

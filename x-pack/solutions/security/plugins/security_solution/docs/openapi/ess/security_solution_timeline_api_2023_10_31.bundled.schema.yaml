@@ -15,13 +15,10 @@ servers:
 paths:
   /api/note:
     delete:
-      description: >
-        Deletes notes by saved object ID. Send either `noteId` (single ID) or
-        `noteIds` (array of IDs) in the JSON body.
-
+      description: |
+        Deletes notes by saved object ID. Send either `noteId` (single ID) or `noteIds` (array of IDs) in the JSON body.
 
         The response has HTTP 200 with an empty body on success.
-
 
         Requires the **Timeline and Notes** write privilege (`notes_write`).
       operationId: DeleteNote
@@ -49,12 +46,9 @@ paths:
                       type: array
                   required:
                     - noteIds
-        description: >
-          Exactly one shape: `{ "noteId": "<id>" }` for a single delete, or `{
-          "noteIds": ["<id>", ...] }` for bulk delete.
-
-          `noteIds` may be null in some clients; prefer an empty array or omit
-          unused fields when possible.
+        description: |
+          Exactly one shape: `{ "noteId": "<id>" }` for a single delete, or `{ "noteIds": ["<id>", ...] }` for bulk delete.
+          `noteIds` may be null in some clients; prefer an empty array or omit unused fields when possible.
         required: true
       responses:
         '200':
@@ -64,29 +58,16 @@ paths:
         - Security Timeline API
         - access:securitySolution
     get:
-      description: >
+      description: |
         Returns Security Timeline notes as saved objects.
-
 
         **Query modes (mutually exclusive branches on the server):**
 
+        1. **`documentIds` is set** — Returns notes whose `eventId` matches the given Elasticsearch document `_id` (single string or array). Pagination query parameters (`page`, `perPage`, etc.) are **not** applied; the server uses a fixed page size (up to 10000 notes).
 
-        1. **`documentIds` is set** — Returns notes whose `eventId` matches the
-        given Elasticsearch document `_id` (single string or array). Pagination
-        query parameters (`page`, `perPage`, etc.) are **not** applied; the
-        server uses a fixed page size (up to 10000 notes).
+        2. **`savedObjectIds` is set** — Returns notes linked to the given Timeline saved object id(s). Same fixed cap as above; list-mode query parameters are **not** applied.
 
-
-        2. **`savedObjectIds` is set** — Returns notes linked to the given
-        Timeline saved object id(s). Same fixed cap as above; list-mode query
-        parameters are **not** applied.
-
-
-        3. **Neither `documentIds` nor `savedObjectIds`** — Lists notes using
-        saved-objects find semantics: `page` (default 1), `perPage` (default
-        10), optional `search`, `sortField`, `sortOrder`, `filter`,
-        `createdByFilter`, and `associatedFilter`.
-
+        3. **Neither `documentIds` nor `savedObjectIds`** — Lists notes using saved-objects find semantics: `page` (default 1), `perPage` (default 10), optional `search`, `sortField`, `sortOrder`, `filter`, `createdByFilter`, and `associatedFilter`.
 
         Requires the **Timeline and Notes** read privilege (`notes_read`).
       operationId: GetNotes
@@ -151,9 +132,7 @@ paths:
           schema:
             nullable: true
             type: string
-        - description: >-
-            Sort order (`asc` or `desc`) for saved-objects find (list mode
-            only).
+        - description: Sort order (`asc` or `desc`) for saved-objects find (list mode only).
           example: desc
           in: query
           name: sortOrder
@@ -200,23 +179,17 @@ paths:
         - Security Timeline API
         - access:securitySolution
     patch:
-      description: >
+      description: |
         Creates a new note or updates an existing one.
-
 
         **Create:** Send `note` and omit `noteId` to create a new saved object.
 
-
-        **Update:** Send `note` with the changed fields and set `noteId` to the
-        note's saved object ID. Optionally include `version` for optimistic
-        concurrency when the client has it from a prior read.
-
+        **Update:** Send `note` with the changed fields and set `noteId` to the note's saved object ID. Optionally include `version` for optimistic concurrency when the client has it from a prior read.
 
         Requires the **Timeline and Notes** write privilege (`notes_write`).
       externalDocs:
         description: Add or update a note on a Timeline
-        url: >-
-          https://www.elastic.co/guide/en/security/current/timeline-api-update.html
+        url: https://www.elastic.co/guide/en/security/current/timeline-api-update.html
       operationId: PersistNoteRoute
       requestBody:
         content:
@@ -226,32 +199,24 @@ paths:
               properties:
                 note:
                   $ref: '#/components/schemas/BareNote'
-                  description: >-
-                    Note payload (timeline, text, optional event linkage,
-                    metadata).
+                  description: Note payload (timeline, text, optional event linkage, metadata).
                 noteId:
-                  description: >-
-                    The `savedObjectId` of the note to update. Omit when
-                    creating a new note.
+                  description: The `savedObjectId` of the note to update. Omit when creating a new
+                    note.
                   example: 709f99c6-89b6-4953-9160-35945c8e174e
                   nullable: true
                   type: string
                 version:
-                  description: >-
-                    Saved object version string from a previous read; optional
-                    on update.
+                  description: Saved object version string from a previous read; optional on
+                    update.
                   example: WzQ2LDFd
                   nullable: true
                   type: string
               required:
                 - note
-        description: >
-          Body must include the `note` object. For updates, include `noteId`
-          (and optionally `version`).
-
-          To attach a note to a specific event, set `note.eventId` to that
-          event's document `_id`; for a timeline-wide note, omit or clear
-          `eventId` per product rules.
+        description: |
+          Body must include the `note` object. For updates, include `noteId` (and optionally `version`).
+          To attach a note to a specific event, set `note.eventId` to that event's document `_id`; for a timeline-wide note, omit or clear `eventId` per product rules.
         required: true
       responses:
         '200':
@@ -1049,14 +1014,9 @@ components:
               nullable: true
               type: string
             timelineId:
-<<<<<<< migrate-js-yaml-to-yaml--elastic-security-detection-rule-management
-              description: The `savedObjectId` of the Timeline that this note is associated
-                with
-=======
               description: >-
                 The `savedObjectId` of the Timeline this note belongs to (not
                 the note's own ID).
->>>>>>> main
               example: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
               type: string
           required:

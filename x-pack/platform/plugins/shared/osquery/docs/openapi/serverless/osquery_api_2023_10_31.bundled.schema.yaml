@@ -39,16 +39,14 @@ paths:
               A base64-encoded cursor for pagination. Use the value from the
               previous response to fetch the next page.
             type: string
-        - description: >-
-            A search string to filter history entries by pack name, query text,
+        - description: A search string to filter history entries by pack name, query text,
             or query ID.
           in: query
           name: kuery
           required: false
           schema:
-            description: >-
-              A search string to filter history entries by pack name, query
-              text, or query ID.
+            description: A search string to filter history entries by pack name, query text,
+              or query ID.
             type: string
         - description: Comma-separated list of user IDs to filter live query history.
           in: query
@@ -1651,9 +1649,7 @@ components:
                               type: string
                         type: array
                       result_counts:
-                        description: >-
-                          Result count statistics (present when withResultCounts
-                          is true).
+                        description: Result count statistics (present when withResultCounts is true).
                         type: object
                         properties:
                           error_agents:
@@ -1732,16 +1728,10 @@ components:
               description: The saved object ID of the pack.
               type: string
             shards:
-<<<<<<< migrate-js-yaml-to-yaml--elastic-security-detection-rule-management
-              description: Shard configuration for policies, as a map of policy ID to
-                percentage.
-              type: object
-=======
               $ref: '#/components/schemas/Shards'
             type:
               description: The saved object type.
               type: string
->>>>>>> main
             updated_at:
               format: date-time
               type: string
@@ -2058,9 +2048,7 @@ components:
                   _id:
                     type: string
                   _source:
-                    description: >-
-                      The Elasticsearch document source containing query
-                      results.
+                    description: The Elasticsearch document source containing query results.
                     type: object
               type: array
             total:
@@ -2248,14 +2236,10 @@ components:
               description: The number of sub-queries that returned results.
               type: integer
             savedQueryId:
-              description: >-
-                The saved query ID, if the live query was based on a saved
-                query.
+              description: The saved query ID, if the live query was based on a saved query.
               type: string
             source:
-              description: >-
-                Whether this was a manually run live query or triggered by a
-                rule.
+              description: Whether this was a manually run live query or triggered by a rule.
               enum:
                 - Live
                 - Rule

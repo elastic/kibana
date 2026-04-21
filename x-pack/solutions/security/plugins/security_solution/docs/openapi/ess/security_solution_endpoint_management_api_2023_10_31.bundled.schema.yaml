@@ -1013,8 +1013,7 @@ paths:
                       parameters:
                         file_id: 10e4ce3d-4abb-4f93-a0cd-eaf63a489280
                         file_name: fix-malware.sh
-                        file_sha256: >-
-                          a0bed94220193ba4895c0aa5b4e7e293381d15765cb164ddf7be5cdd010ae42a
+                        file_sha256: a0bed94220193ba4895c0aa5b4e7e293381d15765cb164ddf7be5cdd010ae42a
                         file_size: 69
                       startedAt: '2023-07-03T15:07:22.837Z'
                       status: pending
@@ -1138,8 +1137,7 @@ paths:
       description: Create or update the protection updates note for a package policy.
       operationId: CreateUpdateProtectionUpdatesNote
       parameters:
-        - description: >-
-            The package policy ID to create or update the protection updates
+        - description: The package policy ID to create or update the protection updates
             note for.
           in: path
           name: package_policy_id
@@ -1207,9 +1205,8 @@ components:
               type: object
               properties:
                 canEncrypt:
-                  description: >-
-                    Whether the Kibana instance has encryption enabled for
-                    response actions.
+                  description: Whether the Kibana instance has encryption enabled for response
+                    actions.
                   type: boolean
           required:
             - data
@@ -2403,8 +2400,7 @@ components:
       type: object
       properties:
         note:
-          description: >-
-            A note associated with the protection updates for the given package
+          description: A note associated with the protection updates for the given package
             policy.
           type: string
     RawScriptParameters:

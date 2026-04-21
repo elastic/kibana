@@ -32,10 +32,8 @@ paths:
               update:
                 enable_field_rendering: false
                 ids:
-                  - >-
-                    c0c8a8bbb4a6561856a974ee9e461f0c82e673a1f0d83f86c5a8d80fc8de4c4f
-                  - >-
-                    5aa8f2900c0b03854b3b1a52a19558c5ea9893865c78235d4ad3dcc46196f4c7
+                  - c0c8a8bbb4a6561856a974ee9e461f0c82e673a1f0d83f86c5a8d80fc8de4c4f
+                  - 5aa8f2900c0b03854b3b1a52a19558c5ea9893865c78235d4ad3dcc46196f4c7
                 kibana_alert_workflow_status: acknowledged
                 with_replacements: true
             schema:
@@ -106,8 +104,7 @@ paths:
             application/json:
               example:
                 data:
-                  - id: >-
-                      c0c8a8bbb4a6561856a974ee9e461f0c82e673a1f0d83f86c5a8d80fc8de4c4f
+                  - id: c0c8a8bbb4a6561856a974ee9e461f0c82e673a1f0d83f86c5a8d80fc8de4c4f
                     title: Suspicious process execution on host-01
                     workflow_status: acknowledged
               schema:
@@ -356,8 +353,7 @@ paths:
                   - GPT-5 Chat
                 data:
                   - connector_name: GPT-5 Chat
-                    id: >-
-                      c0c8a8bbb4a6561856a974ee9e461f0c82e673a1f0d83f86c5a8d80fc8de4c4f
+                    id: c0c8a8bbb4a6561856a974ee9e461f0c82e673a1f0d83f86c5a8d80fc8de4c4f
                     title: Suspicious process execution on host-01
                 page: 1
                 per_page: 10
@@ -1519,8 +1515,7 @@ paths:
                     discoveries: 3
                     end: '2025-09-29T06:42:44.810Z'
                     execution_uuid: 46b218d5-535d-4329-be56-d0f6af6986b7
-                    loading_message: >-
-                      AI is analyzing up to 100 alerts in the last 24 hours to
+                    loading_message: AI is analyzing up to 100 alerts in the last 24 hours to
                       generate discoveries.
                     start: '2025-09-29T06:42:08.962Z'
                     status: succeeded
@@ -1557,15 +1552,8 @@ paths:
                     description: HTTP status code
                     example: 400
                     type: number
-<<<<<<< migrate-js-yaml-to-yaml--elastic-security-detection-rule-management
-          description: Bad request
-      summary: Get the latest attack discovery generations metadata for the current user
-=======
           description: Bad Request response.
-      summary: >-
-        Get the latest Attack Discovery generations metadata for the current
-        user
->>>>>>> main
+      summary: Get the latest Attack Discovery generations metadata for the current user
       tags:
         - Security Attack discovery API
       x-code-samples:
@@ -1623,8 +1611,7 @@ paths:
             application/json:
               example:
                 data:
-                  - id: >-
-                      c0c8a8bbb4a6561856a974ee9e461f0c82e673a1f0d83f86c5a8d80fc8de4c4f
+                  - id: c0c8a8bbb4a6561856a974ee9e461f0c82e673a1f0d83f86c5a8d80fc8de4c4f
                     title: Suspicious process execution on host-01
                 generation:
                   alerts_context_count: 50
@@ -1666,16 +1653,9 @@ paths:
                     example: Bad Request
                     type: string
                   message:
-<<<<<<< migrate-js-yaml-to-yaml--elastic-security-detection-rule-management
                     description: Human-readable error message describing what went wrong with the
                       request
-                    example: Invalid request parameters
-=======
-                    description: >-
-                      Human-readable error message describing what went wrong
-                      with the request
                     example: Invalid request parameters.
->>>>>>> main
                     type: string
                   status_code:
                     description: HTTP status code
@@ -1728,8 +1708,7 @@ paths:
                 discoveries: 3
                 end: '2025-09-29T06:42:44.810Z'
                 execution_uuid: 46b218d5-535d-4329-be56-d0f6af6986b7
-                loading_message: >-
-                  AI is analyzing up to 100 alerts in the last 24 hours to
+                loading_message: AI is analyzing up to 100 alerts in the last 24 hours to
                   generate discoveries.
                 start: '2025-09-29T06:42:08.962Z'
                 status: dismissed
@@ -1823,12 +1802,7 @@ paths:
                   - loading_message
                   - start
                   - status
-<<<<<<< migrate-js-yaml-to-yaml--elastic-security-detection-rule-management
-          description: Successful response - The attack discovery generation has been
-            dismissed
-=======
           description: Indicates a successful call.
->>>>>>> main
         '400':
           content:
             application/json:
@@ -1844,16 +1818,9 @@ paths:
                     example: Bad Request
                     type: string
                   message:
-<<<<<<< migrate-js-yaml-to-yaml--elastic-security-detection-rule-management
                     description: Human-readable error message describing what went wrong with the
                       request.
-                    example: Invalid request parameters
-=======
-                    description: >-
-                      Human-readable error message describing what went wrong
-                      with the request.
                     example: Invalid request parameters.
->>>>>>> main
                     type: string
                   status_code:
                     description: HTTP status code indicating the type of client error
