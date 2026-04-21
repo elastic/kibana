@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
+  const esql = getService('esql');
 
   const { dashboard, dashboardControls, discover, timePicker } = getPageObjects([
     'dashboard',
@@ -224,6 +225,56 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await dashboardControls.optionsListGetSelectionsString(dashboardControlId)).to.be(
           'CN'
         );
+      });
+    });
+
+    describe('when saving a new by-value Discover session panel back to a dashboard with matching controls', () => {
+      it('should update the existing dashboard control instead of creating a duplicate', async () => {
+        await addUnlinkedSavedSearch();
+
+        expect(await dashboardControls.getControlsCount()).to.be(1);
+
+        const initialDashboardControlId = (await dashboardControls.getAllControlIds())[0];
+        expect(
+          await dashboardControls.optionsListGetSelectionsString(initialDashboardControlId)
+        ).to.be('AE');
+
+        await dashboardAddPanel.clickAddDiscoverPanel();
+        await discover.expectOnDiscover();
+        await discover.waitUntilTabIsLoaded();
+        await discover.selectTextBaseLang();
+        await discover.waitUntilTabIsLoaded();
+
+        await esql.openEsqlControlFlyout('FROM logstash-* | WHERE geo.dest == ');
+        await testSubjects.setValue('esqlVariableName', '?geo_dest');
+        await testSubjects.setValue('esqlControlLabel', 'Updated destination');
+        await testSubjects.waitForEnabled('saveEsqlControlsFlyoutButton');
+        await testSubjects.click('saveEsqlControlsFlyoutButton');
+
+        await discover.waitUntilTabIsLoaded();
+
+        expect(await dashboardControls.getControlsCount()).to.be(1);
+
+        const discoverControlId = (await dashboardControls.getAllControlIds())[0];
+        await dashboardControls.optionsListOpenPopover(discoverControlId, true);
+        await dashboardControls.optionsListPopoverSelectOption('CN');
+        await dashboardControls.optionsListEnsurePopoverIsClosed(discoverControlId);
+        await discover.waitUntilTabIsLoaded();
+
+        expect(await dashboardControls.optionsListGetSelectionsString(discoverControlId)).to.be(
+          'CN'
+        );
+
+        await discover.clickSaveSearchButton();
+        await dashboard.waitForRenderComplete();
+
+        expect(await dashboardControls.getControlsCount()).to.be(1);
+
+        const updatedDashboardControlId = (await dashboardControls.getAllControlIds())[0];
+        expect(updatedDashboardControlId).to.be(initialDashboardControlId);
+        expect(
+          await dashboardControls.optionsListGetSelectionsString(updatedDashboardControlId)
+        ).to.be('CN');
       });
     });
   });
