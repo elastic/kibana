@@ -47,10 +47,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.navigateToApp();
       await dashboard.clickNewDashboard();
       await timePicker.setDefaultDataRange();
-      await dashboard.switchToEditMode();
       await dashboardAddPanel.openAddPanelFlyout();
       await dashboardAddPanel.clickAddNewPanelFromUIActionLink('ES|QL');
       await dashboard.waitForRenderComplete();
+      await header.waitUntilLoadingHasFinished();
       const panelCountBefore = await dashboard.getPanelCount();
 
       await retry.try(async () => {
@@ -58,16 +58,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(panelCount).to.eql(1);
       });
 
-      await esql.waitESQLEditorLoaded('InlineEditingESQLEditor');
+      await esql.waitESQLEditorLoaded('kibanaCodeEditor');
 
-      await esql.typeEsqlEditorQuery(
-        'FROM logstash-* | WHERE geo.dest == ',
-        'InlineEditingESQLEditor'
-      );
+      await esql.typeEsqlEditorQuery('FROM logstash-* | WHERE geo.dest == ', 'kibanaCodeEditor');
       await esql.selectEsqlSuggestionByLabel('Create control');
 
       await testSubjects.existOrFail('create_esql_control_flyout');
-
+      await header.waitUntilLoadingHasFinished();
       const valuesQueryEditorValue = await esql.getEsqlEditorQuery();
       expect(valuesQueryEditorValue).to.contain(
         'FROM logstash-* | WHERE @timestamp <= ?_tend and @timestamp > ?_tstart | STATS BY geo.dest'
@@ -90,6 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await testSubjects.click('applyFlyoutButton');
       await dashboard.waitForRenderComplete();
+      await header.waitUntilLoadingHasFinished();
     });
 
     it('should update the Lens chart accordingly', async () => {
