@@ -27,7 +27,6 @@ jest.mock('../../../common/lib/api', () => ({
 
 const mockServices = coreMock.createStart();
 
-// Test component that uses fields and exposes form state
 const FormTestConsumer: React.FC<{ onSubmitResult?: (data: IntegrationFormData) => void }> = ({
   onSubmitResult,
 }) => {
@@ -160,7 +159,6 @@ const renderForm = (options: RenderFormOptions = {}) => {
   };
 };
 
-// Helper to advance past form debounce time (300ms)
 const advancePastDebounce = async () => {
   await act(async () => {
     jest.advanceTimersByTime(350);
@@ -226,7 +224,6 @@ describe('IntegrationFormProvider', () => {
       await fillAllRequiredFields(getByTestId);
       expect(getByTestId('isValid').textContent).toBe('true');
 
-      // Clear the title with ''
       await act(async () => {
         fireEvent.change(getByTestId('titleInput'), { target: { value: '' } });
       });
@@ -353,7 +350,6 @@ describe('IntegrationFormProvider', () => {
       const onSubmit = jest.fn().mockResolvedValue(undefined);
       const { getByTestId } = renderForm({ onSubmit });
 
-      // Don't fill any fields, just try to submit
       await act(async () => {
         fireEvent.click(getByTestId('submitButton'));
       });

@@ -9,6 +9,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ChatCompleteOptions, AnonymizationRule, Model } from '@kbn/inference-common';
 import {
   createInferenceRequestError,
+  InferenceTaskErrorCode,
   getConnectorFamily,
   getConnectorProvider,
   getConnectorDefaultModel,
@@ -399,7 +400,9 @@ function resolveAndCreatePipeline({
         anonymization,
       }).pipe(
         catchError((error) => {
-          if (error?.meta?.status === 404 || error?.statusCode === 404) {
+          const is404 = error?.meta?.status === 404 || error?.statusCode === 404;
+          const isUpstreamProviderError = error?.code === InferenceTaskErrorCode.providerError;
+          if (is404 && !isUpstreamProviderError) {
             if (resolvedAsInferenceEndpoint) {
               endpointIdCache.invalidate();
               return throwError(() => error);

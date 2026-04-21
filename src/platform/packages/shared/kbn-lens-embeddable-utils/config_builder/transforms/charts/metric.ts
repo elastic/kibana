@@ -84,7 +84,7 @@ const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
 const TRENDLINE_LAYER_ID = 'layer_0_trendline';
 const LENS_METRIC_COMPARE_TO_REVERSED = false;
 
-type MetricIconName = NonNullable<NonNullable<MetricStyling['primary']>['icon']>['name'];
+type MetricIconName = NonNullable<NonNullable<MetricStyling['icon']>['name']>;
 
 const iconCompat = getReversibleMappings<MetricIconName, string>([
   ['alert', 'alert'],
@@ -170,8 +170,8 @@ function convertStylingToStateFormat(
     titlesTextAlign: primaryStyling?.labels?.alignment,
     primaryAlign: primaryStyling?.value?.alignment,
     primaryPosition: primaryStyling?.position,
-    icon: iconCompat.toState(primaryStyling?.icon?.name),
-    iconAlign: primaryStyling?.icon?.alignment,
+    icon: iconCompat.toState(styling.icon?.name),
+    iconAlign: styling.icon?.alignment,
     ...(hasSecondary
       ? stripUndefined({
           secondaryLabel: secondaryStyling?.label?.visible === false ? '' : undefined,
@@ -187,6 +187,12 @@ function convertStylingToAPIFormat(
   hasSecondary: boolean
 ): MetricStyling {
   return stripUndefined({
+    icon: visualization.icon
+      ? {
+          name: iconCompat.toAPI(visualization.icon),
+          alignment: visualization.iconAlign ?? DEFAULT_PRIMARY_ICON_ALIGNMENT,
+        }
+      : undefined,
     primary: stripUndefined({
       position: visualization.primaryPosition ?? DEFAULT_PRIMARY_POSITION,
       labels: {
@@ -199,12 +205,6 @@ function convertStylingToAPIFormat(
           visualization.valuesTextAlign ??
           DEFAULT_PRIMARY_VALUE_ALIGNMENT,
       },
-      icon: visualization.icon
-        ? {
-            name: iconCompat.toAPI(visualization.icon),
-            alignment: visualization.iconAlign ?? DEFAULT_PRIMARY_ICON_ALIGNMENT,
-          }
-        : undefined,
     }),
     secondary: hasSecondary
       ? {

@@ -392,15 +392,31 @@ export const getEntityTool = (
           };
         }
 
-        const enrichedResults = await Promise.all(
-          values.map((row) =>
-            enrichEntityResult({ row, columns, query, date, interval, spaceId, esClient: client })
-          )
-        );
-
-        success = true;
-        entitiesReturned = enrichedResults.length;
-        return { results: enrichedResults };
+        try {
+          const enrichedResults = await Promise.all(
+            values.map((row) =>
+              enrichEntityResult({ row, columns, query, date, interval, spaceId, esClient: client })
+            )
+          );
+          success = true;
+          entitiesReturned = enrichedResults.length;
+          return { results: enrichedResults };
+        } catch (error) {
+          logger.debug(
+            `Error enriching entity results: ${
+              error instanceof Error ? error.message : 'Unknown error'
+            }, returning profile without enrichment`
+          );
+          success = true;
+          entitiesReturned = values.length;
+          return {
+            results: values.map((row) => ({
+              tool_result_id: getToolResultId(),
+              type: ToolResultType.esqlResults,
+              data: { query, columns, values: [row] },
+            })),
+          };
+        }
       } catch (error) {
         errorMessage = error instanceof Error ? error.message : 'Unknown error';
         return {

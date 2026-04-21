@@ -54,13 +54,15 @@ export const esqlCharts: Array<PartitionConfig> = [
       visibility: 'auto',
       nested: false,
     },
-    values: {
-      visible: true,
-      mode: 'percentage',
-    },
-    labels: {
-      visible: true,
-      position: 'outside',
+    styling: {
+      values: {
+        visible: true,
+        mode: 'percentage',
+      },
+      labels: {
+        visible: true,
+        position: 'outside',
+      },
     },
     query: {
       expression: 'test: true',
@@ -106,14 +108,16 @@ export const esqlCharts: Array<PartitionConfig> = [
       visibility: 'auto',
       nested: false,
     },
-    values: {
-      visible: true,
-      mode: 'percentage',
-    },
-    donut_hole: 'm',
-    labels: {
-      visible: true,
-      position: 'outside',
+    styling: {
+      values: {
+        visible: true,
+        mode: 'percentage',
+      },
+      donut_hole: 'm',
+      labels: {
+        visible: true,
+        position: 'outside',
+      },
     },
     query: {
       expression: 'test: true',
@@ -159,9 +163,11 @@ export const esqlCharts: Array<PartitionConfig> = [
       visibility: 'auto',
       nested: false,
     },
-    values: {
-      visible: true,
-      mode: 'percentage',
+    styling: {
+      values: {
+        visible: true,
+        mode: 'percentage',
+      },
     },
     query: {
       expression: 'test: true',
@@ -205,9 +211,11 @@ export const esqlCharts: Array<PartitionConfig> = [
       visibility: 'auto',
       nested: false,
     },
-    values: {
-      visible: true,
-      mode: 'percentage',
+    styling: {
+      values: {
+        visible: true,
+        mode: 'percentage',
+      },
     },
     query: {
       expression: 'test: true',
@@ -252,9 +260,11 @@ export const esqlCharts: Array<PartitionConfig> = [
     legend: {
       visibility: 'auto',
     },
-    values: {
-      visible: true,
-      mode: 'percentage',
+    styling: {
+      values: {
+        visible: true,
+        mode: 'percentage',
+      },
     },
     query: {
       expression: 'test: true',
@@ -313,13 +323,15 @@ export const esqlCharts: Array<PartitionConfig> = [
       visibility: 'visible',
       nested: true,
     },
-    values: {
-      visible: true,
-      mode: 'percentage',
-    },
-    labels: {
-      visible: true,
-      position: 'outside',
+    styling: {
+      values: {
+        visible: true,
+        mode: 'percentage',
+      },
+      labels: {
+        visible: true,
+        position: 'outside',
+      },
     },
     query: {
       expression: 'test: true',
@@ -378,14 +390,16 @@ export const esqlCharts: Array<PartitionConfig> = [
       visibility: 'visible',
       nested: true,
     },
-    values: {
-      visible: true,
-      mode: 'percentage',
-    },
-    donut_hole: 'm',
-    labels: {
-      visible: true,
-      position: 'outside',
+    styling: {
+      values: {
+        visible: true,
+        mode: 'percentage',
+      },
+      donut_hole: 'm',
+      labels: {
+        visible: true,
+        position: 'outside',
+      },
     },
     query: {
       expression: 'test: true',
@@ -444,9 +458,11 @@ export const esqlCharts: Array<PartitionConfig> = [
       visibility: 'auto',
       nested: false,
     },
-    values: {
-      visible: true,
-      mode: 'percentage',
+    styling: {
+      values: {
+        visible: true,
+        mode: 'percentage',
+      },
     },
     query: {
       expression: 'test: true',
@@ -505,8 +521,10 @@ export const esqlCharts: Array<PartitionConfig> = [
       visibility: 'auto',
       nested: false,
     },
-    values: {
-      mode: 'percentage',
+    styling: {
+      values: {
+        mode: 'percentage',
+      },
     },
     query: {
       expression: 'test: true',
@@ -577,13 +595,15 @@ export const esqlCharts: Array<PartitionConfig> = [
       visibility: 'visible',
       nested: true,
     },
-    values: {
-      visible: true,
-      mode: 'percentage',
-    },
-    labels: {
-      visible: true,
-      position: 'outside',
+    styling: {
+      values: {
+        visible: true,
+        mode: 'percentage',
+      },
+      labels: {
+        visible: true,
+        position: 'outside',
+      },
     },
     query: {
       expression: 'test: true',
@@ -654,13 +674,15 @@ export const esqlCharts: Array<PartitionConfig> = [
       visibility: 'visible',
       nested: true,
     },
-    values: {
-      mode: 'percentage',
-    },
-    donut_hole: 'm',
-    labels: {
-      visible: true,
-      position: 'outside',
+    styling: {
+      values: {
+        mode: 'percentage',
+      },
+      donut_hole: 'm',
+      labels: {
+        visible: true,
+        position: 'outside',
+      },
     },
     query: {
       expression: 'test: true',
@@ -718,8 +740,10 @@ export const esqlCharts: Array<PartitionConfig> = [
       visibility: 'visible',
       nested: true,
     },
-    values: {
-      mode: 'percentage',
+    styling: {
+      values: {
+        mode: 'percentage',
+      },
     },
     query: {
       expression: 'test: true',
@@ -778,8 +802,10 @@ export const esqlCharts: Array<PartitionConfig> = [
     legend: {
       visibility: 'visible',
     },
-    values: {
-      mode: 'percentage',
+    styling: {
+      values: {
+        mode: 'percentage',
+      },
     },
     query: {
       expression: 'test: true',
@@ -851,12 +877,14 @@ export const esqlCharts: Array<PartitionConfig> = [
       visibility: 'visible',
       nested: true,
     },
-    values: {
-      mode: 'percentage',
-    },
-    labels: {
-      visible: true,
-      position: 'outside',
+    styling: {
+      values: {
+        mode: 'percentage',
+      },
+      labels: {
+        visible: true,
+        position: 'outside',
+      },
     },
     query: {
       expression: 'test: true',
@@ -961,12 +989,14 @@ export const esqlCharts: Array<PartitionConfig> = [
       visibility: 'visible',
       nested: true,
     },
-    values: {
-      mode: 'percentage',
-    },
-    labels: {
-      visible: true,
-      position: 'outside',
+    styling: {
+      values: {
+        mode: 'percentage',
+      },
+      labels: {
+        visible: true,
+        position: 'outside',
+      },
     },
     query: {
       expression: 'test: true',
@@ -1033,12 +1063,14 @@ export const esqlCharts: Array<PartitionConfig> = [
       visibility: 'visible',
       nested: true,
     },
-    values: {
-      mode: 'percentage',
-    },
-    labels: {
-      visible: true,
-      position: 'outside',
+    styling: {
+      values: {
+        mode: 'percentage',
+      },
+      labels: {
+        visible: true,
+        position: 'outside',
+      },
     },
     query: {
       expression: 'test: true',
@@ -1143,13 +1175,15 @@ export const esqlCharts: Array<PartitionConfig> = [
       visibility: 'visible',
       nested: true,
     },
-    values: {
-      mode: 'percentage',
-    },
-    donut_hole: 'm',
-    labels: {
-      visible: true,
-      position: 'outside',
+    styling: {
+      values: {
+        mode: 'percentage',
+      },
+      donut_hole: 'm',
+      labels: {
+        visible: true,
+        position: 'outside',
+      },
     },
     query: {
       expression: 'test: true',
@@ -1241,9 +1275,11 @@ export const esqlCharts: Array<PartitionConfig> = [
       visibility: 'visible',
       nested: true,
     },
-    values: {
-      visible: true,
-      mode: 'percentage',
+    styling: {
+      values: {
+        visible: true,
+        mode: 'percentage',
+      },
     },
     query: {
       expression: 'test: true',
@@ -1335,9 +1371,11 @@ export const esqlCharts: Array<PartitionConfig> = [
       visibility: 'visible',
       nested: true,
     },
-    values: {
-      visible: true,
-      mode: 'percentage',
+    styling: {
+      values: {
+        visible: true,
+        mode: 'percentage',
+      },
     },
     query: {
       expression: 'test: true',
@@ -1415,9 +1453,11 @@ export const esqlCharts: Array<PartitionConfig> = [
     legend: {
       visibility: 'visible',
     },
-    values: {
-      visible: true,
-      mode: 'percentage',
+    styling: {
+      values: {
+        visible: true,
+        mode: 'percentage',
+      },
     },
     query: {
       expression: 'test: true',
@@ -1452,12 +1492,14 @@ export const esqlCharts: Array<PartitionConfig> = [
       visibility: 'auto',
       nested: false,
     },
-    values: {
-      mode: 'percentage',
-    },
-    labels: {
-      visible: true,
-      position: 'outside',
+    styling: {
+      values: {
+        mode: 'percentage',
+      },
+      labels: {
+        visible: true,
+        position: 'outside',
+      },
     },
   },
   {
@@ -1488,8 +1530,10 @@ export const esqlCharts: Array<PartitionConfig> = [
       visibility: 'auto',
       nested: false,
     },
-    values: {
-      mode: 'percentage',
+    styling: {
+      values: {
+        mode: 'percentage',
+      },
     },
   },
   {
@@ -1518,8 +1562,10 @@ export const esqlCharts: Array<PartitionConfig> = [
       visibility: 'auto',
       nested: false,
     },
-    values: {
-      mode: 'percentage',
+    styling: {
+      values: {
+        mode: 'percentage',
+      },
     },
   },
   {
@@ -1574,8 +1620,10 @@ export const esqlCharts: Array<PartitionConfig> = [
     legend: {
       visibility: 'visible',
     },
-    values: {
-      mode: 'percentage',
+    styling: {
+      values: {
+        mode: 'percentage',
+      },
     },
     query: {
       expression: 'test: true',
@@ -1609,8 +1657,10 @@ export const esqlCharts: Array<PartitionConfig> = [
     legend: {
       visibility: 'auto',
     },
-    values: {
-      mode: 'percentage',
+    styling: {
+      values: {
+        mode: 'percentage',
+      },
     },
   },
 ];
