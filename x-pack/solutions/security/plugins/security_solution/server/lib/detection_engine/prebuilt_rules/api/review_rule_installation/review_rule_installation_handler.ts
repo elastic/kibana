@@ -11,7 +11,7 @@ import type {
   SortResults,
 } from '@elastic/elasticsearch/lib/api/types';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { PrebuiltRuleAssetsSortField } from '../../../../../../common/api/detection_engine/prebuilt_rules/common/prebuilt_rule_assets_sort';
+import type { PrebuiltRuleAssetsSortField } from '../../../../../../common/api/detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route.gen';
 import type { SortOrder } from '../../../../../../common/api/detection_engine/model/sorting.gen';
 import type { RuleSummary } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 import type {

@@ -1,0 +1,155 @@
+openapi: 3.0.0
+info:
+  title: Review Rule Installation API endpoint
+  version: '1'
+paths:
+  /internal/detection_engine/prebuilt_rules/installation/_review:
+    post:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: ReviewRuleInstallation
+      summary: Review prebuilt detection rules available for installation
+      description: Lists prebuilt detection rules that can be installed
+      tags:
+        - Prebuilt Rules API
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviewRuleInstallationRequestBody'
+      responses:
+        '200':
+          description: Indicates a successful call
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewRuleInstallationResponseBody'
+components:
+  schemas:
+    PrebuiltRuleAssetsSortField:
+      type: string
+      description: Field to sort prebuilt rule assets by.
+      enum:
+        - name
+        - risk_score
+        - severity
+
+    PrebuiltRuleAssetsFacetCategory:
+      type: string
+      description: |
+        Facet categories available for prebuilt rule asset aggregations.
+      enum:
+        - tags
+        - type
+
+    PrebuiltRuleAssetsAggregations:
+      type: object
+      additionalProperties: false
+      description: Aggregation options for prebuilt rule asset queries.
+      properties:
+        counts:
+          type: array
+          description: Facet categories for which to compute counts over the filtered + searched set.
+          items:
+            $ref: '#/components/schemas/PrebuiltRuleAssetsFacetCategory'
+
+    ReviewRuleInstallationRequestBody:
+      type: object
+      additionalProperties: false
+      properties:
+        page:
+          type: integer
+          minimum: 1
+          default: 1
+          description: Page number starting from 1. Ignored when `search_after` is provided.
+        per_page:
+          type: integer
+          minimum: 1
+          maximum: 10000
+          default: 20
+          description: Rules per page.
+        filter:
+          type: string
+          description: KQL filter string applied to prebuilt rule assets.
+        search:
+          description: Free-text search.
+          $ref: '../../rule_management/granular_rules_contract.schema.yaml#/components/schemas/GranularRulesSearch'
+        aggregations:
+          description: |
+            Aggregation options computed over the filtered set of
+            installable rules.
+          $ref: '#/components/schemas/PrebuiltRuleAssetsAggregations'
+        sort_field:
+          description: Field to sort by.
+          $ref: '#/components/schemas/PrebuiltRuleAssetsSortField'
+        sort_order:
+          description: Sort order. Required when `sort_field` is set.
+          $ref: '../../model/sorting.schema.yaml#/components/schemas/SortOrder'
+        search_after:
+          type: array
+          minItems: 1
+          description: |
+            Elasticsearch `search_after` tiebreaker values. Requires
+            `sort_field` and `sort_order`. When set, `page` is ignored.
+          items:
+            $ref: '../../rule_management/search_rules/search_rules_route.schema.yaml#/components/schemas/SearchRulesSearchAfterItem'
+
+    RuleInstallationStatsForReview:
+      type: object
+      additionalProperties: false
+      description: Aggregated info about all rules available for installation.
+      properties:
+        num_rules_to_install:
+          type: integer
+          minimum: 0
+          description: Number of prebuilt rules available for installation (before applying filters).
+        tags:
+          description: A union of all tags of all rules available for installation.
+          $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleTagArray'
+      required:
+        - num_rules_to_install
+        - tags
+
+    ReviewRuleInstallationResponseBody:
+      type: object
+      additionalProperties: false
+      properties:
+        page:
+          type: integer
+          description: Current page number.
+        per_page:
+          type: integer
+          description: Rules per page.
+        total:
+          type: integer
+          description: The total number of rules available for installation that match the filter criteria.
+        stats:
+          $ref: '#/components/schemas/RuleInstallationStatsForReview'
+        rules:
+          type: array
+          description: Info about individual rules; one object per each rule available for installation.
+          items:
+            $ref: '../../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/RuleResponse'
+        counts:
+          description: Facet counts per category requested in `aggregations.counts`.
+          $ref: '../../rule_management/granular_rules_contract.schema.yaml#/components/schemas/FacetCounts'
+        search_after:
+          type: array
+          description: |
+            Sort values of the last hit on this page, for use as `search_after`
+            on the next request. Only included when the request used
+            `search_after` or when deep pagination applies.
+          items:
+            $ref: '../../rule_management/search_rules/search_rules_route.schema.yaml#/components/schemas/SearchRulesSearchAfterItem'
+        warnings:
+          type: array
+          description: Warnings produced while serving the request.
+          items:
+            $ref: '../../model/warning_schema.schema.yaml#/components/schemas/WarningSchema'
+      required:
+        - page
+        - per_page
+        - total
+        - stats
+        - rules

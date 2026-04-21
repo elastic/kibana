@@ -45,6 +45,7 @@ import type {
   ReadRuleExecutionResultsRequestParamsInput,
   ReadRuleExecutionResultsRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_results/read_rule_execution_results_route.gen';
+import type { ReviewRuleInstallationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route.gen';
 import type {
   RulePreviewRequestQueryInput,
   RulePreviewRequestBodyInput,
@@ -437,6 +438,26 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
+  /**
+      * Returns the set of prebuilt detection rule assets that can be installed,
+paginated, optionally filtered with a KQL filter, free-text `search`
+term, facet `aggregations`, and ordered by `sort_field`/`sort_order` or
+paged with `search_after`.
+
+      */
+  reviewRuleInstallation(props: ReviewRuleInstallationProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(
+        getRouteUrlForSpace(
+          '/internal/detection_engine/prebuilt_rules/installation/_review',
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
   rulePreview(props: RulePreviewProps, kibanaSpace: string = 'default') {
     return supertest
       .post(getRouteUrlForSpace('/api/detection_engine/rules/preview', kibanaSpace))
@@ -656,6 +677,9 @@ export interface ReadRuleProps {
 export interface ReadRuleExecutionResultsProps {
   params: ReadRuleExecutionResultsRequestParamsInput;
   body: ReadRuleExecutionResultsRequestBodyInput;
+}
+export interface ReviewRuleInstallationProps {
+  body: ReviewRuleInstallationRequestBodyInput;
 }
 export interface RulePreviewProps {
   query: RulePreviewRequestQueryInput;

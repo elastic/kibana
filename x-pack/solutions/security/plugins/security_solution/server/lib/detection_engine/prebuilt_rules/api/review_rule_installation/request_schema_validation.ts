@@ -7,7 +7,7 @@
 
 import type { FindRulesRequestQueryInput } from '../../../../../../common/api/detection_engine/rule_management/find_rules/find_rules_route.gen';
 import { validateFindRulesRequestQuery } from '../../../../../../common/api/detection_engine/rule_management/find_rules/request_schema_validation';
-import type { ReviewRuleInstallationRequestBodyInput } from '../../../../../../common/api/detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route';
+import type { ReviewRuleInstallationRequestBodyInput } from '../../../../../../common/api/detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route.gen';
 import {
   MAX_SEARCH_RULES_SEARCH_TERM_LENGTH,
   validateAggregationsCountsUnique,

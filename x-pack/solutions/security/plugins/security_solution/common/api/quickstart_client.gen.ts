@@ -33,6 +33,10 @@ import type { BootstrapPrebuiltRulesResponse } from './detection_engine/prebuilt
 import type { InstallPrebuiltRulesAndTimelinesResponse } from './detection_engine/prebuilt_rules/install_prebuilt_rules_and_timelines/install_prebuilt_rules_and_timelines_route.gen';
 import type { ReadPrebuiltRulesAndTimelinesStatusResponse } from './detection_engine/prebuilt_rules/read_prebuilt_rules_and_timelines_status/read_prebuilt_rules_and_timelines_status_route.gen';
 import type {
+  ReviewRuleInstallationRequestBodyInput,
+  ReviewRuleInstallationResponse,
+} from './detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route.gen';
+import type {
   PerformRulesBulkActionRequestQueryInput,
   PerformRulesBulkActionRequestBodyInput,
   PerformRulesBulkActionResponse,
@@ -2936,6 +2940,26 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * Returns the set of prebuilt detection rule assets that can be installed,
+paginated, optionally filtered with a KQL filter, free-text `search`
+term, facet `aggregations`, and ordered by `sort_field`/`sort_order` or
+paged with `search_after`.
+
+    */
+  async reviewRuleInstallation(props: ReviewRuleInstallationProps) {
+    this.log.info(`${new Date().toISOString()} Calling API ReviewRuleInstallation`);
+    return this.kbnClient
+      .request<ReviewRuleInstallationResponse>({
+        path: '/internal/detection_engine/prebuilt_rules/installation/_review',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async riskEngineGetPrivileges() {
     this.log.info(`${new Date().toISOString()} Calling API RiskEngineGetPrivileges`);
     return this.kbnClient
@@ -3980,6 +4004,9 @@ export interface ReadRuleExecutionResultsProps {
 }
 export interface ResolveTimelineProps {
   query: ResolveTimelineRequestQueryInput;
+}
+export interface ReviewRuleInstallationProps {
+  body: ReviewRuleInstallationRequestBodyInput;
 }
 export interface RuleMigrationEnhanceRuleProps {
   params: RuleMigrationEnhanceRuleRequestParamsInput;

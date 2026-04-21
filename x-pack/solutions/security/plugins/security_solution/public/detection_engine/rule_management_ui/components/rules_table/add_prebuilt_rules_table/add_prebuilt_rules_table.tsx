@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
-import type { PrebuiltRuleAssetsSortField } from '../../../../../../common/api/detection_engine/prebuilt_rules/common/prebuilt_rule_assets_sort';
+import type { PrebuiltRuleAssetsSortField } from '../../../../../../common/api/detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route.gen';
 import * as i18n from '../../../pages/add_rules/translations';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { RULES_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
@@ -40,9 +40,10 @@ export const AddPrebuiltRulesTable = React.memo(() => {
       selectedRules,
       isUpgradingSecurityPackages,
       pagination,
-      sortingOptions,
+      field,
+      order,
     },
-    actions: { setPagination, setSortingOptions, selectRules },
+    actions: { setPagination, setField, setOrder, selectRules },
   } = useAddPrebuiltRulesTableContext();
 
   const rulesColumns = useAddPrebuiltRulesTableColumns();
@@ -57,25 +58,23 @@ export const AddPrebuiltRulesTable = React.memo(() => {
       });
 
       if (sort) {
-        setSortingOptions({
-          field: sort.field as PrebuiltRuleAssetsSortField,
-          order: sort.direction,
-        });
+        setField(sort.field as PrebuiltRuleAssetsSortField);
+        setOrder(sort.direction);
       }
     },
-    [setPagination, setSortingOptions]
+    [setPagination, setField, setOrder]
   );
 
   const sortingTableProp = useMemo(() => {
-    return sortingOptions
+    return field != null && order != null
       ? {
           sort: {
-            field: sortingOptions.field,
-            direction: sortingOptions.order,
+            field,
+            direction: order,
           },
         }
       : {};
-  }, [sortingOptions]);
+  }, [field, order]);
 
   return (
     <>

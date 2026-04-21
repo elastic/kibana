@@ -15,7 +15,7 @@ import type { SavedObjectsClientContract, SavedObjectsRawDocSource } from '@kbn/
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { invariant } from '../../../../../../../../common/utils/invariant';
 import type { SortOrder } from '../../../../../../../../common/api/detection_engine';
-import type { PrebuiltRuleAssetsSortField } from '../../../../../../../../common/api/detection_engine/prebuilt_rules/common/prebuilt_rule_assets_sort';
+import type { PrebuiltRuleAssetsSortField } from '../../../../../../../../common/api/detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route.gen';
 import type { PrebuiltRuleAsset } from '../../../../model/rule_assets/prebuilt_rule_asset';
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../prebuilt_rule_assets_type';
 import type { RuleVersionSpecifier } from '../../../rule_versions/rule_version_specifier';

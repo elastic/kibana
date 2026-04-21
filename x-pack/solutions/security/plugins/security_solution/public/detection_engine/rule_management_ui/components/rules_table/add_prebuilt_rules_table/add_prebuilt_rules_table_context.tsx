@@ -26,7 +26,8 @@ import * as i18n from './translations';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { RULES_TABLE_INITIAL_PAGE_SIZE } from '../constants';
 import type { PaginationOptions } from '../../../../rule_management/logic';
-import type { PrebuiltRuleAssetsSortItem } from '../../../../../../common/api/detection_engine/prebuilt_rules/common/prebuilt_rule_assets_sort';
+import type { PrebuiltRuleAssetsSortField } from '../../../../../../common/api/detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route.gen';
+import type { SortOrder } from '../../../../../../common/api/detection_engine/model';
 
 export interface AddPrebuiltRulesTableState {
   /**
@@ -87,9 +88,13 @@ export interface AddPrebuiltRulesTableState {
    */
   pagination: PaginationOptions;
   /**
-   * Currently selected table sorting
+   * Sort field for the table (maps to installation review `sort_field`).
    */
-  sortingOptions: PrebuiltRuleAssetsSortItem | undefined;
+  field?: PrebuiltRuleAssetsSortField;
+  /**
+   * Sort direction (maps to installation review `sort_order`).
+   */
+  order?: SortOrder;
 
   /**
    * Currently selected table filter
@@ -110,7 +115,8 @@ export interface AddPrebuiltRulesTableActions {
   setFilterOptions: Dispatch<SetStateAction<AddPrebuiltRulesTableFilterOptions>>;
   selectRules: (rules: RuleResponse[]) => void;
   setPagination: Dispatch<SetStateAction<{ page: number; perPage: number }>>;
-  setSortingOptions: Dispatch<SetStateAction<PrebuiltRuleAssetsSortItem | undefined>>;
+  setField: Dispatch<SetStateAction<PrebuiltRuleAssetsSortField | undefined>>;
+  setOrder: Dispatch<SetStateAction<SortOrder | undefined>>;
   openRulePreview: (ruleId: RuleSignatureId) => void;
 }
 
@@ -156,7 +162,8 @@ export const AddPrebuiltRulesTableContextProvider = ({
     }));
   }, []);
 
-  const [sortingOptions, setSortingOptions] = useState<PrebuiltRuleAssetsSortItem | undefined>();
+  const [field, setField] = useState<PrebuiltRuleAssetsSortField | undefined>();
+  const [order, setOrder] = useState<SortOrder | undefined>();
 
   const { data: prebuiltRulesStatus } = useFetchPrebuiltRulesStatusQuery();
 
@@ -184,7 +191,8 @@ export const AddPrebuiltRulesTableContextProvider = ({
       page: pagination.page,
       perPage: pagination.perPage,
       filterOptions,
-      sortingOptions,
+      field,
+      order,
     },
     {
       refetchInterval: 60000, // Refetch available rules for installation every minute
@@ -311,7 +319,8 @@ export const AddPrebuiltRulesTableContextProvider = ({
   const actions = useMemo(
     () => ({
       setPagination,
-      setSortingOptions,
+      setField,
+      setOrder,
       setFilterOptions,
       installAllRules,
       installOneRule,
@@ -322,7 +331,8 @@ export const AddPrebuiltRulesTableContextProvider = ({
     }),
     [
       setPagination,
-      setSortingOptions,
+      setField,
+      setOrder,
       installAllRules,
       installOneRule,
       installSelectedRules,
@@ -353,7 +363,8 @@ export const AddPrebuiltRulesTableContextProvider = ({
           ...pagination,
           total: rulesMatchingFilterCount,
         },
-        sortingOptions,
+        field,
+        order,
       },
       actions,
     };
@@ -374,7 +385,8 @@ export const AddPrebuiltRulesTableContextProvider = ({
     selectedRules,
     dataUpdatedAt,
     pagination,
-    sortingOptions,
+    field,
+    order,
     actions,
   ]);
 
