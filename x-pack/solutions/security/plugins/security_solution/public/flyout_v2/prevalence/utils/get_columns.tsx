@@ -31,7 +31,7 @@ import {
 import { FormattedCount } from '../../../common/components/formatted_number';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { InvestigateInTimelineButton } from '../../../common/components/event_details/investigate_in_timeline_button';
-import type { PreviewLinkRenderer } from '../../document/components/highlighted_fields_cell';
+import type { ChildLinkRenderer } from '../../document/components/highlighted_fields_cell';
 
 /**
  * Component that renders a grey box to indicate the user doesn't have proper license to view the actual data
@@ -319,7 +319,7 @@ export const getColumns = (
   /**
    * Optional component to render preview links for supported field types (e.g. IP fields)
    */
-  RenderPreviewLink?: PreviewLinkRenderer
+  RenderChildLink?: ChildLinkRenderer
 ): Array<EuiBasicTableColumn<PrevalenceDetailsRow>> => [
   fieldColumn,
   {
@@ -333,11 +333,11 @@ export const getColumns = (
     render: (data: PrevalenceDetailsRow) => {
       const renderValue = (value: string) => {
         const text = <EuiText size="xs">{value}</EuiText>;
-        if (RenderPreviewLink) {
+        if (RenderChildLink) {
           return (
-            <RenderPreviewLink field={data.field} value={value} scopeId={scopeId}>
+            <RenderChildLink field={data.field} value={value} scopeId={scopeId}>
               {text}
-            </RenderPreviewLink>
+            </RenderChildLink>
           );
         }
         return text;

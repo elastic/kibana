@@ -41,7 +41,7 @@ jest.mock('../../../common/components/event_details/use_action_cell_data_provide
   getDataProviderAnd: jest.fn(() => ({ id: 'mock-and-provider' })),
 }));
 
-const MockPreviewLink = ({
+const MockChildLink = ({
   field,
   value,
   children,
@@ -50,7 +50,7 @@ const MockPreviewLink = ({
   value: string;
   children?: React.ReactNode;
 }) => (
-  <div data-test-subj="mockPreviewLink" data-field={field} data-value={value}>
+  <div data-test-subj="mockChildLink" data-field={field} data-value={value}>
     {children}
   </div>
 );
@@ -331,24 +331,24 @@ describe('getColumns', () => {
       expect(screen.getByText('value-one')).toBeInTheDocument();
     });
 
-    it('wraps each value in a PreviewLink when RenderPreviewLink is provided', () => {
+    it('wraps each value in a ChildLink when RenderChildLink is provided', () => {
       const columns = getColumns(
         null as unknown as CellActionRenderer,
         true,
         'alerts-page',
-        MockPreviewLink
+        MockChildLink
       );
       const valueColumn = columns[1];
       const row = { ...defaultRow, field: 'source.ip', values: ['10.0.0.1'] };
 
       renderComponent(callRender(valueColumn, row));
 
-      const previewLink = screen.getByTestId('mockPreviewLink');
+      const previewLink = screen.getByTestId('mockChildLink');
       expect(previewLink).toHaveAttribute('data-field', 'source.ip');
       expect(previewLink).toHaveAttribute('data-value', '10.0.0.1');
     });
 
-    it('renders plain text without PreviewLink when RenderPreviewLink is not provided', () => {
+    it('renders plain text without ChildLink when RenderChildLink is not provided', () => {
       const columns = getColumns(null as unknown as CellActionRenderer, true, 'alerts-page');
       const valueColumn = columns[1];
       const row = { ...defaultRow, values: ['plain-value'] };
@@ -356,7 +356,7 @@ describe('getColumns', () => {
       renderComponent(callRender(valueColumn, row));
 
       expect(screen.getByText('plain-value')).toBeInTheDocument();
-      expect(screen.queryByTestId('mockPreviewLink')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('mockChildLink')).not.toBeInTheDocument();
     });
 
     it('renders one item per value', () => {

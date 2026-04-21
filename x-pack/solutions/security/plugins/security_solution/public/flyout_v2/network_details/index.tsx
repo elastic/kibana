@@ -7,6 +7,7 @@
 
 import type { FC } from 'react';
 import React, { memo } from 'react';
+import { EuiFlyoutHeader, EuiFlyoutBody } from '@elastic/eui';
 import type { FlowTargetSourceDest } from '../../../common/search_strategy';
 import { Header } from './header';
 import { Content } from './content';
@@ -28,8 +29,12 @@ export interface NetworkProps extends Record<string, unknown> {
 export const Network: FC<NetworkProps> = memo(({ ip, flowTarget }) => {
   return (
     <>
-      <Header ip={ip} flowTarget={flowTarget} />
-      <Content ip={ip} flowTarget={flowTarget} />
+      <EuiFlyoutHeader hasBorder>
+        <Header ip={ip} flowTarget={flowTarget} />
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <Content ip={ip} flowTarget={flowTarget} />
+      </EuiFlyoutBody>
     </>
   );
 });

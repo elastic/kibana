@@ -17,11 +17,17 @@ import type { StartServices } from '../../types';
 import type { SecurityAppStore } from '../../common/store/types';
 
 export interface IpCellRendererProps extends DataGridCellValueElementProps {
+  /** Kibana start services, used to access overlays for opening the network details flyout */
   services: StartServices;
+  /** Redux store passed through to the flyout providers */
   store: SecurityAppStore;
 }
 
-const IpCellRendererComponent: React.FC<IpCellRendererProps> = ({ services, store, ...props }) => {
+/**
+ * Cell renderer for IP address columns in One Discover.
+ * Renders each IP as a clickable link that opens the network details flyout.
+ */
+export const IpCellRenderer = React.memo<IpCellRendererProps>(({ services, store, ...props }) => {
   const history = useHistory();
   const { overlays } = services;
   const rawValue = props.row.flattened[props.columnId];
@@ -70,6 +76,6 @@ const IpCellRendererComponent: React.FC<IpCellRendererProps> = ({ services, stor
       ))}
     </>
   );
-};
+});
 
-export const IpCellRenderer = React.memo(IpCellRendererComponent);
+IpCellRenderer.displayName = 'IpCellRenderer';

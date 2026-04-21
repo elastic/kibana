@@ -13,10 +13,10 @@ import { useStore } from 'react-redux';
 import { flyoutProviders } from './flyout_provider';
 import { defaultToolsFlyoutProperties } from '../hooks/use_default_flyout_properties';
 import { useKibana } from '../../../common/lib/kibana';
-import { PREVIEW_LINK_TEST_ID } from './test_ids';
+import { CHILD_LINK_TEST_ID } from './test_ids';
 import { buildFlyoutContent } from '../utils/build_flyout_content';
 
-export interface PreviewLinkProps {
+export interface ChildLinkProps {
   /**
    * Field name used to determine which flyout to open
    */
@@ -47,12 +47,12 @@ export interface PreviewLinkProps {
  * When the field is not supported, the `children` are rendered as-is (pass-through),
  * allowing callers to wrap fallback rendering inside this component.
  */
-export const PreviewLink: FC<PreviewLinkProps> = ({
+export const ChildLink: FC<ChildLinkProps> = ({
   field,
   value,
   scopeId,
   children,
-  'data-test-subj': dataTestSubj = PREVIEW_LINK_TEST_ID,
+  'data-test-subj': dataTestSubj = CHILD_LINK_TEST_ID,
 }) => {
   const { services } = useKibana();
   const { overlays } = services;

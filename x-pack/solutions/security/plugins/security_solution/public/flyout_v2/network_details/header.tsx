@@ -7,16 +7,14 @@
 
 import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
-import type { EuiFlyoutHeader } from '@elastic/eui';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { getNetworkDetailsUrl } from '../../common/components/link_to';
 import { SecuritySolutionLinkAnchor } from '../../common/components/links';
 import type { FlowTargetSourceDest } from '../../../common/search_strategy';
-import { FlyoutHeader } from '../../flyout/shared/components/flyout_header';
 import { FlyoutTitle } from '../shared/components/flyout_title';
 import { encodeIpv6 } from '../../common/lib/helpers';
 
-export interface HeaderProps extends React.ComponentProps<typeof EuiFlyoutHeader> {
+export interface HeaderProps {
   /**
    * IP value
    */
@@ -32,29 +30,25 @@ const urlParamOverride = { timeline: { isOpen: false } };
 /**
  * Header component for the network details flyout.
  */
-export const Header: FC<HeaderProps> = memo(
-  ({ ip, flowTarget, ...flyoutHeaderProps }: HeaderProps) => {
-    const href = useMemo(() => getNetworkDetailsUrl(encodeIpv6(ip), flowTarget), [flowTarget, ip]);
+export const Header: FC<HeaderProps> = memo(({ ip, flowTarget }: HeaderProps) => {
+  const href = useMemo(() => getNetworkDetailsUrl(encodeIpv6(ip), flowTarget), [flowTarget, ip]);
 
-    return (
-      <FlyoutHeader {...flyoutHeaderProps}>
-        <SecuritySolutionLinkAnchor
-          deepLinkId={SecurityPageName.network}
-          path={href}
-          target={'_blank'}
-          external={false}
-          override={urlParamOverride}
-        >
-          <FlyoutTitle
-            title={ip}
-            iconType={'globe'}
-            isLink
-            data-test-subj="network-details-flyout-header"
-          />
-        </SecuritySolutionLinkAnchor>
-      </FlyoutHeader>
-    );
-  }
-);
+  return (
+    <SecuritySolutionLinkAnchor
+      deepLinkId={SecurityPageName.network}
+      path={href}
+      target={'_blank'}
+      external={false}
+      override={urlParamOverride}
+    >
+      <FlyoutTitle
+        title={ip}
+        iconType={'globe'}
+        isLink
+        data-test-subj="network-details-flyout-header"
+      />
+    </SecuritySolutionLinkAnchor>
+  );
+});
 
 Header.displayName = 'Header';

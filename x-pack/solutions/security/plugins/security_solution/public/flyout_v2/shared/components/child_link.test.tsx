@@ -8,8 +8,8 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
-import { PreviewLink } from './preview_link';
-import { PREVIEW_LINK_TEST_ID } from './test_ids';
+import { ChildLink } from './child_link';
+import { CHILD_LINK_TEST_ID } from './test_ids';
 import { buildFlyoutContent } from '../utils/build_flyout_content';
 
 jest.mock('../utils/build_flyout_content');
@@ -42,16 +42,16 @@ const buildFlyoutContentMock = buildFlyoutContent as jest.Mock;
 
 const SCOPE_ID = 'scopeId';
 
-const renderPreviewLink = (props: Partial<React.ComponentProps<typeof PreviewLink>> = {}) =>
+const renderChildLink = (props: Partial<React.ComponentProps<typeof ChildLink>> = {}) =>
   render(
     <TestProviders>
-      <PreviewLink field="source.ip" value="10.0.0.1" scopeId={SCOPE_ID} {...props}>
+      <ChildLink field="source.ip" value="10.0.0.1" scopeId={SCOPE_ID} {...props}>
         <span data-test-subj="fallbackChild">{'fallback'}</span>
-      </PreviewLink>
+      </ChildLink>
     </TestProviders>
   );
 
-describe('<PreviewLink />', () => {
+describe('<ChildLink />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -64,32 +64,32 @@ describe('<PreviewLink />', () => {
     it('should render a link with the value as text when no children are provided', () => {
       const { getByTestId } = render(
         <TestProviders>
-          <PreviewLink field="source.ip" value="10.0.0.1" scopeId={SCOPE_ID} />
+          <ChildLink field="source.ip" value="10.0.0.1" scopeId={SCOPE_ID} />
         </TestProviders>
       );
 
-      const link = getByTestId(PREVIEW_LINK_TEST_ID);
+      const link = getByTestId(CHILD_LINK_TEST_ID);
       expect(link).toBeInTheDocument();
       expect(link).toHaveTextContent('10.0.0.1');
     });
 
     it('should render children inside the link when children are provided', () => {
-      const { getByTestId } = renderPreviewLink();
+      const { getByTestId } = renderChildLink();
 
-      const link = getByTestId(PREVIEW_LINK_TEST_ID);
+      const link = getByTestId(CHILD_LINK_TEST_ID);
       expect(link).toBeInTheDocument();
       expect(link).toHaveTextContent('fallback');
     });
 
     it('should call openSystemFlyout when clicked', () => {
-      const { getByTestId } = renderPreviewLink();
+      const { getByTestId } = renderChildLink();
 
-      getByTestId(PREVIEW_LINK_TEST_ID).click();
+      getByTestId(CHILD_LINK_TEST_ID).click();
       expect(mockOpenSystemFlyout).toHaveBeenCalled();
     });
 
     it('should use a custom data-test-subj when provided', () => {
-      const { getByTestId } = renderPreviewLink({ 'data-test-subj': 'customTestId' });
+      const { getByTestId } = renderChildLink({ 'data-test-subj': 'customTestId' });
 
       expect(getByTestId('customTestId')).toBeInTheDocument();
     });
@@ -101,14 +101,14 @@ describe('<PreviewLink />', () => {
     });
 
     it('should render children as fallback', () => {
-      const { getByTestId, queryByTestId } = renderPreviewLink();
+      const { getByTestId, queryByTestId } = renderChildLink();
 
       expect(getByTestId('fallbackChild')).toBeInTheDocument();
-      expect(queryByTestId(PREVIEW_LINK_TEST_ID)).not.toBeInTheDocument();
+      expect(queryByTestId(CHILD_LINK_TEST_ID)).not.toBeInTheDocument();
     });
 
     it('should not call openSystemFlyout', () => {
-      renderPreviewLink();
+      renderChildLink();
 
       expect(mockOpenSystemFlyout).not.toHaveBeenCalled();
     });

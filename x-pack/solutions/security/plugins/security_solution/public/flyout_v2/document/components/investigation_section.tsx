@@ -29,7 +29,7 @@ import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { HighlightedFields } from './highlighted_fields';
 import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
-import { PreviewLink } from '../../shared/components/preview_link';
+import { ChildLink } from '../../shared/components/child_link';
 
 export const INVESTIGATION_SECTION_TEST_ID = `${PREFIX}InvestigationSection` as const;
 
@@ -136,7 +136,7 @@ export const InvestigationSection = memo(
           ancestorsIndexName={ancestorsIndexName}
           renderCellActions={renderCellActions}
           hideEditButton={isRemoteDocument}
-          renderPreviewLink={PreviewLink}
+          renderChildLink={ChildLink}
         />
       </ExpandableSection>
     );

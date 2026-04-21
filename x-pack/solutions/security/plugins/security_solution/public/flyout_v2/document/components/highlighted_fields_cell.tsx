@@ -22,11 +22,11 @@ import {
 } from './test_ids';
 import { isFlyoutLink } from '../../../flyout/shared/utils/link_utils';
 import { PreviewLink } from '../../../flyout/shared/components/preview_link';
-import type { PreviewLinkProps } from '../../shared/components/preview_link';
+import type { ChildLinkProps } from '../../shared/components/child_link';
 
 const EMPTY_ARRAY: string[] = [];
 
-export type PreviewLinkRenderer = React.FC<PreviewLinkProps>;
+export type ChildLinkRenderer = React.FC<ChildLinkProps>;
 
 export interface HighlightedFieldsCellProps {
   /**
@@ -47,11 +47,11 @@ export interface HighlightedFieldsCellProps {
   values: string[] | null | undefined;
   /**
    * Maintain backwards compatibility // TODO remove when possible
-   * Only needed if alerts page flyout (which has PreviewLink), NOT in EASE alert summary flyout.
+   * Only needed if alerts page flyout (which has ChildLink), NOT in EASE alert summary flyout.
    */
   scopeId?: string;
   /**
-   * If true, we show a PreviewLink for some specific fields.
+   * If true, we show a ChildLink for some specific fields.
    * This is false by default (for EASE alert summary page) and will be true for the alerts page.
    */
   showPreview?: boolean;
@@ -70,7 +70,7 @@ export interface HighlightedFieldsCellProps {
    * When provided, wraps each cell value. If the wrapper handles the field
    * (e.g. IP), it renders its own link; otherwise it passes through children.
    */
-  renderPreviewLink?: PreviewLinkRenderer;
+  renderChildLink?: ChildLinkRenderer;
 }
 
 /**
@@ -85,7 +85,7 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
   ancestorsIndexName,
   displayValuesLimit = 2,
   entityId,
-  renderPreviewLink: RenderPreviewLink,
+  renderChildLink: RenderChildLink,
 }) => {
   const agentType: ResponseActionAgentType = useMemo(() => {
     return getAgentTypeForAgentIdField(originalField);
@@ -160,17 +160,17 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
 
       return (
         <div key={`${i}-${value}`} data-test-subj={`${value}-${HIGHLIGHTED_FIELDS_CELL_TEST_ID}`}>
-          {RenderPreviewLink ? (
-            <RenderPreviewLink field={field} value={value} scopeId={scopeId}>
+          {RenderChildLink ? (
+            <RenderChildLink field={field} value={value} scopeId={scopeId}>
               {content}
-            </RenderPreviewLink>
+            </RenderChildLink>
           ) : (
             content
           )}
         </div>
       );
     },
-    [agentType, ancestorsIndexName, field, scopeId, showPreview, entityId, RenderPreviewLink]
+    [agentType, ancestorsIndexName, field, scopeId, showPreview, entityId, RenderChildLink]
   );
 
   if (values === null) return null;
