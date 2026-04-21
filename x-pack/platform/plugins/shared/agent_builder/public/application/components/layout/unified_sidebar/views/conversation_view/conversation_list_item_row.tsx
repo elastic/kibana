@@ -43,6 +43,9 @@ const labels = {
   openMenu: i18n.translate('xpack.agentBuilder.sidebar.conversationList.openMenu', {
     defaultMessage: 'Open conversation menu',
   }),
+  actionsMenu: i18n.translate('xpack.agentBuilder.sidebar.conversationList.actionsMenu', {
+    defaultMessage: 'Conversation actions',
+  }),
 };
 
 export interface ConversationListItemRowProps {
@@ -205,6 +208,7 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
               panelPaddingSize="none"
               anchorPosition="downRight"
               repositionOnScroll
+              aria-label={labels.actionsMenu}
             >
               <EuiContextMenuPanel size="s" items={menuItems} />
             </EuiPopover>
