@@ -180,9 +180,15 @@ This RFC covers managed workflows only. Templates are a separate initiative (see
 
    None of these options are clean. This is the core reason partial editability is deferred — it requires solving the managed/template hybrid problem, which is out of scope for the first delivery.
 
-   **Overrides mechanism (alternative to full editability):** For workflows whose structure is static but whose configuration is dynamic (e.g., a connector ID or rule ID only known after an entity is created), the YAML can contain template placeholders. When the workflow is provisioned, the caller provides the custom values that populate the placeholders. These values are stored in a separate `overrides` field on the workflow document and rendered into the YAML at creation time. The `definitionHash` is computed from the template YAML (not the rendered output), so it remains unaffected by overrides. When a new version is delivered, the platform reads the existing overrides and renders them into the new YAML before storing — the hash tracks the latest template version. This preserves the full lifecycle process since the workflow version is identified based on the hash, and overrides are orthogonal to versioning.
+   **Overrides mechanism (alternative to full editability):** Two layers handle dynamic configuration without breaking the lifecycle:
 
-   **Recommended first-phase approach:** For the first delivery, the enable/disable toggle is the only user-permitted mutation on managed workflows (see R3). For any other customization, the user should:
+   1. **Workflow `constants` (runtime values).** The workflow engine already supports `constants` defined in the YAML, rendered at execution time. For managed workflows, constants can also be provided as a separate field on the workflow document (merged with YAML-defined constants, with the document field taking precedence). This handles values only needed at runtime (e.g., a connector ID used by a step). Since constants are rendered at execution time, not stored in the YAML, the `definitionHash` is unaffected — lifecycle reconciliation works normally. When a new version is delivered, the platform preserves the existing constants and renders them into the new version at runtime.
+
+   2. **`overrides` field (creation-time values).** Some values are needed at creation time, not just runtime — triggers (scheduling interval, trigger filters), tags, name, and description are all stored on the workflow document when it's provisioned. These can't be deferred to runtime. An `overrides` field on the document stores these creation-time customizations. When the workflow is provisioned, overrides are applied to the document fields before writing. The `definitionHash` is computed from the template YAML (not the overridden values), so it remains unaffected. When a new version is delivered, the platform reads the existing overrides and re-applies them to the new version before storing — the hash tracks the latest template version.
+
+   Both are orthogonal to versioning — the lifecycle process is preserved since the workflow version is identified based on the hash.
+
+   **Recommended first-phase approach:** For any other customization, the user should:
    1. Clone the managed workflow into a user-owned copy.
    2. Edit whatever is needed on the clone.
    3. Disable the original managed workflow.
