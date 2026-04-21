@@ -15,6 +15,7 @@ import { getTransforms } from '../../../common/embeddables/alerts/transforms/tra
  */
 export const registerAlertsEmbeddableTransforms = (embeddable: EmbeddableSetup): void => {
   embeddable.registerTransforms(SLO_ALERTS_EMBEDDABLE_ID, {
+    title: 'SLO alerts',
     getSchema: getAlertsEmbeddableSchema,
     getTransforms,
   });

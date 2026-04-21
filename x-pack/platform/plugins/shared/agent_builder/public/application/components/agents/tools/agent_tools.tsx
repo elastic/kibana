@@ -19,9 +19,8 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import type { ToolDefinition, ToolSelection } from '@kbn/agent-builder-common';
+import type { ToolDefinition } from '@kbn/agent-builder-common';
 import { defaultAgentToolIds } from '@kbn/agent-builder-common';
-import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useQueryState } from '../../../hooks/use_query_state';
 import { searchParamNames } from '../../../search_param_names';
 import { labels } from '../../../utils/i18n';
@@ -29,21 +28,15 @@ import { appPaths } from '../../../utils/app_paths';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { useToolsService } from '../../../hooks/tools/use_tools';
 import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
-import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
-import { useToasts } from '../../../hooks/use_toasts';
-import { queryKeys } from '../../../query_keys';
 import { useFlyoutState } from '../../../hooks/use_flyout_state';
-import {
-  getActiveTools,
-  isToolSelected,
-  toggleToolSelection,
-} from '../../../utils/tool_selection_utils';
+import { getActiveTools } from '../../../utils/tool_selection_utils';
 import { ActiveItemRow } from '../common/active_item_row';
 import { ToolLibraryPanel } from './tool_library_panel';
 import { ToolDetailPanel } from './tool_detail_panel';
 import { PageWrapper } from '../common/page_wrapper';
 import { useListDetailPageStyles } from '../common/styles';
 import { useCanEditAgent } from '../../../hooks/agents/use_can_edit_agent';
+import { useToolsMutation } from './use_tools_mutation';
 
 const ActiveToolsList: React.FC<{
   filteredActiveTools: ToolDefinition[];
@@ -114,17 +107,18 @@ export const AgentTools: React.FC = () => {
   const { agentId } = useParams<{ agentId: string }>();
   const styles = useListDetailPageStyles();
   const { createAgentBuilderUrl } = useNavigation();
-  const { agentService } = useAgentBuilderServices();
-  const { addSuccessToast, addErrorToast } = useToasts();
-  const queryClient = useQueryClient();
 
   const { agent, isLoading: agentLoading } = useAgentBuilderAgentById(agentId);
   const { tools: allTools, isLoading: toolsLoading } = useToolsService();
   const canEditAgent = useCanEditAgent({ agent });
 
+  const { handleAddTool, handleRemoveTool } = useToolsMutation({
+    agent: agent ?? null,
+    allTools,
+  });
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedToolId, setSelectedToolId] = useQueryState<string>(searchParamNames.toolId);
-  const [mutatingToolId, setMutatingToolId] = useState<string | null>(null);
   const {
     isOpen: isLibraryOpen,
     openFlyout: openLibrary,
@@ -178,48 +172,6 @@ export const AgentTools: React.FC = () => {
     );
   }, [activeTools, searchQuery]);
 
-  const updateToolsMutation = useMutation({
-    mutationFn: (newToolSelections: ToolSelection[]) => {
-      return agentService.update(agentId!, { configuration: { tools: newToolSelections } });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.byId(agentId) });
-    },
-    onError: () => {
-      addErrorToast({ title: labels.agentTools.updateToolsErrorToast });
-    },
-  });
-
-  const handleAddTool = useCallback(
-    async (tool: ToolDefinition) => {
-      if (isToolSelected(tool, agentToolSelections)) return;
-      const newSelections = toggleToolSelection(tool.id, allTools, agentToolSelections);
-      setMutatingToolId(tool.id);
-      try {
-        await updateToolsMutation.mutateAsync(newSelections);
-        addSuccessToast({ title: labels.agentTools.addToolSuccessToast(tool.id) });
-      } finally {
-        setMutatingToolId(null);
-      }
-    },
-    [agentToolSelections, allTools, updateToolsMutation, addSuccessToast]
-  );
-
-  const handleRemoveTool = useCallback(
-    (tool: ToolDefinition) => {
-      const newSelections = toggleToolSelection(tool.id, allTools, agentToolSelections);
-      setMutatingToolId(tool.id);
-      updateToolsMutation.mutate(newSelections, {
-        onSuccess: () => {
-          setSelectedToolId(null);
-          addSuccessToast({ title: labels.agentTools.removeToolSuccessToast(tool.id) });
-        },
-        onSettled: () => setMutatingToolId(null),
-      });
-    },
-    [agentToolSelections, allTools, updateToolsMutation, addSuccessToast, setSelectedToolId]
-  );
-
   const handleToggleTool = useCallback(
     (tool: ToolDefinition, isActive: boolean) => {
       if (enableElasticCapabilities && defaultToolIdSet.has(tool.id)) return;
@@ -232,15 +184,23 @@ export const AgentTools: React.FC = () => {
     [handleAddTool, handleRemoveTool, enableElasticCapabilities, defaultToolIdSet]
   );
 
+  const handleRemoveToolWithDeselect = useCallback(
+    (tool: ToolDefinition) => {
+      handleRemoveTool(tool);
+      setSelectedToolId(null);
+    },
+    [handleRemoveTool, setSelectedToolId]
+  );
+
   /** Guarded removal: only prevents removing auto-included tools from the agent. */
-  const handleRemoveSelectedTool = useCallback(() => {
+  const handleRemoveSelectedTool = () => {
     if (!selectedToolId) return;
     if (enableElasticCapabilities && defaultToolIdSet.has(selectedToolId)) return;
     const tool = activeTools.find((t) => t.id === selectedToolId);
     if (tool) {
-      handleRemoveTool(tool);
+      handleRemoveToolWithDeselect(tool);
     }
-  }, [selectedToolId, activeTools, handleRemoveTool, enableElasticCapabilities, defaultToolIdSet]);
+  };
 
   const isLoading = agentLoading || toolsLoading;
 
@@ -304,9 +264,9 @@ export const AgentTools: React.FC = () => {
               selectedToolId={selectedToolId}
               enableElasticCapabilities={enableElasticCapabilities}
               defaultToolIdSet={defaultToolIdSet}
-              isRemoving={updateToolsMutation.isLoading}
+              isRemoving={false}
               onSelect={setSelectedToolId}
-              onRemove={handleRemoveTool}
+              onRemove={handleRemoveToolWithDeselect}
               canEditAgent={canEditAgent}
             />
           </div>
@@ -340,7 +300,6 @@ export const AgentTools: React.FC = () => {
           allTools={allTools}
           activeToolIdSet={libraryActiveToolIdSet}
           onToggleTool={handleToggleTool}
-          mutatingToolId={mutatingToolId}
           enableElasticCapabilities={enableElasticCapabilities}
           builtinToolIdSet={defaultToolIdSet}
         />

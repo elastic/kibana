@@ -86,12 +86,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Entity Analytics: Disables the Risk Score AI Assistant tool.
    */
   riskScoreAssistantToolDisabled: false,
-
-  /**
-   * Entity Analytics: Disables the Risk Score AI Assistant tool.
-   */
-  entityDetailsHighlightsEnabled: true,
-
   /**
    * Enables the new Entity Analytics home page experience.
    */
@@ -246,12 +240,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Release: 9.4
    */
   prebuiltRulesDeprecationUIEnabled: false,
-
-  /**
-   * Classic chrome only: refreshed Security side nav (Launchpad, Manage footer; unified row + panel behavior).
-   * Release: 9.4
-   */
-  securityClassicNavUpdate: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
