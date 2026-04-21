@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Duration } from 'moment';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 
 export interface TimeSeriesExplorerZoomState {
@@ -14,7 +15,7 @@ export interface TimeSeriesExplorerZoomState {
 
 export interface ResolveContextFinishFocusRangeParams {
   zoom: TimeSeriesExplorerZoomState | undefined;
-  contextAggregationInterval: unknown;
+  contextAggregationInterval: Duration;
   bounds: TimeRangeBounds;
   selectedForecastId: string | undefined;
   previousSelectedForecastId: string | undefined;
@@ -23,12 +24,12 @@ export interface ResolveContextFinishFocusRangeParams {
   contextForecastData: unknown[] | undefined;
   calculateInitialFocusRange: (
     zoom: TimeSeriesExplorerZoomState | undefined,
-    contextAggregationInterval: unknown,
+    contextAggregationInterval: Duration,
     bounds: TimeRangeBounds
   ) => [Date, Date] | undefined;
   calculateDefaultFocusRange: (
     autoZoomDuration: number,
-    contextAggregationInterval: unknown,
+    contextAggregationInterval: Duration,
     contextChartData: unknown[],
     contextForecastData: unknown[] | undefined
   ) => [Date, Date] | undefined;

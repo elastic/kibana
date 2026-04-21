@@ -9,6 +9,8 @@ import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import type { Duration, Moment } from 'moment';
 import { lastValueFrom } from 'rxjs';
 
+import type { CriteriaField } from '../../services/results_service';
+
 import {
   isModelPlotEnabled,
   isModelPlotChartableForDetector,
@@ -82,6 +84,18 @@ export interface LoadSingleMetricContextDataEntityControl {
   fieldName: string;
 }
 
+/**
+ * Shape of the chart-details result returned by `mlTimeSeriesSearchService.getChartDetails`.
+ * Mirrors `TimeSeriesExplorerChartDetails.results` in `time_series_search_service.ts` (not exported).
+ */
+export interface SmvChartDetails {
+  functionLabel: string | null;
+  entityData: {
+    count?: number;
+    entities: Array<{ fieldName: string; cardinality?: number }>;
+  };
+}
+
 export interface LoadSingleMetricContextDataDeps {
   mlTimeSeriesSearchService: {
     getMetricData: (
@@ -91,26 +105,28 @@ export interface LoadSingleMetricContextDataDeps {
       earliestMs: number,
       latestMs: number,
       intervalMs: number,
-      functionToPlotByIfMetric: unknown
-    ) => import('rxjs').Observable<{ results: unknown }>;
+      /** `aggregationTypeTransform.toES(functionDescription)` for metric detectors. */
+      functionToPlotByIfMetric: string | undefined
+    ) => import('rxjs').Observable<{ results: Record<string, unknown> }>;
     getChartDetails: (
       job: CombinedJob,
       detectorIndex: number,
       entityFields: LoadSingleMetricContextDataEntityControl[],
       earliestMs: number,
       latestMs: number,
-      metricFunctionDescription?: unknown
-    ) => Promise<{ results: unknown }>;
+      metricFunctionDescription?: string
+    ) => Promise<{ success: boolean; results: SmvChartDetails }>;
   };
   mlResultsService: {
     getRecordMaxScoreByTime: (
       jobId: string,
-      criteriaFields: unknown[],
+      criteriaFields: CriteriaField[],
       earliestMs: number,
       latestMs: number,
       intervalMs: number,
-      functionToPlotByIfMetric: unknown
-    ) => Promise<{ results: unknown }>;
+      /** `aggregationTypeTransform.toES(functionDescription)` for metric detectors. */
+      functionToPlotByIfMetric: string | undefined
+    ) => Promise<{ results: Record<string, unknown> }>;
   };
   mlForecastService: {
     getForecastData: (
@@ -122,7 +138,7 @@ export interface LoadSingleMetricContextDataDeps {
       latestMs: number,
       intervalMs: number,
       aggType: ReturnType<typeof getForecastAggTypeForContextLoad>
-    ) => import('rxjs').Observable<{ results: unknown }>;
+    ) => import('rxjs').Observable<{ results: Record<string, unknown> }>;
   };
   mlTimeSeriesExplorer: {
     calculateAggregationInterval: (
@@ -130,17 +146,20 @@ export interface LoadSingleMetricContextDataDeps {
       target: number,
       job: CombinedJob
     ) => Duration;
-    processMetricPlotResults: (results: unknown, modelPlotEnabled: boolean) => unknown[];
-    processRecordScoreResults: (results: unknown) => unknown[];
-    processForecastResults: (results: unknown) => unknown[];
+    processMetricPlotResults: (
+      results: Record<string, unknown>,
+      modelPlotEnabled: boolean
+    ) => unknown[];
+    processRecordScoreResults: (results: Record<string, unknown>) => unknown[];
+    processForecastResults: (results: Record<string, unknown>) => unknown[];
     calculateInitialFocusRange: (
       zoom: TimeSeriesExplorerZoomState | undefined,
-      contextAggregationInterval: unknown,
+      contextAggregationInterval: Duration,
       bounds: TimeRangeBounds
     ) => [Date, Date] | undefined;
     calculateDefaultFocusRange: (
       autoZoomDuration: number,
-      contextAggregationInterval: unknown,
+      contextAggregationInterval: Duration,
       contextChartData: unknown[],
       contextForecastData: unknown[] | undefined
     ) => [Date, Date] | undefined;
@@ -161,14 +180,14 @@ export interface LoadSingleMetricContextDataParams {
   modelPlotEnabled: boolean;
   selectedForecastId: string | undefined;
   /** Result of `aggregationTypeTransform.toES(functionDescription)` when metric job. */
-  functionToPlotByIfMetric: unknown;
+  functionToPlotByIfMetric: string | undefined;
   /** Raw function description from app state (metric jobs). */
-  functionDescription: unknown;
+  functionDescription: string | undefined;
   zoom: TimeSeriesExplorerZoomState | undefined;
   previousSelectedForecastId: string | undefined;
   autoZoomDuration: number;
   arePartitioningFieldsProvided: boolean;
-  criteriaFields: unknown[];
+  criteriaFields: CriteriaField[];
   displayError: (error: unknown, message: string) => void;
   errorMessages: {
     metric: string;
@@ -287,7 +306,7 @@ async function executeLoadSingleMetricContextData(
     entityControls,
     earliestMs,
     latestMs,
-    functionDescription as never
+    functionDescription
   );
 
   const forecastPromise =
@@ -329,20 +348,25 @@ async function executeLoadSingleMetricContextData(
     forecast: errorMessages.forecast,
   };
 
+  let hadRejection = false;
   for (let i = 0; i < settled.length; i++) {
     const r = settled[i];
     if (r.status === 'rejected') {
       const reason = r.reason;
+      // Fetch layers that honor AbortSignal may reject with DOMException 'AbortError'.
+      // Treat the same as a signal abort: bail silently without showing a toast.
       if (reason instanceof DOMException && reason.name === 'AbortError') {
         return null;
       }
       if (signal?.aborted) {
         return null;
       }
-      const label = errorLabels[i];
-      displayError(reason, errorMessageByLabel[label]);
-      return null;
+      displayError(reason, errorMessageByLabel[errorLabels[i]]);
+      hadRejection = true;
     }
+  }
+  if (hadRejection) {
+    return null;
   }
 
   const metricResp = settled[0].status === 'fulfilled' ? settled[0].value : undefined;
@@ -362,11 +386,9 @@ async function executeLoadSingleMetricContextData(
   const swimlaneData = deps.mlTimeSeriesExplorer.processRecordScoreResults(swimResp.results);
   const chartDetails = detailsResp.results;
   const contextForecastData =
-    selectedForecastId === undefined || forecastRaw === null
-      ? undefined
-      : deps.mlTimeSeriesExplorer.processForecastResults(
-          (forecastRaw as { results: unknown }).results
-        );
+    selectedForecastId !== undefined && forecastRaw != null
+      ? deps.mlTimeSeriesExplorer.processForecastResults(forecastRaw.results)
+      : undefined;
 
   const hasResults =
     (Array.isArray(contextChartData) && contextChartData.length > 0) ||

@@ -413,7 +413,7 @@ class AnnotationsTableUI extends Component {
           defaultMessage: 'Annotation',
         }),
         sortable: true,
-        width: '40%',
+        width: '300px',
         scope: 'row',
         'data-test-subj': `mlAnnotationsColumnAnnotation`,
       },
@@ -461,7 +461,7 @@ class AnnotationsTableUI extends Component {
           defaultMessage: 'Event',
         }),
         sortable: true,
-        width: '10%',
+        width: '80px',
         'data-test-subj': `mlAnnotationsColumnEvent`,
       },
     ];
@@ -621,7 +621,7 @@ class AnnotationsTableUI extends Component {
         name: i18n.translate('xpack.ml.annotationsTable.detectorColumnName', {
           defaultMessage: 'Detector',
         }),
-        width: '10%',
+        width: '100px',
         render: (item) => {
           if ('detector_index' in item) {
             return this.props.detectors[item.detector_index].detector_description;

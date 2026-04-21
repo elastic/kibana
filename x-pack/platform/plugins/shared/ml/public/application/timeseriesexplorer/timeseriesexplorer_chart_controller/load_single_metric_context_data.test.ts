@@ -40,16 +40,17 @@ describe('loadSingleMetricContextData', () => {
 
   const baseDeps = {
     mlTimeSeriesSearchService: {
-      getMetricData: () => of({ results: [] }),
+      getMetricData: () => of({ results: {} }),
       getChartDetails: async () => ({
+        success: true,
         results: { functionLabel: 'mean response', entityData: { entities: [] } },
       }),
     },
     mlResultsService: {
-      getRecordMaxScoreByTime: async () => ({ results: [] }),
+      getRecordMaxScoreByTime: async () => ({ results: {} }),
     },
     mlForecastService: {
-      getForecastData: () => of({ results: [] }),
+      getForecastData: () => of({ results: {} }),
     },
     mlTimeSeriesExplorer: {
       calculateAggregationInterval: () => moment.duration(15, 'minutes'),
@@ -99,6 +100,58 @@ describe('loadSingleMetricContextData', () => {
 
     expect(result).toBeNull();
     expect(displayError).toHaveBeenCalledWith(expect.any(Error), 'metric-err');
+  });
+
+  it('calls displayError for every failing query, not just the first', async () => {
+    const displayError = jest.fn();
+    const result = await loadSingleMetricContextData({
+      bounds,
+      selectedJob,
+      detectorIndex: 0,
+      entityControls: [],
+      modelPlotEnabled: true,
+      selectedForecastId: undefined,
+      functionToPlotByIfMetric: undefined,
+      functionDescription: undefined,
+      zoom: undefined,
+      previousSelectedForecastId: undefined,
+      autoZoomDuration: 1000,
+      arePartitioningFieldsProvided: true,
+      criteriaFields: [],
+      displayError,
+      errorMessages: {
+        metric: 'metric-err',
+        swimlane: 'swim-err',
+        entityCounts: 'details-err',
+        forecast: 'fc-err',
+      },
+      deps: {
+        ...baseDeps,
+        mlTimeSeriesSearchService: {
+          ...baseDeps.mlTimeSeriesSearchService,
+          getMetricData: () => throwError(() => new Error('metric down')),
+          getChartDetails: async () => Promise.reject(new Error('details down')),
+        },
+        mlResultsService: {
+          getRecordMaxScoreByTime: async () => Promise.reject(new Error('swimlane down')),
+        },
+      },
+    });
+
+    expect(result).toBeNull();
+    expect(displayError).toHaveBeenCalledTimes(3);
+    expect(displayError).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'metric down' }),
+      'metric-err'
+    );
+    expect(displayError).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'swimlane down' }),
+      'swim-err'
+    );
+    expect(displayError).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'details down' }),
+      'details-err'
+    );
   });
 
   it('returns null when signal is already aborted (skips work)', async () => {
