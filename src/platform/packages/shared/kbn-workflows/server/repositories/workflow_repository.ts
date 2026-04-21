@@ -189,8 +189,8 @@ export class WorkflowRepository {
         createdBy: source.createdBy as string,
         lastUpdatedBy: source.lastUpdatedBy as string,
         valid: source.valid as boolean,
-        createdAt: source.created_at as string,
-        lastUpdatedAt: source.updated_at as string,
+        createdAt: source.createdAt as string,
+        lastUpdatedAt: source.lastUpdatedAt as string,
       }));
     } finally {
       try {
