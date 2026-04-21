@@ -168,11 +168,11 @@ describe('registerDashboardAttachmentUiDefinition', () => {
   let uiDefinition: AttachmentUIDefinition<DashboardAttachment>;
   let unregister: () => void;
   let chat$: Subject<ChatEvent>;
-  let chatOpen$: BehaviorSubject<boolean>;
+  let sidebarOpen$: BehaviorSubject<boolean>;
 
   const createMockDeps = () => {
     chat$ = new Subject<ChatEvent>();
-    chatOpen$ = new BehaviorSubject<boolean>(true);
+    sidebarOpen$ = new BehaviorSubject<boolean>(true);
     const dashboardAppClientApi$ = new Subject<DashboardApi | undefined>();
     const addAttachmentType = jest.fn();
     const updateAttachmentOrigin = jest.fn().mockResolvedValue(undefined);
@@ -206,10 +206,9 @@ describe('registerDashboardAttachmentUiDefinition', () => {
     const agentBuilder: AgentBuilderPluginStart = {
       attachments: { addAttachmentType },
       addAttachment: mockAddAttachment,
-      chatOpen$,
       subscribeToConversationChanges,
       updateAttachmentOrigin,
-      events: { chat$ },
+      events: { chat$, ui: { sidebarOpen$ } },
     } as unknown as AgentBuilderPluginStart;
 
     const dashboardPlugin: DashboardStart = {
@@ -237,7 +236,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       findDashboardsService,
       emitConversationChange,
       chat$,
-      chatOpen$,
+      sidebarOpen$,
     };
   };
 
@@ -297,10 +296,12 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       agentBuilder: {
         attachments: { addAttachmentType },
         addAttachment: jest.fn(),
-        chatOpen$: new BehaviorSubject<boolean>(true),
         subscribeToConversationChanges: jest.fn(() => () => {}),
         updateAttachmentOrigin: jest.fn().mockResolvedValue(undefined),
-        events: { chat$: new Subject<ChatEvent>() },
+        events: {
+          chat$: new Subject<ChatEvent>(),
+          ui: { sidebarOpen$: new BehaviorSubject<boolean>(true) },
+        },
       } as unknown as AgentBuilderPluginStart,
       canWriteDashboards: true,
       dashboardLocator: undefined,
@@ -476,13 +477,13 @@ describe('registerDashboardAttachmentUiDefinition', () => {
     it('waits for the chat to open before activating dashboard integration', () => {
       const mockApi = createMockDashboardApi();
 
-      deps.chatOpen$.next(false);
+      deps.sidebarOpen$.next(false);
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
       deps.emitConversationChange({ id: undefined, attachments: undefined });
 
       expect(deps.addAttachment).not.toHaveBeenCalled();
 
-      deps.chatOpen$.next(true);
+      deps.sidebarOpen$.next(true);
 
       expect(deps.addAttachment).toHaveBeenCalledWith(
         expect.objectContaining({

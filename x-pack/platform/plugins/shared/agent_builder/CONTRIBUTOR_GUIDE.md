@@ -773,7 +773,7 @@ Not every API on the start contract applies to both chat surfaces. Use this tabl
 | --------------------------------- | :-----: | :------------: | ------------------------------------------------------------------ |
 | `setChatConfig(...)`              |   ✅    |       ❌       | Configures the next (or active) sidebar open.                      |
 | `clearChatConfig()`               |   ✅    |       ❌       | Clears the runtime sidebar config.                                 |
-| `chatOpen$`                       |   ✅    |       ❌       | Tracks sidebar open state only.                                    |
+| `events.ui.sidebarOpen$`          |   ✅    |       ❌       | Tracks sidebar open state only.                                    |
 | `subscribeToConversationChanges(...)` |   ✅    |       ✅       | Fires for both sidebar and routed/full-page chat.                  |
 | `addAttachment(...)`              |   ✅    |       ❌       | Silently ignored when no sidebar is open.                          |
 | `updateAttachmentOrigin(...)`     |   ✅    |       ✅       | Conversation-scoped — works regardless of which surface is active. |
@@ -817,20 +817,20 @@ agentBuilder.setChatConfig({
 });
 ```
 
-### `chatOpen$`
+### `events.ui.sidebarOpen$`
 
-`chatOpen$` is an `Observable<boolean>` that emits `true` while the conversation sidebar is open and `false` otherwise. Use it to gate integrations so they only run while chat is actually present, and to tear them down cleanly when the sidebar closes.
+`events.ui.sidebarOpen$` is an `Observable<boolean>` that emits `true` while the conversation sidebar is open and `false` otherwise. Use it to gate integrations so they only run while the sidebar is actually present, and to tear them down cleanly when the sidebar closes.
 
-It is emitted from the `agentBuilder` start contract and is hot: new subscribers receive the current value immediately (it is backed by a `BehaviorSubject`).
+It is exposed on the `agentBuilder.events.ui` namespace and is hot: new subscribers receive the current value immediately (it is backed by a `BehaviorSubject`).
 
-Typical usage combines `chatOpen$` with `subscribeToConversationChanges(...)`: activate the conversation subscription only while chat is open, and dispose of it when it closes.
+Typical usage combines `events.ui.sidebarOpen$` with `subscribeToConversationChanges(...)`: activate the conversation subscription only while the sidebar is open, and dispose of it when it closes.
 
 ```ts
 import { combineLatest } from 'rxjs';
 
-const subscription = combineLatest([myAppActive$, agentBuilder.chatOpen$]).subscribe(
-  ([appActive, chatOpen]) => {
-    const shouldActivate = appActive && chatOpen;
+const subscription = combineLatest([myAppActive$, agentBuilder.events.ui.sidebarOpen$]).subscribe(
+  ([appActive, sidebarOpen]) => {
+    const shouldActivate = appActive && sidebarOpen;
 
     if (shouldActivate && !unsubscribeConversationChanges) {
       unsubscribeConversationChanges = agentBuilder.subscribeToConversationChanges(

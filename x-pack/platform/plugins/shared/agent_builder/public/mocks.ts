@@ -61,8 +61,10 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
     tools: createToolStartMock(),
     events: {
       chat$: EMPTY,
+      ui: {
+        sidebarOpen$: new BehaviorSubject(false),
+      },
     },
-    chatOpen$: new BehaviorSubject(false),
     setChatConfig: jest.fn(),
     clearChatConfig: jest.fn(),
     toggleChat: jest.fn(),

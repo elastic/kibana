@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Observable } from 'rxjs';
 import type { LensPublicSetup, LensPublicStart } from '@kbn/lens-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type {
@@ -92,13 +91,9 @@ export interface AgentBuilderPluginStart {
    */
   tools: ToolServiceStartContract;
   /**
-   * Events service contract, can be used to listen to chat events.
+   * Events service contract, can be used to listen to chat events and to chat UI-shell state (`events.ui.*`).
    */
   events: EventsServiceStartContract;
-  /**
-   * Emits whether the conversation sidebar is currently open.
-   */
-  chatOpen$: Observable<boolean>;
   /**
    * Opens the conversation sidebar.
    *

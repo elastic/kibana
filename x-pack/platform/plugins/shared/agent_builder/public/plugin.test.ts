@@ -234,12 +234,12 @@ describe('AgentBuilderPlugin', () => {
     });
   });
 
-  describe('chatOpen$', () => {
+  describe('sidebarOpen$', () => {
     it('emits sidebar open state changes', () => {
       const plugin = createPlugin();
       const service = plugin.start(createCoreStart() as any, createStartDependencies() as any);
       const states: boolean[] = [];
-      const subscription = service.chatOpen$.subscribe((isOpen) => {
+      const subscription = service.events.ui.sidebarOpen$.subscribe((isOpen) => {
         states.push(isOpen);
       });
 

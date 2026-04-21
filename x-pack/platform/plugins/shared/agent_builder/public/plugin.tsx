@@ -96,7 +96,7 @@ export class AgentBuilderPlugin
   private conversationChangeListeners = new Set<ConversationChangeHandler>();
   private latestConversationChange: EmbeddableConversationChange | null = null;
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
-  private chatOpenState$ = new BehaviorSubject<boolean>(false);
+  private sidebarOpenState$ = new BehaviorSubject<boolean>(false);
   private experimentalDeepLinksSubscription?: Subscription;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
@@ -199,7 +199,7 @@ export class AgentBuilderPlugin
           this.activeSidebarRef = null;
           this.sidebarCallbacks = null;
           this.latestConversationChange = null;
-          this.chatOpenState$.next(false);
+          this.sidebarOpenState$.next(false);
           clearSidebarRuntimeContext();
         },
       });
@@ -212,13 +212,13 @@ export class AgentBuilderPlugin
           this.activeSidebarRef = null;
           this.sidebarCallbacks = null;
           this.latestConversationChange = null;
-          this.chatOpenState$.next(false);
+          this.sidebarOpenState$.next(false);
           clearSidebarRuntimeContext();
         },
       };
 
       this.activeSidebarRef = sidebarRef;
-      this.chatOpenState$.next(true);
+      this.sidebarOpenState$.next(true);
       return { chatRef: sidebarRef };
     };
 
@@ -260,8 +260,10 @@ export class AgentBuilderPlugin
       agents: createPublicAgentsContract({ agentService }),
       attachments: createPublicAttachmentContract({ attachmentsService }),
       tools: createPublicToolContract({ toolsService }),
-      events: createPublicEventsContract({ eventsService }),
-      chatOpen$: this.chatOpenState$.pipe(distinctUntilChanged()),
+      events: createPublicEventsContract({
+        eventsService,
+        sidebarOpen$: this.sidebarOpenState$.pipe(distinctUntilChanged()),
+      }),
       addAttachment: (attachment: AttachmentInput) => {
         if (this.sidebarCallbacks) {
           this.sidebarCallbacks.addAttachment(attachment);
@@ -303,7 +305,7 @@ export class AgentBuilderPlugin
           // synchronously invoke our onClose callback.
           this.activeSidebarRef = null;
           this.sidebarCallbacks = null;
-          this.chatOpenState$.next(false);
+          this.sidebarOpenState$.next(false);
           sidebarRef.close();
           return;
         }

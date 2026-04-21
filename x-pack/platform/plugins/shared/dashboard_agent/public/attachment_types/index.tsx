@@ -50,7 +50,7 @@ export const registerDashboardAttachmentUiDefinition = ({
 
   const dashboardAppApiSubscription = combineLatest([
     dashboardPlugin.dashboardAppClientApi$,
-    agentBuilder.chatOpen$,
+    agentBuilder.events.ui.sidebarOpen$,
   ])
     .pipe(
       switchMap(([api, isChatOpen]) => {
@@ -88,7 +88,7 @@ export const registerDashboardAttachmentUiDefinition = ({
         canWriteDashboards={canWriteDashboards}
       />
     ),
-    getActionButtons: ({ attachment, openCanvas, isCanvas, isSidebar, updateOrigin }) => {
+    getActionButtons: ({ attachment, openCanvas, isCanvas, isSidebar }) => {
       if (isCanvas) {
         return [];
       }
