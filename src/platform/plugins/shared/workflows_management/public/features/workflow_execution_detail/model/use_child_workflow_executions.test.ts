@@ -39,6 +39,7 @@ const createMockExecution = (overrides?: Partial<WorkflowExecutionDto>): Workflo
   id: 'exec-1',
   status: ExecutionStatus.COMPLETED,
   isTestRun: false,
+  createdAt: '2024-01-15T10:30:00.000Z',
   startedAt: '2024-01-15T10:30:00.000Z',
   finishedAt: '2024-01-15T10:31:00.000Z',
   error: null,

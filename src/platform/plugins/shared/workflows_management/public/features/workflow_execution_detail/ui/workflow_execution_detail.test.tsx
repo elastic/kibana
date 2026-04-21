@@ -505,6 +505,7 @@ describe('WorkflowExecutionDetail - resume input resolution', () => {
       status: ExecutionStatus.WAITING_FOR_INPUT,
       error: null,
       isTestRun: false,
+      createdAt: '2024-01-01T00:00:00Z',
       startedAt: '2024-01-01T00:00:00Z',
       finishedAt: '',
       workflowId: 'workflow-1',
