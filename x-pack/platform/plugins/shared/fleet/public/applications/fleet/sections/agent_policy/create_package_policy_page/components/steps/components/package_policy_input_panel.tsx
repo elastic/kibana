@@ -42,7 +42,9 @@ import {
   DATA_STREAM_USE_APM_VAR,
   shouldIncludeUseAPMVar,
   hasDynamicSignalTypes,
+  mapPackageReleaseToIntegrationCardRelease,
 } from '../../../../../../../../../common/services';
+import { InlineReleaseBadge } from '../../../../../../components';
 import {
   DATA_STREAM_TYPE_VAR_NAME,
   USE_APM_VAR_NAME,
@@ -367,6 +369,27 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
           defaultMessage: 'This input is deprecated.',
         });
 
+    // Whether the individual stream rows will render their own toggle switch.
+    // When they won't (input-type package or single visible stream), we hoist
+    // the non-GA release badge up to the input header so it doesn't float alone.
+    const hasStreamToggle = packageInfo.type !== 'input' && inputStreams.length > 1;
+
+    const inputReleaseBadge = useMemo(() => {
+      if (hasStreamToggle) return null;
+      const preReleaseStream = inputStreams.find(
+        ({ packageInputStream }) =>
+          packageInputStream.data_stream.release && packageInputStream.data_stream.release !== 'ga'
+      );
+      if (!preReleaseStream?.packageInputStream.data_stream.release) return null;
+      return (
+        <InlineReleaseBadge
+          release={mapPackageReleaseToIntegrationCardRelease(
+            preReleaseStream.packageInputStream.data_stream.release
+          )}
+        />
+      );
+    }, [hasStreamToggle, inputStreams]);
+
     // Check if any vars or streams in this input are deprecated
     const hasDeprecatedFeatures = useMemo(() => {
       const inputVarsDeprecated = (packageInput.vars || []).some((v) => !!v.deprecated);
@@ -404,6 +427,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                     </h3>
                   </EuiTitle>
                 </EuiFlexItem>
+                {inputReleaseBadge && <EuiFlexItem grow={false}>{inputReleaseBadge}</EuiFlexItem>}
                 {migrationTooltip}
               </EuiFlexGroup>
               <EuiSpacer size="s" />
@@ -429,6 +453,9 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                         </h3>
                       </EuiTitle>
                     </EuiFlexItem>
+                    {inputReleaseBadge && (
+                      <EuiFlexItem grow={false}>{inputReleaseBadge}</EuiFlexItem>
+                    )}
                     {migrationTooltip}
                     {isDeprecatedInput && (
                       <EuiFlexItem grow={false}>
@@ -528,7 +555,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
         </EuiFlexGroup>
 
         {/* Header rule break */}
-        {isShowingStreams ? <EuiSpacer size="l" /> : null}
+        {isShowingStreams && hasStreamToggle ? <EuiSpacer size="l" /> : null}
         {/* Input level policy */}
         {isShowingStreams && packageInput.vars && packageInput.vars.length ? (
           <Fragment>
@@ -568,7 +595,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                     data-test-subj="PackagePolicy.InputStreamConfig"
                     packageInfo={packageInfo}
                     packageInputStream={packageInputStream}
-                    totalStreams={inputStreams.length}
+                    hasStreamToggle={hasStreamToggle}
                     packagePolicyInputStream={packagePolicyInputStream!}
                     inputPolicyTemplate={packagePolicyInput.policy_template}
                     showDescriptionColumn={!isSingleInputAndStreams}
