@@ -52,7 +52,7 @@ Post detailed findings as inline PR comments on the offending line. Each inline 
 </details>
 ​```
 
-- **Severity emoji:** 🟡 Major, 🔵 Minor, ⚪ Nit
+- **Severity emoji:** 🟡 Major, 🔵 Minor, ⚪ Nit (blocking issues reported by the reviewer skill should be treated as "major")
 - State the rule violated as a **Markdown link** whose text is the section heading from the matching best practices document and whose URL is the section-scoped URL (see routing below). The link is required, not optional.
 - **Overview:** plain prose, no code. A developer skimming the PR should grasp what's wrong and whether to act on it without expanding.
 - **Details:** everything else — reasoning, code snippets, suggested diffs, links to related rules.
