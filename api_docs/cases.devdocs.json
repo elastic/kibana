@@ -224,7 +224,7 @@
           "Props for case-level attachment tabs (Alerts/Events/… table hosts)."
         ],
         "path": "x-pack/platform/plugins/shared/cases/public/client/attachment_framework/types.ts",
-        "lineNumber": 64,
+        "lineNumber": 65,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -400,7 +400,7 @@
               "[]; }"
             ],
             "path": "x-pack/platform/plugins/shared/cases/public/client/attachment_framework/types.ts",
-            "lineNumber": 66,
+            "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -739,7 +739,7 @@
           ">"
         ],
         "path": "x-pack/platform/plugins/shared/cases/public/client/attachment_framework/types.ts",
-        "lineNumber": 124,
+        "lineNumber": 125,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
