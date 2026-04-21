@@ -110,6 +110,7 @@ export function AlertDetailsCharts({
         end={to}
         comparisonChartTheme={comparisonChartTheme}
         timeZone={timeZone}
+        transactionName={transactionName}
         groupId={errorGroupingKey}
         comparisonEnabled={false}
         offset=""

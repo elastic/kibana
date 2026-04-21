@@ -15,6 +15,8 @@ import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { TopAlert } from '@kbn/observability-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CHART_SETTINGS, DEFAULT_DATE_FORMAT } from './constants';
+import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
+import { ApmDocumentType } from '../../../../../common/document_type';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get_timeseries_color';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
@@ -43,6 +45,7 @@ export function ErrorCountChart({
   comparisonEnabled,
   offset,
   kuery = '',
+  transactionName,
   groupId,
   threshold,
   ruleTypeId,
@@ -57,6 +60,7 @@ export function ErrorCountChart({
   comparisonEnabled: boolean;
   offset: string;
   kuery?: string;
+  transactionName?: string;
   groupId?: string;
   threshold?: ReactElement;
   ruleTypeId?: string;
@@ -65,9 +69,19 @@ export function ErrorCountChart({
     services: { uiSettings },
   } = useKibana();
 
+  const preferred = usePreferredDataSourceAndBucketSize({
+    start,
+    end,
+    kuery,
+    numBuckets: 100,
+    type: transactionName
+      ? ApmDocumentType.TransactionMetric
+      : ApmDocumentType.ServiceTransactionMetric,
+  });
+
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
-      if (serviceName && start && end) {
+      if (serviceName && start && end && preferred) {
         return callApmApi('GET /internal/apm/services/{serviceName}/errors/distribution', {
           params: {
             path: { serviceName },
@@ -77,12 +91,14 @@ export function ErrorCountChart({
               start,
               end,
               groupId,
+              transactionName,
+              bucketSizeInSeconds: preferred.bucketSizeInSeconds,
             },
           },
         });
       }
     },
-    [environment, serviceName, start, end, groupId, kuery]
+    [environment, serviceName, start, end, groupId, transactionName, kuery, preferred]
   );
 
   const dateFormat = (uiSettings && uiSettings.get(UI_SETTINGS.DATE_FORMAT)) || DEFAULT_DATE_FORMAT;

@@ -81,9 +81,6 @@ export function LatencyChart({
   filters?: BoolQuery;
   ruleTypeId?: ApmRuleType;
 }) {
-  const latencyAggregationType =
-    latencyAggregationTypeProp ?? getAggsTypeFromRule(ruleAggregationType ?? 'avg');
-
   const {
     services: { uiSettings },
   } = useKibana();
@@ -97,6 +94,9 @@ export function LatencyChart({
       ? ApmDocumentType.TransactionMetric
       : ApmDocumentType.ServiceTransactionMetric,
   });
+
+  const latencyAggregationType =
+    latencyAggregationTypeProp ?? getAggsTypeFromRule(ruleAggregationType ?? 'avg');
 
   const { data, status } = useFetcher(
     (callApmApi) => {
