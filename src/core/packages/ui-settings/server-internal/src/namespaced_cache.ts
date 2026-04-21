@@ -16,7 +16,7 @@ interface NamespacedCacheEntry<T = unknown> {
   timer: NodeJS.Timeout;
 }
 
-export const NAMESPACED_CACHE_TTL = 60_000;
+export const NAMESPACED_CACHE_TTL = 10_000;
 
 /**
  * Shared process-wide cache for namespace-keyed data with configurable TTL.
