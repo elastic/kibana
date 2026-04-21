@@ -142,6 +142,7 @@ export function ErrorCountChart({
                   indexType="error"
                   queryParams={{
                     serviceName,
+                    transactionName,
                     environment,
                   }}
                   timeRange={{ from: start, to: end }}
