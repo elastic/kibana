@@ -13,6 +13,12 @@ export const ENTITY_ANALYTICS_WATCHLISTS_PREFIX = '.entity_analytics.watchlists'
 export const getIndexForWatchlist = (namespace: string) =>
   `${ENTITY_ANALYTICS_WATCHLISTS_PREFIX}.${namespace}`;
 
+/** Builds a composite document _id for the watchlist entity index. */
+export const buildWatchlistDocId = (watchlistId: string, euid: string) => `${watchlistId}:${euid}`;
+
+/** Extracts the euid from a composite watchlist doc _id ({watchlistId}:{euid}). */
+export const extractEuidFromDocId = (docId: string) => docId.substring(docId.indexOf(':') + 1);
+
 export const getEntityType = (record: EntityStoreEntity): EntityType => {
   const entityType = record.entity.EngineMetadata?.Type || record.entity.type;
 
