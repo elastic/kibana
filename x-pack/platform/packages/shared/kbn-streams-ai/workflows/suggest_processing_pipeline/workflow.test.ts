@@ -12,6 +12,7 @@ import type { Streams } from '@kbn/streams-schema';
 import type { ProcessingSimulationResponse } from '@kbn/streams-schema';
 import type { StreamlangDSL } from '@kbn/streamlang';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
+import type { SimulationFeedback } from './build_simulation_feedback';
 import {
   pipelineDefinitionSchema,
   postParsePipelineDefinitionSchema,
@@ -73,6 +74,18 @@ const createIngestDefinition = (): Streams.ClassicStream.Definition => ({
     failure_store: { inherit: {} },
   },
 });
+
+async function invokeSimulateCallback(toolCallbacks: Record<string, Function>, pipeline: object) {
+  const simCallback = toolCallbacks.simulate_pipeline;
+  const toolResult = await simCallback({
+    toolCallId: 't1',
+    function: {
+      name: 'simulate_pipeline',
+      arguments: { pipeline },
+    },
+  });
+  return toolResult.response as SimulationFeedback;
+}
 
 describe('suggestProcessingPipeline workflow', () => {
   const mockEsClient = {
@@ -213,11 +226,7 @@ describe('suggestProcessingPipeline workflow', () => {
       mappedFields: {},
     });
 
-    expect(result.pipeline?.steps.length).toBe(1);
-    expect(result.pipeline?.steps[0]).toMatchObject({
-      action: 'date',
-      customIdentifier: 'root.steps[0]',
-    });
+    expect(result).toMatchSnapshot();
   });
 
   it('uses full processor schema when agentPipelineSchema is the default', async () => {
@@ -254,6 +263,190 @@ describe('suggestProcessingPipeline workflow', () => {
     });
 
     expect(simulatePipeline).not.toHaveBeenCalled();
-    expect(result.pipeline?.steps).toEqual([]);
+    expect(result).toMatchSnapshot();
+  });
+
+  it('simulate_pipeline callback returns processors and temporary_fields in response', async () => {
+    let capturedToolResponse!: SimulationFeedback;
+
+    const simulatePipeline = jest.fn().mockImplementation(() =>
+      Promise.resolve(
+        createSuccessfulSimulation({
+          documents: [
+            {
+              value: { message: 'ok', 'custom.timestamp': '2024-01-01' },
+              errors: [],
+              detected_fields: [],
+              status: 'parsed',
+              processed_by: ['root.steps[0]'],
+            },
+          ],
+          processors_metrics: {
+            'root.steps[0]': {
+              parsed_rate: 1,
+              failed_rate: 0,
+              skipped_rate: 0,
+              dropped_rate: 0,
+              detected_fields: [],
+              errors: [],
+            },
+          },
+        })
+      )
+    );
+
+    mockExecuteAsReasoningAgent.mockImplementation(async ({ toolCallbacks }) => {
+      capturedToolResponse = await invokeSimulateCallback(toolCallbacks, {
+        steps: [{ action: 'date', from: '@timestamp', formats: ['ISO8601'] }],
+      });
+
+      return {
+        content: '',
+        toolCalls: [
+          {
+            toolCallId: 'c1',
+            function: { name: 'commit_pipeline', arguments: { pipeline: { steps: [] } } },
+          },
+        ],
+        input: [{ role: MessageRole.Assistant, content: '', toolCalls: [] }],
+      };
+    });
+
+    await suggestProcessingPipeline({
+      definition: createIngestDefinition(),
+      inferenceClient: mockInferenceClient,
+      agentPipelineSchema: pipelineDefinitionSchema,
+      maxSteps: 2,
+      signal: new AbortController().signal,
+      simulatePipeline,
+      documents: [{ message: 'hello' }],
+      fieldsMetadataClient: mockFieldsMetadataClient,
+      esClient: mockEsClient,
+      initialDatasetAnalysisJson: STUB_INITIAL_DATASET_JSON,
+      mappedFields: {},
+    });
+
+    expect(capturedToolResponse).toMatchSnapshot();
+  });
+
+  it('no longer rejects pipelines based on aggregate 80% parse rate gate', async () => {
+    let capturedToolResponse!: SimulationFeedback;
+
+    const simulatePipeline = jest.fn().mockImplementation(() =>
+      Promise.resolve(
+        createSuccessfulSimulation({
+          documents_metrics: {
+            parsed_rate: 0.5,
+            failed_rate: 0.5,
+            partially_parsed_rate: 0,
+            skipped_rate: 0,
+            dropped_rate: 0,
+          },
+          processors_metrics: {
+            'root.steps[0]': {
+              parsed_rate: 0.5,
+              failed_rate: 0.5,
+              skipped_rate: 0,
+              dropped_rate: 0,
+              detected_fields: [],
+              errors: [],
+            },
+          },
+          documents: [
+            {
+              value: { message: 'partial' },
+              errors: [
+                {
+                  type: 'generic_processor_failure',
+                  message: 'could not parse',
+                  processor_id: 'root.steps[0]',
+                },
+              ],
+              detected_fields: [],
+              status: 'failed',
+              processed_by: ['root.steps[0]'],
+            },
+          ],
+        })
+      )
+    );
+
+    mockExecuteAsReasoningAgent.mockImplementation(async ({ toolCallbacks }) => {
+      capturedToolResponse = await invokeSimulateCallback(toolCallbacks, {
+        steps: [{ action: 'date', from: '@timestamp', formats: ['ISO8601'] }],
+      });
+
+      return {
+        content: '',
+        toolCalls: [
+          {
+            toolCallId: 'c1',
+            function: { name: 'commit_pipeline', arguments: { pipeline: { steps: [] } } },
+          },
+        ],
+        input: [{ role: MessageRole.Assistant, content: '', toolCalls: [] }],
+      };
+    });
+
+    await suggestProcessingPipeline({
+      definition: createIngestDefinition(),
+      inferenceClient: mockInferenceClient,
+      agentPipelineSchema: pipelineDefinitionSchema,
+      maxSteps: 2,
+      signal: new AbortController().signal,
+      simulatePipeline,
+      documents: [{ message: 'hello' }],
+      fieldsMetadataClient: mockFieldsMetadataClient,
+      esClient: mockEsClient,
+      initialDatasetAnalysisJson: STUB_INITIAL_DATASET_JSON,
+      mappedFields: {},
+    });
+
+    expect(capturedToolResponse.metrics.parse_rate).toBe(50);
+    expect(capturedToolResponse.errors).not.toContainEqual(
+      expect.stringContaining('Parse rate is too low')
+    );
+    expect(capturedToolResponse).toMatchSnapshot();
+  });
+
+  it('simulate_pipeline callback returns formatted Zod errors for invalid pipeline', async () => {
+    let capturedToolResponse!: SimulationFeedback;
+
+    const simulatePipeline = jest.fn();
+
+    mockExecuteAsReasoningAgent.mockImplementation(async ({ toolCallbacks }) => {
+      capturedToolResponse = await invokeSimulateCallback(toolCallbacks, {
+        steps: [{ action: 'date', from: 123 }],
+      });
+
+      return {
+        content: '',
+        toolCalls: [
+          {
+            toolCallId: 'c1',
+            function: { name: 'commit_pipeline', arguments: { pipeline: { steps: [] } } },
+          },
+        ],
+        input: [{ role: MessageRole.Assistant, content: '', toolCalls: [] }],
+      };
+    });
+
+    await suggestProcessingPipeline({
+      definition: createIngestDefinition(),
+      inferenceClient: mockInferenceClient,
+      agentPipelineSchema: pipelineDefinitionSchema,
+      maxSteps: 2,
+      signal: new AbortController().signal,
+      simulatePipeline,
+      documents: [{ message: 'hello' }],
+      fieldsMetadataClient: mockFieldsMetadataClient,
+      esClient: mockEsClient,
+      initialDatasetAnalysisJson: STUB_INITIAL_DATASET_JSON,
+      mappedFields: {},
+    });
+
+    expect(simulatePipeline).not.toHaveBeenCalled();
+    expect(capturedToolResponse.valid).toBe(false);
+    expect(capturedToolResponse).toMatchSnapshot();
   });
 });

@@ -21,7 +21,7 @@ import type {
 } from '@kbn/dashboard-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
-import { DashboardCanvasContent } from './canvas_integration/dashboard_canvas_content';
+import { DashboardCanvasAttachment } from './canvas_integration/dashboard_canvas_attachment';
 import { createDashboardAppIntegration$ } from './dashboard_integration/dashboard_app_integration';
 import { previewAttachmentInDashboard } from './dashboard_integration/preview_attachment';
 import { selectDashboardAttachmentForSync } from './dashboard_integration/select_dashboard_attachment_for_sync';
@@ -100,7 +100,7 @@ export const registerDashboardAttachmentUiDefinition = ({
       };
     },
     renderCanvasContent: (props, callbacks) => (
-      <DashboardCanvasContent
+      <DashboardCanvasAttachment
         {...props}
         {...callbacks}
         dashboardLocator={dashboardLocator}
@@ -128,7 +128,6 @@ export const registerDashboardAttachmentUiDefinition = ({
                 attachment,
                 dashboardApi,
                 checkSavedDashboardExist,
-                updateOrigin,
               });
             }
             // sidebar preview - open dashboard in sidebar if possible, otherwise open canvas preview
