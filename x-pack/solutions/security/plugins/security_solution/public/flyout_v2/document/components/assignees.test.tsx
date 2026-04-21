@@ -82,10 +82,13 @@ const mockUserProfiles = [
   { uid: 'user-id-3', enabled: true, user: { username: 'user3', full_name: 'User 3' }, data: {} },
 ];
 
-const createMockHit = (assignedUserIds: string[] = ['user-id-1']): DataTableRecord => {
+const createMockHit = (
+  assignedUserIds: string[] = ['user-id-1'],
+  raw: DataTableRecord['raw'] = { _id: 'event-1' }
+): DataTableRecord => {
   return {
     id: 'event-1',
-    raw: { _id: 'event-1' },
+    raw,
     flattened: {
       'event.kind': 'signal',
       'kibana.alert.workflow_assignee_ids': assignedUserIds,
@@ -93,6 +96,11 @@ const createMockHit = (assignedUserIds: string[] = ['user-id-1']): DataTableReco
     isAnchor: false,
   } as DataTableRecord;
 };
+
+const remoteAlertHit = createMockHit(['user-id-1'], {
+  _id: 'event-1',
+  _index: 'remote-cluster:.alerts-security.alerts-default',
+});
 
 const renderAssignees = (
   props: Partial<Parameters<typeof Assignees>[0]> = {},
@@ -173,6 +181,12 @@ describe('<Assignees />', () => {
       expect(getByTestId(USER_AVATAR_ITEM_TEST_ID('user3'))).toBeInTheDocument();
     });
     expect(queryByTestId(USER_AVATAR_ITEM_TEST_ID('user1'))).toBeInTheDocument();
+  });
+
+  it('disables the add-assignees button for a remote alert', () => {
+    const { getByTestId } = renderAssignees({ hit: remoteAlertHit });
+
+    expect(getByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID)).toBeDisabled();
   });
 
   it('renders the empty state when assignees are hidden', () => {
