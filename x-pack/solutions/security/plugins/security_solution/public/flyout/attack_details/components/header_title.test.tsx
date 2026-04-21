@@ -18,6 +18,7 @@ import {
   HEADER_ASSIGNEES_BLOCK_TEST_ID,
   HEADER_BADGE_TEST_ID,
 } from '../constants/test_ids';
+import { REMOTE_DOCUMENT_BADGE_TEST_ID } from '../../../flyout_v2/document/components/remote_document_badge';
 
 jest.mock('../hooks/use_header_data', () => ({
   useHeaderData: jest.fn(),
@@ -55,6 +56,11 @@ jest.mock('../../../flyout_v2/shared/components/notes', () => ({
   ),
 }));
 
+jest.mock('../../../flyout_v2/document/components/remote_document_badge', () => ({
+  ...jest.requireActual('../../../flyout_v2/document/components/remote_document_badge'),
+  RemoteDocumentBadge: () => <div data-test-subj="remoteDocumentBadge" />,
+}));
+
 jest.mock('../../../flyout_v2/shared/components/alert_header_block', () => ({
   AlertHeaderBlock: ({
     children,
@@ -76,7 +82,10 @@ describe('HeaderTitle', () => {
       timestamp: '2024-10-10T10:00:00.000Z',
       alertsCount: 3,
     });
-    mockedUseAttackDetailsContext.mockReturnValue({ attackId: 'attack-1' });
+    mockedUseAttackDetailsContext.mockReturnValue({
+      attackId: 'attack-1',
+      searchHit: { _index: '.alerts-security.alerts-default', _id: 'attack-1' },
+    });
     mockedUseNavigateToAttackDetailsLeftPanel.mockReturnValue(jest.fn());
   });
 
@@ -84,7 +93,7 @@ describe('HeaderTitle', () => {
     jest.clearAllMocks();
   });
 
-  it('renders the attack badge', () => {
+  it('renders the attack badge for a local document', () => {
     render(
       <TestProviders>
         <HeaderTitle />
@@ -92,6 +101,26 @@ describe('HeaderTitle', () => {
     );
 
     expect(screen.getByTestId(HEADER_BADGE_TEST_ID)).toHaveTextContent('Attack');
+    expect(screen.queryByTestId(REMOTE_DOCUMENT_BADGE_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('renders the remote document badge instead of the attack badge for a remote document', () => {
+    mockedUseAttackDetailsContext.mockReturnValue({
+      attackId: 'attack-1',
+      searchHit: {
+        _index: 'remote-cluster:.alerts-security.alerts-default',
+        _id: 'attack-1',
+      },
+    });
+
+    render(
+      <TestProviders>
+        <HeaderTitle />
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId(REMOTE_DOCUMENT_BADGE_TEST_ID)).toBeInTheDocument();
+    expect(screen.queryByTestId(HEADER_BADGE_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('renders the formatted timestamp when present', () => {
