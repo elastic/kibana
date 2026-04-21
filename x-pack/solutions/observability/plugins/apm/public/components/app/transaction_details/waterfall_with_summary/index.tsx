@@ -62,7 +62,6 @@ export function WaterfallWithSummary<TSample extends {}>({
   waterfallFetchStatus,
   traceSamples,
   traceSamplesFetchStatus,
-  environment,
   onSampleClick,
   onTabClick,
   serviceName,
@@ -185,9 +184,9 @@ export function WaterfallWithSummary<TSample extends {}>({
                   isLoading={isLoading}
                   transaction={entryTransaction}
                   waterfall={waterfallFetchResult}
-                  environment={environment}
                   useUnified={useUnified}
                   traceItems={unifiedWaterfallFetchResult.traceItems}
+                  onViewFullTrace={() => {}}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
