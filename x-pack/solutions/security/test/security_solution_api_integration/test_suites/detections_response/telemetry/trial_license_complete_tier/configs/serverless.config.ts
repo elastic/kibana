@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import type { FtrConfigProviderContext } from '@kbn/test';
 import { createTestConfig } from '../../../../../config/serverless/config.base';
 
-export default createTestConfig({
+const baseConfig = createTestConfig({
   testFiles: [require.resolve('..')],
   junit: {
     reportName: 'Detection Engine - Telemetry Integration Tests - Serverless Env - Complete Tier',
@@ -16,3 +17,16 @@ export default createTestConfig({
     `--xpack.securitySolution.enableExperimental=${JSON.stringify(['previewTelemetryUrlEnabled'])}`,
   ],
 });
+
+export default async (context: FtrConfigProviderContext) => {
+  const config = await baseConfig(context);
+  return {
+    ...config,
+    // DEBUG: disable CI log capture so our debug logger.info lines stream to
+    // the Buildkite console instead of being buffered and only dumped on test
+    // failure.
+    mochaReporter: {
+      captureLogOutput: false,
+    },
+  };
+};

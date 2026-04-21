@@ -18,5 +18,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     junit: {
       reportName: 'Detection Engine - Telemetry Integration Tests - ESS Env - Trial License',
     },
+    // DEBUG: disable CI log capture so our debug logger.info lines stream to
+    // the Buildkite console instead of being buffered and only dumped on test
+    // failure.
+    mochaReporter: {
+      captureLogOutput: false,
+    },
   };
 }
