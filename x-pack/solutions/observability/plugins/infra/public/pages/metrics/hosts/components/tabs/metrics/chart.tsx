@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import type { LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
+import type { LensConfig } from '@kbn/lens-embeddable-utils';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import useAsync from 'react-use/lib/useAsync';
 import { EuiPanel } from '@elastic/eui';

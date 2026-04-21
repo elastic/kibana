@@ -7235,6 +7235,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/heap-snapshot-analyzer-cli@link:packages/kbn-heap-snapshot-analyzer-cli":
+  version "0.0.0"
+  uid ""
+
 "@kbn/hello-world-plugin@link:examples/hello_world":
   version "0.0.0"
   uid ""
@@ -8908,10 +8912,6 @@
   uid ""
 
 "@kbn/serverless-security-settings@link:src/platform/packages/shared/serverless/settings/security_project":
-  version "0.0.0"
-  uid ""
-
-"@kbn/serverless-storybook-config@link:src/platform/packages/shared/serverless/storybook/config":
   version "0.0.0"
   uid ""
 
@@ -16029,19 +16029,19 @@
   resolved "https://registry.yarnpkg.com/@xtuc/long/-/long-4.2.2.tgz#d291c6a4e97989b5c61d9acf396ae4fe133a718d"
   integrity sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==
 
-"@xyflow/react@12.10.1":
-  version "12.10.1"
-  resolved "https://registry.yarnpkg.com/@xyflow/react/-/react-12.10.1.tgz#6c61cc271ac4b21dd6d60525b527c8e9f0395f28"
-  integrity sha512-5eSWtIK/+rkldOuFbOOz44CRgQRjtS9v5nufk77DV+XBnfCGL9HAQ8PG00o2ZYKqkEU/Ak6wrKC95Tu+2zuK3Q==
+"@xyflow/react@12.10.2":
+  version "12.10.2"
+  resolved "https://registry.yarnpkg.com/@xyflow/react/-/react-12.10.2.tgz#40f6d71944f674f0ffbb83c660f9473018adbe61"
+  integrity sha512-CgIi6HwlcHXwlkTpr0fxLv/0sRVNZ8IdwKLzzeCscaYBwpvfcH1QFOCeaTCuEn1FQEs/B8CjnTSjhs8udgmBgQ==
   dependencies:
-    "@xyflow/system" "0.0.75"
+    "@xyflow/system" "0.0.76"
     classcat "^5.0.3"
     zustand "^4.4.0"
 
-"@xyflow/system@0.0.75":
-  version "0.0.75"
-  resolved "https://registry.yarnpkg.com/@xyflow/system/-/system-0.0.75.tgz#8bf988fe7943f0d7a26a594acd6a588af1d6b764"
-  integrity sha512-iXs+AGFLi8w/VlAoc/iSxk+CxfT6o64Uw/k0CKASOPqjqz6E0rb5jFZgJtXGZCpfQI6OQpu5EnumP5fGxQheaQ==
+"@xyflow/system@0.0.76":
+  version "0.0.76"
+  resolved "https://registry.yarnpkg.com/@xyflow/system/-/system-0.0.76.tgz#57da5e4d230cdbec56548a6d5eec115f22858259"
+  integrity sha512-hvwvnRS1B3REwVDlWexsq7YQaPZeG3/mKo1jv38UmnpWmxihp14bW6VtEOuHEwJX2FvzFw8k77LyKSk/wiZVNA==
   dependencies:
     "@types/d3-drag" "^3.0.7"
     "@types/d3-interpolate" "^3.0.4"
