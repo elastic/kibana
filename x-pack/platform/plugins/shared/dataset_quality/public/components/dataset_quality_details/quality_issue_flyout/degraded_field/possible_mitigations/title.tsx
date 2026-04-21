@@ -6,29 +6,17 @@
  */
 
 import React from 'react';
-import { EuiBetaBadge, EuiFlexGroup, EuiTitle } from '@elastic/eui';
+import { EuiTitle } from '@elastic/eui';
 
-import {
-  overviewQualityIssuesAccordionTechPreviewBadge,
-  possibleMitigationTitle,
-} from '../../../../../../common/translations';
+import { possibleMitigationTitle } from '../../../../../../common/translations';
 
 export function PossibleMitigationTitle() {
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s">
-      <EuiTitle
-        size="xs"
-        data-test-subj="datasetQualityDetailsDegradedFieldFlyoutPossibleMitigationTitle"
-      >
-        <p>{possibleMitigationTitle}</p>
-      </EuiTitle>
-      <EuiBetaBadge
-        alignment="middle"
-        color="hollow"
-        data-test-subj="datasetQualityDetailsDegradedFieldFlyoutPossibleMitigationTechPreviewBadge"
-        label={overviewQualityIssuesAccordionTechPreviewBadge}
-        size="s"
-      />
-    </EuiFlexGroup>
+    <EuiTitle
+      size="xs"
+      data-test-subj="datasetQualityDetailsDegradedFieldFlyoutPossibleMitigationTitle"
+    >
+      <p>{possibleMitigationTitle}</p>
+    </EuiTitle>
   );
 }

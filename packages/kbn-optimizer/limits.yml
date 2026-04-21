@@ -102,7 +102,7 @@ pageLoadAssetSize:
   kibanaUtils: 54161
   kql: 15428
   kubernetesSecurity: 6807
-  lens: 86000
+  lens: 90000
   licenseManagement: 8265
   licensing: 10073
   links: 8620
@@ -176,7 +176,7 @@ pageLoadAssetSize:
   spaces: 28871
   stackAlerts: 31499
   stackConnectors: 85421
-  streams: 14000
+  streams: 15434
   streamsApp: 25375
   synthetics: 31571
   telemetry: 25755
