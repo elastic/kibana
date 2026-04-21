@@ -54,6 +54,11 @@ test.describe(
         await expect(featureSettings.apiDocumentationLink).toBeVisible();
       });
 
+      await test.step('verify enable AI section', async () => {
+        await expect(featureSettings.enableAiSection).toBeVisible();
+        await expect(featureSettings.enableAiSwitch).toBeVisible();
+      });
+
       await test.step('verify default model section', async () => {
         await expect(featureSettings.defaultModelSection).toBeVisible();
         await expect(featureSettings.defaultModelComboBox).toBeVisible();
@@ -80,6 +85,32 @@ test.describe(
 
       await test.step('feature sections reappear', async () => {
         await expect(featureSettings.allFeatureSections).not.toHaveCount(0);
+      });
+    });
+
+    test('turning off the master AI toggle collapses the default-model section and feature sections', async ({
+      pageObjects,
+    }) => {
+      const { featureSettings } = pageObjects;
+
+      await test.step('default-model controls and feature sections are visible', async () => {
+        await expect(featureSettings.defaultModelSection).toBeVisible();
+        await expect(featureSettings.disallowOtherModelsCheckbox).toBeVisible();
+        await expect(featureSettings.allFeatureSections).not.toHaveCount(0);
+      });
+
+      await test.step('flip the Enable AI features toggle off', async () => {
+        await featureSettings.enableAiSwitch.click();
+      });
+
+      await test.step('default-model controls and feature sections are hidden', async () => {
+        await expect(featureSettings.defaultModelSection).toBeHidden();
+        await expect(featureSettings.disallowOtherModelsCheckbox).toBeHidden();
+        await expect(featureSettings.allFeatureSections).toHaveCount(0);
+      });
+
+      await test.step('enable AI switch remains visible', async () => {
+        await expect(featureSettings.enableAiSwitch).toBeVisible();
       });
     });
 

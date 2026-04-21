@@ -16,6 +16,10 @@ export class FeatureSettingsPage {
   // Content
   readonly content: Locator;
 
+  // Enable AI Section (master toggle)
+  readonly enableAiSection: Locator;
+  readonly enableAiSwitch: Locator;
+
   // Default Model Section
   readonly defaultModelSection: Locator;
   readonly defaultModelComboBox: Locator;
@@ -52,6 +56,10 @@ export class FeatureSettingsPage {
 
     // Content
     this.content = this.page.testSubj.locator('modelSettingsContent');
+
+    // Enable AI Section (master toggle)
+    this.enableAiSection = this.page.testSubj.locator('enableAiSection');
+    this.enableAiSwitch = this.page.testSubj.locator('enableAiSwitch');
 
     // Default Model Section
     this.defaultModelSection = this.page.testSubj.locator('defaultModelSection');
