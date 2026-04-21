@@ -10,7 +10,7 @@
     "server/**/*",
     "test/**/*",
     "../../../../../typings/**/*"
-    , "../workflows_execution_engine/server/trigger_events/event_context/event_chain_context.test.ts", "../workflows_execution_engine/server/trigger_events/event_context/event_chain_context.ts"  ],
+  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/workflows",

@@ -32,6 +32,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { WorkflowsApiRequestHandlerContext } from '@kbn/workflows/server';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import type {
   WorkflowsExtensionsServerPluginSetup,
@@ -90,14 +91,6 @@ export interface WorkflowsServerPluginStartDeps {
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
-}
-
-export interface WorkflowsClient {
-  emitEvent: (triggerId: string, payload: Record<string, unknown>) => Promise<void>;
-}
-export interface WorkflowsApiRequestHandlerContext {
-  isWorkflowsAvailable: boolean;
-  getWorkflowsClient: () => WorkflowsClient;
 }
 
 export type WorkflowsRouteHandlerContext = CustomRequestHandlerContext<{
