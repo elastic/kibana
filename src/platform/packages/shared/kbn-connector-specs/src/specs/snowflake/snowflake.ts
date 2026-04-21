@@ -242,9 +242,6 @@ export const Snowflake: ConnectorSpec = {
 
         const response = await ctx.client.post(url, body, {
           params: { async: true },
-          headers: {
-            'X-Snowflake-Authorization-Token-Type': 'OAUTH',
-          },
           validateStatus: (status) => status === 200 || status === 202,
         });
 
@@ -267,9 +264,6 @@ export const Snowflake: ConnectorSpec = {
 
         const response = await ctx.client.get(url, {
           params,
-          headers: {
-            'X-Snowflake-Authorization-Token-Type': 'OAUTH',
-          },
           validateStatus: (status) => status === 200 || status === 202,
         });
 
@@ -291,9 +285,6 @@ export const Snowflake: ConnectorSpec = {
           url,
           {},
           {
-            headers: {
-              'X-Snowflake-Authorization-Token-Type': 'OAUTH',
-            },
             validateStatus: (status) => status === 200 || status === 422,
           }
         );
@@ -316,9 +307,6 @@ export const Snowflake: ConnectorSpec = {
         url,
         { statement: 'SELECT CURRENT_VERSION()' },
         {
-          headers: {
-            'X-Snowflake-Authorization-Token-Type': 'OAUTH',
-          },
           validateStatus: (status) => status === 200 || status === 202,
         }
       );

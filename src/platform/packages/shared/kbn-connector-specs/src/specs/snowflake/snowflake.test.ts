@@ -98,7 +98,6 @@ describe('Snowflake', () => {
         }),
         expect.objectContaining({
           params: { async: true },
-          headers: { 'X-Snowflake-Authorization-Token-Type': 'OAUTH' },
         })
       );
       expect(result.statementHandle).toBe('019c06a4-0000-df4f-0000-00100006589e');
@@ -200,7 +199,6 @@ describe('Snowflake', () => {
         `${ACCOUNT_URL}/api/v2/statements/handle-123`,
         expect.objectContaining({
           params: {},
-          headers: { 'X-Snowflake-Authorization-Token-Type': 'OAUTH' },
         })
       );
       expect(result.code).toBe('333334');
@@ -284,9 +282,7 @@ describe('Snowflake', () => {
       expect(mockClient.post).toHaveBeenCalledWith(
         `${ACCOUNT_URL}/api/v2/statements/handle-123/cancel`,
         {},
-        expect.objectContaining({
-          headers: { 'X-Snowflake-Authorization-Token-Type': 'OAUTH' },
-        })
+        expect.any(Object)
       );
       expect(result.message).toBe('SQL execution canceled');
     });
