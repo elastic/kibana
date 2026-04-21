@@ -779,6 +779,7 @@ Data ingestion and Fleet::
 * Reuses shared integration policies when duplicating agent policies ({kibana-pull}217872[#217872]).
 * Adds support for collapsible sections in integration overview pages ({kibana-pull}223916[#223916]).
 * Updates the `context.link` variable to use the new Discover URL formatting in all {es} query rule types ({kibana-pull}216376[#216376]).
+Discover::
 * Expands the {esql} editor to fit the query size automatically when loading **Discover** ({kibana-pull}225509[#225509]).
 * Hides the "Selected only" toggle in **Discover**'s pages that don't support filtering by value ({kibana-pull}220624[#220624]).
 * Adds a **Copy value** button to field value cells in the Document viewer ({kibana-pull}218817[#218817]).
