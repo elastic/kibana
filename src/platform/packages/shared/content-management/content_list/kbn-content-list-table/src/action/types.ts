@@ -61,12 +61,13 @@ export interface ActionProps {
  * Namespace interface for `Action` sub-components.
  *
  * The base `Action` accepts {@link ActionProps}; pre-built actions
- * are properties (e.g., `Action.Edit`, `Action.Delete`).
+ * are properties (e.g., `Action.Edit`, `Action.Delete`, `Action.Inspect`).
  */
 export interface ActionNamespace {
   (props: ActionProps): ReactNode;
   Edit: (props: EditActionProps) => ReactNode;
   Delete: (props: DeleteActionProps) => ReactNode;
+  Inspect: (props: InspectActionProps) => ReactNode;
 }
 
 /**
@@ -87,4 +88,12 @@ export interface DeleteActionProps {
   label?: string;
   /** Per-item guard. When provided, disables the action for items where this returns `false`. */
   enabled?: (item: ContentListItem) => boolean;
+}
+
+/**
+ * Props for the `Action.Inspect` preset component.
+ */
+export interface InspectActionProps {
+  /** Custom label for the inspect action. Defaults to `'View {itemTitle} details'`. */
+  label?: string | ((item: ContentListItem) => ReactNode);
 }

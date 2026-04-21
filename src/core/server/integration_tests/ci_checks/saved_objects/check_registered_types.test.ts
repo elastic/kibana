@@ -200,7 +200,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "user_connector_token": "524b43a59d7bbc5b0430b19332f8f0f69e323dec2e391a87c568bb4fb4b3690c",
         "visualization": "b7c299233eb6fc88faccdf5924d4cff9fc2f4c3fe8acf5376d7232c05c9a3cfd",
         "watchlist-config": "447ff0c6227fa2ca64fe05afb5b3bc4808063926c1da3edacb9c28d52c1fb86a",
-        "watchlist-entity-source": "842a0b6c668784c51c0f62c316f22101200fd1872296c63edcceb2ae726b8152",
+        "watchlist-entity-source": "c51b3021ff12acaa47d35e3ead5236e9956e211cd928becb1d7636854595c1a2",
         "workplace_search_telemetry": "b17dd0963b685cea46246d00b7da598822668434659b7e698313da6c2212febb",
       }
     `);
@@ -1391,8 +1391,9 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "watchlist-config|10.1.0: 895160f5280b70553de3e5afb38ab5d7ff43d4ea54cffc4aa5255c1793a8d840",
         "=========================================================================================",
         "watchlist-entity-source|global: c1a10635e0b47578006f9ba55d1a8cc8b5fc29db",
-        "watchlist-entity-source|mappings: 6fb587c32f08d6f56a1d7316a2b0d7259ba671bf",
+        "watchlist-entity-source|mappings: 9ffd89787c09633c55456fc1d46ebd2cfd4db1cc",
         "watchlist-entity-source|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
+        "watchlist-entity-source|10.2.0: 6014db43a6561ba3b1995e33475b129082222bbe08d6a784b680ed5a806e17a6",
         "watchlist-entity-source|10.1.0: 7a6b96c670be283b52b768a0d3ec4f80ad7523beefc39fb63dc361611db476b7",
         "================================================================================================",
         "workplace_search_telemetry|global: 1788a0f48253a7ac02a9d00de8047bc5128cd4be",
@@ -1562,7 +1563,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "user_connector_token": "10.1.0",
         "visualization": "10.0.0",
         "watchlist-config": "10.1.0",
-        "watchlist-entity-source": "10.1.0",
+        "watchlist-entity-source": "10.2.0",
         "workplace_search_telemetry": "10.0.0",
       }
     `);
@@ -1728,7 +1729,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "user_connector_token": "10.1.0",
         "visualization": "8.5.0",
         "watchlist-config": "10.1.0",
-        "watchlist-entity-source": "10.1.0",
+        "watchlist-entity-source": "10.2.0",
         "workplace_search_telemetry": "0.0.0",
       }
     `);
