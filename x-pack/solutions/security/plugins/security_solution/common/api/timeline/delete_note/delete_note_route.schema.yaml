@@ -43,7 +43,7 @@ paths:
                     noteIds:
                       type: array
                       nullable: true
-                      description: Saved object ids of the notes to delete.
+                      description: Saved object IDs of the notes to delete.
                       items:
                         type: string
       responses:
