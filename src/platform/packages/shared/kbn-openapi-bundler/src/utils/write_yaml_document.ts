@@ -24,27 +24,62 @@ export async function writeYamlDocument(filePath: string, document: unknown): Pr
 }
 
 /**
+ * If any Scalar node holds a Date value (which the yaml-1.1 schema may produce
+ * internally), convert it back to a full ISO-8601 string and force single-quote
+ * style so the time component and timezone suffix are never lost.
+ *
+ * Without this, the yaml package serialises Date objects in yaml-1.1 canonical
+ * form which truncates midnight-UTC timestamps to date-only
+ * (e.g. 2023-10-31T00:00:00Z → 2023-10-31) and strips milliseconds/Z from
+ * other timestamps (e.g. 2025-01-17T08:00:00.000Z → 2025-01-17T08:00:00).
+ */
+const preserveDateTimestamps = (doc: Document): void => {
+  visit(doc, {
+    Scalar(_key, node) {
+      if (node.value instanceof Date) {
+        node.value = node.value.toISOString();
+        node.type = 'QUOTE_SINGLE';
+      }
+    },
+  });
+};
+
+/**
  * Walk the document tree and set explicit scalar types to match js-yaml's
  * block-scalar heuristics:
- *   - Strings containing '\n' → BLOCK_LITERAL (|)
- *   - Strings longer than 80 chars without '\n' → BLOCK_FOLDED (>)
+ *   - Strings with internal '\n' → BLOCK_LITERAL (|)
+ *   - Strings longer than 80 chars, or strings with only a trailing '\n'
+ *     (from a folded block scalar source) → BLOCK_FOLDED (>)
  *
  * Map keys are skipped (they must stay inline). Flow-context scalars fall back
  * to quoted strings automatically in the serialiser, so it is safe to set block
  * types unconditionally on value/sequence-item scalars.
+ *
+ * A trailing '\n' is stripped before the internal-newline check because the
+ * yaml package appends one to folded (>) block scalars via clip-chomping.
+ * Without stripping it, those long single-line values would be mis-classified
+ * as BLOCK_LITERAL and re-serialised with '|' instead of '>'.
  */
 const applyBlockScalarTypes = (doc: Document): void => {
   visit(doc, {
-    Scalar(key, node) {
-      if (key !== 'key' && typeof node.value === 'string') {
-        if (node.value.includes('\n')) {
+    Scalar(_key, node) {
+      if (_key !== 'key' && typeof node.value === 'string') {
+        const str = node.value;
+        const hasTrailingNewline = str.endsWith('\n');
+        const body = hasTrailingNewline ? str.slice(0, -1) : str;
+        if (body.includes('\n')) {
           node.type = 'BLOCK_LITERAL';
-        } else if (node.value.length > 80) {
+        } else if (body.length > 80 || hasTrailingNewline) {
           node.type = 'BLOCK_FOLDED';
         }
       }
     },
   });
+};
+
+const prepareDocument = (doc: Document): void => {
+  preserveDateTimestamps(doc);
+  applyBlockScalarTypes(doc);
 };
 
 function stringifyToYaml(document: unknown): string {
@@ -60,7 +95,7 @@ function stringifyToYaml(document: unknown): string {
       schema: 'yaml-1.1',
       strict: false,
     });
-    applyBlockScalarTypes(doc);
+    prepareDocument(doc);
     // Prefer single quotes over double quotes when a string requires quoting,
     // matching js-yaml's default style. The serialiser falls back to double
     // quotes automatically when the value contains a single quote but no
@@ -74,7 +109,7 @@ function stringifyToYaml(document: unknown): string {
       schema: 'yaml-1.1',
       strict: false,
     });
-    applyBlockScalarTypes(doc);
+    prepareDocument(doc);
     return doc.toString({ singleQuote: true });
   }
 }
