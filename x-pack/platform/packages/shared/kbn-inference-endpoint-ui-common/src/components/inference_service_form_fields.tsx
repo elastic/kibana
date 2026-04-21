@@ -26,13 +26,10 @@ import {
   EuiSpacer,
   EuiTitle,
   keys,
-  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public';
 import type { HttpSetup, IToasts } from '@kbn/core/public';
-import { EisCloudConnectPromoTour } from '@kbn/search-api-panels';
-import { CLOUD_CONNECT_NAV_ID } from '@kbn/deeplinks-management/constants';
 import * as LABELS from '../translations';
 import type { Config, ConfigEntryView, InferenceProvider, Secrets } from '../types/types';
 import { FieldType, isMapWithStringValues } from '../types/types';
@@ -68,7 +65,6 @@ import {
   TaskTypeConfigHiddenField,
 } from './hidden_fields/provider_config_hidden_field';
 import { useProviders } from '../hooks/use_providers';
-import { useKibana } from '../hooks/use_kibana';
 
 // Custom trigger button CSS
 export const buttonCss = css`
@@ -113,7 +109,6 @@ interface InferenceServicesProps {
     allowContextWindowLength?: boolean;
     reenterSecretsOnEdit?: boolean;
     allowTemperature?: boolean;
-    enableEisPromoTour?: boolean;
     /** When set, only these task types will be available for selection in the form. */
     allowedTaskTypes?: InferenceTaskType[];
     /** When set, providers matching these service keys will be hidden from the selectable list. */
@@ -134,16 +129,11 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
     isPreconfigured,
     currentSolution,
     reenterSecretsOnEdit,
-    enableEisPromoTour,
     allowedTaskTypes,
     excludeProviders,
   },
 }) => {
-  const {
-    services: { application, cloud },
-  } = useKibana();
   const { data: providers, isLoading } = useProviders(http, toasts);
-  const { euiTheme } = useEuiTheme();
   const [updatedProviders, setUpdatedProviders] = useState<InferenceProvider[] | undefined>(
     undefined
   );
@@ -152,7 +142,6 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
   const [taskTypeOptions, setTaskTypeOptions] = useState<TaskTypeOption[]>([]);
   const [selectedTaskType, setSelectedTaskType] = useState<string>(DEFAULT_TASK_TYPE);
   const [solutionFilter, setSolutionFilter] = useState<SolutionView | undefined>();
-  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
 
   const { updateFieldValues, setFieldValue, validateFields, isSubmitting } = useFormContext();
   const [optionalProviderFormFields, setOptionalProviderFormFields] = useState<ConfigEntryView[]>(
@@ -592,17 +581,6 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
 
   const isInternalProvider = config?.provider === 'elasticsearch'; // To display link for model_ids for Elasticsearch provider
 
-  useEffect(() => {
-    // Trigger once on mount, then clean up
-    const delay = parseInt(euiTheme.animation.normal ?? '0', 10);
-
-    const timeout = window.setTimeout(() => {
-      setIsFlyoutOpen(true);
-    }, delay);
-
-    return () => clearTimeout(timeout);
-  }, [euiTheme.animation.normal]);
-
   return !isLoading ? (
     <>
       <UseField path="config.provider" config={providerConfigConfig}>
@@ -644,18 +622,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
               </>
             </EuiFormRow>
           );
-          return enableEisPromoTour ? (
-            <EisCloudConnectPromoTour
-              promoId="eisInferenceEndpointFlyout"
-              navigateToApp={() => application.navigateToApp(CLOUD_CONNECT_NAV_ID)}
-              isSelfManaged={!cloud?.isCloudEnabled}
-              isReady={isFlyoutOpen}
-            >
-              {formRow}
-            </EisCloudConnectPromoTour>
-          ) : (
-            formRow
-          );
+          return formRow;
         }}
       </UseField>
       {config?.provider ? (
