@@ -105,4 +105,8 @@ export const ruleMetricsSchema: MakeSchemaFrom<RuleMetric> = {
       description: 'True if Threat match rule has does_not_match condition in threat mappings',
     },
   },
+  ai_created: {
+    type: 'boolean',
+    _meta: { description: 'True if this rule was created using AI assistance' },
+  },
 };
