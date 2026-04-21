@@ -822,4 +822,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Non-default value of setting.',
     },
   },
+  'genAiSettings:tokenUsageTracking': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable token usage tracking in Kibana',
+    },
+  },
 };

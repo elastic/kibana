@@ -254,6 +254,36 @@ describe('StorageIndexAdapter', () => {
       });
     });
 
+    it('bulk create fails when the document id already exists', async () => {
+      await client.index({
+        id: 'existing-doc',
+        document: { foo: 'first' },
+      });
+
+      const conflictResponse = await client.bulk({
+        refresh: 'wait_for',
+        operations: [
+          {
+            create: {
+              _id: 'existing-doc',
+              document: { foo: 'second' },
+            },
+          },
+        ],
+      });
+
+      expect(conflictResponse.errors).toBe(true);
+      expect(conflictResponse.items).toHaveLength(1);
+      expect(conflictResponse.items[0].create?.status).toBe(409);
+      expect(conflictResponse.items[0].create?.error).toEqual(
+        expect.objectContaining({
+          type: expect.stringMatching(
+            /version_conflict_engine_exception|document_already_exists_exception/
+          ),
+        })
+      );
+    });
+
     describe('migrates a document with a legacy property', () => {
       let migratingClient: SimpleIStorageClient<typeof storageSettings>;
       beforeAll(async () => {
@@ -626,6 +656,10 @@ describe('StorageIndexAdapter', () => {
         is_write_index: true,
       },
     });
+
+    expect(getIndexResponse[writeIndexName].settings?.index?.auto_expand_replicas).toEqual('0-1');
+
+    expect(getIndexResponse[writeIndexName].settings?.index?.number_of_shards).toEqual('1');
   }
 
   async function verifyClean() {

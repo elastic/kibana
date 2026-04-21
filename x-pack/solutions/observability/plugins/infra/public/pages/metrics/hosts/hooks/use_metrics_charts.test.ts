@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils/config_builder';
+import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils';
 import { waitFor, renderHook } from '@testing-library/react';
 import { PAGE_SIZE_OPTIONS } from '../constants';
 import { useMetricsCharts } from './use_metrics_charts';

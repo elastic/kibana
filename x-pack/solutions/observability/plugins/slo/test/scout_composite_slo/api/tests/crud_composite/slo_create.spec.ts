@@ -234,10 +234,7 @@ apiTest.describe(
       expect(response).toHaveStatusCode(200);
 
       const tw = (response.body as Record<string, unknown>).timeWindow as Record<string, unknown>;
-      const duration = tw.duration as Record<string, unknown>;
-      expect(duration.value).toBe(30);
-      expect(duration.unit).toBe('d');
-      expect(tw.type).toBe('rolling');
+      expect(tw).toStrictEqual({ duration: '30d', type: 'rolling' });
     });
 
     apiTest('creates a composite SLO with a 90d time window', async ({ apiClient }) => {
@@ -252,10 +249,7 @@ apiTest.describe(
       expect(response).toHaveStatusCode(200);
 
       const tw = (response.body as Record<string, unknown>).timeWindow as Record<string, unknown>;
-      const duration = tw.duration as Record<string, unknown>;
-      expect(duration.value).toBe(90);
-      expect(duration.unit).toBe('d');
-      expect(tw.type).toBe('rolling');
+      expect(tw).toStrictEqual({ duration: '90d', type: 'rolling' });
     });
 
     apiTest('returns 409 when creating with a duplicate custom id', async ({ apiClient }) => {
