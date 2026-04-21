@@ -26,4 +26,4 @@ JSON overview of fields, sample values, and mapping/schema hints for the **same 
 
 ---
 
-Begin with **`simulate_pipeline`** when you have a first candidate; iterate from metrics and errors.
+Start by running through the **Inspection checklist** from the system prompt. Then call **`simulate_pipeline`** with your first candidate and iterate from the response (`errors`, `processors`, `temporary_fields`).
