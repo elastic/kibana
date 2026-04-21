@@ -14,6 +14,7 @@ import { getRuleMetrics } from './rules/get_metrics';
 import {
   getInitialEventLogUsage,
   getInitialRuleCustomizationStatus,
+  getInitialRuleDeprecatedStatus,
   getInitialRuleUpgradeStatus,
   getInitialRulesUsage,
   getInitialSpacesUsage,
@@ -63,6 +64,7 @@ export const getDetectionsMetrics = async ({
             detection_rule_status: getInitialEventLogUsage(),
             elastic_detection_rule_upgrade_status: getInitialRuleUpgradeStatus(),
             elastic_detection_rule_customization_status: getInitialRuleCustomizationStatus(),
+            elastic_detection_rule_deprecated_status: getInitialRuleDeprecatedStatus(),
             spaces_usage: getInitialSpacesUsage(),
           },
     legacy_siem_signals:

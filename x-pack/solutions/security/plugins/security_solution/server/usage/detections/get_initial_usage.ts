@@ -11,6 +11,7 @@ import { getInitialMlJobUsage } from './ml_jobs/get_initial_usage';
 import {
   getInitialEventLogUsage,
   getInitialRuleCustomizationStatus,
+  getInitialRuleDeprecatedStatus,
   getInitialRuleUpgradeStatus,
   getInitialRulesUsage,
   getInitialSpacesUsage,
@@ -32,6 +33,7 @@ export const getInitialDetectionMetrics = (): DetectionMetrics => ({
     detection_rule_status: getInitialEventLogUsage(),
     elastic_detection_rule_upgrade_status: getInitialRuleUpgradeStatus(),
     elastic_detection_rule_customization_status: getInitialRuleCustomizationStatus(),
+    elastic_detection_rule_deprecated_status: getInitialRuleDeprecatedStatus(),
     spaces_usage: getInitialSpacesUsage(),
   },
   legacy_siem_signals: getInitialLegacySiemSignalsUsage(),

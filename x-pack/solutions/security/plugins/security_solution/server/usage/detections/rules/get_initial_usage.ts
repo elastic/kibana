@@ -16,9 +16,9 @@ import type {
   FeatureTypeUsage,
   ResponseActionsUsage,
   UpgradeableRulesSummary,
-  DeprecatedRulesSummary,
   ThreatMatchFeatureTypeUsage,
   RuleCustomizationCounts,
+  DeprecatedRulesSummary,
 } from './types';
 
 export const initialAlertSuppression: AlertSuppressionUsage = {
