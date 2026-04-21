@@ -335,7 +335,7 @@ export const getColumns = (
         const text = <EuiText size="xs">{value}</EuiText>;
         if (RenderChildLink) {
           return (
-            <RenderChildLink field={data.field} value={value} scopeId={scopeId}>
+            <RenderChildLink field={data.field} value={value}>
               {text}
             </RenderChildLink>
           );

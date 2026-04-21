@@ -40,12 +40,10 @@ jest.mock('../../../common/lib/kibana', () => {
 
 const buildFlyoutContentMock = buildFlyoutContent as jest.Mock;
 
-const SCOPE_ID = 'scopeId';
-
 const renderChildLink = (props: Partial<React.ComponentProps<typeof ChildLink>> = {}) =>
   render(
     <TestProviders>
-      <ChildLink field="source.ip" value="10.0.0.1" scopeId={SCOPE_ID} {...props}>
+      <ChildLink field="source.ip" value="10.0.0.1" {...props}>
         <span data-test-subj="fallbackChild">{'fallback'}</span>
       </ChildLink>
     </TestProviders>
@@ -64,7 +62,7 @@ describe('<ChildLink />', () => {
     it('should render a link with the value as text when no children are provided', () => {
       const { getByTestId } = render(
         <TestProviders>
-          <ChildLink field="source.ip" value="10.0.0.1" scopeId={SCOPE_ID} />
+          <ChildLink field="source.ip" value="10.0.0.1" />
         </TestProviders>
       );
 

@@ -26,10 +26,6 @@ export interface ChildLinkProps {
    */
   value: string;
   /**
-   * Scope ID passed to the opened flyout
-   */
-  scopeId: string;
-  /**
    * Optional data-test-subj value
    */
   ['data-test-subj']?: string;
@@ -50,7 +46,6 @@ export interface ChildLinkProps {
 export const ChildLink: FC<ChildLinkProps> = ({
   field,
   value,
-  scopeId,
   children,
   'data-test-subj': dataTestSubj = CHILD_LINK_TEST_ID,
 }) => {

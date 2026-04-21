@@ -161,7 +161,7 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
       return (
         <div key={`${i}-${value}`} data-test-subj={`${value}-${HIGHLIGHTED_FIELDS_CELL_TEST_ID}`}>
           {RenderChildLink ? (
-            <RenderChildLink field={field} value={value} scopeId={scopeId}>
+            <RenderChildLink field={field} value={value}>
               {content}
             </RenderChildLink>
           ) : (
