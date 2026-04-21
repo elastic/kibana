@@ -64,6 +64,7 @@ export type {
   SelectionOption,
   SelectionDetails,
   SelectionContext,
+  StepSelectionValues,
   RequestOptions,
   GetAvailableConnectorsResponse,
 } from './v1';
@@ -84,4 +85,6 @@ export {
   // shared constants
   MAX_WORKFLOW_YAML_LENGTH,
   WORKFLOW_ID_PATTERN,
+  WORKFLOW_ID_MIN_LENGTH,
+  WORKFLOW_ID_MAX_LENGTH,
 } from './v1';

@@ -101,6 +101,17 @@ For out-of-the-box and standardized connectors, refer to [preconfigured connecto
 You can also manage connectors as resources with the [Elasticstack provider](https://registry.terraform.io/providers/elastic/elasticstack/latest) for Terraform. For more details, refer to the [elasticstack_kibana_action_connector](https://registry.terraform.io/providers/elastic/elasticstack/latest/docs/resources/kibana_action_connector) resource.
 ::::
 
+### Connector name and Connector ID [connector-id]
+
+```yaml {applies_to}
+stack: ga 9.4+
+```
+
+When you create a connector, you set a **Connector name** (the display name in {{kib}}) and a **Connector ID** (the stable identifier used by APIs and integrations). {{kib}} suggests a connector ID by slugifying the connector name. It produces a value that uses only lowercase letters, numbers, and hyphens, then truncates it to at most 36 characters if needed. Spaces and most other characters become hyphens. You can edit that suggestion before you save.
+
+The **Connector ID** must be unique among connectors available in the current {{kib}} space, including [preconfigured connectors](/reference/connectors-kibana/pre-configured-connectors.md). After you save the connector, the connector ID cannot be changed. To use a different ID, create a new connector with the same type and configuration, choose the new ID, then update rules and other integrations to reference that connector.
+
+To create a connector with the API, use [Create a connector](https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-actions-connector-id). Send `POST /api/actions/connector` (or `POST /s/<space_id>/api/actions/connector` outside the default space) to let {{kib}} generate an ID, or include the desired ID in the path: `POST /api/actions/connector/<connector_id>`. Custom IDs must follow the same rules as in the UI. They can only be 1–36 characters, and must use lowercase letters, numbers, and hyphens only.
 
 ## Managing connectors [connector-management]
 
@@ -125,6 +136,8 @@ Use the [action configuration settings](/reference/configuration-reference/alert
 ## Importing and exporting connectors [importing-and-exporting-connectors]
 
 To import and export connectors, use the [Saved Objects Management UI](docs-content://explore-analyze/find-and-organize/saved-objects.md).
+
+{applies_to}`stack: ga 9.4+` If you import a connector and use **Check for existing objects**, and its connector ID matches a [preconfigured connector](/reference/connectors-kibana/pre-configured-connectors.md), {{kib}} warns you that the preconfigured connector takes precedence and removes the imported connector. If you import with **Create new objects with random IDs**, {{kib}} keeps both objects and assigns a new id to the imported connector.
 
 :::{image} images/connectors-import-banner.png
 :alt: Connectors import banner

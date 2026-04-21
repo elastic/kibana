@@ -11,6 +11,15 @@ import { css } from '@emotion/react';
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 
+const truncateStyles = css`
+  max-width: 100%;
+  .euiButtonEmpty__text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+`;
+
 export const InputPopoverButton: React.FC<
   PropsWithChildren<{
     open: boolean;
@@ -34,7 +43,7 @@ export const InputPopoverButton: React.FC<
   `;
   return (
     <EuiButtonEmpty
-      css={open && openStyles}
+      css={[truncateStyles, open && openStyles]}
       color="text"
       iconSide="left"
       flush="both"

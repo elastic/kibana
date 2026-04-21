@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import type { z } from '@kbn/zod';
 import type {
   compositeSloDefinitionSchema,
   storedCompositeSloDefinitionSchema,
 } from '@kbn/slo-schema';
-import type * as t from 'io-ts';
 
-type CompositeSLODefinition = t.TypeOf<typeof compositeSloDefinitionSchema>;
-type StoredCompositeSLODefinition = t.OutputOf<typeof storedCompositeSloDefinitionSchema>;
+type CompositeSLODefinition = z.infer<typeof compositeSloDefinitionSchema>;
+type StoredCompositeSLODefinition = z.infer<typeof storedCompositeSloDefinitionSchema>;
 
 export type { CompositeSLODefinition, StoredCompositeSLODefinition };

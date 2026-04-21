@@ -142,6 +142,10 @@ export const isPromptRequestEvent = (
 export interface ReasoningEventData {
   /** plain text reasoning content */
   reasoning: string;
+  /** when reasoning is bound to a tool call, the corresponding tool call ID */
+  tool_call_id?: string;
+  /** when reasoning is bound to a tool call, the corresponding tool call group */
+  tool_call_group_id?: string;
   /** if true, will not be persisted or displaying in the thinking panel, only displayed as "current thinking" **/
   transient?: boolean;
 }

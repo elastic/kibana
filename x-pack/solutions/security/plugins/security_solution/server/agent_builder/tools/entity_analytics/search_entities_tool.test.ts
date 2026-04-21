@@ -233,7 +233,7 @@ describe('searchEntitiesTool', () => {
 
       expect(result.status).toBe('available');
       expect(mockEsClient.asInternalUser.indices.exists).toHaveBeenCalledWith({
-        index: '.entities.v2.latest.security_default',
+        index: 'entities-latest-default',
       });
     });
 
@@ -271,7 +271,7 @@ describe('searchEntitiesTool', () => {
 
       expect(executeEsql).toHaveBeenCalledTimes(1);
       const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
-      expect(query).toContain('FROM .entities.v2.latest.security_default');
+      expect(query).toContain('FROM entities-latest-default');
       expect(query).toContain(EXPECTED_KEEP_CLAUSE);
       expect(query).toContain(EXPECTED_SORT_CLAUSE);
       expect(query).toContain('LIMIT 10');
@@ -592,7 +592,7 @@ describe('searchEntitiesTool', () => {
       const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
 
       // FROM includes both entity index and snapshot index
-      expect(query).toContain('.entities.v2.latest.security_default');
+      expect(query).toContain('entities-latest-default');
       expect(query).toContain('.entities.v2.history.security_default*');
 
       // Risk score IS NOT NULL and timestamp range filters
@@ -616,6 +616,20 @@ describe('searchEntitiesTool', () => {
 
       // KEEP clause is omitted
       expect(query).not.toContain('KEEP');
+    });
+
+    it('omits snapshot index from FROM clause when snapshot index does not exist', async () => {
+      mockEsClient.asCurrentUser.indices.exists.mockResolvedValueOnce(false);
+      mockSingleEntityResponse();
+
+      await tool.handler(
+        { riskScoreChangeInterval: '30d' },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      );
+
+      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      expect(query).toContain('FROM entities-latest-default');
+      expect(query).not.toContain('.entities.v2.history.security_default');
     });
 
     it('uses start-of-day truncation for the timestamp filter', async () => {
@@ -650,7 +664,7 @@ describe('searchEntitiesTool', () => {
       );
 
       const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
-      expect(query).toContain('FROM .entities.v2.latest.security_default');
+      expect(query).toContain('FROM entities-latest-default');
       expect(query).toContain('WHERE entity.EngineMetadata.Type IN ("host")');
       expect(query).toContain('WHERE entity.risk.calculated_score_norm >= 80');
       expect(query).toContain('WHERE entity.risk.calculated_level IN ("High", "Critical")');

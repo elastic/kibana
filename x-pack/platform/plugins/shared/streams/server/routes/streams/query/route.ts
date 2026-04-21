@@ -7,14 +7,14 @@
 
 import { z } from '@kbn/zod/v4';
 import { badData, badRequest } from '@hapi/boom';
-import { Streams, getEsqlViewName } from '@kbn/streams-schema';
+import { Streams, getEsqlViewName, getParentId } from '@kbn/streams-schema';
 import { OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS } from '@kbn/management-settings-ids';
 import { DefinitionNotFoundError } from '../../../lib/streams/errors/definition_not_found_error';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
-import { ASSET_TYPE } from '../../../lib/streams/assets/fields';
 import { getEsqlView } from '../../../lib/streams/esql_views/manage_esql_views';
 import { upsertQueryStreamRequest } from '../../../oas_examples';
+import { getStreamAssets } from '../../../lib/streams/helpers/ingest_upsert';
 
 /**
  * Schema for API request body - accepts esql for UX simplicity.
@@ -125,7 +125,7 @@ const upsertQueryStreamRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients, context, logger }) => {
-    const { streamsClient, queryClient, attachmentClient } = await getScopedClients({
+    const { streamsClient, getQueryClient, attachmentClient } = await getScopedClients({
       request,
     });
 
@@ -156,6 +156,13 @@ const upsertQueryStreamRoute = createServerRoute({
       definition = await streamsClient.getStream(name);
     } catch (error) {
       if (error instanceof DefinitionNotFoundError) {
+        // Ensure the parent stream is registered in .streams index.
+        // Classic streams (plain data streams) may not have a stored definition yet.
+        const parentId = getParentId(name);
+        if (parentId) {
+          await streamsClient.ensureStream(parentId);
+        }
+
         // Create new query stream - the state management will handle view creation
         return await streamsClient.createQueryStream({
           name,
@@ -170,23 +177,12 @@ const upsertQueryStreamRoute = createServerRoute({
       throw badData(`The stream "${name}" already exists and is not a query stream.`);
     }
 
-    // Get existing assets and attachments to preserve them
-    const [assets, attachments] = await Promise.all([
-      queryClient.getAssets(name),
-      attachmentClient.getAttachments(name),
-    ]);
-
-    const dashboards = attachments
-      .filter((attachment) => attachment.type === 'dashboard')
-      .map((attachment) => attachment.id);
-
-    const rules = attachments
-      .filter((attachment) => attachment.type === 'rule')
-      .map((attachment) => attachment.id);
-
-    const queries = assets
-      .filter((asset) => asset[ASSET_TYPE] === 'query')
-      .map((asset) => asset.query);
+    const queryClient = await getQueryClient();
+    const { dashboards, queries, rules } = await getStreamAssets({
+      name,
+      queryClient,
+      attachmentClient,
+    });
 
     // Remove name and updated_at from definition - these are not allowed in UpsertRequest
     const { name: _name, updated_at: _updatedAt, ...stream } = definition;

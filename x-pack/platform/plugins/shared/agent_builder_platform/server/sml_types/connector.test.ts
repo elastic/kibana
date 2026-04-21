@@ -26,7 +26,7 @@ const mockLogger = loggingSystemMock.createLogger();
 
 const createContext = () => ({
   logger: loggingSystemMock.createLogger(),
-  request: httpServerMock.createKibanaRequest(),
+  savedObjectsClient: mockSavedObjectsClient as any,
 });
 
 const createAttachmentContext = () => ({
@@ -96,14 +96,6 @@ describe('connectorSmlType', () => {
           },
         ],
       });
-    });
-
-    it('throws when request is not available', async () => {
-      const context = { logger: loggingSystemMock.createLogger() };
-
-      await expect(connectorSmlType.getSmlData!('conn-1', context as never)).rejects.toThrow(
-        'no request available'
-      );
     });
 
     it('returns undefined on error and logs warning', async () => {

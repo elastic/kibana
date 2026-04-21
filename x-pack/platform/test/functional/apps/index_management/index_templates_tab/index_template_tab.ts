@@ -82,7 +82,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('index template modification', () => {
+    describe('index template modification', function () {
+      // FIPS mode sets defaultRoles to superuser which causes a trial-licensed UI element to
+      // intercept the templateDetailsLink click in the beforeEach hook
+      this.tags('skipFIPS');
       beforeEach(async () => {
         await es.indices.putIndexTemplate({
           name: INDEX_TEMPLATE_NAME,

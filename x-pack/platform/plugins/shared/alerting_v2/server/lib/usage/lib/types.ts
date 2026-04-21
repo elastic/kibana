@@ -67,10 +67,8 @@ export interface RuleStatsAggregations {
   count_by_kind: { buckets: TermsBucket[] };
   count_by_schedule: { buckets: TermsBucket[] };
   count_by_lookback: { buckets: TermsBucket[] };
-  count_with_query_condition: { doc_count: number };
   count_with_recovery_policy: { doc_count: number };
   count_by_recovery_policy_type: { buckets: TermsBucket[] };
-  count_with_recovery_query_condition: { doc_count: number };
   avg_pending_count: { value: number | null };
   avg_recovering_count: { value: number | null };
   count_by_pending_timeframe: { buckets: TermsBucket[] };
@@ -89,10 +87,8 @@ export type RuleStatsResults = Pick<
   | 'count_by_kind'
   | 'count_by_schedule'
   | 'count_by_lookback'
-  | 'count_with_query_condition'
   | 'count_with_recovery_policy'
   | 'count_by_recovery_policy_type'
-  | 'count_with_recovery_query_condition'
   | 'avg_pending_count'
   | 'avg_recovering_count'
   | 'count_by_pending_timeframe'

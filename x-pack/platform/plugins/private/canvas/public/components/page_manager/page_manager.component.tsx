@@ -229,8 +229,9 @@ export class PageManager extends Component<Props, State> {
                   onClick={onAddPage}
                   className="canvasPageManager__addPage kbn-resetFocusState"
                   data-test-subj="canvasAddPageButton"
+                  aria-label={strings.getAddPageTooltip()}
                 >
-                  <EuiIcon color="ghost" type="plusCircle" size="l" />
+                  <EuiIcon color="ghost" type="plusCircle" size="l" aria-hidden={true} />
                 </button>
               </EuiToolTip>
             </EuiFlexItem>

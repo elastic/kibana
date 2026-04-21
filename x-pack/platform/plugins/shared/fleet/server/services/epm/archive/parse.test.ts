@@ -426,7 +426,7 @@ describe('parseAndVerifyArchive', () => {
         'input_only-0.1.0/manifest.yml': buf,
       })
     ).toThrowError(
-      'Could not parse top-level package manifest at top-level directory input_only-0.1.0: YAMLException'
+      'Could not parse top-level package manifest at top-level directory input_only-0.1.0: Manifest must be a valid YAML object'
     );
   });
 
@@ -573,7 +573,9 @@ describe('parseAndVerifyDataStreams', () => {
           'input-only-0.1.0/data_stream/stream1/manifest.yml': Buffer.alloc(1),
         },
       })
-    ).toThrowError("Could not parse package manifest for data stream 'stream1': YAMLException");
+    ).toThrowError(
+      "Could not parse package manifest for data stream 'stream1': Manifest must be a valid YAML object"
+    );
   });
 
   it('should throw when data stream manifest missing type', async () => {

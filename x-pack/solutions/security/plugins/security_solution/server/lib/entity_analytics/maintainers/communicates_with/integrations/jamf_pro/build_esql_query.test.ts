@@ -20,9 +20,10 @@ describe('communicates_with Jamf Pro buildEsqlQuery', () => {
     expect(query).toMatch(/^SET unmapped_fields="nullify";\n/);
   });
 
-  it('requires at least one of host.name or host.id', () => {
+  it('uses the standard host EUID documents-contains-id filter', () => {
     const query = buildEsqlQuery('default');
-    expect(query).toContain('host.name IS NOT NULL OR host.id IS NOT NULL');
+    const hostIdFilter = euid.esql.getEuidDocumentsContainsIdFilter('host');
+    expect(query).toContain(hostIdFilter);
   });
 
   it('uses the standard user EUID documents-contains-id filter', () => {
@@ -43,10 +44,10 @@ describe('communicates_with Jamf Pro buildEsqlQuery', () => {
     expect(query).toContain(`actorUserId = ${userEuidEval}`);
   });
 
-  it('builds targetEntityId with host: prefix from host.id or host.name', () => {
+  it('derives targetEntityId from the standard host EUID evaluation', () => {
     const query = buildEsqlQuery('default');
-    expect(query).toContain('CONCAT("host:", host.id)');
-    expect(query).toContain('CONCAT("host:", host.name)');
+    const hostEuidEval = euid.esql.getEuidEvaluation('host', { withTypeId: true });
+    expect(query).toContain(`targetEntityId = ${hostEuidEval}`);
   });
 
   it('uses MV_EXPAND to handle multi-value host targets', () => {

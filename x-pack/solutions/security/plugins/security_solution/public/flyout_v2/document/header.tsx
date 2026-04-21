@@ -11,6 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
+import { flyoutHeaderBlockStyles } from './constants/styles';
 import { EventKind } from './constants/event_kinds';
 import { Assignees } from './components/assignees';
 import { Title } from './components/title';
@@ -22,11 +23,8 @@ import { RiskScore } from './components/risk_score';
 import { ALERT_SUMMARY_PANEL_TEST_ID } from '../shared/components/test_ids';
 import type { CellActionRenderer } from '../shared/components/cell_actions';
 import { noopCellActionRenderer } from '../shared/components/cell_actions';
-
-// minWidth for each block, allows to switch for a 1 row 4 blocks to 2 rows with 2 block each
-const blockStyles = {
-  minWidth: 280,
-};
+import { useUserPrivileges } from '../../common/components/user_privileges';
+import { RemoteDocumentBadge } from './components/remote_document_badge';
 
 export interface HeaderProps {
   /**
@@ -54,6 +52,7 @@ export interface HeaderProps {
  */
 export const Header: FC<HeaderProps> = memo(
   ({ hit, renderCellActions = noopCellActionRenderer, onAlertUpdated, onShowNotes }) => {
+    const canReadRules = useUserPrivileges().rulesPrivileges.rules.read;
     const isAlert = useMemo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
       [hit]
@@ -61,11 +60,14 @@ export const Header: FC<HeaderProps> = memo(
 
     return (
       <>
-        <DocumentSeverity hit={hit} />
-        <EuiSpacer size="m" />
-        <Timestamp hit={hit} />
-        <EuiSpacer size="xs" />
-        <Title hit={hit} />
+        <DocumentSeverity hit={hit}>
+          <EuiSpacer size="s" />
+        </DocumentSeverity>
+        <Timestamp hit={hit}>
+          <EuiSpacer size="xs" />
+        </Timestamp>
+        <Title hit={hit} hideLink={!canReadRules} />
+        <RemoteDocumentBadge hit={hit} />
         {isAlert && (
           <>
             <EuiSpacer size="m" />
@@ -76,7 +78,7 @@ export const Header: FC<HeaderProps> = memo(
               wrap
               data-test-subj={ALERT_SUMMARY_PANEL_TEST_ID}
             >
-              <EuiFlexItem css={blockStyles}>
+              <EuiFlexItem css={flyoutHeaderBlockStyles}>
                 <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
                   <EuiFlexItem>
                     <Status
@@ -90,7 +92,7 @@ export const Header: FC<HeaderProps> = memo(
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
-              <EuiFlexItem css={blockStyles}>
+              <EuiFlexItem css={flyoutHeaderBlockStyles}>
                 <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
                   <EuiFlexItem>
                     <Assignees hit={hit} onAlertUpdated={onAlertUpdated} />

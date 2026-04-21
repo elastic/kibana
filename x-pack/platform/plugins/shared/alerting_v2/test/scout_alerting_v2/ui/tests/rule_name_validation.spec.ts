@@ -15,8 +15,8 @@ test.describe('Rule name validation — dedicated page', { tag: tags.stateful.cl
     await pageObjects.ruleForm.gotoCreate();
   });
 
-  test('displays "Untitled rule" as the default placeholder name', async ({ pageObjects }) => {
-    await expect(pageObjects.ruleForm.nameInlineEdit()).toContainText('Untitled rule');
+  test('displays "Untitled rule" as the default placeholder', async ({ pageObjects }) => {
+    await expect(pageObjects.ruleForm.nameInput()).toHaveAttribute('placeholder', 'Untitled rule');
   });
 
   test('shows "Name is required" error when saving with empty default value', async ({
@@ -29,6 +29,7 @@ test.describe('Rule name validation — dedicated page', { tag: tags.stateful.cl
   });
 
   test('shows validation error when rule name is cleared after editing', async ({
+    page,
     pageObjects,
   }) => {
     await test.step('set a name then clear it', async () => {
@@ -38,13 +39,13 @@ test.describe('Rule name validation — dedicated page', { tag: tags.stateful.cl
 
     await test.step('attempt to save and verify error is shown', async () => {
       await pageObjects.ruleForm.clickSave();
-      const errorCallout = pageObjects.ruleForm.errorCallout();
-      await expect(errorCallout).toBeVisible();
-      await expect(errorCallout).toContainText('Name is required');
+      await expect(pageObjects.ruleForm.nameInput()).toHaveAttribute('aria-invalid', 'true');
+      await expect(page.getByText('Name is required.')).toBeVisible();
     });
   });
 
   test('shows name validation error when saving after confirming the default placeholder text', async ({
+    page,
     pageObjects,
   }) => {
     await test.step('open name edit and save with the default "Untitled rule" text', async () => {
@@ -53,9 +54,8 @@ test.describe('Rule name validation — dedicated page', { tag: tags.stateful.cl
 
     await test.step('attempt to save and verify error is shown', async () => {
       await pageObjects.ruleForm.clickSave();
-      const errorCallout = pageObjects.ruleForm.errorCallout();
-      await expect(errorCallout).toBeVisible();
-      await expect(errorCallout).toContainText('Name is required');
+      await expect(pageObjects.ruleForm.nameInput()).toHaveAttribute('aria-invalid', 'true');
+      await expect(page.getByText('Name is required.')).toBeVisible();
     });
   });
 
@@ -76,15 +76,13 @@ test.describe('Rule name validation — dedicated page', { tag: tags.stateful.cl
 
   test('no name validation error with a custom rule name', async ({ page, pageObjects }) => {
     await pageObjects.ruleForm.setRuleName('My custom alert rule');
-    await expect(pageObjects.ruleForm.nameInlineEdit()).toContainText('My custom alert rule');
+    await expect(pageObjects.ruleForm.nameInput()).toHaveValue('My custom alert rule');
 
     await pageObjects.ruleForm.clickSave();
 
     await test.step('verify no name-specific errors appear', async () => {
       const nameRequiredError = page.getByText('Name is required.');
-      const uniqueNameError = page.getByText('Please provide a unique rule name.');
       await expect(nameRequiredError).toBeHidden();
-      await expect(uniqueNameError).toBeHidden();
     });
   });
 });

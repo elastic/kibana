@@ -5,43 +5,18 @@
  * 2.0.
  */
 
-import { escapeKuery } from '@kbn/es-query';
+import { buildApiRulesListCombinedFilter } from '../../../common/utils/build_rules_list_kql';
 import { buildRuleSoFilter } from './build_rule_filter';
 
-const normalizeSearchTerm = (term: string): string => {
-  const normalized = term.replace(/^[^a-zA-Z0-9]+|[^a-zA-Z0-9]+$/g, '');
-  return normalized || term;
-};
-
-export const buildRuleSearchQuery = (search?: string): string | undefined => {
-  if (!search?.trim()) {
-    return undefined;
-  }
-
-  const termFilters = search
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((term) => {
-      const escapedTerm = escapeKuery(normalizeSearchTerm(term));
-      return `(metadata.name: ${escapedTerm}* OR metadata.tags: ${escapedTerm}*)`;
-    });
-
-  return termFilters.length > 0 ? termFilters.join(' AND ') : undefined;
-};
+export { buildRuleSearchQuery } from '../../../common/utils/build_rules_list_kql';
 
 export const buildFindRulesSearch = ({
-  filter: existingFilter,
+  filter,
   search,
 }: {
   filter?: string;
   search?: string;
 }): string | undefined => {
-  const searchQuery = buildRuleSearchQuery(search);
-  const combinedQuery =
-    existingFilter && searchQuery
-      ? `(${existingFilter}) AND (${searchQuery})`
-      : existingFilter ?? searchQuery;
-
+  const combinedQuery = buildApiRulesListCombinedFilter({ filter, search });
   return combinedQuery ? buildRuleSoFilter(combinedQuery) : undefined;
 };

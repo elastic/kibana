@@ -139,6 +139,10 @@ describe('runTask abort handling', () => {
       invokeAutomaticImportAgent: jest.fn().mockResolvedValue({
         current_pipeline: { name: 'test', processors: [] },
         pipeline_generation_results: [{ _source: { answer: 42 } }],
+        field_mappings: [
+          { name: 'my_app.created_at', type: 'date' },
+          { name: 'my_app.status', type: 'keyword' },
+        ],
       }),
     }));
 
@@ -176,6 +180,22 @@ describe('runTask abort handling', () => {
       expect.objectContaining({ status: TASK_STATUSES.completed }),
       abortController.signal
     );
+    expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ success: true })
+    );
+  });
+
+  it('passes agent field_mappings to generateFieldMappings', async () => {
+    const abortController = new AbortController();
+    const runner = createRunner(abortController);
+
+    await runner.run();
+
+    expect(generateFieldMappings).toHaveBeenCalledWith(expect.any(Array), expect.anything(), [
+      { name: 'my_app.created_at', type: 'date' },
+      { name: 'my_app.status', type: 'keyword' },
+    ]);
   });
 
   it('marks data stream as cancelled when aborted before agent invocation returns', async () => {
@@ -883,6 +903,26 @@ describe('runTask error edge cases', () => {
     await runner.run();
 
     expect(abortController.signal.aborted).toBe(false);
+  });
+
+  it('passes undefined agent field_mappings when agent does not provide them', async () => {
+    AgentService.mockImplementation(() => ({
+      invokeAutomaticImportAgent: jest.fn().mockResolvedValue({
+        current_pipeline: { name: 'test', processors: [] },
+        pipeline_generation_results: [{ _source: { value: 'test' } }],
+      }),
+    }));
+
+    buildService();
+    const abortController = new AbortController();
+    const runner = createRunner(abortController);
+    await runner.run();
+
+    expect(generateFieldMappings).toHaveBeenCalledWith(
+      expect.any(Array),
+      expect.anything(),
+      undefined
+    );
   });
 
   it('passes validation warnings through without failing the task', async () => {

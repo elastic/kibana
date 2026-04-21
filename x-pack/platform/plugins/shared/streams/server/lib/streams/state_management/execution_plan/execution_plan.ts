@@ -278,9 +278,12 @@ export class ExecutionPlan {
       return;
     }
 
-    return Promise.all(
-      actions.map((action) => this.dependencies.queryClient.deleteAll(action.request.definition))
-    );
+    const { getQueryClient } = this.dependencies;
+    if (!getQueryClient) {
+      throw new Error('queryClient is required for deleteQueries but was not provided');
+    }
+    const queryClient = await getQueryClient();
+    return Promise.all(actions.map((action) => queryClient.deleteAll(action.request.definition)));
   }
 
   private async unlinkAssets(actions: UnlinkAssetsAction[]) {
@@ -306,9 +309,12 @@ export class ExecutionPlan {
       return;
     }
 
-    return Promise.all(
-      actions.map((action) => this.dependencies.featureClient.deleteFeatures(action.request.name))
-    );
+    const { getFeatureClient } = this.dependencies;
+    if (!getFeatureClient) {
+      throw new Error('featureClient is required for unlinkFeatures but was not provided');
+    }
+    const featureClient = await getFeatureClient();
+    return Promise.all(actions.map((action) => featureClient.deleteFeatures(action.request.name)));
   }
 
   private async upsertComponentTemplates(actions: UpsertComponentTemplateAction[]) {

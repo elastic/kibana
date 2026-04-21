@@ -492,7 +492,7 @@ describe('DateRangePickerControl', () => {
 
     const autoRefreshSettings = {
       roundRelativeTime: true,
-      autoRefresh: { isEnabled: true, isPaused: false, interval: 4000 },
+      autoRefresh: { isEnabled: true, isPaused: false, intervalMs: 4000, intervalDisplayUnit: 's' },
     } as const;
 
     it('does not render the auto-refresh append control when `settings.autoRefresh` is absent', () => {
@@ -518,7 +518,12 @@ describe('DateRangePickerControl', () => {
           onRefresh={onRefresh}
           settings={{
             roundRelativeTime: true,
-            autoRefresh: { isEnabled: false, isPaused: false, interval: 4000 },
+            autoRefresh: {
+              isEnabled: false,
+              isPaused: false,
+              intervalMs: 4000,
+              intervalDisplayUnit: 's',
+            },
           }}
         />
       );
@@ -533,7 +538,12 @@ describe('DateRangePickerControl', () => {
           onRefresh={onRefresh}
           settings={{
             roundRelativeTime: true,
-            autoRefresh: { isEnabled: true, isPaused: true, interval: 4000 },
+            autoRefresh: {
+              isEnabled: true,
+              isPaused: true,
+              intervalMs: 4000,
+              intervalDisplayUnit: 's',
+            },
           }}
         />
       );
@@ -635,7 +645,12 @@ describe('DateRangePickerControl', () => {
           {...defaultProps}
           settings={{
             roundRelativeTime: true,
-            autoRefresh: { isEnabled: true, isPaused: true, interval: 1000 },
+            autoRefresh: {
+              isEnabled: true,
+              isPaused: true,
+              intervalMs: 1000,
+              intervalDisplayUnit: 's',
+            },
           }}
           onRefresh={pausedOnRefresh}
         />
@@ -656,7 +671,12 @@ describe('DateRangePickerControl', () => {
           {...defaultProps}
           settings={{
             roundRelativeTime: true,
-            autoRefresh: { isEnabled: false, isPaused: false, interval: 1000 },
+            autoRefresh: {
+              isEnabled: false,
+              isPaused: false,
+              intervalMs: 1000,
+              intervalDisplayUnit: 's',
+            },
           }}
           onRefresh={disabledOnRefresh}
         />

@@ -10,8 +10,8 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
-import { colorMappingSchema, staticColorSchema } from '../color';
-import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
+import { colorMappingSchema, staticColorSchema, autoColorSchema, AUTO_COLOR } from '../color';
+import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 
 import {
   collapseBySchema,
@@ -32,9 +32,10 @@ import {
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
 } from './shared';
+import { objectUnion } from './utils/object_union';
 import { groupIsNotCollapsed } from '../../utils';
 
-const treemapSharedStateSchema = {
+const treemapSharedConfigSchema = {
   legend: schema.maybe(
     schema.object(
       {
@@ -52,29 +53,44 @@ const treemapSharedStateSchema = {
       }
     )
   ),
-  values: valueDisplaySchema,
-
-  /**
-   * Labels configuration
-   */
-  labels: schema.maybe(
-    schema.object(
-      {
-        visible: schema.maybe(schema.boolean({ meta: { description: 'Show category labels' } })),
-      },
-      { meta: { description: 'Labels configuration' } }
-    )
-  ),
 };
 
-const partitionStatePrimaryMetricOptionsSchema = {
+const treemapStylingSchema = schema.object(
+  {
+    values: valueDisplaySchema,
+    /**
+     * Labels configuration
+     */
+    labels: schema.maybe(
+      schema.object(
+        {
+          visible: schema.maybe(schema.boolean({ meta: { description: 'Show category labels' } })),
+        },
+        { meta: { description: 'Labels configuration' } }
+      )
+    ),
+  },
+  {
+    meta: {
+      id: 'treemapStyling',
+      title: 'Treemap styling',
+      description: 'Visual chart styling options',
+    },
+  }
+);
+
+const partitionConfigPrimaryMetricOptionsSchema = {
   /**
    * Color configuration
    */
-  color: schema.maybe(staticColorSchema),
+  color: schema.maybe(
+    schema.oneOf([staticColorSchema, autoColorSchema], {
+      defaultValue: AUTO_COLOR,
+    })
+  ),
 };
 
-const partitionStateBreakdownByOptionsSchema = {
+const partitionConfigBreakdownByOptionsSchema = {
   /**
    * Color configuration: color mapping only
    */
@@ -113,21 +129,21 @@ function validateForMultipleMetrics({
   return validateColoringAssignments({ metrics, group_by });
 }
 
-export const treemapStateSchemaNoESQL = schema.object(
+export const treemapConfigSchemaNoESQL = schema.object(
   {
     type: schema.literal('treemap'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetSchema,
+    ...dataSourceSchema,
     ...dslOnlyPanelInfoSchema,
-    ...treemapSharedStateSchema,
-    ...dslOnlyPanelInfoSchema,
+    ...treemapSharedConfigSchema,
+    styling: schema.maybe(treemapStylingSchema),
     /**
      * Primary value configuration, must define operation. Supports field-based operations (count, unique count, metrics, sum, last value, percentile, percentile ranks), reference-based operations (differences, moving average, cumulative sum, counter rate), and formula-like operations (static value, formula).
      */
     metrics: schema.arrayOf(
       mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
-        partitionStatePrimaryMetricOptionsSchema
+        partitionConfigPrimaryMetricOptionsSchema
       ),
       {
         minSize: 1,
@@ -140,7 +156,7 @@ export const treemapStateSchemaNoESQL = schema.object(
      */
     group_by: schema.maybe(
       schema.arrayOf(
-        mergeAllBucketsWithChartDimensionSchema(partitionStateBreakdownByOptionsSchema),
+        mergeAllBucketsWithChartDimensionSchema(partitionConfigBreakdownByOptionsSchema),
         {
           minSize: 1,
           maxSize: 100,
@@ -160,18 +176,19 @@ export const treemapStateSchemaNoESQL = schema.object(
   }
 );
 
-export const treemapStateSchemaESQL = schema.object(
+export const treemapConfigSchemaESQL = schema.object(
   {
     type: schema.literal('treemap'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetEsqlTableSchema,
-    ...treemapSharedStateSchema,
+    ...dataSourceEsqlTableSchema,
+    ...treemapSharedConfigSchema,
+    styling: schema.maybe(treemapStylingSchema),
     /**
      * Primary value configuration, must define operation. In ES|QL mode, uses column-based configuration.
      */
     metrics: schema.arrayOf(
-      esqlColumnWithFormatSchema.extends(partitionStatePrimaryMetricOptionsSchema),
+      esqlColumnWithFormatSchema.extends(partitionConfigPrimaryMetricOptionsSchema),
       {
         minSize: 1,
         maxSize: 100,
@@ -182,7 +199,7 @@ export const treemapStateSchemaESQL = schema.object(
      * Configure how to break down the metric (e.g. show one metric per term). In ES|QL mode, uses column-based configuration.
      */
     group_by: schema.maybe(
-      schema.arrayOf(esqlColumnWithFormatSchema.extends(partitionStateBreakdownByOptionsSchema), {
+      schema.arrayOf(esqlColumnWithFormatSchema.extends(partitionConfigBreakdownByOptionsSchema), {
         minSize: 1,
         maxSize: 100,
         meta: { description: 'Array of breakdown dimensions (minimum 1)' },
@@ -200,15 +217,18 @@ export const treemapStateSchemaESQL = schema.object(
   }
 );
 
-export const treemapStateSchema = schema.oneOf([treemapStateSchemaNoESQL, treemapStateSchemaESQL], {
-  meta: {
-    id: 'treemapChart',
-    title: 'Treemap Chart',
-    description:
-      'Treemap chart configuration schema supporting both data source queries (non-ES|QL) and ES|QL query modes',
-  },
-});
+export const treemapConfigSchema = objectUnion(
+  [treemapConfigSchemaNoESQL, treemapConfigSchemaESQL],
+  {
+    meta: {
+      id: 'treemapChart',
+      title: 'Treemap Chart',
+      description:
+        'Treemap chart configuration schema supporting both data source queries (non-ES|QL) and ES|QL query modes',
+    },
+  }
+);
 
-export type TreemapState = TypeOf<typeof treemapStateSchema>;
-export type TreemapStateNoESQL = TypeOf<typeof treemapStateSchemaNoESQL>;
-export type TreemapStateESQL = TypeOf<typeof treemapStateSchemaESQL>;
+export type TreemapConfig = TypeOf<typeof treemapConfigSchema>;
+export type TreemapConfigNoESQL = TypeOf<typeof treemapConfigSchemaNoESQL>;
+export type TreemapConfigESQL = TypeOf<typeof treemapConfigSchemaESQL>;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EpisodesFilterState, EpisodesSortState } from './utils/build_episodes_esql_query';
+import type { EpisodesFilterState, EpisodesSortState } from './queries/episodes_query';
 
 export const queryKeys = {
   all: ['alert-episodes'] as const,
@@ -20,4 +20,11 @@ export const queryKeys = {
     sortState?: EpisodesSortState,
     timeRange?: { from: string; to: string } | null
   ) => [...queryKeys.all, 'list', pageSize, filterState, sortState, timeRange] as const,
+  episodeEvents: (episodeId: string) => [...queryKeys.all, 'episode-events', episodeId] as const,
+  relatedEpisodes: (ruleId: string, excludeEpisodeId: string, pageSize: number) =>
+    [...queryKeys.all, 'related-episodes', ruleId, excludeEpisodeId, pageSize] as const,
+  tagOptionsAll: () => [...queryKeys.all, 'tag-options'] as const,
+  tagOptions: (timeRange?: { from: string; to: string } | null) =>
+    [...queryKeys.tagOptionsAll(), timeRange] as const,
+  tagSuggestions: () => [...queryKeys.all, 'tag-suggestions'] as const,
 };
