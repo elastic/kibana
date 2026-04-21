@@ -183,9 +183,8 @@ export function extractIndexPatterns(
  * Matches: lookup, | lookup — but excludes inputlookup, outputlookup.
  */
 export function splHasLookups(splXml: string): boolean {
-  return /(?<![a-z])lookup\s+\w+/i.test(splXml) && !/(?:input|output)lookup/i.test(splXml)
-    ? true
-    : /\|\s*lookup\s+/i.test(splXml);
+  const lookupMatches = splXml.match(/(?<![a-zA-Z])lookup\s+\w+/gi) ?? [];
+  return lookupMatches.some((match) => !/(?:input|output)lookup/i.test(match));
 }
 
 /**

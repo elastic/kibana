@@ -122,6 +122,11 @@ describe('splHasLookups', () => {
   it('returns false when no lookups present', () => {
     expect(splHasLookups('index=main | stats count by src_ip')).toBe(false);
   });
+
+  it('detects standalone lookup even when inputlookup/outputlookup also present', () => {
+    expect(splHasLookups('lookup users | inputlookup extra.csv')).toBe(true);
+    expect(splHasLookups('| inputlookup a.csv | lookup users user_id')).toBe(true);
+  });
 });
 
 describe('esqlHasLookupJoin', () => {
