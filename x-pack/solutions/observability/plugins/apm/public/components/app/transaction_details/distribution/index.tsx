@@ -200,7 +200,6 @@ export function TransactionDistribution({
 
         <EuiSpacer size="s" />
         <WaterfallWithSummary
-          environment={environment}
           onSampleClick={onSampleClick}
           onTabClick={onTabClick}
           serviceName={serviceName}

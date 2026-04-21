@@ -38,7 +38,6 @@ interface Props<TSample extends {}> {
   traceSamples?: TSample[];
   traceSamplesFetchStatus: FETCH_STATUS;
   waterfallFetchStatus: FETCH_STATUS;
-  environment: Environment;
   onSampleClick: (sample: TSample) => void;
   onTabClick: (tab: TransactionTab) => void;
   serviceName?: string;
