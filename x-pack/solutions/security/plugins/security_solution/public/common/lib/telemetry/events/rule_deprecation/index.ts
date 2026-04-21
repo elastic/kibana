@@ -10,7 +10,7 @@ import { RuleDeprecationEventTypes } from './types';
 
 const countSchema = {
   count: {
-    type: 'long' as const,
+    type: 'integer' as const,
     _meta: {
       description: 'Number of deprecated rules',
       optional: false as const,
