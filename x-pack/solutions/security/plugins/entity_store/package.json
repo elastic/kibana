@@ -1,0 +1,9 @@
+{
+  "name": "@kbn/entity-store",
+  "private": true,
+  "version": "1.0.0",
+  "license": "Elastic License 2.0",
+  "scripts": {
+    "openapi:generate": "node scripts/openapi_generate"
+  }
+}
