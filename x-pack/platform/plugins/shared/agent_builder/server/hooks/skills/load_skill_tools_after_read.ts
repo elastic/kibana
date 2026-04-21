@@ -7,43 +7,52 @@
 
 import type { AfterToolCallHookContext, ToolProvider } from '@kbn/agent-builder-server';
 import { filestoreTools } from '@kbn/agent-builder-common/tools';
-import type { SkillsService, ToolManager } from '@kbn/agent-builder-server/runner';
+import { getAgentFromRunContext } from '@kbn/agent-builder-server';
+import type { RunContext, SkillsService, ToolManager } from '@kbn/agent-builder-server/runner';
 import { ToolManagerToolType } from '@kbn/agent-builder-server/runner';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { pickTools } from '../../services/execution/run_agent/utils/select_tools';
 import { isSkillFileEntry } from '../../services/execution/runner/store/volumes/skills/utils';
+import type { AnalyticsService } from '../../telemetry';
+import { classifySkill } from '../../telemetry/utils';
 
 const MAX_SKILL_REGISTRY_TOOLS = 25;
 
-export const loadSkillToolsAfterRead = async (context: AfterToolCallHookContext): Promise<void> => {
-  if (context.toolId !== filestoreTools.read) {
-    return;
-  }
+export const createLoadSkillToolsAfterRead = ({
+  analyticsService,
+}: { analyticsService?: AnalyticsService } = {}) => {
+  return async (context: AfterToolCallHookContext): Promise<void> => {
+    if (context.toolId !== filestoreTools.read) {
+      return;
+    }
 
-  const { filestore, skills, toolProvider, toolManager, request, logger } =
-    context.toolHandlerContext;
+    const { filestore, skills, toolProvider, toolManager, request, logger, runContext } =
+      context.toolHandlerContext;
 
-  const path = context.toolParams.path as string | undefined;
-  if (!path) {
-    return;
-  }
+    const path = context.toolParams.path as string | undefined;
+    if (!path) {
+      return;
+    }
 
-  const entry = await filestore.read(path);
-  if (!entry || !isSkillFileEntry(entry)) {
-    return;
-  }
+    const entry = await filestore.read(path);
+    if (!entry || !isSkillFileEntry(entry)) {
+      return;
+    }
 
-  const { skill_id: skillId } = entry.metadata;
+    const { skill_id: skillId } = entry.metadata;
 
-  await loadSkillTools({
-    skillsService: skills,
-    skillId,
-    toolProvider,
-    request,
-    toolManager,
-    logger,
-  });
+    await loadSkillTools({
+      skillsService: skills,
+      skillId,
+      toolProvider,
+      request,
+      toolManager,
+      logger,
+      runContext,
+      analyticsService,
+    });
+  };
 };
 
 const loadSkillTools = async ({
@@ -53,6 +62,8 @@ const loadSkillTools = async ({
   request,
   toolManager,
   logger,
+  runContext,
+  analyticsService,
 }: {
   skillsService: SkillsService;
   skillId: string;
@@ -60,6 +71,8 @@ const loadSkillTools = async ({
   request: KibanaRequest;
   toolManager: ToolManager;
   logger: Logger;
+  runContext: RunContext;
+  analyticsService?: AnalyticsService;
 }): Promise<void> => {
   const skill = await skillsService.get(skillId);
   if (!skill) {
@@ -91,4 +104,25 @@ const loadSkillTools = async ({
       dynamic: true,
     }
   );
+
+  if (!analyticsService) {
+    return;
+  }
+
+  try {
+    const agentContext = getAgentFromRunContext(runContext);
+    const { origin, solution_area: solutionArea } = classifySkill(skill);
+    analyticsService.reportSkillInvoked({
+      skillId: skill.id,
+      origin,
+      solutionArea,
+      pluginId: skill.plugin_id,
+      agentId: agentContext?.agentId,
+      conversationId: agentContext?.conversationId,
+      executionId: agentContext?.executionId,
+      toolCount: inlineExecutableTools.length + registryExecutableTools.length,
+    });
+  } catch (e) {
+    logger.warn(`Failed to report SkillInvoked telemetry: ${e}`);
+  }
 };
