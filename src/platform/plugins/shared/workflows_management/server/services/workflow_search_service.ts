@@ -292,7 +292,13 @@ export class WorkflowSearchService {
         cancelled: bucket.cancelled.doc_count,
       }));
     } catch (error) {
-      this.deps.logger.error('Failed to get execution history stats', error);
+      if (!isIndexNotFoundError(error)) {
+        this.deps.logger.error('Failed to get execution history stats', error);
+      } else {
+        this.deps.logger.warn(
+          `Executions index not found when fetching execution history stats: ${error.message}`
+        );
+      }
       return [];
     }
   }
