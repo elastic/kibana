@@ -16,7 +16,7 @@
 
 import { z } from '@kbn/zod/v4';
 
-import { EntitySourceType, Matcher, Filter, MonitoringEntitySource } from './common.gen';
+import { EntitySourceType, Matcher, Filter, DateRange, MonitoringEntitySource } from './common.gen';
 
 export type CreateWatchlistEntitySourceRequestParams = z.infer<
   typeof CreateWatchlistEntitySourceRequestParams
@@ -51,6 +51,7 @@ export const CreateWatchlistEntitySourceRequestBody = z
     queryRule: z.string().optional(),
     matchers: z.array(Matcher).optional(),
     filter: Filter.optional(),
+    range: DateRange.optional(),
   })
   .strict();
 export type CreateWatchlistEntitySourceRequestBodyInput = z.input<

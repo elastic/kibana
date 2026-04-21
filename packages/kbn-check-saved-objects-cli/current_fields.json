@@ -960,6 +960,11 @@
   ],
   "inventory-view": [],
   "kql-telemetry": [],
+  "lead-generation-config": [
+    "connectorId",
+    "lastError",
+    "lastExecutionUuid"
+  ],
   "legacy-url-alias": [
     "disabled",
     "resolveCounter",
@@ -1508,6 +1513,9 @@
     "enabled",
     "managed",
     "name",
+    "range",
+    "range.end",
+    "range.start",
     "type"
   ],
   "workplace_search_telemetry": []
