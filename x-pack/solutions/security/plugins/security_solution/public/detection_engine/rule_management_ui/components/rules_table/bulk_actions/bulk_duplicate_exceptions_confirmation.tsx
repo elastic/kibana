@@ -22,7 +22,7 @@ const BulkActionDuplicateExceptionsConfirmationComponent = ({
   onConfirm,
   rulesCount,
 }: BulkDuplicateExceptionsConfirmationProps) => {
-  const { selectedOption, radioGroup } = useDuplicateOptionsRadioGroup(rulesCount);
+  const { selectedOption, radioGroup } = useDuplicateOptionsRadioGroup({ rulesCount });
 
   const modalTitleId = useGeneratedHtmlId();
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback } from 'react';
 import { EuiButton, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
@@ -14,6 +14,7 @@ import type { RuleResponse } from '../../../../../common/api/detection_engine';
 import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
 import { DuplicateOptions } from '../../../../../common/detection_engine/rule_management/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useBulkDuplicateExceptionsConfirmation } from '../../../rule_management_ui/components/rules_table/bulk_actions/use_bulk_duplicate_confirmation';
 import { useExecuteBulkAction } from '../../logic/bulk_actions/use_execute_bulk_action';
 import { usePrebuiltRulesDeprecationReview } from '../../logic/prebuilt_rules/use_prebuilt_rules_deprecation_review';
 import { DeprecatedRulesCallout } from './deprecated_rules_callout';
@@ -39,36 +40,22 @@ export const useDeprecatedRuleDetailsCallout = ({
   } = useKibana().services;
   const {
     rules: { edit: canEditRules },
-    exceptions: { edit: canEditExceptions },
   } = useUserPrivileges().rulesPrivileges;
 
   const isFeatureEnabled = useIsExperimentalFeatureEnabled('prebuiltRulesDeprecationUIEnabled');
   const isPrebuiltRule = rule?.rule_source?.type === 'external';
   const { data, isLoading } = usePrebuiltRulesDeprecationReview(
-    rule?.id ? { ids: [rule.id] } : null,
+    { ids: rule?.id ? [rule.id] : [] },
     { enabled: isFeatureEnabled && isPrebuiltRule }
   );
   const { executeBulkAction } = useExecuteBulkAction();
 
-  const [isDuplicateConfirmVisible, setIsDuplicateConfirmVisible] = useState(false);
-  const duplicateConfirmResolveRef = useRef<(option: string | null) => void>();
-
-  const showDuplicateConfirmation = useCallback((): Promise<string | null> => {
-    setIsDuplicateConfirmVisible(true);
-    return new Promise<string | null>((resolve) => {
-      duplicateConfirmResolveRef.current = resolve;
-    }).finally(() => {
-      setIsDuplicateConfirmVisible(false);
-    });
-  }, []);
-
-  const handleDuplicateConfirmCancel = useCallback(() => {
-    duplicateConfirmResolveRef.current?.(null);
-  }, []);
-
-  const handleDuplicateConfirmConfirm = useCallback((option: string) => {
-    duplicateConfirmResolveRef.current?.(option);
-  }, []);
+  const {
+    isBulkDuplicateConfirmationVisible,
+    showBulkDuplicateConfirmation,
+    cancelRuleDuplication,
+    confirmRuleDuplication,
+  } = useBulkDuplicateExceptionsConfirmation();
 
   const navigateToRulesPage = useCallback(() => {
     navigateToApp(APP_UI_ID, {
@@ -96,9 +83,7 @@ export const useDeprecatedRuleDetailsCallout = ({
       return;
     }
 
-    const duplicateOption = canEditExceptions
-      ? await showDuplicateConfirmation()
-      : DuplicateOptions.withoutExceptions;
+    const duplicateOption = await showBulkDuplicateConfirmation();
     if (duplicateOption === null) {
       return;
     }
@@ -132,11 +117,11 @@ export const useDeprecatedRuleDetailsCallout = ({
       deepLinkId: SecurityPageName.rules,
       path: getRuleDetailsUrl(newRuleId),
     });
-  }, [rule, canEditExceptions, showDuplicateConfirmation, executeBulkAction, navigateToApp]);
+  }, [rule, showBulkDuplicateConfirmation, executeBulkAction, navigateToApp]);
 
   const deprecatedRule = data?.rules?.[0];
 
-  if (!deprecatedRule || deprecatedRule?.id !== rule?.id || isLoading) {
+  if (!deprecatedRule || isLoading) {
     return null;
   }
 
@@ -185,10 +170,10 @@ export const useDeprecatedRuleDetailsCallout = ({
         ]}
         dataTestSubj="deprecated-rule-details-callout"
       />
-      {isDuplicateConfirmVisible && (
+      {isBulkDuplicateConfirmationVisible && (
         <DeprecatedRuleDuplicateConfirmation
-          onCancel={handleDuplicateConfirmCancel}
-          onConfirm={handleDuplicateConfirmConfirm}
+          onCancel={cancelRuleDuplication}
+          onConfirm={confirmRuleDuplication}
         />
       )}
     </>

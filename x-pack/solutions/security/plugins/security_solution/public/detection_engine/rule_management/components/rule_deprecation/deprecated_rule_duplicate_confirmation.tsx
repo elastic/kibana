@@ -19,7 +19,7 @@ const DeprecatedRuleDuplicateConfirmationComponent = ({
   onCancel,
   onConfirm,
 }: DeprecatedRuleDuplicateConfirmationProps) => {
-  const { selectedOption, radioGroup } = useDuplicateOptionsRadioGroup(1);
+  const { selectedOption, radioGroup } = useDuplicateOptionsRadioGroup({ rulesCount: 1 });
 
   const handleConfirm = useCallback(() => {
     onConfirm(selectedOption);

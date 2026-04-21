@@ -8,17 +8,20 @@
 import React, { useCallback, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiRadioGroup, EuiText, EuiIconTip } from '@elastic/eui';
 import { DuplicateOptions } from '../../../../../../common/detection_engine/rule_management/constants';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { bulkDuplicateRuleActions as i18n } from './translations';
 
 interface DuplicateOptionsRadioGroupProps {
   rulesCount: number;
   selectedOption: DuplicateOptions;
+  disabled?: boolean;
   onChange: (option: DuplicateOptions) => void;
 }
 
 export const DuplicateOptionsRadioGroup = ({
   rulesCount,
   selectedOption,
+  disabled = false,
   onChange,
 }: DuplicateOptionsRadioGroupProps) => {
   const handleRadioChange = useCallback(
@@ -34,6 +37,7 @@ export const DuplicateOptionsRadioGroup = ({
       options={[
         {
           id: DuplicateOptions.withExceptions,
+          disabled,
           label: (
             <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
@@ -50,6 +54,7 @@ export const DuplicateOptionsRadioGroup = ({
         },
         {
           id: DuplicateOptions.withExceptionsExcludeExpiredExceptions,
+          disabled,
           label: (
             <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
@@ -74,13 +79,20 @@ export const DuplicateOptionsRadioGroup = ({
   );
 };
 
-export const useDuplicateOptionsRadioGroup = (rulesCount: number) => {
-  const [selectedOption, setSelectedOption] = useState(DuplicateOptions.withExceptions);
+export const useDuplicateOptionsRadioGroup = ({ rulesCount }: { rulesCount: number }) => {
+  const {
+    exceptions: { edit: canEditExceptions },
+  } = useUserPrivileges().rulesPrivileges;
+
+  const [selectedOption, setSelectedOption] = useState(
+    canEditExceptions ? DuplicateOptions.withExceptions : DuplicateOptions.withoutExceptions
+  );
 
   const radioGroup = (
     <DuplicateOptionsRadioGroup
       rulesCount={rulesCount}
       selectedOption={selectedOption}
+      disabled={!canEditExceptions}
       onChange={setSelectedOption}
     />
   );
