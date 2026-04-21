@@ -183,7 +183,7 @@ describe('StorageIndexAdapter - transport options forwarding', () => {
     );
   });
 
-  it('retries index template without settings on serverless ES', async () => {
+  it('retries index template without settings on serverless', async () => {
     const serverlessError = new errors.ResponseError({
       statusCode: 400,
       headers: {},
