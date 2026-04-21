@@ -284,9 +284,13 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
           newProvider?.configurations[k]?.supported_task_types &&
           newProvider?.configurations[k].supported_task_types.includes(taskType)
         ) {
-          // Get default value from schema (which includes overridden defaults from INTERNAL_OVERRIDE_FIELDS)
+          // Get default value from schema (which includes overridden defaults from INTERNAL_OVERRIDE_FIELDS).
+          // If the field is not in the schema (e.g. hidden by INTERNAL_OVERRIDE_FIELDS), skip it so
+          // it is never written into the form state and therefore never sent in the request payload.
           const schemaField = newProviderSchema.find((f) => f.key === k);
-          newConfigToUse[k] = schemaField?.default_value ?? null;
+          if (schemaField !== undefined) {
+            newConfigToUse[k] = schemaField.default_value ?? null;
+          }
         }
       });
 
