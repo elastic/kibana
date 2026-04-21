@@ -17235,7 +17235,7 @@ paths:
                             required:
                               - name
                               - value
-                          maxItems: 10
+                          maxItems: 100
                           type: array
                         has_fleet_server:
                           type: boolean
@@ -17927,7 +17927,7 @@ paths:
                     required:
                       - name
                       - value
-                  maxItems: 10
+                  maxItems: 100
                   type: array
                 has_fleet_server:
                   type: boolean
@@ -18155,7 +18155,7 @@ paths:
                           required:
                             - name
                             - value
-                        maxItems: 10
+                        maxItems: 100
                         type: array
                       has_fleet_server:
                         type: boolean
@@ -18866,7 +18866,7 @@ paths:
                             required:
                               - name
                               - value
-                          maxItems: 10
+                          maxItems: 100
                           type: array
                         has_fleet_server:
                           type: boolean
@@ -19556,7 +19556,7 @@ paths:
                           required:
                             - name
                             - value
-                        maxItems: 10
+                        maxItems: 100
                         type: array
                       has_fleet_server:
                         type: boolean
@@ -20247,7 +20247,7 @@ paths:
                     required:
                       - name
                       - value
-                  maxItems: 10
+                  maxItems: 100
                   type: array
                 has_fleet_server:
                   type: boolean
@@ -20475,7 +20475,7 @@ paths:
                           required:
                             - name
                             - value
-                        maxItems: 10
+                        maxItems: 100
                         type: array
                       has_fleet_server:
                         type: boolean
@@ -21246,7 +21246,7 @@ paths:
                           required:
                             - name
                             - value
-                        maxItems: 10
+                        maxItems: 100
                         type: array
                       has_fleet_server:
                         type: boolean
@@ -26433,7 +26433,7 @@ paths:
                         categories:
                           items:
                             type: string
-                          maxItems: 10
+                          maxItems: 100
                           type: array
                         conditions:
                           additionalProperties: true
@@ -26477,7 +26477,7 @@ paths:
                                     type: string
                                 required:
                                   - name
-                              maxItems: 10
+                              maxItems: 100
                               type: array
                         download:
                           type: string
@@ -26502,7 +26502,7 @@ paths:
                                 type: string
                             required:
                               - src
-                          maxItems: 10
+                          maxItems: 100
                           type: array
                         id:
                           type: string
@@ -26738,7 +26738,7 @@ paths:
                           items:
                             additionalProperties: {}
                             type: object
-                          maxItems: 100
+                          maxItems: 1000
                           type: array
                         readme:
                           type: string
@@ -27608,12 +27608,12 @@ paths:
                             asset_ids:
                               items:
                                 type: string
-                              maxItems: 100
+                              maxItems: 1000
                               type: array
                             asset_types:
                               items:
                                 type: string
-                              maxItems: 10
+                              maxItems: 100
                               type: array
                             text:
                               type: string
@@ -27627,7 +27627,7 @@ paths:
                       categories:
                         items:
                           type: string
-                        maxItems: 10
+                        maxItems: 100
                         type: array
                       conditions:
                         additionalProperties: true
@@ -27671,7 +27671,7 @@ paths:
                                   type: string
                               required:
                                 - name
-                            maxItems: 10
+                            maxItems: 100
                             type: array
                       download:
                         type: string
@@ -27699,7 +27699,7 @@ paths:
                               type: string
                           required:
                             - src
-                        maxItems: 10
+                        maxItems: 100
                         type: array
                       installationInfo:
                         additionalProperties: true
@@ -27939,7 +27939,7 @@ paths:
                         items:
                           additionalProperties: {}
                           type: object
-                        maxItems: 100
+                        maxItems: 1000
                         type: array
                       readme:
                         type: string
@@ -27968,7 +27968,7 @@ paths:
                               type: string
                           required:
                             - src
-                        maxItems: 10
+                        maxItems: 100
                         type: array
                       signature_path:
                         type: string
@@ -28256,12 +28256,12 @@ paths:
                             asset_ids:
                               items:
                                 type: string
-                              maxItems: 100
+                              maxItems: 1000
                               type: array
                             asset_types:
                               items:
                                 type: string
-                              maxItems: 10
+                              maxItems: 100
                               type: array
                             text:
                               type: string
@@ -28275,7 +28275,7 @@ paths:
                       categories:
                         items:
                           type: string
-                        maxItems: 10
+                        maxItems: 100
                         type: array
                       conditions:
                         additionalProperties: true
@@ -28319,7 +28319,7 @@ paths:
                                   type: string
                               required:
                                 - name
-                            maxItems: 10
+                            maxItems: 100
                             type: array
                       download:
                         type: string
@@ -28347,7 +28347,7 @@ paths:
                               type: string
                           required:
                             - src
-                        maxItems: 10
+                        maxItems: 100
                         type: array
                       installationInfo:
                         additionalProperties: true
@@ -28587,7 +28587,7 @@ paths:
                         items:
                           additionalProperties: {}
                           type: object
-                        maxItems: 100
+                        maxItems: 1000
                         type: array
                       readme:
                         type: string
@@ -28616,7 +28616,7 @@ paths:
                               type: string
                           required:
                             - src
-                        maxItems: 10
+                        maxItems: 100
                         type: array
                       signature_path:
                         type: string
@@ -29162,7 +29162,7 @@ paths:
                                 type: string
                             required:
                               - src
-                          maxItems: 10
+                          maxItems: 100
                           type: array
                         name:
                           type: string

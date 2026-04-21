@@ -14975,7 +14975,7 @@ paths:
                             required:
                               - name
                               - value
-                          maxItems: 10
+                          maxItems: 100
                           type: array
                         has_fleet_server:
                           type: boolean
@@ -15218,7 +15218,7 @@ paths:
                                                   - enabled
                                                   - data_stream
                                                   - compiled_stream
-                                              maxItems: 100
+                                              maxItems: 1000
                                               type: array
                                             type:
                                               type: string
@@ -15399,7 +15399,7 @@ paths:
                                           type: string
                                       required:
                                         - id
-                                    maxItems: 100
+                                    maxItems: 1000
                                     type: array
                                   spaceIds:
                                     items:
@@ -15681,7 +15681,7 @@ paths:
                     required:
                       - name
                       - value
-                  maxItems: 10
+                  maxItems: 100
                   type: array
                 has_fleet_server:
                   type: boolean
@@ -15909,7 +15909,7 @@ paths:
                           required:
                             - name
                             - value
-                        maxItems: 10
+                        maxItems: 100
                         type: array
                       has_fleet_server:
                         type: boolean
@@ -16152,7 +16152,7 @@ paths:
                                                 - enabled
                                                 - data_stream
                                                 - compiled_stream
-                                            maxItems: 100
+                                            maxItems: 1000
                                             type: array
                                           type:
                                             type: string
@@ -16333,7 +16333,7 @@ paths:
                                         type: string
                                     required:
                                       - id
-                                  maxItems: 100
+                                  maxItems: 1000
                                   type: array
                                 spaceIds:
                                   items:
@@ -16634,7 +16634,7 @@ paths:
                             required:
                               - name
                               - value
-                          maxItems: 10
+                          maxItems: 100
                           type: array
                         has_fleet_server:
                           type: boolean
@@ -16877,7 +16877,7 @@ paths:
                                                   - enabled
                                                   - data_stream
                                                   - compiled_stream
-                                              maxItems: 100
+                                              maxItems: 1000
                                               type: array
                                             type:
                                               type: string
@@ -17058,7 +17058,7 @@ paths:
                                           type: string
                                       required:
                                         - id
-                                    maxItems: 100
+                                    maxItems: 1000
                                     type: array
                                   spaceIds:
                                     items:
@@ -17338,7 +17338,7 @@ paths:
                           required:
                             - name
                             - value
-                        maxItems: 10
+                        maxItems: 100
                         type: array
                       has_fleet_server:
                         type: boolean
@@ -17581,7 +17581,7 @@ paths:
                                                 - enabled
                                                 - data_stream
                                                 - compiled_stream
-                                            maxItems: 100
+                                            maxItems: 1000
                                             type: array
                                           type:
                                             type: string
@@ -17762,7 +17762,7 @@ paths:
                                         type: string
                                     required:
                                       - id
-                                  maxItems: 100
+                                  maxItems: 1000
                                   type: array
                                 spaceIds:
                                   items:
@@ -18043,7 +18043,7 @@ paths:
                     required:
                       - name
                       - value
-                  maxItems: 10
+                  maxItems: 100
                   type: array
                 has_fleet_server:
                   type: boolean
@@ -18271,7 +18271,7 @@ paths:
                           required:
                             - name
                             - value
-                        maxItems: 10
+                        maxItems: 100
                         type: array
                       has_fleet_server:
                         type: boolean
@@ -18514,7 +18514,7 @@ paths:
                                                 - enabled
                                                 - data_stream
                                                 - compiled_stream
-                                            maxItems: 100
+                                            maxItems: 1000
                                             type: array
                                           type:
                                             type: string
@@ -18695,7 +18695,7 @@ paths:
                                         type: string
                                     required:
                                       - id
-                                  maxItems: 100
+                                  maxItems: 1000
                                   type: array
                                 spaceIds:
                                   items:
@@ -19057,7 +19057,7 @@ paths:
                           required:
                             - name
                             - value
-                        maxItems: 10
+                        maxItems: 100
                         type: array
                       has_fleet_server:
                         type: boolean
@@ -19300,7 +19300,7 @@ paths:
                                                 - enabled
                                                 - data_stream
                                                 - compiled_stream
-                                            maxItems: 100
+                                            maxItems: 1000
                                             type: array
                                           type:
                                             type: string
@@ -19481,7 +19481,7 @@ paths:
                                         type: string
                                     required:
                                       - id
-                                  maxItems: 100
+                                  maxItems: 1000
                                   type: array
                                 spaceIds:
                                   items:
@@ -24258,7 +24258,7 @@ paths:
                         categories:
                           items:
                             type: string
-                          maxItems: 10
+                          maxItems: 100
                           type: array
                         conditions:
                           additionalProperties: true
@@ -24302,7 +24302,7 @@ paths:
                                     type: string
                                 required:
                                   - name
-                              maxItems: 10
+                              maxItems: 100
                               type: array
                         download:
                           type: string
@@ -24327,7 +24327,7 @@ paths:
                                 type: string
                             required:
                               - src
-                          maxItems: 10
+                          maxItems: 100
                           type: array
                         id:
                           type: string
@@ -24564,7 +24564,7 @@ paths:
                           items:
                             additionalProperties: {}
                             type: object
-                          maxItems: 100
+                          maxItems: 1000
                           type: array
                         readme:
                           type: string
@@ -25434,12 +25434,12 @@ paths:
                             asset_ids:
                               items:
                                 type: string
-                              maxItems: 100
+                              maxItems: 1000
                               type: array
                             asset_types:
                               items:
                                 type: string
-                              maxItems: 10
+                              maxItems: 100
                               type: array
                             text:
                               type: string
@@ -25453,7 +25453,7 @@ paths:
                       categories:
                         items:
                           type: string
-                        maxItems: 10
+                        maxItems: 100
                         type: array
                       conditions:
                         additionalProperties: true
@@ -25497,7 +25497,7 @@ paths:
                                   type: string
                               required:
                                 - name
-                            maxItems: 10
+                            maxItems: 100
                             type: array
                       download:
                         type: string
@@ -25525,7 +25525,7 @@ paths:
                               type: string
                           required:
                             - src
-                        maxItems: 10
+                        maxItems: 100
                         type: array
                       installationInfo:
                         additionalProperties: true
@@ -25766,7 +25766,7 @@ paths:
                         items:
                           additionalProperties: {}
                           type: object
-                        maxItems: 100
+                        maxItems: 1000
                         type: array
                       readme:
                         type: string
@@ -25795,7 +25795,7 @@ paths:
                               type: string
                           required:
                             - src
-                        maxItems: 10
+                        maxItems: 100
                         type: array
                       signature_path:
                         type: string
@@ -26083,12 +26083,12 @@ paths:
                             asset_ids:
                               items:
                                 type: string
-                              maxItems: 100
+                              maxItems: 1000
                               type: array
                             asset_types:
                               items:
                                 type: string
-                              maxItems: 10
+                              maxItems: 100
                               type: array
                             text:
                               type: string
@@ -26102,7 +26102,7 @@ paths:
                       categories:
                         items:
                           type: string
-                        maxItems: 10
+                        maxItems: 100
                         type: array
                       conditions:
                         additionalProperties: true
@@ -26146,7 +26146,7 @@ paths:
                                   type: string
                               required:
                                 - name
-                            maxItems: 10
+                            maxItems: 100
                             type: array
                       download:
                         type: string
@@ -26174,7 +26174,7 @@ paths:
                               type: string
                           required:
                             - src
-                        maxItems: 10
+                        maxItems: 100
                         type: array
                       installationInfo:
                         additionalProperties: true
@@ -26415,7 +26415,7 @@ paths:
                         items:
                           additionalProperties: {}
                           type: object
-                        maxItems: 100
+                        maxItems: 1000
                         type: array
                       readme:
                         type: string
@@ -26444,7 +26444,7 @@ paths:
                               type: string
                           required:
                             - src
-                        maxItems: 10
+                        maxItems: 100
                         type: array
                       signature_path:
                         type: string
@@ -26990,7 +26990,7 @@ paths:
                                 type: string
                             required:
                               - src
-                          maxItems: 10
+                          maxItems: 100
                           type: array
                         name:
                           type: string
@@ -33227,7 +33227,7 @@ paths:
                                         - enabled
                                         - data_stream
                                         - compiled_stream
-                                    maxItems: 100
+                                    maxItems: 1000
                                     type: array
                                   type:
                                     type: string
@@ -33408,7 +33408,7 @@ paths:
                                 type: string
                             required:
                               - id
-                          maxItems: 100
+                          maxItems: 1000
                           type: array
                         spaceIds:
                           items:
@@ -33663,7 +33663,7 @@ paths:
                                 - enabled
                                 - data_stream
                                 - compiled_stream
-                            maxItems: 100
+                            maxItems: 1000
                             type: array
                           type:
                             type: string
@@ -34117,7 +34117,7 @@ paths:
                                       - enabled
                                       - data_stream
                                       - compiled_stream
-                                  maxItems: 100
+                                  maxItems: 1000
                                   type: array
                                 type:
                                   type: string
@@ -34298,7 +34298,7 @@ paths:
                               type: string
                           required:
                             - id
-                        maxItems: 100
+                        maxItems: 1000
                         type: array
                       spaceIds:
                         items:
@@ -34602,7 +34602,7 @@ paths:
                                         - enabled
                                         - data_stream
                                         - compiled_stream
-                                    maxItems: 100
+                                    maxItems: 1000
                                     type: array
                                   type:
                                     type: string
@@ -34783,7 +34783,7 @@ paths:
                                 type: string
                             required:
                               - id
-                          maxItems: 100
+                          maxItems: 1000
                           type: array
                         spaceIds:
                           items:
@@ -35117,7 +35117,7 @@ paths:
                                       - enabled
                                       - data_stream
                                       - compiled_stream
-                                  maxItems: 100
+                                  maxItems: 1000
                                   type: array
                                 type:
                                   type: string
@@ -35298,7 +35298,7 @@ paths:
                               type: string
                           required:
                             - id
-                        maxItems: 100
+                        maxItems: 1000
                         type: array
                       spaceIds:
                         items:
@@ -35555,7 +35555,7 @@ paths:
                                 - enabled
                                 - data_stream
                                 - compiled_stream
-                            maxItems: 100
+                            maxItems: 1000
                             type: array
                           type:
                             type: string
@@ -35576,7 +35576,7 @@ paths:
                         required:
                           - type
                           - enabled
-                      maxItems: 100
+                      maxItems: 1000
                       type: array
                     is_managed:
                       type: boolean
@@ -36006,7 +36006,7 @@ paths:
                                       - enabled
                                       - data_stream
                                       - compiled_stream
-                                  maxItems: 100
+                                  maxItems: 1000
                                   type: array
                                 type:
                                   type: string
@@ -36187,7 +36187,7 @@ paths:
                               type: string
                           required:
                             - id
-                        maxItems: 100
+                        maxItems: 1000
                         type: array
                       spaceIds:
                         items:
@@ -36809,7 +36809,7 @@ paths:
                                               - enabled
                                               - data_stream
                                               - compiled_stream
-                                          maxItems: 100
+                                          maxItems: 1000
                                           type: array
                                         type:
                                           type: string
@@ -36990,7 +36990,7 @@ paths:
                                       type: string
                                   required:
                                     - id
-                                maxItems: 100
+                                maxItems: 1000
                                 type: array
                               spaceIds:
                                 items:
@@ -37214,7 +37214,7 @@ paths:
                                           - enabled
                                           - data_stream
                                           - compiled_stream
-                                      maxItems: 100
+                                      maxItems: 1000
                                       type: array
                                     type:
                                       type: string
@@ -37326,7 +37326,7 @@ paths:
                                       type: string
                                   required:
                                     - id
-                                maxItems: 100
+                                maxItems: 1000
                                 type: array
                               supports_agentless:
                                 default: false
