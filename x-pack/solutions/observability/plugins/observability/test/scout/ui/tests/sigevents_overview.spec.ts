@@ -28,6 +28,14 @@ test.describe(
       await browserAuth.loginAsAdmin();
     });
 
+    test.afterAll(async ({ apiServices }) => {
+      await apiServices.core.settings({
+        'feature_flags.overrides': {
+          [SIGEVENTS_FEATURE_FLAG]: false,
+        },
+      });
+    });
+
     test('shows sigevents overview with inline conversation when flag is enabled', async ({
       page,
       kbnUrl,
@@ -44,7 +52,7 @@ test.describe(
       await expect(page.getByTestId('obltSigeventsOverviewPageHeader')).toBeVisible();
       await expect(page.getByTestId('obltSigeventsOverviewPlaceholder')).toBeVisible();
       await expect(page.getByTestId('obltSigeventsConversation')).toBeVisible();
-      await expect(page.getByTestId('agentBuilderInlineConversation')).toBeVisible();
+      await expect(page.getByTestId('agentBuilderEmbeddableConversation')).toBeVisible();
     });
 
     test('landing page redirects to sigevents when flag is enabled', async ({
@@ -73,9 +81,7 @@ test.describe(
 
       await page.goto(kbnUrl.get('/app/observability/overview'));
 
-      await expect(
-        page.getByTestId('obltOverviewPageHeader').or(page.getByTestId('obltOverviewNoDataPrompt'))
-      ).toBeVisible();
+      await expect(page.getByTestId('obltOverviewPageHeader')).toBeVisible();
     });
   }
 );
