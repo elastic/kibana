@@ -21,9 +21,9 @@ export async function getLatestSecurityRuleExecutionMetricsFromEventLog(
    * Rule's SO id
    */
   ruleId: string,
-  totalExecutions?: number
+  options?: { totalExecutions?: number }
 ): Promise<Partial<ConsumerExecutionMetrics>> {
-  await waitForEventLogExecuteComplete(es, log, ruleId, totalExecutions);
+  await waitForEventLogExecuteComplete(es, log, ruleId, options?.totalExecutions);
 
   const response = await es.search({
     index: '.kibana-event-log*',
