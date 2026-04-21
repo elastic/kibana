@@ -14,6 +14,3 @@ Recommended next reading:
 1. [Set up your development environment](./set-up-a-development-environment.md)
 2. Create a [Hello World plugin](./hello-world.md).
 3. [Add data](./add-data.md).
-
-Check out our [API documentation](../key-concepts/platform-architecture/api-documentation.md) to dig into the nitty gritty details of
-every public plugin API.
