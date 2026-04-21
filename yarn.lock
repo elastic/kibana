@@ -8915,10 +8915,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/serverless-storybook-config@link:src/platform/packages/shared/serverless/storybook/config":
-  version "0.0.0"
-  uid ""
-
 "@kbn/serverless-types@link:src/platform/packages/shared/serverless/types":
   version "0.0.0"
   uid ""
