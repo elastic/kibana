@@ -1,0 +1,28 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        postReassignAgentRequestExample:
+          description: 'Reassign an agent to a different policy'
+          value:
+            policy_id: 'agent-policy-id-2'
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          postReassignAgentExample:
+            description: 'Agent successfully reassigned'
+            value: {}
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'

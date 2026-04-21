@@ -20,7 +20,7 @@ import type { EncryptedSavedObjectsService } from '../../server/crypto';
 import * as EncryptedSavedObjectsModule from '../../server/saved_objects';
 
 // This will only change if new ESOs are introduced. This number should never get smaller.
-export const ESO_TYPES_COUNT = 22 as const;
+export const ESO_TYPES_COUNT = 23 as const;
 
 describe('checking changes on all registered encrypted SO types', () => {
   let esServer: TestElasticsearchUtils;
@@ -70,6 +70,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "alert": "878a3b83179bbf2ad9d3862fcba539b7066429869b14c120a1dc7a8d39f4a7fa",
         "anonymization-salt": "1e5ff6ba241b27bbfc6901898b0ece9327ba63fdaea1f2f6cba6344d4a425b43",
         "api_key_pending_invalidation": "4dafadadaaca2f2f3f6038ee8363b71b2d101371ca98c34d2b6aa2a96f7e71c5",
+        "api_key_to_invalidate": "d7a3423a74032bb5ecce9a0975e8ea1d5d5171348f99173df54b2fa0dfd3de43",
         "cloud-connect-api-key": "8c0ae7a780c411145ae4aaf7a70235672c9ccfb56d011c322da3c4eeb258f32d",
         "connector_token": "e446f5ff0fbf516f63398e474f126332b4c31e316daa613c6cb8c863400110c5",
         "entity-discovery-api-key": "cd3b5230a513d2d3503583223e48362fbbbc7812aa4710579a62acfa5bbc30e6",
@@ -83,7 +84,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "synthetics-monitor": "f1c060b7be3b30187c4adcb35d74f1fa8a4290bd7faf04fec869de2aa387e21b",
         "synthetics-monitor-multi-space": "39c4c6abd28c4173f77c1c89306e92b6b92492c0029274e10620a170be4d4a67",
         "synthetics-param": "747ba9d1b7addf5b131713abe7868bd767af6ce0cf8b6b0f335f4ef34b280c7e",
-        "task": "2d8e9bf532f469805b82051f545b915785d99eabfa050cb1aefbc715c6096b97",
+        "task": "d6cc30871dc78caf3f451de1275a3803879ec9935b4a2e34076dee56878c228f",
         "uptime-synthetics-api-key": "5ca81f180763e85397fa8c6508adcd60efd0f916e29bac6dcd5b4564f1db7375",
         "user_connector_token": "b443b022b46b79c0ff9fa674aecc64176a5fcbd09c2db2d9f050a6a88435732e",
       }
@@ -133,6 +134,8 @@ describe('checking changes on all registered encrypted SO types', () => {
         "anonymization-salt|1",
         "api_key_pending_invalidation|2",
         "api_key_pending_invalidation|1",
+        "api_key_to_invalidate|2",
+        "api_key_to_invalidate|1",
         "cloud-connect-api-key|1",
         "connector_token|2",
         "connector_token|1",
@@ -148,10 +151,12 @@ describe('checking changes on all registered encrypted SO types', () => {
         "ingest-outputs|4",
         "ingest-outputs|3",
         "ingest-outputs|2",
+        "ingest-outputs|10",
         "ingest-outputs|1",
         "oauth_state|1",
         "synthetics-monitor|2",
         "synthetics-monitor|1",
+        "task|9",
         "task|8",
         "task|7",
         "task|6",

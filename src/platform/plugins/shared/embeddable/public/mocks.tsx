@@ -19,7 +19,7 @@ import { savedObjectsManagementPluginMock } from '@kbn/saved-objects-management-
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, of, Subject } from 'rxjs';
 import type { EmbeddableStateTransfer } from '.';
 import { setKibanaServices } from './kibana_services';
 import { EmbeddablePublicPlugin } from './plugin';
@@ -44,6 +44,7 @@ export const createEmbeddableStateTransferMock = (): Partial<EmbeddableStateTran
     getIncomingEmbeddablePackage: jest.fn(),
     navigateToEditor: jest.fn(),
     navigateToWithEmbeddablePackages: jest.fn(),
+    onTransferEmbeddablePackage$: jest.fn().mockReturnValue(new Subject()),
   };
 };
 

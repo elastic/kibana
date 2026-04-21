@@ -314,7 +314,7 @@ Array [
             "href": "/jom/app/management/modelManagement/elastic_inference_service",
             "id": "management:elastic_inference_service",
             "isExternal": false,
-            "label": "Elastic inference",
+            "label": "Elastic Inference",
           },
           Object {
             "badgeType": undefined,
