@@ -8,8 +8,7 @@
  */
 
 import React, { useMemo } from 'react';
-import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils/config_builder';
-import type { LensYBoundsConfig } from '@kbn/lens-embeddable-utils/config_builder/types';
+import type { LensYBoundsConfig, LensSeriesLayer } from '@kbn/lens-embeddable-utils';
 import { useTraceMetricsContext } from './context/trace_metrics_context';
 import { Chart } from '../../chart';
 import { ACTION_OPEN_IN_DISCOVER } from '../../../common/constants';
