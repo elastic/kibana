@@ -234,18 +234,19 @@ export const ConnectorSelector: React.FC<{}> = () => {
 
   const selectedConnector = connectors.find((c) => c.id === selectedConnectorId);
 
-  // Track the last observed default so we can detect an admin-initiated change
-  // and propagate it to the chat's selected connector without a page refresh.
-  // Initialized to `undefined` — meaning "no settled value observed yet" — so the
-  // initial `undefined -> <value>` transition (when settings finish loading) is not
-  // mistaken for an admin change and does not overwrite the user's stored selection.
-  const previousDefaultRef = useRef<string | undefined>(undefined);
+  // Track the previously-observed default so we can detect admin-initiated changes.
+  // Seeded with the current value on first render and updated on every effect run
+  // (including early returns) so the ref stays aligned with the observable even
+  // while connectors are still loading. That way, once we proceed past the early
+  // return, `previousDefault` reflects the last observed value — not a mount-time
+  // baseline — and the first real emission is not mistaken for a change.
+  const previousDefaultRef = useRef(defaultConnectorId);
 
   useEffect(() => {
-    if (isLoading || !initialConnectorId) return;
-
     const previousDefault = previousDefaultRef.current;
     previousDefaultRef.current = defaultConnectorId;
+
+    if (isLoading || !initialConnectorId) return;
 
     // Admin enforces "only allow the default model" — always follow the default.
     if (defaultConnectorOnly && defaultConnectorId) {
@@ -267,12 +268,9 @@ export const ConnectorSelector: React.FC<{}> = () => {
       return;
     }
 
-    // Admin changed the default-model setting to a different, valid connector.
-    // Require a prior non-undefined observation so the first `undefined -> <value>`
-    // transition on mount (settings finishing load) does not count as a change.
+    // Admin-initiated change of the default-model setting to a valid connector.
     if (
       defaultConnectorId &&
-      previousDefault !== undefined &&
       defaultConnectorId !== previousDefault &&
       defaultConnectorId !== selectedConnectorId &&
       connectors.some((c) => c.id === defaultConnectorId)
