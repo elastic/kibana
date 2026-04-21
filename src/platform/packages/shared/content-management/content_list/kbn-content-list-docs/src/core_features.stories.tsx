@@ -147,16 +147,21 @@ const CoreFeaturesWrapper = ({
         item={itemConfig}
       >
         <ContentListToolbar />
-        <ContentListTable
-          title="dashboards table"
-          {...{ scrollableInline, responsiveBreakpoint }}
-        >
+        <ContentListTable title="dashboards table" {...{ scrollableInline, responsiveBreakpoint }}>
           {tableChildren}
         </ContentListTable>
         <ContentListFooter />
       </ContentListProvider>
     ),
-    [labels, dataSource, features, itemConfig, tableChildren, scrollableInline, responsiveBreakpoint]
+    [
+      labels,
+      dataSource,
+      features,
+      itemConfig,
+      tableChildren,
+      scrollableInline,
+      responsiveBreakpoint,
+    ]
   );
 
   return (
