@@ -19,20 +19,50 @@ import { z } from '@kbn/zod';
 import { EntityRiskScoreRecord } from '../../common/common.gen';
 import { AssetCriticalityLevel } from '../../asset_criticality/common.gen';
 
+/**
+ * An entity record representing a user, stored in the Entity Store latest index.
+ */
 export type UserEntity = z.infer<typeof UserEntity>;
 export const UserEntity = z.object({
+  /**
+   * The time the entity record was last updated.
+   */
   '@timestamp': z.string().datetime().optional(),
   entity: z.object({
     name: z.string(),
     source: z.string(),
   }),
+  /**
+   * Elastic Common Schema (ECS) user fields collected on the entity.
+   */
   user: z.object({
+    /**
+     * Observed full names of the user.
+     */
     full_name: z.array(z.string()).optional(),
+    /**
+     * Observed user domains.
+     */
     domain: z.array(z.string()).optional(),
+    /**
+     * Observed roles assigned to the user.
+     */
     roles: z.array(z.string()).optional(),
+    /**
+     * Primary user name.
+     */
     name: z.string(),
+    /**
+     * Observed user IDs.
+     */
     id: z.array(z.string()).optional(),
+    /**
+     * Observed email addresses.
+     */
     email: z.array(z.string()).optional(),
+    /**
+     * Observed user hashes.
+     */
     hash: z.array(z.string()).optional(),
     risk: EntityRiskScoreRecord.optional(),
   }),
@@ -43,26 +73,62 @@ export const UserEntity = z.object({
     .optional(),
   event: z
     .object({
+      /**
+       * When the event was ingested into Elasticsearch.
+       */
       ingested: z.string().datetime().optional(),
     })
     .optional(),
 });
 
+/**
+ * An entity record representing a host, stored in the Entity Store latest index.
+ */
 export type HostEntity = z.infer<typeof HostEntity>;
 export const HostEntity = z.object({
+  /**
+   * The time the entity record was last updated.
+   */
   '@timestamp': z.string().datetime().optional(),
   entity: z.object({
     name: z.string(),
     source: z.string(),
   }),
+  /**
+   * Elastic Common Schema (ECS) host fields collected on the entity.
+   */
   host: z.object({
+    /**
+     * Observed hostnames.
+     */
     hostname: z.array(z.string()).optional(),
+    /**
+     * Observed host domains.
+     */
     domain: z.array(z.string()).optional(),
+    /**
+     * Observed IP addresses.
+     */
     ip: z.array(z.string()).optional(),
+    /**
+     * Primary host name.
+     */
     name: z.string(),
+    /**
+     * Observed host IDs.
+     */
     id: z.array(z.string()).optional(),
+    /**
+     * Observed host types.
+     */
     type: z.array(z.string()).optional(),
+    /**
+     * Observed MAC addresses.
+     */
     mac: z.array(z.string()).optional(),
+    /**
+     * Observed CPU architectures.
+     */
     architecture: z.array(z.string()).optional(),
     risk: EntityRiskScoreRecord.optional(),
   }),
@@ -73,19 +139,34 @@ export const HostEntity = z.object({
     .optional(),
   event: z
     .object({
+      /**
+       * When the event was ingested into Elasticsearch.
+       */
       ingested: z.string().datetime().optional(),
     })
     .optional(),
 });
 
+/**
+ * An entity record representing a service, stored in the Entity Store latest index.
+ */
 export type ServiceEntity = z.infer<typeof ServiceEntity>;
 export const ServiceEntity = z.object({
+  /**
+   * The time the entity record was last updated.
+   */
   '@timestamp': z.string().datetime().optional(),
   entity: z.object({
     name: z.string(),
     source: z.string(),
   }),
+  /**
+   * Elastic Common Schema (ECS) service fields collected on the entity.
+   */
   service: z.object({
+    /**
+     * Primary service name.
+     */
     name: z.string(),
     risk: EntityRiskScoreRecord.optional(),
   }),
@@ -96,11 +177,17 @@ export const ServiceEntity = z.object({
     .optional(),
   event: z
     .object({
+      /**
+       * When the event was ingested into Elasticsearch.
+       */
       ingested: z.string().datetime().optional(),
     })
     .optional(),
 });
 
+/**
+ * An entity record from the Entity Store. The `entity` namespace is a root-level field in the latest index, unlike source logs where it is nested under `host`, `user`, or `service`.
+ */
 export const EntityInternal = z.union([UserEntity, HostEntity, ServiceEntity]);
 
 export type Entity = z.infer<typeof EntityInternal>;

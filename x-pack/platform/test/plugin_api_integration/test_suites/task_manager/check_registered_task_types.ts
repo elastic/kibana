@@ -172,7 +172,6 @@ export default function ({ getService }: FtrProviderContext) {
         'fleet:update_agent_tags:retry',
         'fleet:upgrade-agentless-deployments-task',
         'fleet:upgrade_action:retry',
-        'logs-data-telemetry',
         'maintenance-window:generate-events',
         'osquery:telemetry-configs',
         'osquery:telemetry-packs',
