@@ -9,6 +9,7 @@ import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 import { uiTest as test } from '../fixtures';
 import { getMinimalLiveQuery } from '../../api/fixtures/constants';
+import { waitForAtLeastOneAgentOnline } from '../helpers/fleet_agents';
 
 const mkiTags = [...tags.stateful.classic, ...tags.serverless.security.complete];
 
@@ -18,9 +19,11 @@ test.describe('Osquery results attached to Observability cases', { tag: mkiTags 
     page,
     pageObjects,
     apiServices,
+    kbnClient,
   }) => {
     test.setTimeout(240_000);
 
+    await waitForAtLeastOneAgentOnline(kbnClient);
     const live = await apiServices.osquery.liveQueries.create(
       getMinimalLiveQuery({
         query: 'SELECT * FROM os_version;',

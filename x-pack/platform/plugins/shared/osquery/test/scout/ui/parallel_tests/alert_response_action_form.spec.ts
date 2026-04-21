@@ -90,6 +90,7 @@ test.describe('Pack-based Osquery response actions in the rule editor', { tag: l
 
     await pageObjects.osqueryRuleEditor.navigateToRulesList();
     await pageObjects.osqueryRuleEditor.openRuleByName(ruleName);
+    await pageObjects.osqueryRuleEditor.enterRuleEditMode();
     await pageObjects.osqueryRuleEditor.goToActionsTab();
 
     const savePromise = page.waitForResponse(
@@ -116,6 +117,7 @@ test.describe('Pack-based Osquery response actions in the rule editor', { tag: l
       },
     ]);
 
+    await pageObjects.osqueryRuleEditor.enterRuleEditMode();
     await pageObjects.osqueryRuleEditor.goToActionsTab();
     await pageObjects.osqueryRuleEditor
       .responseActionItem(0)

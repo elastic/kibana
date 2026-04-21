@@ -8,6 +8,7 @@
 import rison from '@kbn/rison';
 import type { KibanaUrl, ScoutPage } from '@kbn/scout';
 import { waitForKibanaChromeLoadingFinished } from '../../common/wait_for_kibana_loading_finished';
+import { submitLiveQuery } from '../../common/submit_live_query';
 
 /**
  * Infra / Metrics host asset details surface that embeds OsqueryAction (`formType='simple'`).
@@ -17,9 +18,14 @@ export class InventoryHostOsqueryPage {
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
 
   async gotoHostOsqueryTab(spaceId: string, hostname: string): Promise<void> {
+    // The Osquery tab is only rendered when the host uses the ECS schema
+    // (see `useConditionalTabs` in infra/public/components/asset_details/hooks/use_page_header.tsx:
+    // `[ContentTabIds.OSQUERY]: Boolean(featureFlags.osqueryEnabled) && schema === 'ecs'`).
+    // Requesting `preferredSchema: 'semconv'` hides the tab even when all other
+    // prerequisites (enrollment, osquery_manager integration) are met.
     const assetDetails = rison.encode({
       name: hostname,
-      preferredSchema: 'semconv',
+      preferredSchema: 'ecs',
       tabId: 'overview',
     } as Record<string, unknown>);
 
@@ -37,19 +43,22 @@ export class InventoryHostOsqueryPage {
   }
 
   async submitSimpleEmbeddedQuery(query: string): Promise<void> {
-    const editor = this.page.testSubj.locator('liveQueryForm').getByTestId('kibanaCodeEditor');
+    // Embedded OsqueryAction (`formType='simple'`) renders the shared OsqueryEditor;
+    // target the osquery-owned wrapper (added in public/editor/index.tsx) rather than
+    // the generic `.kibanaCodeEditor` class which also appears in other CodeEditor
+    // instances on the page.
+    const liveQueryForm = this.page.testSubj.locator('liveQueryForm');
+    const editor = liveQueryForm.getByTestId('osqueryEditor');
+    await editor.waitFor({ state: 'visible', timeout: 60_000 });
     await editor.click();
-    await this.page.evaluate((q: string) => {
-      const w = window as unknown as {
-        MonacoEnvironment?: {
-          monaco?: { editor: { getModels: () => Array<{ setValue: (v: string) => void }> } };
-        };
-      };
-      const models = w.MonacoEnvironment?.monaco?.editor.getModels() ?? [];
-      for (const m of models) {
-        m.setValue(q);
-      }
-    }, query);
-    await this.page.testSubj.locator('liveQuerySubmitButton').click();
+    await editor.pressSequentially(query, { delay: 5 });
+
+    // Submit via the shared helper: network-verified with retries to beat the
+    // 500 ms Monaco onChange debounce that otherwise leaves the RHF `query`
+    // field empty on the first click. See `common/submit_live_query.ts`.
+    await submitLiveQuery(
+      this.page,
+      liveQueryForm.locator('[data-test-subj="liveQuerySubmitButton"]')
+    );
   }
 }

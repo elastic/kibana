@@ -27,7 +27,7 @@ describe('Download script API route', () => {
   >['httpHandlerContextMock'];
   let httpResponseMock: HttpApiTestSetupMock<
     DownloadScriptRequestParams,
-    undefined,
+    undefined, 
     undefined
   >['httpResponseMock'];
 

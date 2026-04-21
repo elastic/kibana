@@ -21,6 +21,8 @@ export interface OsqueryApiService {
   packs: {
     create: (body: Record<string, unknown>, space?: string) => Promise<any>;
     get: (id: string) => Promise<any>;
+    /** Lists osquery packs via the public Packs API. Used for post-UI cleanup of packs created by the app (e.g. duplicate-pack flow). */
+    list: () => Promise<any>;
     delete: (id: string, space?: string) => Promise<void>;
     /** Lists osquery_manager package policies via the internal Fleet wrapper (pack config assertions). */
     listFleetWrapperPackagePolicies: () => Promise<any>;
@@ -73,6 +75,18 @@ export const getOsqueryApiService = ({
             await kbnClient.request({
               method: 'GET',
               path: `${OSQUERY_PACKS_URL}/${id}`,
+              headers,
+            })
+        ),
+
+      list: async () =>
+        await measurePerformanceAsync(
+          log,
+          'osquery.packs.list',
+          async () =>
+            await kbnClient.request({
+              method: 'GET',
+              path: OSQUERY_PACKS_URL,
               headers,
             })
         ),

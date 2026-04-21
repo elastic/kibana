@@ -8,6 +8,7 @@
 import { expect } from '@kbn/scout/ui';
 import { uiTest as test } from '../fixtures';
 import { getMinimalLiveQuery } from '../../api/fixtures/constants';
+import { waitForAtLeastOneAgentOnline } from '../helpers/fleet_agents';
 
 const localTags = ['@local-stateful-classic', '@local-serverless-security_complete'];
 
@@ -17,9 +18,11 @@ test.describe('Osquery results attached to Security cases', { tag: localTags }, 
     page,
     pageObjects,
     apiServices,
+    kbnClient,
   }) => {
     test.setTimeout(240_000);
 
+    await waitForAtLeastOneAgentOnline(kbnClient);
     const live = await apiServices.osquery.liveQueries.create(
       getMinimalLiveQuery({
         query: 'SELECT * FROM os_version;',

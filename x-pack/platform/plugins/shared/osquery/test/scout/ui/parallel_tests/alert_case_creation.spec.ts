@@ -58,25 +58,15 @@ test.describe('Alert flyout Osquery case creation', { tag: localTags }, () => {
     await pageObjects.osqueryAlertFlyout.expandFirstAlert();
     await pageObjects.osqueryAlertFlyout.openTakeActionMenu();
     await pageObjects.osqueryAlertFlyout.chooseOsqueryAction();
-    await page.testSubj
-      .locator('flyout-body-osquery')
-      .locator('.kibanaCodeEditor')
-      .waitFor({ state: 'visible', timeout: 60_000 });
-    await page.getByText('Run a set of queries in a pack').click();
-    await page.testSubj.locator('select-live-pack').click();
-    await page.testSubj
-      .locator('select-live-pack')
-      .getByTestId('comboBoxSearchInput')
-      .fill(packName);
-    await page.keyboard.press('ArrowDown');
-    await page.keyboard.press('Enter');
+    await pageObjects.osqueryAlertFlyout.waitForFlyoutEditorReady();
+    await pageObjects.osqueryAlertFlyout.switchFlyoutToPackMode();
+    await pageObjects.osqueryAlertFlyout.selectFlyoutPack(packName);
     await pageObjects.osqueryAlertFlyout.clickSubmitInFlyout();
     await page.testSubj
       .locator('osqueryResultsTable')
       .waitFor({ state: 'visible', timeout: 180_000 });
 
-    // eslint-disable-next-line playwright/no-nth-methods -- the live-query results panel renders several "Add to Case" labelled controls (header + per-row); first-match targets the aggregate header action driving the new-case flow
-    await page.getByLabel('Add to Case').first().click();
+    await pageObjects.osqueryAlertFlyout.clickAddToCaseFromResults();
     await pageObjects.osqueryCasesPage.openCreateCaseFlyoutFromFilterBar();
     const caseTitle = `scout-case-${Date.now()}`;
     await pageObjects.osqueryCasesPage.fillNewCaseTitle(caseTitle);

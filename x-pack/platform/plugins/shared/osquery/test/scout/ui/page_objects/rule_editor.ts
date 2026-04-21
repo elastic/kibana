@@ -49,6 +49,16 @@ export class RuleEditorPage {
     await this.page.testSubj.locator('editRuleSettingsLink').click();
   }
 
+  // The detections-engine rule view renders `editRuleSettingsLink` to enter edit mode;
+  // the rule-actions tab is only mounted under the edit view. Tests that land on the
+  // rule from the list (rule details) must click this link before `goToActionsTab`.
+  async enterRuleEditMode(): Promise<void> {
+    const editLink = this.page.testSubj.locator('editRuleSettingsLink');
+    await editLink.waitFor({ state: 'visible', timeout: 60_000 });
+    await editLink.click();
+    await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
+  }
+
   async closeDatePickerTabIfVisible(): Promise<void> {
     const absoluteTab = this.page.testSubj.locator('superDatePickerAbsoluteTab');
     if (await absoluteTab.isVisible().catch(() => false)) {

@@ -6,8 +6,21 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+import { submitLiveQuery } from '../../common/submit_live_query';
 
 const FLYOUT_OSQUERY_EDITOR = 'flyout-body-osquery';
+
+/** Narrow shape for Monaco editor access in `page.evaluate`. */
+type WindowWithMonaco = Omit<Window, 'MonacoEnvironment'> & {
+  MonacoEnvironment?: {
+    monaco?: {
+      editor: {
+        getModels: () => Array<{ getValue: () => string }>;
+      };
+    };
+  };
+};
 
 export class AlertFlyoutPage {
   public readonly expandEventButton: Locator;
@@ -26,7 +39,9 @@ export class AlertFlyoutPage {
     this.investigationGuideButton = this.page.testSubj.locator(
       'securitySolutionFlyoutInvestigationGuideButton'
     );
-    this.submitButton = this.page.locator('#submit-button');
+    this.submitButton = this.page.testSubj
+      .locator(FLYOUT_OSQUERY_EDITOR)
+      .locator('[data-test-subj="liveQuerySubmitButton"]');
     this.sendAlertToTimelineButton = this.page.testSubj.locator('send-alert-to-timeline-button');
   }
 
@@ -55,13 +70,94 @@ export class AlertFlyoutPage {
   }
 
   async clickFlyoutMonacoEditor(): Promise<void> {
-    await this.page.testSubj.locator(FLYOUT_OSQUERY_EDITOR).locator('.kibanaCodeEditor').click();
+    await this.waitForFlyoutEditorReady();
+    const editor = this.page.testSubj.locator(FLYOUT_OSQUERY_EDITOR).getByTestId('osqueryEditor');
+    await editor.click();
   }
 
+  // Monaco's React wrapper syncs the editor value into react-hook-form on the
+  // content-change callback, but the final keystrokes can still be in-flight when
+  // Submit is clicked — resulting in a "query is required" validation error. After
+  // typing, (a) blur Monaco's hidden textarea so any debounced change flushes, and
+  // (b) wait until the Monaco model's text actually contains the typed query before
+  // letting the caller proceed to Submit.
   async inputFlyoutQuery(query: string): Promise<void> {
-    const editor = this.page.testSubj.locator(FLYOUT_OSQUERY_EDITOR).locator('.kibanaCodeEditor');
+    await this.waitForFlyoutEditorReady();
+    const editor = this.page.testSubj.locator(FLYOUT_OSQUERY_EDITOR).getByTestId('osqueryEditor');
     await editor.click();
     await editor.pressSequentially(query, { delay: 5 });
+
+    // Blur Monaco without pressing Tab/Enter (those would insert characters).
+    await editor.evaluate((el: HTMLElement) => {
+      el.querySelector<HTMLTextAreaElement>('textarea')?.blur();
+    });
+
+    // Wait for Monaco's model to actually carry the typed query before letting
+    // the caller click Submit. The hidden textarea only buffers IME input, so we
+    // have to read the editor model directly.
+    await this.page.waitForFunction(
+      (expected: string) => {
+        const w = window as unknown as WindowWithMonaco;
+        const models = w.MonacoEnvironment?.monaco?.editor.getModels() ?? [];
+        return models.some((m) => m.getValue().includes(expected));
+      },
+      query,
+      { timeout: 10_000 }
+    );
+  }
+
+  // The osquery flyout mounts asynchronously after the take-action menu picks "Run Osquery":
+  // the agent selector first resolves against the alert's host and only then does the
+  // LiveQueryForm render the Monaco editor. Waiting on the editor alone can race with
+  // the agent-selection effect and leave the editor blank. We wait for the agent-count
+  // chip first (matches the `N agent(s) selected` label the Cypress flow relied on) and
+  // then for the osquery-scoped editor wrapper.
+  async waitForFlyoutEditorReady(): Promise<void> {
+    const flyoutBody = this.page.testSubj.locator(FLYOUT_OSQUERY_EDITOR);
+    await flyoutBody
+      .getByText(/\d+ agents? selected/)
+      .waitFor({ state: 'visible', timeout: 60_000 });
+    await flyoutBody.getByTestId('osqueryEditor').waitFor({ state: 'visible', timeout: 60_000 });
+  }
+
+  // The mode selector is an `EuiCard` with the `selectable` prop. The card's onClick
+  // lives on the selectable footer button, not on the description text — clicking
+  // the description via `getByText` frequently fails to toggle the mode. Target the
+  // card's role+name, then assert the pack selector renders before continuing.
+  async switchFlyoutToPackMode(): Promise<void> {
+    const flyoutBody = this.page.testSubj.locator(FLYOUT_OSQUERY_EDITOR);
+    const packCard = flyoutBody.locator('.euiCard', {
+      has: this.page.getByText('Run a set of queries in a pack.'),
+    });
+    await packCard.waitFor({ state: 'visible', timeout: 15_000 });
+    await packCard.click();
+    await flyoutBody
+      .locator('[data-test-subj="select-live-pack"]')
+      .waitFor({ state: 'visible', timeout: 15_000 });
+  }
+
+  async selectFlyoutPack(packName: string): Promise<void> {
+    const selector = this.page.testSubj.locator('select-live-pack');
+    await selector.click();
+    await selector.getByTestId('comboBoxSearchInput').fill(packName);
+    await this.page.keyboard.press('ArrowDown');
+    await this.page.keyboard.press('Enter');
+    // Confirm the pack is actually chosen before returning. Use the search input's
+    // `value` attribute: EuiComboBox writes the selected single-option label into it.
+    // NOTE: do NOT press Escape to dismiss the dropdown — the key event bubbles and
+    // the surrounding alert flyout also listens for Escape, which silently closes it.
+    // EuiComboBox collapses its option list on Enter-select; no manual dismiss needed.
+    await expect(selector.getByTestId('comboBoxSearchInput')).toHaveValue(
+      new RegExp(packName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+    );
+  }
+
+  async clickAddToCaseFromResults(): Promise<void> {
+    const addToCase = this.page.testSubj
+      .locator(FLYOUT_OSQUERY_EDITOR)
+      .getByRole('button', { name: 'Add to Case' });
+    // eslint-disable-next-line playwright/no-nth-methods -- the results panel renders an aggregate header "Add to Case" plus one per row; first-match targets the aggregate header action that drives the new-case flow (same semantics as the Cypress helper that preceded it)
+    await addToCase.first().click();
   }
 
   async clearAgentsAndSelectAllAgents(): Promise<void> {
@@ -78,9 +174,10 @@ export class AlertFlyoutPage {
       .catch(() => {});
   }
 
+  // See `common/submit_live_query.ts` for why a plain click-and-hope is not
+  // reliable here (Monaco debounce race + EuiButton re-render + toast overlays).
   async clickSubmitInFlyout(): Promise<void> {
-    await this.submitButton.waitFor({ state: 'visible', timeout: 30_000 });
-    await this.submitButton.click({ force: true });
+    await submitLiveQuery(this.page, this.submitButton);
   }
 
   async clickAddToTimeline(): Promise<void> {

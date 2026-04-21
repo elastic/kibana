@@ -8,6 +8,7 @@
 import type { Locator, ScoutPage } from '@kbn/scout';
 import { OSQUERY_UI_RESULTS_TIMEOUT_MS } from '../../common/constants';
 import { waitForKibanaChromeLoadingFinished } from '../../common/wait_for_kibana_loading_finished';
+import { submitLiveQuery } from '../../common/submit_live_query';
 
 /** Narrow shape for Monaco editor access in `page.evaluate`; omit conflicts with `Window.MonacoEnvironment` from monaco-editor typings. */
 type WindowWithMonaco = Omit<Window, 'MonacoEnvironment'> & {
@@ -131,48 +132,21 @@ export class LiveQueryFormPage {
 
   async submitQuery(): Promise<void> {
     await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
-
-    await this.submitButton.waitFor({ state: 'visible' });
-    await this.submitButton.scrollIntoViewIfNeeded();
-
+    // Clear any open toasts that may intercept the Submit click.
     for (let dismissRound = 0; dismissRound < 2; dismissRound++) {
       await dismissVisibleToasts(this.page);
     }
 
-    for (let attempt = 0; attempt < 3; attempt++) {
-      try {
-        const [response] = await Promise.all([
-          this.page.waitForResponse(
-            (resp) =>
-              resp.url().includes('/api/osquery/live_queries') &&
-              resp.request().method() === 'POST',
-            { timeout: 30_000 }
-          ),
-          this.submitButton.click({ force: true }),
-        ]);
+    await submitLiveQuery(this.page, this.submitButton);
 
-        if (response.status() !== 200) {
-          const body = await response.text().catch(() => 'Unable to read body');
-          throw new Error(`Live query submission failed with status ${response.status()}: ${body}`);
-        }
-
-        const resultsTab = this.page.testSubj.locator('osquery-results-tab');
-        const packResultsHeading = this.page.getByRole('heading', { name: 'Results' });
-        await Promise.race([
-          resultsTab.waitFor({ state: 'visible', timeout: 30_000 }),
-          packResultsHeading.waitFor({ state: 'visible', timeout: 30_000 }),
-        ]).catch(() => {});
-
-        return;
-      } catch (e) {
-        if (attempt === 2) {
-          throw e;
-        }
-
-        await dismissVisibleToasts(this.page);
-        await this.submitButton.scrollIntoViewIfNeeded();
-      }
-    }
+    // Results UI lands as either a tab (single query) or a heading (pack).
+    // Do a best-effort wait so callers can chain on results visibility.
+    const resultsTab = this.page.testSubj.locator('osquery-results-tab');
+    const packResultsHeading = this.page.getByRole('heading', { name: 'Results' });
+    await Promise.race([
+      resultsTab.waitFor({ state: 'visible', timeout: 30_000 }),
+      packResultsHeading.waitFor({ state: 'visible', timeout: 30_000 }),
+    ]).catch(() => {});
   }
 
   async waitForResults(): Promise<void> {

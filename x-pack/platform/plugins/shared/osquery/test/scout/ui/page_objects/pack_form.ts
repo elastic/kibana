@@ -72,20 +72,10 @@ export class PackFormPage {
   }
 
   async fillQueryInFlyoutFromMonaco(query: string): Promise<void> {
-    const editor = this.page.testSubj.locator('kibanaCodeEditor');
+    const editor = this.page.testSubj.locator('osqueryEditor');
     await editor.waitFor({ state: 'visible', timeout: 30_000 });
     await editor.click();
-    await this.page.evaluate((q: string) => {
-      const w = window as unknown as {
-        MonacoEnvironment?: {
-          monaco?: { editor: { getModels: () => Array<{ setValue: (v: string) => void }> } };
-        };
-      };
-      const models = w.MonacoEnvironment?.monaco?.editor.getModels() ?? [];
-      for (const m of models) {
-        m.setValue(q);
-      }
-    }, query);
+    await editor.pressSequentially(query, { delay: 5 });
   }
 
   async setQueryIntervalSeconds(seconds: string): Promise<void> {
@@ -115,10 +105,24 @@ export class PackFormPage {
 
   async saveNewPack(): Promise<void> {
     await this.savePackButton.click();
+    await this.confirmPolicyChangeModalIfVisible();
   }
 
   async updatePack(): Promise<void> {
     await this.updatePackButton.click();
+    await this.confirmPolicyChangeModalIfVisible();
+  }
+
+  // Pack create/update attaches queries to agent policies. Fleet shows a confirmation
+  // modal ("Update X policies?") when the pack is bound to live policies; the Cypress
+  // suite relied on `closeModalIfVisible()` after every save. Without dismissing it,
+  // the subsequent assertions (success toast, navigation) never land because the
+  // overlay intercepts pointer events on the next action.
+  async confirmPolicyChangeModalIfVisible(): Promise<void> {
+    const confirm = this.page.testSubj.locator('confirmModalConfirmButton');
+    if (await confirm.isVisible({ timeout: 3_000 }).catch(() => false)) {
+      await confirm.click();
+    }
   }
 
   async openPackFromList(packName: string): Promise<void> {
