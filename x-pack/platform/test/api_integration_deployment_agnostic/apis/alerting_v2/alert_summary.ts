@@ -241,7 +241,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(bothRes.status).to.be(200);
       expect(bothRes.body.activeEventCount).to.be(5 + 4);
       expect(bothRes.body.recoveredEventCount).to.be(3 + 2);
+    });
 
+    it('excludes events for rule ids not in the query', async () => {
       const onlyA = await postSummary({
         gte: GTE,
         lte: LTE,

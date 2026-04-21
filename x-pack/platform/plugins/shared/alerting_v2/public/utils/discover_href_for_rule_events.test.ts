@@ -39,9 +39,7 @@ describe('getDiscoverHrefForRuleEvents', () => {
   const getRedirectUrl = jest.fn(() => '/app/discover#/?_a=...');
   const share = sharePluginMock.createStartContract();
   const uiSettings = uiSettingsServiceMock.createStartContract();
-  (uiSettings.get as jest.Mock).mockImplementation((key: string) =>
-    key === ENABLE_ESQL ? true : false
-  );
+  (uiSettings.get as jest.Mock).mockImplementation((key: string) => key === ENABLE_ESQL);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -80,9 +78,7 @@ describe('getDiscoverHrefForRuleEvents', () => {
   });
 
   it('returns undefined when ES|QL is disabled in UI settings', () => {
-    (uiSettings.get as jest.Mock).mockImplementation((key: string) =>
-      key === ENABLE_ESQL ? false : false
-    );
+    (uiSettings.get as jest.Mock).mockImplementation(() => false);
     expect(
       getDiscoverHrefForRuleEvents({
         share,
@@ -96,9 +92,7 @@ describe('getDiscoverHrefForRuleEvents', () => {
   });
 
   it('returns undefined when Discover is not allowed', () => {
-    (uiSettings.get as jest.Mock).mockImplementation((key: string) =>
-      key === ENABLE_ESQL ? true : false
-    );
+    (uiSettings.get as jest.Mock).mockImplementation((key: string) => key === ENABLE_ESQL);
     expect(
       getDiscoverHrefForRuleEvents({
         share,
@@ -112,9 +106,7 @@ describe('getDiscoverHrefForRuleEvents', () => {
   });
 
   it('returns undefined when the Discover locator is not registered', () => {
-    (uiSettings.get as jest.Mock).mockImplementation((key: string) =>
-      key === ENABLE_ESQL ? true : false
-    );
+    (uiSettings.get as jest.Mock).mockImplementation((key: string) => key === ENABLE_ESQL);
     share.url.locators.get = jest.fn().mockReturnValue(undefined);
     expect(
       getDiscoverHrefForRuleEvents({

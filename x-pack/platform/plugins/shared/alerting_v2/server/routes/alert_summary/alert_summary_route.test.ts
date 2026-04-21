@@ -88,15 +88,17 @@ describe('AlertSummaryRoute', () => {
 
     expect(queryService.executeQuery).toHaveBeenCalledTimes(1);
     const [call] = queryService.executeQuery.mock.calls;
-    expect(call[0].query).toContain('FROM .rule-events');
+    expect(call[0].query).toContain('FROM ".rule-events"');
     expect(call[0].query).toContain('BUCKET(@timestamp, 1 hour)');
+    expect(call[0].query).toContain('@timestamp >= ?gte::DATETIME');
+    expect(call[0].query).toContain('@timestamp <= ?lte::DATETIME');
+    expect(call[0].query).toContain('space_id == ?spaceId');
+    expect(call[0].query).toMatch(/rule\.id IN \("rule-a", "rule-b"\)/);
     expect(call[0].params).toEqual(
       expect.arrayContaining([
-        { _tstart: '2025-01-01T00:00:00.000Z' },
-        { _tend: '2025-01-02T00:00:00.000Z' },
-        { space_id: 'space-1' },
-        { rule_id_0: 'rule-a' },
-        { rule_id_1: 'rule-b' },
+        { spaceId: 'space-1' },
+        { gte: '2025-01-01T00:00:00.000Z' },
+        { lte: '2025-01-02T00:00:00.000Z' },
       ])
     );
 
@@ -152,7 +154,8 @@ describe('AlertSummaryRoute', () => {
     await route.handle();
 
     const [call] = queryService.executeQuery.mock.calls;
-    expect(call[0].params).toEqual(expect.arrayContaining([{ space_id: 'default' }]));
+    expect(call[0].query).toContain('space_id == ?spaceId');
+    expect(call[0].params).toEqual(expect.arrayContaining([{ spaceId: 'default' }]));
   });
 
   it('forwards query service errors through the base error handler', async () => {

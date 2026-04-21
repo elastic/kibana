@@ -92,7 +92,11 @@ export class AlertSummaryRoute extends BaseAlertingRoute {
       spaceId,
     });
 
-    const esqlResponse = await this.queryService.executeQuery({ query, params });
+    const esqlResponse = await this.queryService.executeQuery({
+      query,
+      // @ts-expect-error - the types of the composer query are not compatible with the types of the esql client
+      params,
+    });
 
     return this.ctx.response.ok({ body: toAlertSummaryResponse(esqlResponse) });
   }

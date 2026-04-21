@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EsqlQueryRequest } from '@elastic/elasticsearch/lib/api/types';
+import { esql, type EsqlRequest } from '@elastic/esql';
 import { ALERT_EVENTS_DATA_STREAM } from '../../resources/datastreams/alert_events';
 
 export interface BuildAlertSummaryQueryOptions {
@@ -15,7 +15,8 @@ export interface BuildAlertSummaryQueryOptions {
   lte: string;
   /**
    * ES|QL time duration literal used as the BUCKET() size, e.g. `1 hour`, `30 minutes`, `1 day`.
-   * Must be validated by the caller; this value is inlined into the query text.
+   * Validated against `SAFE_FIXED_INTERVAL` before being inlined as a raw token into the query,
+   * because ES|QL time-duration literals cannot be parameterised.
    */
   fixedInterval: string;
   /** Rule ids to include. Must be non-empty; callers should short-circuit when the list is empty. */
@@ -40,9 +41,7 @@ const SAFE_FIXED_INTERVAL = /^\s*\d+\s+[a-zA-Z]+\s*$/;
  * Callers are expected to short-circuit when `ruleIds` is empty – the endpoint
  * contract is "no rules, no data". Passing an empty list here will throw.
  */
-export function buildAlertSummaryQuery(
-  opts: BuildAlertSummaryQueryOptions
-): Required<Pick<EsqlQueryRequest, 'query' | 'params'>> {
+export function buildAlertSummaryQuery(opts: BuildAlertSummaryQueryOptions): EsqlRequest {
   const { gte, lte, fixedInterval, ruleIds, spaceId } = opts;
 
   if (ruleIds.length === 0) {
@@ -54,28 +53,19 @@ export function buildAlertSummaryQuery(
     );
   }
 
-  const ruleIdPlaceholders = ruleIds.map((_, i) => `?rule_id_${i}`).join(', ');
+  const ruleIdLiterals = ruleIds.map((id) => esql.str(id));
+  const bucketInterval = esql.kwd(fixedInterval.trim());
+  const ruleIdCol = esql.col(['rule', 'id']);
 
-  const query = [
-    `FROM ${ALERT_EVENTS_DATA_STREAM}`,
-    `| WHERE type == "alert"`,
-    `    AND space_id == ?space_id`,
-    `    AND @timestamp >= ?_tstart::DATETIME`,
-    `    AND @timestamp <= ?_tend::DATETIME`,
-    `    AND \`rule.id\` IN (${ruleIdPlaceholders})`,
-    `| STATS`,
-    `    active_events    = COUNT(*) WHERE status == "breached",`,
-    `    recovered_events = COUNT(*) WHERE status == "recovered"`,
-    `    BY bucket = BUCKET(@timestamp, ${fixedInterval.trim()})`,
-    `| SORT bucket ASC`,
-  ].join('\n');
-
-  const params: EsqlQueryRequest['params'] = [
-    { _tstart: gte },
-    { _tend: lte },
-    { space_id: spaceId },
-    ...ruleIds.map((id, i) => ({ [`rule_id_${i}`]: id })),
-  ];
-
-  return { query, params };
+  return esql`FROM ${ALERT_EVENTS_DATA_STREAM}
+    | WHERE type == "alert"
+        AND space_id == ${{ spaceId }}
+        AND @timestamp >= ${{ gte }}::datetime
+        AND @timestamp <= ${{ lte }}::datetime
+        AND ${ruleIdCol} IN (${ruleIdLiterals})
+    | STATS
+        active_events = COUNT(*) WHERE status == "breached",
+        recovered_events = COUNT(*) WHERE status == "recovered"
+        BY bucket = BUCKET(@timestamp, ${bucketInterval})
+    | SORT bucket ASC`.toRequest();
 }
