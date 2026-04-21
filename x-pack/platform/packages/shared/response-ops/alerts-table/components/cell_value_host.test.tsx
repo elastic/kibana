@@ -32,8 +32,6 @@ const props = createPartialObjectMock<ComponentProps<typeof CellValueHost>>({
       [ALERT_STATUS]: ['active'],
     },
   ],
-  oldAlertsData: [],
-  ecsAlertsData: [],
   showAlertStatusWithFlapping: false,
   casesConfig: undefined,
   rowIndex: 0,
