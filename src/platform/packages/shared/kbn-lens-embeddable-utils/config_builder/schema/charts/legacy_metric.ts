@@ -23,7 +23,7 @@ import { horizontalAlignmentSchema, verticalAlignmentSchema } from '../alignment
 import { mergeAllMetricsWithChartDimensionSchema } from './shared';
 import { objectUnion } from './utils/object_union';
 
-const legacyMetricStateMetricOptionsSchema = {
+const legacyMetricConfigMetricOptionsSchema = {
   /**
    * Font scale for the legacy metric label and value.
    */
@@ -87,7 +87,7 @@ const legacyMetricStateMetricOptionsSchema = {
   ),
 };
 
-export const legacyMetricStateSchemaNoESQL = schema.object(
+export const legacyMetricConfigSchemaNoESQL = schema.object(
   {
     type: schema.literal('legacy_metric'),
     ...sharedPanelInfoSchema,
@@ -97,12 +97,12 @@ export const legacyMetricStateSchemaNoESQL = schema.object(
     /**
      * Metric configuration, must define operation.
      */
-    metric: mergeAllMetricsWithChartDimensionSchema(legacyMetricStateMetricOptionsSchema),
+    metric: mergeAllMetricsWithChartDimensionSchema(legacyMetricConfigMetricOptionsSchema),
   },
   { meta: { id: 'legacyMetricNoESQL', title: 'Legacy Metric Chart (DSL)' } }
 );
 
-const esqlLegacyMetricState = schema.object(
+const esqlLegacyMetricConfig = schema.object(
   {
     type: schema.literal('legacy_metric'),
     ...sharedPanelInfoSchema,
@@ -111,16 +111,16 @@ const esqlLegacyMetricState = schema.object(
     /**
      * Metric configuration, must define operation.
      */
-    metric: esqlColumnWithFormatSchema.extends(legacyMetricStateMetricOptionsSchema),
+    metric: esqlColumnWithFormatSchema.extends(legacyMetricConfigMetricOptionsSchema),
   },
   { meta: { id: 'legacyMetricESQL', title: 'Legacy Metric Chart (ES|QL)' } }
 );
 
 // Legacy metric is not currently supported for ES|QL datasets
-export const legacyMetricStateSchema = objectUnion([legacyMetricStateSchemaNoESQL], {
+export const legacyMetricConfigSchema = objectUnion([legacyMetricConfigSchemaNoESQL], {
   meta: { id: 'legacyMetricChart', title: 'Legacy Metric Chart' },
 });
 
-export type LegacyMetricState = TypeOf<typeof legacyMetricStateSchema>;
-export type LegacyMetricStateNoESQL = TypeOf<typeof legacyMetricStateSchemaNoESQL>;
-export type LegacyMetricStateESQL = TypeOf<typeof esqlLegacyMetricState>;
+export type LegacyMetricConfig = TypeOf<typeof legacyMetricConfigSchema>;
+export type LegacyMetricConfigNoESQL = TypeOf<typeof legacyMetricConfigSchemaNoESQL>;
+export type LegacyMetricConfigESQL = TypeOf<typeof esqlLegacyMetricConfig>;

@@ -173,7 +173,23 @@ describe('searchAlerts', () => {
         },
         sort: params.sort,
       },
-      { strategy: 'privateRuleRegistryAlertsSearchStrategy' }
+      {
+        strategy: 'privateRuleRegistryAlertsSearchStrategy',
+        abortSignal: undefined,
+        projectRouting: undefined,
+      }
+    );
+  });
+
+  it('passes projectRouting in search options', async () => {
+    await searchAlerts({ ...params, projectRouting: '_alias:_origin' });
+
+    expect(mockDataPlugin.search.search).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.objectContaining({
+        strategy: 'privateRuleRegistryAlertsSearchStrategy',
+        projectRouting: '_alias:_origin',
+      })
     );
   });
 

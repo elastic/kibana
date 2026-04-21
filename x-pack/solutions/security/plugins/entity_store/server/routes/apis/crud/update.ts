@@ -21,11 +21,9 @@ import {
 } from '../../../domain/errors';
 import { Entity } from '../../../../common/domain/definitions/entity.gen';
 
-const paramsSchema = z
-  .object({
-    entityType: z.enum(ALL_ENTITY_TYPES).describe('The entity type to update.'),
-  })
-  .required();
+const paramsSchema = z.object({
+  entityType: z.enum(ALL_ENTITY_TYPES).describe('The entity type to update.'),
+});
 
 const querySchema = z.object({
   force: BooleanFromString.optional()
