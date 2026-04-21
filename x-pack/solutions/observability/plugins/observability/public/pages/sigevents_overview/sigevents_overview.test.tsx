@@ -53,15 +53,10 @@ function renderWithProviders(agentBuilder?: ReturnType<typeof agentBuilderMocks.
 }
 
 describe('SigeventsOverviewPage', () => {
-  it('renders page header with correct test subject', () => {
+  it('renders page structure with header, placeholder, illustration, and conversation container', () => {
     renderWithProviders();
 
     expect(screen.getByTestSubject('obltSigeventsOverviewPageHeader')).toBeInTheDocument();
-  });
-
-  it('renders the empty state placeholder', () => {
-    renderWithProviders();
-
     expect(screen.getByTestSubject('obltSigeventsOverviewPlaceholder')).toBeInTheDocument();
     expect(screen.getByText('Observability Status page')).toBeInTheDocument();
     expect(
@@ -69,17 +64,7 @@ describe('SigeventsOverviewPage', () => {
         'This page will show status, active significant events, impacted entities and other related information. It will also allow for a conversation with context.'
       )
     ).toBeInTheDocument();
-  });
-
-  it('renders the illustration component', () => {
-    renderWithProviders();
-
     expect(screen.getByTestSubject('mock-illustration')).toBeInTheDocument();
-  });
-
-  it('renders the conversation container', () => {
-    renderWithProviders();
-
     expect(screen.getByTestSubject('obltSigeventsConversation')).toBeInTheDocument();
   });
 
