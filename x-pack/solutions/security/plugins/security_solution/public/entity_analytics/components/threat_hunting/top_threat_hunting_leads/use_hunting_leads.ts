@@ -124,10 +124,6 @@ export const useHuntingLeads = (connectorId: string, isEnabled: boolean = true) 
 
   const isLoading = isLeadsLoading || isStatusLoading;
 
-  const reportLeadClicked = useCallback(() => {
-    telemetry.reportEvent(EntityEventTypes.LeadGenerationLeadClicked, {});
-  }, [telemetry]);
-
   return {
     leads: data?.leads?.map(fromApiLead) ?? [],
     totalCount: data?.total ?? 0,
@@ -139,6 +135,5 @@ export const useHuntingLeads = (connectorId: string, isEnabled: boolean = true) 
     refetch,
     isScheduled: statusData?.isEnabled ?? false,
     toggleSchedule,
-    reportLeadClicked,
   };
 };

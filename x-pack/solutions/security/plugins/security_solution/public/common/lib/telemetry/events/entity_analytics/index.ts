@@ -423,12 +423,12 @@ const anomaliesCountClickedEvent: EntityAnalyticsTelemetryEvent = {
   },
 };
 
-export const leadGenerationGenerateClickedEvent: EntityAnalyticsTelemetryEvent = {
+const leadGenerationGenerateClickedEvent: EntityAnalyticsTelemetryEvent = {
   eventType: EntityEventTypes.LeadGenerationGenerateClicked,
   schema: {},
 };
 
-export const leadGenerationLeadClickedEvent: EntityAnalyticsTelemetryEvent = {
+const leadGenerationLeadClickedEvent: EntityAnalyticsTelemetryEvent = {
   eventType: EntityEventTypes.LeadGenerationLeadClicked,
   schema: {},
 };
