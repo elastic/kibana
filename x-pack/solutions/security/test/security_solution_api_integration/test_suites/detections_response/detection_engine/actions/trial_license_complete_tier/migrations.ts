@@ -23,6 +23,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const es = getService('es');
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   describe('@ess actions migrations', () => {
     // This test suite is not meant to test a specific route, but to test the legacy action migration
@@ -347,16 +348,42 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('7.16.0', () => {
+      // The `siem-detection-engine-rule-actions` type is not importable via the standard SO API.
+      // We seed it with pre-7.16.0 migrationVersion so DocumentMigrator runs the 7.16.0 migration
+      // (moving ruleAlertId/action ids to references) on creation.
+      const RULE_ACTIONS_SO_ID = 'fce024a0-0452-11ec-9b15-d13d79d162f3';
+
       before(async () => {
-        await esArchiver.load(
-          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/migrations'
-        );
+        await kibanaServer.savedObjects.create({
+          type: 'siem-detection-engine-rule-actions',
+          id: RULE_ACTIONS_SO_ID,
+          overwrite: true,
+          attributes: {
+            ruleAlertId: 'fb1046a0-0452-11ec-9b15-d13d79d162f3',
+            actions: [
+              {
+                action_type_id: '.slack',
+                id: 'f6e64c00-0452-11ec-9b15-d13d79d162f3',
+                params: {
+                  message:
+                    'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
+                },
+                group: 'default',
+              },
+            ],
+            ruleThrottle: '7d',
+            alertThrottle: '7d',
+          },
+          migrationVersion: { 'siem-detection-engine-rule-actions': '7.11.2' },
+          references: [],
+        });
       });
 
       after(async () => {
-        await esArchiver.unload(
-          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/migrations'
-        );
+        await kibanaServer.savedObjects.delete({
+          type: 'siem-detection-engine-rule-actions',
+          id: RULE_ACTIONS_SO_ID,
+        });
       });
 
       it('migrates legacy siem-detection-engine-rule-actions to use saved object references', async () => {
