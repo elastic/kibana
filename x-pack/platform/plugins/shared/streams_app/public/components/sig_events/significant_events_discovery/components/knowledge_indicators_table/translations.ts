@@ -22,9 +22,14 @@ export const TYPE_COLUMN_LABEL = i18n.translate(
   { defaultMessage: 'Type' }
 );
 
-export const QUERY_TYPE_LABEL = i18n.translate(
-  'xpack.streams.knowledgeIndicators.columns.queryTypeLabel',
-  { defaultMessage: 'Query' }
+export const MATCH_QUERY_TYPE_LABEL = i18n.translate(
+  'xpack.streams.knowledgeIndicators.columns.matchQueryTypeLabel',
+  { defaultMessage: 'Match query' }
+);
+
+export const STATS_QUERY_TYPE_LABEL = i18n.translate(
+  'xpack.streams.knowledgeIndicators.columns.statsQueryTypeLabel',
+  { defaultMessage: 'Stats query' }
 );
 
 export const STREAM_COLUMN_LABEL = i18n.translate(
@@ -108,13 +113,42 @@ export const EMPTY_STATE_DESCRIPTION = i18n.translate(
   'xpack.streams.knowledgeIndicators.emptyState.description',
   {
     defaultMessage:
-      'Facts about your stream automatically extracted from log data to power rule generation. To generate knowledge indicators, go to Streams tab and start onboarding.',
+      'Facts about your stream automatically extracted from log data to power rule generation. Select streams below and generate knowledge indicators.',
   }
 );
 
-export const EMPTY_STATE_GO_TO_STREAMS = i18n.translate(
-  'xpack.streams.knowledgeIndicators.emptyState.goToStreamsButton',
-  { defaultMessage: 'Go to Streams tab' }
+export const GENERATION_IN_PROGRESS_TITLE = i18n.translate(
+  'xpack.streams.knowledgeIndicators.generationInProgressTitle',
+  {
+    defaultMessage: 'Generating knowledge indicators...',
+  }
+);
+
+export const getGenerationInProgressDescription = (streamNames: string[]): string => {
+  const count = streamNames.length;
+  if (count <= 2) {
+    return i18n.translate('xpack.streams.knowledgeIndicators.generationInProgressDescriptionFew', {
+      defaultMessage: 'Generation is running for: {streams}. This may take a few minutes.',
+      values: { streams: streamNames.join(', ') },
+    });
+  }
+  return i18n.translate('xpack.streams.knowledgeIndicators.generationInProgressDescriptionMany', {
+    defaultMessage:
+      'Generation is running for {first}, {second} and {remaining} more. This may take a few minutes.',
+    values: {
+      first: streamNames[0],
+      second: streamNames[1],
+      remaining: count - 2,
+    },
+  });
+};
+
+export const HIDDEN_COMPUTED_FEATURES_HINT = i18n.translate(
+  'xpack.streams.knowledgeIndicators.hiddenComputedFeaturesHint',
+  {
+    defaultMessage:
+      'There are computed features hidden. Enable "Show computed features" to see them.',
+  }
 );
 
 export const CANNOT_EXCLUDE_SELECTION_TOOLTIP = i18n.translate(
@@ -161,3 +195,34 @@ export const DELETE_MODAL_TITLE = (count: number) =>
       'Are you sure you want to delete {count, plural, one {this knowledge indicator} other {these knowledge indicators}}?',
     values: { count },
   });
+
+export const CREATE_RULES_BUTTON = i18n.translate(
+  'xpack.streams.knowledgeIndicators.createRulesButton',
+  { defaultMessage: 'Create rules' }
+);
+
+export const getRuleCountLabel = (count: number) =>
+  i18n.translate('xpack.streams.knowledgeIndicators.ruleCountLabel', {
+    defaultMessage: '{count, plural, one {# new rule} other {# new rules}}',
+    values: { count },
+  });
+
+export const PROMOTE_ALL_ERROR_TOAST_TITLE = i18n.translate(
+  'xpack.streams.knowledgeIndicators.promoteAllErrorTitle',
+  { defaultMessage: 'Failed to promote queries' }
+);
+
+export const PROMOTE_SELECTED_LABEL = i18n.translate(
+  'xpack.streams.knowledgeIndicators.promoteSelectedLabel',
+  { defaultMessage: 'Promote selected' }
+);
+
+export const BULK_PROMOTE_SUCCESS_TOAST_TITLE = i18n.translate(
+  'xpack.streams.knowledgeIndicators.bulkPromoteSuccessToastTitle',
+  { defaultMessage: 'Queries promoted' }
+);
+
+export const BULK_PROMOTE_ERROR_TITLE = i18n.translate(
+  'xpack.streams.knowledgeIndicators.bulkPromoteErrorTitle',
+  { defaultMessage: 'Failed to promote selected queries' }
+);

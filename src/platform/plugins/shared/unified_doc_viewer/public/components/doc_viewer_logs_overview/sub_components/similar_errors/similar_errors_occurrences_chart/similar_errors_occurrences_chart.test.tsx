@@ -14,7 +14,7 @@ import { where } from '@kbn/esql-composer';
 import { setUnifiedDocViewerServices } from '../../../../../plugin';
 import { mockUnifiedDocViewerServices } from '../../../../../__mocks__';
 import { merge } from 'lodash';
-import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
+import { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 
 const mockUseDataSourcesContext = jest.fn(() => ({
   indexes: { logs: 'logs-*', apm: {} },
@@ -65,7 +65,7 @@ setUnifiedDocViewerServices(
   })
 );
 
-jest.mock('@kbn/lens-embeddable-utils/config_builder', () => {
+jest.mock('@kbn/lens-embeddable-utils', () => {
   return {
     LensConfigBuilder: jest.fn().mockImplementation(() => ({
       build: mockBuild,
