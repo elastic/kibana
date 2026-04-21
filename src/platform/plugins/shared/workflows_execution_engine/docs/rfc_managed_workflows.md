@@ -43,7 +43,7 @@ A first-class **managed workflow** concept where plugins can declare bundled wor
 |---|-------------|---------|
 | **R1** | **Distinguish managed from user-defined** | The platform must be able to distinguish managed workflows from user-defined ones. The designation is not user-settable. How this is achieved (a flag on the same index, a separate index, or other mechanism) is discussed in the [Storage](#1-storage) section of the technical design. |
 | **R2** | **Server-side read-only enforcement** | Mutation APIs (`updateWorkflow`, `deleteWorkflows`, and their REST routes) reject changes to managed workflows. This includes the `enabled` toggle (enable/disable is an update). UI-only restrictions are insufficient — API callers can still mutate. Note: this conflicts with the force override (S4) — see the [Force Override](#21-force-override) section for the interaction model and options. |
-| **R3** | **Active by default** | Registered managed workflows are immediately active and ready to execute. No separate activation step required. Note: Detection Engine needs workflows that are disabled by default and user-enabled — see [Open Questions > Mutability #5](#initial-enabled-state). |
+| **R3** | **Enabled by default, with opt-out** | Registered managed workflows are active by default (`enabled: true`). The registration contract supports `enabled: false` for opt-in patterns where a product feature activates the workflow on the user's behalf. On reconciliation (new version), the platform preserves the user's current enabled state unless the registering team explicitly forces a reset. |
 | **R4** | **Ownership metadata** | Every managed workflow identifies its owning plugin, team, or feature. Visible when inspecting the workflow. |
 | **R5** | **Registration mechanism** | A way for solution teams to register managed workflows with the platform, including the workflow definition and ownership metadata. The workflow plugin handles installation and activation. How this is exposed (plugin contract, file-based convention, or other mechanism) is an implementation detail discussed in the [Registration](#3-registration) section of the technical design. |
 | **R6** | **Caller-provided workflow ID with uniqueness guarantee** | Plugins can specify stable, deterministic IDs instead of auto-generated IDs. IDs must be globally unique so all existing APIs continue to serve both managed and user-defined workflows unambiguously. See [Open Questions > Registration #3](#id-uniqueness) for enforcement approaches. |
@@ -117,6 +117,7 @@ These are capabilities that interact with or are prerequisites for managed workf
 | **Workflow-Defined Priority** | — | Should managed workflows have execution priority over user workflows? No stakeholder request yet — flagging for consideration. |
 | **Parallel Execution of Sub-Workflows** | — | O11y (miltonhultgren) needs parallel onboarding tasks across streams. Not supported today. |
 | **Workflow Versioning** | #15776 | First-class versioning for workflow definitions. Managed workflows currently use a SHA-256 hash for change detection (see [Lifecycle](#4-lifecycle-provisioning-updates-cleanup)); once versioning lands, managed workflows should adopt it. |
+| **Workflow Template Library** | [#15748](https://github.com/elastic/security-team/issues/15748) | Pre-built workflow definitions that users install and own — free to edit after installation. Distinct from managed workflows (see [Open Questions > Scope #12](#scope)): templates are not reconciled or version-synced by the platform. Separate initiative, but the boundary between managed workflows and templates must be clear to avoid confusion. |
 
 ---
 
@@ -174,16 +175,11 @@ These are capabilities that interact with or are prerequisites for managed workf
 
    This keeps the managed workflow definition clean (no merge conflicts), gives users full editing power on the clone, and the reconciliation safety net restores the original on upgrade.
 
-5. <a id="initial-enabled-state"></a>**Should managed workflows support being registered as disabled by default?**
-   Detection Engine (nkhristinin, [#16662 comment](https://github.com/elastic/security-team/issues/16662#issuecomment-4280143015)) needs managed workflows that are disabled by default and explicitly enabled by the user (via the Detection Engine UI, which calls the workflow API). This means:
-   - The `ManagedWorkflowRegistration` contract needs an `enabled` option (default `true` to preserve R3 behavior, but settable to `false`).
-   - The enable/disable toggle must be a user-permitted mutation on managed workflows — not gated behind `--force` — since the product UX depends on it.
-   - The reconciliation logic must decide: when a new version of the workflow ships, should the platform reset `enabled` to the registered default, or preserve the user's current state? Preserving user state is likely correct (the user explicitly opted in/out), but the registering plugin should be able to force a reset if needed (e.g., a critical fix that must be active).
+5. <a id="initial-enabled-state"></a>**~~Should managed workflows support being registered as disabled by default?~~** — **Resolved.**
+   Yes. The `ManagedWorkflowRegistration` contract includes an `enabled` option (default `true`, settable to `false`). This covers both always-on patterns and opt-in patterns where a product feature activates the workflow on the user's behalf. The enable/disable toggle is a user-permitted mutation — not gated behind `--force`. On reconciliation, the platform preserves the user's current enabled state unless the registering team forces a reset (e.g., a critical fix that must be active). See R3.
 
-   This overlaps with the partial editability discussion (#4 above) but is narrower — only `enabled` state, not arbitrary fields. It may be reasonable to support this in the first delivery as a special case, since `enabled` is already a first-class field on `WorkflowProperties` and the enforcement is straightforward.
-
-6. **Should a `--force` flag allow overriding read-only?**
-   ruflin proposed this for testing, recovery, and urgent fixes. If supported, it should be API-only (not UI), logged, and clearly documented as "you own the consequences."
+6. **~~Should a `--force` flag allow overriding read-only?~~** — **Resolved.**
+   The primary user path is: disable the managed workflow, clone it into a user-owned copy, and edit the clone freely. The platform preserves the user's enabled state across upgrades unless the registering team forces a reset (e.g., a critical fix that must be active). A `--force` flag on mutation APIs remains available as an operational escape hatch (API-only, not UI, logged) for testing, recovery, and urgent fixes — see the [Force Override](#21-force-override) technical design section.
 
 ### Lifecycle
 
@@ -203,7 +199,22 @@ These are capabilities that interact with or are prerequisites for managed workf
 11. **When a managed workflow is cloned, what happens to the original?**
     The managed workflow remains active and unchanged — it cannot be disabled. The clone is independent. UX should make clear that the user now has two workflows with the same logic.
 
-12. **Should managed workflows be registered from integrations?**
+### Scope
+
+12. **Managed workflow vs. workflow template — where is the boundary?**
+    A managed workflow and a workflow template both ship a pre-built definition, but they differ in ownership after installation:
+
+    | | **Managed workflow** | **Workflow template** |
+    |---|---|---|
+    | **Definition ownership** | Platform keeps it in sync with what the product team ships. | User owns the definition after installation — free to edit. |
+    | **Reconciliation** | Create-if-absent, update-if-changed, orphan cleanup on every startup. | Installed once. No ongoing sync — the user's edits are authoritative. |
+    | **Versioning** | New versions shipped by the team automatically replace the previous version (preserving user's enabled state). | New template versions may be offered as an upgrade, but the user decides whether to apply. |
+    | **Read-only** | Yes (server-side enforced). Users clone to customize. | No — the installed instance is a regular user-owned workflow. |
+    | **Litmus test** | Does the platform keep the definition in sync with what the product team ships? **Yes.** | **No** — the user owns it after installation. |
+
+    This RFC covers managed workflows only. Templates are a separate initiative and out of scope. A managed workflow that ships disabled and requires user enablement is still a managed workflow — it remains reconciled, versioned, and protected. The distinction matters because teams may be tempted to use managed workflows as templates; this table clarifies which pattern to use.
+
+13. **Should managed workflows be registered from integrations?**
     ruflin: "Eventually, ship workflows as integrations in two forms: A) overwrite a managed workflow (rare), B) register a new managed workflow." This is a future direction, not first delivery.
 
 ---
