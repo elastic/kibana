@@ -137,7 +137,7 @@ export const calculateScoresWithESQLV2 = async ({
         entityIds,
         logger,
         errorContext:
-          'Error fetching entities for preview modifier application. Scores for entities missing from the store will be discarded',
+          'Error fetching entities for preview scoring. Scores for entities that cannot be resolved from the store will be discarded',
       });
       const knownEntityIds = new Set(entities.keys());
       const inStoreBaseScores = baseScores.filter((score) => knownEntityIds.has(score.entity_id));
