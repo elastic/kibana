@@ -8,9 +8,27 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { SavedObjectError } from '@kbn/core-saved-objects-common';
+import type {
+  ConcreteTaskInstance,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 import type { EsWorkflow } from '@kbn/workflows';
 import { WorkflowTaskScheduler } from './workflow_task_scheduler';
+
+type FetchReturn = Awaited<ReturnType<TaskManagerStartContract['fetch']>>;
+
+const makeTaskInstance = (id: string): ConcreteTaskInstance =>
+  ({ id } as unknown as ConcreteTaskInstance);
+
+const makeFetchResult = (ids: string[]): FetchReturn =>
+  ({ docs: ids.map((id) => ({ id })), versionMap: new Map() } as unknown as FetchReturn);
+
+const makeBulkError = (id: string, statusCode: number, message: string) => ({
+  id,
+  type: 'task',
+  error: { statusCode, message } as unknown as SavedObjectError,
+});
 
 const mockLogger: Logger = {
   debug: jest.fn(),
@@ -27,8 +45,8 @@ const makeMockTaskManager = (
   overrides?: Partial<TaskManagerStartContract>
 ): jest.Mocked<TaskManagerStartContract> =>
   ({
-    schedule: jest.fn().mockResolvedValue({ id: 'test-task-id' }),
-    fetch: jest.fn().mockResolvedValue({ docs: [] }),
+    schedule: jest.fn().mockResolvedValue(makeTaskInstance('test-task-id')),
+    fetch: jest.fn().mockResolvedValue(makeFetchResult([])),
     bulkRemove: jest.fn().mockResolvedValue(undefined),
     bulkUpdateSchedules: jest.fn().mockResolvedValue({ tasks: [], errors: [] }),
     ...overrides,
@@ -119,7 +137,7 @@ describe('WorkflowTaskScheduler', () => {
       let callCount = 0;
       mockTm.schedule.mockImplementation(async () => {
         callCount++;
-        return { id: `task-${callCount}` };
+        return makeTaskInstance(`task-${callCount}`);
       });
       const scheduler = new WorkflowTaskScheduler(mockLogger, mockTm);
 
@@ -147,7 +165,7 @@ describe('WorkflowTaskScheduler', () => {
     it('propagates error from first failing trigger and stops scheduling', async () => {
       const mockTm = makeMockTaskManager();
       mockTm.schedule
-        .mockResolvedValueOnce({ id: 'task-1' })
+        .mockResolvedValueOnce(makeTaskInstance('task-1'))
         .mockRejectedValueOnce(new Error('connection refused'));
       const scheduler = new WorkflowTaskScheduler(mockLogger, mockTm);
 
@@ -217,7 +235,7 @@ describe('WorkflowTaskScheduler', () => {
       mockTm.schedule.mockRejectedValueOnce(conflictError);
       mockTm.bulkUpdateSchedules.mockResolvedValueOnce({
         tasks: [],
-        errors: [{ id: 'task-1', type: 'task', error: { statusCode: 409, message: 'conflict' } }],
+        errors: [makeBulkError('task-1', 409, 'conflict')],
       });
       const scheduler = new WorkflowTaskScheduler(mockLogger, mockTm);
 
@@ -233,7 +251,7 @@ describe('WorkflowTaskScheduler', () => {
       mockTm.schedule.mockRejectedValueOnce(conflictError);
       mockTm.bulkUpdateSchedules.mockResolvedValueOnce({
         tasks: [],
-        errors: [{ id: 'task-1', type: 'task', error: { statusCode: 404, message: 'not found' } }],
+        errors: [makeBulkError('task-1', 404, 'not found')],
       });
       const scheduler = new WorkflowTaskScheduler(mockLogger, mockTm);
 
@@ -249,9 +267,7 @@ describe('WorkflowTaskScheduler', () => {
       mockTm.schedule.mockRejectedValueOnce(conflictError);
       mockTm.bulkUpdateSchedules.mockResolvedValueOnce({
         tasks: [],
-        errors: [
-          { id: 'task-1', type: 'task', error: { statusCode: 500, message: 'internal error' } },
-        ],
+        errors: [makeBulkError('task-1', 500, 'internal error')],
       });
       const scheduler = new WorkflowTaskScheduler(mockLogger, mockTm);
 
@@ -264,9 +280,7 @@ describe('WorkflowTaskScheduler', () => {
   describe('unscheduleWorkflowTasks', () => {
     it('fetches and removes tasks for the given workflow', async () => {
       const mockTm = makeMockTaskManager();
-      mockTm.fetch.mockResolvedValueOnce({
-        docs: [{ id: 'task-1' }, { id: 'task-2' }],
-      });
+      mockTm.fetch.mockResolvedValueOnce(makeFetchResult(['task-1', 'task-2']));
       const scheduler = new WorkflowTaskScheduler(mockLogger, mockTm);
 
       await scheduler.unscheduleWorkflowTasks('wf-1');
@@ -287,7 +301,7 @@ describe('WorkflowTaskScheduler', () => {
 
     it('does not call bulkRemove when no tasks found', async () => {
       const mockTm = makeMockTaskManager();
-      mockTm.fetch.mockResolvedValueOnce({ docs: [] });
+      mockTm.fetch.mockResolvedValueOnce(makeFetchResult([]));
       const scheduler = new WorkflowTaskScheduler(mockLogger, mockTm);
 
       await scheduler.unscheduleWorkflowTasks('wf-1');
@@ -308,7 +322,7 @@ describe('WorkflowTaskScheduler', () => {
 
     it('logs error and re-throws when bulkRemove fails', async () => {
       const mockTm = makeMockTaskManager();
-      mockTm.fetch.mockResolvedValueOnce({ docs: [{ id: 'task-1' }] });
+      mockTm.fetch.mockResolvedValueOnce(makeFetchResult(['task-1']));
       mockTm.bulkRemove.mockRejectedValueOnce(new Error('remove failed'));
       const scheduler = new WorkflowTaskScheduler(mockLogger, mockTm);
 
