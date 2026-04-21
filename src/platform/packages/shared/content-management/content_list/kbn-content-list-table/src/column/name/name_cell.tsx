@@ -44,14 +44,14 @@ export interface NameCellProps {
   /**
    * Optional click handler for the title.
    * When provided, the provider-level `item.getHref` is ignored unless
-   * `useHref` is explicitly `true`.
+   * `shouldUseHref` is explicitly `true`.
    */
   onClick?: (item: ContentListItem) => void;
   /**
    * Whether to use the provider-level `item.getHref` for the title link.
    * Defaults to `true` unless `onClick` is provided.
    */
-  useHref?: boolean;
+  shouldUseHref?: boolean;
   /**
    * Optional click handler for tag badges.
    * When omitted, the built-in handler in {@link NameCellTags} toggles
@@ -80,7 +80,7 @@ export const NameCell = memo(
     showTags = false,
     showStarred = false,
     onClick,
-    useHref,
+    shouldUseHref,
     onTagClick,
   }: NameCellProps) => {
     const { tags: tagIds } = item;
@@ -110,7 +110,7 @@ export const NameCell = memo(
     return (
       <div>
         <div css={showStarred ? titleRowCss : undefined}>
-          <Title {...{ item, onClick, useHref }} />
+          <Title {...{ item, onClick, shouldUseHref }} />
           {showStarred && <StarButton id={item.id} wrapperCss={inlineStarCss} />}
         </div>
         {showDescription && <Description item={item} />}

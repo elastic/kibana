@@ -142,9 +142,11 @@ export const buildActionsColumn = (
     return undefined;
   }
 
-  // Each `EuiButtonIcon` in EUI's expanded actions cell is 24px wide with 4px
-  // inline gap. Add 8px for cell padding so adjacent columns with long content
-  // do not squeeze the actions column.
+  // Each `EuiButtonIcon` (xs) is `euiTheme.size.l` (24px) wide with a 4px
+  // inline gap — matching `euiButtonSizeMap`'s `xs.height`. `euiButtonSizeMap`
+  // requires a live EUI theme context so we derive the constant here instead.
+  // Add 8px for cell padding so adjacent columns with long content do not
+  // squeeze the actions column.
   const defaultWidth = `${actions.length * 28 + 8}px`;
 
   return {

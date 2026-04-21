@@ -66,14 +66,14 @@ export interface NameColumnProps extends ColumnLayoutProps {
   /**
    * Optional click handler for the title.
    * When provided, the provider-level `item.getHref` is ignored unless
-   * `useHref` is explicitly `true`.
+   * `shouldUseHref` is explicitly `true`.
    */
   onClick?: (item: ContentListItem) => void;
   /**
    * Whether to use the provider-level `item.getHref` for the title link.
    * Defaults to `true` unless `onClick` is provided.
    */
-  useHref?: boolean;
+  shouldUseHref?: boolean;
   /**
    * Optional click handler for tag badges.
    * Called with the tag and a boolean indicating whether a modifier key
@@ -107,7 +107,7 @@ export const buildNameColumn = (
     showTags = context.supports?.tags ?? false,
     showStarred = false,
     onClick,
-    useHref,
+    shouldUseHref,
     onTagClick,
     render: customRender,
   } = attributes;
@@ -130,7 +130,7 @@ export const buildNameColumn = (
 
       return (
         <NameCell
-          {...{ item, showDescription, showTags, showStarred, onClick, useHref, onTagClick }}
+          {...{ item, showDescription, showTags, showStarred, onClick, shouldUseHref, onTagClick }}
         />
       );
     },

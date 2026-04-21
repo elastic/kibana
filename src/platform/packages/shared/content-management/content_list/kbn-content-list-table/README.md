@@ -36,7 +36,7 @@ const { Column } = ContentListTable;
 
 Column sizing props (`width`, `minWidth`, `maxWidth`, `truncateText`) map to `EuiBasicTable` column layout props. Prefer `em` units for text columns, set `minWidth` so headers remain readable, and set `maxWidth` so user content cannot stretch the table too far. `Column.Actions` is sticky by default for tables with horizontal overflow.
 
-`Column.Name` uses the provider-level `item.getHref` link by default. Passing `onClick` makes the title use that click handler instead of `getHref`; set `useHref` to preserve native link affordances such as Cmd/Ctrl-click while handling plain clicks with `onClick`.
+`Column.Name` uses the provider-level `item.getHref` link by default. Passing `onClick` makes the title use that click handler instead of `getHref`; set `shouldUseHref` to preserve native link affordances such as Cmd/Ctrl-click while handling plain clicks with `onClick`.
 
 ### Available column presets
 

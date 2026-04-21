@@ -117,14 +117,14 @@ describe('NameCellTitle', () => {
     expect(handleClick).toHaveBeenCalledWith(item);
   });
 
-  it('uses `getHref` with `onClick` when `useHref` is true', () => {
+  it('uses `getHref` with `onClick` when `shouldUseHref` is true', () => {
     const Wrapper = createWrapper({ getHref: (item) => `/view/${item.id}` });
     const item = createItem({ title: 'Linked Clickable Item' });
     const handleClick = jest.fn();
 
     render(
       <Wrapper>
-        <NameCellTitle item={item} onClick={handleClick} useHref />
+        <NameCellTitle item={item} onClick={handleClick} shouldUseHref />
       </Wrapper>
     );
 
@@ -138,14 +138,14 @@ describe('NameCellTitle', () => {
     expect(handleClick).toHaveBeenCalledWith(item);
   });
 
-  it('allows modified clicks to use `getHref` when `useHref` is true', () => {
+  it('allows modified clicks to use `getHref` when `shouldUseHref` is true', () => {
     const Wrapper = createWrapper({ getHref: (item) => `/view/${item.id}` });
     const item = createItem({ title: 'Linked Clickable Item' });
     const handleClick = jest.fn();
 
     render(
       <Wrapper>
-        <NameCellTitle item={item} onClick={handleClick} useHref />
+        <NameCellTitle item={item} onClick={handleClick} shouldUseHref />
       </Wrapper>
     );
 
@@ -163,12 +163,12 @@ describe('NameCellTitle', () => {
     expect(handleClick).not.toHaveBeenCalled();
   });
 
-  it('renders as plain text when `useHref` is false and `onClick` is omitted', () => {
+  it('renders as plain text when `shouldUseHref` is false and `onClick` is omitted', () => {
     const Wrapper = createWrapper({ getHref: (item) => `/view/${item.id}` });
 
     render(
       <Wrapper>
-        <NameCellTitle item={createItem({ title: 'Plain Item' })} useHref={false} />
+        <NameCellTitle item={createItem({ title: 'Plain Item' })} shouldUseHref={false} />
       </Wrapper>
     );
 

@@ -19,10 +19,10 @@ export interface NameCellTitleProps {
    * Whether to use the provider-level `item.getHref` for the title link.
    * Defaults to `true` unless `onClick` is provided.
    */
-  useHref?: boolean;
+  shouldUseHref?: boolean;
   /**
    * Optional click handler for the title. When provided, the provider-level
-   * `item.getHref` is ignored unless `useHref` is explicitly `true`.
+   * `item.getHref` is ignored unless `shouldUseHref` is explicitly `true`.
    */
   onClick?: (item: ContentListItem) => void;
 }
@@ -30,12 +30,12 @@ export interface NameCellTitleProps {
 const isPlainPrimaryClick = (event: React.MouseEvent<HTMLAnchorElement>) =>
   event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
 
-export const NameCellTitle = ({ item, useHref, onClick }: NameCellTitleProps) => {
+export const NameCellTitle = ({ item, shouldUseHref, onClick }: NameCellTitleProps) => {
   const { title } = item;
   const { item: itemConfig } = useContentListConfig();
 
-  const shouldUseHref = useHref ?? !onClick;
-  const href = shouldUseHref ? itemConfig?.getHref?.(item) : undefined;
+  const useHref = shouldUseHref ?? !onClick;
+  const href = useHref ? itemConfig?.getHref?.(item) : undefined;
 
   if (!href && !onClick) {
     return (
@@ -47,7 +47,7 @@ export const NameCellTitle = ({ item, useHref, onClick }: NameCellTitleProps) =>
 
   const handleClick = onClick
     ? (event: React.MouseEvent<HTMLAnchorElement>) => {
-        if (href && !isPlainPrimaryClick(event)) {
+        if (useHref && !isPlainPrimaryClick(event)) {
           return;
         }
         event.preventDefault();
@@ -57,7 +57,7 @@ export const NameCellTitle = ({ item, useHref, onClick }: NameCellTitleProps) =>
 
   return (
     <EuiText size="s">
-      {/* eslint-disable-next-line @elastic/eui/href-or-on-click -- Intentional when `useHref` preserves native link affordances while `onClick` handles plain clicks. */}
+      {/* eslint-disable-next-line @elastic/eui/href-or-on-click -- Intentional when `shouldUseHref` preserves native link affordances while `onClick` handles plain clicks. */}
       <EuiLink href={href} onClick={handleClick} data-test-subj="content-list-table-item-link">
         {title}
       </EuiLink>

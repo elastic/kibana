@@ -116,13 +116,13 @@ describe('name column builder', () => {
 
     it('passes title click handlers through to the rendered name cell', () => {
       const handleClick = jest.fn();
-      const props: NameColumnProps = { onClick: handleClick, useHref: true };
+      const props: NameColumnProps = { onClick: handleClick, shouldUseHref: true };
       const result = buildNameColumn(props, defaultContext) as NameColumn;
 
       const item = { id: '1', title: 'Test' };
       const rendered = result.render?.('Test', item) as React.ReactElement;
 
-      expect(rendered.props).toMatchObject({ onClick: handleClick, useHref: true });
+      expect(rendered.props).toMatchObject({ onClick: handleClick, shouldUseHref: true });
     });
   });
 
