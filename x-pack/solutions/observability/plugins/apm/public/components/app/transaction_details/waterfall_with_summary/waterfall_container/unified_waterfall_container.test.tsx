@@ -32,9 +32,11 @@ jest.mock('../../../../../context/apm_plugin/use_apm_plugin_context', () => ({
   }),
 }));
 
+const mockRouterLink = jest.fn().mockReturnValue('/mock-service-overview-url');
+
 jest.mock('../../../../../hooks/use_apm_router', () => ({
   useApmRouter: () => ({
-    link: jest.fn().mockReturnValue('/mock-url'),
+    link: mockRouterLink,
   }),
 }));
 
@@ -137,6 +139,7 @@ describe('UnifiedWaterfallContainer', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockRouterLink.mockReturnValue('/mock-service-overview-url');
   });
 
   afterEach(() => {
@@ -287,6 +290,32 @@ describe('UnifiedWaterfallContainer', () => {
 
       await waitFor(() =>
         expect(queryByTestId('waterfallSizeWarningDiscoverLink')).not.toBeInTheDocument()
+      );
+    });
+  });
+
+  describe('service badge navigation', () => {
+    it('service name badge has href pointing to service overview', async () => {
+      const { getAllByTestId } = renderUnifiedWaterfallContainer();
+
+      await waitFor(() => getAllByTestId('apmBarDetailsServiceNameBadge'));
+
+      const badges = getAllByTestId('apmBarDetailsServiceNameBadge');
+      badges.forEach((badge) => {
+        expect(badge).toHaveAttribute('href', '/mock-service-overview-url');
+      });
+    });
+
+    it('builds the href using the service name from the trace item', async () => {
+      const { getAllByTestId } = renderUnifiedWaterfallContainer();
+
+      await waitFor(() => getAllByTestId('apmBarDetailsServiceNameBadge'));
+
+      expect(mockRouterLink).toHaveBeenCalledWith(
+        '/services/{serviceName}/overview',
+        expect.objectContaining({
+          path: { serviceName: 'products-service' },
+        })
       );
     });
   });

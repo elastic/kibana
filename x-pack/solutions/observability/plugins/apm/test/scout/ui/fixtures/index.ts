@@ -33,6 +33,7 @@ import { ServiceDetailsPage } from './page_objects/service_details/service_detai
 import { DependenciesInventoryPage } from './page_objects/dependencies_inventory';
 import { APM_ROLES } from './constants';
 import { DependencyDetailsPage } from './page_objects/dependency_details/dependency_details';
+import { AlertDetailsPage } from './page_objects/alert_details';
 import { AlertsControls } from './page_objects/alerts_controls/alerts_controls';
 
 export interface ApmBrowserAuthFixture extends BrowserAuthFixture {
@@ -60,6 +61,7 @@ export interface ExtendedScoutTestFixtures extends ObltTestFixtures {
     serviceDetailsPage: ServiceDetailsPage;
     dependenciesInventoryPage: DependenciesInventoryPage;
     dependencyDetailsPage: DependencyDetailsPage;
+    alertDetailsPage: AlertDetailsPage;
     alertsControls: AlertsControls;
   };
   browserAuth: ApmBrowserAuthFixture;
@@ -102,6 +104,7 @@ export const test = baseWithSynthtrace.extend<
       serviceDetailsPage: createLazyPageObject(ServiceDetailsPage, page, kbnUrl),
       dependenciesInventoryPage: createLazyPageObject(DependenciesInventoryPage, page, kbnUrl),
       dependencyDetailsPage: createLazyPageObject(DependencyDetailsPage, page, kbnUrl),
+      alertDetailsPage: createLazyPageObject(AlertDetailsPage, page),
       alertsControls: createLazyPageObject(AlertsControls, page),
     };
 

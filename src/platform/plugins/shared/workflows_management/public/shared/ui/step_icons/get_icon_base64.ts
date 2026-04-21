@@ -102,11 +102,7 @@ export interface GetIconBase64Params {
   kind: 'trigger' | 'step';
 }
 
-const DEFAULT_CONNECTOR_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
-    <circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="2"/>
-    <circle cx="8" cy="8" r="2" fill="currentColor"/>
-  </svg>`;
-const DEFAULT_CONNECTOR_DATA_URL = `data:image/svg+xml;base64,${btoa(DEFAULT_CONNECTOR_SVG)}`;
+const DEFAULT_CONNECTOR_DATA_URL = HardcodedIcons.default;
 
 const triggerIconDataUrlCache = new Map<string, string>();
 
@@ -147,10 +143,6 @@ export async function getIconBase64(params: GetIconBase64Params): Promise<string
   }
 
   try {
-    if (icon) {
-      const fallback = defaultFallbackForStep(params);
-      return resolveIconToDataUrl(icon, fallback);
-    }
     if (actionTypeId === 'elasticsearch') {
       return getDataUrlFromReactComponent(ElasticsearchLogo, DEFAULT_CONNECTOR_DATA_URL);
     }
@@ -160,6 +152,9 @@ export async function getIconBase64(params: GetIconBase64Params): Promise<string
     const hardcodedIcon = HardcodedIcons[actionTypeId];
     if (hardcodedIcon) {
       return hardcodedIcon;
+    }
+    if (icon) {
+      return resolveIconToDataUrl(icon, defaultFallbackForStep(params));
     }
     return defaultFallbackForStep(params);
   } catch {

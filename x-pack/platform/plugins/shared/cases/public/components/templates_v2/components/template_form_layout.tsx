@@ -22,8 +22,15 @@ import { TEMPLATE_PREVIEW_WIDTH_KEY } from '../constants';
 import { TemplateFormHeader } from './template_form_header';
 import { TemplateResetModal } from './template_reset_modal';
 import { TemplateEditorLayout } from './template_editor_layout';
-import { updateYamlFieldDefault } from '../utils/update_yaml_field_default';
-import { FieldType } from '../field_types/constants';
+import {
+  type FieldDefaultValue,
+  updateYamlFieldDefault,
+  removeYamlFieldDefault,
+} from '../utils/update_yaml_field_default';
+import {
+  FieldType,
+  UserPickerDefaultSchema,
+} from '../../../../common/types/domain/template/fields';
 
 interface TemplateFormLayoutProps {
   form: UseFormReturn<YamlEditorFormValues>;
@@ -84,8 +91,39 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
 
   const handleFieldDefaultChange = useCallback(
     (fieldName: string, value: string, control: string) => {
-      const isNumericControl = control === FieldType.INPUT_NUMBER;
-      const parsedValue = isNumericControl && value !== '' ? Number(value) : value;
+      const trimmedValue = value.trim();
+
+      const isEmptyNumeric = control === FieldType.INPUT_NUMBER && trimmedValue === '';
+      const isEmptyUserPicker =
+        control === FieldType.USER_PICKER && (value === '' || value === '[]');
+
+      if (isEmptyNumeric || isEmptyUserPicker) {
+        const updatedYaml = removeYamlFieldDefault(yamlValueRef.current, fieldName);
+        if (updatedYaml !== yamlValueRef.current) {
+          onYamlChange(updatedYaml);
+        }
+        return;
+      }
+
+      let parsedValue: FieldDefaultValue;
+      if (control === FieldType.INPUT_NUMBER) {
+        parsedValue = Number(trimmedValue);
+      } else if (control === FieldType.CHECKBOX_GROUP) {
+        try {
+          parsedValue = JSON.parse(value) as string[];
+        } catch {
+          parsedValue = [];
+        }
+      } else if (control === FieldType.USER_PICKER) {
+        try {
+          const result = UserPickerDefaultSchema.safeParse(JSON.parse(value));
+          parsedValue = result.success ? result.data : [];
+        } catch {
+          parsedValue = [];
+        }
+      } else {
+        parsedValue = trimmedValue;
+      }
       const updatedYaml = updateYamlFieldDefault(yamlValueRef.current, fieldName, parsedValue);
       if (updatedYaml !== yamlValueRef.current) {
         onYamlChange(updatedYaml);

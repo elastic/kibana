@@ -6,8 +6,8 @@
  */
 
 import type { KibanaRequest, ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { InferenceConnector } from '@kbn/inference-common';
+import type { ActionsClientProvider } from '../types';
 import { getDefaultConnector } from '../../common/utils/get_default_connector';
 import { getConnectorList } from './get_connector_list';
 
@@ -17,7 +17,7 @@ export const loadDefaultConnector = async ({
   esClient,
   logger,
 }: {
-  actions: ActionsPluginStart;
+  actions: ActionsClientProvider;
   request: KibanaRequest;
   esClient: ElasticsearchClient;
   logger: Logger;

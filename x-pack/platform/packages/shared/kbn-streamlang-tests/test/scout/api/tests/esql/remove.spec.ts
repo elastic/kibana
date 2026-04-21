@@ -27,7 +27,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docs = [{ temp_field: 'to-be-removed', message: 'keep-this' }];
       await testBed.ingest(indexName, docs);
@@ -54,7 +54,7 @@ apiTest.describe(
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL);
 
         const docWithField = { temp_field: 'to-be-removed', message: 'doc1' };
         const docWithoutField = { message: 'doc2' }; // Should be filtered out
@@ -82,7 +82,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docWithField = { temp_field: 'to-be-removed', message: 'doc1' };
       const docWithoutField = { message: 'doc2' }; // Should pass through
@@ -114,7 +114,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docs = [
         { temp_data: 'remove-me', event: { kind: 'test' }, message: 'doc1' },
@@ -146,7 +146,7 @@ apiTest.describe(
           } as RemoveProcessor,
         ],
       };
-      expect(() => transpile(streamlangDSL)).toThrow(
+      await expect(transpile(streamlangDSL)).rejects.toThrow(
         'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names'
       );
     });

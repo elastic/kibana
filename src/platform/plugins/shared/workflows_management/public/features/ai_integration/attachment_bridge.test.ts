@@ -159,6 +159,76 @@ describe('AttachmentBridge: workflow navigation', () => {
   });
 });
 
+describe('AttachmentBridge: onProposalReceived workflowId', () => {
+  it('does not fall back to attachmentId when event workflowId is undefined', () => {
+    const chat$ = new Subject<BrowserChatEvent>();
+    const editor = createMockEditor('yaml: content');
+    const editorRef = { current: editor };
+    const tracker = new ProposalTracker();
+    const { manager } = createMockProposalManager();
+
+    const onProposalReceived = jest.fn();
+
+    const bridge = new AttachmentBridge();
+    bridge.start(chat$, manager, editorRef, tracker, {
+      workflowId: 'attachment-uuid-not-a-real-workflow-id',
+      onProposalReceived,
+    });
+
+    chat$.next(
+      makeYamlChangedEvent({
+        proposalId: 'p1',
+        beforeYaml: 'yaml: content',
+        afterYaml: 'yaml: changed',
+        toolId: 'some.tool',
+      })
+    );
+
+    expect(onProposalReceived).toHaveBeenCalledTimes(1);
+    expect(onProposalReceived).toHaveBeenCalledWith({
+      proposalId: 'p1',
+      toolId: 'some.tool',
+      workflowId: undefined,
+    });
+
+    bridge.stop();
+  });
+
+  it('passes real workflowId from event payload when present', () => {
+    const chat$ = new Subject<BrowserChatEvent>();
+    const editor = createMockEditor('yaml: content');
+    const editorRef = { current: editor };
+    const tracker = new ProposalTracker();
+    const { manager } = createMockProposalManager();
+
+    const onProposalReceived = jest.fn();
+
+    const bridge = new AttachmentBridge();
+    bridge.start(chat$, manager, editorRef, tracker, {
+      workflowId: 'real-workflow-id',
+      onProposalReceived,
+    });
+
+    chat$.next(
+      makeYamlChangedEvent({
+        proposalId: 'p1',
+        beforeYaml: 'yaml: content',
+        afterYaml: 'yaml: changed',
+        workflowId: 'real-workflow-id',
+        toolId: 'some.tool',
+      })
+    );
+
+    expect(onProposalReceived).toHaveBeenCalledWith({
+      proposalId: 'p1',
+      toolId: 'some.tool',
+      workflowId: 'real-workflow-id',
+    });
+
+    bridge.stop();
+  });
+});
+
 describe('AttachmentBridge: sequential events delegate to applyAfterYaml', () => {
   const ORIGINAL_YAML = [
     "version: '1'",

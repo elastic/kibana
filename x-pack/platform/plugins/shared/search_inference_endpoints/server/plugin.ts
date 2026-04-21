@@ -20,7 +20,10 @@ import type { SearchInferenceEndpointsConfig } from './config';
 import { DynamicConnectorsPoller } from './lib/dynamic_connectors';
 import { defineRoutes } from './routes';
 import { InferenceFeatureRegistry } from './inference_feature_registry';
-import { getForFeature as getForFeatureFn } from './inference_endpoints';
+import {
+  getForFeature as getForFeatureFn,
+  getForFeatureWithDefault as getForFeatureWithDefaultFn,
+} from './inference_endpoints';
 import { createInferenceSettingsSavedObjectType } from './saved_objects/inference_settings';
 import type {
   SearchInferenceEndpointsPluginSetup,
@@ -86,12 +89,18 @@ export class SearchInferenceEndpointsPlugin
       return pluginsStart.inference.getConnectorList(request);
     };
 
+    const getConnectorById = async (id: string, request: KibanaRequest) => {
+      const [, pluginsStart] = await core.getStartServices();
+      return pluginsStart.inference.getConnectorById(id, request);
+    };
+
     defineRoutes({
       logger: this.logger,
       router,
       featureRegistry: this.featureRegistry,
       getForFeature,
       getConnectorList,
+      getConnectorById,
     });
 
     plugins.features.registerKibanaFeature({
@@ -103,7 +112,11 @@ export class SearchInferenceEndpointsPlugin
       app: [],
       catalogue: [],
       management: {
-        ml: [ELASTIC_INFERENCE_SERVICE_APP_ID, INFERENCE_ENDPOINTS_APP_ID, MODEL_SETTINGS_APP_ID],
+        modelManagement: [
+          ELASTIC_INFERENCE_SERVICE_APP_ID,
+          INFERENCE_ENDPOINTS_APP_ID,
+          MODEL_SETTINGS_APP_ID,
+        ],
       },
       privileges: {
         all: {
@@ -111,7 +124,7 @@ export class SearchInferenceEndpointsPlugin
           api: [ApiPrivileges.manage(PLUGIN_ID)],
           catalogue: [],
           management: {
-            ml: [
+            modelManagement: [
               ELASTIC_INFERENCE_SERVICE_APP_ID,
               INFERENCE_ENDPOINTS_APP_ID,
               MODEL_SETTINGS_APP_ID,
@@ -169,14 +182,18 @@ export class SearchInferenceEndpointsPlugin
       endpoints: {
         getForFeature: (featureId: string, request: KibanaRequest) => {
           const soClient = core.savedObjects.createInternalRepository([INFERENCE_SETTINGS_SO_TYPE]);
+          const uiSettingsClient = core.uiSettings.asScopedToClient(
+            core.savedObjects.getScopedClient(request)
+          );
           const getConnectorById = (id: string) => plugins.inference.getConnectorById(id, request);
-          return getForFeatureFn(
-            featureRegistry,
+          return getForFeatureWithDefaultFn({
+            registry: featureRegistry,
             soClient,
+            uiSettingsClient,
             getConnectorById,
             featureId,
-            this.logger
-          );
+            logger: this.logger,
+          });
         },
       },
     };

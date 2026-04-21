@@ -79,7 +79,7 @@ export const LogEntryActionsMenu = ({ logEntry }: LogEntryActionsMenuProps) => {
           data-test-subj="logEntryActionsMenuButton"
           disabled={!hasMenuItems}
           iconSide="right"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           onClick={toggle}
         >
           <FormattedMessage

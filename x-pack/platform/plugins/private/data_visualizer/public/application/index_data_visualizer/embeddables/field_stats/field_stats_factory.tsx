@@ -199,7 +199,7 @@ export const getFieldStatsChartEmbeddableFactory = (
         };
       };
 
-      const unsavedChangesApi = initializeUnsavedChanges({
+      const unsavedChangesApi = initializeUnsavedChanges<FieldStatisticsTableEmbeddableState>({
         uuid,
         parentApi,
         serializeState,

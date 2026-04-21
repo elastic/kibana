@@ -222,4 +222,57 @@ test.describe('WorkflowsList/ImportExport', { tag: [...tags.stateful.classic] },
     const filename = download.suggestedFilename();
     expect(filename).toContain('.zip');
   });
+
+  test('should show file size error for oversized files', async ({ pageObjects }) => {
+    await pageObjects.workflowList.navigate();
+    await pageObjects.workflowList.clickImportButton();
+
+    const flyout = pageObjects.workflowList.getImportFlyout();
+    await expect(flyout).toBeVisible();
+
+    // Create a file exceeding 10 MB
+    const oversizedContent = 'x'.repeat(11 * 1024 * 1024);
+    await pageObjects.workflowList.uploadFile(
+      toFilePayload('huge.yml', oversizedContent, 'text/yaml')
+    );
+
+    // The import confirm button should remain disabled
+    await expect(
+      pageObjects.workflowList
+        .getImportFlyout()
+        .locator('[data-test-subj="import-workflows-confirm"]')
+    ).toBeDisabled();
+  });
+
+  test('should show parse error callout when ZIP contains non-YAML entries', async ({
+    pageObjects,
+  }) => {
+    const zip = new AdmZip();
+    const validYaml = getListTestWorkflowYaml({
+      name: 'ImportParseError Valid',
+      description: 'valid entry',
+      enabled: false,
+    });
+    const wfId = `workflow-${generateUuid()}`;
+    zip.addFile(`${wfId}.yml`, Buffer.from(validYaml, 'utf-8'));
+    zip.addFile('readme.txt', Buffer.from('not a workflow', 'utf-8'));
+    const manifest = YAML.stringify({
+      exportedCount: 1,
+      exportedAt: new Date().toISOString(),
+      version: '1',
+    });
+    zip.addFile('manifest.yml', Buffer.from(manifest, 'utf-8'));
+    const zipBuffer = await zip.toBufferPromise();
+
+    await pageObjects.workflowList.navigate();
+    await pageObjects.workflowList.clickImportButton();
+    await pageObjects.workflowList.uploadFile(
+      toFilePayload('mixed.zip', zipBuffer, 'application/zip')
+    );
+
+    // The valid workflow should still appear in the import preview
+    await expect(
+      pageObjects.workflowList.getImportFlyout().locator('text=ImportParseError Valid')
+    ).toBeVisible();
+  });
 });

@@ -41,6 +41,14 @@ const getAllowedPackage = (filePath) => {
     return { package: '@kbn/scout' };
   }
 
+  // example plugins (OSS and x-pack)
+  if (/\/examples\/[^/]+\/test\/(?:scout|scout_\w+)\//.test(filePath)) {
+    return { package: '@kbn/scout' };
+  }
+  if (/\/x-pack\/examples\/[^/]+\/test\/(?:scout|scout_\w+)\//.test(filePath)) {
+    return { package: '@kbn/scout' };
+  }
+
   return null;
 };
 

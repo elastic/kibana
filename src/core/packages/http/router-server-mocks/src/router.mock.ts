@@ -51,6 +51,8 @@ export interface RequestFixtureOptions<P = any, Q = any, B = any> {
   body?: Record<string, any>;
   query?: Record<string, any>;
   path?: string;
+  // Sets Hapi request.route.path
+  routePath?: string;
   method?: RouteMethod;
   socket?: Socket;
   routeTags?: string[];
@@ -74,6 +76,7 @@ function createKibanaRequestMock<P = any, Q = any, B = any>({
   socket = new Socket(),
   routeTags,
   routeAuthRequired,
+  routePath,
   validation = {},
   kibanaRouteOptions = { xsrfRequired: true, access: 'internal' },
   kibanaRequestState = {
@@ -98,6 +101,7 @@ function createKibanaRequestMock<P = any, Q = any, B = any>({
       method,
       url,
       route: {
+        ...(routePath ? { path: routePath } : {}),
         // @ts-expect-error According to types/hapi__hapi the following settings-fields have problems:
         // - `auth` can't be a boolean, but it can according to the @hapi/hapi source (https://github.com/hapijs/hapi/blob/v18.4.2/lib/route.js#L139)
         // - `app` isn't a valid property, but it is and this was fixed in the types in v19.0.1 (https://github.com/DefinitelyTyped/DefinitelyTyped/pull/41968)

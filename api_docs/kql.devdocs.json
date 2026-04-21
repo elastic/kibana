@@ -832,6 +832,24 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.QueryStringInputProps.suggestionsDebounceMs",
+            "type": "number",
+            "tags": [],
+            "label": "suggestionsDebounceMs",
+            "description": [
+              "\nDebounce delay in ms for fetching suggestions. Defaults to 100."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 155,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1042,7 +1060,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"cases\" | \"rules\" | \"alerts\" | \"endpoints\""
+              "\"cases\" | \"rules\" | \"alerts\" | \"endpoints\" | \"notification_policies\""
             ],
             "path": "src/platform/plugins/shared/kql/public/components/typeahead/suggestions_component.tsx",
             "lineNumber": 42,

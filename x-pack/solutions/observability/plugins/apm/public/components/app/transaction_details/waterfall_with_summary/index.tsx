@@ -192,7 +192,7 @@ export function WaterfallWithSummary<TSample extends {}>({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <OpenInDiscover
-                  variant="button"
+                  variant="emptyButton"
                   dataTestSubj="apmWaterfallOpenInDiscoverButton"
                   indexType="traces"
                   rangeFrom={rangeFrom}

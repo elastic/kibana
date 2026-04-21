@@ -323,7 +323,7 @@ export enum Location {
 }
 
 export enum UnmappedFieldsStrategy {
-  FAIL = 'FAIL',
+  DEFAULT = 'DEFAULT',
   NULLIFY = 'NULLIFY',
   LOAD = 'LOAD',
 }

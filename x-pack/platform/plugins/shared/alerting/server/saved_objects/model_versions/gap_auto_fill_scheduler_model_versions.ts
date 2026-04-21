@@ -7,6 +7,7 @@
 
 import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
 import { rawGapAutoFillSchedulerSchemaV1 } from '../schemas/raw_gap_auto_fill_scheduler';
+import { rawGapAutoFillSchedulerSchemaV2 } from '../schemas/raw_gap_auto_fill_scheduler/v2';
 
 export const gapAutoFillSchedulerModelVersions: SavedObjectsModelVersionMap = {
   '1': {
@@ -14,6 +15,13 @@ export const gapAutoFillSchedulerModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       forwardCompatibility: rawGapAutoFillSchedulerSchemaV1.extends({}, { unknowns: 'ignore' }),
       create: rawGapAutoFillSchedulerSchemaV1,
+    },
+  },
+  '2': {
+    changes: [],
+    schemas: {
+      forwardCompatibility: rawGapAutoFillSchedulerSchemaV2.extends({}, { unknowns: 'ignore' }),
+      create: rawGapAutoFillSchedulerSchemaV2,
     },
   },
 };

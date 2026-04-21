@@ -40,7 +40,6 @@ export function SpanLinksTable({ items }: Props) {
   } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view',
-    '/traces/explorer/waterfall',
     '/dependencies/operation'
   );
   const [idActionMenuOpen, setIdActionMenuOpen] = useState<string | undefined>();
@@ -120,7 +119,11 @@ export function SpanLinksTable({ items }: Props) {
           return (
             <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiIcon type={getSpanIcon(details.spanType, details.spanSubtype)} size="l" />
+                <EuiIcon
+                  type={getSpanIcon(details.spanType, details.spanSubtype)}
+                  size="l"
+                  aria-hidden={true}
+                />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiLink
@@ -171,13 +174,16 @@ export function SpanLinksTable({ items }: Props) {
         const id = `${traceId}:${spanId}`;
         return (
           <EuiPopover
+            aria-label={i18n.translate('xpack.apm.spanLinks.table.actions.ariaLabel', {
+              defaultMessage: 'Actions',
+            })}
             button={
               <EuiButtonIcon
                 data-test-subj="apmColumnsButton"
                 aria-label={i18n.translate('xpack.apm.spanLinks.table.actions.edit.ariaLabel', {
                   defaultMessage: 'Edit',
                 })}
-                iconType="boxesHorizontal"
+                iconType="boxesVertical"
                 onClick={() => {
                   setIdActionMenuOpen(id);
                 }}

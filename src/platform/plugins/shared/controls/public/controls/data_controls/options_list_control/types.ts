@@ -10,13 +10,18 @@
 import type { Subject } from 'rxjs';
 
 import type {
-  OptionsListControlState,
   OptionsListSelection,
   OptionsListSortingType,
   DataControlState,
+  OptionsListDSLControlState,
 } from '@kbn/controls-schemas';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { HasType, HasUniqueId, PublishingSubject } from '@kbn/presentation-publishing';
+import type {
+  HasType,
+  HasUniqueId,
+  PublishesUnsavedChanges,
+  PublishingSubject,
+} from '@kbn/presentation-publishing';
 import type { SettersOf, SubjectsOf } from '@kbn/presentation-publishing/state_manager/types';
 import type { DataControlApi, PublishesField } from '../types';
 import type { EditorState } from './editor_state_manager';
@@ -24,8 +29,9 @@ import type { SelectionsState } from './selections_manager';
 import type { TemporaryState } from './temporay_state_manager';
 import type { OptionsListPublishesOptions, OptionsListSelectionsApi } from '../../types';
 
-export type OptionsListControlApi = DefaultEmbeddableApi<OptionsListControlState> &
-  DataControlApi & {
+export type OptionsListControlApi = DefaultEmbeddableApi<OptionsListDSLControlState> &
+  DataControlApi &
+  PublishesUnsavedChanges & {
     setSelectedOptions: (options: OptionsListSelection[]) => void;
     clearSelections: () => void;
     hasSelections$: PublishingSubject<boolean | undefined>;

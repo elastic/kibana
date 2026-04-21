@@ -18,7 +18,7 @@ import { DEFAULT_ANOMALY_SCORE, ML_GROUP_IDS } from '../../../../../../common/co
 import { IdentifierType } from '../../../../../../common/api/entity_analytics/common/common.gen';
 import type { EntityType } from '../../../../../../common/api/entity_analytics';
 import type { SecurityMlJobsSkillsContext } from '../../security_ml_jobs_skill';
-import { createFindMlJobsAndIndicesGraph } from './graph';
+import { findMatchingMlJobs } from './find_matching_ml_jobs';
 
 export const SECURITY_ML_JOBS_INLINE_TOOL = `security.ml.jobs`;
 
@@ -39,6 +39,9 @@ const isSecurityJob = (job: ModuleJob): boolean =>
 export interface SecurityJobType {
   id: string;
   description?: string;
+}
+
+interface InternalJobType extends SecurityJobType {
   influencers?: string[];
   isJobStarted: boolean;
 }
@@ -46,11 +49,10 @@ export interface SecurityJobType {
 export interface ActiveMlModules {
   moduleTitle: string;
   moduleDescription: string;
-  moduleJobs: Array<SecurityJobType>;
+  moduleJobs: Array<InternalJobType>;
 }
 
 const getActiveMlModules = async (
-  request: KibanaRequest,
   soClient: SavedObjectsClientContract,
   ml?: SecurityMlJobsSkillsContext['ml']
 ): Promise<ActiveMlModules[]> => {
@@ -84,10 +86,9 @@ export const securityMlJobsInlineToolHandler = async (
   toolContext: ToolHandlerContext & SecurityMlJobsSkillsContext
 ) => {
   try {
-    const { getStartServices, esClient, logger, ml, modelProvider, request, savedObjectsClient } =
-      toolContext;
+    const { getStartServices, logger, ml, modelProvider, savedObjectsClient } = toolContext;
 
-    logger.info(
+    logger.debug(
       `${SECURITY_ML_JOBS_INLINE_TOOL} tool called with args: ${JSON.stringify(toolArgs)}`
     );
 
@@ -95,18 +96,15 @@ export const securityMlJobsInlineToolHandler = async (
     const uiSettingsClient = core.uiSettings.asScopedToClient(savedObjectsClient);
 
     const anomalyScore = await uiSettingsClient.get<number>(DEFAULT_ANOMALY_SCORE);
-    const activeMlModules = await getActiveMlModules(request, savedObjectsClient, ml);
+    const activeMlModules = await getActiveMlModules(savedObjectsClient, ml);
     const model = await modelProvider.getDefaultModel();
 
-    const graph = createFindMlJobsAndIndicesGraph({
+    const matchingJobs = await findMatchingMlJobs({
       activeMlModules,
       entityType: toolArgs.entityType,
-      esClient: esClient.asCurrentUser,
       model,
       prompt: toolArgs.prompt,
-      threshold: anomalyScore,
     });
-    const outState = await graph.invoke({});
 
     return {
       results: [
@@ -114,9 +112,8 @@ export const securityMlJobsInlineToolHandler = async (
           tool_result_id: getToolResultId(),
           type: ToolResultType.other,
           data: {
-            activeJobIds: outState.recommendedStartedJobIds,
-            allJobs: outState.recommendedJobs,
-            indices: outState.indices,
+            activeJobIds: matchingJobs.recommendedStartedJobIds,
+            allJobs: matchingJobs.recommendedJobs,
             scoreThreshold: anomalyScore,
           },
         },

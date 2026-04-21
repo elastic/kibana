@@ -394,7 +394,9 @@ export const makeSelectNotesBySavedObjectId = () =>
   createSelector(
     [selectAllNotes, (_: State, savedObjectId: string) => savedObjectId],
     (notes, savedObjectId) =>
-      fallbackToEmptyArray(notes.filter((note) => note.timelineId === savedObjectId))
+      fallbackToEmptyArray(
+        notes.filter((note) => savedObjectId !== '' && note.timelineId === savedObjectId)
+      )
   );
 
 export const selectDocumentNotesBySavedObjectId = createSelector(

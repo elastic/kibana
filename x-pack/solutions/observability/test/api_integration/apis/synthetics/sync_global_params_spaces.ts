@@ -16,7 +16,10 @@ import { omit } from 'lodash';
 import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
-import { PrivateLocationTestService } from './services/private_location_test_service';
+import {
+  PrivateLocationTestService,
+  cleanSyntheticsTestData,
+} from './services/private_location_test_service';
 import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_policy';
 import { omitMonitorKeys } from './add_monitor';
 
@@ -41,8 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       await testPrivateLocations.cleanupFleetPolicies();
-      await kServer.savedObjects.cleanStandardList();
-      await testPrivateLocations.installSyntheticsPackage();
+      await cleanSyntheticsTestData(kServer);
       _browserMonitorJson = getFixtureJson('browser_monitor');
     });
 
@@ -54,7 +56,7 @@ export default function ({ getService }: FtrProviderContext) {
       const data = await monitorTestService.addsNewSpace();
       spaceId = data.SPACE_ID;
       locWithSpace = await testPrivateLocations.createPrivateLocation({
-        spaceId,
+        spaces: ['default', spaceId],
         label: 'Test private location 1',
       });
       loc2WithSpace = await testPrivateLocations.createPrivateLocation({
@@ -120,6 +122,7 @@ export default function ({ getService }: FtrProviderContext) {
           isBrowser: true,
           location: { id: locWithSpace.agentPolicyId },
           packageVersion: testPrivateLocations.installedVersion,
+          spaceIds: [spaceId, 'default'],
         })
       );
     });
@@ -171,6 +174,7 @@ export default function ({ getService }: FtrProviderContext) {
           isBrowser: true,
           location: { id: locWithSpace.agentPolicyId },
           packageVersion: testPrivateLocations.installedVersion,
+          spaceIds: [spaceId, 'default'],
         })
       );
     });
@@ -215,6 +219,7 @@ export default function ({ getService }: FtrProviderContext) {
           isBrowser: true,
           location: { id: locWithSpace.id },
           packageVersion: testPrivateLocations.installedVersion,
+          spaceIds: [spaceId, 'default'],
         })
       );
     });
@@ -241,6 +246,7 @@ export default function ({ getService }: FtrProviderContext) {
           isBrowser: true,
           location: { id: locWithSpace.id },
           packageVersion: testPrivateLocations.installedVersion,
+          spaceIds: [spaceId, 'default'],
         })
       );
     });

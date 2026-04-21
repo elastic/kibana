@@ -36,33 +36,13 @@ fileGroups:
     - src/languages/painless/autocomplete_definitions/*.json
     - '!target/**/*'
     - version_dependencies.txt
+  jest-config:
+    - jest.config.js
 tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
   extract-version-dependencies:
     command: node
     args:
-      - $workspaceRoot/scripts/extract_version_dependencies.js
+      - scripts/extract_version_dependencies.js
       - src/platform/packages/shared/kbn-monaco/version_dependencies.txt
       - '--collect'
       - babel-loader
@@ -89,7 +69,7 @@ tasks:
     args:
       - build
     deps:
-      - extract-version-dependencies
+      - ~:extract-version-dependencies
     inputs:
       - '@group(src)'
       - package.json

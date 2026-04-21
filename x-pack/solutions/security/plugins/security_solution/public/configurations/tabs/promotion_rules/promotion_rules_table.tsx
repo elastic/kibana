@@ -34,7 +34,6 @@ import {
   useRuleExecutionStatusColumn,
 } from '../../../detection_engine/rule_management_ui/components/rules_table/use_columns';
 import * as i18n from './translations';
-import { useUserPrivileges } from '../../../common/components/user_privileges';
 
 const INITIAL_SORT_FIELD = 'name';
 
@@ -181,17 +180,13 @@ interface ColumnsProps {
 }
 
 const useRulesColumns = ({ currentTab }: ColumnsProps): Array<EuiBasicTableColumn<Rule>> => {
-  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
-
   const enabledColumn = useEnabledColumn({
-    hasCRUDPermissions: canEditRules,
     isLoadingJobs: false,
     mlJobs: [],
     startMlJobs: async (jobIds: string[] | undefined) => {},
   });
   const executionStatusColumn = useRuleExecutionStatusColumn({
     sortable: true,
-    width: '16%',
     isLoadingJobs: false,
     mlJobs: [],
   });

@@ -459,7 +459,7 @@
               "\nUnique identifier for the palette"
             ],
             "signature": [
-              "\"status\" | \"severity\" | \"default\" | \"complementary\" | \"temperature\" | \"cool\" | \"warm\" | \"gray\" | \"elastic_line_optimized\" | \"neutral\" | \"eui_amsterdam\" | \"behind_text\" | \"kibana_v7_legacy\" | \"elastic_brand_2023\" | \"red\" | \"green\" | \"compare_to\" | \"log_level\" | \"eui_amsterdam_color_blind\""
+              "\"status\" | \"severity\" | \"default\" | \"complementary\" | \"temperature\" | \"elastic_line_optimized\" | \"neutral\" | \"eui_amsterdam\" | \"behind_text\" | \"kibana_v7_legacy\" | \"elastic_brand_2023\" | \"cool\" | \"gray\" | \"red\" | \"green\" | \"warm\" | \"compare_to\" | \"log_level\" | \"eui_amsterdam_color_blind\""
             ],
             "path": "src/platform/packages/shared/kbn-palettes/classes/types.ts",
             "lineNumber": 21,
@@ -708,7 +708,7 @@
         "label": "KbnPaletteId",
         "description": [],
         "signature": [
-          "\"status\" | \"severity\" | \"default\" | \"complementary\" | \"temperature\" | \"cool\" | \"warm\" | \"gray\" | \"elastic_line_optimized\" | \"neutral\" | \"eui_amsterdam\" | \"behind_text\" | \"kibana_v7_legacy\" | \"elastic_brand_2023\" | \"red\" | \"green\" | \"compare_to\" | \"log_level\" | \"eui_amsterdam_color_blind\""
+          "\"status\" | \"severity\" | \"default\" | \"complementary\" | \"temperature\" | \"elastic_line_optimized\" | \"neutral\" | \"eui_amsterdam\" | \"behind_text\" | \"kibana_v7_legacy\" | \"elastic_brand_2023\" | \"cool\" | \"gray\" | \"red\" | \"green\" | \"warm\" | \"compare_to\" | \"log_level\" | \"eui_amsterdam_color_blind\""
         ],
         "path": "src/platform/packages/shared/kbn-palettes/classes/types.ts",
         "lineNumber": 15,

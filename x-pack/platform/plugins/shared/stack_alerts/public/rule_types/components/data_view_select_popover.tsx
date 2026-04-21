@@ -181,6 +181,10 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
   return (
     <EuiPopover
       id="dataViewPopover"
+      aria-label={i18n.translate(
+        'xpack.stackAlerts.components.ui.dataViewSelectPopover.ariaLabel',
+        { defaultMessage: 'Data view' }
+      )}
       button={
         <EuiExpression
           display="columns"
@@ -245,7 +249,7 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
           <EuiPopoverFooter paddingSize="none">
             <EuiButtonEmpty
               css={createDataViewButtonPadding.s}
-              iconType="plusInCircleFilled"
+              iconType="plusCircle"
               data-test-subj="chooseDataViewPopover.createDataViewButton"
               onClick={() => {
                 closeDataViewPopover();

@@ -7,8 +7,7 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiButton, EuiButtonEmpty, EuiLink } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiButton, EuiButtonEmpty, EuiButtonIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useApmIndexSettingsContext } from '../../../../context/apm_index_settings/use_apm_index_settings_context';
 import type { ESQLQueryParams } from './get_esql_query';
@@ -20,28 +19,26 @@ const linkStyle = css`
   align-items: center;
 `;
 
-const OPEN_IN_DISCOVER_LABEL = i18n.translate('xpack.apm.openInDiscover.label', {
-  defaultMessage: 'Open in Discover',
-});
+type DiscoverButtonVariant = 'button' | 'emptyButton' | 'iconButton' | 'link';
 
 interface OpenInDiscoverProps {
   dataTestSubj: string;
-  variant: 'button' | 'outlinedButton' | 'link';
+  label: string;
+  variant: DiscoverButtonVariant;
   indexType: 'traces' | 'error';
   rangeFrom: string;
   rangeTo: string;
   queryParams: ESQLQueryParams;
-  label?: string;
 }
 
 export function OpenInDiscover({
   dataTestSubj,
+  label,
   variant,
   indexType,
   rangeFrom,
   rangeTo,
   queryParams,
-  label = OPEN_IN_DISCOVER_LABEL,
 }: OpenInDiscoverProps) {
   const { indexSettingsStatus } = useApmIndexSettingsContext();
 
@@ -54,43 +51,55 @@ export function OpenInDiscover({
 
   const isDisabled = !discoverHref || indexSettingsStatus !== FETCH_STATUS.SUCCESS;
 
-  if (variant === 'outlinedButton') {
-    return (
-      <EuiButton
-        data-test-subj={dataTestSubj}
-        aria-label={label}
-        isLoading={indexSettingsStatus === FETCH_STATUS.LOADING}
-        isDisabled={isDisabled}
-        iconType="discoverApp"
-        href={discoverHref}
-      >
-        {label}
-      </EuiButton>
-    );
+  switch (variant) {
+    case 'button':
+      return (
+        <EuiButton
+          data-test-subj={dataTestSubj}
+          aria-label={label}
+          isLoading={indexSettingsStatus === FETCH_STATUS.LOADING}
+          isDisabled={isDisabled}
+          iconType="discoverApp"
+          href={discoverHref}
+        >
+          {label}
+        </EuiButton>
+      );
+    case 'emptyButton':
+      return (
+        <EuiButtonEmpty
+          data-test-subj={dataTestSubj}
+          aria-label={label}
+          isLoading={indexSettingsStatus === FETCH_STATUS.LOADING}
+          isDisabled={isDisabled}
+          iconType="discoverApp"
+          href={discoverHref}
+        >
+          {label}
+        </EuiButtonEmpty>
+      );
+    case 'iconButton':
+      return (
+        <EuiToolTip content={label} disableScreenReaderOutput>
+          <EuiButtonIcon
+            data-test-subj={dataTestSubj}
+            aria-label={label}
+            isLoading={indexSettingsStatus === FETCH_STATUS.LOADING}
+            isDisabled={isDisabled}
+            iconType="discoverApp"
+            href={discoverHref}
+          />
+        </EuiToolTip>
+      );
+    case 'link':
+      return (
+        <EuiLink
+          data-test-subj={dataTestSubj}
+          css={linkStyle}
+          {...(isDisabled ? { disabled: true, color: 'subdued' } : { href: discoverHref })}
+        >
+          {label}
+        </EuiLink>
+      );
   }
-
-  if (variant === 'button') {
-    return (
-      <EuiButtonEmpty
-        data-test-subj={dataTestSubj}
-        aria-label={label}
-        isLoading={indexSettingsStatus === FETCH_STATUS.LOADING}
-        isDisabled={isDisabled}
-        iconType="discoverApp"
-        href={discoverHref}
-      >
-        {label}
-      </EuiButtonEmpty>
-    );
-  }
-
-  return (
-    <EuiLink
-      data-test-subj={dataTestSubj}
-      css={linkStyle}
-      {...(isDisabled ? { disabled: true, color: 'subdued' } : { href: discoverHref })}
-    >
-      {label}
-    </EuiLink>
-  );
 }

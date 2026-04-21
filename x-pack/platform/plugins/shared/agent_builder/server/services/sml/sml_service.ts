@@ -75,8 +75,15 @@ class SmlServiceImpl implements SmlServiceInstance {
 
     return {
       getCrawler: () => crawler,
-      search: async ({ keywords, size = 10, spaceId, esClient, request }) => {
-        const rawResults = await searchSml({ keywords, size, spaceId, esClient, logger });
+      search: async ({ query, size = 10, spaceId, esClient, request, skipContent }) => {
+        const rawResults = await searchSml({
+          query,
+          size,
+          spaceId,
+          esClient,
+          logger,
+          skipContent,
+        });
         return filterResultsByPermissions({
           searchResult: rawResults,
           request,
@@ -84,9 +91,9 @@ class SmlServiceImpl implements SmlServiceInstance {
           logger,
         });
       },
-      checkItemsAccess: async ({ items, spaceId, esClient, request }) => {
+      checkItemsAccess: async ({ ids, spaceId, esClient, request }) => {
         return checkItemsAccess({
-          items,
+          ids,
           spaceId,
           esClient,
           request,
@@ -202,14 +209,14 @@ const filterResultsByPermissions = async ({
  * Looks up each item's permissions from the index and batch-checks them.
  */
 const checkItemsAccess = async ({
-  items,
+  ids,
   spaceId,
   esClient,
   request,
   securityAuthz,
   logger,
 }: {
-  items: Array<{ id: string; type: string }>;
+  ids: string[];
   spaceId: string;
   esClient: ElasticsearchClient;
   request: KibanaRequest;
@@ -220,13 +227,11 @@ const checkItemsAccess = async ({
 
   // When the security plugin is absent, grant access to all items.
   if (!securityAuthz) {
-    for (const item of items) {
-      accessMap.set(item.id, true);
+    for (const id of ids) {
+      accessMap.set(id, true);
     }
     return accessMap;
   }
-
-  const ids = items.map((item) => item.id);
 
   let docPermissions: Map<string, string[]>;
   try {
@@ -261,14 +266,14 @@ const checkItemsAccess = async ({
     );
   } catch (error) {
     if (isNotFoundError(error)) {
-      for (const item of items) {
-        accessMap.set(item.id, false);
+      for (const id of ids) {
+        accessMap.set(id, false);
       }
       return accessMap;
     }
     logger.warn(`SML items access check failed: ${(error as Error).message}`);
-    for (const item of items) {
-      accessMap.set(item.id, false);
+    for (const id of ids) {
+      accessMap.set(id, false);
     }
     return accessMap;
   }
@@ -282,18 +287,18 @@ const checkItemsAccess = async ({
     logger,
   });
 
-  for (const item of items) {
-    const perms = docPermissions.get(item.id);
+  for (const id of ids) {
+    const perms = docPermissions.get(id);
     if (!perms) {
-      accessMap.set(item.id, false);
+      accessMap.set(id, false);
       continue;
     }
     if (perms.length === 0) {
-      accessMap.set(item.id, true);
+      accessMap.set(id, true);
       continue;
     }
     accessMap.set(
-      item.id,
+      id,
       perms.every((p) => authorizedPerms.has(p))
     );
   }
@@ -301,27 +306,29 @@ const checkItemsAccess = async ({
   return accessMap;
 };
 
+const SML_SEARCH_AS_YOU_TYPE_FIELDS = [
+  'title',
+  'title._2gram', // Combination of two words
+  'title._3gram', // Combination of three words
+  'title._index_prefix',
+  'type.autocomplete',
+  'type.autocomplete._index_prefix',
+] as const;
+
 /**
- * Build the content query clause from an array of keywords.
- *
- * - `["*"]` or empty array → `match_all` (return everything)
- * - otherwise → `bool.should` with one `multi_match` per keyword (OR logic)
+ * Build the search query from a single string. Only `type` and `title` (search_as_you_type + bool_prefix) are searched.
+ * After trim: empty string or `*` → `match_all` (return everything)
  */
-const buildContentQuery = (keywords: string[]): Record<string, unknown> => {
-  const filtered = keywords.map((k) => k.trim()).filter(Boolean);
-  if (filtered.length === 0 || (filtered.length === 1 && filtered[0] === '*')) {
+const buildSmlSearchQuery = (query: string): Record<string, unknown> => {
+  const trimmed = query.trim();
+  if (trimmed === '' || trimmed === '*') {
     return { match_all: {} };
   }
   return {
-    bool: {
-      should: filtered.map((keyword) => ({
-        multi_match: {
-          query: keyword,
-          fields: ['title^2', 'content'],
-          type: 'best_fields',
-        },
-      })),
-      minimum_should_match: 1,
+    multi_match: {
+      query: trimmed,
+      type: 'bool_prefix',
+      fields: [...SML_SEARCH_AS_YOU_TYPE_FIELDS],
     },
   };
 };
@@ -331,26 +338,28 @@ const buildContentQuery = (keywords: string[]): Record<string, unknown> => {
  * the function returns empty results silently.
  */
 const searchSml = async ({
-  keywords,
+  query,
   size,
   spaceId,
   esClient,
   logger,
+  skipContent,
 }: {
-  keywords: string[];
+  query: string;
   size: number;
   spaceId: string;
   esClient: ElasticsearchClient;
   logger: Logger;
+  skipContent?: boolean;
 }): Promise<{ results: SmlSearchResult[]; total: number }> => {
   logger.debug(
-    `SML search: keywords=${JSON.stringify(
-      keywords
+    `SML search: query=${JSON.stringify(
+      query
     )}, size=${size}, spaceId='${spaceId}', index='${smlIndexName}'`
   );
 
   try {
-    const contentQuery = buildContentQuery(keywords);
+    const smlQuery = buildSmlSearchQuery(query);
 
     const response = await esClient.search<SmlDocument>({
       index: smlIndexName,
@@ -359,7 +368,7 @@ const searchSml = async ({
       ignore_unavailable: true,
       query: {
         bool: {
-          must: [contentQuery],
+          must: [smlQuery],
           filter: [
             {
               bool: {
@@ -370,7 +379,7 @@ const searchSml = async ({
           ],
         },
       },
-      _source: true,
+      _source: skipContent ? { excludes: ['content'] } : true,
     });
 
     const total =
@@ -387,7 +396,7 @@ const searchSml = async ({
           type: source.type ?? '',
           title: source.title ?? '',
           origin_id: source.origin_id ?? '',
-          content: source.content ?? '',
+          content: source.content,
           created_at: source.created_at ?? '',
           updated_at: source.updated_at ?? '',
           spaces: source.spaces ?? [],

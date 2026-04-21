@@ -14,6 +14,7 @@ import {
   getCasesSettingsCasesSubFeature,
   getCasesAddCommentsCasesSubFeature,
   getCasesReopenCaseSubFeature,
+  getCasesManageTemplatesCasesSubFeature,
 } from '../kibana_sub_features';
 import { addAllSubFeatureReplacements } from '../../utils';
 
@@ -26,6 +27,7 @@ export const getCasesBaseKibanaSubFeatureIdsV2 = (): CasesSubFeatureId[] => [
   CasesSubFeatureId.casesSettings,
   CasesSubFeatureId.createComment,
   CasesSubFeatureId.reopenCase,
+  CasesSubFeatureId.manageTemplates,
 ];
 
 /**
@@ -39,6 +41,7 @@ export const getCasesSubFeaturesMapV2 = (params: CasesFeatureParams) => {
     /* The below sub features were newly added in v2 (8.17) */
     [CasesSubFeatureId.createComment, getCasesAddCommentsCasesSubFeature(params)],
     [CasesSubFeatureId.reopenCase, getCasesReopenCaseSubFeature(params)],
+    [CasesSubFeatureId.manageTemplates, getCasesManageTemplatesCasesSubFeature(params)],
   ]);
 
   return addAllSubFeatureReplacements(subFeaturesMap, [{ feature: CASES_FEATURE_ID_V3 }]);

@@ -146,6 +146,45 @@
       },
       {
         "parentPluginId": "@kbn/cps-utils",
+        "id": "def-public.useCpsPickerAccess",
+        "type": "Function",
+        "tags": [],
+        "label": "useCpsPickerAccess",
+        "description": [
+          "\nRegisters a CPS picker access resolver for the current app.\nAutomatically cleans up (sets DISABLED) on unmount.\n\nConsumers are responsible for providing their own resolver logic\nbased on their routing patterns.\n\nNOTE: Call this hook only once per rendered page (at the top-level page component).\nCalling it in nested sub-routes or sub-components risks the cleanup of an inner instance\noverwriting the CPS state set by an outer one."
+        ],
+        "signature": [
+          "({ resolver, currentAppId$, cpsManager, }: UseCpsPickerAccessParams) => void"
+        ],
+        "path": "src/platform/packages/shared/kbn-cps-utils/components/use_cps_picker_access.ts",
+        "lineNumber": 38,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.useCpsPickerAccess.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  resolver,\n  currentAppId$,\n  cpsManager,\n}",
+            "description": [],
+            "signature": [
+              "UseCpsPickerAccessParams"
+            ],
+            "path": "src/platform/packages/shared/kbn-cps-utils/components/use_cps_picker_access.ts",
+            "lineNumber": 38,
+            "columnNumber": 36,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cps-utils",
         "id": "def-public.useFetchProjects",
         "type": "Function",
         "tags": [],
@@ -248,6 +287,104 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cps-utils",
+        "id": "def-public.useRouteBasedCpsPickerAccess",
+        "type": "Function",
+        "tags": [],
+        "label": "useRouteBasedCpsPickerAccess",
+        "description": [],
+        "signature": [
+          "(access: ",
+          {
+            "pluginId": "@kbn/cps-utils",
+            "scope": "public",
+            "docId": "kibKbnCpsUtilsPluginApi",
+            "section": "def-public.ProjectRoutingAccess",
+            "text": "ProjectRoutingAccess"
+          },
+          ", { application, cps }: { application: ApplicationService; cps?: CpsService | undefined; }) => void"
+        ],
+        "path": "src/platform/packages/shared/kbn-cps-utils/components/use_route_based_cps_picker_access.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.useRouteBasedCpsPickerAccess.$1",
+            "type": "Enum",
+            "tags": [],
+            "label": "access",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/cps-utils",
+                "scope": "public",
+                "docId": "kibKbnCpsUtilsPluginApi",
+                "section": "def-public.ProjectRoutingAccess",
+                "text": "ProjectRoutingAccess"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-cps-utils/components/use_route_based_cps_picker_access.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.useRouteBasedCpsPickerAccess.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "{ application, cps }",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-cps-utils/components/use_route_based_cps_picker_access.ts",
+            "lineNumber": 27,
+            "columnNumber": 25,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/cps-utils",
+                "id": "def-public.useRouteBasedCpsPickerAccess.$2.application",
+                "type": "Object",
+                "tags": [],
+                "label": "application",
+                "description": [],
+                "signature": [
+                  "ApplicationService"
+                ],
+                "path": "src/platform/packages/shared/kbn-cps-utils/components/use_route_based_cps_picker_access.ts",
+                "lineNumber": 27,
+                "columnNumber": 27,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/cps-utils",
+                "id": "def-public.useRouteBasedCpsPickerAccess.$2.cps",
+                "type": "Object",
+                "tags": [],
+                "label": "cps",
+                "description": [],
+                "signature": [
+                  "CpsService | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-cps-utils/components/use_route_based_cps_picker_access.ts",
+                "lineNumber": 27,
+                "columnNumber": 60,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "returnComment": [],

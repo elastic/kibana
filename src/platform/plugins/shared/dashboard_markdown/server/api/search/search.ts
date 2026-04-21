@@ -8,9 +8,9 @@
  */
 
 import type { RequestHandlerContext } from '@kbn/core/server';
+import { getMeta } from '@kbn/as-code-shared-schemas';
 import { MARKDOWN_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import type { MarkdownSearchRequestQuery, MarkdownSearchResponseBody } from './types';
-import { getMarkdownMeta } from '../../saved_object_utils';
 import type { MarkdownAttributes } from '../../markdown_saved_object';
 
 export async function search(
@@ -38,7 +38,7 @@ export async function search(
           ...(description && { description }),
           title: title ?? '',
         },
-        meta: getMarkdownMeta(so, 'search'),
+        meta: getMeta(so),
       };
     }),
     page: soResponse.page,

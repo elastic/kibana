@@ -22,6 +22,8 @@ export interface InferenceFeatureConfig {
   taskType: InferenceTaskType;
   maxNumberOfEndpoints?: number;
   recommendedEndpoints: string[];
+  isTechPreview?: boolean;
+  isBeta?: boolean;
 }
 
 export type RegisterResult = { ok: true } | { ok: false; error: string };

@@ -35,6 +35,7 @@ export const processorFieldRenames: Record<string, Record<string, string>> = {
   concat: { to: 'field', where: 'if' },
   network_direction: { where: 'if' },
   json_extract: { where: 'if' },
+  enrich: { to: 'target_field', where: 'if' },
   manual_ingest_pipeline: { where: 'if' },
 };
 

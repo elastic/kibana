@@ -16,6 +16,7 @@ export type {
 } from './date_range_picker';
 export type {
   DateRangePickerSettings,
+  TimePrecision,
   AutoRefreshSettings,
   AutoRefreshIntervalUnit,
 } from './types';

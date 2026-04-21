@@ -311,8 +311,9 @@ describe('Create Default Policy tests ', () => {
         expect(policy[os].memory_protection.mode).toBe('off');
         expect(policy[os].behavior_protection.mode).toBe('off');
       });
-      // Ransomware is windows only
+      // Ransomware is configurable on windows and macOS
       expect(policy.windows.ransomware.mode).toBe('off');
+      expect(policy.mac.ransomware.mode).toBe('off');
     });
   });
 

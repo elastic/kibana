@@ -63,7 +63,9 @@ export interface TabbedContentProps
   onEBTEvent: (event: TabsEBTEvent) => void;
   tabContentIdOverride?: string;
   appendRight?: React.ReactNode;
-  /** Optional function to provide additional menu items for tabs */
+  /** Optional function to provide menu items placed after rename/duplicate */
+  getTopTabMenuItems?: (item: TabItem) => TabMenuItem[];
+  /** Optional function to provide additional menu items placed at the end of the menu */
   getAdditionalTabMenuItems?: (item: TabItem) => TabMenuItem[];
 }
 
@@ -107,6 +109,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   disableDragAndDrop = false,
   disableTabsBarMenu = false,
   appendRight,
+  getTopTabMenuItems,
   getAdditionalTabMenuItems,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -396,6 +399,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
       onDuplicate,
       onCloseOtherTabs,
       onCloseTabsToTheRight,
+      getTopTabMenuItems,
       getAdditionalTabMenuItems,
     });
   }, [
@@ -404,6 +408,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
     onDuplicate,
     onCloseOtherTabs,
     onCloseTabsToTheRight,
+    getTopTabMenuItems,
     getAdditionalTabMenuItems,
   ]);
 

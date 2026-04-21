@@ -15,7 +15,7 @@ import { SECURITY_PROFILE_ID } from '../constants';
 import * as i18n from '../translations';
 import type { SecurityProfileProviderFactory } from '../types';
 import { AlertEventOverviewLazy } from '../components';
-import { isAlertDocument } from '../utils/is_alert_document';
+import { isAlertDocument, isEventDocument } from '../utils/is_alert_document';
 
 export const createSecurityDocumentProfileProvider: SecurityProfileProviderFactory<
   DocumentProfileProvider
@@ -26,11 +26,12 @@ export const createSecurityDocumentProfileProvider: SecurityProfileProviderFacto
       getDocViewer: (prev) => (params) => {
         const prevDocViewer = prev(params);
         const isAlert = isAlertDocument(params.record);
+        const isEvent = isEventDocument(params.record);
 
         return {
           ...prevDocViewer,
           docViewsRegistry: (registry) => {
-            if (isAlert) {
+            if (isAlert || isEvent) {
               registry.add({
                 id: 'doc_view_alerts_overview',
                 title: i18n.overviewTabTitle(isAlert),

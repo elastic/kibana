@@ -105,10 +105,10 @@ if is_pr; then
 
   if ! is_auto_commit_disabled; then
     # The step might update files like removed_types.json and/or SO fixtures
-    node scripts/check_saved_objects --baseline "$MERGE_BASE_REV" "${SERVERLESS_BASELINE_FLAG[@]}" --fix
+    node scripts/check_saved_objects --baseline "$MERGE_BASE_REV" "${SERVERLESS_BASELINE_FLAG[@]}" --algorithm both --fix
     check_for_changed_files "node scripts/check_saved_objects" true
   else
-    node scripts/check_saved_objects --baseline "$MERGE_BASE_REV" "${SERVERLESS_BASELINE_FLAG[@]}"
+    node scripts/check_saved_objects --baseline "$MERGE_BASE_REV" "${SERVERLESS_BASELINE_FLAG[@]}" --algorithm both
   fi
 else
   # We are on the 'on-merge' pipeline, the goal is to test against current serverless release,
@@ -120,6 +120,6 @@ else
       exit 1
     fi
     # Perform the check against current serverless release
-    node scripts/check_saved_objects --baseline "$GITHUB_SERVERLESS_BASELINE_SHA"
+    node scripts/check_saved_objects --baseline "$GITHUB_SERVERLESS_BASELINE_SHA" --algorithm both
   fi
 fi

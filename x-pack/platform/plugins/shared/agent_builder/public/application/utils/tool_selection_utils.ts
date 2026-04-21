@@ -94,6 +94,28 @@ export const toggleToolSelection = (
 };
 
 /**
+ * Returns the list of active tools for an agent, combining explicitly selected tools
+ * with default tools when elastic capabilities are enabled. Default tools that are
+ * already explicitly selected are not duplicated.
+ */
+export const getActiveTools = <T extends ToolSelectionRelevantFields>(
+  allTools: T[],
+  agentToolSelections: ToolSelection[],
+  enableElasticCapabilities: boolean,
+  defaultToolIds: Set<string>
+): T[] => {
+  const explicitTools = allTools.filter((t) => isToolSelected(t, agentToolSelections));
+  if (enableElasticCapabilities) {
+    const explicitIdSet = new Set(explicitTools.map((t) => t.id));
+    const defaultToolsNotExplicit = allTools.filter(
+      (t) => defaultToolIds.has(t.id) && !explicitIdSet.has(t.id)
+    );
+    return [...explicitTools, ...defaultToolsNotExplicit];
+  }
+  return explicitTools;
+};
+
+/**
  * Removes invalid tool references from the agent configuration.
  * Filters out tool IDs that don't exist in the available tools list,
  * while preserving wildcard selections and removing empty selections.

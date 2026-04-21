@@ -56,7 +56,7 @@ export const getPersistableStateAttachmentRegular = (
         label: 'See attachment',
         onClick: () => {},
         isPrimary: true,
-        iconType: 'arrowRight',
+        iconType: 'chevronSingleRight',
       },
     ],
     children: getLazyComponent(EmbeddableComponent),

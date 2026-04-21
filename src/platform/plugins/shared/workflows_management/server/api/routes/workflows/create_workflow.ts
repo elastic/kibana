@@ -15,7 +15,8 @@ import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_CREATE_SECURITY } from '../utils/route_security';
 import { withLicenseCheck } from '../utils/with_license_check';
 
-export function registerCreateWorkflowRoute({ router, api, spaces }: RouteDependencies) {
+export function registerCreateWorkflowRoute(deps: RouteDependencies) {
+  const { router, api, spaces, audit } = deps;
   router.versioned
     .post({
       path: '/api/workflows/workflow',
@@ -45,8 +46,12 @@ export function registerCreateWorkflowRoute({ router, api, spaces }: RouteDepend
         try {
           const spaceId = spaces.getSpaceId(request);
           const createdWorkflow = await api.createWorkflow(request.body, spaceId, request);
+          audit.logWorkflowCreated(request, {
+            id: createdWorkflow.id,
+          });
           return response.ok({ body: createdWorkflow });
         } catch (error) {
+          audit.logWorkflowCreateFailed(request, error);
           return handleRouteError(response, error);
         }
       })

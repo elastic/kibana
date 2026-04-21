@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useContext, useMemo } from 'react';
+import { useContext, useEffect, useMemo } from 'react';
 import * as uuid from 'uuid';
 import {
   type GroupOption,
@@ -14,12 +14,13 @@ import {
   getGroupingQuery,
   useGrouping,
 } from '@kbn/grouping';
-import { parseGroupingQuery } from '@kbn/grouping/src';
+import { parseGroupingQuery, MAX_QUERY_SIZE } from '@kbn/grouping/src';
 import { buildEsQuery, type Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 
 import dedent from 'dedent';
 import type { MappingRuntimeFieldType } from '@elastic/elasticsearch/lib/api/types';
+import type { ESBoolQuery } from '../../../../../../common/typed_json';
 import { useGlobalFilterQuery } from '../../../../../common/hooks/use_global_filter_query';
 import { DataViewContext } from '..';
 import type { EntityURLStateResult } from '../hooks/use_entity_url_state';
@@ -29,20 +30,16 @@ import {
   ENTITY_TYPE_FILTER,
   LOCAL_STORAGE_GROUPING_KEY,
 } from '../constants';
-import { type EntitiesGroupingAggregation, useFetchGroupedData } from './use_fetch_grouped_data';
-import { groupPanelRenderer, groupStatsRenderer } from './entity_group_renderer';
+import {
+  type EntitiesGroupingAggregation,
+  type EntitiesGroupingQuery,
+  useFetchGroupedData,
+  useFetchTargetMetadata,
+} from './use_fetch_grouped_data';
+import { createGroupPanelRenderer, createGroupStatsRenderer } from './entity_group_renderer';
+import { useHasEntityResolutionLicense } from '../../../../../common/hooks/use_has_entity_resolution_license';
 
 const MAX_GROUPING_LEVELS = 3;
-
-const defaultGroupingOptions: GroupOption[] = [
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.entitiesTable.groupBy.entityType',
-      { defaultMessage: 'Entity type' }
-    ),
-    key: ENTITY_GROUPING_OPTIONS.ENTITY_TYPE,
-  },
-];
 
 const entitiesUnit = (totalCount: number) =>
   i18n.translate('xpack.securitySolution.entityAnalytics.entitiesTable.unit', {
@@ -69,7 +66,7 @@ const getTermAggregation = (key: keyof EntitiesGroupingAggregation, field: strin
   },
 });
 
-const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
+export const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
   if (isNoneGroup([field])) {
     return [];
   }
@@ -90,6 +87,62 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
   return aggMetrics;
 };
 
+export const buildResolutionGroupingQuery = ({
+  filters,
+  pageIndex,
+  pageSize,
+}: {
+  filters: ESBoolQuery[];
+  pageIndex: number;
+  pageSize: number;
+}): EntitiesGroupingQuery => ({
+  size: 0,
+  runtime_mappings: {
+    groupByField: {
+      type: 'keyword' as MappingRuntimeFieldType,
+      script: {
+        source: dedent(`
+          if (doc.containsKey('${ENTITY_FIELDS.RESOLVED_TO}')
+              && !doc['${ENTITY_FIELDS.RESOLVED_TO}'].empty) {
+            emit(doc['${ENTITY_FIELDS.RESOLVED_TO}'].value);
+          } else if (doc.containsKey('${ENTITY_FIELDS.ENTITY_ID}')
+              && !doc['${ENTITY_FIELDS.ENTITY_ID}'].empty) {
+            emit(doc['${ENTITY_FIELDS.ENTITY_ID}'].value);
+          }
+        `),
+      },
+    },
+  },
+  aggs: {
+    groupByFields: {
+      terms: {
+        field: 'groupByField',
+        size: MAX_QUERY_SIZE,
+        order: [{ resolutionRiskScore: 'desc' as const }, { _count: 'desc' as const }],
+      },
+      aggs: {
+        resolutionRiskScore: {
+          max: { field: ENTITY_FIELDS.RESOLUTION_RISK_SCORE },
+        },
+        bucket_truncate: {
+          bucket_sort: {
+            from: pageIndex * pageSize,
+            size: pageSize,
+          },
+        },
+      },
+    },
+    unitsCount: { value_count: { field: 'groupByField' } },
+    groupsCount: { cardinality: { field: 'groupByField' } },
+  },
+  query: {
+    bool: {
+      filter: filters,
+    },
+  },
+  _source: false,
+});
+
 export const useEntityGrouping = ({
   state,
   groupFilters = [],
@@ -102,50 +155,77 @@ export const useEntityGrouping = ({
   const { query, setUrlQuery, pageSize, pageIndex } = state;
   const { dataView, dataViewIsLoading } = useContext(DataViewContext);
   const { filterQuery: globalFilterQuery } = useGlobalFilterQuery();
+  const hasResolutionLicense = useHasEntityResolutionLicense();
 
-  const grouping = useGrouping({
-    componentProps: {
-      unit: entitiesUnit,
-      groupPanelRenderer,
-      getGroupStats: groupStatsRenderer,
-      groupsUnit: entitiesGroupsUnit,
-    },
-    defaultGroupingOptions,
-    fields: dataViewIsLoading ? [] : dataView.fields,
-    groupingId: LOCAL_STORAGE_GROUPING_KEY,
-    maxGroupingLevels: MAX_GROUPING_LEVELS,
-    title: groupingTitle,
-    onGroupChange: ({ groupByFields }) => {
-      setUrlQuery({
-        groupBy: groupByFields,
-      });
-    },
-  });
+  const defaultGroupingOptions = useMemo<GroupOption[]>(() => {
+    const resolutionOption: GroupOption = {
+      label: i18n.translate(
+        'xpack.securitySolution.entityAnalytics.entitiesTable.groupBy.resolution',
+        { defaultMessage: 'Resolution' }
+      ),
+      key: ENTITY_GROUPING_OPTIONS.RESOLUTION,
+    };
+    const entityTypeOption: GroupOption = {
+      label: i18n.translate(
+        'xpack.securitySolution.entityAnalytics.entitiesTable.groupBy.entityType',
+        { defaultMessage: 'Entity type' }
+      ),
+      key: ENTITY_GROUPING_OPTIONS.ENTITY_TYPE,
+    };
+    if (hasResolutionLicense) {
+      return [resolutionOption, entityTypeOption];
+    }
+    return [entityTypeOption];
+  }, [hasResolutionLicense]);
+
+  const initialGroupings = useMemo(
+    () => ({
+      groupById: {
+        [LOCAL_STORAGE_GROUPING_KEY]: {
+          activeGroups: hasResolutionLicense
+            ? [ENTITY_GROUPING_OPTIONS.RESOLUTION]
+            : [ENTITY_GROUPING_OPTIONS.NONE],
+          options: defaultGroupingOptions,
+        },
+      },
+    }),
+    [defaultGroupingOptions, hasResolutionLicense]
+  );
 
   const additionalFilters = buildEsQuery(dataView, [], groupFilters);
-  const currentSelectedGroup = selectedGroup || grouping.selectedGroups[0];
-  const isNoneSelected = isNoneGroup(grouping.selectedGroups);
+  const isResolutionGrouping = selectedGroup === ENTITY_GROUPING_OPTIONS.RESOLUTION;
   const uniqueValue = useMemo(() => `${selectedGroup}-${uuid.v4()}`, [selectedGroup]);
 
-  const groupingQuery = useMemo(
-    () => ({
+  const groupingQuery = useMemo(() => {
+    const allFilters = [
+      ...(query ? [query] : []),
+      additionalFilters,
+      ENTITY_TYPE_FILTER,
+      ...(globalFilterQuery ? [globalFilterQuery] : []),
+    ];
+
+    if (isResolutionGrouping) {
+      return buildResolutionGroupingQuery({
+        filters: allFilters,
+        pageIndex,
+        pageSize,
+      });
+    }
+
+    const currentGroup = selectedGroup || ENTITY_GROUPING_OPTIONS.ENTITY_TYPE;
+    return {
       ...getGroupingQuery({
-        additionalFilters: [
-          ...(query ? [query] : []),
-          additionalFilters,
-          ENTITY_TYPE_FILTER,
-          ...(globalFilterQuery ? [globalFilterQuery] : []),
-        ],
-        groupByField: currentSelectedGroup,
+        additionalFilters: allFilters,
+        groupByField: currentGroup,
         uniqueValue,
         pageNumber: pageIndex * pageSize,
         size: pageSize,
         sort: [{ groupByField: { order: 'desc' } }],
-        statsAggregations: getAggregationsByGroupField(currentSelectedGroup),
+        statsAggregations: getAggregationsByGroupField(currentGroup),
         rootAggregations: [
           {
-            ...(!isNoneGroup([currentSelectedGroup]) && {
-              nullGroupItems: { missing: { field: currentSelectedGroup } },
+            ...(!isNoneGroup([currentGroup]) && {
+              nullGroupItems: { missing: { field: currentGroup } },
             }),
           },
         ],
@@ -169,38 +249,89 @@ export const useEntityGrouping = ({
           }
         `),
             params: {
-              selectedGroup: currentSelectedGroup,
+              selectedGroup: currentGroup,
               uniqueValue,
             },
           },
         },
       },
-    }),
-    [
-      currentSelectedGroup,
-      uniqueValue,
-      additionalFilters,
-      query,
-      pageIndex,
-      pageSize,
-      globalFilterQuery,
-    ]
-  );
+    };
+  }, [
+    selectedGroup,
+    isResolutionGrouping,
+    uniqueValue,
+    additionalFilters,
+    query,
+    pageIndex,
+    pageSize,
+    globalFilterQuery,
+  ]);
 
   const { data, isFetching } = useFetchGroupedData({
     query: groupingQuery,
-    enabled: !isNoneSelected,
+    enabled: !!selectedGroup && !isNoneGroup([selectedGroup]),
   });
 
   const groupData = useMemo(
     () =>
       parseGroupingQuery(
-        currentSelectedGroup,
+        selectedGroup || ENTITY_GROUPING_OPTIONS.ENTITY_TYPE,
         uniqueValue,
         data as GroupingAggregation<EntitiesGroupingAggregation>
       ),
-    [data, currentSelectedGroup, uniqueValue]
+    [data, selectedGroup, uniqueValue]
   );
+
+  const targetEntityIds = useMemo(() => {
+    if (!isResolutionGrouping || !('groupByFields' in groupData)) return [];
+    const buckets = groupData.groupByFields?.buckets;
+    if (!buckets) return [];
+    return buckets.map((bucket) => String(bucket.key_as_string ?? bucket.key));
+  }, [groupData, isResolutionGrouping]);
+
+  const targetMetadata = useFetchTargetMetadata(targetEntityIds);
+
+  const groupPanelRenderer = useMemo(
+    () => createGroupPanelRenderer(targetMetadata),
+    [targetMetadata]
+  );
+
+  const groupStatsRenderer = useMemo(
+    () => createGroupStatsRenderer(targetMetadata),
+    [targetMetadata]
+  );
+
+  const grouping = useGrouping({
+    componentProps: {
+      unit: entitiesUnit,
+      groupPanelRenderer,
+      getGroupStats: groupStatsRenderer,
+      groupsUnit: entitiesGroupsUnit,
+    },
+    defaultGroupingOptions,
+    initialGroupings,
+    fields: dataViewIsLoading ? [] : dataView.fields,
+    groupingId: LOCAL_STORAGE_GROUPING_KEY,
+    maxGroupingLevels: MAX_GROUPING_LEVELS,
+    title: groupingTitle,
+    onGroupChange: ({ groupByFields }) => {
+      setUrlQuery({
+        groupBy: groupByFields,
+      });
+    },
+  });
+
+  useEffect(() => {
+    const currentGroups = grouping.selectedGroups;
+    if (!hasResolutionLicense && currentGroups.includes(ENTITY_GROUPING_OPTIONS.RESOLUTION)) {
+      const filtered = currentGroups.filter((g) => g !== ENTITY_GROUPING_OPTIONS.RESOLUTION);
+      const newGroups = filtered.length > 0 ? filtered : [ENTITY_GROUPING_OPTIONS.NONE];
+      grouping.setSelectedGroups(newGroups);
+      setUrlQuery({ groupBy: newGroups });
+    }
+  }, [hasResolutionLicense, grouping, setUrlQuery]);
+
+  const isNoneSelected = isNoneGroup(grouping.selectedGroups);
 
   const isEmptyResults =
     !isFetching && 'unitsCount' in groupData && groupData.unitsCount?.value === 0;

@@ -146,7 +146,7 @@ const PolicyEmptyState = React.memo<{
                   <EuiFlexItem grow={false}>
                     <EuiButton
                       fill
-                      iconType="plusInCircle"
+                      iconType="plusCircle"
                       onClick={onActionClick}
                       isDisabled={actionDisabled}
                       data-test-subj="onboardingStartButton"

@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Boom from '@hapi/boom';
 import type { RequestHandlerContext } from '@kbn/core/server';
+import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
 import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import type { DashboardUpdateRequestBody, DashboardUpdateResponseBody } from './types';
 import { transformDashboardIn } from '../transforms';
-import { getDashboardCRUResponseBody } from '../saved_object_utils';
+import { getDashboardCRUResponseBody } from '../get_cru_response_body';
 import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 
 export async function update(
@@ -24,15 +24,29 @@ export async function update(
   isDashboardAppRequest: boolean = false
 ): Promise<DashboardUpdateResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
-  const { access_control: accessControl, ...restOfData } = updateBody;
 
-  const {
-    attributes: soAttributes,
-    references: soReferences,
-    error: transformInError,
-  } = transformDashboardIn(restOfData, isDashboardAppRequest);
-  if (transformInError) {
-    throw Boom.badRequest(`Invalid data. ${transformInError.message}`);
+  const { attributes: soAttributes, references: soReferences } = transformDashboardIn(
+    updateBody,
+    isDashboardAppRequest
+  );
+
+  let isCreateRequest = false;
+  try {
+    await core.savedObjects.client.resolve<DashboardSavedObjectAttributes>(
+      DASHBOARD_SAVED_OBJECT_TYPE,
+      id
+    );
+  } catch (resolveError) {
+    if (resolveError.isBoom && resolveError.output.statusCode === 404) {
+      isCreateRequest = true;
+    } else {
+      throw resolveError;
+    }
+  }
+
+  // Validate id at handler level for create requests
+  if (isCreateRequest) {
+    asCodeIdSchema.validate(id);
   }
 
   const savedObject = await core.savedObjects.client.update<DashboardSavedObjectAttributes>(
@@ -41,6 +55,7 @@ export async function update(
     soAttributes,
     {
       references: soReferences,
+      upsert: soAttributes,
       /** perform a "full" update instead, where the provided attributes will fully replace the existing ones */
       mergeAttributes: false,
     }

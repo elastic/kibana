@@ -35,13 +35,13 @@ ajv@6.14.0
 ajv@8.18.0
 babel-loader@9.2.1
 baseline-browser-mapping@2.9.14
-browserslist@4.28.0
+browserslist@4.28.1
 buffer-from@1.1.1
-caniuse-lite@1.0.30001754
+caniuse-lite@1.0.30001781
 chrome-trace-event@1.0.2
 commander@2.20.3
 common-path-prefix@3.0.0
-electron-to-chromium@1.5.250
+electron-to-chromium@1.5.321
 enhanced-resolve@5.20.0
 es-module-lexer@1.5.4
 escalade@3.2.0
@@ -95,7 +95,7 @@ terser-webpack-plugin@5.3.17
 terser@5.40.0
 tslib@1.14.1
 undici-types@6.21.0
-update-browserslist-db@1.1.4
+update-browserslist-db@1.2.3
 uri-js@4.2.2
 vscode-jsonrpc@8.2.0
 vscode-languageserver-protocol@3.17.5

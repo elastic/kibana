@@ -19,6 +19,7 @@ import {
   EuiPageHeader,
   EuiPagination,
   EuiPopover,
+  EuiScreenReaderLive,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -28,8 +29,10 @@ import type { ExceptionListFilter, NamespaceType } from '@kbn/securitysolution-i
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
 import { EmptyViewerState, ViewerStatus } from '@kbn/securitysolution-exception-list-components';
+import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
 
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import { useGetEndpointExceptionsPerPolicyOptIn } from '../../../management/hooks/artifacts/use_endpoint_per_policy_opt_in';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { AutoDownload } from '../../../common/components/auto_download/auto_download';
 import { useKibana } from '../../../common/lib/kibana';
@@ -97,18 +100,16 @@ export const SharedLists = React.memo(() => {
   const isEndpointExceptionsMovedFFEnabled = useIsExperimentalFeatureEnabled(
     'endpointExceptionsMovedUnderManagement'
   );
+  const { data: endpointPerPolicyOptIn } = useGetEndpointExceptionsPerPolicyOptIn();
 
   const canAccessEndpointExceptions = useEndpointExceptionsCapability('showEndpointExceptions');
   const canWriteEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
 
   const {
-    services: {
-      http,
-      notifications,
-      timelines,
-      application: { navigateToApp },
-    },
+    services: { http, application, cps, notifications, timelines },
   } = useKibana();
+  const { navigateToApp } = application;
+  useRouteBasedCpsPickerAccess(ProjectRoutingAccess.READONLY, { application, cps });
   const { exportExceptionList, deleteExceptionList, duplicateExceptionList } = useApi(http);
 
   const [showReferenceErrorModal, setShowReferenceErrorModal] = useState(false);
@@ -162,6 +163,7 @@ export const SharedLists = React.memo(() => {
 
   const [exportDownload, setExportDownload] = useState<{ name?: string; blob?: Blob }>({});
   const [displayImportListFlyout, setDisplayImportListFlyout] = useState(false);
+  const [screenReaderMessage, setScreenReaderMessage] = useState('');
   const { addError, addSuccess } = useAppToasts();
 
   // Loading states
@@ -216,7 +218,18 @@ export const SharedLists = React.memo(() => {
   const handleExportSuccess = useCallback(
     (listId: string, name: string) =>
       (blob: Blob): void => {
-        addSuccess(i18n.EXCEPTION_LIST_EXPORTED_SUCCESSFULLY(name));
+        const message = i18n.EXCEPTION_LIST_EXPORTED_SUCCESSFULLY(name);
+        addSuccess(message);
+        // If the same list is exported twice in a row, React won't re-render
+        // since state hasn't changed, so the live region won't re-announce.
+        // Clearing to '' first ensures VoiceOver sees a new change on the next frame.
+        setScreenReaderMessage((current) => {
+          if (current === message) {
+            requestAnimationFrame(() => setScreenReaderMessage(message));
+            return '';
+          }
+          return message;
+        });
         setExportDownload({ name: listId, blob });
       },
     [addSuccess]
@@ -480,6 +493,9 @@ export const SharedLists = React.memo(() => {
 
   return (
     <>
+      <EuiScreenReaderLive aria-live="assertive" aria-atomic="true" focusRegionOnTextChange>
+        {screenReaderMessage}
+      </EuiScreenReaderLive>
       <MissingDetectionsPrivilegesCallOut />
       <EuiPageHeader
         pageTitle={i18n.ALL_EXCEPTIONS}
@@ -606,9 +622,11 @@ export const SharedLists = React.memo(() => {
 
       <EuiHorizontalRule />
       <div data-test-subj="allExceptionListsPanel">
-        {isEndpointExceptionsMovedFFEnabled && (
-          <EndpointExceptionsMovedCallout id="sharedListsPage" dismissable title="moved" />
-        )}
+        {isEndpointExceptionsMovedFFEnabled &&
+          (endpointPerPolicyOptIn?.status === false ||
+            endpointPerPolicyOptIn?.reason === 'userOptedIn') && (
+            <EndpointExceptionsMovedCallout id="sharedListsPage" dismissable title="moved" />
+          )}
 
         {!initLoading && <ListsSearchBar onSearch={handleSearch} />}
         <EuiSpacer size="m" />

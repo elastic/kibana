@@ -9,6 +9,14 @@
 
 import type { RootSchema } from '@kbn/core/public';
 import type {
+  ReportWorkflowAiChatOpenedParams,
+  ReportWorkflowAiProposalReceivedParams,
+  ReportWorkflowAiProposalResolvedParams,
+  ReportWorkflowAiSessionCompletedParams,
+  WorkflowAiChatEventTypes,
+} from './ai_chat/types';
+import type {
+  ReportWorkflowExecutionsCancelledActionParams,
   ReportWorkflowRunCancelledActionParams,
   ReportWorkflowRunInitiatedActionParams,
   ReportWorkflowStepTestRunInitiatedActionParams,
@@ -29,6 +37,10 @@ import type {
   WorkflowLifecycleEventTypes,
 } from './lifecycle/types';
 import type {
+  ReportWorkflowAccessDeniedLicenseActionParams,
+  ReportWorkflowAccessDeniedPrivilegesActionParams,
+  ReportWorkflowAccessDeniedServerlessTierActionParams,
+  ReportWorkflowCreateOpenedActionParams,
   ReportWorkflowDetailViewedActionParams,
   ReportWorkflowListViewedActionParams,
   WorkflowUIEventTypes,
@@ -99,10 +111,19 @@ export interface WorkflowsTelemetryEventsMap {
   [WorkflowExecutionEventTypes.WorkflowStepTestRunInitiated]: ReportWorkflowStepTestRunInitiatedActionParams;
   [WorkflowExecutionEventTypes.WorkflowRunInitiated]: ReportWorkflowRunInitiatedActionParams;
   [WorkflowExecutionEventTypes.WorkflowRunCancelled]: ReportWorkflowRunCancelledActionParams;
+  [WorkflowExecutionEventTypes.WorkflowExecutionsCancelled]: ReportWorkflowExecutionsCancelledActionParams;
   [WorkflowUIEventTypes.WorkflowListViewed]: ReportWorkflowListViewedActionParams;
   [WorkflowUIEventTypes.WorkflowDetailViewed]: ReportWorkflowDetailViewedActionParams;
+  [WorkflowUIEventTypes.WorkflowCreateOpened]: ReportWorkflowCreateOpenedActionParams;
+  [WorkflowUIEventTypes.WorkflowAccessDeniedPrivileges]: ReportWorkflowAccessDeniedPrivilegesActionParams;
+  [WorkflowUIEventTypes.WorkflowAccessDeniedLicense]: ReportWorkflowAccessDeniedLicenseActionParams;
+  [WorkflowUIEventTypes.WorkflowAccessDeniedServerlessTier]: ReportWorkflowAccessDeniedServerlessTierActionParams;
   [WorkflowImportExportEventTypes.WorkflowExported]: ReportWorkflowExportedActionParams;
   [WorkflowImportExportEventTypes.WorkflowImported]: ReportWorkflowImportedActionParams;
+  [WorkflowAiChatEventTypes.WorkflowAiChatOpened]: ReportWorkflowAiChatOpenedParams;
+  [WorkflowAiChatEventTypes.WorkflowAiProposalReceived]: ReportWorkflowAiProposalReceivedParams;
+  [WorkflowAiChatEventTypes.WorkflowAiProposalResolved]: ReportWorkflowAiProposalResolvedParams;
+  [WorkflowAiChatEventTypes.WorkflowAiSessionCompleted]: ReportWorkflowAiSessionCompletedParams;
 }
 
 export type AllWorkflowEventTypes =
@@ -110,7 +131,8 @@ export type AllWorkflowEventTypes =
   | WorkflowValidationEventTypes
   | WorkflowExecutionEventTypes
   | WorkflowUIEventTypes
-  | WorkflowImportExportEventTypes;
+  | WorkflowImportExportEventTypes
+  | WorkflowAiChatEventTypes;
 
 export interface WorkflowsTelemetryEvent {
   eventType: AllWorkflowEventTypes;

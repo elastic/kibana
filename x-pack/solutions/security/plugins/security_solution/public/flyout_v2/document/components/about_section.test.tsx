@@ -27,6 +27,18 @@ jest.mock('./mitre_attack', () => ({
   MitreAttack: () => <div>{'MitreAttack'}</div>,
 }));
 
+jest.mock('./event_category_description', () => ({
+  EventCategoryDescription: () => <div>{'EventCategoryDescription'}</div>,
+}));
+
+jest.mock('./event_kind_description', () => ({
+  EventKindDescription: () => <div>{'EventKindDescription'}</div>,
+}));
+
+jest.mock('./event_renderer', () => ({
+  EventRenderer: () => <div>{'EventRenderer'}</div>,
+}));
+
 jest.mock('../../shared/hooks/use_expand_section', () => ({
   useExpandSection: jest.fn(),
 }));
@@ -91,6 +103,72 @@ describe('AboutSection', () => {
       expect(getByText('AlertReason')).toBeInTheDocument();
       expect(getByText('AlertStatus')).toBeInTheDocument();
       expect(getByText('MitreAttack')).toBeInTheDocument();
+    });
+  });
+
+  it('renders EventCategoryDescription and EventRenderer for event.kind === event', async () => {
+    mockUseExpandSection.mockReturnValue(true);
+    const eventHit = createMockHit({ 'event.kind': 'event' });
+
+    const { getByText } = render(
+      <IntlProvider locale="en">
+        <AboutSection hit={eventHit} />
+      </IntlProvider>
+    );
+
+    await act(async () => {
+      expect(getByText('EventCategoryDescription')).toBeInTheDocument();
+      expect(getByText('EventRenderer')).toBeInTheDocument();
+    });
+  });
+
+  it('renders EventKindDescription and EventRenderer for a non-event ECS-valid event.kind', async () => {
+    mockUseExpandSection.mockReturnValue(true);
+    const metricHit = createMockHit({ 'event.kind': 'metric' });
+
+    const { getByText } = render(
+      <IntlProvider locale="en">
+        <AboutSection hit={metricHit} />
+      </IntlProvider>
+    );
+
+    await act(async () => {
+      expect(getByText('EventKindDescription')).toBeInTheDocument();
+      expect(getByText('EventRenderer')).toBeInTheDocument();
+    });
+  });
+
+  it('renders only EventRenderer for a non-ECS event.kind', async () => {
+    mockUseExpandSection.mockReturnValue(true);
+    const unknownKindHit = createMockHit({ 'event.kind': 'custom-non-ecs-kind' });
+
+    const { getByText, queryByText } = render(
+      <IntlProvider locale="en">
+        <AboutSection hit={unknownKindHit} />
+      </IntlProvider>
+    );
+
+    await act(async () => {
+      expect(getByText('EventRenderer')).toBeInTheDocument();
+      expect(queryByText('EventCategoryDescription')).not.toBeInTheDocument();
+      expect(queryByText('EventKindDescription')).not.toBeInTheDocument();
+    });
+  });
+
+  it('renders only EventRenderer when event.kind is not set', async () => {
+    mockUseExpandSection.mockReturnValue(true);
+    const noKindHit = createMockHit({});
+
+    const { getByText, queryByText } = render(
+      <IntlProvider locale="en">
+        <AboutSection hit={noKindHit} />
+      </IntlProvider>
+    );
+
+    await act(async () => {
+      expect(getByText('EventRenderer')).toBeInTheDocument();
+      expect(queryByText('EventCategoryDescription')).not.toBeInTheDocument();
+      expect(queryByText('EventKindDescription')).not.toBeInTheDocument();
     });
   });
 });

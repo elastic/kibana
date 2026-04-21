@@ -30,6 +30,7 @@ import type {
   ConcatProcessor,
   NetworkDirectionProcessor,
   JsonExtractProcessor,
+  EnrichProcessor,
 } from '.';
 import type { Condition } from '../conditions';
 
@@ -169,6 +170,12 @@ export type IngestPipelineJsonExtractProcessor = RenameFieldsAndRemoveAction<
   { where: 'if' }
 >;
 
+// Enrich
+export type IngestPipelineEnrichProcessor = RenameFieldsAndRemoveAction<
+  EnrichProcessor,
+  { to: 'target_field'; where: 'if' }
+>;
+
 // Manual Ingest Pipeline (escape hatch)
 export type IngestPipelineManualIngestPipelineProcessor = RenameFieldsAndRemoveAction<
   ManualIngestPipelineProcessor,
@@ -198,4 +205,5 @@ export type IngestPipelineProcessor =
   | IngestPipelineConcatProcessor
   | IngestPipelineNetworkDirectionProcessor
   | IngestPipelineJsonExtractProcessor
+  | IngestPipelineEnrichProcessor
   | IngestPipelineManualIngestPipelineProcessor;

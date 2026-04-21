@@ -9,10 +9,16 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import ResilientConnectorFields from './resilient_connectors';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
-import { act, render, waitFor } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
+jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', () => ({
+  ...jest.requireActual(
+    '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'
+  ),
+  checkConnectorIdAvailability: jest.fn().mockResolvedValue({ isAvailable: true }),
+}));
 
 describe('ResilientActionConnectorFields renders', () => {
   test('alerting Resilient connector fields are rendered', () => {
@@ -85,11 +91,9 @@ describe('ResilientActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(getByTestId('form-test-provide-submit'));
 
-      waitFor(() => {
+      await waitFor(() => {
         expect(onSubmit).toBeCalledWith({
           data: {
             actionTypeId: '.resilient',
@@ -98,6 +102,7 @@ describe('ResilientActionConnectorFields renders', () => {
               apiUrl: 'https://test.com',
               orgId: '201',
             },
+            id: 'resilient',
             secrets: {
               apiKeyId: 'key',
               apiKeySecret: 'secret',
@@ -143,7 +148,9 @@ describe('ResilientActionConnectorFields renders', () => {
 
       await userEvent.click(res.getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+      });
     });
   });
 });

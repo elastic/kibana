@@ -60,5 +60,6 @@ export default function endpointAPIIntegrationTests(providerContext: FtrProvider
     loadTestFile(require.resolve('./endpoint_exceptions'));
     loadTestFile(require.resolve('./endpoint_list_api_rbac'));
     loadTestFile(require.resolve('./artifact_import'));
+    loadTestFile(require.resolve('./endpoint_exceptions_per_policy_opt_in'));
   });
 }

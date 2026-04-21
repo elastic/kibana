@@ -22,6 +22,7 @@ export const factory: EmbeddableFactory<{}, Api> = {
   buildEmbeddable: async ({ finalizeApi, parentApi }) => {
     const api = finalizeApi({
       serializeState: () => ({}),
+      applySerializedState: () => undefined,
     });
 
     return {

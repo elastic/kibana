@@ -6,21 +6,24 @@
  */
 
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { esqlMetricState } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/metric';
-import { gaugeStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/gauge';
-import { tagcloudStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/tagcloud';
-import { xyStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/xy';
-import { regionMapStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/region_map';
-import { heatmapStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/heatmap';
-import { datatableStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/datatable';
-import { pieStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/pie';
-import { treemapStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/treemap';
-import { waffleStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/waffle';
-import { mosaicStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/mosaic';
+import {
+  metricConfigSchemaESQL,
+  gaugeConfigSchemaESQL,
+  tagcloudConfigSchemaESQL,
+  xyConfigSchemaESQL,
+  regionMapConfigSchemaESQL,
+  heatmapConfigSchemaESQL,
+  datatableConfigSchemaESQL,
+  pieConfigSchemaESQL,
+  treemapConfigSchemaESQL,
+  waffleConfigSchemaESQL,
+  mosaicConfigSchemaESQL,
+} from '@kbn/lens-embeddable-utils';
 
 interface ChartTypeRegistryEntry {
   schema: { validate: (config: unknown) => any; getSchema: () => any };
   guidance: { description: string; guideline: string };
+  configPromptRules?: string[];
 }
 
 /**
@@ -34,9 +37,9 @@ interface ChartTypeRegistryEntry {
  * TypeScript enforces exhaustiveness via `satisfies Record<SupportedChartType, ...>` —
  * a missing entry is a compile error.
  */
-export const chartTypeRegistry = {
+export const chartTypeRegistry: Record<SupportedChartType, ChartTypeRegistryEntry> = {
   [SupportedChartType.Metric]: {
-    schema: esqlMetricState,
+    schema: metricConfigSchemaESQL,
     guidance: {
       description:
         'For displaying single numeric values, KPIs, or metrics with optional trend lines. Best for showing key performance indicators, counts, sums, averages, or other aggregate statistics.',
@@ -45,25 +48,33 @@ export const chartTypeRegistry = {
     },
   },
   [SupportedChartType.Gauge]: {
-    schema: gaugeStateSchemaESQL,
+    schema: gaugeConfigSchemaESQL,
     guidance: {
       description:
         'For displaying a single metric value within a range with min/max/goal values. Best for showing progress, performance against targets, or values within bounds (e.g., "show CPU usage as a gauge", "display sales target progress").',
       guideline:
         "Choose 'gauge' when showing a value within a range, progress toward a goal, or performance against min/max thresholds",
     },
+    configPromptRules: [
+      "Always omit the optional 'min' and 'max' fields from the final configuration.",
+      'Do not infer, synthesize, or backfill gauge bounds from the ES|QL results or the user request.',
+      'Only include goal/target-related fields when the user explicitly asks for a goal or threshold.',
+    ],
   },
   [SupportedChartType.XY]: {
-    schema: xyStateSchemaESQL,
+    schema: xyConfigSchemaESQL,
     guidance: {
       description:
         'For displaying time series, trends, comparisons, or distributions using line charts, bar charts, or area charts. Best for showing data over time, comparing multiple series, histograms, or any visualization with X and Y axes (e.g., "show request count over time", "compare sales by region as a bar chart", "display CPU usage trend as a line chart").',
       guideline:
         "Choose 'xy' when showing trends over time, comparing multiple data series, or displaying distributions with axes",
     },
+    configPromptRules: [
+      'CRITICAL: For horizontal bars, use type: "bar_horizontal" with x = category field and y = metric field. Example: "top OS by count as horizontal bar" → type: "bar_horizontal", x: { column: "OS" }, y: [{ column: "Count" }]. Do NOT put the metric on x.',
+    ],
   },
   [SupportedChartType.Heatmap]: {
-    schema: heatmapStateSchemaESQL,
+    schema: heatmapConfigSchemaESQL,
     guidance: {
       description:
         'For showing density or intensity across two dimensions (x and y buckets) using color to encode metric values. Best for correlations, distribution grids, calendar heatmaps, or when both axes are categorical/time buckets and color represents magnitude (e.g., "errors by service by status code", "requests by hour of day and day of week").',
@@ -72,7 +83,7 @@ export const chartTypeRegistry = {
     },
   },
   [SupportedChartType.Tagcloud]: {
-    schema: tagcloudStateSchemaESQL,
+    schema: tagcloudConfigSchemaESQL,
     guidance: {
       description:
         'For displaying word frequency or categorical data where text size represents value. Best for showing top terms, keywords, categories, or text-based aggregations (e.g., "show top error messages", "display most common tags").',
@@ -81,7 +92,7 @@ export const chartTypeRegistry = {
     },
   },
   [SupportedChartType.RegionMap]: {
-    schema: regionMapStateSchemaESQL,
+    schema: regionMapConfigSchemaESQL,
     guidance: {
       description:
         'For choropleth or region-based maps that show a metric by geographic boundary (country, state, province, county, etc.). Best when the data includes region identifiers that can be joined to map boundaries (e.g., "show revenue by state on a map", "display incidents by country").',
@@ -90,7 +101,7 @@ export const chartTypeRegistry = {
     },
   },
   [SupportedChartType.Datatable]: {
-    schema: datatableStateSchemaESQL,
+    schema: datatableConfigSchemaESQL,
     guidance: {
       description:
         'For displaying data in a structured table format with sortable columns. Best for showing detailed records, precise numeric comparisons, or multi-dimensional breakdowns where exact values matter more than visual patterns (e.g., "list top 20 hosts by CPU usage", "show error counts by service and status code").',
@@ -99,7 +110,7 @@ export const chartTypeRegistry = {
     },
   },
   [SupportedChartType.Pie]: {
-    schema: pieStateSchemaESQL,
+    schema: pieConfigSchemaESQL,
     guidance: {
       description:
         'For showing proportional composition or part-to-whole relationships as slices of a circle. Supports pie and donut variants. Best for showing percentage breakdowns with a small number of categories (e.g., "show traffic distribution by browser", "display error proportion by type as a donut chart").',
@@ -108,7 +119,7 @@ export const chartTypeRegistry = {
     },
   },
   [SupportedChartType.Treemap]: {
-    schema: treemapStateSchemaESQL,
+    schema: treemapConfigSchemaESQL,
     guidance: {
       description:
         'For showing hierarchical or proportional data as nested rectangles where area encodes magnitude. Best for visualizing size comparisons across categories with optional hierarchical grouping (e.g., "show disk usage by folder", "display log volume by service and host").',
@@ -117,7 +128,7 @@ export const chartTypeRegistry = {
     },
   },
   [SupportedChartType.Waffle]: {
-    schema: waffleStateSchemaESQL,
+    schema: waffleConfigSchemaESQL,
     guidance: {
       description:
         'For showing proportional data as a grid of small squares where filled squares represent the proportion. Best for intuitive percentage displays that are easier to read than pie charts (e.g., "show what percentage of requests are errors", "display completion rate").',
@@ -126,7 +137,7 @@ export const chartTypeRegistry = {
     },
   },
   [SupportedChartType.Mosaic]: {
-    schema: mosaicStateSchemaESQL,
+    schema: mosaicConfigSchemaESQL,
     guidance: {
       description:
         'For showing the relationship between two categorical variables using a tiled mosaic of rectangles where both area and position encode information. Best for cross-tabulation views (e.g., "show error distribution across services and environments", "display request methods by status code").',
@@ -134,7 +145,7 @@ export const chartTypeRegistry = {
         "Choose 'mosaic' when visualizing the joint distribution of two categorical dimensions",
     },
   },
-} satisfies Record<SupportedChartType, ChartTypeRegistryEntry>;
+};
 
 export type ChartTypeRegistry = typeof chartTypeRegistry;
 

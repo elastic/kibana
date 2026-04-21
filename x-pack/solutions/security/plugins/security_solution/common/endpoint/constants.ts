@@ -135,6 +135,9 @@ export const ENDPOINT_ERROR_CODES: Record<string, number> = {
 export const ENDPOINT_FIELDS_SEARCH_STRATEGY = 'endpointFields';
 export const ENDPOINT_SEARCH_STRATEGY = 'endpointSearchStrategy';
 
+/** Endpoint Exceptions routes */
+export const ENDPOINT_EXCEPTIONS_PER_POLICY_OPT_IN_ROUTE = `${BASE_INTERNAL_ENDPOINT_ROUTE}/endpoint_exceptions_per_policy_opt_in`;
+
 /** Search strategy keys */
 export const ENDPOINT_PACKAGE_POLICIES_STATS_STRATEGY = 'endpointPackagePoliciesStatsStrategy';
 

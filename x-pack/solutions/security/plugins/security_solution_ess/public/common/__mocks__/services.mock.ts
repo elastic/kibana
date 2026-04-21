@@ -11,7 +11,6 @@ import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { navigationPluginMock } from '@kbn/navigation-plugin/public/mocks';
 import { managementPluginMock } from '@kbn/management-plugin/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
-import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
 
 import type { Services } from '../services';
 
@@ -22,5 +21,4 @@ export const mockServices: Services = {
   navigation: navigationPluginMock.createStartContract(),
   management: managementPluginMock.createStartContract(),
   cloud: cloudMock.createStart(),
-  cases: casesPluginMock.createStartContract(),
 };

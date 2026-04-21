@@ -65,6 +65,7 @@ dependsOn:
   - '@kbn/actions-utils'
   - '@kbn/encrypted-saved-objects-shared'
   - '@kbn/usage-api-plugin'
+  - '@kbn/core-security-server'
 tags:
   - plugin
   - prod
@@ -78,26 +79,6 @@ fileGroups:
     - public/**/*
     - common/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

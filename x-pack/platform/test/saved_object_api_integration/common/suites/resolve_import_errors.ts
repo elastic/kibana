@@ -6,13 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import type { Agent as SuperTestAgent } from 'supertest';
-import type { Client } from '@elastic/elasticsearch';
 import type { SavedObjectReference, SavedObjectsImportRetry } from '@kbn/core/server';
+import { getTestDataLoader, SPACE_1, SPACE_2 } from '../../../common/lib/test_data_loader';
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { SPACES } from '../lib/spaces';
 import { expectResponses, getUrlPrefix, getTestTitle } from '../lib/saved_object_test_utils';
 import type { ExpectResponseBody, TestCase, TestDefinition, TestSuite } from '../lib/types';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export interface ResolveImportErrorsTestDefinition extends TestDefinition {
   request: {
@@ -194,11 +194,10 @@ export const resolveImportErrorsTestCaseFailures = {
     condition !== false ? { failureType: 'conflict' } : {},
 };
 
-export function resolveImportErrorsTestSuiteFactory(
-  es: Client,
-  esArchiver: any,
-  supertest: SuperTestAgent
-) {
+export function resolveImportErrorsTestSuiteFactory(context: FtrProviderContext) {
+  const testDataLoader = getTestDataLoader(context);
+  const supertest = context.getService('supertestWithoutAuth');
+  const es = context.getService('es');
   const expectSavedObjectForbidden = (action: string, typeOrTypes: string | string[]) =>
     expectResponses.forbiddenTypes(action)(typeOrTypes);
   const expectResponseBody =
@@ -352,16 +351,53 @@ export function resolveImportErrorsTestSuiteFactory(
       const { user, spaceId = SPACES.DEFAULT.spaceId, tests } = definition;
 
       describeFn(description, () => {
-        before(() =>
-          esArchiver.load(
-            'x-pack/platform/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-          )
-        );
-        after(() =>
-          esArchiver.unload(
-            'x-pack/platform/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-          )
-        );
+        before(async () => {
+          await testDataLoader.createFtrSpaces();
+          await testDataLoader.createFtrSavedObjectsData([
+            {
+              spaceName: null,
+              dataUrl:
+                'x-pack/platform/test/saved_object_api_integration/common/fixtures/kbn_archiver/default_space.json',
+            },
+            {
+              spaceName: SPACE_1.id,
+              dataUrl:
+                'x-pack/platform/test/saved_object_api_integration/common/fixtures/kbn_archiver/space_1.json',
+            },
+            {
+              spaceName: SPACE_2.id,
+              dataUrl:
+                'x-pack/platform/test/saved_object_api_integration/common/fixtures/kbn_archiver/space_2.json',
+            },
+          ]);
+          await testDataLoader.createLegacyUrlAliases([
+            {
+              spaceName: null,
+              dataUrl:
+                'x-pack/platform/test/saved_object_api_integration/common/fixtures/kbn_archiver/legacy_url_aliases_all.json',
+            },
+            {
+              spaceName: SPACE_1.id,
+              dataUrl:
+                'x-pack/platform/test/saved_object_api_integration/common/fixtures/kbn_archiver/legacy_url_aliases_all.json',
+            },
+            {
+              spaceName: 'space_x',
+              dataUrl:
+                'x-pack/platform/test/saved_object_api_integration/common/fixtures/kbn_archiver/legacy_url_aliases.json',
+            },
+            {
+              spaceName: 'space_y',
+              dataUrl:
+                'x-pack/platform/test/saved_object_api_integration/common/fixtures/kbn_archiver/legacy_url_aliases.json',
+              disabled: true,
+            },
+          ]);
+        });
+        after(async () => {
+          await testDataLoader.deleteAllSavedObjectsFromKibanaIndex();
+          await testDataLoader.deleteFtrSpaces();
+        });
 
         const attrs = { attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL } };
 

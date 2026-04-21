@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "id": "user-1",
-    "index": ".entities.v2.latest.security_default",
+    "index": ".entities.v2.latest.security_default-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "entity": {
@@ -14,6 +14,13 @@
         "source": "logs-endpoint.events.process-default",
         "risk": {
           "calculated_score_norm": 72.45
+        },
+        "relationships": {
+          "resolution": {
+            "risk": {
+              "calculated_score_norm": 82.50
+            }
+          }
         }
       },
       "asset": {
@@ -34,7 +41,7 @@
   "type": "doc",
   "value": {
     "id": "user-2",
-    "index": ".entities.v2.latest.security_default",
+    "index": ".entities.v2.latest.security_default-00001",
     "source": {
       "@timestamp": "2025-07-20T16:00:00.000Z",
       "entity": {
@@ -60,7 +67,7 @@
   "type": "doc",
   "value": {
     "id": "host-1",
-    "index": ".entities.v2.latest.security_default",
+    "index": ".entities.v2.latest.security_default-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "entity": {
@@ -92,7 +99,7 @@
   "type": "doc",
   "value": {
     "id": "host-2",
-    "index": ".entities.v2.latest.security_default",
+    "index": ".entities.v2.latest.security_default-00001",
     "source": {
       "@timestamp": "2025-07-20T15:00:00.000Z",
       "entity": {
@@ -118,7 +125,7 @@
   "type": "doc",
   "value": {
     "id": "service-1",
-    "index": ".entities.v2.latest.security_default",
+    "index": ".entities.v2.latest.security_default-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "entity": {
@@ -150,7 +157,7 @@
   "type": "doc",
   "value": {
     "id": "service-2",
-    "index": ".entities.v2.latest.security_default",
+    "index": ".entities.v2.latest.security_default-00001",
     "source": {
       "@timestamp": "2025-07-20T14:00:00.000Z",
       "entity": {
@@ -167,6 +174,68 @@
       "service": {
         "id": "service-auth-provider",
         "name": "auth-provider-prod"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "user-4",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2025-07-20T16:30:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "user-alice-okta",
+        "name": "alice@okta.com",
+        "source": "logs-entityanalytics_okta.user-default",
+        "relationships": {
+          "resolution": {
+            "resolved_to": "user-alice"
+          }
+        }
+      },
+      "event": {
+        "ingested": "2025-07-20T16:31:00.000Z"
+      },
+      "user": {
+        "id": "user-alice-okta",
+        "name": "alice@okta.com"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "user-5",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2025-07-20T16:30:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "user-alice-entra",
+        "name": "alice.j@entra.com",
+        "source": "logs-entityanalytics_entra_id.user-default",
+        "relationships": {
+          "resolution": {
+            "resolved_to": "user-alice"
+          }
+        }
+      },
+      "event": {
+        "ingested": "2025-07-20T16:31:00.000Z"
+      },
+      "user": {
+        "id": "user-alice-entra",
+        "name": "alice.j@entra.com"
       }
     }
   }

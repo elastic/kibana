@@ -8,11 +8,12 @@
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { find } from 'lodash/fp';
+import { isCCSRemoteIndexName } from '@kbn/es-query';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { SIGNAL_STATUS_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
 import { getEnrichedFieldInfo } from '../../document_details/right/utils/enriched_field_info';
 
-import { AlertHeaderBlock } from '../../shared/components/alert_header_block';
+import { AlertHeaderBlock } from '../../../flyout_v2/shared/components/alert_header_block';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import type {
   EnrichedFieldInfo,
@@ -30,8 +31,10 @@ function hasData(fieldInfo?: EnrichedFieldInfo): fieldInfo is EnrichedFieldInfoW
 }
 
 export const Status = memo(() => {
-  const { attackId, browserFields, dataFormattedForFieldBrowser } = useAttackDetailsContext();
+  const { attackId, indexName, browserFields, dataFormattedForFieldBrowser } =
+    useAttackDetailsContext();
   const currentSpaceId = useSpaceId();
+  const isRemoteDocument = useMemo(() => isCCSRemoteIndexName(indexName), [indexName]);
   const statusData = useMemo(() => {
     const item = find(
       { field: SIGNAL_STATUS_FIELD_NAME, category: 'kibana' },
@@ -63,7 +66,7 @@ export const Status = memo(() => {
       {!statusData || !hasData(statusData) ? (
         getEmptyTagValue()
       ) : (
-        <StatusPopoverButton enrichedFieldInfo={statusData} />
+        <StatusPopoverButton enrichedFieldInfo={statusData} disabled={isRemoteDocument} />
       )}
     </AlertHeaderBlock>
   );

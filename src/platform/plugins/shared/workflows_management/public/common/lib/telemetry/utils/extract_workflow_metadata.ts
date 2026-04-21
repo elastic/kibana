@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isWellKnownWorkflowTriggerSource } from '@kbn/workflows';
 import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
 import { parseWorkflowYamlForAutocomplete } from '../../../../../common/lib/yaml/parse_workflow_yaml_for_autocomplete';
 
@@ -83,6 +84,11 @@ export interface WorkflowTelemetryMetadata {
    */
   triggerCount: number;
   /**
+   * Whether at least one trigger config includes an on.condition value.
+   * The condition text is never emitted, only presence/absence.
+   */
+  hasTriggerConditions: boolean;
+  /**
    * Maximum concurrent runs if concurrency is configured
    */
   concurrencyMax?: number;
@@ -135,6 +141,7 @@ export function extractWorkflowMetadata(
     inputCount: 0,
     constCount: 0,
     triggerCount: 0,
+    hasTriggerConditions: false,
     settingsUsed: [],
     hasDescription: false,
     tagCount: 0,
@@ -195,6 +202,20 @@ export function extractWorkflowMetadata(
       triggers.filter((trigger) => trigger?.type).map((trigger) => trigger.type as string)
     ),
   ];
+  const hasTriggerConditions = triggers.some((trigger) => {
+    if (trigger == null || typeof trigger !== 'object') {
+      return false;
+    }
+
+    const triggerType =
+      'type' in trigger && typeof trigger.type === 'string' ? trigger.type : undefined;
+    if (isWellKnownWorkflowTriggerSource(triggerType)) {
+      return false;
+    }
+
+    const condition = (trigger as { on?: { condition?: unknown } }).on?.condition;
+    return typeof condition === 'string' && condition.trim().length > 0;
+  });
 
   // Count inputs
   const inputCount = Array.isArray(workflow.inputs) ? workflow.inputs.length : 0;
@@ -227,6 +248,7 @@ export function extractWorkflowMetadata(
     inputCount,
     constCount,
     triggerCount: triggers.length,
+    hasTriggerConditions,
     ...(concurrencyMax !== undefined && { concurrencyMax }),
     ...(concurrencyStrategy && { concurrencyStrategy }),
     settingsUsed,

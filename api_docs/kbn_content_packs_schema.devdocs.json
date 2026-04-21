@@ -1081,31 +1081,6 @@
       },
       {
         "parentPluginId": "@kbn/content-packs-schema",
-        "id": "def-common.contentPackIncludedObjectsSchema",
-        "type": "Any",
-        "tags": [],
-        "label": "contentPackIncludedObjectsSchema",
-        "description": [],
-        "signature": [
-          "z.Schema<",
-          {
-            "pluginId": "@kbn/content-packs-schema",
-            "scope": "common",
-            "docId": "kibKbnContentPacksSchemaPluginApi",
-            "section": "def-common.ContentPackIncludedObjects",
-            "text": "ContentPackIncludedObjects"
-          },
-          ">"
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/api.ts",
-        "lineNumber": 32,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/content-packs-schema",
         "id": "def-common.ContentPackLens",
         "type": "Type",
         "tags": [],
@@ -1878,31 +1853,6 @@
       },
       {
         "parentPluginId": "@kbn/content-packs-schema",
-        "id": "def-common.contentPackManifestSchema",
-        "type": "Any",
-        "tags": [],
-        "label": "contentPackManifestSchema",
-        "description": [],
-        "signature": [
-          "z.Schema<",
-          {
-            "pluginId": "@kbn/content-packs-schema",
-            "scope": "common",
-            "docId": "kibKbnContentPacksSchemaPluginApi",
-            "section": "def-common.ContentPackManifest",
-            "text": "ContentPackManifest"
-          },
-          ">"
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
-        "lineNumber": 53,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/content-packs-schema",
         "id": "def-common.ContentPackSavedObject",
         "type": "Type",
         "tags": [],
@@ -2025,6 +1975,78 @@
       }
     ],
     "objects": [
+      {
+        "parentPluginId": "@kbn/content-packs-schema",
+        "id": "def-common.contentPackIncludedObjectsSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "contentPackIncludedObjectsSchema",
+        "description": [],
+        "signature": [
+          "ZodType",
+          "<",
+          {
+            "pluginId": "@kbn/content-packs-schema",
+            "scope": "common",
+            "docId": "kibKbnContentPacksSchemaPluginApi",
+            "section": "def-common.ContentPackIncludedObjects",
+            "text": "ContentPackIncludedObjects"
+          },
+          ", unknown, ",
+          "node_modules/zod/v4/core/schemas",
+          "$ZodTypeInternals<",
+          {
+            "pluginId": "@kbn/content-packs-schema",
+            "scope": "common",
+            "docId": "kibKbnContentPacksSchemaPluginApi",
+            "section": "def-common.ContentPackIncludedObjects",
+            "text": "ContentPackIncludedObjects"
+          },
+          ", unknown>>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/api.ts",
+        "lineNumber": 32,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-packs-schema",
+        "id": "def-common.contentPackManifestSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "contentPackManifestSchema",
+        "description": [],
+        "signature": [
+          "ZodType",
+          "<",
+          {
+            "pluginId": "@kbn/content-packs-schema",
+            "scope": "common",
+            "docId": "kibKbnContentPacksSchemaPluginApi",
+            "section": "def-common.ContentPackManifest",
+            "text": "ContentPackManifest"
+          },
+          ", unknown, ",
+          "node_modules/zod/v4/core/schemas",
+          "$ZodTypeInternals<",
+          {
+            "pluginId": "@kbn/content-packs-schema",
+            "scope": "common",
+            "docId": "kibKbnContentPacksSchemaPluginApi",
+            "section": "def-common.ContentPackManifest",
+            "text": "ContentPackManifest"
+          },
+          ", unknown>>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+        "lineNumber": 53,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/content-packs-schema",
         "id": "def-common.SUPPORTED_ENTRY_TYPE",

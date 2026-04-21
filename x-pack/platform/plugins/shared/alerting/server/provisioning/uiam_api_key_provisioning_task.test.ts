@@ -25,7 +25,10 @@ import {
   UiamApiKeyProvisioningEntityType,
   UiamApiKeyProvisioningStatus,
 } from '../saved_objects/schemas/raw_uiam_api_keys_provisioning_status';
+import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
+import type { AnalyticsServiceSetup } from '@kbn/core/server';
 import type { AlertingPluginsStart } from '../plugin';
+import { UIAM_PROVISIONING_RUN_EVENT } from './event_based_telemetry';
 
 jest.mock('./lib/get_exclude_rules_filter', () => ({
   getExcludeRulesFilter: jest.fn().mockResolvedValue(undefined),
@@ -160,10 +163,15 @@ function createConvertFailedResult(overrides: {
 
 describe('UiamApiKeyProvisioningTask', () => {
   const logger = loggingSystemMock.createLogger();
+  let analytics: jest.Mocked<AnalyticsServiceSetup>;
+
+  beforeEach(() => {
+    analytics = analyticsServiceMock.createAnalyticsServiceSetup();
+  });
 
   describe('register', () => {
     it('does not register when not serverless', () => {
-      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: false });
+      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: false, analytics });
       const taskManager = { registerTaskDefinitions: jest.fn() };
       task.register({
         core: coreMock.createSetup() as CoreSetup<AlertingPluginsStart>,
@@ -173,7 +181,7 @@ describe('UiamApiKeyProvisioningTask', () => {
     });
 
     it('registers task definition when serverless', () => {
-      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true });
+      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true, analytics });
       const taskManager = { registerTaskDefinitions: jest.fn() };
       task.register({
         core: coreMock.createSetup() as CoreSetup<AlertingPluginsStart>,
@@ -198,7 +206,7 @@ describe('UiamApiKeyProvisioningTask', () => {
       const removeIfExists = jest.fn();
       const taskManager = { ensureScheduled, removeIfExists } as never;
 
-      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: false });
+      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: false, analytics });
       await task.start({ core, taskManager });
 
       expect(ensureScheduled).not.toHaveBeenCalled();
@@ -208,7 +216,7 @@ describe('UiamApiKeyProvisioningTask', () => {
     it('logs error and returns when taskManager is missing and serverless', async () => {
       const core = coreMock.createStart();
 
-      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true });
+      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true, analytics });
       await task.start({ core, taskManager: undefined as never });
 
       expect(logger.error).toHaveBeenCalledWith(
@@ -225,7 +233,7 @@ describe('UiamApiKeyProvisioningTask', () => {
       const removeIfExists = jest.fn();
       const taskManager = { ensureScheduled, removeIfExists } as never;
 
-      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true });
+      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true, analytics });
       await task.start({ core, taskManager });
 
       await new Promise<void>((resolve) => setImmediate(resolve));
@@ -256,7 +264,7 @@ describe('UiamApiKeyProvisioningTask', () => {
       const removeIfExists = jest.fn().mockResolvedValue(undefined);
       const taskManager = { ensureScheduled, removeIfExists } as never;
 
-      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true });
+      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true, analytics });
       await task.start({ core, taskManager });
 
       flag$.next(true);
@@ -279,7 +287,7 @@ describe('UiamApiKeyProvisioningTask', () => {
       const ensureScheduled = jest.fn().mockRejectedValue(new Error('schedule failed'));
       const taskManager = { ensureScheduled, removeIfExists: jest.fn() } as never;
 
-      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true });
+      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true, analytics });
       await task.start({ core, taskManager });
 
       await new Promise<void>((resolve) => setImmediate(resolve));
@@ -298,7 +306,7 @@ describe('UiamApiKeyProvisioningTask', () => {
       const removeIfExists = jest.fn().mockRejectedValue(new Error('remove failed'));
       const taskManager = { ensureScheduled, removeIfExists } as never;
 
-      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true });
+      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true, analytics });
       await task.start({ core, taskManager });
 
       flag$.next(true);
@@ -322,7 +330,7 @@ describe('UiamApiKeyProvisioningTask', () => {
       const ensureScheduled = jest.fn().mockResolvedValue(undefined);
       const taskManager = { ensureScheduled, removeIfExists: jest.fn() } as never;
 
-      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true });
+      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true, analytics });
       await task.start({ core, taskManager });
 
       task.stop();
@@ -334,7 +342,7 @@ describe('UiamApiKeyProvisioningTask', () => {
     });
 
     it('is safe to call when start was never called', () => {
-      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true });
+      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true, analytics });
       expect(() => task.stop()).not.toThrow();
     });
 
@@ -347,7 +355,7 @@ describe('UiamApiKeyProvisioningTask', () => {
         removeIfExists: jest.fn(),
       } as never;
 
-      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true });
+      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true, analytics });
       await task.start({ core, taskManager });
 
       expect(() => {
@@ -365,7 +373,7 @@ describe('UiamApiKeyProvisioningTask', () => {
 
       mockPitFinderRules(encryptedSavedObjectsClient, []);
 
-      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true });
+      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true, analytics });
       const taskManager = { registerTaskDefinitions: jest.fn() };
       task.register({
         core: coreSetup as CoreSetup<AlertingPluginsStart>,
@@ -415,7 +423,7 @@ describe('UiamApiKeyProvisioningTask', () => {
         })),
       });
 
-      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true });
+      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true, analytics });
       const taskManager = { registerTaskDefinitions: jest.fn() };
       task.register({
         core: coreSetup as CoreSetup<AlertingPluginsStart>,
@@ -504,7 +512,7 @@ describe('UiamApiKeyProvisioningTask', () => {
         ],
       });
 
-      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true });
+      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true, analytics });
       const taskManager = { registerTaskDefinitions: jest.fn() };
       task.register({
         core: coreSetup as CoreSetup<AlertingPluginsStart>,
@@ -634,7 +642,7 @@ describe('UiamApiKeyProvisioningTask', () => {
         ],
       });
 
-      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true });
+      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true, analytics });
       const taskManager = { registerTaskDefinitions: jest.fn() };
       task.register({
         core: coreSetup as CoreSetup<AlertingPluginsStart>,
@@ -716,7 +724,7 @@ describe('UiamApiKeyProvisioningTask', () => {
         }),
       ]);
 
-      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true });
+      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true, analytics });
       const taskManager = { registerTaskDefinitions: jest.fn() };
       task.register({
         core: coreSetup as CoreSetup<AlertingPluginsStart>,
@@ -763,7 +771,7 @@ describe('UiamApiKeyProvisioningTask', () => {
         }),
       ]);
 
-      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true });
+      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true, analytics });
       const taskManager = { registerTaskDefinitions: jest.fn() };
       task.register({
         core: coreSetup as CoreSetup<AlertingPluginsStart>,
@@ -813,7 +821,7 @@ describe('UiamApiKeyProvisioningTask', () => {
         }),
       ]);
 
-      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true });
+      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true, analytics });
       const taskManager = { registerTaskDefinitions: jest.fn() };
       task.register({
         core: coreSetup as CoreSetup<AlertingPluginsStart>,
@@ -877,7 +885,7 @@ describe('UiamApiKeyProvisioningTask', () => {
         ],
       });
 
-      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true });
+      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true, analytics });
       const taskManager = { registerTaskDefinitions: jest.fn() };
       task.register({
         core: coreSetup as CoreSetup<AlertingPluginsStart>,
@@ -910,7 +918,7 @@ describe('UiamApiKeyProvisioningTask', () => {
         }),
       ]);
 
-      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true });
+      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true, analytics });
       const taskManager = { registerTaskDefinitions: jest.fn() };
       task.register({
         core: coreSetup as CoreSetup<AlertingPluginsStart>,
@@ -944,7 +952,7 @@ describe('UiamApiKeyProvisioningTask', () => {
         }),
       ]);
 
-      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true });
+      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true, analytics });
       const taskManager = { registerTaskDefinitions: jest.fn() };
       task.register({
         core: coreSetup as CoreSetup<AlertingPluginsStart>,
@@ -972,7 +980,7 @@ describe('UiamApiKeyProvisioningTask', () => {
         }),
       ]);
 
-      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true });
+      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true, analytics });
       const taskManager = { registerTaskDefinitions: jest.fn() };
       task.register({
         core: coreSetup as CoreSetup<AlertingPluginsStart>,
@@ -1021,7 +1029,7 @@ describe('UiamApiKeyProvisioningTask', () => {
         }),
       ]);
 
-      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true });
+      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true, analytics });
       const taskManager = { registerTaskDefinitions: jest.fn() };
       task.register({
         core: coreSetup as CoreSetup<AlertingPluginsStart>,
@@ -1053,7 +1061,7 @@ describe('UiamApiKeyProvisioningTask', () => {
         encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser as jest.Mock
       ).mockRejectedValue(new Error('PIT finder failed'));
 
-      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true });
+      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true, analytics });
       const taskManager = { registerTaskDefinitions: jest.fn() };
       task.register({
         core: coreSetup as CoreSetup<AlertingPluginsStart>,
@@ -1094,7 +1102,7 @@ describe('UiamApiKeyProvisioningTask', () => {
 
       savedObjectsClient.bulkUpdate.mockRejectedValue(new Error('bulkUpdate failed'));
 
-      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true });
+      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true, analytics });
       const taskManager = { registerTaskDefinitions: jest.fn() };
       task.register({
         core: coreSetup as CoreSetup<AlertingPluginsStart>,
@@ -1169,7 +1177,7 @@ describe('UiamApiKeyProvisioningTask', () => {
         ],
       });
 
-      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true });
+      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true, analytics });
       const taskManager = { registerTaskDefinitions: jest.fn() };
       task.register({
         core: coreSetup as CoreSetup<AlertingPluginsStart>,
@@ -1229,7 +1237,7 @@ describe('UiamApiKeyProvisioningTask', () => {
         ],
       });
 
-      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true });
+      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true, analytics });
       const taskManager = { registerTaskDefinitions: jest.fn() };
       task.register({
         core: coreSetup as CoreSetup<AlertingPluginsStart>,
@@ -1269,6 +1277,151 @@ describe('UiamApiKeyProvisioningTask', () => {
         'Wrote provisioning status: 2 total (0 skipped, 1 failed conversions, 1 completed, 0 failed updates).',
         { tags: TAGS }
       );
+    });
+
+    describe('EBT telemetry reporting', () => {
+      it('reports a provisioning run event with correct counts after a successful run', async () => {
+        const uiamConvert = jest.fn().mockResolvedValue({
+          results: [
+            createConvertSuccessResult({ key: 'uiam-key-1' }),
+            createConvertSuccessResult({ key: 'uiam-key-2', id: 'essu_1' }),
+          ],
+        } as ConvertUiamAPIKeysResponse);
+
+        const { coreSetup, savedObjectsClient, encryptedSavedObjectsClient } =
+          createMockCore(uiamConvert);
+
+        const rules = [
+          createRuleSavedObject({
+            id: 'rule-1',
+            attributes: { apiKey: 'es-api-key-1', apiKeyCreatedByUser: false },
+            version: '1',
+          }),
+          createRuleSavedObject({
+            id: 'rule-2',
+            attributes: { apiKey: 'es-api-key-2', apiKeyCreatedByUser: false },
+            version: '1',
+          }),
+          createRuleSavedObject({
+            id: 'rule-skipped',
+            attributes: { apiKey: undefined, apiKeyCreatedByUser: false },
+          }),
+        ];
+        mockPitFinderRules(encryptedSavedObjectsClient, rules);
+
+        savedObjectsClient.bulkUpdate.mockResolvedValue({
+          saved_objects: [
+            {
+              id: 'rule-1',
+              type: RULE_SAVED_OBJECT_TYPE,
+              attributes: {},
+              references: [],
+              version: '1',
+              error: undefined,
+            },
+            {
+              id: 'rule-2',
+              type: RULE_SAVED_OBJECT_TYPE,
+              attributes: {},
+              references: [],
+              version: '1',
+              error: undefined,
+            },
+          ],
+        });
+
+        const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true, analytics });
+        const taskManager = { registerTaskDefinitions: jest.fn() };
+        task.register({
+          core: coreSetup as CoreSetup<AlertingPluginsStart>,
+          taskManager: taskManager as never,
+        });
+
+        const def =
+          taskManager.registerTaskDefinitions.mock.calls[0][0][API_KEY_PROVISIONING_TASK_TYPE];
+        const runner = def.createTaskRunner({
+          taskInstance: createTaskInstance({ runs: 0 }),
+        });
+        await runner.run();
+
+        expect(analytics.reportEvent).toHaveBeenCalledWith(UIAM_PROVISIONING_RUN_EVENT.eventType, {
+          total: 3,
+          completed: 2,
+          failed: 0,
+          skipped: 1,
+          has_more_to_provision: false,
+          has_error: false,
+          run_number: 1,
+        });
+      });
+
+      it('reports has_error: true with zero counts when runTask throws', async () => {
+        const uiamConvert = jest.fn().mockRejectedValue(new Error('convert boom'));
+        const { coreSetup, encryptedSavedObjectsClient } = createMockCore(uiamConvert);
+
+        mockPitFinderRules(encryptedSavedObjectsClient, [
+          createRuleSavedObject({
+            id: 'rule-1',
+            attributes: { apiKey: 'es-api-key-1', apiKeyCreatedByUser: false },
+            version: '1',
+          }),
+        ]);
+
+        const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true, analytics });
+        const taskManager = { registerTaskDefinitions: jest.fn() };
+        task.register({
+          core: coreSetup as CoreSetup<AlertingPluginsStart>,
+          taskManager: taskManager as never,
+        });
+
+        const def =
+          taskManager.registerTaskDefinitions.mock.calls[0][0][API_KEY_PROVISIONING_TASK_TYPE];
+        const runner = def.createTaskRunner({
+          taskInstance: createTaskInstance({ runs: 2 }),
+        });
+
+        await expect(runner.run()).rejects.toThrow('convert boom');
+
+        expect(analytics.reportEvent).toHaveBeenCalledWith(UIAM_PROVISIONING_RUN_EVENT.eventType, {
+          total: 0,
+          completed: 0,
+          failed: 0,
+          skipped: 0,
+          has_more_to_provision: false,
+          has_error: true,
+          run_number: 0,
+        });
+      });
+
+      it('does not throw when analytics.reportEvent fails', async () => {
+        analytics.reportEvent.mockImplementation(() => {
+          throw new Error('telemetry failure');
+        });
+
+        const uiamConvert = jest.fn().mockResolvedValueOnce({ results: [] });
+        const { coreSetup, encryptedSavedObjectsClient } = createMockCore(uiamConvert);
+
+        mockPitFinderRules(encryptedSavedObjectsClient, []);
+
+        const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true, analytics });
+        const taskManager = { registerTaskDefinitions: jest.fn() };
+        task.register({
+          core: coreSetup as CoreSetup<AlertingPluginsStart>,
+          taskManager: taskManager as never,
+        });
+
+        const def =
+          taskManager.registerTaskDefinitions.mock.calls[0][0][API_KEY_PROVISIONING_TASK_TYPE];
+        const runner = def.createTaskRunner({
+          taskInstance: createTaskInstance({ runs: 0 }),
+        });
+        const result = await runner.run();
+
+        expect(result).toEqual({ state: { runs: 1 } });
+        expect(logger.debug).toHaveBeenCalledWith(
+          expect.stringContaining('Failed to report UIAM provisioning run telemetry event')
+        );
+      });
     });
   });
 });

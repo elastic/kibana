@@ -17,7 +17,7 @@
 import { z } from '@kbn/zod/v4';
 
 export type EntitySourceType = z.infer<typeof EntitySourceType>;
-export const EntitySourceType = z.enum(['index', 'entity_analytics_integration']);
+export const EntitySourceType = z.enum(['index', 'entity_analytics_integration', 'store']);
 export type EntitySourceTypeEnum = typeof EntitySourceType.enum;
 export const EntitySourceTypeEnum = EntitySourceType.enum;
 
@@ -59,17 +59,42 @@ export const Integrations = z.object({
     .optional(),
 });
 
+/**
+ * Defines the lookback period for filtering source data by timestamp.
+ */
+export type DateRange = z.infer<typeof DateRange>;
+export const DateRange = z.object({
+  /**
+   * Start of the lookback period (date math or ISO string, e.g. "now-10d")
+   */
+  start: z.string(),
+  /**
+   * End of the lookback period (date math or ISO string, e.g. "now")
+   */
+  end: z.string(),
+});
+
 export type UpdateableMonitoringEntitySourceProperties = z.infer<
   typeof UpdateableMonitoringEntitySourceProperties
 >;
 export const UpdateableMonitoringEntitySourceProperties = z.object({
+  type: EntitySourceType.optional(),
   name: z.string().optional(),
   indexPattern: z.string().optional(),
   integrationName: z.string().optional(),
   enabled: z.boolean().optional(),
+  /**
+   * Field used to query the entity store for index-type sources
+   */
+  identifierField: z.string().optional(),
+  /**
+   * KQL query used to filter data from the provided index patterns
+   */
+  queryRule: z.string().optional(),
   matchers: z.array(Matcher).optional(),
   filter: Filter.optional(),
   integrations: Integrations.optional(),
+  range: DateRange.optional(),
 });
 
 export type UpdateEntitySourceNoadditionalProps = z.infer<
@@ -82,7 +107,6 @@ export const UpdateEntitySourceNoadditionalProps = UpdateableMonitoringEntitySou
 export type MonitoringEntitySourceProperties = z.infer<typeof MonitoringEntitySourceProperties>;
 export const MonitoringEntitySourceProperties = UpdateableMonitoringEntitySourceProperties.merge(
   z.object({
-    type: EntitySourceType.optional(),
     managed: z.boolean().optional(),
   })
 );

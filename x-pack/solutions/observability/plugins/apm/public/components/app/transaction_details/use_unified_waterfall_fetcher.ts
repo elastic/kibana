@@ -61,7 +61,7 @@ export function useUnifiedWaterfallFetcher({
         return callApmApi('GET /internal/apm/unified_traces/{traceId}', {
           params: {
             path: { traceId },
-            query: { start, end, entryTransactionId, serviceName },
+            query: { start, end, entryTransactionId, serviceName, ecsOnly: true },
           },
         });
       }

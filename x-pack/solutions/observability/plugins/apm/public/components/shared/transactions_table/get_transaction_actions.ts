@@ -42,8 +42,8 @@ export function useTransactionActions({
         actions: [
           {
             id: 'transactionsTable-openInDiscover',
-            name: i18n.translate('xpack.apm.transactionsTable.openInDiscover', {
-              defaultMessage: 'Open in Discover',
+            name: i18n.translate('xpack.apm.transactionsTable.openTracesInDiscover', {
+              defaultMessage: 'Open traces in Discover',
             }),
             href: (item) => {
               const esqlQuery = getESQLQuery({

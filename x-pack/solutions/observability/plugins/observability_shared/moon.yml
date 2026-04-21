@@ -32,7 +32,6 @@ dependsOn:
   - '@kbn/es-types'
   - '@kbn/spaces-plugin'
   - '@kbn/core-application-browser'
-  - '@kbn/core-application-common'
   - '@kbn/datemath'
   - '@kbn/rison'
   - '@kbn/kibana-utils-plugin'
@@ -70,26 +69,6 @@ fileGroups:
     - .storybook/**/*
     - '!target/**/*'
     - '!.storybook/**/*.js'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

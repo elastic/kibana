@@ -52,9 +52,11 @@ export type LogsOverviewProps = DocViewRenderProps &
     renderAIInsight?: ObservabilityLogsAIInsightFeature['render'];
     renderFlyoutStreamField?: ObservabilityStreamsFeature['renderFlyoutStreamField'];
     renderFlyoutStreamProcessingLink?: ObservabilityStreamsFeature['renderFlyoutStreamProcessingLink'];
+    renderCpsWarning?: boolean;
     indexes: ObservabilityIndexes;
     showTraceWaterfall?: boolean;
     docViewActions?: DocViewActions;
+    profileId: string;
   };
 
 export interface LogsOverviewApi {
@@ -75,11 +77,13 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
       renderAIInsight,
       renderFlyoutStreamField,
       renderFlyoutStreamProcessingLink,
+      renderCpsWarning,
       indexes,
       showTraceWaterfall = true,
       docViewActions,
       initialState,
       onInitialStateChange,
+      profileId,
     },
     ref
   ) => {
@@ -136,16 +140,18 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
             formattedDoc={parsedDoc}
             hit={hit}
             renderFlyoutStreamProcessingLink={renderFlyoutStreamProcessingLink}
+            renderCpsWarning={renderCpsWarning}
             filter={filter}
             onAddColumn={onAddColumn}
             onRemoveColumn={onRemoveColumn}
             dataView={dataView}
           />
-          <DataSourcesProvider indexes={indexes}>
+          <DataSourcesProvider indexes={indexes} profileId={profileId}>
             <DocViewerExtensionActionsProvider actions={docViewActions}>
               {showSimilarErrors ? <SimilarErrors hit={hit} /> : null}
               <div>
-                {renderFlyoutStreamField && renderFlyoutStreamField({ dataView, doc: hit })}
+                {renderFlyoutStreamField &&
+                  renderFlyoutStreamField({ dataView, doc: hit, renderCpsWarning })}
               </div>
               <LogsOverviewDegradedFields ref={qualityIssuesSectionRef} rawDoc={hit.raw} />
               {isStacktraceAvailable && (

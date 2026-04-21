@@ -9,7 +9,6 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
-
 // Google Drive API constants
 const GOOGLE_DRIVE_API_BASE = 'https://www.googleapis.com/drive/v3';
 const DEFAULT_PAGE_SIZE = 250;
@@ -55,8 +54,38 @@ export const GoogleDriveConnector: ConnectorSpec = {
     isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
+
   auth: {
-    types: ['bearer'],
+    types: [
+      'bearer',
+      {
+        type: 'oauth_authorization_code',
+        overrides: {
+          meta: {
+            authorizationUrl: { hidden: true },
+            tokenUrl: { hidden: true },
+            scope: { hidden: true },
+          },
+        },
+        defaults: {
+          authorizationUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
+          tokenUrl: 'https://oauth2.googleapis.com/token',
+          scope:
+            'https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/drive.metadata.readonly',
+        },
+      },
+      {
+        type: 'ears',
+        overrides: {
+          meta: { scope: { disabled: true } },
+        },
+        defaults: {
+          provider: 'google',
+          scope:
+            'https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/drive.metadata.readonly',
+        },
+      },
+    ],
     headers: {
       Accept: 'application/json',
     },
@@ -65,25 +94,37 @@ export const GoogleDriveConnector: ConnectorSpec = {
   actions: {
     searchFiles: {
       isTool: true,
+      description:
+        "Search for files in Google Drive using Google's query syntax. Use this to find files by name, content, type, owner, or modification date across the entire Drive.",
       input: z.object({
         query: z
           .string()
           .min(1)
           .describe(
-            'Google Drive search query. ' +
-              "Examples: name contains 'budget' and trashed=false | " +
-              "fullText contains 'quarterly report' and mimeType='application/pdf' | " +
-              "'me' in owners and modifiedTime > '2024-01-01' | " +
-              "mimeType='application/vnd.google-apps.folder' and trashed=false. " +
-              "Operators: contains, =, !=, <, >, <=, >=. Combine with 'and'/'or'. " +
-              "String values use single quotes. Add 'and trashed=false' to exclude trashed files."
+            'Google Drive search query passed verbatim to the Drive API `q` parameter. ' +
+              'Key patterns: ' +
+              "name match: name contains 'budget' | " +
+              "full-text search: fullText contains 'quarterly report' | " +
+              "MIME type filter: mimeType = 'application/pdf' | " +
+              "owner filter: 'me' in owners | " +
+              "date filter: modifiedTime > '2024-01-01' | " +
+              "folder contents: '<folderId>' in parents | " +
+              'exclude trash: trashed = false (always add unless the user asks for trashed files). ' +
+              "Operators: contains, =, !=, <, >, <=, >=. Combine clauses with 'and' / 'or'. " +
+              'String values must use single quotes. ' +
+              "Example: name contains 'budget' and mimeType = 'application/pdf' and trashed = false"
           ),
         pageSize: z
           .number()
-          .optional()
+          .max(1000)
           .default(DEFAULT_PAGE_SIZE)
-          .describe('Maximum number of files to return (1-1000)'),
-        pageToken: z.string().optional().describe('Token for pagination'),
+          .describe('Number of results to return (default 250, max 1000)'),
+        pageToken: z
+          .string()
+          .optional()
+          .describe(
+            "Pagination token. Pass the 'nextPageToken' value from a previous response to get the next page. When nextPageToken is absent in the response, there are no more results."
+          ),
         orderBy: z
           .preprocess(
             (val) => (val === '' ? undefined : val),
@@ -98,7 +139,9 @@ export const GoogleDriveConnector: ConnectorSpec = {
               ])
               .optional()
           )
-          .describe('Field and direction to order results by'),
+          .describe(
+            "Sort order for results. Options: 'createdTime', 'createdTime desc', 'modifiedTime', 'modifiedTime desc', 'name', or 'name desc'"
+          ),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as {
@@ -141,28 +184,37 @@ export const GoogleDriveConnector: ConnectorSpec = {
 
     listFiles: {
       isTool: true,
+      description:
+        'List files and subfolders within a specific Google Drive folder. Use this to browse folder contents by folder ID, or start at the root folder.',
       input: z.object({
         folderId: z
           .preprocess((val) => (val === '' ? undefined : val), z.string().optional())
           .default(DEFAULT_FOLDER_ID)
-          .describe("Parent folder ID ('root' for root folder)"),
+          .describe(
+            "Folder ID to list contents of. Use 'root' for the root folder, or a folder ID from search/list results. Defaults to 'root'."
+          ),
         pageSize: z
           .number()
-          .optional()
+          .max(1000)
           .default(DEFAULT_PAGE_SIZE)
-          .describe('Maximum number of files to return (1-1000)'),
-        pageToken: z.string().optional().describe('Token for pagination'),
+          .describe('Number of results to return (default 250, max 1000)'),
+        pageToken: z
+          .string()
+          .optional()
+          .describe(
+            "Pagination token. Pass the 'nextPageToken' value from a previous response to get the next page. When nextPageToken is absent in the response, there are no more results."
+          ),
         orderBy: z
           .preprocess(
             (val) => (val === '' ? undefined : val),
             z.enum(['name', 'modifiedTime', 'createdTime']).optional()
           )
-          .describe('Field to order results by'),
+          .describe("Sort order for results. Options: 'name', 'modifiedTime', or 'createdTime'"),
         includeTrashed: z
           .boolean()
           .optional()
           .default(false)
-          .describe('Include trashed files in results (default: false)'),
+          .describe('Whether to include trashed files in results (default: false)'),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as {
@@ -208,8 +260,15 @@ export const GoogleDriveConnector: ConnectorSpec = {
 
     downloadFile: {
       isTool: true,
+      description:
+        'Download a file from Google Drive and return its content as base64-encoded data. Works with PDFs, Office documents, Google Docs (exported as PDF), Google Sheets (exported as XLSX), and other binary or text-based formats. Use file IDs from searchFiles or listFiles results. WARNING: Returns potentially large base64 payloads. Only call this when you have a plan to process the binary data (e.g. via an Elasticsearch ingest pipeline attachment processor). For text-based files, prefer reading metadata first to confirm the file type.',
       input: z.object({
-        fileId: z.string().min(1).describe('The ID of the file to download'),
+        fileId: z
+          .string()
+          .min(1)
+          .describe(
+            'The ID of the file to download. Use IDs from searchFiles or listFiles results. Works with PDFs, Office docs, Google Docs, and other text-based formats.'
+          ),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as {
@@ -283,13 +342,14 @@ export const GoogleDriveConnector: ConnectorSpec = {
 
     getFileMetadata: {
       isTool: true,
+      description:
+        'Get detailed metadata for one or more specific files, including ownership, sharing status, permissions, labels, and descriptions. Use after searchFiles or listFiles to inspect specific files in depth.',
       input: z.object({
         fileIds: z
           .array(z.string().min(1))
           .min(1)
           .describe(
-            'Array of file IDs to fetch metadata for. Use after search/list to get ownership, ' +
-              'sharing, permissions, and other details for specific files.'
+            'Array of file IDs to fetch metadata for. Use IDs from searchFiles or listFiles results. Returns ownership, sharing, permissions, and other details for each file.'
           ),
       }),
       handler: async (ctx, input) => {
@@ -340,6 +400,26 @@ export const GoogleDriveConnector: ConnectorSpec = {
       },
     },
   },
+
+  skill: [
+    'Google Drive connector — usage guidance for LLMs',
+    '',
+    '## Search → download pattern',
+    'The typical pattern for retrieving file content is: call searchFiles (or listFiles) first to',
+    'discover file IDs, then call downloadFile with those IDs to fetch the actual content.',
+    'Never guess or construct file IDs; always obtain them from search or list results.',
+    '',
+    '## Choosing the right search action',
+    'Use searchFiles when the user provides a keyword, phrase, file type, owner, or date criterion',
+    "— it queries across the entire Drive using Google's query syntax.",
+    'Use listFiles when the user wants to browse the contents of a known folder (by folder ID),',
+    'or to enumerate what is in a directory. listFiles does not support full-text search.',
+    '',
+    '## Be selective with downloads',
+    'downloadFile returns base64-encoded content that can be very large.',
+    'When downloading multiple files, be selective — large payloads can exceed context limits.',
+    'Prefer narrowing search results before downloading rather than downloading everything.',
+  ].join('\n'),
 
   test: {
     description: i18n.translate('core.kibanaConnectorSpecs.googleDrive.test.description', {

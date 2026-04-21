@@ -12,7 +12,9 @@ import type { WorkflowApi } from '@kbn/workflows-ui';
 import {
   exportSingleWorkflow,
   exportWorkflows,
+  findMissingReferencedIds,
   prepareSingleWorkflowExport,
+  resolveAllReferences,
 } from './export_workflows';
 
 const mockDownloadFileAs = jest.fn();
@@ -36,12 +38,27 @@ const createWorkflow = (overrides: Partial<WorkflowListItemDto> = {}): WorkflowL
   ...overrides,
 });
 
-const createMockWorkflowApi = (): WorkflowApi =>
+const mockGenerateWorkflowsZip = jest
+  .fn()
+  .mockResolvedValue(new Blob(['zip'], { type: 'application/zip' }));
+jest.mock('./export/generate_zip_archive', () => ({
+  generateWorkflowsZip: (...args: unknown[]) => mockGenerateWorkflowsZip(...args),
+}));
+
+const createMockWorkflowApi = (): jest.Mocked<WorkflowApi> =>
   ({
-    exportWorkflows: jest
-      .fn()
-      .mockResolvedValue(new Blob(['zip-data'], { type: 'application/zip' })),
-  } as unknown as WorkflowApi);
+    exportWorkflows: jest.fn().mockResolvedValue({
+      entries: [
+        { id: 'w-1', yaml: 'name: First\nsteps: []' },
+        { id: 'w-2', yaml: 'name: Second\nsteps: []' },
+      ],
+      manifest: {
+        exportedCount: 2,
+        exportedAt: '2026-01-01T00:00:00.000Z',
+        version: '1',
+      },
+    }),
+  } as unknown as jest.Mocked<WorkflowApi>);
 
 describe('export_workflows', () => {
   beforeEach(() => {
@@ -107,7 +124,7 @@ describe('export_workflows', () => {
       expect(api.exportWorkflows).not.toHaveBeenCalled();
     });
 
-    it('should export multiple workflows as ZIP via WorkflowApi', async () => {
+    it('should fetch entries from API and build ZIP client-side for multiple workflows', async () => {
       const api = createMockWorkflowApi();
       const workflows = [
         createWorkflow({ id: 'w-1', name: 'First' }),
@@ -117,6 +134,17 @@ describe('export_workflows', () => {
 
       expect(result).toBe(2);
       expect(api.exportWorkflows).toHaveBeenCalledWith({ ids: ['w-1', 'w-2'] });
+      expect(mockGenerateWorkflowsZip).toHaveBeenCalledWith(
+        [
+          { id: 'w-1', yaml: 'name: First\nsteps: []' },
+          { id: 'w-2', yaml: 'name: Second\nsteps: []' },
+        ],
+        {
+          exportedCount: 2,
+          exportedAt: '2026-01-01T00:00:00.000Z',
+          version: '1',
+        }
+      );
       expect(mockDownloadFileAs).toHaveBeenCalledTimes(1);
       const [filename, payload] = mockDownloadFileAs.mock.calls[0];
       expect(filename).toMatch(/^workflows_export_.*\.zip$/);
@@ -147,6 +175,171 @@ describe('export_workflows', () => {
       expect(result).toBe(1);
       const [filename] = mockDownloadFileAs.mock.calls[0];
       expect(filename).toMatch(/\.yml$/);
+    });
+
+    it('should propagate HTTP errors from the _export API', async () => {
+      const api = createMockWorkflowApi();
+      api.exportWorkflows.mockRejectedValue(new Error('Network error'));
+      const workflows = [
+        createWorkflow({ id: 'w-1', name: 'First' }),
+        createWorkflow({ id: 'w-2', name: 'Second' }),
+      ];
+
+      await expect(exportWorkflows(workflows, api)).rejects.toThrow('Network error');
+    });
+  });
+
+  describe('findMissingReferencedIds', () => {
+    const createWorkflowWithRefs = (id: string, referencedIds: string[]): WorkflowListItemDto => {
+      const steps = referencedIds.map((refId) => ({
+        type: 'workflow.execute',
+        with: { 'workflow-id': refId },
+      }));
+      return createWorkflow({
+        id,
+        definition: { steps } as unknown as WorkflowListItemDto['definition'],
+      });
+    };
+
+    it('should return empty when no workflows reference others', () => {
+      const workflows = [createWorkflow({ id: 'w-1' }), createWorkflow({ id: 'w-2' })];
+      expect(findMissingReferencedIds(workflows)).toEqual([]);
+    });
+
+    it('should return IDs referenced but not in the export set', () => {
+      const workflows = [createWorkflowWithRefs('w-1', ['w-2', 'w-3'])];
+      const missing = findMissingReferencedIds(workflows);
+      expect(missing).toEqual(expect.arrayContaining(['w-2', 'w-3']));
+      expect(missing).toHaveLength(2);
+    });
+
+    it('should not return IDs already in the export set', () => {
+      const workflows = [createWorkflowWithRefs('w-1', ['w-2']), createWorkflow({ id: 'w-2' })];
+      expect(findMissingReferencedIds(workflows)).toEqual([]);
+    });
+
+    it('should skip workflows with null definitions', () => {
+      const workflows = [createWorkflow({ id: 'w-1', definition: null })];
+      expect(findMissingReferencedIds(workflows)).toEqual([]);
+    });
+
+    it('should deduplicate when multiple workflows reference the same external ID', () => {
+      const workflows = [
+        createWorkflowWithRefs('w-1', ['w-external']),
+        createWorkflowWithRefs('w-2', ['w-external']),
+      ];
+      expect(findMissingReferencedIds(workflows)).toEqual(['w-external']);
+    });
+  });
+
+  describe('resolveAllReferences', () => {
+    const createWorkflowWithRefs = (id: string, referencedIds: string[]): WorkflowListItemDto => {
+      const steps = referencedIds.map((refId) => ({
+        type: 'workflow.execute',
+        with: { 'workflow-id': refId },
+      }));
+      return createWorkflow({
+        id,
+        definition: { steps } as unknown as WorkflowListItemDto['definition'],
+      });
+    };
+
+    it('should resolve direct references (depth 1)', () => {
+      const wA = createWorkflowWithRefs('a', ['b']);
+      const wB = createWorkflow({ id: 'b' });
+      const allMap = new Map([
+        ['a', wA],
+        ['b', wB],
+      ]);
+
+      const result = resolveAllReferences([wA], allMap);
+      const ids = result.map((w) => w.id);
+      expect(ids).toEqual(expect.arrayContaining(['a', 'b']));
+      expect(ids).toHaveLength(2);
+    });
+
+    it('should resolve transitive references (depth 2: A->B->C)', () => {
+      const wA = createWorkflowWithRefs('a', ['b']);
+      const wB = createWorkflowWithRefs('b', ['c']);
+      const wC = createWorkflow({ id: 'c' });
+      const allMap = new Map([
+        ['a', wA],
+        ['b', wB],
+        ['c', wC],
+      ]);
+
+      const result = resolveAllReferences([wA], allMap);
+      const ids = result.map((w) => w.id);
+      expect(ids).toEqual(expect.arrayContaining(['a', 'b', 'c']));
+      expect(ids).toHaveLength(3);
+    });
+
+    it('should stop at MAX_RESOLVE_DEPTH (10)', () => {
+      // Build a chain: w0 -> w1 -> w2 -> ... -> w11
+      const allWorkflows: WorkflowListItemDto[] = [];
+      for (let i = 0; i <= 11; i++) {
+        const refs = i < 11 ? [`w${i + 1}`] : [];
+        allWorkflows.push(createWorkflowWithRefs(`w${i}`, refs));
+      }
+      const allMap = new Map(allWorkflows.map((w) => [w.id, w]));
+
+      const result = resolveAllReferences([allWorkflows[0]], allMap);
+      const ids = result.map((w) => w.id);
+
+      // w0 is initial (depth 0), w1..w10 are resolved (depths 1-10), w11 should be excluded
+      expect(ids).toContain('w0');
+      expect(ids).toContain('w10');
+      expect(ids).not.toContain('w11');
+    });
+
+    it('should handle circular references (A->B->A) without infinite loop', () => {
+      const wA = createWorkflowWithRefs('a', ['b']);
+      const wB = createWorkflowWithRefs('b', ['a']);
+      const allMap = new Map([
+        ['a', wA],
+        ['b', wB],
+      ]);
+
+      const result = resolveAllReferences([wA], allMap);
+      const ids = result.map((w) => w.id);
+      expect(ids).toEqual(expect.arrayContaining(['a', 'b']));
+      expect(ids).toHaveLength(2);
+    });
+
+    it('should handle diamond references (A->B, A->C, B->D, C->D)', () => {
+      const wA = createWorkflowWithRefs('a', ['b', 'c']);
+      const wB = createWorkflowWithRefs('b', ['d']);
+      const wC = createWorkflowWithRefs('c', ['d']);
+      const wD = createWorkflow({ id: 'd' });
+      const allMap = new Map([
+        ['a', wA],
+        ['b', wB],
+        ['c', wC],
+        ['d', wD],
+      ]);
+
+      const result = resolveAllReferences([wA], allMap);
+      const ids = result.map((w) => w.id);
+      expect(ids).toEqual(expect.arrayContaining(['a', 'b', 'c', 'd']));
+      expect(ids).toHaveLength(4);
+    });
+
+    it('should skip missing references not in allWorkflowsMap', () => {
+      const wA = createWorkflowWithRefs('a', ['missing']);
+      const allMap = new Map([['a', wA]]);
+
+      const result = resolveAllReferences([wA], allMap);
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe('a');
+    });
+
+    it('should include workflows with null definitions in result without crashing', () => {
+      const wA = createWorkflow({ id: 'a', definition: null });
+      const allMap = new Map([['a', wA]]);
+
+      const result = resolveAllReferences([wA], allMap);
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe('a');
     });
   });
 });

@@ -3686,14 +3686,14 @@
           {
             "parentPluginId": "lists",
             "id": "def-server.CreateExceptionListItemOptions.entries",
-            "type": "Any",
+            "type": "Array",
             "tags": [],
             "label": "entries",
             "description": [
               "an array with the exception list item entries"
             ],
             "signature": [
-              "z.infer<any>"
+              "({ type: any; field: string; value: string; operator: any; } | { type: any; field: string; value: string[]; operator: any; } | { type: any; field: string; list: { id: string; type: any; }; operator: any; } | { type: any; field: string; operator: any; } | { type: any; field: string; entries: any[]; } | { type: any; field: string; value: string; operator: any; })[]"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
             "lineNumber": 259,
@@ -4081,14 +4081,14 @@
           {
             "parentPluginId": "lists",
             "id": "def-server.UpdateExceptionListItemOptions.entries",
-            "type": "Any",
+            "type": "Array",
             "tags": [],
             "label": "entries",
             "description": [
               "item exception entries logic"
             ],
             "signature": [
-              "z.infer<any>"
+              "({ type: any; field: string; value: string; operator: any; } | { type: any; field: string; value: string[]; operator: any; } | { type: any; field: string; list: { id: string; type: any; }; operator: any; } | { type: any; field: string; operator: any; } | { type: any; field: string; entries: any[]; } | { type: any; field: string; value: string; operator: any; })[]"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
             "lineNumber": 330,

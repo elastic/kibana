@@ -8,7 +8,9 @@
  */
 
 import type { RootSchema } from '@kbn/core/server';
+import type { WellKnownWorkflowTriggerSource } from '@kbn/workflows';
 import {
+  type EventDrivenExecutionSuppressedParams,
   type WorkflowExecutionCancelledParams,
   type WorkflowExecutionCompletedParams,
   type WorkflowExecutionFailedParams,
@@ -19,18 +21,22 @@ export const workflowExecutionEventNames = {
   [WorkflowExecutionTelemetryEventTypes.WorkflowExecutionCompleted]: 'Workflow execution completed',
   [WorkflowExecutionTelemetryEventTypes.WorkflowExecutionFailed]: 'Workflow execution failed',
   [WorkflowExecutionTelemetryEventTypes.WorkflowExecutionCancelled]: 'Workflow execution cancelled',
+  [WorkflowExecutionTelemetryEventTypes.EventDrivenExecutionSuppressed]:
+    'Event-driven workflow execution suppressed at runtime',
 };
 
 const baseWorkflowExecutionSchema: RootSchema<{
   workflowExecutionId: string;
   workflowId: string;
   spaceId: string;
-  triggerType: 'manual' | 'scheduled' | 'alert' | 'workflow-step';
+  triggerType: WellKnownWorkflowTriggerSource | 'event';
+  eventTriggerId?: string;
   isTestRun: boolean;
   ruleId?: string;
   compositionDepth?: number;
   parentWorkflowId?: string;
   parentWorkflowInvocation?: 'sync' | 'async';
+  eventChainDepth?: number;
 }> = {
   workflowExecutionId: {
     type: 'keyword',
@@ -57,8 +63,16 @@ const baseWorkflowExecutionSchema: RootSchema<{
     type: 'keyword',
     _meta: {
       description:
-        'How the workflow was triggered: manual, scheduled, alert, or workflow-step for sub-workflows',
+        'How the workflow was triggered: manual, scheduled, alert, workflow-step (sub-workflow), or event (event-driven trigger)',
       optional: false,
+    },
+  },
+  eventTriggerId: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Event trigger id when triggerType is event (e.g. cases.caseCreated). Omitted for built-in triggers.',
+      optional: true,
     },
   },
   isTestRun: {
@@ -100,7 +114,22 @@ const baseWorkflowExecutionSchema: RootSchema<{
       optional: true,
     },
   },
+  eventChainDepth: {
+    type: 'integer',
+    _meta: {
+      description:
+        'Event-chain depth when this run was scheduled from event-driven emits. Distinct from compositionDepth.',
+      optional: true,
+    },
+  },
 };
+
+const {
+  compositionDepth: _compositionDepth,
+  parentWorkflowId: _parentWorkflowId,
+  parentWorkflowInvocation: _parentWorkflowInvocation,
+  ...eventDrivenExecutionSuppressedBaseSchema
+} = baseWorkflowExecutionSchema;
 
 const eventNameSchema: RootSchema<{ eventName: string }> = {
   eventName: {
@@ -286,6 +315,14 @@ const workflowExecutionCompletedSchema: RootSchema<WorkflowExecutionCompletedPar
     _meta: {
       description:
         'Queue delay in milliseconds - time from when workflow was queued/scheduled to when it started executing. Only present when workflow was queued due to concurrency limits or scheduling.',
+      optional: true,
+    },
+  },
+  emitToStartMs: {
+    type: 'long',
+    _meta: {
+      description:
+        'Time from event dispatch to workflow execution start in milliseconds. Only present for event-driven executions when dispatch metadata is available.',
       optional: true,
     },
   },
@@ -533,6 +570,14 @@ const workflowExecutionFailedSchema: RootSchema<WorkflowExecutionFailedParams> =
       optional: true,
     },
   },
+  emitToStartMs: {
+    type: 'long',
+    _meta: {
+      description:
+        'Time from event dispatch to workflow execution start in milliseconds. Only present for event-driven executions when dispatch metadata is available.',
+      optional: true,
+    },
+  },
   timedOut: {
     type: 'boolean',
     _meta: {
@@ -755,6 +800,14 @@ const workflowExecutionCancelledSchema: RootSchema<WorkflowExecutionCancelledPar
       optional: true,
     },
   },
+  emitToStartMs: {
+    type: 'long',
+    _meta: {
+      description:
+        'Time from event dispatch to workflow execution start in milliseconds. Only present for event-driven executions when dispatch metadata is available.',
+      optional: true,
+    },
+  },
   timedOut: {
     type: 'boolean',
     _meta: {
@@ -801,10 +854,24 @@ const workflowExecutionCancelledSchema: RootSchema<WorkflowExecutionCancelledPar
   },
 };
 
+const eventDrivenExecutionSuppressedSchema: RootSchema<EventDrivenExecutionSuppressedParams> = {
+  ...eventDrivenExecutionSuppressedBaseSchema,
+  ...eventNameSchema,
+  logTriggerEventsEnabled: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether trigger-event audit logging is enabled when suppression ran',
+      optional: false,
+    },
+  },
+};
+
 export const workflowExecutionEventSchemas = {
   [WorkflowExecutionTelemetryEventTypes.WorkflowExecutionCompleted]:
     workflowExecutionCompletedSchema,
   [WorkflowExecutionTelemetryEventTypes.WorkflowExecutionFailed]: workflowExecutionFailedSchema,
   [WorkflowExecutionTelemetryEventTypes.WorkflowExecutionCancelled]:
     workflowExecutionCancelledSchema,
+  [WorkflowExecutionTelemetryEventTypes.EventDrivenExecutionSuppressed]:
+    eventDrivenExecutionSuppressedSchema,
 };

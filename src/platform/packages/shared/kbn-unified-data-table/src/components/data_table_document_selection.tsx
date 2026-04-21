@@ -333,7 +333,7 @@ export function DataTableDocumentToolbarBtn({
       button={
         <EuiDataGridToolbarControl
           iconSide="left"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           onClick={toggleSelectionToolbar}
           data-selected-documents={selectedDocsCount}
           data-test-subj="unifiedDataTableSelectionBtn"
@@ -436,7 +436,7 @@ export const DataTableCompareToolbarBtn = ({
     <EuiContextMenuItem
       data-test-subj="unifiedDataTableCompareSelectedDocuments"
       disabled={isDisabled}
-      icon="diff"
+      icon="compare"
       onClick={() => {
         setIsCompareActive(true);
       }}

@@ -12,7 +12,8 @@ import { bulkUpsertOperationsFactory, UPDATE_SCRIPT_SOURCE } from './upsert';
 const logger = loggingSystemMock.createLogger();
 
 describe('bulkUpsertOperationsFactory', () => {
-  const buildOps = bulkUpsertOperationsFactory(logger);
+  const watchlist = { name: 'test-watchlist', id: 'watchlist-1' };
+  const buildOps = bulkUpsertOperationsFactory(logger, watchlist);
   const targetIndex = '.entity-analytics.watchlists.test-watchlist-default';
 
   afterEach(() => {
@@ -31,21 +32,23 @@ describe('bulkUpsertOperationsFactory', () => {
     expect(ops).toHaveLength(4);
 
     // First entity — index action
-    expect(ops[0]).toEqual({ index: { _index: targetIndex, _id: 'user:alice' } });
+    expect(ops[0]).toEqual({ index: { _index: targetIndex, _id: 'watchlist-1:user:alice' } });
     // First entity — doc body
     expect(ops[1]).toEqual(
       expect.objectContaining({
         entity: { id: 'user:alice', name: 'alice', type: 'user' },
         labels: { sources: ['index'], source_ids: ['source-1'] },
+        watchlist,
       })
     );
 
     // Second entity — index action
-    expect(ops[2]).toEqual({ index: { _index: targetIndex, _id: 'user:bob' } });
+    expect(ops[2]).toEqual({ index: { _index: targetIndex, _id: 'watchlist-1:user:bob' } });
     expect(ops[3]).toEqual(
       expect.objectContaining({
         entity: { id: 'user:bob', name: 'bob', type: 'user' },
         labels: { sources: ['index'], source_ids: ['source-1'] },
+        watchlist,
       })
     );
   });
@@ -98,7 +101,7 @@ describe('bulkUpsertOperationsFactory', () => {
     expect(ops).toHaveLength(4);
 
     // First is an index op
-    expect(ops[0]).toEqual({ index: { _index: targetIndex, _id: 'user:new-user' } });
+    expect(ops[0]).toEqual({ index: { _index: targetIndex, _id: 'watchlist-1:user:new-user' } });
 
     // Second pair is an update op
     expect(ops[2]).toEqual({ update: { _index: targetIndex, _id: 'doc-456' } });

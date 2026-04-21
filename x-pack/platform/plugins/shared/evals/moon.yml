@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/logging'
   - '@kbn/features-plugin'
+  - '@kbn/encrypted-saved-objects-plugin'
   - '@kbn/management-plugin'
   - '@kbn/kibana-react-plugin'
   - '@kbn/storage-adapter'
@@ -33,7 +34,10 @@ dependsOn:
   - '@kbn/core-logging-server-mocks'
   - '@kbn/core-http-router-server-mocks'
   - '@kbn/code-editor'
+  - '@kbn/react-kibana-mount'
   - '@kbn/react-kibana-context-theme'
+  - '@kbn/core-saved-objects-api-server-mocks'
+  - '@kbn/core-http-browser'
 tags:
   - plugin
   - prod
@@ -46,26 +50,6 @@ fileGroups:
     - public/**/*
     - server/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

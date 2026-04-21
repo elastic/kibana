@@ -695,4 +695,240 @@ describe('WorkflowExecutionRepository', () => {
       expect(esClient.bulk).toHaveBeenCalled();
     });
   });
+
+  describe('findNonTerminalExecutionIdsByWorkflowIdPage', () => {
+    const baseSearchExpectation = {
+      index: WORKFLOWS_EXECUTIONS_INDEX,
+      query: {
+        bool: {
+          filter: [
+            { term: { workflowId: 'wf-1' } },
+            { term: { spaceId: 'default' } },
+            {
+              terms: {
+                status: NonTerminalExecutionStatuses,
+              },
+            },
+          ],
+        },
+      },
+      _source: ['id'],
+      sort: [{ createdAt: { order: 'asc' } }, { id: { order: 'asc' } }],
+      track_total_hits: true,
+    };
+
+    it('should search without search_after on the first page', async () => {
+      esClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'a',
+              _source: { id: 'exec-a' },
+              sort: ['2024-01-01T00:00:00.000Z', 'exec-a'],
+            },
+          ],
+          total: { value: 1, relation: 'eq' },
+        },
+      });
+
+      const result = await repository.findNonTerminalExecutionIdsByWorkflowIdPage({
+        spaceId: 'default',
+        workflowId: 'wf-1',
+        size: 10,
+      });
+
+      expect(esClient.search).toHaveBeenCalledWith({
+        ...baseSearchExpectation,
+        size: 10,
+      });
+      expect(result).toEqual({
+        results: ['exec-a'],
+        total: 1,
+        nextSearchAfter: undefined,
+      });
+    });
+
+    it('should cap size at 10000 for ES max_result_window', async () => {
+      esClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 0, relation: 'eq' } },
+      });
+
+      await repository.findNonTerminalExecutionIdsByWorkflowIdPage({
+        spaceId: 'default',
+        workflowId: 'wf-1',
+        size: 50_000,
+      });
+
+      expect(esClient.search).toHaveBeenCalledWith({
+        ...baseSearchExpectation,
+        size: 10000,
+      });
+    });
+
+    it('should pass search_after when continuing pagination', async () => {
+      esClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 0, relation: 'eq' } },
+      });
+
+      const searchAfter = ['2024-01-01T00:00:00.000Z', 'exec-a'] as const;
+
+      await repository.findNonTerminalExecutionIdsByWorkflowIdPage({
+        spaceId: 'default',
+        workflowId: 'wf-1',
+        size: 10,
+        searchAfter: [...searchAfter],
+      });
+
+      expect(esClient.search).toHaveBeenCalledWith({
+        ...baseSearchExpectation,
+        size: 10,
+        search_after: [...searchAfter],
+      });
+    });
+
+    it('should omit search_after when searchAfter is an empty array', async () => {
+      esClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 0, relation: 'eq' } },
+      });
+
+      await repository.findNonTerminalExecutionIdsByWorkflowIdPage({
+        spaceId: 'default',
+        workflowId: 'wf-1',
+        size: 10,
+        searchAfter: [],
+      });
+
+      expect(esClient.search).toHaveBeenCalledWith({
+        ...baseSearchExpectation,
+        size: 10,
+      });
+    });
+
+    it('should return nextSearchAfter when the page is full', async () => {
+      const lastSort = ['2024-01-02T00:00:00.000Z', 'exec-b'] as const;
+      esClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'a',
+              _source: { id: 'exec-a' },
+              sort: ['2024-01-01T00:00:00.000Z', 'exec-a'],
+            },
+            {
+              _id: 'b',
+              _source: { id: 'exec-b' },
+              sort: [...lastSort],
+            },
+          ],
+          total: { value: 5, relation: 'eq' },
+        },
+      });
+
+      const result = await repository.findNonTerminalExecutionIdsByWorkflowIdPage({
+        spaceId: 'default',
+        workflowId: 'wf-1',
+        size: 2,
+      });
+
+      expect(result.results).toEqual(['exec-a', 'exec-b']);
+      expect(result.total).toBe(5);
+      expect(result.nextSearchAfter).toEqual([...lastSort]);
+    });
+
+    it('should not return nextSearchAfter when the page is not full', async () => {
+      esClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'a',
+              _source: { id: 'exec-a' },
+              sort: ['2024-01-01T00:00:00.000Z', 'exec-a'],
+            },
+          ],
+          total: { value: 1, relation: 'eq' },
+        },
+      });
+
+      const result = await repository.findNonTerminalExecutionIdsByWorkflowIdPage({
+        spaceId: 'default',
+        workflowId: 'wf-1',
+        size: 10,
+      });
+
+      expect(result.results).toEqual(['exec-a']);
+      expect(result.nextSearchAfter).toBeUndefined();
+    });
+
+    it('should fall back to _id when _source.id is missing', async () => {
+      esClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'exec-from-id',
+              _source: {},
+              sort: ['2024-01-01T00:00:00.000Z', 'exec-from-id'],
+            },
+          ],
+          total: { value: 1, relation: 'eq' },
+        },
+      });
+
+      const result = await repository.findNonTerminalExecutionIdsByWorkflowIdPage({
+        spaceId: 'default',
+        workflowId: 'wf-1',
+        size: 10,
+      });
+
+      expect(result.results).toEqual(['exec-from-id']);
+    });
+
+    it('should parse total when returned as a number', async () => {
+      esClient.search.mockResolvedValue({
+        hits: { hits: [], total: 0 },
+      });
+
+      const result = await repository.findNonTerminalExecutionIdsByWorkflowIdPage({
+        spaceId: 'default',
+        workflowId: 'wf-1',
+        size: 10,
+      });
+
+      expect(result.total).toBe(0);
+    });
+
+    it('should default total to 0 when total is missing', async () => {
+      esClient.search.mockResolvedValue({
+        hits: { hits: [] },
+      });
+
+      const result = await repository.findNonTerminalExecutionIdsByWorkflowIdPage({
+        spaceId: 'default',
+        workflowId: 'wf-1',
+        size: 10,
+      });
+
+      expect(result.total).toBe(0);
+    });
+
+    it('should not set nextSearchAfter when the last hit has no sort values', async () => {
+      esClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            { _id: 'a', _source: { id: 'exec-a' } },
+            { _id: 'b', _source: { id: 'exec-b' } },
+          ],
+          total: { value: 2, relation: 'eq' },
+        },
+      });
+
+      const result = await repository.findNonTerminalExecutionIdsByWorkflowIdPage({
+        spaceId: 'default',
+        workflowId: 'wf-1',
+        size: 2,
+      });
+
+      expect(result.results).toEqual(['exec-a', 'exec-b']);
+      expect(result.nextSearchAfter).toBeUndefined();
+    });
+  });
 });

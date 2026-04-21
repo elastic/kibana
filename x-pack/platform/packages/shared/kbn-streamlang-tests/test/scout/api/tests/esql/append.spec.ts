@@ -27,7 +27,7 @@ apiTest.describe(
           } as AppendProcessor,
         ],
       };
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
       const docs = [{ tags: ['existing_tag'] }];
       await testBed.ingest(indexName, docs);
       const esqlResult = await esql.queryOnIndex(indexName, query);
@@ -46,7 +46,7 @@ apiTest.describe(
           } as AppendProcessor,
         ],
       };
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
       const mappingDoc = { tags: ['initial_tag'] }; // Needed to satisfy ES|QL which needs all operand columns pre-mapped;
       const docs = [mappingDoc, { message: 'message' }];
       await testBed.ingest(indexName, docs);
@@ -68,7 +68,7 @@ apiTest.describe(
             } as AppendProcessor,
           ],
         };
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL);
         const docs = [{ tags: ['existing_tag', 'new_tag'] }];
         await testBed.ingest(indexName, docs);
         const esqlResult = await esql.queryOnIndex(indexName, query);
@@ -90,7 +90,7 @@ apiTest.describe(
             } as AppendProcessor,
           ],
         };
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL);
         const docs = [{ tags: ['existing_tag'] }];
         await testBed.ingest(indexName, docs);
         const esqlResult = await esql.queryOnIndex(indexName, query);
@@ -113,7 +113,7 @@ apiTest.describe(
           } as AppendProcessor,
         ],
       };
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
       const docs = [
         { attributes: { should_exist: 'YES' }, tags: ['existing_tag'] },
         { attributes: { size: 2048 }, tags: ['existing_tag_01', 'existing_tag_02'] },
@@ -141,7 +141,7 @@ apiTest.describe(
             } as AppendProcessor,
           ],
         };
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL);
         const docs = [{ tags: ['existing_tag'] }];
         await testBed.ingest(indexName, docs);
         const esqlResult = await esql.queryOnIndex(indexName, query);
@@ -168,7 +168,7 @@ apiTest.describe(
           } as AppendProcessor,
         ],
       };
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
       const docs = [
         { attributes: { should_exist: 'YES' }, tags: ['existing_tag'] },
         { attributes: { size: 2048 }, tags: ['existing_tag_01', 'existing_tag_02'] },
@@ -195,7 +195,7 @@ apiTest.describe(
       };
 
       // Should throw validation error for Mustache templates
-      expect(() => transpile(streamlangDSL)).toThrow(
+      await expect(transpile(streamlangDSL)).rejects.toThrow(
         'Mustache template syntax {{ }} or {{{ }}} is not allowed'
       );
     });

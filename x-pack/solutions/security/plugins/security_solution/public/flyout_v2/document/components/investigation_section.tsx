@@ -9,9 +9,13 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
+import { isCCSRemoteIndexName } from '@kbn/es-query';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
+import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
+import { alertFlyoutHistoryKey } from '../constants/flyout_history';
+import { defaultToolsFlyoutProperties } from '../../shared/hooks/use_default_flyout_properties';
 import { EventKind } from '../constants/event_kinds';
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 import { useKibana } from '../../../common/lib/kibana';
@@ -24,6 +28,7 @@ import { InvestigationGuide as InvestigationGuideToolsFlyout } from '../../inves
 import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { HighlightedFields } from './highlighted_fields';
 import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
+import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 
 export const INVESTIGATION_SECTION_TEST_ID = `${PREFIX}InvestigationSection` as const;
 
@@ -58,14 +63,20 @@ export const InvestigationSection = memo(
     const { overlays } = services;
     const store = useStore();
     const history = useHistory();
+    const isInSecurityApp = useIsInSecurityApp();
+    const historyKey = isInSecurityApp ? alertFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
 
     const isAlert = useMemo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
       [hit]
     );
+    const isRemoteDocument = useMemo(
+      () => isCCSRemoteIndexName(hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? ''),
+      [hit]
+    );
     const ruleId = useMemo(
       () =>
-        (getFieldValue(hit, EVENT_KIND) as string) === 'signal'
+        (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal
           ? (getFieldValue(hit, 'kibana.alert.rule.uuid') as string)
           : (getFieldValue(hit, 'signal.rule.id') as string),
       [hit]
@@ -95,13 +106,12 @@ export const InvestigationSection = memo(
           children: <InvestigationGuideToolsFlyout hit={hit} />,
         }),
         {
-          ownFocus: false,
-          resizable: true,
-          size: 'm',
-          type: 'overlay',
+          ...defaultToolsFlyoutProperties,
+          historyKey,
+          session: 'start',
         }
       );
-    }, [history, hit, overlays, services, store]);
+    }, [history, historyKey, hit, overlays, services, store]);
 
     return (
       <ExpandableSection
@@ -112,7 +122,7 @@ export const InvestigationSection = memo(
         sectionId={LOCAL_STORAGE_SECTION_KEY}
         title={INVESTIGATION_SECTION_TITLE}
       >
-        {isAlert ? (
+        {isAlert && !isRemoteDocument ? (
           <InvestigationGuide
             hit={hit}
             isAvailable={true}
@@ -124,6 +134,7 @@ export const InvestigationSection = memo(
           investigationFields={investigationFields}
           ancestorsIndexName={ancestorsIndexName}
           renderCellActions={renderCellActions}
+          hideEditButton={isRemoteDocument}
         />
       </ExpandableSection>
     );

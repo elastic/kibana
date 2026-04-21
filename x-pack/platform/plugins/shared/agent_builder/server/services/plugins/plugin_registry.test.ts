@@ -18,7 +18,6 @@ const createBuiltinPlugin = (overrides?: Partial<PluginDefinition>): PluginDefin
   manifest: {},
   skill_ids: ['skill-a'],
   unmanaged_assets: {
-    commands: [],
     agents: [],
     hooks: [],
     mcp_servers: [],
@@ -39,7 +38,6 @@ const createPersistedPlugin = (overrides?: Partial<PluginDefinition>): PluginDef
   manifest: {},
   skill_ids: ['skill-b'],
   unmanaged_assets: {
-    commands: [],
     agents: [],
     hooks: [],
     mcp_servers: [],
@@ -228,7 +226,6 @@ describe('PluginRegistry', () => {
         description: '',
         manifest: {},
         unmanaged_assets: {
-          commands: [],
           agents: [],
           hooks: [],
           mcp_servers: [],
@@ -254,7 +251,6 @@ describe('PluginRegistry', () => {
           description: '',
           manifest: {},
           unmanaged_assets: {
-            commands: [],
             agents: [],
             hooks: [],
             mcp_servers: [],

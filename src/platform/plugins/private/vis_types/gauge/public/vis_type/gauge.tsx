@@ -27,7 +27,7 @@ export const getGaugeVisTypeDefinition = (
 ): VisTypeDefinition<GaugeVisParams> => ({
   name: 'gauge',
   title: i18n.translate('visTypeGauge.gauge.gaugeTitle', { defaultMessage: 'Gauge' }),
-  icon: 'visGauge',
+  icon: 'chartGauge',
   description: i18n.translate('visTypeGauge.gauge.gaugeDescription', {
     defaultMessage: 'Show the status of a metric.',
   }),
