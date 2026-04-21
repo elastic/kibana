@@ -96,18 +96,18 @@ test('Otel Kubernetes', async ({
   await page.evaluate('window.dispatchEvent(new Event("blur"))');
 
   /**
+   * Additional buffer to ensure data has propagated
+   * to dashboards and Discover before navigating.
+   */
+  await page.waitForTimeout(5 * 60000);
+
+  /**
    * Wait for the data received indicator to appear.
    * The flow now uses DataIngestStatus which polls for data
    * after the blur event and shows "We are monitoring your cluster"
    * once both logs and metrics have arrived.
    */
   await otelKubernetesFlowPage.assertDataReceivedIndicator();
-
-  /**
-   * Additional buffer to ensure data has propagated
-   * to dashboards and Discover before navigating.
-   */
-  await page.waitForTimeout(2 * 60000);
 
   /**
    * Wired streams only reroutes logs (to logs.otel); metrics and traces are
