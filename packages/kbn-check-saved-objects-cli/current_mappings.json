@@ -4749,6 +4749,9 @@
         "properties": {
           "apiKeyId": {
             "type": "keyword"
+          },
+          "uiamApiKeyId": {
+            "type": "keyword"
           }
         }
       }
@@ -4941,6 +4944,16 @@
       },
       "name": {
         "type": "text"
+      },
+      "range": {
+        "properties": {
+          "end": {
+            "type": "keyword"
+          },
+          "start": {
+            "type": "keyword"
+          }
+        }
       },
       "type": {
         "type": "keyword"
