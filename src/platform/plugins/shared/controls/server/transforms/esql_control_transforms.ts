@@ -19,6 +19,7 @@ import { EsqlControlType } from '@kbn/esql-types';
 
 export const registerESQLControlTransforms = (embeddable: EmbeddableSetup) => {
   embeddable.registerTransforms(ESQL_CONTROL, {
+    title: 'ES|QL variable control',
     getSchema: () => optionsListESQLControlSchema,
     getTransforms: () => ({
       transformOut: <

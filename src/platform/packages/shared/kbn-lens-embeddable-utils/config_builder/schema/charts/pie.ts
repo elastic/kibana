@@ -98,7 +98,7 @@ const pieStylingSchema = schema.object(
 /**
  * Color configuration for primary metric in pie chart
  */
-const partitionStatePrimaryMetricOptionsSchema = {
+const partitionConfigPrimaryMetricOptionsSchema = {
   color: schema.maybe(
     schema.oneOf([staticColorSchema, autoColorSchema], {
       defaultValue: AUTO_COLOR,
@@ -109,7 +109,7 @@ const partitionStatePrimaryMetricOptionsSchema = {
 /**
  * Breakdown configuration including color mapping and collapse behavior
  */
-const partitionStateBreakdownByOptionsSchema = {
+const partitionConfigBreakdownByOptionsSchema = {
   color: schema.maybe(colorMappingSchema),
   collapse_by: schema.maybe(collapseBySchema),
 };
@@ -139,7 +139,7 @@ function validateForMultipleMetrics({
 /**
  * Pie chart configuration for standard (non-ES|QL) queries
  */
-export const pieStateSchemaNoESQL = schema.object(
+export const pieConfigSchemaNoESQL = schema.object(
   {
     type: pieTypeSchema,
     ...sharedPanelInfoSchema,
@@ -150,7 +150,7 @@ export const pieStateSchemaNoESQL = schema.object(
     styling: schema.maybe(pieStylingSchema),
     metrics: schema.arrayOf(
       mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
-        partitionStatePrimaryMetricOptionsSchema
+        partitionConfigPrimaryMetricOptionsSchema
       ),
       {
         minSize: 1,
@@ -160,7 +160,7 @@ export const pieStateSchemaNoESQL = schema.object(
     ),
     group_by: schema.maybe(
       schema.arrayOf(
-        mergeAllBucketsWithChartDimensionSchema(partitionStateBreakdownByOptionsSchema),
+        mergeAllBucketsWithChartDimensionSchema(partitionConfigBreakdownByOptionsSchema),
         {
           minSize: 1,
           maxSize: 100,
@@ -182,7 +182,7 @@ export const pieStateSchemaNoESQL = schema.object(
 /**
  * Pie chart configuration for ES|QL queries
  */
-export const pieStateSchemaESQL = schema.object(
+export const pieConfigSchemaESQL = schema.object(
   {
     type: pieTypeSchema,
     ...sharedPanelInfoSchema,
@@ -191,7 +191,7 @@ export const pieStateSchemaESQL = schema.object(
     ...pieStateSharedSchema,
     styling: schema.maybe(pieStylingSchema),
     metrics: schema.arrayOf(
-      esqlColumnWithFormatSchema.extends(partitionStatePrimaryMetricOptionsSchema, {
+      esqlColumnWithFormatSchema.extends(partitionConfigPrimaryMetricOptionsSchema, {
         meta: { description: 'ES|QL column reference for primary metric' },
       }),
       {
@@ -201,7 +201,7 @@ export const pieStateSchemaESQL = schema.object(
       }
     ),
     group_by: schema.maybe(
-      schema.arrayOf(esqlColumnWithFormatSchema.extends(partitionStateBreakdownByOptionsSchema), {
+      schema.arrayOf(esqlColumnWithFormatSchema.extends(partitionConfigBreakdownByOptionsSchema), {
         minSize: 1,
         maxSize: 100,
         meta: { description: 'Array of breakdown dimensions (minimum 1)' },
@@ -221,7 +221,7 @@ export const pieStateSchemaESQL = schema.object(
 /**
  * Complete pie chart configuration supporting both standard and ES|QL queries
  */
-export const pieStateSchema = objectUnion([pieStateSchemaNoESQL, pieStateSchemaESQL], {
+export const pieConfigSchema = objectUnion([pieConfigSchemaNoESQL, pieConfigSchemaESQL], {
   meta: {
     id: 'pieChart',
     title: 'Pie Chart',
@@ -229,6 +229,6 @@ export const pieStateSchema = objectUnion([pieStateSchemaNoESQL, pieStateSchemaE
   },
 });
 
-export type PieState = TypeOf<typeof pieStateSchema>;
-export type PieStateNoESQL = TypeOf<typeof pieStateSchemaNoESQL>;
-export type PieStateESQL = TypeOf<typeof pieStateSchemaESQL>;
+export type PieConfig = TypeOf<typeof pieConfigSchema>;
+export type PieConfigNoESQL = TypeOf<typeof pieConfigSchemaNoESQL>;
+export type PieConfigESQL = TypeOf<typeof pieConfigSchemaESQL>;
