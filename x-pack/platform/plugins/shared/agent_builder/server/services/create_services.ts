@@ -163,6 +163,7 @@ export class ServiceManager {
       elasticsearch,
       spaces,
       config: this.config,
+      analyticsService,
     });
 
     const runnerFactory = new RunnerFactoryImpl({
