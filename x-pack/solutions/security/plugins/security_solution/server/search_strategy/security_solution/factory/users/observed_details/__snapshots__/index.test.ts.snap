@@ -133,11 +133,6 @@ Object {
           }
         },
         {
-          \\"term\\": {
-            \\"user.name\\": \\"bastion00.siem.estc.dev\\"
-          }
-        },
-        {
           \\"range\\": {
             \\"@timestamp\\": {
               \\"format\\": \\"strict_date_optional_time\\",
