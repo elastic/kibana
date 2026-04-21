@@ -52,6 +52,7 @@ export type LensProps = Pick<
 >;
 
 export const useLensProps = ({
+  chartId,
   title,
   query,
   services,
@@ -62,7 +63,9 @@ export const useLensProps = ({
   yBounds,
   error,
   userMessages,
+  profileId,
 }: {
+  chartId: string;
   title: string;
   query: string;
   discoverFetch$: UnifiedMetricsGridProps['fetch$'];
@@ -71,13 +74,14 @@ export const useLensProps = ({
   yBounds?: LensYBoundsConfig;
   error?: Error;
   userMessages?: EmbeddableComponentProps['userMessages'];
+  profileId: string;
 } & Pick<UnifiedMetricsGridProps, 'services' | 'fetchParams'>) => {
   const { euiTheme } = useEuiTheme();
   const chartConfigUpdates$ = useRef<BehaviorSubject<void>>(new BehaviorSubject<void>(undefined));
 
   useEffect(() => {
     chartConfigUpdates$.current.next(void 0);
-  }, [query, title, chartLayers, yBounds, error, userMessages]);
+  }, [query, title, chartLayers, yBounds, error, userMessages, profileId]);
 
   // creates a stable function that builds the Lens attributes
   const buildAttributesFn = useLatest(async () => {
@@ -106,6 +110,8 @@ export const useLensProps = ({
         attributes,
         lastReloadRequestTime: fetchParams.lastReloadRequestTime,
         userMessages,
+        profileId,
+        chartId,
       });
     },
     [
@@ -114,6 +120,8 @@ export const useLensProps = ({
       fetchParams.lastReloadRequestTime,
       fetchParams.esqlVariables,
       userMessages,
+      profileId,
+      chartId,
     ]
   );
 
@@ -212,6 +220,8 @@ const getLensProps = ({
   lastReloadRequestTime,
   esqlVariables,
   userMessages,
+  profileId,
+  chartId,
 }: {
   searchSessionId?: string;
   attributes: LensAttributes;
@@ -219,6 +229,8 @@ const getLensProps = ({
   timeRange: TimeRange;
   lastReloadRequestTime?: number;
   userMessages?: EmbeddableComponentProps['userMessages'];
+  profileId: string;
+  chartId: string;
 }): LensProps => ({
   id: 'metricsExperienceLensComponent',
   viewMode: 'view',
@@ -229,6 +241,11 @@ const getLensProps = ({
   searchSessionId,
   executionContext: {
     description: 'metrics experience chart data',
+    meta: {
+      profile_id: profileId,
+      metric_id: chartId,
+      metric_type: attributes.visualizationType,
+    },
   },
   lastReloadRequestTime,
   userMessages,

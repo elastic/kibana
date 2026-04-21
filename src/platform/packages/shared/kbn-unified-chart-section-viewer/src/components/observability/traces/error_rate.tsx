@@ -33,7 +33,7 @@ const ErrorRateChartContent = ({
   color,
   title,
 }: ErrorRateChartContentProps) => {
-  const { services, fetchParams, discoverFetch$, onBrushEnd, onFilter, actions } =
+  const { services, fetchParams, discoverFetch$, onBrushEnd, onFilter, actions, profileId } =
     useTraceMetricsContext();
   const { abortController, timeRange, esqlVariables } = fetchParams;
 
@@ -54,6 +54,7 @@ const ErrorRateChartContent = ({
 
   return (
     <Chart
+      id="errorRate"
       esqlQuery={query}
       size="s"
       discoverFetch$={discoverFetch$}
@@ -70,6 +71,7 @@ const ErrorRateChartContent = ({
       isLoading={isLoadingColumns}
       error={columnsError}
       extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
+      profileId={profileId}
     />
   );
 };
