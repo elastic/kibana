@@ -9,6 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
+import { isCCSRemoteIndexName } from '@kbn/es-query';
 import {
   makeSelectDocumentNotesBySavedObjectId,
   makeSelectNotesByDocumentId,
@@ -174,6 +175,11 @@ const ActionsComponent: React.FC<ActionsComponentProps> = ({
     [isEnterprisePlus, sessionViewConfig]
   );
 
+  const isRemoteDocument = useMemo(
+    () => isCCSRemoteIndexName(ecsData._index ?? ''),
+    [ecsData._index]
+  );
+
   return (
     <ActionsContainer data-test-subj="actions-container">
       <>
@@ -232,7 +238,7 @@ const ActionsComponent: React.FC<ActionsComponentProps> = ({
           key="alert-context-menu"
           ecsRowData={ecsData}
           scopeId={timelineId}
-          disabled={false}
+          disabled={isRemoteDocument}
           onRuleChange={onRuleChange}
           refetch={refetch}
         />

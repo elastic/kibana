@@ -157,7 +157,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
     fn(
       input,
       { query, timeField, locale, titleForInspector, descriptionForInspector, ignoreGlobalFilters },
-      { abortSignal, inspectorAdapters, getKibanaRequest, getSearchSessionId }
+      { abortSignal, inspectorAdapters, getKibanaRequest, getSearchSessionId, getExecutionContext }
     ) {
       return defer(() =>
         getStartDependencies(() => {
@@ -254,7 +254,6 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
 
             return request;
           };
-
           return search<
             IKibanaSearchRequest<ESQLSearchParams>,
             IKibanaSearchResponse<ESQLSearchResponse>
@@ -265,6 +264,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               strategy: ESQL_ASYNC_SEARCH_STRATEGY,
               sessionId: getSearchSessionId(),
               projectRouting: input?.projectRouting,
+              executionContext: getExecutionContext(),
             }
           ).pipe(
             catchError((error) => {

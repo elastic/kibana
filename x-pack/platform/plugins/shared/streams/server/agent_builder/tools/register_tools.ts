@@ -105,7 +105,7 @@ export function registerAgentBuilderTools({
     createSearchKnowledgeIndicatorsTool({
       getScopedClients,
       server,
-      logger: logger.get('search_kis_tool'),
+      logger: logger.get('ki_search_tool'),
     }),
     createFeatureKnowledgeIndicatorTool({
       getScopedClients,
