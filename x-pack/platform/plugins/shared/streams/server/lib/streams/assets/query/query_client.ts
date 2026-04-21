@@ -551,6 +551,13 @@ export class QueryClient {
     minSeverityScore?: number;
     streamDefinitions: Map<string, Streams.all.Definition>;
   }): Promise<{ promoted: number; skipped_stats: number }> {
+    if (!this.isSignificantEventsEnabled) {
+      this.dependencies.logger.debug(
+        `Skipping promoteUnbackedQueries because significant events feature is disabled.`
+      );
+      return { promoted: 0, skipped_stats: 0 };
+    }
+
     const candidates = await this.getPromotableUnbackedQueries({ minSeverityScore });
 
     let toPromote = candidates;
