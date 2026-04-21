@@ -26,7 +26,10 @@ groups:
         datatype: bool
         default: false
         applies_to:
-          stack: ga 9.4+
+          ech: ga 9.4+
+          ece: ga 9.4+
+          eck: ga 9.4+
+          self: ga 9.4+
           serverless: unavailable
 
   - group: Custom branding
@@ -40,7 +43,10 @@ groups:
           A custom image that appears in the header of all {{product.kibana}} pages. Images must have a transparent background, and 128x128 pixels or smaller.
         datatype: string
         applies_to:
-          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           serverless: unavailable
 
       - setting: "xpackCustomBranding:customizedLogo"
@@ -49,7 +55,10 @@ groups:
           The custom text that appears in the header of all {{product.kibana}} pages. Images must have a transparent background, and 200x84 pixels or smaller.
         datatype: string
         applies_to:
-          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           serverless: unavailable
 
       - setting: "xpackCustomBranding:pageTitle"
@@ -58,7 +67,10 @@ groups:
           The custom text that appears on {{product.kibana}} browser tabs.
         datatype: string
         applies_to:
-          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           serverless: unavailable
 
       - setting: "xpackCustomBranding:faviconSVG"
@@ -67,7 +79,10 @@ groups:
           The URL of a custom SVG image that appears on {{product.kibana}} browser tabs. Images must be 16x16 pixels.
         datatype: string
         applies_to:
-          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           serverless: unavailable
 
       - setting: "xpackCustomBranding:faviconPNG"
@@ -76,5 +91,8 @@ groups:
           The URL of a custom PNG image that appears on {{product.kibana}} browser tabs.
         datatype: string
         applies_to:
-          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           serverless: unavailable
