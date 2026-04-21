@@ -514,7 +514,7 @@ const dataLayerToExpression = (
     accessors: layer.accessors,
     columnToLabel: JSON.stringify(columnToLabel),
     palette: buildExpression([
-      layer.palette
+      layer.palette && !layer.collapseFn
         ? buildExpressionFunction<ExpressionFunctionTheme>('theme', {
             variable: 'palette',
             default: [paletteService.get(layer.palette.name).toExpression(layer.palette.params)],
@@ -523,12 +523,14 @@ const dataLayerToExpression = (
             name: getDefaultPalette(layer.seriesType),
           }),
     ]).toAst(),
-    colorMapping: layer.colorMapping
-      ? JSON.stringify(layer.colorMapping)
-      : hasActiveSplits
-      ? JSON.stringify(
-          getColorMappingDefaults({ defaultPaletteId: getDefaultPalette(layer.seriesType) })
-        )
+    colorMapping: hasActiveSplits
+      ? layer.colorMapping
+        ? JSON.stringify(layer.colorMapping)
+        : !layer.palette
+        ? JSON.stringify(
+            getColorMappingDefaults({ defaultPaletteId: getDefaultPalette(layer.seriesType) })
+          )
+        : undefined
       : undefined,
   });
 
