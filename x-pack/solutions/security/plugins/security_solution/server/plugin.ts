@@ -596,6 +596,10 @@ export class Plugin implements ISecuritySolutionPlugin {
         osqueryCreateActionService: plugins.osquery?.createActionService,
       }),
       endpointAppContextService: this.endpointAppContextService,
+      getEntityStore: async () => {
+        const [, startPlugins] = await core.getStartServices();
+        return startPlugins.entityStore;
+      },
     };
 
     const securityRuleTypeWrapper = createSecurityRuleTypeWrapper(securityRuleTypeOptions);
