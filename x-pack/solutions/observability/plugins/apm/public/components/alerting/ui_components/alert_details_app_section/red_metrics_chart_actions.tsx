@@ -46,7 +46,7 @@ const errorsInDiscoverLabel = i18n.translate(
 interface RedMetricsChartActionsProps {
   queryParams: Pick<
     ESQLQueryParams,
-    'serviceName' | 'environment' | 'transactionName' | 'transactionType' | 'kuery'
+    'serviceName' | 'environment' | 'transactionName' | 'transactionType' | 'kuery' | 'errorGroupId'
   >;
   timeRange: { from: string; to: string };
   indexType?: IndexType;

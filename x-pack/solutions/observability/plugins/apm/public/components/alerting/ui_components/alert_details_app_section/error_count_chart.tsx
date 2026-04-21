@@ -144,6 +144,7 @@ export function ErrorCountChart({
                     serviceName,
                     transactionName,
                     environment,
+                    errorGroupId: groupId,
                   }}
                   timeRange={{ from: start, to: end }}
                   ruleTypeId={ruleTypeId}
