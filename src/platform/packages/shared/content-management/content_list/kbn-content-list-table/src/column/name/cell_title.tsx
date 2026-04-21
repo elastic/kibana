@@ -47,7 +47,7 @@ export const NameCellTitle = ({ item, shouldUseHref, onClick }: NameCellTitlePro
 
   const handleClick = onClick
     ? (event: React.MouseEvent<HTMLAnchorElement>) => {
-        if (useHref && !isPlainPrimaryClick(event)) {
+        if (href && !isPlainPrimaryClick(event)) {
           return;
         }
         event.preventDefault();

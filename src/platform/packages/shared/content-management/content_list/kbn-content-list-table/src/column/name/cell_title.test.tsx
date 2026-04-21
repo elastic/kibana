@@ -163,6 +163,33 @@ describe('NameCellTitle', () => {
     expect(handleClick).not.toHaveBeenCalled();
   });
 
+  it('invokes `onClick` on modifier-key click when `shouldUseHref` is true but `getHref` returns undefined', () => {
+    // Regression: the early-return guard must check whether `href` resolved to a
+    // value, not just whether `shouldUseHref` was set. When `getHref` is absent
+    // or returns `undefined`, modifier-key clicks must still call `onClick`.
+    const Wrapper = createWrapper({});
+    const item = createItem({ title: 'No-Href Clickable Item' });
+    const handleClick = jest.fn();
+
+    render(
+      <Wrapper>
+        <NameCellTitle item={item} onClick={handleClick} shouldUseHref />
+      </Wrapper>
+    );
+
+    const link = screen.getByTestId('content-list-table-item-link');
+    const clickEvent = new MouseEvent('click', {
+      bubbles: true,
+      cancelable: true,
+      metaKey: true,
+    });
+
+    fireEvent(link, clickEvent);
+
+    expect(link).not.toHaveAttribute('href');
+    expect(handleClick).toHaveBeenCalledWith(item);
+  });
+
   it('renders as plain text when `shouldUseHref` is false and `onClick` is omitted', () => {
     const Wrapper = createWrapper({ getHref: (item) => `/view/${item.id}` });
 
