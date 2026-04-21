@@ -6,7 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLCallbacks } from '@kbn/esql-types';
 import { type EsqlFieldType, esqlFieldTypes } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
@@ -493,16 +492,6 @@ export interface ValidationErrors {
 
 export type ErrorTypes = keyof ValidationErrors;
 export type ErrorValues<K extends ErrorTypes> = ValidationErrors[K]['type'];
-
-export interface QuickFix {
-  // Title of the quick fix button
-  title: string;
-  // A function that recieves the current query and returns it corrected.
-  fixQuery: (query: string) => string;
-  // A function that determines if the quick fix should be displayed under some special condition,
-  // it will be always visible if not provided.
-  displayCondition?: (query: string, callbacks: ESQLCallbacks) => Promise<boolean>;
-}
 
 export interface ESQLMessage {
   type: 'error' | 'warning';

@@ -8,7 +8,7 @@
  */
 
 import type { ESQLCallbacks } from '@kbn/esql-types';
-import type { QuickFix } from '../../commands/definitions/types';
+import type { QuickFix } from './types';
 import { fixesByMessageCode } from './fixes_by_message_code';
 
 export interface EsqlCodeAction {

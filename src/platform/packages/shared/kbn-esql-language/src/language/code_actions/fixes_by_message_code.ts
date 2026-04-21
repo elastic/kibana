@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { EsqlQuery, mutate } from '@elastic/esql';
-import type { QuickFix } from '../../commands/definitions/types';
+import type { QuickFix } from './types';
 import { EsqlSettingNames } from '../../commands/definitions/generated/settings';
 import { UnmappedFieldsStrategy } from '../../commands/registry/types';
 import { hasWiredStreamsInQuery } from '../../commands/definitions/utils/sources';

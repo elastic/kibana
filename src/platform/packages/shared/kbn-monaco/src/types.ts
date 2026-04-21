@@ -49,7 +49,7 @@ export interface CustomLangModuleType<Deps = unknown, MarkerDataType = monaco.ed
   onLanguage: NonNullable<LangModuleType['onLanguage']>;
 }
 
-  export interface MonacoEditorError {
+export interface MonacoEditorError {
   severity: monaco.MarkerSeverity;
   startLineNumber: number;
   startColumn: number;

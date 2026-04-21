@@ -10,15 +10,6 @@
 import type { EsqlCodeAction } from '@kbn/esql-language';
 import type { monaco } from '../../../../monaco_imports';
 
-/**
- * Wraps language-level quick fixes into Monaco `CodeAction`s.
- *
- * Each input pairs the marker that triggered the fix (so the resulting
- * action can declare it as a `diagnostic`) with the language-computed
- * `EsqlCodeAction` (title + replacement text). The `textEdit` replaces the
- * full model content because `EsqlCodeAction.fixedText` is the corrected
- * query in its entirety.
- */
 export function wrapAsMonacoCodeAction(
   model: monaco.editor.ITextModel,
   marker: monaco.editor.IMarkerData,
