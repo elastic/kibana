@@ -22,8 +22,8 @@ import { TransactionActionMenu } from '../../../shared/transaction_action_menu/t
 import { MaybeViewTraceLink } from './maybe_view_trace_link';
 import type { TransactionTab } from './transaction_tabs';
 import { TransactionTabs } from './transaction_tabs';
-import type { Environment } from '../../../../../common/environment_rt';
 import type { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { TraceWaterfallFlyout } from './trace_waterfall_flyout';
 import { isNotInitiated, isPending, isSuccess } from '../../../../hooks/use_fetcher';
 import type { WaterfallFetchResult } from '../use_waterfall_fetcher';
 import type { UnifiedWaterfallFetcherResult } from '../use_unified_waterfall_fetcher';
@@ -79,6 +79,7 @@ export function WaterfallWithSummary<TSample extends {}>({
   traceId,
 }: Props<TSample>) {
   const [sampleActivePage, setSampleActivePage] = useState(0);
+  const [isFullTraceFlyoutOpen, setIsFullTraceFlyoutOpen] = useState(false);
 
   const isControlled = selectedSample !== undefined;
 
@@ -185,7 +186,7 @@ export function WaterfallWithSummary<TSample extends {}>({
                   waterfall={waterfallFetchResult}
                   useUnified={useUnified}
                   traceItems={unifiedWaterfallFetchResult.traceItems}
-                  onViewFullTrace={() => {}}
+                  onViewFullTrace={() => setIsFullTraceFlyoutOpen(true)}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -254,6 +255,16 @@ export function WaterfallWithSummary<TSample extends {}>({
           entryTransactionId={entryTransactionId}
         />
       </EuiFlexItem>
+      {traceId && (
+        <TraceWaterfallFlyout
+          traceId={traceId}
+          rangeFrom={rangeFrom}
+          rangeTo={rangeTo}
+          isOpen={isFullTraceFlyoutOpen}
+          onClose={() => setIsFullTraceFlyoutOpen(false)}
+          renderDetailFlyout={() => null}
+        />
+      )}
     </EuiFlexGroup>
   );
 }
