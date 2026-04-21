@@ -348,7 +348,7 @@ $$$ai-anonymization-settings$$$`ai:anonymizationSettings` {applies_to}`stack: pr
     :::
 
 $$$observability-log-sources$$$`observability:logSources` {applies_to}`stack: ga` {applies_to}`observability: ga`
-:   Sources to use for logs data. If the data of these indices is not logs data, you can experience degraded functionality. Changes to this setting can potentially impact the sources queried in Log Threshold rules. `logs-*-*, logs-*, filebeat-*` by default.
+:   Sources to use for logs data. If the data of these indices is not logs data, you can experience degraded functionality. Changes to this setting can potentially impact the sources queried in Log Threshold rules. `logs*, -logstash*, filebeat-*` by default.
 
 $$$observability-streams-enable-content-packs$$$`observability:streamsEnableContentPacks` {applies_to}`stack: preview` {applies_to}`observability: preview`
 :   Enable Streams content packs. `false` by default.
@@ -494,6 +494,9 @@ $$$rollups-enableindexpatterns$$$`rollups:enableIndexPatterns` {applies_to}`stac
 
 
 ### {{product.elasticsearch}} [kibana-search-settings]
+
+$$$query-activity-minrunningtime$$$`query_activity:minRunningTime` {applies_to}`stack: preview 9.4` {applies_to}`serverless: preview`
+:   The minimum time in milliseconds that a query must be running before it appears on the [Query activity](docs-content://deploy-manage/monitor/query-activity.md) page. Increase this value to filter out fast-completing queries and focus on long-running ones. `100` by default.
 
 $$$courier-ignorefilteriffieldnotinindex$$$`courier:ignoreFilterIfFieldNotInIndex` {applies_to}`stack: ga` {applies_to}`elasticsearch: ga`
 :   Enhances support for dashboards containing visualizations accessing several dissimilar {{data-sources}}. When activated, filters are ignored for a visualization when the visualization's data view does not contain the filtering field. When deactivated, all filters are applied to all visualizations. `false` by default.

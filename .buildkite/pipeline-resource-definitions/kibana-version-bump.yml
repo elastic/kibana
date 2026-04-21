@@ -21,7 +21,7 @@ spec:
       allow_rebuilds: true
       cancel_intermediate_builds: false
       branch_configuration: main
-      pipeline_file: .buildkite/version_bump.yml
+      pipeline_file: .buildkite/pipelines/version_bump.yml
       provider_settings:
         trigger_mode: none
       repository: elastic/kibana

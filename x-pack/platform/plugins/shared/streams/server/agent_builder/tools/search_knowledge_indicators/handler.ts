@@ -32,8 +32,10 @@ export async function searchKnowledgeIndicatorsToolHandler({
     params,
     onFeatureFetchError: (streamName, error) => {
       const errorMessage =
-        error instanceof Error ? error.stack ?? error.message : String(error ?? 'Unknown error');
-      logger.debug(`search_kis: failed to fetch features for ${streamName}: ${errorMessage}`);
+        error instanceof Error ? error.stack || error.message : String(error ?? 'Unknown error');
+      logger.warn(
+        `ki_search: failed to fetch features for stream "${streamName}": ${errorMessage}`
+      );
     },
     getStreamNames: async () => {
       const streams = await streamsClient.listStreams();
@@ -46,11 +48,15 @@ export async function searchKnowledgeIndicatorsToolHandler({
       return result.hits;
     },
     getQueries: async (streamNames, search_text) => {
+      // Include all queries regardless of rule-backing status so the agent
+      // sees freshly generated and STATS queries that haven't been promoted.
+      const filters = { ruleUnbacked: 'include' as const };
+
       // findQueries uses the default search mode (hybrid when ELSER is available,
       // keyword otherwise), giving the agent the best-available ranking.
       const links = search_text
-        ? await queryClient.findQueries(streamNames, search_text)
-        : await queryClient.getQueryLinks(streamNames);
+        ? await queryClient.findQueries(streamNames, search_text, filters)
+        : await queryClient.getQueryLinks(streamNames, filters);
 
       return links;
     },

@@ -453,6 +453,23 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
       }
     }
 
+    if (
+      newData.output_id !== undefined &&
+      newData.output_id !== packagePolicy.output_id &&
+      !isEmpty(packagePolicy.policy_ids)
+    ) {
+      const parentAgentPolicies = await agentPolicyService.getByIds(
+        soClient,
+        packagePolicy.policy_ids!,
+        { ignoreMissing: true }
+      );
+      if (parentAgentPolicies.some((ap) => ap.is_managed)) {
+        throw new PackagePolicyRequestError(
+          'Cannot change the output of a package policy belonging to a managed agent policy'
+        );
+      }
+    }
+
     await renameAgentlessAgentPolicy(soClient, esClient, packagePolicy, newData.name);
 
     const updatedPackagePolicy = await packagePolicyService.update(

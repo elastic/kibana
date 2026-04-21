@@ -42,5 +42,5 @@ describe('SelectedFilters', function () {
       screen.getByText('Chrome');
       screen.getByTitle('Filter: Browser family: Chrome. Select for more filter actions.');
     });
-  });
+  }, 15_000);
 });

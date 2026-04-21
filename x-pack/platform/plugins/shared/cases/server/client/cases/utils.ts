@@ -90,6 +90,8 @@ export const getLatestPushInfo = (
   return null;
 };
 
+// Only used for comment and action attachments.
+// TODO: https://github.com/elastic/kibana/issues/262574
 const getCommentContent = (comment: AttachmentV2): string => {
   if (isLegacyAttachmentRequest(comment)) {
     if (comment.type === AttachmentType.user) {

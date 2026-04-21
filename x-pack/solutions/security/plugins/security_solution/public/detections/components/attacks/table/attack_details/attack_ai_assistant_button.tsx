@@ -7,7 +7,9 @@
 
 import React from 'react';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
-import { ViewInAiAssistant } from '../../../../../attack_discovery/pages/results/attack_discovery_panel/view_in_ai_assistant';
+import { AiButton } from '@kbn/shared-ux-ai-components';
+import { useViewInAiAssistant } from '../../../../../attack_discovery/pages/results/attack_discovery_panel/view_in_ai_assistant/use_view_in_ai_assistant';
+import { VIEW_IN_AI_ASSISTANT } from '../../../../../attack_discovery/pages/results/attack_discovery_panel/view_in_ai_assistant/translations';
 import { useAgentBuilderAvailability } from '../../../../../agent_builder/hooks/use_agent_builder_availability';
 import { NewAgentBuilderAttachment } from '../../../../../agent_builder/components/new_agent_builder_attachment';
 import type { AgentBuilderAddToChatTelemetry } from '../../../../../agent_builder/hooks/use_report_add_to_chat';
@@ -25,12 +27,16 @@ interface Props {
 
 /**
  * Renders a button to view the attack in the AI Assistant.
- * It conditionally renders either `NewAgentBuilderAttachment` or `ViewInAiAssistant`
+ * It conditionally renders either `NewAgentBuilderAttachment` or an `AiButton`
  * based on the agent builder availability.
  */
 export const AttackAiAssistantButton = React.memo<Props>(({ attack, pathway }) => {
   const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
   const openAgentBuilderFlyout = useAttackDiscoveryAttachment(attack, attack.replacements);
+  const { disabled, showAssistantOverlay } = useViewInAiAssistant({
+    attackDiscovery: attack,
+    replacements: attack.replacements,
+  });
 
   if (isAgentChatExperienceEnabled) {
     return (
@@ -44,6 +50,16 @@ export const AttackAiAssistantButton = React.memo<Props>(({ attack, pathway }) =
     );
   }
 
-  return <ViewInAiAssistant attackDiscovery={attack} replacements={attack.replacements} />;
+  return (
+    <AiButton
+      variant="empty"
+      iconType="aiAssistantLogo"
+      data-test-subj="viewInAiAssistant"
+      isDisabled={disabled}
+      onClick={showAssistantOverlay}
+    >
+      {VIEW_IN_AI_ASSISTANT}
+    </AiButton>
+  );
 });
 AttackAiAssistantButton.displayName = 'AttackAiAssistantButton';

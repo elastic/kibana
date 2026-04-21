@@ -122,5 +122,30 @@ describe('AppMenu', () => {
       expect(screen.getByText('Item 1')).toBeInTheDocument();
       expect(screen.getByText('Item 2')).toBeInTheDocument();
     });
+
+    it('should render overflow button at xl breakpoint when item is marked as overflow', () => {
+      mockUseIsWithinBreakpoints.mockImplementation((breakpoints: string[]) => {
+        if (breakpoints.includes('xl')) return true;
+        return false;
+      });
+
+      const forcedOverflowConfig: AppMenuConfig = {
+        items: [
+          {
+            id: 'singleOverflowItem',
+            label: 'Single overflow item',
+            run: jest.fn(),
+            iconType: 'gear',
+            order: 1,
+            overflow: true,
+          },
+        ],
+      };
+
+      render(<AppMenuComponent config={forcedOverflowConfig} />);
+
+      expect(screen.getByTestId('app-menu-overflow-button')).toBeInTheDocument();
+      expect(screen.queryByText('Single overflow item')).not.toBeInTheDocument();
+    });
   });
 });

@@ -45,8 +45,17 @@ jest.mock('../../../context/apm_plugin/use_apm_plugin_context', () => ({
       uiSettings: {
         get: jest.fn().mockReturnValue(false),
       },
+      application: {
+        capabilities: {
+          slo: { read: true },
+        },
+      },
     },
   }),
+}));
+
+jest.mock('../../../hooks/use_apm_route_path', () => ({
+  useApmRoutePath: () => '/services/{serviceName}/service-map',
 }));
 
 // Mock APM router
