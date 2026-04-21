@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
+import { schema } from '@kbn/config-schema';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
-import { getRouteConfig } from '../get_route_config';
-import { deleteDashboard } from './delete';
 
+import { getRouteConfig } from '../get_route_config';
 import { trackDeleteDashboardAction } from '../user_actions';
+import { deleteDashboard } from './delete';
 
 export function registerDeleteRoute(
   router: VersionedRouter<RequestHandlerContext>,

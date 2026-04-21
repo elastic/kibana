@@ -12,10 +12,10 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { Tag } from '@kbn/saved-objects-tagging-oss-plugin/common';
 
 import { coreServices, taggingService } from '../kibana_services';
-import type { DashboardCreateResponseBody } from './create';
-import type { DashboardDeleteResponseBody } from './delete';
-import type { DashboardState } from './types';
-import type { DashboardUpdateResponseBody } from './update';
+import type { DashboardCreateResponseBody } from '../api/create';
+import type { DashboardDeleteResponseBody } from '../api/delete';
+import type { DashboardState } from '../api/types';
+import type { DashboardUpdateResponseBody } from '../api/update';
 
 export async function trackCreateDashboardAction(
   result: DashboardCreateResponseBody,
