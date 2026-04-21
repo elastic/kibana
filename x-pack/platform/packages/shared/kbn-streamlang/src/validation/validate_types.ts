@@ -312,8 +312,6 @@ export function getProcessorOutputType(
     case 'remove_by_prefix':
     case 'drop_document':
     case 'manual_ingest_pipeline':
-      return 'unknown';
-
     case 'user_agent':
       return 'unknown';
 
