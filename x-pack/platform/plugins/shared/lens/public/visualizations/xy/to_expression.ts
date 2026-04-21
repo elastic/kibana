@@ -489,7 +489,7 @@ const dataLayerToExpression = (
     fn: [layer.collapseFn!],
   });
 
-  const hasActiveSplits = !layer.collapseFn && (layer.splitAccessors ?? []).length > 0;
+  const hasActiveSplits = !layer.collapseFn && Boolean(layer.splitAccessors?.length);
   const extendedDataLayerFn = buildExpressionFunction<ExtendedDataLayerFn>('extendedDataLayer', {
     layerId: layer.layerId,
     simpleView: Boolean(layer.simpleView),
