@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { omit } from 'lodash';
 import { apiTest, tags, type RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import {
@@ -127,10 +128,11 @@ apiTest.describe('data views integration (data view api)', { tag: tags.deploymen
       const recreatedDataView = recreateResponse.body[SERVICE_KEY];
       createdIds.push(recreatedDataView.id);
 
-      expect(recreatedDataView.title).toBe(resultDataView.title);
-      expect(recreatedDataView.fields.runtimeBar.name).toBe('runtimeBar');
-      expect(recreatedDataView.fieldFormats.runtimeBar.id).toBe('duration');
-      expect(recreatedDataView.fieldAttrs.runtimeBar.count).toBe(123);
+      // The retrieved object should be transient, so a clone re-created from it should
+      // match the original (ignoring `version`/`namespaces` which are assigned server-side).
+      expect(omit(recreatedDataView, ['version', 'namespaces'])).toStrictEqual(
+        omit(resultDataView, ['version', 'namespaces'])
+      );
     }
   );
 });

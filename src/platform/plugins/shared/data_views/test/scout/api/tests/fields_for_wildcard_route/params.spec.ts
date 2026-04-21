@@ -19,10 +19,11 @@ apiTest.describe(
   `GET /${FIELDS_FOR_WILDCARD_PATH} - params`,
   { tag: tags.deploymentAgnostic },
   () => {
-    let adminApiCredentials: RoleApiCredentials;
+    let viewerApiCredentials: RoleApiCredentials;
 
     apiTest.beforeAll(async ({ esArchiver, requestAuth }) => {
-      adminApiCredentials = await requestAuth.getApiKey('admin');
+      // Route only reads field metadata, so `viewer` is sufficient.
+      viewerApiCredentials = await requestAuth.getApiKey('viewer');
       await esArchiver.loadIfNeeded(ES_ARCHIVE_BASIC_INDEX);
     });
 
@@ -30,7 +31,7 @@ apiTest.describe(
       const response = await apiClient.get(FIELDS_FOR_WILDCARD_PATH, {
         headers: {
           ...INTERNAL_COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
+          ...viewerApiCredentials.apiKeyHeader,
         },
         responseType: 'json',
       });
@@ -46,7 +47,7 @@ apiTest.describe(
       const response = await apiClient.get(`${FIELDS_FOR_WILDCARD_PATH}?${params.toString()}`, {
         headers: {
           ...INTERNAL_COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
+          ...viewerApiCredentials.apiKeyHeader,
         },
         responseType: 'json',
       });
@@ -62,7 +63,7 @@ apiTest.describe(
       const response = await apiClient.get(`${FIELDS_FOR_WILDCARD_PATH}?${params.toString()}`, {
         headers: {
           ...INTERNAL_COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
+          ...viewerApiCredentials.apiKeyHeader,
         },
         responseType: 'json',
       });
@@ -78,7 +79,7 @@ apiTest.describe(
       const response = await apiClient.get(`${FIELDS_FOR_WILDCARD_PATH}?${params.toString()}`, {
         headers: {
           ...INTERNAL_COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
+          ...viewerApiCredentials.apiKeyHeader,
         },
         responseType: 'json',
       });
@@ -95,7 +96,7 @@ apiTest.describe(
       const response = await apiClient.get(`${FIELDS_FOR_WILDCARD_PATH}?${params.toString()}`, {
         headers: {
           ...INTERNAL_COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
+          ...viewerApiCredentials.apiKeyHeader,
         },
         responseType: 'json',
       });
@@ -111,7 +112,7 @@ apiTest.describe(
       const response = await apiClient.get(`${FIELDS_FOR_WILDCARD_PATH}?${params.toString()}`, {
         headers: {
           ...INTERNAL_COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
+          ...viewerApiCredentials.apiKeyHeader,
         },
         responseType: 'json',
       });
@@ -127,7 +128,7 @@ apiTest.describe(
       const response = await apiClient.get(`${FIELDS_FOR_WILDCARD_PATH}?${params.toString()}`, {
         headers: {
           ...INTERNAL_COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
+          ...viewerApiCredentials.apiKeyHeader,
         },
         responseType: 'json',
       });
@@ -143,7 +144,7 @@ apiTest.describe(
       const response = await apiClient.get(`${FIELDS_FOR_WILDCARD_PATH}?${params.toString()}`, {
         headers: {
           ...INTERNAL_COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
+          ...viewerApiCredentials.apiKeyHeader,
         },
         responseType: 'json',
       });
@@ -161,7 +162,7 @@ apiTest.describe(
         const response = await apiClient.get(`${FIELDS_FOR_WILDCARD_PATH}?${params.toString()}`, {
           headers: {
             ...INTERNAL_COMMON_HEADERS,
-            ...adminApiCredentials.apiKeyHeader,
+            ...viewerApiCredentials.apiKeyHeader,
           },
           responseType: 'json',
         });
@@ -181,7 +182,7 @@ apiTest.describe(
         const response = await apiClient.get(`${FIELDS_FOR_WILDCARD_PATH}?${params.toString()}`, {
           headers: {
             ...INTERNAL_COMMON_HEADERS,
-            ...adminApiCredentials.apiKeyHeader,
+            ...viewerApiCredentials.apiKeyHeader,
           },
           responseType: 'json',
         });
@@ -198,7 +199,7 @@ apiTest.describe(
       const response = await apiClient.get(`${FIELDS_FOR_WILDCARD_PATH}?${params.toString()}`, {
         headers: {
           ...INTERNAL_COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
+          ...viewerApiCredentials.apiKeyHeader,
         },
         responseType: 'json',
       });
@@ -216,7 +217,7 @@ apiTest.describe(
         const response = await apiClient.get(`${FIELDS_FOR_WILDCARD_PATH}?${params.toString()}`, {
           headers: {
             ...INTERNAL_COMMON_HEADERS,
-            ...adminApiCredentials.apiKeyHeader,
+            ...viewerApiCredentials.apiKeyHeader,
           },
           responseType: 'json',
         });

@@ -19,10 +19,11 @@ apiTest.describe(
   `GET /${FIELDS_FOR_WILDCARD_PATH} - conflicts`,
   { tag: tags.deploymentAgnostic },
   () => {
-    let adminApiCredentials: RoleApiCredentials;
+    let viewerApiCredentials: RoleApiCredentials;
 
     apiTest.beforeAll(async ({ esArchiver, requestAuth }) => {
-      adminApiCredentials = await requestAuth.getApiKey('admin');
+      // Route only reads field metadata, so `viewer` is sufficient.
+      viewerApiCredentials = await requestAuth.getApiKey('viewer');
       await esArchiver.loadIfNeeded(ES_ARCHIVE_CONFLICTS);
     });
 
@@ -30,7 +31,7 @@ apiTest.describe(
       const response = await apiClient.get(`${FIELDS_FOR_WILDCARD_PATH}?pattern=logs-2017.01.*`, {
         headers: {
           ...INTERNAL_COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
+          ...viewerApiCredentials.apiKeyHeader,
         },
         responseType: 'json',
       });
