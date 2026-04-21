@@ -59,7 +59,8 @@ describe('useInstallEntityStoreV2', () => {
 
     await waitFor(() => {
       expect(mockServices.http.get).toHaveBeenCalledWith({
-        path: '/api/entity_store/status',
+        path: '/internal/entity_store/status',
+        version: '1',
       });
     });
 
@@ -83,7 +84,8 @@ describe('useInstallEntityStoreV2', () => {
     });
 
     expect(mockServices.http.get).toHaveBeenNthCalledWith(1, {
-      path: '/api/entity_store/status',
+      path: '/internal/entity_store/status',
+      version: '1',
     });
     expect(mockServices.http.get).toHaveBeenNthCalledWith(2, {
       path: ENTITY_STORE_ROUTES.public.STATUS,
@@ -159,7 +161,8 @@ describe('isEntityStoreV1Installed', () => {
       isEntityStoreV1Installed(mockServices.http as unknown as Services['http'])
     ).resolves.toBe(true);
     expect(mockServices.http.get).toHaveBeenCalledWith({
-      path: '/api/entity_store/status',
+      path: '/internal/entity_store/status',
+      version: '1',
     });
   });
 
