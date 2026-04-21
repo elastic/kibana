@@ -39,7 +39,11 @@ export async function calibrateSamplingStrategy(
 
   for (const index of indices) {
     try {
-      const response = await esClient.asInternalUser.count({
+      // Scope counts to the caller's RBAC — the index list fed in here was
+      // already filtered through discoverIndices which also runs as the
+      // current user, but re-asserting here guards against future callers
+      // passing a broader list.
+      const response = await esClient.asCurrentUser.count({
         index: index.name,
         query: {
           range: {

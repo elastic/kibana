@@ -74,9 +74,7 @@ export function registerGetExecutionDetailRoute({ router, logger }: AESOPRouteDe
       access: 'internal',
       security: {
         authz: {
-          enabled: false,
-          reason:
-            'Internal route for AESOP exploration execution details, RBAC handled by parent plugin',
+          requiredPrivileges: ['evals'],
         },
       },
     })

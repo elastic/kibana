@@ -63,7 +63,17 @@ export function registerRunExplorationRoute({
           const internalClient = coreContext.elasticsearch.client.asInternalUser;
           const rateLimiter = new PersistentRateLimiter(internalClient, logger);
 
-          const userId = 'anonymous';
+          // Key the rate limiter on the authenticated username so one user
+          // exhausting their quota does not block other users. Falls back to
+          // 'anonymous' only when security is disabled (dev / serverless
+          // insecure mode), which we also log.
+          const currentUser = coreContext.security.authc.getCurrentUser();
+          const userId = currentUser?.username ?? 'anonymous';
+          if (!currentUser) {
+            logger.warn(
+              '[AESOP] Running exploration without an authenticated user; rate-limiting under shared "anonymous" bucket'
+            );
+          }
           const rateLimit = await rateLimiter.checkRateLimit(userId, 'exploration');
 
           if (!rateLimit.allowed) {

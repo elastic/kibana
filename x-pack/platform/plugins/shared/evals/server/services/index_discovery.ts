@@ -70,8 +70,11 @@ export async function discoverIndices(
 
   try {
     // Step 1: Resolve all indices and data streams in one call
-    // resolveIndex cleanly separates indices, data_streams, and aliases
-    const resolved = await esClient.asInternalUser.indices.resolveIndex({
+    // resolveIndex cleanly separates indices, data_streams, and aliases.
+    // Use asCurrentUser so discovery is scoped to the caller's RBAC — we must
+    // not leak index names or document samples from indices the user would
+    // not normally be able to read.
+    const resolved = await esClient.asCurrentUser.indices.resolveIndex({
       name: '*',
       expand_wildcards: ['open', 'hidden'],
     });
@@ -246,7 +249,9 @@ async function sampleIndex(
   isDataStream: boolean
 ): Promise<IndexInfo | null> {
   try {
-    const countResponse = await esClient.asInternalUser.count({ index: name });
+    // asCurrentUser ensures we never sample documents from indices the
+    // caller would not normally be able to read.
+    const countResponse = await esClient.asCurrentUser.count({ index: name });
     const docCount = countResponse.count;
 
     if (docCount === 0) {
@@ -255,7 +260,7 @@ async function sampleIndex(
     }
 
     // Sample documents to extract field names and timestamps
-    const sampleResponse = await esClient.asInternalUser.search({
+    const sampleResponse = await esClient.asCurrentUser.search({
       index: name,
       size: 100,
       _source: true,

@@ -55,11 +55,18 @@ export async function inferAnalystRole(
       },
     };
 
-    const eventsResponse = await esClient.asInternalUser.search({
+    // Scope to the current user's RBAC. `.kibana-event-log-*` contains
+    // other users' activity; reading it via `asInternalUser` would leak
+    // that activity into the LLM prompt for a caller who cannot normally
+    // read it. Callers that lack read access will gracefully fall through
+    // to the default `ops_analyst` role below.
+    const eventsResponse = await esClient.asCurrentUser.search({
       index: '.kibana-event-log-*',
       size: 5000,
       query,
       _source: ['event.action', 'kibana.alert.id', 'kibana.savedObjects', 'request.url'],
+      ignore_unavailable: true,
+      allow_no_indices: true,
     });
 
     const events = eventsResponse.hits.hits.map((hit) => hit._source as Record<string, any>);

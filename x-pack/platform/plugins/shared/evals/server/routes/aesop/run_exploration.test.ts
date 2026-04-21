@@ -54,11 +54,18 @@ describe('POST /internal/aesop/exploration/run', () => {
     asInternalUser: mockEsClient,
   });
 
-  const createMockContext = () =>
+  const createMockContext = (
+    currentUser: { username: string } | null = { username: 'test-user' }
+  ) =>
     ({
       core: Promise.resolve({
         elasticsearch: {
           client: mockScopedClient(),
+        },
+        security: {
+          authc: {
+            getCurrentUser: () => currentUser,
+          },
         },
       }),
       evals: Promise.resolve({
@@ -187,6 +194,7 @@ describe('POST /internal/aesop/exploration/run', () => {
       const mockContext = {
         core: Promise.resolve({
           elasticsearch: { client: scopedClient },
+          security: { authc: { getCurrentUser: () => ({ username: 'test-user' }) } },
         }),
       } as any;
       const mockRequest = createMockRequest();
@@ -205,6 +213,7 @@ describe('POST /internal/aesop/exploration/run', () => {
       const mockContext = {
         core: Promise.resolve({
           elasticsearch: { client: scopedClient },
+          security: { authc: { getCurrentUser: () => ({ username: 'test-user' }) } },
         }),
       } as any;
       const mockRequest = createMockRequest();
@@ -219,6 +228,7 @@ describe('POST /internal/aesop/exploration/run', () => {
       const mockContext = {
         core: Promise.resolve({
           elasticsearch: { client: scopedClient },
+          security: { authc: { getCurrentUser: () => ({ username: 'test-user' }) } },
         }),
       } as any;
       const mockRequest = createMockRequest();
@@ -231,15 +241,13 @@ describe('POST /internal/aesop/exploration/run', () => {
       );
     });
 
-    it('should pass userId to inferAnalystRole', async () => {
-      // Implementation currently uses a hardcoded 'anonymous' userId.
-      // When user extraction from request is implemented, this test should be updated.
-      const mockContext = createMockContext();
+    it('should pass the authenticated username to inferAnalystRole', async () => {
+      const mockContext = createMockContext({ username: 'test-user' });
       const mockRequest = createMockRequest();
 
       await routeHandler(mockContext, mockRequest, mockResponse);
 
-      expect(mockInferAnalystRole).toHaveBeenCalledWith(expect.anything(), mockLogger, 'anonymous');
+      expect(mockInferAnalystRole).toHaveBeenCalledWith(expect.anything(), mockLogger, 'test-user');
     });
 
     it('should pass discovered indices to calibrateSamplingStrategy', async () => {
@@ -412,17 +420,17 @@ describe('POST /internal/aesop/exploration/run', () => {
   });
 
   describe('userId handling', () => {
-    it('should use "anonymous" when username is not available', async () => {
-      const mockContext = createMockContext();
-      const mockRequest = httpServerMock.createKibanaRequest({
-        body: { include_sample_data: true },
-      });
-      (mockRequest as any).auth = { credentials: {} };
+    it('should fall back to "anonymous" when the security service returns no user', async () => {
+      // Security disabled / insecure dev mode -> getCurrentUser() returns null.
+      const mockContext = createMockContext(null);
+      const mockRequest = createMockRequest();
 
       await routeHandler(mockContext, mockRequest, mockResponse);
 
-      // The handler does: request.auth.credentials?.username || 'anonymous'
       expect(mockInferAnalystRole).toHaveBeenCalledWith(expect.anything(), mockLogger, 'anonymous');
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('without an authenticated user')
+      );
     });
   });
 
