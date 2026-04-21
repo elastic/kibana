@@ -48,13 +48,18 @@ const getEuidEvaluationBlock = (euidApi: EntityStoreEuid) => {
     `| EVAL entity_id = COALESCE(${ANOMALY_ENTITY_TYPES.map((t) => `${t}_euid`).join(', ')})`
   );
 
-  const entityTypeCases = ANOMALY_ENTITY_TYPES.map((t) => `${t}_euid IS NOT NULL, "${t}"`).join(
+  // `*_euid IS NOT NULL` was sometimes reporting false even when `*_euid` was a non-empty string;
+  // So using `LENGTH(...) > 0` instead.
+  const typedEuidNonEmpty = (t: (typeof ANOMALY_ENTITY_TYPES)[number]) =>
+    `LENGTH(TO_STRING(${t}_euid)) > 0`;
+
+  const entityTypeCases = ANOMALY_ENTITY_TYPES.map((t) => `${typedEuidNonEmpty(t)}, "${t}"`).join(
     ', '
   );
   parts.push(`| EVAL entity_type = CASE(${entityTypeCases}, NULL)`);
 
   const entityNameCases = ANOMALY_ENTITY_TYPES.map(
-    (t) => `${t}_euid IS NOT NULL, ${ENTITY_NAME_FIELD[t]}`
+    (t) => `${typedEuidNonEmpty(t)}, ${ENTITY_NAME_FIELD[t]}`
   ).join(', ');
   parts.push(`| EVAL entity_name = CASE(${entityNameCases}, NULL)`);
 
