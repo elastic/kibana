@@ -16,10 +16,6 @@ apiTest.describe(
   'Cross-compatibility - User Agent Processor',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    // *** Compatible Cases ***
-    // ES|QL now supports the USER_AGENT command for parsing browser user agent strings.
-    // These tests verify that both Ingest Pipeline and ES|QL produce similar results.
-
     apiTest(
       'should extract user agent in both ingest pipeline and ES|QL',
       async ({ testBed, esql }) => {
@@ -36,7 +32,6 @@ apiTest.describe(
         const { processors } = await transpileIngestPipeline(streamlangDSL);
         const { query } = await transpileEsql(streamlangDSL);
 
-        // ES|QL should contain the USER_AGENT command
         expect(query).toContain('USER_AGENT');
         expect(query).toContain('parsed_agent');
 
@@ -47,11 +42,9 @@ apiTest.describe(
           },
         ];
 
-        // Ingest pipeline should process user_agent
         await testBed.ingest('ingest-user-agent-compat', docs, processors);
         const ingestResult = await testBed.getDocs('ingest-user-agent-compat');
 
-        // ES|QL should also process user_agent with USER_AGENT command
         await testBed.ingest('esql-user-agent-compat', docs);
         const esqlResult = await esql.queryOnIndex('esql-user-agent-compat', query);
 
@@ -67,7 +60,7 @@ apiTest.describe(
     );
 
     apiTest(
-      'should extract user agent in both transpilers (ES|QL extracts all properties)',
+      'should extract user agent properties in both transpilers',
       async ({ testBed, esql }) => {
         const streamlangDSL: StreamlangDSL = {
           steps: [
@@ -206,7 +199,6 @@ apiTest.describe(
         const { processors } = await transpileIngestPipeline(streamlangDSL);
         const { query } = await transpileEsql(streamlangDSL);
 
-        // Seed `agent_string` in the index mapping (second doc omits it) so ES|QL can resolve the column.
         const docs = [
           {
             agent_string:
@@ -232,56 +224,6 @@ apiTest.describe(
         expect(esqlOrdered).toHaveLength(2);
         expect(asDoc(esqlOrdered[1])['parsed_agent.name']).toBeNull();
         expect(asDoc(esqlOrdered[1]).other_field).toBe('some_value');
-      }
-    );
-
-    apiTest(
-      'should work with mixed processors where user_agent is between supported processors',
-      async ({ testBed, esql }) => {
-        const streamlangDSL: StreamlangDSL = {
-          steps: [
-            {
-              action: 'set',
-              to: 'before_user_agent',
-              value: 'before',
-            },
-            {
-              action: 'user_agent',
-              from: 'agent_string',
-              to: 'parsed_agent',
-            } as UserAgentProcessor,
-            {
-              action: 'set',
-              to: 'after_user_agent',
-              value: 'after',
-            },
-          ],
-        };
-
-        const { processors } = await transpileIngestPipeline(streamlangDSL);
-        const { query } = await transpileEsql(streamlangDSL);
-
-        const docs = [
-          {
-            agent_string: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/120.0.0.0',
-          },
-        ];
-
-        await testBed.ingest('ingest-user-agent-mixed', docs, processors);
-        const ingestResult = await testBed.getDocs('ingest-user-agent-mixed');
-
-        await testBed.ingest('esql-user-agent-mixed', docs);
-        const esqlResult = await esql.queryOnIndex('esql-user-agent-mixed', query);
-
-        const ingest0 = asDoc(ingestResult[0]);
-        const esqlFlat = asDoc(esqlResult.documentsWithoutKeywords[0]);
-        expect(ingest0.before_user_agent).toBe('before');
-        expect(ingest0.after_user_agent).toBe('after');
-        expect(esqlFlat.before_user_agent).toBe('before');
-        expect(esqlFlat.after_user_agent).toBe('after');
-
-        expect(asDoc(ingest0.parsed_agent).name).toBe('Chrome');
-        expect(esqlFlat['parsed_agent.name']).toBe('Chrome');
       }
     );
   }

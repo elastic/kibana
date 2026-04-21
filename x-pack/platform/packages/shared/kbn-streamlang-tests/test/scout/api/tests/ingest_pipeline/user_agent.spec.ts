@@ -99,7 +99,7 @@ apiTest.describe(
 
       const { processors } = await transpile(streamlangDSL);
 
-      const docs = [{ log: { level: 'info' } }]; // No 'http.user_agent' field
+      const docs = [{ log: { level: 'info' } }];
       await testBed.ingest(indexName, docs, processors);
 
       const ingestedDocs = await testBed.getDocs(indexName);
@@ -123,7 +123,7 @@ apiTest.describe(
 
       const { processors } = await transpile(streamlangDSL);
 
-      const docs = [{ log: { level: 'info' } }]; // 'http.user_agent' field is missing
+      const docs = [{ log: { level: 'info' } }];
       const { errors } = await testBed.ingest(indexName, docs, processors);
       expect(errors[0].reason).toContain('not present as part of path [http.user_agent]');
     });

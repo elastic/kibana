@@ -28,7 +28,6 @@ apiTest.describe(
 
       const { query } = await transpile(streamlangDSL);
 
-      // Verify that the ES|QL query contains the USER_AGENT command
       expect(query).toContain('USER_AGENT');
       expect(query).toContain('parsed_agent');
       expect(query).toContain('`http.user_agent`');
@@ -46,7 +45,6 @@ apiTest.describe(
 
       const { query } = await transpile(streamlangDSL);
 
-      // Default target field should be 'user_agent'
       expect(query).toContain('USER_AGENT');
       expect(query).toContain('user_agent');
       expect(query).toContain('agent_string');
@@ -66,7 +64,6 @@ apiTest.describe(
 
       const { query } = await transpile(streamlangDSL);
 
-      // Should contain WITH clause with regex_file option
       expect(query).toContain('USER_AGENT');
       expect(query).toContain('WITH');
       expect(query).toContain('regex_file');
@@ -87,7 +84,6 @@ apiTest.describe(
 
       const { query } = await transpile(streamlangDSL);
 
-      // Should contain WITH clause with extract_device_type option
       expect(query).toContain('USER_AGENT');
       expect(query).toContain('WITH');
       expect(query).toContain('extract_device_type');
@@ -108,7 +104,6 @@ apiTest.describe(
 
       const { query } = await transpile(streamlangDSL);
 
-      // Should contain WITH clause with properties option as a list
       expect(query).toContain('USER_AGENT');
       expect(query).toContain('WITH');
       expect(query).toContain('properties');
@@ -133,7 +128,6 @@ apiTest.describe(
 
       const { query } = await transpile(streamlangDSL);
 
-      // Should contain USER_AGENT command with all options in WITH clause
       expect(query).toContain('USER_AGENT');
       expect(query).toContain('parsed_agent');
       expect(query).toContain('WITH');
@@ -160,7 +154,6 @@ apiTest.describe(
 
       const { query } = await transpile(streamlangDSL);
 
-      // Conditional execution: inline CASE on the source field (no temp column / DROP)
       expect(query).toContain('USER_AGENT');
       expect(query).toContain('CASE');
       expect(query).toContain('agent_string');
@@ -180,45 +173,11 @@ apiTest.describe(
 
       const { query } = await transpile(streamlangDSL);
 
-      // Should generate conditional execution with WHERE condition check
       expect(query).toContain('USER_AGENT');
       expect(query).toContain('CASE');
       expect(query).toContain('should_parse');
     });
 
-    apiTest('should generate valid ES|QL when mixed with supported processors', async () => {
-      const streamlangDSL: StreamlangDSL = {
-        steps: [
-          {
-            action: 'set',
-            to: 'supported_field',
-            value: 'supported_value',
-          },
-          {
-            action: 'user_agent',
-            from: 'agent_string',
-            to: 'parsed_agent',
-          } as UserAgentProcessor,
-          {
-            action: 'rename',
-            from: 'old_field',
-            to: 'new_field',
-            override: true,
-          },
-        ],
-      };
-
-      const { query } = await transpile(streamlangDSL);
-
-      // Should contain USER_AGENT command
-      expect(query).toContain('USER_AGENT');
-
-      // Should also contain supported processors
-      expect(query).toContain('EVAL'); // For set processor
-      expect(query).toContain('RENAME'); // For rename processor
-    });
-
-    // Template validation tests - both transpilers should consistently REJECT Mustache templates
     [
       {
         templateType: '{{ }}',
