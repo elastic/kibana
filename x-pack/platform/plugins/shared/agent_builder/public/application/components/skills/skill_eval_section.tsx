@@ -21,7 +21,9 @@ import {
   EuiListGroupItem,
   EuiLoadingSpinner,
   EuiPanel,
+  EuiPopover,
   EuiProgress,
+  EuiSelectable,
   EuiSpacer,
   EuiStat,
   EuiSuperSelect,
@@ -30,6 +32,7 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
+import type { EuiSelectableOption } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
@@ -155,6 +158,10 @@ const evaluatorListStyles = css`
 const previewTableStyles = css`
   max-height: 300px;
   overflow-y: auto;
+`;
+
+const catalogPopoverStyles = css`
+  width: 380px;
 `;
 
 export const SkillEvalSection: React.FC<SkillEvalSectionProps> = ({
@@ -413,6 +420,100 @@ export const SkillEvalSection: React.FC<SkillEvalSectionProps> = ({
   const selectedEvaluatorNames = useMemo(
     () => evaluators.filter((e) => e.selected).map((e) => e.name),
     [evaluators]
+  );
+
+  // ─── Catalog picker (manual selection, no LLM) ────────────────
+  const [isCatalogPopoverOpen, setIsCatalogPopoverOpen] = useState(false);
+
+  interface CatalogEvaluator {
+    id: string;
+    name: string;
+    kind: 'LLM' | 'CODE';
+    type: 'llm-judge' | 'code' | 'esql' | 'prebuilt';
+    description: string;
+    source: 'prebuilt' | 'custom';
+  }
+
+  const { data: catalogEvaluators = [], isLoading: catalogLoading } = useQuery({
+    queryKey: ['evals-evaluators-catalog'],
+    queryFn: async () => {
+      const result = await http.get<{ evaluators: CatalogEvaluator[] }>(
+        '/internal/evals/evaluators',
+        { version: '1' }
+      );
+      return result.evaluators ?? [];
+    },
+    enabled: isCatalogPopoverOpen,
+  });
+
+  const catalogOptions = useMemo<Array<EuiSelectableOption<{ evaluator: CatalogEvaluator }>>>(
+    () =>
+      catalogEvaluators.map((e) => {
+        const existing = evaluators.find((ev) => ev.name === e.name);
+        return {
+          label: e.name,
+          key: e.name,
+          checked: existing?.selected ? 'on' : undefined,
+          'data-test-subj': `agentBuilderSkillEvalCatalog-${e.name}`,
+          append: (
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiBadge color={KIND_BADGE_COLORS[e.kind] ?? 'hollow'}>{e.kind}</EuiBadge>
+              </EuiFlexItem>
+              {e.source === 'custom' && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="hollow">
+                    {i18n.translate('xpack.agentBuilder.skills.eval.catalogCustomBadge', {
+                      defaultMessage: 'Custom',
+                    })}
+                  </EuiBadge>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          ),
+          toolTipContent: e.description,
+          evaluator: e,
+        };
+      }),
+    [catalogEvaluators, evaluators]
+  );
+
+  const handleCatalogSelectionChange = useCallback(
+    (newOptions: Array<EuiSelectableOption<{ evaluator: CatalogEvaluator }>>) => {
+      setEvaluators((prev) => {
+        const next = [...prev];
+        for (const option of newOptions) {
+          const isOn = option.checked === 'on';
+          const idx = next.findIndex((ev) => ev.name === option.evaluator.name);
+
+          if (idx >= 0) {
+            // Update selection state for existing evaluator (toggle without removing)
+            if (next[idx].selected !== isOn) {
+              next[idx] = { ...next[idx], selected: isOn };
+            }
+          } else if (isOn) {
+            // Add newly picked evaluator
+            const cat = option.evaluator;
+            next.push({
+              name: cat.name,
+              description: cat.description,
+              kind: cat.kind,
+              type: cat.type,
+              // Catalog items are already registered; mark as prebuilt so we
+              // skip the auto-save-to-custom flow in runEvalMutation.
+              source: 'prebuilt',
+              selected: true,
+              rationale: i18n.translate(
+                'xpack.agentBuilder.skills.eval.manuallyPickedRationale',
+                { defaultMessage: 'Manually selected from catalog.' }
+              ),
+            });
+          }
+        }
+        return next;
+      });
+    },
+    []
   );
 
   // ─── Generate dataset mutation ────────────────────────────────
@@ -889,6 +990,59 @@ export const SkillEvalSection: React.FC<SkillEvalSectionProps> = ({
                   })}
             </strong>
           </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiPopover
+            button={
+              <EuiButtonEmpty
+                size="xs"
+                iconType="list"
+                onClick={() => setIsCatalogPopoverOpen((prev) => !prev)}
+                data-test-subj="agentBuilderSkillPickEvaluatorsButton"
+              >
+                {i18n.translate('xpack.agentBuilder.skills.eval.pickEvaluators', {
+                  defaultMessage: 'Pick from catalog',
+                })}
+              </EuiButtonEmpty>
+            }
+            isOpen={isCatalogPopoverOpen}
+            closePopover={() => setIsCatalogPopoverOpen(false)}
+            panelPaddingSize="none"
+            anchorPosition="downLeft"
+          >
+            <EuiSelectable
+              aria-label={i18n.translate(
+                'xpack.agentBuilder.skills.eval.catalogPopoverAriaLabel',
+                { defaultMessage: 'Select evaluators from catalog' }
+              )}
+              options={catalogOptions}
+              onChange={handleCatalogSelectionChange}
+              searchable
+              searchProps={{
+                placeholder: i18n.translate(
+                  'xpack.agentBuilder.skills.eval.catalogSearchPlaceholder',
+                  { defaultMessage: 'Search evaluators' }
+                ),
+                compressed: true,
+                'data-test-subj': 'agentBuilderSkillEvalCatalogSearch',
+              }}
+              isLoading={catalogLoading}
+              listProps={{ rowHeight: 40, showIcons: false }}
+              singleSelection={false}
+              height={320}
+              emptyMessage={i18n.translate('xpack.agentBuilder.skills.eval.catalogEmpty', {
+                defaultMessage: 'No evaluators registered.',
+              })}
+              data-test-subj="agentBuilderSkillEvalCatalogSelectable"
+            >
+              {(list, search) => (
+                <div css={catalogPopoverStyles}>
+                  {search}
+                  {list}
+                </div>
+              )}
+            </EuiSelectable>
+          </EuiPopover>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty

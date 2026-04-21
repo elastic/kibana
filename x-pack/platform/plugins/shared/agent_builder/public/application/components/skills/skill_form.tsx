@@ -28,7 +28,6 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { PublicSkillDefinition } from '@kbn/agent-builder-common';
-import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { defer } from 'lodash';
@@ -49,6 +48,7 @@ import { SkillEvalSection } from './skill_eval_section';
 import { useSkillBrowserApiTools } from './use_skill_browser_api_tools';
 import { useAesopSuggestions } from './use_aesop_suggestions';
 import type { EvalResults } from './types';
+import { buildInitialMessage, buildSidebarAttachments } from './skill_chat_helpers';
 
 export enum SkillFormMode {
   Create = 'create',
@@ -368,81 +368,6 @@ const SkillFormContent: React.FC<SkillFormContentProps> = ({
       )}
     </EuiForm>
   );
-};
-
-const buildSidebarAttachments = ({
-  skillName,
-  skillDescription,
-  skillContent,
-  isReadonly,
-  evalResults,
-}: {
-  skillName: string;
-  skillDescription: string;
-  skillContent: string;
-  isReadonly: boolean;
-  evalResults?: EvalResults;
-}): AttachmentInput[] => {
-  const attachments: AttachmentInput[] = [
-    {
-      type: 'skill-context',
-      data: {
-        name: skillName,
-        description: skillDescription,
-        content: skillContent,
-        readonly: isReadonly,
-      },
-      hidden: true,
-    },
-  ];
-
-  if (evalResults) {
-    attachments.push({
-      type: 'eval-results',
-      data: evalResults as unknown as Record<string, unknown>,
-      hidden: true,
-    });
-  }
-
-  return attachments;
-};
-
-const buildInitialMessage = ({
-  isCreateMode,
-  evalResults,
-  skillName,
-}: {
-  isCreateMode: boolean;
-  evalResults?: EvalResults;
-  skillName: string;
-}): string | undefined => {
-  if (isCreateMode) {
-    return i18n.translate('xpack.agentBuilder.skills.chat.createInitialMessage', {
-      defaultMessage:
-        'I want to create a new Agent Builder skill. Help me draft the name, description, and instructions content.',
-    });
-  }
-
-  if (evalResults) {
-    const { summary, evaluatorScores } = evalResults;
-    const weakest = evaluatorScores.reduce(
-      (min, e) => (e.meanScore < min.meanScore ? e : min),
-      evaluatorScores[0]
-    );
-    return i18n.translate('xpack.agentBuilder.skills.chat.evalInitialMessage', {
-      defaultMessage:
-        'My skill "{skillName}" scored {score}% on evaluation (pass rate: {passRate}%). The weakest evaluator was "{weakestName}" at {weakestScore}%. Help me improve it.',
-      values: {
-        skillName,
-        score: (summary.meanScore * 100).toFixed(0),
-        passRate: (summary.passRate * 100).toFixed(0),
-        weakestName: weakest?.name ?? 'unknown',
-        weakestScore: weakest ? (weakest.meanScore * 100).toFixed(0) : '0',
-      },
-    });
-  }
-
-  return undefined;
 };
 
 export const SkillForm: React.FC<SkillFormProps> = ({
