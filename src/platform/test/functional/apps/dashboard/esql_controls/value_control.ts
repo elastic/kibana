@@ -25,10 +25,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const esql = getService('esql');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const browser = getService('browser');
   const dashboardPanelActions = getService('dashboardPanelActions');
 
-  // Failing: See https://github.com/elastic/kibana/issues/251388
   describe('dashboard - add a value type ES|QL control', function () {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
