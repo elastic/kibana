@@ -18,21 +18,6 @@ const LOGSTASH_TIME_RANGE = {
   to: '2015-09-23T18:31:44.000Z',
 };
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
-}
-
-function getDashboardIdFromResponse(body: unknown): string {
-  if (!isRecord(body)) {
-    throw new Error('Dashboard create response: expected a JSON object');
-  }
-  const { id } = body;
-  if (typeof id !== 'string' || id.length === 0) {
-    throw new Error('Dashboard create response: expected a non-empty string id');
-  }
-  return id;
-}
-
 function withSpace(path: string, spaceId: string): string {
   return `/s/${spaceId}${path}`;
 }
@@ -53,23 +38,11 @@ async function createDashboard(client: KbnClient, body: unknown, spaceId: string
     );
   }
 
-  return getDashboardIdFromResponse(response.data);
-}
-
-async function deleteDashboard(
-  client: KbnClient,
-  dashboardId: string,
-  spaceId: string
-): Promise<void> {
-  const response = await client.request({
-    method: 'DELETE',
-    path: withSpace(`${DASHBOARD_API_PATH}/${encodeURIComponent(dashboardId)}`, spaceId),
-    headers: { 'elastic-api-version': DASHBOARD_API_VERSION },
-  });
-
-  if (response.status !== 204 && response.status !== 404) {
-    throw new Error(`Expected dashboard delete status 204 or 404, got ${response.status}`);
+  const { id } = response.data as Record<string, unknown>;
+  if (typeof id !== 'string' || id.length === 0) {
+    throw new Error('Dashboard create response: expected a non-empty string id');
   }
+  return id;
 }
 
 spaceTest.describe(
@@ -137,16 +110,11 @@ spaceTest.describe(
         };
 
         const dashboardId = await createDashboard(kbnClient, body, scoutSpace.id);
+        await browserAuth.loginAsPrivilegedUser();
+        await pageObjects.dashboard.openDashboardWithId(dashboardId);
 
-        try {
-          await browserAuth.loginAsPrivilegedUser();
-          await pageObjects.dashboard.openDashboardWithId(dashboardId);
-
-          await expect(page.getByTestId('mtrVis')).toBeVisible();
-          await expect(page.locator('.echSingleMetricSparkline')).toBeVisible();
-        } finally {
-          await deleteDashboard(kbnClient, dashboardId, scoutSpace.id);
-        }
+        await expect(page.getByTestId('mtrVis')).toBeVisible();
+        await expect(page.locator('.echSingleMetricSparkline')).toBeVisible();
       }
     );
 
@@ -183,16 +151,11 @@ spaceTest.describe(
         };
 
         const dashboardId = await createDashboard(kbnClient, body, scoutSpace.id);
+        await browserAuth.loginAsPrivilegedUser();
+        await pageObjects.dashboard.openDashboardWithId(dashboardId);
 
-        try {
-          await browserAuth.loginAsPrivilegedUser();
-          await pageObjects.dashboard.openDashboardWithId(dashboardId);
-
-          await expect(page.getByTestId('mtrVis')).toBeVisible();
-          await expect(page.locator('.echSingleMetricSparkline')).toBeVisible();
-        } finally {
-          await deleteDashboard(kbnClient, dashboardId, scoutSpace.id);
-        }
+        await expect(page.getByTestId('mtrVis')).toBeVisible();
+        await expect(page.locator('.echSingleMetricSparkline')).toBeVisible();
       }
     );
   }
