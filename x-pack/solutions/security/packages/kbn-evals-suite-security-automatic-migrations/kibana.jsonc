@@ -8,7 +8,7 @@
 {
   "type": "functional-tests",
   "id": "@kbn/evals-suite-security-automatic-migrations",
-  "owner": "@elastic/security-generative-ai",
+  "owner": "@elastic/security-threat-hunting",
   "group": "security",
   "visibility": "private",
   "devOnly": true
