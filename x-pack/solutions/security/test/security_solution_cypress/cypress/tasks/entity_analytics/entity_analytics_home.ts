@@ -29,6 +29,31 @@ export const setGrouping = (activeGroups: string[]) => {
   );
 };
 
+x -
+  pack /
+    solutions /
+    security /
+    packages /
+    navigation /
+    src /
+    navigation_tree /
+    entity_analytics_navigation_tree.ts;
+/**
+ * Waits for Kibana global navigation loading to finish, the Entity Analytics home
+ * shell to mount (past EmptyPrompt / data-view PageLoader), and the page-level
+ * sourcerer spinner to disappear so charts and grid are in the DOM.
+ */
+export const waitForEntityAnalyticsHomeShell = () => {
+  cy.get(GLOBAL_LOADING_INDICATOR_HIDDEN, {
+    timeout: ENTITY_ANALYTICS_HOME_READY_TIMEOUT_MS,
+  }).should('exist');
+  cy.get(GLOBAL_LOADING_INDICATOR).should('not.exist');
+  cy.get(PAGE_TITLE, { timeout: ENTITY_ANALYTICS_HOME_READY_TIMEOUT_MS }).should('exist');
+  cy.get(ENTITY_ANALYTICS_HOME_PAGE_LOADER, {
+    timeout: ENTITY_ANALYTICS_HOME_READY_TIMEOUT_MS,
+  }).should('not.exist');
+};
+
 /**
  * Waits for the grouping table to finish loading by intercepting the
  * underlying search request and confirming the DOM is ready.
