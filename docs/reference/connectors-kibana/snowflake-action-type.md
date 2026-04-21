@@ -3,7 +3,7 @@ navigation_title: "Snowflake"
 type: reference
 description: "Use the Snowflake connector to execute SQL queries, check statement status, and cancel running statements via the Snowflake SQL REST API."
 applies_to:
-  stack: preview
+  stack: preview 9.4
   serverless: preview
 ---
 
