@@ -18,6 +18,7 @@ import type {
   DashboardAttachmentData,
 } from '../types';
 import { isSection } from '../types';
+import { EMPTY_DASHBOARD_STATE } from '../dashboard_state_helpers';
 
 /**
  * Converts an AttachmentPanel to a DashboardPanel.
@@ -61,34 +62,6 @@ const normalizeWidgets = (widgets: AgentWidget[]): DashboardWidget[] =>
   (widgets ?? []).map((widget) =>
     isSection(widget) ? normalizeSection(widget) : buildPanelFromConfig(widget)
   );
-
-export const DEFAULT_TIME_RANGE = { from: 'now-24h', to: 'now' } as const;
-
-/**
- * Default values for all dashboard state fields except project_routing.
- */
-const EMPTY_DASHBOARD_STATE: Readonly<Omit<Required<DashboardState>, 'project_routing'>> =
-  Object.freeze({
-    title: '',
-    description: '',
-    panels: [],
-    time_range: DEFAULT_TIME_RANGE,
-    query: { expression: '', language: 'kql' as const },
-    filters: [],
-    options: {
-      hide_panel_titles: false,
-      hide_panel_borders: false,
-      use_margins: true,
-      auto_apply_filters: true,
-      sync_colors: false,
-      sync_cursor: true,
-      sync_tooltips: false,
-    },
-    pinned_panels: [],
-    refresh_interval: { pause: true, value: 0 },
-    tags: [],
-    access_control: {},
-  });
 
 /**
  * Converts a DashboardAttachment to a DashboardState.
