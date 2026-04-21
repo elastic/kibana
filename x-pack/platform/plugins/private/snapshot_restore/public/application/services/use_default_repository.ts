@@ -5,19 +5,31 @@
  * 2.0.
  */
 
-import { useState } from 'react';
-
-const DEFAULT_REPO_STORAGE_KEY = 'sr_default_repository';
+import { useState, useEffect } from 'react';
+import {
+  getDefaultRepository,
+  setDefaultRepositoryApi,
+  clearDefaultRepositoryApi,
+} from './http/repository_requests';
 
 export const useDefaultRepository = () => {
-  const [defaultRepository, setDefaultRepositoryState] = useState<string | undefined>(() => {
-    return localStorage.getItem(DEFAULT_REPO_STORAGE_KEY) || undefined;
-  });
+  const [defaultRepository, setDefaultRepositoryState] = useState<string | undefined>(undefined);
 
-  const setDefaultRepository = (name: string) => {
-    localStorage.setItem(DEFAULT_REPO_STORAGE_KEY, name);
+  useEffect(() => {
+    getDefaultRepository().then(({ data }) => {
+      setDefaultRepositoryState(data?.repositoryName ?? undefined);
+    });
+  }, []);
+
+  const setDefaultRepository = async (name: string) => {
+    await setDefaultRepositoryApi(name);
     setDefaultRepositoryState(name);
   };
 
-  return { defaultRepository, setDefaultRepository };
+  const clearDefaultRepository = async () => {
+    await clearDefaultRepositoryApi();
+    setDefaultRepositoryState(undefined);
+  };
+
+  return { defaultRepository, setDefaultRepository, clearDefaultRepository };
 };

@@ -37,6 +37,7 @@ interface Props {
   managedRepository?: string;
   defaultRepository?: string;
   onSetDefaultRepository: (name: string) => void;
+  onDeleteAll: () => void;
   reload: UseRequestResponse['resendRequest'];
   openRepositoryDetailsUrl: (name: Repository['name']) => string;
   onRepositoryDeleted: (repositoriesDeleted: Array<Repository['name']>) => void;
@@ -47,6 +48,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
   managedRepository,
   defaultRepository,
   onSetDefaultRepository,
+  onDeleteAll,
   reload,
   openRepositoryDetailsUrl,
   onRepositoryDeleted,
@@ -353,6 +355,28 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
       </RepositoryDeleteProvider>
     ) : undefined,
     toolsRight: [
+      <EuiToolTip
+        key="deleteAllReposTooltip"
+        content={i18n.translate(
+          'xpack.snapshotRestore.repositoryList.table.deleteAllRepositoriesTooltip',
+          {
+            defaultMessage:
+              'PROTOTYPE ONLY — Not intended for production. Deletes all repositories and clears the default for testing purposes.',
+          }
+        )}
+      >
+        <EuiButton
+          key="deleteAllRepos"
+          color="danger"
+          onClick={onDeleteAll}
+          data-test-subj="deleteAllRepositoriesButton"
+        >
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryList.table.deleteAllRepositoriesButton"
+            defaultMessage="Delete all repositories"
+          />
+        </EuiButton>
+      </EuiToolTip>,
       <EuiButton
         key="reloadButton"
         color="success"

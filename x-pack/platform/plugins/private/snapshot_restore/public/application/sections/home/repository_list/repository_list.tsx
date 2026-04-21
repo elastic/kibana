@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { Fragment, useEffect } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { RouteComponentProps } from 'react-router-dom';
-import { EuiButton, EuiPageTemplate } from '@elastic/eui';
+import { EuiButton, EuiConfirmModal, EuiPageTemplate, useGeneratedHtmlId } from '@elastic/eui';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
@@ -18,7 +18,7 @@ import { PageLoading, PageError, useExecutionContext } from '../../../../shared_
 import { useDecodedParams } from '../../../lib';
 import { BASE_PATH, UIM_REPOSITORY_LIST_LOAD } from '../../../constants';
 import { useAppContext, useServices } from '../../../app_context';
-import { useLoadRepositories } from '../../../services/http';
+import { useLoadRepositories, deleteRepositories } from '../../../services/http';
 import { useDefaultRepository } from '../../../services/use_default_repository';
 import { linkToAddRepository, linkToRepository } from '../../../services/navigation';
 
@@ -47,7 +47,10 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
 
   const { uiMetricService } = useServices();
   const { core } = useAppContext();
-  const { defaultRepository, setDefaultRepository } = useDefaultRepository();
+  const { defaultRepository, setDefaultRepository, clearDefaultRepository } =
+    useDefaultRepository();
+  const [isConfirmDeleteAllOpen, setIsConfirmDeleteAllOpen] = useState(false);
+  const confirmDeleteAllModalTitleId = useGeneratedHtmlId();
 
   const openRepositoryDetailsUrl = (newRepositoryName: Repository['name']): string => {
     return linkToRepository(newRepositoryName);
@@ -55,6 +58,19 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
 
   const closeRepositoryDetails = () => {
     history.push(`${BASE_PATH}/repositories`);
+  };
+
+  const handleDeleteAll = async () => {
+    const allNames = (repositories || []).map((r) => r.name);
+    if (allNames.length) {
+      await deleteRepositories(allNames);
+    }
+    await clearDefaultRepository();
+    setIsConfirmDeleteAllOpen(false);
+    if (repositoryName) {
+      closeRepositoryDetails();
+    }
+    reload();
   };
 
   const onRepositoryDeleted = (repositoriesDeleted: Array<Repository['name']>): void => {
@@ -148,6 +164,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
           onRepositoryDeleted={onRepositoryDeleted}
           defaultRepository={defaultRepository}
           onSetDefaultRepository={setDefaultRepository}
+          onDeleteAll={() => setIsConfirmDeleteAllOpen(true)}
         />
       </section>
     );
@@ -162,6 +179,42 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
           onRepositoryDeleted={onRepositoryDeleted}
           isDefaultRepository={repositoryName === defaultRepository}
         />
+      ) : null}
+      {isConfirmDeleteAllOpen ? (
+        <EuiConfirmModal
+          aria-labelledby={confirmDeleteAllModalTitleId}
+          titleProps={{ id: confirmDeleteAllModalTitleId }}
+          title={
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryList.confirmDeleteAllModal.title"
+              defaultMessage="Delete all repositories?"
+            />
+          }
+          onCancel={() => setIsConfirmDeleteAllOpen(false)}
+          onConfirm={handleDeleteAll}
+          cancelButtonText={
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryList.confirmDeleteAllModal.cancelButtonLabel"
+              defaultMessage="Cancel"
+            />
+          }
+          confirmButtonText={
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryList.confirmDeleteAllModal.confirmButtonLabel"
+              defaultMessage="Delete all"
+            />
+          }
+          buttonColor="danger"
+          maxWidth={440}
+          data-test-subj="confirmDeleteAllRepositoriesModal"
+        >
+          <p>
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryList.confirmDeleteAllModal.description"
+              defaultMessage="This will permanently delete all repositories and clear the default. This action is for prototype testing only."
+            />
+          </p>
+        </EuiConfirmModal>
       ) : null}
       {content}
     </>

@@ -58,7 +58,7 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
       setSaveError(error);
     } else {
       if (isFirstRepository || isDefaultRepository) {
-        setDefaultRepository(name);
+        await setDefaultRepository(name);
       }
 
       toastNotifications.addSuccess({

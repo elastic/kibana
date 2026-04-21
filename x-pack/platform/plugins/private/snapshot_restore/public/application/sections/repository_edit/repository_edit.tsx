@@ -88,7 +88,7 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
       setSaveError(error);
     } else {
       if (isDefaultRepository) {
-        setDefaultRepository(name);
+        await setDefaultRepository(name);
       }
 
       toastNotifications.addSuccess({

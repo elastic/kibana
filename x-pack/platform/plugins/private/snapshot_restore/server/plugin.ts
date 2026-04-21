@@ -28,7 +28,21 @@ export class SnapshotRestoreServerPlugin implements Plugin<void, void, any, any>
     this.license = new License();
   }
 
-  public setup({ http }: CoreSetup, { licensing, features, security, cloud }: Dependencies): void {
+  public setup(
+    { http, savedObjects }: CoreSetup,
+    { licensing, features, security, cloud }: Dependencies
+  ): void {
+    savedObjects.registerType({
+      name: 'sr_prototype_default_repository',
+      hidden: false,
+      namespaceType: 'single',
+      mappings: {
+        dynamic: false,
+        properties: {
+          repositoryName: { type: 'keyword' },
+        },
+      },
+    });
     const pluginConfig = this.context.config.get<SnapshotRestoreConfig>();
 
     const router = http.createRouter();
