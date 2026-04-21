@@ -24,7 +24,9 @@ export const EmbeddableWelcomeMessage = () => {
   const { docLinksService } = useAgentBuilderServices();
   const hasAccessToGenAiSettings = useHasConnectorsAllPrivileges();
 
-  const [showCallOut, setShowCallOut] = useState(false);
+  const [showCallOut, setShowCallOut] = useState(
+    !localStorage.getItem(storageKeys.welcomeMessageDismissed)
+  );
 
   const onDismiss = () => {
     localStorage.setItem(storageKeys.welcomeMessageDismissed, 'true');

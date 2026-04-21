@@ -14,8 +14,9 @@ import { ConversationTitle } from '../conversation_header/conversation_title';
 import { EmbeddableMenuButton } from './embeddable_menu_button';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { useAgentId, useHasActiveConversation } from '../../../hooks/use_conversation';
+import { useConversationContext } from '../../../context/conversation/conversation_context';
 
-const newConversationTitleLabel = i18n.translate(
+const defaultNewConversationTitle = i18n.translate(
   'xpack.agentBuilder.embeddableHeader.newConversation',
   {
     defaultMessage: 'New Conversation',
@@ -35,7 +36,9 @@ export const EmbeddableConversationHeader: React.FC<EmbeddableConversationHeader
   const agentId = useAgentId();
   const { agents } = useAgentBuilderAgents();
   const hasActiveConversation = useHasActiveConversation();
+  const { initialTitle } = useConversationContext();
   const currentAgent = agents.find((a) => a.id === agentId);
+  const newConversationTitle = initialTitle ?? defaultNewConversationTitle;
 
   return (
     <div
@@ -67,7 +70,7 @@ export const EmbeddableConversationHeader: React.FC<EmbeddableConversationHeader
               text-overflow: ellipsis;
             `}
           >
-            {newConversationTitleLabel}
+            {newConversationTitle}
           </h4>
         )}
         {currentAgent && (
