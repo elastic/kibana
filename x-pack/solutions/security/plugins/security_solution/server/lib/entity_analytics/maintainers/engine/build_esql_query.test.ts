@@ -75,6 +75,24 @@ describe('buildEsqlQuery', () => {
         '>= 10'
       );
     });
+
+    it('uses actorEvalOverride when provided', () => {
+      const override = 'CONCAT("user:", user.name, "@", host.id, "@local")';
+      const query = buildEsqlQuery({ ...accessesConfig, actorEvalOverride: override }, 'default');
+      expect(query).toContain(override);
+    });
+
+    it('skips entity.namespace field evals when actorEvalOverride is set', () => {
+      const override = 'CONCAT("user:", user.name, "@", host.id, "@local")';
+      const query = buildEsqlQuery({ ...accessesConfig, actorEvalOverride: override }, 'default');
+      expect(query).not.toContain('entity.namespace');
+      expect(query).not.toContain('_src_entity_namespace');
+    });
+
+    it('includes entity.namespace field evals when actorEvalOverride is not set', () => {
+      const query = buildEsqlQuery(accessesConfig, 'default');
+      expect(query).toContain('entity.namespace');
+    });
   });
 
   describe('communicates_with template', () => {

@@ -15,7 +15,7 @@ const DEFAULT_FREQUENCY_THRESHOLD = 4;
 
 function buildAccessesEsql(config: RelationshipIntegrationConfig, namespace: string): string {
   const indexPattern = config.indexPattern(namespace);
-  const userFieldEvals = getFieldEvaluationsEsql('user');
+  const userFieldEvals = !config.actorEvalOverride ? getFieldEvaluationsEsql('user') : undefined;
   const userFieldEvalsLine = userFieldEvals ? `| EVAL ${userFieldEvals}\n` : '';
   const userIdFilter = euid.esql.getEuidDocumentsContainsIdFilter('user');
   const hostIdFilter = euid.esql.getEuidDocumentsContainsIdFilter('host');
@@ -58,7 +58,7 @@ function buildCommunicatesWithEsql(
   namespace: string
 ): string {
   const indexPattern = config.indexPattern(namespace);
-  const userFieldEvals = getFieldEvaluationsEsql('user');
+  const userFieldEvals = !config.actorEvalOverride ? getFieldEvaluationsEsql('user') : undefined;
   const userFieldEvalsLine = userFieldEvals ? `| EVAL ${userFieldEvals}\n` : '';
   const userIdFilter = euid.esql.getEuidDocumentsContainsIdFilter('user');
 
