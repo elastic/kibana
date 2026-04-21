@@ -40,7 +40,7 @@ import {
   ENDPOINT_EXCEPTION_ITEM_NAME_INPUT,
 } from '../../../../../screens/exceptions';
 import {
-  goToEndpointExceptions,
+  navigateToEndpointExceptions,
   visitRuleDetailsPage,
   waitForTheRuleToBeExecuted,
 } from '../../../../../tasks/rule_details';
@@ -123,7 +123,7 @@ describe(
       selectCloseSingleAlerts();
       submitNewExceptionItem(ENDPOINT_EXCEPTION_ITEM_CONFIRM_BTN);
 
-      goToEndpointExceptions();
+      navigateToEndpointExceptions();
 
       // new exception item displays
       cy.get(ENDPOINT_EXCEPTION_CARD).should('have.length', 1);
