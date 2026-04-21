@@ -342,7 +342,11 @@ export const HostPanel = ({
         />
       )}
       {!isPreviewMode && assetInventoryEnabled && (
-        <HostPanelFooter identityFields={documentEntityIdentifiers} entity={entityFromStore} />
+        <HostPanelFooter
+          hostName={hostName}
+          identityFields={documentEntityIdentifiers}
+          entity={entityFromStore}
+        />
       )}
     </>
   );

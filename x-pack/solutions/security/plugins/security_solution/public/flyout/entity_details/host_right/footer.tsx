@@ -13,16 +13,23 @@ import type { IdentityFields } from '../../document_details/shared/utils';
 import type { EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
 
 export const HostPanelFooter = ({
+  hostName: hostNameProp,
   identityFields,
   entity,
 }: {
+  /**
+   * The human-readable host name to use in the timeline KQL filter (e.g. from `entity.name` / `host.name`).
+   * Takes priority over values derived from `identityFields`, which may contain only identity-field IDs
+   * (e.g. `host.id`) when Entity Store v2 identifies entities by `host.id` rather than `host.name`.
+   */
+  hostName?: string;
   identityFields: IdentityFields;
   /** When entity store v2 is enabled: entity record from the store. */
   entity?: EntityStoreRecord;
 }) => {
   const hostName = useMemo(
-    () => identityFields[EntityIdentifierFields.hostName] || Object.values(identityFields)[0] || '',
-    [identityFields]
+    () => hostNameProp || identityFields[EntityIdentifierFields.hostName] || '',
+    [hostNameProp, identityFields]
   );
 
   return (

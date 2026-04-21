@@ -335,7 +335,11 @@ export const UserPanel = ({
         )}
       </FlyoutBody>
       {!isPreviewMode && assetInventoryEnabled && (
-        <UserPanelFooter identityFields={documentEntityIdentifiers} entity={entityFromStore} />
+        <UserPanelFooter
+          userName={userName}
+          identityFields={documentEntityIdentifiers}
+          entity={entityFromStore}
+        />
       )}
       {isPreviewMode && (
         <UserPreviewPanelFooter

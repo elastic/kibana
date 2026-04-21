@@ -12,16 +12,23 @@ import type { IdentityFields } from '../../document_details/shared/utils';
 import type { EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
 
 export const UserPanelFooter = ({
+  userName: userNameProp,
   identityFields,
   entity,
 }: {
+  /**
+   * The human-readable user name to use in the timeline KQL filter (e.g. from `entity.name` / `user.name`).
+   * Takes priority over values derived from `identityFields`, which may contain only identity-field IDs
+   * (e.g. `user.id`, `user.email`) when Entity Store v2 identifies entities by non-name fields.
+   */
+  userName?: string;
   identityFields: IdentityFields;
   /** When entity store v2 is enabled: entity record from the store. */
   entity?: EntityStoreRecord;
 }) => {
   const userName = useMemo(
-    () => identityFields['user.name'] || Object.values(identityFields)[0] || '',
-    [identityFields]
+    () => userNameProp || identityFields['user.name'] || '',
+    [userNameProp, identityFields]
   );
 
   return (
