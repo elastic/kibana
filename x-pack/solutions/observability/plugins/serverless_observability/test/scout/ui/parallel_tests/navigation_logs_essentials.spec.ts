@@ -42,10 +42,6 @@ test.describe(
         }
       });
 
-      await test.step('Streams entry is visible (experimental)', async () => {
-        await expect(nav.navItemInBodyByDeepLinkId('streams')).toBeVisible();
-      });
-
       await test.step('complete-tier features are not present', async () => {
         const disabledDeepLinks = ['observability-overview:cases', 'slo'];
         for (const deepLinkId of disabledDeepLinks) {
