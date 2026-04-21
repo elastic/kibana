@@ -20,6 +20,7 @@ import {
   USER_ENTITY_NAMESPACE,
 } from '../../../../common/domain/definitions/user_entity_constants';
 import {
+  assertEntitiesEqual,
   expectedGenericEntities,
   expectedHostEntities,
   expectedServiceEntities,
@@ -76,9 +77,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     await clearEntityStoreIndices(esClient);
   });
 
-  apiTest('Should extract properly extract host', async ({ apiClient, esClient }) => {
-    const expectedResultCount = 20;
-
+  apiTest('Should extract properly extract host', async ({ apiClient, esClient, log }) => {
     const extractionResponse = await apiClient.post(
       ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('host'),
       {
@@ -93,7 +92,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     expect(extractionResponse.statusCode).toBe(200);
     expect(extractionResponse.body.success).toBe(true);
     expect(extractionResponse.body.pages).toBe(1);
-    expect(extractionResponse.body.count).toBe(expectedResultCount);
+    expect(extractionResponse.body.count).toBe(expectedHostEntities.length);
 
     const entities = await esClient.search({
       index: LATEST_ALIAS,
@@ -104,18 +103,13 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
           },
         },
       },
-      sort: '@timestamp:asc,entity.id:asc',
       size: 1000, // a lot just to be sure we are not capping it
     });
 
-    expect(entities.hits.hits).toHaveLength(expectedResultCount);
-    // it's deterministic because of the SHA-256 id;
-    expect(entities.hits.hits).toMatchObject(expectedHostEntities);
+    assertEntitiesEqual(expectedHostEntities, entities.hits.hits, (msg) => log.error(msg));
   });
 
-  apiTest('Should extract properly extract user', async ({ apiClient, esClient }) => {
-    const expectedResultCount = 25;
-
+  apiTest('Should extract properly extract user', async ({ apiClient, esClient, log }) => {
     const extractionResponse = await apiClient.post(
       ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('user'),
       {
@@ -130,7 +124,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     expect(extractionResponse.statusCode).toBe(200);
     expect(extractionResponse.body.success).toBe(true);
     expect(extractionResponse.body.pages).toBe(1);
-    expect(extractionResponse.body.count).toBe(expectedResultCount);
+    expect(extractionResponse.body.count).toBe(expectedUserEntities.length);
 
     const entities = await esClient.search({
       index: LATEST_ALIAS,
@@ -141,14 +135,11 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
           },
         },
       },
-      sort: '@timestamp:asc,entity.id:asc',
       size: 1000, // a lot just to be sure we are not capping it
     });
 
-    expect(entities.hits.hits).toHaveLength(expectedResultCount);
-    // it's deterministic because of the SHA-256 id
-    // manually checking object until we have a snapshot matcher
-    expect(entities.hits.hits).toMatchObject(expectedUserEntities);
+    assertEntitiesEqual(expectedUserEntities, entities.hits.hits, (msg) => log.error(msg));
+
     // All user entities must have entity.namespace (from fieldEvaluations) and entity.confidence (from whenConditionTrueSetFieldsAfterStats)
     for (const hit of entities.hits.hits) {
       const source = hit._source as Record<string, unknown>;
@@ -184,14 +175,10 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
           },
         },
       },
-      sort: '@timestamp:asc,entity.id:asc',
       size: 1000, // a lot just to be sure we are not capping it
     });
 
-    expect(entities.hits.hits).toHaveLength(2);
-    // it's deterministic because of the SHA-256 id
-    // manually checking object until we have a snapshot matcher
-    expect(entities.hits.hits).toMatchObject(expectedServiceEntities);
+    assertEntitiesEqual(expectedServiceEntities, entities.hits.hits);
   });
 
   apiTest('Should extract properly extract generic', async ({ apiClient, esClient }) => {
@@ -220,14 +207,10 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
           },
         },
       },
-      sort: '@timestamp:asc,entity.id:asc',
       size: 1000, // a lot just to be sure we are not capping it
     });
 
-    expect(entities.hits.hits).toHaveLength(1);
-    // it's deterministic because of the SHA-256 id
-    // manually checking object until we have a snapshot matcher
-    expect(entities.hits.hits).toMatchObject(expectedGenericEntities);
+    assertEntitiesEqual(expectedGenericEntities, entities.hits.hits);
   });
 
   apiTest('Should properly handle field retention strategies', async ({ apiClient, esClient }) => {
@@ -555,7 +538,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         entity: {
           id: 'user:postagg-idp-iam-ad-inlatest@active_directory',
           type: 'Identity',
-          name: 'IDP IAM AD InLatest',
+          name: 'IDP IAM AD InLatest Updated',
           namespace: 'active_directory',
           confidence: ENTITY_CONFIDENCE.High,
         },

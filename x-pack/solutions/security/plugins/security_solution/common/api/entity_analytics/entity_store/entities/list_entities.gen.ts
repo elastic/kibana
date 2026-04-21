@@ -22,23 +22,50 @@ import { Entity } from './common.gen';
 
 export type ListEntitiesRequestQuery = z.infer<typeof ListEntitiesRequestQuery>;
 export const ListEntitiesRequestQuery = z.object({
+  /**
+   * Field to sort results by.
+   */
   sort_field: z.string().optional(),
+  /**
+   * Sort order.
+   */
   sort_order: z.enum(['asc', 'desc']).optional(),
+  /**
+   * Page number to return (1-indexed).
+   */
   page: z.coerce.number().int().min(1).optional(),
+  /**
+   * Number of entities per page.
+   */
   per_page: z.coerce.number().int().min(1).max(10000).optional(),
   /**
    * An ES query to filter by.
    */
   filterQuery: z.string().optional(),
+  /**
+   * Entity types to include in the results.
+   */
   entity_types: ArrayFromString(EntityType),
 });
 export type ListEntitiesRequestQueryInput = z.input<typeof ListEntitiesRequestQuery>;
 
 export type ListEntitiesResponse = z.infer<typeof ListEntitiesResponse>;
 export const ListEntitiesResponse = z.object({
+  /**
+   * The entity records for this page.
+   */
   records: z.array(Entity),
+  /**
+   * Current page number.
+   */
   page: z.number().int().min(1),
+  /**
+   * Number of entities per page.
+   */
   per_page: z.number().int().min(1).max(1000),
+  /**
+   * Total number of entities matching the query.
+   */
   total: z.number().int().min(0),
   inspect: InspectQuery.optional(),
 });

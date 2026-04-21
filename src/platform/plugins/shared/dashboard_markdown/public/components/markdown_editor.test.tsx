@@ -27,7 +27,9 @@ const contentLength = testedContent.length;
 const renderMarkdownEditor = (overrideProps?: Partial<MarkdownEditorProps>) => {
   const isEditing$ = new BehaviorSubject(true);
   const isPreview$ = new BehaviorSubject(false);
-  const settings$ = new BehaviorSubject(undefined) as MarkdownEditorProps['settings$'];
+  const settings$ = new BehaviorSubject({
+    open_links_in_new_tab: true,
+  }) as MarkdownEditorProps['settings$'];
   return render(
     <>
       <MarkdownEditorPreviewSwitch
