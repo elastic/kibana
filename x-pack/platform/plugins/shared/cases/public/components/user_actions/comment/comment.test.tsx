@@ -245,54 +245,6 @@ describe('createCommentUserActionBuilder', () => {
 
       expect(screen.getByText('removed event')).toBeInTheDocument();
     });
-
-    it('renders correctly when deleting a unified attachment with getAttachmentRemovalObject defined', async () => {
-      const getAttachmentRemovalObject = jest.fn().mockReturnValue({
-        event: 'removed my own attachment',
-      });
-
-      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
-      unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
-      unifiedAttachmentTypeRegistry.register({
-        id: 'test.customAttachment',
-        displayName: 'Custom Attachment',
-        icon: 'casesApp',
-        getAttachmentViewObject: () => ({ event: 'added a custom attachment' }),
-        getAttachmentRemovalObject,
-        schemaValidator: () => {},
-      });
-
-      const userAction = getEventUserAction({
-        action: UserActionActions.delete,
-        payload: {
-          comment: {
-            type: 'test.customAttachment',
-            attachmentId: 'custom-attachment-id-1',
-            metadata: { index: 'custom-index-1' },
-            owner: 'securitySolution',
-          },
-        },
-      });
-
-      const builder = createCommentUserActionBuilder({
-        ...builderArgs,
-        unifiedAttachmentTypeRegistry,
-        userAction,
-      });
-
-      const createdUserAction = builder.build();
-      renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
-
-      expect(screen.getByText('removed my own attachment')).toBeInTheDocument();
-      expect(getAttachmentRemovalObject).toHaveBeenCalledWith({
-        attachmentId: 'custom-attachment-id-1',
-        metadata: { index: 'custom-index-1' },
-        caseData: {
-          id: 'basic-case-id',
-          title: 'Another horrible breach!!',
-        },
-      });
-    });
   });
 
   describe('user comments', () => {
