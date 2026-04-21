@@ -444,6 +444,29 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-chart-section-viewer",
+            "id": "def-public.MetricsInfo.activeDimensions",
+            "type": "Array",
+            "tags": [],
+            "label": "activeDimensions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/unified-chart-section-viewer",
+                "scope": "public",
+                "docId": "kibKbnUnifiedChartSectionViewerPluginApi",
+                "section": "def-public.Dimension",
+                "text": "Dimension"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
+            "lineNumber": 94,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -747,7 +770,7 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
-        "lineNumber": 96,
+        "lineNumber": 97,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -769,7 +792,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
-            "lineNumber": 97,
+            "lineNumber": 98,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

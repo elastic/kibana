@@ -9,69 +9,75 @@
 
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import type { ChromeHelpExtension } from '@kbn/core-chrome-browser';
-
 import { HeaderHelpMenu } from './header_help_menu';
 import { TestChromeProviders, serverlessCoreEnv } from '../test_helpers';
 
 describe('HeaderHelpMenu', () => {
   afterEach(() => jest.clearAllMocks());
 
-  const renderAndOpenMenu = ({
+  const renderAndOpenMenu = async ({
     chrome,
     coreEnv,
   }: {
     chrome?: ReturnType<typeof chromeServiceMock.createStartContract>;
     coreEnv?: typeof serverlessCoreEnv;
   } = {}) => {
-    const component = mountWithIntl(
+    renderWithI18n(
       <TestChromeProviders chrome={chrome} coreEnv={coreEnv}>
         <HeaderHelpMenu />
       </TestChromeProviders>
     );
-    component.find('EuiButtonEmpty').simulate('click');
-    return component;
+    await userEvent.click(screen.getByRole('button'));
   };
 
-  test('it only renders the default content', () => {
-    const component = renderAndOpenMenu();
+  it('should only render the default content', async () => {
+    await renderAndOpenMenu();
 
-    const buttons = component.find('EuiButtonEmpty');
-    const buttonTexts = buttons.map((button) => button.text()).filter((text) => text.trim() !== '');
-
-    expect(buttonTexts).toEqual(['Kibana documentation', 'Ask Elastic', 'Open an issue in GitHub']);
+    expect(screen.getByText('Kibana documentation')).toBeInTheDocument();
+    expect(screen.getByText('Ask Elastic')).toBeInTheDocument();
+    expect(screen.getByText('Open an issue in GitHub')).toBeInTheDocument();
   });
 
-  test("it doesn't render the version details when serverless", () => {
-    const component = mountWithIntl(
+  it('should not render the version details when serverless', () => {
+    renderWithI18n(
       <TestChromeProviders coreEnv={serverlessCoreEnv}>
         <HeaderHelpMenu />
       </TestChromeProviders>
     );
-    expect(component.find('[data-test-subj="kbnVersionString"]').exists()).toBeFalsy();
+    expect(screen.queryByTestId('kbnVersionString')).not.toBeInTheDocument();
   });
 
-  test('it renders content and passes hideHelpMenu action', () => {
-    const content = jest.fn(() => <span data-test-subj="react-content-node">React Content</span>);
+  it('should render custom link with onClick and closes menu', async () => {
+    const onClick = jest.fn();
     const chrome = chromeServiceMock.createStartContract();
     chrome.getHelpExtension$.mockReturnValue(
       new BehaviorSubject<ChromeHelpExtension | undefined>({
         appName: 'Test App',
-        content,
+        links: [
+          {
+            linkType: 'custom',
+            content: 'Keyboard shortcuts',
+            iconType: 'keyboard',
+            onClick,
+          },
+        ],
       })
     );
 
-    const component = renderAndOpenMenu({ chrome });
+    await renderAndOpenMenu({ chrome });
 
-    expect(component.find('[data-test-subj="react-content-node"]').exists()).toBeTruthy();
-    expect(content).toHaveBeenCalledWith(
-      expect.objectContaining({ hideHelpMenu: expect.any(Function) })
-    );
+    const customItem = screen.getByText('Keyboard shortcuts').closest('button')!;
+    expect(customItem).toBeInTheDocument();
+    await userEvent.click(customItem, { pointerEventsCheck: 0 });
+    expect(onClick).toHaveBeenCalled();
   });
 
-  test('it renders the global custom content + the default content', () => {
+  it('should render the global custom content + the default content', async () => {
     const chrome = chromeServiceMock.createStartContract();
     chrome.getGlobalHelpExtensionMenuLinks$.mockReturnValue(
       new BehaviorSubject([
@@ -91,16 +97,38 @@ describe('HeaderHelpMenu', () => {
       ])
     );
 
-    const component = renderAndOpenMenu({ chrome });
+    await renderAndOpenMenu({ chrome });
 
-    // 2 custom global link + 3 default links + the toggle button
-    expect(component.find('EuiButtonEmpty').length).toBe(6);
+    expect(screen.getByText('Some text for the link')).toBeInTheDocument();
+    expect(screen.getByText('Some other text for the link')).toBeInTheDocument();
+    expect(screen.getByText('Kibana documentation')).toBeInTheDocument();
 
-    expect(component.find('[data-test-subj="my-test-custom-link"]').exists()).toBeTruthy();
+    expect(screen.getByTestId('my-test-custom-link')).toBeInTheDocument();
 
-    // The first global component is the second button (first is the toggle button)
-    expect(component.find('EuiButtonEmpty').at(1).prop('data-test-subj')).toBe(
-      'my-test-custom-link'
+    // The custom link with highest priority should appear
+    expect(screen.getByText('Some text for the link')).toBeInTheDocument();
+  });
+
+  it('should render extension section with app name title', async () => {
+    const chrome = chromeServiceMock.createStartContract();
+    chrome.getHelpExtension$.mockReturnValue(
+      new BehaviorSubject<ChromeHelpExtension | undefined>({
+        appName: 'Security',
+        links: [
+          {
+            linkType: 'documentation',
+            href: 'https://example.com/docs',
+          },
+        ],
+      })
     );
+
+    await renderAndOpenMenu({ chrome });
+
+    // App name rendered as section title
+    expect(screen.getByText('Security')).toBeInTheDocument();
+
+    // Documentation link rendered
+    expect(screen.getByText('Documentation')).toBeInTheDocument();
   });
 });

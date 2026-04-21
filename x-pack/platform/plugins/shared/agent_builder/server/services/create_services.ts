@@ -105,6 +105,7 @@ export class ServiceManager {
     securityPlugin,
     trackingService,
     analyticsService,
+    searchInferenceEndpoints,
   }: ServicesStartDeps): InternalStartServices {
     if (!this.services) {
       throw new Error('#startServices called before #setupServices');
@@ -162,6 +163,8 @@ export class ServiceManager {
       elasticsearch,
       spaces,
       config: this.config,
+      getToolRegistry: tools.getRegistry,
+      analyticsService,
     });
 
     const runnerFactory = new RunnerFactoryImpl({
@@ -181,6 +184,7 @@ export class ServiceManager {
       trackingService,
       analyticsService,
       hooks,
+      searchInferenceEndpoints,
     });
     runner = runnerFactory.getRunner();
 
@@ -209,6 +213,7 @@ export class ServiceManager {
       trackingService,
       analyticsService,
       meteringService: this.services.metering,
+      searchInferenceEndpoints,
     });
 
     const execution = createAgentExecutionService({
@@ -226,6 +231,7 @@ export class ServiceManager {
       trackingService,
       analyticsService,
       meteringService: this.services.metering,
+      searchInferenceEndpoints,
     });
 
     const consumption = this.services.consumption.start({ elasticsearch, spaces });

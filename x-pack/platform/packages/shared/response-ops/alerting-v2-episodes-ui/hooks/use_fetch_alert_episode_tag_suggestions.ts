@@ -23,7 +23,7 @@ export const useFetchAlertEpisodeTagSuggestions = ({
   enabled = true,
 }: UseFetchAlertEpisodeTagSuggestionsOptions) =>
   useQuery({
-    queryKey: queryKeys.alertActionTagSuggestions(),
+    queryKey: queryKeys.tagSuggestions(),
     queryFn: ({ signal }) => fetchAlertActionTagSuggestions({ services, abortSignal: signal }),
     enabled,
     refetchOnWindowFocus: false,

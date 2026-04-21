@@ -16,6 +16,7 @@ import type { NameColumnProps } from './name/name_builder';
 import type { UpdatedAtColumnProps } from './updated_at/updated_at_builder';
 import type { ActionsColumnProps } from './actions/actions_builder';
 import type { StarredColumnProps } from './starred/starred_builder';
+import type { CreatedByColumnProps } from './created_by/created_by_builder';
 
 /**
  * Props for the `Column` component (custom columns).
@@ -62,6 +63,12 @@ export interface ColumnNamespace {
    * @param props - {@link StarredColumnProps}
    */
   Starred: (props: StarredColumnProps) => ReactNode;
+  /**
+   * Pre-built "Created by" avatar column.
+   *
+   * @param props - {@link CreatedByColumnProps}
+   */
+  CreatedBy: (props: CreatedByColumnProps) => ReactNode;
 }
 
 /** Preset-to-props mapping for table columns. */
@@ -70,6 +77,7 @@ export interface ColumnPresets {
   updatedAt: UpdatedAtColumnProps;
   actions: ActionsColumnProps;
   starred: StarredColumnProps;
+  createdBy: CreatedByColumnProps;
 }
 
 /** Part factory for table columns. */

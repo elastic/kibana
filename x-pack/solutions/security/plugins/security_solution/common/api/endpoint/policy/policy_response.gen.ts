@@ -20,9 +20,10 @@ import { AgentId, SuccessResponse } from '../model/schema/common.gen';
 
 export type GetPolicyResponseRequestQuery = z.infer<typeof GetPolicyResponseRequestQuery>;
 export const GetPolicyResponseRequestQuery = z.object({
-  query: z.object({
-    agentId: AgentId.optional(),
-  }),
+  /**
+   * The agent ID to retrieve the policy response for.
+   */
+  agentId: AgentId,
 });
 export type GetPolicyResponseRequestQueryInput = z.input<typeof GetPolicyResponseRequestQuery>;
 

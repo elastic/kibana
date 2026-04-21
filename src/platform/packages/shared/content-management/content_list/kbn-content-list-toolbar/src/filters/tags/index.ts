@@ -9,4 +9,3 @@
 
 export { TagFilter, type TagFilterProps } from './tag_filter';
 export { TagFilterRenderer, type TagFilterRendererProps } from './tag_filter_renderer';
-export { useTagQueryParser } from './use_tag_query_parser';

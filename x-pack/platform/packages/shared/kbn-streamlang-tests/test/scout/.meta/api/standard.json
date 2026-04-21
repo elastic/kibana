@@ -1,5 +1,5 @@
 {
-  "sha1": "9ef0fc2a909981bfd3f6558c6eaa4718d7e86bfe",
+  "sha1": "2d01ddb30271bba791ae6b9bf03d28e8a4805684",
   "tests": [
     {
       "id": "7a50a1b508e10f4-3be34281d1d9c2c",
@@ -570,6 +570,102 @@
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/drop_document.spec.ts",
         "line": 71,
+        "column": 12
+      }
+    },
+    {
+      "id": "7e7734002ff1828-77cbc1a165a96c6",
+      "title": "Cross-compatibility - Else Branch should execute if-branch when condition matches and else-branch when it does not",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/else_branch.spec.ts",
+        "line": 24,
+        "column": 12
+      }
+    },
+    {
+      "id": "7e7734002ff1828-2d279610bc298d0",
+      "title": "Cross-compatibility - Else Branch should execute multiple steps in else branch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/else_branch.spec.ts",
+        "line": 82,
+        "column": 12
+      }
+    },
+    {
+      "id": "7e7734002ff1828-bba14a33864c832",
+      "title": "Cross-compatibility - Else Branch documents with missing condition field: ingest else-branch fires, esql excludes from both branches",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/else_branch.spec.ts",
+        "line": 144,
+        "column": 12
+      }
+    },
+    {
+      "id": "7e7734002ff1828-6c140a3d9a94214",
+      "title": "Cross-compatibility - Else Branch should handle nested conditions inside else branch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/else_branch.spec.ts",
+        "line": 211,
+        "column": 12
+      }
+    },
+    {
+      "id": "7e7734002ff1828-c98a4552941a449",
+      "title": "Cross-compatibility - Else Branch should handle if-else inside an else branch with multiple steps",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/else_branch.spec.ts",
+        "line": 287,
+        "column": 12
+      }
+    },
+    {
+      "id": "7e7734002ff1828-352b74f3d354fef",
+      "title": "Cross-compatibility - Else Branch should produce same results after round-tripping through identifier utilities",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/else_branch.spec.ts",
+        "line": 381,
         "column": 12
       }
     },

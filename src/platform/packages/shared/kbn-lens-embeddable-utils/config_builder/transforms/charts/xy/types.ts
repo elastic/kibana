@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { XYState } from '../../../schema';
+import type { XYConfig } from '../../../schema';
 
-type Legend = NonNullable<XYState['legend']>;
+type Legend = NonNullable<XYConfig['legend']>;
 
 type StripLegendInternals<T> = Omit<T, 'visibility' | 'statistics'>;
 
