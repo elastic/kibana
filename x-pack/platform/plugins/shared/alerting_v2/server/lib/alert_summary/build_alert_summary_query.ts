@@ -63,11 +63,10 @@ export function buildAlertSummaryQuery(
     `    AND @timestamp >= ?_tstart::DATETIME`,
     `    AND @timestamp <= ?_tend::DATETIME`,
     `    AND \`rule.id\` IN (${ruleIdPlaceholders})`,
-    `| EVAL bucket = BUCKET(@timestamp, ${fixedInterval.trim()})`,
     `| STATS`,
     `    active_events    = COUNT(*) WHERE status == "breached",`,
     `    recovered_events = COUNT(*) WHERE status == "recovered"`,
-    `    BY bucket`,
+    `    BY bucket = BUCKET(@timestamp, ${fixedInterval.trim()})`,
     `| SORT bucket ASC`,
   ].join('\n');
 

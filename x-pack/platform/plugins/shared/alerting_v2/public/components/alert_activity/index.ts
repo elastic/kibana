@@ -11,6 +11,8 @@ export {
   AlertActivitySparkline,
 } from './alert_activity_card';
 export { AlertsOverTimeChart, AlertsOverTimeChartView } from './alerts_over_time_chart';
+export { getAlertActivityColors } from './get_alert_activity_colors';
+export type { AlertActivityColors } from './get_alert_activity_colors';
 export type {
   AlertActivityWidgetProps,
   AlertActivityCardProps,

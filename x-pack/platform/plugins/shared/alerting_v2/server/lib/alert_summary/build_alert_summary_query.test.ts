@@ -63,9 +63,9 @@ describe('buildAlertSummaryQuery', () => {
 
   it('buckets by @timestamp using the requested fixed interval', () => {
     const { query } = buildAlertSummaryQuery({ ...baseOpts, fixedInterval: '30 minutes' });
-    expect(query).toContain('EVAL bucket = BUCKET(@timestamp, 30 minutes)');
-    expect(query).toContain('BY bucket');
+    expect(query).toContain('BY bucket = BUCKET(@timestamp, 30 minutes)');
     expect(query).toContain('SORT bucket ASC');
+    expect(query).not.toMatch(/^\s*\| EVAL bucket/m);
   });
 
   it('trims surrounding whitespace from fixedInterval before inlining', () => {

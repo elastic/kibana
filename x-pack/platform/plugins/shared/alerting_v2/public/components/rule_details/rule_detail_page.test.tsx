@@ -53,6 +53,14 @@ jest.mock('./sidebar/rule_sidebar', () => ({
   ),
 }));
 
+const mockRuleOverviewSection = jest.fn();
+jest.mock('./overview', () => ({
+  RuleOverviewSection: () => {
+    mockRuleOverviewSection();
+    return <div data-test-subj="ruleOverviewSection">overview</div>;
+  },
+}));
+
 jest.mock('./rule_details_actions_menu', () => ({
   RuleDetailsActionsMenu: ({ showDeleteConfirmation }: { showDeleteConfirmation: () => void }) => (
     <button

@@ -25,15 +25,12 @@ jest.mock('@elastic/charts', () => ({
 
 jest.mock('@kbn/core-di-browser', () => ({
   useService: jest.fn(),
+  PluginStart: jest.fn((key: string) => `plugin:${key}`),
   CoreStart: jest.fn((key: string) => `core:${key}`),
 }));
 
-jest.mock('@kbn/core-di', () => ({
-  PluginStart: jest.fn((key: string) => `plugin:${key}`),
-}));
-
 const mockUseFetchAlertSummary = jest.fn();
-jest.mock('../../../hooks/use_fetch_alert_summary', () => ({
+jest.mock('../../hooks/use_fetch_alert_summary', () => ({
   useFetchAlertSummary: (params: unknown) => mockUseFetchAlertSummary(params),
 }));
 

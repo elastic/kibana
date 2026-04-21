@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { AlertSummaryResponse } from '@kbn/alerting-v2-schemas';
+import { getAlertActivityColors } from '../get_alert_activity_colors';
 import { AlertActivitySparkline } from './alert_activity_sparkline';
 
 const cardTitle = i18n.translate('xpack.alertingV2.alertActivityCard.title', {
@@ -57,28 +58,18 @@ export const AlertActivityCardView = ({
   baseTheme,
 }: AlertActivityCardViewProps) => {
   const { euiTheme } = useEuiTheme();
+  const { active: activeColor, recovered: recoveredColor } = getAlertActivityColors(euiTheme);
 
   return (
     <EuiPanel hasBorder paddingSize="m" data-test-subj="alertActivityCard">
-      <EuiFlexGroup
-        justifyContent="spaceBetween"
-        alignItems="center"
-        gutterSize="s"
-        responsive={false}
-      >
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h3>{cardTitle}</h3>
-          </EuiTitle>
-        </EuiFlexItem>
-        {lookbackLabel && (
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs" color="subdued" data-test-subj="alertActivityCardLookback">
-              {lookbackLabel}
-            </EuiText>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+      <EuiTitle size="xs">
+        <h3>{cardTitle}</h3>
+      </EuiTitle>
+      {lookbackLabel && (
+        <EuiText size="xs" color="subdued" data-test-subj="alertActivityCardLookback">
+          {lookbackLabel}
+        </EuiText>
+      )}
 
       <EuiSpacer size="m" />
 
@@ -108,44 +99,56 @@ export const AlertActivityCardView = ({
       )}
 
       {!isLoading && !isError && data && (
-        <EuiFlexGroup gutterSize="l" responsive={false}>
+        <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
           <EuiFlexItem>
-            <EuiStat
-              data-test-subj="alertActivityCardActive"
-              description={activeLabel}
-              title={data.activeEventCount}
-              titleColor="danger"
-              titleSize="m"
-              reverse
-            />
-            <AlertActivitySparkline
-              series={data.activeSeries}
-              color={euiTheme.colors.danger}
-              baseTheme={baseTheme}
-              ariaLabel={i18n.translate(
-                'xpack.alertingV2.alertActivityCard.activeSparklineAriaLabel',
-                { defaultMessage: 'Active alert events over time' }
-              )}
-            />
+            <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiStat
+                  data-test-subj="alertActivityCardActive"
+                  description={activeLabel}
+                  title={data.activeEventCount}
+                  titleColor={activeColor}
+                  titleSize="m"
+                  reverse
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <AlertActivitySparkline
+                  series={data.activeSeries}
+                  color={activeColor}
+                  baseTheme={baseTheme}
+                  ariaLabel={i18n.translate(
+                    'xpack.alertingV2.alertActivityCard.activeSparklineAriaLabel',
+                    { defaultMessage: 'Active alert events over time' }
+                  )}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiStat
-              data-test-subj="alertActivityCardRecovered"
-              description={recoveredLabel}
-              title={data.recoveredEventCount}
-              titleColor="success"
-              titleSize="m"
-              reverse
-            />
-            <AlertActivitySparkline
-              series={data.recoveredSeries}
-              color={euiTheme.colors.success}
-              baseTheme={baseTheme}
-              ariaLabel={i18n.translate(
-                'xpack.alertingV2.alertActivityCard.recoveredSparklineAriaLabel',
-                { defaultMessage: 'Recovered alert events over time' }
-              )}
-            />
+            <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiStat
+                  data-test-subj="alertActivityCardRecovered"
+                  description={recoveredLabel}
+                  title={data.recoveredEventCount}
+                  titleColor={recoveredColor}
+                  titleSize="m"
+                  reverse
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <AlertActivitySparkline
+                  series={data.recoveredSeries}
+                  color={recoveredColor}
+                  baseTheme={baseTheme}
+                  ariaLabel={i18n.translate(
+                    'xpack.alertingV2.alertActivityCard.recoveredSparklineAriaLabel',
+                    { defaultMessage: 'Recovered alert events over time' }
+                  )}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       )}

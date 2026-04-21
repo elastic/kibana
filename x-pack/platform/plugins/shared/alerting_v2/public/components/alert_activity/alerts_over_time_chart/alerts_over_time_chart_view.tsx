@@ -19,11 +19,11 @@ import {
   Tooltip,
 } from '@elastic/charts';
 import {
+  EuiButtonEmpty,
   EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiLoadingChart,
   EuiPanel,
   EuiSpacer,
@@ -32,6 +32,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { AlertSummaryResponse } from '@kbn/alerting-v2-schemas';
+import { getAlertActivityColors } from '../get_alert_activity_colors';
 
 const defaultTitle = i18n.translate('xpack.alertingV2.alertsOverTimeChart.title', {
   defaultMessage: 'Alerts',
@@ -78,6 +79,7 @@ export const AlertsOverTimeChartView = ({
   onBrushEnd,
 }: AlertsOverTimeChartViewProps) => {
   const { euiTheme } = useEuiTheme();
+  const { active: activeColor, recovered: recoveredColor } = getAlertActivityColors(euiTheme);
 
   const hasData = Boolean(data && (data.activeEventCount > 0 || data.recoveredEventCount > 0));
 
@@ -108,14 +110,18 @@ export const AlertsOverTimeChartView = ({
         </EuiFlexItem>
         {discoverHref && (
           <EuiFlexItem grow={false}>
-            <EuiLink
+            <EuiButtonEmpty
               href={discoverHref}
               target="_blank"
-              external
+              color="text"
+              size="s"
+              iconType="discoverApp"
+              iconSide="left"
+              flush="both"
               data-test-subj="alertsOverTimeChartDiscoverLink"
             >
               {exploreInDiscoverLabel}
-            </EuiLink>
+            </EuiButtonEmpty>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
@@ -197,7 +203,7 @@ export const AlertsOverTimeChartView = ({
               xAccessor="key"
               yAccessors={['doc_count']}
               data={data.activeSeries}
-              color={[euiTheme.colors.danger]}
+              color={[activeColor]}
               curve={CurveType.CURVE_MONOTONE_X}
               lineSeriesStyle={{
                 line: { strokeWidth: 2 },
@@ -211,7 +217,7 @@ export const AlertsOverTimeChartView = ({
               xAccessor="key"
               yAccessors={['doc_count']}
               data={data.recoveredSeries}
-              color={[euiTheme.colors.success]}
+              color={[recoveredColor]}
               curve={CurveType.CURVE_MONOTONE_X}
               lineSeriesStyle={{
                 line: { strokeWidth: 2 },
