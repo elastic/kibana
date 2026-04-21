@@ -7,7 +7,48 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
+import type { SelectableEntry } from '@kbn/shared-ux-toolbar-selector';
 import type { Dimension, ParsedMetricItem } from '../../types';
+
+/**
+ * A `SelectableEntry` carrying the `Dimension` it was built from. Keeping the
+ * dimension on the option lets `handleChange` read it back without a reverse
+ * lookup against `dimensions` + `localSelectedDimensions`.
+ */
+export type DimensionEntry = SelectableEntry & { dimension: Dimension };
+
+interface BuildDimensionOptionParams {
+  dimension: Dimension;
+  isSelected: boolean;
+  isDisabled: boolean;
+  appendNode?: ReactNode;
+}
+
+/**
+ * Builds the `DimensionEntry` rendered by the toolbar selector. Kept as a
+ * helper so the hook's `options` memo stays focused on partitioning and
+ * disabled-state derivation.
+ */
+export const buildDimensionOption = ({
+  dimension,
+  isSelected,
+  isDisabled,
+  appendNode,
+}: BuildDimensionOptionParams): DimensionEntry => {
+  const option: DimensionEntry = {
+    value: dimension.name,
+    label: dimension.name,
+    checked: isSelected ? 'on' : undefined,
+    disabled: isDisabled,
+    key: dimension.name,
+    dimension,
+  };
+  if (appendNode) {
+    option.append = appendNode;
+  }
+  return option;
+};
 
 interface OptionDisabledStateParams {
   singleSelection: boolean;

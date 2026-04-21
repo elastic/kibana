@@ -27,10 +27,12 @@ import { debounce } from 'lodash';
 import type { Dimension, ParsedMetricItem } from '../../../types';
 import { DEBOUNCE_TIME, MAX_DIMENSIONS_SELECTIONS } from '../../../common/constants';
 import {
+  buildDimensionOption,
   getApplicableDimensionNames,
   getOptionDisabledState,
   partitionDimensionsForRender,
 } from '../dimensions_selector_helpers';
+import type { DimensionEntry } from '../dimensions_selector_helpers';
 
 interface UseDimensionsSelectorParams {
   dimensions: Dimension[];
@@ -93,7 +95,7 @@ export const useDimensionsSelector = ({
     return getApplicableDimensionNames(metricItems, [...selectedNamesSet]);
   }, [metricItems, selectedNamesSet]);
 
-  const options = useMemo<SelectableEntry[]>(() => {
+  const options = useMemo<DimensionEntry[]>(() => {
     const isAtMaxLimit = localSelectedDimensions.length >= MAX_DIMENSIONS_SELECTIONS;
 
     const { orphanSelections, applicableDimensions } = partitionDimensionsForRender({
@@ -102,36 +104,24 @@ export const useDimensionsSelector = ({
       optimisticApplicableNames,
     });
 
-    const toOption = (dimension: Dimension): SelectableEntry => {
+    const toOption = (dimension: Dimension): DimensionEntry => {
       const isSelected = selectedNamesSet.has(dimension.name);
+      const isDisabled = getOptionDisabledState({ singleSelection, isSelected, isAtMaxLimit });
+      const showMaxTooltip = isAtMaxLimit && isDisabled;
 
-      const isDisabled = getOptionDisabledState({
-        singleSelection,
+      return buildDimensionOption({
+        dimension,
         isSelected,
-        isAtMaxLimit,
-      });
-
-      const tooltipContent =
-        isAtMaxLimit && isDisabled ? (
-          <FormattedMessage
-            id="metricsExperience.dimensionsSelector.maxDimensionsWarning"
-            defaultMessage="Maximum of {maxDimensions} dimensions selected"
-            values={{ maxDimensions: MAX_DIMENSIONS_SELECTIONS }}
-          />
-        ) : undefined;
-
-      const option: SelectableEntry = {
-        value: dimension.name,
-        label: dimension.name,
-        checked: isSelected ? 'on' : undefined,
-        disabled: isDisabled,
-        key: dimension.name,
-      };
-
-      if (tooltipContent) {
-        option.append = (
+        isDisabled,
+        appendNode: showMaxTooltip ? (
           <EuiToolTip
-            content={tooltipContent}
+            content={
+              <FormattedMessage
+                id="metricsExperience.dimensionsSelector.maxDimensionsWarning"
+                defaultMessage="Maximum of {maxDimensions} dimensions selected"
+                values={{ maxDimensions: MAX_DIMENSIONS_SELECTIONS }}
+              />
+            }
             position="top"
             anchorProps={{
               css: css`
@@ -146,10 +136,8 @@ export const useDimensionsSelector = ({
           >
             <div />
           </EuiToolTip>
-        );
-      }
-
-      return option;
+        ) : undefined,
+      });
     };
 
     // Orphan selections are prepended so they stay easy to find; the
@@ -191,17 +179,13 @@ export const useDimensionsSelector = ({
     (chosenOption?: SelectableEntry | SelectableEntry[]) => {
       const opts =
         chosenOption == null ? [] : Array.isArray(chosenOption) ? chosenOption : [chosenOption];
-      // Include local selections in the lookup so toggling another option
-      // doesn't silently drop a selection that's no longer in `dimensions`.
-      const dimensionByName = new Map<string, Dimension>();
-      for (const dimension of localSelectedDimensions) {
-        dimensionByName.set(dimension.name, dimension);
-      }
-      for (const dimension of dimensions) {
-        dimensionByName.set(dimension.name, dimension);
-      }
-      const newSelection = opts
-        .map((opt) => dimensionByName.get(opt.value))
+
+      // Each option carries its source `Dimension` (see `buildDimensionOption`),
+      // so we can read it straight off the option and skip the reverse lookup
+      // against `dimensions` + `localSelectedDimensions` that would otherwise
+      // be needed to recover selections no longer present in `dimensions`.
+      const newSelection = (opts as DimensionEntry[])
+        .map((opt) => opt.dimension)
         .filter((d): d is Dimension => d !== undefined)
         .slice(0, MAX_DIMENSIONS_SELECTIONS);
 
@@ -215,7 +199,7 @@ export const useDimensionsSelector = ({
       debouncedOnChange.cancel();
       debouncedOnChange(newSelection);
     },
-    [onChange, dimensions, localSelectedDimensions, singleSelection, debouncedOnChange]
+    [onChange, singleSelection, debouncedOnChange]
   );
 
   const handleClearAll = useCallback(() => {
