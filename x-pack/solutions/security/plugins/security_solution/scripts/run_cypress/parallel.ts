@@ -44,6 +44,7 @@ import type { LoadBalancerConfig, SpecGroup } from './utils';
 import { getFTRConfig } from './get_ftr_config';
 import { resolveLoadBalancerConfig } from './lb_config_registry';
 import { isInBuildkite, isSpecCompleted, markSpecCompleted } from './buildkite_checkpoint';
+import { recordCypressResult } from './cypress_result_report';
 
 const filterCompletedSpecs = async (
   specFiles: string[],
@@ -573,11 +574,62 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
 
                 results.push(runResult);
 
-                if (!(runResult as CypressCommandLine.CypressRunResult)?.totalFailed) {
+                const asRun = runResult as CypressCommandLine.CypressRunResult;
+                const asFailed = runResult as CypressCommandLine.CypressFailedRunResult;
+                const durationMs = asRun?.totalDuration;
+
+                if (runResult === undefined) {
+                  // cypress.run() resolved undefined - anomalous, treat like a
+                  // thrown error and route to infra retry. Never checkpoint.
+                  log.error(`Cypress returned no result for ${filePath}; routing to infra retry.`);
+                  recordCypressResult({
+                    spec: filePath,
+                    kind: 'undefined_result',
+                    isRetryRun,
+                    durationMs,
+                  });
+                  if (!infraFailedSpecFilePaths.includes(filePath)) {
+                    infraFailedSpecFilePaths.push(filePath);
+                  }
+                } else if (asFailed?.status === 'failed') {
+                  // CypressFailedRunResult: Cypress could not execute the spec.
+                  // Treat as a deterministic runner failure: keep it in
+                  // failedSpecFilePaths so the final exit check fires, do NOT
+                  // auto-retry in place, and do NOT checkpoint as completed.
+                  log.error(
+                    `Cypress failed to run ${filePath}: ${asFailed.message ?? 'no message'}`
+                  );
+                  recordCypressResult({
+                    spec: filePath,
+                    kind: 'runner_failure',
+                    status: asFailed.status,
+                    message: asFailed.message,
+                    isRetryRun,
+                    durationMs,
+                  });
+                } else if (asRun?.runs && !asRun.totalFailed) {
+                  // Real success: both `runs` present and `totalFailed === 0`.
+                  recordCypressResult({
+                    spec: filePath,
+                    kind: 'success',
+                    totalFailed: 0,
+                    isRetryRun,
+                    durationMs,
+                  });
                   _.pull(failedSpecFilePaths, filePath);
                   if (!isOpen && isInBuildkite()) {
                     markSpecCompleted(filePath).catch(() => {});
                   }
+                } else {
+                  // Assertion failure: already went through the in-place retry
+                  // above. Leave in failedSpecFilePaths, do not checkpoint.
+                  recordCypressResult({
+                    spec: filePath,
+                    kind: 'assertion_failure',
+                    totalFailed: asRun?.totalFailed,
+                    isRetryRun,
+                    durationMs,
+                  });
                 }
               }
             }
@@ -587,6 +639,13 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
             for (const filePath of group.specFilePaths) {
               if (failedSpecFilePaths.includes(filePath)) {
                 infraFailedSpecFilePaths.push(filePath);
+                recordCypressResult({
+                  spec: filePath,
+                  kind: 'runner_failure',
+                  status: 'thrown',
+                  message: error instanceof Error ? error.message : String(error),
+                  isRetryRun,
+                });
               }
             }
 
@@ -677,13 +736,16 @@ ${specGroups
               (runResult as CypressCommandLine.CypressRunResult)?.totalFailed
           );
 
-        const hasFailedInitialTests = hasFailedTests(initialResults);
         const hasFailedRetryTests = hasFailedTests(retryResults);
 
-        if (
-          (hasFailedRetryTests && failedSpecFilePaths.length) ||
-          (hasFailedInitialTests && !retryResults.length)
-        ) {
+        // Watertight invariant: if any spec is still listed as failed after
+        // initial + infra-retry passes, or if any infra-retry itself reported
+        // failures, the job must fail. Closes the false-green path where a
+        // CypressFailedRunResult in the initial pass could leak past the old
+        // `hasFailedInitialTests && !retryResults.length` clause the moment
+        // any unrelated spec went through an infra retry.
+        const stillFailing = failedSpecFilePaths.length > 0 || hasFailedRetryTests;
+        if (stillFailing) {
           throw createFailError('Not all tests passed');
         }
       } else {
@@ -752,13 +814,16 @@ ${specGroups
               (runResult as CypressCommandLine.CypressRunResult)?.totalFailed
           );
 
-        const hasFailedInitialTests = hasFailedTests(initialResults);
         const hasFailedRetryTests = hasFailedTests(retryResults);
 
-        if (
-          (hasFailedRetryTests && failedSpecFilePaths.length) ||
-          (hasFailedInitialTests && !retryResults.length)
-        ) {
+        // Watertight invariant: if any spec is still listed as failed after
+        // initial + infra-retry passes, or if any infra-retry itself reported
+        // failures, the job must fail. Closes the false-green path where a
+        // CypressFailedRunResult in the initial pass could leak past the old
+        // `hasFailedInitialTests && !retryResults.length` clause the moment
+        // any unrelated spec went through an infra retry.
+        const stillFailing = failedSpecFilePaths.length > 0 || hasFailedRetryTests;
+        if (stillFailing) {
           throw createFailError('Not all tests passed');
         }
       }
