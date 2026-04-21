@@ -1,0 +1,76 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+ {{> disclaimer}}
+
+{{#each imports}}
+import type {
+  {{#each this}}{{.}},{{/each}}
+} from "{{@key}}"
+{{/each}}
+
+{{#each components.schemas}}
+{{#if description}}
+/**
+  * {{{description}}}
+  {{#if deprecated}}
+  * @deprecated
+  {{/if}}
+  */
+{{/if}}
+export type {{transformSchemaName @key}} = {{> ts_type}};
+{{#if (isCircularSchema @key)}}
+export type {{transformSchemaName @key}}Input = {{> ts_input_type }};
+{{/if}}
+{{#if enum}}
+{{#unless (isSingle enum)}}
+export type {{transformSchemaName @key}}Enum = { {{#each enum}}readonly '{{.}}': '{{.}}'; {{/each}} };
+{{/unless}}
+{{/if}}
+
+{{/each}}
+
+{{#each operations}}
+{{#if requestQuery}}
+{{#if requestQuery.description}}
+/**
+* {{{requestQuery.description}}}
+*/
+{{/if}}
+export type {{operationId}}RequestQuery = {{> ts_type requestQuery }};
+export type {{operationId}}RequestQueryInput = {{> ts_input_type requestQuery }};
+{{/if}}
+
+{{#if requestParams}}
+{{#if requestParams.description}}
+/**
+* {{{requestParams.description}}}
+*/
+{{/if}}
+export type {{operationId}}RequestParams = {{> ts_type requestParams }};
+export type {{operationId}}RequestParamsInput = {{> ts_input_type requestParams }};
+{{/if}}
+
+{{#if requestBody}}
+{{#if requestBody.description}}
+/**
+* {{{requestBody.description}}}
+*/
+{{/if}}
+export type {{operationId}}RequestBody = {{> ts_type requestBody }};
+export type {{operationId}}RequestBodyInput = {{> ts_input_type requestBody }};
+{{/if}}
+
+{{#if response}}
+{{#if response.description}}
+/**
+* {{{response.description}}}
+*/
+{{/if}}
+export type {{operationId}}Response = {{> ts_type response }};
+{{/if}}
+{{/each}}

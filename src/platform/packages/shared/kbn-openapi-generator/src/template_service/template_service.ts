@@ -14,7 +14,7 @@ import type { BundleGenerationContext, GenerationContext } from '../parser/get_g
 import { registerHelpers } from './register_helpers';
 import { registerTemplates } from './register_templates';
 
-export const AVAILABLE_TEMPLATES = ['zod_operation_schema'] as const;
+export const AVAILABLE_TEMPLATES = ['zod_operation_schema', 'ts_types_only'] as const;
 
 export type TemplateName = (typeof AVAILABLE_TEMPLATES)[number];
 

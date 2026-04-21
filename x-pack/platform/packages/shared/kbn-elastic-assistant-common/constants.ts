@@ -5,6 +5,19 @@
  * 2.0.
  */
 
+// API versioning constants (also re-exported from impl/schemas/index.ts for back-compat)
+export const API_VERSIONS = {
+  public: {
+    v1: '2023-10-31',
+  },
+  internal: {
+    v1: '1',
+  },
+} as const;
+
+export const PUBLIC_API_ACCESS = 'public';
+export const INTERNAL_API_ACCESS = 'internal';
+
 export const ELASTIC_AI_ASSISTANT_URL = '/api/security_ai_assistant';
 export const ELASTIC_AI_ASSISTANT_INTERNAL_URL = '/internal/elastic_assistant';
 

@@ -5,18 +5,8 @@
  * 2.0.
  */
 
-// API versioning constants
-export const API_VERSIONS = {
-  public: {
-    v1: '2023-10-31',
-  },
-  internal: {
-    v1: '1',
-  },
-} as const;
-
-export const PUBLIC_API_ACCESS = 'public';
-export const INTERNAL_API_ACCESS = 'internal';
+// API versioning constants (canonical home is constants.ts; re-exported here for back-compat)
+export { API_VERSIONS, PUBLIC_API_ACCESS, INTERNAL_API_ACCESS } from '../../constants';
 
 // Common Schemas
 export * from './common_attributes.gen';
@@ -133,26 +123,16 @@ export * from './conversations/find_conversations_route.gen';
 export * from './actions_connector/post_actions_connector_execute_route.gen';
 
 // Knowledge Base Schemas
-import type { z } from '@kbn/zod/v4';
-import {
-  CreateKnowledgeBaseRequestParams as CreateKnowledgeBaseRequestParamsBase,
-  ReadKnowledgeBaseRequestParams as ReadKnowledgeBaseRequestParamsBase,
-} from './knowledge_base/crud_kb_route.gen';
 export * from './knowledge_base/crud_kb_route.gen';
 export * from './knowledge_base/entries/bulk_crud_knowledge_base_entries_route.gen';
 export * from './knowledge_base/entries/common_attributes.gen';
 export * from './knowledge_base/entries/crud_knowledge_base_entries_route.gen';
 export * from './knowledge_base/entries/find_knowledge_base_entries_route.gen';
-// OAS does not support optional path parameters, so we override the generated schema
-export const CreateKnowledgeBaseRequestParams = CreateKnowledgeBaseRequestParamsBase.extend({
-  resource: CreateKnowledgeBaseRequestParamsBase.shape.resource.optional(),
-});
-export type CreateKnowledgeBaseRequestParams = z.infer<typeof CreateKnowledgeBaseRequestParams>;
-
-export const ReadKnowledgeBaseRequestParams = ReadKnowledgeBaseRequestParamsBase.extend({
-  resource: ReadKnowledgeBaseRequestParamsBase.shape.resource.optional(),
-});
-export type ReadKnowledgeBaseRequestParams = z.infer<typeof ReadKnowledgeBaseRequestParams>;
+// OAS does not support optional path parameters; overrides are in a separate file
+export {
+  CreateKnowledgeBaseRequestParams,
+  ReadKnowledgeBaseRequestParams,
+} from './knowledge_base/overrides.gen_overrides';
 
 export * from './anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 export * from './anonymization_fields/find_anonymization_fields_route.gen';
