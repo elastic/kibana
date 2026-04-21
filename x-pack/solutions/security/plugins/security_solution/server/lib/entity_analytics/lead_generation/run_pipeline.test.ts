@@ -6,6 +6,7 @@
  */
 
 import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import type { InferenceChatModel } from '@kbn/inference-langchain';
 
 const mockListEntities = jest.fn();
 
@@ -40,6 +41,7 @@ describe('runLeadGenerationPipeline', () => {
   const logger = loggingSystemMock.createLogger();
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   const riskScoreDataClient = riskScoreDataClientMock.create();
+  const fakeChatModel = { invoke: jest.fn() } as unknown as InferenceChatModel;
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -55,6 +57,7 @@ describe('runLeadGenerationPipeline', () => {
       spaceId: 'default',
       riskScoreDataClient,
       sourceType: 'scheduled',
+      chatModel: fakeChatModel,
     });
 
     expect(result).toEqual({ total: 0 });
@@ -64,7 +67,14 @@ describe('runLeadGenerationPipeline', () => {
 
   it('runs the full pipeline and returns counts', async () => {
     const mockEntity = {
-      record: { entity: { type: 'user', name: 'testuser', id: 'euid-testuser' } },
+      record: {
+        entity: {
+          type: 'user',
+          name: 'testuser',
+          id: 'euid-testuser',
+          risk: { calculated_score_norm: 75 },
+        },
+      },
       type: 'user',
       name: 'testuser',
     };
@@ -93,6 +103,7 @@ describe('runLeadGenerationPipeline', () => {
       riskScoreDataClient,
       sourceType: 'adhoc',
       executionId: 'exec-123',
+      chatModel: fakeChatModel,
     });
 
     expect(result).toEqual({ total: 1 });
@@ -107,7 +118,14 @@ describe('runLeadGenerationPipeline', () => {
 
   it('uses scheduled sourceType for Task Manager runs', async () => {
     const mockEntity = {
-      record: { entity: { type: 'user', name: 'admin', id: 'euid-admin' } },
+      record: {
+        entity: {
+          type: 'user',
+          name: 'admin',
+          id: 'euid-admin',
+          risk: { calculated_score_norm: 60 },
+        },
+      },
       type: 'user',
       name: 'admin',
     };
@@ -121,10 +139,43 @@ describe('runLeadGenerationPipeline', () => {
       spaceId: 'test-space',
       riskScoreDataClient,
       sourceType: 'scheduled',
+      chatModel: fakeChatModel,
     });
 
     expect(mockCreateLeads).toHaveBeenCalledWith(
       expect.objectContaining({ sourceType: 'scheduled' })
+    );
+  });
+
+  it('passes chatModel to engine.generateLeads', async () => {
+    const mockEntity = {
+      record: {
+        entity: {
+          type: 'user',
+          name: 'testuser',
+          id: 'euid-testuser',
+          risk: { calculated_score_norm: 80 },
+        },
+      },
+      type: 'user',
+      name: 'testuser',
+    };
+    mockListEntities.mockResolvedValueOnce([mockEntity]);
+    mockGenerateLeads.mockResolvedValueOnce([]);
+
+    await runLeadGenerationPipeline({
+      listEntities: mockListEntities,
+      esClient,
+      logger,
+      spaceId: 'default',
+      riskScoreDataClient,
+      sourceType: 'adhoc',
+      chatModel: fakeChatModel,
+    });
+
+    expect(mockGenerateLeads).toHaveBeenCalledWith(
+      expect.any(Array),
+      expect.objectContaining({ chatModel: fakeChatModel })
     );
   });
 });

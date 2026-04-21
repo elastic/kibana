@@ -1,0 +1,31 @@
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          getPackagesExample:
+            description: 'List of available integration packages'
+            value:
+              items:
+                - id: 'aws'
+                  name: 'aws'
+                  title: 'AWS'
+                  version: '2.10.0'
+                  description: 'Collect logs and metrics from Amazon Web Services'
+                  categories:
+                    - 'cloud'
+                  status: 'not_installed'
+              total: 1
+              searchExcluded: 0
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'

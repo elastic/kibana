@@ -6,7 +6,7 @@
  */
 import { v5 as uuidv5 } from 'uuid';
 import { omit } from 'lodash';
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 import deepEqual from 'fast-deep-equal';
 import { indexBy } from 'lodash/fp';
 
@@ -52,6 +52,7 @@ import {
   kafkaSaslMechanism,
   kafkaPartitionType,
   kafkaCompressionType,
+  kafkaAuthType,
   kafkaAcknowledgeReliabilityLevel,
   RESERVED_CONFIG_YML_KEYS,
   FLEET_APM_PACKAGE,
@@ -557,7 +558,7 @@ class OutputService {
     if (outputTypeSupportPresets(data.type)) {
       if (
         data.preset === 'balanced' &&
-        outputYmlIncludesReservedPerformanceKey(output.config_yaml ?? '', load)
+        outputYmlIncludesReservedPerformanceKey(output.config_yaml ?? '', parse)
       ) {
         throw new OutputInvalidError(
           `preset cannot be balanced when config_yaml contains one of ${RESERVED_CONFIG_YML_KEYS.join(
@@ -634,11 +635,11 @@ class OutputService {
     }
 
     if (!data.preset && data.type === outputType.Elasticsearch) {
-      data.preset = getDefaultPresetForEsOutput(data.config_yaml ?? '', load);
+      data.preset = getDefaultPresetForEsOutput(data.config_yaml ?? '', parse);
     }
 
     if (output.config_yaml) {
-      const configJs = load(output.config_yaml);
+      const configJs = parse(output.config_yaml);
       const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
 
       if (isShipperDisabled && output.shipper) {
@@ -689,6 +690,14 @@ class OutputService {
       if (output.required_acks === null || output.required_acks === undefined) {
         // required_acks can be 0
         data.required_acks = kafkaAcknowledgeReliabilityLevel.Commit;
+      }
+      // Clear fields that are only valid for specific auth_type values
+      if (output.auth_type !== kafkaAuthType.None) {
+        data.connection_type = undefined;
+      }
+      if (output.auth_type !== kafkaAuthType.Userpass) {
+        data.username = undefined;
+        data.password = undefined;
       }
     }
 
@@ -948,7 +957,7 @@ class OutputService {
     if (updateData.type && outputTypeSupportPresets(updateData.type)) {
       if (
         updateData.preset === 'balanced' &&
-        outputYmlIncludesReservedPerformanceKey(updateData.config_yaml ?? '', load)
+        outputYmlIncludesReservedPerformanceKey(updateData.config_yaml ?? '', parse)
       ) {
         throw new OutputInvalidError(
           `preset cannot be balanced when config_yaml contains one of ${RESERVED_CONFIG_YML_KEYS.join(
@@ -1015,6 +1024,8 @@ class OutputService {
         originalOutput.type === outputType.RemoteElasticsearch
       ) {
         (updateData as Nullable<OutputSoBaseAttributes>).write_to_logs_streams = null;
+        (updateData as Nullable<OutputSoBaseAttributes>).otel_exporter_config_yaml = null;
+        (updateData as Nullable<OutputSoBaseAttributes>).otel_disable_beatsauth = null;
       }
 
       if (data.type === outputType.Logstash) {
@@ -1074,6 +1085,14 @@ class OutputService {
         if (updateData.required_acks === null || updateData.required_acks === undefined) {
           // required_acks can be 0
           updateData.required_acks = kafkaAcknowledgeReliabilityLevel.Commit;
+        }
+        // Clear fields that are only valid for specific auth_type values
+        if (data.auth_type && data.auth_type !== kafkaAuthType.None) {
+          updateData.connection_type = null;
+        }
+        if (data.auth_type && data.auth_type !== kafkaAuthType.Userpass) {
+          updateData.username = null;
+          updateData.password = null;
         }
       }
     }
@@ -1142,7 +1161,7 @@ class OutputService {
     }
 
     if (!data.preset && data.type === outputType.Elasticsearch) {
-      updateData.preset = getDefaultPresetForEsOutput(data.config_yaml ?? '', load);
+      updateData.preset = getDefaultPresetForEsOutput(data.config_yaml ?? '', parse);
     }
 
     // Remove the shipper data if the shipper is not enabled from the yaml config
@@ -1150,7 +1169,7 @@ class OutputService {
       updateData.shipper = null;
     }
     if (data.config_yaml) {
-      const configJs = load(data.config_yaml);
+      const configJs = parse(data.config_yaml);
       const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
 
       if (isShipperDisabled && data.shipper) {
@@ -1226,7 +1245,7 @@ class OutputService {
     await pMap(
       outputs.items.filter((output) => outputTypeSupportPresets(output.type) && !output.preset),
       async (output) => {
-        const preset = getDefaultPresetForEsOutput(output.config_yaml ?? '', load);
+        const preset = getDefaultPresetForEsOutput(output.config_yaml ?? '', parse);
 
         await outputService.update(
           soClient,

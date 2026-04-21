@@ -7,14 +7,9 @@
 
 import React from 'react';
 import { EuiButton, EuiLink } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
-import {
-  ADD_ENDPOINT_LABEL,
-  EXTERNAL_INFERENCE_EMPTY_TITLE,
-  EXTERNAL_INFERENCE_EMPTY_DESCRIPTION,
-  VIEW_DOCUMENTATION_LINK,
-} from '../../common/translations';
 import { docLinks } from '../../common/doc_links';
 
 interface ExternalInferenceEmptyPromptProps {
@@ -28,11 +23,26 @@ export const ExternalInferenceEmptyPrompt: React.FC<ExternalInferenceEmptyPrompt
     <KibanaPageTemplate.EmptyPrompt
       data-test-subj="externalInferenceEmptyPrompt"
       iconType="plusInCircle"
-      title={<h2>{EXTERNAL_INFERENCE_EMPTY_TITLE}</h2>}
-      body={<p>{EXTERNAL_INFERENCE_EMPTY_DESCRIPTION}</p>}
+      title={
+        <h2>
+          {i18n.translate('xpack.searchInferenceEndpoints.externalInference.emptyTitle', {
+            defaultMessage: 'Connect to external model providers',
+          })}
+        </h2>
+      }
+      body={
+        <p>
+          {i18n.translate('xpack.searchInferenceEndpoints.externalInference.emptyDescription', {
+            defaultMessage:
+              'Add model endpoints from your favorite model providers to use them for AI-powered search.',
+          })}
+        </p>
+      }
       actions={
         <EuiButton fill onClick={onFlyoutOpen} data-test-subj="addEndpointButton">
-          {ADD_ENDPOINT_LABEL}
+          {i18n.translate('xpack.searchInferenceEndpoints.addConnectorButtonLabel', {
+            defaultMessage: 'Add endpoint',
+          })}
         </EuiButton>
       }
       footer={
@@ -42,7 +52,9 @@ export const ExternalInferenceEmptyPrompt: React.FC<ExternalInferenceEmptyPrompt
           external
           data-test-subj="viewDocumentationLink"
         >
-          {VIEW_DOCUMENTATION_LINK}
+          {i18n.translate('xpack.searchInferenceEndpoints.providerInference.viewDocumentation', {
+            defaultMessage: 'View documentation',
+          })}
         </EuiLink>
       }
     />
