@@ -7,4 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { readConfigFile, loadRawServerConfig } from './read_config_file';
+import type { ScoutServerConfig } from '../../../../../types';
+import { defaultConfig } from '../../default/stateful/base.config';
+
+export const servers: ScoutServerConfig = {
+  ...defaultConfig,
+  http2: true,
+};
