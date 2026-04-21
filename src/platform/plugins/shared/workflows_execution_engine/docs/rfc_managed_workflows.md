@@ -161,6 +161,10 @@ This RFC covers managed workflows only. Templates are a separate initiative (see
 
    - **Option B: Deferred provisioning via `provisionOnStart: false`.** A new field on `ManagedWorkflowRegistration` (default `true`). When `false`, the workflow is registered in the in-memory registry at `setup()` (known to the platform, approval gate applies) but not provisioned to storage on startup. The team triggers provisioning post-start by calling a `registerManagedWorkflow(id)` API. Once provisioned, all future reconciliation (updates, cleanup) works normally via the standard hash-based lifecycle. This avoids creating a disabled workflow document that sits unused, while keeping the workflow known and reconcilable.
 
+   **ID generation for post-start workflows:** Post-start provisioning introduces an ID uniqueness challenge — the same workflow could be created multiple times (e.g., per entity). For workflows registered at `setup()`, the deterministic ID from the registration handles this (create-if-absent). For post-start, two options:
+   - **Caller-provided ID** — The caller provides a unique ID that must start with the system workflow prefix (e.g., `system:attack-discovery-generation:space-x`). The platform validates uniqueness before creation.
+   - **Platform-generated ID** — If no ID is provided, the platform generates one using the registered workflow ID as a base (e.g., `system:<registered-id>:<spaceId>` or a UUID). This avoids duplicates but makes the ID less predictable for the caller.
+
    The first delivery should at minimum be designed to not preclude these approaches.
 
 3. **~~How to prevent ID collisions between managed and user-defined workflows?~~** — **Resolved.**
