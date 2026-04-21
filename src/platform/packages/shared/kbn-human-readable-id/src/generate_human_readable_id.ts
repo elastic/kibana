@@ -29,6 +29,9 @@ export const generateHumanReadableId = (
       return slug;
     }
   }
-  const prefix = options?.fallbackPrefix ?? 'id';
+  const prefix =
+    options?.fallbackPrefix != null && options?.fallbackPrefix !== ''
+      ? options?.fallbackPrefix
+      : 'id';
   return `${prefix}-${generateUuid()}`;
 };
