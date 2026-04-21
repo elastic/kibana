@@ -262,10 +262,10 @@ describe('ResumeExecutionButton', () => {
       });
     });
 
-    it('re-enables the button when pausedWaitStepExecutionId changes after a successful submit', async () => {
+    it('re-enables the button when waitingStepExecutionId changes after a successful submit', async () => {
       const { rerender } = render(
         <TestWrapper>
-          <ResumeExecutionButton {...defaultProps} pausedWaitStepExecutionId="wait-step-exec-1" />
+          <ResumeExecutionButton {...defaultProps} waitingStepExecutionId="wait-step-exec-1" />
         </TestWrapper>
       );
       fireEvent.click(screen.getByTestId('provideActionButton'));
@@ -279,7 +279,7 @@ describe('ResumeExecutionButton', () => {
 
       rerender(
         <TestWrapper>
-          <ResumeExecutionButton {...defaultProps} pausedWaitStepExecutionId="wait-step-exec-2" />
+          <ResumeExecutionButton {...defaultProps} waitingStepExecutionId="wait-step-exec-2" />
         </TestWrapper>
       );
       expect(screen.getByTestId('provideActionButton')).not.toBeDisabled();
