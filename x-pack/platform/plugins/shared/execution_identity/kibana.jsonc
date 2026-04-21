@@ -1,0 +1,20 @@
+{
+  "type": "plugin",
+  "id": "@kbn/execution-identity-plugin",
+  "owner": [
+    "@elastic/workflows-eng"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "executionIdentity",
+    "browser": true,
+    "server": true,
+    "requiredPlugins": [
+      "management",
+      "features",
+      "encryptedSavedObjects"
+    ],
+    "optionalPlugins": []
+  }
+}

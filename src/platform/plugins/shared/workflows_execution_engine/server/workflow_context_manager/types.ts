@@ -30,6 +30,9 @@ export interface ContextDependencies {
   workflowExecutionRepository?: WorkflowExecutionRepository;
   stepExecutionRepository?: StepExecutionRepository;
   workflowsExecutionEngine?: WorkflowsExecutionEnginePluginStart;
+  executionIdentity?: {
+    resolveIdentity: (id: string) => Promise<{ apiKey: string; name: string }>;
+  };
   spaceId?: string;
   request?: KibanaRequest;
 }

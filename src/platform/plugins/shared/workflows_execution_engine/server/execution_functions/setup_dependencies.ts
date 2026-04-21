@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  FakeRawRequest,
+  Headers,
+  KibanaRequest,
+  Logger,
+} from '@kbn/core/server';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { EsWorkflowExecution, WorkflowSettings } from '@kbn/workflows';
 import { WorkflowRepository } from '@kbn/workflows';
 import { WorkflowGraph } from '@kbn/workflows/graph';
@@ -39,9 +46,10 @@ export async function setupDependencies(
   logger: Logger,
   config: WorkflowsExecutionEngineConfig,
   dependencies: ContextDependencies,
-  fakeRequest?: KibanaRequest,
+  initialFakeRequest?: KibanaRequest,
   workflowsExecutionEngine?: WorkflowsExecutionEnginePluginStart
 ) {
+  let fakeRequest = initialFakeRequest;
   const { coreStart, actions, taskManager } = dependencies;
 
   // Get ES client from core services (guaranteed to be available at task execution time)
@@ -67,6 +75,57 @@ export async function setupDependencies(
     logger.error('Cannot execute a workflow without Kibana Request');
     throw new Error(
       `Workflow execution id ${workflowRunId} cannot execute a workflow without Kibana Request`
+    );
+  }
+
+  // Execution Identity resolution: if the workflow YAML definition has an execution_identity
+  // configured, resolve it to an API key and replace the fakeRequest.
+  // IMPORTANT: if resolution fails, the workflow MUST fail -- never fall back to user identity.
+  const definitionKeys = Object.keys(workflowExecution.workflowDefinition ?? {});
+  logger.info(
+    `[ExecutionIdentity] Definition keys for workflow "${
+      workflowExecution.workflowId
+    }": [${definitionKeys.join(', ')}]`
+  );
+  const executionIdentityValue = (workflowExecution.workflowDefinition as Record<string, unknown>)
+    ?.execution_identity as string | undefined;
+  logger.info(
+    `[ExecutionIdentity] execution_identity value: "${executionIdentityValue ?? 'NOT SET'}"`
+  );
+
+  if (executionIdentityValue) {
+    logger.info(
+      `[ExecutionIdentity] Workflow "${workflowExecution.workflowId}" has execution_identity="${executionIdentityValue}". Resolving...`
+    );
+
+    if (!dependencies.executionIdentity) {
+      throw new Error(
+        `Workflow "${workflowExecution.workflowId}" requires execution_identity "${executionIdentityValue}" but the executionIdentity plugin is not available`
+      );
+    }
+
+    const resolved = await dependencies.executionIdentity.resolveIdentity(executionIdentityValue);
+    logger.info(
+      `[ExecutionIdentity] Resolved identity "${resolved.name}" (value="${executionIdentityValue}") for workflow "${workflowExecution.workflowId}". Building scoped request.`
+    );
+
+    const requestHeaders: Headers = {};
+    requestHeaders.authorization = `ApiKey ${resolved.apiKey}`;
+    const fakeRawRequest: FakeRawRequest = {
+      headers: requestHeaders,
+      path: '/',
+    };
+    fakeRequest = kibanaRequestFactory(fakeRawRequest);
+    if (spaceId !== 'default') {
+      coreStart.http.basePath.set(fakeRequest, `/s/${spaceId}`);
+    }
+
+    logger.info(
+      `[ExecutionIdentity] Successfully replaced fakeRequest with identity "${resolved.name}" for workflow "${workflowExecution.workflowId}"`
+    );
+  } else {
+    logger.debug(
+      `[ExecutionIdentity] Workflow "${workflowExecution.workflowId}" has no execution_identity configured. Using original request identity.`
     );
   }
 

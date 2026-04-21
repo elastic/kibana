@@ -58,6 +58,12 @@ export interface WorkflowLineParseResult extends BaseLineParseResult {
   valueStartIndex: number;
 }
 
+export interface ExecutionIdentityLineParseResult extends BaseLineParseResult {
+  matchType: 'execution-identity';
+  match: RegExpMatchArray;
+  valueStartIndex: number;
+}
+
 export interface WorkflowInputsLineParseResult extends BaseLineParseResult {
   matchType: 'workflow-inputs';
   match: RegExpMatchArray | null;
@@ -85,7 +91,8 @@ export type LineParseResult =
   | WorkflowLineParseResult
   | WorkflowInputsLineParseResult
   | TypeLineParseResult
-  | TimezoneLineParseResult;
+  | TimezoneLineParseResult
+  | ExecutionIdentityLineParseResult;
 
 // eslint-disable-next-line complexity
 export function parseLineForCompletion(lineUpToCursor: string): LineParseResult | null {
@@ -136,6 +143,19 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
       fullKey: workflowValue,
       match: workflowIdMatch,
       valueStartIndex: workflowIdMatch.groups.prefix.length + 1,
+    };
+  }
+
+  const executionIdentityMatch = lineUpToCursor.match(
+    /^(?<prefix>\s*execution_identity:)\s*(?<value>.*)$/
+  );
+  if (executionIdentityMatch && executionIdentityMatch.groups) {
+    const identityValue = executionIdentityMatch.groups?.value.trim() ?? '';
+    return {
+      matchType: 'execution-identity',
+      fullKey: identityValue,
+      match: executionIdentityMatch,
+      valueStartIndex: executionIdentityMatch.groups.prefix.length + 1,
     };
   }
 

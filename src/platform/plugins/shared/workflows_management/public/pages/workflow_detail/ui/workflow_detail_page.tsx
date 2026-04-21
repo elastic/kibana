@@ -29,6 +29,7 @@ import {
   selectWorkflowName,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { loadConnectorsThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_connectors_thunk';
+import { loadExecutionIdentitiesThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_execution_identities_thunk';
 import { loadWorkflowThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_workflow_thunk';
 import { loadWorkflowsThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_workflows_thunk';
 import { WorkflowExecutionDetail } from '../../../features/workflow_execution_detail';
@@ -42,6 +43,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   const dispatch = useDispatch();
   const [loadConnectors, { isLoading: isLoadingConnectors }] =
     useAsyncThunkState(loadConnectorsThunk);
+  const [loadExecutionIdentities] = useAsyncThunkState(loadExecutionIdentitiesThunk);
   const [loadWorkflows] = useAsyncThunkState(loadWorkflowsThunk);
   const [loadWorkflow, { isLoading: isLoadingWorkflow, error }] =
     useAsyncThunkState(loadWorkflowThunk);
@@ -89,7 +91,8 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   useEffect(() => {
     loadConnectors(); // dispatch load connectors on mount
     loadWorkflows(); // dispatch load workflows on mount
-  }, [loadConnectors, loadWorkflows]);
+    loadExecutionIdentities(); // dispatch load execution identities on mount
+  }, [loadConnectors, loadWorkflows, loadExecutionIdentities]);
 
   // Load workflow when id changes
   useEffect(() => {

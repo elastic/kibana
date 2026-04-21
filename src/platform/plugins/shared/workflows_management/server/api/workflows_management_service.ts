@@ -304,6 +304,9 @@ export class WorkflowsService {
 
     const id = workflow.id || generateWorkflowId(workflowToCreate.name);
 
+    const executionIdentity = (workflowToCreate.definition as Record<string, unknown> | undefined)
+      ?.execution_identity as string | undefined;
+
     const workflowData: WorkflowProperties = {
       name: workflowToCreate.name,
       description: workflowToCreate.description,
@@ -311,6 +314,7 @@ export class WorkflowsService {
       tags: workflowToCreate.tags || [],
       triggerTypes: getTriggerTypesFromDefinition(workflowToCreate.definition),
       yaml: workflow.yaml,
+      execution_identity: executionIdentity,
       definition: workflowToCreate.definition ?? null,
       createdBy: authenticatedUser,
       lastUpdatedBy: authenticatedUser,
@@ -590,6 +594,8 @@ export class WorkflowsService {
     }
 
     const workflowDef = transformWorkflowYamlJsontoEsWorkflow(validation.parsedWorkflow);
+    const executionIdentity = (workflowDef.definition as Record<string, unknown> | undefined)
+      ?.execution_identity as string | undefined;
     return {
       updatedDataPatch: {
         definition: workflowDef.definition,
@@ -598,6 +604,7 @@ export class WorkflowsService {
         description: workflowDef.description,
         tags: workflowDef.tags,
         triggerTypes: getTriggerTypesFromDefinition(workflowDef.definition),
+        execution_identity: executionIdentity,
         valid: true,
         yaml: workflowYaml,
       },

@@ -249,6 +249,7 @@ export const EsWorkflowSchema = z.object({
   deleted_at: z.date().nullable().default(null),
   yaml: z.string(),
   valid: z.boolean().readonly(),
+  execution_identity: z.string().optional(),
 });
 
 export type EsWorkflow = z.infer<typeof EsWorkflowSchema>;

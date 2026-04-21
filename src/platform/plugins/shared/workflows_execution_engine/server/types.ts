@@ -62,6 +62,9 @@ export interface WorkflowsExecutionEnginePluginStartDeps {
   cloud: CloudStart;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
   licensing: LicensingPluginStart;
+  executionIdentity?: {
+    resolveIdentity: (id: string) => Promise<{ apiKey: string; name: string }>;
+  };
 }
 
 export type ExecuteWorkflow = (

@@ -1200,6 +1200,8 @@
       "@kbn/event-log-plugin/*": ["x-pack/platform/plugins/shared/event_log/*"],
       "@kbn/event-stacktrace": ["x-pack/platform/packages/shared/kbn-event-stacktrace"],
       "@kbn/event-stacktrace/*": ["x-pack/platform/packages/shared/kbn-event-stacktrace/*"],
+      "@kbn/execution-identity-plugin": ["x-pack/platform/plugins/shared/execution_identity"],
+      "@kbn/execution-identity-plugin/*": ["x-pack/platform/plugins/shared/execution_identity/*"],
       "@kbn/expandable-flyout": ["x-pack/solutions/security/packages/expandable-flyout"],
       "@kbn/expandable-flyout/*": ["x-pack/solutions/security/packages/expandable-flyout/*"],
       "@kbn/expect": ["src/platform/packages/shared/kbn-expect"],
