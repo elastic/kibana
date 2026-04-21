@@ -67,12 +67,18 @@ describe('getPackageReleaseLabel', () => {
   });
 });
 
-const dualModeTemplate = (release?: AgentlessDeploymentReleaseStatus): RegistryPolicyTemplate =>
+const dualModeTemplate = (
+  release?: AgentlessDeploymentReleaseStatus,
+  isDefault?: boolean
+): RegistryPolicyTemplate =>
   ({
     name: 'tmpl',
     title: 'T',
     description: '',
-    deployment_modes: { agentless: { enabled: true, release }, default: { enabled: true } },
+    deployment_modes: {
+      agentless: { enabled: true, release, is_default: isDefault },
+      default: { enabled: true },
+    },
   } as RegistryPolicyTemplate);
 
 const onlyAgentlessTemplate = (
@@ -96,9 +102,9 @@ describe('getAgentlessReleaseOverride', () => {
     expect(getAgentlessReleaseOverride(packageInfo)).toBeUndefined();
   });
 
-  it('should return the agentless release as-is (including GA) for a default-agentless integration', () => {
+  it('should return GA as-is for a default-agentless integration with GA release', () => {
     const packageInfo = {
-      policy_templates: [dualModeTemplate(AgentlessDeploymentReleaseStatus.GA)],
+      policy_templates: [dualModeTemplate(AgentlessDeploymentReleaseStatus.GA, true)],
       version: '1.0.0',
     };
     expect(getAgentlessReleaseOverride(packageInfo, 'tmpl')).toBe(
@@ -106,12 +112,12 @@ describe('getAgentlessReleaseOverride', () => {
     );
   });
 
-  it('should return the agentless release when isAgentlessContext is true', () => {
+  it('should return beta for a default-agentless integration with beta release', () => {
     const packageInfo = {
-      policy_templates: [dualModeTemplate(AgentlessDeploymentReleaseStatus.Beta)],
+      policy_templates: [dualModeTemplate(AgentlessDeploymentReleaseStatus.Beta, true)],
       version: '1.0.0',
     };
-    expect(getAgentlessReleaseOverride(packageInfo, undefined, { isAgentlessContext: true })).toBe(
+    expect(getAgentlessReleaseOverride(packageInfo, 'tmpl')).toBe(
       AgentlessDeploymentReleaseStatus.Beta
     );
   });
@@ -124,7 +130,7 @@ describe('resolveEffectiveRelease', () => {
 
   it('should return beta when agentless override is beta', () => {
     const packageInfo = {
-      policy_templates: [dualModeTemplate(AgentlessDeploymentReleaseStatus.Beta)],
+      policy_templates: [dualModeTemplate(AgentlessDeploymentReleaseStatus.Beta, true)],
       version: '1.0.0',
     };
     expect(resolveEffectiveRelease(packageInfo, 'tmpl')).toBe('beta');
@@ -132,7 +138,7 @@ describe('resolveEffectiveRelease', () => {
 
   it('should defer to semver when agentless override is GA and semver is ga', () => {
     const packageInfo = {
-      policy_templates: [dualModeTemplate(AgentlessDeploymentReleaseStatus.GA)],
+      policy_templates: [dualModeTemplate(AgentlessDeploymentReleaseStatus.GA, true)],
       version: '1.0.0',
     };
     expect(resolveEffectiveRelease(packageInfo, 'tmpl')).toBe('ga');
@@ -140,10 +146,18 @@ describe('resolveEffectiveRelease', () => {
 
   it('should defer to semver when agentless override is GA and semver is preview', () => {
     const packageInfo = {
-      policy_templates: [dualModeTemplate(AgentlessDeploymentReleaseStatus.GA)],
+      policy_templates: [dualModeTemplate(AgentlessDeploymentReleaseStatus.GA, true)],
       version: '1.0.0-preview',
     };
     expect(resolveEffectiveRelease(packageInfo, 'tmpl')).toBe('preview');
+  });
+
+  it('should return beta via isAgentlessContext when package is dual-mode with beta release', () => {
+    const packageInfo = {
+      policy_templates: [dualModeTemplate(AgentlessDeploymentReleaseStatus.Beta)],
+      version: '1.0.0',
+    };
+    expect(resolveEffectiveRelease(packageInfo, 'tmpl', { isAgentlessContext: true })).toBe('beta');
   });
 
   it('should return ga when single only-agentless template defers to semver', () => {
