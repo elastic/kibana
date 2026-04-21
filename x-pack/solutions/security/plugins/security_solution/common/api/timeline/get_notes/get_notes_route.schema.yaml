@@ -137,7 +137,7 @@ components:
         `document_and_saved_object`: notes on a timeline and linked to an event; post-filtering enforces a real `eventId`.
         `orphan`: not on a timeline and `eventId` is empty (stricter than missing `eventId` in some cases).
     DocumentIds:
-      description: One document id or an array of ids (Elasticsearch `_id` of the event).
+      description: One document ID or an array of IDs (Elasticsearch `_id` of the event).
       oneOf:
         - type: array
           items:
