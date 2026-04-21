@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import {
   RULES_FEATURE_LATEST,
@@ -121,7 +120,6 @@ export const RULES_LANDING_PATH = `${RULES_PATH}/landing` as const;
 export const RULES_ADD_PATH = `${RULES_PATH}/add_rules` as const;
 export const RULES_UPDATES = `${RULES_PATH}/updates` as const;
 export const RULES_CREATE_PATH = `${RULES_PATH}/create` as const;
-export const AI_RULE_CREATION_PATH = `${RULES_PATH}/ai_rule_creation` as const;
 export const EXCEPTIONS_PATH = '/exceptions' as const;
 export const EXCEPTION_LIST_DETAIL_PATH = `${EXCEPTIONS_PATH}/details/:detailName` as const;
 export const HOSTS_PATH = '/hosts' as const;
@@ -724,8 +722,6 @@ export enum SecurityAgentBuilderAttachments {
 }
 
 export const SECURITY_RULE_ATTACHMENT_ID = 'ai-rule-creation';
-
-export const THREAT_HUNTING_AGENT_ID = `${internalNamespaces.security}.agent`;
 
 export const REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG =
   'securitySolution.registerAlertValidationStepsEnabled' as const;
