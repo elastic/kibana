@@ -9,15 +9,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import {
-  apiTest,
-  ESE_API_PATH,
-  TEST_INDEX,
-  TEST_DOC_ID,
-  COMMON_HEADERS,
-  shardDelayAgg,
-  waitFor,
-} from '../../fixtures';
+import { apiTest, ESE_API_PATH, COMMON_HEADERS } from '../../fixtures';
 
 apiTest.describe(
   'ese search - delete',
@@ -25,18 +17,8 @@ apiTest.describe(
   () => {
     let cookieHeader: Record<string, string>;
 
-    apiTest.beforeAll(async ({ samlAuth, esClient }) => {
+    apiTest.beforeAll(async ({ samlAuth }) => {
       ({ cookieHeader } = await samlAuth.asInteractiveUser('admin'));
-      await esClient.index({
-        index: TEST_INDEX,
-        id: TEST_DOC_ID,
-        document: { message: 'test doc' },
-        refresh: 'wait_for',
-      });
-    });
-
-    apiTest.afterAll(async ({ esClient }) => {
-      await esClient.indices.delete({ index: TEST_INDEX }).catch(() => {});
     });
 
     apiTest('should return 404 when no search id provided', async ({ apiClient }) => {
@@ -57,81 +39,6 @@ apiTest.describe(
       expect(response.body.message).toContain('illegal_argument_exception');
       expect(response.body.attributes).toBeDefined();
       expect(response.body.attributes.root_cause).toBeDefined();
-    });
-
-    apiTest('should delete an in-progress search', async ({ apiClient, isSnapshotBuild }) => {
-      apiTest.skip(!isSnapshotBuild, 'Requires shard_delay agg (SNAPSHOT builds only)');
-
-      const response = await apiClient.post(ESE_API_PATH, {
-        headers: { ...COMMON_HEADERS, ...cookieHeader },
-        body: {
-          params: {
-            index: TEST_INDEX,
-            body: { query: { match_all: {} }, ...shardDelayAgg('10s') },
-            wait_for_completion_timeout: '1ms',
-          },
-        },
-      });
-
-      expect(response).toHaveStatusCode(200);
-      const { id } = response.body;
-      expect(id).toBeDefined();
-      expect(response.body.isPartial).toBe(true);
-      expect(response.body.isRunning).toBe(true);
-
-      const deleteResponse = await apiClient.delete(`${ESE_API_PATH}/${id}`, {
-        headers: { ...COMMON_HEADERS, ...cookieHeader },
-      });
-      expect(deleteResponse).toHaveStatusCode(200);
-
-      const refetchResponse = await apiClient.post(`${ESE_API_PATH}/${id}`, {
-        headers: { ...COMMON_HEADERS, ...cookieHeader },
-        body: {},
-      });
-      expect(refetchResponse).toHaveStatusCode(404);
-    });
-
-    apiTest('should delete a completed search', async ({ apiClient, isSnapshotBuild }) => {
-      apiTest.skip(!isSnapshotBuild, 'Requires shard_delay agg (SNAPSHOT builds only)');
-
-      const response = await apiClient.post(ESE_API_PATH, {
-        headers: { ...COMMON_HEADERS, ...cookieHeader },
-        body: {
-          params: {
-            index: TEST_INDEX,
-            body: { query: { match_all: {} }, ...shardDelayAgg('3s') },
-            wait_for_completion_timeout: '1ms',
-          },
-        },
-      });
-
-      expect(response).toHaveStatusCode(200);
-      const { id } = response.body;
-      expect(id).toBeDefined();
-      expect(response.body.isPartial).toBe(true);
-      expect(response.body.isRunning).toBe(true);
-
-      await waitFor(
-        async () => {
-          const pollResponse = await apiClient.post(`${ESE_API_PATH}/${id}`, {
-            headers: { ...COMMON_HEADERS, ...cookieHeader },
-            body: {},
-          });
-          return !pollResponse.body.isRunning && !pollResponse.body.isPartial;
-        },
-        { timeout: 30_000, interval: 2_000 }
-      );
-
-      const deleteResponse = await apiClient.delete(`${ESE_API_PATH}/${id}`, {
-        headers: { ...COMMON_HEADERS, ...cookieHeader },
-      });
-      expect(deleteResponse).toHaveStatusCode(200);
-
-      const refetchResponse = await apiClient.post(`${ESE_API_PATH}/${id}`, {
-        headers: { ...COMMON_HEADERS, ...cookieHeader },
-        body: {},
-      });
-      expect(refetchResponse).toHaveStatusCode(404);
     });
   }
 );

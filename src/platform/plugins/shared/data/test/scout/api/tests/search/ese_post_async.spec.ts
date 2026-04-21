@@ -26,6 +26,8 @@ apiTest.describe(
     let cookieHeader: Record<string, string>;
 
     apiTest.beforeAll(async ({ samlAuth, esClient, isSnapshotBuild }) => {
+      // Throwing skip from beforeAll aborts the hook and marks every test in
+      // this describe as skipped, so none of the tests below will run.
       apiTest.skip(!isSnapshotBuild, 'Requires shard_delay agg (SNAPSHOT builds only)');
       ({ cookieHeader } = await samlAuth.asInteractiveUser('admin'));
       await esClient.index({
