@@ -77,6 +77,7 @@ describe('getEsqlFn', () => {
         inspectorAdapters: {},
         getKibanaRequest: jest.fn(),
         getSearchSessionId: jest.fn(),
+        getExecutionContext: jest.fn(),
       } as unknown as ExecutionContext);
 
     const inputFilter = {
