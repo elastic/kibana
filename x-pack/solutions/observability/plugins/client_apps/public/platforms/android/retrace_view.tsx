@@ -29,6 +29,21 @@ interface RetraceViewProps {
   core: CoreStart;
 }
 
+/**
+ * Fetches the crash document from ES and extracts the stacktrace and build_id.
+ *
+ * TODO: Implement actual crash document fetching. The doc_id and index come from
+ * the URL drilldown. This function should query ES for the document and return
+ * the stacktrace and build_id fields.
+ */
+async function fetchCrashDocument(
+  _core: CoreStart,
+  _docId: string,
+  _index: string | null
+): Promise<{ stacktrace: string; buildId: string } | null> {
+  return null;
+}
+
 export function RetraceView({ core }: RetraceViewProps) {
   const [result, setResult] = useState<SymbolicationResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -45,20 +60,33 @@ export function RetraceView({ core }: RetraceViewProps) {
       return;
     }
 
-    const body: Record<string, string> = { doc_id: docId };
-    if (index) {
-      body.index = index;
-    }
+    (async () => {
+      try {
+        const crashDoc = await fetchCrashDocument(core, docId, index);
+        if (!crashDoc) {
+          setError(`No crash document found for doc_id "${docId}".`);
+          return;
+        }
 
-    core.http
-      .fetch<SymbolicationResponse>(ANDROID_RETRACE_API_PATH, {
-        method: 'POST',
-        body: JSON.stringify(body),
-      })
-      .then((res) => setResult(res))
-      .catch((err) => setError(err.body?.message ?? err.message ?? 'Retrace failed'))
-      .finally(() => setLoading(false));
-  }, [docId, index, core.http]);
+        const res = await core.http.fetch<SymbolicationResponse>(ANDROID_RETRACE_API_PATH, {
+          method: 'POST',
+          body: JSON.stringify({
+            stacktrace: crashDoc.stacktrace,
+            build_id: crashDoc.buildId,
+          }),
+        });
+        setResult(res);
+      } catch (err) {
+        const message =
+          err instanceof Error
+            ? (err as { body?: { message?: string } }).body?.message ?? err.message
+            : 'Retrace failed';
+        setError(message);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [docId, index, core]);
 
   return (
     <EuiPage paddingSize="l">

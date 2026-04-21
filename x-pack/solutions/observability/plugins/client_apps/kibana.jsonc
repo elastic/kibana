@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/client-apps-plugin",
-  "owner": ["@elastic/observability-android"],
+  "owner": ["@elastic/apm-agent-approvers"],
   "group": "observability",
   "visibility": "private",
   "plugin": {
