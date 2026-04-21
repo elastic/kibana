@@ -4104,10 +4104,10 @@ export function updatePackageInputs(
       // Per-source-type counters for positional stream matching when a stream declares
       // migrate_from. Shared across iterations so each source stream is consumed once.
       const streamMigrateFromCounters: Record<string, number> = {};
-      // Track whether any stream-level migrate_from succeeded so we can carry the old
-      // input's enabled state to the new input (Path B equivalent of applyStreamLevelMigration).
-      let pathBStreamMigrationOccurred = false;
-      let pathBOldInputForStream: NewPackagePolicyInput | undefined;
+      // Track whether any stream successfully migrated from an old input type, and which
+      // old input was the source. Used to carry enabled state and input-level vars over.
+      let streamMigratedFromOldInput = false;
+      let oldSourceInput: NewPackagePolicyInput | undefined;
       for (const stream of update.streams) {
         let originalStream = originalInput?.streams.find(
           (s) => s.data_stream.dataset === stream.data_stream.dataset
@@ -4141,8 +4141,8 @@ export function updatePackageInputs(
               originalInput.streams.push(
                 migrateStreamVars(stream as InputsOverride, oldStream, oldInputForStream?.vars)
               );
-              pathBStreamMigrationOccurred = true;
-              if (!pathBOldInputForStream) pathBOldInputForStream = oldInputForStream;
+              streamMigratedFromOldInput = true;
+              if (!oldSourceInput) oldSourceInput = oldInputForStream;
               continue;
             }
           }
@@ -4173,19 +4173,19 @@ export function updatePackageInputs(
       // existing input. This covers the partial-migration case where the new input (cel) already
       // existed in the old policy alongside the old input (httpjson), but was disabled and had
       // empty vars because the user only ever configured the httpjson side.
-      if (pathBStreamMigrationOccurred && pathBOldInputForStream) {
+      if (streamMigratedFromOldInput && oldSourceInput) {
         const indexOfInput = inputs.indexOf(originalInput);
         let updatedInput = originalInput;
 
         if (!limitedPackage) {
           updatedInput = {
             ...updatedInput,
-            enabled: pathBOldInputForStream.enabled ?? updatedInput.enabled,
+            enabled: oldSourceInput.enabled ?? updatedInput.enabled,
           };
         }
 
-        if (pathBOldInputForStream.vars && (update.vars || updatedInput.vars)) {
-          const oldSourceVars = pathBOldInputForStream.vars;
+        if (oldSourceInput.vars && (update.vars || updatedInput.vars)) {
+          const oldSourceVars = oldSourceInput.vars;
           const storedCelVars = storedInputVars ?? {};
           // Start with httpjson vars as the base — the migrate_from declaration signals that
           // httpjson is the authoritative source for these vars.
