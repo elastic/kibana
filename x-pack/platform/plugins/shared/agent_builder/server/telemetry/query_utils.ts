@@ -210,6 +210,77 @@ export class QueryUtils {
   }
 
   /**
+   * Get counts of persisted skills from Elasticsearch, broken down by origin.
+   * Skills with a `plugin_id` field are plugin-bundled; the rest are custom.
+   * Built-in skills are not persisted, so we get that count separately.
+   */
+  async getSkillsMetrics(): Promise<{
+    total: number;
+    custom: number;
+    plugin: number;
+  }> {
+    try {
+      const skillsIndexName = chatSystemIndex('skills');
+      const response = await this.esClient.search({
+        index: skillsIndexName,
+        size: 0,
+        track_total_hits: true,
+        aggs: {
+          custom: {
+            filter: {
+              bool: {
+                must_not: { exists: { field: 'plugin_id' } },
+              },
+            },
+          },
+          plugin: {
+            filter: {
+              exists: { field: 'plugin_id' },
+            },
+          },
+        },
+      });
+
+      const total =
+        typeof response.hits.total === 'number'
+          ? response.hits.total
+          : response.hits.total?.value || 0;
+      const customCount = (response.aggregations?.custom as { doc_count?: number })?.doc_count ?? 0;
+      const pluginCount = (response.aggregations?.plugin as { doc_count?: number })?.doc_count ?? 0;
+
+      return {
+        total,
+        custom: customCount,
+        plugin: pluginCount,
+      };
+    } catch (error) {
+      if (!isIndexNotFoundError(error)) {
+        this.logger.warn(`Failed to fetch skills metrics: ${(error as Error).message}`);
+      }
+      return { total: 0, custom: 0, plugin: 0 };
+    }
+  }
+
+  /**
+   * Get total count of installed plugins from Elasticsearch.
+   */
+  async getPluginsCount(): Promise<number> {
+    try {
+      const pluginsIndexName = chatSystemIndex('plugins');
+      const response = await this.esClient.count({
+        index: pluginsIndexName,
+      });
+
+      return response.count || 0;
+    } catch (error) {
+      if (!isIndexNotFoundError(error)) {
+        this.logger.warn(`Failed to fetch plugins count: ${(error as Error).message}`);
+      }
+      return 0;
+    }
+  }
+
+  /**
    * Get conversation metrics from Elasticsearch
    */
   async getConversationMetrics(dateFilter?: { gte: string }) {
