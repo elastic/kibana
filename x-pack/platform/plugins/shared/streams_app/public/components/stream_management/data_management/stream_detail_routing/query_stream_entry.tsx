@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -166,6 +166,11 @@ export function CreatingQueryStreamEntry({ parentStreamName }: CreatingQueryStre
   const definition = useStreamsRoutingSelector((snapshot) => snapshot.context.definition);
   const isClassicParent = Streams.ClassicStream.Definition.is(definition.stream);
 
+  const existingSiblingNames = useMemo(
+    () => definition.stream.query_streams?.map((ref) => ref.name) ?? [],
+    [definition.stream.query_streams]
+  );
+
   const isSaving = useStreamsRoutingSelector((state) =>
     state.matches({ ready: { queryMode: { creating: 'saving' } } })
   );
@@ -196,6 +201,7 @@ export function CreatingQueryStreamEntry({ parentStreamName }: CreatingQueryStre
       onCancel={cancelQueryStreamCreation}
       onQueryChange={debouncedExecuteQuery}
       isSaving={isSaving}
+      existingSiblingNames={existingSiblingNames}
     />
   );
 }

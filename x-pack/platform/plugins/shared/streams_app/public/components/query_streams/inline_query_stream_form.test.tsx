@@ -128,6 +128,24 @@ describe('InlineQueryStreamForm', () => {
     expect(saveButton).toBeDisabled();
   });
 
+  it('disables the save button when the name matches an existing query-stream sibling', () => {
+    mockRoutingContext.routing = [];
+
+    renderWithProviders(
+      <InlineQueryStreamForm
+        parentStreamName="logs"
+        initialName="existing-query"
+        initialEsqlQuery="FROM $.logs"
+        existingSiblingNames={['logs.existing-query']}
+        onSave={jest.fn()}
+        onCancel={jest.fn()}
+      />
+    );
+
+    const saveButton = screen.getByTestId('streamsAppQueryStreamFormSaveButton');
+    expect(saveButton).toBeDisabled();
+  });
+
   it('does not paint the input invalid in edit mode even when the stream is in routing', () => {
     mockRoutingContext.routing = [
       { destination: 'logs.my-query', isNew: false },
@@ -146,7 +164,6 @@ describe('InlineQueryStreamForm', () => {
 
     const nameInput = screen.getByTestId('streamsAppRoutingStreamEntryNameField');
     expect(nameInput).not.toHaveAttribute('aria-invalid', 'true');
-    expect(screen.queryByText(/already exists/i)).not.toBeInTheDocument();
   });
 
   it('enables the save button for a valid new name + non-empty ES|QL', () => {

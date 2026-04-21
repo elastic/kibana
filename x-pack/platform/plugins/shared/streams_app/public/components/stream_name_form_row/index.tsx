@@ -114,6 +114,7 @@ interface UseChildStreamInputOptions {
   streamName: string;
   readOnly?: boolean;
   checkRootChildExists?: boolean;
+  additionalExistingNames?: readonly string[];
 }
 
 /**
@@ -122,12 +123,12 @@ interface UseChildStreamInputOptions {
  * @param options.streamName - The stream name to use for the local input field.
  * @param options.readOnly - Whether the input field is read only.
  * @param options.checkRootChildExists - When true (default), dot-related validation surfaces root-child existence errors. Set to false for query streams where the parent is always the viewed stream.
+ * @param options.additionalExistingNames - Extra full stream names to include in the duplicate-name check. Used to cover siblings that don't live in the wired routing array (e.g. existing query-stream children of the parent).
  * @returns An object containing local states, input validation flags, and help/error messages.
  * @example
- * const { localStreamName, setLocalStreamName, isStreamNameValid, prefix, partitionName, helpText, errorMessage } = useChildStreamInput({ streamName: 'logs.linux' });
+ * const { setLocalStreamName, isStreamNameValid, prefix, partitionName, helpText, errorMessage } = useChildStreamInput({ streamName: 'logs.linux' });
  * return (
  *   <StreamNameFormRow
- *     localStreamName={localStreamName}
  *     setLocalStreamName={setLocalStreamName}
  *     isStreamNameValid={isStreamNameValid}
  *     prefix={prefix}
@@ -141,6 +142,7 @@ export const useChildStreamInput = ({
   streamName,
   readOnly = false,
   checkRootChildExists = true,
+  additionalExistingNames,
 }: UseChildStreamInputOptions): ChildStreamInputHookResponse => {
   const [localStreamName, setLocalStreamName] = useState(streamName);
 
@@ -158,8 +160,10 @@ export const useChildStreamInput = ({
   const partitionName = localStreamName.replace(prefix, '');
   const rootChild = partitionName.split('.')[0];
   const isDuplicatedName = useMemo(
-    () => routing.some((r) => r.destination === localStreamName && !r.isNew),
-    [routing, localStreamName]
+    () =>
+      routing.some((r) => r.destination === localStreamName && !r.isNew) ||
+      (additionalExistingNames?.includes(localStreamName) ?? false),
+    [routing, localStreamName, additionalExistingNames]
   );
   const rootChildExists = useMemo(
     () => routing.some((r) => r.destination === prefix + rootChild && !r.isNew),

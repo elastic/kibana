@@ -284,6 +284,22 @@ describe('StreamNameFormRow', () => {
       expect(result.current.errorMessage).toBeDefined();
     });
 
+    it('flags a duplicate when the name is in additionalExistingNames but not in routing', () => {
+      mockRoutingContext.routing = [];
+
+      const { result } = renderHook(() =>
+        useChildStreamInput({
+          streamName: 'logs.existing-query',
+          readOnly: false,
+          checkRootChildExists: false,
+          additionalExistingNames: ['logs.existing-query'],
+        })
+      );
+
+      expect(result.current.isStreamNameValid).toBe(false);
+      expect(result.current.errorMessage).toBe('A stream with this name already exists');
+    });
+
     it('still rejects invalid characters when checkRootChildExists is false', () => {
       mockRoutingContext.routing = [];
 

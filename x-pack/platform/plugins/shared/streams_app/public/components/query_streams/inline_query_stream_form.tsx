@@ -71,12 +71,20 @@ export interface InlineQueryStreamFormProps {
    * Callback when delete is clicked. The delete button is only shown when this is provided.
    */
   onDelete?: () => void;
+  /**
+   * Full names of existing query-stream siblings to include in the duplicate-name check.
+   * Query-stream siblings are not in the wired routing array, so callers must pass them
+   * explicitly to prevent silent overwrites.
+   */
+  existingSiblingNames?: readonly string[];
 }
 
 /**
  * A reusable inline form component for creating or editing query streams.
- * This component manages its own form state and is not coupled to any specific
- * state management solution, making it reusable across different contexts.
+ *
+ * Couples to `StreamRoutingContext` via `useChildStreamInput` — use within the
+ * `stream_detail_routing` subtree (or any context that provides
+ * `StreamRoutingContext`).
  *
  * @example
  * ```tsx
@@ -102,6 +110,7 @@ export function InlineQueryStreamForm({
   saveButtonLabel,
   onDelete,
   nameReadOnly = false,
+  existingSiblingNames,
 }: InlineQueryStreamFormProps) {
   const { euiTheme } = useEuiTheme();
   const prefix = `${parentStreamName}.`;
@@ -112,10 +121,11 @@ export function InlineQueryStreamForm({
   );
 
   const fullName = `${prefix}${name}`;
-  const { isStreamNameValid, errorMessage, helpText } = useChildStreamInput({
+  const { isStreamNameValid, errorMessage, helpText, setLocalStreamName } = useChildStreamInput({
     streamName: fullName,
     readOnly: nameReadOnly || readOnly || isSaving,
     checkRootChildExists: false,
+    additionalExistingNames: existingSiblingNames,
   });
 
   const shouldShowNameValidation = !nameReadOnly;
@@ -177,10 +187,10 @@ export function InlineQueryStreamForm({
         <QueryStreamForm.StreamName
           partitionName={name}
           onChange={handleNameChange}
-          prefix={`${parentStreamName}.`}
+          setLocalStreamName={setLocalStreamName}
+          prefix={prefix}
           readOnly={nameReadOnly || readOnly || isSaving}
           isStreamNameValid={displayedIsStreamNameValid}
-          isInvalid={!displayedIsStreamNameValid}
           errorMessage={displayedErrorMessage}
           helpText={helpText}
         />
