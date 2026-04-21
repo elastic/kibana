@@ -31,6 +31,29 @@ import type { RuleResponse } from '../../../common/api/detection_engine/model/ru
 import type { AiRuleCreationService } from '../../detection_engine/common/ai_rule_creation_store';
 import { RULES_PATH, SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { hasCapabilities } from '../../common/lib/capabilities';
+import {
+  Threshold as ThresholdDisplay,
+  AnomalyThreshold as AnomalyThresholdDisplay,
+  ThreatIndex as ThreatIndexDisplay,
+  constructThreatMappingDescription,
+  NewTermsFields as NewTermsFieldsDisplay,
+  HistoryWindowSize,
+} from '../../detection_engine/rule_management/components/rule_details/rule_definition_section';
+import {
+  EQL_OPTIONS_EVENT_CATEGORY_FIELD_LABEL,
+  EQL_OPTIONS_EVENT_TIEBREAKER_FIELD_LABEL,
+  EQL_OPTIONS_EVENT_TIMESTAMP_FIELD_LABEL,
+} from '../../detection_engine/rule_creation/components/eql_query_edit/translations';
+import {
+  THRESHOLD_FIELD_LABEL,
+  ANOMALY_THRESHOLD_FIELD_LABEL,
+  MACHINE_LEARNING_JOB_ID_FIELD_LABEL,
+  THREAT_INDEX_FIELD_LABEL,
+  THREAT_MAPPING_FIELD_LABEL,
+  NEW_TERMS_FIELDS_FIELD_LABEL,
+  HISTORY_WINDOW_SIZE_FIELD_LABEL,
+} from '../../detection_engine/rule_management/components/rule_details/translations';
+import { THREAT_QUERY_LABEL } from '../../detection_engine/rule_creation_ui/components/description_step/translations';
 
 type RuleAttachment = Attachment<string, { text: string; attachmentLabel?: string }>;
 
@@ -163,6 +186,167 @@ const IndexPatterns: React.FC<{ patterns: string[] }> = ({ patterns }) => (
   </>
 );
 
+export const ThresholdDetails: React.FC<{ rule: RuleResponse }> = ({ rule }) => {
+  if (rule.type !== 'threshold') {
+    return null;
+  }
+
+  return (
+    <>
+      <SectionHeading>{THRESHOLD_FIELD_LABEL}</SectionHeading>
+      <EuiSpacer size="xs" />
+      <EuiText size="xs">
+        <ThresholdDisplay threshold={rule.threshold} />
+      </EuiText>
+      <EuiSpacer size="s" />
+    </>
+  );
+};
+
+export const ThreatMatchDetails: React.FC<{ rule: RuleResponse }> = ({ rule }) => {
+  if (rule.type !== 'threat_match') {
+    return null;
+  }
+
+  return (
+    <>
+      <EuiText size="xs">
+        <strong>{THREAT_INDEX_FIELD_LABEL}</strong>
+      </EuiText>
+      <EuiSpacer size="xs" />
+      <ThreatIndexDisplay threatIndex={rule.threat_index} />
+      <EuiSpacer size="xs" />
+      {rule.threat_query && (
+        <>
+          <EuiText size="xs">
+            <strong>{THREAT_QUERY_LABEL}</strong>
+          </EuiText>
+          <EuiSpacer size="xs" />
+          <EuiCodeBlock fontSize="s" paddingSize="s" overflowHeight={100}>
+            {rule.threat_query}
+          </EuiCodeBlock>
+          <EuiSpacer size="xs" />
+        </>
+      )}
+      <EuiText size="xs">
+        <strong>{THREAT_MAPPING_FIELD_LABEL}</strong>
+      </EuiText>
+      <EuiSpacer size="xs" />
+      <EuiText size="xs">{constructThreatMappingDescription(rule.threat_mapping)}</EuiText>
+      <EuiSpacer size="s" />
+    </>
+  );
+};
+
+export const MachineLearningDetails: React.FC<{ rule: RuleResponse }> = ({ rule }) => {
+  if (rule.type !== 'machine_learning') {
+    return null;
+  }
+  const jobIds = Array.isArray(rule.machine_learning_job_id)
+    ? rule.machine_learning_job_id
+    : [rule.machine_learning_job_id];
+
+  return (
+    <>
+      <EuiText size="xs">
+        <strong>{MACHINE_LEARNING_JOB_ID_FIELD_LABEL}</strong>
+      </EuiText>
+      <EuiSpacer size="xs" />
+      <TagsBadgeList tags={jobIds} />
+      <EuiSpacer size="xs" />
+      <EuiText size="xs">
+        <strong>{ANOMALY_THRESHOLD_FIELD_LABEL}</strong>
+      </EuiText>
+      <EuiSpacer size="xs" />
+      <AnomalyThresholdDisplay anomalyThreshold={rule.anomaly_threshold} />
+      <EuiSpacer size="s" />
+    </>
+  );
+};
+
+export const NewTermsDetails: React.FC<{ rule: RuleResponse }> = ({ rule }) => {
+  if (rule.type !== 'new_terms') {
+    return null;
+  }
+
+  return (
+    <>
+      <EuiText size="xs">
+        <strong>{NEW_TERMS_FIELDS_FIELD_LABEL}</strong>
+      </EuiText>
+      <EuiSpacer size="xs" />
+      <NewTermsFieldsDisplay newTermsFields={rule.new_terms_fields} />
+      <EuiSpacer size="xs" />
+      <EuiText size="xs">
+        <strong>{HISTORY_WINDOW_SIZE_FIELD_LABEL}</strong>
+      </EuiText>
+      <EuiSpacer size="xs" />
+      <HistoryWindowSize historyWindowStart={rule.history_window_start} />
+      <EuiSpacer size="s" />
+    </>
+  );
+};
+
+export const EqlDetails: React.FC<{ rule: RuleResponse }> = ({ rule }) => {
+  if (rule.type !== 'eql') {
+    return null;
+  }
+  const { event_category_override, tiebreaker_field, timestamp_field } = rule;
+  if (!event_category_override && !tiebreaker_field && !timestamp_field) {
+    return null;
+  }
+
+  return (
+    <>
+      {event_category_override && (
+        <EuiText size="xs">
+          <strong>
+            {EQL_OPTIONS_EVENT_CATEGORY_FIELD_LABEL}
+            {':'}
+          </strong>{' '}
+          {event_category_override}
+        </EuiText>
+      )}
+      {tiebreaker_field && (
+        <EuiText size="xs">
+          <strong>
+            {EQL_OPTIONS_EVENT_TIEBREAKER_FIELD_LABEL}
+            {':'}
+          </strong>{' '}
+          {tiebreaker_field}
+        </EuiText>
+      )}
+      {timestamp_field && (
+        <EuiText size="xs">
+          <strong>
+            {EQL_OPTIONS_EVENT_TIMESTAMP_FIELD_LABEL}
+            {':'}
+          </strong>{' '}
+          {timestamp_field}
+        </EuiText>
+      )}
+      <EuiSpacer size="s" />
+    </>
+  );
+};
+
+const RuleTypeDetails: React.FC<{ rule: RuleResponse }> = ({ rule }) => {
+  switch (rule.type) {
+    case 'threshold':
+      return <ThresholdDetails rule={rule} />;
+    case 'threat_match':
+      return <ThreatMatchDetails rule={rule} />;
+    case 'machine_learning':
+      return <MachineLearningDetails rule={rule} />;
+    case 'new_terms':
+      return <NewTermsDetails rule={rule} />;
+    case 'eql':
+      return <EqlDetails rule={rule} />;
+    default:
+      return null;
+  }
+};
+
 const RuleInlineContent: React.FC<AttachmentRenderProps<RuleAttachment>> = ({ attachment }) => {
   const rule = parseRuleFromAttachment(attachment);
 
@@ -217,6 +401,8 @@ const RuleInlineContent: React.FC<AttachmentRenderProps<RuleAttachment>> = ({ at
       )}
 
       {index && index.length > 0 && <IndexPatterns patterns={index} />}
+
+      <RuleTypeDetails rule={rule} />
 
       {rule.tags && rule.tags.length > 0 && (
         <>
