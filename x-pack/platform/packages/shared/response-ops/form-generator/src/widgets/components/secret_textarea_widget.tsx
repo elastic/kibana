@@ -70,6 +70,25 @@ const SecretTextareaField: React.FC<SecretTextareaFieldProps> = ({
     }
   }, [isVisible]);
 
+  // Compose the internal ref (needed to imperatively apply the
+  // -webkit-text-security masking style) with any caller-provided
+  // `inputRef`, so spreading `euiFieldProps` can't silently drop either
+  // side. Supports both callback and object refs, matching EUI's
+  // `inputRef` contract.
+  const {
+    inputRef: callerInputRef,
+    style: callerStyle,
+    ...restEuiFieldProps
+  } = euiFieldProps ?? {};
+  const setInputRef = (el: HTMLTextAreaElement | null) => {
+    textareaRef.current = el;
+    if (typeof callerInputRef === 'function') {
+      callerInputRef(el);
+    } else if (callerInputRef && typeof callerInputRef === 'object') {
+      (callerInputRef as React.MutableRefObject<HTMLTextAreaElement | null>).current = el;
+    }
+  };
+
   return (
     <EuiFormRow
       label={field.label}
@@ -89,9 +108,8 @@ const SecretTextareaField: React.FC<SecretTextareaFieldProps> = ({
       {...rest}
     >
       <EuiTextArea
-        inputRef={(el) => {
-          textareaRef.current = el;
-        }}
+        {...restEuiFieldProps}
+        inputRef={setInputRef}
         isInvalid={isInvalid}
         value={field.value as string}
         onChange={field.onChange}
@@ -99,8 +117,7 @@ const SecretTextareaField: React.FC<SecretTextareaFieldProps> = ({
         rows={DEFAULT_ROWS}
         data-test-subj="input"
         data-is-masked={!isVisible}
-        style={{ fontFamily: 'monospace' }}
-        {...euiFieldProps}
+        style={{ fontFamily: 'monospace', ...(callerStyle ?? {}) }}
       />
     </EuiFormRow>
   );

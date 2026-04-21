@@ -184,4 +184,79 @@ describe('SecretTextareaWidget', () => {
 
     expect(await screen.findByText('Private key is required')).toBeDefined();
   });
+
+  describe('ref composition with caller-provided euiFieldProps.inputRef', () => {
+    it('invokes a caller-provided callback inputRef AND keeps masking applied', () => {
+      const callerRef = jest.fn();
+
+      render(
+        <TestFormWrapper>
+          <SecretTextareaWidget
+            meta={meta}
+            formConfig={{}}
+            path="privateKey"
+            schema={z.string()}
+            fieldProps={{
+              label: 'Private key',
+              euiFieldProps: { inputRef: callerRef },
+            }}
+            fieldConfig={{ validations: [{ validator: () => undefined }] }}
+          />
+        </TestFormWrapper>,
+        { wrapper }
+      );
+
+      const input = screen.getByLabelText('Private key') as HTMLTextAreaElement;
+      expect(callerRef).toHaveBeenCalledWith(input);
+      expect(input.getAttribute('data-is-masked')).toBe('true');
+    });
+
+    it('populates a caller-provided object inputRef AND keeps masking applied', () => {
+      const callerRef = React.createRef<HTMLTextAreaElement>();
+
+      render(
+        <TestFormWrapper>
+          <SecretTextareaWidget
+            meta={meta}
+            formConfig={{}}
+            path="privateKey"
+            schema={z.string()}
+            fieldProps={{
+              label: 'Private key',
+              euiFieldProps: { inputRef: callerRef },
+            }}
+            fieldConfig={{ validations: [{ validator: () => undefined }] }}
+          />
+        </TestFormWrapper>,
+        { wrapper }
+      );
+
+      const input = screen.getByLabelText('Private key') as HTMLTextAreaElement;
+      expect(callerRef.current).toBe(input);
+      expect(input.getAttribute('data-is-masked')).toBe('true');
+    });
+
+    it('merges caller-provided style with the internal monospace fontFamily', () => {
+      render(
+        <TestFormWrapper>
+          <SecretTextareaWidget
+            meta={meta}
+            formConfig={{}}
+            path="privateKey"
+            schema={z.string()}
+            fieldProps={{
+              label: 'Private key',
+              euiFieldProps: { style: { backgroundColor: 'rgb(240, 240, 240)' } },
+            }}
+            fieldConfig={{ validations: [{ validator: () => undefined }] }}
+          />
+        </TestFormWrapper>,
+        { wrapper }
+      );
+
+      const input = screen.getByLabelText('Private key') as HTMLTextAreaElement;
+      expect(input.style.fontFamily).toBe('monospace');
+      expect(input.style.backgroundColor).toBe('rgb(240, 240, 240)');
+    });
+  });
 });
