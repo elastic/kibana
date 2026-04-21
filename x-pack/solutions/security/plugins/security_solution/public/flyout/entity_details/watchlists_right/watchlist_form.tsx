@@ -5,123 +5,97 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { Suspense } from 'react';
 import {
   EuiFieldText,
-  EuiFilePicker,
+  EuiLoadingSpinner,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
-  EuiHorizontalRule,
   EuiRange,
   EuiSpacer,
-  EuiSuperSelect,
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import type { Filter, Query } from '@kbn/es-query';
-import type { SavedQuery } from '@kbn/data-plugin/public';
-import { QueryBar } from '../../../common/components/query_bar';
-import { useKibana } from '../../../common/lib/kibana';
+import { canUpdateWatchlistField } from '../../../../common/api/entity_analytics/watchlists/management';
 import type { CreateWatchlistRequestBodyInput } from '../../../../common/api/entity_analytics/watchlists/management/create.gen';
-import { SUPPORTED_FILE_TYPES } from './constants';
 import {
   WATCHLIST_DESCRIPTION_LABEL,
-  WATCHLIST_ENTITY_FIELD_ARIA_LABEL,
-  WATCHLIST_ENTITY_FIELD_PLACEHOLDER,
-  WATCHLIST_FILE_PICKER_ARIA_LABEL,
-  WATCHLIST_FILE_UPLOAD_LABEL,
-  WATCHLIST_FILTER_QUERY_HELP_TEXT,
-  WATCHLIST_FILTER_QUERY_LABEL,
-  WATCHLIST_IDENTIFY_ENTITIES_BY_LABEL,
   WATCHLIST_NAME_LABEL,
   WATCHLIST_RISK_SCORE_WEIGHTING_LABEL,
+  WATCHLIST_CSV_DATA_SOURCE_TITLE,
+  WATCHLIST_CSV_DATA_SOURCE_DESCRIPTION,
 } from './translations';
+import { RuleBasedSourceInput } from './rule_based_source_input';
+import { WatchlistCsvUpload } from './csv_upload';
+import { ManagedWatchlistSourceInput } from './managed_watchlist_source_input';
+import { MAX_WATCHLIST_DESCRIPTION_LENGTH, MAX_WATCHLIST_NAME_LENGTH } from './constants';
 
 export interface WatchlistFormProps {
   watchlist: CreateWatchlistRequestBodyInput;
-  isNameInvalid: boolean;
+  watchlistId?: string;
+  isEditMode: boolean;
+  isNameTooLong: boolean;
+  isDescriptionTooLong: boolean;
   onFieldChange: <K extends keyof CreateWatchlistRequestBodyInput>(
     key: K,
     value: CreateWatchlistRequestBodyInput[K]
   ) => void;
+  onSourceValidationChange: (valid: boolean) => void;
 }
 
-export const WatchlistForm = ({ watchlist, isNameInvalid, onFieldChange }: WatchlistFormProps) => {
-  const {
-    services: { data },
-  } = useKibana();
-  const [dataView, setDataView] = useState<DataView>();
-  const [filterQuery, setFilterQuery] = useState<Query>({ query: '', language: 'kuery' });
-  const [savedQuery, setSavedQuery] = useState<SavedQuery | undefined>(undefined);
-  const [filters, setFilters] = useState<Filter[]>([]);
-  const [entityField, setEntityField] = useState<string>('');
-  const filterManager = data.query.filterManager;
+const getTooLongError = (isTooLong: boolean, maxLength: number, fieldId: string) =>
+  isTooLong
+    ? [
+        i18n.translate(fieldId, {
+          defaultMessage: 'Must be {maxLength} characters or fewer',
+          values: { maxLength },
+        }),
+      ]
+    : undefined;
 
-  useEffect(() => {
-    setFilters(filterManager.getFilters());
-    const subscription = filterManager.getUpdates$().subscribe(() => {
-      setFilters(filterManager.getFilters());
-    });
-
-    return () => subscription.unsubscribe();
-  }, [filterManager]);
-
-  useEffect(() => {
-    let isSubscribed = true;
-    const loadDefaultDataView = async () => {
-      const defaultDataView = await data.dataViews.getDefaultDataView();
-      if (isSubscribed && defaultDataView) {
-        setDataView(defaultDataView);
-      }
-    };
-
-    loadDefaultDataView();
-
-    return () => {
-      isSubscribed = false;
-    };
-  }, [data.dataViews]);
-
-  const onSubmitQuery = useCallback((query: Query) => {
-    setFilterQuery(query);
-  }, []);
-
-  const onSavedQuery = useCallback((newSavedQuery: SavedQuery | undefined) => {
-    setSavedQuery(newSavedQuery);
-  }, []);
+export const WatchlistForm = ({
+  watchlist,
+  watchlistId,
+  isEditMode,
+  isNameTooLong,
+  isDescriptionTooLong,
+  onFieldChange,
+  onSourceValidationChange,
+}: WatchlistFormProps) => {
+  const isManaged = watchlist.managed === true;
+  const isNameDisabled = isEditMode && !canUpdateWatchlistField('name', isManaged);
+  const isDescriptionDisabled = isEditMode && !canUpdateWatchlistField('description', isManaged);
 
   return (
-    <EuiForm component="form" fullWidth>
+    <EuiForm component="form" fullWidth onSubmit={(e) => e.preventDefault()}>
       <EuiFormRow
         label={WATCHLIST_NAME_LABEL}
-        isInvalid={isNameInvalid}
-        error={
-          isNameInvalid
-            ? [
-                i18n.translate(
-                  'xpack.securitySolution.entityAnalytics.watchlists.flyout.nameInvalid',
-                  {
-                    defaultMessage:
-                      'Use lowercase letters, numbers, ".", "_" or "-" and start with a letter or number.',
-                  }
-                ),
-              ]
-            : undefined
-        }
+        isInvalid={isNameTooLong}
+        error={getTooLongError(
+          isNameTooLong,
+          MAX_WATCHLIST_NAME_LENGTH,
+          'xpack.securitySolution.entityAnalytics.watchlists.flyout.nameInvalid'
+        )}
       >
         <EuiFieldText
+          isInvalid={isNameTooLong}
           name="WatchlistName"
           value={watchlist.name}
           onChange={(e) => onFieldChange('name', e.target.value)}
-          isInvalid={isNameInvalid}
+          disabled={isNameDisabled}
         />
       </EuiFormRow>
       <EuiFormRow
         label={WATCHLIST_DESCRIPTION_LABEL}
+        isInvalid={isDescriptionTooLong}
+        error={getTooLongError(
+          isDescriptionTooLong,
+          MAX_WATCHLIST_DESCRIPTION_LENGTH,
+          'xpack.securitySolution.entityAnalytics.watchlists.flyout.descriptionInvalid'
+        )}
         labelAppend={
           <EuiText size="xs" color="subdued">
             <FormattedMessage
@@ -132,9 +106,11 @@ export const WatchlistForm = ({ watchlist, isNameInvalid, onFieldChange }: Watch
         }
       >
         <EuiFieldText
+          isInvalid={isDescriptionTooLong}
           name="WatchlistDescription"
           value={watchlist.description}
           onChange={(e) => onFieldChange('description', e.target.value)}
+          disabled={isDescriptionDisabled}
         />
       </EuiFormRow>
       <EuiFormRow label={WATCHLIST_RISK_SCORE_WEIGHTING_LABEL}>
@@ -148,94 +124,39 @@ export const WatchlistForm = ({ watchlist, isNameInvalid, onFieldChange }: Watch
           onChange={(e) => onFieldChange('riskModifier', Number(e.currentTarget.value))}
         />
       </EuiFormRow>
-      <EuiFormRow label={WATCHLIST_FILE_UPLOAD_LABEL}>
-        <EuiFilePicker
-          data-test-subj="upload-watchlist-file"
-          accept={SUPPORTED_FILE_TYPES.join(',')}
-          fullWidth
-          onChange={() => {}} // TODO use fileUploader from privmon
-          isInvalid={false}
-          isLoading={false}
-          aria-label={WATCHLIST_FILE_PICKER_ARIA_LABEL}
-        />
-      </EuiFormRow>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup alignItems="center" gutterSize="s">
-        <EuiFlexItem>
-          <EuiHorizontalRule margin="none" size="full" css={{ height: 2 }} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s" color="subdued">
-            <FormattedMessage
-              id="xpack.securitySolution.entityAnalytics.watchlists.flyout.orSeparator"
-              defaultMessage="OR"
-            />
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiHorizontalRule margin="none" css={{ height: 2 }} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s">
-            <FormattedMessage
-              id="xpack.securitySolution.entityAnalytics.watchlists.flyout.createByQueryTitle"
-              defaultMessage="Create watchlist by query"
-            />
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <EuiFormRow label={WATCHLIST_FILTER_QUERY_LABEL} helpText={WATCHLIST_FILTER_QUERY_HELP_TEXT}>
-        <EuiFlexGroup direction="column" gutterSize="m">
-          <EuiFlexItem>
-            {dataView ? (
-              // TODO: plug into endpoint when available: https://github.com/elastic/security-team/issues/15538
-              <QueryBar
-                indexPattern={dataView}
-                isRefreshPaused={true}
-                filterQuery={filterQuery}
-                filterManager={filterManager}
-                filters={filters}
-                onSubmitQuery={onSubmitQuery}
-                savedQuery={savedQuery}
-                onSavedQuery={onSavedQuery}
-                hideSavedQuery={false}
-                displayStyle="inPage"
-                dataTestSubj="watchlistFilterQuery"
-              />
-            ) : (
-              <EuiText size="s" color="subdued">
-                <FormattedMessage
-                  id="xpack.securitySolution.entityAnalytics.watchlists.flyout.filterQueryLoading"
-                  defaultMessage="Loading data view..."
-                />
+      {isEditMode && watchlistId && (
+        <>
+          <EuiSpacer size="l" />
+          <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">
+                <strong>{WATCHLIST_CSV_DATA_SOURCE_TITLE}</strong>
               </EuiText>
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFormRow>
-      <EuiFormRow label={WATCHLIST_IDENTIFY_ENTITIES_BY_LABEL}>
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiSuperSelect
-              valueOfSelected={entityField}
-              placeholder={WATCHLIST_ENTITY_FIELD_PLACEHOLDER}
-              // TODO: remove this when backend route available: https://github.com/elastic/security-team/issues/15538
-              options={[
-                { value: 'user.name', inputDisplay: 'user.name' },
-                { value: 'host.name', inputDisplay: 'host.name' },
-                { value: 'source.ip', inputDisplay: 'source.ip' },
-              ]}
-              onChange={(value) => setEntityField(value)}
-              aria-label={WATCHLIST_ENTITY_FIELD_ARIA_LABEL}
-              style={{ width: 240 }}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFormRow>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                <p>{WATCHLIST_CSV_DATA_SOURCE_DESCRIPTION}</p>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+          <WatchlistCsvUpload watchlistId={watchlistId} />
+        </>
+      )}
+      <EuiSpacer size="m" />
+      {watchlist.managed && (
+        <Suspense fallback={<EuiLoadingSpinner size="m" />}>
+          <ManagedWatchlistSourceInput watchlist={watchlist} />
+        </Suspense>
+      )}
+      <RuleBasedSourceInput
+        watchlistName={watchlist.name}
+        isEditMode={isEditMode}
+        isManaged={watchlist.managed}
+        onFieldChange={onFieldChange}
+        initialEntitySources={watchlist.entitySources}
+        onSourceValidationChange={onSourceValidationChange}
+      />
     </EuiForm>
   );
 };

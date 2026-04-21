@@ -27,6 +27,7 @@ interface Props {
   value: string;
   onChange: (value: string) => void;
   errors?: string;
+  compressed?: boolean;
 }
 
 export const LookbackWindow = React.forwardRef<HTMLInputElement, Props>((props, ref) => (

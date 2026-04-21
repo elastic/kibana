@@ -274,6 +274,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ruleId = value;
     }
 
+    await testSubjects.click('discoverQueryTotalHits'); // dismiss tooltip
     await filterBar.addFilter({ field: 'rule_id', operation: 'is', value: ruleId });
 
     await retry.waitFor('results', async () => {
@@ -466,6 +467,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await testSubjects.click('ruleFormStep-details');
+      await toasts.dismissIfExists();
       await testSubjects.click('ruleFlyoutFooterSaveButton');
 
       await testSubjects.click('ruleFormStep-definition');

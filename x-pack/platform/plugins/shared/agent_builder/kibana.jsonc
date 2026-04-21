@@ -33,9 +33,11 @@
       "triggersActionsUi",
       "esUiShared",
       "workflowsExtensions",
+      "searchInferenceEndpoints"
     ],
     "requiredBundles": [
-      "kibanaReact"
+      "kibanaReact",
+      "usageCollection"
     ],
     "optionalPlugins": [
       "cloud",
@@ -43,7 +45,6 @@
       "licenseManagement",
       "security",
       "workflowsManagement",
-      "searchInferenceEndpoints",
       "usageCollection",
       "usageApi",
       "home",

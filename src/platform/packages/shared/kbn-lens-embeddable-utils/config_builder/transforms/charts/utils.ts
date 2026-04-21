@@ -21,16 +21,17 @@ import type {
 } from '@kbn/lens-common';
 
 import type { LensAttributes } from '../../types';
-import type { LensApiState } from '../../schema';
+import type { LensApiConfig } from '../../schema';
 import type { legendTruncateAfterLinesSchema } from '../../schema/shared';
 import { buildReferences, getAdhocDataviews, isTextBasedLayer, nonNullable } from '../utils';
 import { LENS_LAYER_SUFFIX } from '../constants';
 import type { APIAdHocDataView, APIDataView } from '../columns/types';
 import type { AnyMetricLensStateColumn } from '../columns/types';
+import type { XScaleSchemaType } from '../../schema/charts/shared';
 
 export function getSharedChartLensStateToAPI(
   config: Pick<LensAttributes, 'title' | 'description'>
-): Pick<LensApiState, 'title' | 'description'> {
+): Pick<LensApiConfig, 'title' | 'description'> {
   return {
     // @TODO: need to make this optional in LensDocument type
     title: config.title ?? '',
@@ -174,13 +175,47 @@ export function getLegendTruncateAfterLines(
   return shouldTruncate && maxLines > 0 ? maxLines : undefined;
 }
 
+// This is needed as numbers like 0 | -90 | -45 are often just typed as number
+// So we need the types to be looser if the given values are numbers vs strings
+type ExtendsNumber<N, Yes, No> = N extends number ? Yes : No;
+
+/**
+ * Used to map enum values from api to state and vice versa.
+ */
+export function getReversibleMappings<
+  API extends string | number | undefined,
+  State extends string | number | undefined
+>(entries: readonly [API, State][]) {
+  const mappings = new Map(entries);
+  const reverseMappings = new Map(entries.map(([key, value]) => [value, key]));
+
+  function toState(
+    value: ExtendsNumber<API, number, API>
+  ): ExtendsNumber<API, State | undefined, State>;
+  function toState(value?: ExtendsNumber<API, number, API>): State | undefined;
+  function toState(value?: ExtendsNumber<API, number, API>): State | undefined {
+    return value != null ? mappings.get(value as API) : undefined;
+  }
+
+  function toAPI(
+    value: ExtendsNumber<State, number, State>
+  ): ExtendsNumber<State, API | undefined, API>;
+  function toAPI(value?: ExtendsNumber<State, number, State>): API | undefined;
+  function toAPI(value?: ExtendsNumber<State, number, State>): API | undefined {
+    return value != null ? reverseMappings.get(value as State) : undefined;
+  }
+
+  return {
+    toState,
+    toAPI,
+  };
+}
+
 /**
  * Determines the x-axis scale type based on column metadata type.
  * Returns 'temporal' for date columns, 'linear' for numeric columns, and 'ordinal' for others.
  */
-export function getScaleTypeFromColumnType(
-  columnType: string | undefined
-): 'temporal' | 'linear' | 'ordinal' {
+export function getScaleTypeFromColumnType(columnType: string | undefined): XScaleSchemaType {
   if (columnType === 'date') {
     return 'temporal';
   } else if (columnType === 'number') {

@@ -11,6 +11,7 @@ import type { ColorMapping, ColorStop, CustomPaletteParams, PaletteOutput } from
 import type { KbnPaletteId } from '@kbn/palettes';
 import type {
   AllColoringTypes,
+  AutoColorType,
   ColorByValueAbsolute,
   ColorByValueStep,
   ColorByValueType,
@@ -18,23 +19,21 @@ import type {
   ColorMappingColorDefType,
   ColorMappingGradientType,
   ColorMappingType,
+  NoColorType,
   StaticColorType,
   UnassignedColorType,
 } from '../../schema/color';
+export { NO_COLOR, AUTO_COLOR, DEFAULT_CATEGORICAL_COLOR_MAPPING } from '../../schema/color';
 import type { SerializableValueType } from '../../schema/serializedValue';
+import { getReversibleMappings } from '../charts/utils';
 
 const LENS_DEFAULT_COLOR_BY_VALUE_RANGE_TYPE = 'percentage';
 const LENS_DEFAULT_COLOR_MAPPING_PALETTE: KbnPaletteId = 'default';
 
-const LEGACY_TO_API_RANGE_NAMES: Record<'percent' | 'number', 'percentage' | 'absolute'> = {
-  number: 'absolute',
-  percent: 'percentage',
-};
-
-const API_TO_LEGACY_RANGE_NAMES: Record<'percentage' | 'absolute', 'percent' | 'number'> = {
-  absolute: 'number',
-  percentage: 'percent',
-};
+const paletteRangeCompat = getReversibleMappings([
+  ['percentage', 'percent'],
+  ['absolute', 'number'],
+]);
 
 export const LEGACY_PALETTE_PREFIX = 'LEGACY_PALETTE_';
 
@@ -83,9 +82,7 @@ export function fromColorByValueAPIToLensState(
       rangeMin,
       // @ts-expect-error - This can be null
       rangeMax,
-      rangeType: config.range
-        ? API_TO_LEGACY_RANGE_NAMES[config.range]
-        : API_TO_LEGACY_RANGE_NAMES.absolute,
+      rangeType: paletteRangeCompat.toState(config.range ?? 'absolute'),
       stops: !needsPaletteShift
         ? stops
         : stops.map((stop, i) => ({
@@ -144,9 +141,7 @@ export function fromColorByValueLensStateToAPI(
     }));
   }
 
-  const range = rangeType
-    ? LEGACY_TO_API_RANGE_NAMES[rangeType]
-    : LENS_DEFAULT_COLOR_BY_VALUE_RANGE_TYPE;
+  const range = paletteRangeCompat.toAPI(rangeType) ?? LENS_DEFAULT_COLOR_BY_VALUE_RANGE_TYPE;
   const stops = !reverse
     ? originalStops
     : originalStops
@@ -453,4 +448,12 @@ export function isColorByValueAbsolute(color?: AllColoringTypes): color is Color
 export function isColorMappingColor(color?: AllColoringTypes): color is ColorMappingType {
   if (!color || !('mode' in color)) return false;
   return color.mode === 'categorical' || color.mode === 'gradient';
+}
+
+export function isNoColor(color?: AllColoringTypes): color is NoColorType {
+  return !!color && 'type' in color && color.type === 'none';
+}
+
+export function isAutoColor(color?: AllColoringTypes): color is AutoColorType {
+  return !!color && 'type' in color && color.type === 'auto';
 }

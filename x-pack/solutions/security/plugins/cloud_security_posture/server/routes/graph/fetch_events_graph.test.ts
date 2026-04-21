@@ -10,6 +10,7 @@ import { fetchEvents } from './fetch_events_graph';
 import type { Logger } from '@kbn/core/server';
 import type { OriginEventId, EsQuery } from './types';
 import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
+import { GRAPH_ACTOR_EUID_SOURCE_FIELDS, GRAPH_TARGET_EUID_SOURCE_FIELDS } from './constants';
 
 describe('fetchEvents', () => {
   const esClient = elasticsearchServiceMock.createScopedClusterClient();
@@ -253,8 +254,8 @@ describe('fetchEvents', () => {
     });
   });
 
-  describe('New ECS schema support', () => {
-    it('should use COALESCE to unify entity IDs with correct precedence', async () => {
+  describe('EUID-based resolution', () => {
+    it('should use COALESCE with per-type EUID variables for actor resolution', async () => {
       const validIndexPatterns = ['valid_index'];
       const params = {
         esClient,
@@ -277,37 +278,140 @@ describe('fetchEvents', () => {
       // Verify COALESCE is used for actor identification
       expect(query).toMatch(/EVAL\s+actorEntityId\s*=\s*COALESCE\(/);
 
-      // Verify precedence order for actor (user -> host -> service -> entity)
-      const actorCoalesceRegex = /actorEntityId\s*=\s*COALESCE\(([\s\S]*?)\)/;
-      const actorCoalesceMatch = actorCoalesceRegex.exec(query);
-      expect(actorCoalesceMatch).toBeTruthy();
-      if (actorCoalesceMatch) {
-        const coalesceContent = actorCoalesceMatch[1];
-        const fields = coalesceContent.split(',').map((f) => f.trim());
+      // Verify per-type EUID variables are computed
+      expect(query).toContain('_actor_user_euid');
+      expect(query).toContain('_actor_host_euid');
+      expect(query).toContain('_actor_service_euid');
 
-        // Verify actor precedence order (new ECS fields only)
-        expect(fields[0]).toContain('user.entity.id');
-        expect(fields[1]).toContain('host.entity.id');
-        expect(fields[2]).toContain('service.entity.id');
-        expect(fields[3]).toContain('entity.id');
-        // Should only have 4 fields (no legacy actor.entity.id)
-        expect(fields).toHaveLength(4);
+      // Verify EUID source fields are referenced in the query
+      for (const field of [
+        ...GRAPH_ACTOR_EUID_SOURCE_FIELDS.user,
+        ...GRAPH_ACTOR_EUID_SOURCE_FIELDS.host,
+        ...GRAPH_ACTOR_EUID_SOURCE_FIELDS.service,
+        ...GRAPH_ACTOR_EUID_SOURCE_FIELDS.generic,
+      ]) {
+        expect(query).toContain(field);
       }
 
-      // Verify target entity ID uses multi-value collection with CASE statements and MV_APPEND
-      // (to support multiple targets from different fields)
-      // targetEntityId is initialized to null, then all fields use the same CASE pattern
+      // Verify target EUID variables are computed
+      expect(query).toContain('_target_user_euid');
+      expect(query).toContain('_target_host_euid');
+      expect(query).toContain('_target_service_euid');
+      expect(query).toContain('_target_generic_euid');
+
+      // Verify target entity ID uses multi-value collection
       expect(query).toContain('EVAL targetEntityId = TO_STRING(null)');
       expect(query).toMatch(/EVAL\s+targetEntityId\s*=\s*CASE\(/);
-      expect(query).toContain('MV_APPEND(targetEntityId, user.target.entity.id)');
-      expect(query).toContain('MV_APPEND(targetEntityId, host.target.entity.id)');
-      expect(query).toContain('MV_APPEND(targetEntityId, service.target.entity.id)');
-      expect(query).toContain('MV_APPEND(targetEntityId, entity.target.id)');
+      expect(query).toContain('MV_APPEND(targetEntityId, _target_user_euid)');
+      expect(query).toContain('MV_APPEND(targetEntityId, _target_host_euid)');
+      expect(query).toContain('MV_APPEND(targetEntityId, _target_service_euid)');
+      expect(query).toContain('MV_APPEND(targetEntityId, _target_generic_euid)');
+    });
+
+    it('should include user EUID source fields in actor sourceFields', async () => {
+      const validIndexPatterns = ['valid_index'];
+      const params = {
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds: [] as OriginEventId[],
+        showUnknownTarget: false,
+        indexPatterns: validIndexPatterns,
+        spaceId: 'default',
+        esQuery: undefined as EsQuery | undefined,
+      };
+
+      await fetchEvents(params);
+
+      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      const query = esqlCallArgs[0].query;
+
+      // Verify user EUID source fields appear in the sourceFields JSON construction
+      expect(query).toContain('\\"user.email\\"');
+      expect(query).toContain('\\"user.id\\"');
+      expect(query).toContain('\\"user.name\\"');
+    });
+
+    it('should include host EUID source fields in actor sourceFields', async () => {
+      const validIndexPatterns = ['valid_index'];
+      const params = {
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds: [] as OriginEventId[],
+        showUnknownTarget: false,
+        indexPatterns: validIndexPatterns,
+        spaceId: 'default',
+        esQuery: undefined as EsQuery | undefined,
+      };
+
+      await fetchEvents(params);
+
+      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      const query = esqlCallArgs[0].query;
+
+      // Verify host EUID source fields appear in the sourceFields JSON construction
+      expect(query).toContain('\\"host.id\\"');
+      expect(query).toContain('\\"host.name\\"');
+      expect(query).toContain('\\"host.hostname\\"');
+    });
+
+    it('should include service EUID source fields in actor sourceFields', async () => {
+      const validIndexPatterns = ['valid_index'];
+      const params = {
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds: [] as OriginEventId[],
+        showUnknownTarget: false,
+        indexPatterns: validIndexPatterns,
+        spaceId: 'default',
+        esQuery: undefined as EsQuery | undefined,
+      };
+
+      await fetchEvents(params);
+
+      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      const query = esqlCallArgs[0].query;
+
+      // Verify service EUID source field appears in the sourceFields JSON construction
+      expect(query).toContain('\\"service.name\\"');
+    });
+
+    it('should include target EUID source fields in target sourceFields', async () => {
+      const validIndexPatterns = ['valid_index'];
+      const params = {
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds: [] as OriginEventId[],
+        showUnknownTarget: false,
+        indexPatterns: validIndexPatterns,
+        spaceId: 'default',
+        esQuery: undefined as EsQuery | undefined,
+      };
+
+      await fetchEvents(params);
+
+      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      const query = esqlCallArgs[0].query;
+
+      // Verify target EUID source field values appear in the sourceFields JSON construction
+      // The JSON keys use actor-namespace names (e.g., "user.email") while the values
+      // reference saved target-namespace field variables (e.g., _sf_user_target_email)
+      expect(query).toContain('_sf_user_target_email');
+      expect(query).toContain('_sf_user_target_id');
+      expect(query).toContain('_sf_host_target_id');
+      expect(query).toContain('_sf_service_target_name');
     });
   });
 
   describe('Target entity filtering', () => {
-    it('should check all target entity fields when showUnknownTarget is false', async () => {
+    it('should check all EUID source target fields when showUnknownTarget is false', async () => {
       const validIndexPatterns = ['valid_index'];
       const params = {
         esClient,
@@ -327,17 +431,21 @@ describe('fetchEvents', () => {
       const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
       const filterArg = esqlCallArgs[0].filter as any;
 
-      // Should have bool.filter with target entity exists checks (new ECS fields only)
+      // Should have bool.filter with target EUID source field exists checks
+      const allTargetFields = [
+        ...GRAPH_TARGET_EUID_SOURCE_FIELDS.user,
+        ...GRAPH_TARGET_EUID_SOURCE_FIELDS.host,
+        ...GRAPH_TARGET_EUID_SOURCE_FIELDS.service,
+        ...GRAPH_TARGET_EUID_SOURCE_FIELDS.generic,
+      ];
+      const expectedExistsChecks = allTargetFields.map((field) => ({
+        exists: { field },
+      }));
       expect(filterArg.bool.filter).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
             bool: expect.objectContaining({
-              should: expect.arrayContaining([
-                { exists: { field: 'user.target.entity.id' } },
-                { exists: { field: 'host.target.entity.id' } },
-                { exists: { field: 'service.target.entity.id' } },
-                { exists: { field: 'entity.target.id' } },
-              ]),
+              should: expect.arrayContaining(expectedExistsChecks),
               minimum_should_match: 1,
             }),
           }),
@@ -347,7 +455,7 @@ describe('fetchEvents', () => {
       const targetFilter = filterArg.bool.filter.find((f: any) =>
         f.bool?.should?.some((s: any) => s.exists?.field?.includes('target'))
       );
-      expect(targetFilter?.bool?.should).toHaveLength(4);
+      expect(targetFilter?.bool?.should).toHaveLength(allTargetFields.length);
     });
 
     it('should not filter targets when showUnknownTarget is true', async () => {

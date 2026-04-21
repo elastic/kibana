@@ -6,24 +6,24 @@
  */
 
 import { inject, injectable } from 'inversify';
-import type {
-  LastNotifiedRecord,
-  NotificationGroup,
-  NotificationGroupId,
-  NotificationPolicy,
-  DispatcherStep,
-  DispatcherPipelineState,
-  DispatcherStepOutput,
-} from '../types';
+import { parseDurationToMs } from '../../duration';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../../services/query_service/tokens';
-import { queryResponseToRecords } from '../../services/query_service/query_response_to_records';
 import { getLastNotifiedTimestampsQuery } from '../queries';
-import { parseDurationToMs } from '../../duration';
+import type {
+  DispatcherPipelineState,
+  DispatcherStep,
+  DispatcherStepOutput,
+  LastNotifiedInfo,
+  LastNotifiedRecord,
+  NotificationGroup,
+  NotificationGroupId,
+  NotificationPolicy,
+} from '../types';
 
 @injectable()
 export class ApplyThrottlingStep implements DispatcherStep {
@@ -60,14 +60,19 @@ export class ApplyThrottlingStep implements DispatcherStep {
 
   private async fetchLastNotifiedTimestamps(
     notificationGroupIds: NotificationGroupId[]
-  ): Promise<Map<NotificationGroupId, Date>> {
-    const result = await this.queryService.executeQuery({
+  ): Promise<Map<NotificationGroupId, LastNotifiedInfo>> {
+    const records = await this.queryService.executeQueryRows<LastNotifiedRecord>({
       query: getLastNotifiedTimestampsQuery(notificationGroupIds).query,
     });
 
-    const records = queryResponseToRecords<LastNotifiedRecord>(result);
-    return new Map<NotificationGroupId, Date>(
-      records.map((record) => [record.notification_group_id, new Date(record.last_notified)])
+    return new Map<NotificationGroupId, LastNotifiedInfo>(
+      records.map((record) => [
+        record.notification_group_id,
+        {
+          lastNotified: new Date(record.last_notified),
+          episodeStatus: record.episode_status,
+        },
+      ])
     );
   }
 }
@@ -75,7 +80,7 @@ export class ApplyThrottlingStep implements DispatcherStep {
 export function applyThrottling(
   groups: readonly NotificationGroup[],
   policies: ReadonlyMap<string, NotificationPolicy>,
-  lastNotifiedMap: ReadonlyMap<NotificationGroupId, Date>,
+  lastNotifiedMap: ReadonlyMap<NotificationGroupId, LastNotifiedInfo>,
   now: Date
 ): { dispatch: NotificationGroup[]; throttled: NotificationGroup[] } {
   const dispatch: NotificationGroup[] = [];
@@ -83,21 +88,52 @@ export function applyThrottling(
 
   for (const group of groups) {
     const policy = policies.get(group.policyId)!;
-    const lastNotified = lastNotifiedMap.get(group.id);
-
-    if (
-      lastNotified &&
-      policy.throttle &&
-      policy.throttle.interval &&
-      isWithinInterval(lastNotified, policy.throttle.interval, now)
-    ) {
-      throttled.push(group);
-    } else {
-      dispatch.push(group);
-    }
+    const bucket = shouldDispatch(group, policy, lastNotifiedMap.get(group.id), now)
+      ? dispatch
+      : throttled;
+    bucket.push(group);
   }
 
   return { dispatch, throttled };
+}
+
+function shouldDispatch(
+  group: NotificationGroup,
+  policy: NotificationPolicy,
+  lastRecord: LastNotifiedInfo | undefined,
+  now: Date
+): boolean {
+  if (!lastRecord) return true;
+
+  const groupingMode = policy.groupingMode ?? 'per_episode';
+  const strategy =
+    policy.throttle?.strategy ??
+    (groupingMode === 'per_episode' ? 'on_status_change' : 'time_interval');
+
+  if (strategy === 'every_time') return true;
+
+  // Aggregate modes (per_field, all): throttle by interval only
+  if (groupingMode !== 'per_episode') {
+    return (
+      !policy.throttle?.interval ||
+      !isWithinInterval(lastRecord.lastNotified, policy.throttle.interval, now)
+    );
+  }
+
+  // per_episode: always dispatch on status change
+  const statusChanged = lastRecord.episodeStatus !== group.episodes[0]?.episode_status;
+  if (statusChanged) return true;
+
+  // per_status_interval: also dispatch when interval has elapsed
+  if (strategy === 'per_status_interval') {
+    return (
+      !!policy.throttle?.interval &&
+      !isWithinInterval(lastRecord.lastNotified, policy.throttle.interval, now)
+    );
+  }
+
+  // on_status_change with no change → throttle
+  return false;
 }
 
 function isWithinInterval(lastNotifiedAt: Date, interval: string, now: Date): boolean {

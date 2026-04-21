@@ -6,9 +6,9 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
+import { buildPath } from '@kbn/core-http-browser';
 import type { Reference } from '@kbn/content-management-utils';
-import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
-import type { LensApiState } from '@kbn/lens-embeddable-utils/config_builder/schema';
+import type { LensApiConfig, LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 
 import type { LensSavedObjectAttributes } from '@kbn/lens-common';
 import { LENS_INTERNAL_VIS_API_PATH, LENS_INTERNAL_API_VERSION } from '../../common/constants';
@@ -31,6 +31,7 @@ import { getLensBuilder } from '../lazy_builder';
 
 export interface LensItemResponse<M extends Record<string, string | boolean> = {}> {
   item: LensItem;
+  // TODO: align meta with public routes when internal routes are removed
   meta: LensItemMeta & M;
 }
 
@@ -54,14 +55,17 @@ export class LensClient {
       data,
       meta,
       id: responseId,
-    } = await this.http.get<LensGetResponseBody>(`${LENS_INTERNAL_VIS_API_PATH}/${id}`, {
-      version: LENS_INTERNAL_API_VERSION,
-    });
+    } = await this.http.get<LensGetResponseBody>(
+      buildPath(`${LENS_INTERNAL_VIS_API_PATH}/{id}`, { id }),
+      {
+        version: LENS_INTERNAL_API_VERSION,
+      }
+    );
 
     const chartType = this.builder?.getType(data);
 
     if (this.builder?.isEnabled && this.builder?.isSupported(chartType)) {
-      const config = data as LensApiState;
+      const config = data as LensApiConfig;
       return {
         item: {
           ...this.builder.fromAPIFormat(config),
@@ -125,7 +129,7 @@ export class LensClient {
     );
 
     if (useApiFormat && this.builder) {
-      const config = data as LensApiState;
+      const config = data as LensApiConfig;
       return {
         item: {
           ...rest,
@@ -181,7 +185,7 @@ export class LensClient {
           };
 
     const { data, meta, ...rest } = await this.http.put<LensUpdateResponseBody>(
-      `${LENS_INTERNAL_VIS_API_PATH}/${id}`,
+      buildPath(`${LENS_INTERNAL_VIS_API_PATH}/{id}`, { id }),
       {
         body: JSON.stringify(body),
         query: options,
@@ -190,7 +194,7 @@ export class LensClient {
     );
 
     if (useApiFormat && this.builder) {
-      const config = data as LensApiState;
+      const config = data as LensApiConfig;
       return {
         item: {
           ...rest,
@@ -216,10 +220,13 @@ export class LensClient {
   }
 
   async delete(id: string): Promise<{ success: boolean }> {
-    const response = await this.http.delete(`${LENS_INTERNAL_VIS_API_PATH}/${id}`, {
-      asResponse: true,
-      version: LENS_INTERNAL_API_VERSION,
-    });
+    const response = await this.http.delete(
+      buildPath(`${LENS_INTERNAL_VIS_API_PATH}/{id}`, { id }),
+      {
+        asResponse: true,
+        version: LENS_INTERNAL_API_VERSION,
+      }
+    );
     const success = response.response?.ok ?? false;
 
     return { success };
@@ -247,7 +254,7 @@ export class LensClient {
       const chartType = this.builder?.getType(data);
 
       if (this.builder?.isEnabled && this.builder?.isSupported(chartType)) {
-        const config = data as LensApiState;
+        const config = data as LensApiConfig;
         return {
           id,
           ...this.builder.fromAPIFormat(config),

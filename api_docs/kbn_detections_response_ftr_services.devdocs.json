@@ -378,7 +378,7 @@
             "section": "def-common.ToolingLog",
             "text": "ToolingLog"
           },
-          ", rule: z.infer<any>, namespace?: string | undefined) => Promise<z.infer<any>>"
+          ", rule: Record<any, any>, namespace?: string | undefined) => Promise<Record<any, any>>"
         ],
         "path": "x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response/rules/create_rule.ts",
         "lineNumber": 29,
@@ -433,14 +433,14 @@
           {
             "parentPluginId": "@kbn/detections-response-ftr-services",
             "id": "def-common.createRule.$3",
-            "type": "Any",
+            "type": "Object",
             "tags": [],
             "label": "rule",
             "description": [
               "The rule to create"
             ],
             "signature": [
-              "z.infer<any>"
+              "Record<any, any>"
             ],
             "path": "x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response/rules/create_rule.ts",
             "lineNumber": 32,
@@ -766,7 +766,7 @@
         "signature": [
           "(supertest: ",
           "Agent",
-          ", ruleId: string) => Promise<z.infer<any>>"
+          ", ruleId: string) => Promise<Record<any, any>>"
         ],
         "path": "x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response/rules/delete_rule.ts",
         "lineNumber": 19,
@@ -1010,7 +1010,7 @@
           "SearchResponse",
           "<{ 'kibana.alert.rule.risk_score': number; 'kibana.alert.rule.severity': string; 'kibana.alert.rule.building_block_type': string | undefined; \"@timestamp\": string; \"kibana.space_ids\": string[]; \"event.kind\": \"signal\"; \"kibana.alert.original_time\": string | undefined; \"kibana.alert.rule.consumer\": string; \"kibana.alert.ancestors\": { rule: string | undefined; id: string; type: string; index: string; depth: number; }[]; \"kibana.alert.status\": string; \"kibana.alert.workflow_status\": string; \"kibana.alert.depth\": number; \"kibana.alert.reason\": string; \"kibana.alert.building_block_type\": string | undefined; \"kibana.alert.severity\": string; \"kibana.alert.risk_score\": number; \"kibana.alert.rule.parameters\": { [key: string]: ",
           "SearchTypes",
-          "; }; \"kibana.alert.rule.actions\": { action_type_id: string; group?: string | undefined; id: string; params: object; uuid?: string | undefined; alerts_filter?: object | undefined; frequency?: { summary: boolean; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; throttle: string | null; } | undefined; }[]; \"kibana.alert.rule.author\": string[]; \"kibana.alert.rule.created_at\": string; \"kibana.alert.rule.created_by\": string; \"kibana.alert.rule.description\": string; \"kibana.alert.rule.enabled\": boolean; \"kibana.alert.rule.exceptions_list\": { id: string; list_id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; }[]; \"kibana.alert.rule.false_positives\": string[]; \"kibana.alert.rule.from\": string; \"kibana.alert.rule.immutable\": boolean; \"kibana.alert.rule.interval\": string; \"kibana.alert.rule.license\": string | undefined; \"kibana.alert.rule.max_signals\": number; \"kibana.alert.rule.name\": string; \"kibana.alert.rule.namespace\": string | undefined; \"kibana.alert.rule.note\": string | undefined; \"kibana.alert.rule.references\": string[]; \"kibana.alert.rule.risk_score_mapping\": { field: string; value: string; operator: \"equals\"; risk_score: number | undefined; }[]; \"kibana.alert.rule.rule_id\": string; \"kibana.alert.rule.rule_name_override\": string | undefined; \"kibana.alert.rule.severity_mapping\": { field: string; value: string; operator: \"equals\"; severity: \"medium\" | \"critical\" | \"high\" | \"low\"; }[]; \"kibana.alert.rule.tags\": string[]; \"kibana.alert.rule.threat\": { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; \"kibana.alert.rule.throttle\": string | undefined; \"kibana.alert.rule.timeline_id\": string | undefined; \"kibana.alert.rule.timeline_title\": string | undefined; \"kibana.alert.rule.timestamp_override\": string | undefined; \"kibana.alert.rule.to\": string; \"kibana.alert.rule.type\": \"eql\" | \"esql\" | \"query\" | \"threshold\" | \"threat_match\" | \"saved_query\" | \"machine_learning\" | \"new_terms\"; \"kibana.alert.rule.updated_at\": string; \"kibana.alert.rule.updated_by\": string; \"kibana.alert.rule.uuid\": string; \"kibana.alert.rule.version\": number; \"kibana.alert.uuid\": string; \"kibana.alert.rule.indices\": string[] | undefined; \"host.risk.calculated_level\": string | undefined; \"host.risk.calculated_score_norm\": number | undefined; \"user.risk.calculated_level\": string | undefined; \"user.risk.calculated_score_norm\": number | undefined; \"kibana.alert.url\": string | undefined; \"kibana.alert.workflow_tags\": string[] | undefined; \"kibana.alert.workflow_assignee_ids\": string[] | undefined; \"kibana.alert.host.criticality_level\": string | undefined; \"kibana.alert.user.criticality_level\": string | undefined; \"host.asset.criticality\": string | undefined; \"user.asset.criticality\": string | undefined; \"kibana.alert.rule.execution.type\": string | undefined; \"kibana.alert.intended_timestamp\": string | undefined; \"service.asset.criticality\": string | undefined; \"service.risk.calculated_level\": string | undefined; \"service.risk.calculated_score_norm\": number | undefined; \"kibana.alert.original_data_stream.dataset\"?: string | undefined; \"kibana.alert.original_data_stream.namespace\"?: string | undefined; \"kibana.alert.original_data_stream.type\"?: string | undefined; \"kibana.alert.updated_at\"?: string | undefined; \"kibana.alert.updated_by.user.id\"?: string | undefined; \"kibana.alert.updated_by.user.name\"?: string | undefined; \"kibana.alert.attack_ids\"?: string[] | undefined; } & { [key: string]: ",
+          "; }; \"kibana.alert.rule.actions\": { action_type_id: string; group?: string | undefined; id: string; params: object; uuid?: string | undefined; alerts_filter?: object | undefined; frequency?: { summary: boolean; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; throttle: string | null; } | undefined; }[]; \"kibana.alert.rule.author\": string[]; \"kibana.alert.rule.created_at\": string; \"kibana.alert.rule.created_by\": string; \"kibana.alert.rule.description\": string; \"kibana.alert.rule.enabled\": boolean; \"kibana.alert.rule.exceptions_list\": { id: string; list_id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; }[]; \"kibana.alert.rule.false_positives\": string[]; \"kibana.alert.rule.from\": string; \"kibana.alert.rule.immutable\": boolean; \"kibana.alert.rule.interval\": string; \"kibana.alert.rule.license\": string | undefined; \"kibana.alert.rule.max_signals\": number; \"kibana.alert.rule.name\": string; \"kibana.alert.rule.namespace\": string | undefined; \"kibana.alert.rule.note\": string | undefined; \"kibana.alert.rule.references\": string[]; \"kibana.alert.rule.risk_score_mapping\": { field: string; value: string; operator: \"equals\"; risk_score: number | undefined; }[]; \"kibana.alert.rule.rule_id\": string; \"kibana.alert.rule.rule_name_override\": string | undefined; \"kibana.alert.rule.severity_mapping\": { field: string; value: string; operator: \"equals\"; severity: \"medium\" | \"critical\" | \"high\" | \"low\"; }[]; \"kibana.alert.rule.tags\": string[]; \"kibana.alert.rule.threat\": { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; \"kibana.alert.rule.throttle\": string | undefined; \"kibana.alert.rule.timeline_id\": string | undefined; \"kibana.alert.rule.timeline_title\": string | undefined; \"kibana.alert.rule.timestamp_override\": string | undefined; \"kibana.alert.rule.to\": string; \"kibana.alert.rule.type\": \"eql\" | \"esql\" | \"query\" | \"threshold\" | \"machine_learning\" | \"saved_query\" | \"threat_match\" | \"new_terms\"; \"kibana.alert.rule.updated_at\": string; \"kibana.alert.rule.updated_by\": string; \"kibana.alert.rule.uuid\": string; \"kibana.alert.rule.version\": number; \"kibana.alert.uuid\": string; \"kibana.alert.rule.indices\": string[] | undefined; \"host.risk.calculated_level\": string | undefined; \"host.risk.calculated_score_norm\": number | undefined; \"user.risk.calculated_level\": string | undefined; \"user.risk.calculated_score_norm\": number | undefined; \"kibana.alert.url\": string | undefined; \"kibana.alert.workflow_tags\": string[] | undefined; \"kibana.alert.workflow_assignee_ids\": string[] | undefined; \"kibana.alert.host.criticality_level\": string | undefined; \"kibana.alert.user.criticality_level\": string | undefined; \"host.asset.criticality\": string | undefined; \"user.asset.criticality\": string | undefined; \"kibana.alert.rule.execution.type\": string | undefined; \"kibana.alert.intended_timestamp\": string | undefined; \"service.asset.criticality\": string | undefined; \"service.risk.calculated_level\": string | undefined; \"service.risk.calculated_score_norm\": number | undefined; \"kibana.alert.original_data_stream.dataset\"?: string | undefined; \"kibana.alert.original_data_stream.namespace\"?: string | undefined; \"kibana.alert.original_data_stream.type\"?: string | undefined; \"kibana.alert.updated_at\"?: string | undefined; \"kibana.alert.updated_by.user.id\"?: string | undefined; \"kibana.alert.updated_by.user.name\"?: string | undefined; \"kibana.alert.attack_ids\"?: string[] | undefined; } & { [key: string]: ",
           "SearchTypes",
           "; } & ",
           "RiskEnrichmentFields",
@@ -1131,7 +1131,7 @@
         "label": "getLuceneRuleForTesting",
         "description": [],
         "signature": [
-          "() => z.infer<any>"
+          "() => Record<any, any>"
         ],
         "path": "x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response/rules/get_rule_for_alert_testing.ts",
         "lineNumber": 34,
@@ -1150,7 +1150,7 @@
         "label": "getQueryAlertIds",
         "description": [],
         "signature": [
-          "(alertIds: z.infer<any>) => { query: { terms: { _id: z.infer<any>; }; }; }"
+          "(alertIds: string[]) => { query: { terms: { _id: string[]; }; }; }"
         ],
         "path": "x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response/alerts/get_query_alert_ids.ts",
         "lineNumber": 10,
@@ -1161,12 +1161,12 @@
           {
             "parentPluginId": "@kbn/detections-response-ftr-services",
             "id": "def-common.getQueryAlertIds.$1",
-            "type": "Any",
+            "type": "Array",
             "tags": [],
             "label": "alertIds",
             "description": [],
             "signature": [
-              "z.infer<any>"
+              "string[]"
             ],
             "path": "x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response/alerts/get_query_alert_ids.ts",
             "lineNumber": 10,
@@ -1247,7 +1247,7 @@
           "\nThis is a typical signal testing rule that is easy for most basic testing of output of alerts.\nIt starts out in an enabled true state. The 'from' is set very far back to test the basics of signal\ncreation and testing by getting all the alerts at once."
         ],
         "signature": [
-          "(index: string[], ruleId?: string, enabled?: boolean) => z.infer<any>"
+          "(index: string[], ruleId?: string, enabled?: boolean) => Record<any, any>"
         ],
         "path": "x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response/rules/get_rule_for_alert_testing.ts",
         "lineNumber": 17,
@@ -2335,7 +2335,7 @@
           "\nWaits for rule to settle in a provided status.\nDepending on wether `id` or `ruleId` provided it may impact the behavior.\n- `id` leads to fetching a rule via ES Get API (rulesClient.resolve -> SOClient.resolve -> ES Get API)\n- `ruleId` leads to fetching a rule via ES Search API (rulesClient.find -> SOClient.find -> ES Search API)\nES Search API may return outdated data while ES Get API always returns fresh data"
         ],
         "signature": [
-          "(expectedStatus: z.infer<any>, { supertest, log, afterDate, namespace, ...idOrRuleId }: ",
+          "(expectedStatus: any, { supertest, log, afterDate, namespace, ...idOrRuleId }: ",
           {
             "pluginId": "@kbn/detections-response-ftr-services",
             "scope": "common",
@@ -2359,7 +2359,7 @@
             "label": "expectedStatus",
             "description": [],
             "signature": [
-              "z.infer<any>"
+              "any"
             ],
             "path": "x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response/rules/wait_for_rule_status.ts",
             "lineNumber": 43,

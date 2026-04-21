@@ -14,6 +14,7 @@ import {
   spaceTest,
   TRACES,
   RICH_TRACE,
+  PRODUCER_TRACE,
   DEEP_TRACE,
   setupTracesExperience,
   teardownTracesExperience,
@@ -221,6 +222,32 @@ spaceTest.describe(
     );
 
     spaceTest(
+      'Service badge in full-screen waterfall navigates to the APM service overview',
+      async ({ browserAuth, page, pageObjects }) => {
+        const { flyout } = pageObjects.tracesExperience;
+
+        await spaceTest.step('setup: login and open trace timeline', async () => {
+          await browserAuth.loginAsViewer();
+          await openTraceTimeline(pageObjects);
+        });
+
+        await spaceTest.step('Click the service badge on the transaction row', async () => {
+          const { serviceBadge } = flyout.waterfallFlyout.getWaterfallItem(
+            RICH_TRACE.TRANSACTION_NAME
+          );
+          await expect(serviceBadge).toBeVisible();
+          await serviceBadge.click();
+        });
+
+        await spaceTest.step('Verify navigation to the APM service overview', async () => {
+          await expect(page).toHaveURL(
+            new RegExp(`/app/apm/services/${RICH_TRACE.SERVICE_NAME}/overview`)
+          );
+        });
+      }
+    );
+
+    spaceTest(
       'Open in Discover from child flyout sections navigates to the correct data',
       async ({ browserAuth, pageObjects }) => {
         const { flyout } = pageObjects.tracesExperience;
@@ -256,38 +283,36 @@ spaceTest.describe(
           }
         );
 
-        // TODO: These steps are commented out due to a buggy integration with the Flyout System.
-        // This will be addressed in a separate PR.
-        // await spaceTest.step(
-        //   'Internal span child flyout - logs Open in Discover shows the correlated logs',
-        //   async () => {
-        //     await flyout.waterfallFlyout.childDocFlyout.logs.openInDiscoverButton.click();
-        //     await pageObjects.discover.expectDocTableToContainText(
-        //       RICH_TRACE.LOGS.PROCESS_ORDER_VALIDATING
-        //     );
-        //     await pageObjects.discover.expectDocTableToContainText(
-        //       RICH_TRACE.LOGS.PROCESS_ORDER_INVENTORY
-        //     );
-        //     await pageObjects.discover.expectDocTableToContainText(
-        //       RICH_TRACE.LOGS.PROCESS_ORDER_SUCCESS
-        //     );
-        //   }
-        // );
-        //
-        // await spaceTest.step(
-        //   'Internal span child flyout - switch back to original tab',
-        //   async () => {
-        //     await pageObjects.discover.navigateToTabByName('Untitled');
-        //   }
-        // );
-        //
-        // await spaceTest.step(
-        //   'Internal span child flyout - span links Open in Discover shows the linked span',
-        //   async () => {
-        //     await flyout.waterfallFlyout.childDocFlyout.spanLinks.openInDiscoverButton.click();
-        //     await pageObjects.discover.expectDocTableToContainText(PRODUCER_TRACE.KAFKA_SPAN_NAME);
-        //   }
-        // );
+        await spaceTest.step(
+          'Internal span child flyout - logs Open in Discover shows the correlated logs',
+          async () => {
+            await flyout.waterfallFlyout.childDocFlyout.logs.openInDiscoverButton.click();
+            await pageObjects.discover.expectDocTableToContainText(
+              RICH_TRACE.LOGS.PROCESS_ORDER_VALIDATING
+            );
+            await pageObjects.discover.expectDocTableToContainText(
+              RICH_TRACE.LOGS.PROCESS_ORDER_INVENTORY
+            );
+            await pageObjects.discover.expectDocTableToContainText(
+              RICH_TRACE.LOGS.PROCESS_ORDER_SUCCESS
+            );
+          }
+        );
+
+        await spaceTest.step(
+          'Internal span child flyout - switch back to original tab',
+          async () => {
+            await pageObjects.discover.navigateToTabByName('Untitled');
+          }
+        );
+
+        await spaceTest.step(
+          'Internal span child flyout - span links Open in Discover shows the linked span',
+          async () => {
+            await flyout.waterfallFlyout.childDocFlyout.spanLinks.openInDiscoverButton.click();
+            await pageObjects.discover.expectDocTableToContainText(PRODUCER_TRACE.KAFKA_SPAN_NAME);
+          }
+        );
       }
     );
   }

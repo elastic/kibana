@@ -17,7 +17,7 @@ import {
 } from '../test_utils';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { createQueryService } from '../../services/query_service/query_service.mock';
-import type { AlertEvent } from '../../../resources/alert_events';
+import type { AlertEvent } from '../../../resources/datastreams/alert_events';
 
 describe('CreateRecoveryEventsStep', () => {
   const { loggerService } = createLoggerService();

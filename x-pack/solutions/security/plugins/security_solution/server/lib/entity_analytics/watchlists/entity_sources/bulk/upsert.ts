@@ -6,9 +6,12 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { CRUDClient } from '@kbn/entity-store/server/domain/crud/crud_client';
 import type { MonitoringEntitySource } from '../../../../../../common/api/entity_analytics/watchlists/data_source/common.gen';
 import type { WatchlistBulkEntity } from '../types';
 import { getErrorFromBulkResponse, errorsMsg } from '../sync/utils';
+import { buildWatchlistDocId } from '../../entities/utils';
+import { addWatchlistAttributeToStore } from '../sync/entity_store_sync';
 
 export const UPDATE_SCRIPT_SOURCE = `
 def src = ctx._source;
@@ -33,7 +36,11 @@ if (modified) {
 }
 `;
 
-const buildCreateDoc = (entity: WatchlistBulkEntity, sourceLabel: string) => {
+const buildCreateDoc = (
+  entity: WatchlistBulkEntity,
+  sourceLabel: string,
+  watchlist: { name: string; id: string }
+) => {
   const now = new Date().toISOString();
   return {
     '@timestamp': now,
@@ -44,11 +51,12 @@ const buildCreateDoc = (entity: WatchlistBulkEntity, sourceLabel: string) => {
       type: entity.type,
     },
     labels: { sources: [sourceLabel], source_ids: [entity.sourceId] },
+    watchlist,
   };
 };
 
 export const bulkUpsertOperationsFactory =
-  (logger: Logger) =>
+  (logger: Logger, watchlist: { name: string; id: string }) =>
   ({
     entities,
     sourceLabel,
@@ -77,8 +85,8 @@ export const bulkUpsertOperationsFactory =
         );
       } else {
         ops.push(
-          { index: { _index: targetIndex, _id: entity.euid } },
-          buildCreateDoc(entity, sourceLabel)
+          { index: { _index: targetIndex, _id: buildWatchlistDocId(watchlist.id, entity.euid) } },
+          buildCreateDoc(entity, sourceLabel, watchlist)
         );
       }
     }
@@ -87,30 +95,32 @@ export const bulkUpsertOperationsFactory =
 
 export const applyBulkUpsert = async ({
   esClient,
+  crudClient,
   logger,
   entities,
   source,
-  targetIndex,
+  watchlist,
 }: {
   esClient: ElasticsearchClient;
+  crudClient: CRUDClient;
   logger: Logger;
   entities: WatchlistBulkEntity[];
   source: MonitoringEntitySource;
-  targetIndex: string;
+  watchlist: { name: string; id: string; index: string };
 }) => {
   if (entities.length === 0) {
     return;
   }
 
   const chunkSize = 500;
-  const buildOps = bulkUpsertOperationsFactory(logger);
+  const buildOps = bulkUpsertOperationsFactory(logger, watchlist);
 
   for (let start = 0; start < entities.length; start += chunkSize) {
     const chunk = entities.slice(start, start + chunkSize);
     const operations = buildOps({
       entities: chunk,
       sourceLabel: source.type ?? 'index',
-      targetIndex,
+      targetIndex: watchlist.index,
     });
     if (operations.length > 0) {
       const resp = await esClient.bulk({ refresh: 'wait_for', body: operations });
@@ -120,4 +130,15 @@ export const applyBulkUpsert = async ({
       }
     }
   }
+
+  await addWatchlistAttributeToStore({
+    crudClient,
+    logger,
+    entityRefs: entities.map((e) => ({
+      euid: e.euid,
+      type: e.type,
+      currentWatchlists: e.currentWatchlists,
+    })),
+    watchlistId: watchlist.id,
+  });
 };

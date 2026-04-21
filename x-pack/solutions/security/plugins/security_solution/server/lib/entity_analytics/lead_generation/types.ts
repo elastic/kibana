@@ -11,7 +11,7 @@ import type { Entity } from '../../../../common/api/entity_analytics/entity_stor
  * Entity representation flowing through the lead generation pipeline.
  *
  * Entity Store V2 records already embed risk scores (`entity.risk`), attributes
- * (`entity.attributes.privileged`, etc.), and behaviors, so we carry the full
+ * (`entity.attributes.watchlists`, etc.), and behaviors, so we carry the full
  * entity record through the pipeline rather than fetching data separately.
  */
 export interface LeadEntity {
@@ -53,6 +53,8 @@ export interface ObservationModuleConfig {
   readonly name: string;
   /** Execution order (higher = earlier) */
   readonly priority: number;
+  /** Optional weight for the weighted scoring engine (defaults in engine if omitted) */
+  readonly weight?: number;
 }
 
 /** The contract every pluggable observation module must satisfy. */
@@ -111,9 +113,18 @@ export interface LeadGenerationEngineConfig {
   readonly minObservations: number;
   /** Maximum number of leads to return */
   readonly maxLeads: number;
+  /** Bonus multiplier applied when multiple observations come from the same module (0.0–1.0) */
+  readonly corroborationBonus: number;
+  /** Bonus multiplier applied when observations come from multiple modules (0.0–1.0) */
+  readonly diversityBonus: number;
+  /** Raw score ceiling used when normalizing to the 1–10 priority scale */
+  readonly normalizationCeiling: number;
 }
 
 export const DEFAULT_ENGINE_CONFIG: LeadGenerationEngineConfig = {
   minObservations: 1,
   maxLeads: 10,
+  corroborationBonus: 0.15,
+  diversityBonus: 0.1,
+  normalizationCeiling: 100,
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -16,8 +16,6 @@ import {
   EuiText,
   EuiTextColor,
   EuiLink,
-  EuiFlexGrid,
-  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import type {
   LanguageDefinition,
@@ -32,18 +30,11 @@ import {
   useCloudConnectStatus,
 } from '@kbn/search-api-panels';
 import { CLOUD_CONNECT_NAV_ID } from '@kbn/deeplinks-management/constants';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { type Index } from '../../../../../../../common';
-import { formatBytes } from '../../../../../lib/format_bytes';
 import { useAppContext } from '../../../../../app_context';
 import { documentationService, useLoadIndexMappings } from '../../../../../services';
-import { loadIndexDocCount } from '../../../../../services/api';
 import { languageDefinitions, curlDefinition } from './languages';
-import type { DocCountState } from '../quick_stats/quick_stats';
-import { StatusDetails } from '../quick_stats/status_details';
-import { DataStreamDetails } from '../quick_stats/data_stream_details';
-import { StorageDetails } from '../quick_stats/storage_details';
-import { AliasesDetails } from '../quick_stats/aliases_details';
-import { SizeDocCountDetails } from '../quick_stats/size_doc_count_details';
 
 import { UpdateElserMappingsModal } from '../update_elser_mappings/update_elser_mappings_modal';
 import { useMappingsState } from '../../../../../components/mappings_editor/mappings_state_context';
@@ -52,24 +43,23 @@ import { useMappingsStateListener } from '../../../../../components/mappings_edi
 import { parseMappings } from '../../../../../shared/parse_mappings';
 import { useUserPrivileges } from '../../../../../services/api';
 import { useLicense } from '../../../../../../hooks/use_license';
+import { IndexDocuments } from '../index_documents/index_documents';
+import { QuickStats } from '../quick_stats/quick_stats';
 
 interface Props {
   indexDetails: Index;
+  sampleDocuments: SearchHit[];
+  isDocumentsLoading: boolean;
+  documentsError: unknown;
 }
 
-export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetails }) => {
-  const {
-    name,
-    status,
-    health,
-    documents_deleted: documentsDeleted,
-    primary,
-    replica,
-    aliases,
-    data_stream: dataStream,
-    size,
-    primary_size: primarySize,
-  } = indexDetails;
+export const DetailsPageOverview: React.FunctionComponent<Props> = ({
+  indexDetails,
+  sampleDocuments,
+  isDocumentsLoading,
+  documentsError,
+}) => {
+  const { name } = indexDetails;
   const {
     core,
     plugins: { cloud, cloudConnect, share },
@@ -79,25 +69,6 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
   const { data: mappingsData, resendRequest } = useLoadIndexMappings(name || '');
   const { isAtLeastEnterprise } = useLicense();
 
-  const [docCount, setDocCount] = useState<DocCountState>({ isLoading: true, isError: false });
-
-  const fetchDocCount = useCallback(async () => {
-    try {
-      const { data, error } = await loadIndexDocCount(name);
-      if (error || !data) {
-        setDocCount({ isLoading: false, isError: true });
-      } else {
-        setDocCount({ count: data[name], isLoading: false, isError: false });
-      }
-    } catch {
-      setDocCount({ isLoading: false, isError: true });
-    }
-  }, [name]);
-
-  useEffect(() => {
-    fetchDocCount();
-  }, [fetchDocCount]);
-
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageDefinition>(curlDefinition);
   const [elasticsearchUrl, setElasticsearchUrl] = useState<string>('');
   const hasElserOnMlNodeSemanticText = hasElserOnMlNodeSemanticTextField(state.mappingViewFields);
@@ -106,16 +77,12 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
   const { data } = useUserPrivileges(indexDetails.name);
   const hasUpdateMappingsPrivileges = data?.privileges?.canManageIndex === true;
 
-  const sizeFormatted = formatBytes(size);
-  const primarySizeFormatted = formatBytes(primarySize);
-
   const codeSnippetArguments: LanguageDefinitionSnippetArguments = {
     url: elasticsearchUrl,
     apiKey: 'your_api_key',
     indexName: name,
   };
 
-  const isLarge = useIsWithinBreakpoints(['xl']);
   const {
     isLoading: isCloudConnectStatusLoading,
     isCloudConnected,
@@ -174,27 +141,7 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
         />
       )}
 
-      <EuiFlexGrid columns={isLarge ? 3 : 1}>
-        <StorageDetails
-          size={sizeFormatted}
-          primarySize={primarySizeFormatted}
-          primary={primary}
-          replica={replica}
-        />
-
-        <StatusDetails
-          docCount={docCount}
-          documentsDeleted={documentsDeleted!}
-          status={status}
-          health={health}
-        />
-
-        <SizeDocCountDetails size={sizeFormatted} docCount={docCount} />
-
-        <AliasesDetails aliases={aliases} />
-
-        {dataStream && <DataStreamDetails dataStreamName={dataStream} />}
-      </EuiFlexGrid>
+      <QuickStats indexDetails={indexDetails} />
 
       <EuiSpacer />
 
@@ -254,6 +201,12 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
               consoleRequest={getConsoleRequest('ingestDataIndex', codeSnippetArguments)}
             />
           </EuiFlexItem>
+          <IndexDocuments
+            documents={sampleDocuments}
+            isLoading={isDocumentsLoading}
+            error={documentsError}
+            mappings={mappingsData ?? undefined}
+          />
         </EuiFlexGroup>
       )}
     </>

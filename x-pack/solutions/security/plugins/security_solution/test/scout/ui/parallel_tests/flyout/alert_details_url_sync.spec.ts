@@ -11,7 +11,8 @@ import { CUSTOM_QUERY_RULE } from '@kbn/scout-security/src/playwright/constants/
 
 const RIGHT = 'right';
 
-spaceTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/256433
+spaceTest.describe.skip(
   'Expandable flyout state sync',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {

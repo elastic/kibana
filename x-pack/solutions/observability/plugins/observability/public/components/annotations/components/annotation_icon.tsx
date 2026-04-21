@@ -27,7 +27,7 @@ function AnnotationIcon({ annotation }: AnnotationIconProps) {
     <EuiIcon
       type={
         eventEnd
-          ? 'stopFilled'
+          ? 'stopFill'
           : (annotationsIconSet.find((icon) => icon.value === iconValue)?.icon as IconType) ??
             (iconValue as IconType)
       }

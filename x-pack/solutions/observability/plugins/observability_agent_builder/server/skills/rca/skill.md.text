@@ -25,6 +25,24 @@ Do NOT use for:
 
 ---
 
+## Memory Integration (Optional)
+
+If the **significant-events-memory** skill is loaded (check your available skills), you have access to a
+shared knowledge base containing architecture overviews, service descriptions, and operational
+patterns learned from previous investigations.
+
+**How to use memory during RCA:**
+- **Before investigating:** Search memory for the affected service or stream name to load prior
+  context (architecture, known failure modes, dependencies). This helps you form better hypotheses
+  in Step A-3.
+- **After confirming a root cause:** If you discovered something new and noteworthy about the system
+  (a previously unknown dependency, failure mode, or architectural detail), offer to save it to
+  memory for future investigations.
+- **Skip memory entirely** if the significant-events-memory skill is not in your available skills list.
+  Memory has no effect when the skill is not loaded.
+
+---
+
 ## Mandatory First Step
 
 **If `search_kis` is in your tool list, your FIRST tool call MUST be
@@ -63,6 +81,10 @@ Before calling any tool, read the user's message carefully and note:
 This context shapes every tool call you will make. Do not invent details not present in
 the user's message, but do use them to fill in parameters precisely.
 
+If the **significant-events-memory** skill is available, search memory for the suspect service/stream name
+now. Prior architecture context, known dependencies, and past failure patterns will improve your
+hypotheses in Step A-3.
+
 ### Step A-1: Identify Target Stream and Time Window
 
 **Stream:** Use the service or stream name from Step A-0 as `stream_names`. If the user
@@ -81,7 +103,7 @@ Use this window consistently in all subsequent queries.
 
 **Always start with a targeted call**, using the symptom from Step A-0 as `search_text`:
 - `stream_names`: the target stream(s) from Step A-1 when known; omit only for discovery (Step A-1)
-- `search_text`: the symptom keyword(s) from Step A-0 (e.g. "database errors", "connection timeout", "OOM killed")
+- `search_text`: a descriptive phrase of the symptom from Step A-0 (e.g. "database connection pool exhaustion", "connection timeout errors", "OOM killed containers"). Prefer natural-language descriptions over single keywords — the search uses semantic ranking.
 - `limit`: **50** when **not** passing `stream_names` (discovery); **20** when passing `stream_names`
 - No `kind` filter (retrieve both features and queries)
 
@@ -259,6 +281,10 @@ State the specific mechanism in one sentence. Include confidence level: Confirme
 - Unconfirmed hypothesis: what data would confirm it and how to obtain it.
 - Query KIs with `backed: false`: recommend creating Kibana alert rules.
 - Feature KIs with `status: "stale"` that remain relevant: recommend refreshing feature extraction.
+
+**Memory update:** If the **significant-events-memory** skill is available and you discovered new
+architectural details, dependencies, or failure patterns not already in memory, offer to save
+them for future investigations.
 
 ---
 

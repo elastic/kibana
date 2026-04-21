@@ -44,6 +44,7 @@ const getResetByField = (fieldsToReset: DefaultProfileStateField[]) => ({
   rowHeight: fieldsToReset.includes('rowHeight'),
   breakdownField: fieldsToReset.includes('breakdownField'),
   hideChart: fieldsToReset.includes('hideChart'),
+  hideTable: fieldsToReset.includes('hideTable'),
 });
 
 describe('getDefaultProfileState', () => {
@@ -85,6 +86,23 @@ describe('getDefaultProfileState', () => {
       }).getPreFetchState();
 
       expect(appStateWithoutHideChart).toBeUndefined();
+    });
+
+    it('should return expected hideTable', () => {
+      let appState = getDefaultProfileState({
+        scopedProfilesManager,
+        defaultProfileState: createDefaultProfileState(['hideTable']),
+        dataView: dataViewWithTimefieldMock,
+      }).getPreFetchState();
+      expect(appState).toEqual({
+        hideTable: false,
+      });
+      appState = getDefaultProfileState({
+        scopedProfilesManager,
+        defaultProfileState: createDefaultProfileState('none'),
+        dataView: dataViewWithTimefieldMock,
+      }).getPreFetchState();
+      expect(appState).toEqual(undefined);
     });
   });
 

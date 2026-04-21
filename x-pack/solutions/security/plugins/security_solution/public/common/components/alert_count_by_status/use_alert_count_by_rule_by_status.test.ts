@@ -9,7 +9,10 @@ import { renderHook } from '@testing-library/react';
 
 import { mockQuery, mockAlertCountByRuleResult, parsedAlertCountByRuleResult } from './mock_data';
 import type { UseAlertCountByRuleByStatusProps } from './use_alert_count_by_rule_by_status';
-import { useAlertCountByRuleByStatus } from './use_alert_count_by_rule_by_status';
+import {
+  buildRuleAlertsByEntityQuery,
+  useAlertCountByRuleByStatus,
+} from './use_alert_count_by_rule_by_status';
 
 const dateNow = new Date('2022-04-15T12:00:00.000Z').valueOf();
 const mockDateNow = jest.fn().mockReturnValue(dateNow);
@@ -140,5 +143,24 @@ describe('useAlertCountByRuleByStatus', () => {
       isLoading: false,
       updatedAt: dateNow,
     });
+  });
+
+  it('should filter by identityFields when provided', () => {
+    renderUseAlertCountByRuleByStatus({
+      identityFields: { 'host.id': 'host-uuid', 'host.name': 'hostname' },
+    });
+
+    expect(mockUseQueryAlerts).toBeCalledWith(
+      expect.objectContaining({
+        query: buildRuleAlertsByEntityQuery({
+          from,
+          to,
+          statuses: ['open'],
+          field: 'test_field',
+          value: 'test_value',
+          identityFields: { 'host.id': 'host-uuid', 'host.name': 'hostname' },
+        }),
+      })
+    );
   });
 });

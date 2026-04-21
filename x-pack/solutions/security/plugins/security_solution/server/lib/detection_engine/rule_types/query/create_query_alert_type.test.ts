@@ -19,11 +19,12 @@ import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { docLinksServiceMock } from '@kbn/core/server/mocks';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import { hasTimestampFields } from '../utils/utils';
+import { createMockEndpointAppContextService } from '../../../../endpoint/mocks';
 
 jest.mock('@kbn/data-views-plugin/server', () => ({
   ...jest.requireActual('@kbn/data-views-plugin/server'),
   IndexPatternsFetcher: jest.fn().mockImplementation(() => ({
-    getIndexPatternsWithMatches: jest.fn().mockResolvedValue(['some-index']),
+    getIndexPatternMatches: jest.fn().mockResolvedValue({ matchedIndexPatterns: ['some-index'] }),
   })),
 }));
 
@@ -79,6 +80,10 @@ describe('Custom Query Alerts', () => {
     eventsTelemetry,
     licensing,
     scheduleNotificationResponseActionsService: () => null,
+    endpointAppContextService: createMockEndpointAppContextService(),
+    getEntityStore: jest.fn().mockResolvedValue({
+      createCRUDClient: jest.fn().mockReturnValue({ listEntities: jest.fn() }),
+    }),
   });
 
   afterEach(() => {
@@ -125,7 +130,7 @@ describe('Custom Query Alerts', () => {
 
   it('short-circuits and writes a warning if no indices are found', async () => {
     (IndexPatternsFetcher as jest.Mock).mockImplementationOnce(() => ({
-      getIndexPatternsWithMatches: jest.fn().mockResolvedValue([]),
+      getIndexPatternMatches: jest.fn().mockResolvedValue({ matchedIndexPatterns: [] }),
     }));
     const queryAlertType = securityRuleTypeWrapper(
       createQueryAlertType({
@@ -201,6 +206,41 @@ describe('Custom Query Alerts', () => {
 
     expect((await ruleDataClient.getWriter()).bulk).toHaveBeenCalled();
     expect(eventsTelemetry.sendAsync).toHaveBeenCalled();
+  });
+
+  it('classifies gap errors as user errors', async () => {
+    const queryAlertType = securityRuleTypeWrapper(
+      createQueryAlertType({
+        id: QUERY_RULE_TYPE_ID,
+        name: 'Custom Query Rule',
+      })
+    );
+
+    alerting.registerType(queryAlertType);
+
+    services.scopedClusterClient.asCurrentUser.search.mockResolvedValue({
+      hits: {
+        hits: [],
+        total: { relation: 'eq', value: 0 },
+      },
+      took: 0,
+      timed_out: false,
+      _shards: { failed: 0, skipped: 0, successful: 1, total: 1 },
+    });
+
+    const params = getQueryRuleParams();
+
+    await executor({
+      params,
+      previousStartedAt: new Date(Date.now() - 60 * 60 * 1000),
+    });
+
+    expect(mockedStatusLogger.error).toHaveBeenCalledWith(
+      expect.stringContaining(
+        'were not queried between this rule execution and the last execution'
+      ),
+      expect.objectContaining({ userError: true })
+    );
   });
 
   it('sends an alert when events are found and logs a warning when hasTimestampFields throws an error', async () => {

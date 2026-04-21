@@ -52,4 +52,22 @@ describe('WorkflowsTriggersList', () => {
     render(<WorkflowsTriggersList triggers={[{ type: 'custom_thing' }]} />);
     expect(screen.getByText('Custom_thing')).toBeInTheDocument();
   });
+
+  describe('responsive structure', () => {
+    it('renders trigger icon with title attribute for native tooltip', () => {
+      render(<WorkflowsTriggersList triggers={[{ type: 'manual' }]} />);
+      const icon = document.querySelector('[title="Manual"]');
+      expect(icon).toBeInTheDocument();
+    });
+
+    it('renders the trigger label in a text element alongside the icon', () => {
+      render(<WorkflowsTriggersList triggers={[{ type: 'alert' }]} />);
+      expect(screen.getByText('Alert')).toBeInTheDocument();
+    });
+
+    it('renders the "No triggers" text for empty triggers', () => {
+      render(<WorkflowsTriggersList triggers={[]} />);
+      expect(screen.getByText('No triggers')).toBeInTheDocument();
+    });
+  });
 });

@@ -21,7 +21,11 @@ export const ElasticInferenceService = () => {
       data-test-subj="eisModelsPage"
     >
       <ElasticInferenceServiceModelsHeader />
-      <EuiPageTemplate.Section className="eui-yScroll" data-test-subj="eisModelsPageMain">
+      <EuiPageTemplate.Section
+        className="eui-yScroll"
+        data-test-subj="eisModelsPageMain"
+        paddingSize="none"
+      >
         <ElasticInferenceServiceModelsPage />
       </EuiPageTemplate.Section>
     </KibanaPageTemplate>

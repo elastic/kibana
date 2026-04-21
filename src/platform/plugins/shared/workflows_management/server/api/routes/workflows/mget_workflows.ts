@@ -15,7 +15,8 @@ import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_READ_SECURITY } from '../utils/route_security';
 import { withLicenseCheck } from '../utils/with_license_check';
 
-export function registerMgetWorkflowsRoute({ router, api, spaces }: RouteDependencies) {
+export function registerMgetWorkflowsRoute(deps: RouteDependencies) {
+  const { router, api, spaces, audit } = deps;
   router.versioned
     .post({
       path: '/api/workflows/mget',
@@ -65,8 +66,13 @@ export function registerMgetWorkflowsRoute({ router, api, spaces }: RouteDepende
           const spaceId = spaces.getSpaceId(request);
           const { ids, source } = request.body;
           const workflows = await api.getWorkflowsSourceByIds(ids, spaceId, source);
+          audit.logWorkflowMget(request, {
+            requestedCount: ids.length,
+            returnedCount: workflows.length,
+          });
           return response.ok({ body: workflows });
         } catch (error) {
+          audit.logWorkflowMget(request, { error });
           return handleRouteError(response, error);
         }
       })

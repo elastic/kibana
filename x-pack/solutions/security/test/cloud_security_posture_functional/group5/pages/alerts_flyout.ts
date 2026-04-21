@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
 import {
   waitForPluginInitialized,
-  cleanupEntityStore,
   waitForEntityDataIndexed,
   dataViewRouteHelpersFactory,
-  initEntityEnginesWithRetry,
+  installEntityStoreV2,
+  uninstallEntityStoreV2,
+  waitForEntityStoreV2Running,
 } from '../../../cloud_security_posture_api/utils';
 import type { SecurityTelemetryFtrProviderContext } from '../../config.base';
 
@@ -39,6 +39,17 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
     this.tags(['cloud_security_posture_graph_viz']);
 
     before(async () => {
+      // Clean up any leftover alerts indices from previous failed runs
+      for (const suffix of ['000001', '000002']) {
+        try {
+          await es.indices.delete({
+            index: `.internal.alerts-security.alerts-default-${suffix}`,
+          });
+        } catch (e) {
+          // Ignore if index doesn't exist
+        }
+      }
+
       // security_alerts_modified_mappings - contains mappings for actor and target
       // security_alerts - does not contain mappings for actor and target
       await esArchiver.load(
@@ -51,24 +62,23 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await waitForPluginInitialized({ retry, supertest, logger });
       await ebtUIHelper.setOptIn(true); // starts the recording of events from this moment
 
-      // Enable asset inventory setting (required for entity store with 'generic' type)
-      await kibanaServer.uiSettings.update({ 'securitySolution:enableAssetInventory': true });
+      // Enable asset inventory and entity store v2 settings
+      await kibanaServer.uiSettings.update({
+        'securitySolution:enableAssetInventory': true,
+        'securitySolution:entityStoreEnableV2': true,
+      });
 
       // Initialize security-solution-default data-view (required by entity store)
       const dataView = dataViewRouteHelpersFactory(supertest);
       await dataView.create('security-solution');
 
-      // Initialize entity engine (required for graph visualization)
-      await initEntityEnginesWithRetry({
-        supertest,
-        retry,
-        logger,
-        entityTypes: ['generic'],
-      });
+      // Install Entity Store V2 (required for graph visualization)
+      await installEntityStoreV2({ supertest, logger });
+      await waitForEntityStoreV2Running({ supertest, retry, logger });
     });
 
     after(async () => {
-      await cleanupEntityStore({ supertest, logger });
+      await uninstallEntityStoreV2({ supertest, logger });
       await es.deleteByQuery({
         index: '.internal.alerts-*',
         query: { match_all: {} },
@@ -103,30 +113,30 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await expandedFlyoutGraph.toggleSearchBar();
 
       // Show actions by entity
-      await expandedFlyoutGraph.showActionsByEntity('admin@example.com');
-      await expandedFlyoutGraph.expectFilterTextEquals(0, 'user.entity.id: admin@example.com');
-      await expandedFlyoutGraph.expectFilterPreviewEquals(0, 'user.entity.id: admin@example.com');
+      await expandedFlyoutGraph.showActionsByEntity('user:admin@example.com@gcp');
+      await expandedFlyoutGraph.expectFilterTextEquals(0, 'user.id: admin@example.com');
+      await expandedFlyoutGraph.expectFilterPreviewEquals(0, 'user.id: admin@example.com');
 
       // Show actions on entity
-      await expandedFlyoutGraph.showActionsOnEntity('admin@example.com');
+      await expandedFlyoutGraph.showActionsOnEntity('user:admin@example.com@gcp');
       await expandedFlyoutGraph.expectFilterTextEquals(
         0,
-        'user.entity.id: admin@example.com OR user.target.entity.id: admin@example.com'
+        'user.id: admin@example.com OR user.target.id: admin@example.com'
       );
       await expandedFlyoutGraph.expectFilterPreviewEquals(
         0,
-        'user.entity.id: admin@example.com OR user.target.entity.id: admin@example.com'
+        'user.id: admin@example.com OR user.target.id: admin@example.com'
       );
 
       // Explore related entities
-      await expandedFlyoutGraph.exploreRelatedEntities('admin@example.com');
+      await expandedFlyoutGraph.exploreRelatedEntities('user:admin@example.com@gcp');
       await expandedFlyoutGraph.expectFilterTextEquals(
         0,
-        'user.entity.id: admin@example.com OR user.target.entity.id: admin@example.com OR related.entity: admin@example.com'
+        'user.id: admin@example.com OR user.target.id: admin@example.com OR related.entity: user:admin@example.com@gcp'
       );
       await expandedFlyoutGraph.expectFilterPreviewEquals(
         0,
-        'user.entity.id: admin@example.com OR user.target.entity.id: admin@example.com OR related.entity: admin@example.com'
+        'user.id: admin@example.com OR user.target.id: admin@example.com OR related.entity: user:admin@example.com@gcp'
       );
 
       // Show events with the same action
@@ -135,16 +145,16 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       );
       await expandedFlyoutGraph.expectFilterTextEquals(
         0,
-        'user.entity.id: admin@example.com OR user.target.entity.id: admin@example.com OR related.entity: admin@example.com OR event.action: google.iam.admin.v1.CreateRole'
+        'user.id: admin@example.com OR user.target.id: admin@example.com OR related.entity: user:admin@example.com@gcp OR event.action: google.iam.admin.v1.CreateRole'
       );
       await expandedFlyoutGraph.expectFilterPreviewEquals(
         0,
-        'user.entity.id: admin@example.com OR user.target.entity.id: admin@example.com OR related.entity: admin@example.com OR event.action: google.iam.admin.v1.CreateRole'
+        'user.id: admin@example.com OR user.target.id: admin@example.com OR related.entity: user:admin@example.com@gcp OR event.action: google.iam.admin.v1.CreateRole'
       );
 
       await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
 
-      await expandedFlyoutGraph.showEntityDetails('5c6ec5af8800b6d061824c3b5d2282c2');
+      await expandedFlyoutGraph.showEntityDetails('ba5009af439e17933876ad557ecefa32');
       // check the preview panel grouped items rendered correctly
       await alertsPage.flyout.assertPreviewPanelGroupedItemsNumber(4);
       await expandedFlyoutGraph.assertPreviewPanelGroupedItemTitleTextNumber(4);
@@ -156,22 +166,22 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       );
       await expandedFlyoutGraph.expectFilterTextEquals(
         0,
-        'user.entity.id: admin@example.com OR user.target.entity.id: admin@example.com OR related.entity: admin@example.com'
+        'user.id: admin@example.com OR user.target.id: admin@example.com OR related.entity: user:admin@example.com@gcp'
       );
       await expandedFlyoutGraph.expectFilterPreviewEquals(
         0,
-        'user.entity.id: admin@example.com OR user.target.entity.id: admin@example.com OR related.entity: admin@example.com'
+        'user.id: admin@example.com OR user.target.id: admin@example.com OR related.entity: user:admin@example.com@gcp'
       );
 
       // Hide actions on entity
-      await expandedFlyoutGraph.hideActionsOnEntity('admin@example.com');
+      await expandedFlyoutGraph.hideActionsOnEntity('user:admin@example.com@gcp');
       await expandedFlyoutGraph.expectFilterTextEquals(
         0,
-        'user.entity.id: admin@example.com OR related.entity: admin@example.com'
+        'user.id: admin@example.com OR related.entity: user:admin@example.com@gcp'
       );
       await expandedFlyoutGraph.expectFilterPreviewEquals(
         0,
-        'user.entity.id: admin@example.com OR related.entity: admin@example.com'
+        'user.id: admin@example.com OR related.entity: user:admin@example.com@gcp'
       );
 
       // Clear filters
@@ -179,7 +189,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       // Add custom filter
       await expandedFlyoutGraph.addFilter({
-        field: 'user.entity.id',
+        field: 'user.id',
         operation: 'is',
         value: 'admin2@example.com',
       });
@@ -273,8 +283,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
     });
 
     describe('ECS fields only', function () {
-      // Entity store engine is already initialized at the parent level — reused here.
-      // Tests run sequentially: first v1 (ENRICH), then v2 (LOOKUP JOIN)
+      // Entity store v2 is installed at the parent level for graph visibility.
+      // Enrichment tests use LOOKUP JOIN (v2) with custom entity data loaded via esArchiver.
       before(async () => {
         await es.deleteByQuery({
           index: '.internal.alerts-*',
@@ -282,24 +292,10 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           conflicts: 'proceed',
         });
 
-        try {
-          // delete v2 index manually since its not being deleted by the cleanupEntityStore function
-          await es.indices.delete({
-            index: getEntitiesLatestIndexName(),
-            ignore_unavailable: true,
-          });
-        } catch (e) {
-          // Ignore if index doesn't exist
-        }
-
-        // Load alerts data (shared by both v1 and v2 tests)
+        // Load alerts data
         await esArchiver.load(
           'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/security_alerts_ecs_only_mappings'
         );
-      });
-
-      after(async () => {
-        // Entity store cleanup is handled by the parent after hook
       });
 
       // Shared test suite that registers all test cases - called from both v1 and v2 describe blocks
@@ -327,23 +323,26 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
           await expandedFlyoutGraph.expandGraph();
           await expandedFlyoutGraph.waitGraphIsLoaded();
+          if (await expandedFlyoutGraph.isCalloutVisible()) {
+            await expandedFlyoutGraph.dismissCallout();
+          }
           await expandedFlyoutGraph.assertGraphNodesNumber(5);
           await expandedFlyoutGraph.toggleSearchBar();
 
-          // Test filter actions - Show actions by entity (user.entity.id)
-          await expandedFlyoutGraph.showActionsByEntity('serviceaccount@example.com');
+          // Test filter actions - Show actions by entity (user.id)
+          await expandedFlyoutGraph.showActionsByEntity('user:serviceaccount@example.com@gcp');
           await expandedFlyoutGraph.showSearchBar();
           await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
           await expandedFlyoutGraph.expectFilterTextEquals(
             0,
-            'user.entity.id: serviceaccount@example.com'
+            'user.name: Service Account OR user.email: serviceaccount@example.com OR user.id: serviceaccount@example.com'
           );
           await expandedFlyoutGraph.expectFilterPreviewEquals(
             0,
-            'user.entity.id: serviceaccount@example.com'
+            'user.name: Service Account OR user.email: serviceaccount@example.com OR user.id: serviceaccount@example.com'
           );
 
-          await expandedFlyoutGraph.showEntityDetails('4be3083f01620e3b7ad07ed171640ace');
+          await expandedFlyoutGraph.showEntityDetails('d45b28b33930cc202a6c9d8d8eab3ae6');
           // check the preview panel grouped items rendered correctly
           await alertsPage.flyout.assertPreviewPanelGroupedItemsNumber(3);
           await expandedFlyoutGraph.assertPreviewPanelGroupedItemTitleLinkNumber(3);
@@ -355,7 +354,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
           // Test custom filter in query bar
           await expandedFlyoutGraph.addFilter({
-            field: 'user.entity.id',
+            field: 'user.id',
             operation: 'is',
             value: 'serviceaccount@example.com',
           });
@@ -406,20 +405,17 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           await expandedFlyoutGraph.assertGraphNodesNumber(3);
 
           // Verify first entity node - Service actor
-          await expandedFlyoutGraph.assertNodeEntityTag(
-            'api-service@your-project-id.iam.gserviceaccount.com',
-            'Service'
-          );
+          await expandedFlyoutGraph.assertNodeEntityTag('service:ApiServiceAccount', 'Service');
           await expandedFlyoutGraph.assertNodeEntityDetails(
-            'api-service@your-project-id.iam.gserviceaccount.com',
+            'service:ApiServiceAccount',
             'ApiServiceAccount'
           );
 
           // Verify second entity node - Host target
-          // get Node by md5 hash of host-instance-1 and host-instance-2
-          await expandedFlyoutGraph.assertNodeEntityTag('599353ee39e688c8a37d9d2818d77898', 'Host');
+          // get Node by md5 hash of host:host-instance-1 and host:host-instance-2
+          await expandedFlyoutGraph.assertNodeEntityTag('9da97a47da11862817d60dcc1cfbaaef', 'Host');
           await expandedFlyoutGraph.assertNodeEntityDetails(
-            '599353ee39e688c8a37d9d2818d77898',
+            '9da97a47da11862817d60dcc1cfbaaef',
             'GCP Compute Instance'
           );
         });
@@ -427,17 +423,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       describe('via LOOKUP JOIN (v2)', () => {
         before(async () => {
-          // Delete v2 manually since its not being deleted by the cleanupEntityStore function
-          try {
-            await es.indices.delete({
-              index: getEntitiesLatestIndexName(),
-              ignore_unavailable: true,
-            });
-          } catch (e) {
-            // Ignore if index doesn't exist
-          }
-
-          // Load v2 entity data
+          // Load v2 entity data into the entity store index created by v2 install
           await esArchiver.load(
             'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/entity_store_v2'
           );

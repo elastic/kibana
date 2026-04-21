@@ -1542,25 +1542,6 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-t-grid",
-        "id": "def-common.IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME",
-        "type": "string",
-        "tags": [],
-        "label": "IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME",
-        "description": [
-          "This class is added to the document body while timeline field dragging"
-        ],
-        "signature": [
-          "\"is-timeline-field-dragging\""
-        ],
-        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
-        "lineNumber": 132,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/securitysolution-t-grid",
         "id": "def-common.KEYBOARD_DRAG_OFFSET",
         "type": "number",
         "tags": [],

@@ -173,14 +173,6 @@
     "x-pack/platform/test/fleet_api_integration/apis/fixtures/test_packages/security_detection_engine/security_detection_engine-8.16.0.zip": "'security_detection_engine-8.16.0.zip' should be snake_case",
     "x-pack/platform/test/fleet_api_integration/apis/fixtures/test_packages/test_agentless/1.0.0/img/sample-logo.svg": "'sample-logo.svg' should be snake_case"
   },
-  "@elastic/integration-experience": {
-    "x-pack/platform/plugins/shared/automatic_import/server/templates/readme/setup/aws-cloudwatch.md.njk": "'aws-cloudwatch.md.njk' should be snake_case",
-    "x-pack/platform/plugins/shared/automatic_import/server/templates/readme/setup/aws-s3.md.njk": "'aws-s3.md.njk' should be snake_case",
-    "x-pack/platform/plugins/shared/automatic_import/server/templates/readme/setup/azure-blob-storage.md.njk": "'azure-blob-storage.md.njk' should be snake_case",
-    "x-pack/platform/plugins/shared/automatic_import/server/templates/readme/setup/azure-eventhub.md.njk": "'azure-eventhub.md.njk' should be snake_case",
-    "x-pack/platform/plugins/shared/automatic_import/server/templates/readme/setup/gcp-pubsub.md.njk": "'gcp-pubsub.md.njk' should be snake_case",
-    "x-pack/platform/plugins/shared/automatic_import/server/templates/readme/setup/ssl-tls.md.njk": "'ssl-tls.md.njk' should be snake_case"
-  },
   "@elastic/kibana-cases": {
     "x-pack/platform/plugins/shared/cases/docs/openapi/bundled-types.json": "'bundled-types.json' should be snake_case",
     "x-pack/platform/plugins/shared/cases/docs/openapi/bundled-types.schema.yaml": "'bundled-types.schema.yaml' should be snake_case",
@@ -402,7 +394,6 @@
   },
   "@elastic/search-kibana": {
     "src/platform/packages/shared/deeplinks/agent_builder": "'agent_builder' should be kebab-case",
-    "src/platform/packages/shared/deeplinks/data_sources": "'data_sources' should be kebab-case",
     "src/platform/packages/shared/deeplinks/workplace_ai": "'workplace_ai' should be kebab-case",
     "src/platform/packages/shared/serverless/settings/search_project": "'search_project' should be kebab-case",
     "src/platform/packages/shared/serverless/settings/workplace_ai_project": "'workplace_ai_project' should be kebab-case",

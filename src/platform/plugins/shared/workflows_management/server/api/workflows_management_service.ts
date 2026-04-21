@@ -8,7 +8,6 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { v4 as generateUuid } from 'uuid';
 import { WorkflowsConnectorFeatureId } from '@kbn/actions-plugin/common/connector_feature_config';
 import type { ActionsClient, IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type { FindActionResult } from '@kbn/actions-plugin/server/types';
@@ -21,7 +20,11 @@ import type {
 } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { ExecutionType, transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
+import {
+  ExecutionType,
+  NonTerminalExecutionStatuses,
+  transformWorkflowYamlJsontoEsWorkflow,
+} from '@kbn/workflows';
 import type {
   ConnectorTypeInfo,
   CreateWorkflowCommand,
@@ -45,6 +48,7 @@ import type {
   ChildWorkflowExecutionItem,
   ConnectorInstanceConfig,
   GetAvailableConnectorsResponse,
+  WorkflowListItemDto,
   WorkflowPartialDetailDto,
 } from '@kbn/workflows/types/v1';
 import type {
@@ -71,13 +75,21 @@ import type {
 } from './workflows_management_api';
 import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 import { CONNECTOR_SUB_ACTIONS_MAP } from '../../common/connector_sub_actions_map';
-import { WorkflowConflictError, WorkflowValidationError } from '../../common/lib/errors';
+import { WorkflowConflictError } from '../../common/lib/errors';
 
+import { generateWorkflowId } from '../../common/lib/import';
 import { validateWorkflowYaml } from '../../common/lib/validate_workflow_yaml';
-import { updateWorkflowYamlFields } from '../../common/lib/yaml';
+import { parseYamlToJSONWithoutValidation, updateWorkflowYamlFields } from '../../common/lib/yaml';
 import { getWorkflowZodSchema } from '../../common/schema';
+import type { BulkFailureEntry, BulkWorkflowEntry } from '../lib/bulk_id_helpers';
+import {
+  deduplicateUserIds,
+  partitionByIdSource,
+  removeConflictingIds,
+} from '../lib/bulk_id_helpers';
 import { getAuthenticatedUser } from '../lib/get_user';
 import { hasScheduledTriggers } from '../lib/schedule_utils';
+import { resolveUniqueWorkflowIds, validateWorkflowId } from '../lib/workflow_id_resolver';
 import type { WorkflowProperties, WorkflowStorage } from '../storage/workflow_storage';
 import { createStorage, workflowIndexName } from '../storage/workflow_storage';
 import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
@@ -91,7 +103,18 @@ function getTriggerTypesFromDefinition(definition: WorkflowYaml | null | undefin
     .filter(<T>(v: T): v is NonNullable<T> => v != null);
 }
 
+/** True when the YAML root map includes `enabled` (before Zod defaults). */
+function workflowYamlDeclaresTopLevelEnabled(yamlString: string): boolean {
+  const parsed = parseYamlToJSONWithoutValidation(yamlString);
+  if (!parsed.success || parsed.json == null || typeof parsed.json !== 'object') {
+    return false;
+  }
+  return Object.prototype.hasOwnProperty.call(parsed.json, 'enabled');
+}
+
 const DEFAULT_PAGE_SIZE = 100;
+
+type WorkflowStorageClient = ReturnType<WorkflowStorage['getClient']>;
 
 export interface SearchWorkflowExecutionsParams {
   workflowId: string;
@@ -279,7 +302,7 @@ export class WorkflowsService {
       workflowToCreate.definition = undefined;
     }
 
-    const id = workflow.id || this.generateWorkflowId();
+    const id = workflow.id || generateWorkflowId(workflowToCreate.name);
 
     const workflowData: WorkflowProperties = {
       name: workflowToCreate.name,
@@ -339,7 +362,7 @@ export class WorkflowsService {
     await this.ensureInitialized();
 
     if (workflow.id) {
-      this.validateWorkflowId(workflow.id);
+      validateWorkflowId(workflow.id);
     }
 
     const zodSchema = await this.getWorkflowZodSchema({ loose: false }, spaceId, request);
@@ -347,7 +370,11 @@ export class WorkflowsService {
     const now = new Date();
     const triggerDefinitions = this.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
 
-    const { id, workflowData, definition } = this.prepareWorkflowDocument(
+    const {
+      id: baseId,
+      workflowData,
+      definition,
+    } = this.prepareWorkflowDocument(
       workflow,
       zodSchema,
       authenticatedUser,
@@ -356,7 +383,9 @@ export class WorkflowsService {
       triggerDefinitions
     );
 
+    let id = baseId;
     if (workflow.id) {
+      // User-supplied ID: fail on conflict (existing behaviour)
       const existingWorkflow = await this.getWorkflow(workflow.id, spaceId);
       if (existingWorkflow) {
         throw new WorkflowConflictError(
@@ -364,6 +393,11 @@ export class WorkflowsService {
           workflow.id
         );
       }
+    } else {
+      // Server-generated ID: resolve collisions with numeric suffix
+      [id] = await resolveUniqueWorkflowIds([baseId], new Set(), (candidateIds) =>
+        this.checkExistingIds(candidateIds, spaceId)
+      );
     }
 
     await this.workflowStorage.getClient().index({
@@ -377,6 +411,13 @@ export class WorkflowsService {
     return this.transformStorageDocumentToWorkflowDto(id, workflowData);
   }
 
+  /**
+   * Creates multiple workflows in a single bulk operation.
+   *
+   * Note: with `overwrite: true`, concurrent calls targeting the same ID use
+   * last-write-wins semantics (ES `index` operation). Both callers receive a
+   * success response, but only the last write persists.
+   */
   public async bulkCreateWorkflows(
     workflows: CreateWorkflowCommand[],
     spaceId: string,
@@ -384,7 +425,7 @@ export class WorkflowsService {
     options?: { overwrite?: boolean }
   ): Promise<{
     created: WorkflowDetailDto[];
-    failed: Array<{ index: number; id: string; error: string }>;
+    failed: BulkFailureEntry[];
   }> {
     await this.ensureInitialized();
 
@@ -394,21 +435,15 @@ export class WorkflowsService {
     const triggerDefinitions = this.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
 
     const created: WorkflowDetailDto[] = [];
-    const failed: Array<{ index: number; id: string; error: string }> = [];
-    const bulkOperations: Array<{ index: { _id: string; document: WorkflowProperties } }> = [];
-    const validWorkflows: Array<{
-      idx: number;
-      id: string;
-      workflowData: WorkflowProperties;
-      definition?: WorkflowYaml;
-    }> = [];
+    const failed: BulkFailureEntry[] = [];
+    const validWorkflows: BulkWorkflowEntry[] = [];
 
-    // Phase 1: Validate all workflows and prepare bulk operations
+    // Phase 1: Validate all workflows
     for (let i = 0; i < workflows.length; i++) {
       try {
         const customId = workflows[i].id;
         if (customId) {
-          this.validateWorkflowId(customId);
+          validateWorkflowId(customId);
         }
         const prepared = this.prepareWorkflowDocument(
           workflows[i],
@@ -419,12 +454,10 @@ export class WorkflowsService {
           triggerDefinitions
         );
 
-        bulkOperations.push({
-          index: { _id: prepared.id, document: prepared.workflowData },
-        });
         validWorkflows.push({
           idx: i,
           id: prepared.id,
+          idSource: workflows[i].id ? 'user-supplied' : 'server-generated',
           workflowData: prepared.workflowData,
           definition: prepared.definition,
         });
@@ -437,6 +470,22 @@ export class WorkflowsService {
       }
     }
 
+    // Phase 1.5: Resolve IDs — deduplicate in-batch and check database for collisions.
+    const overwrite = options?.overwrite ?? false;
+    const { resolvedWorkflows, failures } = await this.resolveAndDeduplicateBulkIds(
+      validWorkflows,
+      overwrite,
+      spaceId
+    );
+    failed.push(...failures);
+
+    // Build bulk operations from resolved workflows
+    const bulkOperations = resolvedWorkflows.map((vw) =>
+      overwrite
+        ? { index: { _id: vw.id, document: vw.workflowData } }
+        : { create: { _id: vw.id, document: vw.workflowData } }
+    );
+
     // Phase 2: Bulk write all valid workflows
     if (bulkOperations.length > 0) {
       const bulkResponse = await this.workflowStorage.getClient().bulk({
@@ -445,14 +494,15 @@ export class WorkflowsService {
       });
 
       // Process bulk response
-      bulkResponse.items.forEach((item, itemIndex) => {
-        const operation = item.index;
-        const validWorkflow = validWorkflows[itemIndex];
+      for (let itemIndex = 0; itemIndex < bulkResponse.items.length; itemIndex++) {
+        const item = bulkResponse.items[itemIndex];
+        const operation = item.index ?? item.create;
+        const resolvedWorkflow = resolvedWorkflows[itemIndex];
 
         if (operation?.error) {
           failed.push({
-            index: validWorkflow.idx,
-            id: validWorkflow.id,
+            index: resolvedWorkflow.idx,
+            id: resolvedWorkflow.id,
             error:
               typeof operation.error === 'object' && 'reason' in operation.error
                 ? operation.error.reason ?? JSON.stringify(operation.error)
@@ -460,15 +510,18 @@ export class WorkflowsService {
           });
         } else {
           created.push(
-            this.transformStorageDocumentToWorkflowDto(validWorkflow.id, validWorkflow.workflowData)
+            this.transformStorageDocumentToWorkflowDto(
+              resolvedWorkflow.id,
+              resolvedWorkflow.workflowData
+            )
           );
         }
-      });
+      }
     }
 
     // Phase 3: Schedule triggers for successfully created workflows (in parallel)
     const createdIds = new Set(created.map((w) => w.id));
-    const workflowsToSchedule = validWorkflows.filter(
+    const workflowsToSchedule = resolvedWorkflows.filter(
       (vw) => createdIds.has(vw.id) && vw.definition?.triggers?.some((t) => t.type === 'scheduled')
     );
 
@@ -667,6 +720,22 @@ export class WorkflowsService {
         updatedData = { ...updatedData, yaml: workflow.yaml, ...yamlResult.updatedDataPatch };
         validationErrors.push(...yamlResult.validationErrors);
         shouldUpdateScheduler = shouldUpdateScheduler || yamlResult.shouldUpdateScheduler;
+
+        // Zod may default `enabled` to true when YAML omits it; do not overwrite stored or request values.
+        if (
+          yamlResult.validationErrors.length === 0 &&
+          yamlResult.updatedDataPatch.valid &&
+          updatedData.definition &&
+          !workflowYamlDeclaresTopLevelEnabled(workflow.yaml)
+        ) {
+          const resolvedEnabled =
+            workflow.enabled !== undefined ? workflow.enabled : existingSource.enabled;
+          updatedData.enabled = resolvedEnabled;
+          updatedData.definition = {
+            ...updatedData.definition,
+            enabled: resolvedEnabled,
+          } as WorkflowYaml;
+        }
       } else {
         updatedData = { ...updatedData, ...this.applyFieldUpdates(workflow, existingSource) };
       }
@@ -702,10 +771,14 @@ export class WorkflowsService {
     }
   }
 
-  public async deleteWorkflows(ids: string[], spaceId: string): Promise<DeleteWorkflowsResponse> {
+  public async deleteWorkflows(
+    ids: string[],
+    spaceId: string,
+    options?: { force?: boolean }
+  ): Promise<DeleteWorkflowsResponse> {
     await this.ensureInitialized();
 
-    const now = new Date();
+    const force = options?.force ?? false;
     const failures: Array<{ id: string; error: string }> = [];
     const client = this.workflowStorage.getClient();
 
@@ -720,19 +793,219 @@ export class WorkflowsService {
       track_total_hits: false,
     });
 
-    // Build bulk operations for all found workflows
-    const bulkOperations = searchResponse.hits.hits.map((hit) => ({
+    const hits = searchResponse.hits.hits;
+
+    if (force) {
+      return this.hardDeleteWorkflows(ids, hits, client, spaceId, failures);
+    }
+
+    return this.softDeleteWorkflows(ids, hits, client, failures);
+  }
+
+  private async hardDeleteWorkflows(
+    ids: string[],
+    hits: Array<{ _id?: string; _source?: WorkflowProperties }>,
+    client: WorkflowStorageClient,
+    spaceId: string,
+    failures: Array<{ id: string; error: string }>
+  ): Promise<DeleteWorkflowsResponse> {
+    const foundIds = hits.map((hit) => hit._id).filter(Boolean) as string[];
+
+    // Phase 1: Disable enabled workflows to prevent new executions from being
+    // created between the running-execution check and the actual delete
+    // (closes the TOCTOU race window).
+    const disabledIds = await this.disableWorkflowsForDeletion(hits, client);
+
+    // Phase 2: Check for running executions
+    const runningIds: string[] = [];
+    for (const id of foundIds) {
+      const executions = await this.getWorkflowExecutions(
+        { workflowId: id, statuses: [...NonTerminalExecutionStatuses], size: 1 },
+        spaceId
+      );
+      if (executions.total > 0) {
+        runningIds.push(id);
+      }
+    }
+    if (runningIds.length > 0) {
+      await this.restoreDisabledWorkflows(hits, disabledIds, client);
+      throw new WorkflowConflictError(
+        `Cannot force-delete workflows with running executions: [${runningIds.join(', ')}]`,
+        runningIds[0]
+      );
+    }
+
+    // Phase 3: Delete workflow documents
+    const successfulIds: string[] = [];
+    for (const id of foundIds) {
+      try {
+        await client.delete({ id });
+        successfulIds.push(id);
+      } catch (error) {
+        failures.push({
+          id,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
+
+    // Phase 4: Cleanup
+    await this.unscheduleDeletedWorkflowTasks(successfulIds);
+    await this.purgeWorkflowRelatedData(successfulIds, spaceId);
+
+    return {
+      total: ids.length,
+      deleted: ids.length - failures.length,
+      failures,
+      successfulIds,
+    };
+  }
+
+  /**
+   * Disables enabled workflows before hard-deletion to prevent new executions
+   * from being accepted while the delete is in progress.
+   * Returns the IDs of workflows that were actually disabled (were previously enabled).
+   */
+  private async disableWorkflowsForDeletion(
+    hits: Array<{ _id?: string; _source?: WorkflowProperties }>,
+    client: WorkflowStorageClient
+  ): Promise<string[]> {
+    const disableOperations = hits
+      .filter(
+        (hit): hit is { _id: string; _source: WorkflowProperties } =>
+          Boolean(hit._id) && Boolean(hit._source) && hit._source?.enabled === true
+      )
+      .map((hit) => {
+        return {
+          index: {
+            _id: hit._id,
+            document: {
+              ...(hit._source satisfies WorkflowProperties),
+              enabled: false,
+            },
+          },
+        };
+      });
+
+    if (disableOperations.length > 0) {
+      const response = await client.bulk({ operations: disableOperations, refresh: true });
+      return disableOperations
+        .filter((_, i) => {
+          const status = response.items[i]?.index?.status ?? 0;
+          return status >= 200 && status < 300;
+        })
+        .map((op) => op.index._id);
+    }
+
+    return [];
+  }
+
+  /**
+   * Re-enables workflows that were disabled during a hard-delete attempt
+   * that was aborted due to running executions.
+   */
+  private async restoreDisabledWorkflows(
+    hits: Array<{ _id?: string; _source?: WorkflowProperties }>,
+    disabledIds: string[],
+    client: WorkflowStorageClient
+  ): Promise<void> {
+    if (disabledIds.length === 0) {
+      return;
+    }
+
+    const restoreOperations = hits
+      .filter(
+        (hit): hit is { _id: string; _source: WorkflowProperties } =>
+          Boolean(hit._id) && Boolean(hit._source) && disabledIds.includes(String(hit._id))
+      )
+      .map((hit) => ({
+        index: {
+          _id: hit._id,
+          document: hit._source satisfies WorkflowProperties,
+        },
+      }));
+
+    if (restoreOperations.length > 0) {
+      try {
+        await client.bulk({ operations: restoreOperations, refresh: true });
+      } catch (error) {
+        this.logger.warn(
+          `Failed to restore disabled workflows after hard-delete conflict: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      }
+    }
+  }
+
+  /**
+   * Permanently removes all execution history and step executions
+   * associated with the given workflow IDs within the specified space.
+   * Used during hard (force) delete so the workflow ID can be fully reused.
+   */
+  private async purgeWorkflowRelatedData(workflowIds: string[], spaceId: string): Promise<void> {
+    if (workflowIds.length === 0) {
+      return;
+    }
+
+    const query = {
+      bool: {
+        must: [{ terms: { workflowId: workflowIds } }, { term: { spaceId } }],
+      },
+    };
+
+    const deleteOps = [
+      this.esClient
+        .deleteByQuery({
+          index: WORKFLOWS_EXECUTIONS_INDEX,
+          query,
+          refresh: true,
+          conflicts: 'proceed',
+        })
+        .catch((error) => {
+          this.logger.warn(
+            `Failed to purge executions for workflows [${workflowIds.join(', ')}]: ${error.message}`
+          );
+        }),
+      this.esClient
+        .deleteByQuery({
+          index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+          query,
+          refresh: true,
+          conflicts: 'proceed',
+        })
+        .catch((error) => {
+          this.logger.warn(
+            `Failed to purge step executions for workflows [${workflowIds.join(', ')}]: ${
+              error.message
+            }`
+          );
+        }),
+    ];
+
+    await Promise.allSettled(deleteOps);
+  }
+
+  private async softDeleteWorkflows(
+    ids: string[],
+    hits: Array<{ _id?: string; _source?: WorkflowProperties }>,
+    client: WorkflowStorageClient,
+    failures: Array<{ id: string; error: string }>
+  ): Promise<DeleteWorkflowsResponse> {
+    const now = new Date();
+    const successfulIds: string[] = [];
+
+    const bulkOperations = hits.map((hit) => ({
       index: {
         _id: hit._id,
         document: {
-          ...hit._source,
+          ...(hit._source as WorkflowProperties),
           deleted_at: now,
           enabled: false,
         },
       },
     }));
 
-    // Bulk update all found workflows in a single call
     if (bulkOperations.length > 0) {
       try {
         const bulkResponse = await client.bulk({
@@ -740,8 +1013,6 @@ export class WorkflowsService {
           refresh: true,
         });
 
-        // Process bulk response to track successes and failures
-        const successfulIds: string[] = [];
         bulkResponse.items.forEach((item) => {
           const operation = item.index;
           if (operation?.error) {
@@ -757,24 +1028,8 @@ export class WorkflowsService {
           }
         });
 
-        // Unschedule tasks for successfully deleted workflows to prevent orphaned tasks
-        if (this.taskScheduler && successfulIds.length > 0) {
-          await Promise.allSettled(
-            successfulIds.map((workflowId) =>
-              this.taskScheduler?.unscheduleWorkflowTasks(workflowId)
-            )
-          ).then((results) => {
-            results.forEach((result, i) => {
-              if (result.status === 'rejected') {
-                this.logger.warn(
-                  `Failed to unschedule tasks for deleted workflow ${successfulIds[i]}: ${result.reason}`
-                );
-              }
-            });
-          });
-        }
+        await this.unscheduleDeletedWorkflowTasks(successfulIds);
       } catch (error) {
-        // If the entire bulk operation fails, mark all as failed
         bulkOperations.forEach((op) => {
           failures.push({
             id: op.index._id ?? 'unknown',
@@ -787,6 +1042,153 @@ export class WorkflowsService {
     return {
       total: ids.length,
       deleted: ids.length - failures.length,
+      failures,
+      successfulIds,
+    };
+  }
+
+  private async unscheduleDeletedWorkflowTasks(successfulIds: string[]): Promise<void> {
+    if (this.taskScheduler && successfulIds.length > 0) {
+      const results = await Promise.allSettled(
+        successfulIds.map((workflowId) => this.taskScheduler?.unscheduleWorkflowTasks(workflowId))
+      );
+      results.forEach((result, i) => {
+        if (result.status === 'rejected') {
+          this.logger.warn(
+            `Failed to unschedule tasks for deleted workflow ${successfulIds[i]}: ${result.reason}`
+          );
+        }
+      });
+    }
+  }
+
+  /**
+   * Disables all enabled workflows across all spaces. Sets `enabled: false`,
+   * patches YAML accordingly, and unschedules any scheduled tasks.
+   * Used when a user opts out of workflows by toggling the global UI setting off.
+   */
+  public async disableAllWorkflows(): Promise<{
+    total: number;
+    disabled: number;
+    failures: Array<{ id: string; error: string }>;
+  }> {
+    await this.ensureInitialized();
+
+    const client = this.workflowStorage.getClient();
+    const pageSize = 1000;
+    const MAX_PAGES = 50;
+    const failures: Array<{ id: string; error: string }> = [];
+    const disabledIds: string[] = [];
+    let totalHits = 0;
+
+    const query = {
+      bool: {
+        must: [{ term: { enabled: true } }],
+        must_not: [{ exists: { field: 'deleted_at' } }],
+      },
+    };
+    const sort = [{ updated_at: { order: 'desc' as const } }, '_shard_doc'];
+
+    let searchAfter: estypes.SortResults | undefined;
+    let hasMore = true;
+    let pageCount = 0;
+
+    while (hasMore && pageCount < MAX_PAGES) {
+      pageCount++;
+
+      const searchResponse = await client.search({
+        query,
+        size: pageSize,
+        sort,
+        _source: true,
+        track_total_hits: pageCount === 1,
+        ...(searchAfter ? { search_after: searchAfter } : {}),
+      });
+
+      const hits = searchResponse.hits.hits.filter(
+        (hit): hit is typeof hit & { _id: string; _source: WorkflowProperties } =>
+          hit._id != null && hit._source != null
+      );
+
+      if (hits.length === 0) {
+        break;
+      }
+
+      totalHits += hits.length;
+
+      const bulkOperations = hits.map((hit) => {
+        const source = hit._source;
+        const updatedYaml = updateWorkflowYamlFields(source.yaml, { enabled: false }, false);
+        return {
+          index: {
+            _id: hit._id,
+            document: {
+              ...source,
+              enabled: false,
+              yaml: updatedYaml,
+            },
+          },
+        };
+      });
+
+      try {
+        const bulkResponse = await client.bulk({
+          operations: bulkOperations,
+          refresh: true,
+        });
+
+        const pageDisabledIds: string[] = [];
+        bulkResponse.items.forEach((item) => {
+          const operation = item.index;
+          if (operation?.error) {
+            failures.push({
+              id: operation._id ?? 'unknown',
+              error:
+                typeof operation.error === 'object' && 'reason' in operation.error
+                  ? operation.error.reason ?? JSON.stringify(operation.error)
+                  : JSON.stringify(operation.error),
+            });
+          } else if (operation?._id) {
+            pageDisabledIds.push(operation._id);
+          }
+        });
+
+        if (pageDisabledIds.length > 0) {
+          disabledIds.push(...pageDisabledIds);
+          await this.unscheduleDeletedWorkflowTasks(pageDisabledIds);
+        }
+      } catch (error) {
+        bulkOperations.forEach((op) => {
+          failures.push({
+            id: op.index._id ?? 'unknown',
+            error: error instanceof Error ? error.message : String(error),
+          });
+        });
+      }
+
+      hasMore = hits.length >= pageSize;
+      if (hasMore) {
+        const lastHit = hits[hits.length - 1];
+        if (!lastHit.sort) {
+          break;
+        }
+        searchAfter = lastHit.sort;
+      }
+    }
+
+    if (hasMore && pageCount >= MAX_PAGES) {
+      this.logger.warn(
+        `disableAllWorkflows truncated at ${MAX_PAGES} pages (${totalHits} workflows processed)`
+      );
+    }
+
+    this.logger.info(
+      `Disabled ${disabledIds.length} workflows across all spaces (${failures.length} failures)`
+    );
+
+    return {
+      total: totalHits,
+      disabled: disabledIds.length,
       failures,
     };
   }
@@ -897,7 +1299,11 @@ export class WorkflowsService {
     }
   }
 
-  public async getWorkflows(params: GetWorkflowsParams, spaceId: string): Promise<WorkflowListDto> {
+  public async getWorkflows(
+    params: GetWorkflowsParams,
+    spaceId: string,
+    options?: { includeExecutionHistory?: boolean }
+  ): Promise<WorkflowListDto> {
     await this.ensureInitialized();
 
     const { size = 100, page = 1, enabled, createdBy, tags, query } = params;
@@ -1011,7 +1417,7 @@ export class WorkflowsService {
     });
 
     const workflows = searchResponse.hits.hits
-      .map((hit) => {
+      .map<WorkflowListItemDto>((hit) => {
         if (!hit._source) {
           throw new Error('Missing _source in search result');
         }
@@ -1020,17 +1426,13 @@ export class WorkflowsService {
           ...workflow,
           description: workflow.description || '',
           definition: workflow.definition,
-          history: [] as WorkflowExecutionHistoryModel[], // Will be populated below
         };
       })
       .filter((workflow): workflow is NonNullable<typeof workflow> => workflow !== null);
 
-    // Fetch recent execution history for all workflows
-    if (workflows.length > 0) {
+    if (options?.includeExecutionHistory && workflows.length > 0) {
       const workflowIds = workflows.map((w) => w.id);
       const executionHistory = await this.getRecentExecutionsForWorkflows(workflowIds, spaceId);
-
-      // Populate history for each workflow
       workflows.forEach((workflow) => {
         workflow.history = executionHistory[workflow.id] || [];
       });
@@ -1047,7 +1449,10 @@ export class WorkflowsService {
     };
   }
 
-  public async getWorkflowStats(spaceId: string): Promise<WorkflowStatsDto> {
+  public async getWorkflowStats(
+    spaceId: string,
+    options?: { includeExecutionStats?: boolean }
+  ): Promise<WorkflowStatsDto> {
     await this.ensureInitialized();
 
     const statsResponse = await this.workflowStorage.getClient().search({
@@ -1072,17 +1477,19 @@ export class WorkflowsService {
     });
 
     const aggs = statsResponse.aggregations;
-
-    // Get execution history stats for the last 30 days
-    const executionStats = await this.getExecutionHistoryStats(spaceId);
-
-    return {
+    const workflowsStats: WorkflowStatsDto = {
       workflows: {
         enabled: aggs?.enabled_count.doc_count ?? 0,
         disabled: aggs?.disabled_count.doc_count ?? 0,
       },
-      executions: executionStats,
     };
+
+    if (options?.includeExecutionStats) {
+      // Get execution history stats for the last 30 days
+      workflowsStats.executions = await this.getExecutionHistoryStats(spaceId);
+    }
+
+    return workflowsStats;
   }
 
   private async getExecutionHistoryStats(spaceId: string) {
@@ -1545,17 +1952,90 @@ export class WorkflowsService {
     };
   }
 
-  private validateWorkflowId(id: string): void {
-    const uuidRegex = /^workflow-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    if (!uuidRegex.test(id)) {
-      throw new WorkflowValidationError(
-        `Invalid workflow ID format. Expected format: workflow-{uuid}, received: ${id}`
+  /**
+   * Phase 1.5 of bulkCreateWorkflows: resolves server-generated IDs against the
+   * database and in-batch collisions, checks user-supplied IDs for conflicts,
+   * and deduplicates within the batch.
+   *
+   * Returns the filtered list of workflows (with resolved IDs) and any failures.
+   */
+  private async resolveAndDeduplicateBulkIds(
+    validWorkflows: readonly BulkWorkflowEntry[],
+    overwrite: boolean,
+    spaceId: string
+  ): Promise<{
+    resolvedWorkflows: BulkWorkflowEntry[];
+    failures: BulkFailureEntry[];
+  }> {
+    const failures: BulkFailureEntry[] = [];
+
+    // Separate server-generated IDs (need collision resolution) from user-supplied IDs.
+    // User-supplied IDs are reserved in seenIds first so that server-generated resolution
+    // routes around them — explicit user IDs always take priority.
+    const { serverGenerated, userSupplied } = partitionByIdSource(validWorkflows);
+    const seenIds = new Set<string>(userSupplied.map((wf) => wf.id));
+
+    // For server-generated IDs: resolve unique IDs in batch
+    // (handles both in-batch dedup and database collision avoidance)
+    let resolvedServerGen = serverGenerated;
+    if (serverGenerated.length > 0) {
+      const resolvedIds = await resolveUniqueWorkflowIds(
+        serverGenerated.map((wf) => wf.id),
+        seenIds,
+        (candidateIds) => this.checkExistingIds(candidateIds, spaceId)
       );
+      resolvedServerGen = serverGenerated.map((wf, i) => ({ ...wf, id: resolvedIds[i] }));
     }
+
+    // Reassemble in original order with resolved server-generated IDs
+    const resolvedById = new Map(resolvedServerGen.map((wf, i) => [serverGenerated[i], wf]));
+    let workflows: BulkWorkflowEntry[] = validWorkflows.map((wf) => resolvedById.get(wf) ?? wf);
+
+    // For user-supplied IDs with overwrite: false — best-effort check for conflicts in the
+    // database. The ES `create` operation in the bulk call is the real atomicity guarantee;
+    // this pre-check provides a cleaner error message when a conflict is detected early.
+    if (!overwrite && userSupplied.length > 0) {
+      const existingUserIds = await this.checkExistingIds(
+        userSupplied.map((wf) => wf.id),
+        spaceId
+      );
+      const conflictResult = removeConflictingIds(workflows, existingUserIds);
+      workflows = conflictResult.kept;
+      failures.push(...conflictResult.removed);
+    }
+
+    // Deduplicate user-supplied IDs within the batch (first wins, later ones fail).
+    // Server-generated IDs are already guaranteed unique by resolveUniqueWorkflowIds.
+    const dedupResult = deduplicateUserIds(workflows);
+    workflows = dedupResult.kept;
+    failures.push(...dedupResult.removed);
+
+    return { resolvedWorkflows: workflows, failures };
   }
 
-  private generateWorkflowId(): string {
-    return `workflow-${generateUuid()}`;
+  /**
+   * Checks which of the given IDs already exist in the given space.
+   * Returns the set of IDs that exist.
+   *
+   * Intentionally includes soft-deleted workflows (no must_not deleted_at filter)
+   * to prevent reassigning an ID that belongs to a soft-deleted workflow.
+   */
+  private async checkExistingIds(ids: string[], spaceId: string): Promise<Set<string>> {
+    if (ids.length === 0) {
+      return new Set();
+    }
+
+    const response = await this.workflowStorage.getClient().search({
+      query: {
+        bool: {
+          must: [{ ids: { values: ids } }, { term: { spaceId } }],
+        },
+      },
+      size: ids.length,
+      track_total_hits: false,
+    });
+
+    return new Set(response.hits.hits.map((hit) => hit._id).filter((id): id is string => !!id));
   }
 
   public async getAvailableConnectors(

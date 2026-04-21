@@ -7,8 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { LensAttributes, LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
-import { LensConfigBuilder, type LensSeriesLayer } from '@kbn/lens-embeddable-utils/config_builder';
+import {
+  LensConfigBuilder,
+  type LensAttributes,
+  type LensConfig,
+  type LensESQLDataset,
+  type LensSeriesLayer,
+  type LensYBoundsConfig,
+} from '@kbn/lens-embeddable-utils';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
 import useLatest from 'react-use/lib/useLatest';
@@ -28,10 +34,6 @@ import {
 } from 'rxjs';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import { useEuiTheme } from '@elastic/eui';
-import type {
-  LensYBoundsConfig,
-  LensESQLDataset,
-} from '@kbn/lens-embeddable-utils/config_builder/types';
 import type { UnifiedMetricsGridProps } from '../../../types';
 
 export type LensProps = Pick<
@@ -44,7 +46,6 @@ export type LensProps = Pick<
   | 'noPadding'
   | 'searchSessionId'
   | 'executionContext'
-  | 'onLoad'
   | 'lastReloadRequestTime'
   | 'userMessages'
 >;

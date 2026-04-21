@@ -49,7 +49,7 @@ export const DefinitionsPopover = () => {
       button={
         <EuiButtonEmpty
           data-test-subj="syntheticsDefinitionsPopoverButton"
-          iconType="list"
+          iconType="listBullet"
           iconSide="right"
           onClick={onButtonClick}
         >

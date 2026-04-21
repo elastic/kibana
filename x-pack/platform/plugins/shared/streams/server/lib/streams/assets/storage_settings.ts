@@ -14,8 +14,10 @@ import {
   QUERY_DESCRIPTION,
   QUERY_ESQL_QUERY,
   QUERY_KQL_BODY,
+  QUERY_SEARCH_EMBEDDING,
   QUERY_SEVERITY_SCORE,
   QUERY_TITLE,
+  QUERY_TYPE,
   RULE_BACKED,
   RULE_ID,
   STREAM_NAME,
@@ -39,6 +41,7 @@ export const queryStorageSettings = {
       [QUERY_TITLE]: types.keyword(),
       [QUERY_DESCRIPTION]: types.text(),
       [QUERY_SEVERITY_SCORE]: types.long(),
+      [QUERY_TYPE]: types.keyword(),
       [RULE_BACKED]: types.boolean(),
       [RULE_ID]: types.keyword(),
       experimental: types.object({ enabled: false }),
@@ -47,3 +50,16 @@ export const queryStorageSettings = {
 } satisfies IndexStorageSettings;
 
 export type QueryStorageSettings = typeof queryStorageSettings;
+
+export const getQueryStorageSettings = (inferenceId: string): IndexStorageSettings => ({
+  name: queryStorageSettings.name,
+  schema: {
+    properties: {
+      ...queryStorageSettings.schema.properties,
+      // The semantic_text field is always declared in the mapping regardless of
+      // inference availability — ES does not validate the inference_id at mapping
+      // time, so this is safe even when ML is disabled or ELSER is not deployed.
+      [QUERY_SEARCH_EMBEDDING]: types.semantic_text({ inference_id: inferenceId }),
+    },
+  },
+});

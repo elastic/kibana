@@ -27,24 +27,26 @@ export async function getDataStreamDetails({
   start,
   end,
   isServerless,
+  isSecurityEnabled,
 }: {
   esClient: IScopedClusterClient;
   dataStream: string;
   start: number;
   end: number;
   isServerless: boolean;
+  isSecurityEnabled: boolean;
 }): Promise<DataStreamDetails> {
   throwIfInvalidDataStreamParams(dataStream);
 
   // Query datastreams as the current user as the Kibana internal user may not have all the required permissions
   const esClientAsCurrentUser = esClient.asCurrentUser;
-  const esClientAsSecondaryAuthUser = esClient.asSecondaryAuthUser;
 
   const dataStreamPrivileges = (
     await datasetQualityPrivileges.getHasIndexPrivileges(
       esClientAsCurrentUser,
       [dataStream],
-      ['monitor', FAILURE_STORE_PRIVILEGE, MANAGE_FAILURE_STORE_PRIVILEGE]
+      ['monitor', FAILURE_STORE_PRIVILEGE, MANAGE_FAILURE_STORE_PRIVILEGE],
+      isSecurityEnabled
     )
   )[dataStream];
 
@@ -53,6 +55,7 @@ export async function getDataStreamDetails({
         await getDataStreams({
           esClient: esClientAsCurrentUser,
           datasetQuery: dataStream,
+          isSecurityEnabled,
         })
       ).dataStreams[0]
     : undefined;
@@ -80,7 +83,7 @@ export async function getDataStreamDetails({
     const avgDocSizeInBytes =
       dataStreamPrivileges.monitor && dataStreamSummaryStats.docsCount > 0
         ? isServerless
-          ? await getMeteringAvgDocSizeInBytes(esClientAsSecondaryAuthUser, dataStream)
+          ? await getMeteringAvgDocSizeInBytes(esClient.asSecondaryAuthUser, dataStream)
           : await getAvgDocSizeInBytes(esClientAsCurrentUser, dataStream)
         : 0;
 

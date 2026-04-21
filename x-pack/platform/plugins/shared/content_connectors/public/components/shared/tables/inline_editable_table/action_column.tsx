@@ -70,7 +70,7 @@ export const ActionColumn = <Item extends ItemWithAnID>({
             aria-label={SAVE_BUTTON_LABEL}
             data-test-subj="saveButton"
             color="primary"
-            iconType="checkInCircleFilled"
+            iconType="checkCircleFill"
             onClick={isEditingUnsavedItem ? saveNewItem : saveExistingItem}
             disabled={
               isLoading ||

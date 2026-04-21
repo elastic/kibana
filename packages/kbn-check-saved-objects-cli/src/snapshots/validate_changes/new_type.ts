@@ -13,12 +13,12 @@ import {
   validateAllMappingsInModelVersion,
   validateNewModelVersionSchemas,
   validateModelVersionNumbers,
-  validateNameTitleFieldTypes,
   validateNoIndexOrEnabledFalseInAllMappings,
   getLatestModelVersion,
   validateInitialModelVersion,
   getFirstModelVersion,
 } from './common_utils';
+import { validateNameTitleFieldTypesNewType } from './new_type_utils';
 
 interface ValidateChangesNewTypeParams {
   to: MigrationInfoRecord;
@@ -52,5 +52,5 @@ export function validateChangesNewType({ to, registeredType }: ValidateChangesNe
   validateNoIndexOrEnabledFalseInAllMappings(name, to);
 
   // validate that name and title fields are of type "text"
-  validateNameTitleFieldTypes(name, to);
+  validateNameTitleFieldTypesNewType(name, to, registeredType);
 }

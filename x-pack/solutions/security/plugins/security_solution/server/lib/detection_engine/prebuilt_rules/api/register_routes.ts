@@ -17,6 +17,7 @@ import { performRuleUpgradeRoute } from './perform_rule_upgrade/perform_rule_upg
 import { bootstrapPrebuiltRulesRoute } from './bootstrap_prebuilt_rules/bootstrap_prebuilt_rules';
 import { getPrebuiltRuleBaseVersion } from './get_prebuilt_rule_base_version/get_prebuilt_rule_base_version_route';
 import { revertPrebuiltRule } from './revert_prebuilt_rule/revert_prebuilt_rule_route';
+import { reviewRuleDeprecationRoute } from './review_rule_deprecation/review_rule_deprecation_route';
 
 export const registerPrebuiltRulesRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -35,4 +36,5 @@ export const registerPrebuiltRulesRoutes = (
   bootstrapPrebuiltRulesRoute(router, logger);
   getPrebuiltRuleBaseVersion(router);
   revertPrebuiltRule(router);
+  reviewRuleDeprecationRoute(router);
 };

@@ -24,7 +24,7 @@ export class RulesPage {
    * Navigates to the rules list page (Observability)
    */
   async goto(ruleId: string = '') {
-    await this.page.gotoApp(`rules/${ruleId}`);
+    await this.page.gotoApp(ruleId ? `rules/rule/${ruleId}` : 'rules');
     if (!ruleId) {
       await this.page.testSubj.waitForSelector(RULES_SETTINGS_TEST_SUBJECTS.RULE_PAGE_TAB, {
         timeout: BIGGER_TIMEOUT,

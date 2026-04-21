@@ -19,3 +19,4 @@ export {
   parseRawFlags,
   remapPluginPaths,
 } from './src/kibana_cli_args';
+export { findTestPluginPaths } from './src/find_test_plugin_paths';

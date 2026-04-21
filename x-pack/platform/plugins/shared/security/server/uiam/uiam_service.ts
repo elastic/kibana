@@ -133,6 +133,14 @@ export interface UiamServicePublic {
   ): Promise<GrantUiamApiKeyResponse>;
 
   /**
+   * Exchanges an OAuth access token for an ephemeral UIAM token. Validates that the audience
+   * returned by UIAM matches the expected Kibana server audience and throws if there is a mismatch.
+   * @param accessToken The OAuth access token.
+   * @returns The ephemeral token.
+   */
+  exchangeOAuthToken(accessToken: string): Promise<string>;
+
+  /**
    * Revokes a UIAM API key by its ID.
    * @param apiKeyId The ID of the API key to revoke.
    * @param apiKey The API key to revoke; will be used for authentication on this request.
@@ -148,6 +156,13 @@ export interface UiamServicePublic {
   convertApiKeys(keys: string[]): Promise<ConvertUiamApiKeysResponse>;
 }
 
+interface UiamServiceOptions {
+  /** The base URL of the Kibana server. */
+  kibanaServerURL: string;
+  /** The URL of the Elasticsearch cluster. */
+  elasticsearchUrl?: string;
+}
+
 /**
  * See {@link UiamServicePublic}.
  */
@@ -155,11 +170,13 @@ export class UiamService implements UiamServicePublic {
   readonly #logger: Logger;
   readonly #config: Required<UiamConfigType>;
   readonly #dispatcher: Agent | undefined;
+  readonly #kibanaServerURL: string;
   readonly #elasticsearchUrl?: string;
 
-  constructor(logger: Logger, config: UiamConfigType, elasticsearchUrl?: string) {
+  constructor(logger: Logger, config: UiamConfigType, options: UiamServiceOptions) {
     this.#logger = logger;
-    this.#elasticsearchUrl = elasticsearchUrl;
+    this.#kibanaServerURL = options.kibanaServerURL;
+    this.#elasticsearchUrl = options.elasticsearchUrl;
 
     // Destructure existing config and re-create it again after validation to make TypeScript can infer the proper types.
     const { enabled, url, sharedSecret, ssl } = config;
@@ -248,6 +265,51 @@ export class UiamService implements UiamServicePublic {
     } catch (err) {
       this.#logger.error(
         () => `Failed to invalidate session tokens: ${getDetailedErrorMessage(err)}`
+      );
+
+      throw err;
+    }
+  }
+
+  /**
+   * See {@link UiamServicePublic.exchangeOAuthToken}.
+   */
+  async exchangeOAuthToken(accessToken: string): Promise<string> {
+    this.#logger.debug('Attempting to exchange OAuth access token for ephemeral token.');
+
+    // Temporary workaround for https://github.com/elastic/cp-iam-team/issues/2697
+    const expectedAudience = this.#kibanaServerURL.endsWith('/')
+      ? this.#kibanaServerURL
+      : `${this.#kibanaServerURL}/`;
+    const url = new URL(`${this.#config.url}/uiam/api/v1/authentication/_authenticate`);
+    url.searchParams.set('include_token', 'true');
+    url.searchParams.set('audience', expectedAudience);
+
+    try {
+      const response = await UiamService.#parseUiamResponse(
+        await fetch(url.toString(), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
+            Authorization: `Bearer ${accessToken}`,
+          },
+          // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+          dispatcher: this.#dispatcher,
+        })
+      );
+
+      const audience = response.credentials?.oauth?.audience;
+      if (audience !== expectedAudience) {
+        throw Boom.badRequest(
+          `OAuth token audience mismatch: expected "${expectedAudience}" but got "${audience}".`
+        );
+      }
+
+      return response.token;
+    } catch (err) {
+      this.#logger.error(
+        () => `Failed to exchange OAuth access token: ${getDetailedErrorMessage(err)}`
       );
 
       throw err;

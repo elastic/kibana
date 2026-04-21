@@ -48,7 +48,7 @@ jest.mock('../components/home/combined_risk_donut_chart', () => ({
   ),
 }));
 
-jest.mock('../components/home/anomalies_placeholder_panel', () => ({
+jest.mock('../components/home/anomalies_panel', () => ({
   EntityAnalyticsRecentAnomalies: () => (
     <div data-test-subj="recent-anomalies-panel">{'Recent anomalies'}</div>
   ),

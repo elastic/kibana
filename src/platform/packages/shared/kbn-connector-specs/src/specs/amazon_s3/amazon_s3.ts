@@ -24,10 +24,6 @@ import type {
   AmazonS3BucketObjectListing,
   AmazonS3Object,
 } from './amazon_s3_types';
-import downloadFileWorkflow from './workflows/download_file.yaml';
-import listBucketObjectsWorkflow from './workflows/list_bucket_objects.yaml';
-import listBucketsWorkflow from './workflows/list_buckets.yaml';
-
 /**
  * Default maximum file size that can be downloaded (128 kilobytes)
  * If the user requests a file larger than this, we will return a pre-signed URL for them to download the file directly from S3 instead of through Kibana.
@@ -42,6 +38,7 @@ export const AmazonS3: ConnectorSpec = {
       defaultMessage: 'List buckets and download files from Amazon S3',
     }),
     minimumLicense: 'enterprise',
+    isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
   auth: {
@@ -66,9 +63,21 @@ export const AmazonS3: ConnectorSpec = {
   actions: {
     listBuckets: {
       isTool: true,
+      description:
+        'List available Amazon S3 buckets. Use this to discover which buckets exist before listing objects or downloading files.',
       input: z.object({
-        region: z.string().optional().describe('The optional AWS region to list buckets from'),
-        prefix: z.string().optional().describe('The prefix to filter buckets by'),
+        region: z
+          .string()
+          .optional()
+          .describe(
+            'The AWS region to list buckets from. If not specified, buckets from the default region in the authorization credentials will be listed. Example: "us-east-1".'
+          ),
+        prefix: z
+          .string()
+          .optional()
+          .describe(
+            'An optional prefix to filter bucket names. Only buckets whose names start with this prefix will be returned. Example: "my-app-" to find "my-app-logs" and "my-app-data".'
+          ),
       }),
       handler: async (ctx, input: ActionListBucketsInput) => {
         let buckets: { name?: string; creationDate?: string }[] = [];
@@ -97,26 +106,38 @@ export const AmazonS3: ConnectorSpec = {
 
     listBucketObjects: {
       isTool: true,
+      description:
+        'List objects (files and folders) in an Amazon S3 bucket. Supports filtering by prefix and pagination via continuation tokens.',
       input: z.object({
-        bucket: z.string().min(1).describe('The name of the S3 bucket'),
+        bucket: z
+          .string()
+          .min(1)
+          .describe('The name of the S3 bucket to list objects from. Example: "my-app-data".'),
         region: z
           .string()
           .optional()
           .describe(
-            'The optional region of the S3 bucket. If not specified, will attempt to auto-detect.'
+            'The region of the S3 bucket. If not specified, will attempt to auto-detect. Example: "us-west-2".'
           ),
-        prefix: z.string().optional().describe('The prefix to filter objects by'),
+        prefix: z
+          .string()
+          .optional()
+          .describe(
+            'An optional prefix to filter object keys (file paths) in the bucket. Use this to list objects under a specific folder path. Example: "logs/2024/" to list only objects in that path.'
+          ),
         continuationToken: z
           .string()
           .optional()
-          .describe('Continuation token for paginated listing'),
+          .describe(
+            'The continuation token for retrieving the next page of results. Obtain this from the "nextContinuationToken" field of a previous response when "isTruncated" is true. Omit on the first request.'
+          ),
         maxKeys: z
           .number()
           .int()
           .positive()
           .optional()
           .describe(
-            'Maximum number of keys to return in a single page. Defaults to 1000. Maximum allowed is 1000.'
+            'Maximum number of object keys to return in a single page. Defaults to 1000. Maximum allowed is 1000.'
           )
           .default(1000),
       }),
@@ -134,15 +155,27 @@ export const AmazonS3: ConnectorSpec = {
 
     downloadFile: {
       isTool: true,
+      description:
+        'Download a file from an Amazon S3 bucket. If the file content is small enough, returns the file content directly. If the file exceeds the size limit, returns a pre-signed URL for direct download from S3 instead.',
       input: z.object({
-        bucket: z.string().min(1).describe('The name of the S3 bucket'),
-        key: z.string().min(1).describe('The key (path) of the file to download'),
+        bucket: z
+          .string()
+          .min(1)
+          .describe(
+            'The name of the S3 bucket containing the file to download. Example: "my-app-data".'
+          ),
+        key: z
+          .string()
+          .min(1)
+          .describe(
+            'The key (full path) of the file to download from the S3 bucket. Example: "reports/2024/summary.pdf".'
+          ),
         maximumDownloadSizeBytes: z
           .number()
           .positive()
           .optional()
           .describe(
-            'Maximum file size in bytes that can be downloaded for the file content. If the file exceeds this size, a pre-signed URL will be returned instead of the content.'
+            'Maximum file size in bytes that can be downloaded for the file content. If the file size exceeds this limit, a pre-signed URL will be returned for direct download from S3 instead of the content. Default is 131072 (128 KB). Do not override this unless necessary to complete the task, as large files may exceed the token limit.'
           ),
       }),
       handler: async (ctx, input: ActionDownloadFileInput) => {
@@ -179,7 +212,13 @@ export const AmazonS3: ConnectorSpec = {
     },
   },
 
-  agentBuilderWorkflows: [downloadFileWorkflow, listBucketObjectsWorkflow, listBucketsWorkflow],
+  skill: [
+    'Use listBuckets to discover available buckets, then listBucketObjects (by bucket name) to explore their contents, then downloadFile to retrieve a specific file.',
+    'There is no search capability — use listBucketObjects with a prefix to filter results by path or folder (e.g., prefix: "logs/2024/" to scope to that folder).',
+    'listBucketObjects returns paginated results. When isTruncated is true in the response, pass the nextContinuationToken as continuationToken in the next request to retrieve the next page.',
+    'downloadFile returns file content directly when the file is within the size limit. When the file exceeds the limit, a pre-signed URL is returned instead — use that URL to access the file.',
+    'Keep downloads small to avoid exceeding the LLM token limit. Do not override maximumDownloadSizeBytes unless it is strictly necessary to complete the task.',
+  ].join('\n'),
 
   test: {
     description: i18n.translate('core.kibanaConnectorSpecs.amazonS3.test.description', {

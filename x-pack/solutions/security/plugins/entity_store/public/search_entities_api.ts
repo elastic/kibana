@@ -6,10 +6,8 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
-import type { Entity } from '../common';
-import { ENTITY_STORE_ROUTES } from '../common/constants';
-import type { EntityType } from '../common';
-import { API_VERSIONS } from '../common/constants';
+import type { Entity, EntityType } from '../common';
+import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../common';
 export interface SearchEntitiesFromEntityStoreParams {
   entityTypes: EntityType[];
   filterQuery?: string;
@@ -29,15 +27,15 @@ export interface SearchEntitiesFromEntityStoreResponse {
 
 /**
  * List/search Entity Store v2 unified latest index via the internal list-entities route
- * (`ENTITY_STORE_ROUTES.CRUD_GET`, page mode). Requires Entity Store v2 feature flag.
+ * (`ENTITY_STORE_ROUTES.public.CRUD_GET`, page mode). Requires Entity Store v2 feature flag.
  */
 export async function searchEntitiesFromEntityStore(
   http: HttpStart,
   params: SearchEntitiesFromEntityStoreParams,
   options?: { signal?: AbortSignal }
 ): Promise<SearchEntitiesFromEntityStoreResponse> {
-  return http.fetch<SearchEntitiesFromEntityStoreResponse>(ENTITY_STORE_ROUTES.CRUD_GET, {
-    version: API_VERSIONS.internal.v2,
+  return http.fetch<SearchEntitiesFromEntityStoreResponse>(ENTITY_STORE_ROUTES.public.CRUD_GET, {
+    version: API_VERSIONS.public.v1,
     method: 'GET',
     query: {
       entity_types: params.entityTypes,

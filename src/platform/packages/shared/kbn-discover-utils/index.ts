@@ -38,7 +38,8 @@ export {
   createStacktraceControl,
   fieldConstants,
   formatFieldValue,
-  formatHit,
+  formatFieldValueReact,
+  formatHitReact,
   getDocId,
   getLogDocumentOverview,
   getTraceDocumentOverview,
@@ -75,6 +76,7 @@ export {
   getEsQuerySort,
   getTieBreakerFieldName,
   escapeAndPreserveHighlightTags,
+  getHighlightedFieldValue,
   severityOrder,
 } from './src';
 

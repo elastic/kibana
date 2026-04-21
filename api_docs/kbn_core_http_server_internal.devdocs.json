@@ -724,7 +724,7 @@
         "label": "HttpServer",
         "description": [],
         "path": "src/core/packages/http/server-internal/src/http_server.ts",
-        "lineNumber": 190,
+        "lineNumber": 193,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -740,7 +740,7 @@
               "any"
             ],
             "path": "src/core/packages/http/server-internal/src/http_server.ts",
-            "lineNumber": 209,
+            "lineNumber": 212,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -756,7 +756,7 @@
                   "CoreContext"
                 ],
                 "path": "src/core/packages/http/server-internal/src/http_server.ts",
-                "lineNumber": 210,
+                "lineNumber": 213,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -773,7 +773,7 @@
                   "string"
                 ],
                 "path": "src/core/packages/http/server-internal/src/http_server.ts",
-                "lineNumber": 211,
+                "lineNumber": 214,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -791,7 +791,7 @@
                   "<moment.Duration>"
                 ],
                 "path": "src/core/packages/http/server-internal/src/http_server.ts",
-                "lineNumber": 212,
+                "lineNumber": 215,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -811,7 +811,7 @@
               "() => boolean"
             ],
             "path": "src/core/packages/http/server-internal/src/http_server.ts",
-            "lineNumber": 223,
+            "lineNumber": 226,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -833,7 +833,7 @@
               ">"
             ],
             "path": "src/core/packages/http/server-internal/src/http_server.ts",
-            "lineNumber": 253,
+            "lineNumber": 256,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -849,7 +849,7 @@
                   "HttpServerSetupOptions"
                 ],
                 "path": "src/core/packages/http/server-internal/src/http_server.ts",
-                "lineNumber": 253,
+                "lineNumber": 256,
                 "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -869,7 +869,7 @@
               "() => Promise<void>"
             ],
             "path": "src/core/packages/http/server-internal/src/http_server.ts",
-            "lineNumber": 352,
+            "lineNumber": 355,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -887,7 +887,7 @@
               "() => Promise<void>"
             ],
             "path": "src/core/packages/http/server-internal/src/http_server.ts",
-            "lineNumber": 377,
+            "lineNumber": 380,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -913,7 +913,7 @@
               "[]; }"
             ],
             "path": "src/core/packages/http/server-internal/src/http_server.ts",
-            "lineNumber": 950,
+            "lineNumber": 952,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -929,7 +929,7 @@
                   "GetRoutersOptions"
                 ],
                 "path": "src/core/packages/http/server-internal/src/http_server.ts",
-                "lineNumber": 950,
+                "lineNumber": 952,
                 "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1616,7 +1616,7 @@
         "label": "HttpConfigType",
         "description": [],
         "signature": [
-          "{ readonly uuid?: string | undefined; readonly basePath?: string | undefined; readonly publicBaseUrl?: string | undefined; readonly name: string; readonly ssl: Readonly<{ key?: string | undefined; certificate?: string | undefined; certificateAuthorities?: string | string[] | undefined; keyPassphrase?: string | undefined; redirectHttpFromPort?: number | undefined; } & { enabled: boolean; clientAuthentication: \"none\" | \"required\" | \"optional\"; keystore: Readonly<{ password?: string | undefined; path?: string | undefined; } & {}>; truststore: Readonly<{ password?: string | undefined; path?: string | undefined; } & {}>; cipherSuites: string[]; supportedProtocols: string[]; }>; readonly host: string; readonly protocol: \"http1\" | \"http2\"; readonly port: number; readonly compression: Readonly<{ referrerWhitelist?: string[] | undefined; } & { enabled: boolean; brotli: Readonly<{} & { enabled: boolean; quality: number; }>; }>; readonly cors: Readonly<{} & { enabled: boolean; allowCredentials: boolean; allowOrigin: string[] | \"*\"[]; }>; readonly cdn: Readonly<{ url?: string | null | undefined; } & {}>; readonly prototypeHardening: boolean; readonly http2: Readonly<{} & { allowUnsecure: boolean; }>; readonly versioned: Readonly<{} & { useVersionResolutionStrategyForInternalPaths: string[]; versionResolution: \"none\" | \"oldest\" | \"newest\"; strictClientVersionCheck: boolean; }>; readonly autoListen: boolean; readonly shutdownTimeout: moment.Duration; readonly oas: Readonly<{} & { enabled: boolean; }>; readonly securityResponseHeaders: Readonly<{ permissionsPolicyReportOnly?: string | null | undefined; } & { referrerPolicy: \"origin\" | \"no-referrer\" | \"no-referrer-when-downgrade\" | \"origin-when-cross-origin\" | \"same-origin\" | \"strict-origin\" | \"strict-origin-when-cross-origin\" | \"unsafe-url\" | null; strictTransportSecurity: string | null; xContentTypeOptions: \"nosniff\" | null; permissionsPolicy: string | null; disableEmbedding: boolean; crossOriginOpenerPolicy: \"same-origin\" | \"unsafe-none\" | \"same-origin-allow-popups\" | null; }>; readonly customResponseHeaders: Record<string, any>; readonly maxPayload: ",
+          "{ readonly uuid?: string | undefined; readonly basePath?: string | undefined; readonly publicBaseUrl?: string | undefined; readonly name: string; readonly ssl: Readonly<{ key?: string | undefined; certificate?: string | undefined; certificateAuthorities?: string | string[] | undefined; keyPassphrase?: string | undefined; redirectHttpFromPort?: number | undefined; } & { enabled: boolean; clientAuthentication: \"none\" | \"optional\" | \"required\"; keystore: Readonly<{ password?: string | undefined; path?: string | undefined; } & {}>; truststore: Readonly<{ password?: string | undefined; path?: string | undefined; } & {}>; cipherSuites: string[]; supportedProtocols: string[]; }>; readonly host: string; readonly protocol: \"http1\" | \"http2\"; readonly port: number; readonly compression: Readonly<{ referrerWhitelist?: string[] | undefined; } & { enabled: boolean; brotli: Readonly<{} & { enabled: boolean; quality: number; }>; }>; readonly cors: Readonly<{} & { enabled: boolean; allowCredentials: boolean; allowOrigin: string[] | \"*\"[]; }>; readonly cdn: Readonly<{ url?: string | null | undefined; } & {}>; readonly prototypeHardening: boolean; readonly http2: Readonly<{} & { allowUnsecure: boolean; }>; readonly versioned: Readonly<{} & { useVersionResolutionStrategyForInternalPaths: string[]; versionResolution: \"none\" | \"oldest\" | \"newest\"; strictClientVersionCheck: boolean; }>; readonly autoListen: boolean; readonly shutdownTimeout: moment.Duration; readonly oas: Readonly<{} & { enabled: boolean; }>; readonly securityResponseHeaders: Readonly<{ permissionsPolicyReportOnly?: string | null | undefined; } & { referrerPolicy: \"origin\" | \"no-referrer\" | \"no-referrer-when-downgrade\" | \"origin-when-cross-origin\" | \"same-origin\" | \"strict-origin\" | \"strict-origin-when-cross-origin\" | \"unsafe-url\" | null; strictTransportSecurity: string | null; xContentTypeOptions: \"nosniff\" | null; permissionsPolicy: string | null; disableEmbedding: boolean; crossOriginOpenerPolicy: \"same-origin\" | \"unsafe-none\" | \"same-origin-allow-popups\" | null; }>; readonly customResponseHeaders: Record<string, any>; readonly maxPayload: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",

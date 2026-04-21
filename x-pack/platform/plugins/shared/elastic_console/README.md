@@ -1,4 +1,6 @@
-# Elastic Console Plugin
+# Elastic Ramen (Elastic Console Plugin)
+
+> **Experimental** — this feature is under active development and may change without notice.
 
 An OpenAI-compatible proxy that routes requests through Kibana-configured AI connectors. External tools (coding agents, CLI tools, IDE extensions) can talk to any Elasticsearch AI connector using the standard OpenAI chat completions API.
 
@@ -11,7 +13,7 @@ The plugin is gated behind **both** a feature flag and an advanced setting:
    feature_flags.overrides:
      elasticConsole.enabled: true
    ```
-2. **Advanced setting**: Go to **Stack Management > Advanced Settings**, search for **Elastic Console**, and toggle `elasticConsole:enabled` to `true`.
+2. **Advanced setting**: Go to **Stack Management > Advanced Settings**, search for **Elastic Ramen**, and toggle `elasticRamen:enabled` to `true`.
 
 Until both are enabled, every route returns `404`.
 
@@ -22,7 +24,7 @@ All API routes require a valid Kibana session or API key. The easiest way to get
 ### Setup endpoint
 
 ```
-POST /internal/elastic_console/setup
+POST /internal/elastic_ramen/setup
 ```
 
 Returns:
@@ -38,7 +40,7 @@ The API key is scoped to the calling user's privileges and expires after 30 days
 
 ### Setup UI
 
-Navigate to `/app/elasticConsole` in Kibana. Click **Generate credentials** to create an API key. The page will:
+Navigate to `/app/elasticRamen` in Kibana. Click **Generate credentials** to create an API key. The page will:
 
 1. Attempt to auto-deliver credentials to a local agent at `http://localhost:14642/config`
 2. Fall back to displaying the credentials for manual copy if no local agent is found
@@ -57,7 +59,7 @@ All routes are internal Kibana APIs. Clients must include:
 ### Example: curl
 
 ```bash
-curl -X POST "https://my-kibana:5601/internal/elastic_console/v1/chat/completions" \
+curl -X POST "https://my-kibana:5601/internal/elastic_ramen/v1/chat/completions" \
   -H "Authorization: ApiKey YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -H "x-elastic-internal-origin: kibana" \
@@ -74,7 +76,7 @@ curl -X POST "https://my-kibana:5601/internal/elastic_console/v1/chat/completion
 ### List models
 
 ```
-GET /internal/elastic_console/v1/models
+GET /internal/elastic_ramen/v1/models
 ```
 
 Returns available AI connectors in OpenAI model list format:
@@ -96,7 +98,7 @@ Returns available AI connectors in OpenAI model list format:
 ### Chat completions
 
 ```
-POST /internal/elastic_console/v1/chat/completions
+POST /internal/elastic_ramen/v1/chat/completions
 ```
 
 OpenAI-compatible chat completions endpoint. Supports:
@@ -141,7 +143,7 @@ CRUD endpoints for managing chat conversations stored in Elasticsearch.
 #### List conversations
 
 ```
-GET /internal/elastic_console/conversations?agent_id=<optional>
+GET /internal/elastic_ramen/conversations?agent_id=<optional>
 ```
 
 Returns conversations for the current space, sorted by `updated_at` descending (max 100). The `conversation_rounds` field is excluded from list results.
@@ -149,7 +151,7 @@ Returns conversations for the current space, sorted by `updated_at` descending (
 #### Get conversation
 
 ```
-GET /internal/elastic_console/conversations/:id
+GET /internal/elastic_ramen/conversations/:id
 ```
 
 Returns a single conversation with full `conversation_rounds`.
@@ -157,7 +159,7 @@ Returns a single conversation with full `conversation_rounds`.
 #### Create conversation
 
 ```
-POST /internal/elastic_console/conversations
+POST /internal/elastic_ramen/conversations
 ```
 
 Body:
@@ -174,7 +176,7 @@ Returns `{ "id": "generated-uuid" }`.
 #### Update conversation
 
 ```
-PUT /internal/elastic_console/conversations/:id
+PUT /internal/elastic_ramen/conversations/:id
 ```
 
 Body (all fields optional):
@@ -195,7 +197,7 @@ Returns `{ "id": "conversation-id" }`.
 from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://my-kibana:5601/internal/elastic_console/v1",
+    base_url="https://my-kibana:5601/internal/elastic_ramen/v1",
     api_key="YOUR_API_KEY",
     default_headers={
         "x-elastic-internal-origin": "kibana",
@@ -216,7 +218,7 @@ print(response.choices[0].message.content)
 import OpenAI from 'openai';
 
 const client = new OpenAI({
-  baseURL: 'https://my-kibana:5601/internal/elastic_console/v1',
+  baseURL: 'https://my-kibana:5601/internal/elastic_ramen/v1',
   apiKey: 'YOUR_API_KEY',
   defaultHeaders: {
     'x-elastic-internal-origin': 'kibana',
@@ -233,7 +235,7 @@ console.log(response.choices[0].message.content);
 
 ### Claude Code / other agents
 
-Set the base URL to `https://my-kibana:5601/internal/elastic_console/v1` and use the API key from the setup endpoint. Include `x-elastic-internal-origin: kibana` in all requests, and include `kbn-xsrf: true` for non-GET requests.
+Set the base URL to `https://my-kibana:5601/internal/elastic_ramen/v1` and use the API key from the setup endpoint. Include `x-elastic-internal-origin: kibana` in all requests, and include `kbn-xsrf: true` for non-GET requests.
 
 ## Development
 

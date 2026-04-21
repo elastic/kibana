@@ -10,6 +10,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { MappingField } from './mappings';
 import { flattenMapping, getIndexMappings } from './mappings';
 import { processFieldCapsResponse, processFieldCapsResponsePerIndex } from './field_caps';
+import { batchByUrlLength } from './batch_by_url_length';
 
 /**
  * Returns true if the resource name targets a remote cluster (contains ':'),
@@ -76,18 +77,32 @@ export const getBatchedFieldsFromFieldCaps = async ({
     return {};
   }
 
-  const fieldCapRes = await esClient.fieldCaps({
-    index: resources.join(','),
-    fields: ['*'],
-  });
+  const batches = batchByUrlLength(resources);
 
-  const perIndex = processFieldCapsResponsePerIndex(fieldCapRes);
+  const batchResults = await Promise.all(
+    batches.map(async (batch) => {
+      const fieldCapRes = await esClient.fieldCaps({
+        index: batch.join(','),
+        fields: ['*'],
+      });
+      return processFieldCapsResponsePerIndex(fieldCapRes);
+    })
+  );
 
-  const result: Record<string, MappingField[]> = {};
-  for (const name of resources) {
-    result[name] = perIndex[name] ?? [];
+  const merged: Record<string, MappingField[]> = {};
+  for (const batchResult of batchResults) {
+    for (const [name, fields] of Object.entries(batchResult)) {
+      merged[name] = fields;
+    }
   }
-  return result;
+
+  for (const name of resources) {
+    if (!merged[name]) {
+      merged[name] = [];
+    }
+  }
+
+  return merged;
 };
 
 export interface IndexFieldsResult {

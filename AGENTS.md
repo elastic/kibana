@@ -79,9 +79,14 @@ Follow existing patterns in the target area first; below are common defaults.
 - Avoid inline styles unless consistent with the file’s conventions.
 - Use `@elastic/eui` components with Emotion (`@emotion/react`) for styling.
 
+## Internationalization (i18n)
+- Guidelines are found in src/platform/packages/shared/kbn-i18n/GUIDELINE.md
+- Run `node scripts/i18n_check --fix` to check for and fix errors.
+
 ## Contribution Hygiene
 - Unsure: read more code; if still stuck, ask w/ short options. Never guess.
 - Fix root cause (not band-aid).
 - Make focused changes; avoid unrelated refactors.
 - Update docs and tests when behavior or usage changes.
 - Never remove, skip, or comment out tests to make them pass; fix the underlying code.
+- Always open PRs as draft.

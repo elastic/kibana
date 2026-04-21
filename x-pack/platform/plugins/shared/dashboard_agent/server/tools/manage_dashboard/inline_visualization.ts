@@ -10,18 +10,19 @@ import { buildVisualizationConfig, type VisualizationConfig } from '@kbn/agent-b
 import { type ModelProvider, type ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import {
-  fromEmbeddablePanel,
-  type AttachmentPanel,
-  type VisualizationContent,
-} from '@kbn/dashboard-agent-common';
+import { type AttachmentPanel } from '@kbn/dashboard-agent-common';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import type { VisualizationFailure } from './utils';
 import { getErrorMessage } from './utils';
+
+const DASHBOARD_CHART_CONFIG_INSTRUCTIONS = `XY AXIS TITLE RULES:
+- For XY charts, do NOT set axis titles. Rely on the visualization title and column labels to convey meaning.
+- Set axis title visibility to false (e.g. { visible: false }) for both X and Y axes.`;
 
 export type VisualizationAttempt =
   | {
       type: 'success';
-      visContent: VisualizationContent;
+      visContent: Pick<AttachmentPanel, 'type' | 'config'>;
     }
   | {
       type: 'failure';
@@ -71,7 +72,7 @@ export const createVisualizationResolver = ({
 }): ResolveVisualizationConfig => {
   return async ({ operationType, identifier, nlQuery, index, chartType, esql, existingPanel }) => {
     try {
-      if (existingPanel && existingPanel.type !== 'lens') {
+      if (existingPanel && existingPanel.type !== LENS_EMBEDDABLE_TYPE) {
         return createVisualizationFailureResult(
           operationType,
           identifier,
@@ -80,8 +81,8 @@ export const createVisualizationResolver = ({
       }
 
       const existingConfig =
-        existingPanel?.type === 'lens'
-          ? (fromEmbeddablePanel(existingPanel).config as VisualizationConfig)
+        existingPanel?.type === LENS_EMBEDDABLE_TYPE
+          ? (existingPanel?.config as VisualizationConfig)
           : undefined;
 
       const result = await buildVisualizationConfig({
@@ -92,6 +93,7 @@ export const createVisualizationResolver = ({
         existingConfig: existingConfig ? JSON.stringify(existingConfig) : undefined,
         parsedExistingConfig: existingConfig,
         includeTimeRange: false,
+        additionalChartConfigInstructions: DASHBOARD_CHART_CONFIG_INSTRUCTIONS,
         modelProvider,
         logger,
         events,
@@ -101,7 +103,7 @@ export const createVisualizationResolver = ({
       return {
         type: 'success',
         visContent: {
-          type: 'lens',
+          type: LENS_EMBEDDABLE_TYPE,
           config: result.validatedConfig,
         },
       };

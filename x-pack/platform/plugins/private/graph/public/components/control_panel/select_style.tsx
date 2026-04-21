@@ -37,7 +37,7 @@ export const SelectStyle = ({ colors, workspace }: SelectStyleProps) => {
           };
           return (
             <EuiIcon
-              type="stopFilled"
+              type="stopFill"
               color={c}
               css={colorPickerIconStyles}
               aria-hidden="true"

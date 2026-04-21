@@ -5,66 +5,69 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import { Logger } from '@kbn/core-di';
-import type { RouteHandler } from '@kbn/core-di-server';
-import { Request, Response } from '@kbn/core-di-server';
-import type { KibanaRequest, KibanaResponseFactory, RouteSecurity } from '@kbn/core-http-server';
-import type { Logger as KibanaLogger } from '@kbn/logging';
-import { z } from '@kbn/zod';
+import { Request } from '@kbn/core-di-server';
+import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
+import { z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
 import { NotificationPolicyClient } from '../../lib/notification_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
-import { INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH } from '../constants';
+import { BaseAlertingRoute } from '../base_alerting_route';
+import { AlertingRouteContext } from '../alerting_route_context';
+import { ALERTING_V2_NOTIFICATION_POLICY_API_PATH } from '../constants';
 import { buildRouteValidationWithZod } from '../route_validation';
 
 const updateNotificationPolicyApiKeyParamsSchema = z.object({
-  id: z.string(),
+  id: z.string().describe('The notification policy identifier.'),
 });
 
 @injectable()
-export class UpdateNotificationPolicyApiKeyRoute implements RouteHandler {
+export class UpdateNotificationPolicyApiKeyRoute extends BaseAlertingRoute {
   static method = 'post' as const;
-  static path = `${INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/{id}/_update_api_key`;
+  static path = `${ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/{id}/_update_api_key`;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.notificationPolicies.write],
     },
   };
-  static options = { access: 'internal' } as const;
+  static routeOptions = {
+    summary: 'Update a notification policy API key',
+    description: 'Rotate the API key for a notification policy.',
+  } as const;
   static validate = {
     request: {
       params: buildRouteValidationWithZod(updateNotificationPolicyApiKeyParamsSchema),
     },
-  } as const;
+    response: {
+      204: {
+        description: 'Indicates a successful call.',
+      },
+      404: {
+        description: 'Indicates a notification policy with the given ID does not exist.',
+      },
+    },
+  };
+
+  protected readonly routeName = 'update notification policy api key';
 
   constructor(
-    @inject(Logger) private readonly logger: KibanaLogger,
+    @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(Request)
     private readonly request: KibanaRequest<
       z.infer<typeof updateNotificationPolicyApiKeyParamsSchema>,
       unknown,
       unknown
     >,
-    @inject(Response) private readonly response: KibanaResponseFactory,
     @inject(NotificationPolicyClient)
     private readonly notificationPolicyClient: NotificationPolicyClient
-  ) {}
+  ) {
+    super(ctx);
+  }
 
-  async handle() {
-    try {
-      await this.notificationPolicyClient.updateNotificationPolicyApiKey({
-        id: this.request.params.id,
-      });
+  protected async execute() {
+    await this.notificationPolicyClient.updateNotificationPolicyApiKey({
+      id: this.request.params.id,
+    });
 
-      return this.response.noContent();
-    } catch (e) {
-      const boom = Boom.isBoom(e) ? e : Boom.boomify(e);
-      this.logger.debug(`update notification policy api key route error: ${boom.message}`);
-      return this.response.customError({
-        statusCode: boom.output.statusCode,
-        body: boom.output.payload,
-      });
-    }
+    return this.ctx.response.noContent();
   }
 }

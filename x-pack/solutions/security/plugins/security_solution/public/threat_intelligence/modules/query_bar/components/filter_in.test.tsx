@@ -96,7 +96,7 @@ describe('<FilterInButtonIcon /> <FilterInContextMenu /> <FilterInCellAction />'
     const mockComponent: FunctionComponent = () => (
       <EuiButtonIcon
         aria-label={'test'}
-        iconType="plusInCircle"
+        iconType="plusCircle"
         data-test-subj={CHILD_COMPONENT_TEST_ID}
       />
     );

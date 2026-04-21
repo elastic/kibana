@@ -3,9 +3,17 @@ responses:
     description: 'Indicates a successful response'
 x-codeSamples:
   - lang: curl
+    label: 'Soft delete (default)'
     source: |
       curl \
         -X DELETE "${KIBANA_URL}/api/workflows/workflow/{id}" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -H "kbn-xsrf: true"
+  - lang: curl
+    label: 'Hard delete (permanent)'
+    source: |
+      curl \
+        -X DELETE "${KIBANA_URL}/api/workflows/workflow/{id}?force=true" \
         -H "Authorization: ApiKey ${API_KEY}" \
         -H "kbn-xsrf: true"
   - lang: Console

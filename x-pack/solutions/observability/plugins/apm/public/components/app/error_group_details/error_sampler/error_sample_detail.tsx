@@ -215,8 +215,11 @@ export function ErrorSampleDetails({
         ) : undefined}
         <EuiFlexItem grow={false}>
           <OpenInDiscover
-            dataTestSubj="errorGroupDetailsOpenErrorInDiscoverButton"
-            variant="button"
+            dataTestSubj="errorSampleOpenInDiscoverButton"
+            variant="iconButton"
+            label={i18n.translate('xpack.apm.errorSampleDetails.openErrorInDiscover', {
+              defaultMessage: 'Open error in Discover',
+            })}
             indexType="error"
             rangeFrom={rangeFrom}
             rangeTo={rangeTo}
@@ -224,6 +227,7 @@ export function ErrorSampleDetails({
               kuery,
               serviceName: error?.service?.name,
               errorGroupId: groupId,
+              errorId: error?.error?.id,
               sortDirection: 'DESC',
             }}
           />

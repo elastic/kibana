@@ -45,7 +45,12 @@ import {
   isBillablePolicy,
   removeDeviceControl,
 } from '../../common/endpoint/models/policy_config_helpers';
-import type { NewPolicyData, PolicyConfig, PolicyData } from '../../common/endpoint/types';
+import {
+  ProtectionModes,
+  type NewPolicyData,
+  type PolicyConfig,
+  type PolicyData,
+} from '../../common/endpoint/types';
 import type { LicenseService } from '../../common/license';
 import type { ManifestManager } from '../endpoint/services';
 import type { IRequestContextFactory } from '../request_context_factory';
@@ -274,6 +279,15 @@ export const getPackagePolicyUpdateCallback = (
     );
 
     const endpointIntegrationData = newPackagePolicy as NewPolicyData;
+
+    // The advanced settings UI may delete mac.ransomware.mode when cleared;
+    // restore the default before validation so the typed field is never missing.
+    const policyValue = endpointIntegrationData.inputs?.[0]?.config?.policy?.value as
+      | PolicyConfig
+      | undefined;
+    if (policyValue?.mac?.ransomware && !policyValue.mac.ransomware.mode) {
+      policyValue.mac.ransomware.mode = ProtectionModes.off;
+    }
 
     // Validate that Endpoint Security policy uses only enabled App Features
     validatePolicyAgainstProductFeatures(endpointIntegrationData.inputs, productFeatures);

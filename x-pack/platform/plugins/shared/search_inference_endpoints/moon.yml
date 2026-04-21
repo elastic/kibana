@@ -34,7 +34,6 @@ dependsOn:
   - '@kbn/kibana-utils-plugin'
   - '@kbn/features-plugin'
   - '@kbn/ui-theme'
-  - '@kbn/deeplinks-search'
   - '@kbn/deeplinks-management'
   - '@kbn/management-plugin'
   - '@kbn/serverless'
@@ -44,7 +43,6 @@ dependsOn:
   - '@kbn/inference-endpoint-ui-common'
   - '@kbn/object-utils'
   - '@kbn/react-query'
-  - '@kbn/search-api-panels'
   - '@kbn/cloud-plugin'
   - '@kbn/core-http-router-server-mocks'
   - '@kbn/logging-mocks'
@@ -53,6 +51,8 @@ dependsOn:
   - '@kbn/core-security-server'
   - '@kbn/inference-common'
   - '@kbn/inference-plugin'
+  - '@kbn/management-settings-ids'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -65,6 +65,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout_inference_test/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

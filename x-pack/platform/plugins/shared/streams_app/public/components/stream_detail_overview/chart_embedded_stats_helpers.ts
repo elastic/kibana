@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { AsyncState } from 'react-use/lib/useAsync';
 
-import { formatBytes } from '../data_management/stream_detail_lifecycle/helpers/format_bytes';
+import { formatBytes } from '../stream_management/data_management/stream_detail_lifecycle/helpers/format_bytes';
 import { executeEsqlQuery } from '../../hooks/use_execute_esql_query';
 import { buildDataQualityTotalDocCountEsql } from '../../util/stream_overview_esql';
 

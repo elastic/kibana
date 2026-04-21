@@ -26,6 +26,7 @@ export interface HostDetailsPanelProps extends Record<string, unknown> {
   hasMisconfigurationFindings?: boolean;
   hasVulnerabilitiesFindings?: boolean;
   hasNonClosedAlerts?: boolean;
+  entityStoreEntityId?: string;
   path?: {
     tab?: EntityDetailsLeftPanelTab;
     subTab?: CspInsightLeftPanelSubTab;

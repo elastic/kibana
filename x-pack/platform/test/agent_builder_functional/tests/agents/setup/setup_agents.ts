@@ -26,6 +26,15 @@ export function setupAgents({
     agents,
     agentsHooks: {
       async before() {
+        // Pre-cleanup: remove agents left over from a crashed or incomplete previous run
+        await es.deleteByQuery({
+          index: chatSystemIndex('agents'),
+          query: { match_all: {} },
+          wait_for_completion: true,
+          refresh: true,
+          conflicts: 'proceed',
+          ignore_unavailable: true,
+        });
         for (const agent of agents) {
           await agentBuilder.createAgentViaUI(agent);
         }
@@ -37,6 +46,7 @@ export function setupAgents({
           wait_for_completion: true,
           refresh: true,
           conflicts: 'proceed',
+          ignore_unavailable: true,
         });
       },
     },

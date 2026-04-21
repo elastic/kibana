@@ -50,6 +50,13 @@ describe('StepIcon', () => {
       expect(container.querySelector('[data-euiicon-type="document"]')).toBeInTheDocument();
     });
 
+    it('renders document icon for trigger_event (event-driven pseudo-step)', () => {
+      const { container } = render(
+        <StepIcon stepType="trigger_event" executionStatus={undefined} />
+      );
+      expect(container.querySelector('[data-euiicon-type="document"]')).toBeInTheDocument();
+    });
+
     it('renders clock icon for trigger_scheduled', () => {
       const { container } = render(
         <StepIcon stepType="trigger_scheduled" executionStatus={undefined} />
@@ -66,7 +73,7 @@ describe('StepIcon', () => {
 
     it('renders console icon for console step', () => {
       const { container } = render(<StepIcon stepType="console" executionStatus={undefined} />);
-      expect(container.querySelector('[data-euiicon-type="console"]')).toBeInTheDocument();
+      expect(container.querySelector('[data-euiicon-type="commandLine"]')).toBeInTheDocument();
     });
 
     it('renders branch icon for if step', () => {
@@ -81,7 +88,7 @@ describe('StepIcon', () => {
 
     it('renders email icon for email step', () => {
       const { container } = render(<StepIcon stepType="email" executionStatus={undefined} />);
-      expect(container.querySelector('[data-euiicon-type="email"]')).toBeInTheDocument();
+      expect(container.querySelector('[data-euiicon-type="mail"]')).toBeInTheDocument();
     });
 
     it('renders logoSlack icon for slack step', () => {
@@ -145,6 +152,22 @@ describe('StepIcon', () => {
       // When a custom icon is provided, the default "plugs" icon should NOT render
       expect(container.querySelector('[data-euiicon-type="plugs"]')).not.toBeInTheDocument();
     });
+
+    it('resolves a base type to a registered namespaced step def icon (list aggregation)', () => {
+      // List rows pass the base type (e.g. `cases` from `cases.createCase`). When no step
+      // definition is registered under the bare base type but one exists for `${base}.X`, the
+      // icon should be inherited from that family definition rather than falling through to
+      // actionTypeRegistry or `plugs`.
+      (mockServices.workflowsExtensions.getStepDefinition as jest.Mock).mockReturnValue(undefined);
+      (mockServices.workflowsExtensions.getAllStepDefinitions as jest.Mock).mockReturnValue([
+        { id: 'cases.createCase', icon: 'briefcase' },
+        { id: 'cases.getCase', icon: 'briefcase' },
+      ]);
+
+      const { container } = render(<StepIcon stepType="cases" executionStatus={undefined} />);
+      expect(container.querySelector('[data-euiicon-type="briefcase"]')).toBeInTheDocument();
+      expect(container.querySelector('[data-euiicon-type="plugs"]')).not.toBeInTheDocument();
+    });
   });
 
   describe('__overview pseudo-step', () => {
@@ -152,9 +175,7 @@ describe('StepIcon', () => {
       const { container } = render(
         <StepIcon stepType="__overview" executionStatus={ExecutionStatus.COMPLETED} />
       );
-      expect(
-        container.querySelector('[data-euiicon-type="checkInCircleFilled"]')
-      ).toBeInTheDocument();
+      expect(container.querySelector('[data-euiicon-type="checkCircleFill"]')).toBeInTheDocument();
     });
 
     it('renders a loading spinner for __overview step with RUNNING status', () => {

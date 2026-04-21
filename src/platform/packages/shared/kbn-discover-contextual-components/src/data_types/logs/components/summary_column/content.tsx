@@ -17,7 +17,7 @@ import {
   LOG_LEVEL_REGEX,
   OTEL_MESSAGE_FIELD,
 } from '@kbn/discover-utils';
-import { MESSAGE_FIELD, escapeAndPreserveHighlightTags } from '@kbn/discover-utils';
+import { MESSAGE_FIELD, getHighlightedFieldValue } from '@kbn/discover-utils';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { makeHighContrastColor, useEuiTheme } from '@elastic/eui';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
@@ -100,6 +100,7 @@ export const Content = ({
 }: ContentProps) => {
   // Use OTel fallback version that returns the actual field name used
   const { field, value } = getMessageFieldWithFallbacks(row.flattened);
+  const highlights = field ? row.raw.highlight?.[field] : undefined;
 
   const { euiTheme } = useEuiTheme();
   const isDarkTheme = useKibanaIsDarkMode();
@@ -107,9 +108,14 @@ export const Content = ({
   const highlightedValue = useMemo(
     () =>
       value
-        ? getHighlightedMessage(escapeAndPreserveHighlightTags(value), row, euiTheme, isDarkTheme)
-        : value,
-    [value, row, euiTheme, isDarkTheme]
+        ? getHighlightedMessage(
+            getHighlightedFieldValue(value, highlights),
+            row,
+            euiTheme,
+            isDarkTheme
+          )
+        : undefined,
+    [value, highlights, row, euiTheme, isDarkTheme]
   );
 
   const shouldRenderContent = !!field && !!value && !!highlightedValue;

@@ -22,7 +22,7 @@ import type { ReactNode } from 'react';
 import React, { useMemo, useState } from 'react';
 import type { StatefulStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
-import { useStreamsRoutingSelector } from '../data_management/stream_detail_routing/state_management/stream_routing_state_machine';
+import { useStreamsRoutingSelector } from '../stream_management/data_management/stream_detail_routing/state_management/stream_routing_state_machine';
 
 interface StreamNameFormRowProps {
   onChange?: (value: string) => void;

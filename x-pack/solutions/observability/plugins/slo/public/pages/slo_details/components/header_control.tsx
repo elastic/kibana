@@ -199,7 +199,7 @@ export function HeaderControl({ slo }: Props) {
 
   const showRemoteLinkIcon = isRemote ? (
     <EuiIcon
-      type="popout"
+      type="external"
       size="s"
       css={{
         marginLeft: '10px',
@@ -216,7 +216,7 @@ export function HeaderControl({ slo }: Props) {
             data-test-subj="o11yHeaderControlActionsButton"
             fill
             iconSide="right"
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             iconSize="s"
             onClick={handleActionsClick}
           >

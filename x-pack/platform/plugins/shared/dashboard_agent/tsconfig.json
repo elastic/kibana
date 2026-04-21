@@ -15,15 +15,22 @@
     "@kbn/dashboard-plugin",
     "@kbn/dashboard-agent-common",
     "@kbn/zod",
-    "@kbn/lens-embeddable-utils",
     "@kbn/dashboard-markdown",
     "@kbn/unified-search-plugin",
     "@kbn/deeplinks-analytics",
     "@kbn/share-plugin",
     "@kbn/css-utils",
-    "@kbn/core-saved-objects-api-server",
     "@kbn/logging",
-    "@kbn/core-elasticsearch-server"
+    "@kbn/core-elasticsearch-server",
+    "@kbn/lens-common",
+    "@kbn/presentation-publishing",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/es-query",
+    "@kbn/data-plugin",
+    "@kbn/as-code-filters-transforms",
+    "@kbn/as-code-shared-transforms",
+    "@kbn/data-views-plugin",
+    "@kbn/test-jest-helpers"
   ],
   "exclude": ["target/**/*"]
 }

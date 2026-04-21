@@ -16,7 +16,7 @@ import {
   ignoredFeatureSchema,
 } from '@kbn/streams-schema';
 import { withSpan } from '@kbn/apm-utils';
-import { conditionSchema, type Condition } from '@kbn/streamlang';
+import { conditionSchema, isConditionComplete, type Condition } from '@kbn/streamlang';
 import { createIdentifyFeaturesPrompt } from './prompt';
 import { formatRawDocument } from './utils/format_raw_document';
 import { sumTokens } from '../helpers/sum_tokens';
@@ -57,7 +57,6 @@ export async function identifyFeatures({
   excludedFeatures,
   systemPrompt,
   inferenceClient,
-  logger,
   signal,
   previouslyIdentifiedFeatures = [],
 }: IdentifyFeaturesOptions): Promise<{
@@ -65,8 +64,6 @@ export async function identifyFeatures({
   ignoredFeatures: IgnoredFeature[];
   tokensUsed: ChatCompletionTokenCount;
 }> {
-  logger.debug(`Identifying features from ${sampleDocuments.length} sample documents`);
-
   const formattedDocuments = compact(
     sampleDocuments.map((hit) =>
       formatRawDocument({
@@ -132,5 +129,9 @@ function tryParseFilter(maybeFilter: unknown): Condition | undefined {
   }
 
   const result = conditionSchema.safeParse(maybeFilter);
-  return result.success ? result.data : undefined;
+  if (!result.success) {
+    return undefined;
+  }
+
+  return isConditionComplete(result.data) ? result.data : undefined;
 }

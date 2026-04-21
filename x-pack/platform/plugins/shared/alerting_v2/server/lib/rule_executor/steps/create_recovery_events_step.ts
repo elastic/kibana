@@ -23,7 +23,7 @@ import type { QueryServiceContract } from '../../services/query_service/query_se
 import { getActiveAlertGroupHashesQuery, type ActiveAlertGroupHash } from '../queries';
 import { guardedExpandStep } from '../stream_utils';
 import type { RuleResponse } from '../../rules_client';
-import type { AlertEvent } from '../../../resources/alert_events';
+import type { AlertEvent } from '../../../resources/datastreams/alert_events';
 import type { ExecutionContext } from '../../execution_context';
 
 @injectable()
@@ -71,6 +71,7 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
           : buildRecoveryAlertEvents({
               ruleId: rule.id,
               ruleVersion: 1,
+              spaceId: input.spaceId,
               activeGroupHashes,
               breachedGroupHashes: new Set(alertEventsBatch.map((e) => e.group_hash)),
               scheduledTimestamp: input.scheduledAt,

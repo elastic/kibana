@@ -31,10 +31,10 @@ import { PackagePolicyRequestError, PackagePolicyValidationError } from '../../e
 
 import type { FullAgentPolicyInput, PackagePolicy, TemplateAgentPolicyInput } from '../../types';
 import { pkgToPkgKey } from '../epm/registry';
-import { hasDynamicSignalTypes } from '../epm/packages/input_type_packages';
 import { packagePolicyInputAllowsUndefinedDataStreamType } from '../../../common/services';
 
 import { extractSignalTypesFromPipelines } from './otel_collector';
+import { getEffectiveOtelStreamDataset } from './get_effective_otel_stream_dataset';
 
 export const DEFAULT_CLUSTER_PERMISSIONS = ['monitor'];
 
@@ -117,9 +117,13 @@ export function storedPackagePoliciesToAgentPermissions(
       return connectorServicePermissions(packagePolicy.id);
     }
 
-    // For packages that have any dynamic_signal_types input (input-only or composable integration),
-    // skip the dataStreams check — permissions will be determined dynamically from OTel pipelines.
-    const isDynamicInput = hasDynamicSignalTypes(pkg);
+    // If any enabled input in this package policy has dynamic_signal_types, permissions are
+    // determined dynamically from OTel pipelines rather than from static data stream definitions.
+    // We check per-input (not package-level) so that a non-dynamic input in a package that also
+    // has a dynamic input template gets normal data-stream-based permissions.
+    const isDynamicInput = packagePolicy.inputs.some(
+      (input) => input.enabled && packagePolicyInputAllowsUndefinedDataStreamType(pkg, input)
+    );
 
     const dataStreams = getNormalizedDataStreams(pkg);
     if (!isDynamicInput && (!dataStreams || dataStreams.length === 0)) {
@@ -218,8 +222,9 @@ export function storedPackagePoliciesToAgentPermissions(
 
                   const ds: DataStreamMeta = {
                     type: stream.data_stream.type,
-                    dataset:
-                      stream.compiled_stream?.data_stream?.dataset ?? stream.data_stream.dataset,
+                    dataset: isOtelInput
+                      ? getEffectiveOtelStreamDataset(stream)
+                      : stream.compiled_stream?.data_stream?.dataset ?? stream.data_stream.dataset,
                   };
 
                   if (stream.data_stream.elasticsearch) {
@@ -229,13 +234,17 @@ export function storedPackagePoliciesToAgentPermissions(
                   dataStreams_.push(ds);
 
                   if (isOtelInput && stream.data_stream.type === 'traces') {
-                    // For traces allow to send span event to logs-generic.otel-{namespace}
+                    // Span events use the same effective dataset as OTTL (getFullInputStreams merge +
+                    // data_stream.dataset var, then generateOtelTypeTransforms). Propagate
+                    // dynamic_dataset from the traces stream so wildcard indices match traces-*-* when
+                    // the registry marks traces as dynamic (input-type OTel packages).
+                    const spanEventElasticsearch = getOtelSpanEventElasticsearchFromTracesStream(
+                      stream.data_stream.elasticsearch
+                    );
                     dataStreams_.push({
                       type: 'logs',
-                      dataset: 'generic.otel',
-                      elasticsearch: {
-                        dynamic_namespace: stream.data_stream.elasticsearch?.dynamic_namespace,
-                      },
+                      dataset: getEffectiveOtelStreamDataset(stream),
+                      ...(spanEventElasticsearch ? { elasticsearch: spanEventElasticsearch } : {}),
                     });
 
                     if (stream.vars?.[USE_APM_VAR_NAME]?.value === true) {
@@ -290,6 +299,25 @@ export interface DataStreamMeta {
     privileges?: RegistryDataStreamPrivileges;
     dynamic_namespace?: boolean;
     dynamic_dataset?: boolean;
+  };
+}
+
+/** Span-event logs inherit only dynamic_dataset/dynamic_namespace from the traces stream; omit when unset. */
+function getOtelSpanEventElasticsearchFromTracesStream(
+  traceElasticsearch: DataStreamMeta['elasticsearch'] | undefined
+):
+  | Pick<NonNullable<DataStreamMeta['elasticsearch']>, 'dynamic_dataset' | 'dynamic_namespace'>
+  | undefined {
+  if (!traceElasticsearch) {
+    return undefined;
+  }
+  const { dynamic_dataset, dynamic_namespace } = traceElasticsearch;
+  if (dynamic_dataset === undefined && dynamic_namespace === undefined) {
+    return undefined;
+  }
+  return {
+    ...(dynamic_dataset !== undefined ? { dynamic_dataset } : {}),
+    ...(dynamic_namespace !== undefined ? { dynamic_namespace } : {}),
   };
 }
 

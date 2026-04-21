@@ -47,9 +47,6 @@ const getBaseQuery = ({
 export const useBaseEsQuery = ({ filters = [], query, pageFilters = [] }: EntitiesBaseURLQuery) => {
   const {
     notifications: { toasts },
-    data: {
-      query: { filterManager, queryString },
-    },
     uiSettings,
   } = useKibana().services;
   const { dataView } = useContext(DataViewContext);
@@ -71,11 +68,6 @@ export const useBaseEsQuery = ({ filters = [], query, pageFilters = [] }: Entiti
     }
     return result;
   }, [dataView, filters, pageFilters, query, config, globalFilterQuery]);
-
-  useEffect(() => {
-    filterManager.setAppFilters(filters);
-    queryString.setQuery(query);
-  }, [filters, filterManager, queryString, query]);
 
   const handleMalformedQueryError = () => {
     const error = baseEsQuery instanceof Error ? baseEsQuery : undefined;

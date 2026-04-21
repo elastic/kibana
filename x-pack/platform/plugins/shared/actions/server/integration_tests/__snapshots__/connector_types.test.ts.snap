@@ -393,7 +393,7 @@ Object {
 
 exports[`Connector type config checks detect connector type changes for: .cases-webhook 3`] = `
 Object {
-  "anyOf": Array [
+  "oneOf": Array [
     Object {
       "additionalProperties": false,
       "properties": Object {
@@ -944,7 +944,7 @@ Object {
 
 exports[`Connector type config checks detect connector type changes for: .gen-ai 1`] = `
 Object {
-  "anyOf": Array [
+  "oneOf": Array [
     Object {
       "additionalProperties": false,
       "properties": Object {
@@ -1379,7 +1379,22 @@ Object {
   "additionalProperties": false,
   "properties": Object {
     "body": Object {
-      "type": "string",
+      "anyOf": Array [
+        Object {
+          "type": "string",
+        },
+        Object {
+          "items": Object {},
+          "type": "array",
+        },
+        Object {
+          "additionalProperties": Object {},
+          "propertyNames": Object {
+            "type": "string",
+          },
+          "type": "object",
+        },
+      ],
     },
     "fetcher": Object {
       "properties": Object {
@@ -1464,7 +1479,22 @@ Object {
   "additionalProperties": false,
   "properties": Object {
     "body": Object {
-      "type": "string",
+      "anyOf": Array [
+        Object {
+          "type": "string",
+        },
+        Object {
+          "items": Object {},
+          "type": "array",
+        },
+        Object {
+          "additionalProperties": Object {},
+          "propertyNames": Object {
+            "type": "string",
+          },
+          "type": "object",
+        },
+      ],
     },
     "fetcher": Object {
       "properties": Object {
@@ -1725,7 +1755,7 @@ Object {
 
 exports[`Connector type config checks detect connector type changes for: .jira 3`] = `
 Object {
-  "anyOf": Array [
+  "oneOf": Array [
     Object {
       "additionalProperties": false,
       "properties": Object {
@@ -2806,7 +2836,7 @@ Object {
 
 exports[`Connector type config checks detect connector type changes for: .servicenow 3`] = `
 Object {
-  "anyOf": Array [
+  "oneOf": Array [
     Object {
       "additionalProperties": false,
       "properties": Object {
@@ -3250,7 +3280,7 @@ Object {
 
 exports[`Connector type config checks detect connector type changes for: .servicenow-itom 3`] = `
 Object {
-  "anyOf": Array [
+  "oneOf": Array [
     Object {
       "additionalProperties": false,
       "properties": Object {
@@ -3547,7 +3577,7 @@ Object {
 
 exports[`Connector type config checks detect connector type changes for: .servicenow-sir 3`] = `
 Object {
-  "anyOf": Array [
+  "oneOf": Array [
     Object {
       "additionalProperties": false,
       "properties": Object {
@@ -4409,7 +4439,7 @@ Object {
 
 exports[`Connector type config checks detect connector type changes for: .swimlane 3`] = `
 Object {
-  "anyOf": Array [
+  "oneOf": Array [
     Object {
       "additionalProperties": false,
       "properties": Object {

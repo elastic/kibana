@@ -25,10 +25,17 @@ const mockUnsnoozeNotificationPolicy = jest.fn();
 const mockSettingsClientGet = jest.fn();
 const mockUseFetchWorkflow = jest.fn();
 
+jest.mock('../../application/breadcrumb_context', () => ({
+  useSetBreadcrumbs: () => jest.fn(),
+}));
+
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
     if (token === 'application') {
       return { navigateToUrl: mockNavigateToUrl, getUrlForApp: mockGetUrlForApp };
+    }
+    if (token === 'chrome') {
+      return { docTitle: { change: jest.fn() } };
     }
     if (token === 'http') {
       return { basePath: { prepend: (path: string) => path } };
@@ -112,6 +119,10 @@ jest.mock('../../hooks/use_fetch_workflow', () => ({
   useFetchWorkflow: (...args: unknown[]) => mockUseFetchWorkflow(...args),
 }));
 
+jest.mock('../../hooks/use_fetch_tags', () => ({
+  useFetchTags: () => ({ data: [], isLoading: false }),
+}));
+
 jest.mock('../../components/notification_policy/delete_confirmation_modal', () => ({
   DeleteNotificationPolicyConfirmModal: () => null,
 }));
@@ -144,7 +155,9 @@ const createPolicy = (
   destinations: [{ type: 'workflow', id: 'workflow-1' }],
   matcher: null,
   groupBy: null,
-  throttle: null,
+  tags: null,
+  groupingMode: null,
+  throttle: { strategy: undefined, interval: undefined },
   snoozedUntil: null,
   auth: {
     owner: 'elastic',
@@ -238,6 +251,7 @@ describe('ListNotificationPoliciesPage', () => {
     expect(columnHeaders).toEqual([
       'Name',
       'Destinations',
+      'Tags',
       'Last update',
       'Updated by',
       'State',

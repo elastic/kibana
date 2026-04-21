@@ -31,7 +31,8 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
   const es = getService('es');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
 
-  describe('eventLog', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/259686
+  describe.skip('eventLog', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     const runRuleAndEnsureCompletion = async ({

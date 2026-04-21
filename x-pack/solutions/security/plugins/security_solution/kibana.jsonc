@@ -67,10 +67,10 @@
       "telemetry",
       "elasticAssistantSharedState",
       "share",
-      "entityStore",
     ],
     "optionalPlugins": [
       "encryptedSavedObjects",
+      "evals",
       "fleet",
       "ml",
       "newsfeed",
