@@ -13,8 +13,10 @@ import {
 } from './get_alert_evaluation_unit_type_by_rule_type_id';
 
 export const formatAlertEvaluationValue = (ruleTypeId?: string, evaluationValue?: number) => {
-  if (null == evaluationValue || !ruleTypeId) return '-';
+  if (evaluationValue == null || !ruleTypeId) return '-';
+
   const unitType = getAlertEvaluationUnitTypeByRuleTypeId(ruleTypeId);
+
   switch (unitType) {
     case ALERT_EVALUATION_UNIT_TYPE.DURATION:
       return asMillisecondDuration(evaluationValue);
@@ -22,8 +24,8 @@ export const formatAlertEvaluationValue = (ruleTypeId?: string, evaluationValue?
       return asPercent(evaluationValue, 100);
     case ALERT_EVALUATION_UNIT_TYPE.COUNT:
       return i18n.translate('xpack.observability.alertEvaluation.countValue', {
-        defaultMessage: '{value} {value, plural, one {error} other {errors}}',
-        values: { value: asInteger(evaluationValue) },
+        defaultMessage: '{formattedValue} {value, plural, one {error} other {errors}}',
+        values: { value: evaluationValue, formattedValue: asInteger(evaluationValue) },
       });
     default:
       return evaluationValue;
