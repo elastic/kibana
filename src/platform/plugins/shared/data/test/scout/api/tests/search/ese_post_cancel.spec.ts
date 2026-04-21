@@ -59,7 +59,10 @@ apiTest.describe(
       expect(response.body.isPartial).toBe(true);
       expect(response.body.isRunning).toBe(true);
 
-      // Fire a long-polling request and abort it after 2s to create a race
+      // Send a follow-up request that waits up to 10s for completion. We'll
+      // abort it after 2s and immediately fire DELETE so the abort and the
+      // cancellation race on the server. This must not crash Kibana, and the
+      // search must end up cancelled.
       const controller = new AbortController();
       const pollPromise = apiClient
         .post(`${ESE_API_PATH}/${id}`, {
@@ -69,30 +72,23 @@ apiTest.describe(
         })
         .catch((e: Error) => e);
 
-      await new Promise((resolve) =>
-        setTimeout(() => {
-          controller.abort();
-          resolve(null);
-        }, 2000)
-      );
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      controller.abort();
 
-      // Wait for the abort to fully settle
-      const abortResult = await pollPromise;
-      expect(abortResult instanceof Error).toBe(true);
-
-      // Delete the search server-side; accept 200 (still alive) or 404 (abort
-      // already triggered server-side cleanup) — the key assertion is that
-      // Kibana did not crash.
       const deleteResponse = await apiClient.delete(`${ESE_API_PATH}/${id}`, {
         headers: { ...COMMON_HEADERS, ...cookieHeader },
       });
-      expect(deleteResponse).toHaveStatusCode({ oneOf: [200, 404] });
+      expect(deleteResponse).toHaveStatusCode(200);
 
-      // Confirm the server is still healthy after the abort + delete race
-      const healthCheck = await apiClient.get('/api/status', {
-        headers: { ...cookieHeader },
+      const abortResult = await pollPromise;
+      expect(abortResult instanceof Error).toBe(true);
+
+      // Confirm the search was actually cancelled (a fresh poll should 404).
+      const refetchResponse = await apiClient.post(`${ESE_API_PATH}/${id}`, {
+        headers: { ...COMMON_HEADERS, ...cookieHeader },
+        body: {},
       });
-      expect(healthCheck).toHaveStatusCode(200);
+      expect(refetchResponse).toHaveStatusCode(404);
     });
   }
 );
