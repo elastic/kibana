@@ -45,12 +45,7 @@ const {
 describe(
   'Workflow Insights',
   {
-    tags: [
-      '@ess',
-      '@serverless',
-      // skipped on MKI since feature flags are not supported there
-      '@skipInServerlessMKI',
-    ],
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
   },
   () => {
     const connectorName = 'TEST-CONNECTOR';

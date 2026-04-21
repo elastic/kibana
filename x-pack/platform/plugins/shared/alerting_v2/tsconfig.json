@@ -92,7 +92,9 @@
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/core-http-browser",
     "@kbn/utility-types",
-    "@kbn/usage-collection-plugin"
+    "@kbn/usage-collection-plugin",
+    "@kbn/share-plugin",
+    "@kbn/deeplinks-analytics"
   ],
   "exclude": ["target/**/*"]
 }

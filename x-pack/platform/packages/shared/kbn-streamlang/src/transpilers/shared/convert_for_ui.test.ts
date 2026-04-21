@@ -86,6 +86,38 @@ describe('convertStepsForUI', () => {
     expect(result).toHaveLength(0);
   });
 
+  it('flattens else branch steps with branch attribute', () => {
+    const dsl: StreamlangDSL = {
+      steps: [
+        {
+          customIdentifier: 'cond1',
+          condition: {
+            field: 'status',
+            eq: 200,
+            steps: [{ customIdentifier: 'if1', action: 'set', to: 'a', value: 'b' }],
+            else: [{ customIdentifier: 'else1', action: 'set', to: 'a', value: 'c' }],
+          },
+        },
+      ],
+    };
+    const result = convertStepsForUI(dsl) as FlattenedStep[];
+    expect(result).toHaveLength(3);
+
+    // Condition block itself
+    expect(result[0].customIdentifier).toBe('cond1');
+    expect(result[0].parentId).toBeNull();
+
+    // If-branch child
+    expect(result[1].customIdentifier).toBe('if1');
+    expect(result[1].parentId).toBe('cond1');
+    expect(result[1].branch).toBe('if');
+
+    // Else-branch child
+    expect(result[2].customIdentifier).toBe('else1');
+    expect(result[2].parentId).toBe('cond1');
+    expect(result[2].branch).toBe('else');
+  });
+
   it('handles steps with existing ids', () => {
     const dsl: StreamlangDSL = {
       steps: [
@@ -177,5 +209,86 @@ describe('convertUIStepsToDSL', () => {
   it('handles empty input', () => {
     const dsl = convertUIStepsToDSL([]);
     expect(dsl.steps).toHaveLength(0);
+  });
+
+  it('nests else-branch steps under condition.else using branch attribute', () => {
+    const uiSteps: StreamlangStepWithUIAttributes[] = [
+      {
+        customIdentifier: 'cond1',
+        condition: { field: 'status', eq: 200 },
+        parentId: null,
+      },
+      {
+        customIdentifier: 'if1',
+        action: 'set',
+        to: 'a',
+        value: 'b',
+        parentId: 'cond1',
+        branch: 'if',
+      },
+      {
+        customIdentifier: 'else1',
+        action: 'set',
+        to: 'a',
+        value: 'c',
+        parentId: 'cond1',
+        branch: 'else',
+      },
+    ];
+    const dsl = convertUIStepsToDSL(uiSteps, false);
+    expect(dsl.steps).toHaveLength(1);
+    const cond = dsl.steps[0];
+    expect(isConditionBlock(cond)).toBe(true);
+    if (!isConditionBlock(cond)) return;
+    expect(cond.condition.steps).toHaveLength(1);
+    expect(cond.condition.else).toHaveLength(1);
+    expect(isActionBlock(cond.condition.steps[0]) && cond.condition.steps[0].action).toBe('set');
+    expect(isActionBlock(cond.condition.else![0]) && cond.condition.else![0].action).toBe('set');
+  });
+
+  it('omits else from DSL when empty', () => {
+    const uiSteps: StreamlangStepWithUIAttributes[] = [
+      {
+        customIdentifier: 'cond1',
+        condition: { field: 'status', eq: 200 },
+        parentId: null,
+      },
+      {
+        customIdentifier: 'if1',
+        action: 'set',
+        to: 'a',
+        value: 'b',
+        parentId: 'cond1',
+      },
+    ];
+    const dsl = convertUIStepsToDSL(uiSteps);
+    const cond = dsl.steps[0];
+    expect(isConditionBlock(cond)).toBe(true);
+    if (!isConditionBlock(cond)) return;
+    expect(cond.condition.else).toBeUndefined();
+  });
+
+  it('round-trips DSL with else branches', () => {
+    const originalDsl: StreamlangDSL = {
+      steps: [
+        {
+          customIdentifier: 'cond1',
+          condition: {
+            field: 'env',
+            eq: 'prod',
+            steps: [{ customIdentifier: 'if1', action: 'set', to: 'flag', value: 'true' }],
+            else: [{ customIdentifier: 'else1', action: 'set', to: 'flag', value: 'false' }],
+          },
+        },
+      ],
+    };
+    const uiSteps = convertStepsForUI(originalDsl);
+    const roundTrippedDsl = convertUIStepsToDSL(uiSteps, false);
+    expect(roundTrippedDsl.steps).toHaveLength(1);
+    const cond = roundTrippedDsl.steps[0];
+    expect(isConditionBlock(cond)).toBe(true);
+    if (!isConditionBlock(cond)) return;
+    expect(cond.condition.steps).toHaveLength(1);
+    expect(cond.condition.else).toHaveLength(1);
   });
 });

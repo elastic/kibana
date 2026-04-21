@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react';
-import { mount } from 'enzyme';
+import { act, render, renderHook, screen, within } from '@testing-library/react';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 
@@ -194,7 +193,7 @@ describe('useUserProfileForm', () => {
 
       const nonCloudUser = mockAuthenticatedUser({ elastic_cloud_user: false });
 
-      const testWrapper = mount(
+      const { container } = render(
         coreStart.rendering.addContext(
           <Providers
             services={coreStart}
@@ -210,7 +209,7 @@ describe('useUserProfileForm', () => {
         )
       );
 
-      expect(testWrapper.exists('UserAvatar')).toBeTruthy();
+      expect(container.querySelector('.euiAvatar')).toBeInTheDocument();
     });
 
     it('should not display if the User is a cloud user', () => {
@@ -218,7 +217,7 @@ describe('useUserProfileForm', () => {
 
       const cloudUser = mockAuthenticatedUser({ elastic_cloud_user: true });
 
-      const testWrapper = mount(
+      const { container } = render(
         coreStart.rendering.addContext(
           <Providers
             services={coreStart}
@@ -234,7 +233,7 @@ describe('useUserProfileForm', () => {
         )
       );
 
-      expect(testWrapper.exists('UserAvatar')).toBeFalsy();
+      expect(container.querySelector('.euiAvatar')).not.toBeInTheDocument();
     });
   });
 
@@ -244,7 +243,7 @@ describe('useUserProfileForm', () => {
 
       const nonCloudUser = mockAuthenticatedUser({ elastic_cloud_user: false });
 
-      const testWrapper = mount(
+      render(
         coreStart.rendering.addContext(
           <Providers
             services={coreStart}
@@ -260,17 +259,14 @@ describe('useUserProfileForm', () => {
         )
       );
 
-      const overrideMsg = testWrapper.find('EuiToolTip[data-test-subj="themeOverrideTooltip"]');
-      expect(overrideMsg).toHaveLength(0);
+      const themeMenu = screen.getByTestId('themeMenu');
+      expect(themeMenu).toBeInTheDocument();
+      expect(themeMenu.closest('.euiToolTipAnchor')).toBeNull();
 
-      const themeMenu = testWrapper.find('EuiKeyPadMenu[data-test-subj="themeMenu"]');
-      expect(themeMenu).toHaveLength(1);
-
-      const themeOptions = themeMenu.find('EuiKeyPadMenuItem');
-      expect(themeOptions).toHaveLength(4);
-      themeOptions.forEach((option) => {
-        const menuItemEl = (option.getDOMNode() as unknown as Element[])[1];
-        expect(menuItemEl.className).not.toContain('disabled');
+      const themeItems = within(themeMenu).getAllByRole('radio');
+      expect(themeItems).toHaveLength(4);
+      themeItems.forEach((item) => {
+        expect(item).not.toBeDisabled();
       });
     });
 
@@ -279,7 +275,7 @@ describe('useUserProfileForm', () => {
 
       const cloudUser = mockAuthenticatedUser({ elastic_cloud_user: true });
 
-      const testWrapper = mount(
+      render(
         coreStart.rendering.addContext(
           <Providers
             services={coreStart}
@@ -295,7 +291,7 @@ describe('useUserProfileForm', () => {
         )
       );
 
-      expect(testWrapper.exists('EuiKeyPadMenu[data-test-subj="themeMenu"]')).toBeFalsy();
+      expect(screen.queryByTestId('themeMenu')).not.toBeInTheDocument();
     });
 
     it('should add special toast after submitting form successfully since darkMode requires a refresh', async () => {
@@ -334,7 +330,7 @@ describe('useUserProfileForm', () => {
       coreStart.theme.getTheme.mockReturnValue({ darkMode: true, name: 'borealis' });
       coreStart.settings.client.isOverridden.mockReturnValue(true);
 
-      const testWrapper = mount(
+      render(
         coreStart.rendering.addContext(
           <Providers
             services={coreStart}
@@ -350,18 +346,14 @@ describe('useUserProfileForm', () => {
         )
       );
 
-      const overrideMsg = testWrapper.find('EuiToolTip[data-test-subj="themeOverrideTooltip"]');
-      expect(overrideMsg).toHaveLength(1);
-      expect(overrideMsg.getElement().props.content).not.toEqual('');
+      const themeMenu = screen.getByTestId('themeMenu');
+      expect(themeMenu).toBeInTheDocument();
+      expect(themeMenu.closest('.euiToolTipAnchor')).not.toBeNull();
 
-      const themeMenu = testWrapper.find('EuiKeyPadMenu[data-test-subj="themeMenu"]');
-      expect(themeMenu).toHaveLength(1);
-
-      const themeOptions = themeMenu.find('EuiKeyPadMenuItem');
-      expect(themeOptions).toHaveLength(4);
-      themeOptions.forEach((option) => {
-        const menuItemEl = (option.getDOMNode() as unknown as Element[])[1];
-        expect(menuItemEl.className).toContain('disabled');
+      const themeItems = within(themeMenu).getAllByRole('radio');
+      expect(themeItems).toHaveLength(4);
+      themeItems.forEach((item) => {
+        expect(item).toBeDisabled();
       });
     });
 
@@ -372,7 +364,7 @@ describe('useUserProfileForm', () => {
       coreStart.theme.getTheme.mockReturnValue({ darkMode: false, name: 'borealis' });
       coreStart.settings.client.isOverridden.mockReturnValue(true);
 
-      const testWrapper = mount(
+      render(
         coreStart.rendering.addContext(
           <Providers
             services={coreStart}
@@ -388,18 +380,14 @@ describe('useUserProfileForm', () => {
         )
       );
 
-      const overrideMsg = testWrapper.find('EuiToolTip[data-test-subj="themeOverrideTooltip"]');
-      expect(overrideMsg).toHaveLength(1);
-      expect(overrideMsg.getElement().props.content).not.toEqual('');
+      const themeMenu = screen.getByTestId('themeMenu');
+      expect(themeMenu).toBeInTheDocument();
+      expect(themeMenu.closest('.euiToolTipAnchor')).not.toBeNull();
 
-      const themeMenu = testWrapper.find('EuiKeyPadMenu[data-test-subj="themeMenu"]');
-      expect(themeMenu).toHaveLength(1);
-
-      const themeOptions = themeMenu.find('EuiKeyPadMenuItem');
-      expect(themeOptions).toHaveLength(4);
-      themeOptions.forEach((option) => {
-        const menuItemEl = (option.getDOMNode() as unknown as Element[])[1];
-        expect(menuItemEl.className).toContain('disabled');
+      const themeItems = within(themeMenu).getAllByRole('radio');
+      expect(themeItems).toHaveLength(4);
+      themeItems.forEach((item) => {
+        expect(item).toBeDisabled();
       });
     });
   });
@@ -443,7 +431,7 @@ describe('useUserProfileForm', () => {
       coreStart.settings.client.get.mockReturnValue(false);
       coreStart.settings.client.isOverridden.mockReturnValue(true);
 
-      const testWrapper = mount(
+      render(
         coreStart.rendering.addContext(
           <Providers
             services={coreStart}
@@ -458,10 +446,10 @@ describe('useUserProfileForm', () => {
           </Providers>
         )
       );
-      expect(testWrapper.exists('dl[data-test-subj="userRoles"]')).toBeTruthy();
+      expect(screen.getByTestId('userRoles')).toBeInTheDocument();
 
-      expect(testWrapper.exists('button[data-test-subj="userRolesExpand"]')).toBeFalsy();
-      expect(testWrapper.exists('EuiBadgeGroup[data-test-subj="remainingRoles"]')).toBeFalsy();
+      expect(screen.queryByTestId('userRolesExpand')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('remainingRoles')).not.toBeInTheDocument();
     });
 
     it('should display a popover for users with more than three roles', () => {
@@ -472,7 +460,7 @@ describe('useUserProfileForm', () => {
       coreStart.settings.client.isOverridden.mockReturnValue(true);
 
       nonCloudUser.roles = [...nonCloudUser.roles, 'user-role-1', 'user-role-2', 'user-role-3'];
-      const testWrapper = mount(
+      render(
         coreStart.rendering.addContext(
           <Providers
             services={coreStart}
@@ -490,10 +478,10 @@ describe('useUserProfileForm', () => {
 
       const extraRoles = nonCloudUser.roles.splice(3);
 
-      const userRolesExpandButton = testWrapper.find('button[data-test-subj="userRolesExpand"]');
+      const userRolesExpandButton = screen.getByTestId('userRolesExpand');
 
-      expect(userRolesExpandButton).toBeTruthy();
-      expect(userRolesExpandButton.text()).toEqual(`+${extraRoles.length}`);
+      expect(userRolesExpandButton).toBeInTheDocument();
+      expect(userRolesExpandButton).toHaveTextContent(`+${extraRoles.length}`);
     });
   });
 });

@@ -10,6 +10,8 @@ export enum PrivateLocationHealthStatusValue {
   MissingPackagePolicy = 'missing_package_policy',
   MissingAgentPolicy = 'missing_agent_policy',
   MissingLocation = 'missing_location',
+  MissingAgents = 'missing_agents',
+  UnhealthyAgent = 'unhealthy_agent',
 }
 
 export interface PrivateLocationHealthStatus {

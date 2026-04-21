@@ -28,10 +28,12 @@ export const buildLookupSyncOperationsForPage = ({
   page,
   now,
   notInStoreEntityIds,
+  resolutionTargetIds = [],
 }: {
   page: ScoredEntityPage;
   now: string;
   notInStoreEntityIds: string[];
+  resolutionTargetIds?: string[];
 }): { upserts: LookupDocument[]; deletes: string[] } => {
   const upsertMap = new Map<string, LookupDocument>();
 
@@ -55,6 +57,20 @@ export const buildLookupSyncOperationsForPage = ({
           '@timestamp': now,
         });
       }
+    }
+  }
+
+  for (const targetId of resolutionTargetIds) {
+    // Some pages only confirm that a target exists; they may not contain an
+    // alias row that would otherwise create the target's self mapping.
+    if (!upsertMap.has(targetId)) {
+      upsertMap.set(targetId, {
+        entity_id: targetId,
+        resolution_target_id: targetId,
+        propagation_target_id: null,
+        relationship_type: SELF_RELATIONSHIP_TYPE,
+        '@timestamp': now,
+      });
     }
   }
 
@@ -106,12 +122,14 @@ export const syncLookupIndexForCategorizedPage = async ({
   page,
   categorized,
   now,
+  resolutionTargetIds = [],
 }: {
   esClient: ElasticsearchClient;
   index: string;
   page: ScoredEntityPage;
   categorized: CategorizedEntities;
   now: string;
+  resolutionTargetIds?: string[];
 }): Promise<LookupSyncSummary> =>
   syncLookupIndex({
     esClient,
@@ -120,5 +138,6 @@ export const syncLookupIndexForCategorizedPage = async ({
       page,
       now,
       notInStoreEntityIds: categorized.not_in_store.map((score) => score.id_value),
+      resolutionTargetIds,
     }),
   });

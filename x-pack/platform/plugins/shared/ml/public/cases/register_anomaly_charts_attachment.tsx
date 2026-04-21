@@ -9,9 +9,10 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CasesPublicSetup } from '@kbn/cases-plugin/public';
+import { ML_ANOMALY_CHARTS_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import type { CoreStart } from '@kbn/core/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { CASE_ATTACHMENT_TYPE_ID_ANOMALY_EXPLORER_CHARTS } from '../../common/constants/cases';
+import { casesSchemaValidator } from '../../common/util/cases_utils';
 import type { MlStartDependencies } from '../plugin';
 import { PLUGIN_ICON } from '../../common/constants/app';
 import { getAnomalyChartsServiceDependencies } from '../embeddables/anomaly_charts/get_anomaly_charts_services_dependencies';
@@ -22,8 +23,8 @@ export function registerAnomalyChartsCasesAttachment(
   pluginStart: MlStartDependencies,
   usageCollection?: UsageCollectionSetup
 ) {
-  cases.attachmentFramework.registerPersistableState({
-    id: CASE_ATTACHMENT_TYPE_ID_ANOMALY_EXPLORER_CHARTS,
+  cases.attachmentFramework.registerUnified({
+    id: ML_ANOMALY_CHARTS_ATTACHMENT_TYPE,
     icon: PLUGIN_ICON,
     displayName: i18n.translate('xpack.ml.cases.anomalyCharts.displayName', {
       defaultMessage: 'Anomaly charts',
@@ -49,5 +50,6 @@ export function registerAnomalyChartsCasesAttachment(
         };
       }),
     }),
+    schemaValidator: casesSchemaValidator,
   });
 }

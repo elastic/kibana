@@ -47,6 +47,43 @@ export interface RoleSessionCredentials {
   cookieHeader: CookieHeader;
 }
 
+/**
+ * UI settings returns 400 when a key is locked by `uiSettings.globalOverrides`.
+ * Collect message + Error.cause chain so we match reliably across clients/wrappers.
+ */
+function formatUnknownError(err: unknown): string {
+  if (err == null) {
+    return '';
+  }
+  if (typeof err === 'string') {
+    return err;
+  }
+  const parts: string[] = [];
+  let current: unknown = err;
+  for (let depth = 0; depth < 8 && current != null; depth++) {
+    if (current instanceof Error) {
+      parts.push(current.message);
+      current = current.cause;
+    } else {
+      try {
+        parts.push(JSON.stringify(current));
+      } catch {
+        parts.push(String(current));
+      }
+      break;
+    }
+  }
+  return parts.join('\n');
+}
+
+function isGlobalUiSettingOverrideConflict(err: unknown): boolean {
+  const text = formatUnknownError(err);
+  return (
+    text.includes('because it is overridden') ||
+    (text.includes('hideAnnouncements') && text.includes('overridden'))
+  );
+}
+
 export interface SamlAuth {
   session: SamlSessionManager;
   customRoleName: string;
@@ -93,6 +130,19 @@ export interface CoreWorkerFixtures {
   esClient: Client;
   kbnClient: KbnClient;
   samlAuth: SamlAuth;
+  /**
+   * `true` when the target Elasticsearch cluster is a SNAPSHOT build. SNAPSHOT
+   * builds bundle test-only modules (e.g. the `shard_delay` aggregation) that
+   * are unavailable in release builds. Use this to gate tests that rely on
+   * those features:
+   *
+   * @example
+   * test('uses shard_delay agg', async ({ esClient, isSnapshotBuild }) => {
+   *   test.skip(!isSnapshotBuild, 'Requires shard_delay agg (SNAPSHOT only)');
+   *   // ...
+   * });
+   */
+  isSnapshotBuild: boolean;
 }
 
 /**
@@ -167,6 +217,24 @@ export const coreWorkerFixtures = base.extend<{}, CoreWorkerFixtures>({
   esClient: [
     ({ config, log }, use) => {
       use(getEsClient(config, log));
+    },
+    { scope: 'worker' },
+  ],
+
+  /**
+   * Resolves once per worker by calling `esClient.info()` and reporting whether
+   * `version.number` contains the `SNAPSHOT` qualifier. Tests can `skip` based
+   * on this flag when they depend on test-only ES modules that are bundled
+   * only with SNAPSHOT builds.
+   */
+  isSnapshotBuild: [
+    async ({ esClient, log }, use) => {
+      const info = await esClient.info();
+      const isSnapshot = info.version.number.includes('SNAPSHOT');
+      log.debug(
+        `[isSnapshotBuild] Elasticsearch version: ${info.version.number} -> isSnapshot=${isSnapshot}`
+      );
+      await use(isSnapshot);
     },
     { scope: 'worker' },
   ],
@@ -256,8 +324,21 @@ export const coreWorkerFixtures = base.extend<{}, CoreWorkerFixtures>({
       };
 
       // Hide the announcements (including the sidenav tour) in advance to prevent
-      // it from interfering with test flows
-      await kbnClient.uiSettings.updateGlobal({ hideAnnouncements: true });
+      // it from interfering with test flows. Default Scout server config_sets do not set
+      // globalOverrides (ECH/MKI parity); a plugin-specific config_set may add
+      // `--uiSettings.globalOverrides.hideAnnouncements`, in which case this POST returns 400.
+      try {
+        await kbnClient.uiSettings.updateGlobal({ hideAnnouncements: true });
+      } catch (err: unknown) {
+        if (isGlobalUiSettingOverrideConflict(err)) {
+          const detail = formatUnknownError(err);
+          log.debug(
+            `Skipping hideAnnouncements update — already enforced by server-level override: ${detail}`
+          );
+        } else {
+          throw err;
+        }
+      }
 
       await use({
         session,

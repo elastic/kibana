@@ -62,23 +62,18 @@ async function handleFromAutocomplete(
 
   // Cursor before FROM keyword
   if (command.location.min > cursorPos) {
-    return getSourceSuggestions(context?.sources ?? [], [], innerText);
+    return getSourceSuggestions(context?.sources ?? [], []);
   }
 
   // Extract text relative to command start (critical for subqueries)
   // Use commandText for pattern matching (e.g., /METADATA\s+$/, /\s$/) because these
   // checks need to operate on the current command only, not the entire query
   const commandText = query.substring(command.location.min, cursorPos);
-
-  const subqueryItem = buildSubqueryCompleteItem(commandText);
-  const subquerySuggestion = {
-    ...subqueryItem,
-    text: `${commandText}${subqueryItem.text}`,
-  };
+  const subquerySuggestion =
+    commandText.length > command.name.length ? buildSubqueryCompleteItem() : undefined;
   const indicesBrowserSuggestion = await getIndicesBrowserSuggestion({
     callbacks,
     context,
-    innerText: commandText,
   });
 
   // METADATA suggestions - uses commandText for regex pattern matching
@@ -96,8 +91,12 @@ async function handleFromAutocomplete(
 
   // Case 1: FROM | (no sources yet)
   if (!hasAnySources) {
-    // Use innerText for absolute positions in rangeToReplace
-    const suggestions = suggestInitialSources(context, innerText, subquerySuggestion);
+    const suggestions = suggestInitialSources(
+      context,
+      innerText,
+      command.location.min,
+      subquerySuggestion
+    );
     if (indicesBrowserSuggestion) {
       suggestions.unshift(indicesBrowserSuggestion);
     }
@@ -119,7 +118,11 @@ async function handleFromAutocomplete(
     context,
     callbacks,
     indexes,
-    subquerySuggestion
+    subquerySuggestion,
+    {
+      textBeforeCursor: innerText,
+      commandStart: command.location.min, // Full-query offset of this FROM command.
+    }
   );
   if (shouldSuggestIndicesBrowserInAdditionalSlot && indicesBrowserSuggestion) {
     suggestions.unshift(indicesBrowserSuggestion);
@@ -133,7 +136,8 @@ async function handleFromAutocomplete(
 function suggestInitialSources(
   context: ICommandContext | undefined,
   innerText: string,
-  subquerySuggestion: ISuggestionItem
+  commandStart: number,
+  subquerySuggestion?: ISuggestionItem
 ): ISuggestionItem[] {
   let sources = context?.sources ?? [];
 
@@ -141,11 +145,14 @@ function suggestInitialSources(
     sources = sources.filter((source) => source.type !== SOURCES_TYPES.TIMESERIES);
   }
 
-  const sourceSuggestions = getSourceSuggestions(sources, [], innerText);
+  const sourceSuggestions = getSourceSuggestions(sources, [], {
+    textBeforeCursor: innerText,
+    commandStart,
+  });
   const viewSuggestions = buildViewsDefinitions(context?.views ?? [], []);
   const suggestions = [...sourceSuggestions, ...viewSuggestions];
 
-  if (shouldSuggestSubquery(context)) {
+  if (subquerySuggestion && shouldSuggestSubquery(context)) {
     suggestions.push(subquerySuggestion);
   }
 
@@ -177,16 +184,22 @@ async function suggestAdditionalSources(
   context: ICommandContext | undefined,
   callbacks: ICommandCallbacks | undefined,
   indexes: ReturnType<typeof getSourcesFromCommands>,
-  subquerySuggestion: ISuggestionItem
+  subquerySuggestion?: ISuggestionItem,
+  sourceReplacementContext?: {
+    textBeforeCursor: string;
+    commandStart: number;
+  }
 ): Promise<ISuggestionItem[]> {
   const lastIndex = indexes[indexes.length - 1];
-  const isTypingIndexName = lastIndex?.name && innerText.endsWith(lastIndex.name);
+  const isTypingIndexName = !!(lastIndex?.name && innerText.endsWith(lastIndex.name));
 
   // Only use overlap here to decide when to show `METADATA`.
   // The replacement range is still handled centrally.
   if (!isTypingIndexName && getOverlapRange(innerText, METADATA_KEYWORD)) {
     return [metadataSuggestion];
   }
+
+  const canRewriteFromToTs = indexes.length === 1 && isTypingIndexName;
 
   let sources = context?.sources ?? [];
 
@@ -204,10 +217,11 @@ async function suggestAdditionalSources(
     sources,
     indexes.map(({ name }) => name),
     recommendedQueries,
-    context?.views ?? []
+    context?.views ?? [],
+    canRewriteFromToTs ? sourceReplacementContext : undefined
   );
 
-  if (isRestartingExpression(innerText) && shouldSuggestSubquery(context)) {
+  if (subquerySuggestion && isRestartingExpression(innerText) && shouldSuggestSubquery(context)) {
     suggestions.push(subquerySuggestion);
   }
 

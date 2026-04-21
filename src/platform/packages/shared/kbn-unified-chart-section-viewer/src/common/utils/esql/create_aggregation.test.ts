@@ -109,9 +109,8 @@ describe('createTimeBucketAggregation', () => {
   it('should return the correct time bucket aggregation', () => {
     const result = createTimeBucketAggregation({
       targetBuckets: 100,
-      timestampField: '@timestamp',
     });
-    expect(result).toBe('BUCKET(@timestamp, 100, ?_tstart, ?_tend)');
+    expect(result).toBe('TBUCKET(100)');
   });
 });
 
