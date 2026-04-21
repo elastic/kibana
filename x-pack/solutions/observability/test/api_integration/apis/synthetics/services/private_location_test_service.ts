@@ -94,7 +94,7 @@ export class PrivateLocationTestService {
   private readonly getService: FtrProviderContext['getService'];
   private readonly retry: RetryService;
 
-  get installedVersion(): string {
+  public get installedVersion(): string {
     return installedVersionCache ?? DEFAULT_SYNTHETICS_VERSION;
   }
 
