@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { OnboardingResult, TaskResult } from '@kbn/streams-schema';
 import { OnboardingStep } from '@kbn/streams-schema';
 import pMap from 'p-map';
@@ -13,7 +14,6 @@ import type { ScheduleOnboardingOptions } from '../../../../hooks/use_onboarding
 import { useOnboardingApi } from '../../../../hooks/use_onboarding_api';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { getFormattedError } from '../../../../util/errors';
-import { ONBOARDING_SCHEDULING_FAILURE_TITLE } from '../components/shared/translations';
 import type { OnboardingConfig } from '../components/shared/types';
 import { useOnboardingStatusUpdateQueue } from './use_onboarding_status_update_queue';
 
@@ -47,6 +47,7 @@ export function useBulkOnboarding({
     async (streamNames: string[], options?: ScheduleOnboardingOptions): Promise<string[]> => {
       setIsScheduling(true);
       const succeeded: string[] = [];
+      const failures: Array<{ streamName: string; error: unknown }> = [];
       try {
         await pMap(
           streamNames,
@@ -55,15 +56,30 @@ export function useBulkOnboarding({
               await scheduleOnboardingTask(streamName, options);
               succeeded.push(streamName);
             } catch (error) {
-              toasts.addError(getFormattedError(error), {
-                title: ONBOARDING_SCHEDULING_FAILURE_TITLE,
-              });
+              failures.push({ streamName, error });
             }
           },
           { concurrency: 10, stopOnError: false }
         );
       } finally {
         setIsScheduling(false);
+      }
+
+      if (failures.length > 0) {
+        toasts.addError(
+          new Error(
+            failures
+              .map(({ streamName, error }) => `${streamName}: ${getFormattedError(error).message}`)
+              .join('\n')
+          ),
+          {
+            title: i18n.translate('xpack.streams.bulkOnboarding.schedulingErrorSummary', {
+              defaultMessage:
+                'Failed to schedule onboarding for {count, plural, one {# stream} other {# streams}}',
+              values: { count: failures.length },
+            }),
+          }
+        );
       }
 
       succeeded.forEach((streamName) => {

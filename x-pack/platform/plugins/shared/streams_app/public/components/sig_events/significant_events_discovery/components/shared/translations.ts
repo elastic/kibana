@@ -77,10 +77,3 @@ export const GENERATE_QUERIES_TOOLTIP = i18n.translate(
     defaultMessage: 'Runs only query generation on selected streams using the configured model.',
   }
 );
-
-export const ONBOARDING_SCHEDULING_FAILURE_TITLE = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.streamsView.schedulingErrorTitle',
-  {
-    defaultMessage: 'Could not schedule a task to onboard stream',
-  }
-);

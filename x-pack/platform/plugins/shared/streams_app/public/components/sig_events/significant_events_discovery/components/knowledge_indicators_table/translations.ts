@@ -119,11 +119,24 @@ export const GENERATION_IN_PROGRESS_TITLE = i18n.translate(
   }
 );
 
-export const getGenerationInProgressDescription = (streamNames: string[]): string =>
-  i18n.translate('xpack.streams.knowledgeIndicators.generationInProgressDescription', {
-    defaultMessage: 'Generation is running for: {streams}. This may take a few minutes.',
-    values: { streams: streamNames.join(', ') },
+export const getGenerationInProgressDescription = (streamNames: string[]): string => {
+  const count = streamNames.length;
+  if (count <= 2) {
+    return i18n.translate('xpack.streams.knowledgeIndicators.generationInProgressDescriptionFew', {
+      defaultMessage: 'Generation is running for: {streams}. This may take a few minutes.',
+      values: { streams: streamNames.join(', ') },
+    });
+  }
+  return i18n.translate('xpack.streams.knowledgeIndicators.generationInProgressDescriptionMany', {
+    defaultMessage:
+      'Generation is running for {first}, {second} and {remaining} more. This may take a few minutes.',
+    values: {
+      first: streamNames[0],
+      second: streamNames[1],
+      remaining: count - 2,
+    },
   });
+};
 
 export const HIDDEN_COMPUTED_FEATURES_HINT = i18n.translate(
   'xpack.streams.knowledgeIndicators.hiddenComputedFeaturesHint',

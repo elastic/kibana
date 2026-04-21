@@ -300,8 +300,26 @@ export function useKnowledgeIndicatorsTable() {
   const hasOnlyHiddenComputedFeatures = useMemo(() => {
     if (!hideComputedTypes || knowledgeIndicators.length === 0) return false;
     if (filteredKnowledgeIndicators.length > 0) return false;
-    return knowledgeIndicators.some((ki) => ki.kind === 'feature' && isComputedFeature(ki.feature));
-  }, [hideComputedTypes, knowledgeIndicators, filteredKnowledgeIndicators]);
+    return knowledgeIndicators
+      .filter((ki) =>
+        matchesKnowledgeIndicatorFilters(ki, {
+          statusFilter,
+          selectedTypes,
+          selectedStreams,
+          hideComputedTypes: false,
+          searchTerm: debouncedSearchTerm,
+        })
+      )
+      .some((ki) => ki.kind === 'feature' && isComputedFeature(ki.feature));
+  }, [
+    hideComputedTypes,
+    knowledgeIndicators,
+    filteredKnowledgeIndicators,
+    statusFilter,
+    selectedTypes,
+    selectedStreams,
+    debouncedSearchTerm,
+  ]);
 
   const { selectionContainsNonExcludable, isSelectionActionsDisabled } = useMemo(() => {
     const containsQueries = selectedKnowledgeIndicators.some((ki) => ki.kind === 'query');
