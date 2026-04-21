@@ -6,14 +6,21 @@
  */
 
 import type { CoreStart, Logger, AnalyticsServiceSetup } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
   TaskRunCreatorFunction,
 } from '@kbn/task-manager-plugin/server';
+import {
+  createTaskRunError,
+  TaskErrorSource,
+  getErrorSource,
+} from '@kbn/task-manager-plugin/server/task_running';
 import moment from 'moment';
 
+import { v4 as uuidv4 } from 'uuid';
 import type { ExperimentalFeatures } from '../../../../../common';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import type { ConfigType } from '../../../../config';
@@ -27,7 +34,9 @@ import {
   type LatestTaskStateSchema as LeadGenerationTaskState,
 } from './state';
 import { runLeadGenerationPipeline } from '../run_pipeline';
-import { fetchAllLeadEntities } from '../entity_conversion';
+import { fetchCandidateEntities } from '../entity_conversion';
+import { getLeadGenerationConfig, updateLeadGenerationConfig } from '../saved_object';
+import { resolveChatModel } from '../utils';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -47,6 +56,7 @@ interface StartParams {
   logger: Logger;
   namespace: string;
   taskManager: TaskManagerStartContract;
+  request: KibanaRequest;
 }
 
 // ---------------------------------------------------------------------------
@@ -108,7 +118,7 @@ const createLeadGenerationTaskRunnerFactory =
     config: ConfigType;
     kibanaVersion: string;
   }): TaskRunCreatorFunction =>
-  ({ taskInstance }) => {
+  ({ taskInstance, fakeRequest }) => {
     let cancelled = false;
     const isCancelled = () => cancelled;
 
@@ -119,6 +129,7 @@ const createLeadGenerationTaskRunnerFactory =
           isCancelled,
           logger: deps.logger,
           taskInstance,
+          fakeRequest,
           core,
           startPlugins,
           kibanaVersion: deps.kibanaVersion,
@@ -138,6 +149,7 @@ const runLeadGenerationTask = async ({
   isCancelled,
   logger,
   taskInstance,
+  fakeRequest,
   core,
   startPlugins,
   kibanaVersion,
@@ -145,6 +157,7 @@ const runLeadGenerationTask = async ({
   isCancelled: () => boolean;
   logger: Logger;
   taskInstance: ConcreteTaskInstance;
+  fakeRequest: KibanaRequest | undefined;
   core: CoreStart;
   startPlugins: StartPlugins;
   kibanaVersion: string;
@@ -162,13 +175,25 @@ const runLeadGenerationTask = async ({
     return { state: updatedState };
   }
 
+  const executionUuid = uuidv4();
+  const soClient = buildScopedInternalSavedObjectsClientUnsafe({
+    coreStart: core,
+    namespace: state.namespace,
+  });
+
   try {
     logger.info('[LeadGeneration] Running scheduled lead generation task');
-    const esClient = core.elasticsearch.client.asInternalUser;
-    const soClient = buildScopedInternalSavedObjectsClientUnsafe({
-      coreStart: core,
-      namespace: state.namespace,
-    });
+
+    if (!fakeRequest) {
+      throw createTaskRunError(
+        new Error('No fakeRequest available in task context; cannot resolve inference connector'),
+        TaskErrorSource.FRAMEWORK
+      );
+    }
+
+    // Use the scoped client so the task runs with the user's privileges.
+    // Entity Store indices (entities-latest-*) are not accessible to kibana_system.
+    const esClient = core.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
     const crudClient = startPlugins.entityStore.createCRUDClient(esClient, state.namespace);
     const riskScoreDataClient = new RiskScoreDataClient({
       logger,
@@ -178,16 +203,54 @@ const runLeadGenerationTask = async ({
       soClient,
     });
 
+    const config = await getLeadGenerationConfig(soClient, state.namespace);
+    if (!config?.connectorId) {
+      throw createTaskRunError(
+        new Error(
+          'No connectorId configured; skipping scheduled run. Call POST /enable with a connectorId first.'
+        ),
+        TaskErrorSource.USER
+      );
+    }
+
+    const chatModel = await resolveChatModel(
+      startPlugins.inference,
+      fakeRequest,
+      config.connectorId
+    );
+
     await runLeadGenerationPipeline({
-      listEntities: () => fetchAllLeadEntities(crudClient, logger),
+      listEntities: () => fetchCandidateEntities(crudClient, logger),
       esClient,
       logger,
       spaceId: state.namespace,
       riskScoreDataClient,
+      executionId: executionUuid,
       sourceType: 'scheduled',
+      chatModel,
     });
+
+    await updateLeadGenerationConfig(soClient, state.namespace, {
+      lastExecutionUuid: executionUuid,
+      lastError: null,
+    }).catch((soErr: Error) =>
+      logger.warn(`[LeadGeneration] Failed to persist execution success: ${soErr.message}`)
+    );
   } catch (e) {
-    logger.error(`[LeadGeneration] Error running scheduled lead generation task: ${e.message}`);
+    const errorMessage = e instanceof Error ? e.message : String(e);
+    logger.error(`[LeadGeneration] Error running scheduled lead generation task: ${errorMessage}`);
+
+    await updateLeadGenerationConfig(soClient, state.namespace, {
+      lastExecutionUuid: executionUuid,
+      lastError: errorMessage,
+    }).catch((soErr: Error) =>
+      logger.warn(`[LeadGeneration] Failed to persist execution error: ${soErr.message}`)
+    );
+
+    // Re-throw decorated errors so Task Manager correctly tracks USER vs FRAMEWORK failures.
+    if (getErrorSource(e)) {
+      throw e;
+    }
   }
 
   logger.info('[LeadGeneration] Finished running scheduled lead generation task');
@@ -198,20 +261,24 @@ const runLeadGenerationTask = async ({
 // Start (schedule the task)
 // ---------------------------------------------------------------------------
 
-export const startLeadGenerationTask = async ({ logger, namespace, taskManager }: StartParams) => {
+export const startLeadGenerationTask = async ({
+  logger,
+  namespace,
+  taskManager,
+  request,
+}: StartParams) => {
   const taskId = getTaskId(namespace);
-  try {
-    await taskManager.ensureScheduled({
-      id: taskId,
-      taskType: getTaskName(),
-      scope: SCOPE,
-      schedule: {
-        interval: INTERVAL,
-      },
-      state: { ...defaultState, namespace },
-      params: { version: VERSION },
-    });
+  const taskDefinition = {
+    id: taskId,
+    taskType: getTaskName(),
+    scope: SCOPE,
+    schedule: { interval: INTERVAL },
+    state: { ...defaultState, namespace },
+    params: { version: VERSION },
+  };
 
+  try {
+    await taskManager.ensureScheduled(taskDefinition, { request });
     logger.info(`[LeadGeneration] Scheduled lead generation task with id ${taskId}`);
   } catch (e) {
     logger.warn(`[LeadGeneration][task ${taskId}]: error scheduling task, received ${e.message}`);
@@ -223,7 +290,11 @@ export const startLeadGenerationTask = async ({ logger, namespace, taskManager }
 // Remove (unschedule the task)
 // ---------------------------------------------------------------------------
 
-export const removeLeadGenerationTask = async ({ taskManager, namespace, logger }: StartParams) => {
+export const removeLeadGenerationTask = async ({
+  taskManager,
+  namespace,
+  logger,
+}: Omit<StartParams, 'request'>) => {
   const taskId = getTaskId(namespace);
   try {
     await taskManager.removeIfExists(taskId);

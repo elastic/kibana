@@ -58,7 +58,7 @@ describe('createESQLQuery', () => {
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+  | STATS AVG(cpu.usage) BY TBUCKET(100)
 `.trim()
     );
   });
@@ -70,7 +70,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS SUM(RATE(requests.count)) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+  | STATS SUM(RATE(requests.count)) BY TBUCKET(100)
 `.trim()
     );
   });
@@ -82,7 +82,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS PERCENTILE(http.request.duration, 95) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+  | STATS PERCENTILE(http.request.duration, 95) BY TBUCKET(100)
 `.trim()
     );
   });
@@ -94,7 +94,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS PERCENTILE(http.request.duration, 95) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+  | STATS PERCENTILE(http.request.duration, 95) BY TBUCKET(100)
 `.trim()
     );
   });
@@ -106,7 +106,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS PERCENTILE(TO_TDIGEST(histogram.legacy), 95) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+  | STATS PERCENTILE(TO_TDIGEST(histogram.legacy), 95) BY TBUCKET(100)
 `.trim()
     );
   });
@@ -119,7 +119,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS PERCENTILE(TO_TDIGEST(histogram.legacy), 95) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`service.name\`, \`host.name\`
+  | STATS PERCENTILE(TO_TDIGEST(histogram.legacy), 95) BY TBUCKET(100), \`service.name\`, \`host.name\`
 `.trim()
     );
   });
@@ -132,7 +132,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS PERCENTILE(http.request.duration, 95) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`service.name\`
+  | STATS PERCENTILE(http.request.duration, 95) BY TBUCKET(100), \`service.name\`
 `.trim()
     );
   });
@@ -145,7 +145,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS PERCENTILE(http.request.duration, 95) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`service.name\`, \`host.name\`
+  | STATS PERCENTILE(http.request.duration, 95) BY TBUCKET(100), \`service.name\`, \`host.name\`
 `.trim()
     );
   });
@@ -158,7 +158,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS PERCENTILE(http.request.duration, 95) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`service.name\`
+  | STATS PERCENTILE(http.request.duration, 95) BY TBUCKET(100), \`service.name\`
 `.trim()
     );
   });
@@ -171,7 +171,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS PERCENTILE(http.request.duration, 95) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`service.name\`, \`host.name\`
+  | STATS PERCENTILE(http.request.duration, 95) BY TBUCKET(100), \`service.name\`, \`host.name\`
 `.trim()
     );
   });
@@ -184,7 +184,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`host.name\`
+  | STATS AVG(cpu.usage) BY TBUCKET(100), \`host.name\`
 `.trim()
     );
   });
@@ -197,7 +197,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`host.name\`, \`container.id\`
+  | STATS AVG(cpu.usage) BY TBUCKET(100), \`host.name\`, \`container.id\`
 `.trim()
     );
   });
@@ -210,7 +210,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`host.ip\`, \`host.name\`
+  | STATS AVG(cpu.usage) BY TBUCKET(100), \`host.ip\`, \`host.name\`
 `.trim()
     );
   });
@@ -223,7 +223,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`cpu.cores\`, \`host.name\`
+  | STATS AVG(cpu.usage) BY TBUCKET(100), \`cpu.cores\`, \`host.name\`
 `.trim()
     );
   });
@@ -236,7 +236,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`host.ip\`, \`host.name\`, \`cpu.cores\`
+  | STATS AVG(cpu.usage) BY TBUCKET(100), \`host.ip\`, \`host.name\`, \`cpu.cores\`
 `.trim()
     );
   });
@@ -248,7 +248,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS custom-metrics-*
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+  | STATS AVG(cpu.usage) BY TBUCKET(100)
 `.trim()
     );
   });
@@ -262,7 +262,7 @@ TS custom-metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+  | STATS AVG(cpu.usage) BY TBUCKET(100)
 `.trim()
     );
   });
@@ -277,7 +277,7 @@ TS metrics-*
       `
 TS metrics-*
   | WHERE host.name == "host-01" AND system.cpu.user.pct IS NOT NULL
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+  | STATS AVG(cpu.usage) BY TBUCKET(100)
 `.trim()
     );
   });
@@ -294,7 +294,7 @@ TS metrics-*
 TS metrics-*
   | WHERE host.name == "host-01"
   | WHERE cpu.cores > 4
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`host.name\`
+  | STATS AVG(cpu.usage) BY TBUCKET(100), \`host.name\`
 `.trim()
     );
   });
@@ -308,7 +308,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+  | STATS AVG(cpu.usage) BY TBUCKET(100)
 `.trim()
     );
   });
@@ -322,7 +322,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+  | STATS AVG(cpu.usage) BY TBUCKET(100)
 `.trim()
     );
   });
@@ -336,7 +336,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+  | STATS AVG(cpu.usage) BY TBUCKET(100)
 `.trim()
     );
   });
@@ -359,7 +359,7 @@ TS metrics-*
       expect(query).toBe(
         `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`service-name\`
+  | STATS AVG(cpu.usage) BY TBUCKET(100), \`service-name\`
 `.trim()
       );
     });
@@ -372,7 +372,7 @@ TS metrics-*
       expect(query).toBe(
         `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`service-name\`, \`container-id\`
+  | STATS AVG(cpu.usage) BY TBUCKET(100), \`service-name\`, \`container-id\`
 `.trim()
       );
     });
@@ -385,7 +385,7 @@ TS metrics-*
       expect(query).toBe(
         `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`host-ip\`, \`service-name\`
+  | STATS AVG(cpu.usage) BY TBUCKET(100), \`host-ip\`, \`service-name\`
 `.trim()
       );
     });
@@ -407,7 +407,7 @@ TS metrics-*
       expect(query).toBe(
         `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`field\`\`with\`\`ticks\`
+  | STATS AVG(cpu.usage) BY TBUCKET(100), \`field\`\`with\`\`ticks\`
 `.trim()
       );
     });
@@ -430,7 +430,7 @@ TS metrics-*
       expect(query).toBe(
         `
 TS timeseries-rich-metrics-primary
-  | STATS AVG(TO_DOUBLE(http.request.duration)) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+  | STATS AVG(TO_DOUBLE(http.request.duration)) BY TBUCKET(100)
 `.trim()
       );
     });
@@ -443,7 +443,7 @@ TS timeseries-rich-metrics-primary
       expect(query).toBe(
         `
 TS timeseries-rich-metrics-primary
-  | STATS AVG(TO_DOUBLE(http.request.duration)) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`service.name\`
+  | STATS AVG(TO_DOUBLE(http.request.duration)) BY TBUCKET(100), \`service.name\`
 `.trim()
       );
     });
@@ -464,7 +464,7 @@ TS timeseries-rich-metrics-primary
       expect(query).toBe(
         `
 TS metrics-*
-  | STATS SUM(RATE(TO_LONG(requests.count))) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+  | STATS SUM(RATE(TO_LONG(requests.count))) BY TBUCKET(100)
 `.trim()
       );
     });
@@ -485,7 +485,7 @@ TS metrics-*
       expect(query).toBe(
         `
 TS metrics-*
-  | STATS AVG(TO_DOUBLE(metric.value)) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+  | STATS AVG(TO_DOUBLE(metric.value)) BY TBUCKET(100)
 `.trim()
       );
     });
@@ -499,7 +499,7 @@ TS metrics-*
         `
 TS timeseries-rich-metrics-primary
   | WHERE service.name == "api-server"
-  | STATS AVG(TO_DOUBLE(http.request.duration)) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+  | STATS AVG(TO_DOUBLE(http.request.duration)) BY TBUCKET(100)
 `.trim()
       );
     });
@@ -520,7 +520,7 @@ TS timeseries-rich-metrics-primary
       expect(query).toBe(
         `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+  | STATS AVG(cpu.usage) BY TBUCKET(100)
 `.trim()
       );
     });
@@ -543,7 +543,7 @@ TS metrics-*
       expect(query).toBe(
         `
 TS metrics-*
-  | STATS PERCENTILE(request.duration, 95) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+  | STATS PERCENTILE(request.duration, 95) BY TBUCKET(100)
 `.trim()
       );
     });

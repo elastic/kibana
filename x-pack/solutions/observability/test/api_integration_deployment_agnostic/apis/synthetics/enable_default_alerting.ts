@@ -15,7 +15,10 @@ import { DYNAMIC_SETTINGS_DEFAULTS } from '@kbn/synthetics-plugin/common/constan
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
 import { addMonitorAPIHelper, omitMonitorKeys } from './create_monitor';
-import { PrivateLocationTestService } from '../../services/synthetics_private_location';
+import {
+  PrivateLocationTestService,
+  cleanSyntheticsTestData,
+} from '../../services/synthetics_private_location';
 
 const TEST_INDEX_CONNECTOR_NAME = 'synthetics-default-alerting-test';
 
@@ -39,12 +42,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     };
 
     after(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
+      await cleanSyntheticsTestData(kibanaServer);
       await alerting.deleteAllActionConnectors({ roleAuthc: editorUser });
     });
 
     before(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
+      await cleanSyntheticsTestData(kibanaServer);
       _httpMonitorJson = getFixtureJson('http_monitor');
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
       await privateLocationTestService.installSyntheticsPackage();
