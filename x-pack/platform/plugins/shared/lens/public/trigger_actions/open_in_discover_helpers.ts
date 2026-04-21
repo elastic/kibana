@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type AggregateQuery, type Filter, type Query, type TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { DataViewsService } from '@kbn/data-views-plugin/public';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
@@ -13,7 +13,7 @@ import {
   type EmbeddableApiContext,
   apiIsPresentationContainer,
 } from '@kbn/presentation-publishing';
-import { getEsqlControls } from '@kbn/esql-utils';
+import { getEsqlControls, getInitialESQLQuery } from '@kbn/esql-utils';
 import { isLensApi } from '../react_embeddable/type_guards';
 
 interface DiscoverAppLocatorParams extends SerializableRecord {
@@ -57,21 +57,20 @@ async function getDiscoverLocationParams({
     // shouldn't be executed because of the isCompatible check
     throw new Error('Can only be executed in the context of Lens visualization');
   }
+
   const args = embeddable.getViewUnderlyingDataArgs();
   if (!args) {
     // shouldn't be executed because of the isCompatible check
     throw new Error('Underlying data is not ready');
   }
+
   const dataView = await dataViews.get(args.dataViewSpec.id!);
-  // we don't want to pass the DSL filters when navigating from an ES|SQL embeddable
-  let filtersToApply = embeddable.isTextBasedLanguage()
-    ? []
-    : [...(filters || []), ...args.filters];
+
+  let filtersToApply = [...(filters || []), ...args.filters];
   let timeRangeToApply = args.timeRange;
-  // if the target data view is time based, attempt to split out a time range from the provided filters
-  if (dataView.isTimeBased() && dataView.timeFieldName === timeFieldName) {
+  if (timeFieldName && dataView.isTimeBased() && dataView.timeFieldName === timeFieldName) {
     const { extractTimeRange } = await import('@kbn/es-query');
-    const { restOfFilters, timeRange } = extractTimeRange(filters || [], timeFieldName);
+    const { restOfFilters, timeRange } = extractTimeRange(filtersToApply, timeFieldName);
     filtersToApply = restOfFilters;
     if (timeRange) {
       timeRangeToApply = timeRange;
@@ -82,12 +81,28 @@ async function getDiscoverLocationParams({
     ? embeddable.parentApi
     : undefined;
 
+  const useGeneratedFromFilters = embeddable.isTextBasedLanguage() && filtersToApply.length > 0; // check this
+
+  const query: AggregateQuery | Query | undefined = useGeneratedFromFilters
+    ? { esql: getInitialESQLQuery(dataView, undefined, filtersToApply) }
+    : args.query;
+
+  // When filters are baked into the ES|QL string, do not pass the same DSL filters again
+  // (Discover would apply them twice: in the query text and via the filter bar).
+  const filtersForDiscover = useGeneratedFromFilters ? [] : filtersToApply;
+
+  const columns = useGeneratedFromFilters ? [] : args.columns;
+
+  const esqlQueryForControls = useGeneratedFromFilters ? query : args.query;
+
   return {
     ...args,
+    query,
+    columns,
+    filters: filtersForDiscover,
     timeRange: timeRangeToApply,
-    filters: filtersToApply,
     esqlControls: presentationContainer
-      ? getEsqlControls(presentationContainer, args.query)
+      ? getEsqlControls(presentationContainer, esqlQueryForControls)
       : undefined,
   };
 }
@@ -100,9 +115,7 @@ export async function getHref({ embeddable, locator, filters, dataViews, timeFie
     timeFieldName,
   });
 
-  const discoverUrl = locator?.getRedirectUrl(params);
-
-  return discoverUrl;
+  return locator?.getRedirectUrl(params);
 }
 
 export async function getLocation({

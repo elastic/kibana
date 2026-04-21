@@ -8,12 +8,25 @@
 import type { DataViewsService } from '@kbn/data-views-plugin/public';
 import { type EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { getInitialESQLQuery } from '@kbn/esql-utils';
 import { createOpenInDiscoverAction } from './open_in_discover_action';
 import type { DiscoverAppLocator } from './open_in_discover_helpers';
 import { getLensApiMock } from '../react_embeddable/mocks';
 
+jest.mock('@kbn/esql-utils', () => {
+  const actual = jest.requireActual('@kbn/esql-utils');
+  return {
+    ...actual,
+    getInitialESQLQuery: jest.fn(() => 'FROM index-pattern-id'),
+  };
+});
+
 describe('open in discover action', () => {
   const compatibleEmbeddableApi = getLensApiMock();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   describe('compatibility check', () => {
     it('is incompatible with non-lens embeddables', async () => {
@@ -135,16 +148,17 @@ describe('open in discover action', () => {
     expect(embeddable.getViewUnderlyingDataArgs).toHaveBeenCalled();
     expect(locator.getRedirectUrl).toHaveBeenCalledWith(viewUnderlyingDataArgs);
     expect(globalThis.open).toHaveBeenCalledWith(discoverUrl, '_blank');
+    expect(getInitialESQLQuery).not.toHaveBeenCalled();
   });
 
-  it('navigates to discover for an ES|QL chart but without the filters', async () => {
+  it('navigates to discover for an ES|QL chart with merged filters', async () => {
     const viewUnderlyingDataArgs = {
       dataViewSpec: { id: 'index-pattern-id' },
       timeRange: {},
       filters: [{ meta: { type: 'range' } }],
       query: undefined,
       esqlControls: undefined,
-      columns: [],
+      columns: ['viz_metric', 'Over time'],
     };
 
     const embeddable = {
@@ -174,11 +188,53 @@ describe('open in discover action', () => {
     } as ActionExecutionContext<EmbeddableApiContext>);
 
     expect(embeddable.getViewUnderlyingDataArgs).toHaveBeenCalled();
-    const viewUnderlyingDataArgsWithoutFilters = {
+    expect(locator.getRedirectUrl).toHaveBeenCalledWith({
       ...viewUnderlyingDataArgs,
+      query: { esql: 'FROM index-pattern-id' },
+      columns: [],
       filters: [],
-    };
-    expect(locator.getRedirectUrl).toHaveBeenCalledWith(viewUnderlyingDataArgsWithoutFilters);
+    });
     expect(globalThis.open).toHaveBeenCalledWith(discoverUrl, '_blank');
+    expect(getInitialESQLQuery).toHaveBeenCalled();
+  });
+
+  it('does not replace query with generated ES|QL for form-based Lens when filters are present', async () => {
+    const viewUnderlyingDataArgs = {
+      dataViewSpec: { id: 'index-pattern-id' },
+      timeRange: {},
+      filters: [{ meta: { type: 'range', key: 'bytes' } }],
+      query: { language: 'kuery', query: 'response:200' },
+      esqlControls: undefined,
+      columns: ['bytes', 'clientip'],
+    };
+
+    const embeddable = {
+      ...compatibleEmbeddableApi,
+      getViewUnderlyingDataArgs: jest.fn(() => viewUnderlyingDataArgs),
+      isTextBasedLanguage: jest.fn(() => false),
+    };
+
+    const discoverUrl = 'https://discover-redirect-url';
+    const locator = {
+      getRedirectUrl: jest.fn(() => discoverUrl),
+    } as unknown as DiscoverAppLocator;
+
+    globalThis.open = jest.fn();
+
+    await createOpenInDiscoverAction(
+      locator,
+      {
+        get: () => ({
+          isTimeBased: () => true,
+          toSpec: () => ({ id: 'index-pattern-id' }),
+        }),
+      } as unknown as DataViewsService,
+      true
+    ).execute({
+      embeddable,
+    } as ActionExecutionContext<EmbeddableApiContext>);
+
+    expect(locator.getRedirectUrl).toHaveBeenCalledWith(viewUnderlyingDataArgs);
+    expect(getInitialESQLQuery).not.toHaveBeenCalled();
   });
 });
