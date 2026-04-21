@@ -164,9 +164,14 @@ export const createEntitySourcesService = ({
 
   /**
    * Removes entities from orphaned sources (sources that no longer exist but
-   * still have entities in the watchlist index). Skips CSV and active sources.
+   * still have entities in the watchlist index). Skips active sources and any
+   * explicitly ignored source IDs (defaults to skipping MANUAL_SOURCE_ID).
    */
-  const cleanupOrphanedEntities = async (meta: WatchlistMeta, activeSourceIds: string[] = []) => {
+  const cleanupOrphanedEntities = async (
+    meta: WatchlistMeta,
+    activeSourceIds: string[] = [],
+    ignoredSourceIds: string[] = [MANUAL_SOURCE_ID]
+  ) => {
     const aggResponse = await esClient.search({
       index: meta.index,
       size: 0,
@@ -176,7 +181,7 @@ export const createEntitySourcesService = ({
       },
     });
 
-    const excludedIds = new Set([MANUAL_SOURCE_ID, ...activeSourceIds]);
+    const excludedIds = new Set([...ignoredSourceIds, ...activeSourceIds]);
     const orphanedSourceIds: string[] = (
       (aggResponse.aggregations?.source_ids as { buckets: Array<{ key: string }> })?.buckets ?? []
     )
@@ -285,5 +290,16 @@ export const createEntitySourcesService = ({
     );
   };
 
-  return { syncWatchlist, syncAllWatchlists };
+  const deleteWatchlistEntities = async (watchlistId: string) => {
+    const watchlist = await watchlistClient.get(watchlistId);
+    const meta: WatchlistMeta = {
+      name: watchlist.name,
+      id: watchlist.id || watchlistId,
+      index: getIndexForWatchlist(namespace),
+    };
+    // Pass empty ignoredSourceIds so all sources — including manual — are treated as orphaned.
+    await cleanupOrphanedEntities(meta, [], []);
+  };
+
+  return { syncWatchlist, syncAllWatchlists, deleteWatchlistEntities };
 };

@@ -1175,8 +1175,13 @@ For detailed information on Kibana actions and alerting, and additional API call
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Delete a note from a Timeline using the note ID.
-   */
+    * Deletes notes by saved object ID. Send either `noteId` (single ID) or `noteIds` (array of IDs) in the JSON body.
+
+The response has HTTP 200 with an empty body on success.
+
+Requires the **Timeline and Notes** write privilege (`notes_write`).
+
+    */
   async deleteNote(props: DeleteNoteProps) {
     this.log.info(`${new Date().toISOString()} Calling API DeleteNote`);
     return this.kbnClient
@@ -1973,8 +1978,19 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Get all notes for a given document.
-   */
+    * Returns Security Timeline notes as saved objects.
+
+**Query modes (mutually exclusive branches on the server):**
+
+1. **`documentIds` is set** — Returns notes whose `eventId` matches the given Elasticsearch document `_id` (single string or array). Pagination query parameters (`page`, `perPage`, etc.) are **not** applied; the server uses a fixed page size (up to 10000 notes).
+
+2. **`savedObjectIds` is set** — Returns notes linked to the given Timeline saved object id(s). Same fixed cap as above; list-mode query parameters are **not** applied.
+
+3. **Neither `documentIds` nor `savedObjectIds`** — Lists notes using saved-objects find semantics: `page` (default 1), `perPage` (default 10), optional `search`, `sortField`, `sortOrder`, `filter`, `createdByFilter`, and `associatedFilter`.
+
+Requires the **Timeline and Notes** read privilege (`notes_read`).
+
+    */
   async getNotes(props: GetNotesProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetNotes`);
     return this.kbnClient
@@ -2697,8 +2713,15 @@ The edit action is idempotent, meaning that if you add a tag to a rule that alre
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Add a note to a Timeline or update an existing note.
-   */
+    * Creates a new note or updates an existing one.
+
+**Create:** Send `note` and omit `noteId` to create a new saved object.
+
+**Update:** Send `note` with the changed fields and set `noteId` to the note's saved object ID. Optionally include `version` for optimistic concurrency when the client has it from a prior read.
+
+Requires the **Timeline and Notes** write privilege (`notes_write`).
+
+    */
   async persistNoteRoute(props: PersistNoteRouteProps) {
     this.log.info(`${new Date().toISOString()} Calling API PersistNoteRoute`);
     return this.kbnClient
