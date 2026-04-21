@@ -155,7 +155,8 @@ export class LogsExtractionClient {
         return operationResult;
       }
 
-      await this.engineDescriptorClient.update(type, {
+      await this.engineDescriptorClient.updateWith(type, (current) => ({
+        ...current,
         logExtractionState: {
           // we went through all the pages,
           // therefore we can leave the lastExecutionTimestamp as the beginning of the next
@@ -170,7 +171,7 @@ export class LogsExtractionClient {
           lastExecutionTimestamp: lastSearchTimestamp || moment().utc().toISOString(),
         },
         error: ccsError ? { message: ccsError.message, action: 'extractLogs' } : undefined,
-      });
+      }));
 
       return operationResult;
     } catch (error) {

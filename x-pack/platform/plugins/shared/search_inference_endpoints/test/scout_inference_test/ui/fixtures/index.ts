@@ -7,11 +7,12 @@
 
 import type { PageObjects, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
 import { test as baseTest, createLazyPageObject } from '@kbn/scout';
-import { FeatureSettingsPage } from './page_objects';
+import { FeatureSettingsPage, EisModelsPage } from './page_objects';
 
 export interface ExtScoutTestFixtures extends ScoutTestFixtures {
   pageObjects: PageObjects & {
     featureSettings: FeatureSettingsPage;
+    eisModels: EisModelsPage;
   };
 }
 
@@ -29,6 +30,7 @@ export const test = baseTest.extend<ExtScoutTestFixtures, ScoutWorkerFixtures>({
     const extendedPageObjects = {
       ...pageObjects,
       featureSettings: createLazyPageObject(FeatureSettingsPage, page),
+      eisModels: createLazyPageObject(EisModelsPage, page),
     };
 
     await use(extendedPageObjects);

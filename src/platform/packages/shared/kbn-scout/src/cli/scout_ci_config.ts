@@ -98,6 +98,11 @@ const findIndentedKey = (
 
 export const getScoutCiConfigModuleFromPath = (relativePath: string): ScoutCiConfigModule => {
   const normalized = relativePath.trim().replace(/\\/g, '/').replace(/\/+$/g, '');
+
+  if (normalized.startsWith('src/core/')) {
+    return { kind: 'packages', name: 'core' };
+  }
+
   const parts = normalized.split('/').filter(Boolean);
 
   const typeIndex = parts.findIndex((p) => p === 'plugins' || p === 'packages');

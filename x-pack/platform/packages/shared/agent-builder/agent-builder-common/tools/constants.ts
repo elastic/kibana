@@ -38,8 +38,18 @@ export const platformCoreTools = {
   executeConnectorSubAction: platformCoreTool('execute_connector_sub_action'),
 } as const;
 
+/**
+ * Sig Events tools should try to follow this naming convention when possible:
+ * {namespace}.sig_events.{feature}_{entity}_{action}
+ *
+ * - {feature} refers to a high-level scope within Sig Events, for example KIs.
+ * - {entity} is a more granular entity withing the {feature} scope, for example Feature KI or Query KI.
+ * - {action} the action to perform on the entity
+ */
 export const platformStreamsSigEventsTools = {
-  searchKnowledgeIndicators: `${internalNamespaces.platformStreams}.sig_events.search_kis`,
+  searchKnowledgeIndicators: `${internalNamespaces.platformStreams}.sig_events.ki_search`,
+  createFeatureKnowledgeIndicator: `${internalNamespaces.platformStreams}.sig_events.ki_feature_create`,
+  createQueryKnowledgeIndicator: `${internalNamespaces.platformStreams}.sig_events.ki_query_create`,
 } as const;
 
 export const attachmentTools = {
