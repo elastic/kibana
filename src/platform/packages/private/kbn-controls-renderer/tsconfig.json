@@ -14,6 +14,7 @@
     "@kbn/ui-actions-plugin",
     "@kbn/controls-constants",
     "@kbn/i18n",
-    "@kbn/controls-schemas"
+    "@kbn/controls-schemas",
+    "@kbn/presentation-util"
   ]
 }
