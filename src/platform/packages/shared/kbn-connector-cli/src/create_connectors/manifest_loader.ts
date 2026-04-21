@@ -39,9 +39,15 @@ function validate(manifest: Manifest, filename: string): void {
 
 async function resolveSecretField(
   name: string,
-  field: ManifestSecretField,
+  field: ManifestSecretField | null | undefined,
   manifestName: string
 ): Promise<string> {
+  if (field == null) {
+    throw new Error(
+      `Secret "${name}" in manifest "${manifestName}" has no value. Either provide a "value" or a "vault" + "field" pair, or remove the key.`
+    );
+  }
+
   if (field.value !== undefined) {
     return field.value;
   }
