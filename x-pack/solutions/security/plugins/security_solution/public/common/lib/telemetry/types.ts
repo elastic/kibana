@@ -64,6 +64,10 @@ import type {
   TrialCompanionEventTypes,
   TrialCompanionTelemetryEventsMap,
 } from './events/trial_companion/types';
+import type {
+  SiemReadinessEventTypes,
+  SiemReadinessTelemetryEventsMap,
+} from './events/siem_readiness/types';
 
 export * from './events/app/types';
 export * from './events/attacks/types';
@@ -119,6 +123,8 @@ export type TelemetryEventTypeData<T extends TelemetryEventTypes> = T extends Al
   ? AgentBuilderTelemetryEventsMap[T]
   : T extends AttacksEventTypes
   ? AttacksTelemetryEventsMap[T]
+  : T extends SiemReadinessEventTypes
+  ? SiemReadinessTelemetryEventsMap[T]
   : never;
 
 export type TelemetryEventTypes =
@@ -139,4 +145,5 @@ export type TelemetryEventTypes =
   | AIValueReportEventTypes
   | TrialCompanionEventTypes
   | AgentBuilderEventTypes
-  | AttacksEventTypes;
+  | AttacksEventTypes
+  | SiemReadinessEventTypes;

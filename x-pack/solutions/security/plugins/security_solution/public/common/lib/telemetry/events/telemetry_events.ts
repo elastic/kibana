@@ -20,6 +20,7 @@ import { siemMigrationsTelemetryEvents } from './siem_migrations';
 import { ruleUpgradeTelemetryEvents } from './rule_upgrade';
 import { aiValueReportTelemetryEvents } from './ai_value_report';
 import { attacksTelemetryEvents } from './attacks';
+import { siemReadinessTelemetryEvents } from './siem_readiness';
 
 export const telemetryEvents = [
   ...attacksTelemetryEvents,
@@ -38,4 +39,5 @@ export const telemetryEvents = [
   ...siemMigrationsTelemetryEvents,
   ...aiValueReportTelemetryEvents,
   ...trialCompanionTelemetryEvents,
+  ...siemReadinessTelemetryEvents,
 ];
