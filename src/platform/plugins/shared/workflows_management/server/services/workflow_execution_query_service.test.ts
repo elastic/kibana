@@ -115,10 +115,7 @@ describe('WorkflowExecutionQueryService', () => {
     it('adds omitStepRuns filter', async () => {
       mockEsClient.search.mockResolvedValue(emptyResponse as any);
 
-      await service.getWorkflowExecutions(
-        { workflowId: 'wf-1', omitStepRuns: true },
-        'default'
-      );
+      await service.getWorkflowExecutions({ workflowId: 'wf-1', omitStepRuns: true }, 'default');
 
       const call = mockEsClient.search.mock.calls[0][0] as any;
       const must = call.query.bool.must;
@@ -141,10 +138,7 @@ describe('WorkflowExecutionQueryService', () => {
     it('calculates correct offset for page 3 with size 20', async () => {
       mockEsClient.search.mockResolvedValue(emptyResponse as any);
 
-      await service.getWorkflowExecutions(
-        { workflowId: 'wf-1', page: 3, size: 20 },
-        'default'
-      );
+      await service.getWorkflowExecutions({ workflowId: 'wf-1', page: 3, size: 20 }, 'default');
 
       const call = mockEsClient.search.mock.calls[0][0] as any;
       expect(call.size).toBe(20);
@@ -236,9 +230,9 @@ describe('WorkflowExecutionQueryService', () => {
         hits: { hits: [{ _id: 'bad' }] },
       } as any);
 
-      await expect(
-        service.getWorkflowExecutionHistory('exec-1', 'default')
-      ).rejects.toThrow('Missing _source in search result');
+      await expect(service.getWorkflowExecutionHistory('exec-1', 'default')).rejects.toThrow(
+        'Missing _source in search result'
+      );
     });
   });
 
@@ -300,6 +294,19 @@ describe('WorkflowExecutionQueryService', () => {
       );
 
       expect(result).toEqual(stepSource);
+    });
+
+    it('returns null when hit has undefined _source', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [{ _id: 'some-id' }] },
+      } as any);
+
+      const result = await service.getStepExecution(
+        { executionId: 'exec-1', id: 'step-1' },
+        'default'
+      );
+
+      expect(result).toBeNull();
     });
 
     it('queries by workflowRunId, id, and spaceId', async () => {

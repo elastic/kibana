@@ -52,7 +52,6 @@ describe('syncSchedulerAfterSave', () => {
       finalData: { ...baseData, definition: null },
       taskScheduler: mockTaskScheduler,
       logger,
-      getWorkflow: jest.fn(),
     });
 
     expect(mockTaskScheduler.unscheduleWorkflowTasks).toHaveBeenCalledWith('wf-1');
@@ -67,7 +66,6 @@ describe('syncSchedulerAfterSave', () => {
       finalData: { ...baseData, valid: false },
       taskScheduler: mockTaskScheduler,
       logger,
-      getWorkflow: jest.fn(),
     });
 
     expect(mockTaskScheduler.unscheduleWorkflowTasks).toHaveBeenCalledWith('wf-1');
@@ -81,7 +79,6 @@ describe('syncSchedulerAfterSave', () => {
       finalData: { ...baseData, enabled: false },
       taskScheduler: mockTaskScheduler,
       logger,
-      getWorkflow: jest.fn(),
     });
 
     expect(mockTaskScheduler.unscheduleWorkflowTasks).toHaveBeenCalledWith('wf-1');
@@ -98,7 +95,6 @@ describe('syncSchedulerAfterSave', () => {
       },
       taskScheduler: mockTaskScheduler,
       logger,
-      getWorkflow: jest.fn(),
     });
 
     expect(mockTaskScheduler.unscheduleWorkflowTasks).toHaveBeenCalledWith('wf-1');
@@ -106,15 +102,6 @@ describe('syncSchedulerAfterSave', () => {
   });
 
   it('updates tasks when workflow is schedulable with scheduled triggers', async () => {
-    const getWorkflow = jest.fn().mockResolvedValue({
-      id: 'wf-1',
-      name: 'Test',
-      enabled: true,
-      definition: baseData.definition,
-      createdAt: '2024-01-01T00:00:00.000Z',
-      lastUpdatedAt: '2024-01-01T00:00:00.000Z',
-    });
-
     await syncSchedulerAfterSave({
       workflowId: 'wf-1',
       spaceId: 'default',
@@ -122,30 +109,23 @@ describe('syncSchedulerAfterSave', () => {
       finalData: baseData,
       taskScheduler: mockTaskScheduler,
       logger,
-      getWorkflow,
     });
 
     expect(mockTaskScheduler.unscheduleWorkflowTasks).not.toHaveBeenCalled();
     expect(mockTaskScheduler.updateWorkflowTasks).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'wf-1' }),
+      expect.objectContaining({
+        id: 'wf-1',
+        name: baseData.name,
+        enabled: baseData.enabled,
+        definition: baseData.definition,
+        tags: baseData.tags,
+        yaml: baseData.yaml,
+        valid: baseData.valid,
+        createdAt: new Date(baseData.created_at),
+        lastUpdatedAt: new Date(baseData.updated_at),
+      }),
       'default',
       mockRequest
     );
-  });
-
-  it('does nothing when getWorkflow returns null', async () => {
-    const getWorkflow = jest.fn().mockResolvedValue(null);
-
-    await syncSchedulerAfterSave({
-      workflowId: 'wf-1',
-      spaceId: 'default',
-      request: mockRequest,
-      finalData: baseData,
-      taskScheduler: mockTaskScheduler,
-      logger,
-      getWorkflow,
-    });
-
-    expect(mockTaskScheduler.updateWorkflowTasks).not.toHaveBeenCalled();
   });
 });
