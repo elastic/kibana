@@ -104,8 +104,7 @@ export const stubInferenceConnectorsApiResponse = (connectorId: string, connecto
     },
     (req) => {
       req.reply(200, {
-        connectors: [],
-        allConnectors: [
+        connectors: [
           {
             connectorId,
             name: connectorName,
