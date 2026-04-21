@@ -26,6 +26,8 @@ import type { PackageInfo } from '../../common/types';
 import { SetupTechnology } from '../../common/types';
 
 export const SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ = 'setup-technology-selector';
+export const SETUP_TECHNOLOGY_SELECTOR_BETA_BADGE_TEST_SUBJ =
+  'setup-technology-selector-beta-badge';
 
 interface SetupTechnologySelectorProps {
   disabled: boolean;
@@ -90,6 +92,7 @@ export const SetupTechnologySelector = ({
                 ) : (
                   showBetaBadge && (
                     <EuiBetaBadge
+                      data-test-subj={SETUP_TECHNOLOGY_SELECTOR_BETA_BADGE_TEST_SUBJ}
                       href={docLinks.links.fleet.agentlessIntegrations}
                       target="_blank"
                       label={
@@ -181,6 +184,7 @@ export const SetupTechnologySelector = ({
                 ) : (
                   showBetaBadge && (
                     <EuiBetaBadge
+                      data-test-subj={SETUP_TECHNOLOGY_SELECTOR_BETA_BADGE_TEST_SUBJ}
                       href={docLinks.links.fleet.agentlessIntegrations}
                       target="_blank"
                       label={
