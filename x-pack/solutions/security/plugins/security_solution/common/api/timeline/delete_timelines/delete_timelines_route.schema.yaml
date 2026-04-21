@@ -42,6 +42,14 @@ paths:
                 value:
                   savedObjectIds:
                     - 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+              deleteWithSearches:
+                summary: Delete Timelines and their linked saved searches
+                value:
+                  savedObjectIds:
+                    - 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                    - 6ce1b592-84e3-4b4a-9552-f189d4b82075
+                  searchIds:
+                    - 2c1b8f02-9ad6-4e33-8f6a-2c6b7d0a1f11
       responses:
         '200':
           description: Indicates a successful call.

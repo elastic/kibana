@@ -67,7 +67,7 @@ paths:
                 properties:
                   body:
                     type: string
-                    description: The error message
+                    description: The error message.
                     example: update timeline error
                   statusCode:
                     type: number

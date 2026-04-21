@@ -20,7 +20,7 @@ paths:
           name: template_timeline_id
           schema:
             type: string
-          description: The `savedObjectId` of the template timeline to retrieve
+          description: The `savedObjectId` of the Timeline template to retrieve.
         - in: query
           name: id
           schema:

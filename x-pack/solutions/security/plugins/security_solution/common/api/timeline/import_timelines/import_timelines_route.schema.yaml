@@ -76,7 +76,7 @@ paths:
                     statusCode: 400
 
         '404':
-          description: Indicates that we were unable to locate the saved object client necessary to handle the import.
+          description: Not found response.
           content:
             application/json:
               schema:
