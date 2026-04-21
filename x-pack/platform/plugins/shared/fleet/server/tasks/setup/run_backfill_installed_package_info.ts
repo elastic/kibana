@@ -13,10 +13,23 @@ import type { SavedObject } from '@kbn/core/server';
 import { appContextService } from '../../services';
 import { PACKAGES_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
 import type { Installation } from '../../types';
+import { AgentlessDeploymentReleaseStatus } from '../../../common/types';
 import type { RegistryPolicyTemplate } from '../../../common/types';
+import { FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE } from '../../../common/constants';
 import * as Registry from '../../services/epm/registry';
 
 const BATCH_SIZE = 50;
+
+// CSPM's agentless feature was GA before the release field was introduced — explicitly backfill GA.
+function buildCSPMDeploymentInfo(t: RegistryPolicyTemplate) {
+  return {
+    name: t.name,
+    deployment_modes: {
+      ...t.deployment_modes,
+      agentless: { ...t.deployment_modes?.agentless, release: AgentlessDeploymentReleaseStatus.GA },
+    },
+  };
+}
 
 async function buildDeploymentInfoUpdates(
   batch: Array<SavedObject<Installation>>,
@@ -40,10 +53,16 @@ async function buildDeploymentInfoUpdates(
       updates.push({
         id: so.id,
         policy_templates_deployment_info: pkgInfo.policy_templates?.map(
-          (t: RegistryPolicyTemplate) => ({
-            name: t.name,
-            deployment_modes: t.deployment_modes,
-          })
+          (t: RegistryPolicyTemplate) => {
+            if (
+              t.name === FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE &&
+              t.deployment_modes?.agentless?.enabled &&
+              !t.deployment_modes.agentless.release
+            ) {
+              return buildCSPMDeploymentInfo(t);
+            }
+            return { name: t.name, deployment_modes: t.deployment_modes };
+          }
         ),
       });
     } catch (err) {
@@ -69,6 +88,7 @@ export async function runBackfillInstalledPackageInfo({
     type: PACKAGES_SAVED_OBJECT_TYPE,
     perPage: SO_SEARCH_LIMIT,
     filter: `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.install_status:installed and not ${PACKAGES_SAVED_OBJECT_TYPE}.attributes.policy_templates_deployment_info:*`,
+    fields: ['name', 'version', 'install_source'],
   });
 
   if (res.total === 0) {
