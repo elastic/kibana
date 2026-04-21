@@ -17,11 +17,15 @@ const SectionHeading: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
 const formatRangeFilter = (key: string, params: Record<string, unknown>): string => {
   const parts: string[] = [];
-  if (params.gte !== undefined || params.gt !== undefined) {
-    parts.push(`>= ${params.gte ?? params.gt}`);
+  if (params.gte !== undefined) {
+    parts.push(`>= ${params.gte}`);
+  } else if (params.gt !== undefined) {
+    parts.push(`> ${params.gt}`);
   }
-  if (params.lte !== undefined || params.lt !== undefined) {
-    parts.push(`<= ${params.lte ?? params.lt}`);
+  if (params.lte !== undefined) {
+    parts.push(`<= ${params.lte}`);
+  } else if (params.lt !== undefined) {
+    parts.push(`< ${params.lt}`);
   }
   return `${key}: ${parts.join(' AND ')}`;
 };

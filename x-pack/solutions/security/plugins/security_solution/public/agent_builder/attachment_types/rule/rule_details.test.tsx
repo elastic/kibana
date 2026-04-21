@@ -628,6 +628,27 @@ describe('getFilterLabel', () => {
     expect(getFilterLabel(filter)).toBe('risk_score: >= 50');
   });
 
+  it('formats range filter with strict gt and lt', () => {
+    const filter: Filter = {
+      meta: { key: 'bytes', type: 'range', params: { gt: 100, lt: 500 } },
+    };
+    expect(getFilterLabel(filter)).toBe('bytes: > 100 AND < 500');
+  });
+
+  it('formats range filter with strict gt only', () => {
+    const filter: Filter = {
+      meta: { key: 'risk_score', type: 'range', params: { gt: 50 } },
+    };
+    expect(getFilterLabel(filter)).toBe('risk_score: > 50');
+  });
+
+  it('prefers gte over gt when both present', () => {
+    const filter: Filter = {
+      meta: { key: 'bytes', type: 'range', params: { gte: 100, gt: 99 } },
+    };
+    expect(getFilterLabel(filter)).toBe('bytes: >= 100');
+  });
+
   it('falls back to JSON for filter without key', () => {
     const filter: Filter = { meta: {}, query: { match_all: {} } };
     expect(getFilterLabel(filter)).toBe('{"match_all":{}}');
