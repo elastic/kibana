@@ -43,6 +43,7 @@ export type ControlsRendererParentApi = Pick<
   | 'setIndicateRelatedPanelsId'
   | 'indicateRelatedPanelsId$'
   | 'getRelatedPanelIds$'
+  | 'arePanelsRelated$'
 > &
   Partial<PublishesUnifiedSearch> &
   PublishesViewMode &

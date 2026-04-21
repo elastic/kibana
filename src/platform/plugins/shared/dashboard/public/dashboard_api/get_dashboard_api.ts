@@ -302,7 +302,6 @@ export function getDashboardApi({
     ...layoutManager.internalApi,
     ...unifiedSearchManager.internalApi,
     ...esqlVariablesManager.api,
-    ...relatedPanelsManager.internalApi,
     dashboardContainerRef$,
     setDashboardContainerRef: (ref: HTMLElement | null) => dashboardContainerRef$.next(ref),
   };

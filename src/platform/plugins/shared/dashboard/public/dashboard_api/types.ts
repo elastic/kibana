@@ -243,7 +243,6 @@ export interface DashboardInternalApi {
   publishedEsqlVariables$: PublishingSubject<ESQLControlVariable[]>;
   unpublishedEsqlVariables$: PublishingSubject<ESQLControlVariable[]>;
   publishVariables: () => void;
-  arePanelsRelated$: BehaviorSubject<(a: string, b: string) => boolean>;
 }
 
 export interface DashboardUser {

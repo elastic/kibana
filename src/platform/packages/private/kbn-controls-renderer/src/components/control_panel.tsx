@@ -8,7 +8,7 @@
  */
 
 import classNames from 'classnames';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Subscription, of } from 'rxjs';
 
 import { useSortable } from '@dnd-kit/sortable';
@@ -19,6 +19,7 @@ import {
   EuiFormLabel,
   EuiFormRow,
   EuiIcon,
+  transparentize,
   type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -58,16 +59,25 @@ export const ControlPanel = ({
     id,
   });
 
-  const [viewMode, disabledActionIds] = useBatchedPublishingSubjects(
-    parentApi.viewMode$,
-    parentApi.disabledActionIds$ ?? (of([] as string[]) as PublishingSubject<string[]>)
-  );
+  const [viewMode, disabledActionIds, arePanelsRelated, indicateRelatedPanelsId] =
+    useBatchedPublishingSubjects(
+      parentApi.viewMode$,
+      parentApi.disabledActionIds$ ?? (of([] as string[]) as PublishingSubject<string[]>),
+      parentApi.arePanelsRelated$,
+      parentApi.indicateRelatedPanelsId$
+    );
 
   const [panelLabel, setPanelLabel] = useState<string | undefined>();
   const [panelTooltipLabel, setPanelTooltipLabel] = useState<string | undefined>();
 
   const prependWrapperRef = useRef<HTMLDivElement>(null);
 
+  const indicateControl = useMemo(
+    () =>
+      indicateRelatedPanelsId !== undefined &&
+      arePanelsRelated(id, indicateRelatedPanelsId, { relatedByFilter: false }),
+    [arePanelsRelated, id, indicateRelatedPanelsId]
+  );
   const {
     canIndicateRelatedPanels,
     isIndicatingRelatedPanels,
@@ -166,7 +176,11 @@ export const ControlPanel = ({
       }}
       grow={Boolean(grow)}
       data-test-subj="control-frame"
-      css={css([isDragging && styles.draggingItem, styles.controlWidthStyles])}
+      css={css([
+        isDragging && styles.draggingItem,
+        styles.controlWidthStyles,
+        indicateControl && styles.controlIndicated,
+      ])}
       className={`controlFrameWrapper--${width}`}
     >
       <FloatingActions
@@ -289,4 +303,19 @@ const controlPanelStyles = {
         },
       },
     }),
+  controlIndicated: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      borderColor: euiTheme.colors.vis.euiColorVis0,
+      boxShadow: `${transparentize(
+        euiTheme.colors.vis.euiColorVis0,
+        BASE_SHADOW_OPACITY * 1.6
+      )} 0px 0px 2px 0px, ${transparentize(
+        euiTheme.colors.vis.euiColorVis0,
+        BASE_SHADOW_OPACITY
+      )} 0px 3px 10px 0px, ${transparentize(
+        euiTheme.colors.vis.euiColorVis0,
+        BASE_SHADOW_OPACITY * 0.6
+      )} 0px 6px 14px 0px`,
+    }),
 };
+const BASE_SHADOW_OPACITY = 0.5;

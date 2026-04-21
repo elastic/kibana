@@ -6,7 +6,11 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { CanBeRelatedPanelsIndicator, PublishingSubject, ViewMode } from '@kbn/presentation-publishing';
+import type {
+  CanBeRelatedPanelsIndicator,
+  PublishingSubject,
+  ViewMode,
+} from '@kbn/presentation-publishing';
 import { apiAppliesFilters, apiHasUseGlobalFiltersSetting } from '@kbn/presentation-publishing';
 import type { Observable, Subscription } from 'rxjs';
 import { BehaviorSubject, combineLatest, filter, map, of, switchMap } from 'rxjs';
@@ -26,7 +30,7 @@ interface SectionFilterEntry {
   doesNotApplyFilters: Set<string>;
 }
 
-type RelationQueryOptions = Partial<CanBeRelatedPanelsIndicator['indicateRelatedPanelOptions']>>
+type RelationQueryOptions = Partial<CanBeRelatedPanelsIndicator['indicateRelatedPanelOptions']>;
 
 const getBlankSectionFilterEntry = () =>
   ({
@@ -123,7 +127,8 @@ export const initializeRelatedPanelsManager = ({
           esqlQueryChildrenByUUID.push(
             child.query$.pipe(map(({ esql }) => ({ esql, uuid: child.uuid })))
           );
-        } else if (apiPublishesESQLVariable(child)) {
+        }
+        if (apiPublishesESQLVariable(child)) {
           esqlVariableChildrenByUUID.push(
             child.esqlVariable$.pipe(map((variable) => ({ variable, uuid: child.uuid })))
           );
@@ -190,13 +195,11 @@ export const initializeRelatedPanelsManager = ({
   };
 
   return {
-    internalApi: {
-      arePanelsRelated$,
-    },
     api: {
       indicateRelatedPanelsId$,
       setIndicateRelatedPanelsId,
       getRelatedPanelIds$,
+      arePanelsRelated$,
     },
     cleanup: () => {
       relatedPanelSubscription.unsubscribe();

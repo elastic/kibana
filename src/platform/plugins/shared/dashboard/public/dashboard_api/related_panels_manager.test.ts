@@ -103,7 +103,7 @@ describe('initializeRelatedPanelsManager', () => {
       viewMode$: new BehaviorSubject('edit' as ViewMode),
     });
     test('should not compute', (done) => {
-      subscription = relatedPanelsManager.internalApi.arePanelsRelated$.subscribe(() => {
+      subscription = relatedPanelsManager.api.arePanelsRelated$.subscribe(() => {
         expect(mockLayoutManager.api.getDashboardPanelFromId).not.toHaveBeenCalled();
         done();
       });
@@ -126,7 +126,7 @@ describe('initializeRelatedPanelsManager', () => {
       viewMode$: new BehaviorSubject('view' as ViewMode),
     });
     test('should not compute', (done) => {
-      subscription = relatedPanelsManager.internalApi.arePanelsRelated$.subscribe(() => {
+      subscription = relatedPanelsManager.api.arePanelsRelated$.subscribe(() => {
         expect(mockLayoutManager.api.getDashboardPanelFromId).not.toHaveBeenCalled();
         done();
       });
@@ -146,13 +146,13 @@ describe('initializeRelatedPanelsManager', () => {
     });
 
     test('should compute', (done) => {
-      relatedPanelsManager.internalApi.arePanelsRelated$.subscribe(() => {
+      relatedPanelsManager.api.arePanelsRelated$.subscribe(() => {
         expect(mockLayoutManager.api.getDashboardPanelFromId).toHaveBeenCalled();
         done();
       });
     });
 
-    const arePanelsRelated = relatedPanelsManager.internalApi.arePanelsRelated$.value;
+    const arePanelsRelated = relatedPanelsManager.api.arePanelsRelated$.value;
 
     test('should mark a panel without a section ID as related to all filter controls without section IDs', () => {
       expect(arePanelsRelated('control', 'panel')).toBe(true);

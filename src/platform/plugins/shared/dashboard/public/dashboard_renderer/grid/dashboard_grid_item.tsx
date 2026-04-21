@@ -74,7 +74,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       dashboardApi.settings.useMargins$,
       dashboardApi.viewMode$,
       dashboardInternalApi.dashboardContainerRef$,
-      dashboardInternalApi.arePanelsRelated$,
+      dashboardApi.arePanelsRelated$,
       dashboardApi.indicateRelatedPanelsId$
     );
 

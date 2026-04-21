@@ -17,6 +17,13 @@ import type { CanBeRelatedPanelsIndicator } from './panel_capabilities';
 export interface CanIndicateRelatedPanels {
   setIndicateRelatedPanelsId: (panelId?: string) => void;
   indicateRelatedPanelsId$: BehaviorSubject<string | undefined>;
+  arePanelsRelated$: BehaviorSubject<
+    (
+      a: string,
+      b: string,
+      options?: CanBeRelatedPanelsIndicator['indicateRelatedPanelOptions']
+    ) => boolean
+  >;
   getRelatedPanelIds$: (
     panelId: string,
     options?: CanBeRelatedPanelsIndicator['indicateRelatedPanelOptions']
