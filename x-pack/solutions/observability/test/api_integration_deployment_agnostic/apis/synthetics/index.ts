@@ -8,7 +8,7 @@
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { PrivateLocationTestService } from '../../services/synthetics_private_location';
 
-export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
+export default function ({ loadTestFile, getService }: DeploymentAgnosticFtrProviderContext) {
   describe('SyntheticsAPITests', function () {
     // temporarily skipping for cloud runs until stability fix is in place
     this.tags(['skipCloud']);
