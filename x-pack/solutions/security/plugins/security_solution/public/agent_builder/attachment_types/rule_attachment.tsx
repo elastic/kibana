@@ -27,6 +27,7 @@ import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { Filter } from '@kbn/es-query';
 import { RULES_UI_EDIT_PRIVILEGE } from '@kbn/security-solution-features/constants';
+import { toSimpleRuleSchedule } from '../../../common/api/detection_engine/model/rule_schema/to_simple_rule_schedule';
 import type { RuleResponse } from '../../../common/api/detection_engine/model/rule_schema';
 import type { AiRuleCreationService } from '../../detection_engine/common/ai_rule_creation_store';
 import { RULES_PATH, SecurityAgentBuilderAttachments } from '../../../common/constants';
@@ -120,6 +121,43 @@ const TagsBadgeList: React.FC<{ tags: string[] }> = ({ tags }) => (
     ))}
   </EuiFlexGroup>
 );
+
+const RULE_TYPE_LABELS: Record<string, string> = {
+  esql: 'ES|QL',
+  eql: 'EQL',
+  query: 'Query',
+  saved_query: 'Saved Query',
+  threshold: 'Threshold',
+  threat_match: 'Indicator Match',
+  machine_learning: 'Machine Learning',
+  new_terms: 'New Terms',
+};
+
+const ScheduleDisplay: React.FC<{ interval: string; from?: string }> = ({ interval, from }) => {
+  const schedule = toSimpleRuleSchedule({ interval, from: from ?? `now-${interval}`, to: 'now' });
+
+  return (
+    <EuiText size="s">
+      <strong>
+        {i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.intervalLabel', {
+          defaultMessage: 'Interval:',
+        })}
+      </strong>{' '}
+      {schedule?.interval ?? interval}
+      {schedule?.lookback && (
+        <>
+          {' | '}
+          <strong>
+            {i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.lookbackLabel', {
+              defaultMessage: 'Lookback time:',
+            })}
+          </strong>{' '}
+          {schedule.lookback}
+        </>
+      )}
+    </EuiText>
+  );
+};
 
 const getQueryLabel = (rule: RuleResponse): string => {
   switch (rule.type) {
@@ -396,6 +434,35 @@ const RuleTypeDetails: React.FC<{ rule: RuleResponse }> = ({ rule }) => {
   }
 };
 
+const SeverityRiskScore: React.FC<{
+  severity?: string;
+  riskScore?: number;
+}> = ({ severity, riskScore }) => (
+  <EuiText size="s">
+    {severity && (
+      <>
+        <strong>
+          {i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.severityLabel', {
+            defaultMessage: 'Severity:',
+          })}
+        </strong>{' '}
+        {severity.charAt(0).toUpperCase() + severity.slice(1)}
+        {riskScore !== undefined && <>{' | '}</>}
+      </>
+    )}
+    {riskScore !== undefined && (
+      <>
+        <strong>
+          {i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.riskScoreLabel', {
+            defaultMessage: 'Risk Score:',
+          })}
+        </strong>{' '}
+        {riskScore}
+      </>
+    )}
+  </EuiText>
+);
+
 const RuleInlineContent: React.FC<AttachmentRenderProps<RuleAttachment>> = ({ attachment }) => {
   const rule = parseRuleFromAttachment(attachment);
 
@@ -406,9 +473,39 @@ const RuleInlineContent: React.FC<AttachmentRenderProps<RuleAttachment>> = ({ at
   const query = 'query' in rule ? rule.query : undefined;
   const index = 'index' in rule ? (rule.index as string[] | undefined) : undefined;
   const filters = 'filters' in rule ? (rule.filters as unknown[] | undefined) : undefined;
+  const interval = 'interval' in rule ? rule.interval : undefined;
+  const from = 'from' in rule ? rule.from : undefined;
 
   return (
     <EuiPanel paddingSize="m" hasShadow={false} hasBorder={false}>
+      {rule.type && (
+        <>
+          <EuiText size="s">
+            <strong>
+              {i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.ruleTypeLabel', {
+                defaultMessage: 'Rule Type:',
+              })}
+            </strong>{' '}
+            {RULE_TYPE_LABELS[rule.type] ?? rule.type}
+          </EuiText>
+          <EuiSpacer size="s" />
+        </>
+      )}
+
+      {rule.description && (
+        <>
+          <SectionHeading>
+            {i18n.translate(
+              'xpack.securitySolution.agentBuilder.ruleAttachment.descriptionHeading',
+              { defaultMessage: 'Description' }
+            )}
+          </SectionHeading>
+          <EuiSpacer size="xs" />
+          <EuiText size="s">{rule.description}</EuiText>
+          <EuiSpacer size="s" />
+        </>
+      )}
+
       {query && (
         <>
           <SectionHeading>{getQueryLabel(rule)}</SectionHeading>
@@ -441,6 +538,16 @@ const RuleInlineContent: React.FC<AttachmentRenderProps<RuleAttachment>> = ({ at
           </SectionHeading>
           <EuiSpacer size="xs" />
           <TagsBadgeList tags={rule.tags} />
+          <EuiSpacer size="s" />
+        </>
+      )}
+
+      <SeverityRiskScore severity={rule.severity} riskScore={rule.risk_score} />
+
+      {interval && (
+        <>
+          <EuiSpacer size="s" />
+          <ScheduleDisplay interval={interval} from={from} />
         </>
       )}
     </EuiPanel>

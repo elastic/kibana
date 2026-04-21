@@ -710,6 +710,60 @@ describe('RuleInlineContent integration', () => {
     (window as { location: unknown }).location = originalLocation;
   });
 
+  it('renders rule type label', () => {
+    const { container } = renderInlineContent({
+      ...baseRule,
+      type: 'threat_match',
+      query: '*:*',
+      threat_index: ['filebeat-*'],
+      threat_query: '*:*',
+      threat_mapping: [
+        { entries: [{ field: 'source.ip', type: 'mapping', value: 'threat.indicator.ip' }] },
+      ],
+    });
+
+    expect(screen.getByText('Rule Type:')).toBeInTheDocument();
+    const allText = container.textContent ?? '';
+    expect(allText).toContain('Indicator Match');
+  });
+
+  it('renders description section', () => {
+    renderInlineContent({
+      ...baseRule,
+      type: 'query',
+      query: 'host.name: *',
+    });
+
+    expect(screen.getByText('Description')).toBeInTheDocument();
+    expect(screen.getByText('A test rule')).toBeInTheDocument();
+  });
+
+  it('renders severity and risk score', () => {
+    const { container } = renderInlineContent({
+      ...baseRule,
+      type: 'query',
+      query: 'host.name: *',
+    });
+
+    expect(screen.getByText('Severity:')).toBeInTheDocument();
+    expect(screen.getByText('Risk Score:')).toBeInTheDocument();
+    const allText = container.textContent ?? '';
+    expect(allText).toContain('High');
+    expect(allText).toContain('73');
+  });
+
+  it('renders interval and lookback time', () => {
+    renderInlineContent({
+      ...baseRule,
+      type: 'query',
+      query: 'host.name: *',
+    });
+
+    expect(screen.getByText('Interval:')).toBeInTheDocument();
+    expect(screen.getByText(/5m/)).toBeInTheDocument();
+    expect(screen.getByText('Lookback time:')).toBeInTheDocument();
+  });
+
   it('renders threshold rule with type-specific section', () => {
     renderInlineContent({
       ...baseRule,
@@ -719,7 +773,7 @@ describe('RuleInlineContent integration', () => {
     });
 
     expect(screen.getByText('Custom query')).toBeInTheDocument();
-    expect(screen.getByText('Threshold')).toBeInTheDocument();
+    expect(screen.getAllByText('Threshold').length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText(/source\.ip/)).toBeInTheDocument();
     expect(screen.getByText(/>= 5/)).toBeInTheDocument();
   });
@@ -799,13 +853,14 @@ describe('RuleInlineContent integration', () => {
   });
 
   it('does not render type-specific section for basic query rule', () => {
-    renderInlineContent({
+    const { container } = renderInlineContent({
       ...baseRule,
       type: 'query',
       query: 'host.name: *',
     });
 
-    expect(screen.getByText('Custom query')).toBeInTheDocument();
+    const allText = container.textContent ?? '';
+    expect(allText).toContain('Custom query');
     expect(screen.queryByText('Indicator index patterns')).not.toBeInTheDocument();
     expect(screen.queryByText('Machine Learning job')).not.toBeInTheDocument();
     expect(screen.queryByText(/Event category field/)).not.toBeInTheDocument();
@@ -964,7 +1019,7 @@ describe('RuleInlineContent integration', () => {
   });
 
   it('renders query in a code block with correct heading', () => {
-    renderInlineContent({
+    const { container } = renderInlineContent({
       ...baseRule,
       type: 'query',
       query: 'host.name: *',
@@ -972,7 +1027,8 @@ describe('RuleInlineContent integration', () => {
     });
 
     expect(screen.getByText('host.name: *')).toBeInTheDocument();
-    expect(screen.getByText('Custom query')).toBeInTheDocument();
+    const allText = container.textContent ?? '';
+    expect(allText).toContain('Custom query');
   });
 
   it('renders filters for indicator match rule with threat_filters', () => {
