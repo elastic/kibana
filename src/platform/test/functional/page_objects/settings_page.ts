@@ -578,7 +578,7 @@ export class SettingsPageObject extends FtrService {
         }
       );
 
-      await (await this.getSaveIndexPatternButton()).click();
+      await (await this.getSaveDataViewButtonActive()).click();
     });
     await this.header.waitUntilLoadingHasFinished();
     await this.retry.try(async () => {

@@ -7,31 +7,39 @@
 
 import type { Logger } from '@kbn/logging';
 import type { EntityUpdateClient, BulkObject } from '@kbn/entity-store/server';
+import type { EntityType } from '@kbn/entity-store/common';
 import type { Entity } from '@kbn/entity-store/common/domain/definitions/entity.gen';
 
+import { groupByEntityId } from '../group_by_entity_id';
 import type { ProcessedEntityRecord } from './types';
 
+type ValidRecord = ProcessedEntityRecord & { entityId: string };
+
 interface MergedEntity {
-  entityType: string;
+  entityType: EntityType;
   targets: Set<string>;
 }
 
+function filterValid(records: ProcessedEntityRecord[]): ValidRecord[] {
+  return records.filter(
+    (r): r is ValidRecord => r.entityId !== null && r.communicates_with.ids.length > 0
+  );
+}
+
+function seed(r: ValidRecord): MergedEntity {
+  return {
+    entityType: r.entityType,
+    targets: new Set(r.communicates_with.ids),
+  };
+}
+
+function merge(acc: MergedEntity, r: ValidRecord): MergedEntity {
+  for (const id of r.communicates_with.ids) acc.targets.add(id);
+  return acc;
+}
+
 function mergeRecordsByEntityId(records: ProcessedEntityRecord[]): Map<string, MergedEntity> {
-  const merged = new Map<string, MergedEntity>();
-  for (const r of records) {
-    if (r.entityId && r.communicates_with.length > 0) {
-      const existing = merged.get(r.entityId);
-      if (existing) {
-        for (const t of r.communicates_with) existing.targets.add(t);
-      } else {
-        merged.set(r.entityId, {
-          entityType: r.entityType,
-          targets: new Set(r.communicates_with),
-        });
-      }
-    }
-  }
-  return merged;
+  return groupByEntityId(filterValid(records), seed, merge);
 }
 
 export async function updateEntityRelationships(
@@ -44,15 +52,15 @@ export async function updateEntityRelationships(
   const merged = mergeRecordsByEntityId(records);
 
   const objects: BulkObject[] = Array.from(merged, ([entityId, { entityType, targets }]) => ({
-    type: entityType as BulkObject['type'],
+    type: entityType,
     doc: {
       entity: {
         id: entityId,
         relationships: {
-          communicates_with: Array.from(targets),
+          communicates_with: { ids: Array.from(targets) },
         },
       },
-    } as Entity,
+    } satisfies Entity,
   }));
 
   if (objects.length === 0) return 0;
@@ -60,9 +68,17 @@ export async function updateEntityRelationships(
   logger.info(`Updating ${objects.length} entity relationship records via bulk API`);
   const errors = await crudClient.bulkUpdateEntity({ objects, force: true });
 
+  const missingErrors = errors.filter((e) => e.status === 404);
+  const realErrors = errors.filter((e) => e.status !== 404);
   const updated = objects.length - errors.length;
-  if (errors.length > 0) {
-    logger.error(`Failed to update ${errors.length} entity records: ${JSON.stringify(errors)}`);
+
+  if (missingErrors.length > 0) {
+    logger.debug(`Skipped ${missingErrors.length} records for entities not yet in store`);
+  }
+  if (realErrors.length > 0) {
+    logger.error(
+      `Failed to update ${realErrors.length} entity records: ${JSON.stringify(realErrors)}`
+    );
   }
 
   logger.info(`Updated ${updated} entity relationship records`);

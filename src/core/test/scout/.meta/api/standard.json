@@ -1,0 +1,535 @@
+{
+  "sha1": "77536c8a138c9091d2b333d449698d3bb4e16540",
+  "tests": [
+    {
+      "id": "686afb1e43c1702-93eb078795ca679",
+      "title": "blocked internal saved objects API post /api/saved_objects/_bulk_create returns 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-workplaceai",
+        "@cloud-serverless-workplaceai"
+      ],
+      "location": {
+        "file": "src/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
+        "line": 43,
+        "column": 12
+      }
+    },
+    {
+      "id": "686afb1e43c1702-a37c39e10458d4b",
+      "title": "blocked internal saved objects API post /api/saved_objects/_bulk_delete returns 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-workplaceai",
+        "@cloud-serverless-workplaceai"
+      ],
+      "location": {
+        "file": "src/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
+        "line": 43,
+        "column": 12
+      }
+    },
+    {
+      "id": "686afb1e43c1702-1ccd8b7bfcff39e",
+      "title": "blocked internal saved objects API post /api/saved_objects/_bulk_get returns 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-workplaceai",
+        "@cloud-serverless-workplaceai"
+      ],
+      "location": {
+        "file": "src/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
+        "line": 43,
+        "column": 12
+      }
+    },
+    {
+      "id": "686afb1e43c1702-369aa1fcc98c081",
+      "title": "blocked internal saved objects API post /api/saved_objects/_bulk_resolve returns 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-workplaceai",
+        "@cloud-serverless-workplaceai"
+      ],
+      "location": {
+        "file": "src/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
+        "line": 43,
+        "column": 12
+      }
+    },
+    {
+      "id": "686afb1e43c1702-be7d768f1a165cd",
+      "title": "blocked internal saved objects API post /api/saved_objects/_bulk_update returns 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-workplaceai",
+        "@cloud-serverless-workplaceai"
+      ],
+      "location": {
+        "file": "src/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
+        "line": 43,
+        "column": 12
+      }
+    },
+    {
+      "id": "686afb1e43c1702-a4f50f6f408c4a7",
+      "title": "blocked internal saved objects API get /api/saved_objects/test/id returns 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-workplaceai",
+        "@cloud-serverless-workplaceai"
+      ],
+      "location": {
+        "file": "src/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
+        "line": 43,
+        "column": 12
+      }
+    },
+    {
+      "id": "686afb1e43c1702-770386b247870f7",
+      "title": "blocked internal saved objects API post /api/saved_objects/test/id returns 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-workplaceai",
+        "@cloud-serverless-workplaceai"
+      ],
+      "location": {
+        "file": "src/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
+        "line": 43,
+        "column": 12
+      }
+    },
+    {
+      "id": "686afb1e43c1702-42d710165637ec6",
+      "title": "blocked internal saved objects API delete /api/saved_objects/test/id returns 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-workplaceai",
+        "@cloud-serverless-workplaceai"
+      ],
+      "location": {
+        "file": "src/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
+        "line": 43,
+        "column": 12
+      }
+    },
+    {
+      "id": "686afb1e43c1702-48e110dd7cdae01",
+      "title": "blocked internal saved objects API get /api/saved_objects/_find returns 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-workplaceai",
+        "@cloud-serverless-workplaceai"
+      ],
+      "location": {
+        "file": "src/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
+        "line": 43,
+        "column": 12
+      }
+    },
+    {
+      "id": "686afb1e43c1702-05780bc38941c88",
+      "title": "blocked internal saved objects API put /api/saved_objects/test/id returns 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-workplaceai",
+        "@cloud-serverless-workplaceai"
+      ],
+      "location": {
+        "file": "src/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
+        "line": 43,
+        "column": 12
+      }
+    },
+    {
+      "id": "86ba5703113e69a-6f4b0a7c5c0ce07",
+      "title": "capabilities returns a 400 when an invalid app id is provided",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/core/test/scout/api/tests/capabilities.spec.ts",
+        "line": 22,
+        "column": 10
+      }
+    },
+    {
+      "id": "72d6c2fd4f4541e-b83ed9283b3719a",
+      "title": "compression uses compression when there is no referer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/core/test/scout/api/tests/compression.spec.ts",
+        "line": 21,
+        "column": 10
+      }
+    },
+    {
+      "id": "72d6c2fd4f4541e-75ad71f09bc256a",
+      "title": "compression uses compression when there is a whitelisted referer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/core/test/scout/api/tests/compression.spec.ts",
+        "line": 32,
+        "column": 10
+      }
+    },
+    {
+      "id": "6054c2de485a042-e6175d7abccb252",
+      "title": "translations returns the translations with the correct headers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/core/test/scout/api/tests/translations.spec.ts",
+        "line": 22,
+        "column": 10
+      }
+    },
+    {
+      "id": "6054c2de485a042-7c1b7d0f5a752d1",
+      "title": "translations returns a 404 when not using the correct locale",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/core/test/scout/api/tests/translations.spec.ts",
+        "line": 45,
+        "column": 10
+      }
+    },
+    {
+      "id": "6fbdb2654b9e364-e44412455fa0d7e",
+      "title": "ui settings CRUD returns list of settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-workplaceai",
+        "@cloud-serverless-workplaceai"
+      ],
+      "location": {
+        "file": "src/core/test/scout/api/tests/ui_settings_crud.spec.ts",
+        "line": 37,
+        "column": 10
+      }
+    },
+    {
+      "id": "6fbdb2654b9e364-f60cbf2c626f5ce",
+      "title": "ui settings CRUD set validates value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-workplaceai",
+        "@cloud-serverless-workplaceai"
+      ],
+      "location": {
+        "file": "src/core/test/scout/api/tests/ui_settings_crud.spec.ts",
+        "line": 50,
+        "column": 10
+      }
+    },
+    {
+      "id": "6fbdb2654b9e364-4618619772f68a0",
+      "title": "ui settings CRUD sets value of a setting",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-workplaceai",
+        "@cloud-serverless-workplaceai"
+      ],
+      "location": {
+        "file": "src/core/test/scout/api/tests/ui_settings_crud.spec.ts",
+        "line": 67,
+        "column": 10
+      }
+    },
+    {
+      "id": "6fbdb2654b9e364-c38c95874036220",
+      "title": "ui settings CRUD set many validates value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-workplaceai",
+        "@cloud-serverless-workplaceai"
+      ],
+      "location": {
+        "file": "src/core/test/scout/api/tests/ui_settings_crud.spec.ts",
+        "line": 89,
+        "column": 10
+      }
+    },
+    {
+      "id": "6fbdb2654b9e364-e1879b7a513bf21",
+      "title": "ui settings CRUD sets values of multiple settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-workplaceai",
+        "@cloud-serverless-workplaceai"
+      ],
+      "location": {
+        "file": "src/core/test/scout/api/tests/ui_settings_crud.spec.ts",
+        "line": 106,
+        "column": 10
+      }
+    },
+    {
+      "id": "6fbdb2654b9e364-c971c3cd0d843b3",
+      "title": "ui settings CRUD deletes setting",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-workplaceai",
+        "@cloud-serverless-workplaceai"
+      ],
+      "location": {
+        "file": "src/core/test/scout/api/tests/ui_settings_crud.spec.ts",
+        "line": 128,
+        "column": 10
+      }
+    },
+    {
+      "id": "00b3bc15914b6b5-1a3d801f87f249d",
+      "title": "ui settings validate returns validation error for invalid value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-workplaceai",
+        "@cloud-serverless-workplaceai"
+      ],
+      "location": {
+        "file": "src/core/test/scout/api/tests/ui_settings_validate.spec.ts",
+        "line": 31,
+        "column": 10
+      }
+    },
+    {
+      "id": "00b3bc15914b6b5-628ade5d8dbc25e",
+      "title": "ui settings validate returns no error for valid value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-workplaceai",
+        "@cloud-serverless-workplaceai"
+      ],
+      "location": {
+        "file": "src/core/test/scout/api/tests/ui_settings_validate.spec.ts",
+        "line": 50,
+        "column": 10
+      }
+    },
+    {
+      "id": "00b3bc15914b6b5-efa22959cc1a5d8",
+      "title": "ui settings validate returns 404 for non-existing key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-workplaceai",
+        "@cloud-serverless-workplaceai"
+      ],
+      "location": {
+        "file": "src/core/test/scout/api/tests/ui_settings_validate.spec.ts",
+        "line": 68,
+        "column": 10
+      }
+    },
+    {
+      "id": "00b3bc15914b6b5-e2d3cac2f19ae7d",
+      "title": "ui settings validate returns 400 for null value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-workplaceai",
+        "@cloud-serverless-workplaceai"
+      ],
+      "location": {
+        "file": "src/core/test/scout/api/tests/ui_settings_validate.spec.ts",
+        "line": 85,
+        "column": 10
+      }
+    }
+  ]
+}

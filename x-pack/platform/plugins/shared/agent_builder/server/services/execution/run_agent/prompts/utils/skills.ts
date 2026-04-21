@@ -10,6 +10,10 @@ import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import { isSkillFileEntry } from '../../../runner/store/volumes/skills/utils';
 import type { SkillFileEntry } from '../../../runner/store/volumes/skills/types';
 
+// The "load skills before other tool calls" guidance exists because skills dynamically
+// register tools via the loadSkillToolsAfterRead hook. If the LLM parallelizes a skill
+// read with other tool calls, the skill's specialized tools aren't available yet,
+// causing the LLM to fall back on general-purpose tools and often duplicate work.
 export const getSkillsInstructions = async ({
   filesystem,
 }: {
@@ -44,6 +48,8 @@ ${skillsFileEntries.map(skillToLine).join('\n')}
 ### How to load a skill
 
 Read the skill's file path using the \`filestore.read\` tool. Any tools provided by the skill will become available automatically.
+
+**Load skills before calling non-skill tools.** Wait for skills to load, then use their dedicated tools. Multiple skills can be loaded in parallel.
 
 ### When to load skills
 
