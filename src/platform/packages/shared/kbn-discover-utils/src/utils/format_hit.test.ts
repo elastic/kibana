@@ -13,15 +13,15 @@ import {
   createDataViewWithoutCustomField,
   columnsMetaOverridingBytesType,
   columnsMetaWithCustomField,
-  createFormatFieldValueSpy,
+  createFormatFieldValueReactSpy,
   expectFieldCallToMatch,
 } from '../__mocks__';
-import { formatHit } from './format_hit';
+import { formatHitReact } from './format_hit';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import type { DataTableRecord, EsHitRecord } from '../types';
 import { buildDataTableRecord } from './build_data_record';
 
-describe('formatHit', () => {
+describe('formatHitReact', () => {
   let row: DataTableRecord;
   let hit: EsHitRecord;
   beforeEach(() => {
@@ -37,12 +37,12 @@ describe('formatHit', () => {
     };
     row = buildDataTableRecord(hit, dataViewMock);
     (dataViewMock.getFormatterForField as jest.Mock).mockReturnValue({
-      convert: (value: unknown) => `formatted:${value}`,
+      reactConvert: (value: unknown) => `formatted:${value}`,
     });
   });
 
-  it('formats a document as expected', () => {
-    const formatted = formatHit(
+  it('formats a document as expected using reactConvert', () => {
+    const formatted = formatHitReact(
       row,
       dataViewMock,
       (fieldName) => ['_index', 'message', 'extension', 'object.value'].includes(fieldName),
@@ -68,7 +68,7 @@ describe('formatHit', () => {
       dataViewMock
     );
 
-    const formatted = formatHit(
+    const formatted = formatHitReact(
       highlightHit,
       dataViewMock,
       (fieldName) => ['_index', 'message', 'extension', 'object.value'].includes(fieldName),
@@ -86,7 +86,7 @@ describe('formatHit', () => {
   });
 
   it('only limits count of pairs based on advanced setting', () => {
-    const formatted = formatHit(
+    const formatted = formatHitReact(
       row,
       dataViewMock,
       (fieldName) => ['_index', 'message', 'extension', 'object.value'].includes(fieldName),
@@ -102,7 +102,7 @@ describe('formatHit', () => {
   });
 
   it('should not include fields not mentioned in fieldsToShow', () => {
-    const formatted = formatHit(
+    const formatted = formatHitReact(
       row,
       dataViewMock,
       (fieldName) => ['_index', 'message', 'object.value'].includes(fieldName),
@@ -132,7 +132,7 @@ describe('formatHit', () => {
       dataViewMock
     );
 
-    const formatted = formatHit(
+    const formatted = formatHitReact(
       highlightHit,
       dataViewMock,
       (fieldName) => ['_index', 'object'].includes(fieldName),
@@ -150,7 +150,7 @@ describe('formatHit', () => {
   });
 
   it('should filter fields based on their real name not displayName', () => {
-    const formatted = formatHit(
+    const formatted = formatHitReact(
       row,
       dataViewMock,
       (fieldName) => ['_index', 'bytes'].includes(fieldName),
@@ -166,36 +166,36 @@ describe('formatHit', () => {
   });
 
   describe('with columnsMeta', () => {
-    let formatFieldValueSpy: jest.SpyInstance;
+    let formatFieldValueReactSpy: jest.SpyInstance;
 
     beforeEach(() => {
-      formatFieldValueSpy = createFormatFieldValueSpy();
+      formatFieldValueReactSpy = createFormatFieldValueReactSpy();
     });
 
     afterEach(() => {
-      formatFieldValueSpy.mockRestore();
+      formatFieldValueReactSpy.mockRestore();
     });
 
-    it('should pass data view field to formatFieldValue when columnsMeta is undefined', () => {
+    it('should pass data view field to formatFieldValueReact when columnsMeta is undefined', () => {
       const testDataView = createDataViewWithBytesField();
       const testHit = buildDataTableRecord(
         { _id: '1', _index: 'logs', fields: { bytes: [100] } },
         testDataView
       );
 
-      formatHit(testHit, testDataView, () => true, 220, fieldFormatsMock, undefined);
+      formatHitReact(testHit, testDataView, () => true, 220, fieldFormatsMock, undefined);
 
-      expectFieldCallToMatch(formatFieldValueSpy, 'bytes', 'number');
+      expectFieldCallToMatch(formatFieldValueReactSpy, 'bytes', 'number');
     });
 
-    it('should pass field with columnsMeta type to formatFieldValue when types differ', () => {
+    it('should pass field with columnsMeta type to formatFieldValueReact when types differ', () => {
       const testDataView = createDataViewWithBytesField();
       const testHit = buildDataTableRecord(
         { _id: '1', _index: 'logs', fields: { bytes: ['100'] } },
         testDataView
       );
 
-      formatHit(
+      formatHitReact(
         testHit,
         testDataView,
         () => true,
@@ -204,17 +204,17 @@ describe('formatHit', () => {
         columnsMetaOverridingBytesType
       );
 
-      expectFieldCallToMatch(formatFieldValueSpy, 'bytes', 'string', ['keyword']);
+      expectFieldCallToMatch(formatFieldValueReactSpy, 'bytes', 'string', ['keyword']);
     });
 
-    it('should pass field created from columnsMeta to formatFieldValue for fields not in data view', () => {
+    it('should pass field created from columnsMeta to formatFieldValueReact for fields not in data view', () => {
       const testDataView = createDataViewWithoutCustomField();
       const testHit = buildDataTableRecord(
         { _id: '1', _index: 'logs', fields: { custom_esql_field: [42] } },
         testDataView
       );
 
-      formatHit(
+      formatHitReact(
         testHit,
         testDataView,
         () => true,
@@ -223,7 +223,7 @@ describe('formatHit', () => {
         columnsMetaWithCustomField
       );
 
-      expectFieldCallToMatch(formatFieldValueSpy, 'custom_esql_field', 'number', ['long']);
+      expectFieldCallToMatch(formatFieldValueReactSpy, 'custom_esql_field', 'number', ['long']);
     });
   });
 });

@@ -335,23 +335,23 @@ const buildKeepClause = ({ riskScoreChangeInterval }: ToolParams): string[] => {
 };
 
 const buildFromClause = (
+  { riskScoreChangeInterval }: ToolParams,
   entityIndex: string,
-  entitySnapshotIndex: string,
-  { riskScoreChangeInterval }: ToolParams
+  entitySnapshotIndex?: string
 ): string => {
-  if (riskScoreChangeInterval) {
+  if (riskScoreChangeInterval && entitySnapshotIndex) {
     return `FROM ${entityIndex},${entitySnapshotIndex}`;
   }
   return `FROM ${entityIndex}`;
 };
 
 const buildQuery = (
+  params: ToolParams,
   entityIndex: string,
-  entitySnapshotIndex: string,
-  params: ToolParams
+  entitySnapshotIndex?: string
 ): string => {
   const clauses = [
-    buildFromClause(entityIndex, entitySnapshotIndex, params),
+    buildFromClause(params, entityIndex, entitySnapshotIndex),
     ...buildIdentityFilterClauses(params),
     ...buildAttributeFilterClauses(params),
     ...buildLifecycleFilterClauses(params),
@@ -432,7 +432,14 @@ export const searchEntitiesTool = (
         const client = esClient.asCurrentUser;
         const entityIndex = getEntitiesAlias(ENTITY_LATEST, spaceId);
         const entitySnapshotIndex = getHistorySnapshotIndexPattern(spaceId);
-        const query = buildQuery(entityIndex, entitySnapshotIndex, params);
+        const snapshotIndexExists = await client.indices.exists({
+          index: entitySnapshotIndex,
+        });
+        const query = buildQuery(
+          params,
+          entityIndex,
+          snapshotIndexExists ? entitySnapshotIndex : undefined
+        );
 
         const { columns, values } = await executeEsql({ query, esClient: client });
 
