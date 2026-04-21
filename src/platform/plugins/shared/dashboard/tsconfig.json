@@ -5,7 +5,6 @@
   },
   "include": [
     "*.ts",
-    ".storybook/**/*.ts",
     "common/**/*",
     "public/**/*",
     "server/**/*",
@@ -123,7 +122,12 @@
     "@kbn/core-http-common",
     "@kbn/core-http-server-mocks",
     "@kbn/core-http-browser",
-    "@kbn/lens-common"
+    "@kbn/lens-common",
+    "@kbn/dashboard-navigation-options-common",
+    "@kbn/dashboard-navigation-options-components",
+    "@kbn/dashboard-navigation-options-schema"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }

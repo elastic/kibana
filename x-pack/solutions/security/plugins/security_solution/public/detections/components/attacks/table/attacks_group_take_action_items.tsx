@@ -35,6 +35,8 @@ interface AttacksGroupTakeActionItemsProps {
   closePopover?: () => void;
   /** Optional callback to run after an action is successfully taken */
   onActionSuccess?: () => void;
+  /** Whether to include the AI assistant action in the menu (default true) */
+  showAiAssistantAction?: boolean;
   /** Optional size for the context menu for flyout */
   size?: 's' | 'm';
   /** Telemetry source for action events (e.g. flyout vs table) */
@@ -50,6 +52,7 @@ export function AttacksGroupTakeActionItems({
   attack,
   closePopover,
   onActionSuccess,
+  showAiAssistantAction = true,
   size,
   telemetrySource,
 }: AttacksGroupTakeActionItemsProps) {
@@ -206,7 +209,7 @@ export function AttacksGroupTakeActionItems({
         ...tagsItems,
         ...assignItems,
         ...runWorkflowItems,
-        ...viewInAiAssistantItems,
+        ...(showAiAssistantAction ? viewInAiAssistantItems : []),
         ...datasetItems,
         ...investigateInTimelineItems,
       ],
@@ -218,6 +221,7 @@ export function AttacksGroupTakeActionItems({
       tagsItems,
       investigateInTimelineItems,
       casesItems,
+      showAiAssistantAction,
       viewInAiAssistantItems,
       datasetItems,
     ]
