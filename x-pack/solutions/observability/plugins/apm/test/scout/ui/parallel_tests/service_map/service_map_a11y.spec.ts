@@ -44,12 +44,16 @@ test.describe(
     }) => {
       await test.step('nodes have visible focus indicators when focused', async () => {
         await serviceMapPage.waitForServiceNodeToLoad(SERVICE_OPBEANS_JAVA);
+        await serviceMapPage.openFindInPageWithKeyboardShortcut();
+        await serviceMapPage.serviceMapFindInPageInput.fill(SERVICE_OPBEANS_JAVA);
+        await expect(serviceMapPage.serviceMapFindMatchSummary).toHaveText(/[1-9]/);
         const node = serviceMapPage.getServiceNode(SERVICE_OPBEANS_JAVA);
         await node.focus();
         await expect(node).toBeFocused();
       });
 
       await test.step('zoom controls are keyboard accessible', async () => {
+        await serviceMapPage.clickFitView();
         await expect(serviceMapPage.zoomInBtnControl).toBeVisible();
         await expect(serviceMapPage.zoomOutBtnControl).toBeVisible();
         await expect(serviceMapPage.fitViewBtn).toBeVisible();
