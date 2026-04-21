@@ -54,6 +54,7 @@ const SiemReadinessDashboard = () => {
   // Handle tab selection by updating URL path
   const handleTabSelect = useCallback(
     (tabId: VisibilityTabId) => {
+      // TODO: report tab visit telemetry event here
       history.push(`${SIEM_READINESS_PATH}/visibility/${tabId}`);
     },
     [history]
