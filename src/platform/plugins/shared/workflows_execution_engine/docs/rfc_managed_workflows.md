@@ -151,7 +151,7 @@ This RFC covers managed workflows only. Templates are a separate initiative (see
    Post-start registration means installing a managed workflow on demand (e.g., user action, feature activation) rather than at plugin startup. Two distinct use cases exist:
 
    - **On-demand registration of a constant, read-only workflow.** The workflow YAML is predefined and immutable — the only question is *when* to install it, not *what* to install. Example: a feature that activates a managed workflow when the user enables it from the product UI. The workflow itself doesn't change.
-   - **Registration with a customized YAML.** The workflow structure is predefined, but some configuration values (e.g., connector ID, rule ID) are only known at runtime. This is a Mutability concern — see [question #4](#mutability) for the overrides mechanism that addresses this without requiring full partial editability.
+   - **Registration with a customized YAML.** The workflow structure is predefined, but some configuration values (e.g., connector ID, rule ID, scheduling intercal) are only known at creation. This is a Mutability concern — see [question #4](#mutability) for the overrides mechanism that addresses this without requiring full partial editability.
 
    For the first use case (constant workflows), the workflow can still be read-only, based on a predefined YAML, just installed on demand instead of at `setup()`.
 
@@ -163,14 +163,8 @@ This RFC covers managed workflows only. Templates are a separate initiative (see
 
    The first delivery should at minimum be designed to not preclude these approaches.
 
-3. **How to prevent ID collisions between managed and user-defined workflows?**
-   ID uniqueness is key for lifecycle management and for keeping existing APIs working with minimum changes. If a user-defined workflow can have the same ID as a managed one, every API (get, execute, clone, delete) needs additional logic to disambiguate. Three approaches:
-
-   - **Reserved prefix** (e.g., `system:`) — `createWorkflow` rejects user-defined workflows with the reserved prefix. All existing APIs remain unchanged — IDs are globally unique by construction, so get-by-ID, execute-by-ID, etc. just work. The prefix is not used to determine whether a workflow is managed (the `managed` flag or separate index handles that), it only guarantees collision-free coexistence.
-   - **Dedicated endpoints** — Separate API routes for managed workflows (e.g., `/api/workflows/system/...`). Avoids ID collisions by routing, but duplicates the API surface and requires consumers to know which endpoint to call.
-   - **Flag on every API call** — A parameter (e.g., `managed=true`) on each request to scope the lookup. Avoids ID collisions at query time, but adds friction to every API call and is easy to forget.
-
-   The simplest approach is the reserved prefix — it keeps the API surface unchanged for users while guaranteeing no collisions. Human-readable, caller-provided custom IDs are already supported by the platform; managed workflows use this existing capability with the added prefix convention.
+3. **~~How to prevent ID collisions between managed and user-defined workflows?~~** — **Resolved.**
+   Reserved prefix (e.g., `system:`). `createWorkflow` rejects user-defined workflows with the reserved prefix — IDs are globally unique by construction. All read APIs (get, list, execute) work exactly the same for both managed and user-defined workflows, no changes needed. The `managed` flag on the document provides an additional layer of identification on the storage side. For mutations (enable/disable toggle), the update endpoint requires a `--force` flag to ensure user intentionality (see R2). The prefix is not used to determine whether a workflow is managed — it only guarantees collision-free coexistence.
 
 ### <a id="mutability"></a>Mutability
 
@@ -204,8 +198,8 @@ This RFC covers managed workflows only. Templates are a separate initiative (see
 
 ### Lifecycle
 
-6. **What happens if a workflow references a step or trigger from an unavailable plugin?**
-   Assumptions: (a) cross-solution workflows are against Kibana best practices, (b) products are available/not based on tiering, so filtering at registration time is sufficient for the first iteration.
+6. **~~What happens if a workflow references a step or trigger from an unavailable plugin?~~** — **Resolved.**
+   Cross-solution workflows are against Kibana best practices, and products are available/not based on tiering, so filtering at registration time (via `shouldInstall` or the platform tier gate in R9) is sufficient — a managed workflow should only be installed where its dependencies are available.
 
 ### Execution
 
@@ -214,7 +208,7 @@ This RFC covers managed workflows only. Templates are a separate initiative (see
 
 ### Cloning
 
-10. **When a managed workflow is cloned, what happens to the original?**
+10. **~~When a managed workflow is cloned, what happens to the original?~~** - **Resolved.**
     The managed workflow remains unchanged. The clone is a fully independent user-owned workflow. UX should make clear that the user now has two workflows with the same logic. The user can disable the original if they want only the clone to run.
 
 ---
