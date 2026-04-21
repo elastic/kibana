@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { expect as baseExpect } from '@playwright/test';
+import type { expect as baseExpect, Expect } from '@playwright/test';
 import type { ToHaveStatusCodeOptions } from './to_have_status_code';
 
 /**
@@ -100,6 +100,16 @@ export type Matchers = GenericMatchers &
  * objectContaining, etc.) return the same type.
  */
 export type AsymmetricMatcher = ReturnType<typeof baseExpect.anything>;
+
+/**
+ * Derived from Playwright's Expect['poll'] — keeps our types in sync with Playwright.
+ */
+type PlaywrightPoll = Expect['poll'];
+type PlaywrightPollResult = ReturnType<PlaywrightPoll>;
+export type PollOptions = NonNullable<Parameters<PlaywrightPoll>[1]>;
+export type PollMatchers = Pick<PlaywrightPollResult, keyof GenericMatchers> & {
+  not: Pick<PlaywrightPollResult['not'], keyof GenericMatchers['not']>;
+};
 
 /**
  * Asymmetric matchers available on the expect object.

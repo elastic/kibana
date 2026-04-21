@@ -8,95 +8,16 @@
  */
 
 import { expect as baseExpect } from '@playwright/test';
-import type { ExpectOptionsOrMessage, Matchers } from './types';
+import type { ExpectOptionsOrMessage, Matchers, PollMatchers, PollOptions } from './types';
 import { toHaveStatusCode } from './to_have_status_code';
 import { toHaveStatusText } from './to_have_status_text';
 import { toHaveHeaders } from './to_have_headers';
 import { asymmetricMatchers } from './asymmetric_matchers';
+import { restrictMatchers } from './restrict_matchers';
 
-// Register custom response matchers natively on Playwright's expect
 const extendedExpect = baseExpect.extend({ toHaveStatusCode, toHaveStatusText, toHaveHeaders });
 
 /**
- * Allowed matcher names that can be accessed through our expect wrapper.
- * Any matcher not in this set will throw a runtime error.
- */
-const allowedMatchers = new Set([
-  // Generic matchers
-  'toBe',
-  'toBeDefined',
-  'toBeUndefined',
-  'toContain',
-  'toHaveLength',
-  'toStrictEqual',
-  'toBeGreaterThan',
-  'toBeGreaterThanOrEqual',
-  'toBeLessThan',
-  'toBeLessThanOrEqual',
-  'toMatchObject',
-  'toMatch',
-  'toBeNull',
-  'toBeCloseTo',
-  'toBeInstanceOf',
-  'toThrow',
-  'toThrowError',
-  // Custom response matchers
-  'toHaveStatusCode',
-  'toHaveStatusText',
-  'toHaveHeaders',
-]);
-
-/**
- * Properties that are structural (not matchers) and should always be allowed through.
- */
-// Structural props that return nested Playwright objects — wrap with the same restriction
-const nestedProps = new Set(['not', 'rejects', 'resolves']);
-// Props that must not throw to avoid breaking serializers and await
-const safePassthroughProps = new Set(['then', 'toJSON']);
-
-/**
- * Creates a restricting Proxy around a Playwright expect result.
- * Allows only matchers in the allowedMatchers set, blocking everything else at runtime.
- * Since the real Playwright Proxy is underneath, test step locations in the HTML report
- * will correctly point to the test file instead of internal matcher files.
- */
-function restrictMatchers(playwrightExpectResult: object): Matchers {
-  return new Proxy(playwrightExpectResult, {
-    get(target, prop, receiver) {
-      if (typeof prop === 'symbol') {
-        return Reflect.get(target, prop, receiver);
-      }
-      if (safePassthroughProps.has(prop)) {
-        return undefined;
-      }
-      if (nestedProps.has(prop)) {
-        const value = Reflect.get(target, prop, receiver);
-        if (typeof value === 'object' && value !== null) {
-          return restrictMatchers(value);
-        }
-        return value;
-      }
-      if (!allowedMatchers.has(prop)) {
-        throw new Error(
-          `Matcher '${prop}' is not available in Scout API tests. ` +
-            `See the Scout API matchers README for the list of supported matchers.`
-        );
-      }
-      // Matchers are returned unbound; `this` at call time will be the Proxy, not the target.
-      // Safe today because Playwright's matchers use closures, not `this`.
-      // If a Playwright upgrade causes unexpected "Matcher 'X' is not available" errors
-      // for internal property names, bind the function to target here instead:
-      //   return Reflect.get(target, prop, receiver).bind(target);
-      return Reflect.get(target, prop, receiver);
-    },
-  }) as Matchers;
-}
-
-/**
- * Custom expect wrapper for API tests with generic and response matchers.
- * Uses a restricting Proxy over Playwright's native expect to ensure correct
- * test step locations in the HTML report while controlling the matcher surface.
- *
  * @example
  * expect(response).toHaveStatusCode(200);
  * expect(response).toMatchObject({ body: { count: expect.toBeGreaterThan(0) } });
@@ -110,4 +31,20 @@ function expectFn(actual: unknown, options?: ExpectOptionsOrMessage): Matchers {
   return restrictMatchers(expectInstance);
 }
 
-export const expect = Object.assign(expectFn, asymmetricMatchers);
+/**
+ * @example
+ * await expect.poll(
+ *   async () => {
+ *     const response = await apiClient.get('/api/status');
+ *     return response.status;
+ *   },
+ *   { timeout: 30_000, intervals: [2_000] }
+ * ).toBe(200);
+ */
+function poll<T>(actual: () => T | Promise<T>, options?: PollOptions): PollMatchers {
+  // eslint-disable-next-line playwright/valid-expect
+  const pollResult = extendedExpect.poll(actual, options);
+  return restrictMatchers(pollResult) as unknown as PollMatchers;
+}
+
+export const expect = Object.assign(expectFn, asymmetricMatchers, { poll });

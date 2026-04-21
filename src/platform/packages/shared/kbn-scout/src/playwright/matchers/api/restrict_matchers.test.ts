@@ -35,6 +35,23 @@ describe('restrictMatchers Proxy', () => {
     });
   });
 
+  describe('expect.poll', () => {
+    it('resolves when the polled value eventually matches', async () => {
+      let callCount = 0;
+      await expect(
+        apiExpect.poll(() => ++callCount >= 3, { timeout: 5000, intervals: [100] }).toBe(true)
+      ).resolves.toBeUndefined();
+      expect(callCount).toBeGreaterThanOrEqual(3);
+    });
+
+    it('blocks disallowed matchers on poll result', () => {
+      // @ts-expect-error — toBeTruthy is intentionally not in our PollMatchers type
+      expect(() => apiExpect.poll(() => true).toBeTruthy()).toThrow(
+        "Matcher 'toBeTruthy' is not available in Scout API tests"
+      );
+    });
+  });
+
   describe('structural property access', () => {
     it('allows symbol-keyed access without throwing', () => {
       const result = apiExpect(42);
