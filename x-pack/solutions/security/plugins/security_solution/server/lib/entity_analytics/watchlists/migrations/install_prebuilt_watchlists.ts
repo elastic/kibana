@@ -54,6 +54,7 @@ const getPrebuiltWatchlists = (namespace: string) => [
         indexPattern: getStreamPatternFor('entityanalytics_okta', namespace),
         integrationName: 'entityanalytics_okta',
         enabled: true,
+        managed: true,
         queryRule: OKTA_QUERY_RULE,
       },
       {
@@ -62,6 +63,7 @@ const getPrebuiltWatchlists = (namespace: string) => [
         indexPattern: getStreamPatternFor('entityanalytics_ad', namespace),
         integrationName: 'entityanalytics_ad',
         enabled: true,
+        managed: true,
         queryRule: AD_QUERY_RULE,
       },
     ],

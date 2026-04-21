@@ -16,6 +16,10 @@ import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../prebuilt_rule_assets_type';
 import { validatePrebuiltRuleAssets } from '../../prebuilt_rule_assets_validation';
 import { invariant } from '../../../../../../../../common/utils/invariant';
 
+export interface FetchLatestAssetsOptions {
+  size: number;
+}
+
 /**
  * Fetches the latest version of each prebuilt rule asset.
  *
@@ -23,7 +27,10 @@ import { invariant } from '../../../../../../../../common/utils/invariant';
  * @returns A promise that resolves to an array of prebuilt rule assets.
  */
 export async function fetchLatestAssets(
-  savedObjectsClient: SavedObjectsClientContract
+  savedObjectsClient: SavedObjectsClientContract,
+  options: FetchLatestAssetsOptions = {
+    size: MAX_PREBUILT_RULES_COUNT,
+  }
 ): Promise<PrebuiltRuleAsset[]> {
   const findResult = await savedObjectsClient.find<
     PrebuiltRuleAsset,
@@ -41,7 +48,7 @@ export async function fetchLatestAssets(
       rules: {
         terms: {
           field: `${PREBUILT_RULE_ASSETS_SO_TYPE}.attributes.rule_id`,
-          size: MAX_PREBUILT_RULES_COUNT,
+          size: options.size,
         },
         aggs: {
           latest_version: {
