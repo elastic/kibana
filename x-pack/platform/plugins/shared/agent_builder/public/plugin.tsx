@@ -91,7 +91,6 @@ export class AgentBuilderPlugin
   } | null = null;
   private activeConversationState$ = new BehaviorSubject<EmbeddableConversationChange | null>(null);
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
-  private sidebarOpenState$ = new BehaviorSubject<boolean>(false);
   private experimentalDeepLinksSubscription?: Subscription;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
@@ -193,7 +192,6 @@ export class AgentBuilderPlugin
           this.activeSidebarRef = null;
           this.sidebarCallbacks = null;
           this.activeConversationState$.next(null);
-          this.sidebarOpenState$.next(false);
           clearSidebarRuntimeContext();
         },
       });
@@ -206,13 +204,11 @@ export class AgentBuilderPlugin
           this.activeSidebarRef = null;
           this.sidebarCallbacks = null;
           this.activeConversationState$.next(null);
-          this.sidebarOpenState$.next(false);
           clearSidebarRuntimeContext();
         },
       };
 
       this.activeSidebarRef = sidebarRef;
-      this.sidebarOpenState$.next(true);
       return { chatRef: sidebarRef };
     };
 
@@ -256,7 +252,6 @@ export class AgentBuilderPlugin
       tools: createPublicToolContract({ toolsService }),
       events: createPublicEventsContract({
         eventsService,
-        sidebarOpen$: this.sidebarOpenState$.pipe(distinctUntilChanged()),
         activeConversation$: this.activeConversationState$.asObservable(),
       }),
       addAttachment: (attachment: AttachmentInput) => {
@@ -290,7 +285,6 @@ export class AgentBuilderPlugin
           this.activeSidebarRef = null;
           this.sidebarCallbacks = null;
           this.activeConversationState$.next(null);
-          this.sidebarOpenState$.next(false);
           sidebarRef.close();
           return;
         }

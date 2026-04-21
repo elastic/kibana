@@ -9,6 +9,7 @@ import React from 'react';
 import { combineLatest, EMPTY, switchMap } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
+import type { ChromeStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
@@ -27,6 +28,7 @@ import { handleEditInDashboard } from './handle_edit_in_dashboard';
 
 export const registerDashboardAttachmentUiDefinition = ({
   agentBuilder,
+  chrome,
   dashboardLocator,
   unifiedSearch,
   data,
@@ -34,6 +36,7 @@ export const registerDashboardAttachmentUiDefinition = ({
   canWriteDashboards,
 }: {
   agentBuilder: AgentBuilderPluginStart;
+  chrome: ChromeStart;
   dashboardLocator?: DashboardRendererProps['locator'];
   unifiedSearch: UnifiedSearchPublicPluginStart;
   data: DataPublicPluginStart;
@@ -50,14 +53,15 @@ export const registerDashboardAttachmentUiDefinition = ({
 
   const dashboardAppApiSubscription = combineLatest([
     dashboardPlugin.dashboardAppClientApi$,
-    agentBuilder.events.ui.sidebarOpen$,
+    chrome.sidebar.getCurrentAppId$(),
   ])
     .pipe(
-      switchMap(([api, isChatOpen]) => {
+      switchMap(([api, appId]) => {
         // maintains a dashboardApi reference for access in getActionButtons
         dashboardApi = api;
         // integrates dashboard app with agent only when both dashboard and chat are active
-        return api && isChatOpen
+        const isAgentOpen = appId === 'agentBuilder';
+        return api && isAgentOpen
           ? createDashboardAppIntegration$({
               agentBuilder,
               api,

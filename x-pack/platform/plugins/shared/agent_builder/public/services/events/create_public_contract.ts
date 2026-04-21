@@ -14,17 +14,14 @@ import type { EventsService } from './events_service';
 
 export const createPublicEventsContract = ({
   eventsService,
-  sidebarOpen$,
   activeConversation$,
 }: {
   eventsService: EventsService;
-  sidebarOpen$: Observable<boolean>;
   activeConversation$: Observable<EmbeddableConversationChange | null>;
 }): EventsServiceStartContract => {
   return {
     chat$: eventsService.obs$,
     ui: {
-      sidebarOpen$,
       activeConversation$,
     },
   };

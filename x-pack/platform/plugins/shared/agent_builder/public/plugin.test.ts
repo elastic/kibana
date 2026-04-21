@@ -236,24 +236,4 @@ describe('AgentBuilderPlugin', () => {
     });
   });
 
-  describe('sidebarOpen$', () => {
-    it('emits sidebar open state changes', () => {
-      const plugin = createPlugin();
-      const service = plugin.start(createCoreStart() as any, createStartDependencies() as any);
-      const states: boolean[] = [];
-      const subscription = service.events.ui.sidebarOpen$.subscribe((isOpen) => {
-        states.push(isOpen);
-      });
-
-      expect(states).toEqual([false]);
-
-      service.openChat();
-      expect(states).toEqual([false, true]);
-
-      service.toggleChat();
-      expect(states).toEqual([false, true, false]);
-
-      subscription.unsubscribe();
-    });
-  });
 });

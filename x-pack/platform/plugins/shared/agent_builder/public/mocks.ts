@@ -62,7 +62,6 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
     events: {
       chat$: EMPTY,
       ui: {
-        sidebarOpen$: new BehaviorSubject(false),
         activeConversation$: new BehaviorSubject(null),
       },
     },

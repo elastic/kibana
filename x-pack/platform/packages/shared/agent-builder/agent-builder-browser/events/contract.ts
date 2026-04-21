@@ -24,12 +24,6 @@ export interface EmbeddableConversationChange {
 
 export interface ChatUiEventsContract {
   /**
-   * Emits whether the conversation sidebar is currently open.
-   *
-   * Tracks sidebar open state only; does not emit for the full-page routed chat.
-   */
-  sidebarOpen$: Observable<boolean>;
-  /**
    * Emits the currently active conversation binding for both the embeddable sidebar and
    * the full-page routed chat. Emits `null` when no chat surface is currently bound.
    *

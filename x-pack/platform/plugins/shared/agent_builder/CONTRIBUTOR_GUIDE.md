@@ -835,34 +835,21 @@ This is useful when the save workflow completes somewhere else in your plugin, b
 
 ## Events
 
-The `agentBuilder` start contract exposes observables on the `events.ui` namespace that let plugins react to the chat surface lifecycle (sidebar open state and the currently bound conversation). All observables are backed by a `BehaviorSubject`: new subscribers receive the current value immediately.
+The `agentBuilder` start contract exposes observables on the `events.ui` namespace that let plugins react to the chat surface lifecycle (currently the active conversation binding). All observables are backed by a `BehaviorSubject`: new subscribers receive the current value immediately.
 
-### `events.ui.sidebarOpen$`
+### Observing sidebar open state
 
-`events.ui.sidebarOpen$` is an `Observable<boolean>` that emits `true` while the conversation sidebar is open and `false` otherwise. Use it to gate integrations so they only run while the sidebar is actually present, and to tear them down cleanly when the sidebar closes.
-
-It is exposed on the `agentBuilder.events.ui` namespace and is hot: new subscribers receive the current value immediately (it is backed by a `BehaviorSubject`).
-
-Typical usage combines `events.ui.sidebarOpen$` with `events.ui.activeConversation$`: activate the conversation subscription only while the sidebar is open, and dispose of it when it closes.
+Agent Builder does not re-export the sidebar open state. If you need to know whether the Agent Builder sidebar is currently open, subscribe to the core chrome sidebar primitive and match on the `agentBuilder` app id:
 
 ```ts
-import { combineLatest, EMPTY, switchMap } from 'rxjs';
-
-const subscription = combineLatest([myAppActive$, agentBuilder.events.ui.sidebarOpen$])
-  .pipe(
-    switchMap(([appActive, sidebarOpen]) =>
-      appActive && sidebarOpen ? agentBuilder.events.ui.activeConversation$ : EMPTY
-    )
-  )
-  .subscribe((change) => {
-    if (!change) {
-      // No chat surface currently bound — tear down local state.
-      return;
-    }
-
-    const { id, attachments } = change;
-    // react to the active conversation
+useEffect(() => {
+  const sub = chrome.sidebar.getCurrentAppId$().subscribe((appId) => {
+    const isOpen = appId === 'agentBuilder';
+    // react to the {isOpen} value
   });
+
+  return () => sub.unsubscribe();
+}, [chrome.sidebar]);
 ```
 
 ### `events.ui.activeConversation$`

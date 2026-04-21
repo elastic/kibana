@@ -6,6 +6,7 @@
  */
 
 import { BehaviorSubject, Subject } from 'rxjs';
+import type { ChromeStart } from '@kbn/core/public';
 import type { DashboardApi, DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { DashboardSaveEvent } from '@kbn/dashboard-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
@@ -168,11 +169,11 @@ describe('registerDashboardAttachmentUiDefinition', () => {
   let uiDefinition: AttachmentUIDefinition<DashboardAttachment>;
   let unregister: () => void;
   let chat$: Subject<ChatEvent>;
-  let sidebarOpen$: BehaviorSubject<boolean>;
+  let currentAppId$: BehaviorSubject<string | null>;
 
   const createMockDeps = () => {
     chat$ = new Subject<ChatEvent>();
-    sidebarOpen$ = new BehaviorSubject<boolean>(true);
+    currentAppId$ = new BehaviorSubject<string | null>('agentBuilder');
     const dashboardAppClientApi$ = new Subject<DashboardApi | undefined>();
     const addAttachmentType = jest.fn();
     const updateAttachmentOrigin = jest.fn().mockResolvedValue(undefined);
@@ -197,9 +198,15 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       updateAttachmentOrigin,
       events: {
         chat$,
-        ui: { sidebarOpen$, activeConversation$: activeConversation$.asObservable() },
+        ui: { activeConversation$: activeConversation$.asObservable() },
       },
     } as unknown as AgentBuilderPluginStart;
+
+    const chrome: ChromeStart = {
+      sidebar: {
+        getCurrentAppId$: () => currentAppId$.asObservable(),
+      },
+    } as unknown as ChromeStart;
 
     const dashboardPlugin: DashboardStart = {
       dashboardAppClientApi$,
@@ -214,6 +221,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
 
     return {
       agentBuilder,
+      chrome,
       addAttachment: mockAddAttachment,
       canWriteDashboards: true,
       data,
@@ -226,7 +234,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       findDashboardsService,
       emitConversationChange,
       chat$,
-      sidebarOpen$,
+      currentAppId$,
     };
   };
 
@@ -290,7 +298,6 @@ describe('registerDashboardAttachmentUiDefinition', () => {
         events: {
           chat$: new Subject<ChatEvent>(),
           ui: {
-            sidebarOpen$: new BehaviorSubject<boolean>(true),
             activeConversation$: new BehaviorSubject<{
               id?: string;
               attachments?: VersionedAttachment[];
@@ -298,6 +305,11 @@ describe('registerDashboardAttachmentUiDefinition', () => {
           },
         },
       } as unknown as AgentBuilderPluginStart,
+      chrome: {
+        sidebar: {
+          getCurrentAppId$: () => new BehaviorSubject<string | null>('agentBuilder').asObservable(),
+        },
+      } as unknown as ChromeStart,
       canWriteDashboards: true,
       dashboardLocator: undefined,
       dashboardPlugin: {
@@ -472,13 +484,13 @@ describe('registerDashboardAttachmentUiDefinition', () => {
     it('waits for the chat to open before activating dashboard integration', () => {
       const mockApi = createMockDashboardApi();
 
-      deps.sidebarOpen$.next(false);
+      deps.currentAppId$.next(null);
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
       deps.emitConversationChange({ id: undefined, attachments: undefined });
 
       expect(deps.addAttachment).not.toHaveBeenCalled();
 
-      deps.sidebarOpen$.next(true);
+      deps.currentAppId$.next('agentBuilder');
 
       expect(deps.addAttachment).toHaveBeenCalledWith(
         expect.objectContaining({

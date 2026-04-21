@@ -44,6 +44,7 @@ export class DashboardAgentPlugin
     import('./attachment_types').then(({ registerDashboardAttachmentUiDefinition }) => {
       this.cleanupAttachmentUi = registerDashboardAttachmentUiDefinition({
         agentBuilder: plugins.agentBuilder,
+        chrome: core.chrome,
         canWriteDashboards: core.application.capabilities.dashboard_v2?.showWriteControls === true,
         dashboardLocator: plugins.share.url.locators.get(DASHBOARD_APP_LOCATOR),
         unifiedSearch: plugins.unifiedSearch,
