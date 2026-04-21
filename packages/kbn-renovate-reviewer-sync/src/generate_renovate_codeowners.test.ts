@@ -351,9 +351,27 @@ describe('discoverFilesViaGitGrep', () => {
     if (repoRoot) rmSync(repoRoot, { recursive: true, force: true });
   });
 
-  it('SHOULD discover files containing import/require/export under scanned prefixes', () => {
-    const files = discoverFilesViaGitGrep(repoRoot).sort();
+  it('SHOULD discover files containing import/require/export under scanned prefixes', async () => {
+    const files = (await discoverFilesViaGitGrep(repoRoot)).sort();
     expect(files).toEqual(['src/with_import.ts', 'src/with_require.js', 'x-pack/with_export.ts']);
+  });
+
+  it('SHOULD emit running file-count progress as paths stream in', async () => {
+    const progressTicks: number[] = [];
+    const files = (
+      await discoverFilesViaGitGrep(repoRoot, (n) => {
+        progressTicks.push(n);
+      })
+    ).sort();
+    expect(files).toEqual(['src/with_import.ts', 'src/with_require.js', 'x-pack/with_export.ts']);
+    expect(progressTicks.length).toBeGreaterThan(0);
+    // The callback must report a monotonically non-decreasing count — any
+    // backwards step would mean the file set shrank mid-scan, which would
+    // break the orchestrator's "last seen" display.
+    for (let i = 1; i < progressTicks.length; i++) {
+      expect(progressTicks[i]).toBeGreaterThanOrEqual(progressTicks[i - 1]);
+    }
+    expect(progressTicks[progressTicks.length - 1]).toEqual(files.length);
   });
 });
 
@@ -633,6 +651,90 @@ describe('generateRenovateCodeowners', () => {
       // The original config must be untouched — no partial write.
       expect(setup.readRenovateConfig().packageRules?.[0].reviewers).toEqual(['team:old']);
       expect(pool.shutdownCalls).toEqual(1);
+    });
+
+    it('SHOULD treat a batch-level pool rejection as a failed batch, abort, and refuse to write', async () => {
+      // Distinct from the per-file failure above: here `processBatch` itself
+      // throws (simulating a crashed worker / dead pool), which must hit the
+      // batch-catch path that attributes the error to the first file in the
+      // batch and aborts without writing.
+      setup = setupRepo({
+        packageJson: { dependencies: { lodash: '1' } },
+        renovateConfig: {
+          packageRules: [
+            {
+              matchDepNames: ['lodash'],
+              reviewers: ['team:old'],
+              x_kbn_reviewer_sync: { mode: 'sync' },
+            },
+          ],
+        },
+      });
+      const pool = new FakeWorkerPool();
+      pool.rejectAllWith = new Error('pool crashed');
+
+      const log = buildLog();
+      await expect(
+        generateRenovateCodeowners(
+          log,
+          { mode: 'write' },
+          {
+            repoRoot: setup.repoRoot,
+            discoverFiles: () => ['src/a.ts', 'src/b.ts'],
+            createWorkerPool: () => pool,
+            workerCount: 2,
+            setExitCode: () => {},
+            installSignalHandlers: false,
+          }
+        )
+      ).rejects.toThrow(/Aborting reviewer sync: failed to process src\/a\.ts: pool crashed/);
+
+      // The batch-failure log line must surface on the raw output so CI logs
+      // still show which batch blew up.
+      expect(log.rawWrites.join('')).toMatch(/Failed to process batch starting at src\/a\.ts/);
+      expect(setup.readRenovateConfig().packageRules?.[0].reviewers).toEqual(['team:old']);
+      expect(pool.shutdownCalls).toEqual(1);
+    });
+  });
+
+  describe('WHEN discoverFiles takes long enough for the progress tick to fire', () => {
+    it('SHOULD stream a live "Scanning..." line while discovery is in flight and erase it on completion', async () => {
+      setup = setupRepo({
+        packageJson: { dependencies: { lodash: '1' } },
+        renovateConfig: { packageRules: [] },
+      });
+      const pool = new FakeWorkerPool();
+
+      // Fake discoverFiles that reports a non-zero file count synchronously,
+      // then stalls past the 250ms interval so the live-tick fires at least
+      // once, then resolves. This is the only way to exercise the visible
+      // "Scanning..." feedback the discovery phase emits; injecting a sync
+      // fake (as every other test does) settles too fast for the tick.
+      const slowDiscoverFiles = async (onProgress?: (n: number) => void) => {
+        if (onProgress) onProgress(7);
+        await new Promise((resolve) => setTimeout(resolve, 300));
+        return ['src/a.ts'];
+      };
+
+      const log = buildLog();
+      await generateRenovateCodeowners(
+        log,
+        { mode: 'dry-run' },
+        {
+          repoRoot: setup.repoRoot,
+          discoverFiles: slowDiscoverFiles,
+          createWorkerPool: () => pool,
+          workerCount: 2,
+          setExitCode: () => {},
+          installSignalHandlers: false,
+        }
+      );
+
+      const rawOutput = log.rawWrites.join('');
+      expect(rawOutput).toMatch(/Scanning\.\.\. 7 files so far/);
+      // The finally-block erase keeps the subsequent `info` lines from
+      // appearing on the same terminal row as the spinner.
+      expect(rawOutput).toContain('\x1b[2K\r');
     });
   });
 

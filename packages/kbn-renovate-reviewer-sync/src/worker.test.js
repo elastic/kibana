@@ -12,10 +12,12 @@ const fs = require('fs');
 const os = require('os');
 const {
   parseCodeOwners,
+  compileLookupIndex,
   getTeamsForPath,
   extractImportsFromContent,
   addPackageIfValid,
-  processFile,
+  processFileAsync,
+  runBatchAsync,
   MAX_FILE_SIZE,
 } = require('./worker');
 
@@ -62,7 +64,7 @@ describe('worker', () => {
       expect(entries.map((e) => e.pattern)).toEqual(['src/b', 'src/a']);
     });
 
-    it('returns entries in reverse file order so the FIRST match wins (last-in-file precedence)', () => {
+    it('returns entries in reverse file order so later compiled-index processing can score by line index', () => {
       const content = ['src/foo @elastic/general', 'src/foo/bar @elastic/specific'].join('\n');
       const entries = parseCodeOwners(content);
       expect(entries.map((e) => e.pattern)).toEqual(['src/foo/bar', 'src/foo']);
@@ -75,40 +77,132 @@ describe('worker', () => {
     });
   });
 
-  describe('getTeamsForPath', () => {
+  describe('compileLookupIndex + getTeamsForPath', () => {
     const repoRoot = path.resolve('/tmp/fake-repo');
     const abs = (p) => path.join(repoRoot, p);
 
-    it('returns [] when no entries are supplied', () => {
+    const compile = (content) => compileLookupIndex(parseCodeOwners(content));
+
+    it('returns [] when no entries are supplied (null index)', () => {
       expect(getTeamsForPath(abs('src/foo.ts'), null, repoRoot)).toEqual([]);
     });
 
     it('returns [] when no repoRoot is supplied', () => {
-      const entries = parseCodeOwners('src/foo @elastic/team-a');
-      expect(getTeamsForPath(abs('src/foo.ts'), entries, null)).toEqual([]);
+      const index = compile('src/foo @elastic/team-a');
+      expect(getTeamsForPath(abs('src/foo.ts'), index, null)).toEqual([]);
     });
 
-    it('returns the matching entry teams', () => {
-      const entries = parseCodeOwners('src/foo @elastic/team-a');
-      expect(getTeamsForPath(abs('src/foo/file.ts'), entries, repoRoot)).toEqual([
+    it('returns the matching team for a literal directory-prefix pattern', () => {
+      const index = compile('src/foo @elastic/team-a');
+      expect(getTeamsForPath(abs('src/foo/file.ts'), index, repoRoot)).toEqual(['elastic/team-a']);
+    });
+
+    it('returns [] when no entry matches', () => {
+      const index = compile('src/foo @elastic/team-a');
+      expect(getTeamsForPath(abs('other/file.ts'), index, repoRoot)).toEqual([]);
+    });
+
+    it('matches the exact path AND descendants for non-glob prefix patterns', () => {
+      const index = compile('src/foo @elastic/team-a');
+      expect(getTeamsForPath(abs('src/foo'), index, repoRoot)).toEqual(['elastic/team-a']);
+      expect(getTeamsForPath(abs('src/foo/sub/deep.ts'), index, repoRoot)).toEqual([
         'elastic/team-a',
       ]);
     });
 
-    it('returns [] when no entry matches', () => {
-      const entries = parseCodeOwners('src/foo @elastic/team-a');
-      expect(getTeamsForPath(abs('other/file.ts'), entries, repoRoot)).toEqual([]);
-    });
-
-    it('lower-in-file entries take precedence (more-specific override)', () => {
-      const content = ['src/foo @elastic/general', 'src/foo/special @elastic/specific'].join('\n');
-      const entries = parseCodeOwners(content);
-      expect(getTeamsForPath(abs('src/foo/special/file.ts'), entries, repoRoot)).toEqual([
+    it('lower-in-file entries take precedence over earlier ones (last-wins)', () => {
+      const index = compile(
+        ['src/foo @elastic/general', 'src/foo/special @elastic/specific'].join('\n')
+      );
+      expect(getTeamsForPath(abs('src/foo/special/file.ts'), index, repoRoot)).toEqual([
         'elastic/specific',
       ]);
-      expect(getTeamsForPath(abs('src/foo/other/file.ts'), entries, repoRoot)).toEqual([
+      expect(getTeamsForPath(abs('src/foo/other/file.ts'), index, repoRoot)).toEqual([
         'elastic/general',
       ]);
+    });
+
+    it('routes glob patterns through the globEntries pool, not the trie', () => {
+      const index = compile('**/*.scss @elastic/styles');
+      expect(index.globEntries).toHaveLength(1);
+      expect(index.trie.children.size).toBe(0);
+      expect(getTeamsForPath(abs('src/foo/bar.scss'), index, repoRoot)).toEqual(['elastic/styles']);
+      expect(getTeamsForPath(abs('src/foo/bar.ts'), index, repoRoot)).toEqual([]);
+    });
+
+    it('routes basename-only patterns (no slash) through the glob pool', () => {
+      // Patterns without `/` match anywhere in gitignore semantics — they
+      // can't be anchored to a single trie position. Compile-time check.
+      const index = compile('.cursorignore @elastic/dx');
+      expect(index.globEntries).toHaveLength(1);
+      expect(getTeamsForPath(abs('.cursorignore'), index, repoRoot)).toEqual(['elastic/dx']);
+    });
+
+    it('drops `!`-negation patterns (a single-pattern matcher has nothing to negate)', () => {
+      const index = compile(
+        ['src/foo @elastic/team-a', '!src/foo/bar.ts @elastic/wont-fire'].join('\n')
+      );
+      expect(getTeamsForPath(abs('src/foo/bar.ts'), index, repoRoot)).toEqual(['elastic/team-a']);
+      expect(index.globEntries.find((e) => e.pattern.startsWith('!'))).toBeUndefined();
+    });
+
+    it('compares trie hits and glob hits by line index (later wins across pools)', () => {
+      // Trie hit comes first in the file, glob hit comes second — the glob
+      // entry should win because it appears later (higher lineIndex).
+      const index = compile(
+        ['src/foo @elastic/dir-team', '**/*.snapshot @elastic/snapshot-team'].join('\n')
+      );
+      expect(getTeamsForPath(abs('src/foo/file.snapshot'), index, repoRoot)).toEqual([
+        'elastic/snapshot-team',
+      ]);
+      expect(getTeamsForPath(abs('src/foo/file.ts'), index, repoRoot)).toEqual([
+        'elastic/dir-team',
+      ]);
+    });
+
+    it('handles a leading-slash anchored prefix the same as no leading slash', () => {
+      const index = compile('/src/foo @elastic/team-a');
+      expect(getTeamsForPath(abs('src/foo/file.ts'), index, repoRoot)).toEqual(['elastic/team-a']);
+    });
+
+    it('preserves multi-team output', () => {
+      const index = compile('src/foo @elastic/a @elastic/b');
+      expect(getTeamsForPath(abs('src/foo/file.ts'), index, repoRoot)).toEqual([
+        'elastic/a',
+        'elastic/b',
+      ]);
+    });
+
+    it('resolves a mixed corpus correctly across both pools', () => {
+      // End-to-end behavioral check across the split storage: literal-prefix
+      // entries land in the trie, glob entries land in `globEntries`, and
+      // line-index scoring picks the correct winner regardless of which pool
+      // the candidates came from. Any future refactor of the split must keep
+      // these expectations stable.
+      const content = [
+        'src/foo @elastic/dir-team',
+        'src/foo/special @elastic/specific',
+        '**/*.scss @elastic/styles',
+        '/src/anchored @elastic/anchored-team',
+        'examples/x @elastic/examples',
+      ].join('\n');
+      const index = compileLookupIndex(parseCodeOwners(content));
+      expect(getTeamsForPath(abs('src/foo/anything.ts'), index, repoRoot)).toEqual([
+        'elastic/dir-team',
+      ]);
+      expect(getTeamsForPath(abs('src/foo/special/file.ts'), index, repoRoot)).toEqual([
+        'elastic/specific',
+      ]);
+      expect(getTeamsForPath(abs('src/styles/main.scss'), index, repoRoot)).toEqual([
+        'elastic/styles',
+      ]);
+      expect(getTeamsForPath(abs('src/anchored/whatever.ts'), index, repoRoot)).toEqual([
+        'elastic/anchored-team',
+      ]);
+      expect(getTeamsForPath(abs('examples/x/y/z.ts'), index, repoRoot)).toEqual([
+        'elastic/examples',
+      ]);
+      expect(getTeamsForPath(abs('unrelated/file.ts'), index, repoRoot)).toEqual([]);
     });
   });
 
@@ -256,79 +350,144 @@ describe('worker', () => {
     });
   });
 
-  describe('processFile', () => {
+  describe('processFileAsync', () => {
     let tempDir;
-    let codeOwnersEntries;
+    let codeOwnersIndex;
 
     beforeAll(() => {
-      tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'krrs-pf-'));
-      // Single catch-all CODEOWNERS rule so any file under tempDir resolves to
-      // the team-everyone owner. The no-owner test uses a separate empty entry list.
-      codeOwnersEntries = parseCodeOwners('* @elastic/team-everyone');
+      tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'krrs-pfa-'));
+      // Single catch-all rule compiled into the fast index — the production
+      // runtime shape. The no-owner test uses a separate empty index below.
+      codeOwnersIndex = compileLookupIndex(parseCodeOwners('* @elastic/team-everyone'));
     });
 
     afterAll(() => {
       if (tempDir) fs.rmSync(tempDir, { recursive: true, force: true });
     });
 
-    it('returns `{ success: true, skipped: true }` when the file has no team owner', () => {
-      // Empty entry list ⇒ getTeamsForPath returns [] ⇒ skip before any I/O.
-      const filePath = path.join(tempDir, 'unowned.ts');
+    it('returns `{ success: true, skipped: true }` when the file has no team owner', async () => {
+      const filePath = path.join(tempDir, 'unowned-async.ts');
       fs.writeFileSync(filePath, "import x from 'lodash';", 'utf8');
-      const result = processFile(filePath, 'unowned.ts', [], tempDir);
-      expect(result).toEqual({ relativePath: 'unowned.ts', success: true, skipped: true });
+      // Empty index ⇒ no match ⇒ skip before any I/O.
+      const emptyIndex = compileLookupIndex([]);
+      const result = await processFileAsync(filePath, 'unowned-async.ts', emptyIndex, tempDir);
+      expect(result).toEqual({ relativePath: 'unowned-async.ts', success: true, skipped: true });
     });
 
-    it('returns `{ success: true, skipped: true }` when the file cannot be read', () => {
+    it('returns `{ success: true, skipped: true }` when the file cannot be read', async () => {
       // Discovery → process race: file deleted between `git grep` and worker
-      // dispatch. readFileSync throws ENOENT, which we swallow and report skip.
-      const result = processFile(
-        path.join(tempDir, 'does-not-exist.ts'),
-        'missing.ts',
-        codeOwnersEntries,
+      // dispatch. fs.promises.readFile rejects with ENOENT, which we swallow
+      // and report as a skip.
+      const result = await processFileAsync(
+        path.join(tempDir, 'does-not-exist-async.ts'),
+        'missing-async.ts',
+        codeOwnersIndex,
         tempDir
       );
-      expect(result).toEqual({ relativePath: 'missing.ts', success: true, skipped: true });
+      expect(result).toEqual({ relativePath: 'missing-async.ts', success: true, skipped: true });
     });
 
-    it('returns `{ success: true, skipped: true }` when the file is larger than MAX_FILE_SIZE', () => {
-      // Buffer-length check (post-read) replaces the prior statSync check.
-      // Padding with bytes that don't form import patterns keeps the result
-      // attributable to the size guard, not to "no imports found".
-      const filePath = path.join(tempDir, 'oversize.ts');
+    it('returns `{ success: true, skipped: true }` when the file is larger than MAX_FILE_SIZE', async () => {
+      // Buffer-length check (post-read). Padding with bytes that don't form
+      // import patterns keeps the result attributable to the size guard, not
+      // to "no imports found".
+      const filePath = path.join(tempDir, 'oversize-async.ts');
       const padding = 'x'.repeat(MAX_FILE_SIZE + 1);
       fs.writeFileSync(filePath, padding, 'utf8');
-      const result = processFile(filePath, 'oversize.ts', codeOwnersEntries, tempDir);
-      expect(result).toEqual({ relativePath: 'oversize.ts', success: true, skipped: true });
+      const result = await processFileAsync(
+        filePath,
+        'oversize-async.ts',
+        codeOwnersIndex,
+        tempDir
+      );
+      expect(result).toEqual({ relativePath: 'oversize-async.ts', success: true, skipped: true });
     });
 
-    it('returns extracted imports + teams for an owned, in-size file', () => {
-      const filePath = path.join(tempDir, 'normal.ts');
+    it('returns extracted imports + teams for an owned, in-size file', async () => {
+      const filePath = path.join(tempDir, 'normal-async.ts');
       fs.writeFileSync(filePath, "import x from 'lodash';\nconst y = require('axios');", 'utf8');
-      const result = processFile(filePath, 'normal.ts', codeOwnersEntries, tempDir);
+      const result = await processFileAsync(filePath, 'normal-async.ts', codeOwnersIndex, tempDir);
       expect(result).toEqual({
-        relativePath: 'normal.ts',
+        relativePath: 'normal-async.ts',
         success: true,
         imports: ['lodash', 'axios'],
         teams: ['elastic/team-everyone'],
       });
     });
 
-    it('returns `{ success: false, error }` when an internal helper throws', () => {
-      // Malformed CODEOWNERS entry (no `matcher`) makes getTeamsForPath throw
-      // on `.matcher.test(...)`. The outer catch must convert it into a per-file
-      // failure rather than letting the worker thread die.
-      const malformedEntries = [{ pattern: '*', teams: ['elastic/x'], matcher: null }];
-      const result = processFile(
-        path.join(tempDir, 'whatever.ts'),
-        'whatever.ts',
-        malformedEntries,
-        tempDir
-      );
+    it('returns `{ success: false, error }` when an internal helper throws', async () => {
+      // A glob entry with a null `matcher` makes getTeamsForPath throw on
+      // `entry.matcher.test(...)`. The outer catch must convert it into a
+      // per-file failure rather than letting the worker thread die.
+      const malformedIndex = {
+        trie: { children: new Map(), match: null },
+        globEntries: [{ pattern: '*', teams: ['elastic/x'], matcher: null, lineIndex: 0 }],
+      };
+      const filePath = path.join(tempDir, 'malformed.ts');
+      fs.writeFileSync(filePath, "import x from 'lodash';", 'utf8');
+      const result = await processFileAsync(filePath, 'malformed.ts', malformedIndex, tempDir);
       expect(result.success).toEqual(false);
-      expect(result.relativePath).toEqual('whatever.ts');
+      expect(result.relativePath).toEqual('malformed.ts');
       expect(typeof result.error).toEqual('string');
       expect(result.error.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('runBatchAsync', () => {
+    let tempDir;
+    let codeOwnersIndex;
+
+    beforeAll(() => {
+      tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'krrs-rba-'));
+      codeOwnersIndex = compileLookupIndex(parseCodeOwners('* @elastic/team-everyone'));
+    });
+
+    afterAll(() => {
+      if (tempDir) fs.rmSync(tempDir, { recursive: true, force: true });
+    });
+
+    it('returns [] for an empty batch without spawning any concurrent tasks', async () => {
+      const results = await runBatchAsync([], codeOwnersIndex, tempDir);
+      expect(results).toEqual([]);
+    });
+
+    it('preserves input order in the results array even with concurrent reads', async () => {
+      // Order is load-bearing: the worker pool aligns each `result[i]` back
+      // to the corresponding `files[i]` it dispatched. Any reordering here
+      // would silently mis-attribute imports to wrong relativePaths.
+      const files = [];
+      for (let i = 0; i < 32; i++) {
+        const fp = path.join(tempDir, `f-${i}.ts`);
+        // Vary file size so reads complete out-of-order under libuv.
+        const size = (i % 4) * 2048 + 64;
+        const padding = 'x'.repeat(size);
+        fs.writeFileSync(fp, `import pkg${i} from 'pkg-${i}';\n${padding}`, 'utf8');
+        files.push({ filePath: fp, relativePath: `f-${i}.ts` });
+      }
+      const results = await runBatchAsync(files, codeOwnersIndex, tempDir);
+      expect(results).toHaveLength(32);
+      for (let i = 0; i < 32; i++) {
+        expect(results[i].relativePath).toEqual(`f-${i}.ts`);
+        expect(results[i].imports).toEqual([`pkg-${i}`]);
+      }
+    });
+
+    it('mixes successful, skipped, and missing files in one batch', async () => {
+      const okPath = path.join(tempDir, 'mix-ok.ts');
+      fs.writeFileSync(okPath, "import x from 'lodash';", 'utf8');
+      const oversizePath = path.join(tempDir, 'mix-oversize.ts');
+      fs.writeFileSync(oversizePath, 'x'.repeat(MAX_FILE_SIZE + 1), 'utf8');
+      const missingPath = path.join(tempDir, 'mix-missing.ts');
+
+      const files = [
+        { filePath: okPath, relativePath: 'mix-ok.ts' },
+        { filePath: oversizePath, relativePath: 'mix-oversize.ts' },
+        { filePath: missingPath, relativePath: 'mix-missing.ts' },
+      ];
+      const [ok, oversize, missing] = await runBatchAsync(files, codeOwnersIndex, tempDir);
+      expect(ok).toMatchObject({ success: true, imports: ['lodash'] });
+      expect(oversize).toMatchObject({ success: true, skipped: true });
+      expect(missing).toMatchObject({ success: true, skipped: true });
     });
   });
 });

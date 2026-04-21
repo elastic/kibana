@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { execSync } from 'child_process';
+import { spawn } from 'child_process';
 import { readFileSync, writeFileSync } from 'fs';
 import { resolve as pathResolve, join, extname } from 'path';
 import { cpus } from 'os';
@@ -34,9 +34,10 @@ export const SCAN_PREFIXES: readonly string[] = ['src/', 'x-pack/', 'packages/']
 /**
  * Number of files dispatched per worker IPC round-trip. Larger values amortize
  * `postMessage` / structured-clone overhead more aggressively but worsen load
- * balancing if some files are much slower to scan than others. 200 is a balance:
- * with ~83k files and 6 workers that's ~70 batches per worker, plenty of
- * granularity for pickup-as-free scheduling.
+ * balancing if some files are much slower to scan than others. 200 keeps the
+ * per-batch cost dwarfing the IPC cost while leaving dozens of batches per
+ * worker on a Kibana-sized tree — plenty of granularity for
+ * pickup-as-free scheduling across the pool.
  */
 export const WORKER_BATCH_SIZE = 200;
 
@@ -45,6 +46,10 @@ export const WORKER_BATCH_SIZE = 200;
  * to workers. Tuned to match `import`/`require`/`export from` keywords with a
  * left word boundary so they don't match identifiers that happen to contain
  * those substrings.
+ *
+ * The three alternatives are passed to `git grep` as a single combined regex
+ * (joined with `|`) so the working tree is scanned once instead of three
+ * times. Exported as the individual patterns so tests can assert the shape.
  */
 export const GREP_PATTERNS: readonly string[] = [
   '(^|[^a-zA-Z0-9_])import',
@@ -122,41 +127,78 @@ export function getAllPackages(packageJson: unknown): string[] {
 }
 
 /**
- * Default file-discovery: runs `git grep -l` once per import pattern under
- * `repoRoot`, restricted to scanned extensions, and returns the union of paths
- * inside the scanned directory prefixes.
+ * Default file-discovery: runs a single `git grep -l -E "<combined>"` under
+ * `repoRoot`, restricted to scanned extensions, and returns the paths that
+ * live inside the scanned directory prefixes.
  *
  * Patterns that match nothing make `git grep` exit non-zero — that's expected
  * and treated as "no files" rather than a failure.
+ *
+ * Streaming rather than buffered: `git grep` emits matching paths as it walks
+ * the tree, so `onProgress` fires with a running total as lines arrive. That
+ * gives the orchestrator something to render during a scan that can take a
+ * few seconds on a large repo.
  */
-export function discoverFilesViaGitGrep(repoRoot: string): string[] {
-  const filesWithImports = new Set<string>();
-  const extArgs = SCAN_EXTENSIONS.map((ext) => `"*${ext}"`).join(' ');
+export function discoverFilesViaGitGrep(
+  repoRoot: string,
+  onProgress?: (foundCount: number) => void
+): Promise<string[]> {
+  return new Promise((resolvePromise, rejectPromise) => {
+    const filesWithImports = new Set<string>();
+    const combinedPattern = GREP_PATTERNS.join('|');
+    const extArgs = SCAN_EXTENSIONS.map((ext) => `*${ext}`);
 
-  for (const pattern of GREP_PATTERNS) {
-    try {
-      const grepFiles = execSync(`git grep -l -E "${pattern}" -- ${extArgs}`, {
-        cwd: repoRoot,
-        encoding: 'utf8',
-        stdio: 'pipe',
-        maxBuffer: 20 * 1024 * 1024,
-      });
+    const child = spawn('git', ['grep', '-l', '-E', combinedPattern, '--', ...extArgs], {
+      cwd: repoRoot,
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
 
-      grepFiles
-        .toString()
-        .trim()
-        .split('\n')
-        .forEach((f) => {
-          if (shouldScanFile(f)) {
-            filesWithImports.add(f);
-          }
-        });
-    } catch {
-      // git grep returns non-zero when nothing matches — not a failure.
-    }
-  }
+    // Line-boundary aware buffering: stdout chunks don't align with newlines,
+    // so we keep a trailing partial line in `pending` until the next chunk
+    // completes it. Dropping that would silently lose the last file on every
+    // chunk boundary.
+    let pending = '';
+    let settled = false;
 
-  return Array.from(filesWithImports);
+    const flushLine = (line: string) => {
+      if (!line) return;
+      if (shouldScanFile(line)) {
+        filesWithImports.add(line);
+      }
+    };
+
+    const settleWithResult = () => {
+      // `error` and `close` can both fire (error → process dies → close).
+      // Guard so we only resolve once; a Promise ignores extra resolves but
+      // the idempotency keeps the intent explicit.
+      if (settled) return;
+      settled = true;
+      if (pending) flushLine(pending);
+      pending = '';
+      resolvePromise(Array.from(filesWithImports));
+    };
+
+    child.stdout.on('data', (chunk: Buffer) => {
+      pending += chunk.toString('utf8');
+      let nl = pending.indexOf('\n');
+      while (nl !== -1) {
+        flushLine(pending.slice(0, nl));
+        pending = pending.slice(nl + 1);
+        nl = pending.indexOf('\n');
+      }
+      if (onProgress) onProgress(filesWithImports.size);
+    });
+
+    // Drain stderr so a large error message (>~64KB kernel pipe buffer) can't
+    // block git grep on a write. Match the prior `execSync`-in-try/catch
+    // behavior and discard — any git-side failure resolves with whatever
+    // partial set we collected, just like the old implementation which
+    // caught every error from execSync.
+    child.stderr.on('data', () => {});
+
+    child.on('error', settleWithResult);
+    child.on('close', settleWithResult);
+  });
 }
 
 /** Logger surface this module needs. Matches `@kbn/dev-cli-runner`'s ToolingLog. */
@@ -184,15 +226,22 @@ export interface GenerateRenovateCodeownersOptions {
 export interface GenerateRenovateCodeownersDeps {
   /** Repo root for resolving package.json / renovate.json / CODEOWNERS. Defaults to `REPO_ROOT`. */
   repoRoot?: string;
-  /** Discover candidate files (relative to `repoRoot`). Defaults to `discoverFilesViaGitGrep(repoRoot)`. */
-  discoverFiles?: () => string[];
+  /**
+   * Discover candidate files (relative to `repoRoot`). Defaults to
+   * `discoverFilesViaGitGrep(repoRoot, onProgress)`. May be sync (for tests
+   * with fixed file lists) or async (for real scans). When async, `onProgress`
+   * is called with the running file count so the orchestrator can render
+   * live feedback — during a scan that can take a few seconds on a large
+   * repo, the spinner-equivalent would otherwise just be a silent pause.
+   */
+  discoverFiles?: (onProgress?: (foundCount: number) => void) => string[] | Promise<string[]>;
   /** Build a worker pool. Defaults to a real `worker_threads`-backed pool loading `worker.js`. */
   createWorkerPool?: (params: {
     workerCount: number;
     repoRoot: string;
     codeOwnersPath: string;
   }) => WorkerPoolLike;
-  /** Worker count override. Defaults to `min(cpus-1, 6)`. */
+  /** Worker count override. Defaults to `max(1, cpus - 1)`. */
   workerCount?: number;
   /** Read a UTF-8 file. Defaults to `fs.readFileSync(path, 'utf8')`. */
   readFile?: (filePath: string) => string;
@@ -213,12 +262,31 @@ const defaultWriteFile = (filePath: string, contents: string) =>
 const defaultSetExitCode = (code: number) => {
   process.exitCode = code;
 };
-const defaultWorkerCount = () => Math.min(Math.max(1, cpus().length - 1), 6);
+// Default to one fewer than physical cores: workers are CPU-bound (regex +
+// trie lookups) AND I/O-bound (file reads via libuv), so leaving one core for
+// the orchestrator + libuv reactor keeps the system responsive without
+// undersubscribing.
+const defaultWorkerCount = () => Math.max(1, cpus().length - 1);
+
+// libuv's threadpool defaults to 4 threads per worker; that bottlenecks the
+// async `readFile` path inside each worker (worker concurrency is 16, so
+// reads queue 4-deep in libuv before any forward progress). Setting this
+// here works because (a) `process.env` is shared across worker_threads,
+// (b) libuv reads `UV_THREADPOOL_SIZE` when it initializes, which happens
+// on worker spawn — i.e. AFTER `defaultCreateWorkerPool` runs. We only set
+// it when unset so users can still cap it explicitly via the environment.
+const ensureLibuvThreadpool = () => {
+  if (!process.env.UV_THREADPOOL_SIZE) {
+    process.env.UV_THREADPOOL_SIZE = '16';
+  }
+};
+
 const defaultCreateWorkerPool: NonNullable<GenerateRenovateCodeownersDeps['createWorkerPool']> = ({
   workerCount,
   repoRoot,
   codeOwnersPath,
 }) => {
+  ensureLibuvThreadpool();
   const workerPath = pathResolve(__dirname, 'worker.js');
   return new WorkerPool(workerCount, workerPath, { repoRoot, codeOwnersPath });
 };
@@ -235,7 +303,8 @@ export async function generateRenovateCodeowners(
   const installSignalHandlers = deps.installSignalHandlers ?? true;
   const workerCount = deps.workerCount ?? defaultWorkerCount();
   const createWorkerPool = deps.createWorkerPool ?? defaultCreateWorkerPool;
-  const discoverFiles = deps.discoverFiles ?? (() => discoverFilesViaGitGrep(repoRoot));
+  const discoverFiles =
+    deps.discoverFiles ?? ((onProgress) => discoverFilesViaGitGrep(repoRoot, onProgress));
 
   const packageJsonPath = join(repoRoot, PACKAGE_JSON_FILENAME);
   const renovateConfigPath = join(repoRoot, RENOVATE_CONFIG_FILENAME);
@@ -258,7 +327,32 @@ export async function generateRenovateCodeowners(
 
   log.info(`\n🔍 Finding files with imports...`);
 
-  const filesArray = discoverFiles().filter(shouldScanFile);
+  // Live-tick the running file count while `git grep` streams paths. The scan
+  // can take a few seconds on a large repo (~83k files → ~2s even after the
+  // three-pattern collapse) and silence here was the user-visible pause that
+  // motivated the streaming switch. `.unref()` so the tick never keeps the
+  // event loop alive on its own.
+  let discoveredCount = 0;
+  const discoveryInterval = setInterval(() => {
+    if (discoveredCount > 0) {
+      log.write(`  Scanning... ${discoveredCount.toLocaleString()} files so far\r`);
+    }
+  }, 250);
+  discoveryInterval.unref?.();
+
+  let rawFiles: string[];
+  try {
+    rawFiles = await discoverFiles((n) => {
+      discoveredCount = n;
+    });
+  } finally {
+    clearInterval(discoveryInterval);
+    // Erase the last spinner line so the subsequent `info` lines render
+    // cleanly on their own row. The write is narrow-enough to not flicker.
+    if (discoveredCount > 0) log.write(`\x1b[2K\r`);
+  }
+
+  const filesArray = rawFiles.filter(shouldScanFile);
   const totalFiles = filesArray.length;
 
   log.info(`  Found ${totalFiles} files with imports`);
