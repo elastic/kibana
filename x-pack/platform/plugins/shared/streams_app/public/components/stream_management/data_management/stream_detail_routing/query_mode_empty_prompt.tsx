@@ -17,9 +17,8 @@ import {
 
 export const QueryModeEmptyPrompt = () => {
   const { createQueryStream } = useStreamRoutingEvents();
-  const canManage = useStreamsRoutingSelector(
-    (snapshot) => snapshot.context.definition.privileges.manage
-  );
+  const definition = useStreamsRoutingSelector((snapshot) => snapshot.context.definition);
+  const canManage = 'privileges' in definition ? definition.privileges.manage : true;
 
   return (
     <EuiFlexGroup

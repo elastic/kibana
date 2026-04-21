@@ -81,7 +81,9 @@ export function QueryStreamDetailManagement({
   }
 
   tabs.partitioning = {
-    content: <QueryStreamPartitioning />,
+    content: (
+      <QueryStreamPartitioning definition={definition} refreshDefinition={refreshDefinition} />
+    ),
     label: i18n.translate('xpack.streams.streamDetailView.partitioningTab', {
       defaultMessage: 'Partitioning',
     }),

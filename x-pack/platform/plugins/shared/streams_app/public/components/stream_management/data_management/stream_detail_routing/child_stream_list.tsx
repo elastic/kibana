@@ -204,7 +204,7 @@ export function ChildStreamList({ availableStreams = [] }: { availableStreams?: 
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued" textAlign="center">
             {i18n.translate('xpack.streams.streamDetailRouting.childStreamList.classicNotice', {
-              defaultMessage: 'Ingest-time partitioning is not available for classic streams.',
+              defaultMessage: 'Ingest-time partitioning is not available for this stream type.',
             })}
           </EuiText>
         </EuiFlexItem>
@@ -542,7 +542,7 @@ function QueryModeChildrenList() {
     (snapshot) => snapshot.context.editingQueryStreamName
   );
   const { createQueryStream, editQueryStream } = useStreamRoutingEvents();
-  const canManage = definition.privileges.manage;
+  const canManage = 'privileges' in definition ? definition.privileges.manage : true;
 
   // Get child query stream names from the definition
   const childQueryStreamNames = useMemo(() => {

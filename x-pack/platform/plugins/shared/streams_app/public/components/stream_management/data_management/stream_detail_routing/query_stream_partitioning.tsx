@@ -5,8 +5,45 @@
  * 2.0.
  */
 
+import type { Streams } from '@kbn/streams-schema';
 import React from 'react';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { useTimefilter } from '../../../../hooks/use_timefilter';
+import { PartitioningLayout } from './partitioning_layout';
+import { StreamRoutingContextProvider } from './state_management/stream_routing_state_machine';
 
-export const QueryStreamPartitioning = () => {
-  return <h1>Partitioning tab goes here</h1>;
+interface QueryStreamPartitioningProps {
+  definition: Streams.QueryStream.GetResponse;
+  refreshDefinition: () => void;
+}
+
+export const QueryStreamPartitioning = ({
+  definition,
+  refreshDefinition,
+}: QueryStreamPartitioningProps) => {
+  const {
+    core,
+    dependencies,
+    services: { telemetryClient },
+  } = useKibana();
+  const {
+    data,
+    streams: { streamsRepositoryClient },
+  } = dependencies.start;
+
+  const { timeState$ } = useTimefilter();
+
+  return (
+    <StreamRoutingContextProvider
+      definition={definition}
+      refreshDefinition={refreshDefinition}
+      core={core}
+      data={data}
+      timeState$={timeState$}
+      streamsRepositoryClient={streamsRepositoryClient}
+      telemetryClient={telemetryClient}
+    >
+      <PartitioningLayout />
+    </StreamRoutingContextProvider>
+  );
 };

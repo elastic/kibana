@@ -14,13 +14,13 @@ import {
   EuiLink,
   useEuiTheme,
 } from '@elastic/eui';
-import type { Streams } from '@kbn/streams-schema';
 import { getAncestorsAndSelf } from '@kbn/streams-schema';
 import React from 'react';
 import { css } from '@emotion/css';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
+import type { PartitionableDefinition } from './state_management/stream_routing_state_machine/types';
 
-export function CurrentStreamEntry({ definition }: { definition: Streams.ingest.all.GetResponse }) {
+export function CurrentStreamEntry({ definition }: { definition: PartitionableDefinition }) {
   const { euiTheme } = useEuiTheme();
   const router = useStreamsAppRouter();
 
