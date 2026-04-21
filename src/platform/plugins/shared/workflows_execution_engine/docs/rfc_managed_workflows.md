@@ -56,10 +56,10 @@ A first-class **managed workflow** concept where plugins can declare bundled wor
 
 | # | Requirement | Details |
 |---|-------------|---------|
-| **R11** | **Auto-provisioning across spaces** | At startup, managed workflows are provisioned into all existing spaces and into newly created spaces, without requiring the consuming plugin to trigger provisioning via request-scoped logic. See [Lifecycle](#4-lifecycle-provisioning-updates-cleanup) in the technical design. |
-| **R12** | **Privileged update path** | The platform supports updating managed workflows on plugin upgrades (system update) while still blocking user edits. Without this, read-only enforcement prevents plugins from evolving their workflows. Pattern: create-if-absent, update-if-changed. See [Lifecycle](#4-lifecycle-provisioning-updates-cleanup) in the technical design. |
-| **R13** | **Cleanup on plugin uninstall** | When a plugin is uninstalled, all managed workflows it owns (identified by `managedBy`) are removed from all spaces. See [Lifecycle](#4-lifecycle-provisioning-updates-cleanup) in the technical design. |
-| **R14** | **Cleanup on unregistration** | When a managed workflow is no longer registered in code (i.e., the plugin removes the registration in a new release), the platform removes it from all spaces during startup reconciliation. See [Lifecycle](#4-lifecycle-provisioning-updates-cleanup) in the technical design. |
+| **R11** | **Auto-provisioning across spaces** | At startup, managed workflows are provisioned into all existing spaces and into newly created spaces, without requiring the consuming plugin to trigger provisioning via request-scoped logic. See [Lifecycle](#5-lifecycle-provisioning-updates-cleanup) in the technical design. |
+| **R12** | **Privileged update path** | The platform supports updating managed workflows on plugin upgrades (system update) while still blocking user edits. Without this, read-only enforcement prevents plugins from evolving their workflows. Pattern: create-if-absent, update-if-changed. See [Lifecycle](#5-lifecycle-provisioning-updates-cleanup) in the technical design. |
+| **R13** | **Cleanup on plugin uninstall** | When a plugin is uninstalled, all managed workflows it owns (identified by `managedBy`) are removed from all spaces. See [Lifecycle](#5-lifecycle-provisioning-updates-cleanup) in the technical design. |
+| **R14** | **Cleanup on unregistration** | When a managed workflow is no longer registered in code (i.e., the plugin removes the registration in a new release), the platform removes it from all spaces during startup reconciliation. See [Lifecycle](#5-lifecycle-provisioning-updates-cleanup) in the technical design. |
 
 #### UI
 
@@ -76,7 +76,7 @@ A first-class **managed workflow** concept where plugins can declare bundled wor
 
 | # | Requirement | Details | Requested By |
 |---|-------------|---------|--------------|
-| **S1** | **Version/hash tracking** | Track a content hash so the platform can determine if updates are needed without fetching and string-comparing full YAML. Also drives the reconciliation lifecycle (create-if-absent, update-if-changed, skip-if-matching) — see [Lifecycle](#4-lifecycle-provisioning-updates-cleanup). | Security (andrew-goldstein) |
+| **S1** | **Version/hash tracking** | Track a content hash so the platform can determine if updates are needed without fetching and string-comparing full YAML. Also drives the reconciliation lifecycle (create-if-absent, update-if-changed, skip-if-matching) — see [Lifecycle](#5-lifecycle-provisioning-updates-cleanup). | Security (andrew-goldstein) |
 | **S2** | **Caller-provided execution ID** | Support a caller-specified unique execution ID for correlation and deduplication. | O11y (ruflin, cesco-f) |
 | **S3** | **Caller-provided execution metadata** | Allow callers to attach arbitrary metadata to an execution for debugging and correlation. | — |
 | **S4** | **Plugin-controlled install decision** | `shouldInstall(ctx)` hook called during provisioning with the full context (space, license tier, deployment type, feature flags, etc.). The registering plugin decides whether to install the workflow based on any condition. Enables per-space decisions, tier gating, deployment-type filtering, and progressive rollout without separate mechanisms. | Security AB (KDKHD) |
@@ -114,7 +114,7 @@ These are capabilities that interact with or are prerequisites for managed workf
 | **Configurable Execution Identity** | [#15718](https://github.com/elastic/security-team/issues/15718) | **Highest risk dependency.** Who does a managed workflow run as? Triggering user doesn't work for scheduled/background cases. Kibana system user is too restrictive (only `.kibana*`). Service accounts are the target but depend on this epic. Every consumer team has raised this. |
 | **Workflow-Defined Priority** | [#258538](https://github.com/elastic/kibana/issues/258538) | Allow workflows to declare execution priority. Useful when system workflows are not time-sensitive and can be delayed under load, so they don't compete with other important workflows (system or user-defined). Requested by ruflin (O11y). |
 | **Parallel Execution of Sub-Workflows** | [#16372](https://github.com/elastic/security-team/issues/16372) | O11y (miltonhultgren) needs parallel onboarding tasks across streams. Not supported today. |
-| **Workflow Versioning** | [#15776](https://github.com/elastic/security-team/issues/15776) | First-class versioning for workflow definitions. Managed workflows currently use a SHA-256 hash for change detection (see [Lifecycle](#4-lifecycle-provisioning-updates-cleanup)); once versioning lands, managed workflows should adopt it. |
+| **Workflow Versioning** | [#15776](https://github.com/elastic/security-team/issues/15776) | First-class versioning for workflow definitions. Managed workflows currently use a SHA-256 hash for change detection (see [Lifecycle](#5-lifecycle-provisioning-updates-cleanup)); once versioning lands, managed workflows should adopt it. |
 | **Workflow Template Library** | [#15748](https://github.com/elastic/security-team/issues/15748) | Pre-built workflow definitions that users install and own — free to edit after installation. Distinct from managed workflows (see [Open Questions > Scope #12](#scope)): templates are not reconciled or version-synced by the platform. Separate initiative, but the boundary between managed workflows and templates must be clear to avoid confusion. |
 
 ---
@@ -211,14 +211,23 @@ This RFC covers managed workflows only. Templates are a separate initiative (see
 6. **~~What happens if a workflow references a step or trigger from an unavailable plugin?~~** — **Resolved.**
    Cross-solution workflows are against Kibana best practices, and products are available/not based on tiering, so filtering at registration time (via `shouldInstall` or the platform tier gate in R9) is sufficient — a managed workflow should only be installed where its dependencies are available.
 
+### Space Behavior
+
+9. **How should managed workflows behave across spaces?**
+   The product requirement is that managed workflows are space-aware and behave consistently in every space. Several product-level questions need stakeholder input before the implementation approach can be decided (see [Technical Design > Space Provisioning](#4-space-provisioning) for how these answers affect implementation):
+
+   - **Global vs. per-space execution:** Is there a scenario where a system workflow should run once globally, not per space? E.g., a scheduled system workflow — should it execute once (globally) or once per space? Do all known use cases need space-scoped resources (connectors, rules, alerts, cases)?
+   - **Per-space enablement:** When a user disables a managed workflow, should it be disabled across all spaces or only in the space where the action was taken?
+   - **Scheduled execution context:** For user-action-driven runs, the space context comes from the request. For scheduled workflows, which space context do they run with?
+
 ### Execution
 
-9. **How do teams know when a managed workflow finishes?**
+10. **How do teams know when a managed workflow finishes?**
    Options: polling via `getWorkflowExecutionById`, callback/hook provided at registration, event bus. ruflin: "event bus ideal, polling ok for now." KDKHD: "must be able to detect/get notified about status."
 
 ### Cloning
 
-10. **~~When a managed workflow is cloned, what happens to the original?~~** - **Resolved.**
+11. **~~When a managed workflow is cloned, what happens to the original?~~** - **Resolved.**
     The managed workflow remains unchanged. The clone is a fully independent user-owned workflow. UX should make clear that the user now has two workflows with the same logic. The user can disable the original if they want only the clone to run.
 
 ---
@@ -517,9 +526,15 @@ Plugin setup()                    workflows_management setup()
                                       └─ Orphan cleanup (see Lifecycle section)
 ```
 
-**Space-agnostic workflows:**
+**What about integrations?**
 
-Two fundamental approaches exist for managed workflows that should be available across all spaces:
+Integrations (Fleet packages) are a future distribution channel. The integration would call the same `registerManagedWorkflow` API during its install lifecycle. The API contract is the same — the only difference is *who* calls it (plugin `setup()` vs. integration install handler). This is deferred (N7) but the API design does not preclude it.
+
+---
+
+### 4. Space Provisioning
+
+The product requirement is that managed workflows are space-aware and behave consistently in every space — users in any space should be able to see them and interact with them the same way. Two fundamental approaches exist:
 
 **Approach 1: Sentinel space ID (e.g., `_global`)**
 
@@ -539,15 +554,11 @@ Today, the Spaces plugin has no public `onSpaceCreated` hook or event system. Sp
 - **Option B: Lazy provisioning on first access** — When any workflow API is called in a space, check if managed workflows are provisioned. Cache the result per space. No dependency on the Spaces plugin, but workflows are missing until first use (does not fully meet R11).
 - **Option C: Periodic reconciliation** — A Task Manager task that periodically scans all spaces and provisions missing workflows. Robust, no Spaces plugin dependency, but adds delay (up to one reconciliation interval) and background load.
 
-**Recommendation:** Approach 1 (sentinel space ID). A single `_global` document eliminates the new-space provisioning problem entirely — no hooks, no lazy checks, no periodic tasks. The execution context question is addressed by the "caller provides space at execution time" sub-option: the workflow definition is stored once, but every execution is space-scoped (the trigger, schedule, or API request carries the target space). This keeps space-scoped resource access (connectors, rules, alerts) well-defined without duplicating the definition across spaces. Approach 2 remains a viable fallback if the sentinel pattern proves problematic with existing query paths.
-
-**What about integrations?**
-
-Integrations (Fleet packages) are a future distribution channel. The integration would call the same `registerManagedWorkflow` API during its install lifecycle. The API contract is the same — the only difference is *who* calls it (plugin `setup()` vs. integration install handler). This is deferred (N7) but the API design does not preclude it.
+**Leaning toward Approach 2.** It is more robust: each space has its own document with its own enabled state, schedule, and execution context. This naturally supports per-space enablement/disabling, eliminates the scheduled execution context problem (each space's document carries its own space context), and avoids the query path changes required by Approach 1. The tradeoff is solving the new-space provisioning problem — see the options above (hook, lazy, periodic). The remaining product-level questions are captured in [Open Questions > Space Behavior #9](#space-behavior).
 
 ---
 
-### 4. Lifecycle (Provisioning, Updates, Cleanup)
+### 5. Lifecycle (Provisioning, Updates, Cleanup)
 
 On startup, the platform reconciles the in-memory registry (what plugins declared) against storage (what's persisted per space). This covers R11 (auto-provisioning), R12 (privileged updates), R13 (plugin uninstall cleanup), and R14 (unregistration cleanup).
 
@@ -593,7 +604,7 @@ With N managed workflows and M spaces, reconciliation performs up to N*M queries
 
 ---
 
-### 5. Execution Identity
+### 6. Execution Identity
 
 **Interim approach: User identity for on-demand, Task Manager API key for scheduled.**
 
