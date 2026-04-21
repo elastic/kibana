@@ -78,4 +78,20 @@ describe('renderTemplate', () => {
     const content = await renderTemplate(mockParams());
     expect(content).not.toContain('__REACT_DEVTOOLS_GLOBAL_HOOK__');
   });
+
+  test('includes __kbnHmrActive__ = true when useHMR is true', async () => {
+    const content = await renderTemplate({
+      ...mockParams(),
+      useHMR: true,
+    });
+    expect(content).toContain('__kbnHmrActive__ = true');
+  });
+
+  test('does NOT include __kbnHmrActive__ when useHMR is false', async () => {
+    const content = await renderTemplate({
+      ...mockParams(),
+      useHMR: false,
+    });
+    expect(content).not.toContain('__kbnHmrActive__');
+  });
 });

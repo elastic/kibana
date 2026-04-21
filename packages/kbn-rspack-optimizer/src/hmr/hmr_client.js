@@ -320,11 +320,13 @@ function onKeyDown(e) {
   }
 }
 
-document.addEventListener('keydown', onKeyDown);
+if (window.__kbnHmrActive__) {
+  document.addEventListener('keydown', onKeyDown);
+}
 
 // --- HMR client -----------------------------------------------------------
 
-if (module.hot) {
+if (window.__kbnHmrActive__ && module.hot) {
   var RECONNECT_INITIAL = 1000;
   var RECONNECT_MAX = 12000;
   var reconnectDelay = RECONNECT_INITIAL;

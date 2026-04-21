@@ -91,6 +91,7 @@ window.__kbnHardenPrototypes__ = kbnHardenPrototypes.hardenPrototypes;
 window.__kbnStrictCsp__ = kbnCsp.strictCsp;
 ${kbnThemeTagTemplate}
 window.__kbnPublicPath__ = ${publicPathMap};
+${useHMR ? 'window.__kbnHmrActive__ = true;' : ''}
 window.__kbnBundles__ = kbnBundlesLoader();
 
 if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {

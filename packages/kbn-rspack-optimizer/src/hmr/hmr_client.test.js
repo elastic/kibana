@@ -65,6 +65,7 @@ describe('hmr_client', () => {
 
     global.__KBN_HMR_PORT__ = 12345;
     global.__webpack_hash__ = 'hash-a';
+    global.window.__kbnHmrActive__ = true;
 
     global.MutationObserver = class {
       observe() {}
@@ -98,6 +99,7 @@ describe('hmr_client', () => {
     global.EventSource = OriginalEventSource;
     delete global.__KBN_HMR_PORT__;
     delete global.__webpack_hash__;
+    delete global.window.__kbnHmrActive__;
 
     jest.restoreAllMocks();
 
@@ -217,5 +219,12 @@ describe('hmr_client', () => {
 
     expect(document.getElementById('__kbn_hmr_error_overlay__')).toBeNull();
     expect(hot.check).toHaveBeenCalledWith({ ignoreDeclined: true, ignoreUnaccepted: true });
+  });
+
+  it('does not initialize when __kbnHmrActive__ is falsy', () => {
+    delete global.window.__kbnHmrActive__;
+    loadHmrClient();
+    expect(EventSource).not.toHaveBeenCalled();
+    expect(document.getElementById('__kbn_hmr_indicator__')).toBeNull();
   });
 });
