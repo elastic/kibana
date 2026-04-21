@@ -51,25 +51,16 @@ describe('runBackfillInstalledPackageInfo', () => {
     expect(soClient.bulkUpdate).not.toHaveBeenCalled();
   });
 
-  it('should skip packages with install_source upload', async () => {
-    soClient.find.mockResolvedValue({
-      total: 1,
-      page: 1,
-      per_page: 1,
-      saved_objects: [
-        {
-          id: 'pkg-1',
-          type: 'epm-packages',
-          references: [],
-          attributes: { name: 'my_pkg', version: '1.0.0', install_source: 'upload' } as any,
-        },
-      ],
-    });
+  it('should exclude uploaded packages via the SO query filter', async () => {
+    soClient.find.mockResolvedValue({ total: 0, saved_objects: [], page: 1, per_page: 0 });
 
     await runBackfillInstalledPackageInfo({ logger, abortController });
 
-    expect(MockRegistry.fetchInfo).not.toHaveBeenCalled();
-    expect(soClient.bulkUpdate).not.toHaveBeenCalled();
+    expect(soClient.find).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filter: expect.stringContaining('install_source:registry'),
+      })
+    );
   });
 
   it('should fetch registry info and call bulkUpdate for registry packages', async () => {
@@ -168,13 +159,16 @@ describe('runBackfillInstalledPackageInfo', () => {
     expect(MockRegistry.fetchInfo).toHaveBeenCalledTimes(1);
   });
 
-  it('should include fields option in the SO find query', async () => {
+  it('should use the correct fields and filter in the SO find query', async () => {
     soClient.find.mockResolvedValue({ total: 0, saved_objects: [], page: 1, per_page: 0 });
 
     await runBackfillInstalledPackageInfo({ logger, abortController });
 
     expect(soClient.find).toHaveBeenCalledWith(
-      expect.objectContaining({ fields: ['name', 'version', 'install_source'] })
+      expect.objectContaining({
+        fields: ['name', 'version'],
+        filter: expect.stringContaining('install_source:registry'),
+      })
     );
   });
 

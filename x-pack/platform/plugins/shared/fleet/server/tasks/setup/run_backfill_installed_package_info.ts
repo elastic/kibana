@@ -22,13 +22,19 @@ const BATCH_SIZE = 50;
 
 // CSPM's agentless feature was GA before the release field was introduced — explicitly backfill GA.
 function buildCSPMDeploymentInfo(t: RegistryPolicyTemplate) {
-  return {
-    name: t.name,
-    deployment_modes: {
-      ...t.deployment_modes,
-      agentless: { ...t.deployment_modes?.agentless, release: AgentlessDeploymentReleaseStatus.GA },
-    },
-  };
+  if (t.deployment_modes?.agentless?.enabled && !t.deployment_modes.agentless.release) {
+    return {
+      name: t.name,
+      deployment_modes: {
+        ...t.deployment_modes,
+        agentless: {
+          ...t.deployment_modes?.agentless,
+          release: AgentlessDeploymentReleaseStatus.GA,
+        },
+      },
+    };
+  }
+  return { name: t.name, deployment_modes: t.deployment_modes };
 }
 
 async function buildDeploymentInfoUpdates(
@@ -41,29 +47,19 @@ async function buildDeploymentInfoUpdates(
   for (const so of batch) {
     if (abortController.signal.aborted) return updates;
 
-    const { name, version, install_source } = so.attributes;
-
-    if (install_source === 'upload') {
-      logger.debug(`Skipping uploaded package ${name} — not in registry`);
-      continue;
-    }
+    const { name, version } = so.attributes;
 
     try {
       const pkgInfo = await Registry.fetchInfo(name, version);
       updates.push({
         id: so.id,
-        policy_templates_deployment_info: pkgInfo.policy_templates?.map(
-          (t: RegistryPolicyTemplate) => {
-            if (
-              t.name === FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE &&
-              t.deployment_modes?.agentless?.enabled &&
-              !t.deployment_modes.agentless.release
-            ) {
+        policy_templates_deployment_info:
+          pkgInfo.policy_templates?.map((t: RegistryPolicyTemplate) => {
+            if (t.name === FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE) {
               return buildCSPMDeploymentInfo(t);
             }
             return { name: t.name, deployment_modes: t.deployment_modes };
-          }
-        ),
+          }) ?? [],
       });
     } catch (err) {
       logger.warn(
@@ -87,8 +83,8 @@ export async function runBackfillInstalledPackageInfo({
   const res = await soClient.find<Installation>({
     type: PACKAGES_SAVED_OBJECT_TYPE,
     perPage: SO_SEARCH_LIMIT,
-    filter: `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.install_status:installed and not ${PACKAGES_SAVED_OBJECT_TYPE}.attributes.policy_templates_deployment_info:*`,
-    fields: ['name', 'version', 'install_source'],
+    filter: `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.install_status:installed and ${PACKAGES_SAVED_OBJECT_TYPE}.attributes.install_source:registry and not ${PACKAGES_SAVED_OBJECT_TYPE}.attributes.policy_templates_deployment_info:*`,
+    fields: ['name', 'version'],
   });
 
   if (res.total === 0) {
