@@ -19,7 +19,7 @@ Suggest ingest pipelines that normalize logs to the target schema. Work in an **
 
 ## Field overview and `unmapped`
 
-The sample-structure JSON lists each field with a type from **field caps** against the stream backing index (and optional ECS/OTel hints). **`unmapped`** means there was **no mapping entry yet** for that field in the snapshot field caps used-not that the sample value is wrong. New or rarely seen fields often have **no persisted mapping** in the index yet, or caps may lag behind the document shape. **That is normal and not a problem.** **Do not** treat `unmapped` as a reason to drop the field, avoid processors, or commit an empty pipeline; rely on **Time**, schema goals, and **`simulate_pipeline`**.
+The sample-structure JSON lists each field with a type from **field caps** against the stream backing index (and optional ECS/OTel hints). **`unmapped`** means there was **no mapping entry yet** for that field in the snapshot field caps used—not that the sample value is wrong. New or rarely seen fields often have **no persisted mapping** in the index yet, or caps may lag behind the document shape. **That is normal and not a problem.** **Do not** treat `unmapped` as a reason to drop the field, avoid processors, or commit an empty pipeline; rely on **Time**, schema goals, and **`simulate_pipeline`**.
 
 **When simulation errors:** Simplify; remove failing processors; trust the error text.
 
@@ -39,7 +39,7 @@ Match **ECS** or **OTel** as given in the task.
 ## Principles
 
 - **Defensive:** `ignore_missing`; `on_failure` where appropriate.
-- **Clean:** After **`date` / conversions**, **remove** dead weight: redundant **`custom.*`** from grok, duplicate times, empty captures-use **`remove`** in the suggested pipeline so **`simulate_pipeline`** reflects the cleanup; reviewers still choose whether to apply it.
+- **Clean:** After **`date` / conversions**, **remove** dead weight: redundant **`custom.*`** from grok, duplicate times, empty captures—use **`remove`** in the suggested pipeline so **`simulate_pipeline`** reflects the cleanup; reviewers still choose whether to apply it.
 
 ## Acceptance
 

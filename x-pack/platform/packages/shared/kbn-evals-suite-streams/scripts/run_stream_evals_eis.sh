@@ -90,9 +90,7 @@ REPO_ROOT="$(cd "$SCRIPT_DIR" && git rev-parse --show-toplevel)"
 
 cd "$REPO_ROOT"
 
-# Separate variable assignment from export to ensure set -e captures vault read failures
-KIBANA_EIS_CCM_API_KEY="$(vault read -field key secret/kibana-issues/dev/inference/kibana-eis-ccm)"
-export KIBANA_EIS_CCM_API_KEY
+export KIBANA_EIS_CCM_API_KEY="$(vault read -field key secret/kibana-issues/dev/inference/kibana-eis-ccm)"
 
 EIS_MODELS_JSON="$REPO_ROOT/target/eis_models.json"
 if [[ ! -f "$EIS_MODELS_JSON" ]]; then
@@ -104,8 +102,7 @@ fi
 
 GEN_CONNECTORS="$REPO_ROOT/x-pack/platform/packages/shared/kbn-evals/scripts/ci/generate_eis_connectors.js"
 echo "[run_stream_evals_eis] Generating KIBANA_TESTING_AI_CONNECTORS..."
-KIBANA_TESTING_AI_CONNECTORS="$(node "$GEN_CONNECTORS")"
-export KIBANA_TESTING_AI_CONNECTORS
+export KIBANA_TESTING_AI_CONNECTORS="$(node "$GEN_CONNECTORS")"
 
 echo "[run_stream_evals_eis] Starting evals (connector=$CONNECTOR_ID, grep=$GREP_PATTERN, workers=$STREAM_EVALS_WORKERS)..."
 node scripts/evals start --suite streams \

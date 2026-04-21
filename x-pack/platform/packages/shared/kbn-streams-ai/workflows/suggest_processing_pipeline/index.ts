@@ -222,19 +222,6 @@ export async function suggestProcessingPipeline({
     }
     throw error;
   }
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    // Check if it's a timeout/abort error
-    if (errorMessage.includes('abort') || errorMessage.includes('timeout')) {
-      throw new Error(
-        i18n.translate('xpack.streams.ai.suggestProcessingPipeline.timeoutError', {
-          defaultMessage:
-            'Pipeline suggestion generation took too long and was stopped. Try with fewer or simpler log samples, or select a different LLM model.',
-        })
-      );
-    }
-    throw error;
-  }
 
   // Count assistant messages to determine steps used
   const stepsUsed = response.input.filter(
