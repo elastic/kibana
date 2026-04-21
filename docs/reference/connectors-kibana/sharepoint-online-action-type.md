@@ -149,7 +149,7 @@ To use delegated (per-user) authentication, register an application and configur
 3. Select **New registration**.
 4. Enter a name for your application.
 5. Select **Accounts in this organizational directory only**.
-6. Under **Redirect URI**, select **Web** and enter your {{kib}} redirect URI (for example, `https://your-kibana-url/api/actions/connector/_oauth_redirect`).
+6. Under **Redirect URI**, select **Web** and enter your {{kib}} redirect URI (for example, `https://your-kibana-url/api/actions/connector/_oauth_callback`).
 7. Select **Register**.
 8. In your app registration, go to **API permissions**.
 9. Select **Add a permission** > **Microsoft Graph** > **Delegated permissions**.

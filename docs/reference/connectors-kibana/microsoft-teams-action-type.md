@@ -104,7 +104,7 @@ To use the Microsoft Teams connector, you need a Microsoft Azure AD application 
 
 1. Sign in to the [Azure portal](https://portal.azure.com). Select **Azure Active Directory → App registrations**.
 2. Create a new application registration.
-3. Under **Authentication**, select **Add a platform**, choose **Web**, and enter your {{kib}} redirect URI (for example, `https://your-kibana-url/api/actions/connector/_oauth_redirect`).
+3. Under **Authentication**, select **Add a platform**, choose **Web**, and enter your {{kib}} redirect URI (for example, `https://your-kibana-url/api/actions/connector/_oauth_callback`).
 4. Under **API permissions**, add the following **Delegated** permissions for Microsoft Graph:
    - `Team.ReadBasic.All` — List joined teams
    - `Channel.ReadBasic.All` — List channels
