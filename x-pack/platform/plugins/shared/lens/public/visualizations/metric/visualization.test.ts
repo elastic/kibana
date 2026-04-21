@@ -12,7 +12,7 @@ import type {
   ExpressionAstExpression,
   ExpressionAstFunction,
 } from '@kbn/expressions-plugin/common';
-import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { FrameMock } from '../../mocks';
 import { createMockDatasource, createMockFramePublicAPI, generateActiveData } from '../../mocks';
@@ -77,6 +77,7 @@ describe('metric visualization', () => {
       | 'secondaryColor'
       | 'secondaryPrefix'
       | 'valuesTextAlign'
+      | 'titleWeight'
     >
   > = {
     layerId: 'first',
@@ -98,7 +99,6 @@ describe('metric visualization', () => {
     primaryAlign: 'right',
     secondaryAlign: 'right',
     primaryPosition: 'bottom',
-    titleWeight: 'bold',
     iconAlign: 'right',
     valueFontMode: 'default',
     secondaryTrend: { type: 'none' },
@@ -109,7 +109,7 @@ describe('metric visualization', () => {
   const fullStateWTrend: Required<
     Omit<
       MetricVisualizationState,
-      'secondaryTrend' | 'secondaryColor' | 'secondaryPrefix' | 'valuesTextAlign'
+      'secondaryTrend' | 'secondaryColor' | 'secondaryPrefix' | 'valuesTextAlign' | 'titleWeight'
     >
   > = {
     ...fullState,
@@ -128,6 +128,19 @@ describe('metric visualization', () => {
 
     test('returns persisted state', () => {
       expect(visualization.initialize(() => fullState.layerId, fullState)).toEqual(fullState);
+    });
+
+    test('removes legacy state property titleWeight', () => {
+      const stateWithLegacyTitleWeight: MetricVisualizationState = {
+        ...fullState,
+        titleWeight: 'bold',
+      };
+      expect(
+        visualization.initialize(
+          () => stateWithLegacyTitleWeight.layerId,
+          stateWithLegacyTitleWeight
+        )
+      ).toEqual(fullState);
     });
 
     test('migrates legacy state properties secondaryPrefix and valuesTextAlign', () => {
@@ -571,9 +584,6 @@ describe('metric visualization', () => {
                 "subtitle": Array [
                   "subtitle",
                 ],
-                "titleWeight": Array [
-                  "bold",
-                ],
                 "titlesTextAlign": Array [
                   "left",
                 ],
@@ -661,9 +671,6 @@ describe('metric visualization', () => {
                 ],
                 "subtitle": Array [
                   "subtitle",
-                ],
-                "titleWeight": Array [
-                  "bold",
                 ],
                 "titlesTextAlign": Array [
                   "left",
@@ -984,9 +991,6 @@ describe('metric visualization', () => {
               "subtitle": Array [
                 "subtitle",
               ],
-              "titleWeight": Array [
-                "bold",
-              ],
               "titlesTextAlign": Array [
                 "left",
               ],
@@ -1054,7 +1058,7 @@ describe('metric visualization', () => {
               datasourceLayers
             ) as ExpressionAstExpression
           ).chain[1].arguments.color[0]
-        ).toBe(euiLightVars.euiColorPrimary);
+        ).toBe(euiThemeVars.euiColorVis2);
 
         expect(
           (
@@ -1067,7 +1071,7 @@ describe('metric visualization', () => {
               datasourceLayers
             ) as ExpressionAstExpression
           ).chain[1].arguments.color[0]
-        ).toBe(euiLightVars.euiColorEmptyShade);
+        ).toBe(euiThemeVars.euiColorEmptyShade);
 
         expect(
           (
@@ -1081,7 +1085,7 @@ describe('metric visualization', () => {
               datasourceLayers
             ) as ExpressionAstExpression
           ).chain[1].arguments.color[0]
-        ).toBe(euiLightVars.euiColorEmptyShade);
+        ).toBe(euiThemeVars.euiColorEmptyShade);
 
         // this case isn't currently relevant because other parts of the code don't allow showBar to be
         // set when there isn't a max dimension but this test covers the branch anyhow
@@ -1177,14 +1181,14 @@ describe('metric visualization', () => {
           expect(secondaryMetricAST.secondaryColor).toEqual(undefined);
           expect(secondaryMetricAST.secondaryTrendBaseline).toEqual([0]);
           expect(secondaryMetricAST.secondaryTrendPalette).toEqual([
-            euiLightVars.euiColorBackgroundLightDanger,
-            euiLightVars.euiColorBackgroundLightText,
-            euiLightVars.euiColorBackgroundLightSuccess,
+            euiThemeVars.euiColorBackgroundLightDanger,
+            euiThemeVars.euiColorBackgroundLightText,
+            euiThemeVars.euiColorBackgroundLightSuccess,
           ]);
           expect(secondaryMetricAST.secondaryTrendTextPalette).toEqual([
-            euiLightVars.euiColorTextDanger,
-            euiLightVars.euiColorTextParagraph,
-            euiLightVars.euiColorTextSuccess,
+            euiThemeVars.euiColorTextDanger,
+            euiThemeVars.euiColorTextParagraph,
+            euiThemeVars.euiColorTextSuccess,
           ]);
         } else {
           fail('AST is not an object');
@@ -1229,7 +1233,6 @@ describe('metric visualization', () => {
         "primaryAlign": "right",
         "primaryPosition": "bottom",
         "secondaryAlign": "right",
-        "titleWeight": "bold",
         "titlesTextAlign": "left",
         "valueFontMode": "default",
       }
@@ -1716,8 +1719,6 @@ describe('metric visualization', () => {
             type: 'static',
             color: LENS_METRIC_SECONDARY_DEFAULT_STATIC_COLOR,
           },
-          secondaryLabel: undefined,
-          secondaryLabelPosition: 'before',
         })
       );
     });
@@ -1750,8 +1751,6 @@ describe('metric visualization', () => {
             paletteId: 'compare_to',
             baselineValue: 0,
           },
-          secondaryLabel: undefined,
-          secondaryLabelPosition: 'before',
         })
       );
     });

@@ -73,19 +73,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('does not refetch when returning to a previously expanded group', async () => {
       await runCascadeQuery();
 
-      const [firstRowId, secondRowId] = await discover.getCascadeLayoutRowIds();
+      const [firstRowId, secondRowId] = await discover.getCascadeLayoutVisibleRowIds();
       const baseline = await getCascadeRequestTimestamp();
 
       await discover.toggleCascadeLayoutRow(firstRowId);
       await expectCascadeRequestTimestampToChange(baseline);
 
       const firstTimestamp = await getCascadeRequestTimestamp();
+      // close first row so the second row is in view
+      await discover.toggleCascadeLayoutRow(firstRowId);
 
       await discover.toggleCascadeLayoutRow(secondRowId);
       await expectCascadeRequestTimestampToChange(firstTimestamp);
 
       const secondTimestamp = await getCascadeRequestTimestamp();
+      // close the just opened second row so the first row is in view
+      await discover.toggleCascadeLayoutRow(secondRowId);
 
+      // reopen previously expanded row
       await discover.toggleCascadeLayoutRow(firstRowId);
       await expectCascadeRequestTimestampToStay(secondTimestamp);
     });
@@ -93,7 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('does not refetch when re-expanding a group after switching tabs', async () => {
       await runCascadeQuery();
 
-      const [firstRowId] = await discover.getCascadeLayoutRowIds();
+      const [firstRowId] = await discover.getCascadeLayoutVisibleRowIds();
       const baseline = await getCascadeRequestTimestamp();
 
       await discover.toggleCascadeLayoutRow(firstRowId);
@@ -105,7 +110,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await unifiedTabs.createNewTab();
       await runCascadeQuery();
 
-      const [secondTabRowId] = await discover.getCascadeLayoutRowIds();
+      const [secondTabRowId] = await discover.getCascadeLayoutVisibleRowIds();
       const secondTabBaseline = await getCascadeRequestTimestamp();
 
       await discover.toggleCascadeLayoutRow(secondTabRowId);
@@ -126,7 +131,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await unifiedTabs.selectTab(0);
       await discover.waitUntilTabIsLoaded();
 
-      const [firstRowId] = await discover.getCascadeLayoutRowIds();
+      const [firstRowId] = await discover.getCascadeLayoutVisibleRowIds();
       const baseline = await getCascadeRequestTimestamp();
 
       await discover.toggleCascadeLayoutRow(firstRowId);

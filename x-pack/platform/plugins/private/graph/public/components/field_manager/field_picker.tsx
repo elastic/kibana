@@ -82,7 +82,7 @@ export function FieldPicker({
         <EuiBadge
           data-test-subj="graph-add-field-button"
           color="hollow"
-          iconType="plusInCircleFilled"
+          iconType="plusCircle"
           aria-disabled={!hasFields}
           {...onClickProps}
           css={[

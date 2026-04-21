@@ -37,22 +37,24 @@ const AUTO_REFRESH_UNIT_OPTIONS: Array<{ value: AutoRefreshIntervalUnit; text: s
 export function AutoRefresh({ autoRefresh }: { autoRefresh: AutoRefreshSettings }) {
   const { settings, onSettingsChange } = useDateRangePickerContext();
 
-  const derived = msToAutoRefreshInterval(autoRefresh.interval, autoRefresh.intervalUnit);
+  const derived = msToAutoRefreshInterval(autoRefresh.intervalMs, autoRefresh.intervalDisplayUnit);
 
   const [countInput, setCountInput] = useState<number | ''>(derived.count);
 
   // Sync count input when interval or display unit changes externally (not only interval ms).
   const prevAutoRefreshDisplayKeyRef = useRef(
-    `${autoRefresh.interval}\0${autoRefresh.intervalUnit ?? ''}`
+    `${autoRefresh.intervalMs}\0${autoRefresh.intervalDisplayUnit}`
   );
 
   useEffect(() => {
-    const key = `${autoRefresh.interval}\0${autoRefresh.intervalUnit ?? ''}`;
+    const key = `${autoRefresh.intervalMs}\0${autoRefresh.intervalDisplayUnit}`;
     if (key !== prevAutoRefreshDisplayKeyRef.current) {
-      setCountInput(msToAutoRefreshInterval(autoRefresh.interval, autoRefresh.intervalUnit).count);
+      setCountInput(
+        msToAutoRefreshInterval(autoRefresh.intervalMs, autoRefresh.intervalDisplayUnit).count
+      );
       prevAutoRefreshDisplayKeyRef.current = key;
     }
-  }, [autoRefresh.interval, autoRefresh.intervalUnit]);
+  }, [autoRefresh.intervalMs, autoRefresh.intervalDisplayUnit]);
 
   const handleToggle = useCallback(() => {
     onSettingsChange({
@@ -77,7 +79,7 @@ export function AutoRefresh({ autoRefresh }: { autoRefresh: AutoRefreshSettings 
           ...settings,
           autoRefresh: {
             ...autoRefresh,
-            interval: autoRefreshIntervalToMs(parsed, derived.unit),
+            intervalMs: autoRefreshIntervalToMs(parsed, derived.unit),
           },
         });
       }
@@ -94,8 +96,8 @@ export function AutoRefresh({ autoRefresh }: { autoRefresh: AutoRefreshSettings 
         ...settings,
         autoRefresh: {
           ...autoRefresh,
-          interval: autoRefreshIntervalToMs(currentCount, newUnit),
-          intervalUnit: newUnit,
+          intervalMs: autoRefreshIntervalToMs(currentCount, newUnit),
+          intervalDisplayUnit: newUnit,
         },
       });
     },

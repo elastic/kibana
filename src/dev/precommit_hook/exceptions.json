@@ -394,7 +394,6 @@
   },
   "@elastic/search-kibana": {
     "src/platform/packages/shared/deeplinks/agent_builder": "'agent_builder' should be kebab-case",
-    "src/platform/packages/shared/deeplinks/data_sources": "'data_sources' should be kebab-case",
     "src/platform/packages/shared/deeplinks/workplace_ai": "'workplace_ai' should be kebab-case",
     "src/platform/packages/shared/serverless/settings/search_project": "'search_project' should be kebab-case",
     "src/platform/packages/shared/serverless/settings/workplace_ai_project": "'workplace_ai_project' should be kebab-case",

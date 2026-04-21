@@ -33,6 +33,7 @@ import {
   buildInternalSavedObjectsClientUnsafe,
 } from '../tasks/helpers';
 import { getIsIdBasedRiskScoringEnabled } from '../is_id_based_risk_scoring_enabled';
+import { getIndexPatternDataStream } from '../configurations';
 import { resetToZero } from './steps/reset_to_zero';
 import { buildAlertFilters } from './steps/build_alert_filters';
 import { scoreBaseEntities } from './steps/score_base_entities';
@@ -115,7 +116,7 @@ export const createRiskScoreMaintainer = ({
       });
 
       logger.debug(`Ensuring risk score resources exist for namespace "${namespace}"`);
-      await initSavedObjects({ savedObjectsClient: soClient, namespace });
+      await initSavedObjects({ savedObjectsClient: soClient, logger, namespace });
       await riskScoreDataClient.init();
       await ensureLookupIndex({ esClient, namespace });
       logger.info(`Risk score maintainer setup completed for namespace "${namespace}"`);
@@ -209,7 +210,7 @@ const initializeRunContext = async ({
   });
 
   logger.debug(`Ensuring risk score resources exist for namespace "${namespace}"`);
-  await initSavedObjects({ savedObjectsClient: soClient, namespace });
+  await initSavedObjects({ savedObjectsClient: soClient, logger, namespace });
   await riskScoreDataClient.init();
   const lookupIndex = await ensureLookupIndex({ esClient, namespace });
 
@@ -276,7 +277,7 @@ const loadRunConfiguration = async ({
   entityAnalyticsConfig: EntityAnalyticsConfig;
 }): Promise<LoadedRunConfig> => {
   const configuration: RiskEngineConfiguration =
-    (await getConfiguration({ savedObjectsClient: soClient })) ??
+    (await getConfiguration({ savedObjectsClient: soClient, logger, namespace })) ??
     getDefaultRiskEngineConfiguration({ namespace });
   const dataViewId = configuration.dataViewId ?? getAlertsIndex(namespace);
   const { index: alertsIndex } = await riskScoreDataClient.getRiskInputsIndex({ dataViewId });
@@ -427,6 +428,12 @@ const executeEntityTypeRun = async ({
     runLogger.error(`resolution scoring failed: ${errorMessage}`);
     resolutionStage.error({ errorKind: 'unexpected' });
   }
+
+  // Refresh the risk score data stream so reset-to-zero can see scores written in phases 1 & 2.
+  // Without this, the ES|QL query in reset may not see the new documents and could incorrectly
+  // zero out scores that were just written in this run.
+  const { alias: riskScoreAlias } = getIndexPatternDataStream(runContext.namespace);
+  await runContext.esClient.indices.refresh({ index: riskScoreAlias });
 
   // Stage 3: reset stale positive scores not touched in this run.
   if (runConfig.configuration.enableResetToZero !== false) {

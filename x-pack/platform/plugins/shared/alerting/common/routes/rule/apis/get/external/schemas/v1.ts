@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import path from 'node:path';
 import { schema } from '@kbn/config-schema';
 import { ruleResponseSchema } from '../../../../response/schemas/v1';
+
+export const getRuleParamsExamples = () => path.join(__dirname, 'examples_get_rule.yaml');
 
 export const getRuleRequestParamsSchema = schema.object({
   id: schema.string({

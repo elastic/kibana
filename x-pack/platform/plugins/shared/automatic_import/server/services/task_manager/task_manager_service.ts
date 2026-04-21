@@ -22,12 +22,14 @@ import type {
 import { TaskCost, TaskPriority } from '@kbn/task-manager-plugin/server/task';
 import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import type { Pipeline } from '@kbn/ingest-pipelines-plugin/common/types';
+import { getConnectorDefaultModel } from '@kbn/inference-common';
 import { MAX_ATTEMPTS_AI_WORKFLOWS, TASK_TIMEOUT_DURATION } from '../constants';
 import { TASK_STATUSES } from '../saved_objects/constants';
 import { AgentService } from '../agents/agent_service';
 import type { AutomaticImportSamplesIndexService } from '../samples_index/index_service';
 import { generateFieldMappings } from '../build_integration/fields';
 import { validateFieldMappings } from '../build_integration/validate_fields';
+import type { FieldMapping } from '../../agents/state';
 import type { LangSmithOptions } from '../../routes/types';
 import type { AutomaticImportPluginStartDependencies } from '../../types';
 import type { AutomaticImportSavedObjectService } from '../saved_objects/saved_objects_service';
@@ -115,9 +117,6 @@ export class TaskManagerService {
             }
           },
           cancel: async () => {
-            if (!abortController.signal.aborted) {
-              abortController.abort();
-            }
             return this.cancelTask(taskInstance);
           },
         }),
@@ -148,41 +147,19 @@ export class TaskManagerService {
       dataStreamId: params.dataStreamId,
     });
 
-    try {
-      const taskInstance = await this.taskManager.schedule(
-        {
-          id: taskId,
-          taskType: DATA_STREAM_CREATION_TASK_TYPE,
-          params,
-          state: { task_status: TASK_STATUSES.pending },
-          scope: ['automaticImport'],
-        },
-        { request }
-      );
+    const taskInstance = await this.taskManager.ensureScheduled(
+      {
+        id: taskId,
+        taskType: DATA_STREAM_CREATION_TASK_TYPE,
+        params,
+        state: { task_status: TASK_STATUSES.pending },
+        scope: ['automaticImport'],
+      },
+      { request }
+    );
 
-      this.logger.debug(`Task scheduled: ${taskInstance.id}`);
-      return { taskId: taskInstance.id };
-    } catch (error: unknown) {
-      const statusCode =
-        typeof error === 'object' && error !== null && 'statusCode' in error
-          ? (error as { statusCode?: number }).statusCode
-          : undefined;
-      const message = error instanceof Error ? error.message : '';
-      // If task already exists (version conflict), return the existing task ID
-      if (statusCode === 409 || message.includes('version conflict')) {
-        this.logger.debug(`Task ${taskId} already exists, returning existing task ID`);
-        try {
-          const existingTask = await this.taskManager.get(taskId);
-          return { taskId: existingTask.id };
-        } catch (getError) {
-          // If we can't get the task, re-throw the original error
-          this.logger.error(`Failed to get existing task ${taskId}:`, getError);
-          throw error;
-        }
-      }
-      // Re-throw other errors
-      throw error;
-    }
+    this.logger.debug(`Task scheduled: ${taskInstance.id}`);
+    return { taskId: taskInstance.id };
   }
 
   public async removeDataStreamCreationTask(dataStreamParams: DataStreamParams): Promise<void> {
@@ -249,6 +226,9 @@ export class TaskManagerService {
     );
 
     const startTime = Date.now();
+    let modelName: string | undefined;
+    let connectorType: string | undefined;
+    let connectorName: string | undefined;
 
     try {
       if (!integrationId || !dataStreamId || !connectorId) {
@@ -274,6 +254,15 @@ export class TaskManagerService {
           telemetryMetadata: { pluginId: 'automatic_import' },
         },
       });
+
+      try {
+        const inferenceConnector = model.getConnector();
+        modelName = getConnectorDefaultModel(inferenceConnector);
+        connectorType = inferenceConnector.type;
+        connectorName = inferenceConnector.name;
+      } catch (resolveErr) {
+        this.logger.warn(`Failed to resolve model info for telemetry: ${resolveErr}`);
+      }
 
       const fieldsMetadataClient = await pluginsStart.fieldsMetadata.getClient(request);
 
@@ -302,9 +291,11 @@ export class TaskManagerService {
         `Pipeline generation results objects: ${JSON.stringify(result.pipeline_generation_results)}`
       );
 
+      const agentFieldMappings = (result.field_mappings as FieldMapping[] | undefined) ?? undefined;
       const fieldMapping = await generateFieldMappings(
         (pipelineGenerationResultsObjects ?? []) as Array<Record<string, unknown>>,
-        fieldsMetadataClient
+        fieldsMetadataClient,
+        agentFieldMappings
       );
       this.logger.debug(`Generated field mappings: ${JSON.stringify(fieldMapping)}`);
       this.throwIfAborted(abortSignal);
@@ -339,6 +330,19 @@ export class TaskManagerService {
 
       this.logger.debug(`Data stream ${dataStreamId} updated successfully`);
       this.logger.debug(`Task ${taskId} result: ${JSON.stringify(result)}`);
+
+      this.reportDataStreamCreationComplete({
+        integrationId,
+        integrationName,
+        dataStreamId,
+        dataStreamName,
+        connectorId,
+        modelName,
+        connectorType,
+        connectorName,
+        durationMs: Date.now() - startTime,
+        success: true,
+      });
 
       return {
         state: {
@@ -393,6 +397,10 @@ export class TaskManagerService {
         integrationName,
         dataStreamId,
         dataStreamName,
+        connectorId,
+        modelName,
+        connectorType,
+        connectorName,
         durationMs: Date.now() - startTime,
         success: false,
         errorMessage,
@@ -410,6 +418,10 @@ export class TaskManagerService {
     integrationName: string;
     dataStreamId: string;
     dataStreamName: string;
+    connectorId: string;
+    modelName?: string;
+    connectorType?: string;
+    connectorName?: string;
     durationMs: number;
     success: boolean;
     errorMessage?: string;
@@ -421,8 +433,12 @@ export class TaskManagerService {
         integrationName: params.integrationName,
         dataStreamId: params.dataStreamId,
         dataStreamName: params.dataStreamName,
+        connectorId: params.connectorId,
         durationMs: params.durationMs,
         success: params.success,
+        ...(params.modelName ? { modelName: params.modelName } : {}),
+        ...(params.connectorType ? { connectorType: params.connectorType } : {}),
+        ...(params.connectorName ? { connectorName: params.connectorName } : {}),
         ...(params.errorMessage ? { errorMessage: params.errorMessage } : {}),
       });
     } catch (telemetryError) {
@@ -437,7 +453,6 @@ export class TaskManagerService {
   }
 
   private async cancelTask(taskInstance: ConcreteTaskInstance) {
-    // Cancel the AI task here
     this.logger.debug(`Cancelling task ${taskInstance.id}`);
     return { state: { task_status: TASK_STATUSES.cancelled } };
   }

@@ -10,6 +10,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { Header } from './header';
+import { REMOTE_DOCUMENT_BADGE_TEST_ID } from './components/remote_document_badge';
 import { ALERT_SUMMARY_PANEL_TEST_ID } from '../shared/components/test_ids';
 
 jest.mock('../../common/lib/kibana', () => ({
@@ -23,12 +24,11 @@ jest.mock('../../common/lib/kibana', () => ({
 }));
 
 jest.mock('./components/title', () => ({
-  Title: ({ hit, titleHref }: { hit: DataTableRecord; titleHref?: string }) => (
+  Title: ({ hit }: { hit: DataTableRecord }) => (
     <div
       data-test-subj="mockHeaderTitle"
       data-hit-id={hit.id}
       data-event-kind={String(hit.flattened['event.kind'] ?? '')}
-      data-title-href={titleHref ?? ''}
     />
   ),
 }));
@@ -107,6 +107,18 @@ const eventHit = createMockHit({
   'kibana.alert.risk_score': 21,
 });
 
+const remoteAlertHit = createMockHit({
+  'event.kind': 'signal',
+  'kibana.alert.rule.name': 'Test Rule',
+  'kibana.alert.rule.uuid': 'test-rule-id',
+  _index: 'remote-cluster:index-name',
+});
+
+const remoteEventHit = createMockHit({
+  'event.kind': 'event',
+  _index: 'remote-cluster:index-name',
+});
+
 const defaultHeaderProps: Pick<Parameters<typeof Header>[0], 'onAlertUpdated' | 'onShowNotes'> = {
   onAlertUpdated: jest.fn(),
   onShowNotes: jest.fn(),
@@ -144,19 +156,18 @@ describe('<DocumentHeader />', () => {
     expect(getByTestId('mockHeaderTitle')).toHaveAttribute('data-event-kind', 'signal');
   });
 
-  it('should resolve and pass titleHref for alerts with a rule id', () => {
+  it('should pass alert documents to the header title', () => {
     const { getByTestId } = renderHeader({ hit: alertHit });
 
-    expect(getByTestId('mockHeaderTitle')).toHaveAttribute(
-      'data-title-href',
-      'https://example.com/rule/test-rule-id'
-    );
+    expect(getByTestId('mockHeaderTitle')).toHaveAttribute('data-hit-id', '1');
+    expect(getByTestId('mockHeaderTitle')).toHaveAttribute('data-event-kind', 'signal');
   });
 
-  it('should not pass titleHref when there is no rule id', () => {
+  it('should pass non-alert documents to the header title', () => {
     const { getByTestId } = renderHeader({ hit: eventHit });
 
-    expect(getByTestId('mockHeaderTitle')).toHaveAttribute('data-title-href', '');
+    expect(getByTestId('mockHeaderTitle')).toHaveAttribute('data-hit-id', '1');
+    expect(getByTestId('mockHeaderTitle')).toHaveAttribute('data-event-kind', 'event');
   });
 
   it('should render the alert summary blocks for alerts', () => {
@@ -204,5 +215,23 @@ describe('<DocumentHeader />', () => {
     const { queryByTestId } = renderHeader({ hit: eventHit });
 
     expect(queryByTestId(ALERT_SUMMARY_PANEL_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('should not render the remote badge for local documents', () => {
+    const { queryByTestId } = renderHeader({ hit: alertHit });
+
+    expect(queryByTestId(REMOTE_DOCUMENT_BADGE_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('should render "Remote alert" badge for remote alerts', () => {
+    const { getByTestId } = renderHeader({ hit: remoteAlertHit });
+
+    expect(getByTestId(REMOTE_DOCUMENT_BADGE_TEST_ID)).toHaveTextContent('Remote alert');
+  });
+
+  it('should render "Remote event" badge for remote non-alert documents', () => {
+    const { getByTestId } = renderHeader({ hit: remoteEventHit });
+
+    expect(getByTestId(REMOTE_DOCUMENT_BADGE_TEST_ID)).toHaveTextContent('Remote event');
   });
 });

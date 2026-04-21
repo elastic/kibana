@@ -55,12 +55,38 @@ describe('useStats', () => {
     expect(mockHttpGet).toHaveBeenCalledWith('/internal/search_homepage/stats');
     expect(result.current.data).toEqual({
       size: '10.5 GB',
-      documents: 1000000,
+      hasNoDocuments: false,
     });
 
     expect(cachedData).toEqual({
       size: '10.5 GB',
-      documents: 1000000,
+      hasNoDocuments: false,
+    });
+  });
+  it('should return hasNoDocuments to true when has document', async () => {
+    const mockResponse = {
+      sizeStats: {
+        size: '0 GB',
+        documents: 0,
+      },
+    };
+
+    mockHttpGet.mockResolvedValue(mockResponse);
+
+    const { result } = renderHook(() => useStats(), { wrapper });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    const cachedData = queryClient.getQueryData(['fetchSizeStats']);
+
+    expect(mockHttpGet).toHaveBeenCalledWith('/internal/search_homepage/stats');
+    expect(result.current.data).toEqual({
+      size: '0 GB',
+      hasNoDocuments: true,
+    });
+
+    expect(cachedData).toEqual({
+      size: '0 GB',
+      hasNoDocuments: true,
     });
   });
 });

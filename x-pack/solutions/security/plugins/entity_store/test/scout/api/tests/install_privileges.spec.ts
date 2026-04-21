@@ -14,14 +14,14 @@ import {
   ENTITY_STORE_SOURCE_INDICES_PRIVILEGES,
   ENTITY_STORE_TARGET_INDICES_PRIVILEGES,
 } from '../../../../server/domain/constants';
-import { getLatestEntitiesIndexName } from '../../../../common/domain/entity_index';
+import { getEntitiesAlias, ENTITY_LATEST } from '../../../../common/domain/entity_index';
 import { PUBLIC_HEADERS, ENTITY_STORE_ROUTES, ENTITY_STORE_TAGS } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 import { clearEntityStoreIndices } from '../fixtures/helpers';
 import { getUpdatesEntitiesDataStreamName } from '../../../../server/domain/asset_manager/updates_data_stream';
 
 apiTest.describe('Entity Store install - privilege checks', { tag: ENTITY_STORE_TAGS }, () => {
-  const TARGET_INDEX_LATEST = getLatestEntitiesIndexName('default');
+  const TARGET_INDEX_LATEST = getEntitiesAlias(ENTITY_LATEST, 'default');
   const TARGET_INDEX_UPDATES = getUpdatesEntitiesDataStreamName('default');
 
   const SAVED_OBJECT_PRIVILEGE = 'saved_object:entity-engine-descriptor-v2/create';

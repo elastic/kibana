@@ -16,9 +16,13 @@ import { EDITOR_SCROLLBAR_WIDTH_PX, FOCUSED_STEP_DECORATION_INSET_PX } from './c
 export const EXECUTION_YAML_SNAPSHOT_CLASS = 'execution-yaml-snapshot';
 
 const editorStyleMap = {
-  actionsMenuPopoverPanel: css({
-    minInlineSize: '600px',
-  }),
+  actionsMenuPopoverPanel: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      minInlineSize: '600px',
+      maxInlineSize: '600px',
+      maxBlockSize: '520px',
+      borderRadius: euiTheme.border.radius.medium,
+    }),
 
   container: ({ euiTheme }: UseEuiTheme) =>
     css({
@@ -206,6 +210,14 @@ const editorStyleMap = {
         backgroundColor: 'transparent',
       },
     }),
+  agentBuilderSectionCss: (euiThemeContext: UseEuiTheme) =>
+    css({
+      position: 'absolute',
+      top: euiThemeContext.euiTheme.size.xxs,
+      right: euiThemeContext.euiTheme.size.m,
+      zIndex: 10,
+    }),
+  hiddenButtonCss: css({ display: 'none' }),
 };
 
 export const useWorkflowEditorStyles = () => {

@@ -3321,6 +3321,48 @@
             "returnComment": [
               "T, encrypted attributes"
             ]
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.ISavedObjectsEncryptionExtension.getEncryptedAttributes",
+            "type": "Function",
+            "tags": [],
+            "label": "getEncryptedAttributes",
+            "description": [
+              "\nReturns the set of attribute names that are encrypted for the given type.\nReturns undefined if the type is not registered as encryptable."
+            ],
+            "signature": [
+              "(type: string) => ReadonlySet<string> | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/server/src/extensions/encryption.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectsEncryptionExtension.getEncryptedAttributes.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [
+                  "- the string name of the object type"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/core/packages/saved-objects/server/src/extensions/encryption.ts",
+                "lineNumber": 81,
+                "columnNumber": 28,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "the set of encrypted attribute names, or undefined"
+            ]
           }
         ],
         "initialIsOpen": false
@@ -6452,14 +6494,6 @@
           {
             "plugin": "savedSearch",
             "path": "src/platform/plugins/shared/saved_search/server/saved_objects/search_migrations.ts"
-          },
-          {
-            "plugin": "dataCatalog",
-            "path": "x-pack/platform/plugins/shared/data_catalog/common/data_source_spec.ts"
-          },
-          {
-            "plugin": "dataCatalog",
-            "path": "x-pack/platform/plugins/shared/data_catalog/common/data_source_spec.ts"
           },
           {
             "plugin": "canvas",
@@ -9703,6 +9737,8 @@
             "signature": [
               "(includedHiddenTypes?: string[] | undefined, extensions?: ",
               "SavedObjectsExtensions",
+              " | undefined, serverTiming?: ",
+              "RequestTiming",
               " | undefined) => ",
               "ISavedObjectsRepository"
             ],
@@ -9725,7 +9761,7 @@
                   "string[] | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/server/src/client_factory.ts",
-                "lineNumber": 115,
+                "lineNumber": 116,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -9745,7 +9781,27 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/server/src/client_factory.ts",
-                "lineNumber": 116,
+                "lineNumber": 117,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.SavedObjectsRepositoryFactory.createInternalRepository.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "serverTiming",
+                "description": [
+                  "- Optional server timing API for observability purposes only (not used for authentication)."
+                ],
+                "signature": [
+                  "RequestTiming",
+                  " | undefined"
+                ],
+                "path": "src/core/packages/saved-objects/server/src/client_factory.ts",
+                "lineNumber": 118,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -11198,22 +11254,6 @@
                 "path": "src/platform/plugins/shared/data/server/search/saved_objects/search_session.ts"
               },
               {
-                "plugin": "dashboard",
-                "path": "src/platform/plugins/shared/dashboard/server/dashboard_saved_object/dashboard_saved_object.ts"
-              },
-              {
-                "plugin": "share",
-                "path": "src/platform/plugins/shared/share/server/url_service/saved_objects/register_url_service_saved_object_type.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/server/saved_objects/saved_objects_service.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/server/saved_objects/saved_objects_service.ts"
-              },
-              {
                 "plugin": "links",
                 "path": "src/platform/plugins/private/links/server/saved_objects/links.ts"
               },
@@ -11228,6 +11268,18 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/server/saved_objects/saved_objects.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/platform/plugins/shared/spaces/server/saved_objects/saved_objects_service.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/platform/plugins/shared/spaces/server/saved_objects/saved_objects_service.ts"
+              },
+              {
+                "plugin": "share",
+                "path": "src/platform/plugins/shared/share/server/url_service/saved_objects/register_url_service_saved_object_type.ts"
               },
               {
                 "plugin": "actions",
@@ -11246,12 +11298,12 @@
                 "path": "x-pack/platform/plugins/shared/apm_sources_access/server/saved_objects/apm_indices.ts"
               },
               {
-                "plugin": "lens",
-                "path": "x-pack/platform/plugins/shared/lens/server/saved_objects.ts"
-              },
-              {
                 "plugin": "savedSearch",
                 "path": "src/platform/plugins/shared/saved_search/server/saved_objects/search.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/server/saved_objects.ts"
               },
               {
                 "plugin": "cases",
@@ -11300,6 +11352,10 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/platform/plugins/shared/dashboard/server/dashboard_saved_object/dashboard_saved_object.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -11927,16 +11983,16 @@
                 "path": "src/platform/plugins/shared/data/server/search/saved_objects/search_session.ts"
               },
               {
-                "plugin": "dashboard",
-                "path": "src/platform/plugins/shared/dashboard/server/dashboard_saved_object/dashboard_saved_object.ts"
-              },
-              {
                 "plugin": "spaces",
                 "path": "x-pack/platform/plugins/shared/spaces/server/saved_objects/saved_objects_service.ts"
               },
               {
                 "plugin": "savedSearch",
                 "path": "src/platform/plugins/shared/saved_search/server/saved_objects/search.ts"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/platform/plugins/shared/dashboard/server/dashboard_saved_object/dashboard_saved_object.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -12093,14 +12149,6 @@
                 "path": "src/platform/plugins/shared/data/server/saved_objects/query.ts"
               },
               {
-                "plugin": "dashboard",
-                "path": "src/platform/plugins/shared/dashboard/server/dashboard_saved_object/dashboard_saved_object.ts"
-              },
-              {
-                "plugin": "savedObjectsTagging",
-                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/saved_objects/tag.ts"
-              },
-              {
                 "plugin": "actions",
                 "path": "x-pack/platform/plugins/shared/actions/server/saved_objects/index.ts"
               },
@@ -12113,12 +12161,12 @@
                 "path": "x-pack/platform/plugins/shared/alerting/server/saved_objects/index.ts"
               },
               {
-                "plugin": "lens",
-                "path": "x-pack/platform/plugins/shared/lens/server/saved_objects.ts"
-              },
-              {
                 "plugin": "savedSearch",
                 "path": "src/platform/plugins/shared/saved_search/server/saved_objects/search.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/server/saved_objects.ts"
               },
               {
                 "plugin": "cases",
@@ -12149,8 +12197,16 @@
                 "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/templates/index.ts"
               },
               {
+                "plugin": "savedObjectsTagging",
+                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/saved_objects/tag.ts"
+              },
+              {
                 "plugin": "maps",
                 "path": "x-pack/platform/plugins/shared/maps/server/saved_objects/setup_saved_objects.ts"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/platform/plugins/shared/dashboard/server/dashboard_saved_object/dashboard_saved_object.ts"
               },
               {
                 "plugin": "canvas",

@@ -56,7 +56,7 @@ export class SetViewControl extends Component<Props, State> {
               size="s"
               onClick={this._togglePopover}
               data-test-subj="toggleSetViewVisibilityButton"
-              iconType="crosshairs"
+              iconType="crosshair"
               color="text"
               aria-label={i18n.translate('xpack.maps.setViewControl.goToButtonLabel', {
                 defaultMessage: 'Go to',

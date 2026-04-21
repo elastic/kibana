@@ -32,6 +32,8 @@ export interface StreamsApiService {
   ) => Promise<void>;
   /** See `./types` JSDoc for casting to `@kbn/streams-schema` definition types in tests. */
   getStreamDefinition: (streamName: string) => Promise<StreamsIngestGetResponse>;
+  /** Materialize backing data stream for deferred wired roots (e.g. `logs.otel`). */
+  restoreDataStream: (streamName: string) => Promise<void>;
   deleteStream: (streamName: string) => Promise<void>;
   updateStream: (streamName: string, updateBody: { ingest: IngestUpsertRequest }) => Promise<void>;
   clearStreamChildren: (streamName: string) => Promise<void>;
@@ -100,6 +102,14 @@ export const getStreamsApiService = ({
         return response.data as StreamsIngestGetResponse;
       });
     },
+    restoreDataStream: async (streamName: string) => {
+      await measurePerformanceAsync(log, 'streamsApi.restoreDataStream', async () => {
+        await kbnClient.request({
+          method: 'POST',
+          path: `${basePath}/internal/streams/${streamName}/_restore_data_stream`,
+        });
+      });
+    },
     deleteStream: async (streamName: string) => {
       await measurePerformanceAsync(log, 'streamsApi.deleteStream', async () => {
         await kbnClient.request({
@@ -121,11 +131,9 @@ export const getStreamsApiService = ({
       await measurePerformanceAsync(log, 'streamsApi.clearStreamChildren', async () => {
         const definition = await service.getStreamDefinition(streamName);
         if (isWiredStreamDefinition(definition.stream)) {
-          await Promise.all(
-            definition.stream.ingest.wired.routing.map((child) =>
-              service.deleteStream(child.destination)
-            )
-          );
+          for (const child of definition.stream.ingest.wired.routing) {
+            await service.deleteStream(child.destination);
+          }
         }
       });
     },

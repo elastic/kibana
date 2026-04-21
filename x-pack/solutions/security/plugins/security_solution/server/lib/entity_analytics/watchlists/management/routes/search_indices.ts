@@ -11,12 +11,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { take } from 'lodash/fp';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
-import {
-  API_VERSIONS,
-  APP_ID,
-  EXCLUDE_ELASTIC_CLOUD_INDICES,
-  INCLUDE_INDEX_PATTERN,
-} from '../../../../../../common/constants';
+import { API_VERSIONS, APP_ID } from '../../../../../../common/constants';
 import { WATCHLISTS_INDICES_URL } from '../../../../../../common/entity_analytics/watchlists/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { withMinimumLicense } from '../../../utils/with_minimum_license';
@@ -33,15 +28,6 @@ const WATCHLIST_ENTITY_FIELDS = [
   'user.email',
   'entity.id',
 ];
-
-// Indices to exclude from the search pattern
-const PRE_EXCLUDE_INDICES: string[] = [
-  ...INCLUDE_INDEX_PATTERN.map((index) => `-${index}`),
-  ...EXCLUDE_ELASTIC_CLOUD_INDICES,
-];
-
-// Indices to exclude from the results (patterns that can't be excluded via search)
-const POST_EXCLUDE_INDICES = ['.'];
 
 const LIMIT = 20;
 
@@ -81,7 +67,7 @@ export const searchWatchlistIndicesRoute = (
           const esClient = core.elasticsearch.client.asCurrentUser;
 
           const { indices, fields } = await esClient.fieldCaps({
-            index: [query ? `*${query}*` : '*', ...PRE_EXCLUDE_INDICES],
+            index: query ? `*${query}*` : '*',
             types: ['keyword'],
             fields: WATCHLIST_ENTITY_FIELDS,
             include_unmapped: true,
@@ -109,9 +95,7 @@ export const searchWatchlistIndicesRoute = (
             }
           }
 
-          const matchingIndices = Array.from(matchingIndicesSet).filter(
-            (name) => !POST_EXCLUDE_INDICES.some((pattern) => name.startsWith(pattern))
-          );
+          const matchingIndices = Array.from(matchingIndicesSet);
 
           return response.ok({
             body: take(LIMIT, matchingIndices.sort()),

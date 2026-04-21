@@ -110,7 +110,7 @@ export class IconSelect extends Component {
     const { value, svg, label } = this.props.icon;
     return (
       <EuiFieldText
-        icon={{ type: 'arrowDown', side: 'right' }}
+        icon={{ type: 'chevronSingleDown', side: 'right' }}
         onClick={this._togglePopover}
         onKeyDown={this._handleKeyboardActivity}
         value={label || value}

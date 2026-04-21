@@ -20,6 +20,7 @@ import {
 import { Controller } from 'react-hook-form';
 import type { Control } from 'react-hook-form';
 import { labels } from '../../../utils/i18n';
+import { SkillReferencedContentFieldArray } from '../../skills/skill_referenced_content_field_array';
 import type { SkillFormData } from '../../skills/skill_form_validation';
 
 interface SkillFormProps {
@@ -111,6 +112,10 @@ export const SkillForm: React.FC<SkillFormProps> = ({ control, toolOptions, read
           </EuiFormRow>
         )}
       />
+
+      <EuiSpacer size="m" />
+
+      <SkillReferencedContentFieldArray control={control} />
 
       <EuiSpacer size="m" />
 

@@ -130,7 +130,6 @@
     "xpack.screenshotting": "platform/plugins/shared/screenshotting",
     "xpack.searchSharedUI": "solutions/search/packages/shared-ui",
     "xpack.searchHomepage": "solutions/search/plugins/search_homepage",
-    "xpack.searchIndices": "solutions/search/plugins/search_indices",
     "xpack.searchNavigation": "solutions/search/plugins/search_navigation",
     "xpack.searchNotebooks": "solutions/search/plugins/search_notebooks",
     "xpack.searchPlayground": "solutions/search/plugins/search_playground",

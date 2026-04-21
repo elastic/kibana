@@ -28,6 +28,10 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type {
+  SearchInferenceEndpointsPluginSetup,
+  SearchInferenceEndpointsPluginStart,
+} from '@kbn/search-inference-endpoints/server';
+import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
@@ -56,6 +60,7 @@ export interface AutomaticImportPluginSetupDependencies {
   spaces?: SpacesPluginSetup;
   features: FeaturesPluginSetup;
   taskManager: TaskManagerSetupContract;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
 }
 export interface AutomaticImportPluginStartDependencies {
   spaces?: SpacesPluginStart;
@@ -65,6 +70,7 @@ export interface AutomaticImportPluginStartDependencies {
   security: SecurityPluginStart;
   taskManager: TaskManagerStartContract;
   fieldsMetadata: FieldsMetadataServerStart;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
 }
 
 export interface AutomaticImportPluginApiRequestHandlerContext {

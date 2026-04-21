@@ -142,17 +142,25 @@ const toExpression = (
     return null;
   }
 
+  const colorMode = state?.colorMode ?? 'none';
+  const palette =
+    colorMode === 'palette'
+      ? state.palette?.params
+        ? state.palette
+        : getDefaultPalette(paletteService)
+      : undefined;
+
   const gaugeFn = buildExpressionFunction<GaugeExpressionFunctionDefinition>('gauge', {
     metric: state.metricAccessor,
     min: state.minAccessor,
     max: state.maxAccessor,
     goal: state.goalAccessor,
     shape: state.shape ?? GaugeShapes.HORIZONTAL_BULLET,
-    colorMode: state?.colorMode ?? 'none',
-    palette: state.palette?.params
+    colorMode,
+    palette: palette?.params
       ? paletteService
           .get(CUSTOM_PALETTE)
-          .toExpression(computePaletteParams(paletteService, state.palette))
+          .toExpression(computePaletteParams(paletteService, palette))
       : undefined,
     ticksPosition: state.ticksPosition ?? 'auto',
     labelMinor: state.labelMinor,
@@ -672,7 +680,12 @@ function getConfigurationAccessorsAndPalette(
   paletteService: PaletteRegistry,
   activeData?: FramePublicAPI['activeData']
 ) {
-  const hasColoring = Boolean(state.colorMode !== 'none' && state.palette?.params?.stops);
+  const effectivePalette =
+    state.colorMode === 'palette'
+      ? state.palette?.params?.stops
+        ? state.palette
+        : getDefaultPalette(paletteService)
+      : undefined;
 
   const row = getActiveDataForLayer(state?.layerId, activeData)?.rows?.[0];
   const { metricAccessor } = state ?? {};
@@ -680,12 +693,12 @@ function getConfigurationAccessorsAndPalette(
   const accessors = getAccessorsFromState(state);
 
   let palette;
-  if (row != null && metricAccessor != null && state?.palette != null && hasColoring) {
+  if (row != null && metricAccessor != null && effectivePalette != null) {
     const currentMinMax = {
       min: getMinValue(row, accessors),
       max: getMaxValue(row, accessors),
     };
-    const displayStops = applyPaletteParams(paletteService, state?.palette, currentMinMax);
+    const displayStops = applyPaletteParams(paletteService, effectivePalette, currentMinMax);
     palette = displayStops.map(({ color }) => color);
   }
   return { metricAccessor, accessors, palette };

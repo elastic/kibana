@@ -13,17 +13,22 @@ import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import type { DeleteResult } from '@kbn/content-management-plugin/common';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import type { SavedObjectsResolveResponse } from '@kbn/core/server';
-import type { DashboardSearchRequestParams, DashboardSearchResponseBody } from '../../server';
+import type {
+  DashboardCreateRequestBody,
+  DashboardSearchRequestParams,
+  DashboardSearchResponseBody,
+  DashboardUpdateRequestBody,
+} from '../../server';
 import {
   DASHBOARD_API_PATH,
   DASHBOARD_API_VERSION,
   DASHBOARD_APP_API_PATH,
+  DASHBOARD_APP_API_VERSION,
   DASHBOARD_SAVED_OBJECT_TYPE,
 } from '../../common/constants';
 import type {
   DashboardCreateResponseBody,
   DashboardReadResponseBody,
-  DashboardState,
   DashboardUpdateResponseBody,
 } from '../../server';
 import { coreServices } from '../services/kibana_services';
@@ -49,11 +54,11 @@ const buildDashboardAppPath = (id: string) => buildPath(`${DASHBOARD_APP_API_PAT
 
 export const dashboardClient = {
   create: async (
-    dashboardState: DashboardState,
+    dashboardState: DashboardCreateRequestBody,
     accessMode?: SavedObjectAccessControl['accessMode']
   ) => {
     return coreServices.http.post<DashboardCreateResponseBody>(DASHBOARD_APP_API_PATH, {
-      version: DASHBOARD_API_VERSION,
+      version: DASHBOARD_APP_API_VERSION,
       body: JSON.stringify({
         ...dashboardState,
         ...(accessMode && { access_control: { access_mode: accessMode } }),
@@ -73,7 +78,7 @@ export const dashboardClient = {
 
     const { body, response } = await coreServices.http
       .get<DashboardReadResponseBody>(buildDashboardAppPath(id), {
-        version: DASHBOARD_API_VERSION,
+        version: DASHBOARD_APP_API_VERSION,
         asResponse: true,
       })
       .catch((e) => {
@@ -112,11 +117,11 @@ export const dashboardClient = {
       },
     });
   },
-  update: async (id: string, dashboardState: DashboardState) => {
+  update: async (id: string, dashboardState: DashboardUpdateRequestBody) => {
     const updateResponse = await coreServices.http.put<DashboardUpdateResponseBody>(
       buildDashboardAppPath(id),
       {
-        version: DASHBOARD_API_VERSION,
+        version: DASHBOARD_APP_API_VERSION,
         body: JSON.stringify(dashboardState),
       }
     );

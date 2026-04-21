@@ -66,7 +66,9 @@ export const createNavigationTree = (
         link: securityLink(SecurityPageName.cloudSecurityPostureFindings),
       },
       defaultNavigationTree.cases(),
-      defaultNavigationTree.entityAnalytics(),
+      defaultNavigationTree.entityAnalytics(
+        services.experimentalFeatures?.entityAnalyticsNewHomePageEnabled
+      ),
       defaultNavigationTree.explore(),
       defaultNavigationTree.investigations(),
       {
@@ -109,6 +111,10 @@ export const createNavigationTree = (
           {
             title: i18nStrings.launchPad.migrations.title,
             children: [
+              {
+                id: SecurityPageName.siemMigrationsManage,
+                link: securityLink(SecurityPageName.siemMigrationsManage),
+              },
               {
                 id: SecurityPageName.siemMigrationsRules,
                 link: securityLink(SecurityPageName.siemMigrationsRules),
@@ -199,6 +205,7 @@ export const createNavigationTree = (
                   renderAs: 'panelOpener' as const,
                   children: [
                     { link: 'management:rules' as const },
+                    { link: 'management:episodes' as const },
                     { link: 'management:notification_policies' as const },
                   ],
                 },
@@ -218,6 +225,13 @@ export const createNavigationTree = (
                 id: SecurityPageName.entityAnalyticsManagement,
                 link: securityLink(SecurityPageName.entityAnalyticsManagement),
               },
+            ],
+          },
+          {
+            title: i18nStrings.clusterPerformance.title,
+            children: [
+              { link: 'monitoring' },
+              { link: 'management:queryActivity', badgeType: 'new' },
             ],
           },
           {

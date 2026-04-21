@@ -13,6 +13,10 @@ export const DEFAULT_ENTITY_STORE_PERMISSIONS: AuthzEnabled = {
   requiredPrivileges: ['securitySolution'],
 };
 
+export const RESOLUTION_ENTITY_STORE_PERMISSIONS: AuthzEnabled = {
+  requiredPrivileges: ['securitySolution', 'securitySolution-entity-analytics'],
+};
+
 export type LogExtractionInstallParams = z.infer<typeof LogExtractionInstallParams>;
 // timeout: intentionally excluded from LogExtractionBodyParams
 // TODO: add timeout once we have a way to set it as a task override param
@@ -24,6 +28,7 @@ export const LogExtractionInstallParams = LogExtractionConfig.pick({
   frequency: true,
   delay: true,
   docsLimit: true,
+  maxLogsPerPage: true,
 }).partial();
 
 export type LogExtractionUpdateParams = z.infer<typeof LogExtractionUpdateParams>;
@@ -45,6 +50,7 @@ export const LogExtractionUpdateParams = z.object({
     .regex(/[smdh]$/)
     .optional(),
   docsLimit: z.number().int().positive().optional(),
+  maxLogsPerPage: z.number().int().positive().optional(),
 });
 
 export type LogExtractionBodyParams = LogExtractionInstallParams | LogExtractionUpdateParams;

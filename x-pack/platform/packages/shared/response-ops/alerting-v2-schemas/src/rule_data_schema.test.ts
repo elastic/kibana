@@ -36,7 +36,7 @@ describe('createRuleDataSchema', () => {
     it('accepts a full payload with all optional fields', () => {
       const result = createRuleDataSchema.parse({
         ...validCreateData,
-        metadata: { name: 'test rule', owner: 'team-a', labels: ['label-1', 'label-2'] },
+        metadata: { name: 'test rule', owner: 'team-a', tags: ['label-1', 'label-2'] },
         time_field: 'event.created',
         schedule: { every: '5m', lookback: '10m' },
         grouping: { fields: ['host.name'] },
@@ -55,7 +55,7 @@ describe('createRuleDataSchema', () => {
 
       expect(result).toEqual(
         expect.objectContaining({
-          metadata: { name: 'test rule', owner: 'team-a', labels: ['label-1', 'label-2'] },
+          metadata: { name: 'test rule', owner: 'team-a', tags: ['label-1', 'label-2'] },
           time_field: 'event.created',
           schedule: { every: '5m', lookback: '10m' },
           grouping: { fields: ['host.name'] },
@@ -148,13 +148,13 @@ describe('createRuleDataSchema', () => {
     });
   });
 
-  describe('metadata.labels', () => {
-    it('rejects labels exceeding 100 items', () => {
+  describe('metadata.tags', () => {
+    it('rejects tags exceeding 100 items', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
         metadata: {
           name: 'test rule',
-          labels: Array.from({ length: 101 }, (_, i) => `label-${i}`),
+          tags: Array.from({ length: 101 }, (_, i) => `label-${i}`),
         },
       });
 
@@ -164,7 +164,7 @@ describe('createRuleDataSchema', () => {
     it('rejects a label exceeding 64 characters', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        metadata: { name: 'test rule', labels: ['a'.repeat(65)] },
+        metadata: { name: 'test rule', tags: ['a'.repeat(65)] },
       });
 
       expect(result.success).toBe(false);
@@ -734,9 +734,9 @@ describe('updateRuleDataSchema', () => {
       expect(result.success).toBe(false);
     });
 
-    it('rejects more than 100 labels', () => {
+    it('rejects more than 100 tags', () => {
       const result = updateRuleDataSchema.safeParse({
-        metadata: { labels: Array.from({ length: 101 }, (_, i) => `label-${i}`) },
+        metadata: { tags: Array.from({ length: 101 }, (_, i) => `label-${i}`) },
       });
 
       expect(result.success).toBe(false);

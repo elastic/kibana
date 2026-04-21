@@ -11,6 +11,7 @@ export type { GetRuleRequestParams, GetRuleResponse } from './external/types/lat
 export {
   getRuleRequestParamsSchema as getRuleRequestParamsSchemaV1,
   getRuleResponseSchema as getRuleResponseSchemaV1,
+  getRuleParamsExamples as getRuleParamsExamplesV1,
 } from './external/schemas/v1';
 export type {
   GetRuleRequestParams as GetRuleRequestParamsV1,

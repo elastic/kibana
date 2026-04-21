@@ -16,6 +16,15 @@ export interface NormalizeLogSamplesResult {
 }
 
 export function normalizeLogSamplesFromFileContent(content: string): NormalizeLogSamplesResult {
+  try {
+    const parsed: unknown = JSON.parse(content);
+    if (Array.isArray(parsed)) {
+      const lines = parsed.map((element) => JSON.stringify(element));
+      return normalizeLogLinesForUpload(lines);
+    }
+  } catch {
+    // Not valid JSON or not parseable as a single value; fall back to newline splitting.
+  }
   return normalizeLogLinesForUpload(content.split('\n'));
 }
 

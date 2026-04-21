@@ -180,7 +180,8 @@ export function getFakeKibanaRequest(
 
   const fakeRawRequest: FakeRawRequest = {
     headers: requestHeaders,
-    path: '/',
+    path,
+    url: new URL(`https://fake-request${path}`),
   };
 
   const fakeRequest = kibanaRequestFactory(fakeRawRequest);

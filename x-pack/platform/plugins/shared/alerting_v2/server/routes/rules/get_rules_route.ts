@@ -10,7 +10,7 @@ import { inject, injectable } from 'inversify';
 import { Request } from '@kbn/core-di-server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
-import { findRulesResponseSchema } from '@kbn/alerting-v2-schemas';
+import { findRulesResponseSchema, findRulesSortFieldSchema } from '@kbn/alerting-v2-schemas';
 
 import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
@@ -26,8 +26,9 @@ const getRulesQuerySchema = z.object({
     .max(1000)
     .optional()
     .describe('The number of rules to return per page.'),
-
-  filter: z.string().optional().describe('A KQL string to filter the rules.'),
+  filter: z.string().optional().describe('The filter to apply to the rules.'),
+  sortField: findRulesSortFieldSchema.optional().describe('The field to sort rules by.'),
+  sortOrder: z.enum(['asc', 'desc']).optional().describe('The direction to sort rules.'),
   search: z
     .string()
     .trim()
@@ -80,6 +81,8 @@ export class GetRulesRoute extends BaseAlertingRoute {
       perPage: this.request.query.perPage,
       filter: this.request.query.filter,
       search: this.request.query.search,
+      sortField: this.request.query.sortField,
+      sortOrder: this.request.query.sortOrder,
     });
     return this.ctx.response.ok({ body: result });
   }

@@ -10,17 +10,20 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
-import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
+import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import { layerSettingsSchema, sharedPanelInfoSchema, dslOnlyPanelInfoSchema } from '../shared';
 import {
   applyColorToSchema,
   colorByValueAbsoluteSchema,
   legacyColorByValueAbsoluteSchema,
+  autoColorSchema,
+  AUTO_COLOR,
 } from '../color';
 import { horizontalAlignmentSchema, verticalAlignmentSchema } from '../alignments';
 import { mergeAllMetricsWithChartDimensionSchema } from './shared';
+import { objectUnion } from './utils/object_union';
 
-const legacyMetricStateMetricOptionsSchema = {
+const legacyMetricConfigMetricOptionsSchema = {
   /**
    * Font scale for the legacy metric label and value.
    */
@@ -77,45 +80,47 @@ const legacyMetricStateMetricOptionsSchema = {
   /**
    * Color configuration
    */
-  color: schema.maybe(schema.oneOf([colorByValueAbsoluteSchema, legacyColorByValueAbsoluteSchema])),
+  color: schema.maybe(
+    schema.oneOf([colorByValueAbsoluteSchema, legacyColorByValueAbsoluteSchema, autoColorSchema], {
+      defaultValue: AUTO_COLOR,
+    })
+  ),
 };
 
-export const legacyMetricStateSchemaNoESQL = schema.object(
+export const legacyMetricConfigSchemaNoESQL = schema.object(
   {
     type: schema.literal('legacy_metric'),
     ...sharedPanelInfoSchema,
     ...dslOnlyPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetSchema,
+    ...dataSourceSchema,
     /**
      * Metric configuration, must define operation.
      */
-    metric: mergeAllMetricsWithChartDimensionSchema(legacyMetricStateMetricOptionsSchema),
+    metric: mergeAllMetricsWithChartDimensionSchema(legacyMetricConfigMetricOptionsSchema),
   },
   { meta: { id: 'legacyMetricNoESQL', title: 'Legacy Metric Chart (DSL)' } }
 );
 
-const esqlLegacyMetricState = schema.object(
+const esqlLegacyMetricConfig = schema.object(
   {
     type: schema.literal('legacy_metric'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetEsqlTableSchema,
+    ...dataSourceEsqlTableSchema,
     /**
      * Metric configuration, must define operation.
      */
-    metric: esqlColumnWithFormatSchema.extends(legacyMetricStateMetricOptionsSchema),
+    metric: esqlColumnWithFormatSchema.extends(legacyMetricConfigMetricOptionsSchema),
   },
   { meta: { id: 'legacyMetricESQL', title: 'Legacy Metric Chart (ES|QL)' } }
 );
 
-export const legacyMetricStateSchema = schema.oneOf(
-  [legacyMetricStateSchemaNoESQL, esqlLegacyMetricState],
-  {
-    meta: { id: 'legacyMetricChart', title: 'Legacy Metric Chart' },
-  }
-);
+// Legacy metric is not currently supported for ES|QL datasets
+export const legacyMetricConfigSchema = objectUnion([legacyMetricConfigSchemaNoESQL], {
+  meta: { id: 'legacyMetricChart', title: 'Legacy Metric Chart' },
+});
 
-export type LegacyMetricState = TypeOf<typeof legacyMetricStateSchema>;
-export type LegacyMetricStateNoESQL = TypeOf<typeof legacyMetricStateSchemaNoESQL>;
-export type LegacyMetricStateESQL = TypeOf<typeof esqlLegacyMetricState>;
+export type LegacyMetricConfig = TypeOf<typeof legacyMetricConfigSchema>;
+export type LegacyMetricConfigNoESQL = TypeOf<typeof legacyMetricConfigSchemaNoESQL>;
+export type LegacyMetricConfigESQL = TypeOf<typeof esqlLegacyMetricConfig>;
