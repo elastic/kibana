@@ -91,9 +91,7 @@ describe('getInferenceIdFromIndex', () => {
     );
 
     expect(result).toBeUndefined();
-    expect(logger.debug).toHaveBeenCalledWith(
-      expect.stringContaining('Unable to read mapping')
-    );
+    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('Unable to read mapping'));
   });
 
   it('returns undefined when the field does not exist in the mapping', async () => {
