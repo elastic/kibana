@@ -42,7 +42,7 @@ A first-class **managed workflow** concept where plugins can declare bundled wor
 | # | Requirement | Details |
 |---|-------------|---------|
 | **R1** | **Distinguish managed from user-defined** | The platform must be able to distinguish managed workflows from user-defined ones. The designation is not user-settable. How this is achieved (a flag on the same index, a separate index, or other mechanism) is discussed in the [Storage](#1-storage) section of the technical design. |
-| **R2** | **Server-side read-only enforcement** | Mutation APIs (`updateWorkflow`, `deleteWorkflows`, and their REST routes) reject changes to managed workflows. This includes the `enabled` toggle (enable/disable is an update). UI-only restrictions are insufficient — API callers can still mutate. Note: this conflicts with the force override (S4) — see the [Force Override](#21-force-override) section for the interaction model and options. |
+| **R2** | **Server-side read-only enforcement** | Mutation APIs (`updateWorkflow`, `deleteWorkflows`, and their REST routes) reject updates and deletions of managed workflows. The only permitted user mutation is the enable/disable toggle, which requires a `--force` flag to ensure intentionality (see R3). For any other changes, the user must clone the workflow into a user-owned copy and edit the clone. Enforcement is server-side — UI-only restrictions are insufficient since API callers can still mutate. |
 | **R3** | **Enabled by default, with opt-out** | Registered managed workflows are active by default (`enabled: true`). The registration contract supports `enabled: false` for opt-in patterns where a product feature activates the workflow on the user's behalf. On reconciliation (new version), the platform preserves the user's current enabled state unless the registering team explicitly forces a reset. |
 | **R4** | **Ownership metadata** | Every managed workflow identifies its owning plugin, team, or feature. Visible when inspecting the workflow. |
 | **R5** | **Registration mechanism** | A way for solution teams to register managed workflows with the platform, including the workflow definition and ownership metadata. The workflow plugin handles installation and activation. How this is exposed (plugin contract, file-based convention, or other mechanism) is an implementation detail discussed in the [Registration](#3-registration) section of the technical design. |
@@ -79,7 +79,6 @@ A first-class **managed workflow** concept where plugins can declare bundled wor
 | **S1** | **Version/hash tracking** | Track a content hash so the platform can determine if updates are needed without fetching and string-comparing full YAML. Also drives the reconciliation lifecycle (create-if-absent, update-if-changed, skip-if-matching) — see [Lifecycle](#4-lifecycle-provisioning-updates-cleanup). | Security (andrew-goldstein) |
 | **S2** | **Caller-provided execution ID** | Support a caller-specified unique execution ID for correlation and deduplication. | O11y (ruflin, cesco-f) |
 | **S3** | **Caller-provided execution metadata** | Allow callers to attach arbitrary metadata to an execution for debugging and correlation. | — |
-| **S4** | **Force override** | A `--force` flag on mutation APIs to allow intentional override of read-only protection for testing, recovery, or urgent fixes. Not as restrictive as system indices. | O11y (ruflin) |
 
 ### Nice to Have / Deferred
 
@@ -369,32 +368,17 @@ None required for the first delivery. Registration is a server-side plugin contr
 
 #### 2.1 Force Override
 
-The `--force` flag allows intentional override of read-only protection for testing, recovery, or urgent fixes.
+The `--force` flag is scoped to the **enable/disable toggle only**. Updates and deletions of managed workflows are not permitted — the user must clone the workflow for any changes beyond enablement.
 
-**Exposed as:** A `force` query parameter on existing mutation routes.
+**Exposed as:** A `force` query parameter on the update route, scoped to the `enabled` field.
 
-- `PUT /api/workflows/workflow/{id}?force=true` — allows updating a managed workflow.
-- `DELETE /api/workflows/workflow/{id}?force=true` — allows deleting a managed workflow.
+- `PUT /api/workflows/workflow/{id}?force=true` with `{ enabled: true/false }` — toggles the enabled state of a managed workflow.
 
 **Behavior:**
-- When `force=true` and the workflow is managed, the mutation proceeds but:
-  - The operation is logged (audit trail) with the requesting user and reason.
-  - The `managed` flag remains `true` on the document (force-updating a managed workflow does not "unmanage" it).
-  - The `definitionHash` is **not recalculated** after the force edit. It retains the hash of the last platform-provisioned version. This means the startup reconciliation sees the hash as matching and **skips the workflow** — the user's force edits survive restarts. The next time the plugin ships a new YAML version (new hash), the reconciliation will detect the hash mismatch and update to the new version.
-- When `force=true` and `delete` is used, the workflow is **soft-deleted** (e.g., a `deleted: true` flag or equivalent marker). The `definitionHash` is preserved. On restart, reconciliation sees the workflow exists with a matching hash and skips it — the deletion survives. When the plugin ships a new version (new hash), reconciliation detects the mismatch and re-provisions the workflow, clearing the soft-delete marker.
-- The force flag is **API-only** — the UI does not expose it.
-
-**Enablement toggle (`enabled` field):**
-
-A separate consideration from full mutation. Options:
-
-| Option | Behavior | Tradeoff |
-|--------|----------|----------|
-| **A: Cannot disable** | Managed workflows ignore `enabled: false`. Always active. | Simplest. But no escape hatch if a managed workflow is causing issues. |
-| **B: Disableable via force** | Same as mutation — `PUT ...?force=true` with `enabled: false`. Re-enabled on next restart. | Consistent with force override model. Temporary relief. |
-| **C: Declarative per-registration** | `ManagedWorkflowRegistration` includes `allowUserDisable: boolean`. Plugin decides. | Most flexible. More complex. |
-
-**Recommendation:** Option B for the first delivery. Consistent, simple, and the reconciliation on restart provides a safety net.
+- The operation is logged (audit trail) with the requesting user.
+- The `force` flag ensures the user is acting with full intention — without it, the API rejects changes to managed workflows.
+- The platform preserves the user's enabled state across version upgrades (see `preserveEnabledState` in the [Registration](#3-registration) contract). When the registering team sets `preserveEnabledState: false`, a new version resets `enabled` to the registered default.
+- The force flag is **API-only** — the UI may expose the toggle through a product-specific surface (e.g., Detection Engine UI) that calls the API with `force=true` on behalf of the user.
 
 ---
 
