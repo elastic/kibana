@@ -52,6 +52,7 @@ import {
   kafkaSaslMechanism,
   kafkaPartitionType,
   kafkaCompressionType,
+  kafkaAuthType,
   kafkaAcknowledgeReliabilityLevel,
   RESERVED_CONFIG_YML_KEYS,
   FLEET_APM_PACKAGE,
@@ -690,6 +691,14 @@ class OutputService {
         // required_acks can be 0
         data.required_acks = kafkaAcknowledgeReliabilityLevel.Commit;
       }
+      // Clear fields that are only valid for specific auth_type values
+      if (output.auth_type !== kafkaAuthType.None) {
+        data.connection_type = undefined;
+      }
+      if (output.auth_type !== kafkaAuthType.Userpass) {
+        data.username = undefined;
+        data.password = undefined;
+      }
     }
 
     await remoteSyncIntegrationsCheck(esClient, output);
@@ -1015,6 +1024,8 @@ class OutputService {
         originalOutput.type === outputType.RemoteElasticsearch
       ) {
         (updateData as Nullable<OutputSoBaseAttributes>).write_to_logs_streams = null;
+        (updateData as Nullable<OutputSoBaseAttributes>).otel_exporter_config_yaml = null;
+        (updateData as Nullable<OutputSoBaseAttributes>).otel_disable_beatsauth = null;
       }
 
       if (data.type === outputType.Logstash) {
@@ -1074,6 +1085,14 @@ class OutputService {
         if (updateData.required_acks === null || updateData.required_acks === undefined) {
           // required_acks can be 0
           updateData.required_acks = kafkaAcknowledgeReliabilityLevel.Commit;
+        }
+        // Clear fields that are only valid for specific auth_type values
+        if (data.auth_type && data.auth_type !== kafkaAuthType.None) {
+          updateData.connection_type = null;
+        }
+        if (data.auth_type && data.auth_type !== kafkaAuthType.Userpass) {
+          updateData.username = null;
+          updateData.password = null;
         }
       }
     }

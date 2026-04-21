@@ -8,7 +8,13 @@
 export { Streams, streamDefinitionSchema } from './src/models/streams';
 export { IngestBase, type IngestStreamIndexMode } from './src/models/ingest/base';
 export { Ingest, IngestStream, IngestUpsertRequest } from './src/models/ingest';
-export { WiredIngest, WiredStream, WiredIngestUpsertRequest } from './src/models/ingest/wired';
+export {
+  WiredIngest,
+  WiredStream,
+  WiredIngestUpsertRequest,
+  isDraftStream,
+  type DraftStreamDefinition,
+} from './src/models/ingest/wired';
 export {
   ClassicIngest,
   ClassicStream,
@@ -42,6 +48,8 @@ export {
 } from './src/helpers/is_otel_stream';
 export { getIndexPatternsForStream, getSourcesForStream } from './src/helpers/hierarchy_helpers';
 export { getDiscoverEsqlQuery } from './src/helpers/get_discover_esql_query';
+export { definitionToESQLQuery } from './src/helpers/definition_to_esql_query';
+export type { DefinitionToESQLQueryOptions } from './src/helpers/definition_to_esql_query';
 export {
   convertUpsertRequestIntoDefinition,
   convertGetResponseIntoUpsertRequest,
@@ -72,6 +80,8 @@ export {
   hasStatsCommand,
   MS_PER_UNIT,
   normalizeEsqlQuery,
+  normalizeEsqlSafe,
+  hasSameEsql,
   replaceFromSources,
   rewriteFromSources,
 } from './src/helpers/esql_helpers';
