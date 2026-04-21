@@ -69,7 +69,6 @@ export abstract class ResourceIdentifier<I> {
   ): Promise<SiemMigrationResourceBase[]> {
     const lookups = new Set<string>();
     const macros = new Set<string>();
-    const watchlists = new Set<string>();
     for (const item of originalItem) {
       const resources = await this.fromOriginal(item);
       resources.forEach((resource) => {
