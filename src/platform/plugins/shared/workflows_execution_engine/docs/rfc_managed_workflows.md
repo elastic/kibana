@@ -111,11 +111,11 @@ These are capabilities that interact with or are prerequisites for managed workf
 
 | Initiative | Issue | Relationship |
 |------------|-------|--------------|
-| **Configurable Execution Identity** | #15718 | **Highest risk dependency.** Who does a managed workflow run as? Triggering user doesn't work for scheduled/background cases. Kibana system user is too restrictive (only `.kibana*`). Service accounts are the target but depend on this epic. Every consumer team has raised this. |
-| **Sync Workflow Execution** | — | Some consumers (Security AB) need sync invocation from code. The engine supports async today. |
-| **Workflow-Defined Priority** | — | Should managed workflows have execution priority over user workflows? No stakeholder request yet — flagging for consideration. |
+| **Configurable Execution Identity** | [#15718](https://github.com/elastic/security-team/issues/15718) | **Highest risk dependency.** Who does a managed workflow run as? Triggering user doesn't work for scheduled/background cases. Kibana system user is too restrictive (only `.kibana*`). Service accounts are the target but depend on this epic. Every consumer team has raised this. |
+| **Sync Workflow Execution** | — | Some consumers (Security AB) need sync invocation from code. The engine supports async today. Low priority — achievable by polling the execution state on the consumer side until completion. |
+| **Workflow-Defined Priority** | [#258538](https://github.com/elastic/kibana/issues/258538) | Allow workflows to declare execution priority. Useful when system workflows are not time-sensitive and can be delayed under load, so they don't compete with other important workflows (system or user-defined). Requested by ruflin (O11y). |
 | **Parallel Execution of Sub-Workflows** | — | O11y (miltonhultgren) needs parallel onboarding tasks across streams. Not supported today. |
-| **Workflow Versioning** | #15776 | First-class versioning for workflow definitions. Managed workflows currently use a SHA-256 hash for change detection (see [Lifecycle](#4-lifecycle-provisioning-updates-cleanup)); once versioning lands, managed workflows should adopt it. |
+| **Workflow Versioning** | [#15776](https://github.com/elastic/security-team/issues/15776) | First-class versioning for workflow definitions. Managed workflows currently use a SHA-256 hash for change detection (see [Lifecycle](#4-lifecycle-provisioning-updates-cleanup)); once versioning lands, managed workflows should adopt it. |
 | **Workflow Template Library** | [#15748](https://github.com/elastic/security-team/issues/15748) | Pre-built workflow definitions that users install and own — free to edit after installation. Distinct from managed workflows (see [Open Questions > Scope #12](#scope)): templates are not reconciled or version-synced by the platform. Separate initiative, but the boundary between managed workflows and templates must be clear to avoid confusion. |
 
 ---
