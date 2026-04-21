@@ -63,6 +63,7 @@ const metricItems: ParsedMetricItem[] = [
   {
     metricName: 'field1',
     dataStream: 'metrics-*',
+    sourceKind: 'data_stream',
     units: ['ms'],
     metricTypes: ['counter'],
     fieldTypes: [ES_FIELD_TYPES.LONG],
@@ -71,6 +72,7 @@ const metricItems: ParsedMetricItem[] = [
   {
     metricName: 'field2',
     dataStream: 'metrics-*',
+    sourceKind: 'data_stream',
     units: ['ms'],
     metricTypes: ['counter'],
     fieldTypes: [ES_FIELD_TYPES.LONG],

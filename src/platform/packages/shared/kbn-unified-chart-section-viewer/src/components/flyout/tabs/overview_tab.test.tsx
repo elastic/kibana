@@ -32,7 +32,7 @@ describe('Metric Flyout Overview Tab', () => {
   const createMockMetric = (overrides: Partial<ParsedMetricItem> = {}): ParsedMetricItem => ({
     metricName: 'test.metric',
     dataStream: 'test-data-stream',
-    isDataStream: true,
+    sourceKind: 'data_stream',
     fieldTypes: [ES_FIELD_TYPES.DOUBLE],
     units: ['ms'],
     dimensionFields: [],
@@ -403,10 +403,10 @@ describe('Metric Flyout Overview Tab', () => {
       expect(screen.getByTestId('metricsDataStreamEmpty')).toHaveTextContent('-');
     });
 
-    it('renders "Index" label and plain text when isDataStream is false', () => {
+    it('renders "Index" label and plain text when sourceKind is "index"', () => {
       const metricItem = createMockMetric({
         dataStream: 'test-plain-tsdb-index',
-        isDataStream: false,
+        sourceKind: 'index',
       });
       render(
         <OverviewTab metricItem={metricItem} externalServices={mockExternalServicesWithStreams} />
@@ -419,10 +419,10 @@ describe('Metric Flyout Overview Tab', () => {
       expect(screen.queryByTestId('metricsDataStreamLink')).not.toBeInTheDocument();
     });
 
-    it('renders "Data stream" label when isDataStream is true', () => {
+    it('renders "Data stream" label when sourceKind is "data_stream"', () => {
       const metricItem = createMockMetric({
         dataStream: 'metrics-system.cpu-default',
-        isDataStream: true,
+        sourceKind: 'data_stream',
       });
       render(
         <OverviewTab metricItem={metricItem} externalServices={mockExternalServicesWithStreams} />

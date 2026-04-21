@@ -22,6 +22,7 @@ describe('useChartLayers', () => {
   const mockMetric: ParsedMetricItem = {
     metricName: 'system.cpu.total.norm.pct',
     dataStream: 'metrics-*',
+    sourceKind: 'data_stream',
     fieldTypes: [ES_FIELD_TYPES.DOUBLE],
     metricTypes: ['gauge'],
     units: ['percent', null],

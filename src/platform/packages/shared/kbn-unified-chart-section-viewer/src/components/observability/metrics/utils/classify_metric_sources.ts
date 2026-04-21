@@ -8,7 +8,7 @@
  */
 
 import type { DataViewsPublicPluginStart, MatchedItem } from '@kbn/data-views-plugin/public';
-import type { ParsedMetricItem } from '../../../../types';
+import type { MetricSourceKind, ParsedMetricItem, UnclassifiedMetricItem } from '../../../../types';
 
 const extractDataStreamNames = (items: MatchedItem[]): Set<string> =>
   items.reduce<Set<string>>((acc, item) => {
@@ -19,23 +19,27 @@ const extractDataStreamNames = (items: MatchedItem[]): Set<string> =>
   }, new Set());
 
 /**
- * Best-effort enrichment of metric items with data stream classification.
- * Uses the resolve_index API via dataViews.getIndices to determine which
- * sources are actual data streams vs plain indices, flipping `isDataStream`
- * to `false` for plain indices.
+ * Classifies metric sources as either `'data_stream'` or `'index'` using the
+ * resolve_index API via dataViews.getIndices, producing fully-typed
+ * `ParsedMetricItem`s from `UnclassifiedMetricItem`s.
  *
- * On failure (network error, permission denied, etc.) items are returned
- * unchanged. Callers must therefore set a sensible `isDataStream` default
- * on items before passing them in — see `parseMetricsWithTelemetry`, which
- * defaults to `true` based on the real-world distribution of TSDB sources.
+ * Owns the `sourceKind` invariant on every path:
+ * - empty uniqueSources: stamps `options.fallbackKind` on every item
+ * - success: stamps `'data_stream'` or `'index'` per item based on resolved
+ *   data_stream tags
+ * - failure (network / permission): stamps `options.fallbackKind`
+ *
+ * Callers express their failure preference at the call site via
+ * `options.fallbackKind`.
  */
-export const enrichWithDataStreamInfo = async (
+export const classifyMetricSources = async (
   dataViews: DataViewsPublicPluginStart,
-  metricItems: ParsedMetricItem[],
-  uniqueNames: Set<string>
+  metricItems: UnclassifiedMetricItem[],
+  uniqueSources: ReadonlySet<string>,
+  options: { fallbackKind: MetricSourceKind }
 ): Promise<ParsedMetricItem[]> => {
-  if (uniqueNames.size === 0) {
-    return metricItems;
+  if (uniqueSources.size === 0) {
+    return metricItems.map((item) => ({ ...item, sourceKind: options.fallbackKind }));
   }
 
   try {
@@ -45,7 +49,7 @@ export const enrichWithDataStreamInfo = async (
     // a problem in practice because of the quantity of unique sources,
     // but if it ever is, we'll address it then.
     const resolved = await dataViews.getIndices({
-      pattern: [...uniqueNames].join(','),
+      pattern: [...uniqueSources].join(','),
       showAllIndices: true,
       isRollupIndex: () => false,
     });
@@ -54,10 +58,10 @@ export const enrichWithDataStreamInfo = async (
 
     return metricItems.map((item) => ({
       ...item,
-      isDataStream: dataStreamNames.has(item.dataStream),
+      sourceKind: dataStreamNames.has(item.dataStream) ? 'data_stream' : 'index',
     }));
   } catch {
     // TODO: add monitoring/telemetry to track resolution failures
-    return metricItems;
+    return metricItems.map((item) => ({ ...item, sourceKind: options.fallbackKind }));
   }
 };

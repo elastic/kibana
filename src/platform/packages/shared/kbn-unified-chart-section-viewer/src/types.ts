@@ -75,15 +75,25 @@ export interface MetricsESQLResponse {
   dimension_fields: string[] | string;
 }
 
+export type MetricSourceKind = 'data_stream' | 'index';
+
 export interface ParsedMetricItem {
   metricName: string;
   dataStream: string;
-  readonly isDataStream: boolean;
+  readonly sourceKind: MetricSourceKind;
   readonly units: NullableMetricUnit[];
   readonly metricTypes: MappingTimeSeriesMetricType[];
   readonly fieldTypes: ES_FIELD_TYPES[];
   readonly dimensionFields: Dimension[];
 }
+
+/**
+ * Output shape of the parser, before `classifyMetricSources` resolves
+ * `sourceKind` against the `_resolve/index` API. Consumers must not render
+ * an unclassified item directly; the type guarantees that the classification
+ * step has run before a `ParsedMetricItem` exists.
+ */
+export type UnclassifiedMetricItem = Omit<ParsedMetricItem, 'sourceKind'>;
 
 export interface MetricsTelemetry {
   total_number_of_metrics: number;
@@ -97,19 +107,18 @@ export interface MetricsTelemetry {
   };
 }
 
-export interface ParsedMetrics {
-  metricItems: ParsedMetricItem[];
-  allDimensions: Dimension[];
-  uniqueDataStreamNames: Set<string>;
-}
-
-export interface MetricsInfo extends ParsedMetrics {
+export interface MetricsInfo {
   loading: boolean;
   error: Error | null;
+  metricItems: ParsedMetricItem[];
+  allDimensions: Dimension[];
   activeDimensions: Dimension[];
 }
 
-export interface ParsedMetricsWithTelemetry extends ParsedMetrics {
+export interface ParsedMetricsWithTelemetry {
+  metricItems: UnclassifiedMetricItem[];
+  allDimensions: Dimension[];
+  uniqueSources: ReadonlySet<string>;
   telemetry: MetricsTelemetry;
 }
 

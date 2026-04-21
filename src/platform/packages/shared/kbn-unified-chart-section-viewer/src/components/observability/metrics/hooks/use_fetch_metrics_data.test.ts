@@ -76,6 +76,7 @@ const createMockParsedMetrics = (
     dimensionFields: dimensions,
   })),
   allDimensions: dimensions,
+  uniqueSources: new Set(['metrics-*']),
   telemetry: {
     total_number_of_metrics: metricNames.length,
     total_number_of_dimensions: dimensions.length,

@@ -84,7 +84,9 @@ export const OverviewTab = ({ metricItem, description, externalServices }: Overv
     [euiTheme.base]
   );
 
-  const sourceLabel = metricItem.isDataStream
+  const isDataStream = metricItem.sourceKind === 'data_stream';
+
+  const sourceLabel = isDataStream
     ? i18n.translate('metricsExperience.overviewTab.strong.dataStreamLabel', {
         defaultMessage: 'Data stream',
       })
@@ -92,7 +94,7 @@ export const OverviewTab = ({ metricItem, description, externalServices }: Overv
         defaultMessage: 'Index',
       });
 
-  const streamUrl = getStreamUrl(metricItem.dataStream, metricItem.isDataStream);
+  const streamUrl = getStreamUrl(metricItem.dataStream, isDataStream);
 
   const descriptionListItems = useMemo(
     () => [

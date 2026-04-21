@@ -12,13 +12,24 @@ import { useEffect, useMemo } from 'react';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { buildMetricsInfoQuery, hasTransformationalCommand } from '@kbn/esql-utils';
 import { getFieldIconType } from '@kbn/field-utils';
-import type { Dimension, MetricsESQLResponse, MetricsInfo, ParsedMetrics } from '../../../../types';
+import type {
+  Dimension,
+  MetricsESQLResponse,
+  MetricsInfo,
+  ParsedMetricItem,
+} from '../../../../types';
 import { useTelemetry } from '../../../../context/ebt_telemetry_context';
 import { useChartSectionInspector } from '../../../../context/chart_section_inspector';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { parseMetricsWithTelemetry } from '../utils/parse_metrics_response_with_telemetry';
-import { enrichWithDataStreamInfo } from '../utils/enrich_with_data_stream_info';
+import { classifyMetricSources } from '../utils/classify_metric_sources';
 import { getEsqlQuery } from '../utils/get_esql_query';
+
+interface FetchedMetrics {
+  metricItems: ParsedMetricItem[];
+  allDimensions: Dimension[];
+  activeDimensions: Dimension[];
+}
 
 /**
  * Fetches METRICS_INFO when in Metrics Experience (non-transformational ES|QL, chart visible).
@@ -54,9 +65,7 @@ export function useFetchMetricsData({
   );
 
   const [{ value, error, loading }, executeFetch] = useAsyncFn(
-    async (
-      signal: AbortSignal
-    ): Promise<(ParsedMetrics & { activeDimensions: Dimension[] }) | null> => {
+    async (signal: AbortSignal): Promise<FetchedMetrics | null> => {
       const documents = await trackRequest(
         'Grid of metrics',
         'This request queries Elasticsearch to fetch metrics info for the grid.',
@@ -90,10 +99,16 @@ export function useFetchMetricsData({
       };
 
       const parsed = parseMetricsWithTelemetry(documents, getFieldType);
-      const enrichedItems = await enrichWithDataStreamInfo(
+      const classifiedItems = await classifyMetricSources(
         services.dataViews,
         parsed.metricItems,
-        parsed.uniqueDataStreamNames
+        parsed.uniqueSources,
+        // Per Elasticsearch guidance, TSDB sources are effectively always data
+        // streams in practice. When `_resolve/index` can't confirm per-item
+        // classification, we prefer rendering everything as a data stream
+        // (with a stream link) over misclassifying data streams as plain
+        // indices (breaking the link).
+        { fallbackKind: 'data_stream' }
       );
 
       if (!signal.aborted) {
@@ -101,11 +116,10 @@ export function useFetchMetricsData({
       }
 
       return {
-        metricItems: [...enrichedItems].sort((a, b) => a.metricName.localeCompare(b.metricName)),
+        metricItems: [...classifiedItems].sort((a, b) => a.metricName.localeCompare(b.metricName)),
         allDimensions: [...(parsed?.allDimensions ?? [])].sort((a, b) =>
           a.name.localeCompare(b.name)
         ),
-        uniqueDataStreamNames: parsed.uniqueDataStreamNames,
         activeDimensions: selectedDimensionNames ?? [],
       };
     },

@@ -54,6 +54,7 @@ describe('MetricInsightsFlyout', () => {
     ({
       metricName: 'test.metric',
       dataStream: 'test-index',
+      sourceKind: 'data_stream',
       units: ['count'],
       metricTypes: ['counter'],
       fieldTypes: [ES_FIELD_TYPES.DOUBLE],

@@ -8,8 +8,8 @@
  */
 
 import type { DataViewsPublicPluginStart, MatchedItem } from '@kbn/data-views-plugin/public';
-import type { ParsedMetricItem } from '../../../../types';
-import { enrichWithDataStreamInfo } from './enrich_with_data_stream_info';
+import type { UnclassifiedMetricItem } from '../../../../types';
+import { classifyMetricSources } from './classify_metric_sources';
 
 const createMockDataViews = (response?: MatchedItem[]): DataViewsPublicPluginStart =>
   ({
@@ -19,9 +19,9 @@ const createMockDataViews = (response?: MatchedItem[]): DataViewsPublicPluginSta
   } as unknown as DataViewsPublicPluginStart);
 
 const createMetricItem = (
-  overrides: Partial<ParsedMetricItem> & Pick<ParsedMetricItem, 'metricName' | 'dataStream'>
-): ParsedMetricItem => ({
-  isDataStream: true,
+  overrides: Partial<UnclassifiedMetricItem> &
+    Pick<UnclassifiedMetricItem, 'metricName' | 'dataStream'>
+): UnclassifiedMetricItem => ({
   units: [],
   metricTypes: [],
   fieldTypes: [],
@@ -36,14 +36,17 @@ const createMatchedItem = (name: string, isDataStream: boolean): MatchedItem =>
     item: { name },
   } as MatchedItem);
 
-describe('enrichWithDataStreamInfo', () => {
-  it('returns items unchanged when uniqueNames is empty', async () => {
+describe('classifyMetricSources', () => {
+  it('stamps fallbackKind when uniqueSources is empty and does not call getIndices', async () => {
     const dataViews = createMockDataViews([]);
     const items = [createMetricItem({ metricName: 'cpu', dataStream: 'metrics-system-default' })];
 
-    const result = await enrichWithDataStreamInfo(dataViews, items, new Set());
+    const result = await classifyMetricSources(dataViews, items, new Set(), {
+      fallbackKind: 'data_stream',
+    });
 
-    expect(result).toBe(items);
+    expect(result).toHaveLength(1);
+    expect(result[0].sourceKind).toBe('data_stream');
     expect(dataViews.getIndices).not.toHaveBeenCalled();
   });
 
@@ -58,10 +61,11 @@ describe('enrichWithDataStreamInfo', () => {
       createMetricItem({ metricName: 'disk', dataStream: 'plain-index' }),
     ];
 
-    const result = await enrichWithDataStreamInfo(
+    const result = await classifyMetricSources(
       dataViews,
       items,
-      new Set(['metrics-system-default', 'plain-index'])
+      new Set(['metrics-system-default', 'plain-index']),
+      { fallbackKind: 'data_stream' }
     );
 
     expect(dataViews.getIndices).toHaveBeenCalledWith({
@@ -70,20 +74,43 @@ describe('enrichWithDataStreamInfo', () => {
       isRollupIndex: expect.any(Function),
     });
 
-    expect(result[0].isDataStream).toBe(true);
-    expect(result[1].isDataStream).toBe(false);
+    expect(result[0].sourceKind).toBe('data_stream');
+    expect(result[1].sourceKind).toBe('index');
   });
 
-  it('returns items unchanged when getIndices throws', async () => {
+  it("stamps fallbackKind='data_stream' on every item when getIndices throws", async () => {
     const dataViews = createMockDataViews();
-    const items = [createMetricItem({ metricName: 'cpu', dataStream: 'metrics-system-default' })];
+    const items = [
+      createMetricItem({ metricName: 'cpu', dataStream: 'metrics-system-default' }),
+      createMetricItem({ metricName: 'disk', dataStream: 'plain-index' }),
+    ];
 
-    const result = await enrichWithDataStreamInfo(
+    const result = await classifyMetricSources(
       dataViews,
       items,
-      new Set(['metrics-system-default'])
+      new Set(['metrics-system-default', 'plain-index']),
+      { fallbackKind: 'data_stream' }
     );
 
-    expect(result).toBe(items);
+    expect(result[0].sourceKind).toBe('data_stream');
+    expect(result[1].sourceKind).toBe('data_stream');
+  });
+
+  it("stamps fallbackKind='index' on every item when getIndices throws", async () => {
+    const dataViews = createMockDataViews();
+    const items = [
+      createMetricItem({ metricName: 'cpu', dataStream: 'metrics-system-default' }),
+      createMetricItem({ metricName: 'disk', dataStream: 'plain-index' }),
+    ];
+
+    const result = await classifyMetricSources(
+      dataViews,
+      items,
+      new Set(['metrics-system-default', 'plain-index']),
+      { fallbackKind: 'index' }
+    );
+
+    expect(result[0].sourceKind).toBe('index');
+    expect(result[1].sourceKind).toBe('index');
   });
 });

@@ -11,8 +11,8 @@ import type {
   Dimension,
   MetricsESQLResponse,
   MetricsTelemetry,
-  ParsedMetricItem,
   ParsedMetricsWithTelemetry,
+  UnclassifiedMetricItem,
 } from '../../../../types';
 
 import { toArray } from './to_array';
@@ -52,11 +52,11 @@ export const parseMetricsWithTelemetry = (
   response: MetricsESQLResponse[],
   getFieldType?: (name: string) => string | undefined
 ): ParsedMetricsWithTelemetry => {
-  const parsedMetrics: ParsedMetricItem[] = [];
+  const parsedMetrics: UnclassifiedMetricItem[] = [];
   const telemetry = createInitialMetricsTelemetry();
 
   const allDimensionsSet = new Set<string>();
-  const allDataStreamNamesSet = new Set<string>();
+  const uniqueSources = new Set<string>();
 
   const toDimension = (name: string): Dimension => {
     const type = getFieldType?.(name);
@@ -93,17 +93,10 @@ export const parseMetricsWithTelemetry = (
     });
 
     for (const stream of dataStreams) {
-      allDataStreamNamesSet.add(stream);
-      // Per Elasticsearch guidance, TSDB sources are effectively always data streams
-      // in practice, so we optimistically default `isDataStream` to `true` here.
-      // `enrichWithDataStreamInfo` downgrades this flag to `false` for the rare
-      // plain-index case via a best-effort `_resolve/index` call. If that call
-      // fails, items keep the `true` default, matching the common case and
-      // avoiding misclassification of data streams as plain indices.
+      uniqueSources.add(stream);
       parsedMetrics.push({
         metricName: metric.metric_name,
         dataStream: stream,
-        isDataStream: true,
         units,
         metricTypes,
         fieldTypes,
@@ -118,7 +111,7 @@ export const parseMetricsWithTelemetry = (
   return {
     metricItems: parsedMetrics,
     allDimensions: Array.from(allDimensionsSet).map(toDimension),
-    uniqueDataStreamNames: allDataStreamNamesSet,
+    uniqueSources,
     telemetry,
   };
 };
