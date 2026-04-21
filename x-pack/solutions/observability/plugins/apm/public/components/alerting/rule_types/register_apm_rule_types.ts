@@ -59,6 +59,10 @@ export function registerApmRuleTypes(
     validate: () => ({
       errors: [],
     }),
+    alertDetailsAppSection: createLazyApmComponentWithContext(
+      coreSetup,
+      () => import('../ui_components/alert_details_app_section')
+    ),
     requiresAppContext: false,
     defaultActionMessage: errorCountMessage,
     defaultRecoveryMessage: errorCountRecoveryMessage,

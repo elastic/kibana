@@ -20,6 +20,8 @@ export const getAggsTypeFromRule = (ruleAggType: string): LatencyAggregationType
 export const isAnomalyRuleType = (ruleTypeId: ApmRuleType): boolean =>
   ruleTypeId === ApmRuleType.Anomaly;
 
+export const isErrorCountRuleType = (ruleTypeId: string) => ruleTypeId === ApmRuleType.ErrorCount;
+
 export const yLabelFormat = (y?: number | null) => {
   return asPercent(y || 0, 1);
 };
