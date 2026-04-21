@@ -23,6 +23,7 @@ export class PublicStepRegistry {
   /**
    * Register step definition.
    * @param definitionOrLoader - The step definition to register, or a function that returns a promise of the definition (e.g. for dynamic imports)
+   * To skip step registration with async checks (like feature flags), the loader can resolve with undefined.
    */
   public register<
     Input extends z.ZodType = z.ZodType,
@@ -30,13 +31,16 @@ export class PublicStepRegistry {
     Config extends z.ZodObject = z.ZodObject
   >(definitionOrLoader: PublicStepDefinitionOrLoader<Input, Output, Config>): void {
     if (typeof definitionOrLoader === 'function') {
-      const promise = definitionOrLoader().then((definition) => {
-        if (!definition) {
-          throw new Error('Step definition is not loaded correctly');
-        }
-        this.addToRegistry(definition);
-        this.pending.delete(promise);
-      });
+      const promise = definitionOrLoader()
+        .then((definition) => {
+          if (definition) {
+            this.addToRegistry(definition);
+          }
+          this.pending.delete(promise);
+        })
+        .catch((error) => {
+          throw new Error('Failed to load step definition', { cause: error });
+        });
       this.pending.add(promise);
     } else {
       this.addToRegistry(definitionOrLoader);

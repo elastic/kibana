@@ -128,6 +128,9 @@ export class WorkflowsExtensionsServerPlugin
       getAllStepDefinitions: () => {
         return this.stepRegistry.getAll();
       },
+      isReady: async () => {
+        await this.stepRegistry.whenReady();
+      },
       getAllTriggerDefinitions: () => {
         return this.triggerRegistry.list();
       },
