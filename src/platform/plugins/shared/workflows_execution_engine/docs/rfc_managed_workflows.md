@@ -172,8 +172,13 @@ This RFC covers managed workflows only. Templates are a separate initiative (see
 
 ### <a id="mutability"></a>Mutability
 
-4. **Can users modify any part of the definition?**
-   E.g., the scheduling interval, connector ID, etc. The current position is "fully read-only," but partial mutability is a realistic future need. Note: partial editability with ongoing updates is effectively a hybrid between managed workflows and workflow templates (see [Clarifications > Managed workflow vs. workflow template](#managed-workflow-vs-workflow-template)) — the platform keeps the definition in sync, but the user also owns parts of it. This blurs the boundary and introduces the upgrade conflict problem below.
+4. **Is there an actual need to modify parts of a managed workflow definition? What are the use cases?**
+   The current position is "fully read-only" with clone-to-customize. Before investing in partial editability, we need concrete use cases that cannot be solved by cloning or by the overrides/constants mechanism. Two dimensions:
+
+   - **User-driven:** Does any team need users to change the scheduling interval, connector ID, or trigger filters of a managed workflow without cloning? If so, which fields and why can't clone-to-customize work?
+   - **Team-driven:** Does any team need the same managed workflow definition with parts modified in different scenarios (e.g., different connector IDs per deployment, different scheduling intervals per space or customer tier)? This is the overrides/constants use case — if the variation is known at registration or provisioning time, constants and overrides already handle it without partial editability.
+
+   Note: partial editability with ongoing updates is effectively a hybrid between managed workflows and workflow templates (see [Clarifications > Managed workflow vs. workflow template](#managed-workflow-vs-workflow-template)) — the platform keeps the definition in sync, but the user or team also owns parts of it. This blurs the boundary and introduces the upgrade conflict problem below.
 
    **How it could work:** The registering plugin declares which properties are user-editable (an allowlist). The platform enforces the allowlist at the service layer — user mutations that touch non-allowlisted fields are rejected, allowlisted field changes are persisted.
 
