@@ -10,8 +10,8 @@
 import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../../transforms/columns/utils';
 import type { ColorByValueType } from '../color';
-import type { GaugeState } from './gauge';
-import { gaugeStateSchema } from './gauge';
+import type { GaugeConfig } from './gauge';
+import { gaugeConfigSchema } from './gauge';
 
 describe('Gauge Schema', () => {
   const baseGaugeConfig = {
@@ -20,14 +20,14 @@ describe('Gauge Schema', () => {
       type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
       ref_id: 'test-data-view',
     },
-  } satisfies Partial<GaugeState>;
+  } satisfies Partial<GaugeConfig>;
 
   const defaultValues = {
     sampling: 1,
     ignore_global_filters: false,
-  } satisfies Partial<GaugeState>;
+  } satisfies Partial<GaugeConfig>;
 
-  type GaugeInput = Omit<GaugeState, keyof typeof defaultValues>;
+  type GaugeInput = Omit<GaugeConfig, keyof typeof defaultValues>;
 
   it('validates minimal configuration', () => {
     const input = {
@@ -39,7 +39,7 @@ describe('Gauge Schema', () => {
       },
     } satisfies GaugeInput;
 
-    const validated = gaugeStateSchema.validate(input);
+    const validated = gaugeConfigSchema.validate(input);
     expect(validated).toEqual({ ...defaultValues, ...input });
   });
 
@@ -96,7 +96,7 @@ describe('Gauge Schema', () => {
         },
       } satisfies GaugeInput;
 
-      const validated = gaugeStateSchema.validate(input);
+      const validated = gaugeConfigSchema.validate(input);
       expect(validated).toEqual({ ...defaultValues, ...input });
     }
   });
@@ -116,7 +116,7 @@ describe('Gauge Schema', () => {
       },
     } satisfies GaugeInput;
 
-    const validated = gaugeStateSchema.validate(input);
+    const validated = gaugeConfigSchema.validate(input);
     expect(validated).toEqual({ ...defaultValues, ...input });
   });
 
@@ -136,7 +136,7 @@ describe('Gauge Schema', () => {
       },
     } satisfies GaugeInput;
 
-    const validated = gaugeStateSchema.validate(input);
+    const validated = gaugeConfigSchema.validate(input);
     expect(validated.styling?.shape).toEqual({
       type: 'bullet',
       orientation: 'horizontal',
@@ -157,7 +157,7 @@ describe('Gauge Schema', () => {
       },
     } satisfies GaugeInput;
 
-    const validated = gaugeStateSchema.validate(input);
+    const validated = gaugeConfigSchema.validate(input);
     expect(validated).toEqual({ ...defaultValues, ...input });
   });
 
@@ -200,7 +200,7 @@ describe('Gauge Schema', () => {
       },
     } satisfies GaugeInput;
 
-    const validated = gaugeStateSchema.validate(input);
+    const validated = gaugeConfigSchema.validate(input);
     expect(validated).toEqual({ ...defaultValues, ...input });
   });
 
@@ -228,7 +228,7 @@ describe('Gauge Schema', () => {
       },
     } satisfies GaugeInput;
 
-    expect(() => gaugeStateSchema.validate(input)).toThrow();
+    expect(() => gaugeConfigSchema.validate(input)).toThrow();
   });
 
   it('throws on invalid operations as metric', () => {
@@ -237,7 +237,7 @@ describe('Gauge Schema', () => {
       { operation: 'moving_average', window: 5, field: 'bytes' },
     ];
     for (const op of invalidOps) {
-      expect(() => gaugeStateSchema.validate({ ...baseGaugeConfig, metric: op })).toThrow();
+      expect(() => gaugeConfigSchema.validate({ ...baseGaugeConfig, metric: op })).toThrow();
     }
   });
 
@@ -257,7 +257,7 @@ describe('Gauge Schema', () => {
       },
     } satisfies GaugeInput;
 
-    expect(() => gaugeStateSchema.validate(input)).toThrow();
+    expect(() => gaugeConfigSchema.validate(input)).toThrow();
   });
 
   it('throws on invalid ticks value', () => {
@@ -273,6 +273,6 @@ describe('Gauge Schema', () => {
       },
     } satisfies GaugeInput;
 
-    expect(() => gaugeStateSchema.validate(input)).toThrow();
+    expect(() => gaugeConfigSchema.validate(input)).toThrow();
   });
 });

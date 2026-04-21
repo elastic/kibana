@@ -8,11 +8,12 @@
  */
 
 import JSZip from 'jszip';
-import { v4 as generateUuid } from 'uuid';
 import YAML from 'yaml';
 import { MAX_WORKFLOW_YAML_LENGTH } from '@kbn/workflows';
 import {
   detectFileFormat,
+  isReservedWorkflowId,
+  isUnsafeWorkflowId,
   isValidWorkflowId,
   MAX_AGGREGATE_IMPORT_BYTES,
   MAX_IMPORT_WORKFLOWS,
@@ -28,8 +29,13 @@ export interface ClientPreflightResult {
   workflows: WorkflowPreview[];
   /** Workflow IDs extracted from the file, used for server-side conflict checks */
   workflowIds: string[];
-  /** Raw workflow payloads (id + YAML string) ready to send to the bulk create API */
-  rawWorkflows: Array<{ id: string; yaml: string }>;
+  /** Raw workflow payloads ready to send to the bulk create API.
+   * `id` is the desired import ID (slug of the workflow name or a UUID fallback).
+   * `originalId` is the persisted export ID taken from the ZIP entry filename; it
+   * is the value embedded in cross-workflow `workflow-id` references inside the
+   * YAML and must be used as the key when building the reference-rewrite mapping.
+   * For single-YAML imports (no ZIP) `originalId` equals `id`. */
+  rawWorkflows: Array<{ id: string; originalId: string; yaml: string }>;
 }
 
 async function parseZipFile(buffer: ArrayBuffer): Promise<ClientPreflightResult> {
@@ -50,9 +56,14 @@ async function parseZipFile(buffer: ArrayBuffer): Promise<ClientPreflightResult>
 
   const workflows: WorkflowPreview[] = [];
   const workflowIds: string[] = [];
-  const rawWorkflows: Array<{ id: string; yaml: string }> = [];
+  const rawWorkflows: Array<{ id: string; originalId: string; yaml: string }> = [];
   const parseErrors: string[] = [];
+  // JSZip decompresses the full archive during loadAsync, so per-entry
+  // compression-ratio checks would not prevent memory allocation. The
+  // MAX_AGGREGATE_IMPORT_BYTES (50MB) and MAX_WORKFLOW_YAML_LENGTH (1MB)
+  // caps are the effective guards against decompression bombs.
   let totalBytes = 0;
+  const encoder = new TextEncoder();
 
   const entries = Object.entries(zip.files).filter(
     ([name, entry]) => !entry.dir && name !== 'manifest.yml'
@@ -79,11 +90,21 @@ async function parseZipFile(buffer: ArrayBuffer): Promise<ClientPreflightResult>
     }
 
     const ext = name.endsWith('.yaml') ? '.yaml' : '.yml';
-    const id = name.slice(0, -ext.length);
+    // originalId is the persisted export ID (ZIP entry filename stem). It is
+    // the value embedded in cross-workflow `workflow-id` references in the YAML
+    // and must be preserved for the reference-rewrite mapping at import time.
+    const originalId = name.slice(0, -ext.length);
 
-    if (!isValidWorkflowId(id)) {
+    if (isUnsafeWorkflowId(originalId)) {
       parseErrors.push(
-        `Entry [${name}] has an invalid workflow ID: must match [a-zA-Z0-9._-] and be 1-255 characters`
+        `Entry [${name}] has an invalid workflow ID: must match [a-z0-9-] and be 3-255 characters`
+      );
+      // eslint-disable-next-line no-continue
+      continue;
+    }
+    if (isReservedWorkflowId(originalId)) {
+      parseErrors.push(
+        `Entry [${name}] has a reserved workflow ID: must not start with reserved prefixes`
       );
       // eslint-disable-next-line no-continue
       continue;
@@ -98,7 +119,7 @@ async function parseZipFile(buffer: ArrayBuffer): Promise<ClientPreflightResult>
       continue;
     }
 
-    totalBytes += new TextEncoder().encode(yaml).byteLength;
+    totalBytes += encoder.encode(yaml).byteLength;
 
     if (totalBytes > MAX_AGGREGATE_IMPORT_BYTES) {
       throw new Error(
@@ -114,10 +135,24 @@ async function parseZipFile(buffer: ArrayBuffer): Promise<ClientPreflightResult>
       continue;
     }
 
-    const preview = extractWorkflowPreview(id, yaml);
+    const preview = extractWorkflowPreview(yaml);
+    const isLegacyId = !isValidWorkflowId(originalId);
+    // For conforming exports, preserve the original export ID so the import
+    // keeps the same ID the workflow had before export. For legacy exports
+    // (uppercase, underscore, etc.), fall back to the slug-derived ID.
+    const importId = isLegacyId ? preview.id : originalId;
+
+    if (isLegacyId) {
+      parseErrors.push(
+        `Entry [${name}] has a legacy ID format "${originalId}" that will be renamed to "${importId}" to conform to the new ID format`
+      );
+    }
+
+    preview.id = importId;
+
     workflows.push(preview);
-    workflowIds.push(id);
-    rawWorkflows.push({ id, yaml });
+    workflowIds.push(importId);
+    rawWorkflows.push({ id: importId, originalId, yaml });
   }
 
   if (manifestParsed.data.exportedCount !== workflows.length) {
@@ -136,24 +171,22 @@ async function parseZipFile(buffer: ArrayBuffer): Promise<ClientPreflightResult>
   };
 }
 
-function parseYamlFile(content: string, filename: string): ClientPreflightResult {
+function parseYamlFile(content: string): ClientPreflightResult {
   if (content.length > MAX_WORKFLOW_YAML_LENGTH) {
     throw new Error(
       `File exceeds the maximum YAML length of ${MAX_WORKFLOW_YAML_LENGTH} characters`
     );
   }
 
-  const id = `workflow-${generateUuid()}`;
-
-  const preview = extractWorkflowPreview(id, content);
+  const preview = extractWorkflowPreview(content);
 
   return {
     format: 'yaml',
     totalWorkflows: 1,
     parseErrors: [],
     workflows: [preview],
-    workflowIds: [id],
-    rawWorkflows: [{ id, yaml: content }],
+    workflowIds: [preview.id],
+    rawWorkflows: [{ id: preview.id, originalId: preview.id, yaml: content }],
   };
 }
 
@@ -180,5 +213,5 @@ export async function parseImportFile(file: File): Promise<ClientPreflightResult
     throw new Error('The uploaded file is empty');
   }
 
-  return parseYamlFile(content, file.name);
+  return parseYamlFile(content);
 }

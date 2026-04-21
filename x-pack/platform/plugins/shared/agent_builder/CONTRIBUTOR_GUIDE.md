@@ -1134,6 +1134,12 @@ Return `undefined` if the item can no longer be resolved. The `sml_attach`
 tool will report a per-item error to the AI agent without failing the entire
 call.
 
+You may include an optional `description` string on the object returned from
+`toAttachment`. It is stored on the conversation
+attachment and shown in the Agent Builder UI (for example, the “Attachment
+added: …” line). If you omit it, a default label is derived from the SML
+document’s type and title.
+
 ##### `fetchFrequency` — Choose an appropriate interval
 
 - High-churn data (alerts, logs): `5m`–`10m`
