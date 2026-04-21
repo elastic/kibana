@@ -20,16 +20,14 @@ interface ReportDeprecatedRulesCountParams {
   count: number;
 }
 
-type ReportEmptyParams = Record<string, never>;
-
 export interface RuleDeprecationTelemetryEventsMap {
   [RuleDeprecationEventTypes.DeprecatedRulesCalloutShown]: ReportDeprecatedRulesCountParams;
   [RuleDeprecationEventTypes.DeprecatedRulesCalloutDismissed]: ReportDeprecatedRulesCountParams;
   [RuleDeprecationEventTypes.DeprecatedRulesModalOpened]: ReportDeprecatedRulesCountParams;
-  [RuleDeprecationEventTypes.DeprecatedRulesModalRuleLinkClicked]: ReportEmptyParams;
+  [RuleDeprecationEventTypes.DeprecatedRulesModalRuleLinkClicked]: ReportDeprecatedRulesCountParams;
   [RuleDeprecationEventTypes.DeprecatedRulesDeleteAllClicked]: ReportDeprecatedRulesCountParams;
-  [RuleDeprecationEventTypes.DeprecatedRuleDeleteClicked]: ReportEmptyParams;
-  [RuleDeprecationEventTypes.DeprecatedRuleDuplicateAndDeleteClicked]: ReportEmptyParams;
+  [RuleDeprecationEventTypes.DeprecatedRuleDeleteClicked]: ReportDeprecatedRulesCountParams;
+  [RuleDeprecationEventTypes.DeprecatedRuleDuplicateAndDeleteClicked]: ReportDeprecatedRulesCountParams;
 }
 
 export interface RuleDeprecationTelemetryEvent {

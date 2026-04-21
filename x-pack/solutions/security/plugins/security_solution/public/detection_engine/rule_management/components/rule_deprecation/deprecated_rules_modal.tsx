@@ -62,7 +62,9 @@ export const DeprecatedRulesModal: React.FC<DeprecatedRulesModalProps> = ({
   }, [executeBulkAction, rules, onClose, hideConfirm, telemetry]);
 
   const handleRuleLinkClick = useCallback(() => {
-    telemetry.reportEvent(RuleDeprecationEventTypes.DeprecatedRulesModalRuleLinkClicked, {});
+    telemetry.reportEvent(RuleDeprecationEventTypes.DeprecatedRulesModalRuleLinkClicked, {
+      count: 1,
+    });
   }, [telemetry]);
 
   const deprecatedRules: EuiListGroupItemProps[] = useMemo(

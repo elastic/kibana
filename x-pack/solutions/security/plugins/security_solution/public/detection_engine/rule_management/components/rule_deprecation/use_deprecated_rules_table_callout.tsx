@@ -37,8 +37,7 @@ export const useDeprecatedRulesTableCallout = () => {
 
   const hasReportedShown = useRef(false);
   const rulesCount = data?.rules.length ?? 0;
-  const isCalloutVisible =
-    isFeatureEnabled && !isDismissed && !isLoading && rulesCount > 0;
+  const isCalloutVisible = isFeatureEnabled && !isDismissed && !isLoading && rulesCount > 0;
 
   useEffect(() => {
     if (isCalloutVisible && !hasReportedShown.current) {

@@ -13,7 +13,7 @@ const countSchema = {
     type: 'long' as const,
     _meta: {
       description: 'Number of deprecated rules',
-      optional: false,
+      optional: false as const,
     },
   },
 };
@@ -35,7 +35,7 @@ const deprecatedRulesModalOpenedEvent: RuleDeprecationTelemetryEvent = {
 
 const deprecatedRulesModalRuleLinkClickedEvent: RuleDeprecationTelemetryEvent = {
   eventType: RuleDeprecationEventTypes.DeprecatedRulesModalRuleLinkClicked,
-  schema: {},
+  schema: countSchema,
 };
 
 const deprecatedRulesDeleteAllClickedEvent: RuleDeprecationTelemetryEvent = {
@@ -45,12 +45,12 @@ const deprecatedRulesDeleteAllClickedEvent: RuleDeprecationTelemetryEvent = {
 
 const deprecatedRuleDeleteClickedEvent: RuleDeprecationTelemetryEvent = {
   eventType: RuleDeprecationEventTypes.DeprecatedRuleDeleteClicked,
-  schema: {},
+  schema: countSchema,
 };
 
 const deprecatedRuleDuplicateAndDeleteClickedEvent: RuleDeprecationTelemetryEvent = {
   eventType: RuleDeprecationEventTypes.DeprecatedRuleDuplicateAndDeleteClicked,
-  schema: {},
+  schema: countSchema,
 };
 
 export const ruleDeprecationTelemetryEvents = [

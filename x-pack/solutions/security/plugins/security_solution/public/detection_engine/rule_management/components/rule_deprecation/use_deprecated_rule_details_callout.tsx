@@ -85,7 +85,7 @@ export const useDeprecatedRuleDetailsCallout = ({
     if ((await confirmDeletion()) === false) {
       return;
     }
-    telemetry.reportEvent(RuleDeprecationEventTypes.DeprecatedRuleDeleteClicked, {});
+    telemetry.reportEvent(RuleDeprecationEventTypes.DeprecatedRuleDeleteClicked, { count: 1 });
     await executeBulkAction({
       type: BulkActionTypeEnum.delete,
       ids: [rule.id],
@@ -105,7 +105,9 @@ export const useDeprecatedRuleDetailsCallout = ({
       return;
     }
 
-    telemetry.reportEvent(RuleDeprecationEventTypes.DeprecatedRuleDuplicateAndDeleteClicked, {});
+    telemetry.reportEvent(RuleDeprecationEventTypes.DeprecatedRuleDuplicateAndDeleteClicked, {
+      count: 1,
+    });
 
     const duplicateResult = await executeBulkAction({
       type: BulkActionTypeEnum.duplicate,
