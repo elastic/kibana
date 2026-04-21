@@ -87,23 +87,7 @@ describe('FullScreenWaterfall', () => {
             getById: () => ({
               render: (props: any) => {
                 capturedWaterfallProps = props;
-                const { docId, activeFlyoutType, renderDetailFlyout, skipOpenAnimation } = props;
-                return (
-                  <>
-                    <div data-test-subj="fullTraceWaterfall">FullTraceWaterfall</div>
-                    {docId && activeFlyoutType && renderDetailFlyout
-                      ? renderDetailFlyout({
-                          docId,
-                          docIndex: props.docIndex,
-                          traceId: props.traceId,
-                          type: activeFlyoutType,
-                          hasAnimation: !skipOpenAnimation,
-                          onClose: props.onCloseFlyout,
-                          activeSection: props.activeSection,
-                        })
-                      : null}
-                  </>
-                );
+                return <div data-test-subj="fullTraceWaterfall">FullTraceWaterfall</div>;
               },
             }),
           },

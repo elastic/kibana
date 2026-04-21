@@ -21,7 +21,6 @@ export type {
   ObservabilityLogsAIAssistantFeature,
   ObservabilityStreamsFeatureRenderDeps,
   ObservabilityStreamsFeature,
-  ObservabilityTraceWaterfallFlyoutFeature,
   SecuritySolutionCellRendererFeature,
   SecuritySolutionAlertFlyoutOverviewTabFeature,
   DiscoverFeature,

@@ -16,6 +16,7 @@ import type { Query, TimeRange } from '@kbn/es-query';
 import type {
   ErrorsByTraceId,
   FocusedTraceWaterfallProps,
+  FullTraceWaterfallProps,
   SpanLinks,
   TraceRootSpan,
   UnifiedSpanDocument,
@@ -149,6 +150,11 @@ interface ObservabilityFocusedTraceWaterfallFeature {
   render: (props: FocusedTraceWaterfallProps) => JSX.Element;
 }
 
+interface ObservabilityFullTraceWaterfallFeature {
+  id: 'observability-full-trace-waterfall';
+  render: (props: FullTraceWaterfallProps) => JSX.Element;
+}
+
 export interface ObservabilityTracesSpanLinksFeature {
   id: 'observability-traces-fetch-span-links';
   fetchSpanLinks: (
@@ -241,43 +247,6 @@ export interface ObservabilityTracesFetchLatencyOverallSpanDistributionFeature {
   >;
 }
 
-export interface ObservabilityTraceWaterfallFlyoutFeature {
-  id: 'observability-trace-waterfall-flyout';
-  render: (props: {
-    traceId: string;
-    rangeFrom: string;
-    rangeTo: string;
-    serviceName?: string;
-    contextSpanIds?: string[];
-    scrollToContextOnMount?: boolean;
-    docId: string | null;
-    docIndex?: string;
-    activeFlyoutType: 'spanDetailFlyout' | 'logsFlyout' | null;
-    activeSection?: 'errors-table';
-    skipOpenAnimation?: boolean;
-    historyKey?: symbol;
-    onNodeClick: (nodeSpanId: string) => void;
-    onErrorClick: (params: {
-      traceId: string;
-      docId: string;
-      errorCount: number;
-      errorDocId?: string;
-      docIndex?: string;
-    }) => void;
-    onCloseFlyout: (event: MouseEvent | TouchEvent | KeyboardEvent) => void;
-    onExitFullScreen: (event: MouseEvent | TouchEvent | KeyboardEvent) => void;
-    renderDetailFlyout: (props: {
-      docId: string;
-      docIndex?: string;
-      traceId: string;
-      type: 'spanDetailFlyout' | 'logsFlyout';
-      hasAnimation: boolean;
-      onClose: (event: MouseEvent | TouchEvent | KeyboardEvent) => void;
-      activeSection?: 'errors-table';
-    }) => React.ReactNode;
-  }) => React.ReactNode;
-}
-
 export type ObservabilityTracesFeature =
   | ObservabilityTracesSpanLinksFeature
   | ObservabilityTracesFetchErrorsFeature
@@ -286,7 +255,7 @@ export type ObservabilityTracesFeature =
   | ObservabilityTracesFetchLatencyOverallTransactionDistributionFeature
   | ObservabilityTracesFetchLatencyOverallSpanDistributionFeature
   | ObservabilityFocusedTraceWaterfallFeature
-  | ObservabilityTraceWaterfallFlyoutFeature;
+  | ObservabilityFullTraceWaterfallFeature;
 
 /** ****************************************************************************************/
 
