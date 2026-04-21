@@ -22,6 +22,7 @@ import {
   createNoMatchingResourceTool,
   createRelevanceSearchTool,
   naturalLanguageSearchToolName,
+  NO_MATCHING_RESOURCE_ERROR,
 } from './inner_tools';
 import { getSearchDispatcherPrompt } from './prompts';
 import { isIndexPattern } from './target_patterns';
@@ -123,7 +124,7 @@ export const createSearchToolGraph = ({
     });
 
     if (resources.length === 0) {
-      return { error: 'Could not find any matching resources' };
+      return { error: NO_MATCHING_RESOURCE_ERROR };
     }
 
     const tools = getTools(state);

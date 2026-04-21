@@ -185,7 +185,7 @@ Example of natural language queries which can be passed to the tool:
 
 export const noMatchingResourceToolName = 'no_matching_resource';
 
-export const NO_MATCHING_RESOURCE_ERROR = 'Could not figure out which index to use';
+export const NO_MATCHING_RESOURCE_ERROR = 'Could not figure out which data source to use';
 
 export const createNoMatchingResourceTool = () => {
   return toTool(
