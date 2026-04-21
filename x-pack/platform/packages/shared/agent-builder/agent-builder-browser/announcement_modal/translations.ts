@@ -11,10 +11,6 @@ export const MODAL_TITLE = i18n.translate('xpack.agentBuilder.announcementModal.
   defaultMessage: 'Introducing AI Agent',
 });
 
-export const BETA_LABEL = i18n.translate('xpack.agentBuilder.announcementModal.betaLabel', {
-  defaultMessage: 'Beta',
-});
-
 export const WHAT_TO_EXPECT = i18n.translate('xpack.agentBuilder.announcementModal.whatToExpect', {
   defaultMessage: 'What to expect:',
 });
@@ -54,7 +50,7 @@ export const FEATURE_PARITY_BODY = i18n.translate(
   'xpack.agentBuilder.announcementModal.featureParityBody',
   {
     defaultMessage:
-      'Some legacy features, such as anonymization and chat sharing, are not yet supported in this Beta version.',
+      'Some legacy features, such as anonymization and chat sharing, are not yet supported in AI Agent.',
   }
 );
 
@@ -71,12 +67,14 @@ export const NEED_HISTORY_BODY = i18n.translate(
   }
 );
 
-export const NEED_HISTORY_BODY_READONLY = i18n.translate(
-  'xpack.agentBuilder.announcementModal.needHistoryBodyReadonly',
-  {
-    defaultMessage:
-      'Your AI Assistant history and data remain available where your access allows. Only a user with permission to change space-level Gen AI settings can switch this space back to the legacy Assistant. Contact your Kibana administrator if you need that change.',
-  }
+export const LEARN_MORE_CALLOUT_TITLE = i18n.translate(
+  'xpack.agentBuilder.announcementModal.learnMoreCalloutTitle',
+  { defaultMessage: 'Explore Agent Builder' }
+);
+
+export const DOCUMENTATION_LINK_TEXT = i18n.translate(
+  'xpack.agentBuilder.announcementModal.documentationLinkText',
+  { defaultMessage: 'documentation' }
 );
 
 export const REVERT_BUTTON = i18n.translate('xpack.agentBuilder.announcementModal.revertButton', {

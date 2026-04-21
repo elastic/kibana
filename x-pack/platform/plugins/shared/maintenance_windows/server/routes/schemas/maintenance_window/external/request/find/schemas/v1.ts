@@ -47,8 +47,24 @@ export const findMaintenanceWindowsQuerySchema = schema.object(
 );
 
 export const findMaintenanceWindowsResponseSchema = schema.object({
-  page: schema.number(),
-  per_page: schema.number(),
-  total: schema.number(),
-  maintenanceWindows: schema.arrayOf(maintenanceWindowResponseSchemaV1),
+  page: schema.number({
+    meta: {
+      description: 'The current page number.',
+    },
+  }),
+  per_page: schema.number({
+    meta: {
+      description: 'The number of maintenance windows returned per page.',
+    },
+  }),
+  total: schema.number({
+    meta: {
+      description: 'The total number of maintenance windows that match the query.',
+    },
+  }),
+  maintenanceWindows: schema.arrayOf(maintenanceWindowResponseSchemaV1, {
+    meta: {
+      description: 'The list of maintenance windows.',
+    },
+  }),
 });

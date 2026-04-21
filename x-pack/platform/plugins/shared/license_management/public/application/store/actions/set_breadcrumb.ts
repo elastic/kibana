@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import type { ThunkAction } from 'redux-thunk';
-import type { BreadcrumbService } from '../../breadcrumbs';
+import type { AppThunkAction } from '../types';
 
 export const setBreadcrumb =
-  (
-    section: 'dashboard' | 'upload'
-  ): ThunkAction<any, any, { breadcrumbService: BreadcrumbService }, any> =>
+  (section: 'dashboard' | 'upload'): AppThunkAction =>
   (dispatch, getState, { breadcrumbService }) => {
     breadcrumbService.setBreadcrumbs(section);
   };

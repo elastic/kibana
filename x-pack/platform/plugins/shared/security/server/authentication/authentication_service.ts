@@ -6,6 +6,7 @@
  */
 
 import type { errors } from '@elastic/elasticsearch';
+import { ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 
 import type { BuildFlavor } from '@kbn/config';
 import type {
@@ -42,7 +43,7 @@ import type { ConfigType } from '../config';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import { createRedirectHtmlPage } from '../lib/html_page_utils';
-import { ROUTE_TAG_AUTH_FLOW } from '../routes/tags';
+import { ROUTE_TAG_ACCEPT_UIAM_OAUTH, ROUTE_TAG_AUTH_FLOW } from '../routes/tags';
 import type { Session } from '../session_management';
 import type { UiamServicePublic } from '../uiam';
 import type { UserProfileServiceStartInternal } from '../user_profile';
@@ -214,6 +215,35 @@ export class AuthenticationService {
       const originalURL = isAuthRoute
         ? `${http.basePath.get(request)}/`
         : this.authenticator.getRequestOriginalURL(request);
+
+      // For routes that accept UIAM OAuth tokens, return a 401 with a WWW-Authenticate header
+      // containing the resource_metadata URL instead of redirecting to the login page.
+      // https://datatracker.ietf.org/doc/html/rfc9728#name-www-authenticate-response
+      if (
+        preResponse.statusCode === 401 &&
+        config.mcp?.oauth2 &&
+        request.route.options.tags.includes(ROUTE_TAG_ACCEPT_UIAM_OAUTH)
+      ) {
+        const baseUrl =
+          http.basePath.publicBaseUrl ??
+          `${request.url.protocol}//${request.url.host}${http.basePath.serverBasePath}`;
+        const resourceMetadataUrl = `${baseUrl}/.well-known/oauth-protected-resource`;
+
+        return toolkit.render({
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            id: null,
+            // TODO: In MCP SDK v2, ErrorCode is renamed to ProtocolErrorCode, and ConnectionClosed moves to
+            // SdkErrorCode (local-only, string-valued). Update this import when upgrading to SDK v2.
+            // https://github.com/modelcontextprotocol/typescript-sdk/blob/main/docs/migration.md#error-hierarchy-refactoring
+            error: { code: ErrorCode.ConnectionClosed, message: 'Unauthorized' },
+          }),
+          headers: {
+            'WWW-Authenticate': `Bearer resource_metadata="${resourceMetadataUrl}"`,
+            'Content-Type': 'application/json',
+          },
+        });
+      }
 
       // Let API responses or <400 responses pass through as we can let their handlers deal with them.
       if (preResponse.statusCode < 400 || !canRedirectRequest(request)) {

@@ -193,9 +193,11 @@ export interface UsageStats {
   'observability:streamsEnableQueryStreams': boolean;
   'observability:streamsEnableWiredStreamViews': boolean;
   'observability:streamsEnableOverviewPage': boolean;
+  'observability:streamsEnableDraftStreams': boolean;
   'observability:streamsSigEventsIndexPatterns': string;
   'observability:streamsEnableMemory': boolean;
   'securitySolution:entityStoreEnableV2': boolean;
   'elasticRamen:enabled': boolean;
   'query_activity:minRunningTime': number;
+  'genAiSettings:tokenUsageTracking': boolean;
 }
