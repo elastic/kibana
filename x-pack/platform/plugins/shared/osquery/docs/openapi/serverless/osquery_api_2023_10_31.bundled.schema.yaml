@@ -1474,81 +1474,36 @@ components:
       $ref: '#/components/schemas/Enabled'
       nullable: true
     FindLiveQueryDetailsResponse:
-      examples:
-        pack_query:
-          summary: Pack action details
-          value:
-            data:
-              '@timestamp': '2022-07-26T09:59:32.220Z'
-              action_id: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+      example:
+        data:
+          '@timestamp': '2022-07-26T09:59:32.220Z'
+          action_id: 3c42c847-eb30-4452-80e0-728584042334
+          agents:
+            - 16d7caf5-efd2-4212-9b62-73dafc91fa13
+          expiration: '2022-07-26T10:04:32.220Z'
+          queries:
+            - action_id: 609c4c66-ba3d-43fa-afdd-53e244577aa0
               agents:
                 - 16d7caf5-efd2-4212-9b62-73dafc91fa13
-              expiration: '2022-07-26T10:04:32.220Z'
-              pack_id: my-pack
-              pack_name: My Pack
-              queries:
-                - action_id: aaa-111
-                  agents:
-                    - 16d7caf5-efd2-4212-9b62-73dafc91fa13
-                  docs: 42
-                  failed: 0
-                  id: query-1
-                  pending: 0
-                  query: select * from uptime;
-                  responded: 1
-                  status: completed
-                  successful: 1
-                - action_id: bbb-222
-                  agents:
-                    - 16d7caf5-efd2-4212-9b62-73dafc91fa13
-                  docs: 42
-                  failed: 0
-                  id: query-2
-                  pending: 0
-                  query: select * from os_version;
-                  responded: 1
-                  status: completed
-                  successful: 1
-              result_counts:
-                error_agents: 0
-                queries_total: 2
-                queries_with_results: 2
-                successful_agents: 1
-                total_rows: 84
+              docs: 0
+              ecs_mapping:
+                host.uptime:
+                  field: total_seconds
+              failed: 1
+              id: 6724a474-cbba-41ef-a1aa-66aebf0879e2
+              pending: 0
+              query: select * from uptime;
+              responded: 1
+              saved_query_id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
               status: completed
-              user_id: elastic
-        single_query:
-          summary: Single-query action details
-          value:
-            data:
-              '@timestamp': '2022-07-26T09:59:32.220Z'
-              action_id: 3c42c847-eb30-4452-80e0-728584042334
-              agents:
-                - 16d7caf5-efd2-4212-9b62-73dafc91fa13
-              expiration: '2022-07-26T10:04:32.220Z'
-              queries:
-                - action_id: 609c4c66-ba3d-43fa-afdd-53e244577aa0
-                  agents:
-                    - 16d7caf5-efd2-4212-9b62-73dafc91fa13
-                  docs: 0
-                  ecs_mapping:
-                    host.uptime:
-                      field: total_seconds
-                  failed: 1
-                  id: 6724a474-cbba-41ef-a1aa-66aebf0879e2
-                  pending: 0
-                  query: select * from uptime;
-                  responded: 1
-                  saved_query_id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
-                  status: completed
-                  successful: 0
-              result_counts:
-                error_agents: 0
-                responded_agents: 1
-                successful_agents: 1
-                total_rows: 42
-              status: completed
-              user_id: elastic
+              successful: 0
+          result_counts:
+            error_agents: 0
+            responded_agents: 1
+            successful_agents: 1
+            total_rows: 42
+          status: completed
+          user_id: elastic
       type: object
       properties:
         data:
@@ -1654,66 +1609,32 @@ components:
             user_profile_uid:
               type: string
     FindLiveQueryResponse:
-      examples:
-        pack_query:
-          summary: Pack action with result_counts
-          value:
-            data:
-              items:
-                - _source:
-                    '@timestamp': '2023-10-31T00:00:00Z'
-                    action_id: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+      example:
+        data:
+          items:
+            - _source:
+                '@timestamp': '2023-10-31T00:00:00Z'
+                action_id: 3c42c847-eb30-4452-80e0-728584042334
+                agents:
+                  - 16d7caf5-efd2-4212-9b62-73dafc91fa13
+                expiration: '2023-10-31T00:00:00Z'
+                queries:
+                  - action_id: 609c4c66-ba3d-43fa-afdd-53e244577aa0
                     agents:
                       - 16d7caf5-efd2-4212-9b62-73dafc91fa13
-                    expiration: '2023-10-31T00:00:00Z'
-                    pack_id: my-pack
-                    queries:
-                      - action_id: aaa-111
-                        agents:
-                          - 16d7caf5-efd2-4212-9b62-73dafc91fa13
-                        id: query-1
-                        query: select * from uptime;
-                      - action_id: bbb-222
-                        agents:
-                          - 16d7caf5-efd2-4212-9b62-73dafc91fa13
-                        id: query-2
-                        query: select * from os_version;
-                    result_counts:
-                      error_agents: 0
-                      queries_total: 2
-                      queries_with_results: 2
-                      successful_agents: 1
-                      total_rows: 84
-                    user_id: elastic
-              total: 1
-        single_query:
-          summary: Single-query action with result_counts
-          value:
-            data:
-              items:
-                - _source:
-                    '@timestamp': '2023-10-31T00:00:00Z'
-                    action_id: 3c42c847-eb30-4452-80e0-728584042334
-                    agents:
-                      - 16d7caf5-efd2-4212-9b62-73dafc91fa13
-                    expiration: '2023-10-31T00:00:00Z'
-                    queries:
-                      - action_id: 609c4c66-ba3d-43fa-afdd-53e244577aa0
-                        agents:
-                          - 16d7caf5-efd2-4212-9b62-73dafc91fa13
-                        ecs_mapping:
-                          host.uptime:
-                            field: total_seconds
-                        id: 6724a474-cbba-41ef-a1aa-66aebf0879e2
-                        query: select * from uptime;
-                        saved_query_id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
-                    result_counts:
-                      error_agents: 0
-                      responded_agents: 1
-                      successful_agents: 1
-                      total_rows: 42
-                    user_id: elastic
-              total: 1
+                    ecs_mapping:
+                      host.uptime:
+                        field: total_seconds
+                    id: 6724a474-cbba-41ef-a1aa-66aebf0879e2
+                    query: select * from uptime;
+                    saved_query_id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
+                result_counts:
+                  error_agents: 0
+                  responded_agents: 1
+                  successful_agents: 1
+                  total_rows: 42
+                user_id: elastic
+          total: 1
       type: object
       properties:
         data:
