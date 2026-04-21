@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import type {
-  ConditionRule,
-  CompoundCondition,
-} from '../../../../common/types/domain/template/fields';
-import { FieldType } from '../../../../common/types/domain/template/fields';
+import type { ConditionRule, CompoundCondition } from './fields';
+import { FieldType } from './fields';
 
 const isScalarEmpty = (value: unknown): boolean =>
   value === null || value === undefined || value === '';
@@ -29,6 +26,25 @@ const evaluateJsonArrayRule = (value: unknown, rule: ConditionRule): boolean | n
   switch (rule.operator) {
     case 'contains':
       return arr.includes(String(rule.value ?? ''));
+    case 'empty':
+      return arr.length === 0;
+    case 'not_empty':
+      return arr.length > 0;
+    default:
+      return null;
+  }
+};
+
+const evaluateUserPickerRule = (value: unknown, rule: ConditionRule): boolean | null => {
+  const arr = parseJsonArray(value);
+  switch (rule.operator) {
+    case 'contains':
+      return arr.some(
+        (item) =>
+          typeof item === 'object' &&
+          item !== null &&
+          (item as { uid?: string }).uid === String(rule.value ?? '')
+      );
     case 'empty':
       return arr.length === 0;
     case 'not_empty':
@@ -67,8 +83,13 @@ const evaluateRule = (
   const current = fieldValues[rule.field];
   const control = fieldControlMap[rule.field];
 
-  if (control === FieldType.CHECKBOX_GROUP || control === FieldType.USER_PICKER) {
+  if (control === FieldType.CHECKBOX_GROUP) {
     const result = evaluateJsonArrayRule(current, rule);
+    if (result !== null) return result;
+  }
+
+  if (control === FieldType.USER_PICKER) {
+    const result = evaluateUserPickerRule(current, rule);
     if (result !== null) return result;
   }
 
