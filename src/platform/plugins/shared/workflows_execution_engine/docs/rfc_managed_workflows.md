@@ -49,8 +49,8 @@ A first-class **managed workflow** concept where plugins can declare bundled wor
 | **R6** | **Caller-provided workflow ID with uniqueness guarantee** | Plugins can specify stable, deterministic IDs instead of auto-generated IDs. IDs must be globally unique so all existing APIs continue to serve both managed and user-defined workflows unambiguously. See [Open Questions > Registration #3](#id-uniqueness) for enforcement approaches. |
 | **R7** | **Custom triggers and custom steps** | Managed workflows support custom step types and custom triggers registered via `workflows_extensions`. Same engine, same capabilities. |
 | **R8** | **Existing guardrails apply** | All existing concurrency strategies, execution limits, and guardrails apply to managed workflows. |
-| **R9** | **Enterprise tier gating** | Features registering managed workflows require Enterprise license. On lower tiers, managed workflows are not installed or not executed. Note: this conflicts with Entity Analytics (#15382) which needs Basic tier support — see [Open Questions > Licensing #12](#licensing) for the discussion. |
-| **R10** | **Metering exemption** | Managed workflow executions are excluded from the customer's workflow execution meter (success or failure). Only user workflow executions are counted and billed. Managed executions are still tracked internally for capacity planning. |
+| **R9** | **Enterprise tier gating** | License tier gating. The workflow engine and managed workflow support are available on Enterprise tier (ECH), Complete tier (Serverless Security and Observability), and all Elasticsearch/Search project tiers. Features registering managed workflows must be available at these tiers. On tiers where the engine is unavailable, managed workflows are not installed or executed. This is a platform-level gate, not a per-workflow decision. |
+| **R10** | **Metering and billing** | Managed workflow executions are metered internally for capacity planning and operational visibility. By default, managed workflow executions are not counted toward the customer's workflow execution meter (billable: false). The registering team may declare a managed workflow as billable (billable: true), in which case executions count toward the customer's meter. Billable managed workflows are expected to be opt-in (user explicitly enables the functionality through a product surface) and deliver standalone value beyond the feature they belong to. Only user-authored workflow executions and billable managed workflow executions are included in active billing. |
 
 #### Lifecycle
 
@@ -203,12 +203,7 @@ These are capabilities that interact with or are prerequisites for managed workf
 11. **When a managed workflow is cloned, what happens to the original?**
     The managed workflow remains active and unchanged — it cannot be disabled. The clone is independent. UX should make clear that the user now has two workflows with the same logic.
 
-### Licensing
-
-12. <a id="licensing"></a>**How to reconcile Enterprise-only with Basic tier consumers?**
-    The epic mandates Enterprise (#16665). Entity Analytics (#15382) explicitly needs Basic tier ("no matter what license"). Today, the workflow engine itself is gated to Enterprise — it is unavailable on lower tiers entirely. To support per-plugin gating via `shouldInstall`, the workflow engine must first be available on all tiers (the platform capability becomes tier-agnostic). Once the engine is tier-agnostic, each team controls whether their workflow is installed on a given cluster via the `shouldInstall(ctx)` hook, where the license/tier context is available. This pushes the licensing decision to the registering plugin — Security can gate on Enterprise, Entity Analytics can allow Basic — without the platform imposing a blanket tier requirement. This means R9 would need to change: instead of a blanket Enterprise gate, the platform runs on all tiers and individual workflows declare their own tier requirements. See the [`shouldInstall` hook](#3-registration) in the registration contract.
-
-13. **Should managed workflows be registered from integrations?**
+12. **Should managed workflows be registered from integrations?**
     ruflin: "Eventually, ship workflows as integrations in two forms: A) overwrite a managed workflow (rare), B) register a new managed workflow." This is a future direction, not first delivery.
 
 ---
