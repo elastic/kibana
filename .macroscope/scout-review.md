@@ -52,7 +52,7 @@ Post detailed findings as inline PR comments on the offending line. Each inline 
 </details>
 ​```
 
-- **Severity emoji:** 🔴 Blocker, 🟡 Major, 🔵 Minor, ⚪ Nit
+- **Severity emoji:** 🟡 Major, 🔵 Minor, ⚪ Nit
 - State the rule violated as a **Markdown link** whose text is the section heading from the matching best practices document and whose URL is the section-scoped URL (see routing below). The link is required, not optional.
 - **Overview:** plain prose, no code. A developer skimming the PR should grasp what's wrong and whether to act on it without expanding.
 - **Details:** everything else — reasoning, code snippets, suggested diffs, links to related rules.
@@ -92,8 +92,9 @@ The summary has two parts:
 One line stating what was found on the latest review. Examples:
 
 - `Found 2 issues (1 🟡 Major, 1 🔵 Minor). See inline comments for details.`
-- `Found 1 issue (1 🔴 Blocker). See inline comments for details.`
+- `Found 1 issue (1 🟡 Major). See inline comments for details.`
 - `No issues found. ✅`
+- `All issues resolved ✅`
 - `Skipped — no Scout test files changed.`
 
 **2. Footer (always present, verbatim)**
