@@ -1321,6 +1321,9 @@ importers:
       '@kbn/core-hotkeys-browser':
         specifier: workspace:*
         version: link:src/core/packages/hotkeys/browser
+      '@kbn/core-hotkeys-browser-internal':
+        specifier: workspace:*
+        version: link:src/core/packages/hotkeys/browser-internal
       '@kbn/core-http-browser':
         specifier: workspace:*
         version: link:src/core/packages/http/browser
@@ -7276,6 +7279,8 @@ importers:
   src/core/packages/feature-flags/server-mocks: {}
 
   src/core/packages/hotkeys/browser: {}
+
+  src/core/packages/hotkeys/browser-internal: {}
 
   src/core/packages/hotkeys/browser-mocks: {}
 

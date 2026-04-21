@@ -467,6 +467,7 @@
     "@kbn/core-feature-flags-server-mocks": "workspace:*",
     "@kbn/core-history-block-plugin": "workspace:*",
     "@kbn/core-hotkeys-browser": "workspace:*",
+    "@kbn/core-hotkeys-browser-internal": "workspace:*",
     "@kbn/core-http-browser": "workspace:*",
     "@kbn/core-http-browser-internal": "workspace:*",
     "@kbn/core-http-common": "workspace:*",
