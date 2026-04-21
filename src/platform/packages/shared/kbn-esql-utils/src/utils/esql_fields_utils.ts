@@ -68,6 +68,8 @@ const isGroupable = (type: string | undefined, esType: string | undefined): bool
  * @returns True if the column is groupable, false otherwise.
  */
 export const isESQLColumnGroupable = (column: DatatableColumn): boolean => {
+  if (column.meta?.type === '_source') return false;
+
   return isGroupable(column.meta?.type, column.meta?.esType);
 };
 
