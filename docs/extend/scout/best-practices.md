@@ -24,6 +24,15 @@ Scout is deployment-agnostic: write once, run locally and on Elastic Cloud.
 - Within a test, avoid relying on configuration, data, or behavior specific to a single deployment. Test logic should produce the same result locally and on Cloud.
 - Run your tests against a real Elastic Cloud project before merging to catch environment-specific surprises early. See [Run tests on Elastic Cloud](./run-tests.md#scout-run-tests-cloud) for setup instructions.
 
+### Keep tests close to the code they test [keep-tests-close-to-source-code]
+
+A test should live in the plugin or package that owns the code it exercises. When writing or reviewing a test, confirm that the scenarios logically belong to the plugin they were added to:
+
+- **API tests**: the routes under test should be defined in this plugin's `/server` directory.
+- **UI tests**: the UI being driven should come from this plugin's `/public` directory — a quick look there is usually enough to understand what the plugin renders and whether the test fits.
+
+This also keeps Scout's selective testing effective: it runs only the tests for modules affected by a PR, so a test placed in the wrong plugin won't be triggered by changes to the code it actually covers. The full suite still runs post-merge on `kibana-on-merge`.
+
 ### Prefer runtime feature flags [prefer-runtime-feature-flags]
 
 When a feature is gated behind a flag, enable it at runtime with `apiServices.core.settings()` rather than creating a custom server config. Runtime flags work locally and on Cloud, don’t require a server restart, and avoid the CI cost of a dedicated server instance.
@@ -41,6 +50,7 @@ Prefer doing this locally first (faster feedback), and use the Flaky Test Runner
 - Keep **one top-level suite** per file (`test.describe`).
 - Avoid nested `describe` blocks. Use `test.step` for structure inside a test.
 - Don’t rely on test file execution order (it’s [not guaranteed](https://playwright.dev/docs/test-parallel#control-test-order)).
+- Don’t assume a previous test in the suite already set up the data you need (if that test fails or is skipped, the test will break with a misleading error).
 
 ### Write descriptive test names [write-descriptive-test-names]
 
@@ -114,11 +124,19 @@ globalSetupHook('Load shared test data (if needed)', async ({ esArchiver, log })
 
 :::::
 
+::::::{note}
+Global setup hooks have **no corresponding teardown**. Keep operations that require cleanup (such as `kbnClient.importExport.load()`) in `beforeAll`/`afterAll` hooks so saved objects are properly removed after tests run. See [Global setup hook: When to use](./global-setup-hook.md#when-to-use) for guidance.
+::::::
+
 ### Only load archives your tests actually use [only-load-archives-your-tests-actually-use]
 
 It’s common for test suites to load Elasticsearch or Kibana archives that are barely used (or not used at all). Unused archives slow down setup, waste resources, and make it harder to understand what a test actually depends on. Check if your tests ingest the data they actually need.
 
-Use `esArchiver.loadIfNeeded()`, which skips ingestion if the index and documents already exist (useful when multiple suites share the same data).
+Use `esArchiver.loadIfNeeded()`, which skips ingestion if the index already exists (useful when multiple suites share the same data).
+
+::::::{warning}
+`loadIfNeeded()` checks at the **index level**, not individual documents. If a test deletes specific documents, subsequent runs or retries won't restore them. Reindex documents that were deleted.
+::::::
 
 :::::{dropdown} Examples
 ❌ **Don’t:** load archives that no test in the suite relies on:
@@ -130,7 +148,7 @@ test.beforeAll(async ({ esArchiver }) => {
 });
 
 test('shows metrics dashboard', async ({ page }) => {
-  // only uses large_metrics_archive — user_actions_archive is never referenced
+  // only uses large_metrics_archive; user_actions_archive is never referenced
 });
 ```
 
@@ -146,7 +164,7 @@ test.beforeAll(async ({ esArchiver }) => {
 
 ### Keep cleanup in hooks [put-cleanup-code-in-hooks-not-in-the-test-body]
 
-Cleanup in the test body doesn’t run after a failure. Prefer `afterEach` / `afterAll`.
+Cleanup in the test body doesn’t run after a failure. Prefer `afterEach` / `afterAll`. **Don’t duplicate** the same teardown in the test body when a hook already runs it; duplication invites unnecessary `try/catch` and drift between paths.
 
 :::::{dropdown} Examples
 ❌ **Don’t:** put cleanup at the end of the test body (it’s skipped if the test fails):
@@ -278,6 +296,20 @@ await browserAuth.loginAsPlatformEngineer();
 For setup details, see [Reuse role helpers](./browser-auth.md#scout-browser-auth-extend).
 :::::
 
+### Contribute to Scout when possible [contribute-to-scout-when-possible]
+
+If you build a helper that will benefit other tests, consider upstreaming it:
+
+- **Reusable across many plugins/teams**: contribute to `@kbn/scout`
+- **Reusable but solution-scoped**: contribute to the relevant solution Scout package
+- **Plugin-specific**: keep it in your plugin’s `test/scout` tree
+
+For the full guidance, see [Scout](../scout.md#contribute-to-scout-when-possible).
+
+:::::{tip} Keep Scout packages package and plugin-agnostic
+When you move a helper into `@kbn/scout` or a solution Scout package, **don't import types from plugins or plugin-scoped packages**. Scout packages are intentionally slim, shared infrastructure — adding a dependency on a specific plugin's types pulls that plugin into every consumer and breaks the sharing model.
+:::::
+
 ---
 
 ## UI tests [ui-tests]
@@ -323,7 +355,7 @@ await expect(page.testSubj.locator('row-0-col-dataset')).not.toHaveText('');
 
 ### Use `test.step` for multi-step flows [use-teststep-for-multi-step-flows]
 
-Use `test.step()` to structure a multi-step flow while keeping one browser context (faster, clearer reporting).
+Use `test.step()` to structure a multi-step flow while keeping one browser context (faster, clearer reporting). Group closely related actions into a single step when it keeps the report readable without hiding intent.
 
 :::::{dropdown} Example
 
@@ -340,6 +372,10 @@ test('navigates through pages', async ({ pageObjects }) => {
 ```
 
 :::::
+
+### Prefer realistic in-app navigation for user flows [prefer-realistic-in-app-navigation]
+
+When a test asserts **user flow** (not just “land on a page”), prefer navigation the way a user would: follow links and buttons, and use browser history (`page.goBack()`) instead of direct URL jumps where it matters for the scenario. Reserve `page.goto` / deep links for cheap setup when the test is not about navigation.
 
 ### Prefer APIs for setup and teardown [prefer-kibana-apis-over-ui-for-setup-and-teardown]
 
@@ -458,12 +494,14 @@ await page.testSubj.locator('confirmDeleteModal').getByRole('button', { name: 'D
 
 :::::
 
-### Use Scout's default timeouts [use-scouts-default-timeouts]
+### Avoid unnecessary timeout overrides [use-scouts-default-timeouts]
 
 Scout configures Playwright timeouts ([source](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-scout/src/playwright/config/create_config.ts)). Prefer defaults.
 
 - Don’t override suite-level timeouts/retries with `test.describe.configure()` unless you have a strong reason.
-- If you increase a timeout for one operation, keep it well below the test timeout and leave a short rationale. An assertion timeout that exceeds the test timeout is ignored.
+- If you increase a timeout for one operation, keep it well below the test timeout and **add a short code comment** explaining why (slow first load, CI variance, known heavy view, etc.).
+- After raising timeouts for flakiness, **re-run the flaky test runner** (or many local repeats) to confirm the new value is necessary.
+- Keep in mind that an assertion timeout that exceeds the test timeout is ignored.
 - Time spent in hooks (`beforeEach`, `afterEach`) counts toward the test timeout. If setup is slow, the test itself may time out even though its assertions are fast.
 
 :::::{dropdown} Example
@@ -480,6 +518,8 @@ await expect(downloadBtn).toBeEnabled({ timeout: 30_000 });
 ### Wait for complex UI to finish rendering [wait-for-complex-components-to-fully-render]
 
 Tables/maps/visualizations can appear before data is rendered. Prefer waiting on a component-specific **“loaded” signal** rather than global indicators like the Kibana chrome spinner (our data shows they are unreliable for confirming that a particular component has finished rendering).
+
+**Do not rely on helpers that only wait for a global “loading” indicator to disappear.** Each view should have an explicit readiness wait (or removal of such helpers in favor of those waits).
 
 :::::{dropdown} Example
 In source code, use a dynamic `data-test-subj`:
@@ -506,6 +546,8 @@ For Kibana Maps, `data-render-complete="true"` is often the right “ready” si
 
 Prefer existing page objects (and their methods) over rebuilding EUI interactions in test files.
 
+- Prefer **`readonly` locator fields** assigned in the constructor for stable selectors, and **methods** for parameterized locators, multi-step actions, or flows. Thin getter-only methods for every field add noise; match the patterns used by built-in page objects (for example `DashboardApp`).
+
 :::::{dropdown} Example
 
 ```ts
@@ -516,6 +558,10 @@ await pageObjects.datePicker.setAbsoluteRange({
 ```
 
 :::::
+
+### Keep mocks and non-UI setup out of page objects [keep-mocks-out-of-page-objects]
+
+Page objects should focus on real UI interaction. Put HTTP mocks, interceptors, and similar setup in dedicated fixtures (for example `fixtures/mocks.ts`) so tests and reviewers can find them in one place.
 
 ### Abstract common operations in page object methods [abstract-common-operations-in-page-object-methods]
 
@@ -562,6 +608,8 @@ async openEditMode() {
 ### Keep assertions explicit in tests, not hidden in page objects [keep-assertions-explicit-in-tests-not-hidden-in-page-objects]
 
 Prefer explicit `expect()` in the test file so reviewers can see intent and failure modes. Also prefer `expect()` over manual boolean checks, as Playwright’s error output includes the locator, call log, and a clear message, which `if`/`throw` patterns lose.
+
+**In page objects, avoid `expect()`.** Use `waitForSelector` / visibility waits to synchronize after navigation or actions (for example wait for a header to be visible). Assertions belong in specs.
 
 :::::{dropdown} Examples
 ❌ **Don’t:** hide assertions inside page objects:
@@ -657,16 +705,6 @@ test.beforeEach(async ({ page, browserAuth, pageObjects }) => {
 
 :::::
 
-### Contribute to Scout when possible [contribute-to-scout-when-possible]
-
-If you build a helper that will benefit other tests, consider upstreaming it:
-
-- **Reusable across many plugins/teams**: contribute to `@kbn/scout`
-- **Reusable but solution-scoped**: contribute to the relevant solution Scout package
-- **Plugin-specific**: keep it in your plugin’s `test/scout` tree
-
-For the full guidance, see [Scout](../scout.md#contribute-to-scout-when-possible).
-
 ---
 
 ## API tests [api-tests]
@@ -708,6 +746,17 @@ apiTest('returns data for viewer', async ({ apiClient }) => {
 :::::
 
 This pattern validates both endpoint behavior and the [permission model](#test-with-minimal-permissions-avoid-admin-when-possible).
+
+### Choose the right auth pattern [choose-the-right-auth-pattern]
+
+Scout supports two authentication methods for API tests. Choose based on endpoint type:
+
+| Endpoint type                | Auth method          | Fixture                        |
+| ---------------------------- | -------------------- | ------------------------------ |
+| Public APIs (`api/*`)        | API key              | `requestAuth` + `apiKeyHeader` |
+| Internal APIs (`internal/*`) | Cookie-based session | `samlAuth` + `cookieHeader`    |
+
+See [API authentication](./api-auth.md) for details and examples.
 
 ### Validate the response body (not just status) [dont-just-verify-the-status-code-validate-the-response-body]
 

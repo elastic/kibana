@@ -122,8 +122,8 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiSpacer size="s" />
-      <EuiText size="s" color="subdued">
+      <EuiSpacer size="m" />
+      <EuiText size="m" color="default">
         {agent.description}
       </EuiText>
 

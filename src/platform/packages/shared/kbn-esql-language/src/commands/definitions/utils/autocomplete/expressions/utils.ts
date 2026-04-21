@@ -13,7 +13,6 @@ import { nullCheckOperators, inOperators } from '../../../all_operators';
 import type { ExpressionContext, FunctionParameterContext } from './types';
 import type { ICommandContext, ISuggestionItem } from '../../../../registry/types';
 import { getFunctionDefinition } from '../..';
-import { EDITOR_MARKER } from '../../../constants';
 import { resolveArgumentTypes } from '../../expressions';
 import type { SupportedDataType } from '../../../types';
 import {
@@ -63,7 +62,8 @@ export function matchesSpecialFunction(name: string, expected: SpecialFunctionNa
  */
 export function buildExpressionFunctionParameterContext(
   fn: ESQLFunction,
-  context?: ICommandContext
+  context?: ICommandContext,
+  shouldGetNextArgument = false
 ): FunctionParameterContext | null {
   const fnDefinition = getFunctionDefinition(fn.name);
 
@@ -76,7 +76,6 @@ export function buildExpressionFunctionParameterContext(
     unmappedFieldsStrategy: context?.unmappedFieldsStrategy,
   });
 
-  const shouldGetNextArgument = fn.text.includes(EDITOR_MARKER);
   let argIndex = Math.max(fn.args.length, 0);
   if (!shouldGetNextArgument && argIndex) {
     argIndex -= 1;

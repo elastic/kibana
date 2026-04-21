@@ -89,6 +89,8 @@ describe('useTopNavLinks', () => {
           hasShareIntegration: false,
           persistedDiscoverSession: undefined,
           ...hookAttrs,
+          onOpenSaveModal: hookAttrs.onOpenSaveModal ?? jest.fn(),
+          onOpenSaveAsModal: hookAttrs.onOpenSaveAsModal ?? jest.fn(),
         }),
       {
         wrapper: ({ children }) => (
@@ -115,26 +117,26 @@ describe('useTopNavLinks', () => {
   });
 
   describe('when ES|QL mode is true', () => {
-    it('should NOT include the esql secondary action item', async () => {
+    it('should NOT include the esql item', async () => {
       const appMenuConfig = await setup({
         isEsqlMode: true,
       });
 
       expect(appMenuConfig.items).toBeDefined();
-      expect(appMenuConfig.secondaryActionItem).toBeUndefined();
+      const itemIds = appMenuConfig.items?.map((item) => item.id);
+      expect(itemIds).not.toContain('esql');
     });
   });
 
   describe('when ES|QL mode is false (classic mode)', () => {
-    it('should include the esql secondary action item', async () => {
+    it('should include the esql item', async () => {
       const appMenuConfig = await setup({
         isEsqlMode: false,
       });
 
       expect(appMenuConfig.items).toBeDefined();
-      expect(appMenuConfig.secondaryActionItem).toBeDefined();
-      expect(appMenuConfig.secondaryActionItem?.id).toBe('esql');
-      expect(appMenuConfig.secondaryActionItem?.label).toBe('ES|QL');
+      const itemIds = appMenuConfig.items?.map((item) => item.id);
+      expect(itemIds).toContain('esql');
     });
   });
 
@@ -383,6 +385,8 @@ describe('useTopNavLinks', () => {
             hasShareIntegration: false,
             persistedDiscoverSession: undefined,
             ...hookAttrs,
+            onOpenSaveModal: hookAttrs.onOpenSaveModal ?? jest.fn(),
+            onOpenSaveAsModal: hookAttrs.onOpenSaveAsModal ?? jest.fn(),
           }),
         {
           wrapper: ({ children }) => (

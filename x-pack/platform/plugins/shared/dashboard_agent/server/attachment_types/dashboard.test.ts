@@ -17,6 +17,7 @@ import {
 } from '@kbn/dashboard-agent-common';
 import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { createDashboardAttachmentType } from './dashboard';
 
 const dashboardAttachmentData: DashboardAttachmentData = {
@@ -24,7 +25,7 @@ const dashboardAttachmentData: DashboardAttachmentData = {
   description: 'Main dashboard for key metrics',
   panels: [
     {
-      type: 'lens',
+      type: LENS_EMBEDDABLE_TYPE,
       id: 'panel-1',
       grid: { x: 0, y: 0, w: 24, h: 15 },
       config: {
@@ -191,5 +192,64 @@ describe('createDashboardAttachmentType', () => {
         },
       },
     });
+  });
+
+  it('treats legacy wrapped Lens configs as equal when checking staleness', async () => {
+    const dashboardClient = {
+      read: jest.fn().mockResolvedValue({
+        id: 'dashboard-1',
+        data: {
+          title: 'System Overview',
+          description: 'Main dashboard for key metrics',
+          panels: [
+            {
+              type: LENS_EMBEDDABLE_TYPE,
+              id: 'panel-1',
+              grid: { x: 0, y: 0, w: 24, h: 15 },
+              config: {
+                type: 'lnsXY',
+                title: 'CPU Usage',
+              },
+            },
+          ],
+        },
+        meta: {
+          outcome: 'exactMatch',
+          updated_at: '2025-01-02T00:00:00.000Z',
+          version: 'v1',
+        },
+      }),
+    } as jest.Mocked<DashboardPluginStart['client']>;
+    const savedObjectsClient = createSavedObjectsClient();
+    const definition = createDashboardAttachmentType({
+      logger: createLogger(),
+      getDashboardClient: async () => dashboardClient,
+    });
+
+    const isStale = await definition.isStale?.(
+      createAttachment({
+        ...dashboardAttachmentData,
+        panels: [
+          {
+            type: LENS_EMBEDDABLE_TYPE,
+            id: 'panel-1',
+            grid: { x: 0, y: 0, w: 24, h: 15 },
+            config: {
+              title: 'CPU Usage',
+              attributes: {
+                type: 'lnsXY',
+              },
+            },
+          },
+        ],
+      }),
+      {
+        request: {} as never,
+        spaceId: 'default',
+        savedObjectsClient,
+      }
+    );
+
+    expect(isStale).toBe(false);
   });
 });

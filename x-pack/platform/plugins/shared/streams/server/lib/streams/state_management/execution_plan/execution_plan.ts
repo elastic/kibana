@@ -278,11 +278,11 @@ export class ExecutionPlan {
       return;
     }
 
-    const { queryClient } = this.dependencies;
-    if (!queryClient) {
+    const { getQueryClient } = this.dependencies;
+    if (!getQueryClient) {
       throw new Error('queryClient is required for deleteQueries but was not provided');
     }
-
+    const queryClient = await getQueryClient();
     return Promise.all(actions.map((action) => queryClient.deleteAll(action.request.definition)));
   }
 
@@ -309,11 +309,11 @@ export class ExecutionPlan {
       return;
     }
 
-    const { featureClient } = this.dependencies;
-    if (!featureClient) {
+    const { getFeatureClient } = this.dependencies;
+    if (!getFeatureClient) {
       throw new Error('featureClient is required for unlinkFeatures but was not provided');
     }
-
+    const featureClient = await getFeatureClient();
     return Promise.all(actions.map((action) => featureClient.deleteFeatures(action.request.name)));
   }
 

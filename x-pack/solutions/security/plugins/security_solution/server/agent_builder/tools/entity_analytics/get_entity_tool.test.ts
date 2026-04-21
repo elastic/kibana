@@ -111,7 +111,7 @@ describe('getEntityTool', () => {
 
       expect(result.status).toBe('available');
       expect(mockEsClient.asInternalUser.indices.exists).toHaveBeenCalledWith({
-        index: '.entities.v2.latest.security_default',
+        index: 'entities-latest-default',
       });
     });
   });
@@ -130,7 +130,7 @@ describe('getEntityTool', () => {
 
       expect(executeEsql).toHaveBeenCalledTimes(1);
       expect((executeEsql as jest.Mock).mock.calls[0][0].query).toEqual(
-        `FROM .entities.v2.latest.security_default | WHERE entity.id == \"host:server1\" | LIMIT 1`
+        `FROM entities-latest-default | WHERE entity.id == \"host:server1\" | LIMIT 1`
       );
       expect(result.results).toHaveLength(1);
       expect(result.results[0].type).toBe(ToolResultType.esqlResults);

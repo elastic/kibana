@@ -52,7 +52,7 @@ export const DeleteVar: FC<Props> = ({ selectedVar, onCancel, onDelete }) => {
       <div className="canvasVarHeader__triggerWrapper">
         <button className="canvasVarHeader__button" type="button" onClick={() => onCancel()}>
           <span className="canvasVarHeader__iconWrapper">
-            <EuiIcon type="sortLeft" style={{ verticalAlign: 'top' }} />
+            <EuiIcon type="sortLeft" style={{ verticalAlign: 'top' }} aria-hidden={true} />
           </span>
           <span>
             <span className="canvasVarHeader__anchor">{strings.getTitle()}</span>

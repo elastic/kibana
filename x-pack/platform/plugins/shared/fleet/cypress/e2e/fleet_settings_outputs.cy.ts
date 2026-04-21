@@ -37,11 +37,15 @@ import { login } from '../tasks/login';
 import { visit } from '../tasks/common';
 
 export const fillYamlConfigBox = (query: string) => {
-  cy.get('[data-test-subj="kibanaCodeEditor"] textarea').type(query, { force: true });
+  cy.get(
+    '[data-test-subj="settingsOutputsFlyout.yamlConfigInput"] [data-test-subj="kibanaCodeEditor"] textarea'
+  ).type(query, { force: true });
 };
 
 export const clearYamlConfigBox = () => {
-  cy.get('[data-test-subj="kibanaCodeEditor"] textarea').clear({ force: true });
+  cy.get(
+    '[data-test-subj="settingsOutputsFlyout.yamlConfigInput"] [data-test-subj="kibanaCodeEditor"] textarea'
+  ).clear({ force: true });
 };
 
 describe('Outputs', () => {

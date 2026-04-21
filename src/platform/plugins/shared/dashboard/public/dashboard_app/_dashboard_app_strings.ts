@@ -298,7 +298,7 @@ export const topNavStrings = {
   },
   add: {
     label: i18n.translate('dashboard.topNave.addButtonAriaLabel', {
-      defaultMessage: 'add',
+      defaultMessage: 'Add panel',
     }),
     description: i18n.translate('dashboard.topNave.addConfigDescription', {
       defaultMessage: 'Add content to your dashboard',

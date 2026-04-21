@@ -7,7 +7,20 @@
 
 import { evaluateCondition } from './evaluate_conditions';
 
-const typeMap = { status: 'keyword', priority: 'keyword', score: 'integer', notes: 'keyword' };
+const typeMap = {
+  status: 'keyword',
+  priority: 'keyword',
+  score: 'integer',
+  notes: 'keyword',
+  systems: 'keyword',
+};
+const controlMap = {
+  status: 'INPUT_TEXT',
+  priority: 'SELECT_BASIC',
+  score: 'INPUT_NUMBER',
+  notes: 'INPUT_TEXT',
+  systems: 'CHECKBOX_GROUP',
+};
 
 describe('evaluateCondition', () => {
   describe('unknown field reference', () => {
@@ -121,6 +134,85 @@ describe('evaluateCondition', () => {
           { field: 'notes', operator: 'contains', value: '' },
           { notes: null },
           typeMap
+        )
+      ).toBe(false);
+    });
+  });
+
+  describe('CHECKBOX_GROUP field', () => {
+    it('contains: returns true when the array includes the value', () => {
+      expect(
+        evaluateCondition(
+          { field: 'systems', operator: 'contains', value: 'database' },
+          { systems: '["api","database"]' },
+          typeMap,
+          controlMap
+        )
+      ).toBe(true);
+    });
+
+    it('contains: returns false when the array does not include the value', () => {
+      expect(
+        evaluateCondition(
+          { field: 'systems', operator: 'contains', value: 'auth' },
+          { systems: '["api","database"]' },
+          typeMap,
+          controlMap
+        )
+      ).toBe(false);
+    });
+
+    it('contains: does not match partial substrings', () => {
+      expect(
+        evaluateCondition(
+          { field: 'systems', operator: 'contains', value: 'data' },
+          { systems: '["api","database"]' },
+          typeMap,
+          controlMap
+        )
+      ).toBe(false);
+    });
+
+    it('empty: returns true when nothing is selected', () => {
+      expect(
+        evaluateCondition(
+          { field: 'systems', operator: 'empty' },
+          { systems: '[]' },
+          typeMap,
+          controlMap
+        )
+      ).toBe(true);
+    });
+
+    it('empty: returns false when at least one item is selected', () => {
+      expect(
+        evaluateCondition(
+          { field: 'systems', operator: 'empty' },
+          { systems: '["api"]' },
+          typeMap,
+          controlMap
+        )
+      ).toBe(false);
+    });
+
+    it('not_empty: returns true when at least one item is selected', () => {
+      expect(
+        evaluateCondition(
+          { field: 'systems', operator: 'not_empty' },
+          { systems: '["api"]' },
+          typeMap,
+          controlMap
+        )
+      ).toBe(true);
+    });
+
+    it('not_empty: returns false when nothing is selected', () => {
+      expect(
+        evaluateCondition(
+          { field: 'systems', operator: 'not_empty' },
+          { systems: '[]' },
+          typeMap,
+          controlMap
         )
       ).toBe(false);
     });

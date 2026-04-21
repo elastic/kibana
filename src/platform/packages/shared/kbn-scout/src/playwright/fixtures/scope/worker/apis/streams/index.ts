@@ -131,11 +131,9 @@ export const getStreamsApiService = ({
       await measurePerformanceAsync(log, 'streamsApi.clearStreamChildren', async () => {
         const definition = await service.getStreamDefinition(streamName);
         if (isWiredStreamDefinition(definition.stream)) {
-          await Promise.all(
-            definition.stream.ingest.wired.routing.map((child) =>
-              service.deleteStream(child.destination)
-            )
-          );
+          for (const child of definition.stream.ingest.wired.routing) {
+            await service.deleteStream(child.destination);
+          }
         }
       });
     },

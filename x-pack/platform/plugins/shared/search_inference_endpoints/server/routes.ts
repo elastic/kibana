@@ -26,16 +26,24 @@ export function defineRoutes({
   featureRegistry,
   getForFeature,
   getConnectorList,
+  getConnectorById,
 }: {
   logger: Logger;
   router: IRouter;
   featureRegistry: InferenceFeatureRegistry;
   getForFeature: (featureId: string, request: KibanaRequest) => Promise<ResolvedInferenceEndpoints>;
   getConnectorList: (request: KibanaRequest) => Promise<InferenceConnector[]>;
+  getConnectorById: (id: string, request: KibanaRequest) => Promise<InferenceConnector>;
 }) {
-  defineInferenceSettingsRoutes({ logger, router });
+  defineInferenceSettingsRoutes({ logger, router, featureRegistry, getConnectorById });
   defineInferenceFeaturesRoutes({ logger, router, featureRegistry });
-  defineInferenceConnectorsRoute({ logger, router, getForFeature, getConnectorList });
+  defineInferenceConnectorsRoute({
+    logger,
+    router,
+    getForFeature,
+    getConnectorList,
+    getConnectorById,
+  });
   router.get(
     {
       path: APIRoutes.GET_INFERENCE_ENDPOINTS,

@@ -43,7 +43,7 @@ export const getAllAttachmentsStepCommonDefinition: CommonStepDefinition<
   GetAllAttachmentsStepOutputSchema
 > = {
   id: GetAllAttachmentsStepTypeId,
-  category: StepCategory.Kibana,
+  category: StepCategory.KibanaCases,
   label: i18n.GET_ALL_ATTACHMENTS_STEP_LABEL,
   description: i18n.GET_ALL_ATTACHMENTS_STEP_DESCRIPTION,
   documentation: {

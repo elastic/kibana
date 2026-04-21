@@ -58,7 +58,6 @@ export async function autocomplete(
           ...buildConstantsDefinitions(
             [QUERY_TEXT_SNIPPET],
             '',
-            '1',
             undefined,
             undefined,
             SuggestionCategory.CONSTANT_VALUE
@@ -79,7 +78,6 @@ export async function autocomplete(
           ...buildConstantsDefinitions(
             [QUERY_TEXT_SNIPPET],
             '',
-            '1',
             undefined,
             undefined,
             SuggestionCategory.CONSTANT_VALUE
@@ -103,7 +101,6 @@ export async function autocomplete(
         {
           ...withCompleteItem,
           text: withCompleteItem.text,
-          sortText: '01',
         },
       ];
       return suggestFieldsList(

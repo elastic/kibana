@@ -9,17 +9,36 @@ import type {
   ConditionRule,
   CompoundCondition,
 } from '../../../../common/types/domain/template/fields';
+import { FieldType } from '../../../../common/types/domain/template/fields';
 
-const evaluateRule = (
-  rule: ConditionRule,
-  fieldValues: Record<string, unknown>,
-  fieldTypeMap: Record<string, string>
-): boolean => {
-  // Unknown field reference → safe default: don't hide by surprise
-  if (fieldTypeMap[rule.field] === undefined) return true;
+const isScalarEmpty = (value: unknown): boolean =>
+  value === null || value === undefined || value === '';
 
-  const current = fieldValues[rule.field];
+const parseJsonArray = (value: unknown): unknown[] => {
+  if (typeof value !== 'string' || value === '') return [];
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+};
 
+const evaluateJsonArrayRule = (value: unknown, rule: ConditionRule): boolean | null => {
+  const arr = parseJsonArray(value);
+  switch (rule.operator) {
+    case 'contains':
+      return arr.includes(String(rule.value ?? ''));
+    case 'empty':
+      return arr.length === 0;
+    case 'not_empty':
+      return arr.length > 0;
+    default:
+      return null;
+  }
+};
+
+const evaluateScalarRule = (current: unknown, rule: ConditionRule): boolean => {
   switch (rule.operator) {
     case 'eq':
       return String(current ?? '') === String(rule.value ?? '');
@@ -28,12 +47,32 @@ const evaluateRule = (
     case 'contains':
       return typeof current === 'string' && current.includes(String(rule.value ?? ''));
     case 'empty':
-      return current === null || current === undefined || current === '';
+      return isScalarEmpty(current);
     case 'not_empty':
-      return current !== null && current !== undefined && current !== '';
+      return !isScalarEmpty(current);
     default:
       return true;
   }
+};
+
+const evaluateRule = (
+  rule: ConditionRule,
+  fieldValues: Record<string, unknown>,
+  fieldTypeMap: Record<string, string>,
+  fieldControlMap: Record<string, string>
+): boolean => {
+  // Unknown field reference → safe default: don't hide by surprise
+  if (fieldTypeMap[rule.field] === undefined) return true;
+
+  const current = fieldValues[rule.field];
+  const control = fieldControlMap[rule.field];
+
+  if (control === FieldType.CHECKBOX_GROUP || control === FieldType.USER_PICKER) {
+    const result = evaluateJsonArrayRule(current, rule);
+    if (result !== null) return result;
+  }
+
+  return evaluateScalarRule(current, rule);
 };
 
 /**
@@ -42,18 +81,20 @@ const evaluateRule = (
  * @param condition - The condition to evaluate (ConditionRule or CompoundCondition)
  * @param fieldValues - Map of fieldName -> current value
  * @param fieldTypeMap - Map of fieldName -> type; unknown fields default to true
+ * @param fieldControlMap - Map of fieldName -> control (e.g. CHECKBOX_GROUP)
  */
 export const evaluateCondition = (
   condition: ConditionRule | CompoundCondition,
   fieldValues: Record<string, unknown>,
-  fieldTypeMap: Record<string, string>
+  fieldTypeMap: Record<string, string>,
+  fieldControlMap: Record<string, string> = {}
 ): boolean => {
   if ('rules' in condition) {
     const { combine, rules } = condition;
     return combine === 'any'
-      ? rules.some((rule) => evaluateRule(rule, fieldValues, fieldTypeMap))
-      : rules.every((rule) => evaluateRule(rule, fieldValues, fieldTypeMap));
+      ? rules.some((rule) => evaluateRule(rule, fieldValues, fieldTypeMap, fieldControlMap))
+      : rules.every((rule) => evaluateRule(rule, fieldValues, fieldTypeMap, fieldControlMap));
   }
 
-  return evaluateRule(condition, fieldValues, fieldTypeMap);
+  return evaluateRule(condition, fieldValues, fieldTypeMap, fieldControlMap);
 };

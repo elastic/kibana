@@ -211,6 +211,7 @@ enabled:
   - x-pack/platform/test/cases_api_integration/security_and_spaces/config_basic.ts
   - x-pack/platform/test/cases_api_integration/security_and_spaces/config_trial.ts
   - x-pack/platform/test/cases_api_integration/security_and_spaces/config_trial_common.ts
+  - x-pack/platform/test/cases_api_integration/security_and_spaces/config_trial_unified_attachments.ts
   - x-pack/platform/test/cases_api_integration/security_and_spaces/config_no_public_base_url.ts
   - x-pack/platform/test/cases_api_integration/spaces_only/config.ts
   - x-pack/platform/test/disable_ems/config.ts
@@ -380,12 +381,14 @@ enabled:
   - x-pack/platform/test/security_api_integration/http_no_auth_providers.config.ts
   - x-pack/platform/test/security_api_integration/kerberos_anonymous_access.config.ts
   - x-pack/platform/test/security_api_integration/kerberos.config.ts
+  - x-pack/platform/test/security_api_integration/kerberos.http2.config.ts
   - x-pack/platform/test/security_api_integration/login_selector.config.ts
   - x-pack/platform/test/security_api_integration/oidc_implicit_flow.config.ts
   - x-pack/platform/test/security_api_integration/oidc.config.ts
   - x-pack/platform/test/security_api_integration/oidc.http2.config.ts
   - x-pack/platform/test/security_api_integration/oidc_multiple_realms.config.ts
   - x-pack/platform/test/security_api_integration/pki.config.ts
+  - x-pack/platform/test/security_api_integration/pki.http2.config.ts
   - x-pack/platform/test/security_api_integration/saml.config.ts
   - x-pack/platform/test/security_api_integration/saml.http2.config.ts
   - x-pack/platform/test/security_api_integration/saml_cloud.config.ts
@@ -429,6 +432,7 @@ enabled:
   - x-pack/performance/journeys_e2e/many_fields_discover_esql.ts
   - x-pack/performance/journeys_e2e/many_fields_lens_editor.ts
   - x-pack/performance/journeys_e2e/many_fields_transform.ts
+  - x-pack/performance/journeys_e2e/metrics_experience_grid.ts
   - x-pack/performance/journeys_e2e/tsdb_logs_data_visualizer.ts
   - x-pack/performance/journeys_e2e/promotion_tracking_dashboard.ts
   - x-pack/performance/journeys_e2e/web_logs_dashboard.ts
@@ -443,7 +447,8 @@ enabled:
   - x-pack/performance/journeys_e2e/tags_listing_page.ts
   - x-pack/performance/journeys_e2e/cloud_security_dashboard.ts
   - x-pack/performance/journeys_e2e/apm_service_inventory.ts
-  - x-pack/performance/journeys_e2e/infra_hosts_view.ts
+  - x-pack/performance/journeys_e2e/infra_hosts_view_ecs.ts
+  - x-pack/performance/journeys_e2e/infra_hosts_view_semconv.ts
   # configs migrated to the new Kibana architecture
   - x-pack/platform/test/api_integration/apis/aiops/config.ts
   - x-pack/platform/test/api_integration/apis/cases/config.ts
@@ -458,7 +463,6 @@ enabled:
   - x-pack/platform/test/api_integration/apis/grok_debugger/config.ts
   - x-pack/platform/test/api_integration/apis/file_upload/config.ts
   - x-pack/platform/test/api_integration/apis/kibana/config.ts
-  - x-pack/platform/test/api_integration/apis/logstash/config.ts
   - x-pack/platform/test/api_integration/apis/management/config.ts
   - x-pack/platform/test/api_integration/apis/management/index_management/disabled_data_enrichers/config.ts
   - x-pack/platform/test/api_integration/apis/maps/config.ts
@@ -495,3 +499,4 @@ enabled:
   - x-pack/platform/test/api_integration_deployment_agnostic/configs/stateful/platform.streams_ccr.stateful.config.ts
   - x-pack/platform/test/api_integration/apis/streams/streams_without_security.config.ts
   - x-pack/platform/test/api_integration_deployment_agnostic/configs/stateful/platform.alerting_v2.stateful.config.ts
+  - x-pack/platform/test/api_integration_deployment_agnostic/configs/stateful/platform.streams_definitions.feature_flag.stateful.config.ts
