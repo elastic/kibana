@@ -25,6 +25,12 @@ paths:
           schema:
             type: string
           description: End of time range (ISO 8601)
+        - name: name
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter projects by name (case-insensitive substring match)
         - name: page
           in: query
           required: false

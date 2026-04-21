@@ -60,6 +60,11 @@ export class ServerlessObservabilityPlugin
         description:
           'Observability Overview Complete - Enables overview of the Observability solution.',
       },
+      {
+        id: 'observability:workflows',
+        products: [{ name: 'observability', tier: 'complete' }],
+        description: 'Workflows - Enables the Workflows application in the Observability solution.',
+      },
     ]);
     return {};
   }

@@ -220,7 +220,7 @@ components:
           description: The name of the connector that generated the attack discovery
           type: string
         enableFieldRendering:
-          description: Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack discovery views within Kibana. Defaults to `false`.
+          description: Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack Discovery views within Kibana. Defaults to `false`.
           type: boolean
         generationUuid:
           description: The generation ID of the run that created the attack discovery
@@ -249,7 +249,7 @@ components:
           items:
             type: string
         enableFieldRendering:
-          description: Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack discovery views within Kibana. Defaults to `false`.
+          description: Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack Discovery views within Kibana. Defaults to `false`.
           type: boolean
         end:
           description: filter by end date (relative or absolute)

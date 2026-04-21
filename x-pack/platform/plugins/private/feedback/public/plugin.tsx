@@ -10,8 +10,8 @@ import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { TelemetryPluginStart } from '@kbn/telemetry-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import type { FeedbackRegistryEntry } from '@kbn/feedback-registry';
 import { getFeedbackQuestionsForApp } from '@kbn/feedback-registry';
+import type { FeedbackRegistryEntry } from '@kbn/feedback-components';
 import type { FeedbackFormData } from '../common';
 import { getAppDetails } from './src/utils';
 

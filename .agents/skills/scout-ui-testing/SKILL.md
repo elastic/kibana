@@ -25,6 +25,7 @@ description: Use when creating, updating, debugging, or reviewing Scout UI tests
 ## Non-negotiable conventions
 
 - **Tags are required**: Scout validates UI test tags at runtime. Ensure each test has at least one supported tag (typically by tagging the top-level `test.describe(...)` / `spaceTest.describe(...)`, e.g. `tags.deploymentAgnostic`, `tags.stateful.classic`, or `tags.performance`).
+- **No `@` in test titles**: Playwright treats `@word` in test/describe titles as tags. Do not use `@` followed by word characters in titles (e.g., `@timestamp`, `@elastic`). This causes Scout tag validation to fail with "Unsupported tag(s) found". Rephrase the title instead (e.g., use `timestamp field` instead of `@timestamp`).
 - **Prefer one suite per file**: keep a single top-level `test.describe(...)` (sequential) or `spaceTest.describe(...)` (parallel) and avoid nested `describe` blocks where possible.
 - **UI actions live in page objects**; assertions stay in the spec.
 - **Use APIs for setup/teardown**: prefer `apiServices`/`kbnClient`/`esArchiver` in hooks over clicking through the UI.
@@ -38,10 +39,14 @@ description: Use when creating, updating, debugging, or reviewing Scout UI tests
 ## Page objects (UI)
 
 - Prefer `page.testSubj.locator(...)`, role/label locators; avoid brittle CSS.
-- Keep selectors + interactions inside the page object class.
+- Keep selectors + interactions inside the page object class. **Do not use `expect` assertions in page objects** — use `waitForSelector` for waiting on elements. Assertions belong in test specs only.
+- **Keep route mocks out of page objects** — page objects are for UI interactions only. Put `page.route()` mocks in a dedicated `fixtures/mocks.ts` file as standalone functions that accept `page` as a parameter. See `cloud_security_posture/test/scout_cspm_agentless/ui/fixtures/mocks.ts` for the reference pattern.
 - Don't make API calls from page objects (use `apiServices`/`kbnClient` in hooks instead).
 - Register plugin page objects by extending the `pageObjects` fixture in `test/scout*/ui/fixtures/index.ts`.
+- **Use `readonly` class fields for static locators** — assign them in the constructor, not as getter methods. Use methods only for parameterized locators/actions. See `DashboardApp` in `kbn-scout` for the reference pattern.
 - Scout provides EUI component wrappers for stable interactions with common EUI widgets: `EuiComboBoxWrapper`, `EuiDataGridWrapper`, `EuiSelectableWrapper`, `EuiCheckBoxWrapper`, `EuiFieldTextWrapper`, `EuiCodeBlockWrapper`, `EuiSuperSelectWrapper`, `EuiToastWrapper`. Import them from `@kbn/scout` and use them as class members in page objects.
+- **Avoid `.first()`, `.nth()`, `.last()`** — the `playwright/no-nth-methods` lint rule flags these. Instead, use `data-test-subj` attributes or other targeted selectors. If the component lacks a `data-test-subj`, add one rather than disabling the rule.
+- **Do not disable eslint rules** — avoid `eslint-disable` comments in test files. Fix the underlying issue (e.g., use targeted selectors instead of positional ones, add `data-test-subj` to the components) rather than suppressing the lint rule.
 
 ## Parallel UI specifics (spaceTest)
 

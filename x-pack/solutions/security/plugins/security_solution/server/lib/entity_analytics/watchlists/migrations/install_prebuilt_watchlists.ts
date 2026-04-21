@@ -10,21 +10,39 @@ import type { EntityAnalyticsMigrationsParams } from '../../migrations';
 import { buildScopedInternalSavedObjectsClientUnsafe } from '../../risk_score/tasks/helpers';
 import { PRIVILEGED_USER_MODIFIER } from '../../risk_score/modifiers/privileged_users';
 import {
-  PRIVILEGED_USER_WATCHLIST_ID,
+  getPrivilegedUserWatchlistSavedObjectId,
   PRIVILEGED_USER_WATCHLIST_NAME,
 } from '../../../../../common/entity_analytics/watchlists/constants';
-import { getMatchersFor } from '../../privilege_monitoring/data_sources/matchers';
 import { getStreamPatternFor } from '../../privilege_monitoring/data_sources/constants';
 import type { WatchlistConfigClient } from '../management/watchlist_config';
 import { WatchlistConfigClient as WatchlistConfigClientClass } from '../management/watchlist_config';
 import { WatchlistEntitySourceClient } from '../entity_sources/infra';
 
 // Bump this when PREBUILT_WATCHLISTS definitions change
-export const PREBUILT_WATCHLISTS_VERSION = 1;
+export const PREBUILT_WATCHLISTS_VERSION = 2;
 
-const PREBUILT_WATCHLISTS = [
+const OKTA_PRIVILEGED_ROLES = [
+  'Super Administrator',
+  'Organization Administrator',
+  'Group Administrator',
+  'Application Administrator',
+  'Mobile Administrator',
+  'Help Desk Administrator',
+  'Report Administrator',
+  'API Access Management Administrator',
+  'Group Membership Administrator',
+  'Read-only Administrator',
+];
+
+const buildKqlValuesFilter = (field: string, values: string[]): string =>
+  `${field}: (${values.map((v) => `"${v}"`).join(' OR ')})`;
+
+const OKTA_QUERY_RULE = buildKqlValuesFilter('user.roles', OKTA_PRIVILEGED_ROLES);
+const AD_QUERY_RULE = 'entityanalytics_ad.user.privileged_group_member: true';
+
+const getPrebuiltWatchlists = (namespace: string) => [
   {
-    id: PRIVILEGED_USER_WATCHLIST_ID,
+    id: getPrivilegedUserWatchlistSavedObjectId(namespace),
     name: PRIVILEGED_USER_WATCHLIST_NAME,
     description: 'System-managed watchlist for tracking privileged users',
     managed: true,
@@ -33,22 +51,26 @@ const PREBUILT_WATCHLISTS = [
       {
         type: 'entity_analytics_integration' as const,
         name: 'okta',
-        indexPattern: getStreamPatternFor('entityanalytics_okta', 'default'),
+        indexPattern: getStreamPatternFor('entityanalytics_okta', namespace),
         integrationName: 'entityanalytics_okta',
         enabled: true,
-        matchers: getMatchersFor('entityanalytics_okta'),
+        managed: true,
+        queryRule: OKTA_QUERY_RULE,
       },
       {
         type: 'entity_analytics_integration' as const,
         name: 'ad',
-        indexPattern: getStreamPatternFor('entityanalytics_ad', 'default'),
+        indexPattern: getStreamPatternFor('entityanalytics_ad', namespace),
         integrationName: 'entityanalytics_ad',
         enabled: true,
-        matchers: getMatchersFor('entityanalytics_ad'),
+        managed: true,
+        queryRule: AD_QUERY_RULE,
       },
     ],
   },
 ];
+
+type PrebuiltWatchlistDefinition = ReturnType<typeof getPrebuiltWatchlists>[number];
 
 /**
  * Ensures all prebuilt watchlists exist for the given namespace.
@@ -65,7 +87,7 @@ export const ensurePrebuiltWatchlists = async ({
   namespace: string;
   logger: Logger;
 }) => {
-  for (const watchlist of PREBUILT_WATCHLISTS) {
+  for (const watchlist of getPrebuiltWatchlists(namespace)) {
     const { id, entitySources, ...attrs } = watchlist;
 
     const watchlistId = await getOrCreateWatchlist({ watchlistClient, logger, id, attrs });
@@ -98,7 +120,7 @@ const getOrCreateWatchlist = async ({
   watchlistClient: WatchlistConfigClient;
   logger: Logger;
   id: string;
-  attrs: Omit<(typeof PREBUILT_WATCHLISTS)[number], 'id' | 'entitySources'>;
+  attrs: Omit<PrebuiltWatchlistDefinition, 'id' | 'entitySources'>;
 }): Promise<string | undefined> => {
   try {
     const existing = await watchlistClient.get(id);
@@ -132,7 +154,7 @@ const ensureEntitySources = async ({
   namespace: string;
   logger: Logger;
   watchlistId: string;
-  entitySources: (typeof PREBUILT_WATCHLISTS)[number]['entitySources'];
+  entitySources: PrebuiltWatchlistDefinition['entitySources'];
 }) => {
   const sourceClient = new WatchlistEntitySourceClient({ soClient, namespace });
 

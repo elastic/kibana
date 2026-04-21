@@ -18,6 +18,7 @@ export enum WidgetType {
   FormFieldset = 'formFieldset',
   Hidden = 'hidden',
   Object = 'object',
+  FileUpload = 'fileUpload',
 }
 
 export interface BaseWidgetProps<

@@ -32,7 +32,7 @@ import { getEmptyTagValue } from '../../../../common/components/empty_value';
 
 interface EntitySummaryGridProps {
   entityRecord: Entity;
-  criticalityLevel?: CriticalityLevelWithUnassigned;
+  criticalityLevel?: CriticalityLevelWithUnassigned | null;
   onCriticalitySave?: (value: CriticalityLevelWithUnassigned) => void;
 }
 
@@ -159,7 +159,7 @@ const AssetCriticalityCell = memo(
     canEdit,
     onOpenModal,
   }: {
-    criticalityLevel?: CriticalityLevelWithUnassigned;
+    criticalityLevel?: CriticalityLevelWithUnassigned | null;
     canEdit: boolean;
     onOpenModal: () => void;
   }) => (
@@ -204,7 +204,13 @@ const WatchlistsCell = memo(({ watchlistIds }: { watchlistIds: string[] }) => {
 
   const resolvedNames = useMemo(() => {
     if (watchlistIds.length === 0) return [];
-    return watchlistIds.map((id) => watchlistNamesById.get(id) ?? getWatchlistName(id));
+    return watchlistIds
+      .map((id) => {
+        const watchlistName = watchlistNamesById.get(id) ?? getWatchlistName(id);
+        // If all we have is the ID, the watchlist has likely been deleted
+        return watchlistName !== id ? watchlistName : undefined;
+      })
+      .filter((name) => name !== undefined);
   }, [watchlistIds, watchlistNamesById]);
 
   if (resolvedNames.length === 0) {
@@ -221,13 +227,15 @@ const WatchlistsCell = memo(({ watchlistIds }: { watchlistIds: string[] }) => {
       </EuiFlexItem>
       {moreCount > 0 && (
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty size="xs" flush="left">
-            {`+${moreCount} `}
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.entityDetails.grid.watchlistsMore"
-              defaultMessage="More"
-            />
-          </EuiButtonEmpty>
+          <EuiToolTip content={resolvedNames.slice(1).join(', ')}>
+            <EuiButtonEmpty size="xs" flush="left">
+              {`+${moreCount} `}
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.entityDetails.grid.watchlistsMore"
+                defaultMessage="More"
+              />
+            </EuiButtonEmpty>
+          </EuiToolTip>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

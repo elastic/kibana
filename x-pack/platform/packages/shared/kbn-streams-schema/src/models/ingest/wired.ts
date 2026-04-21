@@ -36,6 +36,7 @@ interface IngestWired {
   wired: {
     fields: FieldDefinition;
     routing: RoutingDefinition[];
+    draft?: boolean;
   };
 }
 
@@ -43,6 +44,7 @@ const ingestWiredShape = {
   wired: z.object({
     fields: fieldDefinitionSchema,
     routing: routingDefinitionListSchema,
+    draft: z.boolean().optional(),
   }),
 };
 
@@ -177,3 +179,19 @@ WiredStream.Definition.is = (
       stream.ingest &&
       'wired' in stream.ingest
   );
+
+/**
+ * A wired stream definition where `draft` is narrowed to `true`.
+ */
+export type DraftStreamDefinition = WiredStream.Definition & {
+  ingest: { wired: { draft: true } };
+};
+
+/**
+ * Type guard that checks whether a stream definition is a draft wired stream.
+ */
+export function isDraftStream(
+  definition: BaseStream.Model['Definition']
+): definition is DraftStreamDefinition {
+  return WiredStream.Definition.is(definition) && definition.ingest.wired.draft === true;
+}
