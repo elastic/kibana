@@ -30,7 +30,6 @@ export const NAMESPACED_CACHE_TTL = 10_000;
 export class NamespacedCache<T = unknown> {
   private readonly entries = new Map<string, NamespacedCacheEntry<T>>();
   private readonly inflightReads = new Map<string, Promise<T>>();
-  private readonly inflightWrites = new Map<string, Promise<void>>();
 
   /**
    * Get cached value for a specific namespace
@@ -67,7 +66,6 @@ export class NamespacedCache<T = unknown> {
 
     // Clear in-flight promises to prevent stale data
     this.inflightReads.delete(namespace);
-    this.inflightWrites.delete(namespace);
   }
 
   /**
@@ -79,7 +77,6 @@ export class NamespacedCache<T = unknown> {
     }
     this.entries.clear();
     this.inflightReads.clear();
-    this.inflightWrites.clear();
   }
 
   /**
