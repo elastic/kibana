@@ -378,6 +378,16 @@ import type {
   UpdateWatchlistEntitySourceResponse,
 } from './entity_analytics/watchlists/data_source/update.gen';
 import type {
+  AssignWatchlistEntitiesRequestParamsInput,
+  AssignWatchlistEntitiesRequestBodyInput,
+  AssignWatchlistEntitiesResponse,
+} from './entity_analytics/watchlists/entities/assign.gen';
+import type {
+  UnassignWatchlistEntitiesRequestParamsInput,
+  UnassignWatchlistEntitiesRequestBodyInput,
+  UnassignWatchlistEntitiesResponse,
+} from './entity_analytics/watchlists/entities/unassign.gen';
+import type {
   CreateWatchlistRequestBodyInput,
   CreateWatchlistResponse,
 } from './entity_analytics/watchlists/management/create.gen';
@@ -584,6 +594,9 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Synchronize data view index patterns to all running entity engines so that newly added indices are picked up by the transforms.
+   */
   async applyEntityEngineDataviewIndices() {
     this.log.info(`${new Date().toISOString()} Calling API ApplyEntityEngineDataviewIndices`);
     return this.kbnClient
@@ -605,6 +618,30 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+    * Assigns the provided entities to the specified watchlist using a "manual" source label.
+The entities must already exist in the entity store.
+
+If an entity is already on the watchlist, no new document is created — the "manual" label
+is added to its existing source labels instead.
+
+    */
+  async assignWatchlistEntities(props: AssignWatchlistEntitiesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API AssignWatchlistEntities`);
+    return this.kbnClient
+      .request<AssignWatchlistEntitiesResponse>({
+        path: replaceParams(
+          '/api/entity_analytics/watchlists/{watchlist_id}/entities/assign',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -991,6 +1028,9 @@ For detailed information on Kibana actions and alerting, and additional API call
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Create or update the protection updates note for a package policy.
+   */
   async createUpdateProtectionUpdatesNote(props: CreateUpdateProtectionUpdatesNoteProps) {
     this.log.info(`${new Date().toISOString()} Calling API CreateUpdateProtectionUpdatesNote`);
     return this.kbnClient
@@ -1135,8 +1175,13 @@ For detailed information on Kibana actions and alerting, and additional API call
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Delete a note from a Timeline using the note ID.
-   */
+    * Deletes notes by saved object ID. Send either `noteId` (single ID) or `noteIds` (array of IDs) in the JSON body.
+
+The response has HTTP 200 with an empty body on success.
+
+Requires the **Timeline and Notes** write privilege (`notes_write`).
+
+    */
   async deleteNote(props: DeleteNoteProps) {
     this.log.info(`${new Date().toISOString()} Calling API DeleteNote`);
     return this.kbnClient
@@ -1546,6 +1591,9 @@ The entity will be immediately deleted from the latest index.  It will remain av
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Check whether the current user has the required Elasticsearch and Kibana privileges to use the Entity Store.
+   */
   async entityStoreGetPrivileges() {
     this.log.info(`${new Date().toISOString()} Calling API EntityStoreGetPrivileges`);
     return this.kbnClient
@@ -1855,6 +1903,9 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Get a list of all endpoint host metadata.
+   */
   async getEndpointMetadataList(props: GetEndpointMetadataListProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetEndpointMetadataList`);
     return this.kbnClient
@@ -1882,6 +1933,9 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Get the engine descriptor for a specific entity type, including its configuration and current status.
+   */
   async getEntityEngine(props: GetEntityEngineProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetEntityEngine`);
     return this.kbnClient
@@ -1906,6 +1960,9 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Get the overall Entity Store status and per-engine statuses, optionally including component-level health details.
+   */
   async getEntityStoreStatus(props: GetEntityStoreStatusProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetEntityStoreStatus`);
     return this.kbnClient
@@ -1921,8 +1978,19 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Get all notes for a given document.
-   */
+    * Returns Security Timeline notes as saved objects.
+
+**Query modes (mutually exclusive branches on the server):**
+
+1. **`documentIds` is set** — Returns notes whose `eventId` matches the given Elasticsearch document `_id` (single string or array). Pagination query parameters (`page`, `perPage`, etc.) are **not** applied; the server uses a fixed page size (up to 10000 notes).
+
+2. **`savedObjectIds` is set** — Returns notes linked to the given Timeline saved object id(s). Same fixed cap as above; list-mode query parameters are **not** applied.
+
+3. **Neither `documentIds` nor `savedObjectIds`** — Lists notes using saved-objects find semantics: `page` (default 1), `perPage` (default 10), optional `search`, `sortField`, `sortOrder`, `filter`, `createdByFilter`, and `associatedFilter`.
+
+Requires the **Timeline and Notes** read privilege (`notes_read`).
+
+    */
   async getNotes(props: GetNotesProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetNotes`);
     return this.kbnClient
@@ -1937,6 +2005,9 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Get the most recent policy response for an endpoint.
+   */
   async getPolicyResponse(props: GetPolicyResponseProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetPolicyResponse`);
     return this.kbnClient
@@ -1965,6 +2036,9 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Get the protection updates note for a package policy.
+   */
   async getProtectionUpdatesNote(props: GetProtectionUpdatesNoteProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetProtectionUpdatesNote`);
     return this.kbnClient
@@ -2271,6 +2345,9 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Initialize a single entity engine for the specified entity type.
+   */
   async initEntityEngine(props: InitEntityEngineProps) {
     this.log.info(`${new Date().toISOString()} Calling API InitEntityEngine`);
     return this.kbnClient
@@ -2284,6 +2361,9 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Initialize the entire Entity Store, creating engines for all or specified entity types.
+   */
   async initEntityStore(props: InitEntityStoreProps) {
     this.log.info(`${new Date().toISOString()} Calling API InitEntityStore`);
     return this.kbnClient
@@ -2466,6 +2546,9 @@ Each row will match up to 10,000 entities.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Get a list of all installed entity engines and their current status.
+   */
   async listEntityEngines() {
     this.log.info(`${new Date().toISOString()} Calling API ListEntityEngines`);
     return this.kbnClient
@@ -2630,8 +2713,15 @@ The edit action is idempotent, meaning that if you add a tag to a rule that alre
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Add a note to a Timeline or update an existing note.
-   */
+    * Creates a new note or updates an existing one.
+
+**Create:** Send `note` and omit `noteId` to create a new saved object.
+
+**Update:** Send `note` with the changed fields and set `noteId` to the note's saved object ID. Optionally include `version` for optimistic concurrency when the client has it from a prior read.
+
+Requires the **Timeline and Notes** write privilege (`notes_write`).
+
+    */
   async persistNoteRoute(props: PersistNoteRouteProps) {
     this.log.info(`${new Date().toISOString()} Calling API PersistNoteRoute`);
     return this.kbnClient
@@ -3138,6 +3228,9 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Start a previously stopped entity engine, resuming transform processing for the given entity type.
+   */
   async startEntityEngine(props: StartEntityEngineProps) {
     this.log.info(`${new Date().toISOString()} Calling API StartEntityEngine`);
     return this.kbnClient
@@ -3184,6 +3277,9 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Stop a running entity engine, pausing transform processing for the given entity type.
+   */
   async stopEntityEngine(props: StopEntityEngineProps) {
     this.log.info(`${new Date().toISOString()} Calling API StopEntityEngine`);
     return this.kbnClient
@@ -3250,6 +3346,29 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         path: '/internal/risk_score/calculation/entity',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+    * Unassigns the provided entities from the specified watchlist.
+This only removes the "manual" assignment. If the entity is also
+assigned via other sources (for example, index or integration), it will
+remain on the watchlist.
+
+    */
+  async unassignWatchlistEntities(props: UnassignWatchlistEntitiesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UnassignWatchlistEntities`);
+    return this.kbnClient
+      .request<UnassignWatchlistEntitiesResponse>({
+        path: replaceParams(
+          '/api/entity_analytics/watchlists/{watchlist_id}/entities/unassign',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'POST',
         body: props.body,
@@ -3524,6 +3643,10 @@ If the specified entity already exists, it is updated with the provided values. 
 
 export interface AlertsMigrationCleanupProps {
   body: AlertsMigrationCleanupRequestBodyInput;
+}
+export interface AssignWatchlistEntitiesProps {
+  params: AssignWatchlistEntitiesRequestParamsInput;
+  body: AssignWatchlistEntitiesRequestBodyInput;
 }
 export interface BulkUpsertAssetCriticalityRecordsProps {
   body: BulkUpsertAssetCriticalityRecordsRequestBodyInput;
@@ -3927,6 +4050,10 @@ export interface SyncWatchlistProps {
 }
 export interface TriggerRiskScoreCalculationProps {
   body: TriggerRiskScoreCalculationRequestBodyInput;
+}
+export interface UnassignWatchlistEntitiesProps {
+  params: UnassignWatchlistEntitiesRequestParamsInput;
+  body: UnassignWatchlistEntitiesRequestBodyInput;
 }
 export interface UpdateDashboardMigrationProps {
   params: UpdateDashboardMigrationRequestParamsInput;

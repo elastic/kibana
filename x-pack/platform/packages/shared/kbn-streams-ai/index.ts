@@ -9,9 +9,24 @@ export { generateStreamDescription } from './src/description/generate_descriptio
 export { partitionStream } from './workflows/partition_stream';
 export {
   suggestProcessingPipeline,
+  mergeSeedParsingProcessorIntoSuggestedPipeline,
+  buildDocumentStructureOverviewForPipelinePrompt,
+  formatUpstreamSeedParsingContextForPromptMarkdown,
+  fetchMappedFieldsForStreamProcessingSuggestions,
+  getPipelineDefinitionJsonSchema,
+  pipelineDefinitionSchema,
+  postParsePipelineDefinitionSchema,
+  formatZodPipelineErrors,
+  buildSimulationFeedback,
+  detectTemporaryFields,
   type SuggestProcessingPipelineResult,
+  type SuggestPipelineAgentSchema,
+  type SimulationFeedback,
 } from './workflows/suggest_processing_pipeline';
-export { generateSignificantEvents } from './src/significant_events/generate_significant_events';
+export {
+  generateSignificantEvents,
+  type ExistingQuerySummary,
+} from './src/significant_events/generate_significant_events';
 export {
   createDefaultSignificantEventsToolUsage,
   type SignificantEventsToolUsage,

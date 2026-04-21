@@ -53,7 +53,7 @@ export const CapabilityCard: React.FC<CapabilityCardProps> = ({
         paddingSize="m"
         title={title}
         titleElement="h4"
-        description={<EuiSkeletonText lines={2} size="s" />}
+        titleSize="xs"
         textAlign="left"
         footer={
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -67,7 +67,9 @@ export const CapabilityCard: React.FC<CapabilityCardProps> = ({
           }
         `}
         aria-busy={true}
-      />
+      >
+        <EuiSkeletonText lines={2} size="s" />
+      </EuiCard>
     );
   }
 
@@ -80,6 +82,7 @@ export const CapabilityCard: React.FC<CapabilityCardProps> = ({
         paddingSize="none"
         title={title}
         titleElement="h4"
+        titleSize="xs"
         description={emptyDescription}
         textAlign="left"
         href={href}
@@ -119,6 +122,7 @@ export const CapabilityCard: React.FC<CapabilityCardProps> = ({
       paddingSize="m"
       title={title}
       titleElement="h4"
+      titleSize="xs"
       description={description}
       textAlign="left"
       footer={
