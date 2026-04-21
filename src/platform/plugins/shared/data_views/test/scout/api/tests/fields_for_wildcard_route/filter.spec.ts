@@ -15,11 +15,10 @@ apiTest.describe(
   `PUT /${FIELDS_FOR_WILDCARD_PATH} - filter fields`,
   { tag: tags.deploymentAgnostic },
   () => {
-    let viewerApiCredentials: RoleApiCredentials;
+    let adminApiCredentials: RoleApiCredentials;
 
     apiTest.beforeAll(async ({ esClient, requestAuth }) => {
-      // Route only reads field metadata, so `viewer` is sufficient.
-      viewerApiCredentials = await requestAuth.getApiKey('viewer');
+      adminApiCredentials = await requestAuth.getApiKey('admin');
 
       await esClient.index({
         index: 'helloworld1',
@@ -45,7 +44,7 @@ apiTest.describe(
       const response = await apiClient.put(`${FIELDS_FOR_WILDCARD_PATH}?pattern=helloworld*`, {
         headers: {
           ...INTERNAL_COMMON_HEADERS,
-          ...viewerApiCredentials.apiKeyHeader,
+          ...adminApiCredentials.apiKeyHeader,
         },
         responseType: 'json',
         body: { index_filter: { exists: { field: 'bye' } } },
