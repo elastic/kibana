@@ -45,9 +45,9 @@ else
   RUN_WITH_SELECTIVE_TESTING="false"
 fi
 echo "Decision made based on the following signals:
-- SELECTIVE_TESTING_ENABLED=${SELECTIVE_TESTING_ENABLED:-false}
-- 'scout:run-all-tests' GitHub label present: $(is_pr_with_label "scout:run-all-tests")
-- Critical Scout files touched: ${SCOUT_CRITICAL_FILES_TOUCHED}"
+  • SELECTIVE_TESTING_ENABLED=${SELECTIVE_TESTING_ENABLED:-false}
+  • 'scout:run-all-tests' GitHub label present: $(is_pr_with_label "scout:run-all-tests" && echo yes || echo no)
+  • Critical Scout files touched: ${SCOUT_CRITICAL_FILES_TOUCHED}"
 
 SCOUT_TEST_DISTRIBUTION_STRATEGY="${SCOUT_TEST_DISTRIBUTION_STRATEGY:-configs}"
 
