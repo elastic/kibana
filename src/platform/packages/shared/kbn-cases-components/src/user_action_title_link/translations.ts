@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { addons } from '@storybook/manager-api';
-import { create } from '@storybook/theming';
-import { PANEL_ID } from '@storybook/addon-actions';
+import { i18n } from '@kbn/i18n';
 
-addons.setConfig({
-  theme: create({
-    base: 'light',
-    brandTitle: 'Kibana React Storybook',
-    brandUrl:
-      'https://github.com/elastic/kibana/tree/main/src/platform/plugins/shared/kibana_react',
-  }),
-  showPanel: true.valueOf,
-  selectedPanel: PANEL_ID,
+export const UNKNOWN_LINK_LABEL = i18n.translate('cases.components.userActionLabel.unknownLink', {
+  defaultMessage: 'Unknown',
 });
+
+export const LINK_LOADING_ARIA_LABEL = i18n.translate(
+  'cases.components.userActionLabel.loadingLinkAriaLabel',
+  {
+    defaultMessage: 'Loading link',
+    description:
+      'Accessibility label for the loading spinner shown while a user action link is loading',
+  }
+);
