@@ -289,6 +289,7 @@ export class AgentBuilderPlugin
           // synchronously invoke our onClose callback.
           this.activeSidebarRef = null;
           this.sidebarCallbacks = null;
+          this.activeConversationState$.next(null);
           this.sidebarOpenState$.next(false);
           sidebarRef.close();
           return;

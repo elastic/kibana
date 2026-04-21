@@ -43,6 +43,9 @@ export const createManualChangesSubscription = ({
   const childrenChanges$ = childrenUnsavedChanges$(api.children$).pipe(skip(1));
 
   return merge(...observables, childrenChanges$)
-    .pipe(debounceTime(150))
+    .pipe(
+      skip(observables.length), // Skip initial emissions from all BehaviorSubjects
+      debounceTime(150)
+    )
     .subscribe(onManualChanges);
 };

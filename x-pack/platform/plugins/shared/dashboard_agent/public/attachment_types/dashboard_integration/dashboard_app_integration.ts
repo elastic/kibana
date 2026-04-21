@@ -47,6 +47,8 @@ export const registerDashboardAppIntegration = ({
     conversationId: undefined,
   };
 
+  let pendingAddAttachmentTimeout: ReturnType<typeof setTimeout> | undefined;
+
   const addAttachmentFromDashboard = () => {
     const dashboardId = api.savedObjectId$.getValue();
     const syncAttachment = state.attachments?.find(({ origin }) => origin === dashboardId);
@@ -92,7 +94,13 @@ export const registerDashboardAppIntegration = ({
       state.attachments = dashboardAttachments;
       state.conversationId = conversationId;
       // we have to defer adding the attachment from the dashboard until after the active conversation change has fully propagated, otherwise sidebarCallbacks from agent builder are null
-      setTimeout(() => addAttachmentFromDashboard());
+      if (pendingAddAttachmentTimeout !== undefined) {
+        clearTimeout(pendingAddAttachmentTimeout);
+      }
+      pendingAddAttachmentTimeout = setTimeout(() => {
+        pendingAddAttachmentTimeout = undefined;
+        addAttachmentFromDashboard();
+      });
     }
   );
 
@@ -130,6 +138,10 @@ export const registerDashboardAppIntegration = ({
     originSyncSubscription.unsubscribe();
     manualChangesSubscription.unsubscribe();
     conversationChangesSubscription.unsubscribe();
+    if (pendingAddAttachmentTimeout !== undefined) {
+      clearTimeout(pendingAddAttachmentTimeout);
+      pendingAddAttachmentTimeout = undefined;
+    }
     state.attachments = undefined;
     state.conversationId = undefined;
   };
