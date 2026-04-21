@@ -26,10 +26,11 @@ groups:
         datatype: bool
         default: false
         applies_to:
-          ech: ga 9.0-9.3, deprecated 9.4+
-          ece: ga 9.0-9.3, deprecated 9.4+
-          eck: ga 9.0-9.3, deprecated 9.4+
-          self: ga 9.0-9.3, deprecated 9.4+
+          stack: ga 9.0-9.3, deprecated 9.4+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           serverless: unavailable
         note: "{applies_to}`stack: ga 9.4+` If this setting is set to `false` but the `hideAnnouncements` setting located in the **Global Settings** tab is set to `true`, then messages and tours that highlight new features won't show for the current space."
 
@@ -39,6 +40,7 @@ groups:
           The format to use for displaying [pretty formatted dates](https://momentjs.com/docs/#/displaying/format/).
         datatype: string
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -52,6 +54,7 @@ groups:
         datatype: string
         default: Browser
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -64,6 +67,7 @@ groups:
           The values that define the format to use to render ordered time-based data. Formatted timestamps must adapt to the interval between measurements. Keys are [ISO8601 intervals](http://en.wikipedia.org/wiki/ISO_8601#Time_intervals).
         datatype: string
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -76,6 +80,7 @@ groups:
           The day that a week should start on.
         datatype: string
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -88,6 +93,7 @@ groups:
           The format to use for displaying [pretty formatted dates](https://momentjs.com/docs/#/displaying/format/) of [{{product.elasticsearch}} date_nanos type](elasticsearch://reference/elasticsearch/mapping-reference/date_nanos.md).
         datatype: string
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -104,10 +110,11 @@ groups:
           - option: disabled
           - option: system
         applies_to:
-          ech: deprecated 9.0
-          ece: deprecated 9.0
-          eck: deprecated 9.0
-          self: deprecated 9.0
+          stack: deprecated 9.0
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           serverless: unavailable
 
       - setting: "state:storeInSessionStorage"
@@ -116,10 +123,11 @@ groups:
           {{product.kibana}} tracks UI state in the URL, which can lead to problems when there is a lot of state information, and the URL gets long. Enabling this setting stores part of the URL in your browser session to keep the URL short.
         datatype: bool
         applies_to:
-          ech: preview 9.0-9.3, deprecated 9.4+
-          ece: preview 9.0-9.3, deprecated 9.4+
-          eck: preview 9.0-9.3, deprecated 9.4+
-          self: preview 9.0-9.3, deprecated 9.4+
+          stack: preview 9.0-9.3, deprecated 9.4+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           serverless: unavailable
 
       - setting: "savedObjects:perPage"
@@ -129,6 +137,7 @@ groups:
         datatype: int
         default: 20
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -142,6 +151,7 @@ groups:
         datatype: int
         default: 1000
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -155,6 +165,7 @@ groups:
         datatype: string
         default: ","
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -168,6 +179,7 @@ groups:
         datatype: bool
         default: true
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -181,6 +193,7 @@ groups:
         datatype: bool
         default: false
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -193,6 +206,7 @@ groups:
           A map of the default format name for each field type. Field types that are not explicitly mentioned use "_default_".
         datatype: string
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -206,6 +220,7 @@ groups:
         datatype: string
         default: "0,0.[000]"
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -219,6 +234,7 @@ groups:
         datatype: string
         default: "0,0.[000]%"
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -232,6 +248,7 @@ groups:
         datatype: string
         default: "0,0.[0]b"
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -245,6 +262,7 @@ groups:
         datatype: string
         default: "($0,0.[00])"
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -258,6 +276,7 @@ groups:
         datatype: string
         default: en
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -270,6 +289,7 @@ groups:
           Allows the exclusion of listed data tiers when getting a field list for faster performance.
         datatype: string
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -283,6 +303,7 @@ groups:
         datatype: int
         default: 5
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -296,6 +317,7 @@ groups:
         datatype: string
         default: "_source, _id, _index, _score, _ignored"
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -308,6 +330,7 @@ groups:
           Options for the Lucene query string parser. Only used when `search:queryLanguage` is set to **Lucene**.
         datatype: string
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -321,6 +344,7 @@ groups:
         datatype: bool
         default: true
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -334,6 +358,7 @@ groups:
         datatype: string
         default: KQL
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -346,6 +371,7 @@ groups:
           Options for the {{product.elasticsearch}} [sort](elasticsearch://reference/elasticsearch/rest-apis/sort-search-results.md) parameter.
         datatype: string
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -359,6 +385,7 @@ groups:
         datatype: string
         default: "null"
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -372,6 +399,7 @@ groups:
         datatype: int
         default: 50
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -385,6 +413,7 @@ groups:
         datatype: int
         default: 1000
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -398,6 +427,7 @@ groups:
         datatype: int
         default: 10
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -411,6 +441,7 @@ groups:
         datatype: string
         default: '{"pause": true, "value": 60000}'
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -424,6 +455,7 @@ groups:
         datatype: string
         default: '{"from": "now-15m", "to": "now"}'
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -436,6 +468,7 @@ groups:
           The list of ranges to show in the Quick section of the time filter. This must be an array of objects, with each object containing `from`, `to` (refer to [accepted formats](elasticsearch://reference/elasticsearch/rest-apis/common-options.md#date-math)), and `display` (the title to be displayed).
         datatype: string
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -449,6 +482,7 @@ groups:
         datatype: bool
         default: false
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -462,6 +496,7 @@ groups:
         datatype: bool
         default: true
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -474,6 +509,7 @@ groups:
           The default route when opening {{product.kibana}}. Use this setting to route users to a specific dashboard, application, or saved object as they enter each space.
         datatype: string
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -487,6 +523,7 @@ groups:
         datatype: string
         default: 100MB
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -502,6 +539,7 @@ groups:
         datatype: bool
         default: true
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -515,6 +553,7 @@ groups:
         datatype: int
         default: 2000
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -528,6 +567,7 @@ groups:
         datatype: bool
         default: false
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -541,10 +581,11 @@ groups:
         datatype: bool
         default: false
         applies_to:
-          ech: preview 9.3
-          ece: preview 9.3
-          eck: preview 9.3
-          self: preview 9.3
+          stack: preview 9.3
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           serverless: preview
 
       - setting: "fields:popularLimit"
@@ -554,6 +595,7 @@ groups:
         datatype: int
         default: 10
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -566,10 +608,11 @@ groups:
           This setting allows you to choose which AI Assistants are available to use and where. You can choose to only show the AI Assistants in their solutions, in other {{product.kibana}} applications (for example, Discover, Dashboards, and {{stack-manage-app}} pages), or nowhere.
         datatype: string
         applies_to:
-          ech: ga 9.1
-          ece: ga 9.1
-          eck: ga 9.1
-          self: ga 9.1
+          stack: ga 9.1
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           serverless: unavailable
         note: "{applies_to}`stack: ga 9.2` Configure the `aiAssistant:preferredAIAssistantType` setting from the **GenAI Settings** page, which you can find using the Classic navigation menu or the [global search field](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md). Note that this setting is unavailable from the **GenAI Settings** page when using a [solution view](docs-content://deploy-manage/manage-spaces.md)."
 
@@ -584,6 +627,7 @@ groups:
         datatype: bool
         default: false
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -597,6 +641,7 @@ groups:
         datatype: bool
         default: true
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -610,6 +655,7 @@ groups:
         datatype: bool
         default: false
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -623,6 +669,7 @@ groups:
         datatype: bool
         default: false
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -640,6 +687,7 @@ groups:
         datatype: bool
         default: false
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -663,6 +711,7 @@ groups:
           - option: terms_enum
           - option: terms_agg
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -676,6 +725,7 @@ groups:
         datatype: bool
         default: true
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -693,6 +743,7 @@ groups:
           The placement of the banner for this space. Set to `Top` to display a banner above the Elastic header. Uses the value of the `xpack.banners.placement` configuration property by default.
         datatype: string
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -705,6 +756,7 @@ groups:
           The text to display inside the banner for this space, either plain text or Markdown. Uses the value of the `xpack.banners.textContent` configuration property by default.
         datatype: string
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -717,6 +769,7 @@ groups:
           The color for the banner text for this space. Uses the value of the `xpack.banners.textColor` configuration property by default.
         datatype: string
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -729,10 +782,11 @@ groups:
           The color for the banner link text for this space. Uses the value of the `xpack.banners.linkColor` configuration property by default.
         datatype: string
         applies_to:
-          ech: ga 9.1
-          ece: ga 9.1
-          eck: ga 9.1
-          self: ga 9.1
+          stack: ga 9.1
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           serverless: unavailable
 
       - setting: "banners:backgroundColor"
@@ -741,6 +795,7 @@ groups:
           The color of the banner background for this space. Uses the value of the `xpack.banners.backgroundColor` configuration property by default.
         datatype: string
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -758,6 +813,7 @@ groups:
         datatype: bool
         default: true
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -770,6 +826,7 @@ groups:
           The columns that appear by default on the **Discover** page. When empty, displays a summary of the document.
         datatype: string
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -783,6 +840,7 @@ groups:
         datatype: int
         default: 200
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -796,6 +854,7 @@ groups:
         datatype: int
         default: 500
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -809,6 +868,7 @@ groups:
         datatype: int
         default: 100
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -822,6 +882,7 @@ groups:
         datatype: string
         default: Descending
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -835,6 +896,7 @@ groups:
         datatype: bool
         default: true
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -848,6 +910,7 @@ groups:
         datatype: bool
         default: false
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -861,6 +924,7 @@ groups:
         datatype: int
         default: 5
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -874,6 +938,7 @@ groups:
         datatype: int
         default: 5
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -887,6 +952,7 @@ groups:
         datatype: string
         default: _doc
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -900,6 +966,7 @@ groups:
         datatype: bool
         default: true
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -913,10 +980,11 @@ groups:
         datatype: bool
         default: true
         applies_to:
-          ech: beta
-          ece: beta
-          eck: beta
-          self: beta
+          stack: beta
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
 
       - setting: "discover:showMultiFields"
         id: "discover:showMultiFields"
@@ -925,6 +993,7 @@ groups:
         datatype: bool
         default: false
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -938,6 +1007,7 @@ groups:
         datatype: int
         default: 3
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -955,6 +1025,7 @@ groups:
         datatype: bool
         default: false
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -969,6 +1040,7 @@ groups:
         datatype: string
         default: '{"from": "now-15m", "to": "now"}'
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -986,6 +1058,7 @@ groups:
           A custom banner intended for temporary notices to all users. Supports [Markdown syntax](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax).
         datatype: string
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -999,6 +1072,7 @@ groups:
         datatype: int
         default: 3000000
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -1012,6 +1086,7 @@ groups:
         datatype: int
         default: 300000
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -1025,6 +1100,7 @@ groups:
         datatype: int
         default: 10000
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -1038,6 +1114,7 @@ groups:
         datatype: int
         default: 5000
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -1080,10 +1157,11 @@ groups:
           :::
         datatype: string
         applies_to:
-          ech: preview
-          ece: preview
-          eck: preview
-          self: preview
+          stack: preview
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           observability: preview
           elasticsearch: preview
 
@@ -1092,8 +1170,9 @@ groups:
         description: |
           Sources to use for logs data. If the data of these indices is not logs data, you can experience degraded functionality. Changes to this setting can potentially impact the sources queried in Log Threshold rules.
         datatype: string
-        default: "logs*, -logstash*, filebeat-*"
+        default: "logs-*-*, logs-*, filebeat-*"
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -1107,10 +1186,11 @@ groups:
         datatype: bool
         default: false
         applies_to:
-          ech: preview
-          ece: preview
-          eck: preview
-          self: preview
+          stack: preview
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           observability: preview
 
       - setting: "observability:aiAssistantSimulatedFunctionCalling"
@@ -1120,10 +1200,11 @@ groups:
         datatype: bool
         default: false
         applies_to:
-          ech: preview
-          ece: preview
-          eck: preview
-          self: preview
+          stack: preview
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           observability: preview
           elasticsearch: preview
 
@@ -1133,10 +1214,11 @@ groups:
           Index pattern used by the AI Assistant when querying search connectors indices (part of the knowledge base). Empty by default: the index for every search connector is queried.
         datatype: string
         applies_to:
-          ech: preview
-          ece: preview
-          eck: preview
-          self: preview
+          stack: preview
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           observability: ga
           elasticsearch: ga
 
@@ -1147,10 +1229,11 @@ groups:
         datatype: bool
         default: true
         applies_to:
-          ech: preview
-          ece: preview
-          eck: preview
-          self: preview
+          stack: preview
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           observability: preview
 
       - setting: "observability:enableInspectEsQueries"
@@ -1160,6 +1243,7 @@ groups:
         datatype: bool
         default: false
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -1173,6 +1257,7 @@ groups:
         datatype: int
         default: 100
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -1186,6 +1271,7 @@ groups:
         datatype: bool
         default: true
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -1198,6 +1284,7 @@ groups:
           The default environment for the {{product.apm}} app. When left empty, displays data from all environments by default.
         datatype: string
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -1211,10 +1298,11 @@ groups:
         datatype: string
         default: "Off"
         applies_to:
-          ech: preview 9.0, ga 9.1
-          ece: preview 9.0, ga 9.1
-          eck: preview 9.0, ga 9.1
-          self: preview 9.0, ga 9.1
+          stack: preview 9.0, ga 9.1
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           observability: ga
 
       - setting: "observability:apmServiceInventoryOptimizedSorting"
@@ -1224,10 +1312,11 @@ groups:
         datatype: bool
         default: false
         applies_to:
-          ech: preview 9.0, removed 9.1
-          ece: preview 9.0, removed 9.1
-          eck: preview 9.0, removed 9.1
-          self: preview 9.0, removed 9.1
+          stack: preview 9.0, removed 9.1
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
 
       - setting: "observability:apmServiceGroupMaxNumberOfServices"
         id: observability-apm-max-groups
@@ -1236,6 +1325,7 @@ groups:
         datatype: int
         default: 500
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -1249,10 +1339,11 @@ groups:
         datatype: bool
         default: true
         applies_to:
-          ech: preview 9.0, removed 9.1
-          ece: preview 9.0, removed 9.1
-          eck: preview 9.0, removed 9.1
-          self: preview 9.0, removed 9.1
+          stack: preview 9.0, removed 9.1
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
 
       - setting: "observability:apmLabsButton"
         id: observability-apm-labs
@@ -1261,10 +1352,11 @@ groups:
         datatype: bool
         default: false
         applies_to:
-          ech: removed 9.1
-          ece: removed 9.1
-          eck: removed 9.1
-          self: removed 9.1
+          stack: removed 9.1
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           serverless: unavailable
 
       - setting: "observability:enableInfrastructureProfilingIntegration"
@@ -1274,10 +1366,11 @@ groups:
         datatype: bool
         default: true
         applies_to:
-          ech: preview 9.0, removed 9.1
-          ece: preview 9.0, removed 9.1
-          eck: preview 9.0, removed 9.1
-          self: preview 9.0, removed 9.1
+          stack: preview 9.0, removed 9.1
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
 
       - setting: "observability:enableInfrastructureAssetCustomDashboards"
         id: observability-infrastructure-asset-custom-dashboard
@@ -1286,10 +1379,11 @@ groups:
         datatype: bool
         default: false
         applies_to:
-          ech: preview 9.0
-          ece: preview 9.0
-          eck: preview 9.0
-          self: preview 9.0
+          stack: preview 9.0
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
 
       - setting: "observability:enableAwsLambdaMetrics"
         id: observability-enable-aws-lambda-metrics
@@ -1298,10 +1392,11 @@ groups:
         datatype: bool
         default: true
         applies_to:
-          ech: preview 9.0, removed 9.1
-          ece: preview 9.0, removed 9.1
-          eck: preview 9.0, removed 9.1
-          self: preview 9.0, removed 9.1
+          stack: preview 9.0, removed 9.1
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
 
       - setting: "observability:apmAgentExplorerView"
         id: apm-agent-explorer
@@ -1310,10 +1405,11 @@ groups:
         datatype: bool
         default: true
         applies_to:
-          ech: beta 9.0, removed 9.1
-          ece: beta 9.0, removed 9.1
-          eck: beta 9.0, removed 9.1
-          self: beta 9.0, removed 9.1
+          stack: beta 9.0, removed 9.1
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           serverless: unavailable
 
       - setting: "observability:apmEnableTableSearchBar"
@@ -1323,10 +1419,11 @@ groups:
         datatype: bool
         default: true
         applies_to:
-          ech: preview
-          ece: preview
-          eck: preview
-          self: preview
+          stack: preview
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           observability: preview
 
       - setting: "observability:apmEnableServiceInventoryTableSearchBar"
@@ -1336,10 +1433,11 @@ groups:
         datatype: bool
         default: true
         applies_to:
-          ech: preview
-          ece: preview
-          eck: preview
-          self: preview
+          stack: preview
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           observability: preview
 
       - setting: "observability:apmAWSLambdaPriceFactor"
@@ -1349,6 +1447,7 @@ groups:
         datatype: string
         default: '{"x86_64": 0.0000166667,"arm": 0.0000133334}'
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -1362,6 +1461,7 @@ groups:
         datatype: float
         default: 0.2
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -1375,10 +1475,11 @@ groups:
         datatype: bool
         default: true
         applies_to:
-          ech: beta 9.0, removed 9.1
-          ece: beta 9.0, removed 9.1
-          eck: beta 9.0, removed 9.1
-          self: beta 9.0, removed 9.1
+          stack: beta 9.0, removed 9.1
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           serverless: unavailable
 
       - setting: "observability:apmEnableContinuousRollups"
@@ -1388,10 +1489,11 @@ groups:
         datatype: bool
         default: true
         applies_to:
-          ech: beta 9.0, removed 9.1
-          ece: beta 9.0, removed 9.1
-          eck: beta 9.0, removed 9.1
-          self: beta 9.0, removed 9.1
+          stack: beta 9.0, removed 9.1
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           serverless: unavailable
 
       - setting: "observability:apmEnableCriticalPath"
@@ -1401,10 +1503,11 @@ groups:
         datatype: bool
         default: false
         applies_to:
-          ech: removed 9.1
-          ece: removed 9.1
-          eck: removed 9.1
-          self: removed 9.1
+          stack: removed 9.1
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           serverless: unavailable
 
       - setting: "observability:syntheticsThrottlingEnabled"
@@ -1414,10 +1517,11 @@ groups:
         datatype: bool
         default: false
         applies_to:
-          ech: preview
-          ece: preview
-          eck: preview
-          self: preview
+          stack: preview
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           serverless: unavailable
         warning: "This setting is intended for Elastic-internal use only. [Learn more](https://github.com/elastic/synthetics/blob/main/docs/throttling.md)"
 
@@ -1428,6 +1532,7 @@ groups:
         datatype: bool
         default: false
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -1441,10 +1546,11 @@ groups:
         datatype: bool
         default: true
         applies_to:
-          ech: removed 9.1
-          ece: removed 9.1
-          eck: removed 9.1
-          self: removed 9.1
+          stack: removed 9.1
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           serverless: unavailable
 
       - setting: "observability:profilingShowErrorFrames"
@@ -1454,19 +1560,21 @@ groups:
         datatype: bool
         default: false
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
           self: ga
           serverless: unavailable
 
-      - setting: "observability:profilingPerVCPUWattX86"
+      - setting: "observability:profilingPervCPUWattX86"
         id: observability-profiling-per-vcpu-watt-x86
         description: |
           The average amortized per-core power consumption (based on 100% CPU utilization) for x86 architecture.
         datatype: float
         default: 7
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -1480,6 +1588,7 @@ groups:
         datatype: float
         default: "2.8"
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -1493,6 +1602,7 @@ groups:
         datatype: float
         default: 1.7
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -1505,6 +1615,7 @@ groups:
           Carbon intensity measures how clean your data center electricity is. Specifically, it measures the average amount of CO2 emitted per kilowatt-hour (kWh) of electricity consumed in a particular region. Use the [cloud carbon footprint data sheet](https://ela.st/grid-datasheet) to update this value according to your region. Defaults to US East (N. Virginia).
         datatype: float
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -1517,6 +1628,7 @@ groups:
           If you're enrolled in the AWS Enterprise Discount Program (EDP), enter your discount rate to update the profiling cost calculation.
         datatype: float
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -1529,6 +1641,7 @@ groups:
           If you have an Azure Enterprise Agreement with Microsoft, enter your discount rate to update the profiling cost calculation.
         datatype: float
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -1542,6 +1655,7 @@ groups:
         datatype: float
         default: "0,0425"
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -1555,6 +1669,7 @@ groups:
         datatype: bool
         default: true
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -1568,10 +1683,11 @@ groups:
         datatype: bool
         default: false
         applies_to:
-          ech: removed 9.1
-          ece: removed 9.1
-          eck: removed 9.1
-          self: removed 9.1
+          stack: removed 9.1
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           serverless: unavailable
 
       - setting: "observability:searchExcludedDataTiers"
@@ -1580,10 +1696,11 @@ groups:
           Specify the data tiers to exclude from search, such as data_cold or data_frozen. When configured, indices allocated in the selected tiers are ignored from search requests. Affected apps: {{product.apm}}, Infrastructure.
         datatype: string
         applies_to:
-          ech: preview
-          ece: preview
-          eck: preview
-          self: preview
+          stack: preview
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           serverless: unavailable
 
       - setting: "observability:enableDiagnosticMode"
@@ -1593,10 +1710,11 @@ groups:
         datatype: bool
         default: false
         applies_to:
-          ech: preview
-          ece: preview
-          eck: preview
-          self: preview
+          stack: preview
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           observability: preview
 
       - setting: "observability:streamsEnableSignificantEvents"
@@ -1606,10 +1724,11 @@ groups:
         datatype: bool
         default: false
         applies_to:
-          ech: preview
-          ece: preview
-          eck: preview
-          self: preview
+          stack: preview
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           observability: preview
 
   - group: Reporting
@@ -1622,6 +1741,7 @@ groups:
           A custom image to use in the footer of the PDF.
         datatype: string
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -1640,10 +1760,11 @@ groups:
           Enables the creation of {{data-sources}} that capture rollup indices, which in turn enables visualizations based on rollup data. Refresh the page to apply the changes.
         datatype: bool
         applies_to:
-          ech: deprecated 8.15
-          ece: deprecated 8.15
-          eck: deprecated 8.15
-          self: deprecated 8.15
+          stack: deprecated 8.15
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           serverless: unavailable
 
   - group: "{{product.elasticsearch}}"
@@ -1658,10 +1779,11 @@ groups:
         datatype: int
         default: 100
         applies_to:
-          ech: preview 9.4
-          ece: preview 9.4
-          eck: preview 9.4
-          self: preview 9.4
+          stack: preview 9.4
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           elasticsearch: preview 9.4
           serverless: unavailable
 
@@ -1672,6 +1794,7 @@ groups:
         datatype: bool
         default: false
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -1689,6 +1812,7 @@ groups:
         datatype: string
         default: Session ID
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -1702,6 +1826,7 @@ groups:
         datatype: string
         default: _local
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -1715,6 +1840,7 @@ groups:
         datatype: int
         default: 0
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -1728,10 +1854,11 @@ groups:
         datatype: bool
         default: false
         applies_to:
-          ech: deprecated 7.16
-          ece: deprecated 7.16
-          eck: deprecated 7.16
-          self: deprecated 7.16
+          stack: deprecated 7.16
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           serverless: unavailable
 
       - setting: "search:timeout"
@@ -1741,6 +1868,7 @@ groups:
         datatype: int
         default: 600000
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -1758,6 +1886,7 @@ groups:
         datatype: string
         default: "300000"
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -1771,6 +1900,7 @@ groups:
         datatype: string
         default: '{"from": "now/d","to": "now/d"}'
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -1784,6 +1914,7 @@ groups:
         datatype: string
         default: "apm-*-transaction*, auditbeat-*, endgame-*, filebeat-*, logs-*, packetbeat-*, traces-apm*, winlogbeat-*, -*elastic-cloud-logs-*"
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -1797,6 +1928,7 @@ groups:
         datatype: string
         default: "logs-ti_*"
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -1810,6 +1942,7 @@ groups:
         datatype: int
         default: 50
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -1823,6 +1956,7 @@ groups:
         datatype: bool
         default: true
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -1836,6 +1970,7 @@ groups:
         datatype: bool
         default: false
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -1849,10 +1984,11 @@ groups:
         datatype: bool
         default: false
         applies_to:
-          ech: removed 9.4, preview 9.1-9.3
-          ece: removed 9.4, preview 9.1-9.3
-          eck: removed 9.4, preview 9.1-9.3
-          self: removed 9.4, preview 9.1-9.3
+          stack: removed 9.4, preview 9.1-9.3
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           serverless: removed
 
       - setting: "securitySolution:enableAssetInventory"
@@ -1862,10 +1998,11 @@ groups:
         datatype: bool
         default: false
         applies_to:
-          ech: preview
-          ece: preview
-          eck: preview
-          self: preview
+          stack: preview
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           security: preview
         note: "Disabling this setting will not disable the Entity Store or clear persistent Entity metadata. To manage or disable the Entity Store, visit the **Entity Store Management** page."
 
@@ -1876,10 +2013,11 @@ groups:
         datatype: bool
         default: true
         applies_to:
-          ech: preview
-          ece: preview
-          eck: preview
-          self: preview
+          stack: preview
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           security: preview
 
       - setting: "securitySolution:rulesTableRefresh"
@@ -1889,6 +2027,7 @@ groups:
         datatype: string
         default: '{"on": true,"value": 60000}'
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -1902,6 +2041,7 @@ groups:
         datatype: string
         default: "https://feeds.elastic.co/security-solution"
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -1923,6 +2063,7 @@ groups:
           :::
         datatype: string
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -1936,10 +2077,11 @@ groups:
         datatype: bool
         default: true
         applies_to:
-          ech: ga 9.0-9.3, removed 9.4+
-          ece: ga 9.0-9.3, removed 9.4+
-          eck: ga 9.0-9.3, removed 9.4+
-          self: ga 9.0-9.3, removed 9.4+
+          stack: ga 9.0-9.3, removed 9.4+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           serverless: unavailable
 
       - setting: "securitySolution:suppressionBehaviorOnAlertClosure"
@@ -1949,6 +2091,7 @@ groups:
         datatype: string
         default: Restart suppression
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -1962,6 +2105,7 @@ groups:
         datatype: bool
         default: true
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -1975,6 +2119,7 @@ groups:
         datatype: string
         default: "Duplicate, False Positive, Further investigation required"
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -1987,6 +2132,7 @@ groups:
           Specifies data tiers to exclude from searching during rule execution. Excludes events from the specified data tiers, which might help improve rule performance or reduce execution time. For example: `data_frozen,data_cold`.
         datatype: string
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -2000,10 +2146,11 @@ groups:
         datatype: bool
         default: true
         applies_to:
-          ech: preview 9.1, removed 9.3
-          ece: preview 9.1, removed 9.3
-          eck: preview 9.1, removed 9.3
-          self: preview 9.1, removed 9.3
+          stack: preview 9.1, removed 9.3
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           serverless: unavailable
 
       - setting: "securitySolution:enableEsqlRiskScoring"
@@ -2013,10 +2160,11 @@ groups:
         datatype: bool
         default: true
         applies_to:
-          ech: preview 9.0, removed 9.3
-          ece: preview 9.0, removed 9.3
-          eck: preview 9.0, removed 9.3
-          self: preview 9.0, removed 9.3
+          stack: preview 9.0, removed 9.3
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           serverless: unavailable
 
       - setting: "securitySolution:defaultAIConnector"
@@ -2070,6 +2218,7 @@ groups:
         datatype: string
         default: "@timestamp"
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -2083,6 +2232,7 @@ groups:
         datatype: string
         default: _all
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -2096,6 +2246,7 @@ groups:
         datatype: int
         default: 200
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -2109,6 +2260,7 @@ groups:
         datatype: int
         default: 2000
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -2122,6 +2274,7 @@ groups:
         datatype: string
         default: 1ms
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -2139,6 +2292,7 @@ groups:
         datatype: int
         default: 50
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
@@ -2152,10 +2306,11 @@ groups:
         datatype: bool
         default: false
         applies_to:
-          ech: deprecated
-          ece: deprecated
-          eck: deprecated
-          self: deprecated
+          stack: deprecated
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           serverless: unavailable
 
       - setting: "visualization:useLegacyTimeAxis"
@@ -2165,10 +2320,11 @@ groups:
         datatype: bool
         default: true
         applies_to:
-          ech: deprecated 8.10, removed 9.1
-          ece: deprecated 8.10, removed 9.1
-          eck: deprecated 8.10, removed 9.1
-          self: deprecated 8.10, removed 9.1
+          stack: deprecated 8.10, removed 9.1
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           serverless: unavailable
 
   - group: Developer tools
@@ -2182,6 +2338,7 @@ groups:
         datatype: bool
         default: true
         applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
