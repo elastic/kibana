@@ -80,19 +80,23 @@ describe('getEsqlFn', () => {
 
     const inputFilter = {
       meta: { alias: null, disabled: false, negate: false },
-      query: { match_phrase: { myField: 'uniqueTestValue' } },
+      query: { match_phrase: { myField: 'uniqueFromFilterPill' } },
     };
 
     const input: KibanaContext = {
       type: 'kibana_context',
       filters: [inputFilter],
+      query: {
+        language: 'kuery',
+        query: 'myField:uniqueFromQueryBar',
+      },
     };
 
     const emptySearchResponse = of({
       rawResponse: { values: [], columns: [] },
     } as unknown as IKibanaSearchResponse<ESQLSearchResponse>);
 
-    it('should include global filters in the query when ignoreGlobalFilters is false', async () => {
+    it('should include global query and filters in params.filter when ignoreGlobalFilters is false', async () => {
       const mockSearch = jest.fn().mockReturnValue(emptySearchResponse);
       const esqlFn = makeEsqlFn(mockSearch);
 
@@ -101,10 +105,13 @@ describe('getEsqlFn', () => {
         .toPromise();
 
       const params = mockSearch.mock.calls[0][0].params;
-      expect(JSON.stringify(params.filter)).toContain('uniqueTestValue');
+      expect(params.query).toBe('FROM index');
+      const filterJson = JSON.stringify(params.filter);
+      expect(filterJson).toContain('uniqueFromFilterPill');
+      expect(filterJson).toContain('uniqueFromQueryBar');
     });
 
-    it('should exclude global filters from the query when ignoreGlobalFilters is true', async () => {
+    it('should exclude global query and filters from params.filter when ignoreGlobalFilters is true', async () => {
       const mockSearch = jest.fn().mockReturnValue(emptySearchResponse);
       const esqlFn = makeEsqlFn(mockSearch);
 
@@ -113,7 +120,10 @@ describe('getEsqlFn', () => {
         .toPromise();
 
       const params = mockSearch.mock.calls[0][0].params;
-      expect(JSON.stringify(params.filter)).not.toContain('uniqueTestValue');
+      expect(params.query).toBe('FROM index');
+      const filterJson = JSON.stringify(params.filter);
+      expect(filterJson).not.toContain('uniqueFromFilterPill');
+      expect(filterJson).not.toContain('uniqueFromQueryBar');
     });
   });
 });
