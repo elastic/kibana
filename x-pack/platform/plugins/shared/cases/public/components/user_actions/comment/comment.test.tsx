@@ -24,7 +24,6 @@ import {
   getExternalReferenceUserAction,
   getHostIsolationUserAction,
   getMultipleAlertsUserAction,
-  getPersistableStateAttachment,
   getPersistableStateUserAction,
   getUserAction,
   hostIsolationComment,
@@ -36,7 +35,6 @@ import { getMockBuilderArgs, getMockCommentRenderingContext } from '../mock';
 import { CommentRenderingProvider } from './comment_rendering_context';
 import { useCaseViewNavigation, useCaseViewParams } from '../../../common/navigation';
 import { ExternalReferenceAttachmentTypeRegistry } from '../../../client/attachment_framework/external_reference_registry';
-import { PersistableStateAttachmentTypeRegistry } from '../../../client/attachment_framework/persistable_state_registry';
 import { userProfiles } from '../../../containers/user_profiles/api.mock';
 import { AttachmentActionType } from '../../../client/attachment_framework/types';
 import { UnifiedAttachmentTypeRegistry } from '../../../client/attachment_framework/unified_attachment_registry';
@@ -190,75 +188,26 @@ describe('createCommentUserActionBuilder', () => {
       expect(screen.getByText('removed attachment')).toBeInTheDocument();
     });
 
-    it('renders correctly when deleting a persistable state attachment', async () => {
-      const userAction = getPersistableStateUserAction({ action: UserActionActions.delete });
+    it('renders correctly when deleting a unified value attachment', async () => {
+      const userAction = getPersistableStateUserAction({
+        action: UserActionActions.delete,
+        payload: {
+          comment: {
+            type: 'lens',
+            data: { state: { test_foo: 'foo' } },
+            owner: 'securitySolution',
+          },
+        },
+      });
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
-        attachments: [basicCommentUnified],
         userAction,
       });
 
       const createdUserAction = builder.build();
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
-      expect(screen.getByText('removed attachment')).toBeInTheDocument();
-    });
-
-    it('renders correctly when deleting a persistable state attachment with getAttachmentRemovalObject defined', async () => {
-      const getAttachmentRemovalObject = jest.fn().mockReturnValue({
-        event: 'removed my own attachment',
-      });
-
-      const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
-      const attachment = getPersistableStateAttachment();
-      persistableStateAttachmentTypeRegistry.register({
-        ...attachment,
-        getAttachmentRemovalObject,
-      });
-
-      const userAction = getPersistableStateUserAction({ action: UserActionActions.delete });
-      const builder = createCommentUserActionBuilder({
-        ...builderArgs,
-        persistableStateAttachmentTypeRegistry,
-        userAction,
-        caseData: {
-          ...builderArgs.caseData,
-          comments: [persistableStateAttachment],
-        },
-      });
-
-      const createdUserAction = builder.build();
-      renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
-
-      expect(screen.getByText('removed my own attachment')).toBeInTheDocument();
-      expect(getAttachmentRemovalObject).toBeCalledWith({
-        caseData: {
-          id: 'basic-case-id',
-          title: 'Another horrible breach!!',
-        },
-        persistableStateAttachmentTypeId: '.test',
-        persistableStateAttachmentState: {
-          test_foo: 'foo',
-        },
-      });
-    });
-
-    it('renders correctly when deleting a persistable state attachment without getAttachmentRemovalObject defined', async () => {
-      const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
-      const attachment = getPersistableStateAttachment();
-      persistableStateAttachmentTypeRegistry.register(attachment);
-
-      const userAction = getPersistableStateUserAction({ action: UserActionActions.delete });
-      const builder = createCommentUserActionBuilder({
-        ...builderArgs,
-        persistableStateAttachmentTypeRegistry,
-        userAction,
-      });
-
-      const createdUserAction = builder.build();
-      renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
-
-      expect(screen.getByText('removed attachment')).toBeInTheDocument();
+      expect(screen.getByText('removed comment')).toBeInTheDocument();
     });
 
     it('renders correctly when deleting a unified event attachment', async () => {
@@ -270,6 +219,7 @@ describe('createCommentUserActionBuilder', () => {
         icon: 'bell',
         getAttachmentViewObject: () => ({ event: 'added an event' }),
         getAttachmentRemovalObject: () => ({ event: 'removed event' }),
+        schemaValidator: () => {},
       });
 
       const userAction = getEventUserAction({
@@ -430,7 +380,7 @@ describe('createCommentUserActionBuilder', () => {
       const createdUserAction = builder.build();
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
-      expect(screen.getByTestId('single-alert-user-action-alert-action-id')).toHaveTextContent(
+      expect(screen.getByTestId('alerts-user-action-alert-action-id')).toHaveTextContent(
         'added an alert from Awesome rule'
       );
     });
@@ -451,7 +401,7 @@ describe('createCommentUserActionBuilder', () => {
 
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
-      expect(screen.getByTestId('single-alert-user-action-alert-action-id')).toHaveTextContent(
+      expect(screen.getByTestId('alerts-user-action-alert-action-id')).toHaveTextContent(
         'added an alert from Awesome rule'
       );
 
@@ -512,7 +462,7 @@ describe('createCommentUserActionBuilder', () => {
       const createdUserAction = builder.build();
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
-      expect(screen.getByTestId('multiple-alerts-user-action-alert-action-id')).toHaveTextContent(
+      expect(screen.getByTestId('alerts-user-action-alert-action-id')).toHaveTextContent(
         'added 2 alerts from Awesome rule'
       );
       expect(screen.getByTestId('comment-action-show-alerts-1234'));
@@ -539,7 +489,7 @@ describe('createCommentUserActionBuilder', () => {
       const createdUserAction = builder.build();
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
-      expect(screen.getByTestId('multiple-alerts-user-action-alert-action-id')).toHaveTextContent(
+      expect(screen.getByTestId('alerts-user-action-alert-action-id')).toHaveTextContent(
         'added 2 alerts from Awesome rule'
       );
 
@@ -613,14 +563,15 @@ describe('createCommentUserActionBuilder', () => {
           event: 'added an event',
           timelineAvatar: <span data-test-subj="event-timeline-avatar" />,
         }),
+        schemaValidator: () => {},
       });
 
       const userAction = getEventUserAction();
       const unifiedEventAttachment = {
         id: eventComment.id,
         type: 'security.event',
-        attachmentId: eventComment.eventId,
-        metadata: { index: eventComment.index },
+        attachmentId: 'event-id-1',
+        metadata: { index: 'event-index-1' },
         owner: eventComment.owner,
         createdAt: eventComment.createdAt,
         createdBy: eventComment.createdBy,
@@ -784,12 +735,11 @@ describe('createCommentUserActionBuilder', () => {
       });
     });
 
-    describe('Persistable state', () => {
-      it('renders correctly a persistable state attachment', async () => {
+    describe('Unified value attachments', () => {
+      it('renders correctly a unified value attachment', async () => {
         const MockComponent = jest.fn((props) => {
-          return (
-            <div data-test-subj={`attachment_${props.persistableStateAttachmentState.test_foo}`} />
-          );
+          const state = props.data.state as { test_foo: string };
+          return <div data-test-subj={`attachment_${state.test_foo}`} />;
         });
 
         const SpyLazyFactory = jest.fn(() => {
@@ -800,17 +750,25 @@ describe('createCommentUserActionBuilder', () => {
           });
         });
 
-        const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
-        persistableStateAttachmentTypeRegistry.register(
-          getPersistableStateAttachment({
+        const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+        unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+        unifiedAttachmentTypeRegistry.register({
+          id: 'lens',
+          displayName: 'Lens',
+          icon: 'lensApp',
+          getAttachmentViewObject: () => ({
+            event: 'added an embeddable',
+            timelineAvatar: 'lensApp',
             children: React.lazy(SpyLazyFactory),
-          })
-        );
+          }),
+        });
 
         const userAction = getPersistableStateUserAction();
         const attachment01 = {
-          ...persistableStateAttachment,
-          persistableStateAttachmentState: { test_foo: '01' },
+          ...basicCommentUnified,
+          id: persistableStateAttachment.id,
+          type: 'lens',
+          data: { state: { test_foo: '01' } },
           createdBy: {
             username: userProfiles[0].user.username,
             fullName: userProfiles[0].user.full_name,
@@ -818,12 +776,10 @@ describe('createCommentUserActionBuilder', () => {
             profileUid: userProfiles[0].uid,
           },
         };
+
         const builder = createCommentUserActionBuilder({
           ...builderArgs,
-          persistableStateAttachmentTypeRegistry,
-          caseData: {
-            ...builderArgs.caseData,
-          },
+          unifiedAttachmentTypeRegistry,
           attachments: [attachment01],
           userAction,
         });
@@ -839,7 +795,7 @@ describe('createCommentUserActionBuilder', () => {
         expect(MockComponent).toHaveBeenCalledTimes(1);
         expect(SpyLazyFactory).toHaveBeenCalledTimes(1);
 
-        expect(screen.getByTestId('comment-persistableState-.test')).toBeInTheDocument();
+        expect(screen.getByTestId('comment-lens-lens')).toBeInTheDocument();
         expect(screen.getByTestId('copy-link-persistable-state-comment-id')).toBeInTheDocument();
         expect(screen.getByTestId('case-user-profile-avatar-damaged_raccoon')).toBeInTheDocument();
         expect(screen.getByText('added an embeddable')).toBeInTheDocument();
@@ -847,15 +803,12 @@ describe('createCommentUserActionBuilder', () => {
         unmount();
 
         const attachment02 = {
-          ...persistableStateAttachment,
-          persistableStateAttachmentState: { test_foo: '02' },
+          ...attachment01,
+          data: { state: { test_foo: '02' } },
         };
         const updateBuilder = createCommentUserActionBuilder({
           ...builderArgs,
-          persistableStateAttachmentTypeRegistry,
-          caseData: {
-            ...builderArgs.caseData,
-          },
+          unifiedAttachmentTypeRegistry,
           attachments: [attachment02],
           userAction,
         });
@@ -870,48 +823,57 @@ describe('createCommentUserActionBuilder', () => {
         expect(SpyLazyFactory).toHaveBeenCalledTimes(1);
       });
 
-      it('renders correctly if the reference is not registered', async () => {
-        const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
-
+      it('does not render if the attachment type is not registered', async () => {
         const userAction = getPersistableStateUserAction();
         const builder = createCommentUserActionBuilder({
           ...builderArgs,
-          persistableStateAttachmentTypeRegistry,
-          caseData: {
-            ...builderArgs.caseData,
-          },
-          attachments: [persistableStateAttachment],
+          attachments: [
+            {
+              ...basicCommentUnified,
+              id: persistableStateAttachment.id,
+              type: 'lens',
+              data: { state: { test_foo: 'foo' } },
+            },
+          ],
           userAction,
         });
 
         const createdUserAction = builder.build();
-        renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
-
-        expect(screen.getByTestId('comment-persistableState-not-found')).toBeInTheDocument();
-        expect(screen.getByText('added an attachment of type')).toBeInTheDocument();
-        expect(screen.getByText('Attachment type is not registered')).toBeInTheDocument();
+        expect(createdUserAction).toEqual([]);
       });
 
       it('deletes the attachment correctly', async () => {
-        const attachment = getPersistableStateAttachment();
-        const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
-        persistableStateAttachmentTypeRegistry.register(attachment);
+        const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+        unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+        unifiedAttachmentTypeRegistry.register({
+          id: 'lens',
+          displayName: 'Lens',
+          icon: 'lensApp',
+          getAttachmentViewObject: () => ({
+            event: 'added an embeddable',
+            timelineAvatar: 'lensApp',
+          }),
+        });
 
         const userAction = getPersistableStateUserAction();
         const builder = createCommentUserActionBuilder({
           ...builderArgs,
-          persistableStateAttachmentTypeRegistry,
-          caseData: {
-            ...builderArgs.caseData,
-          },
-          attachments: [persistableStateAttachment],
+          unifiedAttachmentTypeRegistry,
+          attachments: [
+            {
+              ...basicCommentUnified,
+              id: persistableStateAttachment.id,
+              type: 'lens',
+              data: { state: { test_foo: 'foo' } },
+            },
+          ],
           userAction,
         });
 
         const createdUserAction = builder.build();
         renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
-        expect(screen.getByTestId('comment-persistableState-.test')).toBeInTheDocument();
+        expect(screen.getByTestId('comment-lens-lens')).toBeInTheDocument();
 
         await deleteAttachment('trash', 'Delete');
 
@@ -921,6 +883,16 @@ describe('createCommentUserActionBuilder', () => {
             'Deleted attachment'
           );
         });
+      });
+
+      it('does not render legacy persistable state attachments', async () => {
+        const builder = createCommentUserActionBuilder({
+          ...builderArgs,
+          attachments: [persistableStateAttachment],
+          userAction: getPersistableStateUserAction(),
+        });
+
+        expect(builder.build()).toEqual([]);
       });
     });
 
