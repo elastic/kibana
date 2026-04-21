@@ -31,7 +31,7 @@ import {
   isInferenceEndpointWithDisplayNameMetadata,
   isInferenceEndpointWithDisplayCreatorMetadata,
 } from '../../../common/type_guards';
-import { TASK_TYPE_TOOLTIPS } from '../all_inference_endpoints/render_table_columns/render_endpoint/translations';
+import { TASK_TYPE_TOOLTIPS } from '../all_inference_endpoints/render_table_columns/render_endpoint/endpoint_info';
 import { getModelId } from '../../utils/get_model_id';
 import { AddEndpointModal } from './add_endpoint_modal';
 import { ModelEndpointRow } from './model_endpoint_row';
@@ -137,9 +137,11 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
           <h2 id={flyoutTitleId}>{displayName}</h2>
         </EuiTitle>
         <EuiSpacer size="xs" />
-        {uniqueTaskTypes.map((taskType) => (
-          <EuiBadge key={taskType}>{taskType}</EuiBadge>
-        ))}
+        <span data-test-subj="flyoutTaskBadges">
+          {uniqueTaskTypes.map((taskType) => (
+            <EuiBadge key={taskType}>{taskType}</EuiBadge>
+          ))}
+        </span>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
@@ -148,6 +150,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
           compressed
           columnGutterSize="m"
           listItems={descriptionListItems}
+          data-test-subj="flyoutModelDetails"
         />
 
         <EuiHorizontalRule margin="xxl" />

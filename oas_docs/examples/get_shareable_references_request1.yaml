@@ -1,0 +1,7 @@
+summary: Get shareable references
+description: >
+  Collect references and space contexts for a dashboard saved object.
+value:
+  objects:
+    - type: dashboard
+      id: my-dashboard-id

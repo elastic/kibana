@@ -12643,7 +12643,7 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/visualization/chart_type_registry.ts",
-        "lineNumber": 147,
+        "lineNumber": 152,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

@@ -278,6 +278,12 @@ const gradientColorMappingSchema = schema.object(
   { meta: { id: 'gradientColorMapping', title: 'Gradient Color Mapping' } }
 );
 
+const DEFAULT_CATEGORICAL_COLOR_MAPPING_VALUE: TypeOf<typeof categoricalColorMappingSchema> = {
+  mode: 'categorical',
+  palette: 'default',
+  mapping: [],
+};
+
 export const colorMappingSchema = schema.oneOf(
   [
     /**
@@ -289,13 +295,34 @@ export const colorMappingSchema = schema.oneOf(
      */
     gradientColorMappingSchema,
   ],
-  { meta: { id: 'colorMapping', title: 'Color Mapping' } }
+  {
+    meta: { id: 'colorMapping', title: 'Color Mapping' },
+    defaultValue: DEFAULT_CATEGORICAL_COLOR_MAPPING_VALUE,
+  }
+);
+
+export const noColorSchema = schema.object(
+  { type: schema.literal('none') },
+  { meta: { id: 'noColor', title: 'No Color', description: 'Explicitly disables coloring' } }
+);
+
+export const autoColorSchema = schema.object(
+  { type: schema.literal('auto') },
+  {
+    meta: {
+      id: 'autoColor',
+      title: 'Auto Color',
+      description: 'Coloring determined at runtime based on chart defaults',
+    },
+  }
 );
 
 export const allColoringTypeSchema = schema.oneOf([
   colorByValueSchema,
   staticColorSchema,
   colorMappingSchema,
+  noColorSchema,
+  autoColorSchema,
 ]);
 
 export type StaticColorType = TypeOf<typeof staticColorSchema>;
@@ -308,8 +335,16 @@ export type ColorMappingType = TypeOf<typeof colorMappingSchema>;
 export type ColorMappingCategoricalType = TypeOf<typeof categoricalColorMappingSchema>;
 export type ColorMappingGradientType = TypeOf<typeof gradientColorMappingSchema>;
 export type ColorMappingColorDefType = TypeOf<typeof colorDefSchema>;
+export type NoColorType = TypeOf<typeof noColorSchema>;
+export type AutoColorType = TypeOf<typeof autoColorSchema>;
 export type AllColoringTypes = TypeOf<typeof allColoringTypeSchema>;
 export type UnassignedColorType = TypeOf<typeof unassignedColorSchema>;
+
+export const NO_COLOR: NoColorType = { type: 'none' };
+export const AUTO_COLOR: AutoColorType = { type: 'auto' };
+export const DEFAULT_CATEGORICAL_COLOR_MAPPING: ColorMappingCategoricalType =
+  DEFAULT_CATEGORICAL_COLOR_MAPPING_VALUE;
+
 /**
  * Schema for where to apply the color (to value or background).
  */

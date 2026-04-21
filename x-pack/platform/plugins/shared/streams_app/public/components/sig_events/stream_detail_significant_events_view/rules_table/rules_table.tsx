@@ -18,7 +18,6 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Streams } from '@kbn/streams-schema';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRulesDemote } from '../hooks/use_queries_bulk_delete';
@@ -30,7 +29,6 @@ import { formatLastOccurredAt } from '../../significant_events_discovery/compone
 import { TableTitle } from '../../stream_detail_systems/table_title';
 
 interface RulesTableProps {
-  definition: Streams.all.Definition;
   rules: KnowledgeIndicator[];
   occurrencesByQueryId: Record<string, Array<{ x: number; y: number }>>;
   searchTerm: string;
@@ -39,7 +37,6 @@ interface RulesTableProps {
 }
 
 export function RulesTable({
-  definition,
   rules,
   occurrencesByQueryId,
   searchTerm,
@@ -50,7 +47,6 @@ export function RulesTable({
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
   const [rulesToDelete, setRulesToDelete] = useState<KnowledgeIndicator[]>([]);
   const { demoteRules, isPending } = useRulesDemote({
-    definition,
     onSuccess: () => {
       setSelectedRules([]);
       setRulesToDelete([]);
@@ -58,9 +54,7 @@ export function RulesTable({
   });
 
   const filteredRules = useMemo(() => {
-    const normalizedSearchTerm = searchTerm.trim().toLowerCase();
-
-    if (!normalizedSearchTerm) {
+    if (!searchTerm) {
       return rules;
     }
 
@@ -70,7 +64,7 @@ export function RulesTable({
       }
 
       const title = (rule.query.title ?? '').toLowerCase();
-      return title.includes(normalizedSearchTerm);
+      return title.includes(searchTerm);
     });
   }, [rules, searchTerm]);
 

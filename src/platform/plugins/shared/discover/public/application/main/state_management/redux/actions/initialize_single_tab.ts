@@ -16,7 +16,7 @@ import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { getEsqlDataView } from '@kbn/discover-utils';
 import { internalStateSlice, type TabActionPayload } from '../internal_state';
 import { getInitialAppState } from '../../utils/get_initial_app_state';
-import { type DiscoverAppState } from '..';
+import { TabInitializationStatus, type DiscoverAppState } from '..';
 import type { DiscoverDataStateContainer } from '../../discover_data_state_container';
 import { appendAdHocDataViews } from './data_views';
 import { setDataView } from './tab_state_data_view';
@@ -28,7 +28,6 @@ import { getValidFilters } from '../../../../../utils/get_valid_filters';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
 import { selectTabRuntimeState } from '../runtime_state';
 import type { ConnectedCustomizationService } from '../../../../../customizations';
-import { disconnectTab } from './tabs';
 import { selectTab } from '../selectors';
 import type { TabState, TabStateGlobalState } from '../types';
 import { GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
@@ -64,9 +63,6 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       extra: { services, runtimeStateManager, urlStateStorage, searchSessionManager },
     }
   ) {
-    dispatch(disconnectTab({ tabId }));
-    dispatch(internalStateSlice.actions.resetOnSavedSearchChange({ tabId }));
-
     const { currentDataView$, dataStateContainer$, customizationService$, scopedEbtManager$ } =
       selectTabRuntimeState(runtimeStateManager, tabId);
 
@@ -78,7 +74,8 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     let tabInitialAppState: DiscoverAppState | undefined;
     let tabInitialInternalState: TabState['initialInternalState'] | undefined;
 
-    const tabState = selectTab(getState(), tabId);
+    const getTabState = () => selectTab(getState(), tabId);
+    const tabState = getTabState();
 
     if (tabState.globalState) {
       tabInitialGlobalState = cloneDeep(tabState.globalState);
@@ -235,8 +232,19 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
      * Sync global services
      */
 
+    // Use a function to check if the current tab is still active
+    // to ensure we are always checking the latest state
+    const isCurrentTabActive = () => {
+      const isTabSelected = getState().tabs.unsafeCurrentId === tabId;
+      const currentTabState = getTabState() as TabState | undefined;
+      const isTabDisconnected =
+        currentTabState?.initializationState.initializationStatus ===
+        TabInitializationStatus.Disconnected;
+      return isTabSelected && Boolean(currentTabState) && !isTabDisconnected;
+    };
+
     // Only update global services if this is still the current tab
-    if (getState().tabs.unsafeCurrentId === tabId) {
+    if (isCurrentTabActive()) {
       // Push the tab's initial search session ID to the URL if one exists,
       // unless it should be overridden by a search session ID already in the URL
       if (
@@ -298,7 +306,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     // Begin syncing the state and trigger the initial fetch
     // if this is still the current tab, otherwise mark the
     // tab to fetch when selected
-    if (getState().tabs.unsafeCurrentId === tabId) {
+    if (isCurrentTabActive()) {
       dispatch(initializeAndSync({ tabId }));
       dispatch(fetchData({ tabId, initial: true }));
     } else {

@@ -10,10 +10,7 @@ import { fetchEvents } from './fetch_events_graph';
 import type { Logger } from '@kbn/core/server';
 import type { OriginEventId, EsQuery } from './types';
 import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
-import {
-  GRAPH_ACTOR_EUID_SOURCE_FIELDS,
-  GRAPH_TARGET_EUID_SOURCE_FIELDS,
-} from '@kbn/cloud-security-posture-common/constants';
+import { GRAPH_ACTOR_EUID_SOURCE_FIELDS, GRAPH_TARGET_EUID_SOURCE_FIELDS } from './constants';
 
 describe('fetchEvents', () => {
   const esClient = elasticsearchServiceMock.createScopedClusterClient();
@@ -287,7 +284,12 @@ describe('fetchEvents', () => {
       expect(query).toContain('_actor_service_euid');
 
       // Verify EUID source fields are referenced in the query
-      for (const field of GRAPH_ACTOR_EUID_SOURCE_FIELDS) {
+      for (const field of [
+        ...GRAPH_ACTOR_EUID_SOURCE_FIELDS.user,
+        ...GRAPH_ACTOR_EUID_SOURCE_FIELDS.host,
+        ...GRAPH_ACTOR_EUID_SOURCE_FIELDS.service,
+        ...GRAPH_ACTOR_EUID_SOURCE_FIELDS.generic,
+      ]) {
         expect(query).toContain(field);
       }
 
@@ -398,12 +400,13 @@ describe('fetchEvents', () => {
       const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
       const query = esqlCallArgs[0].query;
 
-      // Verify target EUID source fields appear in the sourceFields JSON construction
-      expect(query).toContain('\\"user.target.email\\"');
-      expect(query).toContain('\\"user.target.id\\"');
-      expect(query).toContain('\\"host.target.id\\"');
-      expect(query).toContain('\\"service.target.name\\"');
-      expect(query).toContain('\\"entity.target.id\\"');
+      // Verify target EUID source field values appear in the sourceFields JSON construction
+      // The JSON keys use actor-namespace names (e.g., "user.email") while the values
+      // reference saved target-namespace field variables (e.g., _sf_user_target_email)
+      expect(query).toContain('_sf_user_target_email');
+      expect(query).toContain('_sf_user_target_id');
+      expect(query).toContain('_sf_host_target_id');
+      expect(query).toContain('_sf_service_target_name');
     });
   });
 
@@ -429,7 +432,13 @@ describe('fetchEvents', () => {
       const filterArg = esqlCallArgs[0].filter as any;
 
       // Should have bool.filter with target EUID source field exists checks
-      const expectedExistsChecks = GRAPH_TARGET_EUID_SOURCE_FIELDS.map((field) => ({
+      const allTargetFields = [
+        ...GRAPH_TARGET_EUID_SOURCE_FIELDS.user,
+        ...GRAPH_TARGET_EUID_SOURCE_FIELDS.host,
+        ...GRAPH_TARGET_EUID_SOURCE_FIELDS.service,
+        ...GRAPH_TARGET_EUID_SOURCE_FIELDS.generic,
+      ];
+      const expectedExistsChecks = allTargetFields.map((field) => ({
         exists: { field },
       }));
       expect(filterArg.bool.filter).toEqual(
@@ -446,7 +455,7 @@ describe('fetchEvents', () => {
       const targetFilter = filterArg.bool.filter.find((f: any) =>
         f.bool?.should?.some((s: any) => s.exists?.field?.includes('target'))
       );
-      expect(targetFilter?.bool?.should).toHaveLength(GRAPH_TARGET_EUID_SOURCE_FIELDS.length);
+      expect(targetFilter?.bool?.should).toHaveLength(allTargetFields.length);
     });
 
     it('should not filter targets when showUnknownTarget is true', async () => {
