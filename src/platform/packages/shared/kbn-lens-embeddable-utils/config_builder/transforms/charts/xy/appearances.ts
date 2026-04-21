@@ -10,7 +10,7 @@
 import type { XYVisualizationState as XYVisualizationState } from '@kbn/lens-common';
 import type { XYCurveType, FittingFunction, EndValue } from '@kbn/expression-xy-plugin/common';
 import type { $Values } from 'utility-types';
-import type { XYStyling } from '../../../schema/charts/xy';
+import type { XYConfig } from '../../../schema/charts/xy';
 import type { XYApiLineInterpolation } from '../../../schema/charts/xy';
 import { getReversibleMappings, stripUndefined } from '../utils';
 import {
@@ -23,6 +23,7 @@ import {
   DEFAULT_POINTS_VISIBILITY,
 } from './defaults';
 
+type XYStyling = NonNullable<XYConfig['styling']>;
 type XYLensAppearanceState = Pick<
   XYVisualizationState,
   | 'valueLabels'

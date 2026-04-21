@@ -37,9 +37,12 @@ export const PLATFORM_AND_SOLUTION_SCOUT_ROOT_PATH_GLOB =
 
 export const EXAMPLE_PLUGIN_SCOUT_ROOT_PATH_GLOB = '{examples,x-pack/examples}/**/test/scout{_*,}';
 
+export const CORE_MODULE_SCOUT_ROOT_PATH_GLOB = 'src/core/test/scout{_*,}';
+
 export const TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB = `{${[
   PLATFORM_AND_SOLUTION_SCOUT_ROOT_PATH_GLOB,
   EXAMPLE_PLUGIN_SCOUT_ROOT_PATH_GLOB,
+  CORE_MODULE_SCOUT_ROOT_PATH_GLOB,
 ].join(',')}}`;
 
 export const TESTABLE_COMPONENT_SCOUT_ROOT_PATH_REGEX = new RegExp(
@@ -84,6 +87,8 @@ export const SCOUT_EXAMPLES_PLAYWRIGHT_CONFIG_REGEX = new RegExp(
 export const SCOUT_UNIFIED_CONFIG_PATH_REGEX = new RegExp(
   `^(?:` +
     `(?<examplesRoot>examples|x-pack/examples)/(?<examplePlugin>[^/]+)` +
+    `|` +
+    `(?<coreRoot>src/core)` +
     `|` +
     `(?:src|x-pack)/(?:(?<platformOrCore>platform|core)|solutions/(?<solution>\\w+))` +
     `/(?<moduleKind>plugins|packages)/?(?<moduleVisibility>shared|private|)` +

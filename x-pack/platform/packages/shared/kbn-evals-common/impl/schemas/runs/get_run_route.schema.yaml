@@ -40,10 +40,20 @@ paths:
                 properties:
                   run_id:
                     type: string
+                  timestamp:
+                    type: string
                   task_model:
                     $ref: '../common_attributes.schema.yaml#/components/schemas/Model'
                   evaluator_model:
                     $ref: '../common_attributes.schema.yaml#/components/schemas/Model'
+                  git_branch:
+                    type: string
+                    nullable: true
+                  git_commit_sha:
+                    type: string
+                    nullable: true
+                  ci:
+                    $ref: '../common_attributes.schema.yaml#/components/schemas/BuildkiteMetadata'
                   total_repetitions:
                     type: integer
                   stats:

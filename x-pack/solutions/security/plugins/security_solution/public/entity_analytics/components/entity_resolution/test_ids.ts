@@ -14,5 +14,7 @@ export const RESOLUTION_GROUP_TAB_CONTENT_TEST_ID = `${PREFIX}ResolutionGroupTab
 export const ADD_ENTITIES_SECTION_TEST_ID = `${PREFIX}AddEntitiesSection` as const;
 export const ADD_ENTITIES_SEARCH_TEST_ID = `${PREFIX}AddEntitiesSearch` as const;
 export const ADD_ENTITIES_TABLE_TEST_ID = `${PREFIX}AddEntitiesTable` as const;
+export const ADD_ENTITIES_ACCORDION_TEST_ID = `${PREFIX}AddEntitiesAccordion` as const;
+export const ADD_ENTITIES_SHOWING_TEST_ID = `${PREFIX}AddEntitiesShowing` as const;
 export const CONFIRM_RESOLUTION_MODAL_TEST_ID = `${PREFIX}ConfirmResolutionModal` as const;
 export const RESOLUTION_EMPTY_STATE_TEST_ID = `${PREFIX}ResolutionEmptyState` as const;
