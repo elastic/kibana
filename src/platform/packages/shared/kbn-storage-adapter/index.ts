@@ -199,4 +199,6 @@ export { StorageIndexAdapter } from './src/index_adapter';
 
 export { BulkOperationError } from './src/errors';
 
+export { getSchemaVersion } from './src/get_schema_version';
+
 export { types } from './types';

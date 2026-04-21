@@ -8,8 +8,8 @@
  */
 
 import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
-import { tagcloudStateSchema } from '../../schema';
-import type { TagcloudState } from '../../schema/charts/tagcloud';
+import { tagcloudConfigSchema } from '../../schema';
+import type { TagcloudConfig } from '../../schema';
 import { DEFAULT_CATEGORICAL_COLOR_MAPPING } from '../../schema/color';
 import { LensConfigBuilder } from '../../config_builder';
 import { validateAPIConverter, validateConverter } from '../validate';
@@ -30,38 +30,38 @@ import {
 describe('Tagcloud', () => {
   describe('validateConverter', () => {
     it('should convert a simple tag cloud', () => {
-      validateConverter(tagcloudAttributes, tagcloudStateSchema);
+      validateConverter(tagcloudAttributes, tagcloudConfigSchema);
     });
     it('should convert a tag cloud with full config', () => {
-      validateConverter(tagcloudAttributesWithFullConfig, tagcloudStateSchema);
+      validateConverter(tagcloudAttributesWithFullConfig, tagcloudConfigSchema);
     });
     it('should convert an esql tagcloud', () => {
-      validateConverter(tagcloudESQLAttributes, tagcloudStateSchema);
+      validateConverter(tagcloudESQLAttributes, tagcloudConfigSchema);
     });
   });
   describe('validateAPIConverter', () => {
     it('should convert a basic tagcloud chart with ad hoc dataView', () => {
-      validateAPIConverter(basicTagcloudWithAdHocDataView, tagcloudStateSchema);
+      validateAPIConverter(basicTagcloudWithAdHocDataView, tagcloudConfigSchema);
     });
 
     it('should convert a basic tagcloud chart with dataView', () => {
-      validateAPIConverter(basicTagcloudWithDataView, tagcloudStateSchema);
+      validateAPIConverter(basicTagcloudWithDataView, tagcloudConfigSchema);
     });
 
     it('should convert a ESQL-based tagcloud chart', () => {
-      validateAPIConverter(basicEsqlTagcloud, tagcloudStateSchema);
+      validateAPIConverter(basicEsqlTagcloud, tagcloudConfigSchema);
     });
 
     it('should convert a comprehensive tagcloud chart with ad hoc data view', () => {
-      validateAPIConverter(comprehensiveTagcloudWithAdHocDataView, tagcloudStateSchema);
+      validateAPIConverter(comprehensiveTagcloudWithAdHocDataView, tagcloudConfigSchema);
     });
 
     it('should convert a comprehensive tagcloud chart with data view', () => {
-      validateAPIConverter(comprehensiveTagcloudWithDataView, tagcloudStateSchema);
+      validateAPIConverter(comprehensiveTagcloudWithDataView, tagcloudConfigSchema);
     });
 
     it('should convert a comprehensive ESQL-based tagcloud chart', () => {
-      validateAPIConverter(comprehensiveEsqlTagcloud, tagcloudStateSchema);
+      validateAPIConverter(comprehensiveEsqlTagcloud, tagcloudConfigSchema);
     });
   });
 
@@ -86,11 +86,11 @@ describe('Tagcloud', () => {
         },
         sampling: 1,
         ignore_global_filters: false,
-      } satisfies TagcloudState;
+      } satisfies TagcloudConfig;
 
       const builder = new LensConfigBuilder();
       const lensState = builder.fromAPIFormat(config);
-      const apiOutput = builder.toAPIFormat(lensState) as TagcloudState;
+      const apiOutput = builder.toAPIFormat(lensState) as TagcloudConfig;
 
       expect(apiOutput.tag_by.color).toEqual(DEFAULT_CATEGORICAL_COLOR_MAPPING);
     });
