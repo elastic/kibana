@@ -766,6 +766,7 @@ Alerting::
 * Allows users to delete a snooze schedule from a rule using schedule ID ({kibana-pull}213247[#213247]).
 * Allows users to create a snooze schedule for rules using the schedule API ({kibana-pull}210584[#210584]).
 * Implements functionality to add observables, procedures, and custom fields to alerts for {hive} ({kibana-pull}207255[#207255]).
+* Updates the `context.link` variable to use the new Discover URL formatting in all {es} query rule types ({kibana-pull}216376[#216376]).
 Dashboards and Visualizations::
 * Updates time-based charts to use the multi-layer time axis by default, providing a better time window context and improved label positioning. ({kibana-pull}210579[#210579]).
 * Adds a **Point visibility** option to Area and Line charts in **Lens** ({kibana-pull}222187[#222187]).
