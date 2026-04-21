@@ -70,7 +70,6 @@ export type {
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
   ChromeUserBanner,
-  ChromeHelpMenuActions,
 } from '@kbn/core-chrome-browser';
 export type {
   Plugin,

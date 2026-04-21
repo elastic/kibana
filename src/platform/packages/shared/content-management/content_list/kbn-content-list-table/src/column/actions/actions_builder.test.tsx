@@ -108,7 +108,7 @@ describe('actions column builder', () => {
         expect(result).toBeUndefined();
       });
 
-      it('returns `undefined` in read-only mode', () => {
+      it('returns `undefined` in read-only mode when onInspect is not configured', () => {
         const context: ColumnBuilderContext = {
           ...defaultContext,
           isReadOnly: true,
@@ -116,6 +116,36 @@ describe('actions column builder', () => {
         const result = buildActionsColumn({}, context);
 
         expect(result).toBeUndefined();
+      });
+
+      it('returns only inspect action in read-only mode when onInspect is configured', () => {
+        const context: ColumnBuilderContext = {
+          ...defaultContext,
+          isReadOnly: true,
+          itemConfig: { ...defaultContext.itemConfig, onInspect: jest.fn() },
+        };
+        const result = buildActionsColumn({}, context) as ActionsColumn;
+
+        expect(result).toBeDefined();
+        expect(result.actions).toHaveLength(1);
+        expect(result.actions[0]).toMatchObject({
+          icon: 'inspect',
+          'data-test-subj': 'content-list-table-action-inspect',
+        });
+      });
+
+      it('includes inspect action alongside edit and delete when onInspect is configured', () => {
+        const context: ColumnBuilderContext = {
+          ...defaultContext,
+          itemConfig: { ...defaultContext.itemConfig, onInspect: jest.fn() },
+        };
+        const result = buildActionsColumn({}, context) as ActionsColumn;
+
+        expect(result).toBeDefined();
+        expect(result.actions).toHaveLength(3);
+        expect(result.actions[0]).toMatchObject({ icon: 'pencil' });
+        expect(result.actions[1]).toMatchObject({ icon: 'trash' });
+        expect(result.actions[2]).toMatchObject({ icon: 'inspect' });
       });
     });
 

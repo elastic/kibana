@@ -88,6 +88,7 @@ describe('AgentExecutionService', () => {
     uiSettings,
     savedObjects,
     meteringService,
+    searchInferenceEndpoints: {} as any,
   });
 
   beforeEach(() => {
