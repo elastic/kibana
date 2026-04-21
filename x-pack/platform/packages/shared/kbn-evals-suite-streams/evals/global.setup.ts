@@ -49,8 +49,8 @@ const LOGHUB_METADATA_OVERRIDES = {
 } satisfies Record<string, Record<string, unknown>>;
 
 /**
- * Per-system creative themes that drive dynamic per-document metadata
- * (partition hints, storyline tags, palettes, deployment slots, trace correlations).
+ * Per-system service themes that drive dynamic per-document metadata
+ * (host hostnames, PIDs, trace IDs, container IDs, availability zones).
  * Resolved by the `sample_logs` scenario into function-based overrides.
  */
 const LOGHUB_CREATIVE_THEMES: Record<string, string> = {

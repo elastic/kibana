@@ -21,48 +21,62 @@ import { castArray } from 'lodash';
 import type { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
 
-// ── Creative metadata word pools ─────────────────────────────────────────────
-// Used to build per-document synthetic tags that add realistic noise
-// without introducing arbitrary numbers. Each run picks fresh combinations.
+// ── Realistic per-document metadata generation ────────────────────────────────
+// Adds natural variation that real production systems exhibit (different host
+// instances, PIDs, trace IDs, availability zones) while keeping the signal
+// fields (service.name, data_layer, etc.) constant per system.
 
-const CREATIVE_CODENAMES = [
-  'aurora', 'nebula', 'solstice', 'lumen', 'halcyon', 'prism',
-] as const;
-const SHIFT_WINDOWS = ['dawn', 'dusk', 'zenith', 'midwatch', 'eclipse'] as const;
-const STORY_TEXTURES = ['loom', 'lattice', 'helix', 'constellation', 'circuit'] as const;
-const COLORWAYS = ['ember', 'jade', 'cerulean', 'saffron', 'violet', 'obsidian'] as const;
-const DEPLOYMENT_SLOTS = ['canary', 'prod', 'staging', 'ring-0', 'edge'] as const;
-const CORRELATION_GLYPHS = ['alpha', 'beta', 'gamma', 'delta', 'omega'] as const;
+type ServiceTheme = 'batch' | 'proxy' | 'mobile' | 'cloud' | 'stream' | 'infra' | 'homog';
 
-type CreativeTheme = 'batch' | 'proxy' | 'mobile' | 'cloud' | 'stream' | 'infra' | 'homog';
+/** Realistic host instance naming patterns per service theme. */
+const HOST_POOLS: Record<ServiceTheme, string[]> = {
+  batch: ['dp-batch-01', 'dp-batch-02', 'dp-batch-03', 'dp-batch-04'],
+  proxy: ['proxy-edge-01', 'proxy-edge-02', 'proxy-edge-03'],
+  mobile: ['mobile-gw-01', 'mobile-gw-02'],
+  cloud: ['nova-compute-01', 'nova-compute-02', 'nova-compute-03'],
+  stream: ['dp-stream-01', 'dp-stream-02', 'dp-stream-03'],
+  infra: ['infra-mon-01', 'infra-mon-02', 'infra-mon-03', 'infra-mon-04'],
+  homog: ['syslog-01', 'syslog-02'],
+};
 
-function pickRandom<T>(choices: readonly T[]): T {
+const AVAILABILITY_ZONES = ['us-east-1a', 'us-east-1b', 'us-east-1c'] as const;
+
+function pickRandom<T>(choices: readonly T[] | T[]): T {
   return choices[Math.floor(Math.random() * choices.length)];
 }
 
-function buildCreativeMetadata(system: string, theme: CreativeTheme): Record<string, string> {
+function randomHex(len: number): string {
+  let hex = '';
+  for (let i = 0; i < len; i++) {
+    hex += Math.floor(Math.random() * 16).toString(16);
+  }
+  return hex;
+}
+
+function buildPerDocMetadata(system: string, theme: ServiceTheme): Record<string, unknown> {
   return {
-    'streams.partition_hint': `${pickRandom(CREATIVE_CODENAMES)}-${system.toLowerCase()}-${pickRandom(SHIFT_WINDOWS)}`,
-    'observability.storyline_tag': `${theme}-${pickRandom(STORY_TEXTURES)}-${pickRandom(CREATIVE_CODENAMES)}`,
-    'observability.synthetic_palette': `${pickRandom(COLORWAYS)}-${pickRandom(STORY_TEXTURES)}`,
-    'environment.deployment_slot': `${pickRandom(DEPLOYMENT_SLOTS)}-${Math.floor(Math.random() * 12) + 1}`,
-    'telemetry.trace_correlation': `${pickRandom(CORRELATION_GLYPHS)}-${pickRandom(CREATIVE_CODENAMES)}-${pickRandom(SHIFT_WINDOWS)}`,
+    'host.hostname': pickRandom(HOST_POOLS[theme]),
+    'process.pid': Math.floor(Math.random() * 60000) + 1000,
+    'trace.id': randomHex(32),
+    'container.id': randomHex(12),
+    'cloud.availability_zone': pickRandom(AVAILABILITY_ZONES),
   };
 }
 
 /**
- * Wrap a base metadata override with per-document creative fields.
- * The base fields (service.name, host.name, etc.) stay constant;
- * creative fields vary on every invocation.
+ * Wrap a base metadata override with per-document realistic variation.
+ * The base fields (service.name, host.name, data_layer, etc.) stay constant;
+ * noise fields (host.hostname, process.pid, trace.id, container.id,
+ * cloud.availability_zone) vary per document.
  */
-function withCreativeMetadata(
+function withPerDocMetadata(
   base: Record<string, unknown>,
   system: string,
-  theme: CreativeTheme
+  theme: ServiceTheme
 ): MetadataOverride {
   return (_docIndex: number, _logLine: string) => ({
     ...base,
-    ...buildCreativeMetadata(system, theme),
+    ...buildPerDocMetadata(system, theme),
   });
 }
 
@@ -86,8 +100,8 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
     isLogsEnabled?: boolean;
     loghubTimestampLayout?: LoghubTimestampLayout;
     loghubMetadataOverrides?: string | Record<string, Record<string, unknown>>;
-    /** JSON map of system name → creative theme for per-document dynamic metadata. */
-    loghubCreativeThemes?: string | Record<string, CreativeTheme>;
+    /** JSON map of system name → service theme for per-document dynamic metadata. */
+    loghubCreativeThemes?: string | Record<string, ServiceTheme>;
   };
 
   // Parse JSON string metadata overrides if provided
@@ -102,9 +116,9 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
   // Parse creative themes and convert static overrides into per-document generators
   const creativeThemesInput = (runOptions.scenarioOpts ?? {})['loghubCreativeThemes'] as
     | string
-    | Record<string, CreativeTheme>
+    | Record<string, ServiceTheme>
     | undefined;
-  let creativeThemes: Record<string, CreativeTheme> | undefined;
+  let creativeThemes: Record<string, ServiceTheme> | undefined;
   if (creativeThemesInput) {
     creativeThemes =
       typeof creativeThemesInput === 'string'
@@ -118,7 +132,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
     for (const [systemName, baseOverride] of Object.entries(loghubMetadataOverrides)) {
       const theme = creativeThemes?.[systemName];
       if (theme) {
-        resolvedOverrides[systemName] = withCreativeMetadata(baseOverride, systemName, theme);
+        resolvedOverrides[systemName] = withPerDocMetadata(baseOverride, systemName, theme);
       } else {
         resolvedOverrides[systemName] = baseOverride;
       }
