@@ -152,6 +152,7 @@ steps:
     timeout_in_minutes: 20
     env:
       SCOUT_TEST_DISTRIBUTION_STRATEGY: 'lanes'
+      SCOUT_TEST_LANES_GROUP_DEPS: 'build_scout_tests,build'
       SELECTIVE_TESTING_ENABLED: 'true'
     retry:
       automatic:
