@@ -29,6 +29,7 @@ export interface WatchlistFormState {
     key: K,
     value: CreateWatchlistRequestBodyInput[K]
   ) => void;
+  setSourceValid: (valid: boolean) => void;
 }
 
 export const useWatchlistFormState = ({

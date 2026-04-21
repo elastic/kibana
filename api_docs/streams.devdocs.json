@@ -1293,7 +1293,11 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            ", unknown>>; status: any; }, ",
+            ", unknown>>; status: any; draft: ",
+            "ZodOptional",
+            "<",
+            "ZodBoolean",
+            ">; }, ",
             "node_modules/zod/v4/core/schemas",
             "$strip>; }, ",
             "node_modules/zod/v4/core/schemas",
@@ -3877,7 +3881,7 @@
             "StreamsRouteHandlerResources",
             ", { streams: ",
             "ListStreamDetail",
-            "[]; canReadFailureStore: boolean; }, undefined>; }, ",
+            "[]; }, undefined>; }, ",
             "StreamsRepositoryClientOptions",
             ">"
           ],
@@ -4809,7 +4813,11 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          ", unknown>>; status: any; }, ",
+          ", unknown>>; status: any; draft: ",
+          "ZodOptional",
+          "<",
+          "ZodBoolean",
+          ">; }, ",
           "node_modules/zod/v4/core/schemas",
           "$strip>; }, ",
           "node_modules/zod/v4/core/schemas",
@@ -7393,7 +7401,7 @@
           "StreamsRouteHandlerResources",
           ", { streams: ",
           "ListStreamDetail",
-          "[]; canReadFailureStore: boolean; }, undefined>; }"
+          "[]; }, undefined>; }"
         ],
         "path": "x-pack/platform/plugins/shared/streams/server/routes/index.ts",
         "lineNumber": 76,
@@ -8356,6 +8364,23 @@
         ],
         "path": "x-pack/platform/plugins/shared/streams/common/constants.ts",
         "lineNumber": 76,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "streams",
+        "id": "def-common.FAILURE_STORE_SELECTOR",
+        "type": "string",
+        "tags": [],
+        "label": "FAILURE_STORE_SELECTOR",
+        "description": [],
+        "signature": [
+          "\"::failures\""
+        ],
+        "path": "x-pack/platform/plugins/shared/streams/common/constants.ts",
+        "lineNumber": 57,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
