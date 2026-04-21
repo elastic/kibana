@@ -13,7 +13,6 @@ import { useKibana } from '../../../../hooks/use_kibana';
 
 interface StreamsFetchResult {
   streams: ListStreamDetail[];
-  canReadFailureStore: boolean;
 }
 
 export function useFetchStreams(

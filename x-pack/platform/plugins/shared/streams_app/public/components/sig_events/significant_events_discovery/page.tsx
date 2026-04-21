@@ -108,6 +108,11 @@ export function SignificantEventsDiscoveryPage() {
         label: i18n.translate('xpack.streams.significantEventsDiscovery.knowledgeIndicatorsTab', {
           defaultMessage: 'Knowledge Indicators',
         }),
+        append: isPromotingQueries ? (
+          <EuiLoadingSpinner />
+        ) : unbackedQueriesCount > 0 ? (
+          <EuiBadge color="accent">{unbackedQueriesCount}</EuiBadge>
+        ) : undefined,
         href: router.link('/_discovery/{tab}', { path: { tab: 'knowledge_indicators' } }),
         isSelected: tab === 'knowledge_indicators',
       },
@@ -116,11 +121,6 @@ export function SignificantEventsDiscoveryPage() {
         label: i18n.translate('xpack.streams.significantEventsDiscovery.queriesTab', {
           defaultMessage: 'Rules',
         }),
-        append: isPromotingQueries ? (
-          <EuiLoadingSpinner />
-        ) : unbackedQueriesCount > 0 ? (
-          <EuiBadge color="accent">{unbackedQueriesCount}</EuiBadge>
-        ) : undefined,
         href: router.link('/_discovery/{tab}', { path: { tab: 'queries' } }),
         isSelected: tab === 'queries',
       },
