@@ -16,8 +16,8 @@ paths:
   /api/note:
     delete:
       description: >
-        Deletes notes by saved object id. Send either `noteId` (single id) or
-        `noteIds` (array of ids) in the JSON body.
+        Deletes notes by saved object ID. Send either `noteId` (single ID) or
+        `noteIds` (array of IDs) in the JSON body.
 
 
         The response has HTTP 200 with an empty body on success.
@@ -34,7 +34,7 @@ paths:
                   type: object
                   properties:
                     noteId:
-                      description: Saved object id of the note to delete.
+                      description: Saved object ID of the note to delete.
                       type: string
                   required:
                     - noteId
@@ -42,7 +42,7 @@ paths:
                   type: object
                   properties:
                     noteIds:
-                      description: Saved object ids of the notes to delete.
+                      description: Saved object IDs of the notes to delete.
                       items:
                         type: string
                       nullable: true
@@ -204,12 +204,11 @@ paths:
         Creates a new note or updates an existing one.
 
 
-        **Create:** Send `note` as a `BareNote` (required fields include
-        `timelineId`). Omit `noteId` to create a new saved object.
+        **Create:** Send `note` and omit `noteId` to create a new saved object.
 
 
         **Update:** Send `note` with the changed fields and set `noteId` to the
-        note's saved object id. Optionally include `version` for optimistic
+        note's saved object ID. Optionally include `version` for optimistic
         concurrency when the client has it from a prior read.
 
 
@@ -247,7 +246,7 @@ paths:
               required:
                 - note
         description: >
-          Body must include `note` (`BareNote`). For updates, include `noteId`
+          Body must include the `note` object. For updates, include `noteId`
           (and optionally `version`).
 
           To attach a note to a specific event, set `note.eventId` to that
@@ -1069,7 +1068,7 @@ components:
             timelineId:
               description: >-
                 The `savedObjectId` of the Timeline this note belongs to (not
-                the note's own id).
+                the note's own ID).
               example: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
               type: string
           required:
@@ -1190,7 +1189,7 @@ components:
         - template
       type: string
     DocumentIds:
-      description: One document id or an array of ids (Elasticsearch `_id` of the event).
+      description: One document ID or an array of IDs (Elasticsearch `_id` of the event).
       oneOf:
         - items:
             type: string
@@ -1552,7 +1551,7 @@ components:
         - zeek
       type: string
     SavedObjectIds:
-      description: One Timeline saved object id or an array of ids.
+      description: One Timeline saved object ID or an array of IDs.
       oneOf:
         - items:
             type: string
