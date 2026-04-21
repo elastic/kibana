@@ -7,10 +7,8 @@
 
 import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import {
-  ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
-  AttackDiscoveryScheduleParams,
-} from '@kbn/elastic-assistant-common';
+import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common/constants';
+import { AttackDiscoveryScheduleParams } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/routes/public/schedules/schedules.gen';
 
 import { TaskPriority } from '@kbn/task-manager-plugin/server';
 import { ATTACK_DISCOVERY_ALERTS_AAD_CONFIG } from '../constants';

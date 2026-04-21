@@ -9,7 +9,7 @@ import type { AuthenticatedUser } from '@kbn/core-security-common';
 import type {
   KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryResponse,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/entries/common_attributes.gen';
 import { isArray } from 'lodash';
 import type { AIAssistantKnowledgeBaseDataClient } from '../../../ai_assistant_data_clients/knowledge_base';
 import { transformESSearchToKnowledgeBaseEntry } from '../../../ai_assistant_data_clients/knowledge_base/transforms';

@@ -12,9 +12,11 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   API_VERSIONS,
   ATTACK_DISCOVERY_GENERATIONS,
+} from '@kbn/elastic-assistant-common/constants';
+import {
   GetAttackDiscoveryGenerationsRequestQuery,
   GetAttackDiscoveryGenerationsResponse,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/routes/public/get/get_attack_discovery_generations_route.gen';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 
 import { performChecks } from '../../../helpers';

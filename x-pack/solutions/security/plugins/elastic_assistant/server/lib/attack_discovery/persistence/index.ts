@@ -6,16 +6,16 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import {
-  type AttackDiscoveryFindResponse,
-  type AttackDiscoveryApiAlert,
-  type CreateAttackDiscoveryAlertsParams,
-  type FindAttackDiscoveryAlertsParams,
-  type GetAttackDiscoveryGenerationsResponse,
-  type PostAttackDiscoveryGenerationsDismissResponse,
-  type AttackDiscoveryAlertDocument,
-  transformSearchResponseToAlerts,
-} from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryFindResponse } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/routes/public/get/find_attack_discoveries_route.gen';
+import type { AttackDiscoveryApiAlert } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/attack_discovery_api_alert.gen';
+import type {
+  CreateAttackDiscoveryAlertsParams,
+  FindAttackDiscoveryAlertsParams,
+} from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen';
+import type { GetAttackDiscoveryGenerationsResponse } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/routes/public/get/get_attack_discovery_generations_route.gen';
+import type { PostAttackDiscoveryGenerationsDismissResponse } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/routes/public/post/post_attack_discovery_generations_dismiss.route.gen';
+import type { AttackDiscoveryAlertDocument } from '@kbn/elastic-assistant-common';
+import { transformSearchResponseToAlerts } from '@kbn/elastic-assistant-common';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';

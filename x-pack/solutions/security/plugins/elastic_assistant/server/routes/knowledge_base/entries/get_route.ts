@@ -8,12 +8,12 @@
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
-import type { ReadKnowledgeBaseEntryResponse } from '@kbn/elastic-assistant-common';
+import type { ReadKnowledgeBaseEntryResponse } from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/entries/crud_knowledge_base_entries_route.gen';
+import { ReadKnowledgeBaseEntryRequestParams } from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/entries/crud_knowledge_base_entries_route.gen';
 import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BY_ID,
-  ReadKnowledgeBaseEntryRequestParams,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/constants';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import type { ElasticAssistantPluginRouter } from '../../../types';
 import { buildResponse } from '../../utils';

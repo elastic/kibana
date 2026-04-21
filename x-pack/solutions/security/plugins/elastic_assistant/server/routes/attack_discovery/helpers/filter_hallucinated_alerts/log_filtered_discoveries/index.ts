@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { AttackDiscoveries } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveries } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen';
 
 /**
  * Logs information about filtered attack discoveries with hallucinated alert IDs.

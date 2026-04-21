@@ -12,11 +12,11 @@ import type { TelemetryTracer } from '@kbn/langchain/server/tracers/telemetry';
 import type { StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
 import { streamFactory } from '@kbn/ml-response-stream/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen';
 import type {
-  ExecuteConnectorRequestBody,
   InterruptValue,
   TraceData,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
 import { addSpanLabels } from '@kbn/apm-utils';
 import type { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import type { AIMessageChunk } from '@langchain/core/messages';

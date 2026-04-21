@@ -2542,6 +2542,7 @@ module.exports = {
         'no-continue': 'off',
         '@typescript-eslint/no-non-null-assertion': 'off',
         'no-process-exit': 'off',
+        complexity: 'off',
       },
     },
 
@@ -2916,6 +2917,39 @@ module.exports = {
                 ],
                 message:
                   'Use deep @kbn/elastic-assistant-common/types/<path>.gen imports or @kbn/elastic-assistant-common/constants instead.',
+              },
+            ],
+          },
+        ],
+      },
+    },
+
+    /**
+     * Prevent server-side code from pulling in heavy Zod schemas via the impl/schemas barrel.
+     * Use deep @kbn/elastic-assistant-common/impl/schemas/<path>.gen imports or
+     * @kbn/elastic-assistant-common/constants instead.
+     *
+     * Uses `paths` (exact match) instead of `patterns` to avoid matching deep gen file paths.
+     */
+    {
+      files: [
+        'x-pack/solutions/security/plugins/elastic_assistant/server/**/*.{ts,tsx}',
+        'x-pack/solutions/security/plugins/security_solution/server/**/*.{ts,tsx}',
+      ],
+      rules: {
+        'no-restricted-imports': [
+          'warn',
+          {
+            paths: [
+              {
+                name: '@kbn/elastic-assistant-common/impl/schemas',
+                message:
+                  'Use deep @kbn/elastic-assistant-common/impl/schemas/<path>.gen imports or @kbn/elastic-assistant-common/constants instead.',
+              },
+              {
+                name: '@kbn/elastic-assistant-common/impl/schemas/index',
+                message:
+                  'Use deep @kbn/elastic-assistant-common/impl/schemas/<path>.gen imports or @kbn/elastic-assistant-common/constants instead.',
               },
             ],
           },

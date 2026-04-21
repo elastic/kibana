@@ -10,7 +10,7 @@ import { serverMock } from '../../__mocks__/server';
 import { requestContextMock } from '../../__mocks__/request_context';
 import { getPostEvaluateRequest } from '../../__mocks__/request';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import type { PostEvaluateRequestBodyInput } from '@kbn/elastic-assistant-common';
+import type { PostEvaluateRequestBodyInput } from '@kbn/elastic-assistant-common/impl/schemas/evaluation/post_evaluate_route.gen';
 import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 

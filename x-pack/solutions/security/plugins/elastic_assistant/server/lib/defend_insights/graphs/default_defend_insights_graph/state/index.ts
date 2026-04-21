@@ -8,7 +8,8 @@
 import type { Document } from '@langchain/core/documents';
 import type { StateGraphArgs } from '@langchain/langgraph';
 import type { DateMath } from '@elastic/elasticsearch/lib/api/types';
-import type { DefendInsight, Replacements } from '@kbn/elastic-assistant-common';
+import type { DefendInsight } from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/common_attributes.gen';
+import type { Replacements } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
 
 import type { DefendInsightsGraphState } from '../../../../langchain/graphs';
 import type { DefendInsightsPrompts } from '../prompts';

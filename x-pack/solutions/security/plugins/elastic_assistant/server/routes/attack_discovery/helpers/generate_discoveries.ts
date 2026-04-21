@@ -7,7 +7,8 @@
 
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { AttackDiscoveryGenerationConfig, Replacements } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryGenerationConfig } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen';
+import type { Replacements } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
 import type { InferenceClient } from '@kbn/inference-common';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';

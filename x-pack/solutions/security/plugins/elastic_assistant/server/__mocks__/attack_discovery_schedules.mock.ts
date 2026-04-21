@@ -11,7 +11,7 @@ import type {
   AttackDiscoveryScheduleCreateProps,
   AttackDiscoveryScheduleParams,
   AttackDiscoveryScheduleUpdateProps,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/routes/public/schedules/schedules.gen';
 
 import type { SanitizedRule, SanitizedRuleAction } from '@kbn/alerting-types';
 

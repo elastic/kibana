@@ -6,7 +6,7 @@
  */
 
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { Replacements } from '@kbn/elastic-assistant-common';
+import type { Replacements } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
 import {
   securityAlertReference,
   getAnonymizedValue,

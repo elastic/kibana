@@ -14,12 +14,12 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { AttackDiscoveryApiAlert } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/attack_discovery_api_alert.gen';
 import type {
-  AttackDiscoveryApiAlert,
   AttackDiscoveryGenerationConfig,
   CreateAttackDiscoveryAlertsParams,
-  Replacements,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen';
+import type { Replacements } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
 import type { InferenceClient } from '@kbn/inference-common';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';

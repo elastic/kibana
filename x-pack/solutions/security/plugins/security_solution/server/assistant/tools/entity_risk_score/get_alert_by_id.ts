@@ -8,7 +8,7 @@
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
-import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common';
+import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import type { AlertData } from '../../../../public/detection_engine/rule_exceptions/utils/types';
 
 export const createGetAlertsById =

@@ -11,9 +11,11 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_SECURITY_AI_PROMPTS_URL_FIND,
+} from '@kbn/elastic-assistant-common/constants';
+import {
   FindSecurityAIPromptsRequestQuery,
   FindSecurityAIPromptsResponse,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/impl/schemas/security_ai_prompts/find_prompts_route.gen';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { getPromptsByGroupId, getInferenceConnectorById } from '../../lib/prompt';
 import type { ElasticAssistantPluginRouter } from '../../types';

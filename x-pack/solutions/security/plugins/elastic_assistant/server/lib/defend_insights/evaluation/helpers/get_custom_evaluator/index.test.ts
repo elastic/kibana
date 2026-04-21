@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DefendInsightType } from '@kbn/elastic-assistant-common';
+import { DefendInsightType } from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/common_attributes.gen';
 
 import { InvalidDefendInsightTypeError } from '../../../errors';
 import { customIncompatibleAntivirusEvaluator } from './customIncompatibleAntivirusEvaluator';

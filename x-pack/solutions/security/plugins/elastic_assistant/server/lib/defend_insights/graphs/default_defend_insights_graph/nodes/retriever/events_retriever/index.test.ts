@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import type { DefendInsightType } from '@kbn/elastic-assistant-common';
+import type { DefendInsightType } from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/common_attributes.gen';
 
 import { mockAnonymizationFields } from '../../../mock/mock_anonymization_fields';
 import { getAnonymizedEvents } from './get_events';

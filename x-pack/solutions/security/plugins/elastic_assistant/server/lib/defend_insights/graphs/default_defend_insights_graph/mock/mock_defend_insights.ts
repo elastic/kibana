@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DefendInsight } from '@kbn/elastic-assistant-common';
+import type { DefendInsight } from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/common_attributes.gen';
 
 export const mockDefendInsights: DefendInsight[] = [
   {

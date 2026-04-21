@@ -13,15 +13,15 @@ import type {
   ConversationsBulkActionSkipResult,
   ConversationsBulkCrudActionResponse,
   ConversationsBulkCrudActionResults,
-  BulkCrudActionSummary,
   PerformBulkActionResponse,
-  ConversationResponse,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/impl/schemas/conversations/bulk_crud_conversations_route.gen';
+import { PerformBulkActionRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/conversations/bulk_crud_conversations_route.gen';
+import type { BulkCrudActionSummary } from '@kbn/elastic-assistant-common/impl/schemas/common_attributes.gen';
+import type { ConversationResponse } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
 import {
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
-  PerformBulkActionRequestBody,
   API_VERSIONS,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/constants';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { CONVERSATIONS_TABLE_MAX_PAGE_SIZE } from '../../../common/constants';
 import type { ElasticAssistantPluginRouter } from '../../types';

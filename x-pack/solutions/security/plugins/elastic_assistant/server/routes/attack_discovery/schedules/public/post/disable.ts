@@ -17,9 +17,11 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import {
   API_VERSIONS,
   ATTACK_DISCOVERY_SCHEDULES_BY_ID_DISABLE,
+} from '@kbn/elastic-assistant-common/constants';
+import {
   DisableAttackDiscoverySchedulesRequestParams,
   DisableAttackDiscoverySchedulesResponse,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/routes/public/schedules/crud_attack_discovery_schedules_route.gen';
 import { buildResponse } from '../../../../../lib/build_response';
 import type { ElasticAssistantRequestHandlerContext } from '../../../../../types';
 import { performChecks } from '../../../../helpers';

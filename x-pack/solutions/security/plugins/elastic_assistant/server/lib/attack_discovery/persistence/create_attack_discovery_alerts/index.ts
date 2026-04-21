@@ -6,10 +6,8 @@
  */
 
 import type { AuthenticatedUser, Logger } from '@kbn/core/server';
-import type {
-  AttackDiscoveryApiAlert,
-  CreateAttackDiscoveryAlertsParams,
-} from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryApiAlert } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/attack_discovery_api_alert.gen';
+import type { CreateAttackDiscoveryAlertsParams } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash/fp';
 import { v4 as uuidv4 } from 'uuid';

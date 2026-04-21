@@ -8,11 +8,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { AuthenticatedUser } from '@kbn/core-security-common';
-import type { DefendInsightsPostRequestBody } from '@kbn/elastic-assistant-common';
+import type { DefendInsightsPostRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/post_defend_insights_route.gen';
+import {
+  DefendInsightStatus,
+  DefendInsightType,
+} from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/common_attributes.gen';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { OpenAiProviderType } from '@kbn/connector-schemas/openai/constants';
-import { DefendInsightStatus, DefendInsightType } from '@kbn/elastic-assistant-common';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 import type { DefendInsightsDataClient } from '../../lib/defend_insights/persistence';

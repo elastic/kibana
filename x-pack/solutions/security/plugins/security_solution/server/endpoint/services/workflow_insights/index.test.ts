@@ -10,10 +10,8 @@ import moment from 'moment';
 import { ReplaySubject } from 'rxjs';
 
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
-import type {
-  DefendInsightsGetRequestQuery,
-  DefendInsightsPostRequestBody,
-} from '@kbn/elastic-assistant-common';
+import type { DefendInsightsGetRequestQuery } from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/get_defend_insights_route.gen';
+import type { DefendInsightsPostRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/post_defend_insights_route.gen';
 import type { SearchHit, UpdateResponse } from '@elastic/elasticsearch/lib/api/types';
 
 import { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';

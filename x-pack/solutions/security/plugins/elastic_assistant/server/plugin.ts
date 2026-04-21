@@ -17,7 +17,7 @@ import type { AssistantFeatures } from '@kbn/elastic-assistant-common';
 import {
   ATTACK_DISCOVERY_SCHEDULES_CONSUMER_ID,
   ELASTIC_AI_ASSISTANT_CHECKPOINT_SAVER_ENABLED_FEATURE_FLAG,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/constants';
 import { ReplaySubject, type Subject, exhaustMap, takeWhile, takeUntil } from 'rxjs';
 import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/alerting-plugin/server';
 import type { IRuleDataClient, IndexOptions } from '@kbn/rule-registry-plugin/server';

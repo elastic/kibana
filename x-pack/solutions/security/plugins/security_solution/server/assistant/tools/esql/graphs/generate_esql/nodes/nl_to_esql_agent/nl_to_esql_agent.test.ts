@@ -7,7 +7,7 @@
 
 import { getNlToEsqlAgent } from './nl_to_esql_agent';
 import type { KibanaRequest } from '@kbn/core/server';
-import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
+import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AIMessage, HumanMessage, ToolMessage } from '@langchain/core/messages';

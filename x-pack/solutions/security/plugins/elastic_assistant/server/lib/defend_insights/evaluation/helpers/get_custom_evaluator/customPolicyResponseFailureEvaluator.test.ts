@@ -10,7 +10,7 @@ import type {
   DefendInsights,
   DefendInsight,
   DefendInsightEvent,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/common_attributes.gen';
 
 import type { ExampleOutput } from './customPolicyResponseFailureEvaluator';
 import { EVALUATOR_ERRORS } from './constants';

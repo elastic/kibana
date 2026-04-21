@@ -12,10 +12,8 @@ import type {
   RuleType,
   RuleTypeState,
 } from '@kbn/alerting-plugin/server';
-import type {
-  AttackDiscoveryAlertDocument,
-  AttackDiscoveryScheduleParams,
-} from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryAlertDocument } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryScheduleParams } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/routes/public/schedules/schedules.gen';
 
 export type AttackDiscoveryScheduleContext = AlertInstanceContext & {
   attack: {

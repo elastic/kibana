@@ -6,7 +6,7 @@
  */
 
 import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
-import type { ApiConfig } from '@kbn/elastic-assistant-common';
+import type { ApiConfig } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { reportAttackDiscoveryGenerationFailure } from '../../../../helpers/telemetry';

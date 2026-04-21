@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { AttackDiscoveries } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveries } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen';
 
 import { getAlertIdsQuery } from './get_alert_ids_query';
 import { getValidDiscoveries } from './get_valid_discoveries';

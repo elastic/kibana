@@ -6,7 +6,7 @@
  */
 
 import { getSuggestUsersRequest, requestMock } from '../../__mocks__/request';
-import { ELASTIC_USERS_SUGGEST_URL } from '@kbn/elastic-assistant-common';
+import { ELASTIC_USERS_SUGGEST_URL } from '@kbn/elastic-assistant-common/constants';
 import { serverMock } from '../../__mocks__/server';
 import { requestContextMock } from '../../__mocks__/request_context';
 import { getSuggestUsersResponseMock } from '../../__mocks__/response';

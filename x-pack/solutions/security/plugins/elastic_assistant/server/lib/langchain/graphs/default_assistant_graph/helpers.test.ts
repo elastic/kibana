@@ -8,7 +8,7 @@
 import { streamGraph } from './helpers';
 import agent from 'elastic-apm-node';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
+import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen';
 import { PassThrough } from 'stream';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AGENT_NODE_TAG } from './nodes/run_agent';

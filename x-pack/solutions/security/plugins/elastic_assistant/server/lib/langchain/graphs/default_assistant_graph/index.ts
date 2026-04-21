@@ -9,7 +9,7 @@ import type { StructuredTool } from '@langchain/core/tools';
 import { getDefaultArguments } from '@kbn/langchain/server';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { TelemetryTracer } from '@kbn/langchain/server/tracers/telemetry';
-import type { MessageMetadata } from '@kbn/elastic-assistant-common';
+import type { MessageMetadata } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
 import { pruneContentReferences } from '@kbn/elastic-assistant-common';
 import { getPrompt } from '@kbn/security-ai-prompts';
 import { isEmpty } from 'lodash';

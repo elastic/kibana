@@ -17,7 +17,7 @@ import {
   getQueryKnowledgeBaseEntryParams,
 } from '../../../__mocks__/knowledge_base_entry_schema.mock';
 import { authenticatedUser } from '../../../__mocks__/user';
-import { ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL } from '@kbn/elastic-assistant-common';
+import { ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL } from '@kbn/elastic-assistant-common/constants';
 
 describe('Create knowledge base entry route', () => {
   let server: ReturnType<typeof serverMock.create>;

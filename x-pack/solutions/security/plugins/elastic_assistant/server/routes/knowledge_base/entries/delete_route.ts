@@ -10,10 +10,10 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BY_ID,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/constants';
+import type { DeleteKnowledgeBaseEntryResponse } from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/entries/crud_knowledge_base_entries_route.gen';
+import { DeleteKnowledgeBaseEntryRequestParams } from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/entries/crud_knowledge_base_entries_route.gen';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
-import type { DeleteKnowledgeBaseEntryResponse } from '@kbn/elastic-assistant-common/impl/schemas';
-import { DeleteKnowledgeBaseEntryRequestParams } from '@kbn/elastic-assistant-common/impl/schemas';
 import type { ElasticAssistantPluginRouter } from '../../../types';
 import { buildResponse } from '../../utils';
 import { performChecks } from '../../helpers';

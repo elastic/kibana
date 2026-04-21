@@ -14,7 +14,7 @@ import { InferenceConnectorType } from '@kbn/inference-common';
 import { runDefendInsightsEvaluations } from '.';
 import type { DefaultDefendInsightsGraph } from '../../graphs/default_defend_insights_graph';
 import { getLlmType } from '../../../../routes/utils';
-import { DefendInsightType } from '@kbn/elastic-assistant-common';
+import { DefendInsightType } from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/common_attributes.gen';
 
 jest.mock('langsmith/evaluation', () => ({
   evaluate: jest.fn(async (predict: Function) =>

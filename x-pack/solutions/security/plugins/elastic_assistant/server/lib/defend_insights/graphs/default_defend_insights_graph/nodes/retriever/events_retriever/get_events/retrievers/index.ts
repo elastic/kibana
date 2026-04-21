@@ -7,7 +7,7 @@
 
 import type { DateMath } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { DefendInsightType } from '@kbn/elastic-assistant-common';
+import { DefendInsightType } from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/common_attributes.gen';
 
 import { getFileEvents } from './file_events';
 import { getPolicyResponseFailureEvents } from './policy_response_failure_events';

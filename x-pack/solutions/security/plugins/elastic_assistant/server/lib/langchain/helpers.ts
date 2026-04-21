@@ -6,12 +6,10 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type {
-  DefendInsightsPostRequestBody,
-  Message,
-  PostAttackDiscoveryGenerateRequestBody,
-  ExecuteConnectorRequestBody,
-} from '@kbn/elastic-assistant-common';
+import type { DefendInsightsPostRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/post_defend_insights_route.gen';
+import type { Message } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
+import type { PostAttackDiscoveryGenerateRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/routes/public/post/post_attack_discovery_generate.gen';
+import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen';
 import type { BaseMessage } from '@langchain/core/messages';
 import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 

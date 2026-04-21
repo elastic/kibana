@@ -10,7 +10,7 @@ import { serverMock } from '../../__mocks__/server';
 import { requestContextMock } from '../../__mocks__/request_context';
 import { getAlertSummaryBulkActionRequest, requestMock } from '../../__mocks__/request';
 import { authenticatedUser } from '../../__mocks__/user';
-import { ELASTIC_AI_ASSISTANT_PROMPTS_URL_BULK_ACTION } from '@kbn/elastic-assistant-common';
+import { ELASTIC_AI_ASSISTANT_PROMPTS_URL_BULK_ACTION } from '@kbn/elastic-assistant-common/constants';
 import {
   getEmptyFindResult,
   getFindAlertSummaryResultWithSingleHit,

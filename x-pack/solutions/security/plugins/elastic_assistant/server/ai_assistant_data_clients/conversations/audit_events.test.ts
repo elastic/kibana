@@ -12,7 +12,7 @@ import {
   AUDIT_CATEGORY,
   AUDIT_TYPE,
 } from './audit_events';
-import type { User } from '@kbn/elastic-assistant-common';
+import type { User } from '@kbn/elastic-assistant-common/impl/schemas/common_attributes.gen';
 describe('conversationAuditEvent', () => {
   const user1: User = { name: 'Alice', id: '123' } as User;
   const user2: User = { name: 'Bob', id: '456' } as User;

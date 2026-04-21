@@ -6,11 +6,9 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type {
-  AttackDiscoveryAlertDocument,
-  AttackDiscoveryApiAlert,
-} from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryAlertDocument } from '@kbn/elastic-assistant-common';
 import { transformSearchResponseToAlerts } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryApiAlert } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/attack_discovery_api_alert.gen';
 import type { IRuleDataReader } from '@kbn/rule-registry-plugin/server';
 import { isEmpty } from 'lodash/fp';
 

@@ -13,11 +13,11 @@ import type {
   AttackDiscoveryScheduleCreateProps,
   AttackDiscoveryScheduleParams,
   AttackDiscoveryScheduleUpdateProps,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/routes/public/schedules/schedules.gen';
 import {
   ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
   ATTACK_DISCOVERY_SCHEDULES_CONSUMER_ID,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/constants';
 import { convertAlertingRuleToSchedule } from '../../../../routes/attack_discovery/schedules/utils/convert_alerting_rule_to_schedule';
 import type { AttackDiscoveryScheduleFindOptions } from '../types';
 import { convertScheduleActionsToAlertingActions } from './utils/transform_actions';

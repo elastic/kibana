@@ -8,18 +8,22 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import { CAPABILITIES } from '../../common/constants';
 import type {
   CreateAttackDiscoverySchedulesRequestBody,
-  DefendInsightsGetRequestQuery,
-  DefendInsightsPostRequestBody,
-  DeleteKnowledgeBaseEntryRequestParams,
-  KnowledgeBaseEntryUpdateProps,
   UpdateAttackDiscoverySchedulesRequestBody,
+} from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/routes/public/schedules/crud_attack_discovery_schedules_route.gen';
+import type { DefendInsightsGetRequestQuery } from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/get_defend_insights_route.gen';
+import type { DefendInsightsPostRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/post_defend_insights_route.gen';
+import type {
+  DeleteKnowledgeBaseEntryRequestParams,
   UpdateKnowledgeBaseEntryRequestParams,
-  PostAttackDiscoveryGenerateRequestBody,
+} from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/entries/crud_knowledge_base_entries_route.gen';
+import type { KnowledgeBaseEntryUpdateProps } from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/entries/common_attributes.gen';
+import type { PostAttackDiscoveryGenerateRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/routes/public/post/post_attack_discovery_generate.gen';
+import type {
   ConversationCreateProps,
   ConversationUpdateProps,
-  PerformKnowledgeBaseEntryBulkActionRequestBody,
-  PostEvaluateRequestBodyInput,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
+import type { PerformKnowledgeBaseEntryBulkActionRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/entries/bulk_crud_knowledge_base_entries_route.gen';
+import type { PostEvaluateRequestBodyInput } from '@kbn/elastic-assistant-common/impl/schemas/evaluation/post_evaluate_route.gen';
 import {
   ELASTIC_USERS_SUGGEST_URL,
   ATTACK_DISCOVERY_GENERATE,
@@ -49,7 +53,19 @@ import {
   ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND,
   ELASTIC_AI_ASSISTANT_SECURITY_AI_PROMPTS_URL_FIND,
   ATTACK_DISCOVERY_INTERNAL_MISSING_PRIVILEGES,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/constants';
+import type {
+  AnonymizationFieldCreateProps,
+  AnonymizationFieldUpdateProps,
+} from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import type {
+  AlertSummaryCreateProps,
+  AlertSummaryUpdateProps,
+} from '@kbn/elastic-assistant-common/impl/schemas/alert_summary/bulk_crud_alert_summary_route.gen';
+import type {
+  PromptCreateProps,
+  PromptUpdateProps,
+} from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import {
   getAppendConversationMessagesSchemaMock,
   getCreateConversationSchemaMock,
@@ -57,14 +73,6 @@ import {
   getUpdateConversationSchemaMock,
 } from './conversations_schema.mock';
 import { getCreateKnowledgeBaseEntrySchemaMock } from './knowledge_base_entry_schema.mock';
-import type {
-  AnonymizationFieldCreateProps,
-  AnonymizationFieldUpdateProps,
-  AlertSummaryCreateProps,
-  AlertSummaryUpdateProps,
-  PromptCreateProps,
-  PromptUpdateProps,
-} from '@kbn/elastic-assistant-common/impl/schemas';
 
 export const requestMock = {
   create: httpServerMock.createKibanaRequest,

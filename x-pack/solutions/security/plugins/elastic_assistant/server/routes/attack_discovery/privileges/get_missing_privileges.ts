@@ -8,12 +8,12 @@
 import type { IKibanaResponse, IRouter, Logger, ElasticsearchClient } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { AttackDiscoveryMissingPrivileges } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryMissingPrivileges } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/routes/internal/privileges/get_missing_privileges.gen';
+import { GetAttackDiscoveryMissingPrivilegesInternalResponse } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/routes/internal/privileges/get_missing_privileges.gen';
 import {
   API_VERSIONS,
   ATTACK_DISCOVERY_INTERNAL_MISSING_PRIVILEGES,
-  GetAttackDiscoveryMissingPrivilegesInternalResponse,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/constants';
 import type {
   SecurityHasPrivilegesResponse,
   SecurityIndexPrivilege,

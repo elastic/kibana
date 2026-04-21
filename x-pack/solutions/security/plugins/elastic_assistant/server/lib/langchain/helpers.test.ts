@@ -6,7 +6,8 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { Message, ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
+import type { Message } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
+import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen';
 import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 
 import {

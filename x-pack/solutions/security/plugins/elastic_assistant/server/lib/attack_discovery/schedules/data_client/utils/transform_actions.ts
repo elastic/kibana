@@ -10,7 +10,7 @@ import type {
   AttackDiscoveryScheduleAction,
   AttackDiscoveryScheduleGeneralAction,
   AttackDiscoveryScheduleSystemAction,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/routes/public/schedules/schedules.gen';
 
 const isSystemAction = (
   action: AttackDiscoveryScheduleAction,

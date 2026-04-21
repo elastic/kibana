@@ -12,7 +12,7 @@ import { deleteKnowledgeBaseEntryRoute } from './delete_route';
 import { getBasicEmptySearchResponse, getEmptyFindResult } from '../../../__mocks__/response';
 import { getDeleteKnowledgeBaseEntryRequest, requestMock } from '../../../__mocks__/request';
 import { authenticatedUser } from '../../../__mocks__/user';
-import { ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID } from '@kbn/elastic-assistant-common';
+import { ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID } from '@kbn/elastic-assistant-common/constants';
 
 describe('Delete knowledge base entry route', () => {
   let server: ReturnType<typeof serverMock.create>;

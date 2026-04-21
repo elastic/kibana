@@ -18,7 +18,7 @@ import type {
   KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryResponse,
   KnowledgeBaseEntryUpdateProps,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/entries/common_attributes.gen';
 import { AUDIT_OUTCOME, KnowledgeBaseAuditAction, knowledgeBaseAuditEvent } from './audit_events';
 import {
   CREATE_KNOWLEDGE_BASE_ENTRY_ERROR_EVENT,

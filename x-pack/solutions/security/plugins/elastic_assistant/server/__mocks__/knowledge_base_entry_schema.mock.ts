@@ -10,7 +10,7 @@ import type {
   KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryResponse,
   KnowledgeBaseEntryUpdateProps,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/entries/common_attributes.gen';
 import type {
   EsKnowledgeBaseEntrySchema,
   EsDocumentEntry,

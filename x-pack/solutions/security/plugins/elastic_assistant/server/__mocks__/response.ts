@@ -10,7 +10,7 @@ import { getConversationSearchEsMock } from './conversations_schema.mock';
 import type { estypes } from '@elastic/elasticsearch';
 import type { EsConversationSchema } from '../ai_assistant_data_clients/conversations/types';
 import type { FindResponse } from '../ai_assistant_data_clients/find';
-import type { ConversationResponse } from '@kbn/elastic-assistant-common';
+import type { ConversationResponse } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
 import type { EsPromptsSchema } from '../ai_assistant_data_clients/prompts/types';
 import { getPromptsSearchEsMock } from './prompts_schema.mock';
 import type { EsAnonymizationFieldsSchema } from '../ai_assistant_data_clients/anonymization_fields/types';

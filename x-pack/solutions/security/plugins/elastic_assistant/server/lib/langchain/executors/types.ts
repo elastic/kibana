@@ -11,14 +11,14 @@ import type { BaseMessage } from '@langchain/core/messages';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest, KibanaResponseFactory, ResponseHeaders } from '@kbn/core-http-server';
 import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
+import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
+import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen';
 import type {
-  ContentReferencesStore,
-  ExecuteConnectorRequestBody,
   InterruptValue,
   Message,
   Replacements,
-  ScreenContext,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
+import type { ScreenContext } from '@kbn/elastic-assistant-common/impl/schemas/common_attributes.gen';
 import type { StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';

@@ -6,7 +6,8 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { DefendInsight, Replacements } from '@kbn/elastic-assistant-common';
+import { DefendInsight } from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/common_attributes.gen';
+import { Replacements } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
 
 const Document = z.object({
   pageContent: z.string(),

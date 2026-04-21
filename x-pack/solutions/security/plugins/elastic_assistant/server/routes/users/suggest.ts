@@ -9,12 +9,11 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
+import { API_VERSIONS, ELASTIC_USERS_SUGGEST_URL } from '@kbn/elastic-assistant-common/constants';
 import {
-  API_VERSIONS,
-  ELASTIC_USERS_SUGGEST_URL,
   SuggestUsersRequestBody,
   SuggestUsersResponse,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/impl/schemas/users/suggest_route.gen';
 import type { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
 import { performChecks } from '../helpers';

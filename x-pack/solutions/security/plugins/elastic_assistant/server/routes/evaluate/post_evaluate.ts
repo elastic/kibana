@@ -14,19 +14,19 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { getPrompt } from '@kbn/security-ai-prompts';
-import type {
-  ExecuteConnectorRequestBody,
-  ContentReferencesStore,
-} from '@kbn/elastic-assistant-common';
+import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen';
+import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
+import { newContentReferencesStore } from '@kbn/elastic-assistant-common';
 import {
   API_VERSIONS,
-  newContentReferencesStore,
   ELASTIC_AI_ASSISTANT_EVALUATE_URL,
   INTERNAL_API_ACCESS,
+  INFERENCE_CHAT_MODEL_DISABLED_FEATURE_FLAG,
+} from '@kbn/elastic-assistant-common/constants';
+import {
   PostEvaluateBody,
   PostEvaluateResponse,
-  INFERENCE_CHAT_MODEL_DISABLED_FEATURE_FLAG,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/impl/schemas/evaluation/post_evaluate_route.gen';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { getDefaultArguments } from '@kbn/langchain/server';
 import type { StructuredTool } from '@langchain/core/tools';

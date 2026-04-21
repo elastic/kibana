@@ -12,17 +12,17 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_BULK_ACTION,
-} from '@kbn/elastic-assistant-common';
-
+} from '@kbn/elastic-assistant-common/constants';
 import type {
   AnonymizationFieldResponse,
   AnonymizationFieldsBulkActionSkipResult,
   AnonymizationFieldsBulkCrudActionResponse,
   AnonymizationFieldsBulkCrudActionResults,
-  BulkCrudActionSummary,
   PerformAnonymizationFieldsBulkActionResponse,
-} from '@kbn/elastic-assistant-common/impl/schemas';
-import { PerformAnonymizationFieldsBulkActionRequestBody } from '@kbn/elastic-assistant-common/impl/schemas';
+} from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import { PerformAnonymizationFieldsBulkActionRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import type { BulkCrudActionSummary } from '@kbn/elastic-assistant-common/impl/schemas/common_attributes.gen';
+
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import type { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
+import type { AttackDiscovery } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen';
+import type { Replacements } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
 import type { Document } from '@langchain/core/documents';
 import { Annotation } from '@langchain/langgraph';
 

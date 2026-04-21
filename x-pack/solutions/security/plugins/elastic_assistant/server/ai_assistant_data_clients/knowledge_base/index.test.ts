@@ -25,7 +25,7 @@ import {
 } from '../../lib/langchain/content_loaders/security_labs_loader';
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
-import { KnowledgeBaseResource } from '@kbn/elastic-assistant-common';
+import { KnowledgeBaseResource } from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/entries/common_attributes.gen';
 import { createTrainedModelsProviderMock } from '@kbn/ml-plugin/server/shared_services/providers/__mocks__/trained_models';
 import { ASSISTANT_ELSER_INFERENCE_ID } from './field_maps_configuration';
 import {

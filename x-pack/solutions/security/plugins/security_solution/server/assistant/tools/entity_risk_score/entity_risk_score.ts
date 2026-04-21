@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { Replacements } from '@kbn/elastic-assistant-common';
-import { z } from '@kbn/zod/v4';
+import type { Replacements } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
 import {
   getAnonymizedValue,
   getRawDataOrDefault,
@@ -14,6 +13,7 @@ import {
   sizeIsOutOfRange,
   transformRawData,
 } from '@kbn/elastic-assistant-common';
+import { z } from '@kbn/zod/v4';
 import { tool } from '@langchain/core/tools';
 import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-plugin/server/lib/langchain/helpers';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';

@@ -10,8 +10,8 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
-  ReadKnowledgeBaseRequestParams,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/constants';
+import { ReadKnowledgeBaseRequestParams } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import type { KibanaRequest } from '@kbn/core/server';
 import { buildResponse } from '../../lib/build_response';

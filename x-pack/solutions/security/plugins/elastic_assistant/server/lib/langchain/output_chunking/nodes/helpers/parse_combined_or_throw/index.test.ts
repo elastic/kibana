@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
+import type { AttackDiscovery } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen';
 
 import { getRawAttackDiscoveriesMock } from '../../../../../../__mocks__/raw_attack_discoveries';
 import { getAttackDiscoveriesGenerationSchema } from '../../../../../attack_discovery/graphs/default_attack_discovery_graph/schemas';

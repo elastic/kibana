@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common';
+import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import { createGetAlertsById } from './get_alert_by_id';
 
 const mockEsClient = {

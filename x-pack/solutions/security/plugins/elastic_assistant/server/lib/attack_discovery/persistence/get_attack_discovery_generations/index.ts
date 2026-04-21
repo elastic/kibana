@@ -6,7 +6,7 @@
  */
 
 import type { AuthenticatedUser } from '@kbn/core-security-common';
-import type { GetAttackDiscoveryGenerationsResponse } from '@kbn/elastic-assistant-common';
+import type { GetAttackDiscoveryGenerationsResponse } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/routes/public/get/get_attack_discovery_generations_route.gen';
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { get } from 'lodash/fp';

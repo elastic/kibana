@@ -8,9 +8,9 @@
 import type {
   DefendInsightStatus,
   DefendInsightType,
-  Provider,
-  UUID,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/common_attributes.gen';
+import type { Provider } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
+import type { UUID } from '@kbn/elastic-assistant-common/impl/schemas/common_attributes.gen';
 
 import type { EsReplacementSchema } from '../../../ai_assistant_data_clients/conversations/types';
 

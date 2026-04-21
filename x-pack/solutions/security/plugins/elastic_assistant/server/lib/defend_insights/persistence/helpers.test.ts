@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import type { DefendInsightsGetRequestQuery } from '@kbn/elastic-assistant-common';
-
-import { DefendInsightType, DefendInsightStatus } from '@kbn/elastic-assistant-common';
+import type { DefendInsightsGetRequestQuery } from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/get_defend_insights_route.gen';
+import {
+  DefendInsightType,
+  DefendInsightStatus,
+} from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/common_attributes.gen';
 
 import { queryParamsToEsQuery } from './helpers';
 

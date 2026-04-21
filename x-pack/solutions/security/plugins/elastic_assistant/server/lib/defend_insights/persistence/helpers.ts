@@ -14,8 +14,8 @@ import type {
   DefendInsightCreateProps,
   DefendInsightUpdateProps,
   DefendInsightsResponse,
-  DefendInsightsGetRequestQuery,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/common_attributes.gen';
+import type { DefendInsightsGetRequestQuery } from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/get_defend_insights_route.gen';
 
 import type {
   CreateDefendInsightSchema,

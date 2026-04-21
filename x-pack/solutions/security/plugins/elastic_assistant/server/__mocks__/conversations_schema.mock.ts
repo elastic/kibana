@@ -7,14 +7,14 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { estypes } from '@elastic/elasticsearch';
+import type { AppendConversationMessageRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/conversations/append_message.gen';
+import type { PerformBulkActionRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/conversations/bulk_crud_conversations_route.gen';
 import type {
-  AppendConversationMessageRequestBody,
-  PerformBulkActionRequestBody,
   ConversationCreateProps,
   ConversationResponse,
-  DeleteAllConversationsRequestBody,
   ConversationUpdateProps,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
+import type { DeleteAllConversationsRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/conversations/crud_conversation_route.gen';
 import type {
   CreateMessageSchema,
   EsConversationSchema,

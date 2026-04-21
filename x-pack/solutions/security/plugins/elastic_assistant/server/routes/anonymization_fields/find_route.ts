@@ -11,10 +11,10 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/constants';
+import type { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
+import { FindAnonymizationFieldsRequestQuery } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
 
-import type { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas';
-import { FindAnonymizationFieldsRequestQuery } from '@kbn/elastic-assistant-common/impl/schemas';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import _ from 'lodash';
 import type { ElasticAssistantPluginRouter } from '../../types';

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { CreateKnowledgeBaseResponse } from '@kbn/elastic-assistant-common';
+import type { CreateKnowledgeBaseResponse } from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen';
+import { CreateKnowledgeBaseRequestQuery } from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen';
 import {
   API_VERSIONS,
-  CreateKnowledgeBaseRequestParams,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
-  CreateKnowledgeBaseRequestQuery,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/constants';
+import { CreateKnowledgeBaseRequestParams } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import type { IKibanaResponse } from '@kbn/core/server';
 import { buildResponse } from '../../lib/build_response';

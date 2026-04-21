@@ -9,8 +9,8 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
   API_VERSIONS,
-  DeleteAllConversationsRequestBody,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/constants';
+import { DeleteAllConversationsRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/conversations/crud_conversation_route.gen';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import type { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';

@@ -11,13 +11,11 @@ import type { Alert } from '@kbn/alerts-as-data-utils';
 import type { AuthenticatedUser } from '@kbn/core/server';
 import type {
   AttackDiscovery,
-  Replacements,
   CreateAttackDiscoveryAlertsParams,
-  AttackDiscoveryAlertDocument,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen';
+import type { Replacements } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
+import type { AttackDiscoveryAlertDocument } from '@kbn/elastic-assistant-common';
 import {
-  ATTACK_DISCOVERY_AD_HOC_RULE_ID,
-  ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID,
   replaceAnonymizedValuesWithOriginalValues,
   getOriginalAlertIds,
   ALERT_ATTACK_DISCOVERY_ALERT_IDS,
@@ -39,6 +37,10 @@ import {
   ALERT_ATTACK_IDS,
   ALERT_RISK_SCORE,
 } from '@kbn/elastic-assistant-common';
+import {
+  ATTACK_DISCOVERY_AD_HOC_RULE_ID,
+  ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID,
+} from '@kbn/elastic-assistant-common/constants';
 import {
   ALERT_INSTANCE_ID,
   ALERT_RULE_CATEGORY,

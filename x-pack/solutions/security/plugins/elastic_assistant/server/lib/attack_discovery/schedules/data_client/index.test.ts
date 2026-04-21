@@ -17,7 +17,7 @@ import {
   getAttackDiscoveryUpdateScheduleMock,
   getInternalAttackDiscoveryScheduleMock,
 } from '../../../../__mocks__/attack_discovery_schedules.mock';
-import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
+import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common/constants';
 
 const mockApiConfig = {
   connectorId: 'connector-id',

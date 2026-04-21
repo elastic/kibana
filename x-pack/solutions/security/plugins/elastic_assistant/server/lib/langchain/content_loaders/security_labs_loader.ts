@@ -11,7 +11,7 @@ import type { Logger } from '@kbn/core/server';
 import { DirectoryLoader } from '@langchain/classic/document_loaders/fs/directory';
 import { resolve } from 'path';
 import type { Document } from '@langchain/core/documents';
-import type { Metadata } from '@kbn/elastic-assistant-common';
+import type { Metadata } from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/entries/common_attributes.gen';
 import pMap from 'p-map';
 import { ENCODED_FILE_MICROMATCH_PATTERN } from '@kbn/ai-security-labs-content';
 import { addRequiredKbResourceMetadata } from './add_required_kb_resource_metadata';

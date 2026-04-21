@@ -7,7 +7,10 @@
 
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { API_VERSIONS, UPDATE_ANONYMIZATION_FIELDS_URL } from '@kbn/elastic-assistant-common';
+import {
+  API_VERSIONS,
+  UPDATE_ANONYMIZATION_FIELDS_URL,
+} from '@kbn/elastic-assistant-common/constants';
 import type { ElasticAssistantPluginRouter } from '../../types';
 
 export const updateAnonymizationFieldsRoute = (router: ElasticAssistantPluginRouter) => {

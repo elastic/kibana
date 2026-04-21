@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { PostAttackDiscoveryGenerateRequestBody } from '@kbn/elastic-assistant-common';
+import type { PostAttackDiscoveryGenerateRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/routes/public/post/post_attack_discovery_generate.gen';
 
 import { mockAnonymizationFields } from '../../../../../../lib/defend_insights/graphs/default_defend_insights_graph/mock/mock_anonymization_fields';
 import { requestIsValid } from '.';

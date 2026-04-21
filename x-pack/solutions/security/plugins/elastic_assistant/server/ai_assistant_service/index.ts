@@ -31,7 +31,7 @@ import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { IndexPatternAdapter } from '@kbn/index-adapter';
 import { ElasticSearchSaver } from '@kbn/langgraph-checkpoint-saver/server/elastic-search-checkpoint-saver';
-import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common';
+import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import type { ESSearchRequest } from '@kbn/es-types';
 import { alertSummaryFieldsFieldMap } from '../ai_assistant_data_clients/alert_summary/field_maps_configuration';
 import { defendInsightsFieldMap } from '../lib/defend_insights/persistence/field_maps_configuration';

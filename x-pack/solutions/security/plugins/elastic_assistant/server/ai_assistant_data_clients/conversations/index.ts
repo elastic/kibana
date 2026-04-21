@@ -11,7 +11,7 @@ import type {
   ConversationResponse,
   ConversationUpdateProps,
   Message,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
 import type { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { createConversation } from './create_conversation';
 import { updateConversation } from './update_conversation';

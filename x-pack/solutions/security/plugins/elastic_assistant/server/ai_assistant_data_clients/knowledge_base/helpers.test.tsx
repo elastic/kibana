@@ -15,7 +15,8 @@ import {
 } from './helpers';
 import { authenticatedUser } from '../../__mocks__/user';
 import { getCreateKnowledgeBaseEntrySchemaMock } from '../../__mocks__/knowledge_base_entry_schema.mock';
-import type { ContentReferencesStore, IndexEntry } from '@kbn/elastic-assistant-common';
+import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
+import type { IndexEntry } from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/entries/common_attributes.gen';
 import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
 import { isString } from 'lodash';
 

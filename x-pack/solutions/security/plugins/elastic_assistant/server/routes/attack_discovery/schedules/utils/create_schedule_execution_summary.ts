@@ -9,7 +9,7 @@ import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import type {
   AttackDiscoveryScheduleExecution,
   AttackDiscoveryScheduleParams,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/routes/public/schedules/schedules.gen';
 
 export const createScheduleExecutionSummary = (
   rule: SanitizedRule<AttackDiscoveryScheduleParams>

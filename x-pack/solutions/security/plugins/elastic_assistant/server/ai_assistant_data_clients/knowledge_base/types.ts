@@ -9,7 +9,7 @@ import type {
   DocumentEntryType,
   IndexEntryType,
   KnowledgeBaseResource,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/entries/common_attributes.gen';
 
 export type EsKnowledgeBaseEntrySchema = EsDocumentEntry | EsIndexEntry;
 

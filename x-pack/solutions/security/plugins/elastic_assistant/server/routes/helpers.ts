@@ -20,16 +20,14 @@ import type {
   TraceData,
   Message,
   Replacements,
-  ContentReferencesStore,
   ContentReferences,
   MessageMetadata,
-  ScreenContext,
   InterruptValue,
-} from '@kbn/elastic-assistant-common';
-import {
-  replaceAnonymizedValuesWithOriginalValues,
-  DEFEND_INSIGHTS_ID,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
+import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
+import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
+import type { ScreenContext } from '@kbn/elastic-assistant-common/impl/schemas/common_attributes.gen';
+import { DEFEND_INSIGHTS_ID } from '@kbn/elastic-assistant-common/constants';
 import type { ILicense } from '@kbn/licensing-types';
 import { i18n } from '@kbn/i18n';
 import type { AwaitedProperties, PublicMethodsOf } from '@kbn/utility-types';

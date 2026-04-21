@@ -10,19 +10,26 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 
 import { schema } from '@kbn/config-schema';
-import type { Message, Replacements } from '@kbn/elastic-assistant-common';
-import { v4 as uuidv4 } from 'uuid';
+import type {
+  Message,
+  Replacements,
+} from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
 import {
   getIsConversationOwner,
-  API_VERSIONS,
   newContentReferencesStore,
-  ExecuteConnectorRequestBody,
   pruneContentReferences,
-  ExecuteConnectorRequestQuery,
+} from '@kbn/elastic-assistant-common';
+import {
+  API_VERSIONS,
   POST_ACTIONS_CONNECTOR_EXECUTE,
   INFERENCE_CHAT_MODEL_DISABLED_FEATURE_FLAG,
   ASSISTANT_INTERRUPTS_ENABLED_FEATURE_FLAG,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/constants';
+import {
+  ExecuteConnectorRequestBody,
+  ExecuteConnectorRequestQuery,
+} from '@kbn/elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen';
+import { v4 as uuidv4 } from 'uuid';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { getPrompt, getInferenceConnectorById } from '../lib/prompt';

@@ -6,10 +6,8 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type {
-  PostAttackDiscoveryGenerateRequestBody,
-  ExecuteConnectorRequestBody,
-} from '@kbn/elastic-assistant-common';
+import type { PostAttackDiscoveryGenerateRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/routes/public/post/post_attack_discovery_generate.gen';
+import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen';
 import { sizeIsOutOfRange } from '@kbn/elastic-assistant-common';
 
 import { requestHasRequiredAnonymizationParams } from '../../../../../../lib/langchain/helpers';

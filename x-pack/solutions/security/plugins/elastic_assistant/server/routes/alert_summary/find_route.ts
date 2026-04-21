@@ -11,9 +11,9 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL_FIND,
-} from '@kbn/elastic-assistant-common';
-import type { FindAlertSummaryResponse } from '@kbn/elastic-assistant-common/impl/schemas';
-import { FindAlertSummaryRequestQuery } from '@kbn/elastic-assistant-common/impl/schemas';
+} from '@kbn/elastic-assistant-common/constants';
+import type { FindAlertSummaryResponse } from '@kbn/elastic-assistant-common/impl/schemas/alert_summary/find_alert_summary_route.gen';
+import { FindAlertSummaryRequestQuery } from '@kbn/elastic-assistant-common/impl/schemas/alert_summary/find_alert_summary_route.gen';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import _ from 'lodash';
 import { getPrompt, getInferenceConnectorById, promptDictionary } from '../../lib/prompt';

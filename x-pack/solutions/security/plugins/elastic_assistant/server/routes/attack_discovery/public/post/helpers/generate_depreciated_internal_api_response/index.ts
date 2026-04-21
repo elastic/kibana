@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 
-import type { AttackDiscoveryResponse } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryResponse } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen';
 
 /**
  * Depreciated: Returns a (placeholder) AttackDiscoveryResponse for API compatibility

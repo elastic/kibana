@@ -7,7 +7,7 @@
 
 import type { Document } from '@langchain/core/documents';
 import type { Logger } from '@kbn/core/server';
-import type { Metadata } from '@kbn/elastic-assistant-common';
+import type { Metadata } from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/entries/common_attributes.gen';
 import { globSync } from 'fs';
 import { DirectoryLoader } from '@langchain/classic/document_loaders/fs/directory';
 import { TextLoader } from '@langchain/classic/document_loaders/fs/text';

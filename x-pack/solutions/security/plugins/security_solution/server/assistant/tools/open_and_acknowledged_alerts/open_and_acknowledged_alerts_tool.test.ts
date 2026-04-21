@@ -12,12 +12,10 @@ import type { DynamicTool } from '@langchain/core/tools';
 import { OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL } from './open_and_acknowledged_alerts_tool';
 import type { RetrievalQAChain } from '@langchain/classic/chains';
 import { mockAlertsFieldsApi } from '@kbn/elastic-assistant-plugin/server/__mocks__/alerts';
-import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen';
+import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
+import type { SecurityAlertContentReference } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
 import { loggerMock } from '@kbn/logging-mocks';
-import type {
-  ContentReferencesStore,
-  SecurityAlertContentReference,
-} from '@kbn/elastic-assistant-common';
 import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
 
 const MAX_SIZE = 10000;

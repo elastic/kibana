@@ -7,8 +7,11 @@
 
 import type { Document } from '@langchain/core/documents';
 import type { DateMath } from '@elastic/elasticsearch/lib/api/types';
-import type { AttackDiscovery, DefendInsight, Replacements } from '@kbn/elastic-assistant-common';
-import { DEFEND_INSIGHTS_ID, DefendInsightType } from '@kbn/elastic-assistant-common';
+import type { AttackDiscovery } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen';
+import type { DefendInsight } from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/common_attributes.gen';
+import { DefendInsightType } from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/common_attributes.gen';
+import type { Replacements } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
+import { DEFEND_INSIGHTS_ID } from '@kbn/elastic-assistant-common/constants';
 
 import type {
   GetDefaultAssistantGraphParams,

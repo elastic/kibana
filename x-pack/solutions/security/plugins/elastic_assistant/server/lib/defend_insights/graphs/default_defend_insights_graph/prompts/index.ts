@@ -7,7 +7,7 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { InferenceConnector } from '@kbn/inference-common';
-import { DefendInsightType } from '@kbn/elastic-assistant-common';
+import { DefendInsightType } from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/common_attributes.gen';
 
 import { InvalidDefendInsightTypeError } from '../../../errors';
 import { getIncompatibleAntivirusPrompt } from './incompatible_antivirus';

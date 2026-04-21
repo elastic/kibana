@@ -14,7 +14,7 @@ import {
   getConversationMock,
   getQueryConversationParams,
 } from '../../__mocks__/conversations_schema.mock';
-import { ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID } from '@kbn/elastic-assistant-common';
+import { ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID } from '@kbn/elastic-assistant-common/constants';
 
 describe('Read conversation route', () => {
   let server: ReturnType<typeof serverMock.create>;

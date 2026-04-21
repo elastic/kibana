@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ScreenContext } from '@kbn/elastic-assistant-common';
+import type { ScreenContext } from '@kbn/elastic-assistant-common/impl/schemas/common_attributes.gen';
 import moment from 'moment-timezone';
 
 /**

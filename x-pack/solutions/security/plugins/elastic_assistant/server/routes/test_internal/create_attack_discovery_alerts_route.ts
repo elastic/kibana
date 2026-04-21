@@ -10,8 +10,8 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import {
   API_VERSIONS,
   ATTACK_DISCOVERY_SCHEDULES_CONSUMER_ID,
-  CreateAttackDiscoveryAlertsParams,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/constants';
+import { CreateAttackDiscoveryAlertsParams } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen';
 import { ALERT_INSTANCE_ID, ALERT_START, ALERT_TIME_RANGE, TIMESTAMP } from '@kbn/rule-data-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';

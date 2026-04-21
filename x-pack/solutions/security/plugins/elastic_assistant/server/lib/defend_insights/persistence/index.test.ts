@@ -11,12 +11,15 @@ import type { AuthenticatedUser } from '@kbn/core-security-common';
 import type {
   DefendInsightCreateProps,
   DefendInsightsUpdateProps,
-  DefendInsightsGetRequestQuery,
   DefendInsightsResponse,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/common_attributes.gen';
+import {
+  DefendInsightStatus,
+  DefendInsightType,
+} from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/common_attributes.gen';
+import type { DefendInsightsGetRequestQuery } from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/get_defend_insights_route.gen';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { DefendInsightStatus, DefendInsightType } from '@kbn/elastic-assistant-common';
 
 import type { AIAssistantDataClientParams } from '../../../ai_assistant_data_clients';
 import { getDefendInsightsSearchEsMock } from '../../../__mocks__/defend_insights_schema.mock';

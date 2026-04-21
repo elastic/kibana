@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import type { Replacements } from '@kbn/elastic-assistant-common';
+import type { Replacements } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
 
 import type { AttackDiscoveryGraphState } from '../../../../../langchain/graphs';
 import { getRetrieveAnonymizedAlertsNode } from '.';

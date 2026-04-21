@@ -6,7 +6,7 @@
  */
 import { type AuthenticatedUser } from '@kbn/core/server';
 import { getCurrentUserFindRequest, requestMock } from '../../__mocks__/request';
-import { ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND } from '@kbn/elastic-assistant-common';
+import { ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND } from '@kbn/elastic-assistant-common/constants';
 import { serverMock } from '../../__mocks__/server';
 import { requestContextMock } from '../../__mocks__/request_context';
 import { getFindConversationsResultWithSingleHit } from '../../__mocks__/response';

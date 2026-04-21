@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
+import type { AttackDiscovery } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen';
 import type { ActionsClientLlm } from '@kbn/langchain/server';
 import type { ZodType } from '@kbn/zod/v4';
 import { loggerMock } from '@kbn/logging-mocks';

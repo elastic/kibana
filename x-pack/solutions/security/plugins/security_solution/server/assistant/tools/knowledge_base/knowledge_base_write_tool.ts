@@ -8,8 +8,8 @@
 import { tool } from '@langchain/core/tools';
 import { z } from '@kbn/zod/v4';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
-import { DocumentEntryType } from '@kbn/elastic-assistant-common';
-import type { KnowledgeBaseEntryCreateProps } from '@kbn/elastic-assistant-common';
+import type { KnowledgeBaseEntryCreateProps } from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/entries/common_attributes.gen';
+import { DocumentEntryType } from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/entries/common_attributes.gen';
 import type { Require } from '@kbn/elastic-assistant-plugin/server/types';
 import { APP_UI_ID } from '../../../../common';
 

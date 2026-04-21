@@ -7,12 +7,11 @@
 
 import type { IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
+import { DEFEND_INSIGHTS, API_VERSIONS } from '@kbn/elastic-assistant-common/constants';
 import {
-  DEFEND_INSIGHTS,
   DefendInsightsGetResponse,
   DefendInsightsGetRequestQuery,
-  API_VERSIONS,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/get_defend_insights_route.gen';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import type { ElasticAssistantRequestHandlerContext } from '../../types';

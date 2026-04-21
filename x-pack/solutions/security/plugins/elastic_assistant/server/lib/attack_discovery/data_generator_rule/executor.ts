@@ -12,11 +12,9 @@ import type {
   RuleExecutorOptions,
   RuleTypeState,
 } from '@kbn/alerting-plugin/server';
-import {
-  type AttackDiscoveryAlertDocument,
-  CreateAttackDiscoveryAlertsParams as CreateAttackDiscoveryAlertsParamsSchema,
-  type CreateAttackDiscoveryAlertsParams,
-} from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryAlertDocument } from '@kbn/elastic-assistant-common';
+import type { CreateAttackDiscoveryAlertsParams } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen';
+import { CreateAttackDiscoveryAlertsParams as CreateAttackDiscoveryAlertsParamsSchema } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen';
 
 import {
   generateAttackDiscoveryAlertHash,

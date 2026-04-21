@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { AttackDiscoveryApiAlert } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryApiAlert } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/attack_discovery_api_alert.gen';
 import type { AttackDiscoveryGeneration } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/generation.gen';
 
 import type { AttackDiscoveryDataClient } from '../../../../../../lib/attack_discovery/persistence';

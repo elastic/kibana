@@ -19,12 +19,12 @@ import type {
   KnowledgeBaseEntryBulkCrudActionResponse,
   KnowledgeBaseEntryBulkCrudActionSummary,
   PerformKnowledgeBaseEntryBulkActionResponse,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/entries/bulk_crud_knowledge_base_entries_route.gen';
+import { PerformKnowledgeBaseEntryBulkActionRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/entries/bulk_crud_knowledge_base_entries_route.gen';
 import {
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BULK_ACTION,
-  PerformKnowledgeBaseEntryBulkActionRequestBody,
   API_VERSIONS,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/constants';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 
 import {

@@ -6,7 +6,8 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core/server';
-import type { ApiConfig, AttackDiscovery } from '@kbn/elastic-assistant-common';
+import type { ApiConfig } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
+import type { AttackDiscovery } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen';
 import moment from 'moment/moment';
 import { uniq } from 'lodash/fp';
 

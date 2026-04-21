@@ -12,7 +12,7 @@ import type {
   MessageRole,
   Provider,
   Reader,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
 
 export interface EsReplacementSchema {
   value: string;

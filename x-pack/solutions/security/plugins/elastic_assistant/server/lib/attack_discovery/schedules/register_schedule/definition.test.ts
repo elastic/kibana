@@ -7,10 +7,8 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { analyticsServiceMock, coreMock } from '@kbn/core/server/mocks';
-import {
-  ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
-  AttackDiscoveryScheduleParams,
-} from '@kbn/elastic-assistant-common';
+import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common/constants';
+import { AttackDiscoveryScheduleParams } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/routes/public/schedules/schedules.gen';
 
 import { getAttackDiscoveryScheduleType } from '.';
 import { ATTACK_DISCOVERY_ALERTS_AAD_CONFIG } from '../constants';

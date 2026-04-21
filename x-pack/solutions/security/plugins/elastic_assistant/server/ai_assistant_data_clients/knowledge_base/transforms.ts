@@ -11,8 +11,11 @@ import type {
   IndexEntry,
   KnowledgeBaseEntryResponse,
   KnowledgeBaseResource,
-} from '@kbn/elastic-assistant-common';
-import { DocumentEntryType, IndexEntryType } from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/entries/common_attributes.gen';
+import {
+  DocumentEntryType,
+  IndexEntryType,
+} from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/entries/common_attributes.gen';
 import type { EsKnowledgeBaseEntrySchema, LegacyEsKnowledgeBaseEntrySchema } from './types';
 
 export const transformESSearchToKnowledgeBaseEntry = (

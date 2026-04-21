@@ -6,7 +6,10 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { ConversationResponse, Replacements } from '@kbn/elastic-assistant-common';
+import type {
+  ConversationResponse,
+  Replacements,
+} from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
 import {
   replaceOriginalValuesWithUuidValues,
   resolveConnectorId,

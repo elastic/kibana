@@ -6,8 +6,9 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { DefendInsightType, Replacements } from '@kbn/elastic-assistant-common';
-import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { DefendInsightType } from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/common_attributes.gen';
+import type { Replacements } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
+import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 
 import type { DefendInsightsGraphState } from '../../../../../langchain/graphs';
 import type { AIAssistantKnowledgeBaseDataClient } from '../../../../../../ai_assistant_data_clients/knowledge_base';

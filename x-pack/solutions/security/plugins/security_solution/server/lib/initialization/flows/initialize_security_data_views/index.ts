@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { DataView, DataViewListItem, DataViewsService } from '@kbn/data-views-plugin/common';
-import { ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX } from '@kbn/elastic-assistant-common';
+import { ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX } from '@kbn/elastic-assistant-common/constants';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   INITIALIZATION_FLOW_SECURITY_DATA_VIEWS,

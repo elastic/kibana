@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DefendInsightType } from '@kbn/elastic-assistant-common';
+import { DefendInsightType } from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/common_attributes.gen';
 
 import type { AIAssistantKnowledgeBaseDataClient } from '../../../../../../../../../ai_assistant_data_clients/knowledge_base';
 import type { getEventsForInsightType } from '../retrievers';

@@ -13,10 +13,12 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import {
   API_VERSIONS,
   ATTACK_DISCOVERY_SCHEDULES_FIND,
+} from '@kbn/elastic-assistant-common/constants';
+import {
   FindAttackDiscoverySchedulesRequestQuery,
   FindAttackDiscoverySchedulesResponse,
-  transformAttackDiscoveryScheduleToApi,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/routes/public/schedules/get/find_attack_discovery_schedules_route.gen';
+import { transformAttackDiscoveryScheduleToApi } from '@kbn/elastic-assistant-common';
 
 import { buildResponse } from '../../../../../lib/build_response';
 import type { ElasticAssistantRequestHandlerContext } from '../../../../../types';

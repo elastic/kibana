@@ -6,13 +6,15 @@
  */
 
 import type { IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
-import type { GetAttackDiscoveryGenerationResponse } from '@kbn/elastic-assistant-common';
+import type { GetAttackDiscoveryGenerationResponse } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/routes/public/get/get_attack_discovery_generation_route.gen';
+import {
+  GetAttackDiscoveryGenerationRequestParams,
+  GetAttackDiscoveryGenerationRequestQuery,
+} from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/routes/public/get/get_attack_discovery_generation_route.gen';
 import {
   API_VERSIONS,
   ATTACK_DISCOVERY_GENERATIONS_BY_ID,
-  GetAttackDiscoveryGenerationRequestParams,
-  GetAttackDiscoveryGenerationRequestQuery,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/constants';
 import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
 import { ATTACK_DISCOVERY_API_ACTION_ALL } from '@kbn/security-solution-features/actions';
 import { transformError } from '@kbn/securitysolution-es-utils';

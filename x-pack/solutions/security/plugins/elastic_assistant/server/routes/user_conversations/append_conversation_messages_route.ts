@@ -7,13 +7,15 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { ConversationResponse } from '@kbn/elastic-assistant-common';
+import type { ConversationResponse } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
 import {
   AppendConversationMessageRequestBody,
   AppendConversationMessageRequestParams,
+} from '@kbn/elastic-assistant-common/impl/schemas/conversations/append_message.gen';
+import {
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID_MESSAGES,
   API_VERSIONS,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/constants';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { buildResponse } from '../utils';
 import type { ElasticAssistantPluginRouter } from '../../types';

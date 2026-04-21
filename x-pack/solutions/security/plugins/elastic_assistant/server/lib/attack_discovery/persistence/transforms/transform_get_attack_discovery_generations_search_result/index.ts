@@ -7,7 +7,7 @@
 
 import type { AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/core/server';
-import type { GetAttackDiscoveryGenerationsResponse } from '@kbn/elastic-assistant-common';
+import type { GetAttackDiscoveryGenerationsResponse } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/routes/public/get/get_attack_discovery_generations_route.gen';
 
 import { GetAttackDiscoveryGenerationsSearchResult } from '../../get_attack_discovery_generations_search_result';
 import { getGenerationStatusOrThrow } from './get_generation_status_or_throw';

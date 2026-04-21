@@ -6,7 +6,10 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { DefendInsightStatus, DefendInsightType } from '@kbn/elastic-assistant-common';
+import {
+  DefendInsightStatus,
+  DefendInsightType,
+} from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/common_attributes.gen';
 
 import type { EsDefendInsightSchema } from '../lib/defend_insights/persistence/types';
 

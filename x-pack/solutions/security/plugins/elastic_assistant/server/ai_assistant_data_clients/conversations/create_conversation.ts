@@ -8,8 +8,11 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import type { ConversationCreateProps, ConversationResponse } from '@kbn/elastic-assistant-common';
-import { ConversationCategoryEnum } from '@kbn/elastic-assistant-common';
+import type {
+  ConversationCreateProps,
+  ConversationResponse,
+} from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
+import { ConversationCategoryEnum } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
 import { getConversation } from './get_conversation';
 import type { CreateMessageSchema } from './types';
 

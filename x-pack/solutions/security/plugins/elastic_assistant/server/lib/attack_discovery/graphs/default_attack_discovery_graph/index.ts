@@ -6,8 +6,8 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { Replacements } from '@kbn/elastic-assistant-common';
-import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { Replacements } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
+import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import type { ActionsClientLlm } from '@kbn/langchain/server';
 import { END, START, StateGraph } from '@langchain/langgraph';
 

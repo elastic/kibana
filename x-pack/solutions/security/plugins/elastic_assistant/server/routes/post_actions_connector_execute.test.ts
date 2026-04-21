@@ -20,7 +20,7 @@ import {
   getConversationResponseMock,
   getFindAnonymizationFieldsResultWithSingleHit,
 } from '../__mocks__/response';
-import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
+import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen';
 import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { appendAssistantMessageToConversation, langChainExecute } from './helpers';

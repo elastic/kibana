@@ -19,10 +19,10 @@ import type {
   KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryResponse,
   Metadata,
-  ContentReferencesStore,
   KnowledgeBaseEntryUpdateProps,
-} from '@kbn/elastic-assistant-common';
-import { DocumentEntryType } from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/entries/common_attributes.gen';
+import { DocumentEntryType } from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/entries/common_attributes.gen';
+import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
 import pRetry from 'p-retry';
 import type { StructuredTool } from '@langchain/core/tools';
 import { v4 as uuidv4 } from 'uuid';

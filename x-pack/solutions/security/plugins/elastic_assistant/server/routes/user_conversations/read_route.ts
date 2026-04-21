@@ -10,11 +10,10 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
-  getConversationSharedState,
-  getIsConversationOwner,
-} from '@kbn/elastic-assistant-common';
-import type { ConversationResponse } from '@kbn/elastic-assistant-common/impl/schemas';
-import { ReadConversationRequestParams } from '@kbn/elastic-assistant-common/impl/schemas';
+} from '@kbn/elastic-assistant-common/constants';
+import { getConversationSharedState, getIsConversationOwner } from '@kbn/elastic-assistant-common';
+import type { ConversationResponse } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
+import { ReadConversationRequestParams } from '@kbn/elastic-assistant-common/impl/schemas/conversations/crud_conversation_route.gen';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { SHARED_CONVERSATION_ACCESSED_EVENT } from '../../lib/telemetry/event_based_telemetry';
 import { buildResponse } from '../utils';

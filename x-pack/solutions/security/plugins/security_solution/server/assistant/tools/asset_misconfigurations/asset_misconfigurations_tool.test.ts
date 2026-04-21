@@ -10,7 +10,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { ASSET_MISCONFIGURATIONS_TOOL } from './asset_misconfigurations_tool';
 import type { AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
-import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen';
 import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
 
 const mockEsClient = {

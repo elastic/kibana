@@ -7,8 +7,8 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import type { Replacements } from '@kbn/elastic-assistant-common';
-import { DefendInsightType } from '@kbn/elastic-assistant-common';
+import type { Replacements } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
+import { DefendInsightType } from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/common_attributes.gen';
 
 import type { DefendInsightsGraphState } from '../../../../../langchain/graphs';
 import { DEFEND_INSIGHTS } from '../../../../../prompt/prompts';

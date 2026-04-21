@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CreateAttackDiscoveryAlertsParams } from '@kbn/elastic-assistant-common';
+import type { CreateAttackDiscoveryAlertsParams } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen';
 
 export const mockCreateAttackDiscoveryAlertsParams: CreateAttackDiscoveryAlertsParams = {
   alertsContextCount: 59,

@@ -6,16 +6,22 @@
  */
 
 /**
- * Codemod: migrate @kbn/elastic-assistant-common imports in client-side files
+ * Codemod: migrate @kbn/elastic-assistant-common imports in client-side or server-side files
  *
- * For each file in the target directories:
+ * CLIENT MODE (default):
  *   - Schema types (from gen files) → import type { X } from '@kbn/elastic-assistant-common/types/<path>'
  *   - Constants → import { X } from '@kbn/elastic-assistant-common/constants'
  *   - Root utils (functions etc.) → keep import { X } from '@kbn/elastic-assistant-common'
  *   - /impl/schemas barrel imports → import type { X } from '@kbn/elastic-assistant-common/types'
  *
+ * SERVER MODE (--server):
+ *   - Schema names (Zod objects) → import { X } from '@kbn/elastic-assistant-common/impl/schemas/<path>.gen'
+ *   - Constants → import { X } from '@kbn/elastic-assistant-common/constants'
+ *   - Root utils → keep import { X } from '@kbn/elastic-assistant-common'
+ *   - /impl/schemas barrel imports → rewrite each name to its specific deep impl/schemas/<path>.gen path
+ *
  * Run with:
- *   node -r @kbn/setup-node-env x-pack/platform/packages/shared/kbn-elastic-assistant-common/scripts/migrate_imports.ts [--target <glob>...] [--dry-run]
+ *   node -r @kbn/setup-node-env x-pack/platform/packages/shared/kbn-elastic-assistant-common/scripts/migrate_imports.ts [--target <glob>...] [--dry-run] [--server]
  */
 
 import fs from 'fs';
@@ -32,6 +38,7 @@ const PKG_ROOT = path.resolve(__dirname, '..');
 
 const args = process.argv.slice(2);
 const dryRun = args.includes('--dry-run');
+const serverMode = args.includes('--server');
 const targetGlobs: string[] = [];
 for (let i = 0; i < args.length; i++) {
   if (args[i] === '--target' && args[i + 1]) {
@@ -41,11 +48,20 @@ for (let i = 0; i < args.length; i++) {
 }
 
 if (targetGlobs.length === 0) {
-  targetGlobs.push(
-    'x-pack/solutions/security/plugins/security_solution/public/**/*.{ts,tsx}',
-    'x-pack/solutions/security/plugins/elastic_assistant/public/**/*.{ts,tsx}'
-  );
+  if (serverMode) {
+    targetGlobs.push(
+      'x-pack/solutions/security/plugins/elastic_assistant/server/**/*.{ts,tsx}',
+      'x-pack/solutions/security/plugins/security_solution/server/**/*.{ts,tsx}'
+    );
+  } else {
+    targetGlobs.push(
+      'x-pack/solutions/security/plugins/security_solution/public/**/*.{ts,tsx}',
+      'x-pack/solutions/security/plugins/elastic_assistant/public/**/*.{ts,tsx}'
+    );
+  }
 }
+
+console.log(`Mode: ${serverMode ? 'server' : 'client'}`);
 
 // ---------------------------------------------------------------------------
 // Step 1: Build name → deep types path map from impl/schemas/**/*.gen.ts
@@ -56,6 +72,9 @@ const typesDir = path.join(PKG_ROOT, 'types');
 
 // Map: exportedName → '@kbn/elastic-assistant-common/types/<rel>'
 const nameToTypesPath = new Map<string, string>();
+
+// Map: exportedName → '@kbn/elastic-assistant-common/impl/schemas/<rel-no-ext>'
+const nameToSchemasPath = new Map<string, string>();
 
 function getExportedNamesFromContent(content: string): string[] {
   const names: string[] = [];
@@ -101,6 +120,7 @@ for (const genFilePath of genFiles) {
   // Strip .ts extension
   const relNoExt = relFromSchemas.replace(/\.ts$/, '');
   const typesImportPath = `@kbn/elastic-assistant-common/types/${relNoExt}`;
+  const schemasImportPath = `@kbn/elastic-assistant-common/impl/schemas/${relNoExt}`;
 
   const content = fs.readFileSync(genFilePath, 'utf-8');
   const exportedNames = getExportedNamesFromContent(content);
@@ -108,10 +128,13 @@ for (const genFilePath of genFiles) {
     if (!nameToTypesPath.has(name)) {
       nameToTypesPath.set(name, typesImportPath);
     }
+    if (!nameToSchemasPath.has(name)) {
+      nameToSchemasPath.set(name, schemasImportPath);
+    }
   }
 }
 
-// Also scan types/ gen files directly
+// Also scan types/ gen files directly (for client mode nameToTypesPath only)
 const typesFiles = globby.sync('**/*.gen.ts', {
   cwd: typesDir,
   absolute: true,
@@ -132,6 +155,7 @@ for (const typesFilePath of typesFiles) {
 }
 
 console.log(`Built name→types-path map with ${nameToTypesPath.size} entries.`);
+console.log(`Built name→schemas-path map with ${nameToSchemasPath.size} entries.`);
 
 // ---------------------------------------------------------------------------
 // Step 2: Build constants set from constants.ts
@@ -160,11 +184,22 @@ const KEEP_ON_ROOT_BARREL = new Set([
 
 type Classification = 'schemaType' | 'constant' | 'rootUtil';
 
-function classify(name: string): Classification {
+function classifyClient(name: string): Classification {
   if (KEEP_ON_ROOT_BARREL.has(name)) return 'rootUtil';
   if (nameToTypesPath.has(name)) return 'schemaType';
   if (constantsSet.has(name)) return 'constant';
   return 'rootUtil';
+}
+
+function classifyServer(name: string): Classification {
+  if (KEEP_ON_ROOT_BARREL.has(name)) return 'rootUtil';
+  if (nameToSchemasPath.has(name)) return 'schemaType';
+  if (constantsSet.has(name)) return 'constant';
+  return 'rootUtil';
+}
+
+function classify(name: string): Classification {
+  return serverMode ? classifyServer(name) : classifyClient(name);
 }
 
 // ---------------------------------------------------------------------------
@@ -185,112 +220,197 @@ function buildImportStatement(
 
 /**
  * Process a single file's text content and return rewritten text (or null if no changes).
+ *
+ * Two-pass approach to handle multiple import declarations that may share the same destination:
+ *   Pass 1 — collect all names from ALL matching imports, group by destination path.
+ *   Pass 2 — replace ALL matched import declarations: first one gets the consolidated statements,
+ *             subsequent ones from the same "source category" get replaced with empty string.
  */
 function processFileText(fileText: string): string | null {
   const project = new Project({ skipAddingFilesFromTsConfig: true, useInMemoryFileSystem: true });
   const sourceFile = project.createSourceFile('target.ts', fileText);
 
-  let modified = false;
+  // Identify all import declarations that need rewriting
+  const targetImportDecls = sourceFile.getImportDeclarations().filter((decl) => {
+    const spec = decl.getModuleSpecifierValue();
+    return (
+      spec === '@kbn/elastic-assistant-common' ||
+      spec === '@kbn/elastic-assistant-common/impl/schemas' ||
+      spec === '@kbn/elastic-assistant-common/impl/schemas/index'
+    );
+  });
 
-  // We process imports in reverse order so positions don't shift
-  const importDecls = sourceFile.getImportDeclarations();
+  if (targetImportDecls.length === 0) return null;
 
-  // Collect replacements: { start, end, replacement }
-  const replacements: Array<{ start: number; end: number; text: string }> = [];
+  // --- Pass 1: collect all names → destination key mappings ---
+  // Key format:
+  //   client mode: 'type:<path>', 'constant:<path>', 'util:@kbn/elastic-assistant-common'
+  //   server mode: 'schemas:<path>', 'constant:<path>', 'util:@kbn/elastic-assistant-common'
+  //
+  // We also need to detect if any root-barrel import was "type-only" to preserve that
+  // for util names. Track util type-only separately.
 
-  for (const importDecl of importDecls) {
+  // In server mode for impl/schemas barrel: always emit regular imports for schema names
+  // (Zod objects can be used as runtime values even if they're also used as types).
+
+  const consolidatedGroups = new Map<string, Array<{ name: string; alias: string | undefined }>>();
+  let hasUtilTypeOnly = true; // becomes false if any root barrel util is in a regular import
+  let needsChange = false;
+
+  // Track which declarations are truly "only util" (no migration needed)
+  // If ALL root barrel decls only have util names, no change needed.
+  const affectedDecls: Array<{
+    decl: (typeof targetImportDecls)[0];
+    hasNonUtil: boolean;
+  }> = [];
+
+  for (const importDecl of targetImportDecls) {
     const moduleSpecifier = importDecl.getModuleSpecifierValue();
-
-    if (
-      moduleSpecifier !== '@kbn/elastic-assistant-common' &&
-      moduleSpecifier !== '@kbn/elastic-assistant-common/impl/schemas' &&
-      moduleSpecifier !== '@kbn/elastic-assistant-common/impl/schemas/index'
-    ) {
-      continue;
-    }
-
     const isImplSchemas =
       moduleSpecifier === '@kbn/elastic-assistant-common/impl/schemas' ||
       moduleSpecifier === '@kbn/elastic-assistant-common/impl/schemas/index';
-
+    const originalIsTypeOnly = importDecl.isTypeOnly();
     const namedImports = importDecl.getNamedImports();
     if (namedImports.length === 0) continue;
 
-    const start = importDecl.getStart();
-    const end = importDecl.getEnd();
-
-    if (isImplSchemas) {
-      // All names → types barrel
-      const names = namedImports.map((ni) => ({
-        name: ni.getName(),
-        alias: ni.getAliasNode()?.getText(),
-      }));
-      const replacement = buildImportStatement(true, '@kbn/elastic-assistant-common/types', names);
-      replacements.push({ start, end, text: replacement });
-      modified = true;
-      continue;
-    }
-
-    // Root barrel: classify each name
-    // Group by destination module
-    const groups = new Map<string, Array<{ name: string; alias: string | undefined }>>();
-    // Track whether original import was type-only
-    const originalIsTypeOnly = importDecl.isTypeOnly();
+    let hasNonUtil = false;
 
     for (const ni of namedImports) {
       const name = ni.getName();
       const alias = ni.getAliasNode()?.getText();
-      const cls = classify(name);
 
       let key: string;
-      if (cls === 'schemaType') {
-        const typesPath = nameToTypesPath.get(name)!;
-        key = `type:${typesPath}`;
-      } else if (cls === 'constant') {
-        key = 'constant:@kbn/elastic-assistant-common/constants';
+
+      if (isImplSchemas) {
+        // impl/schemas barrel
+        if (serverMode) {
+          if (KEEP_ON_ROOT_BARREL.has(name)) {
+            key = 'util:@kbn/elastic-assistant-common';
+          } else if (nameToSchemasPath.has(name)) {
+            key = `schemas:${nameToSchemasPath.get(name)!}`;
+            hasNonUtil = true;
+          } else if (constantsSet.has(name)) {
+            key = 'constant:@kbn/elastic-assistant-common/constants';
+            hasNonUtil = true;
+          } else {
+            key = 'util:@kbn/elastic-assistant-common';
+          }
+        } else {
+          // client mode: all go to types barrel
+          key = 'type:@kbn/elastic-assistant-common/types';
+          hasNonUtil = true;
+        }
       } else {
-        key = 'util:@kbn/elastic-assistant-common';
+        // root barrel
+        const cls = classify(name);
+        if (cls === 'schemaType') {
+          if (serverMode) {
+            key = `schemas:${nameToSchemasPath.get(name)!}`;
+          } else {
+            key = `type:${nameToTypesPath.get(name)!}`;
+          }
+          hasNonUtil = true;
+        } else if (cls === 'constant') {
+          key = 'constant:@kbn/elastic-assistant-common/constants';
+          hasNonUtil = true;
+        } else {
+          key = 'util:@kbn/elastic-assistant-common';
+          if (!originalIsTypeOnly) hasUtilTypeOnly = false;
+        }
       }
 
-      if (!groups.has(key)) groups.set(key, []);
-      groups.get(key)!.push({ name, alias });
-    }
-
-    // Check if nothing actually changes (all rootUtil, same module)
-    if (groups.size === 1 && groups.has('util:@kbn/elastic-assistant-common')) {
-      continue;
-    }
-
-    const replacementLines: string[] = [];
-    for (const [key, items] of groups) {
-      if (key.startsWith('type:')) {
-        const modulePath = key.slice(5);
-        replacementLines.push(buildImportStatement(true, modulePath, items));
-      } else if (key.startsWith('constant:')) {
-        const modulePath = key.slice(9);
-        replacementLines.push(buildImportStatement(false, modulePath, items));
-      } else {
-        // util – keep on root barrel
-        replacementLines.push(
-          buildImportStatement(originalIsTypeOnly, '@kbn/elastic-assistant-common', items)
-        );
+      if (!consolidatedGroups.has(key)) consolidatedGroups.set(key, []);
+      // Avoid duplicate names (same name from two separate imports)
+      const existing = consolidatedGroups.get(key)!;
+      if (!existing.some((e) => e.name === name && e.alias === alias)) {
+        existing.push({ name, alias });
       }
     }
 
-    replacements.push({ start, end, text: replacementLines.join('\n') });
-    modified = true;
+    if (hasNonUtil) needsChange = true;
+    affectedDecls.push({ decl: importDecl, hasNonUtil });
   }
 
-  if (!modified || replacements.length === 0) return null;
+  // If nothing needs migration (all root util), skip
+  if (!needsChange) return null;
 
-  // Apply replacements in reverse order (to preserve positions)
-  replacements.sort((a, b) => b.start - a.start);
+  // Also mark as needing change if any impl/schemas barrel is present
+  const hasImplSchemas = targetImportDecls.some(
+    (d) =>
+      d.getModuleSpecifierValue() === '@kbn/elastic-assistant-common/impl/schemas' ||
+      d.getModuleSpecifierValue() === '@kbn/elastic-assistant-common/impl/schemas/index'
+  );
+  if (!needsChange && !hasImplSchemas) return null;
+
+  // --- Pass 2: build consolidated replacement text ---
+
+  const replacementLines: string[] = [];
+  for (const [key, items] of consolidatedGroups) {
+    if (key.startsWith('type:')) {
+      const modulePath = key.slice(5);
+      replacementLines.push(buildImportStatement(true, modulePath, items));
+    } else if (key.startsWith('schemas:')) {
+      const modulePath = key.slice(8);
+      // Server mode: schema names are Zod runtime objects — regular import (not type-only)
+      // so they can be used as both TypeScript types and runtime values.
+      replacementLines.push(buildImportStatement(false, modulePath, items));
+    } else if (key.startsWith('constant:')) {
+      const modulePath = key.slice(9);
+      replacementLines.push(buildImportStatement(false, modulePath, items));
+    } else {
+      // util – keep on root barrel, preserve type-only if all util imports were type-only
+      replacementLines.push(
+        buildImportStatement(hasUtilTypeOnly, '@kbn/elastic-assistant-common', items)
+      );
+    }
+  }
+
+  const consolidatedText = replacementLines.join('\n');
+
+  // --- Pass 3: apply replacements ---
+  // Replace ALL matching import declarations, but only put the consolidated text at the FIRST one.
+  // Subsequent ones get empty string. Sort by start position descending.
+
+  const sortedDecls = [...targetImportDecls].sort((a, b) => b.getStart() - a.getStart());
+
+  // Determine the first (earliest in file) matching decl
+  const firstDeclStart = Math.min(...targetImportDecls.map((d) => d.getStart()));
+
+  const posReplacements: Array<{ start: number; end: number; text: string }> = [];
+  for (const decl of sortedDecls) {
+    const start = decl.getStart();
+    const end = decl.getEnd();
+    if (start === firstDeclStart) {
+      posReplacements.push({ start, end, text: consolidatedText });
+    } else {
+      // Remove the declaration entirely (replace with empty string)
+      // Also consume the trailing newline if present
+      posReplacements.push({ start, end, text: '' });
+    }
+  }
+
+  // Remove empty-string replacements that leave blank lines
+  // We handle this by including the trailing newline in the end position
+  const posReplacementsWithNewline: Array<{ start: number; end: number; text: string }> = [];
+  for (const rep of posReplacements) {
+    if (rep.text === '') {
+      // Extend end to include trailing newline
+      let endPos = rep.end;
+      if (fileText[endPos] === '\n') endPos++;
+      posReplacementsWithNewline.push({ start: rep.start, end: endPos, text: '' });
+    } else {
+      posReplacementsWithNewline.push(rep);
+    }
+  }
+
+  // Apply in reverse position order
+  posReplacementsWithNewline.sort((a, b) => b.start - a.start);
   let result = fileText;
-  for (const { start, end, text } of replacements) {
+  for (const { start, end, text } of posReplacementsWithNewline) {
     result = result.slice(0, start) + text + result.slice(end);
   }
 
-  return result;
+  return result === fileText ? null : result;
 }
 
 // ---------------------------------------------------------------------------

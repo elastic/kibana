@@ -7,7 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
+import type { AttackDiscovery } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import { filterHallucinatedAlerts } from '.';

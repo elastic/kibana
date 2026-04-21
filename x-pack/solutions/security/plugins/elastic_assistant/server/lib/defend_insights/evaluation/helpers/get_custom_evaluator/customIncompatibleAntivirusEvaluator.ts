@@ -7,7 +7,7 @@
 
 import type { Example, Run } from 'langsmith';
 import type { EvaluatorT } from 'langsmith/evaluation';
-import type { DefendInsights } from '@kbn/elastic-assistant-common';
+import type { DefendInsights } from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/common_attributes.gen';
 import { EVALUATOR_ERRORS } from './constants';
 
 export interface ExampleOutput {

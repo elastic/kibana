@@ -12,17 +12,17 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_PROMPTS_URL_BULK_ACTION,
-} from '@kbn/elastic-assistant-common';
-
+} from '@kbn/elastic-assistant-common/constants';
 import type {
   PromptResponse,
   PromptsBulkActionSkipResult,
   PromptsBulkCrudActionResponse,
   PromptsBulkCrudActionResults,
-  BulkCrudActionSummary,
   PerformPromptsBulkActionResponse,
-} from '@kbn/elastic-assistant-common/impl/schemas';
-import { PerformPromptsBulkActionRequestBody } from '@kbn/elastic-assistant-common/impl/schemas';
+} from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { PerformPromptsBulkActionRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import type { BulkCrudActionSummary } from '@kbn/elastic-assistant-common/impl/schemas/common_attributes.gen';
+
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { PROMPTS_TABLE_MAX_PAGE_SIZE } from '../../../common/constants';
 import type { ElasticAssistantPluginRouter } from '../../types';

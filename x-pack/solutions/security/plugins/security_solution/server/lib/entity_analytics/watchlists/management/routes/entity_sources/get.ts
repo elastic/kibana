@@ -8,7 +8,7 @@
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
-import { API_VERSIONS } from '@kbn/elastic-assistant-common';
+import { API_VERSIONS } from '@kbn/elastic-assistant-common/constants';
 import { APP_ID } from '@kbn/security-solution-features/constants';
 
 import { WATCHLISTS_DATA_SOURCE_URL } from '../../../../../../../common/constants';

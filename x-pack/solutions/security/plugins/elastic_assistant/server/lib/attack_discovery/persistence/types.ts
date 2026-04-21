@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { AttackDiscoveryStatus, Provider } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryStatus } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen';
+import type { Provider } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
 import type { EsReplacementSchema } from '../../../ai_assistant_data_clients/conversations/types';
 
 export interface EsAttackDiscoverySchema {

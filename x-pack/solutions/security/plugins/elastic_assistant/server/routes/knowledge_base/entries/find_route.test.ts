@@ -6,7 +6,7 @@
  */
 
 import { getKnowledgeBaseEntryFindRequest, requestMock } from '../../../__mocks__/request';
-import { ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_FIND } from '@kbn/elastic-assistant-common';
+import { ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_FIND } from '@kbn/elastic-assistant-common/constants';
 import { serverMock } from '../../../__mocks__/server';
 import { requestContextMock } from '../../../__mocks__/request_context';
 import { getFindKnowledgeBaseEntriesResultWithSingleHit } from '../../../__mocks__/response';

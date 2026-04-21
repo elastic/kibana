@@ -13,9 +13,9 @@ import type {
   ConversationUpdateProps,
   Provider,
   MessageRole,
-  UUID,
   ContentReferences,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
+import type { UUID } from '@kbn/elastic-assistant-common/impl/schemas/common_attributes.gen';
 import { getUpdateScript } from './helpers';
 import type { EsConversationSchema, EsReplacementSchema } from './types';
 import type { DocumentsDataWriter } from '../../lib/data_stream/documents_data_writer';

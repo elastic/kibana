@@ -16,14 +16,21 @@ import type {
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type {
   ApiConfig,
-  ContentReferencesStore,
+  Replacements,
+} from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
+import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
+import type {
   DefendInsightGenerationInterval,
   DefendInsights,
-  DefendInsightsPostRequestBody,
   DefendInsightsResponse,
-  Replacements,
-} from '@kbn/elastic-assistant-common';
-import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+} from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/common_attributes.gen';
+import {
+  DefendInsightStatus,
+  DefendInsightType,
+} from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/common_attributes.gen';
+import type { DefendInsightsPostRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/post_defend_insights_route.gen';
+import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import { DEFEND_INSIGHTS_ID } from '@kbn/elastic-assistant-common/constants';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { Moment } from 'moment';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -36,11 +43,6 @@ import moment from 'moment';
 import { ActionsClientLlm } from '@kbn/langchain/server';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import {
-  DEFEND_INSIGHTS_ID,
-  DefendInsightStatus,
-  DefendInsightType,
-} from '@kbn/elastic-assistant-common';
 
 import type { AIAssistantKnowledgeBaseDataClient } from '../../ai_assistant_data_clients/knowledge_base';
 import type { DefendInsightsGraphState } from '../../lib/langchain/graphs';

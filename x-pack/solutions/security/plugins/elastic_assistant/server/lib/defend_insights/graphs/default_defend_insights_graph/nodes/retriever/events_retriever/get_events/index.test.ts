@@ -7,11 +7,8 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import {
-  DefendInsightType,
-  getRawDataOrDefault,
-  transformRawData,
-} from '@kbn/elastic-assistant-common';
+import { DefendInsightType } from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/common_attributes.gen';
+import { getRawDataOrDefault, transformRawData } from '@kbn/elastic-assistant-common';
 
 import { mockAnonymizationFields } from '../../../../mock/mock_anonymization_fields';
 import { mockAnonymizedEventsReplacements } from '../../../../mock/mock_anonymized_events';

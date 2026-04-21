@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID_MESSAGES } from '@kbn/elastic-assistant-common';
+import { ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID_MESSAGES } from '@kbn/elastic-assistant-common/constants';
 import { getAppendConversationMessageRequest, requestMock } from '../../__mocks__/request';
 import { requestContextMock } from '../../__mocks__/request_context';
 import { serverMock } from '../../__mocks__/server';

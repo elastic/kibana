@@ -12,10 +12,8 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
-import type {
-  DefendInsightsGetRequestQuery,
-  DefendInsightsPostRequestBody,
-} from '@kbn/elastic-assistant-common';
+import type { DefendInsightsGetRequestQuery } from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/get_defend_insights_route.gen';
+import type { DefendInsightsPostRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/post_defend_insights_route.gen';
 import { CallbackIds } from '@kbn/elastic-assistant-plugin/server/types';
 import { combineLatest, firstValueFrom, ReplaySubject } from 'rxjs';
 import { cloneDeep } from 'lodash';

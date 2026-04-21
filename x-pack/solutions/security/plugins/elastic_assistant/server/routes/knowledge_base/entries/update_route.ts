@@ -10,11 +10,11 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BY_ID,
-  UpdateKnowledgeBaseEntryRequestParams,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/constants';
+import { UpdateKnowledgeBaseEntryRequestParams } from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/entries/crud_knowledge_base_entries_route.gen';
+import type { KnowledgeBaseEntryResponse } from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/entries/common_attributes.gen';
+import { KnowledgeBaseEntryUpdateRouteProps } from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/entries/common_attributes.gen';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
-import type { KnowledgeBaseEntryResponse } from '@kbn/elastic-assistant-common/impl/schemas';
-import { KnowledgeBaseEntryUpdateRouteProps } from '@kbn/elastic-assistant-common/impl/schemas';
 import type { ElasticAssistantPluginRouter } from '../../../types';
 import { buildResponse } from '../../utils';
 import { performChecks } from '../../helpers';

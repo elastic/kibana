@@ -6,7 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import type { ConversationUpdateProps } from '@kbn/elastic-assistant-common';
+import type { ConversationUpdateProps } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
 
 import type { UpdateConversationSchema } from './update_conversation';
 import { transformToUpdateScheme, updateConversation } from './update_conversation';

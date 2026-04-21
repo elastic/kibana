@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID } from '@kbn/elastic-assistant-common';
+import { ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID } from '@kbn/elastic-assistant-common/constants';
 import { requestContextMock } from '../../__mocks__/request_context';
 import { serverMock } from '../../__mocks__/server';
 import { deleteConversationRoute } from './delete_route';

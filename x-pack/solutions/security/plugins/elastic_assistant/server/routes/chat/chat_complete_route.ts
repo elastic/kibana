@@ -7,16 +7,23 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
-import type { Replacements, ConversationResponse } from '@kbn/elastic-assistant-common';
+import type {
+  Replacements,
+  ConversationResponse,
+} from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
 import {
   ELASTIC_AI_ASSISTANT_CHAT_COMPLETE_URL,
-  ChatCompleteProps,
   API_VERSIONS,
+} from '@kbn/elastic-assistant-common/constants';
+import {
+  ChatCompleteProps,
+  ChatCompleteRequestQuery,
+} from '@kbn/elastic-assistant-common/impl/schemas/chat/post_chat_complete_route.gen';
+import {
   transformRawData,
   getAnonymizedValue,
   newContentReferencesStore,
   pruneContentReferences,
-  ChatCompleteRequestQuery,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';

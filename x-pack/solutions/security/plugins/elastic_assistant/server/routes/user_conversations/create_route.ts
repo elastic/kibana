@@ -9,10 +9,12 @@ import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
+  API_VERSIONS,
+} from '@kbn/elastic-assistant-common/constants';
+import {
   ConversationCreateProps,
   ConversationResponse,
-  API_VERSIONS,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 
 import { CONVERSATION_DUPLICATED_EVENT } from '../../lib/telemetry/event_based_telemetry';

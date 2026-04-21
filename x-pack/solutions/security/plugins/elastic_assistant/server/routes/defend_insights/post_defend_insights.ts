@@ -6,16 +6,15 @@
  */
 
 import type { IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
-import type { Replacements } from '@kbn/elastic-assistant-common';
-import moment from 'moment/moment';
-import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
+import type { Replacements } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
+import { DEFEND_INSIGHTS, API_VERSIONS } from '@kbn/elastic-assistant-common/constants';
 import {
-  DEFEND_INSIGHTS,
   DefendInsightsPostRequestBody,
   DefendInsightsPostResponse,
-  API_VERSIONS,
-  DefendInsightType,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/post_defend_insights_route.gen';
+import { DefendInsightType } from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/common_attributes.gen';
+import moment from 'moment/moment';
+import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import type { ElasticAssistantRequestHandlerContext } from '../../types';

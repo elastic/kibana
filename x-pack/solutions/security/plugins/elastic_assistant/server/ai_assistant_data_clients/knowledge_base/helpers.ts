@@ -14,8 +14,9 @@ import type {
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
-import type { ContentReferencesStore, IndexEntry } from '@kbn/elastic-assistant-common';
+import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
 import { contentReferenceBlock, esqlQueryReference } from '@kbn/elastic-assistant-common';
+import type { IndexEntry } from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/entries/common_attributes.gen';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { isString } from 'lodash';
 

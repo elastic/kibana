@@ -9,10 +9,9 @@ import type { IRouter, Logger, IKibanaResponse } from '@kbn/core/server';
 import {
   PostAttackDiscoveryGenerateRequestBody,
   PostAttackDiscoveryGenerateResponse,
-  API_VERSIONS,
-  ATTACK_DISCOVERY_GENERATE,
-  getAttackDiscoveryLoadingMessage,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/routes/public/post/post_attack_discovery_generate.gen';
+import { API_VERSIONS, ATTACK_DISCOVERY_GENERATE } from '@kbn/elastic-assistant-common/constants';
+import { getAttackDiscoveryLoadingMessage } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
 import { ATTACK_DISCOVERY_API_ACTION_ALL } from '@kbn/security-solution-features/actions';

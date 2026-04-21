@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { AttackDiscoveries, Replacements } from '@kbn/elastic-assistant-common';
+import { AttackDiscoveries } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen';
+import { Replacements } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
 import type { Example } from 'langsmith/schemas';
 
 import { getDiscoveriesWithOriginalValues } from '../../get_discoveries_with_original_values';

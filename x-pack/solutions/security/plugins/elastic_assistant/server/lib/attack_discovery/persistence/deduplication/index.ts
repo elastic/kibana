@@ -7,11 +7,9 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ALERT_INSTANCE_ID } from '@kbn/rule-data-utils';
-import type {
-  AttackDiscoveries,
-  AttackDiscoveryAlertDocument,
-  Replacements,
-} from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveries } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen';
+import type { AttackDiscoveryAlertDocument } from '@kbn/elastic-assistant-common';
+import type { Replacements } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
 
 import { generateAttackDiscoveryAlertHash } from '../transforms/transform_to_alert_documents';
 

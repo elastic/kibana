@@ -7,8 +7,9 @@
 
 import { ChatPromptTemplate, MessagesPlaceholder, PromptTemplate } from '@langchain/core/prompts';
 import type { BaseMessage } from '@langchain/core/messages';
-import type { ContentReferencesStore, DocumentEntry } from '@kbn/elastic-assistant-common';
+import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
 import { enrichDocument } from '@kbn/elastic-assistant-common';
+import type { DocumentEntry } from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/entries/common_attributes.gen';
 import type { Logger } from '@kbn/logging';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { InferenceConnector } from '@kbn/inference-common';

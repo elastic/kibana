@@ -8,10 +8,8 @@
 import type { DynamicStructuredTool } from '@langchain/core/tools';
 import { KNOWLEDGE_BASE_RETRIEVAL_TOOL } from './knowledge_base_retrieval_tool';
 import type { AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
-import type {
-  ContentReferencesStore,
-  KnowledgeBaseEntryContentReference,
-} from '@kbn/elastic-assistant-common';
+import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
+import type { KnowledgeBaseEntryContentReference } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
 import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
 import { loggerMock } from '@kbn/logging-mocks';
 import { Document } from '@langchain/core/documents';

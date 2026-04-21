@@ -12,7 +12,7 @@ import type {
   Script,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { AuthenticatedUser, Logger, ElasticsearchClient } from '@kbn/core/server';
-import type { UUID } from '@kbn/elastic-assistant-common';
+import type { UUID } from '@kbn/elastic-assistant-common/impl/schemas/common_attributes.gen';
 
 export interface BulkOperationError {
   message: string;

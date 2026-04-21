@@ -8,8 +8,12 @@
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import type { ApiConfig, AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
-import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import type {
+  ApiConfig,
+  Replacements,
+} from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
+import type { AttackDiscovery } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen';
+import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import type { InferenceClient, InferenceConnectorType } from '@kbn/inference-common';
 import { ActionsClientLlm } from '@kbn/langchain/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';

@@ -8,11 +8,8 @@
 import type { IKibanaResponse, IRouter } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
-import {
-  API_VERSIONS,
-  GetCapabilitiesResponse,
-  INTERNAL_API_ACCESS,
-} from '@kbn/elastic-assistant-common';
+import { API_VERSIONS, INTERNAL_API_ACCESS } from '@kbn/elastic-assistant-common/constants';
+import { GetCapabilitiesResponse } from '@kbn/elastic-assistant-common/impl/schemas/capabilities/get_capabilities_route.gen';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { CAPABILITIES } from '../../../common/constants';
 import type { ElasticAssistantRequestHandlerContext } from '../../types';

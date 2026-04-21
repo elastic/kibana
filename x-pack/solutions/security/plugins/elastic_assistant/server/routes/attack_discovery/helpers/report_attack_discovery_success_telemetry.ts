@@ -8,10 +8,12 @@
 import type { Logger, AnalyticsServiceSetup } from '@kbn/core/server';
 import type {
   ApiConfig,
+  Replacements,
+} from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
+import type {
   AttackDiscovery,
   AttackDiscoveryStatus,
-  Replacements,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen';
 import type { Document } from '@langchain/core/documents';
 import type { Moment } from 'moment';
 import moment from 'moment/moment';

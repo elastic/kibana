@@ -9,17 +9,15 @@ import type { RetrievalQAChain } from '@langchain/classic/chains';
 import type { DynamicStructuredTool, DynamicTool } from '@langchain/core/tools';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen';
+import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
+import type { ProductDocumentationContentReference } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
 import { loggerMock } from '@kbn/logging-mocks';
 import { PRODUCT_DOCUMENTATION_TOOL } from './product_documentation_tool';
 import type {
   LlmTasksPluginStart,
   RetrieveDocumentationResultDoc,
 } from '@kbn/llm-tasks-plugin/server';
-import type {
-  ContentReferencesStore,
-  ProductDocumentationContentReference,
-} from '@kbn/elastic-assistant-common';
 import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
 
 const DEFAULT_INFERENCE_ID = '.elser-2-elasticsearch';

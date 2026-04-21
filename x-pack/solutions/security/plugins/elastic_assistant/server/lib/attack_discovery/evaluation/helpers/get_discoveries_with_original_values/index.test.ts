@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
+import type { AttackDiscovery } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen';
 import { omit } from 'lodash/fp';
 
 import { getDiscoveriesWithOriginalValues } from '.';

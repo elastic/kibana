@@ -8,13 +8,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { Document } from '@langchain/core/documents';
-import type { DefendInsights, ContentReferencesStore } from '@kbn/elastic-assistant-common';
-import moment from 'moment';
+import type { DefendInsights } from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/common_attributes.gen';
 import {
-  DEFEND_INSIGHTS_ID,
   DefendInsightStatus,
   DefendInsightType,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/common_attributes.gen';
+import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
+import { DEFEND_INSIGHTS_ID } from '@kbn/elastic-assistant-common/constants';
+import moment from 'moment';
 import { OpenAiProviderType } from '@kbn/connector-schemas/openai/constants';
 
 import {

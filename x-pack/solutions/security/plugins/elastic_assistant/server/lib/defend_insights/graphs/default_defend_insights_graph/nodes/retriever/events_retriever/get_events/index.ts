@@ -7,8 +7,9 @@
 
 import type { DateMath } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
-import type { DefendInsightType, Replacements } from '@kbn/elastic-assistant-common';
+import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import type { DefendInsightType } from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/common_attributes.gen';
+import type { Replacements } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
 import {
   getAnonymizedValue,
   getRawDataOrDefault,

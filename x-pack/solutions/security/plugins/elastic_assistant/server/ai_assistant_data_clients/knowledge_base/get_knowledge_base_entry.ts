@@ -6,7 +6,7 @@
  */
 
 import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { KnowledgeBaseEntryResponse } from '@kbn/elastic-assistant-common';
+import type { KnowledgeBaseEntryResponse } from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/entries/common_attributes.gen';
 import type { EsKnowledgeBaseEntrySchema } from './types';
 import { transformESSearchToKnowledgeBaseEntry } from './transforms';
 

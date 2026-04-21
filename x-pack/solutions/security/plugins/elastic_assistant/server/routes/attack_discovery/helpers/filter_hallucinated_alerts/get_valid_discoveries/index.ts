@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AttackDiscoveries } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveries } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen';
 
 /**
  * Filters attack discoveries to keep only those where ALL alert IDs exist in Elasticsearch.

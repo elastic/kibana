@@ -6,7 +6,7 @@
  */
 
 import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { DefendInsightsResponse } from '@kbn/elastic-assistant-common';
+import type { DefendInsightsResponse } from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/common_attributes.gen';
 
 import type { EsDefendInsightSchema } from './types';
 import { transformESSearchToDefendInsights } from './helpers';

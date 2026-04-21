@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { DefendInsightType } from '@kbn/elastic-assistant-common';
+import { DefendInsightType } from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/common_attributes.gen';
 
 import type { DefendInsightsCombinedPrompts } from '.';
 import { getIncompatibleAntivirusPrompt } from './incompatible_antivirus';

@@ -9,10 +9,8 @@ import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { coreMock, elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
-import {
-  type AttackDiscoveryApiAlert,
-  type AttackDiscoveryGenerationConfig,
-} from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryApiAlert } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/attack_discovery_api_alert.gen';
+import type { AttackDiscoveryGenerationConfig } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen';
 import { OpenAiProviderType } from '@kbn/connector-schemas/openai/constants';
 
 import { mockAnonymizedAlerts } from '../../../lib/attack_discovery/evaluation/__mocks__/mock_anonymized_alerts';

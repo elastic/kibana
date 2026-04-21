@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { Replacements } from '@kbn/elastic-assistant-common';
+import type { Replacements } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
 import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
 import type { BaseMessage } from '@langchain/core/messages';
 import { _isMessageFieldWithRole } from '@langchain/core/messages';

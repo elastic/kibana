@@ -21,7 +21,7 @@ import {
   getQueryKnowledgeBaseEntryParams,
   getUpdateKnowledgeBaseEntrySchemaMock,
 } from '../../../__mocks__/knowledge_base_entry_schema.mock';
-import { ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BULK_ACTION } from '@kbn/elastic-assistant-common';
+import { ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BULK_ACTION } from '@kbn/elastic-assistant-common/constants';
 import { bulkActionKnowledgeBaseEntriesRoute } from './bulk_actions_route';
 import { authenticatedUser } from '../../../__mocks__/user';
 

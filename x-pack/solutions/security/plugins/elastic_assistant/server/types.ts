@@ -28,15 +28,12 @@ import { type MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { StructuredToolInterface } from '@langchain/core/tools';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
-import type {
-  PostAttackDiscoveryGenerateRequestBody,
-  DefendInsightsPostRequestBody,
-  AssistantFeatures,
-  ExecuteConnectorRequestBody,
-  Replacements,
-  ContentReferencesStore,
-} from '@kbn/elastic-assistant-common';
-import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { PostAttackDiscoveryGenerateRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/routes/public/post/post_attack_discovery_generate.gen';
+import type { DefendInsightsPostRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/post_defend_insights_route.gen';
+import type { AssistantFeatures, ContentReferencesStore } from '@kbn/elastic-assistant-common';
+import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen';
+import type { Replacements } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
+import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import type {
   LicensingApiRequestHandlerContext,
   LicensingPluginStart,

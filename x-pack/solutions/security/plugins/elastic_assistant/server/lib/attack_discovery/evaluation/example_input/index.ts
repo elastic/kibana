@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
+import { AttackDiscovery } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen';
+import { Replacements } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
 import { z } from '@kbn/zod/v4';
 
 const Document = z.object({

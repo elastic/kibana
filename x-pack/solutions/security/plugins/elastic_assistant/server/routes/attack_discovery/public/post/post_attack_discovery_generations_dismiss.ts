@@ -12,9 +12,11 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   API_VERSIONS,
   ATTACK_DISCOVERY_GENERATIONS_BY_ID_DISMISS,
+} from '@kbn/elastic-assistant-common/constants';
+import {
   PostAttackDiscoveryGenerationsDismissRequestParams,
   PostAttackDiscoveryGenerationsDismissResponse,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/routes/public/post/post_attack_discovery_generations_dismiss.route.gen';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 
 import { ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_DISMISSED } from '../../../../../common/constants';

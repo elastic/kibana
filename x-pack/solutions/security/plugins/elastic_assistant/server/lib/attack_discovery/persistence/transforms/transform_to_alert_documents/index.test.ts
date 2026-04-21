@@ -8,19 +8,9 @@
 import {
   ATTACK_DISCOVERY_AD_HOC_RULE_ID,
   ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID,
+} from '@kbn/elastic-assistant-common/constants';
+import {
   replaceAnonymizedValuesWithOriginalValues,
-  type CreateAttackDiscoveryAlertsParams,
-} from '@kbn/elastic-assistant-common';
-import {
-  ALERT_INSTANCE_ID,
-  ALERT_RULE_CATEGORY,
-  ALERT_RULE_NAME,
-  ALERT_RULE_TYPE_ID,
-  ALERT_RULE_UUID,
-  ALERT_URL,
-  ALERT_UUID,
-} from '@kbn/rule-data-utils';
-import {
   ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN_WITH_REPLACEMENTS,
   ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS,
   ALERT_ATTACK_DISCOVERY_REPLACEMENTS,
@@ -31,6 +21,16 @@ import {
   ALERT_ATTACK_DISCOVERY_ALERT_IDS,
   ALERT_ATTACK_DISCOVERY_ALERTS_CONTEXT_COUNT,
 } from '@kbn/elastic-assistant-common';
+import type { CreateAttackDiscoveryAlertsParams } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen';
+import {
+  ALERT_INSTANCE_ID,
+  ALERT_RULE_CATEGORY,
+  ALERT_RULE_NAME,
+  ALERT_RULE_TYPE_ID,
+  ALERT_RULE_UUID,
+  ALERT_URL,
+  ALERT_UUID,
+} from '@kbn/rule-data-utils';
 
 import {
   generateAttackDiscoveryAlertHash,

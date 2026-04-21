@@ -12,7 +12,7 @@ import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { ActionsClientLlm } from '@kbn/langchain/server';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { DefendInsightType } from '@kbn/elastic-assistant-common';
+import { DefendInsightType } from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/common_attributes.gen';
 import type { InferenceConnector } from '@kbn/inference-common';
 import { InferenceConnectorType } from '@kbn/inference-common';
 

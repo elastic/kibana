@@ -6,7 +6,7 @@
  */
 
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import type { CreateAttackDiscoverySchedulesRequestBody } from '@kbn/elastic-assistant-common';
+import type { CreateAttackDiscoverySchedulesRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/routes/public/schedules/crud_attack_discovery_schedules_route.gen';
 import { OpenAiProviderType } from '@kbn/connector-schemas/openai/constants';
 
 import { createAttackDiscoverySchedulesRoute } from './create';

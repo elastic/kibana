@@ -12,7 +12,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { EsConversationSchema } from './types';
 import { authenticatedUser } from '../../__mocks__/user';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import type { ConversationResponse } from '@kbn/elastic-assistant-common';
+import type { ConversationResponse } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
 import { getEsConversationSchemaMock } from '../../__mocks__/conversations_schema.mock';
 
 export const getConversationResponseMock = (): ConversationResponse => ({

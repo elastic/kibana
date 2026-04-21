@@ -6,7 +6,7 @@
  */
 
 import type { EcsEvent } from '@kbn/core/server';
-import type { User } from '@kbn/elastic-assistant-common';
+import type { User } from '@kbn/elastic-assistant-common/impl/schemas/common_attributes.gen';
 import { ConversationSharedState } from '@kbn/elastic-assistant-common';
 import type { AuditEvent } from '@kbn/security-plugin/server';
 import type { ArrayElement } from '@kbn/utility-types';

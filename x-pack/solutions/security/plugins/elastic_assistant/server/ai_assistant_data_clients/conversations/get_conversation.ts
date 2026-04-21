@@ -6,7 +6,7 @@
  */
 
 import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { ConversationResponse } from '@kbn/elastic-assistant-common';
+import type { ConversationResponse } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
 import type { EsConversationSchema } from './types';
 import { transformESSearchToConversations } from './transforms';
 

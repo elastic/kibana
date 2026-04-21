@@ -8,7 +8,10 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { AuthenticatedUser, Logger } from '@kbn/core/server';
 
-import type { ConversationResponse, Message } from '@kbn/elastic-assistant-common';
+import type {
+  ConversationResponse,
+  Message,
+} from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
 import type {
   DocumentsDataWriter,
   BulkOperationError,

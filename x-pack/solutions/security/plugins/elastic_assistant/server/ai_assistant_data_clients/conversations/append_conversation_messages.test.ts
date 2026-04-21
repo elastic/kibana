@@ -6,7 +6,10 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import type { ConversationResponse, Message } from '@kbn/elastic-assistant-common';
+import type {
+  ConversationResponse,
+  Message,
+} from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
 import type {
   DocumentsDataWriter,
   WriterBulkResponse,

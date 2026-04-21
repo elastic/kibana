@@ -8,7 +8,7 @@
 import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 import type { InferenceConnector } from '@kbn/inference-common';
 import type { Logger } from '@kbn/logging';
-import type { DefendInsightType } from '@kbn/elastic-assistant-common';
+import type { DefendInsightType } from '@kbn/elastic-assistant-common/impl/schemas/defend_insights/common_attributes.gen';
 import { Client } from 'langsmith';
 import { evaluate } from 'langsmith/evaluation';
 import { asyncForEach } from '@kbn/std';

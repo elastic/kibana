@@ -9,12 +9,11 @@ import type { IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
 import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
 import { ATTACK_DISCOVERY_API_ACTION_ALL } from '@kbn/security-solution-features/actions';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { API_VERSIONS, ATTACK_DISCOVERY_FIND } from '@kbn/elastic-assistant-common/constants';
 import {
-  API_VERSIONS,
-  ATTACK_DISCOVERY_FIND,
   AttackDiscoveryFindRequestQuery,
   AttackDiscoveryFindResponse,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/routes/public/get/find_attack_discoveries_route.gen';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 
 import { performChecks } from '../../../helpers';

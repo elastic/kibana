@@ -11,15 +11,15 @@ import _ from 'lodash';
 
 import type {
   DocumentEntry,
-  FindKnowledgeBaseEntriesResponse,
   KnowledgeBaseResource,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/entries/common_attributes.gen';
+import { DocumentEntryType } from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/entries/common_attributes.gen';
+import type { FindKnowledgeBaseEntriesResponse } from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/entries/find_knowledge_base_entries_route.gen';
+import { FindKnowledgeBaseEntriesRequestQuery } from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/entries/find_knowledge_base_entries_route.gen';
 import {
   API_VERSIONS,
-  DocumentEntryType,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_FIND,
-  FindKnowledgeBaseEntriesRequestQuery,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/constants';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticAssistantPluginRouter } from '../../../types';

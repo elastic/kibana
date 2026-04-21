@@ -12,8 +12,8 @@ import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_EVALUATE_URL,
   INTERNAL_API_ACCESS,
-  GetEvaluateResponse,
-} from '@kbn/elastic-assistant-common';
+} from '@kbn/elastic-assistant-common/constants';
+import { GetEvaluateResponse } from '@kbn/elastic-assistant-common/impl/schemas/evaluation/get_evaluate_route.gen';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { buildResponse } from '../../lib/build_response';
 import type { ElasticAssistantRequestHandlerContext } from '../../types';

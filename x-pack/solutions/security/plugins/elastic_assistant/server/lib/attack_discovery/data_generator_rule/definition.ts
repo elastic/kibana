@@ -8,11 +8,9 @@
 import type { Logger } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type { AlertInstanceContext, RuleType, RuleTypeState } from '@kbn/alerting-plugin/server';
-import {
-  type AttackDiscoveryAlertDocument,
-  CreateAttackDiscoveryAlertsParams as CreateAttackDiscoveryAlertsParamsSchema,
-  type CreateAttackDiscoveryAlertsParams,
-} from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryAlertDocument } from '@kbn/elastic-assistant-common';
+import type { CreateAttackDiscoveryAlertsParams } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen';
+import { CreateAttackDiscoveryAlertsParams as CreateAttackDiscoveryAlertsParamsSchema } from '@kbn/elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen';
 import { TaskPriority } from '@kbn/task-manager-plugin/server';
 
 import { ATTACK_DISCOVERY_ALERTS_AAD_CONFIG } from '../schedules/constants';

@@ -18,7 +18,7 @@ import {
   VULNERABILITIES_RESULT_EVALUATION,
 } from '@kbn/cloud-security-posture-common/utils/findings_query_builders';
 import { buildVulnerabilityEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
-import type { Replacements } from '@kbn/elastic-assistant-common';
+import type { Replacements } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
 import { getAnonymizedValue, getRawDataOrDefault } from '@kbn/elastic-assistant-common';
 import { omit } from 'lodash';
 import { getAnonymizedValues } from '@kbn/elastic-assistant-common/impl/data_anonymization/get_anonymized_values';
