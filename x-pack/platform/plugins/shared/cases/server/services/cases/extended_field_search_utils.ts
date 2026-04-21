@@ -188,15 +188,17 @@ export const buildExtendedFieldRuntimeMappings = (
 export const buildExtendedFieldFilterClauses = (
   resolvedFilters: ResolvedExtendedFieldFilter[]
 ): estypes.QueryDslQueryContainer[] =>
-  resolvedFilters.flatMap(({ storageKey, value, esType, control }) => {
-    const fieldName = `ef_${storageKey}`;
+  resolvedFilters.flatMap(
+    ({ storageKey, value, esType, control }): estypes.QueryDslQueryContainer[] => {
+      const fieldName = `ef_${storageKey}`;
 
-    if (control === DATE_PICKER) {
-      const range = parseDateFilterToRange(value);
-      return range ? [{ range: { [fieldName]: range } }] : [];
+      if (control === DATE_PICKER) {
+        const range = parseDateFilterToRange(value);
+        return range ? [{ range: { [fieldName]: range } }] : [];
+      }
+
+      const runtimeType = mapToRuntimeType(esType);
+      const typedValue = runtimeType === 'long' ? Number(value) : value;
+      return [{ term: { [fieldName]: { value: typedValue } } }];
     }
-
-    const runtimeType = mapToRuntimeType(esType);
-    const typedValue = runtimeType === 'long' ? Number(value) : value;
-    return [{ term: { [fieldName]: { value: typedValue } } }];
-  });
+  );
