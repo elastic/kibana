@@ -9,13 +9,9 @@ import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser/attachments';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import { RULES_FEATURE_LATEST } from '@kbn/security-solution-features/constants';
-import { AiRuleCreationService } from '../../detection_engine/common/ai_rule_creation_store';
-import {
-  createRuleAttachmentDefinition,
-  isOnRuleFormPage,
-  registerRuleAttachment,
-} from './rule_attachment';
-import { SecurityAgentBuilderAttachments } from '../../../common/constants';
+import { AiRuleCreationService } from '../../../detection_engine/common/ai_rule_creation_store';
+import { createRuleAttachmentDefinition, isOnRuleFormPage, registerRuleAttachment } from '.';
+import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 
 const validRule = {
   name: 'Test Rule',

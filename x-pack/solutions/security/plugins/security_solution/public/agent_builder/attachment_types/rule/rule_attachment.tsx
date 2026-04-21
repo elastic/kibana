@@ -25,45 +25,21 @@ import type {
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { ApplicationStart } from '@kbn/core-application-browser';
-import type { Filter } from '@kbn/es-query';
 import { RULES_UI_EDIT_PRIVILEGE } from '@kbn/security-solution-features/constants';
-import { toSimpleRuleSchedule } from '../../../common/api/detection_engine/model/rule_schema/to_simple_rule_schedule';
-import type { RuleResponse } from '../../../common/api/detection_engine/model/rule_schema';
-import type { AiRuleCreationService } from '../../detection_engine/common/ai_rule_creation_store';
-import { RULES_PATH, SecurityAgentBuilderAttachments } from '../../../common/constants';
-import { hasCapabilities } from '../../common/lib/capabilities';
-import {
-  Threshold as ThresholdDisplay,
-  ThreatIndex as ThreatIndexDisplay,
-  constructThreatMappingDescription,
-  NewTermsFields as NewTermsFieldsDisplay,
-} from '../../detection_engine/rule_management/components/rule_details/rule_definition_section';
-import { convertDateMathToDuration } from '../../common/utils/date_math';
-import { DEFAULT_HISTORY_WINDOW_SIZE } from '../../common/constants';
-import {
-  EQL_OPTIONS_EVENT_CATEGORY_FIELD_LABEL,
-  EQL_OPTIONS_EVENT_TIEBREAKER_FIELD_LABEL,
-  EQL_OPTIONS_EVENT_TIMESTAMP_FIELD_LABEL,
-} from '../../detection_engine/rule_creation/components/eql_query_edit/translations';
+import { toSimpleRuleSchedule } from '../../../../common/api/detection_engine/model/rule_schema/to_simple_rule_schedule';
+import type { RuleResponse } from '../../../../common/api/detection_engine/model/rule_schema';
+import type { AiRuleCreationService } from '../../../detection_engine/common/ai_rule_creation_store';
+import { RULES_PATH, SecurityAgentBuilderAttachments } from '../../../../common/constants';
+import { hasCapabilities } from '../../../common/lib/capabilities';
 import {
   INDEX_FIELD_LABEL,
-  THRESHOLD_FIELD_LABEL,
-  ANOMALY_THRESHOLD_FIELD_LABEL,
-  MACHINE_LEARNING_JOB_ID_FIELD_LABEL,
-  THREAT_INDEX_FIELD_LABEL,
-  THREAT_MAPPING_FIELD_LABEL,
-  NEW_TERMS_FIELDS_FIELD_LABEL,
-  HISTORY_WINDOW_SIZE_FIELD_LABEL,
   RULE_TYPE_FIELD_LABEL,
-} from '../../detection_engine/rule_management/components/rule_details/translations';
+} from '../../../detection_engine/rule_management/components/rule_details/translations';
 import {
   QUERY_LABEL,
   EQL_QUERY_LABEL,
   ESQL_QUERY_LABEL,
   SAVED_QUERY_LABEL,
-  SAVED_QUERY_NAME_LABEL,
-  THREAT_QUERY_LABEL,
-  FILTERS_LABEL,
   ML_TYPE_DESCRIPTION,
   EQL_TYPE_DESCRIPTION,
   QUERY_TYPE_DESCRIPTION,
@@ -71,7 +47,24 @@ import {
   THREAT_MATCH_TYPE_DESCRIPTION,
   NEW_TERMS_TYPE_DESCRIPTION,
   ESQL_TYPE_DESCRIPTION,
-} from '../../detection_engine/rule_creation_ui/components/description_step/translations';
+} from '../../../detection_engine/rule_creation_ui/components/description_step/translations';
+const SectionHeading: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <EuiText size="s">
+    <strong>{children}</strong>
+  </EuiText>
+);
+
+const TagsBadgeList: React.FC<{ tags: string[] }> = ({ tags }) => (
+  <EuiFlexGroup responsive={false} gutterSize="xs" wrap>
+    {tags.map((tag) => (
+      <EuiFlexItem grow={false} key={tag}>
+        <EuiBadge color="hollow">{tag}</EuiBadge>
+      </EuiFlexItem>
+    ))}
+  </EuiFlexGroup>
+);
+import { FiltersDisplay } from './filters_display';
+import { RuleTypeDetails } from './rule_type_details';
 
 type RuleAttachment = Attachment<string, { text: string; attachmentLabel?: string }>;
 
@@ -112,22 +105,6 @@ const EmptyRuleContent: React.FC = () => (
       })}
     </EuiText>
   </EuiCallOut>
-);
-
-const SectionHeading: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <EuiText size="s">
-    <strong>{children}</strong>
-  </EuiText>
-);
-
-const TagsBadgeList: React.FC<{ tags: string[] }> = ({ tags }) => (
-  <EuiFlexGroup responsive={false} gutterSize="xs" wrap>
-    {tags.map((tag) => (
-      <EuiFlexItem grow={false} key={tag}>
-        <EuiBadge color="hollow">{tag}</EuiBadge>
-      </EuiFlexItem>
-    ))}
-  </EuiFlexGroup>
 );
 
 const getRuleTypeLabel = (ruleType: string): string => {
@@ -204,265 +181,6 @@ const IndexPatterns: React.FC<{ patterns: string[] }> = ({ patterns }) => (
     </EuiFlexGroup>
   </>
 );
-
-const formatRangeFilter = (key: string, params: Record<string, unknown>): string => {
-  const parts: string[] = [];
-  if (params.gte !== undefined || params.gt !== undefined) {
-    parts.push(`>= ${params.gte ?? params.gt}`);
-  }
-  if (params.lte !== undefined || params.lt !== undefined) {
-    parts.push(`<= ${params.lte ?? params.lt}`);
-  }
-  return `${key}: ${parts.join(' AND ')}`;
-};
-
-const resolveParamValue = (params: Filter['meta']['params']): string => {
-  if (params == null) return '';
-  if (typeof params === 'string' || typeof params === 'number' || typeof params === 'boolean') {
-    return String(params);
-  }
-  if (Array.isArray(params)) return params.join(', ');
-  if (typeof params === 'object' && 'query' in params) return String(params.query);
-  return JSON.stringify(params);
-};
-
-const formatPhraseFilter = (
-  key: string,
-  value: Filter['meta']['value'],
-  params: Filter['meta']['params']
-): string => {
-  const display = typeof value === 'string' ? value : resolveParamValue(params);
-  return `${key}: ${display}`;
-};
-
-export const getFilterLabel = (filter: Filter): string => {
-  if (filter.meta?.alias) {
-    return filter.meta.alias;
-  }
-  const { key, negate, type, params, value } = filter.meta ?? {};
-  const prefix = negate ? 'NOT ' : '';
-
-  if (!key) {
-    return `${prefix}${JSON.stringify(filter.query ?? filter)}`;
-  }
-
-  if (type === 'exists') {
-    return `${prefix}${key}: exists`;
-  }
-
-  if (type === 'phrase' || type === 'phrases') {
-    return `${prefix}${formatPhraseFilter(key, value, params)}`;
-  }
-
-  if (type === 'range' && params && typeof params === 'object' && !Array.isArray(params)) {
-    return `${prefix}${formatRangeFilter(key, params as Record<string, unknown>)}`;
-  }
-
-  const displayValue = typeof value === 'string' ? value : resolveParamValue(params);
-  return displayValue ? `${prefix}${key}: ${displayValue}` : `${prefix}${key}`;
-};
-
-export const FiltersDisplay: React.FC<{ filters: unknown[] }> = ({ filters }) => {
-  const validFilters = filters.filter(
-    (f): f is Filter => f != null && typeof f === 'object' && 'meta' in f
-  );
-  if (validFilters.length === 0) {
-    return null;
-  }
-
-  return (
-    <>
-      <SectionHeading>{FILTERS_LABEL}</SectionHeading>
-      <EuiSpacer size="xs" />
-      <EuiFlexGroup responsive={false} gutterSize="xs" wrap>
-        {validFilters.map((filter, idx) => (
-          <EuiFlexItem grow={false} key={idx}>
-            <EuiBadge color={filter.meta?.negate ? 'danger' : 'hollow'}>
-              {getFilterLabel(filter)}
-            </EuiBadge>
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
-    </>
-  );
-};
-
-export const ThresholdDetails: React.FC<{ rule: RuleResponse }> = ({ rule }) => {
-  if (rule.type !== 'threshold') {
-    return null;
-  }
-
-  return (
-    <>
-      <SectionHeading>{THRESHOLD_FIELD_LABEL}</SectionHeading>
-      <EuiSpacer size="xs" />
-      <ThresholdDisplay threshold={rule.threshold} />
-    </>
-  );
-};
-
-export const ThreatMatchDetails: React.FC<{ rule: RuleResponse }> = ({ rule }) => {
-  if (rule.type !== 'threat_match') {
-    return null;
-  }
-
-  return (
-    <>
-      <SectionHeading>{THREAT_INDEX_FIELD_LABEL}</SectionHeading>
-      <EuiSpacer size="xs" />
-      <ThreatIndexDisplay threatIndex={rule.threat_index} />
-      {rule.threat_query && (
-        <>
-          <EuiSpacer size="xs" />
-          <SectionHeading>{THREAT_QUERY_LABEL}</SectionHeading>
-          <EuiSpacer size="xs" />
-          <EuiCodeBlock fontSize="s" paddingSize="s" overflowHeight={100} isCopyable>
-            {rule.threat_query}
-          </EuiCodeBlock>
-        </>
-      )}
-      <EuiSpacer size="xs" />
-      <EuiText size="s">
-        <strong>
-          {THREAT_MAPPING_FIELD_LABEL}
-          {':'}
-        </strong>{' '}
-        {constructThreatMappingDescription(rule.threat_mapping)}
-      </EuiText>
-    </>
-  );
-};
-
-export const MachineLearningDetails: React.FC<{ rule: RuleResponse }> = ({ rule }) => {
-  if (rule.type !== 'machine_learning') {
-    return null;
-  }
-  const jobIds = Array.isArray(rule.machine_learning_job_id)
-    ? rule.machine_learning_job_id
-    : [rule.machine_learning_job_id];
-
-  return (
-    <>
-      <EuiText size="s">
-        <strong>
-          {MACHINE_LEARNING_JOB_ID_FIELD_LABEL}
-          {':'}
-        </strong>{' '}
-        {jobIds.join(', ')}
-      </EuiText>
-      <EuiSpacer size="xs" />
-      <EuiText size="s">
-        <strong>
-          {ANOMALY_THRESHOLD_FIELD_LABEL}
-          {':'}
-        </strong>{' '}
-        {rule.anomaly_threshold}
-      </EuiText>
-    </>
-  );
-};
-
-export const NewTermsDetails: React.FC<{ rule: RuleResponse }> = ({ rule }) => {
-  if (rule.type !== 'new_terms') {
-    return null;
-  }
-
-  return (
-    <>
-      <SectionHeading>{NEW_TERMS_FIELDS_FIELD_LABEL}</SectionHeading>
-      <EuiSpacer size="xs" />
-      <NewTermsFieldsDisplay newTermsFields={rule.new_terms_fields} />
-      <EuiSpacer size="xs" />
-      <EuiText size="s">
-        <strong>
-          {HISTORY_WINDOW_SIZE_FIELD_LABEL}
-          {':'}
-        </strong>{' '}
-        {rule.history_window_start
-          ? convertDateMathToDuration(rule.history_window_start)
-          : DEFAULT_HISTORY_WINDOW_SIZE}
-      </EuiText>
-    </>
-  );
-};
-
-export const SavedQueryDetails: React.FC<{ rule: RuleResponse }> = ({ rule }) => {
-  if (rule.type !== 'saved_query') {
-    return null;
-  }
-
-  return (
-    <EuiText size="s">
-      <strong>
-        {SAVED_QUERY_NAME_LABEL}
-        {':'}
-      </strong>{' '}
-      {rule.saved_id}
-    </EuiText>
-  );
-};
-
-export const EqlDetails: React.FC<{ rule: RuleResponse }> = ({ rule }) => {
-  if (rule.type !== 'eql') {
-    return null;
-  }
-  const { event_category_override, tiebreaker_field, timestamp_field } = rule;
-  if (!event_category_override && !tiebreaker_field && !timestamp_field) {
-    return null;
-  }
-
-  return (
-    <>
-      {event_category_override && (
-        <EuiText size="s">
-          <strong>
-            {EQL_OPTIONS_EVENT_CATEGORY_FIELD_LABEL}
-            {':'}
-          </strong>{' '}
-          {event_category_override}
-        </EuiText>
-      )}
-      {tiebreaker_field && (
-        <EuiText size="s">
-          <strong>
-            {EQL_OPTIONS_EVENT_TIEBREAKER_FIELD_LABEL}
-            {':'}
-          </strong>{' '}
-          {tiebreaker_field}
-        </EuiText>
-      )}
-      {timestamp_field && (
-        <EuiText size="s">
-          <strong>
-            {EQL_OPTIONS_EVENT_TIMESTAMP_FIELD_LABEL}
-            {':'}
-          </strong>{' '}
-          {timestamp_field}
-        </EuiText>
-      )}
-      <EuiSpacer size="s" />
-    </>
-  );
-};
-
-const RuleTypeDetails: React.FC<{ rule: RuleResponse }> = ({ rule }) => {
-  switch (rule.type) {
-    case 'threshold':
-      return <ThresholdDetails rule={rule} />;
-    case 'threat_match':
-      return <ThreatMatchDetails rule={rule} />;
-    case 'machine_learning':
-      return <MachineLearningDetails rule={rule} />;
-    case 'new_terms':
-      return <NewTermsDetails rule={rule} />;
-    case 'saved_query':
-      return <SavedQueryDetails rule={rule} />;
-    case 'eql':
-      return <EqlDetails rule={rule} />;
-    default:
-      return null;
-  }
-};
 
 const SeverityRiskScore: React.FC<{
   severity?: string;

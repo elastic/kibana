@@ -75,7 +75,7 @@ import { generateIndicatorAttachmentType } from './cases/attachments/indicator/u
 import { defaultDeepLinks } from './app/links/default_deep_links';
 import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
 import { registerAttachmentUiDefinitions } from './agent_builder/attachment_types';
-import { registerRuleAttachment } from './agent_builder/attachment_types/rule_attachment';
+import { registerRuleAttachment } from './agent_builder/attachment_types/rule';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;

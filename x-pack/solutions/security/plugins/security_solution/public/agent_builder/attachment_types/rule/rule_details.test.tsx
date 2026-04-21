@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import type { RuleResponse } from '../../../common/api/detection_engine/model/rule_schema';
+import type { RuleResponse } from '../../../../common/api/detection_engine/model/rule_schema';
 import {
   ThresholdDetails,
   ThreatMatchDetails,
@@ -18,9 +18,9 @@ import {
   FiltersDisplay,
   getFilterLabel,
   createRuleAttachmentDefinition,
-} from './rule_attachment';
+} from '.';
 import type { Filter } from '@kbn/es-query';
-import { AiRuleCreationService } from '../../detection_engine/common/ai_rule_creation_store';
+import { AiRuleCreationService } from '../../../detection_engine/common/ai_rule_creation_store';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import { RULES_FEATURE_LATEST } from '@kbn/security-solution-features/constants';
 
