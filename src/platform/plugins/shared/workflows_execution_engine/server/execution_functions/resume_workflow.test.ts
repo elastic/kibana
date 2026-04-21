@@ -97,7 +97,7 @@ describe('resumeWorkflow', () => {
         config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as any,
         fakeRequest,
         dependencies,
-        workflowsExecutionEngine: { emitEvent: mockEmitEvent } as any,
+        workflowsExecutionEngine: { triggerEvents: { emitEvent: mockEmitEvent } } as any,
       })
     ).rejects.toThrow('Step failed');
 
@@ -106,7 +106,6 @@ describe('resumeWorkflow', () => {
     expect(mockEmitEvent).toHaveBeenCalledTimes(1);
     expect(mockEmitEvent).toHaveBeenCalledWith({
       triggerId: WORKFLOW_EXECUTION_FAILED_TRIGGER_ID,
-      spaceId,
       payload: expect.objectContaining({
         workflow: expect.objectContaining({
           id: 'wf-1',
@@ -152,7 +151,7 @@ describe('resumeWorkflow', () => {
         config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as any,
         fakeRequest,
         dependencies,
-        workflowsExecutionEngine: { emitEvent: mockEmitEvent } as any,
+        workflowsExecutionEngine: { triggerEvents: { emitEvent: mockEmitEvent } } as any,
       })
     ).rejects.toThrow('Runtime error');
 

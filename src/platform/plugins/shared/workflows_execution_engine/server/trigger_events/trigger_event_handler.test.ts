@@ -188,7 +188,7 @@ describe('TriggerEventHandler', () => {
 
     expect(scheduleWorkflow).not.toHaveBeenCalled();
     expect(deps.logger.debug).toHaveBeenCalledWith(
-      expect.stringContaining('Event-driven execution is disabled')
+      expect.stringContaining('Event-driven triggers are disabled')
     );
   });
 

@@ -88,7 +88,7 @@ export class TriggerEventHandler {
 
   async handleEvent(params: EmitEventParams): Promise<void> {
     if (!this.config.enabled && !this.config.logEvents) {
-      this.logger.debug('Event-driven trigger events are disabled; skipping workflow scheduling.');
+      this.logger.debug('Event-driven triggers are disabled; skipping workflow scheduling.');
       return;
     }
 
