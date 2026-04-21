@@ -69,7 +69,7 @@ export class TriggerEventHandler {
   private readonly spaces: SpacesServiceStart | undefined;
   private readonly config: EventTriggersConfig;
   private readonly logger: Logger;
-  private triggerEventsClient?: TriggerEventsDataStreamClient;
+  private readonly triggerEventsClientPromise: Promise<TriggerEventsDataStreamClient>;
 
   constructor(deps: TriggerEventHandlerDeps) {
     this.scheduleWorkflow = deps.scheduleWorkflow;
@@ -83,30 +83,16 @@ export class TriggerEventHandler {
 
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     this.workflowRepository = new WorkflowRepository({ esClient, logger: this.logger });
-
-    initializeTriggerEventsClient(coreStart.dataStreams)
-      .then((client) => {
-        this.triggerEventsClient = client;
-      })
-      .catch((error) => {
-        this.logger.warn(
-          `Failed to initialize trigger events data stream client: ${
-            error instanceof Error ? error.message : String(error)
-          }. Event audit logging will be skipped.`
-        );
-      });
+    this.triggerEventsClientPromise = initializeTriggerEventsClient(coreStart.dataStreams);
   }
 
   async handleEvent(params: EmitEventParams): Promise<void> {
-    if (!this.config.enabled) {
-      this.logger.debug(
-        'Event-driven execution is disabled (workflowsExecutionEngine.eventDriven.enabled: false); skipping workflow scheduling.'
-      );
+    if (!this.config.enabled && !this.config.logEvents) {
+      this.logger.debug('Event-driven trigger events are disabled; skipping workflow scheduling.');
       return;
     }
 
     const { triggerId, payload, request } = params;
-
     const spaceId = this.spaces?.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
     this.validateTrigger(triggerId, spaceId, payload);
@@ -143,7 +129,7 @@ export class TriggerEventHandler {
     }
 
     let scheduleStats: TriggerEventScheduleStats;
-    if (workflows.length > 0) {
+    if (this.config.enabled && workflows.length > 0) {
       scheduleStats = await this.scheduleMatchingWorkflows(
         workflows,
         spaceId,
@@ -238,22 +224,20 @@ export class TriggerEventHandler {
     payload: Record<string, unknown>;
     sourceExecutionId?: string;
   }): Promise<void> {
-    if (!this.triggerEventsClient) {
-      return;
-    }
-    const doc = {
-      '@timestamp': params.timestamp,
-      eventId: params.eventId,
-      triggerId: params.triggerId,
-      spaceId: params.spaceId,
-      subscriptions: params.subscriptions,
-      payload: params.payload,
-      ...(params.sourceExecutionId !== undefined && params.sourceExecutionId !== ''
-        ? { sourceExecutionId: params.sourceExecutionId }
-        : {}),
-    };
     try {
-      await this.triggerEventsClient.create({ documents: [doc] });
+      const triggerEventsClient = await this.triggerEventsClientPromise;
+      const doc = {
+        '@timestamp': params.timestamp,
+        eventId: params.eventId,
+        triggerId: params.triggerId,
+        spaceId: params.spaceId,
+        subscriptions: params.subscriptions,
+        payload: params.payload,
+        ...(params.sourceExecutionId !== undefined && params.sourceExecutionId !== ''
+          ? { sourceExecutionId: params.sourceExecutionId }
+          : {}),
+      };
+      await triggerEventsClient.create({ documents: [doc] });
     } catch (error) {
       this.logger.warn(
         `Failed to write trigger event to data stream (trigger: ${params.triggerId}): ${
