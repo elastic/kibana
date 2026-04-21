@@ -17,6 +17,52 @@ const PARTITIONING_HARD_SYSTEMS = ['Hadoop', 'Mac', 'Linux', 'HPC'] as const;
 /** Must match `sample_logs` scenario `range.interval('5s')` in kbn-synthtrace. */
 const SAMPLE_LOGS_STEP_MS = 5000;
 
+/**
+ * Base metadata overrides for partitioning evaluation — stable fields that define
+ * the signal the LLM must detect. Creative per-document noise is added by the
+ * `sample_logs` scenario based on `loghubCreativeThemes`.
+ */
+const LOGHUB_METADATA_OVERRIDES = {
+  // Easy dataset: distinct identifiers
+  // Note: Hadoop is in both easy and hard datasets; hard dataset uses data-platform
+  Hadoop: { 'service.name': 'data-platform', 'host.name': 'yarn-node-1', data_layer: 'batch' },
+  Proxifier: { 'service.name': 'proxifier-proxy', 'host.name': 'proxy-1' },
+  Android: {
+    'service.name': 'android-system',
+    'host.name': 'pixel-1',
+    'os.platform': 'android',
+  },
+  OpenStack: {
+    'service.name': 'openstack-nova',
+    'host.name': 'compute-1',
+    'cloud.provider': 'openstack',
+  },
+  // Hard dataset: overlapping service.name, distinguished by secondary fields
+  // Note: Hadoop/Mac share service.name 'data-platform'; Linux/HPC share 'infra-monitoring'
+  Mac: { 'service.name': 'data-platform', 'host.name': 'dp-node-2', data_layer: 'streaming' },
+  Linux: { 'service.name': 'infra-monitoring', 'host.name': 'mon-1' },
+  HPC: {
+    'service.name': 'infra-monitoring',
+    'host.name': 'mon-2',
+    'cluster.node_id': 'node-001',
+  },
+} satisfies Record<string, Record<string, unknown>>;
+
+/**
+ * Per-system creative themes that drive dynamic per-document metadata
+ * (partition hints, storyline tags, palettes, deployment slots, trace correlations).
+ * Resolved by the `sample_logs` scenario into function-based overrides.
+ */
+const LOGHUB_CREATIVE_THEMES: Record<string, string> = {
+  Hadoop: 'batch',
+  Proxifier: 'proxy',
+  Android: 'mobile',
+  OpenStack: 'cloud',
+  Mac: 'stream',
+  Linux: 'infra',
+  HPC: 'infra',
+};
+
 const indexModeExamples = PIPELINE_SUGGESTION_DATASETS.flatMap((dataset) =>
   dataset.examples.filter(
     (example) => !example.input.sample_documents || example.input.sample_documents.length === 0
@@ -145,31 +191,6 @@ globalSetupHookWithSynthtrace(
     // Per-system metadata overrides for partitioning evaluation
     // Easy: distinct service.name and host.name patterns per system
     // Hard: overlapping service.name (data-platform, infra-monitoring) requiring secondary field analysis
-    const loghubMetadataOverrides = {
-      // Easy dataset: distinct identifiers
-      // Note: Hadoop is in both easy and hard datasets; hard dataset uses data-platform
-      Hadoop: { 'service.name': 'data-platform', 'host.name': 'yarn-node-1', data_layer: 'batch' },
-      Proxifier: { 'service.name': 'proxifier-proxy', 'host.name': 'proxy-1' },
-      Android: {
-        'service.name': 'android-system',
-        'host.name': 'pixel-1',
-        'os.platform': 'android',
-      },
-      OpenStack: {
-        'service.name': 'openstack-nova',
-        'host.name': 'compute-1',
-        'cloud.provider': 'openstack',
-      },
-      // Hard dataset: overlapping service.name, distinguished by secondary fields
-      // Note: Hadoop/Mac share service.name 'data-platform'; Linux/HPC share 'infra-monitoring'
-      Mac: { 'service.name': 'data-platform', 'host.name': 'dp-node-2', data_layer: 'streaming' },
-      Linux: { 'service.name': 'infra-monitoring', 'host.name': 'mon-1' },
-      HPC: {
-        'service.name': 'infra-monitoring',
-        'host.name': 'mon-2',
-        'cluster.node_id': 'node-001',
-      },
-    };
     await indexSynthtraceScenario({
       scenario: 'sample_logs',
       scenarioOpts: {
@@ -177,7 +198,8 @@ globalSetupHookWithSynthtrace(
         rpm,
         streamType: 'wired',
         loghubTimestampLayout: 'uniform_interval',
-        loghubMetadataOverrides: JSON.stringify(loghubMetadataOverrides),
+        loghubMetadataOverrides: JSON.stringify(LOGHUB_METADATA_OVERRIDES),
+        loghubCreativeThemes: JSON.stringify(LOGHUB_CREATIVE_THEMES),
       },
       config,
       from,

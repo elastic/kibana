@@ -19,6 +19,24 @@ import type { StreamLogDocument, StreamLogGenerator } from '../types';
  */
 export type LoghubTimestampLayout = 'source' | 'uniform_interval';
 
+/**
+ * Per-document metadata override: either a static object applied to every document,
+ * or a function invoked per document to produce varied metadata.
+ */
+export type MetadataOverrideFn = (docIndex: number, logLine: string) => Record<string, unknown>;
+export type MetadataOverride = Record<string, unknown> | MetadataOverrideFn;
+
+function resolveMetadataOverride(
+  override: MetadataOverride | undefined,
+  docIndex: number,
+  logLine: string
+): Record<string, unknown> {
+  if (override === undefined) {
+    return {};
+  }
+  return typeof override === 'function' ? override(docIndex, logLine) : override;
+}
+
 export function createLoghubGenerator({
   system,
   parser,
@@ -34,7 +52,7 @@ export function createLoghubGenerator({
   targetRpm?: number;
   streamType: 'classic' | 'wired';
   timestampLayout?: LoghubTimestampLayout;
-  metadataOverride?: Record<string, unknown>;
+  metadataOverride?: MetadataOverride;
 }): StreamLogGenerator {
   let index = 0;
   let start = 0;
@@ -81,6 +99,7 @@ export function createLoghubGenerator({
             break;
           }
 
+          const docIndex = index;
           const line = lines[index % count];
           index++;
 
@@ -88,7 +107,7 @@ export function createLoghubGenerator({
             '@timestamp': simulatedTimestamp,
             message: parser.replaceTimestamp(line.message, simulatedTimestamp),
             ...parser.getFakeMetadata(line.message),
-            ...metadataOverride,
+            ...resolveMetadataOverride(metadataOverride, docIndex, line.message),
             filepath,
             _index:
               streamType === 'classic' ? `logs-${system.name.toLowerCase()}-default` : undefined,
@@ -101,6 +120,7 @@ export function createLoghubGenerator({
       const safeRange = range > 0 ? range : 1;
 
       while (true) {
+        const docIndex = index;
         const line = lines[index % count];
 
         const rotations = Math.floor(index / count);
@@ -123,7 +143,7 @@ export function createLoghubGenerator({
           '@timestamp': simulatedTimestamp,
           message: parser.replaceTimestamp(line.message, simulatedTimestamp),
           ...parser.getFakeMetadata(line.message),
-          ...metadataOverride,
+          ...resolveMetadataOverride(metadataOverride, docIndex, line.message),
           filepath,
           _index:
             streamType === 'classic' ? `logs-${system.name.toLowerCase()}-default` : undefined,
