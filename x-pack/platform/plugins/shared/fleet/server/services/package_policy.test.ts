@@ -10178,6 +10178,48 @@ describe('Package policy service', () => {
         expect(celInput?.enabled).toBe(true);
       });
 
+      it('disables the pre-existing cel input when the old httpjson input was disabled, even if cel was enabled', () => {
+        const basePolicyWithDisabledHttpjson: NewPackagePolicy = {
+          ...makePartialMigrationBasePolicy(),
+          inputs: [
+            {
+              type: 'httpjson',
+              policy_template: 'template_1',
+              enabled: false,
+              vars: {},
+              streams: [
+                {
+                  enabled: false,
+                  data_stream: { dataset: 'test_package.activity', type: 'logs' },
+                  vars: { interval: { type: 'text', value: '5m' } },
+                },
+              ],
+            },
+            {
+              type: 'cel',
+              policy_template: 'template_1',
+              enabled: true,
+              vars: {
+                url: { type: 'text', value: '' },
+                api_token: { type: 'password', value: '' },
+              },
+              streams: [],
+            },
+          ],
+        };
+
+        const result = updatePackageInputs(
+          basePolicyWithDisabledHttpjson,
+          makePartialMigrationPackageInfo(),
+          makePartialMigrationOverride(),
+          false
+        );
+
+        const celInput = result.inputs.find((i) => i.type === 'cel');
+        // Old httpjson was disabled → cel must be disabled after migration
+        expect(celInput?.enabled).toBe(false);
+      });
+
       it('keeps the pre-existing cel input disabled when the old httpjson input was also disabled', () => {
         const basePolicyWithBothDisabled: NewPackagePolicy = {
           ...makePartialMigrationBasePolicy(),

@@ -4177,8 +4177,11 @@ export function updatePackageInputs(
         const indexOfInput = inputs.indexOf(originalInput);
         let updatedInput = originalInput;
 
-        if (!limitedPackage && pathBOldInputForStream.enabled) {
-          updatedInput = { ...updatedInput, enabled: true };
+        if (!limitedPackage) {
+          updatedInput = {
+            ...updatedInput,
+            enabled: pathBOldInputForStream.enabled ?? updatedInput.enabled,
+          };
         }
 
         if (pathBOldInputForStream.vars && (update.vars || updatedInput.vars)) {
