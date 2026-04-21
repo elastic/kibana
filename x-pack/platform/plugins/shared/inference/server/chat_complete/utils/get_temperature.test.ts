@@ -10,6 +10,8 @@ import { InferenceConnectorType } from '@kbn/inference-common';
 
 const OPENAI_CONNECTOR = { type: InferenceConnectorType.OpenAI } as InferenceConnector;
 const GEMINI_CONNECTOR = { type: InferenceConnectorType.Gemini } as InferenceConnector;
+const BEDROCK_CONNECTOR = { type: InferenceConnectorType.Bedrock } as InferenceConnector;
+const INFERENCE_CONNECTOR = { type: InferenceConnectorType.Inference } as InferenceConnector;
 describe('getTemperatureIfValid', () => {
   it('returns an empty object if temperature is undefined', () => {
     expect(
@@ -72,6 +74,59 @@ describe('getTemperatureIfValid', () => {
       getTemperatureIfValid(undefined, { connector, modelName: 'llm-gateway/gpt-5.2-chat' })
     ).toEqual({
       temperature: 0.25,
+    });
+  });
+
+  it('returns an empty object for Claude 4.5+ / 5+ models that reject temperature', () => {
+    // Bedrock-style model ids (with and without inference-profile prefixes)
+    [
+      'anthropic.claude-opus-4-5-20250929-v1:0',
+      'us.anthropic.claude-opus-4-5',
+      'anthropic.claude-sonnet-4-5',
+      'anthropic.claude-haiku-4-7',
+      'anthropic.claude-opus-5',
+      'anthropic.claude-sonnet-5-0',
+    ].forEach((model) => {
+      expect(
+        getTemperatureIfValid(0.7, { connector: BEDROCK_CONNECTOR, modelName: model })
+      ).toEqual({});
+    });
+
+    // Direct Anthropic model ids via `.gen-ai` (OpenAI-compatible) proxy
+    [
+      'claude-opus-4-5',
+      'claude-sonnet-4-5-20250929',
+      'claude-haiku-4-5',
+      'claude-opus-4-7',
+      'claude-opus-5',
+    ].forEach((model) => {
+      expect(
+        getTemperatureIfValid(0.7, { connector: OPENAI_CONNECTOR, modelName: model })
+      ).toEqual({});
+    });
+
+    // `.inference` connector surfaces the provider model id the same way
+    expect(
+      getTemperatureIfValid(0.7, {
+        connector: INFERENCE_CONNECTOR,
+        modelName: 'anthropic.claude-opus-4-5',
+      })
+    ).toEqual({});
+  });
+
+  it('still forwards temperature for pre-4.5 Claude models', () => {
+    [
+      'anthropic.claude-3-5-sonnet-20241022-v2:0',
+      'anthropic.claude-3-opus-20240229',
+      'anthropic.claude-opus-4',
+      'anthropic.claude-opus-4-1',
+      'anthropic.claude-sonnet-4',
+      'claude-opus-4',
+      'claude-sonnet-4-1',
+    ].forEach((model) => {
+      expect(
+        getTemperatureIfValid(0.7, { connector: BEDROCK_CONNECTOR, modelName: model })
+      ).toEqual({ temperature: 0.7 });
     });
   });
 
