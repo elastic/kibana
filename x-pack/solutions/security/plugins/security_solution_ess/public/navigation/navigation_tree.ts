@@ -98,6 +98,7 @@ export const createNavigationTree = (
               {
                 id: SecurityPageName.siemReadiness,
                 link: securityLink(SecurityPageName.siemReadiness),
+                badgeType: 'new',
               },
               {
                 // value report
