@@ -922,7 +922,7 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
         defaultMessage: 'Available properties: name, os, device, original, version',
       }),
       i18n.translate('xpack.streamlang.actionMetadata.userAgent.tips.deviceType', {
-        defaultMessage: 'Use extract_device_type to identify desktop, mobile, or tablet devices',
+        defaultMessage: 'Use extract_device_type to identify device type from the user agent string on a best-effort basis',
       }),
     ],
   },
