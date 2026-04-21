@@ -39,14 +39,12 @@ describe('useRuleBasedSourceState', () => {
   });
 
   describe('initial state', () => {
-    it('defaults to entityStore toggle with empty state when no sources provided', () => {
+    it('defaults to none toggle with empty state when no sources provided', () => {
       const { result } = renderHook(() => useRuleBasedSourceState(baseParams));
 
-      expect(result.current.activeToggle).toBe('entityStore');
-      expect(result.current.filterQuery).toEqual(EMPTY_QUERY);
-      expect(result.current.selectedIndexPatterns).toEqual([]);
-      expect(result.current.entityField).toBe('');
-      expect(result.current.isEntityStore).toBe(true);
+      expect(result.current.activeToggle).toBe('none');
+      expect(result.current.isNone).toBe(true);
+      expect(result.current.isEntityStore).toBe(false);
     });
 
     it('hydrates store source from initialEntitySources', () => {
@@ -101,7 +99,7 @@ describe('useRuleBasedSourceState', () => {
       expect(onFieldChange).toHaveBeenCalledWith('entitySources', expect.any(Array));
     });
 
-    it('does NOT emit sources for managed watchlists on toggle alone', () => {
+    it('emits entity sources for managed watchlists on toggle', () => {
       const onFieldChange = jest.fn();
       const { result } = renderHook(() =>
         useRuleBasedSourceState({ ...baseParams, isManaged: true, onFieldChange })
@@ -111,7 +109,8 @@ describe('useRuleBasedSourceState', () => {
         result.current.onToggleChange('indexPattern');
       });
 
-      expect(onFieldChange).not.toHaveBeenCalled();
+      // Managed path emits undefined when no sources are dirty
+      expect(onFieldChange).toHaveBeenCalledWith('entitySources', undefined);
     });
   });
 
@@ -121,6 +120,12 @@ describe('useRuleBasedSourceState', () => {
       const { result } = renderHook(() =>
         useRuleBasedSourceState({ ...baseParams, onFieldChange })
       );
+
+      // Switch to entityStore first (default is 'none' which has no source type)
+      act(() => {
+        result.current.onToggleChange('entityStore');
+      });
+      onFieldChange.mockClear();
 
       act(() => {
         result.current.onQueryChange({ query: 'host.os: "windows"', language: 'kuery' });
@@ -168,6 +173,33 @@ describe('useRuleBasedSourceState', () => {
     });
   });
 
+  describe('onRangeChange', () => {
+    it('updates the range and emits for index source', () => {
+      const onFieldChange = jest.fn();
+      const { result } = renderHook(() =>
+        useRuleBasedSourceState({ ...baseParams, onFieldChange })
+      );
+
+      // Switch to index pattern so range is included in the emitted source
+      act(() => {
+        result.current.onToggleChange('indexPattern');
+      });
+      onFieldChange.mockClear();
+
+      act(() => {
+        result.current.onRangeChange({ start: 'now-7d', end: 'now' });
+      });
+
+      expect(result.current.range).toEqual({ start: 'now-7d', end: 'now' });
+      expect(onFieldChange).toHaveBeenCalledWith(
+        'entitySources',
+        expect.arrayContaining([
+          expect.objectContaining({ range: { start: 'now-7d', end: 'now' } }),
+        ])
+      );
+    });
+  });
+
   describe('onEntityFieldChange', () => {
     it('updates entity field for index type', () => {
       const onFieldChange = jest.fn();
@@ -202,6 +234,12 @@ describe('useRuleBasedSourceState', () => {
         })
       );
 
+      // Switch to entityStore first (default is 'none')
+      act(() => {
+        result.current.onToggleChange('entityStore');
+      });
+      onFieldChange.mockClear();
+
       act(() => {
         result.current.onQueryChange({ query: 'risk > 50', language: 'kuery' });
       });
@@ -220,6 +258,11 @@ describe('useRuleBasedSourceState', () => {
           onFieldChange,
         })
       );
+
+      // Switch to entityStore first to modify store
+      act(() => {
+        result.current.onToggleChange('entityStore');
+      });
 
       // Modify store
       act(() => {
@@ -253,36 +296,12 @@ describe('useRuleBasedSourceState', () => {
   });
 
   describe('toggleButtons', () => {
-    it('has both buttons enabled in create mode', () => {
+    it('returns three buttons: none, entityStore, indexPattern', () => {
       const { result } = renderHook(() => useRuleBasedSourceState(baseParams));
-      expect(result.current.toggleButtons[0].isDisabled).toBe(false);
-      expect(result.current.toggleButtons[1].isDisabled).toBe(false);
-    });
-
-    it('has both buttons enabled for managed edit mode', () => {
-      const { result } = renderHook(() =>
-        useRuleBasedSourceState({
-          ...baseParams,
-          isEditMode: true,
-          isManaged: true,
-        })
-      );
-      expect(result.current.toggleButtons[0].isDisabled).toBe(false);
-      expect(result.current.toggleButtons[1].isDisabled).toBe(false);
-    });
-
-    it('locks non-active toggle for non-managed edit mode with existing store source', () => {
-      const { result } = renderHook(() =>
-        useRuleBasedSourceState({
-          ...baseParams,
-          isEditMode: true,
-          isManaged: false,
-          initialEntitySources: [storeSrc],
-        })
-      );
-      // entityStore should be enabled, indexPattern should be disabled
-      expect(result.current.toggleButtons[0].isDisabled).toBe(false);
-      expect(result.current.toggleButtons[1].isDisabled).toBe(true);
+      expect(result.current.toggleButtons).toHaveLength(3);
+      expect(result.current.toggleButtons[0].id).toBe('none');
+      expect(result.current.toggleButtons[1].id).toBe('entityStore');
+      expect(result.current.toggleButtons[2].id).toBe('indexPattern');
     });
   });
 
