@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { registerDeleteRoute } from './register_delete_route';
-export { deleteDashboard } from './delete';
-export type { DashboardDeleteResponseBody } from './types';
+import type { DashboardState } from '../types';
+
+export interface DashboardDeleteResponseBody {
+  id: string;
+  data: Pick<DashboardState, 'title' | 'tags'>;
+}

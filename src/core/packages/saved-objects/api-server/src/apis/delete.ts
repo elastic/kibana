@@ -19,6 +19,4 @@ export interface SavedObjectsDeleteOptions<ReturnTitle extends boolean = false>
   refresh?: MutatingOperationRefreshSetting;
   /** Force deletion of an object that exists in multiple namespaces */
   force?: boolean;
-  /**  */
-  returnTitle?: ReturnTitle;
 }

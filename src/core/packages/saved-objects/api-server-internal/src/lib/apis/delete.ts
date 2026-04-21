@@ -11,10 +11,7 @@ import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-
 import type { SavedObjectsRawDocSource } from '@kbn/core-saved-objects-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
-import type {
-  SavedObjectsClientContract,
-  SavedObjectsDeleteOptions,
-} from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsDeleteOptions } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
 import { deleteLegacyUrlAliases } from './internals/delete_legacy_url_aliases';
@@ -40,7 +37,7 @@ export const performDelete = async <T>(
     logger,
     mappings,
   }: ApiExecutionContext
-): ReturnType<SavedObjectsClientContract['delete']> => {
+): Promise<{}> => {
   const { common: commonHelper, preflight: preflightHelper } = helpers;
   const { securityExtension } = extensions;
   const namespace = commonHelper.getCurrentNamespace(options.namespace);
@@ -51,11 +48,10 @@ export const performDelete = async <T>(
 
   const { refresh = DEFAULT_REFRESH_SETTING, force } = options;
 
-  let nameAttribute: string;
-  let savedObjectResponse;
-  if (securityExtension || options.returnTitle) {
-    nameAttribute = registry.getNameAttribute(type);
-    savedObjectResponse = await client.get<SavedObjectsRawDocSource>(
+  if (securityExtension) {
+    const nameAttribute = registry.getNameAttribute(type);
+
+    const savedObjectResponse = await client.get<SavedObjectsRawDocSource>(
       {
         index: commonHelper.getIndexForType(type),
         id: serializer.generateRawId(namespace, type, id),
@@ -66,14 +62,12 @@ export const performDelete = async <T>(
       },
       { ignore: [404], meta: true }
     );
-  }
 
-  if (securityExtension) {
-    const saveObject = { attributes: savedObjectResponse!.body._source?.[type] };
+    const saveObject = { attributes: savedObjectResponse.body._source?.[type] };
     const name = securityExtension.includeSavedObjectNames()
-      ? SavedObjectsUtils.getName(nameAttribute!, saveObject)
+      ? SavedObjectsUtils.getName(nameAttribute, saveObject)
       : undefined;
-    const accessControl = savedObjectResponse!.body._source?.accessControl;
+    const accessControl = savedObjectResponse.body._source?.accessControl;
     // we don't need to pass existing namespaces in because we're only concerned with authorizing
     // the current space. This saves us from performing the preflight check if we're unauthorized
     await securityExtension?.authorizeDelete({
@@ -144,7 +138,7 @@ export const performDelete = async <T>(
         logger.error(`Unable to delete aliases when deleting an object: ${err.message}`);
       });
     }
-    return options.returnTitle ? { title: savedObjectResponse?.body._source?.title } : {};
+    return {};
   }
 
   const deleteDocNotFound = body.result === 'not_found';

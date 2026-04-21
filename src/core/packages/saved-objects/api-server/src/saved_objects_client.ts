@@ -166,11 +166,7 @@ export interface SavedObjectsClientContract {
    * @param id - the ID of the saved object to delete
    * @param options {@link SavedObjectsDeleteOptions} - options for the delete operation
    */
-  delete<ReturnTitle extends boolean = false>(
-    type: string,
-    id: string,
-    options?: SavedObjectsDeleteOptions<ReturnTitle>
-  ): Promise<ReturnTitle extends true ? { title: string } : {}>;
+  delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
 
   /**
    * Deletes multiple SavedObjects batched together as a single request

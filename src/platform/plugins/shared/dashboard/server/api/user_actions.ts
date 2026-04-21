@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { UserActivityObject } from '@kbn/core-user-activity-server';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { Tag } from '@kbn/saved-objects-tagging-oss-plugin/common';
-import type { UserActivityObject } from '@kbn/core-user-activity-server';
+
 import { coreServices, taggingService } from '../kibana_services';
 import type { DashboardCreateResponseBody } from './create';
+import type { DashboardDeleteResponseBody } from './delete';
+import type { DashboardState } from './types';
 import type { DashboardUpdateResponseBody } from './update';
 
 export async function trackCreateDashboardAction(
@@ -43,7 +46,7 @@ export async function trackUpdateDashboardAction(
 }
 
 export async function trackDeleteDashboardAction(
-  result: { id: string; data: { title: string } }, // HANDLE TAGS!!!!!
+  result: DashboardDeleteResponseBody,
   request: KibanaRequest
 ) {
   coreServices.userActivity.trackUserAction({
@@ -57,7 +60,7 @@ export async function trackDeleteDashboardAction(
 }
 
 async function getUserActivityObject(
-  result: { id: string; data: { title: string; tags?: string[] } },
+  result: { id: string; data: Pick<DashboardState, 'title' | 'tags'> },
   request: KibanaRequest
 ): Promise<UserActivityObject> {
   let tagTitles: string[] = [];

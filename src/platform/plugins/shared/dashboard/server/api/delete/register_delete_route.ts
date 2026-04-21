@@ -58,8 +58,8 @@ export function registerDeleteRoute(
     async (ctx, req, res) =>
       telemetryHandler(req, usageCounter, async () => {
         try {
-          const { title } = await deleteDashboard(ctx, req.params.id);
-          await trackDeleteDashboardAction({ id: req.params.id, data: { title } }, req);
+          const result = await deleteDashboard(ctx, req.params.id);
+          await trackDeleteDashboardAction(result, req);
         } catch (e) {
           if (e.isBoom && e.output.statusCode === 404) {
             return res.notFound({
