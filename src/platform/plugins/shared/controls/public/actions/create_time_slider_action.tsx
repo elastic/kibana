@@ -50,7 +50,7 @@ export const createTimeSliderAction = (): ActionDefinition<EmbeddableApiContext>
       ? i18n.translate('controls.timeSlider.addPanelDisabledTooltip', {
           defaultMessage: 'Only one time slider control can be added per dashboard.',
         })
-      : undefined,
+      : '',
   execute: async ({ embeddable }) => {
     if (!apiCanPinPanels(embeddable)) throw new IncompatibleActionError();
     if (isTimeSliderAddPanelDisabled(embeddable)) throw new IncompatibleActionError();
