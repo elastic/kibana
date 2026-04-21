@@ -212,6 +212,39 @@ describe('deleteWorkflows', () => {
       expect(result.failures[0].error).toBe('doc delete failed');
     });
 
+    it('restores disabled workflows when execution check throws', async () => {
+      const { client, storage } = makeStorageClient([
+        { _id: 'wf-1', _source: makeWorkflowSource() },
+      ]);
+      const getWorkflowExecutions = jest
+        .fn()
+        .mockRejectedValue(new Error('execution lookup failed'));
+      client.bulk
+        .mockResolvedValueOnce({
+          items: [{ index: { _id: 'wf-1', status: 200 } }],
+        })
+        .mockResolvedValueOnce({
+          items: [{ index: { _id: 'wf-1', status: 200 } }],
+        });
+
+      await expect(
+        deleteWorkflows({
+          ids: ['wf-1'],
+          spaceId: 'default',
+          force: true,
+          storage,
+          esClient: makeEsClient(),
+          taskScheduler: null,
+          logger,
+          getWorkflowExecutions,
+        })
+      ).rejects.toThrow('execution lookup failed');
+
+      // Disable bulk + restore bulk = 2 calls; no delete should have run
+      expect(client.bulk).toHaveBeenCalledTimes(2);
+      expect(client.delete).not.toHaveBeenCalled();
+    });
+
     it('logs warning but does not throw when purge fails', async () => {
       const { storage } = makeStorageClient([
         { _id: 'wf-1', _source: makeWorkflowSource() },

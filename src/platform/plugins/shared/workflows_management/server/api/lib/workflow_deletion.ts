@@ -163,15 +163,22 @@ const hardDeleteWorkflows = async (
 
   const disabledIds = await disableWorkflowsForDeletion(hits, client);
 
-  const executionChecks = await Promise.all(
-    foundIds.map(async (id) => {
-      const executions = await getWorkflowExecutions(
-        { workflowId: id, statuses: [...NonTerminalExecutionStatuses], size: 1 },
-        spaceId
-      );
-      return { id, hasRunning: executions.total > 0 };
-    })
-  );
+  let executionChecks: Array<{ id: string; hasRunning: boolean }>;
+  try {
+    executionChecks = await Promise.all(
+      foundIds.map(async (id) => {
+        const executions = await getWorkflowExecutions(
+          { workflowId: id, statuses: [...NonTerminalExecutionStatuses], size: 1 },
+          spaceId
+        );
+        return { id, hasRunning: executions.total > 0 };
+      })
+    );
+  } catch (error) {
+    await restoreDisabledWorkflows(hits, disabledIds, client, logger);
+    throw error;
+  }
+
   const runningIds = executionChecks.filter((c) => c.hasRunning).map((c) => c.id);
   if (runningIds.length > 0) {
     await restoreDisabledWorkflows(hits, disabledIds, client, logger);
