@@ -7,8 +7,17 @@
 
 import { z } from '@kbn/zod';
 import { buildRouteValidationWithZod } from '@kbn/evals-common';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { AESOPRouteDependencies } from './register_aesop_routes';
 import type { ProposedSkillDocument } from '../../lib/aesop/types';
+import {
+  buildLlmRequestBody,
+  extractLlmResponseText,
+  getConnectorTypeId,
+} from '../../lib/aesop/llm_defaults';
+
+type ActionsClient = Awaited<ReturnType<ActionsPluginStart['getActionsClientWithRequest']>>;
 
 const improveSkillParamsSchema = z.object({
   skillId: z.string().min(1),
@@ -185,32 +194,31 @@ export function registerImproveSkillRoute({ router, logger }: AESOPRouteDependen
             throw new Error('Actions plugin not available');
           }
 
-          const actionsClient: any = await actionsStart.getActionsClientWithRequest(request);
+          const actionsClient = await actionsStart.getActionsClientWithRequest(request);
 
           const prompt = buildImprovementPrompt(skill);
+          const connectorTypeId = await getConnectorTypeId(actionsClient, connectorId);
 
           const result = await actionsClient.execute({
             actionId: connectorId,
             params: {
               subAction: 'run',
               subActionParams: {
-                body: JSON.stringify({
-                  messages: [
-                    {
-                      role: 'system',
-                      content:
-                        'You are an expert at improving Agent Builder skills for security operations. ' +
-                        'Given a skill and its validation feedback, produce an improved version. ' +
-                        'Respond with ONLY a JSON object (no markdown fences):\n' +
-                        '{ "name": "<improved name>", "description": "<improved description>", "markdown": "<improved full markdown content>" }\n' +
-                        'The markdown should be a complete, standalone skill document. ' +
-                        'Apply ALL suggestions from the validation feedback. ' +
-                        'Keep the same general purpose but make it more specific, actionable, and complete.',
-                    },
-                    { role: 'user', content: prompt },
-                  ],
-                  temperature: 0.4,
-                }),
+                body: JSON.stringify(
+                  buildLlmRequestBody({
+                    system:
+                      'You are an expert at improving Agent Builder skills for security operations. ' +
+                      'Given a skill and its validation feedback, produce an improved version. ' +
+                      'Respond with ONLY a JSON object (no markdown fences):\n' +
+                      '{ "name": "<improved name>", "description": "<improved description>", "markdown": "<improved full markdown content>" }\n' +
+                      'The markdown should be a complete, standalone skill document. ' +
+                      'Apply ALL suggestions from the validation feedback. ' +
+                      'Keep the same general purpose but make it more specific, actionable, and complete.',
+                    messages: [{ role: 'user', content: prompt }],
+                    temperature: 0.4,
+                    connectorTypeId,
+                  })
+                ),
               },
             },
           });
@@ -221,7 +229,7 @@ export function registerImproveSkillRoute({ router, logger }: AESOPRouteDependen
             );
           }
 
-          const llmResponse = extractResponse(result.data);
+          const llmResponse = extractLlmResponseText(result.data);
           const improved = parseImprovedSkill(llmResponse);
 
           // Save improved skill and set to validating (will auto-validate)
@@ -344,16 +352,6 @@ Apply all suggestions and fix all weaknesses. Make the skill specific, actionabl
 Return the improved skill as JSON: { "name": "...", "description": "...", "markdown": "..." }`;
 }
 
-function extractResponse(data: any): string {
-  if (typeof data === 'string') return data;
-  if (data?.choices?.[0]?.message?.content) return data.choices[0].message.content;
-  if (data?.completion) return data.completion;
-  if (data?.content?.[0]?.text) return data.content[0].text;
-  if (data?.candidates?.[0]?.content?.parts?.[0]?.text)
-    return data.candidates[0].content.parts[0].text;
-  return JSON.stringify(data);
-}
-
 function parseImprovedSkill(response: string): {
   name: string;
   description: string;
@@ -370,11 +368,11 @@ function parseImprovedSkill(response: string): {
       const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
       if (jsonMatch) cleaned = jsonMatch[0];
     }
-    const parsed = JSON.parse(cleaned);
+    const parsed = JSON.parse(cleaned) as Record<string, unknown>;
     return {
-      name: String(parsed.name || 'Improved Skill'),
-      description: String(parsed.description || ''),
-      markdown: String(parsed.markdown || ''),
+      name: String(parsed.name ?? 'Improved Skill'),
+      description: String(parsed.description ?? ''),
+      markdown: String(parsed.markdown ?? ''),
     };
   } catch {
     return {
@@ -397,14 +395,12 @@ async function autoValidateImprovedSkill({
   improvedSkill,
   logger,
 }: {
-  esClient: any;
-
-  actionsClient: any;
+  esClient: ElasticsearchClient;
+  actionsClient: ActionsClient;
   connectorId: string;
   skillId: string;
   improvedSkill: { name: string; description: string; markdown: string };
-
-  logger: any;
+  logger: Logger;
 }) {
   const startTime = Date.now();
   const evalTraceId = `aesop-eval-${skillId}-${Date.now()}`;
@@ -426,18 +422,20 @@ async function autoValidateImprovedSkill({
   const userPrompt = `Evaluate this Agent Builder skill:\n\n## ${improvedSkill.name}\n${improvedSkill.description}\n\n${improvedSkill.markdown}`;
 
   try {
+    const connectorTypeId = await getConnectorTypeId(actionsClient, connectorId);
     const result = await actionsClient.execute({
       actionId: connectorId,
       params: {
         subAction: 'run',
         subActionParams: {
-          body: JSON.stringify({
-            messages: [
-              { role: 'system', content: systemPrompt },
-              { role: 'user', content: userPrompt },
-            ],
-            temperature: 0.3,
-          }),
+          body: JSON.stringify(
+            buildLlmRequestBody({
+              system: systemPrompt,
+              messages: [{ role: 'user', content: userPrompt }],
+              temperature: 0.3,
+              connectorTypeId,
+            })
+          ),
         },
       },
     });
@@ -446,7 +444,7 @@ async function autoValidateImprovedSkill({
       throw new Error(`${result.message} - ${result.serviceMessage}`);
     }
 
-    const rawResponse = extractResponse(result.data);
+    const rawResponse = extractLlmResponseText(result.data);
     const evaluation = parseEvaluation(rawResponse);
     const durationMs = Date.now() - startTime;
 

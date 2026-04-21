@@ -9,8 +9,16 @@ import { z } from '@kbn/zod';
 import { buildRouteValidationWithZod } from '@kbn/evals-common';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { AESOPRouteDependencies } from './register_aesop_routes';
 import type { ProposedSkillDocument } from '../../lib/aesop/types';
+import {
+  buildLlmRequestBody,
+  extractLlmResponseText,
+  getConnectorTypeId,
+} from '../../lib/aesop/llm_defaults';
+
+type ActionsClient = Awaited<ReturnType<ActionsPluginStart['getActionsClientWithRequest']>>;
 
 const runSkillValidationParamsSchema = z.object({
   skillId: z.string(),
@@ -323,8 +331,7 @@ async function runLLMValidation({
   logger,
 }: {
   esClient: ElasticsearchClient;
-
-  actionsClient: any;
+  actionsClient: ActionsClient;
   connectorId: string;
   skillId: string;
   skill: ProposedSkillDocument;
@@ -349,6 +356,7 @@ async function runLLMValidation({
       '"feedback": "<detailed 2-3 sentence summary>", ' +
       '"strengths": ["..."], "weaknesses": ["..."], "suggestions": ["..."] }';
     const userPrompt = buildValidationPrompt(skill);
+    const connectorTypeId = await getConnectorTypeId(actionsClient, connectorId);
 
     // Execute LLM connector
     const result = await actionsClient.execute({
@@ -356,13 +364,14 @@ async function runLLMValidation({
       params: {
         subAction: 'run',
         subActionParams: {
-          body: JSON.stringify({
-            messages: [
-              { role: 'system', content: systemPrompt },
-              { role: 'user', content: userPrompt },
-            ],
-            temperature: 0.3,
-          }),
+          body: JSON.stringify(
+            buildLlmRequestBody({
+              system: systemPrompt,
+              messages: [{ role: 'user', content: userPrompt }],
+              temperature: 0.3,
+              connectorTypeId,
+            })
+          ),
         },
       },
     });
@@ -372,7 +381,7 @@ async function runLLMValidation({
     }
 
     // Parse LLM response
-    const llmRawResponse = extractLLMResponse(result.data);
+    const llmRawResponse = extractLlmResponseText(result.data);
     const evaluation = parseLLMEvaluation(llmRawResponse);
 
     const durationMs = Date.now() - startTime;
@@ -471,21 +480,6 @@ Respond with ONLY a JSON object (no markdown fences):
 { "score": <weighted average 0.0-1.0>, "passed": <true if score >= 0.85>, "criteria": { "relevance": <0-1>, "completeness": <0-1>, "accuracy": <0-1>, "specificity": <0-1>, "safety": <0-1> }, "feedback": "<2-3 sentence summary>", "strengths": ["..."], "weaknesses": ["..."], "suggestions": ["..."] }`;
 }
 
-function extractLLMResponse(data: any): string {
-  // Handle different connector response formats
-  if (typeof data === 'string') return data;
-  // OpenAI format
-  if (data?.choices?.[0]?.message?.content) return data.choices[0].message.content;
-  // Bedrock format
-  if (data?.completion) return data.completion;
-  if (data?.content?.[0]?.text) return data.content[0].text;
-  // Gemini format
-  if (data?.candidates?.[0]?.content?.parts?.[0]?.text)
-    return data.candidates[0].content.parts[0].text;
-  // Fallback
-  return JSON.stringify(data);
-}
-
 interface CriteriaScores {
   relevance: number;
   completeness: number;
@@ -581,8 +575,7 @@ async function runLLMValidationAndGetScore({
   logger,
 }: {
   esClient: ElasticsearchClient;
-
-  actionsClient: any;
+  actionsClient: ActionsClient;
   connectorId: string;
   skillId: string;
   skill: ProposedSkillDocument;
@@ -612,19 +605,21 @@ async function runLLMValidationAndGetScore({
     '"feedback": "<detailed 2-3 sentence summary>", ' +
     '"strengths": ["..."], "weaknesses": ["..."], "suggestions": ["..."] }';
   const userPrompt = buildValidationPrompt(currentSkill);
+  const connectorTypeId = await getConnectorTypeId(actionsClient, connectorId);
 
   const result = await actionsClient.execute({
     actionId: connectorId,
     params: {
       subAction: 'run',
       subActionParams: {
-        body: JSON.stringify({
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: userPrompt },
-          ],
-          temperature: 0.3,
-        }),
+        body: JSON.stringify(
+          buildLlmRequestBody({
+            system: systemPrompt,
+            messages: [{ role: 'user', content: userPrompt }],
+            temperature: 0.3,
+            connectorTypeId,
+          })
+        ),
       },
     },
   });
@@ -633,7 +628,7 @@ async function runLLMValidationAndGetScore({
     throw new Error(`Connector execution failed: ${result.message} - ${result.serviceMessage}`);
   }
 
-  const llmRawResponse = extractLLMResponse(result.data);
+  const llmRawResponse = extractLlmResponseText(result.data);
   const evaluation = parseLLMEvaluation(llmRawResponse);
 
   logger.info(
@@ -675,8 +670,7 @@ async function runLLMImprovement({
   logger,
 }: {
   esClient: ElasticsearchClient;
-
-  actionsClient: any;
+  actionsClient: ActionsClient;
   connectorId: string;
   skillId: string;
   logger: Logger;
@@ -719,25 +713,25 @@ ${(skill.validation?.suggestions || []).map((s: string) => `- ${s}`).join('\n')}
 Apply all suggestions and fix all weaknesses. Make the skill specific, actionable, and complete.
 Return the improved skill as JSON: { "name": "...", "description": "...", "markdown": "..." }`;
 
+  const connectorTypeId = await getConnectorTypeId(actionsClient, connectorId);
+
   const result = await actionsClient.execute({
     actionId: connectorId,
     params: {
       subAction: 'run',
       subActionParams: {
-        body: JSON.stringify({
-          messages: [
-            {
-              role: 'system',
-              content:
-                'You are an expert at improving Agent Builder skills for security operations. ' +
-                'Given a skill and its validation feedback, produce an improved version. ' +
-                'Respond with ONLY a JSON object (no markdown fences):\n' +
-                '{ "name": "<improved name>", "description": "<improved description>", "markdown": "<improved full markdown content>" }',
-            },
-            { role: 'user', content: prompt },
-          ],
-          temperature: 0.4,
-        }),
+        body: JSON.stringify(
+          buildLlmRequestBody({
+            system:
+              'You are an expert at improving Agent Builder skills for security operations. ' +
+              'Given a skill and its validation feedback, produce an improved version. ' +
+              'Respond with ONLY a JSON object (no markdown fences):\n' +
+              '{ "name": "<improved name>", "description": "<improved description>", "markdown": "<improved full markdown content>" }',
+            messages: [{ role: 'user', content: prompt }],
+            temperature: 0.4,
+            connectorTypeId,
+          })
+        ),
       },
     },
   });
@@ -746,7 +740,7 @@ Return the improved skill as JSON: { "name": "...", "description": "...", "markd
     throw new Error(`Connector execution failed: ${result.message} - ${result.serviceMessage}`);
   }
 
-  const llmResponse = extractLLMResponse(result.data);
+  const llmResponse = extractLlmResponseText(result.data);
   const improved = parseImprovedSkillResponse(llmResponse);
 
   await esClient.update({

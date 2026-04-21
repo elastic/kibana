@@ -8,6 +8,55 @@
 import { schema } from '@kbn/config-schema';
 import type { AESOPRouteDependencies } from './register_aesop_routes';
 
+interface ExecutionPhase {
+  phase_name?: string;
+  status?: string;
+  started_at?: string;
+  completed_at?: string;
+  duration_ms?: number;
+}
+
+interface ExecutionStateLike {
+  workflow_name?: string;
+  status?: string;
+  started_at?: string;
+  completed_at?: string;
+  updated_at?: string;
+  error_message?: string;
+  config?: {
+    agent_role?: string;
+    scoped_indices?: string[];
+    exploration_depth?: number;
+    min_pattern_frequency?: number;
+  };
+  phases?: ExecutionPhase[];
+  schemas_discovered?: unknown[];
+  metrics?: {
+    indices_explored?: number;
+    relationships_discovered?: number;
+    patterns_found?: number;
+    skills_generated?: number;
+    total_tokens?: number;
+    total_cost_usd?: number;
+  };
+  trace_id?: string;
+  [key: string]: unknown;
+}
+
+interface EsErrorLike {
+  statusCode?: number;
+  message?: string;
+  meta?: { statusCode?: number };
+}
+
+interface ProposedSkillLike {
+  skill_id?: string;
+  name?: string;
+  description?: string;
+  confidence?: number;
+  validation?: { status?: string };
+}
+
 /**
  * GET /internal/aesop/exploration/executions/{executionId}
  *
@@ -68,9 +117,9 @@ export function registerGetExecutionDetailRoute({ router, logger }: AESOPRouteDe
           }
 
           // Fetch associated proposed skills (if any)
-          let proposedSkills: any[] = [];
+          let proposedSkills: Array<Record<string, unknown>> = [];
           try {
-            const skillsResult = await esClient.search({
+            const skillsResult = await esClient.search<Record<string, unknown>>({
               index: '.aesop-proposed-skills',
               query: {
                 term: {
@@ -79,16 +128,18 @@ export function registerGetExecutionDetailRoute({ router, logger }: AESOPRouteDe
               },
               size: 50,
             });
-            proposedSkills = skillsResult.hits.hits.map((hit) => hit._source);
+            proposedSkills = skillsResult.hits.hits
+              .map((hit) => hit._source)
+              .filter((src): src is Record<string, unknown> => !!src);
           } catch (error) {
             // Skills index may not exist yet - non-critical
             // Continue with empty skills array
           }
 
           // Fetch discovered relationships (if stored)
-          let discoveredRelationships: any[] = [];
+          let discoveredRelationships: Array<Record<string, unknown>> = [];
           try {
-            const relationshipsResult = await esClient.search({
+            const relationshipsResult = await esClient.search<Record<string, unknown>>({
               index: '.aesop-discovered-relationships',
               query: {
                 term: {
@@ -97,15 +148,17 @@ export function registerGetExecutionDetailRoute({ router, logger }: AESOPRouteDe
               },
               size: 100,
             });
-            discoveredRelationships = relationshipsResult.hits.hits.map((hit) => hit._source);
+            discoveredRelationships = relationshipsResult.hits.hits
+              .map((hit) => hit._source)
+              .filter((src): src is Record<string, unknown> => !!src);
           } catch (error) {
             // Relationships index may not exist - non-critical
           }
 
           // Fetch discovered patterns
-          let discoveredPatterns: any[] = [];
+          let discoveredPatterns: Array<Record<string, unknown>> = [];
           try {
-            const patternsResult = await esClient.search({
+            const patternsResult = await esClient.search<Record<string, unknown>>({
               index: '.aesop-discovered-patterns',
               query: {
                 term: {
@@ -114,13 +167,17 @@ export function registerGetExecutionDetailRoute({ router, logger }: AESOPRouteDe
               },
               size: 100,
             });
-            discoveredPatterns = patternsResult.hits.hits.map((hit) => hit._source);
+            discoveredPatterns = patternsResult.hits.hits
+              .map((hit) => hit._source)
+              .filter((src): src is Record<string, unknown> => !!src);
           } catch (error) {
             // Patterns index may not exist - non-critical
           }
 
-          // TODO: Replace with a proper WorkflowExecution type when moving beyond spike
-          const executionState = workflowState._source as any;
+          // TODO(AESOP-contract): replace with a proper WorkflowExecution type from the
+          // aesop lib once it's stable. For now the erased shape below is the public
+          // contract surface consumers see.
+          const executionState = (workflowState._source ?? {}) as ExecutionStateLike;
 
           // Build comprehensive execution detail response
           const executionDetail = {
@@ -139,7 +196,7 @@ export function registerGetExecutionDetailRoute({ router, logger }: AESOPRouteDe
             min_pattern_frequency: executionState.config?.min_pattern_frequency || 10,
 
             // Workflow trace — map phase_name → step_name for frontend
-            workflow_steps: (executionState.phases || []).map((phase: any) => ({
+            workflow_steps: (executionState.phases ?? []).map((phase) => ({
               step_name: phase.phase_name,
               status: phase.status,
               started_at: phase.started_at,
@@ -153,20 +210,24 @@ export function registerGetExecutionDetailRoute({ router, logger }: AESOPRouteDe
             relationships_discovered: discoveredRelationships,
 
             // Generated skills
-            skills_proposed: proposedSkills.map((skill: any) => ({
-              id: skill.skill_id,
-              name: skill.name,
-              description: skill.description,
-              confidence: skill.confidence,
-              validation_status: skill.validation?.status || 'pending',
-            })),
+            skills_proposed: proposedSkills.map((raw) => {
+              const skill = raw as ProposedSkillLike;
+              return {
+                id: skill.skill_id,
+                name: skill.name,
+                description: skill.description,
+                confidence: skill.confidence,
+                validation_status: skill.validation?.status ?? 'pending',
+              };
+            }),
 
             // Performance metrics
             metrics: {
-              total_duration_ms: executionState.completed_at
-                ? new Date(executionState.completed_at).getTime() -
-                  new Date(executionState.started_at).getTime()
-                : undefined,
+              total_duration_ms:
+                executionState.completed_at && executionState.started_at
+                  ? new Date(executionState.completed_at).getTime() -
+                    new Date(executionState.started_at).getTime()
+                  : undefined,
               indices_explored:
                 executionState.metrics?.indices_explored ||
                 executionState.config?.scoped_indices?.length ||
@@ -192,7 +253,8 @@ export function registerGetExecutionDetailRoute({ router, logger }: AESOPRouteDe
             },
           });
         } catch (error) {
-          if (error.statusCode === 404 || error.meta?.statusCode === 404) {
+          const err = error as EsErrorLike;
+          if (err.statusCode === 404 || err.meta?.statusCode === 404) {
             return response.notFound({
               body: {
                 message: `Exploration execution not found: ${request.params.executionId}`,
@@ -201,9 +263,9 @@ export function registerGetExecutionDetailRoute({ router, logger }: AESOPRouteDe
           }
 
           return response.customError({
-            statusCode: error.statusCode || 500,
+            statusCode: err.statusCode ?? 500,
             body: {
-              message: error.message || 'Failed to fetch execution detail',
+              message: err.message ?? 'Failed to fetch execution detail',
             },
           });
         }

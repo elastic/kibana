@@ -22,6 +22,12 @@
 
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+
+interface JsonObject {
+  [key: string]: JsonValue;
+}
+type JsonValue = string | number | boolean | null | JsonObject | JsonValue[];
 
 export interface IndexInfo {
   name: string;
@@ -259,10 +265,11 @@ async function sampleIndex(
 
     const timestamps = sampleResponse.hits.hits
       .map((hit) => {
-        const source = hit._source as Record<string, any>;
-        return source?.['@timestamp'] ? new Date(source['@timestamp']) : null;
+        const source = hit._source as JsonObject | undefined;
+        const ts = source?.['@timestamp'];
+        return typeof ts === 'string' || typeof ts === 'number' ? new Date(ts) : null;
       })
-      .filter((t): t is Date => t !== null);
+      .filter((t): t is Date => t !== null && !Number.isNaN(t.getTime()));
 
     const type = categorizeIndex(name);
     const relevanceScore = calculateRelevanceScore(name, docCount, type);
@@ -294,12 +301,12 @@ async function sampleIndex(
 /**
  * Extract unique field names from sampled documents.
  */
-function extractFieldsFromDocs(hits: any[]): string[] {
+function extractFieldsFromDocs(hits: Array<SearchHit<unknown>>): string[] {
   const fields = new Set<string>();
 
   for (const hit of hits) {
-    const source = hit._source as Record<string, any>;
-    extractFieldsRecursive(source, '', fields);
+    const source = hit._source as JsonObject | undefined;
+    if (source) extractFieldsRecursive(source, '', fields);
   }
 
   return Array.from(fields).sort();
@@ -308,11 +315,11 @@ function extractFieldsFromDocs(hits: any[]): string[] {
 /**
  * Recursively extract field names from nested objects (dot notation).
  */
-function extractFieldsRecursive(obj: any, prefix: string, fields: Set<string>): void {
+function extractFieldsRecursive(obj: unknown, prefix: string, fields: Set<string>): void {
   if (obj === null || obj === undefined) return;
 
   if (typeof obj === 'object' && !Array.isArray(obj)) {
-    for (const [key, value] of Object.entries(obj)) {
+    for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
       const fieldName = prefix ? `${prefix}.${key}` : key;
       fields.add(fieldName);
 

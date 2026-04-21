@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { buildRouteValidationWithZod } from '@kbn/evals-common';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { AESOPRouteDependencies } from './register_aesop_routes';
 import { WorkflowStateTracker } from '../../lib/aesop/workflows/workflow_state_tracker';
 import { ExplorationWorkflowExecutor } from '../../lib/aesop/workflows/exploration_workflow_executor';
@@ -15,6 +16,13 @@ import { APMInstrumentationService } from '../../lib/aesop/monitoring/apm_instru
 import { discoverIndices } from '../../services/index_discovery';
 import { inferAnalystRole, describeRole } from '../../services/analyst_role_inference';
 import { calibrateSamplingStrategy } from '../../services/sampling_strategy';
+
+type ActionsClient = Awaited<ReturnType<ActionsPluginStart['getActionsClientWithRequest']>>;
+
+// Erased skill registry contract to avoid a circular dep on @kbn/agent-builder-plugin.
+// TODO(AESOP-contract): replace with the real type from a shared contract package (tracked for PR B6).
+
+type SkillRegistryLike = any;
 
 const runExplorationBodySchema = z.object({
   include_sample_data: z.boolean().optional().default(true),
@@ -77,8 +85,7 @@ export function registerRunExplorationRoute({
           const esClient = coreContext.elasticsearch.client;
           const { include_sample_data, connector_id: connectorId } = request.body;
 
-          // TODO: Replace with proper ActionsClient type when moving beyond spike
-          let actionsClient: any;
+          let actionsClient: ActionsClient | undefined;
           if (connectorId) {
             const actionsStart = evalsContext.getActionsStart();
             if (actionsStart) {
@@ -155,7 +162,7 @@ export function registerRunExplorationRoute({
           );
 
           // Eagerly create skill registry while request is still active
-          let skillRegistry: any;
+          let skillRegistry: SkillRegistryLike | undefined;
           const agentBuilderStart = await evalsContext.getAgentBuilderStart();
           if (agentBuilderStart) {
             try {

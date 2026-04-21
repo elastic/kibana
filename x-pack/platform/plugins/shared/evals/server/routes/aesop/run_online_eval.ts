@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod';
 import { buildRouteValidationWithZod } from '@kbn/evals-common';
 import type { AESOPRouteDependencies } from './register_aesop_routes';
+import type { ProposedSkillDocument } from '../../lib/aesop/types';
 import { selectEvaluatorsForSkill } from '../../lib/aesop/skill_evaluator_selector';
 
 const runEvalParamsSchema = z.object({ skillId: z.string() });
@@ -55,7 +56,7 @@ export function registerRunOnlineEvalRoute({
             index: '.aesop-proposed-skills',
             id: skillId,
           });
-          const skill = skillDoc._source as any;
+          const skill = skillDoc._source as ProposedSkillDocument | undefined;
           if (!skill) {
             return response.notFound({
               body: { message: `Skill ${skillId} not found` },

@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { EvaluatorRegistry } from '../evaluation_engine';
+import { buildLlmRequestBody, extractLlmResponseText, getConnectorTypeId } from './llm_defaults';
 
 /**
  * Analyzes skill content to select the most relevant evaluators and
@@ -274,7 +275,7 @@ export const proposeEvaluatorsForSkill = async (
 export const generateLLMEvaluatorSuggestions = async (
   skill: SkillContent,
   connectorId: string,
-  actionsClient: { execute: (...args: any[]) => Promise<any> },
+  actionsClient: { execute: (...args: any[]) => Promise<any>; get?: (...args: any[]) => any },
   logger: Logger,
   existingEvaluatorNames: string[] = []
 ): Promise<ProposedEvaluator[]> => {
@@ -304,21 +305,24 @@ Return a JSON array where each evaluator has:
 Return ONLY a JSON array. If no additional evaluators are needed, return [].`;
 
   try {
+    const connectorTypeId = await getConnectorTypeId(actionsClient as any, connectorId);
     const result = await actionsClient.execute({
       actionId: connectorId,
       params: {
         subAction: 'run',
         subActionParams: {
-          body: JSON.stringify({
-            messages: [{ role: 'user', content: prompt }],
-            temperature: 0.3,
-          }),
+          body: JSON.stringify(
+            buildLlmRequestBody({
+              messages: [{ role: 'user', content: prompt }],
+              temperature: 0.3,
+              connectorTypeId,
+            })
+          ),
         },
       },
     });
 
-    const responseText =
-      (result as any)?.data?.message ?? (result as any)?.data?.choices?.[0]?.message?.content ?? '';
+    const responseText = extractLlmResponseText((result as any)?.data);
 
     let cleaned = responseText;
     cleaned = cleaned.replace(/<think>[\s\S]*?<\/think>/g, '');

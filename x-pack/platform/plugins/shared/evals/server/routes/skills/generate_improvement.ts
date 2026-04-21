@@ -8,6 +8,11 @@
 import { z } from '@kbn/zod';
 import { buildRouteValidationWithZod } from '@kbn/evals-common';
 import type { SkillRouteDependencies } from '.';
+import {
+  buildLlmRequestBody,
+  extractLlmResponseText,
+  getConnectorTypeId,
+} from '../../lib/aesop/llm_defaults';
 
 const paramsSchema = z.object({ skillId: z.string() });
 
@@ -97,31 +102,30 @@ export function registerSkillGenerateImprovementRoute({ router, logger }: SkillR
             aesopWeaknesses,
             aesopSuggestions,
           });
+          const connectorTypeId = await getConnectorTypeId(actionsClient, connectorId);
 
           const result = await actionsClient.execute({
             actionId: connectorId,
             params: {
               subAction: 'run',
               subActionParams: {
-                body: JSON.stringify({
-                  messages: [
-                    {
-                      role: 'system',
-                      content:
-                        'You are an expert at improving Agent Builder skills for security operations. ' +
-                        'Given a skill and its evaluation feedback, produce an improved version that addresses all weaknesses. ' +
-                        'Respond with ONLY a JSON object (no markdown fences):\n' +
-                        '{ "improved_name": "<improved name>", "improved_description": "<improved description>", ' +
-                        '"improved_content": "<full improved markdown content>", ' +
-                        '"changes_summary": "<2-3 sentence summary of what was changed and why>", ' +
-                        '"suggestions": ["<specific change 1>", "<specific change 2>", ...] }\n' +
-                        'The improved_content must be a complete, standalone skill document. ' +
-                        'Apply ALL improvements needed to fix failing evaluators and raise low scores.',
-                    },
-                    { role: 'user', content: prompt },
-                  ],
-                  temperature: 0.4,
-                }),
+                body: JSON.stringify(
+                  buildLlmRequestBody({
+                    system:
+                      'You are an expert at improving Agent Builder skills for security operations. ' +
+                      'Given a skill and its evaluation feedback, produce an improved version that addresses all weaknesses. ' +
+                      'Respond with ONLY a JSON object (no markdown fences):\n' +
+                      '{ "improved_name": "<improved name>", "improved_description": "<improved description>", ' +
+                      '"improved_content": "<full improved markdown content>", ' +
+                      '"changes_summary": "<2-3 sentence summary of what was changed and why>", ' +
+                      '"suggestions": ["<specific change 1>", "<specific change 2>", ...] }\n' +
+                      'The improved_content must be a complete, standalone skill document. ' +
+                      'Apply ALL improvements needed to fix failing evaluators and raise low scores.',
+                    messages: [{ role: 'user', content: prompt }],
+                    temperature: 0.4,
+                    connectorTypeId,
+                  })
+                ),
               },
             },
           });
@@ -132,7 +136,7 @@ export function registerSkillGenerateImprovementRoute({ router, logger }: SkillR
             );
           }
 
-          const parsed = parseImprovedSkillResponse(extractResponse(result.data));
+          const parsed = parseImprovedSkillResponse(extractLlmResponseText(result.data));
 
           return response.ok({ body: parsed });
         } catch (error) {
@@ -244,23 +248,6 @@ ${skillContent}
 Return the improved skill as JSON with improved_name, improved_description, improved_content, changes_summary, and suggestions.`;
 
   return prompt;
-};
-
-const extractResponse = (data: unknown): string => {
-  if (typeof data === 'string') return data;
-  const d = data as Record<string, unknown>;
-  const choices = d?.choices as Array<{ message?: { content?: string } }> | undefined;
-  if (choices?.[0]?.message?.content) return choices[0].message.content;
-  if (typeof d?.completion === 'string') return d.completion;
-  const content = d?.content as Array<{ text?: string }> | undefined;
-  if (content?.[0]?.text) return content[0].text;
-  const candidates = d?.candidates as
-    | Array<{
-        content?: { parts?: Array<{ text?: string }> };
-      }>
-    | undefined;
-  if (candidates?.[0]?.content?.parts?.[0]?.text) return candidates[0].content.parts[0].text;
-  return JSON.stringify(data);
 };
 
 const parseImprovedSkillResponse = (

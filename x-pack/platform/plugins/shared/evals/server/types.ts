@@ -32,7 +32,7 @@ import type { ServerEvaluator } from './lib/evaluation_engine';
  * (`skills.x`, `agents.x`, etc.) via an indexed signature, so adding fields
  * to the real plugin contract doesn't break this boundary.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 export type AgentBuilderContractLike = Record<string, any>;
 
 export interface EvalsPluginSetup {

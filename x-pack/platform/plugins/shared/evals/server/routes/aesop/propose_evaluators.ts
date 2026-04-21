@@ -7,11 +7,15 @@
 
 import { z } from '@kbn/zod';
 import { buildRouteValidationWithZod } from '@kbn/evals-common';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { AESOPRouteDependencies } from './register_aesop_routes';
+import type { ProposedSkillDocument } from '../../lib/aesop/types';
 import {
   proposeEvaluatorsForSkill,
   type ProposedEvaluator,
 } from '../../lib/aesop/skill_evaluator_selector';
+
+type ActionsClient = Awaited<ReturnType<ActionsPluginStart['getActionsClientWithRequest']>>;
 
 export type { ProposedEvaluator };
 
@@ -56,7 +60,7 @@ export function registerProposeEvaluatorsRoute({
             index: '.aesop-proposed-skills',
             id: skillId,
           });
-          const skill = skillDoc._source as any;
+          const skill = skillDoc._source as ProposedSkillDocument | undefined;
           if (!skill) {
             return response.notFound({ body: { message: `Skill ${skillId} not found` } });
           }
@@ -73,7 +77,7 @@ export function registerProposeEvaluatorsRoute({
           let llmOptions:
             | {
                 connectorId: string;
-                actionsClient: { execute: (...args: any[]) => Promise<any> };
+                actionsClient: ActionsClient;
               }
             | undefined;
 

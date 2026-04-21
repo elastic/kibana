@@ -11,6 +11,12 @@ import type { EvaluatorRegistry } from '../evaluation_engine';
 import type { DatasetService } from '../../storage/dataset_service';
 import { persistEvalRun } from './eval_results_persister';
 import { indexFailures } from './failure_harvester';
+import {
+  buildLlmRequestBody,
+  extractLlmResponseText,
+  getConnectorTypeId,
+  type LlmChatMessage,
+} from './llm_defaults';
 
 export interface SkillOnlineEvalResult {
   runId: string;
@@ -375,30 +381,34 @@ export class SkillOnlineEvalService {
    * that LLM-judge evaluators can call.
    */
   private buildInferenceClient(options: {
-    actionsClient: { execute: (...args: any[]) => Promise<any> };
+    actionsClient: { execute: (...args: any[]) => Promise<any>; get?: (...args: any[]) => any };
     connectorId: string;
   }) {
     return {
       chatComplete: async (params: {
         messages: Array<{ role: string; content: string }>;
       }): Promise<{ content?: string }> => {
+        const connectorTypeId = await getConnectorTypeId(
+          options.actionsClient as any,
+          options.connectorId
+        );
         const result = await options.actionsClient.execute({
           actionId: options.connectorId,
           params: {
             subAction: 'run',
             subActionParams: {
-              body: JSON.stringify({
-                messages: params.messages,
-                temperature: 0,
-              }),
+              body: JSON.stringify(
+                buildLlmRequestBody({
+                  messages: params.messages as LlmChatMessage[],
+                  temperature: 0,
+                  connectorTypeId,
+                })
+              ),
             },
           },
         });
 
-        const content =
-          (result as any)?.data?.message ??
-          (result as any)?.data?.choices?.[0]?.message?.content ??
-          '';
+        const content = extractLlmResponseText((result as any)?.data);
 
         return { content };
       },
@@ -409,34 +419,32 @@ export class SkillOnlineEvalService {
     skillMarkdown: string,
     userQuery: string,
     options: {
-      actionsClient: { execute: (...args: any[]) => Promise<any> };
+      actionsClient: { execute: (...args: any[]) => Promise<any>; get?: (...args: any[]) => any };
       connectorId: string;
     }
   ): Promise<unknown> {
     try {
+      const connectorTypeId = await getConnectorTypeId(
+        options.actionsClient as any,
+        options.connectorId
+      );
       const result = await options.actionsClient.execute({
         actionId: options.connectorId,
         params: {
           subAction: 'run',
           subActionParams: {
-            body: JSON.stringify({
-              messages: [
-                {
-                  role: 'system',
-                  content: `You are a security analyst agent. Follow this skill to answer the user's question:\n\n${skillMarkdown}`,
-                },
-                { role: 'user', content: userQuery },
-              ],
-            }),
+            body: JSON.stringify(
+              buildLlmRequestBody({
+                system: `You are a security analyst agent. Follow this skill to answer the user's question:\n\n${skillMarkdown}`,
+                messages: [{ role: 'user', content: userQuery }],
+                connectorTypeId,
+              })
+            ),
           },
         },
       });
 
-      return (
-        (result as any)?.data?.message ??
-        (result as any)?.data?.choices?.[0]?.message?.content ??
-        ''
-      );
+      return extractLlmResponseText((result as any)?.data);
     } catch (error) {
       return { error: error instanceof Error ? error.message : String(error) };
     }

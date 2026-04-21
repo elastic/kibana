@@ -31,6 +31,7 @@ import {
 } from '../validation/skill_content_validator';
 import { SkillDeduplicator } from '../dedup/skill_deduplicator';
 import { ConversationAnalyzer, type ConversationInsights } from '../analysis/conversation_analyzer';
+import { buildLlmRequestBody, extractLlmResponseText, getConnectorTypeId } from '../llm_defaults';
 
 const PROPOSED_SKILLS_INDEX = '.aesop-proposed-skills';
 const DISCOVERED_PATTERNS_INDEX = '.aesop-discovered-patterns';
@@ -1318,15 +1319,19 @@ Respond with ONLY a JSON array (no markdown fences): [{ "base_skill_id": "...", 
 If no improvements are warranted, return an empty array: []`;
 
     try {
+      const connectorTypeId = await getConnectorTypeId(actionsClient, connectorId);
       const result = await actionsClient.execute({
         actionId: connectorId,
         params: {
           subAction: 'run',
           subActionParams: {
-            body: JSON.stringify({
-              messages: [{ role: 'user', content: prompt }],
-              temperature: 0.3,
-            }),
+            body: JSON.stringify(
+              buildLlmRequestBody({
+                messages: [{ role: 'user', content: prompt }],
+                temperature: 0.3,
+                connectorTypeId,
+              })
+            ),
           },
         },
       });
@@ -1336,7 +1341,7 @@ If no improvements are warranted, return an empty array: []`;
         return [];
       }
 
-      const rawResponse = this.extractLLMText(result.data);
+      const rawResponse = extractLlmResponseText(result.data);
       const proposals = this.parseSkillImprovements(rawResponse, skillDetails);
 
       this.logger.info(`[AESOP] LLM proposed ${proposals.length} skill improvements`);
@@ -1481,17 +1486,6 @@ If no improvements are warranted, return an empty array: []`;
     sections.push(`\n## Analyst Role: ${this.config.roleDescription}`);
 
     return sections.join('\n');
-  }
-
-  private extractLLMText(data: any): string {
-    if (data == null) return '';
-    if (typeof data === 'string') return data;
-    if (data?.choices?.[0]?.message?.content) return data.choices[0].message.content;
-    if (data?.completion) return data.completion;
-    if (data?.content?.[0]?.text) return data.content[0].text;
-    if (data?.candidates?.[0]?.content?.parts?.[0]?.text)
-      return data.candidates[0].content.parts[0].text;
-    return JSON.stringify(data);
   }
 
   // ---------------------------------------------------------------------------

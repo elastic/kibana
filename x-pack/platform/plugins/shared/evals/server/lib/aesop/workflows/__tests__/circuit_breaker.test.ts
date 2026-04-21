@@ -434,7 +434,7 @@ describe('Workflow Circuit Breaker', () => {
       expect(mockLogger.warn).toHaveBeenCalledWith(
         expect.stringContaining('Circuit breaker OPEN'),
         expect.objectContaining({
-          agent: 'agent',
+          agent: { name: 'agent' },
           failures: 3,
         })
       );

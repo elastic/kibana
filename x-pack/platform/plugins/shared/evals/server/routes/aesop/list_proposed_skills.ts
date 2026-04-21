@@ -7,7 +7,12 @@
 
 import { z } from '@kbn/zod';
 import { buildRouteValidationWithZod } from '@kbn/evals-common';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { AESOPRouteDependencies } from './register_aesop_routes';
+
+interface EsIndexNotFoundError {
+  meta?: { body?: { error?: { type?: string } } };
+}
 
 const listProposedSkillsQuerySchema = z.object({
   status: z.enum(['all', 'pending_review', 'passed', 'failed']).optional().default('all'),
@@ -47,7 +52,7 @@ export function registerListProposedSkillsRoute({ router, logger }: AESOPRouteDe
           const { status, derived_from, limit, offset } = request.query;
 
           // Build query filter based on status and derived_from
-          const mustClauses: any[] = [];
+          const mustClauses: QueryDslQueryContainer[] = [];
 
           if (derived_from !== 'all') {
             mustClauses.push({ term: { derived_from } });
@@ -78,9 +83,10 @@ export function registerListProposedSkillsRoute({ router, logger }: AESOPRouteDe
               from: offset,
               size: limit,
             });
-          } catch (error: any) {
+          } catch (error) {
             // Index doesn't exist yet - return empty list (exploration hasn't run)
-            if (error?.meta?.body?.error?.type === 'index_not_found_exception') {
+            const esError = error as EsIndexNotFoundError | undefined;
+            if (esError?.meta?.body?.error?.type === 'index_not_found_exception') {
               logger.debug('[AESOP] Index .aesop-proposed-skills not found - returning empty list');
               return response.ok({
                 body: {

@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import { buildLlmRequestBody, extractLlmResponseText, getConnectorTypeId } from './llm_defaults';
 
 export interface GeneratedTestCase {
   input: { query: string; context?: Record<string, unknown> };
@@ -23,7 +24,7 @@ export class SkillDatasetGenerator {
   async generateTestCases(
     skill: { name: string; description: string; markdown: string; id: string },
     options: {
-      actionsClient: { execute: (...args: any[]) => Promise<any> };
+      actionsClient: { execute: (...args: any[]) => Promise<any>; get?: (...args: any[]) => any };
       connectorId: string;
       count?: number;
     }
@@ -53,34 +54,48 @@ ${skill.markdown}
 
 Respond with ONLY a JSON array, no other text.`;
 
-    try {
-      const result = await actionsClient.execute({
-        actionId: connectorId,
-        params: {
-          subAction: 'run',
-          subActionParams: {
-            body: JSON.stringify({
+    const connectorTypeId = await getConnectorTypeId(actionsClient as any, connectorId);
+    const result = await actionsClient.execute({
+      actionId: connectorId,
+      params: {
+        subAction: 'run',
+        subActionParams: {
+          body: JSON.stringify(
+            buildLlmRequestBody({
               messages: [{ role: 'user', content: prompt }],
               temperature: 0.7,
-            }),
-          },
+              connectorTypeId,
+            })
+          ),
         },
-      });
+      },
+    });
 
-      const responseText =
-        (result as any)?.data?.message ??
-        (result as any)?.data?.choices?.[0]?.message?.content ??
-        '';
-
-      return this.parseTestCases(responseText, skill);
-    } catch (error) {
-      this.logger.error(
-        `[AESOP] Failed to generate test cases: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
-      return [];
+    // Surface connector-level failures (expired AWS creds, rate limits, malformed requests)
+    // to the caller so the UI can display an actionable message instead of a generic
+    // "no valid test cases" 422. The old catch-and-swallow was masking every real error.
+    if ((result as any)?.status === 'error') {
+      const message = (result as any)?.message ?? 'unknown error';
+      const service = (result as any)?.serviceMessage ?? '';
+      throw new Error(`Connector execution failed: ${message}${service ? ` - ${service}` : ''}`);
     }
+
+    const responseText = extractLlmResponseText((result as any)?.data);
+
+    if (!responseText || !responseText.trim()) {
+      throw new Error(
+        `LLM returned empty content (connector=${connectorId}, typeId=${connectorTypeId ?? 'unknown'})`
+      );
+    }
+
+    const parsed = this.parseTestCases(responseText, skill);
+    if (parsed.length === 0) {
+      // Surface a snippet so the UI toast / server log points at the real cause
+      // (model refused, truncated response, wrong JSON shape, etc.) instead of a blind 422.
+      const preview = responseText.replace(/\s+/g, ' ').slice(0, 400);
+      throw new Error(`LLM response did not contain a parseable JSON array. Preview: ${preview}`);
+    }
+    return parsed;
   }
 
   private parseTestCases(

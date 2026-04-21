@@ -26,6 +26,7 @@ import type {
   EvalsPluginStart,
   EvalsSetupDependencies,
   EvalsStartDependencies,
+  AgentBuilderContractLike,
 } from './types';
 import { registerRoutes } from './routes/register_routes';
 import { DatasetService } from './storage/dataset_service';
@@ -86,7 +87,9 @@ export class EvalsPlugin
     this.monitoringService = new SkillMonitoringService(this.logger);
 
     coreSetup.savedObjects.registerType(evaluatorSavedObjectType);
-    coreSetup.savedObjects.registerType(proposedSkillSavedObjectType);
+    if (this.config.aesop.enabled) {
+      coreSetup.savedObjects.registerType(proposedSkillSavedObjectType);
+    }
     coreSetup.savedObjects.registerType(evalsRemoteKibanaConfigSavedObjectType);
     encryptedSavedObjects.registerType({
       type: EVALS_REMOTE_KIBANA_CONFIG_SAVED_OBJECT_TYPE,
@@ -94,12 +97,14 @@ export class EvalsPlugin
       attributesToIncludeInAAD: new Set(['createdAt', 'url']),
     });
 
-    this.skillValidationService = new SkillValidationService(this.evaluatorRegistry, this.logger);
-    this.skillOnlineEvalService = new SkillOnlineEvalService(
-      this.evaluatorRegistry,
-      this.datasetService!,
-      this.logger
-    );
+    if (this.config.aesop.enabled) {
+      this.skillValidationService = new SkillValidationService(this.evaluatorRegistry, this.logger);
+      this.skillOnlineEvalService = new SkillOnlineEvalService(
+        this.evaluatorRegistry,
+        this.datasetService!,
+        this.logger
+      );
+    }
 
     // Resolve repo root from plugin location for suite runner
     // Plugin is at: x-pack/platform/plugins/shared/evals/server/plugin.ts
@@ -116,9 +121,10 @@ export class EvalsPlugin
     this.suiteRunner = new SuiteRunner(repoRoot, this.logger, { kibanaUrl, elasticsearchUrl });
 
     // Resolve agentBuilder via runtimePluginDependencies to avoid circular dep
-    // (agentBuilder optionally depends on evals)
+    // (agentBuilder optionally depends on evals). Contract shape is erased via
+    // AgentBuilderContractLike - see server/types.ts for the tech-debt rationale.
     const agentBuilderStartPromise = coreSetup.plugins
-      .onStart<{ agentBuilder: any }>('agentBuilder')
+      .onStart<{ agentBuilder: AgentBuilderContractLike }>('agentBuilder')
       .then(({ agentBuilder }) => (agentBuilder.found ? agentBuilder.contract : undefined));
 
     coreSetup.http.registerRouteHandlerContext<EvalsRequestHandlerContext, 'evals'>(
@@ -136,6 +142,10 @@ export class EvalsPlugin
       }
     );
 
+    const allSoTypes = this.config.aesop.enabled
+      ? [EVALUATOR_SAVED_OBJECT_TYPE, PROPOSED_SKILL_SAVED_OBJECT_TYPE]
+      : [EVALUATOR_SAVED_OBJECT_TYPE];
+
     features.registerKibanaFeature({
       id: PLUGIN_ID,
       name: PLUGIN_NAME,
@@ -149,7 +159,7 @@ export class EvalsPlugin
           api: [PLUGIN_ID],
           management: { ai: [PLUGIN_ID] },
           savedObject: {
-            all: [EVALUATOR_SAVED_OBJECT_TYPE, PROPOSED_SKILL_SAVED_OBJECT_TYPE],
+            all: allSoTypes,
             read: [],
           },
           ui: ['show'],
@@ -160,7 +170,7 @@ export class EvalsPlugin
           management: { ai: [PLUGIN_ID] },
           savedObject: {
             all: [],
-            read: [EVALUATOR_SAVED_OBJECT_TYPE, PROPOSED_SKILL_SAVED_OBJECT_TYPE],
+            read: allSoTypes,
           },
           ui: ['show'],
         },
@@ -187,6 +197,7 @@ export class EvalsPlugin
       getEncryptedSavedObjectsStart: () =>
         coreSetup.getStartServices().then(([, pluginsStart]) => pluginsStart.encryptedSavedObjects),
       getInternalRemoteConfigsSoClient: () => internalRemoteConfigsSoClientPromise,
+      aesopEnabled: this.config.aesop.enabled,
     });
 
     return {
@@ -240,14 +251,16 @@ export class EvalsPlugin
     }
 
     // ═══════════════════════════════════════════════════════════════
-    // AESOP: Ensure ILM policy exists for all .aesop-* indices
+    // AESOP: Ensure ILM policy exists for all .aesop-* indices (flag-gated)
     // ═══════════════════════════════════════════════════════════════
-    const internalClient = core.elasticsearch.client.asInternalUser;
-    ensureAesopILMPolicy(internalClient, this.logger).catch((err) => {
-      this.logger.warn(
-        `[AESOP] ILM policy setup failed: ${err instanceof Error ? err.message : String(err)}`
-      );
-    });
+    if (this.config.aesop.enabled) {
+      const internalClient = core.elasticsearch.client.asInternalUser;
+      ensureAesopILMPolicy(internalClient, this.logger).catch((err) => {
+        this.logger.warn(
+          `[AESOP] ILM policy setup failed: ${err instanceof Error ? err.message : String(err)}`
+        );
+      });
+    }
 
     return {
       datasetService: this.datasetService,

@@ -9,6 +9,28 @@ import type { AESOPRouteDependencies } from './register_aesop_routes';
 
 const WORKFLOW_EXECUTIONS_INDEX = '.aesop-workflow-executions';
 
+interface WorkflowExecutionSource {
+  workflow_name?: string;
+  status?: string;
+  started_at?: string;
+  completed_at?: string;
+  error_message?: string;
+  config?: {
+    agent_role?: string;
+    scoped_indices?: string[];
+  };
+  metrics?: {
+    indices_explored?: number;
+    relationships_discovered?: number;
+    patterns_found?: number;
+    skills_generated?: number;
+  };
+}
+
+interface EsIndexNotFoundError {
+  meta?: { body?: { error?: { type?: string } } };
+}
+
 export function registerGetExplorationHistoryRoute({ router, logger }: AESOPRouteDependencies) {
   router.versioned
     .get({
@@ -48,7 +70,7 @@ export function registerGetExplorationHistoryRoute({ router, logger }: AESOPRout
             });
 
             explorations = result.hits.hits.map((hit) => {
-              const source = hit._source as Record<string, any>;
+              const source = (hit._source ?? {}) as WorkflowExecutionSource;
               return {
                 execution_id: hit._id,
                 workflow_name: source.workflow_name,
@@ -56,17 +78,18 @@ export function registerGetExplorationHistoryRoute({ router, logger }: AESOPRout
                 started_at: source.started_at,
                 completed_at: source.completed_at,
                 error_message: source.error_message,
-                agent_role: source.config?.agent_role || 'unknown',
+                agent_role: source.config?.agent_role ?? 'unknown',
                 indices_discovered:
                   source.metrics?.indices_explored ?? source.config?.scoped_indices?.length ?? 0,
-                scoped_indices: source.config?.scoped_indices || [],
+                scoped_indices: source.config?.scoped_indices ?? [],
                 relationships_found: source.metrics?.relationships_discovered ?? 0,
                 patterns_identified: source.metrics?.patterns_found ?? 0,
                 skills_proposed: source.metrics?.skills_generated ?? 0,
               };
             });
-          } catch (error: any) {
-            if (error?.meta?.body?.error?.type === 'index_not_found_exception') {
+          } catch (error) {
+            const esError = error as EsIndexNotFoundError | undefined;
+            if (esError?.meta?.body?.error?.type === 'index_not_found_exception') {
               logger.debug(
                 `[AESOP] Index ${WORKFLOW_EXECUTIONS_INDEX} not found - returning empty history`
               );

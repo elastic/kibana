@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod';
 import { buildRouteValidationWithZod } from '@kbn/evals-common';
 import type { AESOPRouteDependencies } from './register_aesop_routes';
+import type { ProposedSkillDocument } from '../../lib/aesop/types';
 import { SkillDatasetGenerator } from '../../lib/aesop/skill_dataset_generator';
 
 const generateDatasetParamsSchema = z.object({
@@ -50,7 +51,7 @@ export function registerGenerateEvalDatasetRoute({ router, logger }: AESOPRouteD
             index: '.aesop-proposed-skills',
             id: skillId,
           });
-          const skill = skillDoc._source as any;
+          const skill = skillDoc._source as ProposedSkillDocument | undefined;
           if (!skill) {
             return response.notFound({
               body: { message: `Skill ${skillId} not found` },
@@ -111,9 +112,16 @@ export function registerGenerateEvalDatasetRoute({ router, logger }: AESOPRouteD
         } catch (error) {
           const msg = error instanceof Error ? error.message : String(error);
           logger.error(`[AESOP] Failed to generate eval dataset: ${msg}`);
+          const isConnectorIssue = /Connector execution failed|security token|Forbidden|Unauthorized|rate limit|max_tokens|anthropic_version/i.test(
+            msg
+          );
           return response.customError({
-            statusCode: 500,
-            body: { message: `Failed to generate eval dataset: ${msg}` },
+            statusCode: isConnectorIssue ? 400 : 500,
+            body: {
+              message: isConnectorIssue
+                ? `LLM connector failed: ${msg}`
+                : `Failed to generate eval dataset: ${msg}`,
+            },
           });
         }
       }

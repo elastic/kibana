@@ -54,10 +54,12 @@ export interface RouteDependencies {
 interface AllRouteDependencies extends RouteDependencies {
   evaluatorRegistry: EvaluatorRegistry;
   monitoringService: SkillMonitoringService;
-  skillValidationService: SkillValidationService;
+  // AESOP-scoped services; present only when `aesopEnabled` is true.
+  skillValidationService?: SkillValidationService;
   skillOnlineEvalService?: import('../lib/aesop/skill_online_eval_service').SkillOnlineEvalService;
   suiteRunner?: import('../lib/suite_runner').SuiteRunner;
   repoRoot?: string;
+  aesopEnabled: boolean;
 }
 
 export const registerRoutes = (dependencies: AllRouteDependencies) => {
@@ -84,13 +86,13 @@ export const registerRoutes = (dependencies: AllRouteDependencies) => {
   registerGetDatasetStatsRoute(dependencies);
   registerUpdateExampleSplitsRoute(dependencies);
   registerImportExamplesRoute(dependencies);
-  registerGetTracingProjectsRoute(dependencies);
-  registerGetProjectTracesRoute(dependencies);
 
   registerEvaluationRoutes(dependencies);
   registerEvaluatorRoutes(dependencies);
   registerMonitoringRoutes(dependencies);
-  registerAesopRoutes(dependencies);
+  if (dependencies.aesopEnabled) {
+    registerAesopRoutes(dependencies);
+  }
   registerSkillRoutes(dependencies);
   registerRemoteConfigsRoutes(dependencies);
 

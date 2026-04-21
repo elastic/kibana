@@ -112,9 +112,16 @@ export function registerSkillGenerateEvalDatasetRoute({ router, logger }: SkillR
         } catch (error) {
           const msg = error instanceof Error ? error.message : String(error);
           logger.error(`[Evals] Failed to generate eval dataset for skill: ${msg}`);
+          const isConnectorIssue = /Connector execution failed|security token|Forbidden|Unauthorized|rate limit|max_tokens|anthropic_version/i.test(
+            msg
+          );
           return response.customError({
-            statusCode: 500,
-            body: { message: `Failed to generate eval dataset: ${msg}` },
+            statusCode: isConnectorIssue ? 400 : 500,
+            body: {
+              message: isConnectorIssue
+                ? `LLM connector failed: ${msg}`
+                : `Failed to generate eval dataset: ${msg}`,
+            },
           });
         }
       }
