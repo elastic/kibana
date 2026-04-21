@@ -258,11 +258,6 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
     const errorCount = inputValidationResults && countValidationErrors(inputValidationResults);
     const hasErrors = forceShowErrors && errorCount;
 
-    const hasInputStreams = useMemo(
-      () => packageInputStreams.length > 0,
-      [packageInputStreams.length]
-    );
-
     const inputStreams = useMemo(
       () =>
         packageInputStreams
@@ -278,6 +273,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
           .filter((stream) => Boolean(stream.packagePolicyInputStream)),
       [packageInputStreamShouldBeVisible, packageInputStreams, packagePolicyInput.streams]
     );
+    const hasInputStreams = useMemo(() => inputStreams.length > 0, [inputStreams.length]);
     const showTopLevelDescription = inputStreams.length === 1;
 
     const dynamicSignalTypes = useMemo(
@@ -554,11 +550,16 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
           </EuiFlexItem>
         </EuiFlexGroup>
 
-        {/* Header rule break */}
-        {isShowingStreams && hasStreamToggle ? <EuiSpacer size="l" /> : null}
+        {/* Spacing if we are showing rest of content */}
+        {isShowingStreams &&
+        hasInputStreams &&
+        ((packageInput.vars && packageInput.vars.length) || !shouldConsolidateAdvancedSections) ? (
+          <EuiSpacer size="m" />
+        ) : null}
+
         {/* Input level policy */}
         {isShowingStreams && packageInput.vars && packageInput.vars.length ? (
-          <Fragment>
+          <>
             <PackagePolicyInputConfig
               data-test-subj="PackagePolicy.InputConfig"
               hasInputStreams={hasInputStreams}
@@ -580,13 +581,13 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
             packageInput.show_divider !== false ? (
               <ShortenedHorizontalRule margin="m" />
             ) : (
-              <EuiSpacer size="l" />
+              <EuiSpacer size="m" />
             )}
-          </Fragment>
+          </>
         ) : null}
 
         {/* Per-stream policy */}
-        {isShowingStreams && !shouldConsolidateAdvancedSections ? (
+        {isShowingStreams && hasInputStreams && !shouldConsolidateAdvancedSections ? (
           <EuiFlexGroup direction="column" data-test-subj="PackagePolicy.InputConfig.streams">
             {inputStreams.map(({ packageInputStream, packagePolicyInputStream }, index) => {
               return (
