@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/evals-suite-security-automatic-migrations'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/security-generative-ai'
+  defaultOwner: '@elastic/security-threat-hunting'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/evals-suite-security-automatic-migrations'
   description: Moon project for @kbn/evals-suite-security-automatic-migrations
   channel: ''
-  owner: '@elastic/security-generative-ai'
+  owner: '@elastic/security-threat-hunting'
   sourceRoot: x-pack/solutions/security/packages/kbn-evals-suite-security-automatic-migrations
 dependsOn:
   - '@kbn/evals'
