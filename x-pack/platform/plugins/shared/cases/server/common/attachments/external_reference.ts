@@ -12,7 +12,7 @@ import type {
   AttachmentAttributesV2,
 } from '../../../common/types/domain/attachment/v2';
 import type { ExternalReferenceNoSOAttachmentPayload } from '../../../common/types/domain';
-import { AttachmentType, ExternalReferenceStorageType } from '../../../common/types/domain';
+import { AttachmentType } from '../../../common/types/domain';
 import type {
   AttachmentPersistedAttributes,
   UnifiedAttachmentAttributes,
@@ -23,6 +23,7 @@ import {
   EXTERNAL_REFERENCE_TYPE_MAP,
   UNIFIED_TO_EXTERNAL_REFERENCE_TYPE_MAP,
 } from '../../../common/constants/attachments';
+import { getExternalReferenceStorage } from './storage_type';
 
 /**
  * Resolves a legacy externalReferenceAttachmentTypeId to its unified type name.
@@ -88,7 +89,7 @@ export const externalReferenceAttachmentTransformer: AttachmentTypeTransformer<
         attachmentId: legacyAttrs.externalReferenceId,
         metadata: legacyAttrs.externalReferenceMetadata as Record<string, unknown> | undefined,
         owner: legacyAttrs.owner,
-        ...extractCommonAttributes(legacyAttrs as unknown as AttachmentAttributesV2),
+        ...extractCommonAttributes(legacyAttrs as AttachmentAttributesV2),
       } as UnifiedAttachmentAttributes;
     }
 
@@ -107,13 +108,11 @@ export const externalReferenceAttachmentTransformer: AttachmentTypeTransformer<
       return {
         type: AttachmentType.externalReference,
         externalReferenceId: unifiedAttrs.attachmentId,
-        externalReferenceStorage: {
-          type: ExternalReferenceStorageType.elasticSearchDoc,
-        },
+        externalReferenceStorage: getExternalReferenceStorage(legacyTypeId),
         externalReferenceAttachmentTypeId: legacyTypeId,
-        externalReferenceMetadata: unifiedAttrs.metadata as Record<string, unknown> | null,
+        externalReferenceMetadata: unifiedAttrs.metadata ?? null,
         owner: unifiedAttrs.owner,
-        ...extractCommonAttributes(unifiedAttrs as unknown as AttachmentAttributesV2),
+        ...extractCommonAttributes(unifiedAttrs as AttachmentAttributesV2),
       } as AttachmentPersistedAttributes;
     }
 
@@ -168,9 +167,7 @@ export const externalReferenceAttachmentTransformer: AttachmentTypeTransformer<
     return {
       type: AttachmentType.externalReference,
       externalReferenceId: unifiedAttachment.attachmentId,
-      externalReferenceStorage: {
-        type: ExternalReferenceStorageType.elasticSearchDoc,
-      },
+      externalReferenceStorage: getExternalReferenceStorage(legacyTypeId),
       externalReferenceAttachmentTypeId: legacyTypeId,
       externalReferenceMetadata: unifiedAttachment.metadata ?? null,
       owner: unifiedAttachment.owner,

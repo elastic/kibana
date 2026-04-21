@@ -7,24 +7,59 @@
 
 import * as rt from 'io-ts';
 import { isLeft } from 'fp-ts/Either';
+import { RESPONSE_ACTION_AGENT_TYPE } from '../../../common/endpoint/service/response_actions/constants';
 
-const EndpointAttachmentMetadataRt = rt.type({
+/**
+ * Closed union over the domain `ResponseActionAgentType` so typos and
+ * unexpected values are rejected at attachment registration time rather
+ * than silently persisted.
+ */
+const AgentTypeRt = rt.union(
+  RESPONSE_ACTION_AGENT_TYPE.map((agentType) => rt.literal(agentType)) as [
+    rt.LiteralC<(typeof RESPONSE_ACTION_AGENT_TYPE)[number]>,
+    rt.LiteralC<(typeof RESPONSE_ACTION_AGENT_TYPE)[number]>,
+    ...Array<rt.LiteralC<(typeof RESPONSE_ACTION_AGENT_TYPE)[number]>>
+  ]
+);
+
+const EndpointTargetRt = rt.strict({
+  endpointId: rt.string,
+  hostname: rt.string,
+  agentType: AgentTypeRt,
+});
+
+/**
+ * `rt.strict` strips unknown top-level keys in the decoded value. To reject
+ * unknown keys outright (a reasonable v2 expectation), we additionally
+ * enforce an allow-list explicitly. `targets` is required to be non-empty
+ * since a response-action attachment with zero targets is semantically invalid.
+ */
+const EndpointAttachmentMetadataRt = rt.strict({
   command: rt.string,
   comment: rt.string,
-  targets: rt.array(
-    rt.type({
-      endpointId: rt.string,
-      hostname: rt.string,
-      agentType: rt.string,
-    })
-  ),
+  targets: rt.array(EndpointTargetRt),
 });
+
+const ALLOWED_TOP_LEVEL_KEYS = new Set(['command', 'comment', 'targets']);
 
 export const validateEndpointAttachmentMetadata = (data: unknown): void => {
   const result = EndpointAttachmentMetadataRt.decode(data);
   if (isLeft(result)) {
     throw new Error(
-      `Invalid endpoint attachment metadata: expected { command: string, comment: string, targets: Array<{ endpointId: string, hostname: string, agentType: string }> }`
+      `Invalid endpoint attachment metadata: expected { command: string, comment: string, targets: Array<{ endpointId: string, hostname: string, agentType: ResponseActionAgentType }> }`
+    );
+  }
+
+  const extraKeys = Object.keys(data as object).filter((key) => !ALLOWED_TOP_LEVEL_KEYS.has(key));
+  if (extraKeys.length > 0) {
+    throw new Error(
+      `Invalid endpoint attachment metadata: unknown key(s) [${extraKeys.join(', ')}]`
+    );
+  }
+
+  if (result.right.targets.length === 0) {
+    throw new Error(
+      'Invalid endpoint attachment metadata: targets must contain at least one entry'
     );
   }
 };

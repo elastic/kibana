@@ -31,27 +31,35 @@ describe('validateEndpointAttachmentMetadata', () => {
         targets: [
           { endpointId: '1', hostname: 'host-1', agentType: 'endpoint' },
           { endpointId: '2', hostname: 'host-2', agentType: 'sentinel_one' },
+          { endpointId: '3', hostname: 'host-3', agentType: 'microsoft_defender_endpoint' },
+          { endpointId: '4', hostname: 'host-4', agentType: 'crowdstrike' },
         ],
       })
     ).not.toThrow();
   });
 
   it('throws for missing command', () => {
-    expect(() => validateEndpointAttachmentMetadata({ comment: 'test', targets: [] })).toThrow(
-      'Invalid endpoint attachment metadata'
-    );
+    expect(() =>
+      validateEndpointAttachmentMetadata({ comment: 'test', targets: validMetadata.targets })
+    ).toThrow('Invalid endpoint attachment metadata');
   });
 
   it('throws for missing comment', () => {
-    expect(() => validateEndpointAttachmentMetadata({ command: 'isolate', targets: [] })).toThrow(
-      'Invalid endpoint attachment metadata'
-    );
+    expect(() =>
+      validateEndpointAttachmentMetadata({ command: 'isolate', targets: validMetadata.targets })
+    ).toThrow('Invalid endpoint attachment metadata');
   });
 
   it('throws for missing targets', () => {
     expect(() =>
       validateEndpointAttachmentMetadata({ command: 'isolate', comment: 'test' })
     ).toThrow('Invalid endpoint attachment metadata');
+  });
+
+  it('throws for empty targets array', () => {
+    expect(() => validateEndpointAttachmentMetadata({ ...validMetadata, targets: [] })).toThrow(
+      'targets must contain at least one entry'
+    );
   });
 
   it('throws for targets with missing fields', () => {
@@ -61,6 +69,21 @@ describe('validateEndpointAttachmentMetadata', () => {
         targets: [{ endpointId: '1' }],
       })
     ).toThrow('Invalid endpoint attachment metadata');
+  });
+
+  it('throws for targets with an unknown agentType', () => {
+    expect(() =>
+      validateEndpointAttachmentMetadata({
+        ...validMetadata,
+        targets: [{ endpointId: '1', hostname: 'host-1', agentType: 'not-a-real-agent' }],
+      })
+    ).toThrow('Invalid endpoint attachment metadata');
+  });
+
+  it('throws for unknown top-level keys', () => {
+    expect(() => validateEndpointAttachmentMetadata({ ...validMetadata, extra: 'nope' })).toThrow(
+      'unknown key(s) [extra]'
+    );
   });
 
   it('throws for null input', () => {

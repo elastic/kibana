@@ -6,7 +6,6 @@
  */
 
 import React, { lazy, Suspense } from 'react';
-import type { LazyExoticComponent } from 'react';
 import { EuiAvatar } from '@elastic/eui';
 import type {
   UnifiedReferenceAttachmentType,
@@ -14,16 +13,8 @@ import type {
 } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import { SECURITY_ENDPOINT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 
-/**
- * Lazy-loaded components accept EndpointAttachmentProps (union of legacy + unified).
- * Cast to the unified view props type to satisfy the registry contract.
- */
-const LazyEvent = lazy(() => import('./external_reference_event'));
-const LazyChildren = lazy(
-  () => import('./external_reference_children')
-) as unknown as LazyExoticComponent<
-  (props: UnifiedReferenceAttachmentViewProps) => React.ReactElement | null
->;
+const LazyEvent = lazy(() => import('./endpoint_event'));
+const LazyChildren = lazy(() => import('./endpoint_children'));
 
 const getEventContent = (props: UnifiedReferenceAttachmentViewProps) => (
   <Suspense fallback={null}>

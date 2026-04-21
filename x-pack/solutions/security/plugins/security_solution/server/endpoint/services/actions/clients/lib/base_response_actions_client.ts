@@ -16,6 +16,7 @@ import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import { SECURITY_ENDPOINT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import type { MemoryDumpActionRequestBody } from '../../../../../../common/api/endpoint/actions/response_actions/memory_dump';
 import type { CustomScriptsRequestQueryParams } from '../../../../../../common/api/endpoint/custom_scripts/get_custom_scripts_route';
 import type { ResponseActionRequestTag } from '../../constants';
@@ -106,7 +107,6 @@ import type {
   CancelActionRequestBody,
 } from '../../../../../../common/api/endpoint';
 import { stringify } from '../../../../utils/stringify';
-import { CASE_ATTACHMENT_ENDPOINT_TYPE_ID } from '../../../../../../common/constants';
 import { EMPTY_COMMENT } from '../../../../utils/translations';
 
 const ELASTIC_RESPONSE_ACTION_MESSAGE = (
@@ -413,7 +413,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
 
     const attachments: BulkCreateAttachmentsRequestV2 = [
       {
-        type: CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
+        type: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
         attachmentId: actionId,
         metadata: {
           targets,

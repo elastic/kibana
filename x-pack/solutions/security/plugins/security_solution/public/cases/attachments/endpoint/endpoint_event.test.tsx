@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 
-import AttachmentContentEvent from './external_reference_event';
+import AttachmentContentEvent from './endpoint_event';
 import { useNavigation } from '@kbn/security-solution-navigation/src/navigation';
 
 jest.mock('@kbn/security-solution-navigation/src/navigation', () => {
@@ -27,7 +27,7 @@ describe('AttachmentContentEvent', () => {
   });
 
   const defaultProps = {
-    externalReferenceMetadata: {
+    metadata: {
       command: 'isolate',
       comment: 'test comment',
       targets: [
@@ -51,8 +51,8 @@ describe('AttachmentContentEvent', () => {
     rerender(
       <AttachmentContentEvent
         {...defaultProps}
-        externalReferenceMetadata={{
-          ...defaultProps.externalReferenceMetadata,
+        metadata={{
+          ...defaultProps.metadata,
           command: 'unisolate',
         }}
       />

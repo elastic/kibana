@@ -19,6 +19,7 @@ import type { ILicense } from '@kbn/licensing-types';
 import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
+import { SECURITY_ENDPOINT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import { registerScriptsLibraryRoutes } from './endpoint/routes/scripts_library';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
 import { registerTools } from './agent_builder/tools/register_tools';
@@ -55,7 +56,6 @@ import { registerDeprecations } from './deprecations';
 import {
   APP_ID,
   APP_UI_ID,
-  CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
   DEFAULT_ALERTS_INDEX,
   DEFAULT_DETECTIONS_CLOSE_REASONS_KEY,
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
@@ -522,7 +522,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
     this.usageCollection = plugins.usageCollection;
     plugins.cases.attachmentFramework.registerUnified({
-      id: CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
+      id: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
       schemaValidator: validateEndpointAttachmentMetadata,
     });
     plugins.cases.attachmentFramework.registerUnified(getEventAttachmentType());
