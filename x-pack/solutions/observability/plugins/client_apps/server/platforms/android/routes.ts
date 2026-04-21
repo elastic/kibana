@@ -7,10 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger } from '@kbn/core/server';
-import { ANDROID_RETRACE_API_PATH, CRASH_INDEX_PATTERN } from '../../../common';
-import { fetchCrashDocument } from './fetch_crash_doc';
-import { fetchMappings } from './fetch_mappings';
-import { retrace, extractMethodKeys } from './retrace';
+import { ANDROID_RETRACE_API_PATH } from '../../../common';
+import { retrace } from './retrace';
 import { handleRouteError } from '../../lib/handle_route_error';
 
 export function registerAndroidRoutes({ router, logger }: { router: IRouter; logger: Logger }) {
@@ -28,31 +26,20 @@ export function registerAndroidRoutes({ router, logger }: { router: IRouter; log
       },
       validate: {
         body: schema.object({
-          doc_id: schema.string({ minLength: 1 }),
-          index: schema.string({ defaultValue: CRASH_INDEX_PATTERN }),
+          stacktrace: schema.string({ minLength: 1 }),
+          build_id: schema.string({ minLength: 1 }),
         }),
       },
     },
     async (context, request, response) => {
       try {
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-        const { doc_id: docId, index } = request.body;
+        const { stacktrace, build_id: buildId } = request.body;
 
-        const stacktrace = await fetchCrashDocument(esClient, docId, index);
-        if (!stacktrace) {
-          return response.notFound({
-            body: {
-              message: `No crash document found with _id "${docId}" in "${index}"`,
-            },
-          });
-        }
-
-        const methodKeys = extractMethodKeys(stacktrace);
-        const mappings = await fetchMappings(esClient, methodKeys);
-        const deobfuscated = retrace(stacktrace, mappings);
+        const resolved = await retrace({ esClient, stacktrace, buildId, logger });
 
         return response.ok({
-          body: { original: stacktrace, resolved: deobfuscated },
+          body: { original: stacktrace, resolved },
         });
       } catch (error) {
         return handleRouteError({ error, logger, response, message: 'Android retrace failed' });

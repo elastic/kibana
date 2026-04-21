@@ -8,8 +8,5 @@
 export const PLUGIN_ID = 'clientApps';
 
 export const ANDROID_RETRACE_API_PATH = '/internal/client_apps/android/retrace';
-export const ANDROID_MAPPING_INDEX = 'android-r8-mappings';
 
 export const JS_SOURCEMAP_API_PATH = '/internal/client_apps/javascript/sourcemap';
-
-export const CRASH_INDEX_PATTERN = 'logs-generic.otel*';

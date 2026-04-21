@@ -13,7 +13,7 @@ client_apps/
 ├── tsconfig.json                                 TypeScript configuration
 ├── jest.config.js                                Jest test configuration
 ├── common/                                       Shared constants and types
-│   ├── index.ts                                  Plugin ID, API paths, index names
+│   ├── index.ts                                  Plugin ID and API paths
 │   └── types.ts                                  Shared interfaces (e.g. SymbolicationResponse)
 ├── public/                                       Client-side (browser)
 │   ├── index.ts                                  Entry point — exports plugin class
@@ -32,10 +32,7 @@ client_apps/
     └── platforms/
         ├── android/
         │   ├── routes.ts                         POST /internal/client_apps/android/retrace
-        │   ├── retrace.ts                        Core retrace algorithm
-        │   ├── fetch_crash_doc.ts                Fetch crash document from ES
-        │   ├── fetch_mappings.ts                 Batch-fetch R8 mapping documents
-        │   └── parse_mapping_entry.ts            Parse pipe-delimited mapping entries
+        │   └── retrace.ts                        Core retrace algorithm (stub)
         └── javascript/
             └── routes.ts                         JS source map routes (placeholder)
 ```
@@ -130,7 +127,7 @@ Users reach platform views via URL drilldowns configured on dashboard panels. Th
 pattern is:
 
 ```
-{{kibanaUrl}}/app/clientApps/<platform>/<action>?doc_id={{event.value}}&index=<optional>
+{{kibanaUrl}}/app/clientApps/<platform>/<action>?doc_id={{event.value}}
 ```
 
 For example, an Android crash dashboard drills down to:
