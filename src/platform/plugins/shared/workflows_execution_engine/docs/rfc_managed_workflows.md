@@ -191,17 +191,14 @@ These are capabilities that interact with or are prerequisites for managed workf
 9. **How do teams know when a managed workflow finishes?**
    Options: polling via `getWorkflowExecutionById`, callback/hook provided at registration, event bus. ruflin: "event bus ideal, polling ok for now." KDKHD: "must be able to detect/get notified about status."
 
-10. **Should executing un-registered workflow definitions directly be a supported API?**
-    The engine already supports executing a workflow definition without it being persisted (direct execution). The question is whether to expose this as a first-class, documented API for managed workflow consumers who want fire-and-forget execution without storage.
-
 ### Cloning
 
-11. **When a managed workflow is cloned, what happens to the original?**
+10. **When a managed workflow is cloned, what happens to the original?**
     The managed workflow remains active and unchanged — it cannot be disabled. The clone is independent. UX should make clear that the user now has two workflows with the same logic.
 
 ### Scope
 
-12. **Managed workflow vs. workflow template — where is the boundary?**
+11. **Managed workflow vs. workflow template — where is the boundary?**
     A managed workflow and a workflow template both ship a pre-built definition, but they differ in ownership after installation:
 
     | | **Managed workflow** | **Workflow template** |
@@ -213,9 +210,6 @@ These are capabilities that interact with or are prerequisites for managed workf
     | **Litmus test** | Does the platform keep the definition in sync with what the product team ships? **Yes.** | **No** — the user owns it after installation. |
 
     This RFC covers managed workflows only. Templates are a separate initiative and out of scope. A managed workflow that ships disabled and requires user enablement is still a managed workflow — it remains reconciled, versioned, and protected. The distinction matters because teams may be tempted to use managed workflows as templates; this table clarifies which pattern to use.
-
-13. **Should managed workflows be registered from integrations?**
-    ruflin: "Eventually, ship workflows as integrations in two forms: A) overwrite a managed workflow (rare), B) register a new managed workflow." This is a future direction, not first delivery.
 
 ---
 
@@ -554,7 +548,7 @@ Today, the Spaces plugin has no public `onSpaceCreated` hook or event system. Sp
 
 **What about integrations?**
 
-Integrations (Fleet packages) are a future distribution channel. The integration would call the same `registerManagedWorkflow` API during its install lifecycle. The API contract is the same — the only difference is *who* calls it (plugin `setup()` vs. integration install handler). This is deferred (N10) but the API design does not preclude it.
+Integrations (Fleet packages) are a future distribution channel. The integration would call the same `registerManagedWorkflow` API during its install lifecycle. The API contract is the same — the only difference is *who* calls it (plugin `setup()` vs. integration install handler). This is deferred (N7) but the API design does not preclude it.
 
 ---
 
