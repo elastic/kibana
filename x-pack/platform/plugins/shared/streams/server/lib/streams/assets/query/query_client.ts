@@ -472,22 +472,23 @@ export class QueryClient {
   }
 
   /**
-   * Returns all unbacked query links for a stream, including STATS.
-   * Callers (e.g. {@link promoteQueries}) are responsible for filtering
-   * STATS queries and reporting skipped counts to the client.
+   * Returns the raw unbacked set for a stream, including STATS. Used by
+   * {@link promoteQueries} to count STATS it must skip. For the promotable
+   * set (STATS excluded), use {@link getPromotableUnbackedQueries}.
    */
   private async getUnbackedQueries(streamName: string): Promise<QueryLink[]> {
     return this.getQueryLinks([streamName], { ruleUnbacked: 'only' });
   }
 
   /**
-   * Returns the count of all query links across streams that do not have a backing Kibana rule.
+   * Counts queries promotable to rules — unbacked AND non-STATS. Pairs with
+   * {@link getPromotableUnbackedQueries}; the pair MUST stay in sync or the UI
+   * callout count and the Promote-All set diverge.
    *
-   * Pre-migration docs lacking QUERY_TYPE are safe here: STATS queries were
-   * introduced alongside the type field, so any doc without it is a match query.
-   * syncQueries backfills the type for all docs it touches.
+   * Pre-migration docs lacking QUERY_TYPE are safe: STATS were introduced
+   * alongside the type field, so any doc without it is a match query.
    */
-  async getUnbackedQueriesCount(filters?: { minSeverityScore?: number }): Promise<number> {
+  async countPromotableUnbackedQueries(filters?: { minSeverityScore?: number }): Promise<number> {
     const filter = [
       ...termQuery(ASSET_TYPE, 'query'),
       ...termQuery(RULE_BACKED, false),
@@ -510,13 +511,80 @@ export class QueryClient {
   }
 
   /**
-   * Returns all query links across streams that do not have a backing Kibana rule.
+   * Returns all unbacked, non-STATS queries across streams — the list whose
+   * size is {@link countPromotableUnbackedQueries}. The two MUST stay aligned.
    */
-  async getAllUnbackedQueries(filters?: { minSeverityScore?: number }): Promise<QueryLink[]> {
-    return this.getQueryLinks([], {
-      ruleUnbacked: 'only',
-      minSeverityScore: filters?.minSeverityScore,
+  async getPromotableUnbackedQueries(filters?: {
+    minSeverityScore?: number;
+  }): Promise<QueryLink[]> {
+    const filter = [
+      ...termQuery(ASSET_TYPE, 'query'),
+      ...termQuery(RULE_BACKED, false),
+      ...rangeGteQuery(QUERY_SEVERITY_SCORE, filters?.minSeverityScore),
+    ];
+
+    const assetsResponse = await this.dependencies.storageClient.search({
+      size: SEARCH_SIZE_LIMIT,
+      track_total_hits: false,
+      query: {
+        bool: {
+          filter,
+          must_not: termQuery(QUERY_TYPE, QUERY_TYPE_STATS),
+        },
+      },
     });
+
+    return mapSearchHits(assetsResponse);
+  }
+
+  /**
+   * Promotes the promotable-unbacked set (filtered by `queryIds` if provided)
+   * to rule-backed status, grouped by stream.
+   *
+   * Non-obvious behavior:
+   * - `queryIds` referring to STATS/backed/missing queries are silently
+   *   dropped, so `skipped_stats` is reliably `0` from this entry point.
+   * - `streamDefinitions` is injected because `streamsClient` is not a
+   *   `QueryClient` dependency; callers build it from `listStreams()`.
+   */
+  async promoteUnbackedQueries({
+    queryIds,
+    minSeverityScore,
+    streamDefinitions,
+  }: {
+    queryIds?: string[];
+    minSeverityScore?: number;
+    streamDefinitions: Map<string, Streams.all.Definition>;
+  }): Promise<{ promoted: number; skipped_stats: number }> {
+    const candidates = await this.getPromotableUnbackedQueries({ minSeverityScore });
+
+    let toPromote = candidates;
+    if (queryIds && queryIds.length > 0) {
+      const requestedIds = new Set(queryIds);
+      toPromote = candidates.filter((link) => requestedIds.has(link.query.id));
+    }
+
+    const byStream = new Map<string, string[]>();
+    for (const link of toPromote) {
+      const group = byStream.get(link.stream_name) ?? [];
+      group.push(link.query.id);
+      byStream.set(link.stream_name, group);
+    }
+
+    let promoted = 0;
+    let skippedStats = 0;
+    for (const [streamName, ids] of byStream) {
+      const definition = streamDefinitions.get(streamName);
+      if (!definition) {
+        this.dependencies.logger.warn(`Skipping promotion for missing stream ${streamName}`);
+        continue;
+      }
+      const result = await this.promoteQueries(definition, ids);
+      promoted += result.promoted;
+      skippedStats += result.skipped_stats;
+    }
+
+    return { promoted, skipped_stats: skippedStats };
   }
 
   async bulkGetByIds(name: string, ids: string[]) {
