@@ -16,7 +16,11 @@ project:
   channel: ''
   owner: '@elastic/kibana-presentation'
   sourceRoot: src/platform/packages/shared/as-code/shared-telemetry
-dependsOn: []
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/core-http-common'
+  - '@kbn/core-http-server-mocks'
+  - '@kbn/usage-collection-plugin'
 tags:
   - shared-server
   - package
