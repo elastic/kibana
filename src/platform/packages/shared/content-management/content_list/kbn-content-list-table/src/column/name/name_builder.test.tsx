@@ -27,6 +27,7 @@ const defaultContext: ColumnBuilderContext = {
     selection: true,
     tags: false,
     starred: false,
+    userProfiles: false,
   },
 };
 
@@ -79,6 +80,7 @@ describe('name column builder', () => {
           selection: true,
           tags: false,
           starred: false,
+          userProfiles: false,
         },
       };
 
@@ -100,6 +102,41 @@ describe('name column builder', () => {
       const item = { id: '1', title: 'Test' };
       result.render?.('Test', item);
       expect(customRender).toHaveBeenCalledWith(item);
+    });
+  });
+
+  describe('showTags auto-enable', () => {
+    it('auto-enables showTags when supports.tags is true', () => {
+      const context: ColumnBuilderContext = {
+        ...defaultContext,
+        supports: { ...defaultContext.supports!, tags: true },
+      };
+      const result = buildNameColumn({}, context) as NameColumn;
+
+      const item = { id: '1', title: 'Test', tags: ['tag-1'] };
+      const rendered = result.render?.('Test', item) as React.ReactElement;
+      expect(rendered.props).toMatchObject({ showTags: true });
+    });
+
+    it('does not show tags when supports.tags is false', () => {
+      const result = buildNameColumn({}, defaultContext) as NameColumn;
+      // supports.tags is false in defaultContext — showTags defaults to false.
+      const item = { id: '1', title: 'Test', tags: ['tag-1'] };
+      const rendered = result.render?.('Test', item) as React.ReactElement;
+      expect(rendered.props).toMatchObject({ showTags: false });
+    });
+
+    it('respects explicit showTags=false even when supports.tags is true', () => {
+      const context: ColumnBuilderContext = {
+        ...defaultContext,
+        supports: { ...defaultContext.supports!, tags: true },
+      };
+      const props: NameColumnProps = { showTags: false };
+      const result = buildNameColumn(props, context) as NameColumn;
+
+      const item = { id: '1', title: 'Test', tags: ['tag-1'] };
+      const rendered = result.render?.('Test', item) as React.ReactElement;
+      expect(rendered.props).toMatchObject({ showTags: false });
     });
   });
 });

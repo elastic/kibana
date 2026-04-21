@@ -92,7 +92,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await queryBar.setQuery('election');
         await queryBar.submitQuery();
         const currentUrl = await browser.getCurrentUrl();
-        const [, hash] = currentUrl.split('#/');
+        const [, hash] = currentUrl.split('#');
         await common.navigateToUrl(
           'discover',
           hash.replace('columns:!()', 'columns:!(relatedContent)'),
@@ -115,7 +115,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // we used to add _source as a column by default when `discover:searchFieldsFromSource` existed
       it('should show @timestamp and Summary columns for legacy links with _source as a column', async function () {
         const currentUrl = await browser.getCurrentUrl();
-        const [, hash] = currentUrl.split('#/');
+        const [, hash] = currentUrl.split('#');
         const nextHash = hash
           .replace('columns:!(relatedContent)', 'columns:!(_source)')
           .replace('election', 'club');

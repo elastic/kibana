@@ -29,7 +29,7 @@ paths:
           content:
             application/octet-stream:
               schema:
-                type: object
+                type: string
                 format: binary
                 description: A download stream is returned.
               examples:

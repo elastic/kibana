@@ -15,6 +15,7 @@ paths:
         - name: action_id
           in: path
           required: true
+          description: The ID of the response action that generated the file.
           schema:
             type: string
         - name: file_id
@@ -29,7 +30,7 @@ paths:
             type: string
       responses:
         '200':
-          description: OK
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
@@ -39,14 +40,19 @@ paths:
                     properties:
                       actionId:
                         type: string
+                        description: The response action ID.
                       agentId:
                         type: string
+                        description: The agent ID that generated the file.
                       id:
                         type: string
+                        description: The unique file identifier.
                       agentType:
                         type: string
+                        description: The type of agent that generated the file.
                       status:
                         type: string
+                        description: The file upload status.
                         enum:
                           - AWAITING_UPLOAD
                           - UPLOADING
@@ -56,10 +62,14 @@ paths:
                       created:
                         type: string
                         format: date-time
+                        description: The date and time the file was created.
                       name:
                         type: string
+                        description: The file name.
                       size:
                         type: number
+                        description: The file size in bytes.
                       mimeType:
                         type: string
+                        description: The MIME type of the file.
 

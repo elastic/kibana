@@ -139,6 +139,7 @@ spec:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
         REPORT_FAILED_TESTS_TO_GITHUB: 'true'
+        SCOUT_REPORTER_ENABLED: 'true'
       allow_rebuilds: true
       branch_configuration: main 9.4 9.3 9.2 8.19
       default_branch: main

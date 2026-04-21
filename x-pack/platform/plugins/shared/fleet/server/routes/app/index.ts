@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import path from 'path';
+
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
@@ -218,6 +220,7 @@ export const registerRoutes = (
     .get({
       path: APP_API_ROUTES.CHECK_PERMISSIONS_PATTERN,
       summary: `Check permissions`,
+      description: `Check whether the current user has the required permissions to use Fleet. Optionally verifies Fleet Server setup privileges.`,
       options: {
         tags: ['oas-tag:Fleet internals'],
       },
@@ -231,6 +234,9 @@ export const registerRoutes = (
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_check_permissions.yaml'),
+        },
         validate: {
           request: CheckPermissionsRequestSchema,
           response: {
@@ -275,6 +281,7 @@ export const registerRoutes = (
         },
       },
       summary: `Create a service token`,
+      description: `Create a Fleet Server service token. The token is used to enroll Fleet Server instances with Kibana.`,
       options: {
         tags: ['oas-tag:Fleet service tokens'],
       },
@@ -282,6 +289,10 @@ export const registerRoutes = (
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () =>
+            path.join(__dirname, 'examples/post_generate_service_token.yaml'),
+        },
         validate: {
           request: GenerateServiceTokenRequestSchema,
           response: {
