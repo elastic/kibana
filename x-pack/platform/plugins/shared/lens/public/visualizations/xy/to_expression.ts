@@ -7,7 +7,7 @@
 
 import type { Ast } from '@kbn/interpreter';
 import { Position, ScaleType } from '@elastic/charts';
-import type { PaletteRegistry } from '@kbn/coloring';
+import { DEFAULT_COLOR_MAPPING_CONFIG, type PaletteRegistry } from '@kbn/coloring';
 import type { ExpressionFunctionTheme } from '@kbn/expressions-plugin/common';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
@@ -488,6 +488,7 @@ const dataLayerToExpression = (
     fn: [layer.collapseFn!],
   });
 
+  const hasActiveSplits = !layer.collapseFn && (layer.splitAccessors ?? []).length > 0;
   const extendedDataLayerFn = buildExpressionFunction<ExtendedDataLayerFn>('extendedDataLayer', {
     layerId: layer.layerId,
     simpleView: Boolean(layer.simpleView),
@@ -500,7 +501,7 @@ const dataLayerToExpression = (
     isPercentage,
     isStacked,
     isHorizontal,
-    splitAccessors: layer.collapseFn || !layer.splitAccessors ? undefined : layer.splitAccessors,
+    splitAccessors: hasActiveSplits ? layer.splitAccessors : undefined,
     decorations: layer.yConfig
       ? layer.yConfig.map((yConfig) =>
           yConfigToDataDecorationConfigExpression(yConfig, yAxisConfigs)
@@ -521,7 +522,14 @@ const dataLayerToExpression = (
             name: getDefaultPalette(layer.seriesType),
           }),
     ]).toAst(),
-    colorMapping: layer.colorMapping ? JSON.stringify(layer.colorMapping) : undefined,
+    colorMapping: layer.colorMapping
+      ? JSON.stringify(layer.colorMapping)
+      : hasActiveSplits
+      ? JSON.stringify({
+          ...DEFAULT_COLOR_MAPPING_CONFIG,
+          paletteId: getDefaultPalette(layer.seriesType),
+        })
+      : undefined,
   });
 
   return {
