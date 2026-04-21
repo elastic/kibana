@@ -38,7 +38,7 @@
           ") => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/announcement_modal/agent_builder_announcement_modal.tsx",
-        "lineNumber": 43,
+        "lineNumber": 40,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -60,7 +60,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/announcement_modal/agent_builder_announcement_modal.tsx",
-            "lineNumber": 43,
+            "lineNumber": 40,
             "columnNumber": 93,
             "deprecated": false,
             "trackAdoption": false,
@@ -168,7 +168,7 @@
         "label": "AgentBuilderAnnouncementModalProps",
         "description": [],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/announcement_modal/agent_builder_announcement_modal.tsx",
-        "lineNumber": 33,
+        "lineNumber": 30,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -184,7 +184,7 @@
               "() => void"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/announcement_modal/agent_builder_announcement_modal.tsx",
-            "lineNumber": 34,
+            "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -202,7 +202,7 @@
               "() => void"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/announcement_modal/agent_builder_announcement_modal.tsx",
-            "lineNumber": 35,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -222,7 +222,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/announcement_modal/agent_builder_announcement_modal.tsx",
-            "lineNumber": 36,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
