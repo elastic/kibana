@@ -4871,6 +4871,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/as-code-shared-telemetry@link:src/platform/packages/shared/as-code/shared-telemetry":
+  version "0.0.0"
+  uid ""
+
 "@kbn/as-code-shared-transforms@link:src/platform/packages/shared/as-code/shared-transforms":
   version "0.0.0"
   uid ""
