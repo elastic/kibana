@@ -58,9 +58,9 @@ export const useEntityStoreRoutes = () => {
           query: { include_components: withComponents },
         });
       }
-      return http.fetch<GetEntityStoreStatusResponse>('/api/entity_store/status', {
+      return http.fetch<GetEntityStoreStatusResponse>('/internal/entity_store/status', {
         method: 'GET',
-        version: API_VERSIONS.public.v1,
+        version: API_VERSIONS.internal.v1,
         query: { include_components: withComponents },
       });
     };
@@ -74,9 +74,9 @@ export const useEntityStoreRoutes = () => {
           body: JSON.stringify({}),
         });
       }
-      return http.fetch<InitEntityStoreResponse>('/api/entity_store/enable', {
+      return http.fetch<InitEntityStoreResponse>('/internal/entity_store/enable', {
         method: 'POST',
-        version: API_VERSIONS.public.v1,
+        version: API_VERSIONS.internal.v1,
         body: JSON.stringify(options ?? {}),
       });
     };
@@ -95,11 +95,14 @@ export const useEntityStoreRoutes = () => {
       }
       const results = await Promise.all(
         entityTypes.map((entityType) =>
-          http.fetch<StartEntityEngineResponse>(`/api/entity_store/engines/${entityType}/start`, {
-            method: 'POST',
-            version: API_VERSIONS.public.v1,
-            body: JSON.stringify({}),
-          })
+          http.fetch<StartEntityEngineResponse>(
+            `/internal/entity_store/engines/${entityType}/start`,
+            {
+              method: 'POST',
+              version: API_VERSIONS.internal.v1,
+              body: JSON.stringify({}),
+            }
+          )
         )
       );
       return results;
@@ -118,11 +121,14 @@ export const useEntityStoreRoutes = () => {
       }
       const results = await Promise.all(
         entityTypes.map((entityType) =>
-          http.fetch<StopEntityEngineResponse>(`/api/entity_store/engines/${entityType}/stop`, {
-            method: 'POST',
-            version: API_VERSIONS.public.v1,
-            body: JSON.stringify({}),
-          })
+          http.fetch<StopEntityEngineResponse>(
+            `/internal/entity_store/engines/${entityType}/stop`,
+            {
+              method: 'POST',
+              version: API_VERSIONS.internal.v1,
+              body: JSON.stringify({}),
+            }
+          )
         )
       );
       return results;
@@ -141,10 +147,10 @@ export const useEntityStoreRoutes = () => {
       }
       const results = await Promise.all(
         entityTypes.map((entityType) =>
-          http.fetch<DeleteEntityEngineResponse>(`/api/entity_store/engines/${entityType}`, {
+          http.fetch<DeleteEntityEngineResponse>(`/internal/entity_store/engines/${entityType}`, {
             method: 'DELETE',
             query: { data: deleteData },
-            version: API_VERSIONS.public.v1,
+            version: API_VERSIONS.internal.v1,
           })
         )
       );
@@ -152,17 +158,20 @@ export const useEntityStoreRoutes = () => {
     };
 
     const initEntityEngine = async (entityType: EntityType) => {
-      return http.fetch<InitEntityEngineResponse>(`/api/entity_store/engines/${entityType}/init`, {
-        method: 'POST',
-        version: API_VERSIONS.public.v1,
-        body: JSON.stringify({}),
-      });
+      return http.fetch<InitEntityEngineResponse>(
+        `/internal/entity_store/engines/${entityType}/init`,
+        {
+          method: 'POST',
+          version: API_VERSIONS.internal.v1,
+          body: JSON.stringify({}),
+        }
+      );
     };
 
     const listEntityEngines = async () => {
-      return http.fetch<ListEntityEnginesResponse>(`/api/entity_store/engines`, {
+      return http.fetch<ListEntityEnginesResponse>(`/internal/entity_store/engines`, {
         method: 'GET',
-        version: API_VERSIONS.public.v1,
+        version: API_VERSIONS.internal.v1,
       });
     };
 

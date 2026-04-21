@@ -190,7 +190,7 @@ export const useEntityAnalyticsRoutes = () => {
       params: FetchEntitiesListParams;
     }) =>
       http.fetch<ListEntitiesResponse>(LIST_ENTITIES_URL, {
-        version: API_VERSIONS.public.v1,
+        version: API_VERSIONS.internal.v1,
         method: 'GET',
         query: {
           entity_types: params.entityTypes,
