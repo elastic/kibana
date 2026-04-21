@@ -28,7 +28,7 @@ export const getCascadeGridStyles = (euiTheme: EuiThemeComputed) => ({
   }),
 
   toolbar: css({
-    padding: `${euiTheme.size.s} 0`,
+    padding: 0,
     flexShrink: 0,
   }),
 

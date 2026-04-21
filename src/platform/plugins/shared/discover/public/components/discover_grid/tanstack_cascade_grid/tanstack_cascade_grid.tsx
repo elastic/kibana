@@ -575,7 +575,7 @@ export const TanStackCascadeGrid: React.FC<TanStackCascadeGridProps> = React.mem
     <div css={[styles.wrapper, fullScreen && styles.fullScreen]} data-test-subj="tanstackCascadeWrapper">
       {/* Toolbar */}
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false} css={styles.toolbar}>
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiText size="s"><strong><span data-test-subj="discoverQueryHits">{total.toLocaleString()}</span> {total === 1 ? 'group' : 'groups'}</strong></EuiText>
