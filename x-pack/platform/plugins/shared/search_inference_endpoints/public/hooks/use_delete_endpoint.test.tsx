@@ -9,7 +9,6 @@ import { waitFor, renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useKibana } from './use_kibana';
 import { useDeleteEndpoint } from './use_delete_endpoint';
-import * as i18n from './translations';
 import React from 'react';
 
 jest.mock('./use_kibana');
@@ -53,7 +52,7 @@ describe('useDeleteEndpoint', () => {
       )
     );
     expect(mockAddSuccess).toHaveBeenCalledWith({
-      title: i18n.DELETE_SUCCESS,
+      title: 'The inference endpoint has been deleted sucessfully.',
     });
   });
 

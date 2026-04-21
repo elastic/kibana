@@ -10,14 +10,12 @@ import type {
   CompositeSLOMemberSummary,
   CompositeSLOSummary,
   GetCompositeSLOResponse,
+  SLOStatus,
 } from '@kbn/slo-schema';
-import {
-  ALL_VALUE,
-  batchGetCompositeSLOResponseSchema,
-  getCompositeSLOResponseSchema,
-} from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { toHighPrecision } from '../utils/number';
 import type { CompositeSLODefinition } from '../domain/models';
+import { toRichRollingTimeWindow } from '../domain/models';
 import {
   computeWeightedSli,
   computeNormalisedWeights,
@@ -33,6 +31,7 @@ interface MemberSummaryData {
   sloName: string;
   summary: {
     sliValue: number;
+    status: SLOStatus;
     fiveMinuteBurnRate: number;
     oneHourBurnRate: number;
     oneDayBurnRate: number;
@@ -48,13 +47,11 @@ export class GetCompositeSLO {
   ) {}
 
   public async executeBatch(ids: string[]): Promise<BatchGetCompositeSLOResponse> {
-    const results = await Promise.all(ids.map((id) => this.executeOne(id)));
-    return batchGetCompositeSLOResponseSchema.encode(results);
+    return await Promise.all(ids.map((id) => this.executeOne(id)));
   }
 
   public async execute(id: string): Promise<GetCompositeSLOResponse> {
-    const result = await this.executeOne(id);
-    return getCompositeSLOResponseSchema.encode(result);
+    return await this.executeOne(id);
   }
 
   private async executeOne(id: string) {
@@ -68,11 +65,12 @@ export class GetCompositeSLO {
       memberDefinitionMap.has(member.sloId)
     );
 
+    const richTimeWindow = toRichRollingTimeWindow(compositeSlo.timeWindow);
+
     const summaryParams = activeMembers.map((member) => ({
       slo: memberDefinitionMap.get(member.sloId)!,
       instanceId: member.instanceId ?? ALL_VALUE,
-      timeWindowOverride: compositeSlo.timeWindow,
-      budgetingMethodOverride: compositeSlo.budgetingMethod,
+      timeWindowOverride: richTimeWindow,
     }));
 
     const summaryResults = await this.summaryClient.computeSummaries(summaryParams);
@@ -80,7 +78,13 @@ export class GetCompositeSLO {
     const memberSummaries: MemberSummaryData[] = activeMembers.map((member, i) => ({
       member,
       sloName: memberDefinitionMap.get(member.sloId)!.name,
-      summary: summaryResults[i].summary,
+      summary: {
+        sliValue: summaryResults[i].summary.sliValue,
+        status: summaryResults[i].summary.status,
+        fiveMinuteBurnRate: summaryResults[i].summary.fiveMinuteBurnRate,
+        oneHourBurnRate: summaryResults[i].summary.oneHourBurnRate,
+        oneDayBurnRate: summaryResults[i].summary.oneDayBurnRate,
+      },
       burnRateWindows: summaryResults[i].burnRateWindows,
     }));
 
@@ -164,7 +168,7 @@ export class GetCompositeSLO {
     ms: {
       member: { sloId: string; weight: number; instanceId?: string };
       sloName: string;
-      summary: { sliValue: number };
+      summary: { sliValue: number; status: SLOStatus };
     },
     normalisedWeight: number
   ): CompositeSLOMemberSummary {
@@ -177,6 +181,7 @@ export class GetCompositeSLO {
       weight: ms.member.weight,
       normalisedWeight,
       sliValue,
+      status: ms.summary.status,
       contribution,
       ...(ms.member.instanceId !== undefined ? { instanceId: ms.member.instanceId } : {}),
     };
