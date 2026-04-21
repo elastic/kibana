@@ -59,6 +59,7 @@ import {
   EQL_QUERY_LABEL,
   ESQL_QUERY_LABEL,
   SAVED_QUERY_LABEL,
+  SAVED_QUERY_NAME_LABEL,
   THREAT_QUERY_LABEL,
   FILTERS_LABEL,
 } from '../../detection_engine/rule_creation_ui/components/description_step/translations';
@@ -318,6 +319,21 @@ export const NewTermsDetails: React.FC<{ rule: RuleResponse }> = ({ rule }) => {
   );
 };
 
+export const SavedQueryDetails: React.FC<{ rule: RuleResponse }> = ({ rule }) => {
+  if (rule.type !== 'saved_query') {
+    return null;
+  }
+
+  return (
+    <>
+      <SectionHeading>{SAVED_QUERY_NAME_LABEL}</SectionHeading>
+      <EuiSpacer size="xs" />
+      <EuiText size="s">{rule.saved_id}</EuiText>
+      <EuiSpacer size="s" />
+    </>
+  );
+};
+
 export const EqlDetails: React.FC<{ rule: RuleResponse }> = ({ rule }) => {
   if (rule.type !== 'eql') {
     return null;
@@ -371,6 +387,8 @@ const RuleTypeDetails: React.FC<{ rule: RuleResponse }> = ({ rule }) => {
       return <MachineLearningDetails rule={rule} />;
     case 'new_terms':
       return <NewTermsDetails rule={rule} />;
+    case 'saved_query':
+      return <SavedQueryDetails rule={rule} />;
     case 'eql':
       return <EqlDetails rule={rule} />;
     default:

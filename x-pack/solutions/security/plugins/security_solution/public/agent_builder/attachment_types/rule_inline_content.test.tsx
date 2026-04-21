@@ -13,6 +13,7 @@ import {
   ThreatMatchDetails,
   MachineLearningDetails,
   NewTermsDetails,
+  SavedQueryDetails,
   EqlDetails,
   FiltersDisplay,
   getFilterLabel,
@@ -451,6 +452,32 @@ describe('NewTermsDetails', () => {
   });
 });
 
+describe('SavedQueryDetails', () => {
+  it('renders saved query name', () => {
+    const rule = {
+      ...baseRule,
+      type: 'saved_query',
+      saved_id: 'my-saved-query-id',
+    } as unknown as RuleResponse;
+
+    render(<SavedQueryDetails rule={rule} />);
+
+    expect(screen.getByText('Saved query name')).toBeInTheDocument();
+    expect(screen.getByText('my-saved-query-id')).toBeInTheDocument();
+  });
+
+  it('returns null for non-saved_query rule types', () => {
+    const rule = {
+      ...baseRule,
+      type: 'query',
+    } as unknown as RuleResponse;
+
+    const { container } = render(<SavedQueryDetails rule={rule} />);
+
+    expect(container).toBeEmptyDOMElement();
+  });
+});
+
 describe('EqlDetails', () => {
   it('renders all three EQL-specific fields using shared translation labels', () => {
     const rule = {
@@ -798,13 +825,15 @@ describe('RuleInlineContent integration', () => {
     expect(screen.queryByText(/Event category field/)).not.toBeInTheDocument();
   });
 
-  it('does not render type-specific section for saved_query rule', () => {
+  it('renders saved_query rule with saved query name', () => {
     renderInlineContent({
       ...baseRule,
       type: 'saved_query',
       saved_id: 'my-saved-query',
     });
 
+    expect(screen.getByText('Saved query name')).toBeInTheDocument();
+    expect(screen.getByText('my-saved-query')).toBeInTheDocument();
     expect(screen.queryByText('Indicator index patterns')).not.toBeInTheDocument();
     expect(screen.queryByText('Machine Learning job')).not.toBeInTheDocument();
   });
