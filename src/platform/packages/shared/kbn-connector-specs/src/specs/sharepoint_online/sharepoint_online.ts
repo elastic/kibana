@@ -16,7 +16,11 @@
  * - Page listing within sites
  * - Cross-site search functionality
  *
- * Requires OAuth2 client credentials authentication with Microsoft Entra ID.
+ * Supports two Microsoft Entra ID auth flows:
+ * - Delegated: OAuth 2.0 Authorization Code (per-user access).
+ * - App-only: certificate-based OAuth 2.0 client credentials, signed with a
+ *   JWT assertion (PS256 + x5t#S256), per Microsoft's recommendation for
+ *   production app-only access to Graph/SharePoint.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -32,13 +36,16 @@ const GraphCollectionOutputSchema = z.object({
 });
 
 /**
- * Auth types that use Microsoft Entra app-only (client credentials) flows.
- * Both the shared-secret client credentials flow AND the certificate-based
- * flow issue app-only tokens and hit the same Graph endpoints, so feature
- * branches that depend on app-only vs delegated permissions must treat
- * them identically.
+ * Auth types that use Microsoft Entra app-only flows (as opposed to
+ * delegated/per-user). App-only tokens go to different Graph endpoints
+ * (e.g. /sites/getAllSites) than delegated tokens, so this branch guards
+ * endpoint selection inside each action handler.
+ *
+ * Currently only the certificate-based client-credentials flow is exposed;
+ * if another app-only flow is added later (e.g. federated-credentials /
+ * workload identity), extend this set.
  */
-const APP_ONLY_AUTH_TYPES = new Set(['oauth_client_credentials', 'oauth_entra_client_certificate']);
+const APP_ONLY_AUTH_TYPES = new Set(['oauth_entra_client_certificate']);
 
 const isAppOnlyAuth = (authType?: unknown): boolean =>
   typeof authType === 'string' && APP_ONLY_AUTH_TYPES.has(authType);
@@ -58,32 +65,6 @@ export const SharepointOnline: ConnectorSpec = {
 
   auth: {
     types: [
-      {
-        type: 'oauth_client_credentials',
-        defaults: {
-          scope: 'https://graph.microsoft.com/.default',
-        },
-        overrides: {
-          meta: {
-            scope: { hidden: true },
-            tokenUrl: {
-              label: i18n.translate(
-                'core.kibanaConnectorSpecs.sharepointOnline.auth.oauth.tokenUrl.label',
-                { defaultMessage: 'Token URL' }
-              ),
-              placeholder: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.sharepointOnline.auth.oauth.tokenUrl.helpText',
-                {
-                  defaultMessage:
-                    "Replace ''{tenantId}'' with your Azure AD tenant ID. For example: https://login.microsoftonline.com/your-tenant-id/oauth2/v2.0/token",
-                  values: { tenantId: '{tenant-id}' },
-                }
-              ),
-            },
-          },
-        },
-      },
       {
         type: 'oauth_authorization_code',
         defaults: {
@@ -178,7 +159,7 @@ export const SharepointOnline: ConnectorSpec = {
     getAllSites: {
       isTool: true,
       description:
-        'List all SharePoint sites the connector has access to. With app-only (client credentials) auth, returns all sites via /sites/getAllSites. With delegated (authorization code) auth, falls back to /sites?search= because getAllSites requires application permissions. Use this to discover site IDs needed by getSite, getSitePages, getSiteDrives, getSiteLists, and getSiteListItems.',
+        'List all SharePoint sites the connector has access to. With app-only (certificate) auth, returns all sites via /sites/getAllSites. With delegated (authorization code) auth, falls back to /sites?search= because getAllSites requires application permissions. Use this to discover site IDs needed by getSite, getSitePages, getSiteDrives, getSiteLists, and getSiteListItems.',
       input: z
         .object({
           search: z
@@ -672,7 +653,7 @@ export const SharepointOnline: ConnectorSpec = {
           .enum(['NAM', 'EUR', 'APC', 'LAM', 'MEA'])
           .optional()
           .describe(
-            'Search region. Only used with app-only (client credentials) auth — ignored for delegated auth. NAM=North America, EUR=Europe, APC=Asia Pacific, LAM=Latin America, MEA=Middle East/Africa. Defaults to NAM when using app-only auth.'
+            'Search region. Only used with app-only (certificate) auth — ignored for delegated auth. NAM=North America, EUR=Europe, APC=Asia Pacific, LAM=Latin America, MEA=Middle East/Africa. Defaults to NAM when using app-only auth.'
           ),
         from: z
           .number()
@@ -703,8 +684,7 @@ export const SharepointOnline: ConnectorSpec = {
           );
         }
 
-        // region is only required for app-only auth (both client credentials
-        // and certificate flows issue app-only tokens). Sending region with
+        // region is only required for app-only auth. Sending region with
         // delegated auth can cause a 400 error.
         const isAppOnly = isAppOnlyAuth(ctx.secrets?.authType);
 
@@ -769,7 +749,7 @@ export const SharepointOnline: ConnectorSpec = {
     '- **Use browse** (`getAllSites` → `getSiteDrives` → `getDriveItems`) when you need structured navigation — e.g., listing everything in a specific folder or enumerating all items in a library.',
     '',
     '### Auth Mode Differences',
-    '- **App-only auth (`oauth_client_credentials` or `oauth_entra_client_certificate`)**: `getAllSites` calls `/sites/getAllSites` and returns all sites the app has access to. The `search` parameter is ignored. The `search` action requires a `region` parameter (defaults to `NAM`).',
+    '- **App-only auth (`oauth_entra_client_certificate`)**: `getAllSites` calls `/sites/getAllSites` and returns all sites the app has access to. The `search` parameter is ignored. The `search` action requires a `region` parameter (defaults to `NAM`).',
     '- **Delegated auth (`oauth_authorization_code`)**: `getAllSites` falls back to `/sites?search=` — provide a keyword or omit for wildcard (`*`). The `search` action does not use `region` (omit it to avoid 400 errors).',
     '',
     '### Escape Hatch',

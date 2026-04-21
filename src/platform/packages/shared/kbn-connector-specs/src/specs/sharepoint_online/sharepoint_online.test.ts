@@ -111,13 +111,6 @@ describe('SharepointOnline', () => {
   });
 
   describe('auth', () => {
-    it('supports oauth_client_credentials auth', () => {
-      const types = (SharepointOnline.auth?.types as Array<string | { type: string }>).map((t) =>
-        typeof t === 'string' ? t : t.type
-      );
-      expect(types).toContain('oauth_client_credentials');
-    });
-
     it('supports oauth_authorization_code with correct Microsoft defaults', () => {
       const oauthType = (
         SharepointOnline.auth?.types as Array<
@@ -153,7 +146,7 @@ describe('SharepointOnline', () => {
   describe('getAllSites action', () => {
     const appOnlyContext = {
       ...mockContext,
-      secrets: { authType: 'oauth_client_credentials' },
+      secrets: { authType: 'oauth_entra_client_certificate' },
     } as unknown as ActionContext;
 
     const delegatedContext = {
@@ -1051,7 +1044,7 @@ describe('SharepointOnline', () => {
   describe('search action', () => {
     const appOnlySearchContext = {
       ...mockContext,
-      secrets: { authType: 'oauth_client_credentials' },
+      secrets: { authType: 'oauth_entra_client_certificate' },
     } as unknown as ActionContext;
 
     it('should search with default entity types using app-only auth (includes region)', async () => {
