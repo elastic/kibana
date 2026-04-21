@@ -20,6 +20,7 @@ import {
   EntitySourceType,
   Matcher,
   Filter,
+  DateRange,
   MonitoringEntitySource,
 } from '../data_source/common.gen';
 import { WatchlistObject } from './common.gen';
@@ -67,6 +68,7 @@ export const CreateWatchlistRequestBody = z.object({
           queryRule: z.string().optional(),
           matchers: z.array(Matcher).optional(),
           filter: Filter.optional(),
+          range: DateRange.optional(),
         })
         .strict()
     )

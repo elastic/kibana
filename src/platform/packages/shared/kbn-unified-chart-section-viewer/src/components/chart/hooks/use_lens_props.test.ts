@@ -11,8 +11,7 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import React from 'react';
 import { useLensProps } from './use_lens_props';
 import { useChartLayers } from './use_chart_layers';
-import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils/config_builder';
-import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
+import { LensConfigBuilder, type LensSeriesLayer } from '@kbn/lens-embeddable-utils';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { UnifiedHistogramServices } from '@kbn/unified-histogram';
 import { getFetchParamsMock, getFetch$Mock } from '@kbn/unified-histogram/__mocks__/fetch_params';
@@ -20,7 +19,7 @@ import type { TimeRange } from '@kbn/data-plugin/common';
 import type { UnifiedHistogramFetch$ } from '@kbn/unified-histogram/types';
 
 jest.mock('./use_chart_layers');
-jest.mock('@kbn/lens-embeddable-utils/config_builder');
+jest.mock('@kbn/lens-embeddable-utils');
 
 const LensConfigBuilderMock = LensConfigBuilder as jest.MockedClass<typeof LensConfigBuilder>;
 const useChartLayersMock = useChartLayers as jest.MockedFunction<typeof useChartLayers>;
