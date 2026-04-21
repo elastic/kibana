@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import {
+  ALLOWED_MAX_ALERTS,
+  MAX_SNOOZED_INSTANCE_CONDITIONS,
+} from '../../../../common/max_alert_limit';
 import { rawRuleSchema } from './v12';
 
 describe('rawRuleSchemaV12', () => {
@@ -85,5 +89,40 @@ describe('rawRuleSchemaV12', () => {
 
   it('keeps older documents valid when snoozedInstances is absent', () => {
     expect(() => rawRuleSchema.validate(baseRule)).not.toThrow();
+  });
+
+  it('rejects snoozedInstances when conditions exceed the schema max', () => {
+    const conditions = Array.from({ length: MAX_SNOOZED_INSTANCE_CONDITIONS + 1 }, () => ({
+      type: 'severity_change' as const,
+    }));
+
+    expect(() =>
+      rawRuleSchema.validate({
+        ...baseRule,
+        snoozedInstances: [
+          {
+            instanceId: 'alert-1',
+            conditions,
+            snoozedAt: '2024-01-02T12:00:00.000Z',
+            snoozedBy: 'elastic',
+          },
+        ],
+      })
+    ).toThrow();
+  });
+
+  it('rejects snoozedInstances when the array exceeds the schema max', () => {
+    const snoozedInstances = Array.from({ length: ALLOWED_MAX_ALERTS + 1 }, (_, i) => ({
+      instanceId: `alert-${i}`,
+      snoozedAt: '2024-01-02T12:00:00.000Z',
+      snoozedBy: 'elastic',
+    }));
+
+    expect(() =>
+      rawRuleSchema.validate({
+        ...baseRule,
+        snoozedInstances,
+      })
+    ).toThrow();
   });
 });

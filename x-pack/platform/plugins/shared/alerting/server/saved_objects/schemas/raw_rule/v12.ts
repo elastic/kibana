@@ -6,6 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import {
+  ALLOWED_MAX_ALERTS,
+  MAX_SNOOZED_INSTANCE_CONDITIONS,
+} from '../../../../common/max_alert_limit';
 import { rawRuleSchema as rawRuleSchemaV11 } from './v11';
 
 const rawRuleSnoozeConditionSchema = schema.oneOf([
@@ -31,7 +35,9 @@ const rawRuleSnoozeConditionSchema = schema.oneOf([
 export const rawRuleSnoozedInstanceSchema = schema.object({
   instanceId: schema.string(),
   expiresAt: schema.maybe(schema.string()),
-  conditions: schema.maybe(schema.arrayOf(rawRuleSnoozeConditionSchema)),
+  conditions: schema.maybe(
+    schema.arrayOf(rawRuleSnoozeConditionSchema, { maxSize: MAX_SNOOZED_INSTANCE_CONDITIONS })
+  ),
   conditionOperator: schema.maybe(schema.oneOf([schema.literal('any'), schema.literal('all')])),
   snoozeSnapshot: schema.maybe(schema.recordOf(schema.string(), schema.any())),
   snoozedAt: schema.string(),
@@ -39,5 +45,7 @@ export const rawRuleSnoozedInstanceSchema = schema.object({
 });
 
 export const rawRuleSchema = rawRuleSchemaV11.extends({
-  snoozedInstances: schema.maybe(schema.arrayOf(rawRuleSnoozedInstanceSchema)),
+  snoozedInstances: schema.maybe(
+    schema.arrayOf(rawRuleSnoozedInstanceSchema, { maxSize: ALLOWED_MAX_ALERTS })
+  ),
 });
