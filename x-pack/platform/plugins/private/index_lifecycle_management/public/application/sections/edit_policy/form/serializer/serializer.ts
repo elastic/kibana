@@ -183,6 +183,15 @@ export const createSerializer =
             ...hotPhaseActions.searchable_snapshot,
             snapshot_repository: searchableSnapshotMeta?.repository,
           };
+          if (hotPhaseActions.searchable_snapshot.force_merge_index === true) {
+            delete hotPhaseActions.searchable_snapshot.force_merge_index;
+          }
+          if (hotPhaseActions.searchable_snapshot.force_merge_index === false) {
+            delete hotPhaseActions.searchable_snapshot.force_merge_on_clone;
+          }
+          if (hotPhaseActions.searchable_snapshot.force_merge_on_clone === true) {
+            delete hotPhaseActions.searchable_snapshot.force_merge_on_clone;
+          }
         } else {
           delete hotPhaseActions.searchable_snapshot;
         }
@@ -330,6 +339,15 @@ export const createSerializer =
           ...coldPhase.actions.searchable_snapshot,
           snapshot_repository: searchableSnapshotMeta?.repository,
         };
+        if (coldPhase.actions.searchable_snapshot.force_merge_index === true) {
+          delete coldPhase.actions.searchable_snapshot.force_merge_index;
+        }
+        if (coldPhase.actions.searchable_snapshot.force_merge_index === false) {
+          delete coldPhase.actions.searchable_snapshot.force_merge_on_clone;
+        }
+        if (coldPhase.actions.searchable_snapshot.force_merge_on_clone === true) {
+          delete coldPhase.actions.searchable_snapshot.force_merge_on_clone;
+        }
       } else {
         delete coldPhase.actions.searchable_snapshot;
       }
@@ -375,6 +393,15 @@ export const createSerializer =
           ...frozenPhase.actions.searchable_snapshot,
           snapshot_repository: searchableSnapshotMeta?.repository,
         };
+        if (frozenPhase.actions.searchable_snapshot.force_merge_index === true) {
+          delete frozenPhase.actions.searchable_snapshot.force_merge_index;
+        }
+        if (frozenPhase.actions.searchable_snapshot.force_merge_index === false) {
+          delete frozenPhase.actions.searchable_snapshot.force_merge_on_clone;
+        }
+        if (frozenPhase.actions.searchable_snapshot.force_merge_on_clone === true) {
+          delete frozenPhase.actions.searchable_snapshot.force_merge_on_clone;
+        }
       } else {
         delete frozenPhase.actions.searchable_snapshot;
       }

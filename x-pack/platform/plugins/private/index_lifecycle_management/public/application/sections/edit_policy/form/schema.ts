@@ -75,6 +75,36 @@ export const searchableSnapshotFields = {
       }
     ),
   },
+  force_merge_index: {
+    label: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshot.forceMergeIndexLabel',
+      {
+        defaultMessage: 'Force merge index',
+      }
+    ),
+    helpText: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshot.forceMergeIndexHelpText',
+      {
+        defaultMessage:
+          'Force merges the managed index to one segment before the snapshot is created. Defaults to true.',
+      }
+    ),
+  },
+  force_merge_on_clone: {
+    label: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshot.forceMergeOnCloneLabel',
+      {
+        defaultMessage: 'Force merge on clone',
+      }
+    ),
+    helpText: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshot.forceMergeOnCloneHelpText',
+      {
+        defaultMessage:
+          'When force merge is enabled, this controls whether it is performed on a clone of the index with zero replicas. Defaults to true.',
+      }
+    ),
+  },
 };
 
 const numberOfReplicasField = {
