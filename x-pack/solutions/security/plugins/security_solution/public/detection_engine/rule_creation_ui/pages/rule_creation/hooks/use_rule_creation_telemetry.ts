@@ -65,7 +65,7 @@ export const useRuleCreationTelemetry = (ruleType: string): UseRuleCreationTelem
       }
 
       const aiSessionOnUnmount = aiRuleCreation.getSession();
-      const isAi = aiSessionOnUnmount != null && isAiRuleAppliedRef.current;
+      const isAi = aiSessionOnUnmount != null && aiSessionOnUnmount.applyCount > 0;
       const sessionId = isAi
         ? aiSessionOnUnmount.sessionId
         : manualSessionRef.current?.sessionId ?? '';
