@@ -16,10 +16,9 @@ test.describe(
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
       await pageObjects.observabilityNavigation.goto();
-      await pageObjects.observabilityNavigation.waitForLoad();
     });
 
-    test('renders expected body nav items with working links', async ({ pageObjects, page }) => {
+    test('renders expected body nav items with working links', async ({ pageObjects }) => {
       const nav = pageObjects.observabilityNavigation;
 
       await test.step('primary body items are visible and linked', async () => {
@@ -37,8 +36,7 @@ test.describe(
       });
 
       await test.step('opening More menu reveals overflow body items', async () => {
-        await page.testSubj.click('kbnChromeNav-moreMenuTrigger');
-        await expect(nav.morePopover).toBeVisible();
+        await nav.openMoreMenu();
       });
 
       await test.step('More linked items are visible and linked', async () => {
@@ -56,38 +54,56 @@ test.describe(
           await expect(nav.navItemInMoreById(id)).toBeVisible();
         }
       });
+
+      await test.step('AI-Assistant or Agent Builder entry is present in More', async () => {
+        const aiAssistant = nav.navItemInMoreByDeepLinkId('observabilityAIAssistant');
+        const agentBuilder = nav.navItemInMoreById('agent_builder');
+        await expect(aiAssistant.or(agentBuilder)).toBeVisible();
+      });
     });
 
-    test('clicking body nav items navigates to the correct apps', async ({ pageObjects, page }) => {
+    test('clicking body nav items sets the active link, updates breadcrumbs, and navigates', async ({
+      pageObjects,
+      page,
+    }) => {
       const nav = pageObjects.observabilityNavigation;
 
       await test.step('Discover', async () => {
         await nav.navItemInPrimaryByDeepLinkId('discover').click();
         await expect(nav.pageOrNoData('dscPage')).toBeVisible();
+        await expect(nav.activeNavItemByDeepLinkId('discover')).toBeVisible();
+        await expect(nav.breadcrumb({ deepLinkId: 'discover' })).toBeVisible();
       });
 
       await test.step('Dashboards', async () => {
-        await nav.goto();
         await nav.navItemInPrimaryByDeepLinkId('dashboards').click();
         await expect(nav.pageOrNoData('dashboardLandingPage')).toBeVisible();
+        await expect(nav.activeNavItemByDeepLinkId('dashboards')).toBeVisible();
+        await expect(nav.breadcrumb({ deepLinkId: 'dashboards' })).toBeVisible();
       });
 
       await test.step('Workflows', async () => {
-        await nav.goto();
         await nav.navItemInPrimaryByDeepLinkId('workflows').click();
         await expect(page.testSubj.locator('workflowsPage')).toBeVisible();
+        await expect(nav.activeNavItemByDeepLinkId('workflows')).toBeVisible();
       });
 
       await test.step('Alerts', async () => {
-        await nav.goto();
         await nav.navItemInPrimaryByDeepLinkId('observability-overview:alerts').click();
         await expect(page.testSubj.locator('alertsPageWithData')).toBeVisible();
+        await expect(nav.activeNavItemByDeepLinkId('observability-overview:alerts')).toBeVisible();
+      });
+
+      await test.step('Cases (via More menu)', async () => {
+        await nav.openMoreMenu();
+        await nav.navItemInMoreByDeepLinkId('observability-overview:cases').click();
+        // Active-state for a More-hosted item can only be checked while More
+        // is open, so we rely on the breadcrumb to confirm navigation here.
+        await expect(nav.breadcrumb({ text: 'Cases' })).toBeVisible();
       });
 
       await test.step('SLOs (via More menu)', async () => {
-        await nav.goto();
-        await page.testSubj.click('kbnChromeNav-moreMenuTrigger');
-        await expect(nav.morePopover).toBeVisible();
+        await nav.openMoreMenu();
         await nav.navItemInMoreByDeepLinkId('slo').click();
         await expect(
           page.testSubj
@@ -97,15 +113,99 @@ test.describe(
       });
 
       await test.step('Machine Learning opens its nested panel inside the More menu', async () => {
-        await nav.goto();
-        await page.testSubj.click('kbnChromeNav-moreMenuTrigger');
-        await expect(nav.morePopover).toBeVisible();
+        await nav.openMoreMenu();
         await nav.navItemInMoreById('machine_learning-landing').click();
-        await expect(
-          nav.morePopover.locator(
-            '[data-test-subj="kbnChromeNav-nestedPanel-machine_learning-landing"]'
-          )
-        ).toBeVisible();
+        await expect(nav.nestedPanel('machine_learning-landing')).toBeVisible();
+      });
+    });
+
+    test('footer-panel children navigate and update breadcrumbs', async ({ pageObjects }) => {
+      const nav = pageObjects.observabilityNavigation;
+
+      await test.step('data_management → Integrations', async () => {
+        await nav.navItemInFooterById('data_management').click();
+        await expect(nav.sidePanel('data_management')).toBeVisible();
+
+        await nav
+          .sidePanel('data_management')
+          .locator('[data-test-subj~="nav-item-deepLinkId-integrations"]')
+          .click();
+        await expect(nav.breadcrumb({ text: 'Integrations' })).toBeVisible();
+      });
+
+      await test.step('data_management → Fleet', async () => {
+        await nav.navItemInFooterById('data_management').click();
+        await expect(nav.sidePanel('data_management')).toBeVisible();
+
+        await nav
+          .sidePanel('data_management')
+          .locator('[data-test-subj~="nav-item-deepLinkId-fleet"]')
+          .click();
+        await expect(nav.breadcrumb({ text: 'Fleet' })).toBeVisible();
+      });
+
+      await test.step('admin_and_settings → Tags', async () => {
+        await nav.navItemInFooterById('admin_and_settings').click();
+        await expect(nav.sidePanel('admin_and_settings')).toBeVisible();
+
+        await nav
+          .sidePanel('admin_and_settings')
+          .locator('[data-test-subj~="nav-item-id-management:tags"]')
+          .click();
+        await expect(nav.breadcrumb({ text: 'Tags' })).toBeVisible();
+      });
+
+      await test.step('admin_and_settings → Maintenance Windows', async () => {
+        await nav.navItemInFooterById('admin_and_settings').click();
+        await expect(nav.sidePanel('admin_and_settings')).toBeVisible();
+
+        await nav
+          .sidePanel('admin_and_settings')
+          .locator('[data-test-subj~="nav-item-id-management:maintenanceWindows"]')
+          .click();
+        await expect(nav.breadcrumb({ text: 'Maintenance Windows' })).toBeVisible();
+      });
+    });
+
+    test('navigates between apps without a full page reload (SPA) and restores via logo', async ({
+      pageObjects,
+    }) => {
+      const nav = pageObjects.observabilityNavigation;
+
+      const expectNoReload = await nav.createNoPageReloadCheck();
+
+      await test.step('Discover via sidenav', async () => {
+        await nav.navItemInPrimaryByDeepLinkId('discover').click();
+        await expect(nav.activeNavItemByDeepLinkId('discover')).toBeVisible();
+        await expect(nav.breadcrumb({ deepLinkId: 'discover' })).toBeVisible();
+      });
+
+      await test.step('Agents via More', async () => {
+        await nav.openMoreMenu();
+        await nav.navItemInMoreById('agent_builder').click();
+        await expect(nav.breadcrumb({ text: 'Agents' })).toBeVisible();
+      });
+
+      await test.step('admin_and_settings → Tags', async () => {
+        await nav.navItemInFooterById('admin_and_settings').click();
+        await expect(nav.sidePanel('admin_and_settings')).toBeVisible();
+
+        await nav
+          .sidePanel('admin_and_settings')
+          .locator('[data-test-subj~="nav-item-id-management:tags"]')
+          .click();
+        await expect(nav.breadcrumb({ text: 'Tags' })).toBeVisible();
+      });
+
+      await test.step('Logo returns to observability landing', async () => {
+        await nav.clickLogo();
+        await nav.waitForLoad();
+        // Sidenav is still interactive and no app-specific breadcrumb remains.
+        await expect(nav.navItemInPrimaryByDeepLinkId('discover')).toBeVisible();
+      });
+
+      await test.step('no page reload happened during the flow', async () => {
+        expect(await expectNoReload()).toBe(true);
       });
     });
   }

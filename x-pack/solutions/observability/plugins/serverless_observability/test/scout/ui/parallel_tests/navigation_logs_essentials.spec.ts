@@ -23,7 +23,6 @@ test.describe(
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
       await pageObjects.observabilityNavigation.goto();
-      await pageObjects.observabilityNavigation.waitForLoad();
     });
 
     test('renders expected body nav items with working links', async ({ pageObjects }) => {
@@ -43,6 +42,10 @@ test.describe(
         }
       });
 
+      await test.step('Streams entry is visible (experimental)', async () => {
+        await expect(nav.navItemInBodyByDeepLinkId('streams')).toBeVisible();
+      });
+
       await test.step('complete-tier features are not present', async () => {
         const disabledDeepLinks = ['observability-overview:cases', 'slo'];
         for (const deepLinkId of disabledDeepLinks) {
@@ -56,24 +59,35 @@ test.describe(
       });
     });
 
-    test('clicking body nav items navigates to the correct apps', async ({ pageObjects, page }) => {
+    test('clicking body nav items sets the active link and navigates', async ({
+      pageObjects,
+      page,
+    }) => {
       const nav = pageObjects.observabilityNavigation;
 
       await test.step('Discover', async () => {
         await nav.navItemInPrimaryByDeepLinkId('discover').click();
         await expect(nav.pageOrNoData('dscPage')).toBeVisible();
+        await expect(nav.activeNavItemByDeepLinkId('discover')).toBeVisible();
       });
 
       await test.step('Dashboards', async () => {
-        await nav.goto();
         await nav.navItemInPrimaryByDeepLinkId('dashboards').click();
         await expect(nav.pageOrNoData('dashboardLandingPage')).toBeVisible();
+        await expect(nav.activeNavItemByDeepLinkId('dashboards')).toBeVisible();
       });
 
       await test.step('Alerts', async () => {
-        await nav.goto();
         await nav.navItemInPrimaryByDeepLinkId('observability-overview:alerts').click();
         await expect(page.testSubj.locator('alertsPageWithData')).toBeVisible();
+        await expect(nav.activeNavItemByDeepLinkId('observability-overview:alerts')).toBeVisible();
+      });
+    });
+
+    test('disabled apps return a not-found page when visited directly', async ({ page }) => {
+      await test.step('/app/observability/cases shows the observability 404 page', async () => {
+        await page.gotoApp('observability/cases');
+        await expect(page.testSubj.locator('observabilityPageNotFoundBanner')).toBeVisible();
       });
     });
   }

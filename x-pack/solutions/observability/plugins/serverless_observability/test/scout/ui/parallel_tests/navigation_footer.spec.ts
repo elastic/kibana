@@ -16,7 +16,6 @@ test.describe(
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
       await pageObjects.observabilityNavigation.goto();
-      await pageObjects.observabilityNavigation.waitForLoad();
     });
 
     test('renders expected footer items with working links', async ({ pageObjects }) => {
@@ -55,31 +54,45 @@ test.describe(
       });
 
       await test.step('Developer tools navigates to the console app', async () => {
-        await nav.goto();
         await nav.navItemInFooterById('devTools').click();
         await expect(page.testSubj.locator('console')).toBeVisible();
       });
 
       await test.step('Data management opens its side panel', async () => {
-        await nav.goto();
         await nav.navItemInFooterById('data_management').click();
-        await expect(
-          page.testSubj.locator('~kbnChromeNav-sidePanel_data_management')
-        ).toBeVisible();
+        await expect(nav.sidePanel('data_management')).toBeVisible();
       });
 
       await test.step('Admin and Settings opens its side panel', async () => {
-        await nav.goto();
         await nav.navItemInFooterById('admin_and_settings').click();
-        await expect(
-          page.testSubj.locator('~kbnChromeNav-sidePanel_admin_and_settings')
-        ).toBeVisible();
+        await expect(nav.sidePanel('admin_and_settings')).toBeVisible();
       });
 
       await test.step('Management landing renders cards navigation', async () => {
         await page.gotoApp('management');
         await expect(page.testSubj.locator('cards-navigation-page')).toBeVisible();
       });
+    });
+
+    test('active sidenav panel is re-opened after a browser refresh', async ({
+      pageObjects,
+      page,
+    }) => {
+      const nav = pageObjects.observabilityNavigation;
+
+      await nav.navItemInFooterById('admin_and_settings').click();
+      await expect(nav.sidePanel('admin_and_settings')).toBeVisible();
+
+      await nav
+        .sidePanel('admin_and_settings')
+        .locator('[data-test-subj~="nav-item-id-management:tags"]')
+        .click();
+      await expect(nav.breadcrumb({ text: 'Tags' })).toBeVisible();
+
+      await page.reload();
+      await nav.waitForLoad();
+
+      await expect(nav.sidePanel('admin_and_settings')).toBeVisible();
     });
   }
 );
