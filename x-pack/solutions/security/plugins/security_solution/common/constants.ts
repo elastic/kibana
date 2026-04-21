@@ -10,6 +10,7 @@ import {
   RULES_FEATURE_LATEST,
   SECURITY_FEATURE_ID_V5,
 } from '@kbn/security-solution-features/constants';
+import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import * as i18n from './translations';
 
 export {
