@@ -274,8 +274,10 @@ export function usePackagePolicyWithRelatedData(
                 )?.vars;
               let newInputVars = inputVars;
               if (basePolicyInputVars && inputVars) {
-                // merging vars from dry run with updated ones
-                newInputVars = mergeVars(inputVars, basePolicyInputVars);
+                // Merge old policy vars as fallback for any vars the dry run left null.
+                // The dry run result is authoritative (it already applied migrate_from logic);
+                // old vars only fill in gaps where the dry run produced no value.
+                newInputVars = mergeVars(basePolicyInputVars, inputVars);
               }
               // Fix duration vars, if it's a migrated setting, and it's a plain old number with no suffix
               if (basePackage.name === 'apm') {

@@ -10220,10 +10220,67 @@ describe('Package policy service', () => {
         expect(celInput?.enabled).toBe(false);
       });
 
-      it('seeds httpjson input-level vars into cel input-level vars where cel values are null (partial migration)', () => {
-        // Issue #261398: cel existed alongside httpjson but the user only configured httpjson.
-        // After upgrade, cel's url/api_token must be filled from httpjson, not left as defaults.
-        const basePolicyWithEmptyCelVars: NewPackagePolicy = {
+      it.each([
+        { url: null, api_token: null, label: 'null' },
+        { url: '', api_token: '', label: 'empty string' },
+      ])(
+        'seeds httpjson input-level vars into cel input-level vars where cel values are $label (partial migration)',
+        ({ url, api_token }) => {
+          // Issue #261398: cel existed alongside httpjson but the user only configured httpjson.
+          // After upgrade, cel's url/api_token must be filled from httpjson, not left as defaults.
+          // Covers both null and '' (empty string) — both mean "user never set this".
+          const basePolicyWithEmptyCelVars: NewPackagePolicy = {
+            ...makePartialMigrationBasePolicy(),
+            inputs: [
+              {
+                type: 'httpjson',
+                policy_template: 'template_1',
+                enabled: true,
+                vars: {
+                  url: { type: 'text', value: 'http://httpjson-configured.com' },
+                  api_token: { type: 'password', value: 'httpjson-secret' },
+                },
+                streams: [
+                  {
+                    enabled: true,
+                    data_stream: { dataset: 'test_package.activity', type: 'logs' },
+                    vars: { interval: { type: 'text', value: '5m' } },
+                  },
+                ],
+              },
+              {
+                type: 'cel',
+                policy_template: 'template_1',
+                enabled: false,
+                // User never configured cel — vars are null or empty string
+                vars: {
+                  url: { type: 'text', value: url },
+                  api_token: { type: 'password', value: api_token },
+                },
+                streams: [],
+              },
+            ],
+          };
+
+          const result = updatePackageInputs(
+            basePolicyWithEmptyCelVars,
+            makePartialMigrationPackageInfo(),
+            makePartialMigrationOverride(),
+            false
+          );
+
+          const celInput = result.inputs.find((i) => i.type === 'cel');
+          // httpjson values must be seeded into cel where cel's own values were null/empty
+          expect(celInput?.vars?.url?.value).toBe('http://httpjson-configured.com');
+          expect(celInput?.vars?.api_token?.value).toBe('httpjson-secret');
+        }
+      );
+
+      it('seeds httpjson input-level vars into cel input-level vars even when cel vars are non-empty (partial migration)', () => {
+        // Regression test for the SentinelOne upgrade scenario: cel existed alongside httpjson
+        // with url: 'elastic' (non-empty). httpjson always wins for shared keys during
+        // stream migration — that is the purpose of migrate_from.
+        const basePolicyWithDisabledCelNonEmpty: NewPackagePolicy = {
           ...makePartialMigrationBasePolicy(),
           inputs: [
             {
@@ -10246,10 +10303,9 @@ describe('Package policy service', () => {
               type: 'cel',
               policy_template: 'template_1',
               enabled: false,
-              // User never configured cel — vars are null/empty
               vars: {
-                url: { type: 'text', value: null },
-                api_token: { type: 'password', value: null },
+                url: { type: 'text', value: 'elastic' },
+                api_token: { type: 'password', value: '' },
               },
               streams: [],
             },
@@ -10257,19 +10313,22 @@ describe('Package policy service', () => {
         };
 
         const result = updatePackageInputs(
-          basePolicyWithEmptyCelVars,
+          basePolicyWithDisabledCelNonEmpty,
           makePartialMigrationPackageInfo(),
           makePartialMigrationOverride(),
           false
         );
 
         const celInput = result.inputs.find((i) => i.type === 'cel');
-        // httpjson values must be seeded into cel where cel's own values were null
+        // httpjson always wins for shared keys — cel's non-empty 'elastic' value is overridden
         expect(celInput?.vars?.url?.value).toBe('http://httpjson-configured.com');
         expect(celInput?.vars?.api_token?.value).toBe('httpjson-secret');
       });
 
-      it('preserves cel input-level vars when they are already set, even if httpjson has different values', () => {
+      it('httpjson input-level vars always win over cel vars for shared keys during stream migration', () => {
+        // When stream migrate_from fires, httpjson is the authoritative source for shared vars
+        // (url, api_token). Even if cel had non-empty values, httpjson wins because the whole
+        // point of migrate_from is to carry over the user's configuration from the old input.
         const basePolicyWithBothConfigured: NewPackagePolicy = {
           ...makePartialMigrationBasePolicy(),
           inputs: [
@@ -10293,7 +10352,6 @@ describe('Package policy service', () => {
               type: 'cel',
               policy_template: 'template_1',
               enabled: true,
-              // User already set cel vars explicitly — must not be overwritten
               vars: {
                 url: { type: 'text', value: 'http://cel-url.com' },
                 api_token: { type: 'password', value: 'cel-token' },
@@ -10311,9 +10369,9 @@ describe('Package policy service', () => {
         );
 
         const celInput = result.inputs.find((i) => i.type === 'cel');
-        // cel's own non-null values must win over httpjson values
-        expect(celInput?.vars?.url?.value).toBe('http://cel-url.com');
-        expect(celInput?.vars?.api_token?.value).toBe('cel-token');
+        // httpjson values win for shared keys — that is the purpose of migrate_from
+        expect(celInput?.vars?.url?.value).toBe('http://httpjson-url.com');
+        expect(celInput?.vars?.api_token?.value).toBe('httpjson-token');
       });
 
       it('migrates old httpjson input-level vars to new cel stream-level vars when going through packageToPackagePolicyInputs end-to-end', () => {

@@ -4181,25 +4181,21 @@ export function updatePackageInputs(
           updatedInput = { ...updatedInput, enabled: true };
         }
 
-        // Seed cel input-level vars with httpjson values where cel's own stored values are null.
-        // Build a merged vars map that gives priority (highest → lowest):
-        //   1. cel's own stored value (non-null) — user explicitly set it on the cel side
-        //   2. httpjson's value (non-null) — user set it on the old input
-        //   3. new package default — neither side had a value
-        // `storedInputVars` holds a snapshot of the cel input's vars taken before deepMergeVars
-        // mutated them above (deepMergeVars modifies the vars object via a shared reference,
-        // so by the time we get here the original null values have been overwritten by package
-        // defaults). Then re-apply the new package schema via deepMergeVars + removeStaleVars so
-        // any vars absent from the new schema are stripped and schema metadata is current.
         if (pathBOldInputForStream.vars && (update.vars || updatedInput.vars)) {
           const oldSourceVars = pathBOldInputForStream.vars;
           const storedCelVars = storedInputVars ?? {};
+          // Start with httpjson vars as the base — the migrate_from declaration signals that
+          // httpjson is the authoritative source for these vars.
           const seededVars: typeof storedCelVars = { ...oldSourceVars };
+          // Merge in cel's own stored vars only for keys NOT present in the old source input
+          // (i.e. cel-only vars). For shared keys (url, api_token, etc.), the old source
+          // (httpjson) always wins — that is the purpose of the migrate_from migration.
           for (const [key, celEntry] of Object.entries(storedCelVars)) {
-            seededVars[key] =
-              celEntry?.value != null
-                ? celEntry // cel's stored value is set — it wins
-                : oldSourceVars[key] ?? celEntry; // fall back to httpjson or cel schema entry
+            if (!(key in oldSourceVars)) {
+              if (celEntry?.value != null && celEntry.value !== '') {
+                seededVars[key] = celEntry;
+              }
+            }
           }
           const merged = deepMergeVars(
             { ...updatedInput, vars: seededVars },
