@@ -167,6 +167,7 @@ describe('getExecutionState', () => {
 
       expect(state?.status).toBe(ExecutionStatus.WAITING_FOR_INPUT);
       expect(state?.waiting_input).toEqual({
+        waiting_step_id: 'approve',
         message: 'Please approve this request',
         schema: {
           type: 'object',
@@ -207,6 +208,7 @@ describe('getExecutionState', () => {
       });
 
       expect(state?.waiting_input).toEqual({
+        waiting_step_id: 'ask',
         message: 'Provide input',
       });
     });
@@ -245,7 +247,10 @@ describe('getExecutionState', () => {
         workflowApi,
       });
 
-      expect(state?.waiting_input?.message).toBe('Approve item');
+      expect(state?.waiting_input).toEqual({
+        waiting_step_id: 'nested_ask',
+        message: 'Approve item',
+      });
     });
 
     it('omits waiting_input entirely when no waiting step is found', async () => {

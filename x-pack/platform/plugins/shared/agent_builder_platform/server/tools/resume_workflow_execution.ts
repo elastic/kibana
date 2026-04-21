@@ -41,9 +41,14 @@ export const resumeWorkflowExecutionTool = ({
 
     Use this tool when a workflow execution returned with status "waiting_for_input".
     The execution's "waiting_input" field describes what input is expected (message and optional schema).
-
     Provide the executionId and the required input object to resume the workflow.
-    After resuming, use ${platformCoreTools.getWorkflowExecutionStatus} to check whether the workflow completed or paused again (e.g. inside a loop).
+
+    **Important — read after resume:** a successful call means resume was **accepted and scheduled** in the engine.
+    The execution record can **lag**: you may still briefly see the same "waiting_for_input" and the same form right after this tool returns. **Do not** tell the user there is another HITL step, a loop, or a second approval round unless you have **confirmed** a genuinely new pause (clear evidence such as a new step, changed context, or repeated status checks over time that rule out a stale snapshot).
+
+    **What you should do:** call ${platformCoreTools.getWorkflowExecutionStatus} on the same executionId. Compare **waiting_input.waiting_step_id** between polls: if it **changes** while still waiting_for_input, that is evidence of a **new** HITL step; if it is the **same** id immediately after resume, treat it as likely stale until status moves on. If the status still looks unchanged, wait a few seconds and check again. Repeat for up to **about 90 seconds** total, or until the status clearly updates (e.g. completed, failed, running).
+
+    **If after ~90 seconds you still cannot confirm an update:** tell the user their resume was **submitted**, but you **could not confirm** the new execution state from Kibana yet — do **not** invent a second approval workflow.
     `),
     schema: resumeWorkflowExecutionSchema,
     handler: async ({ executionId, input }, { spaceId, request }) => {

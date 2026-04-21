@@ -287,6 +287,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
               resumeMessage={resumeMessage}
               resumeSchema={resumeSchema}
               shouldAutoResume={shouldAutoResume}
+              pausedWaitStepExecutionId={pausedStepId}
               childWorkflowExecution={selectedStepChildExecution}
               parentWorkflowExecution={parentWorkflowExecution}
             />

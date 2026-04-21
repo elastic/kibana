@@ -43,6 +43,7 @@ interface WorkflowStepExecutionDetailsProps {
   resumeMessage?: string;
   resumeSchema?: JsonModelSchemaType;
   shouldAutoResume?: boolean;
+  pausedWaitStepExecutionId?: string;
   /** When the step is workflow.execute, the child workflow execution (to link to) */
   childWorkflowExecution?: ChildWorkflowExecutionItem;
   /** When viewing a step that belongs to a nested execution, the parent workflow execution (to link to) */
@@ -59,6 +60,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
     resumeMessage,
     resumeSchema,
     shouldAutoResume = false,
+    pausedWaitStepExecutionId,
     childWorkflowExecution,
     parentWorkflowExecution,
   }) => {
@@ -187,6 +189,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
           resumeMessage={resumeMessage}
           resumeSchema={resumeSchema}
           shouldAutoResume={shouldAutoResume}
+          pausedWaitStepExecutionId={pausedWaitStepExecutionId}
         />
       );
     }

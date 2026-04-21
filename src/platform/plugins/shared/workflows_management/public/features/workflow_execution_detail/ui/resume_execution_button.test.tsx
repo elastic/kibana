@@ -261,5 +261,28 @@ describe('ResumeExecutionButton', () => {
         expect(screen.getByTestId('provideActionButton')).not.toBeDisabled();
       });
     });
+
+    it('re-enables the button when pausedWaitStepExecutionId changes after a successful submit', async () => {
+      const { rerender } = render(
+        <TestWrapper>
+          <ResumeExecutionButton {...defaultProps} pausedWaitStepExecutionId="wait-step-exec-1" />
+        </TestWrapper>
+      );
+      fireEvent.click(screen.getByTestId('provideActionButton'));
+      await waitFor(() => expect(capturedOnSubmit).toBeDefined());
+      act(() => {
+        capturedOnSubmit!({ stepInputs: { approved: true } });
+      });
+      await waitFor(() => {
+        expect(screen.getByTestId('provideActionButton')).toBeDisabled();
+      });
+
+      rerender(
+        <TestWrapper>
+          <ResumeExecutionButton {...defaultProps} pausedWaitStepExecutionId="wait-step-exec-2" />
+        </TestWrapper>
+      );
+      expect(screen.getByTestId('provideActionButton')).not.toBeDisabled();
+    });
   });
 });

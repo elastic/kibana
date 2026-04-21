@@ -14,6 +14,8 @@ import { getWorkflowOutput } from './get_workflow_output';
 type WorkflowApi = WorkflowsServerPluginSetup['management'];
 
 export interface WaitingInputContext {
+  /** `waitForInput` step id currently blocking (from step execution). Compare across status polls. */
+  waiting_step_id: string;
   /** Human-readable prompt from the waitForInput step's `with.message`. */
   message?: string;
   /** JSON Schema describing the expected input, from the step's `with.schema`. */
@@ -30,7 +32,7 @@ export interface WorkflowExecutionState {
   workflow_name?: string;
   /** Present when status is FAILED; contains the workflow error message. */
   error_message?: string;
-  /** Present when status is WAITING_FOR_INPUT; describes what input is needed to resume. */
+  /** Present when status is WAITING_FOR_INPUT. */
   waiting_input?: WaitingInputContext;
 }
 
@@ -83,12 +85,11 @@ export const getExecutionState = async ({
       const stepConfig =
         step?.type === 'waitForInput' ? (step as WaitForInputStep).with : undefined;
       const waitContext: WaitingInputContext = {
+        waiting_step_id: waitingStep.stepId,
         ...(stepConfig?.message && { message: stepConfig.message }),
         ...(stepConfig?.schema && { schema: stepConfig.schema as Record<string, unknown> }),
       };
-      if (waitContext.message !== undefined || waitContext.schema !== undefined) {
-        state.waiting_input = waitContext;
-      }
+      state.waiting_input = waitContext;
     }
   }
 
