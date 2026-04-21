@@ -16,6 +16,7 @@ test.describe(
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
       await pageObjects.observabilityNavigation.goto();
+      await pageObjects.observabilityNavigation.waitForLoad();
     });
 
     test('renders expected footer items with working links', async ({ pageObjects }) => {

@@ -37,19 +37,24 @@ export class ObservabilityNavigation {
     this.moreMenuTrigger = this.page.testSubj.locator('kbnChromeNav-moreMenuTrigger');
   }
 
+  /**
+   * The `goto*` helpers are thin wrappers around `page.gotoApp` and deliberately
+   * do NOT wait for the new chrome sidenav to hydrate. The sidenav only renders
+   * in spaces using the `oblt` solution view, so consumers like landing-redirect
+   * tests on `stateful.classic` need to hit `/app/observability` without any
+   * chrome assumptions. Navigation specs should call `waitForLoad()` explicitly
+   * in `beforeEach` before interacting with the sidenav.
+   */
   async goto() {
     await this.page.gotoApp('observability');
-    await this.waitForLoad();
   }
 
   async gotoLanding() {
     await this.page.gotoApp('observability/landing');
-    await this.waitForLoad();
   }
 
   async gotoApp(appName: string) {
     await this.page.gotoApp(appName);
-    await this.waitForLoad();
   }
 
   /**

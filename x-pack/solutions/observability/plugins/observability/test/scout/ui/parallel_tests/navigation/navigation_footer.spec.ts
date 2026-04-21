@@ -9,12 +9,15 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { spaceTest as test } from '../../fixtures';
 
-// The new chrome navigation is only rendered in stateful when the space uses
-// the 'oblt' solution view. We use `spaceTest` to get an isolated space per
-// worker and flip it to 'oblt' before any test runs.
 test.describe(
   'Stateful Observability Navigation - Footer',
-  { tag: [...tags.stateful.classic, ...tags.stateful.observability] },
+  // We intentionally only target `stateful.observability` here: the new
+  // chrome navigation only renders in spaces that use the `oblt` solution
+  // view, which is the shape of the observability_complete stateful target.
+  // Running on `stateful.classic` would exercise a synthetic
+  // classic-deployment-with-oblt-space configuration that doesn't exist in
+  // the product.
+  { tag: [...tags.stateful.observability] },
   () => {
     test.beforeAll(async ({ scoutSpace }) => {
       await scoutSpace.setSolutionView('oblt');
@@ -23,6 +26,7 @@ test.describe(
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
       await pageObjects.observabilityNavigation.goto();
+      await pageObjects.observabilityNavigation.waitForLoad();
     });
 
     test('renders expected footer items with working links', async ({ pageObjects }) => {
