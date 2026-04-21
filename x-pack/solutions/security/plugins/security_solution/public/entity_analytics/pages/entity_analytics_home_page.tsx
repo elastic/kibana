@@ -28,6 +28,7 @@ import { useSourcererDataView } from '../../sourcerer/containers';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { PageLoader } from '../../common/components/page_loader';
 import { useSpaceId } from '../../common/hooks/use_space_id';
+import { useStoredAssistantConnectorId } from '../../onboarding/components/hooks/use_stored_state';
 import { EntityAnalyticsRecentAnomalies } from '../components/home/anomalies_panel';
 import { WatchlistFilter } from '../components/watchlists/watchlist_filter';
 import { useEntityStoreDataView } from '../components/home/use_entity_store_data_view';
@@ -68,16 +69,28 @@ export const EntityAnalyticsHomePage = () => {
   const { dataView: entityDataView, isLoading: entityDataViewLoading } =
     useEntityStoreDataView(spaceId);
 
+  const resolvedSpaceId = spaceId ?? 'default';
+  const [storedConnectorId, setStoredConnectorId] = useStoredAssistantConnectorId(resolvedSpaceId);
+  const connectorId = spaceId ? storedConnectorId ?? '' : '';
+  const safeSetConnectorId = useCallback(
+    (id: string | undefined) => {
+      if (spaceId) {
+        setStoredConnectorId(id);
+      }
+    },
+    [spaceId, setStoredConnectorId]
+  );
   const {
     leads,
     totalCount,
     isLoading: isLeadsLoading,
     isGenerating,
     hasGenerated,
+    lastRunTimestamp,
     generate,
     isScheduled,
     toggleSchedule,
-  } = useHuntingLeads(leadGenerationEnabled);
+  } = useHuntingLeads(connectorId, leadGenerationEnabled);
   const openAgentBuilderWithLead = useLeadAttachment();
 
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
@@ -187,12 +200,15 @@ export const EntityAnalyticsHomePage = () => {
                   isLoading={isLeadsLoading}
                   isGenerating={isGenerating}
                   hasGenerated={hasGenerated}
+                  lastRunTimestamp={lastRunTimestamp}
+                  isScheduled={isScheduled}
+                  onToggleSchedule={toggleSchedule}
                   onSeeAll={handleOpenFlyout}
                   onLeadClick={handleOpenLeadInChat}
                   onHuntInChat={handleHuntInChat}
                   onGenerate={generate}
-                  isScheduled={isScheduled}
-                  onToggleSchedule={toggleSchedule}
+                  connectorId={connectorId}
+                  onConnectorIdSelected={safeSetConnectorId}
                 />
               </EuiFlexItem>
             )}

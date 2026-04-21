@@ -13,6 +13,7 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core/server';
+import { parseDurationToMs } from '../infra/time';
 import { TasksConfig } from './config';
 import { EntityStoreTaskType } from './constants';
 import type { EntityStoreCoreSetup } from '../types';
@@ -147,10 +148,13 @@ export async function scheduleHistorySnapshotTasks({
 }): Promise<void> {
   try {
     const taskId = getHistorySnapshotTaskId(namespace);
+    // Delay the first run by the frequency interval (24h by default).
+    const firstRunAt = new Date(Date.now() + parseDurationToMs(frequency));
     await taskManager.ensureScheduled(
       {
         id: taskId,
         taskType: config.type,
+        runAt: firstRunAt,
         schedule: { interval: frequency },
         state: { namespace },
         params: {},

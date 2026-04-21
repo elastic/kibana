@@ -110,6 +110,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
     licensing,
     scheduleNotificationResponseActionsService,
     endpointAppContextService,
+    getEntityStore,
   }) =>
   (type) => {
     const { alertIgnoreFields: ignoreFields, alertMergeStrategy: mergeStrategy } = config;
@@ -176,7 +177,12 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             params;
           const { savedObjectsClient, ruleMonitoringService, ruleResultService } = services;
           const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
-
+          const entityStoreCrudClient = experimentalFeatures.entityAnalyticsEntityStoreV2
+            ? (await getEntityStore()).createCRUDClient(
+                services.scopedClusterClient.asCurrentUser,
+                spaceId
+              )
+            : undefined;
           const ruleExecutionLogger = await ruleExecutionLoggerFactory({
             savedObjectsClient,
             ruleMonitoringService,
@@ -336,7 +342,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 logger.info(`Failed to send gap detected telemetry event: ${error}`);
               }
             }
-            ruleExecutionLogger.error(gapErrorMessage);
+            ruleExecutionLogger.error(gapErrorMessage, { userError: true });
           }
 
           try {
@@ -413,6 +419,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     experimentalFeatures,
                     intendedTimestamp,
                     spaceId,
+                    entityStoreCrudClient,
                     ignoreFields: ignoreFieldsObject,
                     ignoreFieldsRegexes,
                     eventsTelemetry,

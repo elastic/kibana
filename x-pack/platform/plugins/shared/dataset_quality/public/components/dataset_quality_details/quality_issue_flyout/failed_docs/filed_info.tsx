@@ -10,11 +10,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiIcon,
+  EuiIconTip,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -56,9 +55,13 @@ export const FailedFieldInfo = () => {
           <EuiTitle size="xxs">
             <span>{failedDocsErrorsColumnName}</span>
           </EuiTitle>
-          <EuiToolTip content={failedDocsErrorsColumnNameTooltip}>
-            <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
-          </EuiToolTip>
+          <EuiIconTip
+            content={failedDocsErrorsColumnNameTooltip}
+            size="s"
+            color="subdued"
+            type="question"
+            className="eui-alignTop"
+          />
         </EuiFlexGroup>
         <EuiFlexItem
           data-test-subj="datasetQualityDetailsFailedDocsFlyoutFieldsList-cause"
