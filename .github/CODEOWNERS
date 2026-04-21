@@ -1747,6 +1747,8 @@ x-pack/platform/plugins/shared/streams/server/lib/streams/lifecycle/ilm_phases.t
 x-pack/platform/plugins/shared/streams_app/public/components/sig_events @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/streams_app/public/hooks/sig_events @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/streams/server/lib/sig_events @elastic/obs-sig-events-team
+x-pack/platform/plugins/shared/streams/server/lib/streams/feature @elastic/obs-sig-events-team
+x-pack/platform/plugins/shared/streams/server/lib/tasks/task_definitions/features_identification @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/streams/server/routes/sig_events @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/streams/server/routes/internal/sig_events @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events @elastic/obs-sig-events-team
