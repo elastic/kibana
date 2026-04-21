@@ -28,13 +28,5 @@ export async function ensureLatestRulesPackageInstalled(
   if (latestPrebuiltRules.length === 0) {
     // Seems no packages with prepackaged rules were installed, try to install the default rules package
     await installPrebuiltRulesPackage(securityContext, logger);
-
-    logger.debug(
-      'ensureLatestRulesPackageInstalled: Re-fetching latest versions of prebuilt rule assets after package installation'
-    );
-
-    logger.debug(
-      `ensureLatestRulesPackageInstalled: Re-fetched latest versions of prebuilt rule assets after package installation - done. Fetched assets: ${latestPrebuiltRules.length}.`
-    );
   }
 }
