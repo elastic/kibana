@@ -84,14 +84,6 @@ function isNotFoundError(error: Error): error is errors.ResponseError & { status
   return isResponseError(error) && error.statusCode === 404;
 }
 
-function isServerlessSettingsError(error: unknown): boolean {
-  if (!isResponseError(error as Error)) {
-    return false;
-  }
-  const reason: string = (error as errors.ResponseError).body?.error?.reason ?? '';
-  return reason.includes('not available when running in serverless mode');
-}
-
 /*
  * When calling into Elasticsearch, the stack trace is lost.
  * If we create an error before calling, and append it to
@@ -151,7 +143,7 @@ export class StorageIndexAdapter<
 
   private readonly logger: Logger;
   private updateMappingsPromise: Promise<void> | undefined;
-  private isServerless: boolean | undefined;
+  private serverlessCheck: Promise<boolean> | undefined;
 
   constructor(
     private readonly esClient: ElasticsearchClient,
@@ -160,6 +152,16 @@ export class StorageIndexAdapter<
     private readonly options: StorageIndexAdapterOptions<TApplicationType> = {}
   ) {
     this.logger = logger.get('storage').get(this.storage.name);
+  }
+
+  private detectServerless(): Promise<boolean> {
+    if (!this.serverlessCheck) {
+      this.serverlessCheck = this.esClient
+        .info()
+        .then((info) => info.version.build_flavor === 'serverless')
+        .catch(() => false);
+    }
+    return this.serverlessCheck;
   }
 
   private getSearchIndexPattern(): string {
@@ -172,60 +174,34 @@ export class StorageIndexAdapter<
 
   private async createOrUpdateIndexTemplate(): Promise<void> {
     const version = getSchemaVersion(this.storage);
+    const isServerless = await this.detectServerless();
 
-    const mappings: IndicesPutIndexTemplateIndexTemplateMapping['mappings'] = {
-      _meta: { version },
-      dynamic: 'strict',
-      properties: {
-        ...mapValues(this.storage.schema.properties, toElasticsearchMappingProperty),
+    const template: IndicesPutIndexTemplateIndexTemplateMapping = {
+      ...(isServerless ? {} : { settings: StorageIndexAdapter.INDEX_SETTINGS }),
+      mappings: {
+        _meta: { version },
+        dynamic: 'strict',
+        properties: {
+          ...mapValues(this.storage.schema.properties, toElasticsearchMappingProperty),
+        },
+      },
+      aliases: {
+        [getAliasName(this.storage.name)]: {
+          is_write_index: true,
+        },
       },
     };
 
-    const aliases: IndicesPutIndexTemplateIndexTemplateMapping['aliases'] = {
-      [getAliasName(this.storage.name)]: {
-        is_write_index: true,
-      },
-    };
-
-    const baseRequest = {
-      name: getIndexTemplateName(this.storage.name),
-      create: false as const,
-      allow_auto_create: false as const,
-      index_patterns: getIndexPattern(this.storage.name),
-      _meta: { version },
-    };
-
-    const putTemplate = (includeSettings: boolean) =>
-      wrapEsCall(
-        this.esClient.indices.putIndexTemplate({
-          ...baseRequest,
-          template: {
-            ...(includeSettings ? { settings: StorageIndexAdapter.INDEX_SETTINGS } : {}),
-            mappings,
-            aliases,
-          },
-        })
-      ).catch(catchConflictError);
-
-    if (this.isServerless) {
-      await putTemplate(false);
-      return;
-    }
-
-    try {
-      await putTemplate(true);
-      this.isServerless = false;
-    } catch (error) {
-      if (isServerlessSettingsError(error)) {
-        this.isServerless = true;
-        this.logger.debug(
-          'Index settings are unavailable (serverless ES); retrying template without settings'
-        );
-        await putTemplate(false);
-      } else {
-        throw error;
-      }
-    }
+    await wrapEsCall(
+      this.esClient.indices.putIndexTemplate({
+        name: getIndexTemplateName(this.storage.name),
+        create: false,
+        allow_auto_create: false,
+        index_patterns: getIndexPattern(this.storage.name),
+        _meta: { version },
+        template,
+      })
+    ).catch(catchConflictError);
   }
 
   private async getExistingIndexTemplate(): Promise<IndicesIndexTemplate | undefined> {

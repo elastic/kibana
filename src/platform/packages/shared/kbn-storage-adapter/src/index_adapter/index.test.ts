@@ -8,8 +8,6 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { TransportResult } from '@elastic/elasticsearch';
-import { errors } from '@elastic/elasticsearch';
 import type { StorageTransportOptions } from '../..';
 import { StorageIndexAdapter, type StorageSettings } from '../..';
 
@@ -35,6 +33,9 @@ const storageSettings = {
 
 const createMockEsClient = () => {
   const client = {
+    info: jest.fn().mockResolvedValue({
+      version: { build_flavor: 'default' },
+    }),
     search: jest.fn().mockResolvedValue({
       hits: { hits: [{ _id: 'doc1', _index: 'test_index', _source: { foo: 'bar' } }] },
     }),
@@ -183,59 +184,28 @@ describe('StorageIndexAdapter - transport options forwarding', () => {
     );
   });
 
-  it('retries index template without settings on serverless', async () => {
-    const serverlessError = new errors.ResponseError({
-      statusCode: 400,
-      headers: {},
-      warnings: [],
-      meta: {} as any,
-      body: {
-        error: {
-          type: 'illegal_argument_exception',
-          reason:
-            'Settings [index.auto_expand_replicas,index.number_of_shards] are not available when running in serverless mode',
-        },
-      },
-    } as TransportResult);
-    (esClient.indices.putIndexTemplate as jest.Mock).mockRejectedValueOnce(serverlessError);
+  it('omits index template settings on serverless', async () => {
+    (esClient.info as jest.Mock).mockResolvedValue({
+      version: { build_flavor: 'serverless' },
+    });
 
     const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
     const client = adapter.getClient();
 
     await client.index({ id: 'doc1', document: { foo: 'bar' } });
 
-    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledTimes(2);
-    expect(esClient.indices.putIndexTemplate).toHaveBeenNthCalledWith(
-      1,
-      expect.objectContaining({
-        template: expect.objectContaining({
-          settings: expect.objectContaining({ auto_expand_replicas: '0-1' }),
-        }),
-      })
-    );
-    expect(esClient.indices.putIndexTemplate).toHaveBeenNthCalledWith(
-      2,
+    expect(esClient.info).toHaveBeenCalledTimes(1);
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
       expect.objectContaining({
         template: expect.not.objectContaining({ settings: expect.anything() }),
       })
     );
   });
 
-  it('skips settings on subsequent writes after serverless detection', async () => {
-    const serverlessError = new errors.ResponseError({
-      statusCode: 400,
-      headers: {},
-      warnings: [],
-      meta: {} as any,
-      body: {
-        error: {
-          type: 'illegal_argument_exception',
-          reason:
-            'Settings [index.auto_expand_replicas,index.number_of_shards] are not available when running in serverless mode',
-        },
-      },
-    } as TransportResult);
-    (esClient.indices.putIndexTemplate as jest.Mock).mockRejectedValueOnce(serverlessError);
+  it('caches the serverless detection across writes', async () => {
+    (esClient.info as jest.Mock).mockResolvedValue({
+      version: { build_flavor: 'serverless' },
+    });
 
     const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
     const client = adapter.getClient();
@@ -243,11 +213,21 @@ describe('StorageIndexAdapter - transport options forwarding', () => {
     await client.index({ id: 'doc1', document: { foo: 'bar' } });
     await client.index({ id: 'doc2', document: { foo: 'baz' } });
 
-    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledTimes(3);
-    expect(esClient.indices.putIndexTemplate).toHaveBeenNthCalledWith(
-      3,
+    expect(esClient.info).toHaveBeenCalledTimes(1);
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledTimes(2);
+  });
+
+  it('includes index template settings on non-serverless', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    await client.index({ id: 'doc1', document: { foo: 'bar' } });
+
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
       expect.objectContaining({
-        template: expect.not.objectContaining({ settings: expect.anything() }),
+        template: expect.objectContaining({
+          settings: expect.objectContaining({ auto_expand_replicas: '0-1' }),
+        }),
       })
     );
   });
