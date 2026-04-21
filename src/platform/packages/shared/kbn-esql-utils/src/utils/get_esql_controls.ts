@@ -49,8 +49,8 @@ export function getAllEsqlControls(
     if (!variableName) continue;
 
     esqlControlsState[api.uuid] = {
-      type: ESQL_CONTROL,
       ...controlState,
+      type: ESQL_CONTROL,
     };
   }
 
