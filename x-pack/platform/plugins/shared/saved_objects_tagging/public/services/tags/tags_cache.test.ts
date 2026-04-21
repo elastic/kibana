@@ -47,6 +47,39 @@ describe('TagsCache', () => {
     await tagsCache.initialize();
   });
 
+  describe('#getState$', () => {
+    describe('when `waitForInitialization` is `true`', () => {
+      it('does not emit before `initialize` completes', async () => {
+        const cache = new TagsCache({ refreshHandler });
+        const emissions: Tag[][] = [];
+        const subscription = cache.getState$({ waitForInitialization: true }).subscribe((tags) => {
+          emissions.push([...tags]);
+        });
+
+        expect(emissions).toEqual([]);
+
+        await cache.initialize();
+
+        expect(emissions.length).toBe(1);
+        expect(emissions[0].map((tag) => tag.id)).toEqual(['tag-1', 'tag-2', 'tag-3']);
+        subscription.unsubscribe();
+      });
+    });
+
+    describe('when `waitForInitialization` is not used', () => {
+      it('emits synchronously with the initial empty cache state', () => {
+        const cache = new TagsCache({ refreshHandler });
+        const emissions: Tag[][] = [];
+        const subscription = cache.getState$().subscribe((tags) => {
+          emissions.push([...tags]);
+        });
+
+        expect(emissions).toEqual([[]]);
+        subscription.unsubscribe();
+      });
+    });
+  });
+
   describe('#onDelete', () => {
     it('removes the deleted tag from the cache', async () => {
       tagsCache.onDelete('tag-1');

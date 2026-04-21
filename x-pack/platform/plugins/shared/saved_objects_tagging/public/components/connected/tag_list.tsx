@@ -45,7 +45,9 @@ export const getConnectedTagListComponent = ({
   cache,
 }: GetConnectedTagListOptions): FC<TagListComponentProps> => {
   return (props: TagListComponentProps) => {
-    const tags = useObservable(cache.getState$(), cache.getState());
+    // `cache` is fixed for the lifetime of the component returned by getConnectedTagListComponent
+    const tagsState$ = useMemo(() => cache.getState$({ waitForInitialization: true }), []);
+    const tags = useObservable(tagsState$, cache.getState());
     return <SavedObjectTagList {...props} tags={tags} />;
   };
 };
