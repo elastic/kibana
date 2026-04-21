@@ -28,6 +28,16 @@ paths:
       requestBody:
         content:
           application/json:
+            example:
+              update:
+                enable_field_rendering: false
+                ids:
+                  - >-
+                    c0c8a8bbb4a6561856a974ee9e461f0c82e673a1f0d83f86c5a8d80fc8de4c4f
+                  - >-
+                    5aa8f2900c0b03854b3b1a52a19558c5ea9893865c78235d4ad3dcc46196f4c7
+                kibana_alert_workflow_status: acknowledged
+                with_replacements: true
             schema:
               type: object
               properties:
@@ -43,12 +53,12 @@ paths:
                         Enables a markdown syntax used to render pivot fields,
                         for example `{{ user.name james }}`. When disabled, the
                         same example would be rendered as `james`. This is
-                        primarily used for Attack discovery views within Kibana.
+                        primarily used for Attack Discovery views within Kibana.
                         Defaults to `false`.
                       example: false
                       type: boolean
                     ids:
-                      description: Array of Attack discovery IDs to update
+                      description: Array of Attack Discovery IDs to update
                       example:
                         - >-
                           c0c8a8bbb4a6561856a974ee9e461f0c82e673a1f0d83f86c5a8d80fc8de4c4f
@@ -97,12 +107,18 @@ paths:
         '200':
           content:
             application/json:
+              example:
+                data:
+                  - id: >-
+                      c0c8a8bbb4a6561856a974ee9e461f0c82e673a1f0d83f86c5a8d80fc8de4c4f
+                    title: Suspicious process execution on host-01
+                    workflow_status: acknowledged
               schema:
                 type: object
                 properties:
                   data:
                     description: >-
-                      Array of updated Attack discovery alert objects. Each item
+                      Array of updated Attack Discovery alert objects. Each item
                       includes the applied modifications from the bulk update
                       request.
                     items:
@@ -110,10 +126,14 @@ paths:
                     type: array
                 required:
                   - data
-          description: Successful response containing the updated Attack discovery alerts
+          description: Indicates a successful call.
         '400':
           content:
             application/json:
+              example:
+                error: Bad Request
+                message: Invalid request parameters.
+                status_code: 400
               schema:
                 type: object
                 properties:
@@ -125,7 +145,7 @@ paths:
                     description: >-
                       Human-readable error message describing what went wrong
                       with the bulk update request
-                    example: Invalid request parameters
+                    example: Invalid request parameters.
                     type: string
                   status_code:
                     description: HTTP status code
@@ -135,7 +155,7 @@ paths:
                   - status_code
                   - error
                   - message
-          description: Generic Error
+          description: Bad Request response.
       summary: Bulk update Attack discoveries
       tags:
         - Security Attack discovery API
@@ -189,7 +209,7 @@ paths:
         - description: >-
             Enables a markdown syntax used to render pivot fields, for example
             `{{ user.name james }}`. When disabled, the same example would be
-            rendered as `james`. This is primarily used for Attack discovery
+            rendered as `james`. This is primarily used for Attack Discovery
             views within Kibana. Defaults to `false`.
           example: false
           in: query
@@ -335,6 +355,18 @@ paths:
         '200':
           content:
             application/json:
+              example:
+                connector_names:
+                  - GPT-5 Chat
+                data:
+                  - connector_name: GPT-5 Chat
+                    id: >-
+                      c0c8a8bbb4a6561856a974ee9e461f0c82e673a1f0d83f86c5a8d80fc8de4c4f
+                    title: Suspicious process execution on host-01
+                page: 1
+                per_page: 10
+                total: 1
+                unique_alert_ids_count: 0
               schema:
                 type: object
                 properties:
@@ -385,10 +417,14 @@ paths:
                   - per_page
                   - total
                   - unique_alert_ids_count
-          description: Successful response
+          description: Indicates a successful call.
         '400':
           content:
             application/json:
+              example:
+                error: Bad Request
+                message: Invalid request payload.
+                status_code: 400
               schema:
                 type: object
                 properties:
@@ -404,7 +440,7 @@ paths:
                     description: HTTP status code
                     example: 400
                     type: number
-          description: Generic Error
+          description: Bad Request response.
       summary: Find Attack discoveries that match the search criteria
       tags:
         - Security Attack discovery API
@@ -427,6 +463,27 @@ paths:
       requestBody:
         content:
           application/json:
+            example:
+              alertsIndexPattern: .alerts-security.alerts-default
+              anonymizationFields:
+                - allowed: true
+                  anonymized: true
+                  field: host.name
+                - allowed: true
+                  anonymized: true
+                  field: user.name
+                - allowed: true
+                  anonymized: false
+                  field: process.name
+              apiConfig:
+                actionTypeId: .gen-ai
+                connectorId: 12345678-1234-1234-1234-123456789012
+              connectorName: GPT-5 Chat
+              end: now
+              replacements: {}
+              size: 100
+              start: now-24h
+              subAction: invokeAI
             schema:
               $ref: '#/components/schemas/AttackDiscoveryGenerationConfig'
         required: true
@@ -434,6 +491,8 @@ paths:
         '200':
           content:
             application/json:
+              example:
+                execution_uuid: edd26039-0990-4d9f-9829-2a1fcacb77b5
               schema:
                 type: object
                 properties:
@@ -446,10 +505,14 @@ paths:
                     example: edd26039-0990-4d9f-9829-2a1fcacb77b5
                 required:
                   - execution_uuid
-          description: Attack discovery generation initiated successfully
+          description: Indicates a successful call.
         '400':
           content:
             application/json:
+              example:
+                error: Bad Request
+                message: Invalid request parameters.
+                status_code: 400
               schema:
                 type: object
                 properties:
@@ -459,7 +522,7 @@ paths:
                     type: string
                   message:
                     description: Human-readable error message describing what went wrong
-                    example: Invalid request parameters
+                    example: Invalid request parameters.
                     type: string
                   status_code:
                     description: HTTP status code
@@ -469,7 +532,7 @@ paths:
                   - status_code
                   - error
                   - message
-          description: Bad request - Invalid input parameters or configuration
+          description: Bad Request response.
       summary: Generate attack discoveries from alerts
       tags:
         - Security Attack discovery API
@@ -1407,7 +1470,7 @@ paths:
                 "size": 100,
                 "subAction": "invokeAI",
                 "apiConfig": {
-                  "connectorId": "example-connector-id",
+                  "connectorId": "12345678-1234-1234-1234-123456789012",
                   "actionTypeId": ".gen-ai"
                 },
                 "connectorName": "GPT-5 Chat",
@@ -1417,9 +1480,9 @@ paths:
   /api/attack_discovery/generations:
     get:
       description: >-
-        Get the latest attack discovery generations metadata (that are not
+        Get the latest Attack Discovery generations metadata (that are not
         dismissed) for the current user. This endpoint retrieves generation
-        metadata including execution status and statistics for Attack discovery
+        metadata including execution status and statistics for Attack Discovery
         generations.
       operationId: GetAttackDiscoveryGenerations
       parameters:
@@ -1454,20 +1517,36 @@ paths:
         '200':
           content:
             application/json:
+              example:
+                generations:
+                  - alerts_context_count: 75
+                    connector_id: chatGpt5_0ChatAzure
+                    discoveries: 3
+                    end: '2025-09-29T06:42:44.810Z'
+                    execution_uuid: 46b218d5-535d-4329-be56-d0f6af6986b7
+                    loading_message: >-
+                      AI is analyzing up to 100 alerts in the last 24 hours to
+                      generate discoveries.
+                    start: '2025-09-29T06:42:08.962Z'
+                    status: succeeded
               schema:
                 type: object
                 properties:
                   generations:
-                    description: List of attack discovery generations
+                    description: List of Attack Discovery generations
                     items:
                       $ref: '#/components/schemas/AttackDiscoveryGeneration'
                     type: array
                 required:
                   - generations
-          description: Successful response
+          description: Indicates a successful call.
         '400':
           content:
             application/json:
+              example:
+                error: Bad Request
+                message: Invalid size parameter. Must be a positive number.
+                status_code: 400
               schema:
                 type: object
                 properties:
@@ -1483,9 +1562,9 @@ paths:
                     description: HTTP status code
                     example: 400
                     type: number
-          description: Bad request
+          description: Bad Request response.
       summary: >-
-        Get the latest attack discovery generations metadata for the current
+        Get the latest Attack Discovery generations metadata for the current
         user
       tags:
         - Security Attack discovery API
@@ -1500,14 +1579,14 @@ paths:
   /api/attack_discovery/generations/{execution_uuid}:
     get:
       description: >-
-        Returns a specific Attack discovery generation, including all generated
+        Returns a specific Attack Discovery generation, including all generated
         Attack discoveries and associated metadata, including execution status
         and statistics.
       operationId: GetAttackDiscoveryGeneration
       parameters:
         - description: >-
-            The unique identifier for the Attack discovery generation execution.
-            This UUID is returned at the start of an Attack discovery
+            The unique identifier for the Attack Discovery generation execution.
+            This UUID is returned at the start of an Attack Discovery
             generation.
           example: 2e13f386-46cf-4d65-9e2b-68609e132ba5
           in: path
@@ -1518,7 +1597,7 @@ paths:
         - description: >-
             Enables a markdown syntax used to render pivot fields, for example
             `{{ user.name james }}`. When disabled, the same example would be
-            rendered as `james`. This is primarily used for Attack discovery
+            rendered as `james`. This is primarily used for Attack Discovery
             views within Kibana. Defaults to `false`.
           example: false
           in: query
@@ -1542,6 +1621,18 @@ paths:
         '200':
           content:
             application/json:
+              example:
+                data:
+                  - id: >-
+                      c0c8a8bbb4a6561856a974ee9e461f0c82e673a1f0d83f86c5a8d80fc8de4c4f
+                    title: Suspicious process execution on host-01
+                generation:
+                  alerts_context_count: 50
+                  discoveries: 1
+                  end: '2025-09-29T06:42:44.810Z'
+                  execution_uuid: 2e13f386-46cf-4d65-9e2b-68609e132ba5
+                  start: '2025-09-29T06:42:08.962Z'
+                  status: succeeded
               schema:
                 type: object
                 properties:
@@ -1561,10 +1652,14 @@ paths:
                       generations.
                 required:
                   - data
-          description: Successful response
+          description: Indicates a successful call.
         '400':
           content:
             application/json:
+              example:
+                error: Bad Request
+                message: Invalid request parameters.
+                status_code: 400
               schema:
                 type: object
                 properties:
@@ -1576,7 +1671,7 @@ paths:
                     description: >-
                       Human-readable error message describing what went wrong
                       with the request
-                    example: Invalid request parameters
+                    example: Invalid request parameters.
                     type: string
                   status_code:
                     description: HTTP status code
@@ -1586,9 +1681,9 @@ paths:
                   - status_code
                   - error
                   - message
-          description: Generic Error
+          description: Bad Request response.
       summary: >-
-        Get a single Attack discovery generation, including its discoveries and
+        Get a single Attack Discovery generation, including its discoveries and
         (optional) generation metadata
       tags:
         - Security Attack discovery API
@@ -1603,15 +1698,15 @@ paths:
   /api/attack_discovery/generations/{execution_uuid}/_dismiss:
     post:
       description: >-
-        Dismisses an attack discovery generation for the current user,
-        indicating that it's status should not be reported in the UI. This sets
+        Dismisses an Attack Discovery generation for the current user,
+        indicating that its status should not be reported in the UI. This sets
         the generation's status to "dismissed" and affects how the generation
         appears in subsequent queries.
       operationId: PostAttackDiscoveryGenerationsDismiss
       parameters:
         - description: >-
-            The unique identifier for the Attack discovery generation execution.
-            This UUID is returned when an attack discovery generation is created
+            The unique identifier for the Attack Discovery generation execution.
+            This UUID is returned when an Attack Discovery generation is created
             and can be found in generation responses.
           example: 46b218d5-535d-4329-be56-d0f6af6986b7
           in: path
@@ -1623,6 +1718,17 @@ paths:
         '200':
           content:
             application/json:
+              example:
+                alerts_context_count: 75
+                connector_id: chatGpt5_0ChatAzure
+                discoveries: 3
+                end: '2025-09-29T06:42:44.810Z'
+                execution_uuid: 46b218d5-535d-4329-be56-d0f6af6986b7
+                loading_message: >-
+                  AI is analyzing up to 100 alerts in the last 24 hours to
+                  generate discoveries.
+                start: '2025-09-29T06:42:08.962Z'
+                status: dismissed
               schema:
                 type: object
                 properties:
@@ -1718,12 +1824,14 @@ paths:
                   - loading_message
                   - start
                   - status
-          description: >-
-            Successful response - The attack discovery generation has been
-            dismissed
+          description: Indicates a successful call.
         '400':
           content:
             application/json:
+              example:
+                error: Bad Request
+                message: Invalid request parameters.
+                status_code: 400
               schema:
                 type: object
                 properties:
@@ -1735,7 +1843,7 @@ paths:
                     description: >-
                       Human-readable error message describing what went wrong
                       with the request.
-                    example: Invalid request parameters
+                    example: Invalid request parameters.
                     type: string
                   status_code:
                     description: HTTP status code indicating the type of client error
@@ -1745,8 +1853,8 @@ paths:
                   - status_code
                   - error
                   - message
-          description: Generic Error
-      summary: Dismiss an attack discovery generation
+          description: Bad Request response.
+      summary: Dismiss an Attack Discovery generation
       tags:
         - Security Attack discovery API
       x-code-samples:
@@ -1760,8 +1868,8 @@ paths:
   /api/attack_discovery/schedules:
     post:
       description: >-
-        Creates a new Attack discovery schedule that analyzes security alerts at
-        specified intervals. The schedule defines when and how Attack discovery
+        Creates a new Attack Discovery schedule that analyzes security alerts at
+        specified intervals. The schedule defines when and how Attack Discovery
         analysis should run, including which alerts to analyze, which AI
         connector to use, and what actions to take when discoveries are found.
       operationId: CreateAttackDiscoverySchedules
@@ -1786,7 +1894,7 @@ paths:
             schema:
               $ref: '#/components/schemas/AttackDiscoveryApiScheduleCreateProps'
         description: >-
-          Attack discovery schedule configuration including name, parameters,
+          Attack Discovery schedule configuration including name, parameters,
           schedule interval, and actions
         required: true
       responses:
@@ -1815,22 +1923,22 @@ paths:
                 updated_by: elastic
               schema:
                 $ref: '#/components/schemas/AttackDiscoveryApiSchedule'
-          description: Successfully created Attack discovery schedule
+          description: The Attack Discovery schedule was successfully created.
         '400':
           content:
             application/json:
               example:
                 error: Bad Request
-                message: Invalid request parameters
+                message: Invalid request parameters.
                 status_code: 400
               schema:
                 $ref: '#/components/schemas/AttackDiscoveryGenericError'
-          description: Generic Error
-      summary: Create Attack discovery schedule
+          description: Bad Request response.
+      summary: Create Attack Discovery schedule
       tags:
         - Security Attack discovery API
       x-code-samples:
-        - label: Create an Attack discovery schedule
+        - label: Create an Attack Discovery schedule
           lang: curl
           source: |
             curl \
@@ -1874,8 +1982,8 @@ paths:
   /api/attack_discovery/schedules/_find:
     get:
       description: >-
-        Finds Attack discovery schedules that match the search criteria.
-        Supports pagination and sorting by various fields.
+        Find Attack Discovery schedules that match the search criteria. Supports
+        pagination and sorting by various fields.
       operationId: FindAttackDiscoverySchedules
       parameters:
         - description: Page number to return (used for pagination). Defaults to 1.
@@ -1886,7 +1994,7 @@ paths:
           schema:
             type: number
         - description: >-
-            Number of Attack discovery schedules to return per page (used for
+            Number of Attack Discovery schedules to return per page (used for
             pagination). Defaults to 10.
           example: 10
           in: query
@@ -1919,11 +2027,35 @@ paths:
         '200':
           content:
             application/json:
+              example:
+                data:
+                  - actions: []
+                    created_at: '2023-10-31T10:00:00.000Z'
+                    created_by: elastic
+                    enabled: true
+                    id: 12345678-1234-1234-1234-123456789012
+                    name: Daily Security Analysis
+                    params:
+                      alerts_index_pattern: .alerts-security.alerts-default
+                      api_config:
+                        actionTypeId: bedrock
+                        connectorId: my-bedrock-connector
+                        name: Claude 3.5 Sonnet
+                      end: now
+                      size: 100
+                      start: now-24h
+                    schedule:
+                      interval: 24h
+                    updated_at: '2023-10-31T10:00:00.000Z'
+                    updated_by: elastic
+                page: 1
+                per_page: 10
+                total: 1
               schema:
                 type: object
                 properties:
                   data:
-                    description: Array of matched Attack discovery schedule objects.
+                    description: Array of matched Attack Discovery schedule objects.
                     items:
                       $ref: '#/components/schemas/AttackDiscoveryApiSchedule'
                     type: array
@@ -1935,7 +2067,7 @@ paths:
                     type: number
                   total:
                     description: >-
-                      Total number of Attack discovery schedules matching the
+                      Total number of Attack Discovery schedules matching the
                       query (across all pages).
                     type: number
                 required:
@@ -1943,10 +2075,14 @@ paths:
                   - per_page
                   - total
                   - data
-          description: Successful response
+          description: Indicates a successful call.
         '400':
           content:
             application/json:
+              example:
+                error: Bad Request
+                message: Invalid request payload.
+                status_code: 400
               schema:
                 type: object
                 properties:
@@ -1956,14 +2092,14 @@ paths:
                     type: string
                   message:
                     description: Human-readable error message
-                    example: Invalid request payload
+                    example: Invalid request payload.
                     type: string
                   status_code:
                     description: HTTP status code
                     example: 400
                     type: number
-          description: Generic Error
-      summary: Finds Attack discovery schedules that match the search criteria
+          description: Bad Request response.
+      summary: Find Attack Discovery schedules that match the search criteria
       tags:
         - Security Attack discovery API
       x-code-samples:
@@ -1977,7 +2113,7 @@ paths:
   /api/attack_discovery/schedules/{id}:
     delete:
       description: >-
-        Permanently deletes an Attack discovery schedule and all associated
+        Permanently deletes an Attack Discovery schedule and all associated
         configuration.
       operationId: DeleteAttackDiscoverySchedules
       parameters:
@@ -2015,16 +2151,16 @@ paths:
             application/json:
               example:
                 error: Bad Request
-                message: Invalid request parameters
+                message: Invalid request parameters.
                 status_code: 400
               schema:
                 $ref: '#/components/schemas/AttackDiscoveryGenericError'
-          description: Generic Error
-      summary: Delete Attack discovery schedule
+          description: Bad Request response.
+      summary: Delete Attack Discovery schedule
       tags:
         - Security Attack discovery API
       x-code-samples:
-        - label: Delete an Attack discovery schedule
+        - label: Delete an Attack Discovery schedule
           lang: curl
           source: |
             curl \
@@ -2033,7 +2169,7 @@ paths:
              --header "Content-Type: application/json"
     get:
       description: >-
-        Retrieves a specific Attack discovery schedule by its unique identifier.
+        Retrieves a specific Attack Discovery schedule by its unique identifier.
         Returns complete schedule configuration including parameters, interval
         settings, associated actions, and execution history.
       operationId: GetAttackDiscoverySchedules
@@ -2086,16 +2222,16 @@ paths:
             application/json:
               example:
                 error: Bad Request
-                message: Invalid request parameters
+                message: Invalid request parameters.
                 status_code: 400
               schema:
                 $ref: '#/components/schemas/AttackDiscoveryGenericError'
-          description: Generic Error
-      summary: Get Attack discovery schedule by ID
+          description: Bad Request response.
+      summary: Get Attack Discovery schedule by ID
       tags:
         - Security Attack discovery API
       x-code-samples:
-        - label: Get an Attack discovery schedule by ID
+        - label: Get an Attack Discovery schedule by ID
           lang: curl
           source: |
             curl \
@@ -2104,7 +2240,7 @@ paths:
              --header "Content-Type: application/json"
     put:
       description: >-
-        Updates an existing Attack discovery schedule with new configuration.
+        Updates an existing Attack Discovery schedule with new configuration.
         All schedule properties can be modified including name, parameters,
         interval, and actions. The update operation replaces the entire schedule
         configuration with the provided values.
@@ -2140,7 +2276,7 @@ paths:
             schema:
               $ref: '#/components/schemas/AttackDiscoveryApiScheduleUpdateProps'
         description: >-
-          Updated Attack discovery schedule configuration. All fields are
+          Updated Attack Discovery schedule configuration. All fields are
           required as this replaces the entire schedule configuration.
         required: true
       responses:
@@ -2177,16 +2313,16 @@ paths:
             application/json:
               example:
                 error: Bad Request
-                message: Invalid request parameters
+                message: Invalid request parameters.
                 status_code: 400
               schema:
                 $ref: '#/components/schemas/AttackDiscoveryGenericError'
-          description: Generic Error
-      summary: Update Attack discovery schedule
+          description: Bad Request response.
+      summary: Update Attack Discovery schedule
       tags:
         - Security Attack discovery API
       x-code-samples:
-        - label: Update an Attack discovery schedule
+        - label: Update an Attack Discovery schedule
           lang: curl
           source: |
             curl \
@@ -2214,7 +2350,7 @@ paths:
   /api/attack_discovery/schedules/{id}/_disable:
     post:
       description: >-
-        Disables an Attack discovery schedule, preventing it from running
+        Disables an Attack Discovery schedule, preventing it from running
         according to its configured interval. The schedule configuration is
         preserved and can be re-enabled later. Any currently running executions
         will complete, but no new executions will be started.
@@ -2254,16 +2390,16 @@ paths:
             application/json:
               example:
                 error: Bad Request
-                message: Invalid request parameters
+                message: Invalid request parameters.
                 status_code: 400
               schema:
                 $ref: '#/components/schemas/AttackDiscoveryGenericError'
-          description: Generic Error
-      summary: Disable Attack discovery schedule
+          description: Bad Request response.
+      summary: Disable Attack Discovery schedule
       tags:
         - Security Attack discovery API
       x-code-samples:
-        - label: Disable an Attack discovery schedule
+        - label: Disable an Attack Discovery schedule
           lang: curl
           source: |
             curl \
@@ -2273,7 +2409,7 @@ paths:
   /api/attack_discovery/schedules/{id}/_enable:
     post:
       description: >-
-        Enables a previously disabled Attack discovery schedule, allowing it to
+        Enables a previously disabled Attack Discovery schedule, allowing it to
         run according to its configured interval. Once enabled, the schedule
         will begin executing at the next scheduled time based on its interval
         configuration.
@@ -2313,16 +2449,16 @@ paths:
             application/json:
               example:
                 error: Bad Request
-                message: Invalid request parameters
+                message: Invalid request parameters.
                 status_code: 400
               schema:
                 $ref: '#/components/schemas/AttackDiscoveryGenericError'
-          description: Generic Error
-      summary: Enable Attack discovery schedule
+          description: Bad Request response.
+      summary: Enable Attack Discovery schedule
       tags:
         - Security Attack discovery API
       x-code-samples:
-        - label: Enable an Attack discovery schedule
+        - label: Enable an Attack Discovery schedule
           lang: curl
           source: |
             curl \
@@ -2529,11 +2665,11 @@ components:
         - timestamp
         - title
     AttackDiscoveryApiSchedule:
-      description: An attack discovery schedule
+      description: An Attack Discovery schedule
       type: object
       properties:
         actions:
-          description: The attack discovery schedule actions
+          description: The Attack Discovery schedule actions
           items:
             $ref: '#/components/schemas/AttackDiscoveryApiScheduleAction'
           type: array
@@ -2548,20 +2684,20 @@ components:
           description: Indicates whether the schedule is enabled
           type: boolean
         id:
-          description: UUID of attack discovery schedule
+          description: UUID of Attack Discovery schedule
           type: string
         last_execution:
           $ref: '#/components/schemas/AttackDiscoveryApiScheduleExecution'
-          description: The attack discovery schedule last execution summary
+          description: The Attack Discovery schedule last execution summary
         name:
           description: The name of the schedule
           type: string
         params:
           $ref: '#/components/schemas/AttackDiscoveryApiScheduleParams'
-          description: The attack discovery schedule configuration parameters
+          description: The Attack Discovery schedule configuration parameters
         schedule:
           $ref: '#/components/schemas/IntervalApiSchedule'
-          description: The attack discovery schedule interval
+          description: The Attack Discovery schedule interval
         updated_at:
           description: The date the schedule was updated
           format: date-time
@@ -2636,11 +2772,11 @@ components:
       pattern: ^[1-9]\d*[smhd]$
       type: string
     AttackDiscoveryApiScheduleCreateProps:
-      description: An attack discovery schedule create properties
+      description: An Attack Discovery schedule create properties
       type: object
       properties:
         actions:
-          description: The attack discovery schedule actions
+          description: The Attack Discovery schedule actions
           items:
             $ref: '#/components/schemas/AttackDiscoveryApiScheduleAction'
           type: array
@@ -2652,16 +2788,16 @@ components:
           type: string
         params:
           $ref: '#/components/schemas/AttackDiscoveryApiScheduleParams'
-          description: The attack discovery schedule configuration parameters
+          description: The Attack Discovery schedule configuration parameters
         schedule:
           $ref: '#/components/schemas/IntervalApiSchedule'
-          description: The attack discovery schedule interval
+          description: The Attack Discovery schedule interval
       required:
         - name
         - params
         - schedule
     AttackDiscoveryApiScheduleExecution:
-      description: An attack discovery schedule execution information
+      description: An Attack Discovery schedule execution information
       type: object
       properties:
         date:
@@ -2681,7 +2817,7 @@ components:
         - status
         - last_duration
     AttackDiscoveryApiScheduleExecutionStatus:
-      description: An attack discovery schedule execution status
+      description: An Attack Discovery schedule execution status
       enum:
         - ok
         - active
@@ -2713,7 +2849,7 @@ components:
         - id
         - params
     AttackDiscoveryApiScheduleParams:
-      description: An attack discovery schedule params
+      description: An Attack Discovery schedule params
       type: object
       properties:
         alerts_index_pattern:
@@ -2764,11 +2900,11 @@ components:
         - id
         - params
     AttackDiscoveryApiScheduleUpdateProps:
-      description: An attack discovery schedule update properties
+      description: An Attack Discovery schedule update properties
       type: object
       properties:
         actions:
-          description: The attack discovery schedule actions
+          description: The Attack Discovery schedule actions
           items:
             $ref: '#/components/schemas/AttackDiscoveryApiScheduleAction'
           type: array
@@ -2777,10 +2913,10 @@ components:
           type: string
         params:
           $ref: '#/components/schemas/AttackDiscoveryApiScheduleParams'
-          description: The attack discovery schedule configuration parameters
+          description: The Attack Discovery schedule configuration parameters
         schedule:
           $ref: '#/components/schemas/IntervalApiSchedule'
-          description: The attack discovery schedule interval
+          description: The Attack Discovery schedule interval
       required:
         - name
         - params
@@ -2788,7 +2924,7 @@ components:
         - actions
     AttackDiscoveryFindSortField:
       description: >-
-        Allowed field names to sort Attack discovery results by. Clients should
+        Allowed field names to sort Attack Discovery results by. Clients should
         only pass one of the listed values.
       enum:
         - '@timestamp'
@@ -2937,7 +3073,7 @@ components:
         - size
         - subAction
     AttackDiscoveryGenericError:
-      description: Generic error response for Attack discovery schedule operations
+      description: Generic error response for Attack Discovery schedule operations
       type: object
       properties:
         error:
@@ -2946,7 +3082,7 @@ components:
           type: string
         message:
           description: Human-readable error message describing what went wrong
-          example: Invalid request parameters
+          example: Invalid request parameters.
           type: string
         status_code:
           description: HTTP status code
@@ -2955,7 +3091,7 @@ components:
     Filters:
       description: >-
         The filter array used to define the conditions for when alerts are
-        selected as an attack discovery context. Defaults to an empty array.
+        selected as an Attack Discovery context. Defaults to an empty array.
       items: {}
       type: array
     IntervalApiSchedule:
