@@ -84,7 +84,7 @@ if [[ "$SCOUT_TEST_DISTRIBUTION_STRATEGY" == "lanes" ]]; then
   fi
 
   node scripts/scout create-test-tracks \
-    --estimatedLaneSetupMinutes "${SCOUT_TEST_LANE_ESTIMATED_SETUP_MINUTES:-3}" \
+    --estimatedLaneSetupMinutes "${SCOUT_TEST_LANE_ESTIMATED_SETUP_MINUTES:-5}" \
     --targetRuntimeMinutes "${SCOUT_TEST_LANE_TARGET_RUNTIME_MINUTES:-15}" \
     "${TEST_TARGET_FLAGS[@]}" \
     "${SELECTIVE_TESTING_FLAGS[@]}" \
