@@ -188,7 +188,10 @@ export const DiscoverAgentBuilderConfig = () => {
     [dispatch]
   );
 
-  const browserApiTools = useMemo(() => [runQueryTool], [runQueryTool]);
+  const browserApiTools = useMemo(
+    () => (isEsqlMode ? [runQueryTool] : []),
+    [isEsqlMode, runQueryTool]
+  );
 
   useEffect(() => {
     if (!agentBuilder) {
