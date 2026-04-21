@@ -10,6 +10,7 @@
 import Path from 'path';
 import { cpus } from 'os';
 
+import type { PackageFileMap } from '@kbn/repo-file-maps';
 import { asyncForEachWithLimit } from '@kbn/std';
 import type { Package } from '@kbn/repo-packages';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -29,11 +30,13 @@ const distPerms = (rec: FsRecord) => (rec.type === 'file' ? 0o644 : 0o755);
 
 export async function copyPackages({
   packages,
+  pkgFileMap,
   config,
   build,
   log,
 }: {
   packages: Package[];
+  pkgFileMap: PackageFileMap;
   config: Config;
   build: Build;
   log: ToolingLog;
@@ -48,7 +51,8 @@ export async function copyPackages({
       log.verbose(`starting copy of ${pkg.manifest.id}`);
 
       try {
-        const batch = await buildBatch(pkg, pkgSrcPath, pkgDistPath);
+        const repoFilePaths = new Set(Array.from(pkgFileMap.getFiles(pkg), (p) => p.abs));
+        const batch = await buildBatch(pkg, pkgSrcPath, pkgDistPath, repoFilePaths);
         await mkdirBatch(batch);
         const { peggyConfigOutputPaths } = await pool.run(batch);
 

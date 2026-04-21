@@ -10,7 +10,7 @@
 import Fsp from 'fs/promises';
 import Path from 'path';
 
-import { makeMatcher } from '@kbn/picomatcher';
+import { makeMatcher } from '@kbn/picomatcher/make_matcher';
 import type { Package } from '@kbn/repo-packages';
 
 export interface CopyRecord {
@@ -124,7 +124,8 @@ function destForFile(srcRel: string, ext: string, kind: Record['kind']): string 
 export async function buildBatch(
   pkg: Package,
   pkgSrcPath: string,
-  pkgDistPath: string
+  pkgDistPath: string,
+  repoFilePaths: ReadonlySet<string>
 ): Promise<Batch> {
   const matchExtraExcludes = pkg.manifest.build?.extraExcludes
     ? makeMatcher(pkg.manifest.build.extraExcludes)
@@ -166,6 +167,7 @@ export async function buildBatch(
     if (excludeFileByTags(tags)) continue;
 
     const srcAbs = Path.join(entry.parentPath, name);
+    if (!repoFilePaths.has(srcAbs)) continue;
     const srcRel = Path.relative(pkgSrcPath, srcAbs);
 
     if (isInExcludedDir(srcRel)) continue;

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getRepoFiles } from '@kbn/get-repo-files/get_repo_files';
+import { PackageFileMap } from '@kbn/repo-file-maps';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { StdioOption } from 'execa';
 import execa from 'execa';
@@ -18,6 +20,7 @@ export const BuildPackages: Task = {
   description: 'Building distributable versions of packages',
   async run(config, log, build) {
     const packages = config.getDistPackagesFromRepo();
+    const pkgFileMap = new PackageFileMap(packages, await getRepoFiles());
 
     log.info(`Building webpack artifacts which are necessary for the build`);
     await buildWebpackBundles({
@@ -26,7 +29,7 @@ export const BuildPackages: Task = {
       noCache: true,
     });
 
-    await copyPackages({ packages, config, build, log });
+    await copyPackages({ packages, pkgFileMap, config, build, log });
   },
 };
 
