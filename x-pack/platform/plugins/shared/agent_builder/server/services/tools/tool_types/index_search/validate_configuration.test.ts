@@ -9,9 +9,9 @@ import { EsResourceType } from '@kbn/agent-builder-common';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { IndexSearchToolConfig } from '@kbn/agent-builder-common/tools';
 import { validateConfig } from './validate_configuration';
-import { listSearchSources as _listSearchSources } from '@kbn/agent-builder-genai-utils';
+import { listSearchSources as _listSearchSources } from '@kbn/agent-builder-esql-utils';
 
-jest.mock('@kbn/agent-builder-genai-utils');
+jest.mock('@kbn/agent-builder-esql-utils');
 
 const listSearchSourcesMock = _listSearchSources as jest.MockedFunction<typeof _listSearchSources>;
 

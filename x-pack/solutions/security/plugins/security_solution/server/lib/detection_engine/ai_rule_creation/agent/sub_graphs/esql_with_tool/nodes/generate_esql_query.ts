@@ -9,7 +9,7 @@ import type { Logger, KibanaRequest, ElasticsearchClient } from '@kbn/core/serve
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { ScopedModel, ToolEventEmitter } from '@kbn/agent-builder-server';
-import { generateEsql } from '@kbn/agent-builder-genai-utils';
+import { generateEsql } from '@kbn/agent-builder-esql-utils';
 import type { RuleCreationState } from '../../../state';
 
 interface GenerateEsqlQueryParams {

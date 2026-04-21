@@ -11,7 +11,7 @@ import { ToolType, platformCoreTools } from '@kbn/agent-builder-common';
 import type { WorkflowToolConfig } from '@kbn/agent-builder-common/tools';
 import { createErrorResult, getAgentFromRunContext } from '@kbn/agent-builder-server';
 import { WAIT_FOR_COMPLETION_TIMEOUT_SEC } from '@kbn/agent-builder-common/tools/types/workflow';
-import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
+import { cleanPrompt } from '@kbn/agent-builder-esql-utils/prompts';
 import { errorResult, otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
 import type { AnyToolTypeDefinition } from '../definitions';
 import { executeWorkflow } from '../../../workflow';

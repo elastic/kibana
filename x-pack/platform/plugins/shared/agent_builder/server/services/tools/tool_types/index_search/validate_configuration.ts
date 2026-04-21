@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { IndexSearchToolConfig } from '@kbn/agent-builder-common/tools';
 import { createBadRequestError } from '@kbn/agent-builder-common';
-import { listSearchSources } from '@kbn/agent-builder-genai-utils';
+import { listSearchSources } from '@kbn/agent-builder-esql-utils';
 
 /**
  * Validates the index_search tool config: ensures the pattern resolves to at least one

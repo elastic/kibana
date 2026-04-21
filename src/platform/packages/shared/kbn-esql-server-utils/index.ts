@@ -12,4 +12,3 @@ export {
   buildServerESQLCallbacks,
   type BuildServerESQLCallbacksOptions,
 } from './build_server_esql_callbacks';
-export { getListOfCCSIndices } from './lookup_utils';

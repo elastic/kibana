@@ -6,7 +6,7 @@
  */
 
 import type { IFileStore } from '@kbn/agent-builder-server/runner';
-import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
+import { cleanPrompt } from '@kbn/agent-builder-esql-utils/prompts';
 import { isSkillFileEntry } from '../../../runner/store/volumes/skills/utils';
 import type { SkillFileEntry } from '../../../runner/store/volumes/skills/types';
 

@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-builder-server';
-import { executeEsql } from '@kbn/agent-builder-genai-utils';
+import { executeEsql } from '@kbn/agent-builder-esql-utils';
 import type { Logger } from '@kbn/logging';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
 import { securityTool } from './constants';

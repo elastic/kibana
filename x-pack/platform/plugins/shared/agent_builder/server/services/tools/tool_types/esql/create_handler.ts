@@ -7,7 +7,7 @@
 
 import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolHandlerFn } from '@kbn/agent-builder-server';
-import { interpolateEsqlQuery } from '@kbn/agent-builder-genai-utils/tools/utils';
+import { interpolateEsqlQuery } from '@kbn/agent-builder-esql-utils/tools/utils/esql';
 import type { EsqlToolParamValue } from '@kbn/agent-builder-common';
 import { type EsqlToolConfig, ToolResultType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';

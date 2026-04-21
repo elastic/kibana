@@ -22,19 +22,6 @@ export {
   createPromptRequestEvent,
 } from './graph_events';
 export {
-  extractTextContent,
-  extractToolCalls,
-  extractToolCallsWithReasoning,
-  extractToolReturn,
-  createUserMessage,
-  createAIMessage,
-  createToolResultMessage,
-  createToolCallMessage,
-  generateFakeToolCallId,
-  type ToolCall,
-  type ToolCallWithReasoning,
-} from '@kbn/agent-builder-esql-utils/langchain/messages';
-export {
   toolsToLangchain,
   toolToLangchain,
   toolIdentifierFromToolCall,

@@ -8,7 +8,7 @@
 import { filestoreTools } from '@kbn/agent-builder-common/tools';
 import type { IFileStore } from '@kbn/agent-builder-server/runner/filestore';
 import { FileEntryType } from '@kbn/agent-builder-server/runner/filestore';
-import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
+import { cleanPrompt } from '@kbn/agent-builder-esql-utils/prompts';
 import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
 import { buildFolderTree } from './utils/folder_tree';
 

@@ -22,8 +22,8 @@ import {
 import {
   createAIMessage,
   createUserMessage,
-  sanitizeToolId,
-} from '@kbn/agent-builder-genai-utils/langchain';
+} from '@kbn/agent-builder-esql-utils/langchain/messages';
+import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
 import { generateXmlTree, type XmlNode } from '@kbn/agent-builder-genai-utils/tools/utils';
 import type { ProcessedAttachment, ProcessedRoundInput } from '@kbn/agent-builder-server';
 import type { CompactionSummary } from '@kbn/agent-builder-common';

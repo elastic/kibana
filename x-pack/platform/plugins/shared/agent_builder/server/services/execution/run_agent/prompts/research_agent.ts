@@ -6,7 +6,7 @@
  */
 
 import type { BaseMessageLike } from '@langchain/core/messages';
-import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
+import { cleanPrompt } from '@kbn/agent-builder-esql-utils/prompts';
 import { getSkillsInstructions } from './utils/skills';
 import { getConversationAttachmentsSection } from '../utils/attachment_presentation';
 import { convertPreviousRounds } from '../utils/to_langchain_messages';

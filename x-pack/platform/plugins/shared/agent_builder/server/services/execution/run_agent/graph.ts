@@ -14,10 +14,8 @@ import type { ResolvedAgentCapabilities } from '@kbn/agent-builder-common';
 import { AgentExecutionErrorCode as ErrCodes } from '@kbn/agent-builder-common/agents';
 import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import type { AgentEventEmitter } from '@kbn/agent-builder-server';
-import {
-  createReasoningEvent,
-  createToolCallMessage,
-} from '@kbn/agent-builder-genai-utils/langchain';
+import { createToolCallMessage } from '@kbn/agent-builder-esql-utils/langchain/messages';
+import { createReasoningEvent } from '@kbn/agent-builder-genai-utils/langchain';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import type { ResolvedConfiguration } from './types';
 import { convertError, isRecoverableError } from './utils/errors';

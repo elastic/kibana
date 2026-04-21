@@ -6,7 +6,7 @@
  */
 
 import { ToolResultType, type ErrorResult, type EsqlResults } from '@kbn/agent-builder-common';
-import { executeEsql } from '@kbn/agent-builder-genai-utils';
+import { executeEsql } from '@kbn/agent-builder-esql-utils';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import type { coreMock } from '@kbn/core/server/mocks';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
@@ -24,7 +24,7 @@ jest.mock('../../utils/get_agent_builder_resource_availability', () => ({
   getAgentBuilderResourceAvailability: jest.fn(),
 }));
 
-jest.mock('@kbn/agent-builder-genai-utils', () => ({
+jest.mock('@kbn/agent-builder-esql-utils', () => ({
   executeEsql: jest.fn(),
 }));
 

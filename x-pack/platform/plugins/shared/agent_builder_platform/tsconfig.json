@@ -12,6 +12,7 @@
     "@kbn/workflows-management-plugin",
     "@kbn/agent-builder-server",
     "@kbn/lens-embeddable-utils",
+    "@kbn/agent-builder-esql-utils",
     "@kbn/agent-builder-genai-utils",
     "@kbn/agent-builder-common",
     "@kbn/zod",

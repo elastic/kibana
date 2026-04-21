@@ -11,7 +11,7 @@ import {
   extractTextContent,
   extractToolCalls,
   extractToolCallsWithReasoning,
-} from '@kbn/agent-builder-genai-utils/langchain';
+} from '@kbn/agent-builder-esql-utils/langchain/messages';
 import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
 import type { ToolHandlerPromptReturn, ToolHandlerReturn } from '@kbn/agent-builder-server/tools';

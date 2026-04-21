@@ -12,7 +12,7 @@ import type { BaseMessageLike } from '@langchain/core/messages';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { ElasticGenAIAttributes, withActiveInferenceSpan } from '@kbn/inference-tracing';
 import type { Conversation, ConversationRound, ConverseInput } from '@kbn/agent-builder-common';
-import { createUserMessage } from '@kbn/agent-builder-genai-utils/langchain';
+import { createUserMessage } from '@kbn/agent-builder-esql-utils/langchain/messages';
 
 /**
  * Generates a title for a conversation

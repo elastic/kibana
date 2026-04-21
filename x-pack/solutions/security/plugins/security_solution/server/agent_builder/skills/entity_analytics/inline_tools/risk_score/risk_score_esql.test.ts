@@ -18,7 +18,7 @@ jest.mock('../common', () => ({
   entityAnalyticsInlineToolSchema: {},
 }));
 
-jest.mock('@kbn/agent-builder-genai-utils', () => ({
+jest.mock('@kbn/agent-builder-esql-utils', () => ({
   generateEsql: jest.fn(),
 }));
 

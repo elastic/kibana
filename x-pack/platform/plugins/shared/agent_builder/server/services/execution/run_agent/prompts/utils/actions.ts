@@ -12,8 +12,8 @@ import {
   createToolResultMessage,
   createToolCallMessage,
   generateFakeToolCallId,
-} from '@kbn/agent-builder-genai-utils/langchain/messages';
-import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
+} from '@kbn/agent-builder-esql-utils/langchain/messages';
+import { cleanPrompt } from '@kbn/agent-builder-esql-utils/prompts';
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
 import type { AgentBuilderAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import type {

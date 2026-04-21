@@ -27,6 +27,7 @@
     "@kbn/features-plugin",
     "@kbn/core-logging-server-mocks",
     "@kbn/i18n",
+    "@kbn/agent-builder-esql-utils",
     "@kbn/agent-builder-genai-utils",
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/kibana-react-plugin",

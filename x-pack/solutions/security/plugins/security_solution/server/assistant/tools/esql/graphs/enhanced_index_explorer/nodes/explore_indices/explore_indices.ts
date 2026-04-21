@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { indexExplorer } from '@kbn/agent-builder-genai-utils';
+import { indexExplorer } from '@kbn/agent-builder-esql-utils';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';

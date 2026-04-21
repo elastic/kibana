@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
-import { indexExplorer } from '@kbn/agent-builder-genai-utils';
+import { indexExplorer } from '@kbn/agent-builder-esql-utils';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 

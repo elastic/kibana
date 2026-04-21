@@ -6,37 +6,12 @@
  */
 
 export {
-  esqlResponseToJson,
-  flattenMapping,
-  cleanupMapping,
-  getIndexMappings,
-  executeEsql,
-  isCcsTarget,
-  partitionByCcs,
-  getFieldsFromFieldCaps,
-  getIndexFields,
-  type IndexFieldsResult,
-  type MappingField,
-} from '@kbn/agent-builder-esql-utils';
-export {
   getDocumentById,
   type GetDocumentByIdResult,
   listIndices,
   type ListIndexDetailInfo,
   type ListIndexBasicInfo,
-  listSearchSources,
-  type AliasSearchSource,
-  type IndexSearchSource,
-  type DataStreamSearchSource,
-  type EsSearchSource,
-  type ListSourcesResponse,
 } from './tools/steps';
-export {
-  indexExplorer,
-  type IndexExplorerResponse,
-  generateEsql,
-  type GenerateEsqlResponse,
-} from '@kbn/agent-builder-esql-utils';
 export {
   relevanceSearch,
   type RelevanceSearchResponse,

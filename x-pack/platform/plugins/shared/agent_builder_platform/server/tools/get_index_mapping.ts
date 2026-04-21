@@ -7,9 +7,9 @@
 
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
-import type { MappingField } from '@kbn/agent-builder-genai-utils';
+import type { MappingField } from '@kbn/agent-builder-esql-utils';
+import { getIndexFields } from '@kbn/agent-builder-esql-utils';
 import { otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
-import { getIndexFields } from '@kbn/agent-builder-genai-utils';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 
 const getIndexMappingsSchema = z.object({

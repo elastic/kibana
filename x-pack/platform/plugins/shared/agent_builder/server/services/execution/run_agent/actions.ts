@@ -7,7 +7,7 @@
 
 import type { AgentBuilderAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
-import type { ToolCallWithReasoning } from '@kbn/agent-builder-genai-utils/langchain';
+import type { ToolCallWithReasoning } from '@kbn/agent-builder-esql-utils/langchain/messages';
 
 export enum AgentActionType {
   Error = 'error',

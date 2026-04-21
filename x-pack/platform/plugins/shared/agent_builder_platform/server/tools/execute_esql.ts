@@ -12,7 +12,7 @@ import {
   executeEsql,
   buildTimeRangeParams,
   interpolateEsqlQuery,
-} from '@kbn/agent-builder-genai-utils/tools/utils/esql';
+} from '@kbn/agent-builder-esql-utils/tools/utils/esql';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';

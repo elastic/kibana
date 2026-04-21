@@ -13,6 +13,7 @@ import type { OperatorFunction } from 'rxjs';
 import { EMPTY, mergeMap, of } from 'rxjs';
 import type { ChatAgentEvent, ConversationRound } from '@kbn/agent-builder-common/chat';
 import { isToolCallStep } from '@kbn/agent-builder-common/chat';
+import { extractTextContent } from '@kbn/agent-builder-esql-utils/langchain/messages';
 import {
   createBrowserToolCallEvent,
   createMessageEvent,
@@ -22,7 +23,6 @@ import {
   createThinkingCompleteEvent,
   createToolCallEvent,
   createToolResultEvent,
-  extractTextContent,
   hasTag,
   matchEvent,
   matchGraphName,

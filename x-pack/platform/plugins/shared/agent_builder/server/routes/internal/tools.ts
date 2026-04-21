@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { listSearchSources } from '@kbn/agent-builder-genai-utils';
+import { listSearchSources } from '@kbn/agent-builder-esql-utils';
 import { CONNECTOR_ID as MCP_CONNECTOR_ID } from '@kbn/connector-schemas/mcp/constants';
 import type { ListToolsResponse } from '@kbn/mcp-client';
 import {

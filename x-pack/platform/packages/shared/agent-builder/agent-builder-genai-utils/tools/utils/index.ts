@@ -5,26 +5,6 @@
  * 2.0.
  */
 
-export {
-  esqlResponseToJson,
-  extractEsqlQueries,
-  executeEsql,
-  interpolateEsqlQuery,
-  flattenMapping,
-  cleanupMapping,
-  getIndexMappings,
-  getDataStreamMappings,
-  type MappingField,
-  processFieldCapsResponse,
-  processFieldCapsResponsePerIndex,
-  type FieldListFromFieldCapsResponse,
-  isCcsTarget,
-  partitionByCcs,
-  getFieldsFromFieldCaps,
-  getBatchedFieldsFromFieldCaps,
-  getIndexFields,
-  type IndexFieldsResult,
-} from '@kbn/agent-builder-esql-utils/tools/utils';
 export { generateXmlTree, type XmlNode } from './formatting';
 export { errorResult, otherResult } from './results';
 export { estimateTokens, truncateTokens } from './token_count';

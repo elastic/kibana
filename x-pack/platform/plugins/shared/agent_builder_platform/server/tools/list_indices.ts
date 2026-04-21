@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import { listSearchSources } from '@kbn/agent-builder-genai-utils';
+import { listSearchSources } from '@kbn/agent-builder-esql-utils';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 
 const listIndicesSchema = z.object({
