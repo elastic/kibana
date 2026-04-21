@@ -4,23 +4,17 @@
     "outDir": "target/types",
     "types": [
       "jest",
-      "node",
-      "react",
-      "@kbn/ambient-ui-types",
-      "@testing-library/jest-dom",
+      "node"
     ]
   },
   "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    "../../../../../../typings/**/*",
+    "**/*.ts"
   ],
   "exclude": [
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/i18n",
-    "@kbn/i18n-react",
-    "@kbn/doc-links",
+    "@kbn/dev-cli-runner",
+    "@kbn/tooling-log"
   ]
 }
