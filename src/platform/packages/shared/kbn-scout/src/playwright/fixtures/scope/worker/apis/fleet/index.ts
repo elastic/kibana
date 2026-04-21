@@ -31,12 +31,15 @@ export interface FleetApiService {
   };
   agent_policies: {
     get: (queryParams?: Record<string, any>) => Promise<any>;
-    create: (
-      policyName: string,
-      policyNamespace: string,
-      sysMonitoring?: boolean,
-      params?: AgentPolicyCreateBody
+    create: (options: AgentPolicyCreateOptions) => Promise<any>;
+    update: (options: AgentPolicyUpdateOptions) => Promise<any>;
+    bulkGet: (
+      bulkGetIds: string[],
+      params?: BulkGetBody,
+      queryParams?: Record<string, string>
     ) => Promise<any>;
+    delete: (id: string, isForceSet?: boolean) => Promise<any>;
+  };
     update: (
       policyName: string,
       policyNamespace: string,
@@ -179,12 +182,12 @@ export const getFleetApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Fleet
           });
         });
       },
-      create: async (
-        policyName: string,
-        policyNamespace: string,
-        sysMonitoring?: boolean,
-        params?: AgentPolicyCreateBody
-      ) => {
+      create: async ({
+        policyName,
+        policyNamespace,
+        sysMonitoring,
+        params,
+      }: AgentPolicyCreateOptions) => {
         return await measurePerformanceAsync(
           log,
           `fleetApi.agent_policies.create [${policyName}]`,
@@ -208,13 +211,13 @@ export const getFleetApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Fleet
         );
       },
 
-      update: async (
-        policyName: string,
-        policyNamespace: string,
-        agentPolicyId: string,
-        params?: AgentPolicyUpdateBody,
-        queryParams?: Record<string, string>
-      ) => {
+      update: async ({
+        policyName,
+        policyNamespace,
+        agentPolicyId,
+        params,
+        queryParams,
+      }: AgentPolicyUpdateOptions) => {
         return await measurePerformanceAsync(
           log,
           `fleetApi.agent_policies.update [${agentPolicyId}]`,
