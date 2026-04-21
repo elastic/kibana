@@ -221,7 +221,7 @@ const datatableStylingSchema = schema.object(
   }
 );
 
-const datatableStateCommonOptionsSchema = {
+const datatableConfigCommonOptionsSchema = {
   /**
    * Where to apply the color (background, value or badge)
    */
@@ -241,8 +241,8 @@ const datatableStateCommonOptionsSchema = {
   ),
 };
 
-const datatableStateRowsOptionsNoESQLSchema = {
-  ...datatableStateCommonOptionsSchema,
+const datatableConfigRowsOptionsNoESQLSchema = {
+  ...datatableConfigCommonOptionsSchema,
   /**
    * Alignment of the rows
    */
@@ -277,8 +277,8 @@ const datatableStateRowsOptionsNoESQLSchema = {
   collapse_by: schema.maybe(collapseBySchema),
 };
 
-const datatableStateRowsOptionsESQLSchema = {
-  ...datatableStateRowsOptionsNoESQLSchema,
+const datatableConfigRowsOptionsESQLSchema = {
+  ...datatableConfigRowsOptionsNoESQLSchema,
   /**
    * Color configuration
    */
@@ -293,8 +293,8 @@ const datatableStateRowsOptionsESQLSchema = {
   ),
 };
 
-const datatableStateMetricsOptionsSchema = {
-  ...datatableStateCommonOptionsSchema,
+const datatableConfigMetricsOptionsSchema = {
+  ...datatableConfigCommonOptionsSchema,
   /**
    * Color configuration
    */
@@ -397,7 +397,7 @@ function validateSortBy({
   }
 }
 
-export const datatableStateSchemaNoESQL = schema.object(
+export const datatableConfigSchemaNoESQL = schema.object(
   {
     type: schema.literal('data_table'),
     ...sharedPanelInfoSchema,
@@ -409,7 +409,7 @@ export const datatableStateSchemaNoESQL = schema.object(
      * Metric columns configuration, must define operation.
      */
     metrics: schema.arrayOf(
-      mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(datatableStateMetricsOptionsSchema),
+      mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(datatableConfigMetricsOptionsSchema),
       {
         minSize: 1,
         maxSize: 1000,
@@ -421,7 +421,7 @@ export const datatableStateSchemaNoESQL = schema.object(
      */
     rows: schema.maybe(
       schema.arrayOf(
-        mergeAllBucketsWithChartDimensionSchema(datatableStateRowsOptionsNoESQLSchema),
+        mergeAllBucketsWithChartDimensionSchema(datatableConfigRowsOptionsNoESQLSchema),
         {
           minSize: 1,
           maxSize: 50,
@@ -450,7 +450,7 @@ export const datatableStateSchemaNoESQL = schema.object(
   }
 );
 
-export const datatableStateSchemaESQL = schema.object(
+export const datatableConfigSchemaESQL = schema.object(
   {
     type: schema.literal('data_table'),
     ...sharedPanelInfoSchema,
@@ -462,7 +462,7 @@ export const datatableStateSchemaESQL = schema.object(
      */
     metrics: schema.maybe(
       schema.arrayOf(
-        esqlColumnWithFormatSchema.extends(datatableStateMetricsOptionsSchema, {
+        esqlColumnWithFormatSchema.extends(datatableConfigMetricsOptionsSchema, {
           meta: { id: 'datatableESQLMetric', title: 'Datatable Metric (ES|QL)' },
         }),
         {
@@ -476,7 +476,7 @@ export const datatableStateSchemaESQL = schema.object(
      * Row configuration, optional operations.
      */
     rows: schema.maybe(
-      schema.arrayOf(esqlColumnWithFormatSchema.extends(datatableStateRowsOptionsESQLSchema), {
+      schema.arrayOf(esqlColumnWithFormatSchema.extends(datatableConfigRowsOptionsESQLSchema), {
         minSize: 1,
         maxSize: 50,
         meta: { description: 'Array of operations to split the datatable rows by' },
@@ -514,8 +514,8 @@ export const datatableStateSchemaESQL = schema.object(
   }
 );
 
-export const datatableStateSchema = objectUnion(
-  [datatableStateSchemaNoESQL, datatableStateSchemaESQL],
+export const datatableConfigSchema = objectUnion(
+  [datatableConfigSchemaNoESQL, datatableConfigSchemaESQL],
   {
     meta: {
       id: 'datatableChart',
@@ -525,7 +525,6 @@ export const datatableStateSchema = objectUnion(
   }
 );
 
-export type DatatableState = TypeOf<typeof datatableStateSchema>;
-export type DatatableStateNoESQL = TypeOf<typeof datatableStateSchemaNoESQL>;
-export type DatatableStateESQL = TypeOf<typeof datatableStateSchemaESQL>;
-export type DatatableStyling = TypeOf<typeof datatableStylingSchema>;
+export type DatatableConfig = TypeOf<typeof datatableConfigSchema>;
+export type DatatableConfigNoESQL = TypeOf<typeof datatableConfigSchemaNoESQL>;
+export type DatatableConfigESQL = TypeOf<typeof datatableConfigSchemaESQL>;

@@ -17,6 +17,7 @@ jest.mock('./infra/entity_source_client');
 jest.mock('../entities/service');
 jest.mock('./sync/index_sync');
 jest.mock('../entities/utils');
+jest.mock('./bulk/soft_delete');
 
 const { mockListEntitySources } = jest.requireMock('./infra/entity_source_client') as {
   mockListEntitySources: jest.Mock;
@@ -40,6 +41,12 @@ const { mockPlainIndexSync } = jest.requireMock('./sync/index_sync') as {
 
 const { mockGetIndexForWatchlist } = jest.requireMock('../entities/utils') as {
   mockGetIndexForWatchlist: jest.Mock;
+};
+
+const { applyBulkRemoveSource: mockApplyBulkRemoveSource } = jest.requireMock(
+  './bulk/soft_delete'
+) as {
+  applyBulkRemoveSource: jest.Mock;
 };
 
 describe('createEntitySourcesService', () => {
@@ -203,6 +210,58 @@ describe('createEntitySourcesService', () => {
 
       expect(mockWatchlistGet).toHaveBeenCalledTimes(1);
       expect(mockWatchlistGet).toHaveBeenCalledWith('wl-1');
+    });
+
+    it('cleans up orphaned entities when no sources are linked', async () => {
+      mockWatchlistList.mockResolvedValue([{ id: 'wl-1', name: 'Cleaned' }]);
+
+      const service = createService();
+      mockWatchlistGet.mockResolvedValue({ name: 'Cleaned', id: 'wl-1' });
+      mockGetEntitySourceIds.mockResolvedValue([]);
+      mockListEntitySources.mockResolvedValue({ sources: [] });
+
+      // Mock: aggregation returns one orphaned source ID (not csv)
+      esClient.search
+        .mockResolvedValueOnce({
+          aggregations: {
+            source_ids: {
+              buckets: [
+                { key: 'orphaned-source-1', doc_count: 3 },
+                { key: 'csv', doc_count: 2 },
+              ],
+            },
+          },
+        } as never)
+        // Mock: buildWatchlistsByEuid — first search returns euids
+        .mockResolvedValueOnce({
+          hits: { hits: [{ _source: { entity: { id: 'user:alice' } } }] },
+        } as never)
+        // Mock: buildWatchlistsByEuid — entity store query for watchlist memberships
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _source: {
+                  entity: { id: 'user:alice', attributes: { watchlists: ['wl-1'] } },
+                },
+              },
+            ],
+          },
+        } as never)
+        // Mock: findEntitiesBySource — paginated search for stale entities
+        .mockResolvedValueOnce({
+          hits: { hits: [{ _id: 'user:alice:doc1' }] },
+        } as never);
+
+      await service.syncAllWatchlists();
+
+      expect(mockApplyBulkRemoveSource).toHaveBeenCalledWith(
+        expect.objectContaining({
+          staleEntities: [{ docId: 'user:alice:doc1', sourceId: 'orphaned-source-1' }],
+        })
+      );
+      // plainIndexSync still runs (with empty sources) but cleanup handles orphans
+      expect(mockPlainIndexSync).toHaveBeenCalledWith([]);
     });
 
     it('continues syncing remaining watchlists when one fails', async () => {

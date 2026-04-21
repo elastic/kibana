@@ -11,10 +11,6 @@ export const MODAL_TITLE = i18n.translate('xpack.agentBuilder.announcementModal.
   defaultMessage: 'Introducing AI Agent',
 });
 
-export const BETA_LABEL = i18n.translate('xpack.agentBuilder.announcementModal.betaLabel', {
-  defaultMessage: 'Beta',
-});
-
 export const WHAT_TO_EXPECT = i18n.translate('xpack.agentBuilder.announcementModal.whatToExpect', {
   defaultMessage: 'What to expect:',
 });
@@ -54,7 +50,7 @@ export const FEATURE_PARITY_BODY = i18n.translate(
   'xpack.agentBuilder.announcementModal.featureParityBody',
   {
     defaultMessage:
-      'Some legacy features, such as anonymization and chat sharing, are not yet supported in this Beta version.',
+      'Some legacy features, such as anonymization and chat sharing, are not yet supported in AI Agent.',
   }
 );
 
