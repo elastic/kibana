@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../../../../..',
-  roots: ['<rootDir>/x-pack/platform/packages/shared/ai-assistant/ai-agent-confirmation-modal'],
-};
+export { CollectorConfigView } from './collector_config_view';

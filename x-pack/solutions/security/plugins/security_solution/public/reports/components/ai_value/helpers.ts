@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import prettyMilliseconds from 'pretty-ms';
-
 export const getPercChange = (
   newTime: number | null | undefined,
   compareTime: number | null | undefined
@@ -16,6 +14,3 @@ export const getPercChange = (
   }
   return null;
 };
-
-export const makePrettyNumber = (mttr: number): string =>
-  prettyMilliseconds(mttr * 1000, { compact: true, verbose: false });
