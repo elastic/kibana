@@ -269,6 +269,9 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 ruleExecutionLogger.error(`Check for indices to search failed.\nError: ${exc}`);
               }
 
+              // Closing the logger due to early exit
+              await ruleExecutionLogger.close();
+
               return { state: result.state };
             }
           }
