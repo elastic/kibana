@@ -8,9 +8,9 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import type { ScopedModel } from '@kbn/agent-builder-server';
+import { resolveResource } from '@kbn/agent-builder-esql-utils/tools/utils/resources';
 import type { PerformMatchSearchResponse, TopSnippetsConfig } from './steps';
 import { performMatchSearch } from './steps';
-import { resolveResource } from './utils/resources';
 
 export type RelevanceSearchResponse = PerformMatchSearchResponse;
 

@@ -8,7 +8,7 @@
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import type { MappingField } from '../utils/mappings';
+import type { MappingField } from '@kbn/agent-builder-esql-utils/tools/utils/mappings';
 import { performMatchSearch } from './perform_match_search';
 
 jest.mock('./extract_snippets', () => ({

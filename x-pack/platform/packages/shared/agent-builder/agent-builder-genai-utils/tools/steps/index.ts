@@ -20,4 +20,4 @@ export {
   type DataStreamSearchSource,
   type EsSearchSource,
   type ListSourcesResponse,
-} from './list_search_sources';
+} from '@kbn/agent-builder-esql-utils/tools/steps/list_search_sources';

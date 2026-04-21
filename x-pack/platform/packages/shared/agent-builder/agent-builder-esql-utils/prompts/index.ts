@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getEsqlInstructions, type InstructionsTemplateParams } from './instructions_template';
+export { cleanPrompt } from './cleanup';

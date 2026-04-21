@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { cleanPrompt } from './cleanup';
+export { cleanPrompt } from '@kbn/agent-builder-esql-utils/prompts';

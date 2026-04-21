@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { generateEsql, type GenerateEsqlResponse } from './nl_to_esql';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/x-pack/platform/packages/shared/agent-builder/agent-builder-esql-utils'],
+};

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export { indexExplorer, type IndexExplorerResponse } from './index_explorer';
-export { generateEsql, type GenerateEsqlResponse } from './generate_esql';
+export { indexExplorer, type IndexExplorerResponse } from '@kbn/agent-builder-esql-utils';
+export { generateEsql, type GenerateEsqlResponse } from '@kbn/agent-builder-esql-utils';
 export { relevanceSearch, type RelevanceSearchResponse } from './relevance_search';
 export { naturalLanguageSearch, type NaturalLanguageSearchResponse } from './nl_search';
 export { runSearchTool } from './search';

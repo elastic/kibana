@@ -51,6 +51,7 @@
     "@kbn/controls-constants",
     "@kbn/logging",
     "@kbn/logging-mocks",
+    "@kbn/esql-server-utils",
   ],
   "exclude": [
     "target/**/*",

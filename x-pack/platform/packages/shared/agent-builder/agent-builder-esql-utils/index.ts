@@ -6,6 +6,14 @@
  */
 
 export {
+  generateEsql,
+  type GenerateEsqlResponse,
+  type GenerateEsqlDeps,
+  type GenerateEsqlOptions,
+  type GenerateEsqlParams,
+} from './tools/generate_esql';
+export { indexExplorer, type IndexExplorerResponse } from './tools/index_explorer';
+export {
   esqlResponseToJson,
   extractEsqlQueries,
   executeEsql,
@@ -24,7 +32,5 @@ export {
   getBatchedFieldsFromFieldCaps,
   getIndexFields,
   type IndexFieldsResult,
-} from '@kbn/agent-builder-esql-utils/tools/utils';
-export { generateXmlTree, type XmlNode } from './formatting';
-export { errorResult, otherResult } from './results';
-export { estimateTokens, truncateTokens } from './token_count';
+} from './tools/utils';
+export { listSearchSources } from './tools/steps/list_search_sources';

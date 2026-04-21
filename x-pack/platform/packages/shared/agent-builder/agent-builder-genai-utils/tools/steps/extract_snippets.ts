@@ -7,8 +7,8 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import type { MappingField } from '../utils/mappings';
-import { executeEsql } from '../utils/esql';
+import type { MappingField } from '@kbn/agent-builder-esql-utils/tools/utils/mappings';
+import { executeEsql } from '@kbn/agent-builder-esql-utils/tools/utils/esql';
 
 export interface TopSnippetsConfig {
   /** Maximum number of snippets per document. */

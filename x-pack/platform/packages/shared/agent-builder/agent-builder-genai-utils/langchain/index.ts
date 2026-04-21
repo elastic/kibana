@@ -33,7 +33,7 @@ export {
   generateFakeToolCallId,
   type ToolCall,
   type ToolCallWithReasoning,
-} from './messages';
+} from '@kbn/agent-builder-esql-utils/langchain/messages';
 export {
   toolsToLangchain,
   toolToLangchain,

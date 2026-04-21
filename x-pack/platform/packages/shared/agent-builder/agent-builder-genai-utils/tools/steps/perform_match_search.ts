@@ -8,9 +8,9 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
-import type { MappingField } from '../utils/mappings';
-import { isCcsTarget } from '../utils/ccs';
-import { MAX_ES_RESPONSE_SIZE_BYTES } from '../constants';
+import type { MappingField } from '@kbn/agent-builder-esql-utils/tools/utils/mappings';
+import { isCcsTarget } from '@kbn/agent-builder-esql-utils/tools/utils/ccs';
+import { MAX_ES_RESPONSE_SIZE_BYTES } from '@kbn/agent-builder-esql-utils/tools/constants';
 import { extractSnippetsBatch, type TopSnippetsConfig } from './extract_snippets';
 
 export interface MatchResult {

@@ -17,7 +17,7 @@ export {
   getIndexFields,
   type IndexFieldsResult,
   type MappingField,
-} from './tools/utils';
+} from '@kbn/agent-builder-esql-utils';
 export {
   getDocumentById,
   type GetDocumentByIdResult,
@@ -36,6 +36,8 @@ export {
   type IndexExplorerResponse,
   generateEsql,
   type GenerateEsqlResponse,
+} from '@kbn/agent-builder-esql-utils';
+export {
   relevanceSearch,
   type RelevanceSearchResponse,
   naturalLanguageSearch,

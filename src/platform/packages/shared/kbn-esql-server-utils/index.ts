@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export { EsqlService, type EsqlServiceOptions } from './esql_service';
 export {
   buildServerESQLCallbacks,
   type BuildServerESQLCallbacksOptions,
-} from '@kbn/esql-server-utils';
+} from './build_server_esql_callbacks';
+export { getListOfCCSIndices } from './lookup_utils';

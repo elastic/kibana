@@ -22,7 +22,7 @@ import type {
   ToolProvider,
 } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
-import type { ToolCall } from './messages';
+import type { ToolCall } from '@kbn/agent-builder-esql-utils/langchain/messages';
 
 export type ToolIdMapping = Map<string, string>;
 

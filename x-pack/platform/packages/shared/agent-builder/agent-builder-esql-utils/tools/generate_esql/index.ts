@@ -6,12 +6,9 @@
  */
 
 export {
-  esqlResponseToJson,
-  extractEsqlQueries,
-  executeEsql,
-  interpolateEsqlQuery,
-  validateEsqlQuery,
-  buildTimeRangeParams,
-  type ValidateEsqlQueryCallbacks,
-  type EsqlResponse,
-} from '@kbn/agent-builder-esql-utils/tools/utils/esql';
+  generateEsql,
+  type GenerateEsqlResponse,
+  type GenerateEsqlDeps,
+  type GenerateEsqlOptions,
+  type GenerateEsqlParams,
+} from './nl_to_esql';

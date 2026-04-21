@@ -8,10 +8,10 @@
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import { relevanceSearch } from './relevance_search';
-import { resolveResource } from './utils/resources';
+import { resolveResource } from '@kbn/agent-builder-esql-utils/tools/utils/resources';
 import { performMatchSearch } from './steps';
 
-jest.mock('./utils/resources');
+jest.mock('@kbn/agent-builder-esql-utils/tools/utils/resources');
 jest.mock('./steps');
 
 const resolveResourceMock = resolveResource as jest.Mock;

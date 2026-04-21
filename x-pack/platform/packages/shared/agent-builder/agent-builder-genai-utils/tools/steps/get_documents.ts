@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { isCcsTarget } from '../utils/ccs';
+import { isCcsTarget } from '@kbn/agent-builder-esql-utils/tools/utils/ccs';
 
 export interface GetDocumentByIdSuccess {
   id: string;

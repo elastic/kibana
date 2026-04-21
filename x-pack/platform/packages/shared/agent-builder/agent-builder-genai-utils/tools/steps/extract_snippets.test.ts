@@ -7,14 +7,14 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import type { MappingField } from '../utils/mappings';
+import type { MappingField } from '@kbn/agent-builder-esql-utils/tools/utils/mappings';
 import { extractSnippetsBatch } from './extract_snippets';
 
-jest.mock('../utils/esql', () => ({
+jest.mock('@kbn/agent-builder-esql-utils/tools/utils/esql', () => ({
   executeEsql: jest.fn(),
 }));
 
-import { executeEsql } from '../utils/esql';
+import { executeEsql } from '@kbn/agent-builder-esql-utils/tools/utils/esql';
 
 const executeEsqlMock = executeEsql as jest.MockedFunction<typeof executeEsql>;
 

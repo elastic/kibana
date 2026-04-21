@@ -59,6 +59,7 @@ dependsOn:
   - '@kbn/controls-constants'
   - '@kbn/logging'
   - '@kbn/logging-mocks'
+  - '@kbn/esql-server-utils'
 tags:
   - plugin
   - prod

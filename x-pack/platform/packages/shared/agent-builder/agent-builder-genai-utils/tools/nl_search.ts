@@ -9,8 +9,8 @@ import type { TimeRange } from '@kbn/agent-builder-common';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ScopedModel, ToolEventEmitter } from '@kbn/agent-builder-server';
-import type { EsqlResponse } from './utils/esql';
-import { generateEsql } from './generate_esql';
+import type { EsqlResponse } from '@kbn/agent-builder-esql-utils/tools/utils/esql';
+import { generateEsql } from '@kbn/agent-builder-esql-utils';
 
 export interface NaturalLanguageSearchResponse {
   /**
