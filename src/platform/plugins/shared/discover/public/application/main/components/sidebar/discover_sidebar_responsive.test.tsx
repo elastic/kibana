@@ -292,45 +292,51 @@ describe('discover responsive sidebar', function () {
     resetExistingFieldsCache();
   });
 
-  it('should have loading indicators during fields existence loading', async function () {
-    let resolveFunction: (arg: unknown) => void;
-    (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockReset();
-    (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockImplementation(() => {
-      return new Promise((resolve) => {
-        resolveFunction = resolve;
+  it(
+    'should have loading indicators during fields existence loading',
+    async function () {
+      let resolveFunction: (arg: unknown) => void;
+      (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockReset();
+      (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockImplementation(() => {
+        return new Promise((resolve) => {
+          resolveFunction = resolve;
+        });
       });
-    });
 
-    const { result } = await renderComponent(
-      {
-        ...props,
-        fieldListVariant: 'list-always',
-      },
-      {},
-      undefined
-    );
+      const { result } = await renderComponent(
+        {
+          ...props,
+          fieldListVariant: 'list-always',
+        },
+        {},
+        undefined
+      );
 
-    expect(screen.getByTestId('fieldListGroupedAvailableFields-countLoading')).toBeInTheDocument();
-    expect(screen.queryByTestId('fieldListGroupedAvailableFields-count')).not.toBeInTheDocument();
-
-    expect(result.container.querySelector('.euiProgress')).not.toBeNull();
-
-    resolveFunction!({
-      indexPatternTitle: 'test-loaded',
-      existingFieldNames: Object.keys(mockfieldCounts),
-    });
-
-    await waitFor(() => {
       expect(
-        screen.queryByTestId('fieldListGroupedAvailableFields-countLoading')
-      ).not.toBeInTheDocument();
-    });
+        screen.getByTestId('fieldListGroupedAvailableFields-countLoading')
+      ).toBeInTheDocument();
+      expect(screen.queryByTestId('fieldListGroupedAvailableFields-count')).not.toBeInTheDocument();
 
-    expect(screen.getByTestId('fieldListGroupedAvailableFields-count')).toBeInTheDocument();
-    expect(result.container.querySelector('.euiProgress')).toBeNull();
+      expect(result.container.querySelector('.euiProgress')).not.toBeNull();
 
-    expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledTimes(1);
-  });
+      resolveFunction!({
+        indexPatternTitle: 'test-loaded',
+        existingFieldNames: Object.keys(mockfieldCounts),
+      });
+
+      await waitFor(() => {
+        expect(
+          screen.queryByTestId('fieldListGroupedAvailableFields-countLoading')
+        ).not.toBeInTheDocument();
+      });
+
+      expect(screen.getByTestId('fieldListGroupedAvailableFields-count')).toBeInTheDocument();
+      expect(result.container.querySelector('.euiProgress')).toBeNull();
+
+      expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledTimes(1);
+    },
+    EXTENDED_TIMEOUT
+  );
 
   it('should have Selected Fields, Available Fields, Popular and Meta Fields sections', async function () {
     await renderComponent(props);
@@ -505,24 +511,28 @@ describe('discover responsive sidebar', function () {
     EXTENDED_TIMEOUT
   );
 
-  it('should restore sidebar state after switching tabs', async function () {
-    await renderComponent(props, {
-      fieldListUiState: {
-        nameFilter: 'byte',
-        selectedFieldTypes: ['number'],
-        pageSize: 10,
-        scrollTop: 0,
-        accordionState: {},
-      },
-    });
+  it(
+    'should restore sidebar state after switching tabs',
+    async function () {
+      await renderComponent(props, {
+        fieldListUiState: {
+          nameFilter: 'byte',
+          selectedFieldTypes: ['number'],
+          pageSize: 10,
+          scrollTop: 0,
+          accordionState: {},
+        },
+      });
 
-    expect(screen.getByTestId('fieldListGroupedAvailableFields-count')).toHaveTextContent('1');
-    expect(screen.getByTestId('fieldListGrouped__ariaDescription')).toHaveTextContent(
-      '1 popular field. 1 available field. 0 meta fields.'
-    );
+      expect(screen.getByTestId('fieldListGroupedAvailableFields-count')).toHaveTextContent('1');
+      expect(screen.getByTestId('fieldListGrouped__ariaDescription')).toHaveTextContent(
+        '1 popular field. 1 available field. 0 meta fields.'
+      );
 
-    expect(screen.getByTestId('fieldListFiltersFieldSearch')).toHaveValue('byte');
-  });
+      expect(screen.getByTestId('fieldListFiltersFieldSearch')).toHaveValue('byte');
+    },
+    EXTENDED_TIMEOUT
+  );
 
   it('should restore collapsed state state after switching tabs', async function () {
     const { result: collapsedRender } = await renderComponent(

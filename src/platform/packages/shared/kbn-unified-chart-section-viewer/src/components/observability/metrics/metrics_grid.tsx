@@ -107,13 +107,9 @@ export const MetricsGrid = ({
     <FieldsMetadataProvider fields={metricItems} services={services}>
       <A11yGridWrapper
         ref={gridRef}
-        aria-label={i18n.translate('metricsExperience.gridAriaLabel', {
-          defaultMessage: 'Metric charts grid. Use arrow keys to navigate.',
-        })}
         gridRows={gridRows}
         gridColumns={gridColumns}
         onKeyDown={handleKeyDown}
-        data-test-subj="unifiedMetricsExperienceGrid"
       >
         <EuiFlexGrid
           gutterSize="s"
@@ -357,15 +353,12 @@ const A11yGridCell = React.forwardRef(
         tabIndex={isFocused ? 0 : -1}
         onFocus={handleFocusCell}
         css={css`
-          outline: none,
-          cursor: pointer,
-          ${
-            isFocused && {
-              boxShadow: `0 0 ${euiTheme.focus.width} ${euiTheme.colors.primary}`,
-              borderRadius: euiTheme.border.radius.medium,
-            }
-          }
-
+          outline: none;
+          cursor: pointer;
+          ${isFocused && {
+            boxShadow: `0 0 ${euiTheme.focus.width} ${euiTheme.colors.primary}`,
+            borderRadius: euiTheme.border.radius.medium,
+          }}
         `}
       >
         {children}

@@ -329,7 +329,7 @@ export function createTestServers({
           hosts: es.getHostUrls(),
           username: kibanaServerTestUser.username,
           password: kibanaServerTestUser.password,
-          ...(getFips() ? kbnSettings.elasticsearch : {}),
+          ...(getFips() === 1 ? kbnSettings.elasticsearch : {}),
         };
       }
 
