@@ -24,9 +24,6 @@ disabled:
   - src/platform/test/functional/config.edge.js
   - x-pack/platform/test/functional/config.edge.ts
 
-  # Superseded by group configs (config.group1.ts, config.group2.ts, config.group3.ts)
-  - x-pack/platform/test/functional/apps/monitoring/config.ts
-
   # Configs that exist but weren't running in CI when this file was introduced
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group2/tests/actions/config.ts
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group2/tests/telemetry/config.ts
