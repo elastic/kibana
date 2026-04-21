@@ -49,7 +49,9 @@ describe('definitionToESQLQuery', () => {
         definition: createDraftDefinition(),
         routingCondition: eqCondition,
       });
-      expect(result).toBe(['FROM $.logs.otel', '| WHERE COALESCE(`service.name` == "nginx", FALSE)'].join('\n'));
+      expect(result).toBe(
+        ['FROM $.logs.otel', '| WHERE COALESCE(`service.name` == "nginx", FALSE)'].join('\n')
+      );
     });
 
     it('omits WHERE clause for always conditions', async () => {
@@ -66,9 +68,10 @@ describe('definitionToESQLQuery', () => {
         routingCondition: andCondition,
       });
       expect(result).toBe(
-        ['FROM $.logs.otel', '| WHERE COALESCE(`service.name` == "nginx", FALSE) AND COALESCE(`log.level` == "error", FALSE)'].join(
-          '\n'
-        )
+        [
+          'FROM $.logs.otel',
+          '| WHERE COALESCE(`service.name` == "nginx", FALSE) AND COALESCE(`log.level` == "error", FALSE)',
+        ].join('\n')
       );
     });
 
@@ -127,7 +130,9 @@ describe('definitionToESQLQuery', () => {
         definition: createDraftDefinition({ steps: [] }),
         routingCondition: eqCondition,
       });
-      expect(result).toBe(['FROM $.logs.otel', '| WHERE COALESCE(`service.name` == "nginx", FALSE)'].join('\n'));
+      expect(result).toBe(
+        ['FROM $.logs.otel', '| WHERE COALESCE(`service.name` == "nginx", FALSE)'].join('\n')
+      );
     });
   });
 });
