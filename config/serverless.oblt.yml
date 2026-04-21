@@ -110,5 +110,5 @@ xpack.ml.compatibleModuleType: 'observability'
 # Disable the embedded Dev Console
 console.ui.embeddedEnabled: false
 
-# TODO: Remove this once before merging
+# TODO: Remove this before merging
 xpack.evals.enabled: true
