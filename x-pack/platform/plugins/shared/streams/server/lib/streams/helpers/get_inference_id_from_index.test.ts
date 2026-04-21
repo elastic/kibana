@@ -10,12 +10,16 @@ import { getInferenceIdFromIndex } from './get_inference_id_from_index';
 
 const logger = loggerMock.create();
 
-function createEsClient(getMappingResponse?: unknown) {
+type MockEsClient = Parameters<typeof getInferenceIdFromIndex>[0] & {
+  indices: { getMapping: jest.Mock };
+};
+
+function createEsClient(getMappingResponse?: unknown): MockEsClient {
   return {
     indices: {
       getMapping: jest.fn().mockResolvedValue(getMappingResponse ?? {}),
     },
-  } as any;
+  } as unknown as MockEsClient;
 }
 
 describe('getInferenceIdFromIndex', () => {
@@ -91,9 +95,7 @@ describe('getInferenceIdFromIndex', () => {
     );
 
     expect(result).toBeUndefined();
-    expect(logger.debug).toHaveBeenCalledWith(
-      expect.stringContaining('Unable to read mapping')
-    );
+    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('Unable to read mapping'));
   });
 
   it('returns undefined when the field does not exist in the mapping', async () => {
