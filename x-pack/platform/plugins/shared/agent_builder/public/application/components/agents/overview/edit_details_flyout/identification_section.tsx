@@ -33,11 +33,11 @@ export const IdentificationSection: React.FC = () => {
       <EuiTitle size="xs">
         <h3>{flyoutLabels.identificationTitle}</h3>
       </EuiTitle>
-      <EuiSpacer size="xs" />
-      <EuiText size="xs" color="subdued">
+      <EuiSpacer size="s" />
+      <EuiText size="s" color="subdued" component="p">
         {flyoutLabels.identificationDescription}
       </EuiText>
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
 
       <EuiFormRow
         label={flyoutLabels.nameLabel}
