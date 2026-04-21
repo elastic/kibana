@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { SeveritySelector } from './severity_selector';
+import { camelCase } from 'lodash';
+
+export const getFieldSnakeKey = (name: string, type: string): string => `${name}_as_${type}`;
+
+export const getFieldCamelKey = (name: string, type: string): string =>
+  camelCase(getFieldSnakeKey(name, type));
