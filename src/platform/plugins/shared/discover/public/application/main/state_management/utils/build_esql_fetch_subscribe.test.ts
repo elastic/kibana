@@ -9,6 +9,7 @@
 
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { AggregateQuery, Query } from '@kbn/es-query';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import type { EsHitRecord } from '@kbn/discover-utils';
@@ -712,8 +713,9 @@ describe('buildEsqlFetchSubscribe', () => {
     });
   });
 
-  test('changing an ES|QL query that returns empty results should clear columns', async () => {
-    const { replaceUrlState, dataState, tabId } = await setupTest({});
+  test('changing WHERE condition that returns no results should preserve columns', async () => {
+    // Same index, both non-transformational — schema is identical so columns should survive
+    const { replaceUrlState, dataState } = await setupTest({});
     const documents$ = dataState.data$.documents$;
 
     documents$.next(msgComplete);
@@ -724,6 +726,83 @@ describe('buildEsqlFetchSubscribe', () => {
       fetchStatus: FetchStatus.PARTIAL,
       result: [],
       query: { esql: 'from the-data-view-title | where field1 = "no-match"' },
+    });
+
+    expect(replaceUrlState).toHaveBeenCalledTimes(0);
+  });
+
+  test('switching from transformational to non-transformational query with no results should clear columns', async () => {
+    const { replaceUrlState, dataState, tabId } = await setupTest({});
+    const documents$ = dataState.data$.documents$;
+
+    // Establish STATS (transformational) as the previous state
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [
+        {
+          id: '1',
+          raw: { count: 10, status: 'ok' },
+          flattened: { count: 10, status: 'ok' },
+        } as unknown as DataTableRecord,
+      ],
+      query: { esql: 'from the-data-view-title | STATS count = COUNT(*) BY status' },
+    });
+    replaceUrlState.mockClear();
+
+    // Switch to non-transformational WHERE query with no results
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [],
+      esqlQueryColumns: [] as DatatableColumn[],
+      query: { esql: 'from the-data-view-title | where field1 = "no-match"' },
+    });
+
+    expect(replaceUrlState).toHaveBeenCalledTimes(1);
+    expect(replaceUrlState).toHaveBeenCalledWith({
+      tabId,
+      appState: { columns: [] },
+    });
+  });
+
+  test('switching from non-transformational to transformational query with no results should use esqlQueryColumns', async () => {
+    const { replaceUrlState, dataState, tabId } = await setupTest({});
+    const documents$ = dataState.data$.documents$;
+
+    // Establish non-transformational as the previous state
+    documents$.next(msgComplete);
+    replaceUrlState.mockClear();
+
+    // Switch to STATS (transformational) with no rows but column metadata available
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [],
+      esqlQueryColumns: [
+        { name: 'count', id: 'count', meta: { type: 'number' } },
+        { name: 'status', id: 'status', meta: { type: 'string' } },
+      ] as DatatableColumn[],
+      query: { esql: 'from the-data-view-title | STATS count = COUNT(*) BY status' },
+    });
+
+    expect(replaceUrlState).toHaveBeenCalledTimes(1);
+    expect(replaceUrlState).toHaveBeenCalledWith({
+      tabId,
+      appState: { columns: ['count', 'status'] },
+    });
+  });
+
+  test('index pattern change with no results should clear columns', async () => {
+    const { replaceUrlState, dataState, tabId } = await setupTest({});
+    const documents$ = dataState.data$.documents$;
+
+    documents$.next(msgComplete);
+    replaceUrlState.mockClear();
+
+    // Change to a completely different index with no results
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [],
+      esqlQueryColumns: [] as DatatableColumn[],
+      query: { esql: 'from different-index-pattern' },
     });
 
     expect(replaceUrlState).toHaveBeenCalledTimes(1);

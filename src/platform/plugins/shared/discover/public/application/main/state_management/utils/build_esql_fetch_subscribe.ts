@@ -115,7 +115,6 @@ export const buildEsqlFetchSubscribe = ({
 
     let nextAllColumns = prevEsqlData.allColumns;
     let nextDefaultColumns = prevEsqlData.defaultColumns;
-    const hasQueryChanged = nextQuery.esql !== prevEsqlData.query;
 
     if (next.result?.length) {
       nextAllColumns = Object.keys(next.result[0].raw);
@@ -128,8 +127,30 @@ export const buildEsqlFetchSubscribe = ({
       } else {
         nextDefaultColumns = [];
       }
-    } else if (hasQueryChanged && next.result?.length === 0) {
-      nextDefaultColumns = [];
+    } else if (next.result?.length === 0) {
+      const prevHadTransformational = hasTransformationalCommand(prevEsqlData.query);
+      const nextHasTransformational = hasTransformationalCommand(nextQuery.esql);
+      const transformationalStructureChanged = prevHadTransformational !== nextHasTransformational;
+      const noResultsIndexPatternChanged =
+        getIndexPatternFromESQLQuery(nextQuery.esql) !==
+        getIndexPatternFromESQLQuery(prevEsqlData.query);
+      const schemaChanged = noResultsIndexPatternChanged || transformationalStructureChanged;
+
+      if (schemaChanged) {
+        // Use esqlQueryColumns when available — ES|QL always returns column metadata even with
+        // 0 rows, so we can derive the correct columns without needing actual results.
+        const queryColumns = next.esqlQueryColumns?.map((col) => col.name) ?? [];
+        if (queryColumns.length) {
+          nextAllColumns = queryColumns;
+          if (nextHasTransformational || queryColumns.length <= ESQL_TABLE_VIEW_COLUMN_THRESHOLD) {
+            nextDefaultColumns = queryColumns.slice(0, ESQL_MAX_NUM_OF_COLUMNS);
+          } else {
+            nextDefaultColumns = [];
+          }
+        } else {
+          nextDefaultColumns = [];
+        }
+      }
     }
 
     if (prevEsqlData.initialFetch) {
