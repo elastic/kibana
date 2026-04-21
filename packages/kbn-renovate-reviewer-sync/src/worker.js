@@ -42,8 +42,17 @@ const NPM_PACKAGE_PATTERN = /^(?!\.|@kbn\/)[@a-zA-Z][\w\-./]*$/;
 //   group 2: `import('<spec>')`
 //   group 3: `require('<spec>')`
 //   group 4: `export [bindings from] '<spec>'`
+//
+// Both the import and the export binding classes use `[\w*{}\s,]+` (not `.*?`)
+// because `.` does not span newlines without the `s` flag (we only set `g`).
+// That matters for multi-line re-exports like
+//   export {
+//     foo,
+//     bar,
+//   } from 'pkg';
+// which a `.*?` version would silently drop.
 const COMBINED_IMPORT_REGEX =
-  /import\s+(?:type\s+)?(?:[\w*{}\s,]+\s+from\s+)?['"]([^'"]+)['"]|import\s*\(\s*['"]([^'"]+)['"]\s*\)|require\s*\(\s*['"]([^'"]+)['"]\s*\)|export\s+(?:.*?\s+from\s+)?['"]([^'"]+)['"]/g;
+  /import\s+(?:type\s+)?(?:[\w*{}\s,]+\s+from\s+)?['"]([^'"]+)['"]|import\s*\(\s*['"]([^'"]+)['"]\s*\)|require\s*\(\s*['"]([^'"]+)['"]\s*\)|export\s+(?:[\w*{}\s,]+\s+from\s+)?['"]([^'"]+)['"]/g;
 
 /**
  * Parse a CODEOWNERS file's contents into a list of `{ pattern, teams }`

@@ -287,6 +287,33 @@ describe('worker', () => {
       ]);
     });
 
+    it('extracts namespace re-exports (export * as ns from)', () => {
+      expect(extractImportsFromContent("export * as ns from 'ns-reexport';")).toEqual([
+        'ns-reexport',
+      ]);
+    });
+
+    it('extracts type-only re-exports (export type { ... } from)', () => {
+      expect(extractImportsFromContent("export type { Foo } from 'type-reexport';")).toEqual([
+        'type-reexport',
+      ]);
+    });
+
+    it('extracts multi-line named re-exports', () => {
+      // Regression: an earlier regex used `.*?` for export bindings, which
+      // stops at line boundaries unless the `s` flag is set (we only use `g`).
+      // Real Kibana code (e.g. `kbn-monaco/src/monaco_imports.ts`) re-exports
+      // from npm packages across multiple lines — those must be captured the
+      // same way multi-line named imports already are.
+      const content = "export {\n  foo,\n  bar,\n} from 'multi-line-reexport';";
+      expect(extractImportsFromContent(content)).toEqual(['multi-line-reexport']);
+    });
+
+    it('extracts multi-line type-only re-exports', () => {
+      const content = "export type {\n  Foo,\n  Bar,\n} from 'multi-line-type-reexport';";
+      expect(extractImportsFromContent(content)).toEqual(['multi-line-type-reexport']);
+    });
+
     it('extracts scoped packages keeping only the @scope/name', () => {
       expect(extractImportsFromContent("import { EuiFlexGroup } from '@elastic/eui';")).toEqual([
         '@elastic/eui',
