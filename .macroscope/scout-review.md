@@ -12,42 +12,58 @@ conclusion: neutral
 
 Review this PR for compliance with Kibana Scout test best practices.
 
-**Scope**: Focus on **Scout test behavior and best practices** — things that affect test reliability, coverage, and maintainability. Do NOT flag general code quality issues (unused imports/exports, naming conventions, code style) unless they directly impact test behavior. The goal is actionable feedback on tests, not code correctness nitpicks.
+## Scope
 
-Only review files that are:
+Review only **Scout test code and the building blocks tests consume**:
 
-1. **Scout test code**: files under `**/test/scout*/**` paths (spec files, fixtures, page objects, API services, constants, global setup hooks).
-2. **Scout packages**: files under `**/kbn-scout*/**`, but only page objects, API services, fixtures, and test utilities that tests consume. Skip internal framework implementation files.
+- Files under `**/test/scout*/**`: specs, fixtures, page objects, API services, constants, global setup hooks.
+- Files under `**/kbn-scout*/**`: only page objects, API services, fixtures, and test utilities.
 
-Skip all other changed files entirely. If no matching files were changed in this PR, conclude with no comments.
-
-IMPORTANT:
-
-- Do NOT review backport PRs (these usually merge changes into branches that aren't `main`)
-- Do NOT post flaky test runner nudges. A separate agent handles this.
+Skip everything else, including internal `kbn-scout` framework implementation. If no matching files changed, conclude with no comments. Do not post flaky test runner nudges — a separate agent handles that.
 
 ## Review instructions
 
-Follow the skill at `.agents/skills/scout-best-practices-reviewer/SKILL.md` for scope, checklist, reuse rules, and migration parity. You can use the `browse_code` tool to explore the codebase. Use the output instructions below to format the review:
+Follow `.agents/skills/scout-best-practices-reviewer/SKILL.md` for the checklist, reuse rules, and migration parity. Ignore any output formatting in that file — use the format below. Use `browse_code` to explore as needed.
+
+On PR updates, review only the new changes and stay high-signal — not nitpicky. If a `## Scout Test Review` summary comment already exists on the PR, edit it in place instead of posting a new one.
+
+## Non-negotiable UI test checks
+
+These rules must be verified on every applicable UI test file. Do not skip them:
+
+- [Test behavior, not data correctness](docs/extend/scout/ui-best-practices.md): if a test case is validating data, the test belongs in a different layer (component test or API test, see details in the best practices document).
 
 ## Output
 
-Post a **brief summary comment** — a few lines with count, severity, and optionally a one-liner per finding. Keep it scannable; detailed explanations and fixes go in inline comments.
+Post detailed findings as **inline PR comments** on the offending line. Optionally post one **summary comment** with a `## Scout Test Review` header and a brief severity breakdown, ending with this footer, verbatim:
 
+`markdown
+<sup>Share feedback on this review in the [#appex-qa](https://elastic.slack.com/archives/C04HT4P1YS3) channel.</sup>
+`
+
+### Inline comment format
+
+Each inline comment must use a collapsible section to keep the PR readable. Structure:
+
+```markdown
+<severity emoji> **[<rule name>](<link to best-practices section>)**
+
+<1–2 sentence high-level overview of the issue and the fix.>
+
+<details>
+<summary>See details</summary>
+
+<Full explanation, concrete fix, code blocks, before and after examples, or anything else that would overwhelm the inline view.>
+
+</details>
 ```
-## Scout Test Review
 
-Found 2 issues (1 major, 1 minor). See inline comments for details.
-
-This review is experimental. Share your feedback in the #appex-qa channel.
-```
-
-All detailed findings must go in **inline GitHub PR comments** on the specific line where each issue occurs. For each inline comment:
-
-- Start with the severity emoji (🔴 Blocker, 🟡 Major, 🔵 Minor, or ⚪ Nit)
+- **Severity emoji:** 🔴 Blocker, 🟡 Major, 🔵 Minor, ⚪ Nit
 - State the rule violated as a **Markdown link** whose text is the section heading from the matching best-practices document and whose URL is the section-scoped URL (see routing below). The link is required, not optional.
-- Explain the issue in 1–2 sentences
-- Suggest a concrete fix
+- **Overview:** plain prose, no code. A developer skimming the PR should grasp what's wrong and whether to act on it without expanding.
+- **Details:** everything else — reasoning, code snippets, suggested diffs, links to related rules.
+
+If the finding genuinely fits in one line (e.g. a nit about a typo'd constant name), you can skip the `<details>` block. Use judgment — the goal is a scannable PR, not rigid formatting.
 
 ### Pick the right best-practices document (required)
 
@@ -64,9 +80,7 @@ Scout best practices live in three files. Don't guess from keywords — read the
 3. Otherwise, scan the general `best-practices.md`. Use it only when the rule genuinely applies to both UI and API tests (test naming, suite independence, hooks, cleanup, etc.).
 4. When a section with the same intent exists in both the specific doc and the general doc, prefer the specific one.
 
-### Always include the section anchor
-
-Every finding must link to a **section-scoped URL**, not the doc root. Infer the `#anchor` from the explicit heading id in the markdown source (e.g., the heading `## Use Playwright auto-waiting [leverage-playwright-auto-waiting]` yields `#leverage-playwright-auto-waiting`). Only fall back to the doc root URL if the rule genuinely has no matching section (rare — re-read the doc first).
+Always include the section anchor
 
 Format the citation as a Markdown link using the section heading text as the link label:
 
@@ -75,7 +89,3 @@ Format the citation as a Markdown link using the section heading text as the lin
 ```
 
 Do **not** use bare parenthetical labels like `(best practices)` or `(ui best practices)` — the citation must be a real link that takes the reader to the specific section. If you cannot identify a specific section, state the rule in plain text rather than linking to the wrong document.
-
-### Updates to the PR
-
-When a developer updates the PR, review the newer code blocks and suggest improvements while keeping the review high-signal and focused — avoid being overly nitpicky.
