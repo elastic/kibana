@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import type { UserAgentProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
+import { asDoc } from '../../fixtures/doc_utils';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
   'Streamlang to Ingest Pipeline - User Agent Processor',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     apiTest('should extract user agent details from a browser string', async ({ testBed }) => {
       const indexName = 'stream-e2e-test-user-agent';
@@ -26,7 +28,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [
         {
@@ -40,12 +42,13 @@ apiTest.describe(
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      const source = ingestedDocs[0];
+      const source = asDoc(ingestedDocs[0]);
+      const ua = asDoc(source.user_agent);
 
       // Default target field is 'user_agent'
-      expect(source).toHaveProperty('user_agent.name', 'Chrome');
-      expect(source).toHaveProperty('user_agent.os.name', 'Mac OS X');
-      expect(source).toHaveProperty('user_agent.device.name', 'Mac');
+      expect(ua.name).toBe('Chrome');
+      expect(asDoc(ua.os).name).toBe('Mac OS X');
+      expect(asDoc(ua.device).name).toBe('Mac');
     });
 
     apiTest('should extract user agent to a custom target field', async ({ testBed }) => {
@@ -61,7 +64,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [
         {
@@ -73,11 +76,12 @@ apiTest.describe(
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      const source = ingestedDocs[0];
+      const source = asDoc(ingestedDocs[0]);
+      const parsed = asDoc(source.parsed_agent);
 
-      expect(source).toHaveProperty('parsed_agent.name', 'Chrome');
-      expect(source).toHaveProperty('parsed_agent.os.name', 'Windows');
-      expect(source).not.toHaveProperty('user_agent');
+      expect(parsed.name).toBe('Chrome');
+      expect(asDoc(parsed.os).name).toBe('Windows');
+      expect(source.user_agent).toBeUndefined();
     });
 
     apiTest('should ignore missing field when ignore_missing is true', async ({ testBed }) => {
@@ -93,15 +97,15 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ log: { level: 'info' } }]; // No 'http.user_agent' field
       await testBed.ingest(indexName, docs, processors);
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      const source = ingestedDocs[0];
-      expect(source).not.toHaveProperty('user_agent');
+      const source = asDoc(ingestedDocs[0]);
+      expect(source.user_agent).toBeUndefined();
     });
 
     apiTest('should fail if field is missing and ignore_missing is false', async ({ testBed }) => {
@@ -117,7 +121,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ log: { level: 'info' } }]; // 'http.user_agent' field is missing
       const { errors } = await testBed.ingest(indexName, docs, processors);
@@ -137,7 +141,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [
         {
@@ -149,13 +153,13 @@ apiTest.describe(
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      const source = ingestedDocs[0];
+      const source = asDoc(ingestedDocs[0]);
+      const ua = asDoc(source.user_agent);
 
-      expect(source).toHaveProperty('user_agent.name', 'Chrome');
-      expect(source).toHaveProperty('user_agent.version', '120.0.0.0');
-      // Should not have other properties like os or device
-      expect(source).not.toHaveProperty('user_agent.os');
-      expect(source).not.toHaveProperty('user_agent.device');
+      expect(asDoc(ua.name)).toBe('Chrome');
+      expect(asDoc(ua.version)).toBe('120.0.0.0');
+      expect(ua.os).toBeUndefined();
+      expect(ua.device).toBeUndefined();
     });
 
     apiTest('should extract device type when extract_device_type is true', async ({ testBed }) => {
@@ -171,7 +175,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [
         {
@@ -183,9 +187,9 @@ apiTest.describe(
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      const source = ingestedDocs[0];
+      const source = asDoc(ingestedDocs[0]);
 
-      expect(source).toHaveProperty('user_agent.device.type', 'Phone');
+      expect(asDoc(asDoc(source.user_agent).device).type).toBe('Phone');
     });
 
     apiTest('should apply user_agent only when where condition matches', async ({ testBed }) => {
@@ -204,7 +208,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [
         {
@@ -222,11 +226,10 @@ apiTest.describe(
       const ingestedDocs = await testBed.getDocsOrdered(indexName);
       expect(ingestedDocs).toHaveLength(2);
 
-      // First document should have user_agent parsed
-      expect(ingestedDocs[0]).toHaveProperty('user_agent.name', 'Chrome');
-
-      // Second document should NOT have user_agent parsed
-      expect(ingestedDocs[1]).not.toHaveProperty('user_agent');
+      const first = asDoc(ingestedDocs[0]);
+      const second = asDoc(ingestedDocs[1]);
+      expect(asDoc(first.user_agent).name).toBe('Chrome');
+      expect(second.user_agent).toBeUndefined();
     });
 
     [
@@ -240,17 +243,17 @@ apiTest.describe(
       },
     ].forEach(({ templateFrom, description }) => {
       apiTest(`${description}`, async () => {
-        expect(() => {
-          const streamlangDSL: StreamlangDSL = {
-            steps: [
-              {
-                action: 'user_agent',
-                from: templateFrom,
-              } as UserAgentProcessor,
-            ],
-          };
-          transpile(streamlangDSL);
-        }).toThrow('Mustache template syntax {{ }} or {{{ }}} is not allowed');
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'user_agent',
+              from: templateFrom,
+            } as UserAgentProcessor,
+          ],
+        };
+        await expect(transpile(streamlangDSL)).rejects.toThrow(
+          'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names'
+        );
       });
     });
   }

@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import type { UserAgentProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileIngestPipeline, transpileEsql } from '@kbn/streamlang';
+import { asDoc } from '../../fixtures/doc_utils';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
   'Cross-compatibility - User Agent Processor',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     // *** Compatible Cases ***
     // ES|QL now supports the USER_AGENT command for parsing browser user agent strings.
@@ -31,8 +33,8 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         // ES|QL should contain the USER_AGENT command
         expect(query).toContain('USER_AGENT');
@@ -53,13 +55,14 @@ apiTest.describe(
         await testBed.ingest('esql-user-agent-compat', docs);
         const esqlResult = await esql.queryOnIndex('esql-user-agent-compat', query);
 
-        // Ingest Pipeline: user_agent is extracted
-        expect(ingestResult[0]).toHaveProperty('parsed_agent.name', 'Chrome');
-        expect(ingestResult[0]).toHaveProperty('parsed_agent.os.name', 'Mac OS X');
+        const ingest0 = asDoc(ingestResult[0]);
+        const parsedIngest = asDoc(ingest0.parsed_agent);
+        expect(parsedIngest.name).toBe('Chrome');
+        expect(asDoc(parsedIngest.os).name).toBe('Mac OS X');
 
-        // ES|QL: user_agent is also extracted via USER_AGENT command
-        expect(esqlResult.documents[0]).toHaveProperty('parsed_agent.name', 'Chrome');
-        expect(esqlResult.documents[0]).toHaveProperty('parsed_agent.os.name', 'Mac OS X');
+        const esql0 = asDoc(esqlResult.documentsWithoutKeywords[0]);
+        expect(esql0['parsed_agent.name']).toBe('Chrome');
+        expect(esql0['parsed_agent.os.name']).toBe('Mac OS X');
       }
     );
 
@@ -76,8 +79,8 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [
           {
@@ -92,17 +95,16 @@ apiTest.describe(
         await testBed.ingest('esql-user-agent-props', docs);
         const esqlResult = await esql.queryOnIndex('esql-user-agent-props', query);
 
-        // Ingest Pipeline: only specified properties are extracted
-        expect(ingestResult[0]).toHaveProperty('user_agent.name', 'Chrome');
-        expect(ingestResult[0]).toHaveProperty('user_agent.version', '91.0.4472.124');
-        expect(ingestResult[0]).toHaveProperty('user_agent.os.name', 'Windows');
-        expect(ingestResult[0]).not.toHaveProperty('user_agent.device');
+        const ingestUa = asDoc(asDoc(ingestResult[0]).user_agent);
+        expect(ingestUa.name).toBe('Chrome');
+        expect(ingestUa.version).toBe('91.0.4472.124');
+        expect(asDoc(ingestUa.os).name).toBe('Windows');
+        expect(ingestUa.device).toBeUndefined();
 
-        // ES|QL: USER_AGENT extracts all properties (properties filter not supported in ES|QL)
-        // Note: ES|QL USER_AGENT extracts all properties, unlike Ingest which can filter
-        expect(esqlResult.documents[0]).toHaveProperty('user_agent.name', 'Chrome');
-        expect(esqlResult.documents[0]).toHaveProperty('user_agent.version', '91.0.4472.124');
-        expect(esqlResult.documents[0]).toHaveProperty('user_agent.os.name', 'Windows');
+        const esql0 = asDoc(esqlResult.documentsWithoutKeywords[0]);
+        expect(esql0['user_agent.name']).toBe('Chrome');
+        expect(esql0['user_agent.version']).toBe('91.0.4472.124');
+        expect(esql0['user_agent.os.name']).toBe('Windows');
       }
     );
 
@@ -123,8 +125,8 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [
           {
@@ -145,13 +147,12 @@ apiTest.describe(
         await testBed.ingest('esql-user-agent-where', docs);
         const esqlResult = await esql.queryOnIndex('esql-user-agent-where', query);
 
-        // Ingest Pipeline: only first document is processed due to where condition
-        expect(ingestResult[0]).toHaveProperty('parsed_agent.name', 'Chrome');
-        expect(ingestResult[1]).not.toHaveProperty('parsed_agent');
+        expect(asDoc(asDoc(ingestResult[0]).parsed_agent).name).toBe('Chrome');
+        expect(asDoc(ingestResult[1]).parsed_agent).toBeUndefined();
 
-        // ES|QL: same behavior - only first document is processed due to where condition
-        expect(esqlResult.documentsOrdered[0]).toHaveProperty('parsed_agent.name', 'Chrome');
-        expect(esqlResult.documentsOrdered[1]).not.toHaveProperty('parsed_agent');
+        const esqlOrdered = esqlResult.documentsWithoutKeywordsOrdered;
+        expect(asDoc(esqlOrdered[0])['parsed_agent.name']).toBe('Chrome');
+        expect(asDoc(esqlOrdered[1])['parsed_agent.name']).toBeNull();
       }
     );
 
@@ -178,12 +179,11 @@ apiTest.describe(
             ],
           };
 
-          // Both transpilers should throw validation errors for Mustache templates
-          expect(() => transpileIngestPipeline(streamlangDSL)).toThrow(
-            'Mustache template syntax {{ }} or {{{ }}} is not allowed'
+          await expect(transpileIngestPipeline(streamlangDSL)).rejects.toThrow(
+            'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names'
           );
-          expect(() => transpileEsql(streamlangDSL)).toThrow(
-            'Mustache template syntax {{ }} or {{{ }}} is not allowed'
+          await expect(transpileEsql(streamlangDSL)).rejects.toThrow(
+            'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names'
           );
         }
       );
@@ -203,31 +203,35 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
-        // Document without the source field
+        // Seed `agent_string` in the index mapping (second doc omits it) so ES|QL can resolve the column.
         const docs = [
+          {
+            agent_string:
+              'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/91.0.4472.124',
+            other_field: 'seed',
+          },
           {
             other_field: 'some_value',
           },
         ];
 
         await testBed.ingest('ingest-user-agent-ignore', docs, processors);
-        const ingestResult = await testBed.getDocs('ingest-user-agent-ignore');
+        const ingestResult = await testBed.getDocsOrdered('ingest-user-agent-ignore');
 
         await testBed.ingest('esql-user-agent-ignore', docs);
         const esqlResult = await esql.queryOnIndex('esql-user-agent-ignore', query);
 
-        // Ingest Pipeline: document is ingested without error (ignore_missing: true)
-        expect(ingestResult).toHaveLength(1);
-        expect(ingestResult[0]).not.toHaveProperty('parsed_agent');
-        expect(ingestResult[0]).toHaveProperty('other_field', 'some_value');
+        expect(ingestResult).toHaveLength(2);
+        expect(asDoc(ingestResult[1]).parsed_agent).toBeUndefined();
+        expect(asDoc(ingestResult[1]).other_field).toBe('some_value');
 
-        // ES|QL: document is returned without user_agent processing (conditional execution handles missing field)
-        expect(esqlResult.documents).toHaveLength(1);
-        expect(esqlResult.documents[0]).not.toHaveProperty('parsed_agent');
-        expect(esqlResult.documents[0]).toHaveProperty('other_field', 'some_value');
+        const esqlOrdered = esqlResult.documentsWithoutKeywordsOrdered;
+        expect(esqlOrdered).toHaveLength(2);
+        expect(asDoc(esqlOrdered[1])['parsed_agent.name']).toBeNull();
+        expect(asDoc(esqlOrdered[1]).other_field).toBe('some_value');
       }
     );
 
@@ -254,8 +258,8 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [
           {
@@ -269,15 +273,15 @@ apiTest.describe(
         await testBed.ingest('esql-user-agent-mixed', docs);
         const esqlResult = await esql.queryOnIndex('esql-user-agent-mixed', query);
 
-        // Both should have the set processor results
-        expect(ingestResult[0]).toHaveProperty('before_user_agent', 'before');
-        expect(ingestResult[0]).toHaveProperty('after_user_agent', 'after');
-        expect(esqlResult.documents[0]).toHaveProperty('before_user_agent', 'before');
-        expect(esqlResult.documents[0]).toHaveProperty('after_user_agent', 'after');
+        const ingest0 = asDoc(ingestResult[0]);
+        const esqlFlat = asDoc(esqlResult.documentsWithoutKeywords[0]);
+        expect(ingest0.before_user_agent).toBe('before');
+        expect(ingest0.after_user_agent).toBe('after');
+        expect(esqlFlat.before_user_agent).toBe('before');
+        expect(esqlFlat.after_user_agent).toBe('after');
 
-        // Both should have user_agent parsed
-        expect(ingestResult[0]).toHaveProperty('parsed_agent.name', 'Chrome');
-        expect(esqlResult.documents[0]).toHaveProperty('parsed_agent.name', 'Chrome');
+        expect(asDoc(ingest0.parsed_agent).name).toBe('Chrome');
+        expect(esqlFlat['parsed_agent.name']).toBe('Chrome');
       }
     );
   }

@@ -70,9 +70,8 @@ export function validateProcessorValues(
     case 'sort':
     case 'network_direction':
     case 'enrich':
-    case 'manual_ingest_pipeline':
-      break;
     case 'user_agent':
+    case 'manual_ingest_pipeline':
       break;
     case 'json_extract': {
       for (let i = 0; i < step.extractions.length; i++) {
