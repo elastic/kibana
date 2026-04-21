@@ -10,6 +10,7 @@ import { invariant } from '../../../../../../../../common/utils/invariant';
 import { MAX_PREBUILT_RULES_COUNT } from '../../../../../rule_management/logic/search/get_existing_prepackaged_rules';
 import type { PrebuiltRuleAsset } from '../../../../model/rule_assets/prebuilt_rule_asset';
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../prebuilt_rule_assets_type';
+import { validatePrebuiltRuleAssets } from '../../prebuilt_rule_assets_validation';
 import type { RuleVersionSpecifier } from '../../../rule_versions/rule_version_specifier';
 import { getPrebuiltRuleAssetSoId, getPrebuiltRuleAssetsSearchNamespace } from '../utils';
 
@@ -77,5 +78,5 @@ export async function fetchAssetsByVersion(
     .map((soId) => ruleAssetsMap.get(soId))
     .filter((asset) => asset !== undefined);
 
-  return orderedRuleAssets; // validatePrebuiltRuleAssets(orderedRuleAssets);
+  return validatePrebuiltRuleAssets(orderedRuleAssets);
 }

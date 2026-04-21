@@ -6,7 +6,6 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { validatePrebuiltRuleAsset } from '../rule_assets/prebuilt_rule_assets_validation';
 import { MAX_RULES_TO_UPDATE_IN_PARALLEL } from '../../../../../../common/constants';
 import { initPromisePool } from '../../../../../utils/promise_pool';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
@@ -35,7 +34,7 @@ export const upgradePrebuiltRules = async (
       items: rules,
       executor: async (rule) => {
         return detectionRulesClient.upgradePrebuiltRule({
-          ruleAsset: validatePrebuiltRuleAsset(rule),
+          ruleAsset: rule,
         });
       },
     });

@@ -13,6 +13,7 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { MAX_PREBUILT_RULES_COUNT } from '../../../../../rule_management/logic/search/get_existing_prepackaged_rules';
 import type { PrebuiltRuleAsset } from '../../../../model/rule_assets/prebuilt_rule_asset';
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../prebuilt_rule_assets_type';
+import { validatePrebuiltRuleAssets } from '../../prebuilt_rule_assets_validation';
 import { invariant } from '../../../../../../../../common/utils/invariant';
 
 export interface FetchLatestAssetsOptions {
@@ -71,5 +72,5 @@ export async function fetchLatestAssets(
     return hit._source[PREBUILT_RULE_ASSETS_SO_TYPE];
   });
 
-  return ruleAssets; // validatePrebuiltRuleAssets(ruleAssets);
+  return validatePrebuiltRuleAssets(ruleAssets);
 }
