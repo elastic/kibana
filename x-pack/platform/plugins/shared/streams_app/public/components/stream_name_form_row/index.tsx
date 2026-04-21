@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { validateStreamName } from '@kbn/streams-schema';
 import type { ReactNode } from 'react';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { StatefulStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useStreamsRoutingSelector } from '../stream_management/data_management/stream_detail_routing/state_management/stream_routing_state_machine';
@@ -110,14 +110,21 @@ interface ChildStreamInputHookResponse {
   errorMessage: ReactNode | string | undefined;
 }
 
+interface UseChildStreamInputOptions {
+  streamName: string;
+  readOnly?: boolean;
+  checkRootChildExists?: boolean;
+}
+
 /**
  * Custom hook that handles computations necessary for child stream input component instances.
  * Used by parent components to lift up the states needed for the local input field so validation concerns can be shared across components.
- * @param streamName - The stream name to use for the local input field.
- * @param readOnly - Whether the input field is read only.
+ * @param options.streamName - The stream name to use for the local input field.
+ * @param options.readOnly - Whether the input field is read only.
+ * @param options.checkRootChildExists - When true (default), dot-related validation surfaces root-child existence errors. Set to false for query streams where the parent is always the viewed stream.
  * @returns An object containing local states, input validation flags, and help/error messages.
  * @example
- * const { localStreamName, setLocalStreamName, isStreamNameValid, prefix, partitionName, helpText, errorMessage } = useChildStreamInput('logs.linux');
+ * const { localStreamName, setLocalStreamName, isStreamNameValid, prefix, partitionName, helpText, errorMessage } = useChildStreamInput({ streamName: 'logs.linux' });
  * return (
  *   <StreamNameFormRow
  *     localStreamName={localStreamName}
@@ -130,11 +137,16 @@ interface ChildStreamInputHookResponse {
  *   />
  * );
  */
-export const useChildStreamInput = (
-  streamName: string,
-  readOnly: boolean = false
-): ChildStreamInputHookResponse => {
+export const useChildStreamInput = ({
+  streamName,
+  readOnly = false,
+  checkRootChildExists = true,
+}: UseChildStreamInputOptions): ChildStreamInputHookResponse => {
   const [localStreamName, setLocalStreamName] = useState(streamName);
+
+  useEffect(() => {
+    setLocalStreamName(streamName);
+  }, [streamName]);
 
   const router = useStreamsAppRouter();
   const parentStreamName = useStreamsRoutingSelector(
@@ -169,7 +181,7 @@ export const useChildStreamInput = (
   const errorMessage = getErrorMessage(
     baseValidationError,
     isDuplicatedName,
-    rootChildExists,
+    checkRootChildExists ? rootChildExists : true,
     isDotPresent,
     prefix,
     rootChild,

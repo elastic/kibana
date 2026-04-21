@@ -23,7 +23,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import { css as cssReact } from '@emotion/react';
-import { Streams, getEsqlViewName, isChildOf } from '@kbn/streams-schema';
+import { Streams, getEsqlViewName } from '@kbn/streams-schema';
 import { useBoolean, useDebounceFn } from '@kbn/react-hooks';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -177,18 +177,9 @@ export function CreatingQueryStreamEntry({ parentStreamName }: CreatingQueryStre
     }
   }, debouncingOptions);
 
-  // Validate and save the query stream
   const handleSave = useCallback(
     ({ name, esqlQuery }: { name: string; esqlQuery: string }) => {
-      // Validate name follows child naming convention
       const fullName = `${parentStreamName}.${name}`;
-      if (!name || name.trim() === '' || !isChildOf(parentStreamName, fullName)) {
-        return;
-      }
-      if (!esqlQuery || esqlQuery.trim() === '') {
-        return;
-      }
-      // Trigger save with the form data
       saveQueryStream({ name: fullName, esqlQuery });
     },
     [parentStreamName, saveQueryStream]

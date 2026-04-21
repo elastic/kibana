@@ -20,6 +20,7 @@ import { css } from '@emotion/css';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getEsqlViewName } from '@kbn/streams-schema';
 import useMount from 'react-use/lib/useMount';
+import { useChildStreamInput } from '../stream_name_form_row';
 import { QueryStreamForm } from './query_stream_form';
 
 /**
@@ -110,14 +111,24 @@ export function InlineQueryStreamForm({
     () => initialEsqlQuery ?? `FROM ${getEsqlViewName(parentStreamName)}`
   );
 
+  const fullName = `${prefix}${name}`;
+  const { isStreamNameValid, errorMessage, helpText } = useChildStreamInput({
+    streamName: fullName,
+    readOnly: nameReadOnly || readOnly || isSaving,
+    checkRootChildExists: false,
+  });
+
+  const shouldShowNameValidation = !nameReadOnly;
+  const displayedIsStreamNameValid = shouldShowNameValidation ? isStreamNameValid : true;
+  const displayedErrorMessage = shouldShowNameValidation ? errorMessage : undefined;
+
   useMount(() => {
     if (onQueryChange) onQueryChange(esqlQuery);
   });
 
   const handleNameChange = useCallback(
-    (fullName: string) => {
-      // Extract suffix from full name (remove parent prefix)
-      const suffix = fullName.replace(prefix, '');
+    (newFullName: string) => {
+      const suffix = newFullName.replace(prefix, '');
       setName(suffix);
     },
     [prefix]
@@ -145,7 +156,12 @@ export function InlineQueryStreamForm({
 
   const handleSave = () => onSave({ name, esqlQuery });
 
-  const canSave = name && name.trim() !== '' && esqlQuery && esqlQuery.trim() !== '';
+  const canSave =
+    (nameReadOnly || isStreamNameValid) &&
+    name &&
+    name.trim() !== '' &&
+    esqlQuery &&
+    esqlQuery.trim() !== '';
 
   return (
     <EuiPanel
@@ -163,6 +179,10 @@ export function InlineQueryStreamForm({
           onChange={handleNameChange}
           prefix={`${parentStreamName}.`}
           readOnly={nameReadOnly || readOnly || isSaving}
+          isStreamNameValid={displayedIsStreamNameValid}
+          isInvalid={!displayedIsStreamNameValid}
+          errorMessage={displayedErrorMessage}
+          helpText={helpText}
         />
         <QueryStreamForm.ESQLEditor
           isLoading={isSaving}

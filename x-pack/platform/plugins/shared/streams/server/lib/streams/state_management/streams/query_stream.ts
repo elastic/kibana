@@ -9,7 +9,13 @@ import { cloneDeep, isEqual } from 'lodash';
 import { validateQuery } from '@kbn/esql-language';
 import { Parser } from '@elastic/esql';
 import type { ESQLSource, ESQLCommand } from '@elastic/esql/types';
-import { Streams, getEsqlViewName, getParentId, isChildOf } from '@kbn/streams-schema';
+import {
+  Streams,
+  getEsqlViewName,
+  getParentId,
+  isChildOf,
+  validateStreamName,
+} from '@kbn/streams-schema';
 import { getErrorMessage } from '../../errors/parse_error';
 import { StatusError } from '../../errors/status_error';
 import { getEsqlView } from '../../esql_views/manage_esql_views';
@@ -177,9 +183,12 @@ export class QueryStream extends StreamActiveRecord<Streams.QueryStream.Definiti
   ): Promise<ValidationResult> {
     const errors: Error[] = [];
 
-    // Validate that stream name is not empty
-    if (!this._definition.name || this._definition.name.trim() === '') {
-      errors.push(new Error('Stream name cannot be empty'));
+    const nameValidation = validateStreamName(this._definition.name);
+    if (!nameValidation.valid) {
+      return {
+        isValid: false,
+        errors: [new Error(nameValidation.message)],
+      };
     }
 
     // Validate that query is defined
