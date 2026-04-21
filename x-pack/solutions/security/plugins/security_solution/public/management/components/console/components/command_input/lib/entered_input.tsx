@@ -159,7 +159,7 @@ export class EnteredInput {
 
                 // We add an empty space after the argument name (if not already there) so that if
                 // the user continues to type in another argument name, after this Argument Selector
-                // is populated on hte input area, that value will not just be appended to this argument
+                // is populated on the input area, that value will not just be appended to this argument
                 // name and make it invalid
                 const nextCharItemValue =
                   side === 'left'

@@ -29,11 +29,11 @@ describe('When using `EnteredInput` class', () => {
           argsWithValueSelectors: Object.entries(commandDef.args ?? {}).reduce(
             (acc, [argName, argDef]) => {
               if (argDef.SelectorComponent) {
-                acc![argName] = argDef;
+                acc[argName] = argDef;
               }
               return acc;
             },
-            {} as EnteredCommand['argsWithValueSelectors']
+            {} as NonNullable<EnteredCommand['argsWithValueSelectors']>
           ),
         }
       : undefined;
