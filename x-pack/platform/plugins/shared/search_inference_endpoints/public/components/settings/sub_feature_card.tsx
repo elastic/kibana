@@ -33,7 +33,6 @@ import { InferenceConnectorType } from '@kbn/inference-common';
 import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import { css } from '@emotion/react';
-import * as translations from '../../../common/translations';
 import { useRegisteredFeatures } from '../../hooks/use_registered_features';
 import { getProviderKeyForCreator } from '../../utils/eis_utils';
 import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../../common/types';
@@ -225,7 +224,11 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
         >
           <EuiPanel color="subdued" paddingSize="s" hasBorder={false}>
             <EuiText size="xs" color="subdued">
-              <strong>{translations.SETTINGS_ASSIGNED_MODELS}</strong>
+              <strong>
+                {i18n.translate('xpack.searchInferenceEndpoints.settings.assignedModels', {
+                  defaultMessage: 'Assigned models',
+                })}
+              </strong>
             </EuiText>
             <EuiSpacer size="s" />
 
@@ -314,7 +317,10 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                                   {index === 0 && (
                                     <EuiFlexItem grow={false}>
                                       <EuiBadge color="hollow">
-                                        {translations.SETTINGS_DEFAULT_BADGE}
+                                        {i18n.translate(
+                                          'xpack.searchInferenceEndpoints.settings.defaultBadge',
+                                          { defaultMessage: 'Default' }
+                                        )}
                                       </EuiBadge>
                                     </EuiFlexItem>
                                   )}
