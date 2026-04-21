@@ -9,20 +9,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiNotificationBadge,
-  EuiSpacer,
-  EuiText,
-  EuiToolTip,
-  useEuiTheme,
-} from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { SelectableEntry } from '@kbn/shared-ux-toolbar-selector';
-import { css } from '@emotion/react';
 import { debounce } from 'lodash';
 import type { Dimension, ParsedMetricItem } from '../../../types';
 import { DEBOUNCE_TIME, MAX_DIMENSIONS_SELECTIONS } from '../../../common/constants';
@@ -33,6 +20,12 @@ import {
   partitionDimensionsForRender,
 } from '../dimensions_selector_helpers';
 import type { DimensionEntry } from '../dimensions_selector_helpers';
+import {
+  DimensionsButtonLabel,
+  DimensionsPopoverFooter,
+  MaxDimensionsTooltipOverlay,
+  MaxDimensionsWarning,
+} from '../dimensions_selector_components';
 
 interface UseDimensionsSelectorParams {
   dimensions: Dimension[];
@@ -58,11 +51,12 @@ export interface UseDimensionsSelectorResult {
  *   - local selection state (mirrors the controlled prop, lets the UI render
  *     optimistically while the debounced onChange catches up)
  *   - the optimistic applicable-dimension filter derived from `metricItems`
- *   - assembly of the `SelectableEntry[]` (orphans prepended, disabled-state
- *     tooltip)
+ *   - assembly of the `DimensionEntry[]` (orphans prepended, disabled-state
+ *     tooltip overlay appended at the max limit)
  *   - change + clear handlers (debounced for multi-select, immediate for
  *     single)
- *   - the button label, tooltip, and popover footer nodes
+ *   - the button label, tooltip, and popover footer nodes (rendered as
+ *     dedicated components in `../dimensions_selector_components`)
  */
 export const useDimensionsSelector = ({
   dimensions,
@@ -72,7 +66,6 @@ export const useDimensionsSelector = ({
   isLoading,
   metricItems,
 }: UseDimensionsSelectorParams): UseDimensionsSelectorResult => {
-  const { euiTheme } = useEuiTheme();
   const [localSelectedDimensions, setLocalSelectedDimensions] =
     useState<Dimension[]>(selectedDimensions);
 
@@ -113,30 +106,7 @@ export const useDimensionsSelector = ({
         dimension,
         isSelected,
         isDisabled,
-        appendNode: showMaxTooltip ? (
-          <EuiToolTip
-            content={
-              <FormattedMessage
-                id="metricsExperience.dimensionsSelector.maxDimensionsWarning"
-                defaultMessage="Maximum of {maxDimensions} dimensions selected"
-                values={{ maxDimensions: MAX_DIMENSIONS_SELECTIONS }}
-              />
-            }
-            position="top"
-            anchorProps={{
-              css: css`
-                position: absolute;
-                inset: 0;
-                width: 100%;
-                height: 100%;
-                pointer-events: auto;
-                z-index: ${euiTheme.levels.menu};
-              `,
-            }}
-          >
-            <div />
-          </EuiToolTip>
-        ) : undefined,
+        appendNode: showMaxTooltip ? <MaxDimensionsTooltipOverlay /> : undefined,
       });
     };
 
@@ -149,7 +119,6 @@ export const useDimensionsSelector = ({
     optimisticApplicableNames,
     selectedNamesSet,
     singleSelection,
-    euiTheme.levels.menu,
   ]);
 
   const onChangeRef = useRef(onChange);
@@ -210,101 +179,27 @@ export const useDimensionsSelector = ({
     onChange([]);
   }, [onChange, debouncedOnChange]);
 
-  const buttonLabel = useMemo<ReactElement>(() => {
-    const count = localSelectedDimensions.length;
-
-    return (
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
-        <EuiFlexItem
-          grow={false}
-          css={css`
-            align-items: flex-start;
-          `}
-        >
-          {count === 0 ? (
-            <FormattedMessage
-              id="metricsExperience.dimensionsSelector.breakdownFieldButtonLabel"
-              defaultMessage="No {maxDimensions, plural, one {dimension} other {dimensions}} selected"
-              values={{ maxDimensions: MAX_DIMENSIONS_SELECTIONS }}
-            />
-          ) : (
-            <EuiFlexGroup alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <FormattedMessage
-                  id="metricsExperience.dimensionsSelector.breakdownFieldButtonLabelWithSelection"
-                  defaultMessage="Dimensions"
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiNotificationBadge>{count}</EuiNotificationBadge>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )}
-        </EuiFlexItem>
-        {isLoading && (
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="m" />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    );
-  }, [localSelectedDimensions, isLoading]);
+  const buttonLabel = useMemo<ReactElement>(
+    () => (
+      <DimensionsButtonLabel count={localSelectedDimensions.length} isLoading={isLoading} />
+    ),
+    [localSelectedDimensions.length, isLoading]
+  );
 
   const buttonTooltipContent = useMemo<ReactElement | undefined>(() => {
-    const count = localSelectedDimensions.length;
-    const isAtMaxDimensions = count >= MAX_DIMENSIONS_SELECTIONS;
+    const isAtMaxDimensions = localSelectedDimensions.length >= MAX_DIMENSIONS_SELECTIONS;
+    return isAtMaxDimensions ? <MaxDimensionsWarning /> : undefined;
+  }, [localSelectedDimensions.length]);
 
-    if (!isAtMaxDimensions) {
-      return undefined;
-    }
-
-    return (
-      <FormattedMessage
-        id="metricsExperience.dimensionsSelector.maxDimensionsWarning"
-        defaultMessage="Maximum of {maxDimensions} dimensions selected"
-        values={{ maxDimensions: MAX_DIMENSIONS_SELECTIONS }}
+  const popoverContentBelowSearch = useMemo<ReactElement>(
+    () => (
+      <DimensionsPopoverFooter
+        count={localSelectedDimensions.length}
+        onClear={handleClearAll}
       />
-    );
-  }, [localSelectedDimensions]);
-
-  const popoverContentBelowSearch = useMemo<ReactElement>(() => {
-    const count = localSelectedDimensions.length;
-    return (
-      <>
-        <EuiSpacer size="s" />
-        <EuiFlexGroup
-          gutterSize="xs"
-          css={css`
-            min-height: ${euiTheme.size.l};
-          `}
-          justifyContent="spaceBetween"
-          alignItems="center"
-          responsive={false}
-        >
-          <EuiFlexItem>
-            <EuiText size="xs" color="subdued">
-              <FormattedMessage
-                id="metricsExperience.dimensionsSelector.selectedDimensionsCount"
-                defaultMessage="{count, plural, one {# dimension selected} other {# dimensions selected}}"
-                values={{ count }}
-              />
-            </EuiText>
-          </EuiFlexItem>
-          {count > 0 && (
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty size="xs" flush="right" onClick={handleClearAll}>
-                <FormattedMessage
-                  id="metricsExperience.dimensionsSelector.clearSelection"
-                  defaultMessage="Clear selection"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-      </>
-    );
-  }, [localSelectedDimensions.length, handleClearAll, euiTheme.size.l]);
+    ),
+    [localSelectedDimensions.length, handleClearAll]
+  );
 
   const selectedValues = useMemo(() => [...selectedNamesSet], [selectedNamesSet]);
 
