@@ -179,36 +179,26 @@ describe('registerDashboardAttachmentUiDefinition', () => {
     const findDashboardsService = jest.fn().mockResolvedValue({
       findById: jest.fn().mockResolvedValue({ status: 'success' }),
     });
-    const conversationChangeListeners = new Set<
-      (change: { id?: string; attachments?: VersionedAttachment[] }) => void
-    >();
-    let latestConversationChange: { id?: string; attachments?: VersionedAttachment[] } | undefined;
-    const subscribeToConversationChanges = jest.fn((listener) => {
-      conversationChangeListeners.add(listener);
-
-      if (latestConversationChange) {
-        listener(latestConversationChange);
-      }
-
-      return () => {
-        conversationChangeListeners.delete(listener);
-      };
-    });
+    const activeConversation$ = new BehaviorSubject<{
+      id?: string;
+      attachments?: VersionedAttachment[];
+    } | null>(null);
     const emitConversationChange = (change: {
       id?: string;
       attachments?: VersionedAttachment[];
     }) => {
-      latestConversationChange = change;
-      conversationChangeListeners.forEach((listener) => listener(change));
+      activeConversation$.next(change);
     };
 
     const mockAddAttachment = jest.fn();
     const agentBuilder: AgentBuilderPluginStart = {
       attachments: { addAttachmentType },
       addAttachment: mockAddAttachment,
-      subscribeToConversationChanges,
       updateAttachmentOrigin,
-      events: { chat$, ui: { sidebarOpen$ } },
+      events: {
+        chat$,
+        ui: { sidebarOpen$, activeConversation$: activeConversation$.asObservable() },
+      },
     } as unknown as AgentBuilderPluginStart;
 
     const dashboardPlugin: DashboardStart = {
@@ -296,11 +286,16 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       agentBuilder: {
         attachments: { addAttachmentType },
         addAttachment: jest.fn(),
-        subscribeToConversationChanges: jest.fn(() => () => {}),
         updateAttachmentOrigin: jest.fn().mockResolvedValue(undefined),
         events: {
           chat$: new Subject<ChatEvent>(),
-          ui: { sidebarOpen$: new BehaviorSubject<boolean>(true) },
+          ui: {
+            sidebarOpen$: new BehaviorSubject<boolean>(true),
+            activeConversation$: new BehaviorSubject<{
+              id?: string;
+              attachments?: VersionedAttachment[];
+            } | null>(null).asObservable(),
+          },
         },
       } as unknown as AgentBuilderPluginStart,
       canWriteDashboards: true,

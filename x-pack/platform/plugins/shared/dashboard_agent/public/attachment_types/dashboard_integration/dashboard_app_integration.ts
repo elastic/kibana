@@ -63,8 +63,15 @@ export const registerDashboardAppIntegration = ({
     }
   };
 
-  const unsubscribeConversationChanges = agentBuilder.subscribeToConversationChanges(
-    ({ id: conversationId, attachments }) => {
+  const conversationChangesSubscription = agentBuilder.events.ui.activeConversation$.subscribe(
+    (change) => {
+      if (!change) {
+        state.attachments = undefined;
+        state.conversationId = undefined;
+        return;
+      }
+
+      const { id: conversationId, attachments } = change;
       const dashboardAttachments = attachments
         ?.filter(isDashboardAttachment)
         .flatMap((attachment): DashboardAttachment[] => {
@@ -124,7 +131,7 @@ export const registerDashboardAppIntegration = ({
     newAttachmentIdRegenerationSubscription.unsubscribe();
     originSyncSubscription.unsubscribe();
     manualChangesSubscription.unsubscribe();
-    unsubscribeConversationChanges();
+    conversationChangesSubscription.unsubscribe();
     state.attachments = undefined;
     state.conversationId = undefined;
   };

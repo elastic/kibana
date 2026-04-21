@@ -58,7 +58,6 @@ import type {
   ConversationSidebarRef,
 } from './types';
 import type {
-  ConversationChangeHandler,
   EmbeddableConversationChange,
   EmbeddableConversationProps,
 } from './embeddable/types';
@@ -93,8 +92,9 @@ export class AgentBuilderPlugin
     addAttachment: (attachment: AttachmentInput) => void;
     invalidateConversation: () => void;
   } | null = null;
-  private conversationChangeListeners = new Set<ConversationChangeHandler>();
-  private latestConversationChange: EmbeddableConversationChange | null = null;
+  private activeConversationState$ = new BehaviorSubject<EmbeddableConversationChange | null>(
+    null
+  );
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private sidebarOpenState$ = new BehaviorSubject<boolean>(false);
   private experimentalDeepLinksSubscription?: Subscription;
@@ -175,8 +175,7 @@ export class AgentBuilderPlugin
     const hasAgentBuilder = core.application.capabilities.agentBuilder?.show === true;
     const sidebar = core.chrome.sidebar.getApp('agentBuilder');
     const notifyConversationChange = (conversation: EmbeddableConversationChange) => {
-      this.latestConversationChange = conversation;
-      this.conversationChangeListeners.forEach((listener) => listener(conversation));
+      this.activeConversationState$.next(conversation);
     };
 
     const openSidebarInternal = (options?: OpenConversationSidebarOptions) => {
@@ -198,7 +197,7 @@ export class AgentBuilderPlugin
         onClose: () => {
           this.activeSidebarRef = null;
           this.sidebarCallbacks = null;
-          this.latestConversationChange = null;
+          this.activeConversationState$.next(null);
           this.sidebarOpenState$.next(false);
           clearSidebarRuntimeContext();
         },
@@ -211,7 +210,7 @@ export class AgentBuilderPlugin
           sidebar.close();
           this.activeSidebarRef = null;
           this.sidebarCallbacks = null;
-          this.latestConversationChange = null;
+          this.activeConversationState$.next(null);
           this.sidebarOpenState$.next(false);
           clearSidebarRuntimeContext();
         },
@@ -263,6 +262,7 @@ export class AgentBuilderPlugin
       events: createPublicEventsContract({
         eventsService,
         sidebarOpen$: this.sidebarOpenState$.pipe(distinctUntilChanged()),
+        activeConversation$: this.activeConversationState$.asObservable(),
       }),
       addAttachment: (attachment: AttachmentInput) => {
         if (this.sidebarCallbacks) {
@@ -283,17 +283,6 @@ export class AgentBuilderPlugin
         if (this.activeSidebarRef && this.sidebarCallbacks) {
           this.sidebarCallbacks.resetBrowserApiTools();
         }
-      },
-      subscribeToConversationChanges: (listener: ConversationChangeHandler) => {
-        this.conversationChangeListeners.add(listener);
-
-        if (this.latestConversationChange) {
-          listener(this.latestConversationChange);
-        }
-
-        return () => {
-          this.conversationChangeListeners.delete(listener);
-        };
       },
       openChat: (options?: OpenConversationSidebarOptions) => {
         return openSidebarInternal(options);
@@ -323,7 +312,10 @@ export class AgentBuilderPlugin
           origin
         );
 
-        if (this.latestConversationChange?.id === conversationId && this.sidebarCallbacks) {
+        if (
+          this.activeConversationState$.getValue()?.id === conversationId &&
+          this.sidebarCallbacks
+        ) {
           this.sidebarCallbacks.invalidateConversation();
         }
 

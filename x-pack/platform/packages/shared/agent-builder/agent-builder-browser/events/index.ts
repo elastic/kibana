@@ -6,4 +6,8 @@
  */
 
 export type { BrowserChatEvent } from './events';
-export type { EventsServiceStartContract, ChatUiEventsContract } from './contract';
+export type {
+  EventsServiceStartContract,
+  ChatUiEventsContract,
+  EmbeddableConversationChange,
+} from './contract';

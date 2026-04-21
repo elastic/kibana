@@ -63,6 +63,7 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
       chat$: EMPTY,
       ui: {
         sidebarOpen$: new BehaviorSubject(false),
+        activeConversation$: new BehaviorSubject(null),
       },
     },
     setChatConfig: jest.fn(),
@@ -77,7 +78,6 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
       };
     }),
     addAttachment: jest.fn(),
-    subscribeToConversationChanges: jest.fn(),
     updateAttachmentOrigin: jest.fn(),
   };
 };

@@ -7,25 +7,15 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
-import type { AttachmentInput, VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import type { EmbeddableConversationChange } from '@kbn/agent-builder-browser/events';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { AgentBuilderInternalService } from '../services';
+
+export type { EmbeddableConversationChange };
 
 export interface EmbeddableConversationDependencies {
   services: AgentBuilderInternalService;
   coreStart: CoreStart;
-}
-
-export interface EmbeddableConversationChange {
-  /**
-   * Active conversation id, if one already exists.
-   * Undefined means we're currently in a new conversation.
-   */
-  id?: string;
-  /**
-   * Existing attachments in the conversation we changed to.
-   * Only present when switching to an existing conversation (when id is defined).
-   */
-  attachments?: VersionedAttachment[];
 }
 
 export type ConversationChangeHandler = (conversation: EmbeddableConversationChange) => void;

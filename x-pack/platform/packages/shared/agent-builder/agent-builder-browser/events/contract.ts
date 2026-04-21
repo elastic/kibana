@@ -6,7 +6,21 @@
  */
 
 import type { Observable } from 'rxjs';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { BrowserChatEvent } from './events';
+
+export interface EmbeddableConversationChange {
+  /**
+   * Active conversation id, if one already exists.
+   * Undefined means we're currently in a new conversation.
+   */
+  id?: string;
+  /**
+   * Existing attachments in the conversation we changed to.
+   * Only present when switching to an existing conversation (when id is defined).
+   */
+  attachments?: VersionedAttachment[];
+}
 
 export interface ChatUiEventsContract {
   /**
@@ -15,6 +29,13 @@ export interface ChatUiEventsContract {
    * Tracks sidebar open state only; does not emit for the full-page routed chat.
    */
   sidebarOpen$: Observable<boolean>;
+  /**
+   * Emits the currently active conversation binding for both the embeddable sidebar and
+   * the full-page routed chat. Emits `null` when no chat surface is currently bound.
+   *
+   * Backed by a `BehaviorSubject`: new subscribers receive the current value immediately.
+   */
+  activeConversation$: Observable<EmbeddableConversationChange | null>;
 }
 
 /**

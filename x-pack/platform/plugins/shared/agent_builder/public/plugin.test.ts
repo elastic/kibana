@@ -204,7 +204,7 @@ describe('AgentBuilderPlugin', () => {
     });
   });
 
-  describe('subscribeToConversationChanges', () => {
+  describe('activeConversation$', () => {
     it('replays the latest conversation binding and supports unsubscribe', () => {
       const plugin = createPlugin();
       const service = plugin.start(createCoreStart() as any, createStartDependencies() as any);
@@ -216,21 +216,25 @@ describe('AgentBuilderPlugin', () => {
       const runtimeContext = sidebarRuntimeContext$.getValue();
       expect(runtimeContext?.onConversationChange).toEqual(expect.any(Function));
 
-      const unsubscribeFirst = service.subscribeToConversationChanges(firstListener);
+      const firstSubscription =
+        service.events.ui.activeConversation$.subscribe(firstListener);
+      expect(firstListener).toHaveBeenLastCalledWith(null);
+
       runtimeContext?.onConversationChange?.({ id: 'conversation-1' });
 
-      expect(firstListener).toHaveBeenCalledWith({ id: 'conversation-1' });
+      expect(firstListener).toHaveBeenLastCalledWith({ id: 'conversation-1' });
 
-      const unsubscribeSecond = service.subscribeToConversationChanges(secondListener);
-      expect(secondListener).toHaveBeenCalledWith({ id: 'conversation-1' });
+      const secondSubscription =
+        service.events.ui.activeConversation$.subscribe(secondListener);
+      expect(secondListener).toHaveBeenLastCalledWith({ id: 'conversation-1' });
 
-      unsubscribeSecond();
+      secondSubscription.unsubscribe();
       runtimeContext?.onConversationChange?.({ id: 'conversation-2' });
 
       expect(secondListener).toHaveBeenCalledTimes(1);
       expect(firstListener).toHaveBeenLastCalledWith({ id: 'conversation-2' });
 
-      unsubscribeFirst();
+      firstSubscription.unsubscribe();
     });
   });
 

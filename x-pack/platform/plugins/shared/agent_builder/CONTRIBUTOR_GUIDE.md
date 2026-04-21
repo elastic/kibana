@@ -774,7 +774,7 @@ Not every API on the start contract applies to both chat surfaces. Use this tabl
 | `setChatConfig(...)`              |   ✅    |       ❌       | Configures the next (or active) sidebar open.                      |
 | `clearChatConfig()`               |   ✅    |       ❌       | Clears the runtime sidebar config.                                 |
 | `events.ui.sidebarOpen$`          |   ✅    |       ❌       | Tracks sidebar open state only.                                    |
-| `subscribeToConversationChanges(...)` |   ✅    |       ✅       | Fires for both sidebar and routed/full-page chat.                  |
+| `events.ui.activeConversation$`   |   ✅    |       ✅       | Emits for both sidebar and routed/full-page chat.                  |
 | `addAttachment(...)`              |   ✅    |       ❌       | Silently ignored when no sidebar is open.                          |
 | `updateAttachmentOrigin(...)`     |   ✅    |       ✅       | Conversation-scoped — works regardless of which surface is active. |
 
@@ -823,72 +823,73 @@ agentBuilder.setChatConfig({
 
 It is exposed on the `agentBuilder.events.ui` namespace and is hot: new subscribers receive the current value immediately (it is backed by a `BehaviorSubject`).
 
-Typical usage combines `events.ui.sidebarOpen$` with `subscribeToConversationChanges(...)`: activate the conversation subscription only while the sidebar is open, and dispose of it when it closes.
+Typical usage combines `events.ui.sidebarOpen$` with `events.ui.activeConversation$`: activate the conversation subscription only while the sidebar is open, and dispose of it when it closes.
 
 ```ts
-import { combineLatest } from 'rxjs';
+import { combineLatest, EMPTY, switchMap } from 'rxjs';
 
-const subscription = combineLatest([myAppActive$, agentBuilder.events.ui.sidebarOpen$]).subscribe(
-  ([appActive, sidebarOpen]) => {
-    const shouldActivate = appActive && sidebarOpen;
-
-    if (shouldActivate && !unsubscribeConversationChanges) {
-      unsubscribeConversationChanges = agentBuilder.subscribeToConversationChanges(
-        ({ id, attachments }) => {
-          // react to the active conversation
-        }
-      );
+const subscription = combineLatest([myAppActive$, agentBuilder.events.ui.sidebarOpen$])
+  .pipe(
+    switchMap(([appActive, sidebarOpen]) =>
+      appActive && sidebarOpen ? agentBuilder.events.ui.activeConversation$ : EMPTY
+    )
+  )
+  .subscribe((change) => {
+    if (!change) {
+      // No chat surface currently bound — tear down local state.
       return;
     }
 
-    if (!shouldActivate && unsubscribeConversationChanges) {
-      unsubscribeConversationChanges();
-      unsubscribeConversationChanges = undefined;
-    }
-  }
-);
+    const { id, attachments } = change;
+    // react to the active conversation
+  });
 ```
 
-### `subscribeToConversationChanges(...)`
+### `events.ui.activeConversation$`
 
-Use `subscribeToConversationChanges(...)` when you need to react to the conversation currently bound to the active chat surface (both the embeddable sidebar and the full-page routed chat).
+Use `events.ui.activeConversation$` when you need to react to the conversation currently bound to the active chat surface (both the embeddable sidebar and the full-page routed chat).
 
-The listener fires whenever that binding changes, and if a chat surface is already active it is called immediately with the latest binding.
+It is an `Observable<EmbeddableConversationChange | null>` backed by a `BehaviorSubject`: new subscribers receive the current value immediately, subsequent emissions fire whenever the binding changes, and it emits `null` when no chat surface is currently bound.
 
-The payload is:
+The non-null payload is:
 
 - `id?: string` - the currently bound conversation id, or `undefined` when the chat is currently bound to a new conversation
 - `attachments?: VersionedAttachment[]` - existing attachments when the chat switches to an existing conversation
 
 ```ts
 class MyPlugin {
-  private unsubscribeConversationChanges?: () => void;
+  private conversationSubscription?: Subscription;
 
   start(core: CoreStart, { agentBuilder }: { agentBuilder: AgentBuilderPluginStart }) {
-    this.unsubscribeConversationChanges = agentBuilder.subscribeToConversationChanges(
-      ({ id, attachments }) => {
-        if (!id) {
-          agentBuilder.addAttachment({
-            id: 'my-pending-context',
-            type: 'my_type',
-            data: { ... },
-          });
-          return;
-        }
-
-        const hasMyAttachment = attachments?.some(
-          (attachment) => attachment.id === 'my-pending-context'
-        );
-
-        if (!hasMyAttachment) {
-          // Handle the switch away from the pending attachment in your plugin state.
-        }
+    this.conversationSubscription = agentBuilder.events.ui.activeConversation$.subscribe((change) => {
+      if (!change) {
+        // No chat surface currently bound — tear down local state.
+        return;
       }
-    );
+
+      const { id, attachments } = change;
+
+      if (!id) {
+        agentBuilder.addAttachment({
+          id: 'my-pending-context',
+          type: 'my_type',
+          data: { ... },
+        });
+        return;
+      }
+
+      const hasMyAttachment = attachments?.some(
+        (attachment) => attachment.id === 'my-pending-context'
+      );
+
+      if (!hasMyAttachment) {
+        // Handle the switch away from the pending attachment in your plugin state.
+      }
+    });
   }
 
   stop() {
-    this.unsubscribeConversationChanges?.();
+    this.conversationSubscription?.unsubscribe();
   }
 }
 ```

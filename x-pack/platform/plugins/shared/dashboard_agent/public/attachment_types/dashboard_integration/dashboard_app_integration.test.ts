@@ -184,21 +184,21 @@ describe('registerDashboardAppIntegration', () => {
   });
 
   const register = () => {
-    const listeners = new Set<
-      (change: { id?: string; attachments?: VersionedAttachment[] }) => void
-    >();
+    const activeConversation$ = new BehaviorSubject<{
+      id?: string;
+      attachments?: VersionedAttachment[];
+    } | null>(null);
     const agentBuilder = {
       addAttachment,
       updateAttachmentOrigin,
-      subscribeToConversationChanges: jest.fn((listener) => {
-        listeners.add(listener);
-        return () => listeners.delete(listener);
-      }),
-      events: { chat$ },
+      events: {
+        chat$,
+        ui: { activeConversation$: activeConversation$.asObservable() },
+      },
     } as unknown as AgentBuilderPluginStart;
 
     emitConversationChange = (change) => {
-      listeners.forEach((listener) => listener(change));
+      activeConversation$.next(change);
     };
 
     cleanup = registerDashboardAppIntegration({
