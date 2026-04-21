@@ -7,7 +7,6 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { OnboardingStep } from '@kbn/streams-schema';
-import { StreamsAppLocatorDefinition } from '@kbn/streams-app-plugin/common/locators/streams_locator';
 import type { TaskClient } from '../../../lib/tasks/task_client';
 import type { StreamsTaskType } from '../../../lib/tasks/task_definitions';
 import {
@@ -61,15 +60,10 @@ export async function startKiIdentificationToolHandler({
     request,
   });
 
-  const streamsLocator = new StreamsAppLocatorDefinition();
-  const location = await streamsLocator.getLocation({
-    name: streamName,
-    managementTab: 'significantEvents',
-  } as never);
-
   const origin = new URL(request.url).origin;
+  const path = `/app/streams/${streamName}/management/significantEvents`;
 
   return {
-    url: `${origin}/app/${location.app}${location.path}`,
+    url: `${origin}${path}`,
   };
 }

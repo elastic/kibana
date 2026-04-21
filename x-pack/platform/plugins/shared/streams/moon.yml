@@ -96,7 +96,6 @@ dependsOn:
   - '@kbn/core-security-server'
   - '@kbn/workflows-management-plugin'
   - '@kbn/workflows'
-  - '@kbn/streams-app-plugin'
 tags:
   - plugin
   - prod
