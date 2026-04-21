@@ -47,13 +47,13 @@ const PRODUCT_CATALOG_ERROR_LOG_EXPECTED = `-   What happened:
     3.  Monitor the product-catalog service error rate after toggling the flag.`;
 
 const INFO_LOG_EXPECTED = `-   What the log message means:
-    This is a normal operational log entry indicating routine service activity. The log level is info, confirming there is no error or warning condition.
+    This is a normal operational log entry from the \`recommendation\` service. It indicates that the service received a \`ListRecommendations\` request with a set of product IDs and is processing the request. The log level is info, confirming there is no error or warning condition.
 
 -   Source:
-    The log originates from a service in the OpenTelemetry demo application, identifiable by the service name, host, and container fields in the log entry.
+    The log originates from the \`recommendation\` service's \`ListRecommendations\` gRPC handler, which returns product recommendations excluding the provided product IDs.
 
 -   Context:
-    This is expected operational behavior. No investigation or action is required.`;
+    This is expected operational behavior. The recommendation service is functioning normally, processing requests as designed. No investigation or action is required.`;
 
 export const LOG_SCENARIOS: Record<string, LogScenario> = {
   [PAYMENT_UNREACHABLE_ERROR_LOG_ID]: {
