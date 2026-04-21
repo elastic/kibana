@@ -24,6 +24,7 @@ import { fetchEntitiesByIds } from '../utils/fetch_entities_by_ids';
 import type { ScopedLogger } from '../utils/with_log_context';
 import { syncLookupIndexForCategorizedPage } from '../lookup/sync_lookup_index';
 import { persistScoresToEntityStore, persistScoresToRiskIndex } from './persist_scores';
+import { MAX_RESOLUTION_MEMBER_FETCH_COUNT } from '../../constants';
 
 interface ScoreBaseEntitiesParams {
   esClient: ElasticsearchClient;
@@ -142,12 +143,18 @@ export const scoreBaseEntities = async ({
     // Per page: split docs by write path, sync lookup docs, then write scores.
     pagesProcessed += 1;
     const categorized = categorizePhase1Entities(page);
+    const resolutionTargetIds = await findResolutionTargetIdsForPage({
+      page,
+      crudClient: params.crudClient,
+      logger: params.logger,
+    });
     const lookupSyncResult = await syncLookupIndexForCategorizedPage({
       esClient: params.esClient,
       index: lookupIndex,
       page,
       categorized,
       now: params.now,
+      resolutionTargetIds,
     });
 
     writeNowCount += categorized.write_now.length;
@@ -310,4 +317,90 @@ const enrichWithModifiers = async ({
   });
 
   return { entityIds: euidValues, scores: finalScores, entities: entityMap };
+};
+
+/**
+ * Temporary phase-1 backfill for lookup self-rows.
+ *
+ * Why this exists:
+ * - Some scored entities are resolution targets and do not have
+ *   `entity.relationships.resolution.resolved_to` on their own document.
+ * - Without explicitly detecting those targets, lookup sync can miss the
+ *   target self-row and phase 2 cannot discover/score the group when only the
+ *   target has alerts.
+ *
+ * Fixes behavior reported in https://github.com/elastic/security-team/issues/16838
+ *
+ * Remove this helper once https://github.com/elastic/security-team/issues/16839 implemented
+ */
+const findResolutionTargetIdsForPage = async ({
+  page,
+  crudClient,
+  logger,
+}: {
+  page: ScoredEntityPage;
+  crudClient: EntityUpdateClient;
+  logger: ScopedLogger;
+}): Promise<string[]> => {
+  const candidateTargetIds = page.entityIds.filter((id) => {
+    const entity = page.entities.get(id);
+    return entity && !entity.entity?.relationships?.resolution?.resolved_to;
+  });
+
+  if (candidateTargetIds.length === 0) {
+    return [];
+  }
+
+  const candidateSet = new Set(candidateTargetIds);
+  const confirmedTargetIds = new Set<string>();
+
+  try {
+    const fetchPageSize = candidateTargetIds.length * 10;
+    const maxIterations = Math.max(
+      1,
+      Math.ceil(MAX_RESOLUTION_MEMBER_FETCH_COUNT / Math.max(fetchPageSize, 1))
+    );
+    let searchAfter: Array<string | number> | undefined;
+    let iterations = 0;
+    let fetchedCount = 0;
+    do {
+      iterations += 1;
+      if (iterations > maxIterations) {
+        logger.warn(
+          `findResolutionTargetIdsForPage exceeded ${maxIterations} pages (aligned cap=${MAX_RESOLUTION_MEMBER_FETCH_COUNT}), returning partial results`
+        );
+        break;
+      }
+
+      const { entities, nextSearchAfter } = await crudClient.listEntities({
+        filter: {
+          terms: { 'entity.relationships.resolution.resolved_to': candidateTargetIds },
+        },
+        size: fetchPageSize,
+        searchAfter,
+        source: ['entity.relationships.resolution.resolved_to'],
+      });
+      fetchedCount += entities.length;
+      for (const entity of entities) {
+        const resolvedTo = entity.entity?.relationships?.resolution?.resolved_to;
+        if (typeof resolvedTo === 'string' && candidateSet.has(resolvedTo)) {
+          confirmedTargetIds.add(resolvedTo);
+        }
+      }
+      if (fetchedCount >= MAX_RESOLUTION_MEMBER_FETCH_COUNT) {
+        logger.warn(
+          `findResolutionTargetIdsForPage fetched ${fetchedCount} entities (cap=${MAX_RESOLUTION_MEMBER_FETCH_COUNT}), returning partial results`
+        );
+        break;
+      }
+      searchAfter = nextSearchAfter;
+    } while (searchAfter !== undefined);
+  } catch (error) {
+    logger.warn(
+      `Error checking resolution targets for lookup sync. Continuing without additional target self-rows: ${error}`
+    );
+    return [];
+  }
+
+  return [...confirmedTargetIds];
 };
