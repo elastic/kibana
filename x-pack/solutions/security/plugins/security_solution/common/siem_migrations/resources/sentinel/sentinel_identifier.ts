@@ -34,5 +34,5 @@ export const sentinelResourceIdentifier: VendorResourceIdentifier = (kqlQuery: s
     }
   }
 
-  return watchlists.map((name) => ({ type: 'watchlist' as const, name }));
+  return watchlists.map((name) => ({ type: 'lookup', name }));
 };

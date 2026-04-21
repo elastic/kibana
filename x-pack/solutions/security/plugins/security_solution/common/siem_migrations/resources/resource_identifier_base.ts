@@ -77,18 +77,12 @@ export abstract class ResourceIdentifier<I> {
           macros.add(resource.name);
         } else if (resource.type === 'lookup') {
           lookups.add(resource.name);
-        } else if (resource.type === 'watchlist') {
-          watchlists.add(resource.name);
         }
       });
     }
     return [
       ...Array.from(macros).map<SiemMigrationResourceBase>((name) => ({ type: 'macro', name })),
       ...Array.from(lookups).map<SiemMigrationResourceBase>((name) => ({ type: 'lookup', name })),
-      ...Array.from(watchlists).map<SiemMigrationResourceBase>((name) => ({
-        type: 'watchlist',
-        name,
-      })),
     ];
   }
 

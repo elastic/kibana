@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import type { OriginalRuleVendor } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { QRadarProcessor } from './qradar/processor';
 import { SentinelProcessor } from './sentinel/processor';
+
+type SupportedRuleVendor = 'qradar' | 'microsoft-sentinel';
 
 export function getVendorProcessor(vendor: 'qradar'): typeof QRadarProcessor;
 export function getVendorProcessor(vendor: 'microsoft-sentinel'): typeof SentinelProcessor;
 export function getVendorProcessor(
-  vendor: OriginalRuleVendor
+  vendor: SupportedRuleVendor
 ): typeof QRadarProcessor | typeof SentinelProcessor;
-export function getVendorProcessor(vendor: OriginalRuleVendor) {
+export function getVendorProcessor(vendor: SupportedRuleVendor) {
   switch (vendor) {
     case 'qradar':
       return QRadarProcessor;

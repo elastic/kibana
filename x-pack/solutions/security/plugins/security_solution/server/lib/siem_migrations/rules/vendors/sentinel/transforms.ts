@@ -20,6 +20,12 @@ import {
  * into the Elastic Threat format used by detection rules.
  *
  * Sentinel exports tactic names like "InitialAccess" and technique IDs like "T1078".
+ *
+ * Note: Sentinel ARM templates export tactics and techniques as separate flat arrays
+ * with no correlation between them. When only one tactic is present, all techniques
+ * are associated with it (unambiguous). When multiple tactics are present, techniques
+ * are omitted from individual tactic entries to avoid creating false tactic-technique
+ * associations (e.g., claiming T1078 applies to Execution when it does not).
  */
 export function transformSentinelMitreMapping(
   tactics: string[] | undefined,
@@ -29,21 +35,23 @@ export function transformSentinelMitreMapping(
     return [];
   }
 
-  return tactics.reduce<Threat[]>((acc, tacticName) => {
-    const tacticId = SENTINEL_TACTIC_NAME_TO_ID[tacticName];
-    if (!tacticId) {
-      return acc;
-    }
+  const validTactics = tactics.filter((name) => SENTINEL_TACTIC_NAME_TO_ID[name]);
 
+  // Only associate techniques when there is a single tactic (mapping is unambiguous)
+  const ruleTechniques =
+    validTactics.length === 1
+      ? (techniques ?? []).map((techniqueId) => ({
+          id: techniqueId,
+          reference: `${TECHNIQUES_BASE_URL}${techniqueId}/`,
+          name: techniqueId,
+        }))
+      : [];
+
+  return validTactics.map((tacticName) => {
+    const tacticId = SENTINEL_TACTIC_NAME_TO_ID[tacticName];
     const tacticDisplayName = SENTINEL_TACTIC_NAME_TO_DISPLAY[tacticName] ?? tacticName;
 
-    const ruleTechniques = (techniques ?? []).map((techniqueId) => ({
-      id: techniqueId,
-      reference: `${TECHNIQUES_BASE_URL}${techniqueId}/`,
-      name: techniqueId,
-    }));
-
-    acc.push({
+    return {
       framework: 'MITRE ATT&CK',
       tactic: {
         id: tacticId,
@@ -51,10 +59,8 @@ export function transformSentinelMitreMapping(
         name: tacticDisplayName,
       },
       technique: ruleTechniques,
-    });
-
-    return acc;
-  }, []);
+    };
+  });
 }
 
 /**
