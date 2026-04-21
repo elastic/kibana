@@ -57,8 +57,7 @@ describe('InlineQueryStreamForm', () => {
   it('disables the save button when the name has invalid characters (create mode)', () => {
     renderWithProviders(
       <InlineQueryStreamForm
-        parentStreamName="logs"
-        initialName="MyQuery"
+initialName="MyQuery"
         initialEsqlQuery="FROM $.logs"
         onSave={jest.fn()}
         onCancel={jest.fn()}
@@ -76,8 +75,7 @@ describe('InlineQueryStreamForm', () => {
 
     renderWithProviders(
       <InlineQueryStreamForm
-        parentStreamName="logs"
-        initialName="my-query"
+initialName="my-query"
         initialEsqlQuery="FROM $.logs"
         nameReadOnly
         onSave={jest.fn()}
@@ -96,8 +94,7 @@ describe('InlineQueryStreamForm', () => {
 
     renderWithProviders(
       <InlineQueryStreamForm
-        parentStreamName="logs"
-        initialName="my-query"
+initialName="my-query"
         initialEsqlQuery=""
         nameReadOnly
         onSave={jest.fn()}
@@ -116,8 +113,7 @@ describe('InlineQueryStreamForm', () => {
 
     renderWithProviders(
       <InlineQueryStreamForm
-        parentStreamName="logs"
-        initialName="existing"
+initialName="existing"
         initialEsqlQuery="FROM $.logs"
         onSave={jest.fn()}
         onCancel={jest.fn()}
@@ -133,8 +129,7 @@ describe('InlineQueryStreamForm', () => {
 
     renderWithProviders(
       <InlineQueryStreamForm
-        parentStreamName="logs"
-        initialName="existing-query"
+initialName="existing-query"
         initialEsqlQuery="FROM $.logs"
         existingSiblingNames={['logs.existing-query']}
         onSave={jest.fn()}
@@ -153,8 +148,7 @@ describe('InlineQueryStreamForm', () => {
 
     renderWithProviders(
       <InlineQueryStreamForm
-        parentStreamName="logs"
-        initialName="my-query"
+initialName="my-query"
         initialEsqlQuery="FROM $.logs"
         nameReadOnly
         onSave={jest.fn()}
@@ -171,8 +165,7 @@ describe('InlineQueryStreamForm', () => {
 
     renderWithProviders(
       <InlineQueryStreamForm
-        parentStreamName="logs"
-        initialName="new-query"
+initialName="new-query"
         initialEsqlQuery="FROM $.logs"
         onSave={jest.fn()}
         onCancel={jest.fn()}

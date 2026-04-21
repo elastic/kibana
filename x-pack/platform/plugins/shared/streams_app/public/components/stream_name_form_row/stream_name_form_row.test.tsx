@@ -269,7 +269,7 @@ describe('StreamNameFormRow', () => {
       expect(result.current.errorMessage).toBeDefined();
     });
 
-    it('surfaces dot-in-partition error when checkRootChildExists is false', () => {
+    it('surfaces a simple dot-in-partition error when checkRootChildExists is false', () => {
       mockRoutingContext.routing = [];
 
       const { result } = renderHook(() =>
@@ -281,7 +281,7 @@ describe('StreamNameFormRow', () => {
       );
 
       expect(result.current.isStreamNameValid).toBe(false);
-      expect(result.current.errorMessage).toBeDefined();
+      expect(result.current.errorMessage).toBe('Stream name cannot contain the "." character.');
     });
 
     it('flags a duplicate when the name is in additionalExistingNames but not in routing', () => {

@@ -195,7 +195,6 @@ export function CreatingQueryStreamEntry({ parentStreamName }: CreatingQueryStre
 
   return (
     <InlineQueryStreamForm
-      parentStreamName={parentStreamName}
       initialEsqlQuery={`FROM ${initialFromSource}`}
       onSave={handleSave}
       onCancel={cancelQueryStreamCreation}
@@ -304,7 +303,6 @@ export function EditingQueryStreamEntry({
   return (
     <>
       <InlineQueryStreamForm
-        parentStreamName={parentStreamName}
         initialName={suffix}
         initialEsqlQuery={currentEsql}
         onSave={handleSave}

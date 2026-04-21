@@ -31,9 +31,9 @@ test.describe('Query streams - Create query stream', { tag: tags.stateful.classi
   });
 
   test.afterAll(async ({ kbnClient, apiServices, esClient }) => {
+    await deleteRootStreamViews(esClient);
     for (const streamName of STREAM_NAMES_CREATED_BY_SPEC) {
       const esqlViewName = `$.${streamName}`;
-      await deleteRootStreamViews(esClient);
       await deleteQueryStream(apiServices, esClient, streamName, esqlViewName);
     }
     await disableQueryStreams(kbnClient);

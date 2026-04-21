@@ -57,7 +57,8 @@ export const getErrorMessage = (
   isDotPresent: boolean,
   prefix: string,
   rootChild: string,
-  router: StatefulStreamsAppRouter
+  router: StatefulStreamsAppRouter,
+  checkRootChildExists: boolean = true
 ): ReactNode | string | undefined => {
   // Return base validation errors from the shared validator first
   if (baseValidationError) {
@@ -68,15 +69,25 @@ export const getErrorMessage = (
       defaultMessage: 'A stream with this name already exists',
     });
   }
-  if (isDotPresent && !rootChildExists) {
-    return i18n.translate('xpack.streams.streamDetailRouting.rootChildDoesNotExistError', {
-      defaultMessage: `The child stream {rootChild} does not exist. Please create it first.`,
-      values: {
-        rootChild: prefix + rootChild,
-      },
-    });
-  }
-  if (isDotPresent && rootChildExists) {
+  if (isDotPresent) {
+    // Callers that disable root-child lookups (query streams) don't have a meaningful
+    // child-stream link to point at — show a simple message without the link.
+    if (!checkRootChildExists) {
+      return i18n.translate(
+        'xpack.streams.streamDetailRouting.nameContainsDotErrorMessageSimple',
+        {
+          defaultMessage: `Stream name cannot contain the "." character.`,
+        }
+      );
+    }
+    if (!rootChildExists) {
+      return i18n.translate('xpack.streams.streamDetailRouting.rootChildDoesNotExistError', {
+        defaultMessage: `The child stream {rootChild} does not exist. Please create it first.`,
+        values: {
+          rootChild: prefix + rootChild,
+        },
+      });
+    }
     return (
       <FormattedMessage
         id="xpack.streams.streamDetailRouting.nameContainsDotErrorMessage"
@@ -180,16 +191,20 @@ export const useChildStreamInput = ({
 
   const helpText = getHelpText(isStreamNameEmpty, readOnly);
 
+  // Skip dot-in-partition detection when the field is read-only: the value is already
+  // persisted (e.g. edit mode, in-flight save), and re-flagging existing dotted names
+  // would surface false-positive errors the user cannot act on.
   const isDotPresent = !readOnly && partitionName.includes('.');
 
   const errorMessage = getErrorMessage(
     baseValidationError,
     isDuplicatedName,
-    checkRootChildExists ? rootChildExists : true,
+    rootChildExists,
     isDotPresent,
     prefix,
     rootChild,
-    router
+    router,
+    checkRootChildExists
   );
 
   return {

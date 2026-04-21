@@ -21,16 +21,13 @@ import type { AggregateQuery } from '@kbn/es-query';
 import { getEsqlViewName } from '@kbn/streams-schema';
 import useMount from 'react-use/lib/useMount';
 import { useChildStreamInput } from '../stream_name_form_row';
+import { useStreamsRoutingSelector } from '../stream_management/data_management/stream_detail_routing/state_management/stream_routing_state_machine';
 import { QueryStreamForm } from './query_stream_form';
 
 /**
  * Props for the InlineQueryStreamForm component
  */
 export interface InlineQueryStreamFormProps {
-  /**
-   * The parent stream name (used to generate child stream naming)
-   */
-  parentStreamName: string;
   /**
    * Initial name for the query stream (suffix only, without parent prefix)
    */
@@ -40,7 +37,8 @@ export interface InlineQueryStreamFormProps {
    */
   initialEsqlQuery?: string;
   /**
-   * Callback when save is clicked with the form data
+   * Callback when save is clicked with the form data.
+   * `name` is the partition suffix only — it does not include the parent prefix.
    */
   onSave: (data: { name: string; esqlQuery: string }) => void | Promise<void>;
   /**
@@ -80,16 +78,16 @@ export interface InlineQueryStreamFormProps {
 }
 
 /**
- * A reusable inline form component for creating or editing query streams.
+ * Inline form for creating or editing a query stream.
  *
- * Couples to `StreamRoutingContext` via `useChildStreamInput` — use within the
+ * Couples to `StreamRoutingContext` via `useChildStreamInput` and reads the parent
+ * stream name from `definition.stream.name` — render within the
  * `stream_detail_routing` subtree (or any context that provides
  * `StreamRoutingContext`).
  *
  * @example
  * ```tsx
  * <InlineQueryStreamForm
- *   parentStreamName="logs"
  *   onSave={async ({ name, esqlQuery }) => {
  *     await createQueryStream(name, esqlQuery);
  *   }}
@@ -99,7 +97,6 @@ export interface InlineQueryStreamFormProps {
  * ```
  */
 export function InlineQueryStreamForm({
-  parentStreamName,
   initialName = '',
   initialEsqlQuery,
   onSave,
@@ -113,6 +110,9 @@ export function InlineQueryStreamForm({
   existingSiblingNames,
 }: InlineQueryStreamFormProps) {
   const { euiTheme } = useEuiTheme();
+  const parentStreamName = useStreamsRoutingSelector(
+    (snapshot) => snapshot.context.definition.stream.name
+  );
   const prefix = `${parentStreamName}.`;
   // Form state
   const [name, setName] = useState(initialName);
