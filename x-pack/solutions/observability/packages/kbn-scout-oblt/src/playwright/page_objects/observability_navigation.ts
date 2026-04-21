@@ -7,17 +7,7 @@
 
 import type { Locator, ScoutPage } from '@kbn/scout';
 
-/**
- * Shared page object for the Observability solution sidenav. Used by both
- * `serverless_observability` and the stateful `observability` plugin. Helpers
- * are container-scoped (primary nav, footer, "More" popover, side panel,
- * nested panel) so tests fail loudly if an item unexpectedly migrates between
- * locations.
- *
- * Assertions live in the specs (see docs/extend/scout/ui-best-practices.md,
- * "Keep assertions explicit in tests, not hidden in page objects"); this class
- * only exposes locators, navigation actions, and waits.
- */
+/** Chrome nav for Observability — locators and actions only; specs own `expect`. */
 export class ObservabilityNavigation {
   public readonly sidenav: Locator;
   public readonly primaryNav: Locator;
@@ -37,14 +27,7 @@ export class ObservabilityNavigation {
     this.moreMenuTrigger = this.page.testSubj.locator('kbnChromeNav-moreMenuTrigger');
   }
 
-  /**
-   * The `goto*` helpers are thin wrappers around `page.gotoApp` and deliberately
-   * do NOT wait for the new chrome sidenav to hydrate. The sidenav only renders
-   * in spaces using the `oblt` solution view, so consumers like landing-redirect
-   * tests on `stateful.classic` need to hit `/app/observability` without any
-   * chrome assumptions. Navigation specs should call `waitForLoad()` explicitly
-   * in `beforeEach` before interacting with the sidenav.
-   */
+  /** `goto*` does not call `waitForLoad()` — sidenav may be absent (e.g. classic chrome); call `waitForLoad()` when interacting with nav. */
   async goto() {
     await this.page.gotoApp('observability');
   }
@@ -57,25 +40,15 @@ export class ObservabilityNavigation {
     await this.page.gotoApp(appName);
   }
 
-  /**
-   * Waits for the sidenav to be hydrated and interactive. We sync on
-   * `primaryNav` rather than the outer layout container because the layout
-   * div can briefly render with 0 width (flagged "hidden" by Playwright)
-   * before `useSideNavWidth` populates its CSS variable.
-   */
+  /** Waits on `primaryNav` (outer layout can be 0-width until CSS vars apply). */
   async waitForLoad() {
     await this.primaryNav.waitFor({ state: 'visible' });
   }
 
-  /**
-   * Returns a locator matching either the expected page element or the no-data page.
-   * Apps like Discover/Dashboards show a no-data prompt when no data views exist.
-   */
+  /** App root or `kbnNoDataPage` (Discover/Dashboards with no data views). */
   pageOrNoData(testSubj: string): Locator {
     return this.page.testSubj.locator(testSubj).or(this.page.testSubj.locator('kbnNoDataPage'));
   }
-
-  // -- nav item locators ------------------------------------------------------
 
   navItemInPrimaryByDeepLinkId(deepLinkId: string): Locator {
     return this.primaryNav.locator(`[data-test-subj~="nav-item-deepLinkId-${deepLinkId}"]`);
@@ -85,12 +58,7 @@ export class ObservabilityNavigation {
     return this.primaryNav.locator(`[data-test-subj~="nav-item-id-${id}"]`);
   }
 
-  /**
-   * Look up a body nav item anywhere in the sidenav body (primary column or
-   * the "More" popover). Use this for items whose placement depends on
-   * overflow; prefer the primary / more scoped helpers whenever the position
-   * is deterministic.
-   */
+  /** Primary or More — for overflow-dependent placement; prefer scoped helpers when fixed. */
   navItemInBodyByDeepLinkId(deepLinkId: string): Locator {
     const selector = `[data-test-subj~="nav-item-deepLinkId-${deepLinkId}"]`;
     return this.primaryNav.locator(selector).or(this.morePopover.locator(selector));
@@ -117,7 +85,6 @@ export class ObservabilityNavigation {
     return this.morePopover.locator(`[data-test-subj~="nav-item-id-${id}"]`);
   }
 
-  /** Nav item anywhere in the chrome sidenav (primary, footer, more popover, or any open panel). */
   navItemInSidenavByDeepLinkId(deepLinkId: string): Locator {
     return this.sidenav.locator(`[data-test-subj~="nav-item-deepLinkId-${deepLinkId}"]`);
   }
@@ -126,14 +93,7 @@ export class ObservabilityNavigation {
     return this.sidenav.locator(`[data-test-subj~="nav-item-id-${id}"]`);
   }
 
-  // -- active-link locators ---------------------------------------------------
-
-  /**
-   * Matches a nav item that is currently the active route. Chrome sets the
-   * additional `nav-item-isActive` token on the `data-test-subj` attribute of
-   * the active item; both tokens are whitespace-separated so we match each
-   * with `~=`.
-   */
+  /** Item with `nav-item-isActive` in test-subj (current route). */
   activeNavItemByDeepLinkId(deepLinkId: string): Locator {
     return this.sidenav.locator(
       `[data-test-subj~="nav-item-deepLinkId-${deepLinkId}"][data-test-subj~="nav-item-isActive"]`
@@ -146,30 +106,19 @@ export class ObservabilityNavigation {
     );
   }
 
-  // -- panel locators ---------------------------------------------------------
-
-  /** Side panel rendered next to the primary nav (e.g. `admin_and_settings`). */
   sidePanel(id: string): Locator {
     return this.page.testSubj.locator(`~kbnChromeNav-sidePanel_${id}`);
   }
 
-  /** Nested panel rendered inside the More popover for panel-opener items. */
   nestedPanel(id: string): Locator {
     return this.morePopover.locator(`[data-test-subj="kbnChromeNav-nestedPanel-${id}"]`);
   }
 
-  /** Any open panel for the given id, regardless of whether it renders inline or nested. */
   anyPanel(id: string): Locator {
     return this.sidePanel(id).or(this.nestedPanel(id));
   }
 
-  // -- breadcrumb locators ----------------------------------------------------
-
-  /**
-   * Breadcrumb locator. Pass either a `deepLinkId` (preferred, uses the stable
-   * `breadcrumb-deepLinkId-<id>` test-subj token) or a visible `text` — the
-   * latter falls back to a filter on the generic `breadcrumb` container.
-   */
+  /** By `breadcrumb-deepLinkId-*` test-subj or visible text. */
   breadcrumb(by: { deepLinkId: string } | { text: string }): Locator {
     if ('deepLinkId' in by) {
       return this.breadcrumbs.locator(`[data-test-subj~="breadcrumb-deepLinkId-${by.deepLinkId}"]`);
@@ -177,15 +126,7 @@ export class ObservabilityNavigation {
     return this.breadcrumbs.locator('[data-test-subj~="breadcrumb"]', { hasText: by.text });
   }
 
-  // -- actions ----------------------------------------------------------------
-
-  /**
-   * Opens the "More" overflow popover at its root level. If the popover is
-   * already open (e.g. showing a nested panel after a previous panel-opener
-   * click, or still animating closed with an intercepting mask), we dismiss
-   * it with Escape first so the trigger click always produces a fresh root
-   * view with all overflow items visible.
-   */
+  /** If More is already open, Escape first so the next open is the root list. */
   async openMoreMenu() {
     if (await this.morePopover.isVisible()) {
       await this.page.keyboard.press('Escape');
@@ -199,13 +140,7 @@ export class ObservabilityNavigation {
     await this.logo.click();
   }
 
-  /**
-   * SPA guard: stamps a timestamp on `window` and returns a callback that
-   * reads it back. If the page reloaded at any point in between, the value
-   * will be gone and the callback returns `false`. The spec is responsible
-   * for asserting on the result — keeping the `expect` out of the PO (see
-   * docs/extend/scout/ui-best-practices.md).
-   */
+  /** Returns a function that is false after a full page reload (spec asserts). */
   async createNoPageReloadCheck(): Promise<() => Promise<boolean>> {
     const trackReloadTs = Date.now();
     await this.page.evaluate((ts: number) => {

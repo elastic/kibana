@@ -36,7 +36,7 @@ test.describe(
         }
       });
 
-      await test.step('opening More menu reveals overflow body items', async () => {
+      await test.step('Open More menu', async () => {
         await nav.openMoreMenu();
       });
 
@@ -98,8 +98,6 @@ test.describe(
       await test.step('Cases (via More menu)', async () => {
         await nav.openMoreMenu();
         await nav.navItemInMoreByDeepLinkId('observability-overview:cases').click();
-        // Active-state for a More-hosted item can only be checked while More
-        // is open, so we rely on the breadcrumb to confirm navigation here.
         await expect(nav.breadcrumb({ text: 'Cases' })).toBeVisible();
       });
 
@@ -168,6 +166,13 @@ test.describe(
       });
     });
 
+    test('Management landing renders cards navigation', async ({ pageObjects, page }) => {
+      const nav = pageObjects.observabilityNavigation;
+      await page.gotoApp('management');
+      await nav.waitForLoad();
+      await expect(page.testSubj.locator('cards-navigation-page')).toBeVisible();
+    });
+
     test('navigates between apps without a full page reload (SPA) and restores via logo', async ({
       pageObjects,
     }) => {
@@ -201,7 +206,6 @@ test.describe(
       await test.step('Logo returns to observability landing', async () => {
         await nav.clickLogo();
         await nav.waitForLoad();
-        // Sidenav is still interactive and no app-specific breadcrumb remains.
         await expect(nav.navItemInPrimaryByDeepLinkId('discover')).toBeVisible();
       });
 

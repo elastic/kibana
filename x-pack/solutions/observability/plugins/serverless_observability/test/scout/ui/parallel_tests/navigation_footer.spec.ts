@@ -68,11 +68,6 @@ test.describe(
         await nav.navItemInFooterById('admin_and_settings').click();
         await expect(nav.sidePanel('admin_and_settings')).toBeVisible();
       });
-
-      await test.step('Management landing renders cards navigation', async () => {
-        await page.gotoApp('management');
-        await expect(page.testSubj.locator('cards-navigation-page')).toBeVisible();
-      });
     });
 
     test('active sidenav panel is re-opened after a browser refresh', async ({

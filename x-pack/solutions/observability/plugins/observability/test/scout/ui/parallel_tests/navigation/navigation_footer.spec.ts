@@ -5,18 +5,11 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout-oblt';
+import { spaceTest as test, tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
-import { spaceTest as test } from '../../fixtures';
 
 test.describe(
   'Stateful Observability Navigation - Footer',
-  // We intentionally only target `stateful.observability` here: the new
-  // chrome navigation only renders in spaces that use the `oblt` solution
-  // view, which is the shape of the observability_complete stateful target.
-  // Running on `stateful.classic` would exercise a synthetic
-  // classic-deployment-with-oblt-space configuration that doesn't exist in
-  // the product.
   { tag: [...tags.stateful.observability] },
   () => {
     test.beforeAll(async ({ scoutSpace }) => {
@@ -111,6 +104,7 @@ test.describe(
     }) => {
       const nav = pageObjects.observabilityNavigation;
       await page.gotoApp('management');
+      await nav.waitForLoad();
       await expect(page.testSubj.locator('managementHomeSolution')).toBeVisible();
       await expect(nav.sidePanel('stack_management')).toBeVisible();
     });

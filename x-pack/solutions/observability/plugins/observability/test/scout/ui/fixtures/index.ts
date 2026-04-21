@@ -6,7 +6,7 @@
  */
 
 import type { ScoutPage, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout-oblt';
-import { mergeTests, test as baseTest, spaceTest } from '@kbn/scout-oblt';
+import { mergeTests, test as baseTest } from '@kbn/scout-oblt';
 import type { SynthtraceFixture } from '@kbn/scout-synthtrace';
 import { synthtraceFixture } from '@kbn/scout-synthtrace';
 import type { TriggersActionsPageObjects } from './page_objects';
@@ -36,7 +36,5 @@ export const test = baseWithSynthtrace.extend<
     await use(extendedPageObjects);
   },
 });
-
-export { spaceTest };
 
 export { RULES_SETTINGS_TEST_SUBJECTS } from './constants';

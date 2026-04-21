@@ -9,13 +9,7 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 
-/**
- * The logs_essentials tier disables a large slice of the observability
- * feature set via `config/serverless.oblt.logs_essentials.yml` (cases, SLO,
- * APM, infra, ML, AI Assistant, synthetics…). The body nav therefore shrinks
- * to a short list that fits in the primary column and we assert both the
- * presence of the core items and the explicit absence of the disabled ones.
- */
+/** `logs_essentials` config disables many apps — assert core nav plus absence of gated items. */
 test.describe(
   'Serverless Observability Navigation - Logs Essentials tier body',
   { tag: [...tags.serverless.observability.logs_essentials] },
@@ -43,7 +37,7 @@ test.describe(
         }
       });
 
-      await test.step('complete-tier features are not present', async () => {
+      await test.step('Higher-tier-only nav items are absent', async () => {
         const disabledDeepLinks = ['observability-overview:cases', 'slo'];
         for (const deepLinkId of disabledDeepLinks) {
           await expect(nav.navItemInBodyByDeepLinkId(deepLinkId)).toBeHidden();
@@ -72,6 +66,12 @@ test.describe(
         await nav.navItemInPrimaryByDeepLinkId('dashboards').click();
         await expect(nav.pageOrNoData('dashboardLandingPage')).toBeVisible();
         await expect(nav.activeNavItemByDeepLinkId('dashboards')).toBeVisible();
+      });
+
+      await test.step('Workflows', async () => {
+        await nav.navItemInPrimaryByDeepLinkId('workflows').click();
+        await expect(page.testSubj.locator('workflowsPage')).toBeVisible();
+        await expect(nav.activeNavItemByDeepLinkId('workflows')).toBeVisible();
       });
 
       await test.step('Alerts', async () => {

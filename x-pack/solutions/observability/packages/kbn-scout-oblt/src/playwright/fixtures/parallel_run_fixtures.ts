@@ -11,16 +11,9 @@ import { extendPageObjects } from '../page_objects';
 import type { ObltParallelTestFixtures, ObltParallelWorkerFixtures } from './types';
 
 /**
- * Should be used test spec files, running in parallel in isolated spaces against the same Kibana instance.
- *
- * Note: we deliberately do NOT merge in `profilingSetupFixture` here. That
- * fixture extends the non-space `test` from `@kbn/scout`, and merging it with
- * the space-aware base via Playwright's `mergeTests` uses last-write-wins
- * semantics for colliding fixtures — which silently replaces the space-aware
- * `page` with the default-space one, breaking any test that depends on the
- * per-worker isolated space (e.g. `scoutSpace.setSolutionView(...)`).
- * `profilingSetup` is only consumed from the single-thread `test`/`apiTest`
- * and the global setup hook, so it's not needed on `spaceTest`.
+ * Does not merge `profilingSetupFixture`: it extends non-space `test`; `mergeTests`
+ * would overwrite the space-scoped `page` and break `scoutSpace` isolation.
+ * Profiling stays on single-thread `test` / `apiTest` / global setup.
  */
 export const spaceTest = spaceBase.extend<ObltParallelTestFixtures, ObltParallelWorkerFixtures>({
   pageObjects: async (
