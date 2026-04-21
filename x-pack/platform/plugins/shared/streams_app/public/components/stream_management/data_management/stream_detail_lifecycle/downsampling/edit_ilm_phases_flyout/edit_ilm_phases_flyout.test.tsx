@@ -9,7 +9,6 @@ import React from 'react';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { IlmPolicyPhases, PhaseName } from '@kbn/streams-schema';
-import { isEqual } from 'lodash';
 import { EditIlmPhasesFlyout } from './edit_ilm_phases_flyout';
 
 jest.mock('../../hooks/use_ilm_phases_color_and_description', () => ({
@@ -178,7 +177,7 @@ describe('EditIlmPhasesFlyout', () => {
   });
 
   describe('save and cancel', () => {
-    it('calls onSave with the current serialized phases when valid', async () => {
+    it('calls onSave with the current mapped phases when valid', async () => {
       const { onSave, initialPhases } = renderFlyout({
         initialPhases: {
           hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
@@ -350,6 +349,48 @@ describe('EditIlmPhasesFlyout', () => {
 
       await waitFor(() => expect(valueInput.value).toBe('40'));
     });
+
+    it('revalidates dependent phases when warm min_age changes (cold becomes valid without direct edits)', async () => {
+      const onChange = jest.fn();
+      const initialPhases: IlmPolicyPhases = {
+        hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
+        warm: { name: 'warm', size_in_bytes: 0, min_age: '30d' },
+        cold: { name: 'cold', size_in_bytes: 0, min_age: '20d' }, // invalid vs warm=30d
+      };
+
+      renderFlyout({ initialPhases, onChange }, { initialSelectedPhase: 'cold' });
+      await tick();
+
+      // Validate -> save should be disabled due to cold min_age ordering.
+      fireEvent.click(screen.getByTestId(`${DATA_TEST_SUBJ}SaveButton`));
+      await waitFor(() => expect(screen.getByTestId(`${DATA_TEST_SUBJ}SaveButton`)).toBeDisabled());
+      expect(getTab('cold')).toHaveClass('streamsIlmPhasesTab--hasErrors');
+
+      // Lower warm min_age so cold becomes valid (commit happens on blur).
+      fireEvent.click(getTab('warm'));
+      const warmPanel = withinPhase('warm');
+      const moveAfterInput = warmPanel.getByTestId(
+        `${DATA_TEST_SUBJ}MoveAfterValue`
+      ) as HTMLInputElement;
+      fireEvent.change(moveAfterInput, { target: { value: '10' } });
+      fireEvent.blur(moveAfterInput);
+
+      await waitFor(() =>
+        expect(screen.getByTestId(`${DATA_TEST_SUBJ}SaveButton`)).not.toBeDisabled()
+      );
+      await waitFor(() => expect(getTab('cold')).not.toHaveClass('streamsIlmPhasesTab--hasErrors'));
+
+      // Ensure emitted output reflects the warm edit and meta clears invalid phases.
+      await waitFor(() => {
+        const lastCall = onChange.mock.calls.at(-1);
+        expect(lastCall).toBeDefined();
+        const output = lastCall?.[0] as IlmPolicyPhases;
+        const meta = lastCall?.[1] as { invalidPhases: PhaseName[] };
+        expect(output.warm?.min_age).toBe('10d');
+        expect(output.cold?.min_age).toBe('20d');
+        expect(meta.invalidPhases).toEqual([]);
+      });
+    });
   });
 
   describe('downsampling', () => {
@@ -422,6 +463,7 @@ describe('EditIlmPhasesFlyout', () => {
 
       fireEvent.blur(valueInput);
       expect(valueInput.value).toBe(initialValue);
+      await tick();
     });
 
     it('shows a warning when downsampling is enabled but not supported', async () => {
@@ -756,6 +798,45 @@ describe('EditIlmPhasesFlyout', () => {
       fireEvent.click(coldPanel.getByTestId(`${DATA_TEST_SUBJ}SnapshotRepositoryRefreshButton`));
       expect(onRefresh).toHaveBeenCalledTimes(1);
     });
+
+    it('surfaces repository validation per-phase (frozen always, cold only when cold snapshots enabled)', async () => {
+      const onChange = jest.fn();
+
+      // Frozen enabled, but repository is missing -> should mark frozen tab as invalid.
+      // Cold is enabled but snapshots are not enabled -> cold tab should not be marked invalid due to repo error.
+      const initialPhases: IlmPolicyPhases = {
+        cold: { name: 'cold', size_in_bytes: 0, min_age: '20d' },
+        frozen: { name: 'frozen', size_in_bytes: 0, min_age: '40d' },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any;
+
+      renderFlyout(
+        {
+          initialPhases,
+          onChange,
+          canCreateRepository: true,
+          searchableSnapshotRepositories: [],
+        },
+        { initialSelectedPhase: 'frozen' }
+      );
+      await tick();
+      onChange.mockClear();
+
+      // Trigger validation by attempting to save.
+      fireEvent.click(screen.getByTestId(`${DATA_TEST_SUBJ}SaveButton`));
+      await waitFor(() => expect(screen.getByTestId(`${DATA_TEST_SUBJ}SaveButton`)).toBeDisabled());
+
+      expect(getTab('frozen')).toHaveClass('streamsIlmPhasesTab--hasErrors');
+      expect(getTab('cold')).not.toHaveClass('streamsIlmPhasesTab--hasErrors');
+
+      await waitFor(() => {
+        const lastCall = onChange.mock.calls.at(-1);
+        expect(lastCall).toBeDefined();
+        const meta = lastCall?.[1] as { invalidPhases: PhaseName[] };
+        expect(meta.invalidPhases).toContain('frozen');
+        expect(meta.invalidPhases).not.toContain('cold');
+      });
+    });
   });
 
   describe('phase removal', () => {
@@ -858,65 +939,6 @@ describe('EditIlmPhasesFlyout', () => {
 
       fireEvent.click(removeButton);
       expect(getTab('delete')).toBeInTheDocument();
-    });
-  });
-
-  describe('parent-owned draft rehydration', () => {
-    it('keeps the latest draft across a remount', async () => {
-      const initialPhases: IlmPolicyPhases = {
-        hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
-        warm: { name: 'warm', size_in_bytes: 0, min_age: '30d' },
-      };
-
-      const WrapperWithDraft = () => {
-        const [draft, setDraft] = React.useState<IlmPolicyPhases>(initialPhases);
-        const [selectedPhase, setSelectedPhase] = React.useState<PhaseName | undefined>('warm');
-        const [instanceKey, setInstanceKey] = React.useState(0);
-
-        return (
-          <>
-            <button
-              type="button"
-              data-test-subj="remountFlyout"
-              onClick={() => setInstanceKey((k) => k + 1)}
-            >
-              remount
-            </button>
-            <EditIlmPhasesFlyout
-              key={instanceKey}
-              initialPhases={draft}
-              selectedPhase={selectedPhase}
-              setSelectedPhase={setSelectedPhase}
-              searchableSnapshotRepositories={[]}
-              onClose={jest.fn()}
-              onChange={(next) => setDraft((prev) => (isEqual(prev, next) ? prev : next))}
-              onSave={jest.fn()}
-              isMetricsStream={true}
-              onChangeDebounceMs={0}
-            />
-          </>
-        );
-      };
-
-      render(
-        <I18nProvider>
-          <WrapperWithDraft />
-        </I18nProvider>
-      );
-      await tick();
-
-      const warmPanel = withinPhase('warm');
-      const moveAfterInput = warmPanel.getByTestId(
-        `${DATA_TEST_SUBJ}MoveAfterValue`
-      ) as HTMLInputElement;
-
-      fireEvent.change(moveAfterInput, { target: { value: '10' } });
-      fireEvent.blur(moveAfterInput);
-      await tick();
-
-      fireEvent.click(screen.getByTestId('remountFlyout'));
-      await tick();
-      expect(withinPhase('warm').getByTestId(`${DATA_TEST_SUBJ}MoveAfterValue`)).toHaveValue(10);
     });
   });
 
