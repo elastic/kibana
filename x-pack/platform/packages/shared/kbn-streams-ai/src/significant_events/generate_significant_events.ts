@@ -120,11 +120,13 @@ export async function generateSignificantEvents({
 
   const normalizedStoredEsqls = new Set(existingQueriesList.map((q) => normalizeEsqlSafe(q.esql)));
 
+  const contextLimit = Math.max(0, Math.floor(maxExistingQueriesForContext));
+
   const existingQueriesContext = existingQueriesList.length
     ? JSON.stringify(
         [...existingQueriesList]
           .sort((a, b) => (b.severity_score ?? 0) - (a.severity_score ?? 0))
-          .slice(0, maxExistingQueriesForContext)
+          .slice(0, contextLimit)
       )
     : '';
 

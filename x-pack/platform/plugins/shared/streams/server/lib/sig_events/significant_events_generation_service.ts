@@ -121,11 +121,9 @@ export async function generateSignificantEventsQueries(
     );
   } catch (error) {
     if (isInferenceProviderError(error)) {
-      try {
-        const connector = await inferenceClient.getConnectorById(connectorId);
+      const connector = await inferenceClient.getConnectorById(connectorId).catch(() => undefined);
+      if (connector) {
         throw new Error(formatInferenceProviderError(error, connector));
-      } catch {
-        // Connector lookup failed — throw the original inference error
       }
     }
     throw error;
