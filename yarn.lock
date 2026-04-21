@@ -5631,6 +5631,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-hotkeys-browser-internal@link:src/core/packages/hotkeys/browser-internal":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-hotkeys-browser-mocks@link:src/core/packages/hotkeys/browser-mocks":
   version "0.0.0"
   uid ""

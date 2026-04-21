@@ -580,6 +580,8 @@
       "@kbn/core-history-block-plugin/*": ["src/platform/test/plugin_functional/plugins/core_history_block/*"],
       "@kbn/core-hotkeys-browser": ["src/core/packages/hotkeys/browser"],
       "@kbn/core-hotkeys-browser/*": ["src/core/packages/hotkeys/browser/*"],
+      "@kbn/core-hotkeys-browser-internal": ["src/core/packages/hotkeys/browser-internal"],
+      "@kbn/core-hotkeys-browser-internal/*": ["src/core/packages/hotkeys/browser-internal/*"],
       "@kbn/core-hotkeys-browser-mocks": ["src/core/packages/hotkeys/browser-mocks"],
       "@kbn/core-hotkeys-browser-mocks/*": ["src/core/packages/hotkeys/browser-mocks/*"],
       "@kbn/core-http-browser": ["src/core/packages/http/browser"],

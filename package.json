@@ -416,6 +416,7 @@
     "@kbn/core-feature-flags-server-mocks": "link:src/core/packages/feature-flags/server-mocks",
     "@kbn/core-history-block-plugin": "link:src/platform/test/plugin_functional/plugins/core_history_block",
     "@kbn/core-hotkeys-browser": "link:src/core/packages/hotkeys/browser",
+    "@kbn/core-hotkeys-browser-internal": "link:src/core/packages/hotkeys/browser-internal",
     "@kbn/core-http-browser": "link:src/core/packages/http/browser",
     "@kbn/core-http-browser-internal": "link:src/core/packages/http/browser-internal",
     "@kbn/core-http-common": "link:src/core/packages/http/common",
