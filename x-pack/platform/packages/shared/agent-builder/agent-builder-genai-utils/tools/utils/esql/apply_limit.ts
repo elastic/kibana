@@ -9,9 +9,9 @@ import {
   Parser,
   Builder,
   WrappingPrettyPrinter,
+  isIntegerLiteral,
   type WrappingPrettyPrinterOptions,
 } from '@elastic/esql';
-import type { ESQLLiteral } from '@elastic/esql/types';
 
 const defaultPrintOpts: WrappingPrettyPrinterOptions = {
   wrap: 80,
@@ -21,22 +21,30 @@ const defaultPrintOpts: WrappingPrettyPrinterOptions = {
 /**
  * Applies a limit to an ES|QL query string.
  *
- * - If the last command of the query is a `LIMIT N`, it is replaced with
+ * - If the last command is `LIMIT N` (integer literal), it is replaced with
  *   `LIMIT min(N, limit)`.
- * - Otherwise, a new `| LIMIT <limit>` pipe is appended.
+ * - Otherwise (including `LIMIT ?param` where the value isn't statically known),
+ *   a new `| LIMIT <limit>` pipe is appended. ES|QL applies the narrower of the
+ *   two at execution time.
  * - Any non-trailing `LIMIT` is left untouched.
+ *
+ * If the input query has parse errors, it is returned unchanged so the caller
+ * surfaces the error from Elasticsearch against the exact query they provided.
  *
  * The caller is expected to pass a positive integer `limit`; this is not
  * validated.
  */
 export const applyLimit = (query: string, limit: number): string => {
-  const { root } = Parser.parse(query);
-  const lastCommand = root.commands[root.commands.length - 1];
+  const { root, errors } = Parser.parse(query);
+  if (errors.length > 0) {
+    return query;
+  }
 
-  if (lastCommand?.name === 'limit') {
-    const literal = lastCommand.args[0] as ESQLLiteral;
-    const existing = Number(literal.value);
-    const newValue = Number.isFinite(existing) ? Math.min(existing, limit) : limit;
+  const lastCommand = root.commands[root.commands.length - 1];
+  const lastArg = lastCommand?.args[0];
+
+  if (lastCommand?.name === 'limit' && isIntegerLiteral(lastArg)) {
+    const newValue = Math.min(Number(lastArg.value), limit);
     lastCommand.args[0] = Builder.expression.literal.integer(newValue);
   } else {
     const limitCommand = Builder.command({

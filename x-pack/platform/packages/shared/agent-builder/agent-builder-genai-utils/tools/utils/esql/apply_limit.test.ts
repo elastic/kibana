@@ -32,4 +32,15 @@ describe('applyLimit', () => {
 | SORT x`;
     expect(applyLimit(query, 25)).toBe('FROM idx | WHERE x > 1 | SORT x | LIMIT 25');
   });
+
+  it('appends rather than overwriting when the trailing LIMIT uses a parameter', () => {
+    expect(applyLimit('FROM idx | LIMIT ?maxRows', 10)).toBe(
+      'FROM idx | LIMIT ?maxRows | LIMIT 10'
+    );
+  });
+
+  it('returns the original query unchanged when parsing produces errors', () => {
+    const malformed = 'FROM idx | NOT_A_COMMAND foo';
+    expect(applyLimit(malformed, 10)).toBe(malformed);
+  });
 });
