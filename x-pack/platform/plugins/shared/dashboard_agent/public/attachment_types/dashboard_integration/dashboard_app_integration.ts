@@ -91,7 +91,8 @@ export const registerDashboardAppIntegration = ({
 
       state.attachments = dashboardAttachments;
       state.conversationId = conversationId;
-      addAttachmentFromDashboard();
+      // we have to defer adding the attachment from the dashboard until after the active conversation change has fully propagated, otherwise sidebarCallbacks from agent builder are null
+      setTimeout(() => addAttachmentFromDashboard());
     }
   );
 
