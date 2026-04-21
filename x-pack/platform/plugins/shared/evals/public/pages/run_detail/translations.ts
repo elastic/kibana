@@ -24,6 +24,26 @@ export const STAT_REPETITIONS = i18n.translate('xpack.evals.runDetail.stat.repet
   defaultMessage: 'Repetitions',
 });
 
+export const STAT_BRANCH = i18n.translate('xpack.evals.runDetail.stat.branch', {
+  defaultMessage: 'Branch',
+});
+
+export const STAT_CI = i18n.translate('xpack.evals.runDetail.stat.ci', {
+  defaultMessage: 'CI',
+});
+
+export const STAT_PULL_REQUEST = i18n.translate('xpack.evals.runDetail.stat.pullRequest', {
+  defaultMessage: 'PR',
+});
+
+export const CI_BUILD_LINK = i18n.translate('xpack.evals.runDetail.ciBuildLink', {
+  defaultMessage: 'Build',
+});
+
+export const PR_LINK = i18n.translate('xpack.evals.runDetail.prLink', {
+  defaultMessage: 'PR',
+});
+
 export const SECTION_DATASETS = i18n.translate('xpack.evals.runDetail.section.datasets', {
   defaultMessage: 'Datasets',
 });
@@ -72,13 +92,13 @@ export const getExampleCountLabel = (count: number) =>
 
 export const getPageTitle = (runId: string) =>
   i18n.translate('xpack.evals.runDetail.pageTitle', {
-    defaultMessage: 'Run: {runId}...',
+    defaultMessage: 'Run: {runId}',
     values: { runId },
   });
 
 export const getBreadcrumbRun = (runId: string) =>
   i18n.translate('xpack.evals.runDetail.breadcrumbRun', {
-    defaultMessage: 'Run {runId}...',
+    defaultMessage: 'Run {runId}',
     values: { runId },
   });
 
@@ -86,6 +106,31 @@ export const getTraceFlyoutTitle = (traceId: string) =>
   i18n.translate('xpack.evals.runDetail.traceFlyoutTitle', {
     defaultMessage: 'Trace: {traceId}',
     values: { traceId },
+  });
+
+export const RUN_NOT_FOUND_TITLE = i18n.translate('xpack.evals.runDetail.runNotFoundTitle', {
+  defaultMessage: 'Run not found',
+});
+
+export const RUN_LOAD_ERROR_TITLE = i18n.translate('xpack.evals.runDetail.runLoadErrorTitle', {
+  defaultMessage: 'Unable to load run',
+});
+
+export const BACK_TO_RUNS = i18n.translate('xpack.evals.runDetail.backToRuns', {
+  defaultMessage: 'Back to Runs',
+});
+
+export const getRunNotFoundBody = (runId: string) =>
+  i18n.translate('xpack.evals.runDetail.runNotFoundBody', {
+    defaultMessage:
+      'The run {runId} could not be found. It may have been deleted or the URL may be incorrect.',
+    values: { runId },
+  });
+
+export const getRunLoadErrorBody = (errorMessage: string) =>
+  i18n.translate('xpack.evals.runDetail.runLoadErrorBody', {
+    defaultMessage: 'An error occurred while loading run details: {errorMessage}',
+    values: { errorMessage },
   });
 
 export const getExamplesLoadError = (errorMessage: string) =>

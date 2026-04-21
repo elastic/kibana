@@ -27,7 +27,7 @@ export function getSpanLinksTabContent({ spanLinksCount, traceId, spanId, proces
   return {
     id: 'span_links',
     'data-test-subj': 'spanLinksTab',
-    prepend: <TechnicalPreviewBadge icon="beaker" />,
+    prepend: <TechnicalPreviewBadge icon="flask" />,
     name: (
       <>
         {i18n.translate('xpack.apm.propertiesTable.tabs.spanLinks', {

@@ -15,9 +15,9 @@
     "requiredPlugins": [
       "actions",
       "features",
+      "inference",
       "licensing",
       "management",
-      "ml",
       "share",
     ],
     "optionalPlugins": [

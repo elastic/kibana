@@ -20,6 +20,8 @@ import {
   ResizableLayoutOrder,
 } from '@kbn/resizable-layout';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
+import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
+import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { WorkflowExecutionPanel } from './workflow_execution_panel';
 import {
   buildOverviewStepExecutionFromContext,
@@ -65,7 +67,8 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
     const { workflowExecution, error } = useWorkflowExecutionPolling(executionId);
     const queryClient = useQueryClient();
 
-    const { activeTab, setSelectedStepExecution, selectedStepExecutionId } = useWorkflowUrlState();
+    const { activeTab, setSelectedStepExecution, selectedStepExecutionId, shouldAutoResume } =
+      useWorkflowUrlState();
     const [sidebarWidth = DefaultSidebarWidth, setSidebarWidth] = useLocalStorage(
       WidthStorageKey,
       DefaultSidebarWidth
@@ -81,9 +84,9 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
 
     useEffect(() => {
       if (
-        !selectedStepExecutionId && // no step execution selected
-        executionId === workflowExecution?.id && // execution id matches (not stale execution used)
-        workflowExecution?.stepExecutions?.length // step executions are loaded
+        !selectedStepExecutionId &&
+        executionId === workflowExecution?.id &&
+        (workflowExecution?.stepExecutions?.length || isTerminalStatus(workflowExecution?.status))
       ) {
         setSelectedStepExecution(PSEUDO_STEP_OVERVIEW);
       }
@@ -105,6 +108,35 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
 
     const { childExecutions, isLoading: isLoadingChildExecutions } =
       useChildWorkflowExecutions(workflowExecution);
+
+    // Find the lightweight paused step (polling uses includeInput: false)
+    const pausedStepId = useMemo(() => {
+      if (!workflowExecution || workflowExecution.status !== ExecutionStatus.WAITING_FOR_INPUT) {
+        return undefined;
+      }
+      return workflowExecution.stepExecutions?.find(
+        (s) => s.status === ExecutionStatus.WAITING_FOR_INPUT
+      )?.id;
+    }, [workflowExecution]);
+
+    // Fetch the paused step's full data (with input) independently of the selected step
+    // waitForInput stores its `with` config as stepExecution.input on pause entry
+    // consistent with every other step types
+    const { data: pausedStepFullData } = useStepExecution(
+      executionId,
+      pausedStepId,
+      ExecutionStatus.WAITING_FOR_INPUT
+    );
+
+    const { resumeMessage, resumeSchema } = useMemo<{
+      resumeMessage: string | undefined;
+      resumeSchema: JsonModelSchemaType | undefined;
+    }>(() => {
+      const stepInput = pausedStepFullData?.input as
+        | { message?: string; schema?: JsonModelSchemaType }
+        | undefined;
+      return { resumeMessage: stepInput?.message, resumeSchema: stepInput?.schema };
+    }, [pausedStepFullData]);
 
     // For pseudo-steps (overview, trigger), build from execution context directly
     const isPseudoStep =
@@ -251,6 +283,10 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
               stepExecution={selectedStepExecution}
               workflowExecutionDuration={workflowExecution?.duration ?? undefined}
               isLoadingStepData={isLoadingStepData && !isPseudoStep}
+              workflowExecutionStatus={workflowExecution?.status}
+              resumeMessage={resumeMessage}
+              resumeSchema={resumeSchema}
+              shouldAutoResume={shouldAutoResume}
               childWorkflowExecution={selectedStepChildExecution}
               parentWorkflowExecution={parentWorkflowExecution}
             />

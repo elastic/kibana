@@ -17,7 +17,11 @@ import {
 } from '@kbn/esql-types';
 import type { EsqlFieldType } from '@kbn/esql-types';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
-import type { ESQLSourceResult, InferenceEndpointsAutocompleteResult } from '@kbn/esql-types';
+import type {
+  ESQLSourceResult,
+  InferenceEndpointAutocompleteItem,
+  InferenceEndpointsAutocompleteResult,
+} from '@kbn/esql-types';
 import { getListOfCCSIndices } from '../lookup/utils';
 
 export interface EsqlServiceOptions {
@@ -81,10 +85,14 @@ export class EsqlService {
   /**
    * Get all indices, aliases, and data streams for ES|QL sources autocomplete.
    * @param scope The scope to retrieve indices for (local or all).
+   * @param projectRouting Optional CPS project routing value. When provided it is forwarded
+   *   directly to Elasticsearch as `project_routing` so that index resolution reflects the
+   *   project picker selection or an explicit `SET project_routing` pre-statement.
    * @returns A promise that resolves to an array of ESQL source results.
    */
   public async getAllIndices(
-    scope: 'local' | 'all' | 'remote' = 'local'
+    scope: 'local' | 'all' | 'remote' = 'local',
+    projectRouting?: string
   ): Promise<ESQLSourceResult[]> {
     const { client } = this.options;
 
@@ -98,15 +106,18 @@ export class EsqlService {
     // hidden and not, important for finding timeseries mode
     // mode is not returned for time_series datastreams, we need to find it from the indices
     // which are usually hidden
+    const cpsParams = projectRouting ? { project_routing: projectRouting } : {};
     const [allSources, availableSources] = (await Promise.all([
       client.indices.resolveIndex({
         name: namesToQuery,
         expand_wildcards: 'all', // this returns hidden indices too
-      }),
+        ...cpsParams,
+      } as Parameters<typeof client.indices.resolveIndex>[0]),
       client.indices.resolveIndex({
         name: namesToQuery,
         expand_wildcards: 'open',
-      }),
+        ...cpsParams,
+      } as Parameters<typeof client.indices.resolveIndex>[0]),
     ])) as [ResolveIndexResponse, ResolveIndexResponse];
 
     const suggestedIndices = this.processSuggestedIndices(availableSources.indices ?? []);
@@ -202,20 +213,25 @@ export class EsqlService {
    * @returns A promise that resolves to the inference endpoints autocomplete result.
    */
   public async getInferenceEndpoints(
-    taskType: InferenceTaskType
+    taskType: string
   ): Promise<InferenceEndpointsAutocompleteResult> {
     const { client } = this.options;
 
+    // The ES client's InferenceTaskType union can lag behind ES (e.g. new
+    // task types ship on the server before appearing in the client types).
+    // ES itself validates the value and rejects unknown task types.
     const { endpoints } = await client.inference.get({
       inference_id: '_all',
-      task_type: taskType,
+      task_type: taskType as InferenceTaskType,
     });
 
     return {
-      inferenceEndpoints: endpoints.map((endpoint) => ({
-        inference_id: endpoint.inference_id,
-        task_type: endpoint.task_type,
-      })),
+      inferenceEndpoints: endpoints.map(
+        (endpoint): InferenceEndpointAutocompleteItem => ({
+          inference_id: endpoint.inference_id,
+          task_type: endpoint.task_type,
+        })
+      ),
     };
   }
 

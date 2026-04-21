@@ -12,6 +12,7 @@ import { TestProviders } from '../../../common/mock';
 import { EaseDetailsContext } from '../context';
 import { mockDataFormattedForFieldBrowser } from '../../document_details/shared/mocks/mock_data_formatted_for_field_browser';
 import { mockGetFieldsData } from '../../document_details/shared/mocks/mock_get_fields_data';
+import { mockSearchHit } from '../../document_details/shared/mocks/mock_search_hit';
 import {
   HEADER_INTEGRATION_TITLE_TEST_ID,
   HEADER_RISK_SCORE_TITLE_TEST_ID,
@@ -24,7 +25,7 @@ import { useDateFormat, useTimeZone } from '../../../common/lib/kibana';
 import {
   RISK_SCORE_VALUE_TEST_ID,
   SEVERITY_VALUE_TEST_ID,
-} from '../../document_details/right/components/test_ids';
+} from '../../../flyout_v2/document/components/test_ids';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -32,9 +33,23 @@ moment.suppressDeprecationWarnings = true;
 moment.tz.setDefault('UTC');
 
 const dateFormat = 'MMM D, YYYY @ HH:mm:ss.SSS';
+const createSearchHit = (fields: Record<string, unknown[]>) => ({
+  ...mockSearchHit,
+  fields: {
+    ...mockSearchHit.fields,
+    ...fields,
+  },
+});
+
 const mockContextValue = {
   dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
   getFieldsData: jest.fn().mockImplementation(mockGetFieldsData),
+  searchHit: createSearchHit({
+    'event.kind': ['signal'],
+    'kibana.alert.risk_score': [0],
+    'kibana.alert.rule.name': ['rule-name'],
+    'kibana.alert.severity': ['low'],
+  }),
 } as unknown as EaseDetailsContext;
 
 const renderHeader = (contextValue: EaseDetailsContext) =>

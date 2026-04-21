@@ -15,6 +15,8 @@ import {
   getMappingFieldPaths,
   validateAllMappingsInModelVersion,
   getLatestModelVersion,
+  getInvalidNameTitleFields,
+  isSearchableViaManagement,
 } from './common_utils';
 
 export function mappingsUpdated(
@@ -150,6 +152,60 @@ export function validateNewMappingsInModelVersion(
         newModelVersion.version
       }': ${undeclaredFields.join(', ')}. ` +
         `All new mapping fields must be declared via 'mappings_addition' changes in the corresponding model version.`
+    );
+  }
+}
+
+/**
+ * Validates that `name` and `title` mapping fields use `type: text` on an **existing** SO type.
+ * Types that are not searchable via the management page are exempt.
+ *
+ * A field type cannot be changed from 'keyword' to 'text' without reindexing, so when a field
+ * with an incorrect type was already present in the baseline (`from`), a warning is emitted
+ * instead of throwing. Only fields newly introduced with the wrong type cause a hard failure.
+ */
+export function validateNameTitleFieldTypesExistingType(
+  name: string,
+  to: MigrationInfoRecord,
+  from: MigrationInfoRecord,
+  registeredType: SavedObjectsType,
+  log: (message: string) => void
+): void {
+  if (!isSearchableViaManagement(registeredType)) {
+    return;
+  }
+
+  const invalidInTo = getInvalidNameTitleFields(to);
+  if (invalidInTo.length === 0) {
+    return;
+  }
+
+  // A field is "pre-existing" only if it was already invalid in the baseline — not merely
+  // present. This correctly catches the case where a field was downgraded from 'text' to
+  // 'keyword', which is a newly introduced problem even though the key existed before.
+  const alreadyInvalidInFrom = new Set(
+    getInvalidNameTitleFields(from).map(({ fieldName }) => fieldName)
+  );
+
+  const preExisting = invalidInTo.filter(({ fieldName }) => alreadyInvalidInFrom.has(fieldName));
+  const newlyIntroduced = invalidInTo.filter(
+    ({ fieldName }) => !alreadyInvalidInFrom.has(fieldName)
+  );
+
+  if (preExisting.length > 0) {
+    log(
+      `⚠️  The SO type '${name}' has pre-existing 'name' or 'title' fields with incorrect types: ${preExisting
+        .map(({ description }) => description)
+        .join(', ')}. ` +
+        `These fields must be of type 'text' for Search API compatibility, but cannot be changed without reindexing existing data.`
+    );
+  }
+
+  if (newlyIntroduced.length > 0) {
+    throw new Error(
+      `❌ The SO type '${name}' has 'name' or 'title' fields with incorrect types: ${newlyIntroduced
+        .map(({ description }) => description)
+        .join(', ')}. ` + `These fields must be of type 'text' for Search API compatibility.`
     );
   }
 }

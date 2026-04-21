@@ -99,7 +99,7 @@ export const SearchApplicationContent = () => {
               ),
             text: (
               <>
-                <EuiIcon size="s" type="arrowLeft" /> {searchApplicationName}
+                <EuiIcon size="s" type="chevronSingleLeft" /> {searchApplicationName}
               </>
             ),
           },
@@ -110,7 +110,7 @@ export const SearchApplicationContent = () => {
           <EuiButton
             data-telemetry-id="entSearchApplications-indices-addNewIndices"
             data-test-subj="search-application-add-new-indices-btn"
-            iconType="plusInCircle"
+            iconType="plusCircle"
             fill
             onClick={openAddIndicesFlyout}
           >

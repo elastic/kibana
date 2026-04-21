@@ -229,7 +229,7 @@ export function LegendSteps({ steps, onChange }: LegendStepsProps) {
         <>
           <EuiCallOut
             color="danger"
-            iconType="alert"
+            iconType="warning"
             announceOnMount
             title={i18n.translate('xpack.infra.legendSteps.validationErrorTitle', {
               defaultMessage: 'Please fix the following errors:',

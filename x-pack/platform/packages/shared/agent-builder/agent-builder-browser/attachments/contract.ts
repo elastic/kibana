@@ -85,8 +85,24 @@ export interface ActionButton {
   icon?: IconType;
   /** Whether this is the primary action button */
   type: ActionButtonType;
+  /** Whether the action is currently unavailable */
+  disabled?: boolean;
+  /** Optional explanation shown when a disabled action remains visible */
+  disabledReason?: string;
   /** Handler function called when the button is clicked */
   handler: () => void | Promise<void>;
+}
+
+/**
+ * Parameters passed to attachment lifecycle hooks.
+ */
+export interface AttachmentLifecycleParams<
+  TAttachment extends UnknownAttachment = UnknownAttachment
+> {
+  /** Returns the current attachment state */
+  getAttachment: () => TAttachment;
+  /** Update the attachment's origin reference (e.g., after saving to library) */
+  updateOrigin: (origin: string) => Promise<UpdateOriginResponse | undefined>;
 }
 
 /**
@@ -131,6 +147,14 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
    * Buttons will appear alongside or below the rendered content.
    */
   getActionButtons?: (params: GetActionButtonsParams<TAttachment>) => ActionButton[];
+  /**
+   * Optional lifecycle hook called when an attachment is first rendered in the conversation.
+   * Called once per attachment (not per version). Use for setting up subscriptions or
+   * other side effects that should persist across version renders.
+   *
+   * @returns Optional cleanup function called when the attachment is removed from the conversation.
+   */
+  onAttachmentMount?: (params: AttachmentLifecycleParams<TAttachment>) => void | (() => void);
 }
 
 /**

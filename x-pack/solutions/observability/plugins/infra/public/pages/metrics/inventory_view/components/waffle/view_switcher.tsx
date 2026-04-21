@@ -29,7 +29,7 @@ export const ViewSwitcher = ({ view, onChange }: Props) => {
       label: i18n.translate('xpack.infra.viewSwitcher.tableViewLabel', {
         defaultMessage: 'Table view',
       }),
-      iconType: 'visTable',
+      iconType: 'table',
     },
   ];
   return (

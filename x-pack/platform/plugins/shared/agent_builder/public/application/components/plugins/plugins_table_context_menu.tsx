@@ -46,7 +46,7 @@ export const PluginContextMenu: React.FC<PluginContextMenuProps> = ({
       },
     ];
 
-    if (canManage) {
+    if (canManage && !plugin.readonly) {
       items.push({
         name: labels.plugins.deletePluginButtonLabel,
         icon: 'trash',

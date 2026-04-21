@@ -47,8 +47,6 @@ import { throwAuthzError } from '../../../../machine_learning/validation';
 import { routeLimitedConcurrencyTag } from '../../../../../utils/route_limited_concurrency_tag';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
-import type { RuleExecutionContext, StatusChangeArgs } from '../../../rule_monitoring';
-
 import type { ConfigType } from '../../../../../config';
 import { alertInstanceFactoryStub } from './alert_instance_factory_stub';
 import type {
@@ -116,9 +114,14 @@ export const previewRulesRoute = (
           return siemResponse.error({ statusCode: 400, body: validationErrors });
         }
         try {
-          const [, { data, security: securityService, share, dataViews }] =
+          const [coreStart, { data, security: securityService, share, dataViews }] =
             await getStartServices();
-          const searchSourceClient = await data.search.searchSource.asScoped(request);
+          const searchSourceClientWithCps = await data.search.searchSource.asScoped(request, {
+            projectRouting: 'space',
+          });
+          const scopedClusterClientWithCps = coreStart.elasticsearch.client.asScoped(request, {
+            projectRouting: 'space',
+          });
           const savedObjectsClient = coreContext.savedObjects.client;
           const siemClient = (await context.securitySolution).getAppClient();
           const actionsClient = (await context.actions).getActionsClient();
@@ -149,14 +152,10 @@ export const previewRulesRoute = (
           });
           throwAuthzError(await mlAuthz.validateRuleType(internalRule.params.type));
 
-          const listsContext = await context.lists;
-          await listsContext?.getExceptionListClient().createEndpointList();
-
           const spaceId = siemClient.getSpaceId();
           const previewId = uuidv4();
           const username = security?.authc.getCurrentUser(request)?.username;
-          const loggedStatusChanges: Array<RuleExecutionContext & StatusChangeArgs> = [];
-          const previewRuleExecutionLogger = createPreviewRuleExecutionLogger(loggedStatusChanges);
+          const previewRuleExecutionLogger = createPreviewRuleExecutionLogger();
           const runState: Record<string, unknown> = {
             isLoggedRequestsEnabled: request.query.enable_logged_requests,
           };
@@ -277,12 +276,12 @@ export const previewRulesRoute = (
                   savedObjectsClient: coreContext.savedObjects.client,
                   scopedClusterClient: wrapScopedClusterClient({
                     abortController,
-                    scopedClusterClient: coreContext.elasticsearch.client,
+                    scopedClusterClient: scopedClusterClientWithCps,
                   }),
                   getSearchSourceClient: async () =>
                     wrapSearchSourceClient({
                       abortController,
-                      searchSourceClient,
+                      searchSourceClient: searchSourceClientWithCps,
                     }),
                   getMaintenanceWindowIds: async () => [],
                   getMaintenanceWindowNames: async () => [],
@@ -290,7 +289,9 @@ export const previewRulesRoute = (
                   getDataViews: async () => dataViewsService,
                   share,
                   getAsyncSearchClient: (strategy) => {
-                    const client = data.search.asScoped(request);
+                    const clientWithCps = data.search.asScoped(request, {
+                      projectRouting: 'space',
+                    });
                     return wrapAsyncSearchClient({
                       rule: {
                         name: rule.name,
@@ -300,7 +301,7 @@ export const previewRulesRoute = (
                       },
                       logger,
                       strategy,
-                      client,
+                      client: clientWithCps,
                       abortController,
                     });
                   },
@@ -319,25 +320,23 @@ export const previewRulesRoute = (
                 ruleExecutionTimeout: `${PREVIEW_TIMEOUT_SECONDS}s`,
               })) as { state: TState; loggedRequests: RulePreviewLoggedRequest[] });
 
-              const errors = loggedStatusChanges
-                .filter((item) => item.newStatus === RuleExecutionStatusEnum.failed)
-                .map((item) => item.message ?? 'Unknown Error');
-
-              const warnings = loggedStatusChanges
-                .filter((item) => item.newStatus === RuleExecutionStatusEnum['partial failure'])
-                .map((item) => item.message ?? 'Unknown Warning');
+              const executionResult = previewRuleExecutionLogger.getExecutionResult();
 
               logs.push({
-                errors,
-                warnings,
+                errors:
+                  executionResult?.status === RuleExecutionStatusEnum.failed
+                    ? [executionResult?.message, ...previewRuleExecutionLogger.getErrors()]
+                    : previewRuleExecutionLogger.getErrors(),
+                warnings:
+                  executionResult?.status === RuleExecutionStatusEnum['partial failure']
+                    ? [executionResult?.message, ...previewRuleExecutionLogger.getWarnings()]
+                    : previewRuleExecutionLogger.getWarnings(),
                 startedAt: startedAt.toDate().toISOString(),
                 duration: moment().diff(invocationStartTime, 'milliseconds'),
                 ...(loggedRequests ? { requests: loggedRequests } : {}),
               });
 
-              loggedStatusChanges.length = 0;
-
-              if (errors.length) {
+              if (executionResult?.status === RuleExecutionStatusEnum.failed) {
                 break;
               }
 

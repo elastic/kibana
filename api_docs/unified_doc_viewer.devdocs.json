@@ -103,37 +103,69 @@
         "label": "UnifiedDocViewer",
         "description": [],
         "signature": [
-          "React.ForwardRefExoticComponent<Omit<Omit<Omit<Omit<",
-          {
-            "pluginId": "@kbn/unified-doc-viewer",
-            "scope": "public",
-            "docId": "kibKbnUnifiedDocViewerPluginApi",
-            "section": "def-public.DocViewerProps",
-            "text": "DocViewerProps"
-          },
-          ", \"docViews\">, \"ref\"> & React.RefAttributes<",
-          {
-            "pluginId": "@kbn/unified-doc-viewer",
-            "scope": "public",
-            "docId": "kibKbnUnifiedDocViewerPluginApi",
-            "section": "def-public.DocViewerApi",
-            "text": "DocViewerApi"
-          },
+          "React.ForwardRefExoticComponent<Omit<Omit<Omit<Omit<Omit<Omit<Omit<",
+          "InternalDocViewerProps",
+          ", \"ref\"> & React.RefAttributes<",
+          "InternalDocViewerApi",
           ">, \"ref\"> & { ref?: ((instance: ",
-          {
-            "pluginId": "@kbn/unified-doc-viewer",
-            "scope": "public",
-            "docId": "kibKbnUnifiedDocViewerPluginApi",
-            "section": "def-public.DocViewerApi",
-            "text": "DocViewerApi"
-          },
+          "InternalDocViewerApi",
           " | null) => void) | React.RefObject<",
+          "InternalDocViewerApi",
+          "> | null | undefined; } & Pick<",
+          {
+            "pluginId": "@kbn/restorable-state",
+            "scope": "public",
+            "docId": "kibKbnRestorableStatePluginApi",
+            "section": "def-public.RestorableStateProviderProps",
+            "text": "RestorableStateProviderProps"
+          },
+          "<",
           {
             "pluginId": "@kbn/unified-doc-viewer",
             "scope": "public",
             "docId": "kibKbnUnifiedDocViewerPluginApi",
-            "section": "def-public.DocViewerApi",
-            "text": "DocViewerApi"
+            "section": "def-public.DocViewerRestorableState",
+            "text": "DocViewerRestorableState"
+          },
+          ">, \"initialState\" | \"onInitialStateChange\">, \"ref\"> & React.RefAttributes<",
+          "InternalDocViewerApi",
+          " & ",
+          {
+            "pluginId": "@kbn/restorable-state",
+            "scope": "public",
+            "docId": "kibKbnRestorableStatePluginApi",
+            "section": "def-public.RestorableStateProviderApi",
+            "text": "RestorableStateProviderApi"
+          },
+          ">, \"reportEvent\" | \"docViews\">, \"ref\"> & React.RefAttributes<",
+          "InternalDocViewerApi",
+          " & ",
+          {
+            "pluginId": "@kbn/restorable-state",
+            "scope": "public",
+            "docId": "kibKbnRestorableStatePluginApi",
+            "section": "def-public.RestorableStateProviderApi",
+            "text": "RestorableStateProviderApi"
+          },
+          ">, \"ref\"> & { ref?: ((instance: (",
+          "InternalDocViewerApi",
+          " & ",
+          {
+            "pluginId": "@kbn/restorable-state",
+            "scope": "public",
+            "docId": "kibKbnRestorableStatePluginApi",
+            "section": "def-public.RestorableStateProviderApi",
+            "text": "RestorableStateProviderApi"
+          },
+          ") | null) => void) | React.RefObject<",
+          "InternalDocViewerApi",
+          " & ",
+          {
+            "pluginId": "@kbn/restorable-state",
+            "scope": "public",
+            "docId": "kibKbnRestorableStatePluginApi",
+            "section": "def-public.RestorableStateProviderApi",
+            "text": "RestorableStateProviderApi"
           },
           "> | null | undefined; } & ",
           {
@@ -275,7 +307,7 @@
             "section": "def-public.ObservabilityStreamsFeatureRenderDeps",
             "text": "ObservabilityStreamsFeatureRenderDeps"
           },
-          ") => JSX.Element) | undefined; indexes: ",
+          ") => JSX.Element) | undefined; renderCpsWarning?: boolean | undefined; indexes: ",
           "ObservabilityIndexes",
           "; showTraceWaterfall?: boolean | undefined; docViewActions?: ",
           "DocViewActions",
@@ -544,7 +576,7 @@
         "label": "LogsOverviewApi",
         "description": [],
         "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/logs_overview.tsx",
-        "lineNumber": 60,
+        "lineNumber": 61,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -560,7 +592,7 @@
               "(section: \"stacktrace\" | \"quality_issues\") => void"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/logs_overview.tsx",
-            "lineNumber": 61,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -576,7 +608,7 @@
                   "\"stacktrace\" | \"quality_issues\""
                 ],
                 "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/logs_overview.tsx",
-                "lineNumber": 61,
+                "lineNumber": 62,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -603,18 +635,44 @@
             "section": "def-public.UnifiedDocViewerFlyoutProps",
             "text": "UnifiedDocViewerFlyoutProps"
           },
-          " extends Pick<",
+          " extends Pick<Omit<Omit<Omit<",
+          "InternalDocViewerProps",
+          ", \"ref\"> & React.RefAttributes<",
+          "InternalDocViewerApi",
+          ">, \"ref\"> & { ref?: ((instance: ",
+          "InternalDocViewerApi",
+          " | null) => void) | React.RefObject<",
+          "InternalDocViewerApi",
+          "> | null | undefined; } & Pick<",
+          {
+            "pluginId": "@kbn/restorable-state",
+            "scope": "public",
+            "docId": "kibKbnRestorableStatePluginApi",
+            "section": "def-public.RestorableStateProviderProps",
+            "text": "RestorableStateProviderProps"
+          },
+          "<",
           {
             "pluginId": "@kbn/unified-doc-viewer",
             "scope": "public",
             "docId": "kibKbnUnifiedDocViewerPluginApi",
-            "section": "def-public.DocViewerProps",
-            "text": "DocViewerProps"
+            "section": "def-public.DocViewerRestorableState",
+            "text": "DocViewerRestorableState"
           },
-          ", \"initialTabId\" | \"initialDocViewerState\" | \"onInitialDocViewerStateChange\" | \"onUpdateSelectedTabId\">"
+          ">, \"initialState\" | \"onInitialStateChange\">, \"ref\"> & React.RefAttributes<",
+          "InternalDocViewerApi",
+          " & ",
+          {
+            "pluginId": "@kbn/restorable-state",
+            "scope": "public",
+            "docId": "kibKbnRestorableStatePluginApi",
+            "section": "def-public.RestorableStateProviderApi",
+            "text": "RestorableStateProviderApi"
+          },
+          ">, \"initialTabId\" | \"onUpdateSelectedTabId\">"
         ],
         "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-        "lineNumber": 38,
+        "lineNumber": 41,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -628,17 +686,19 @@
             "description": [],
             "signature": [
               "React.LegacyRef<",
+              "InternalDocViewerApi",
+              " & ",
               {
-                "pluginId": "@kbn/unified-doc-viewer",
+                "pluginId": "@kbn/restorable-state",
                 "scope": "public",
-                "docId": "kibKbnUnifiedDocViewerPluginApi",
-                "section": "def-public.DocViewerApi",
-                "text": "DocViewerApi"
+                "docId": "kibKbnRestorableStatePluginApi",
+                "section": "def-public.RestorableStateProviderApi",
+                "text": "RestorableStateProviderApi"
               },
               "> | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 46,
+            "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -654,7 +714,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 47,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -670,7 +730,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 48,
+            "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -687,7 +747,7 @@
               ".Width<string | number> | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 49,
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -703,7 +763,7 @@
               "React.ReactNode"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 50,
+            "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -719,7 +779,7 @@
               "\"push\" | \"overlay\" | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 51,
+            "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -735,7 +795,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 52,
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -755,7 +815,7 @@
               "; }"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 53,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -794,7 +854,7 @@
               ") | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 57,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -807,7 +867,7 @@
             "label": "isEsqlQuery",
             "description": [],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 58,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -823,7 +883,7 @@
               "string[]"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 59,
+            "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -846,7 +906,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 60,
+            "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -868,7 +928,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 61,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -891,7 +951,7 @@
               "[] | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 62,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -913,7 +973,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 63,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -929,7 +989,55 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 64,
+            "lineNumber": 61,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedDocViewer",
+            "id": "def-public.UnifiedDocViewerFlyoutProps.initialDocViewerState",
+            "type": "Object",
+            "tags": [],
+            "label": "initialDocViewerState",
+            "description": [],
+            "signature": [
+              "Partial<",
+              {
+                "pluginId": "@kbn/unified-doc-viewer",
+                "scope": "public",
+                "docId": "kibKbnUnifiedDocViewerPluginApi",
+                "section": "def-public.DocViewerRestorableState",
+                "text": "DocViewerRestorableState"
+              },
+              "> | undefined"
+            ],
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
+            "lineNumber": 62,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedDocViewer",
+            "id": "def-public.UnifiedDocViewerFlyoutProps.onInitialDocViewerStateChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onInitialDocViewerStateChange",
+            "description": [],
+            "signature": [
+              "((initialState: Partial<",
+              {
+                "pluginId": "@kbn/unified-doc-viewer",
+                "scope": "public",
+                "docId": "kibKbnUnifiedDocViewerPluginApi",
+                "section": "def-public.DocViewerRestorableState",
+                "text": "DocViewerRestorableState"
+              },
+              ">) => void) | undefined"
+            ],
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -947,7 +1055,7 @@
               ") => React.ReactElement<any>) | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 65,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -955,6 +1063,44 @@
               {
                 "parentPluginId": "unifiedDocViewer",
                 "id": "def-public.UnifiedDocViewerFlyoutProps.renderCustomHeader.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "DocViewRenderProps"
+                ],
+                "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
+                "lineNumber": 64,
+                "columnNumber": 25,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "unifiedDocViewer",
+            "id": "def-public.UnifiedDocViewerFlyoutProps.renderCustomFooter",
+            "type": "Function",
+            "tags": [],
+            "label": "renderCustomFooter",
+            "description": [],
+            "signature": [
+              "((props: ",
+              "DocViewRenderProps",
+              ") => React.ReactElement<any>) | undefined"
+            ],
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
+            "lineNumber": 65,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "unifiedDocViewer",
+                "id": "def-public.UnifiedDocViewerFlyoutProps.renderCustomFooter.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "props",
@@ -1187,7 +1333,7 @@
             "section": "def-public.ObservabilityStreamsFeatureRenderDeps",
             "text": "ObservabilityStreamsFeatureRenderDeps"
           },
-          ") => JSX.Element) | undefined; indexes: ",
+          ") => JSX.Element) | undefined; renderCpsWarning?: boolean | undefined; indexes: ",
           "ObservabilityIndexes",
           "; showTraceWaterfall?: boolean | undefined; docViewActions?: ",
           "DocViewActions",

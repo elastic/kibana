@@ -23,6 +23,7 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./lifecycle'));
     loadTestFile(require.resolve('./failure_store'));
     loadTestFile(require.resolve('./significant_events'));
+    loadTestFile(require.resolve('./features'));
     loadTestFile(require.resolve('./queries'));
     loadTestFile(require.resolve('./discover'));
     loadTestFile(require.resolve('./content'));
@@ -37,5 +38,7 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./doc_counts'));
     loadTestFile(require.resolve('./snapshot_restore'));
     loadTestFile(require.resolve('./query_streams'));
+    loadTestFile(require.resolve('./deferred_data_stream'));
+    loadTestFile(require.resolve('./draft_streams'));
   });
 }

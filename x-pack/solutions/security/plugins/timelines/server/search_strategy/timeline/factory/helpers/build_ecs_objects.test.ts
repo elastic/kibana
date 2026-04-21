@@ -34,6 +34,7 @@ describe('buildEcsObjects', () => {
         id: ['some-id'],
         ip: [],
         name: ['test-name'],
+        hostname: ['test-name'],
       },
       timestamp: '123456',
       '@timestamp': ['123456'],

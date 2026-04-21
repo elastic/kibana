@@ -13,13 +13,13 @@
  * This file is auto-generated. Do not edit manually.
  * Sources: resolved-semconv.yaml + hardcoded OTLP mappings
  * Registry groups: 143
- * Metric groups: 502
+ * Metric groups: 517
  * Hardcoded fields: 34
- * Total fields: 1216
+ * Total fields: 1247
  *
  * @internal
  *
- * WARNING: This object contains 1216+ field definitions (~50KB+ minified).
+ * WARNING: This object contains 1247+ field definitions (~50KB+ minified).
  * Direct import will significantly increase client bundle size.
  *
  * RECOMMENDED USAGE:
@@ -532,7 +532,7 @@ export const semconvFlat = {
   'aws.lambda.resource_mapping.id': {
     name: 'aws.lambda.resource_mapping.id',
     description:
-      "The UUID of the [AWS Lambda EvenSource Mapping](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-lambda-eventsourcemapping.html). An event source is mapped to a lambda function. It's contents are read by Lambda and used to trigger a function. This isn't available in the lambda execution context or the lambda runtime environtment. This is going to be populated by the AWS SDK for each language when that UUID is present. Some of these operations are Create/Delete/Get/List/Update EventSourceMapping.",
+      "The UUID of the [AWS Lambda EvenSource Mapping](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-lambda-eventsourcemapping.html). An event source is mapped to a lambda function. It's contents are read by Lambda and used to trigger a function. This isn't available in the lambda execution context or the lambda runtime environment. This is going to be populated by the AWS SDK for each language when that UUID is present. Some of these operations are Create/Delete/Get/List/Update EventSourceMapping.",
     type: 'keyword',
     example: '587ad24b-03b9-4413-8202-bbd56b36e5b7',
   },
@@ -609,7 +609,7 @@ export const semconvFlat = {
   },
   'aws.secretsmanager.secret.arn': {
     name: 'aws.secretsmanager.secret.arn',
-    description: 'The ARN of the Secret stored in the Secrets Mangger',
+    description: 'The ARN of the Secret stored in the Secrets Manager',
     type: 'keyword',
     example: 'arn:aws:secretsmanager:us-east-1:123456789012:secret:SecretName-6RandomCharacters',
   },
@@ -1132,7 +1132,7 @@ export const semconvFlat = {
   'container.runtime.description': {
     name: 'container.runtime.description',
     description:
-      'A description about the runtime which could include, for example details about the CRI/API version being used or other customisations.',
+      'A description about the runtime which could include, for example details about the CRI/API version being used or other customizations.',
     type: 'keyword',
     example: 'docker://19.3.1 - CRI: 1.22.0',
   },
@@ -1987,6 +1987,11 @@ export const semconvFlat = {
     type: 'keyword',
     example: 'forest,lived',
   },
+  'gen_ai.request.stream': {
+    name: 'gen_ai.request.stream',
+    description: 'Indicates whether the GenAI request was made in streaming mode.',
+    type: 'boolean',
+  },
   'gen_ai.request.temperature': {
     name: 'gen_ai.request.temperature',
     description: 'The temperature setting for the GenAI request.',
@@ -2023,6 +2028,13 @@ export const semconvFlat = {
     description: 'The name of the model that generated the response.',
     type: 'keyword',
     example: 'gpt-4-0613',
+  },
+  'gen_ai.response.time_to_first_chunk': {
+    name: 'gen_ai.response.time_to_first_chunk',
+    description:
+      'Time to first chunk in a streaming response, measured from request issuance, in seconds. The value is measured from when the client issues the generation request to when the first chunk is received in the response stream.',
+    type: 'double',
+    example: '0.5',
   },
   'gen_ai.retrieval.documents': {
     name: 'gen_ai.retrieval.documents',
@@ -2071,8 +2083,7 @@ export const semconvFlat = {
   },
   'gen_ai.tool.definitions': {
     name: 'gen_ai.tool.definitions',
-    description:
-      'The list of source system tool definitions available to the GenAI agent or model.',
+    description: 'The list of tool definitions available to the GenAI agent or model.',
     type: 'keyword',
     example:
       '[{"type":"function","name":"get_current_weather","description":"Get the current weather in a given location","parameters":{"type":"object","properties":{"location":{"type":"string","description":"The city and state, e.g. San Francisco, CA"},"unit":{"type":"string","enum":["celsius","fahrenheit"]}},"required":["location","unit"]}}]',
@@ -2118,6 +2129,12 @@ export const semconvFlat = {
     description: 'The number of tokens used in the GenAI response (completion).',
     type: 'long',
     example: '180',
+  },
+  'gen_ai.workflow.name': {
+    name: 'gen_ai.workflow.name',
+    description: 'Human-readable name of the GenAI workflow provided by the application.',
+    type: 'keyword',
+    example: 'multi_agent_rag',
   },
   'geo.continent.code': {
     name: 'geo.continent.code',
@@ -2378,7 +2395,7 @@ export const semconvFlat = {
   },
   'hw.battery.capacity': {
     name: 'hw.battery.capacity',
-    description: 'Design capacity in Watts-hours or Amper-hours',
+    description: 'Design capacity in Watts-hours or Ampere-hours',
     type: 'keyword',
     example: '9.3Ah',
   },
@@ -2853,11 +2870,87 @@ export const semconvFlat = {
     type: 'keyword',
     example: 'node-1',
   },
+  'k8s.node.system_container.name': {
+    name: 'k8s.node.system_container.name',
+    description: 'The name of the system container running on the K8s Node.',
+    type: 'keyword',
+    example: 'kubelet',
+  },
   'k8s.node.uid': {
     name: 'k8s.node.uid',
     description: 'The UID of the Node.',
     type: 'keyword',
     example: '1eb3a0c6-0477-4080-a9cb-0cb7db65c6a2',
+  },
+  'k8s.persistentvolume.annotation': {
+    name: 'k8s.persistentvolume.annotation',
+    description:
+      'The annotation placed on the PersistentVolume, the `<key>` being the annotation name, the value being the annotation value, even if the value is empty.',
+    type: 'keyword',
+    example: 'kubernetes.io/aws-ebs',
+  },
+  'k8s.persistentvolume.label': {
+    name: 'k8s.persistentvolume.label',
+    description:
+      'The label placed on the PersistentVolume, the `<key>` being the label name, the value being the label value, even if the value is empty.',
+    type: 'keyword',
+    example: 'ssd',
+  },
+  'k8s.persistentvolume.name': {
+    name: 'k8s.persistentvolume.name',
+    description: 'The name of the PersistentVolume.',
+    type: 'keyword',
+    example: 'pv-data-01',
+  },
+  'k8s.persistentvolume.reclaim_policy': {
+    name: 'k8s.persistentvolume.reclaim_policy',
+    description: 'The reclaim policy of the PersistentVolume.',
+    type: 'keyword',
+    example: 'Delete',
+  },
+  'k8s.persistentvolume.status.phase': {
+    name: 'k8s.persistentvolume.status.phase',
+    description: 'The phase of the PersistentVolume.',
+    type: 'keyword',
+    example: 'Pending',
+  },
+  'k8s.persistentvolume.uid': {
+    name: 'k8s.persistentvolume.uid',
+    description: 'The UID of the PersistentVolume.',
+    type: 'keyword',
+    example: '275ecb36-5aa8-4c2a-9c47-d8bb681b9aff',
+  },
+  'k8s.persistentvolumeclaim.annotation': {
+    name: 'k8s.persistentvolumeclaim.annotation',
+    description:
+      'The annotation placed on the PersistentVolumeClaim, the `<key>` being the annotation name, the value being the annotation value, even if the value is empty.',
+    type: 'keyword',
+    example: 'kubernetes.io/aws-ebs',
+  },
+  'k8s.persistentvolumeclaim.label': {
+    name: 'k8s.persistentvolumeclaim.label',
+    description:
+      'The label placed on the PersistentVolumeClaim, the `<key>` being the label name, the value being the label value, even if the value is empty.',
+    type: 'keyword',
+    example: 'my-app',
+  },
+  'k8s.persistentvolumeclaim.name': {
+    name: 'k8s.persistentvolumeclaim.name',
+    description: 'The name of the PersistentVolumeClaim.',
+    type: 'keyword',
+    example: 'pvc-data-01',
+  },
+  'k8s.persistentvolumeclaim.status.phase': {
+    name: 'k8s.persistentvolumeclaim.status.phase',
+    description: 'The phase of the PersistentVolumeClaim.',
+    type: 'keyword',
+    example: 'Pending',
+  },
+  'k8s.persistentvolumeclaim.uid': {
+    name: 'k8s.persistentvolumeclaim.uid',
+    description: 'The UID of the PersistentVolumeClaim.',
+    type: 'keyword',
+    example: '275ecb36-5aa8-4c2a-9c47-d8bb681b9aff',
   },
   'k8s.pod.annotation': {
     name: 'k8s.pod.annotation',
@@ -4614,9 +4707,54 @@ export const semconvFlat = {
     description: 'Amount of pods allocatable on the node.',
     type: 'double',
   },
+  'metrics.k8s.node.system_container.cpu.time': {
+    name: 'metrics.k8s.node.system_container.cpu.time',
+    description: "Node's system container CPU time.",
+    type: 'double',
+  },
+  'metrics.k8s.node.system_container.cpu.usage': {
+    name: 'metrics.k8s.node.system_container.cpu.usage',
+    description: "Node's system container CPU usage, measured in cpus.",
+    type: 'double',
+  },
+  'metrics.k8s.node.system_container.memory.usage': {
+    name: 'metrics.k8s.node.system_container.memory.usage',
+    description: "Node's system container memory usage.",
+    type: 'double',
+  },
+  'metrics.k8s.node.system_container.memory.working_set': {
+    name: 'metrics.k8s.node.system_container.memory.working_set',
+    description: 'The amount of working set memory.',
+    type: 'double',
+  },
   'metrics.k8s.node.uptime': {
     name: 'metrics.k8s.node.uptime',
     description: 'The time the Node has been running.',
+    type: 'double',
+  },
+  'metrics.k8s.persistentvolume.status.phase': {
+    name: 'metrics.k8s.persistentvolume.status.phase',
+    description: 'Number of PersistentVolumes in a given phase.',
+    type: 'double',
+  },
+  'metrics.k8s.persistentvolume.storage.capacity': {
+    name: 'metrics.k8s.persistentvolume.storage.capacity',
+    description: 'The storage capacity of the PersistentVolume.',
+    type: 'double',
+  },
+  'metrics.k8s.persistentvolumeclaim.status.phase': {
+    name: 'metrics.k8s.persistentvolumeclaim.status.phase',
+    description: 'Number of PersistentVolumeClaims in a given phase.',
+    type: 'double',
+  },
+  'metrics.k8s.persistentvolumeclaim.storage.capacity': {
+    name: 'metrics.k8s.persistentvolumeclaim.storage.capacity',
+    description: 'The actual storage capacity provisioned for the PersistentVolumeClaim.',
+    type: 'double',
+  },
+  'metrics.k8s.persistentvolumeclaim.storage.request': {
+    name: 'metrics.k8s.persistentvolumeclaim.storage.request',
+    description: 'The storage requested by the PersistentVolumeClaim.',
     type: 'double',
   },
   'metrics.k8s.pod.cpu.time': {
@@ -5325,7 +5463,7 @@ export const semconvFlat = {
   },
   'metrics.process.cpu.time': {
     name: 'metrics.process.cpu.time',
-    description: 'Total CPU seconds broken down by different states.',
+    description: 'Total CPU seconds broken down by different CPU modes.',
     type: 'double',
   },
   'metrics.process.cpu.utilization': {
@@ -5481,6 +5619,36 @@ export const semconvFlat = {
     name: 'metrics.system.memory.linux.available',
     description:
       'An estimate of how much memory is available for starting new applications, without causing swapping.',
+    type: 'double',
+  },
+  'metrics.system.memory.linux.hugepages.limit': {
+    name: 'metrics.system.memory.linux.hugepages.limit',
+    description: 'Total number of hugepages available.',
+    type: 'double',
+  },
+  'metrics.system.memory.linux.hugepages.page_size': {
+    name: 'metrics.system.memory.linux.hugepages.page_size',
+    description: 'System hugepage size in bytes.',
+    type: 'double',
+  },
+  'metrics.system.memory.linux.hugepages.reserved': {
+    name: 'metrics.system.memory.linux.hugepages.reserved',
+    description: 'Number of reserved hugepages.',
+    type: 'double',
+  },
+  'metrics.system.memory.linux.hugepages.surplus': {
+    name: 'metrics.system.memory.linux.hugepages.surplus',
+    description: 'Number of surplus hugepages.',
+    type: 'double',
+  },
+  'metrics.system.memory.linux.hugepages.usage': {
+    name: 'metrics.system.memory.linux.hugepages.usage',
+    description: 'Number of hugepages in use by state.',
+    type: 'double',
+  },
+  'metrics.system.memory.linux.hugepages.utilization': {
+    name: 'metrics.system.memory.linux.hugepages.utilization',
+    description: 'Percentage of hugepages in use by state.',
     type: 'double',
   },
   'metrics.system.memory.linux.shared': {
@@ -6552,6 +6720,12 @@ export const semconvFlat = {
     description: 'The filesystem type',
     type: 'keyword',
     example: 'ext4',
+  },
+  'system.memory.linux.hugepages.state': {
+    name: 'system.memory.linux.hugepages.state',
+    description: 'The Linux HugePages memory state',
+    type: 'keyword',
+    example: 'free',
   },
   'system.memory.linux.slab.state': {
     name: 'system.memory.linux.slab.state',

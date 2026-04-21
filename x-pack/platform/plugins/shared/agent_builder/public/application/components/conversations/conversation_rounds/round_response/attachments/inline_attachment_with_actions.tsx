@@ -12,6 +12,7 @@ import type {
 } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentPreviewState } from '@kbn/agent-builder-browser/attachments';
 import { EuiSplitPanel } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { AttachmentsService } from '../../../../../../services/attachments/attachements_service';
 import { useConversationContext } from '../../../../../context/conversation/conversation_context';
 import { usePersistedConversationId } from '../../../../../hooks/use_persisted_conversation_id';
@@ -116,7 +117,14 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
   const title = uiDefinition?.getLabel?.(attachment) ?? attachment.type.toUpperCase();
 
   return (
-    <EuiSplitPanel.Outer grow hasShadow={false} hasBorder={true}>
+    <EuiSplitPanel.Outer
+      grow
+      hasShadow={false}
+      hasBorder={true}
+      css={css`
+        overflow: visible; // allow vis actions to overflow
+      `}
+    >
       <AttachmentHeader
         title={title}
         actionButtons={inlineActionButtons}

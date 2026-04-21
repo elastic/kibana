@@ -155,7 +155,8 @@ export const serviceDetailRoute = {
             defaultMessage: 'Overview',
           }),
           searchBarOptions: {
-            hidden: true,
+            showTimeComparison: true,
+            showTransactionTypeSelector: true,
           },
         }),
         params: t.partial({
@@ -328,7 +329,7 @@ export const serviceDetailRoute = {
         }),
         element: <ServiceMapServiceDetail />,
         searchBarOptions: {
-          hidden: true,
+          showTimeComparison: true,
         },
       }),
       '/services/{serviceName}/logs': page({
@@ -351,9 +352,6 @@ export const serviceDetailRoute = {
             defaultMessage: 'Infrastructure',
           }),
           element: <InfraOverview />,
-          searchBarOptions: {
-            showUnifiedSearchBar: false,
-          },
         }),
         params: t.partial({
           query: t.partial({
@@ -373,7 +371,7 @@ export const serviceDetailRoute = {
           }),
           element: <AlertsOverview />,
           searchBarOptions: {
-            hidden: true,
+            showUnifiedSearchBar: false,
           },
         }),
         params: t.partial({

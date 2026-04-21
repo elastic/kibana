@@ -6,11 +6,12 @@
  */
 
 import { useEffect, useRef } from 'react';
+import moment from 'moment-timezone';
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
 import { getYamlDefaultAsString } from '../../utils';
 
-interface FieldInfo {
+export interface FieldInfo {
   name: string;
   type: string;
   control: string;
@@ -20,10 +21,87 @@ interface FieldInfo {
   };
 }
 
-type OnFieldDefaultChange = (fieldName: string, value: string, control: string) => void;
+export type OnFieldDefaultChange = (fieldName: string, value: string, control: string) => void;
+
+export const useYamlToFormSync = (
+  form: FormHook,
+  parsedFields: FieldInfo[],
+  syncingFromYamlRef: React.MutableRefObject<boolean>,
+  lastSyncedYamlDefaultRef: React.MutableRefObject<Record<string, string>>
+) => {
+  useEffect(() => {
+    const fieldsToSync: Array<{ path: string; name: string; yamlDefault: string }> = [];
+
+    for (const field of parsedFields) {
+      const yamlDefault = getYamlDefaultAsString(field.metadata?.default);
+      const lastSynced = lastSyncedYamlDefaultRef.current[field.name];
+      const fieldPath = `${CASE_EXTENDED_FIELDS}.${field.name}_as_${field.type}`;
+
+      if (lastSynced === undefined || lastSynced !== yamlDefault) {
+        fieldsToSync.push({ path: fieldPath, name: field.name, yamlDefault });
+      }
+    }
+
+    if (fieldsToSync.length === 0) return;
+
+    syncingFromYamlRef.current = true;
+    for (const { path, name, yamlDefault } of fieldsToSync) {
+      lastSyncedYamlDefaultRef.current[name] = yamlDefault;
+      form.setFieldValue(path, yamlDefault);
+    }
+
+    setTimeout(() => {
+      syncingFromYamlRef.current = false;
+    }, 0);
+  }, [parsedFields, form, syncingFromYamlRef, lastSyncedYamlDefaultRef]);
+};
+
+const serializeFormValue = (rawValue: unknown): string => {
+  if (rawValue instanceof Date) return rawValue.toISOString();
+  if (moment.isMoment(rawValue)) return rawValue.utc().toISOString();
+  if (Array.isArray(rawValue)) return JSON.stringify(rawValue);
+  return String(rawValue ?? '');
+};
+
+export const useFormToYamlSync = (
+  form: FormHook,
+  parsedFields: FieldInfo[],
+  syncingFromYamlRef: React.MutableRefObject<boolean>,
+  yamlDefaultsRef: React.MutableRefObject<Record<string, string>>,
+  onFieldDefaultChange?: OnFieldDefaultChange
+) => {
+  const onFieldDefaultChangeRef = useRef(onFieldDefaultChange);
+  onFieldDefaultChangeRef.current = onFieldDefaultChange;
+
+  useEffect(() => {
+    const subscription = form.subscribe(({ data }) => {
+      if (syncingFromYamlRef.current) {
+        return;
+      }
+
+      const extendedFields = (data.internal as Record<string, Record<string, unknown>>)?.[
+        CASE_EXTENDED_FIELDS
+      ];
+      if (!extendedFields) return;
+
+      for (const field of parsedFields) {
+        const fieldKey = `${field.name}_as_${field.type}`;
+        const rawValue = extendedFields[fieldKey];
+        const currentFormValue = serializeFormValue(rawValue);
+        const currentYamlValue = yamlDefaultsRef.current[field.name] ?? '';
+
+        if (currentFormValue !== currentYamlValue) {
+          onFieldDefaultChangeRef.current?.(field.name, currentFormValue, field.control);
+        }
+      }
+    });
+
+    return subscription.unsubscribe;
+  }, [form, parsedFields, syncingFromYamlRef, yamlDefaultsRef]);
+};
 
 /**
- * Hook that syncs form field values with YAML metadata.default values bidirectionally.
+ * Bidirectional sync between form field values and YAML metadata.default values.
  *
  * - When YAML changes (parsedFields updates), form fields are updated
  * - When form fields change (user input), onFieldDefaultChange callback is called
@@ -35,59 +113,17 @@ export const useYamlFormSync = (
   onFieldDefaultChange?: OnFieldDefaultChange
 ) => {
   const yamlDefaultsRef = useRef<Record<string, string>>({});
+  const lastSyncedYamlDefaultRef = useRef<Record<string, string>>({});
   const syncingFromYamlRef = useRef(false);
-  const onFieldDefaultChangeRef = useRef(onFieldDefaultChange);
-  onFieldDefaultChangeRef.current = onFieldDefaultChange;
 
-  // Update yamlDefaultsRef synchronously during render to avoid race conditions
   const currentYamlDefaults: Record<string, string> = {};
   for (const field of parsedFields) {
     currentYamlDefaults[field.name] = getYamlDefaultAsString(field.metadata?.default);
   }
   yamlDefaultsRef.current = currentYamlDefaults;
 
-  // Sync YAML defaults to form fields
-  useEffect(() => {
-    syncingFromYamlRef.current = true;
-
-    for (const field of parsedFields) {
-      const yamlDefault = getYamlDefaultAsString(field.metadata?.default);
-      const fieldPath = `${CASE_EXTENDED_FIELDS}.${field.name}_as_${field.type}`;
-      form.setFieldValue(fieldPath, yamlDefault);
-    }
-
-    // Reset the flag after all subscription callbacks triggered by setFieldValue have been processed
-    setTimeout(() => {
-      syncingFromYamlRef.current = false;
-    }, 0);
-  }, [parsedFields, form]);
-
-  // Subscribe to form changes and propagate to YAML
-  useEffect(() => {
-    const subscription = form.subscribe(({ data }) => {
-      // Skip if we're syncing from YAML to avoid feedback loop
-      if (syncingFromYamlRef.current) {
-        return;
-      }
-
-      const extendedFields = (data.internal as Record<string, Record<string, string>>)?.[
-        CASE_EXTENDED_FIELDS
-      ];
-      if (!extendedFields) return;
-
-      for (const field of parsedFields) {
-        const fieldKey = `${field.name}_as_${field.type}`;
-        const currentFormValue = String(extendedFields[fieldKey] ?? '');
-        const currentYamlValue = yamlDefaultsRef.current[field.name] ?? '';
-
-        if (currentFormValue !== currentYamlValue) {
-          onFieldDefaultChangeRef.current?.(field.name, currentFormValue, field.control);
-        }
-      }
-    });
-
-    return subscription.unsubscribe;
-  }, [form, parsedFields]);
+  useYamlToFormSync(form, parsedFields, syncingFromYamlRef, lastSyncedYamlDefaultRef);
+  useFormToYamlSync(form, parsedFields, syncingFromYamlRef, yamlDefaultsRef, onFieldDefaultChange);
 
   return { yamlDefaults: yamlDefaultsRef.current };
 };

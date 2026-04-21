@@ -5,25 +5,44 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
 import type { KibanaRequest, Logger, ElasticsearchServiceStart } from '@kbn/core/server';
-import { createBadRequestError } from '@kbn/agent-builder-common';
+import { createBadRequestError, validateSkillId } from '@kbn/agent-builder-common';
 import type { ParsedPluginArchive, ParsedSkillFile } from '@kbn/agent-builder-common';
 import type { PersistedSkillCreateRequest } from '@kbn/agent-builder-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { isAllowedBuiltinPlugin } from '@kbn/agent-builder-server/allow_lists';
+import type { BuiltInPluginDefinition } from '@kbn/agent-builder-server/plugins';
+import type { ToolRegistry } from '@kbn/agent-builder-server/tools';
 import type { AgentBuilderConfig } from '../../config';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { PluginClient, PersistedPluginDefinition } from './client';
 import { createClient, parsedArchiveToCreateRequest } from './client';
 import { parsePluginFromUrl, parsePluginFromFile } from './utils';
 import { createClient as createSkillClient } from '../skills/persisted/client';
+import type { SkillClient } from '../skills/persisted/client';
+import type { SkillServiceSetup } from '../skills';
+import { validateToolIds } from '../skills/skill_registry';
+import {
+  createBuiltinPluginRegistry,
+  createBuiltinPluginProvider,
+  type BuiltinPluginRegistry,
+} from './builtin';
+import { createPersistedPluginProvider } from './persisted';
+import { createPluginRegistry, type PluginRegistry } from './plugin_registry';
 
 type InstallPluginSource = { type: 'url'; url: string } | { type: 'file'; filePath: string };
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PluginsServiceSetup {}
+export interface PluginsServiceSetup {
+  register: (plugin: BuiltInPluginDefinition) => void;
+}
+
+export interface PluginsServiceSetupDeps {
+  skillsSetup: SkillServiceSetup;
+}
 
 export interface PluginsServiceStart {
-  getScopedClient(options: { request: KibanaRequest }): PluginClient;
+  getRegistry(options: { request: KibanaRequest }): PluginRegistry;
   installPlugin(options: {
     request: KibanaRequest;
     source: InstallPluginSource;
@@ -33,7 +52,7 @@ export interface PluginsServiceStart {
 }
 
 export interface PluginsService {
-  setup(): PluginsServiceSetup;
+  setup(deps: PluginsServiceSetupDeps): PluginsServiceSetup;
   start(deps: PluginsServiceStartDeps): PluginsServiceStart;
 }
 
@@ -42,24 +61,52 @@ export interface PluginsServiceStartDeps {
   elasticsearch: ElasticsearchServiceStart;
   spaces?: SpacesPluginStart;
   config: AgentBuilderConfig;
+  getToolRegistry: (opts: { request: KibanaRequest }) => Promise<ToolRegistry>;
 }
 
 export const createPluginsService = (): PluginsService => {
   return new PluginsServiceImpl();
 };
 
+interface RequestContext {
+  registry: PluginRegistry;
+  pluginClient: PluginClient;
+  skillClient: SkillClient;
+}
+
 class PluginsServiceImpl implements PluginsService {
   private startDeps?: PluginsServiceStartDeps;
+  private builtinRegistry: BuiltinPluginRegistry;
 
-  setup(): PluginsServiceSetup {
-    return {};
+  constructor() {
+    this.builtinRegistry = createBuiltinPluginRegistry();
+  }
+
+  setup({ skillsSetup }: PluginsServiceSetupDeps): PluginsServiceSetup {
+    return {
+      register: (plugin) => {
+        if (!isAllowedBuiltinPlugin(plugin.id)) {
+          throw new Error(
+            `Built-in plugin with id "${plugin.id}" is not in the list of allowed built-in plugins.
+             Please add it to the list of allowed built-in plugins in the "@kbn/agent-builder-server/allow_lists.ts" file.`
+          );
+        }
+        this.builtinRegistry.register(plugin);
+
+        if (plugin.skills) {
+          for (const skill of plugin.skills) {
+            skillsSetup.registerSkill(skill);
+          }
+        }
+      },
+    };
   }
 
   start(deps: PluginsServiceStartDeps): PluginsServiceStart {
     this.startDeps = deps;
 
     return {
-      getScopedClient: (options) => this.getScopedClients(options).pluginClient,
+      getRegistry: (options) => this.getRequestContext(options).registry,
       installPlugin: (options) => this.installPlugin(options),
       deletePlugin: (options) => this.deletePlugin(options),
     };
@@ -72,15 +119,19 @@ class PluginsServiceImpl implements PluginsService {
     return this.startDeps;
   }
 
-  private getScopedClients({ request }: { request: KibanaRequest }) {
+  private getRequestContext({ request }: { request: KibanaRequest }): RequestContext {
     const { elasticsearch, logger, spaces } = this.getStartDeps();
     const esClient = elasticsearch.client.asScoped(request).asInternalUser;
     const space = getCurrentSpaceId({ request, spaces });
 
-    return {
-      pluginClient: createClient({ esClient, logger, space }),
-      skillClient: createSkillClient({ esClient, logger, space }),
-    };
+    const pluginClient = createClient({ esClient, logger, space });
+    const skillClient = createSkillClient({ esClient, logger, space });
+
+    const builtinProvider = createBuiltinPluginProvider({ registry: this.builtinRegistry });
+    const persistedProvider = createPersistedPluginProvider({ client: pluginClient });
+    const registry = createPluginRegistry({ builtinProvider, persistedProvider });
+
+    return { registry, pluginClient, skillClient };
   }
 
   private async installPlugin({
@@ -104,18 +155,26 @@ class PluginsServiceImpl implements PluginsService {
     }
 
     const pluginName = pluginNameOverride ?? parsedArchive.manifest.name;
-    const { pluginClient, skillClient } = this.getScopedClients({ request });
+    const { registry, pluginClient, skillClient } = this.getRequestContext({ request });
 
-    const existing = await pluginClient.findByName(pluginName);
-    if (existing) {
+    const existingPlugin = await registry.findByName(pluginName);
+    if (existingPlugin) {
+      if (existingPlugin.readonly) {
+        throw createBadRequestError(`Plugin "${pluginName}" conflicts with a built-in plugin`);
+      }
       throw createBadRequestError(
-        `Plugin '${pluginName}' is already installed (id: ${existing.id}, version: ${existing.version}).`
+        `Plugin "${pluginName}" is already installed (id: ${existingPlugin.id}, version: ${existingPlugin.version})`
       );
     }
 
+    const pluginId = randomUUID();
+
     const createRequests = parsedArchive.skills.map((skill) =>
-      toSkillCreateRequest({ skill, pluginName })
+      toSkillCreateRequest({ skill, pluginName, pluginId })
     );
+
+    await this.validateSkillToolIds({ request, createRequests });
+
     await skillClient.bulkCreate(createRequests);
 
     const skillIds = createRequests.map((req) => req.id);
@@ -125,9 +184,25 @@ class PluginsServiceImpl implements PluginsService {
       sourceUrl,
       skillIds,
       nameOverride: pluginNameOverride,
+      id: pluginId,
     });
 
     return pluginClient.create(createRequest);
+  }
+
+  private async validateSkillToolIds({
+    request,
+    createRequests,
+  }: {
+    request: KibanaRequest;
+    createRequests: PersistedSkillCreateRequest[];
+  }): Promise<void> {
+    const { getToolRegistry } = this.getStartDeps();
+    const toolRegistry = await getToolRegistry({ request });
+
+    for (const req of createRequests) {
+      await validateToolIds(req.tool_ids, toolRegistry);
+    }
   }
 
   private async deletePlugin({
@@ -137,23 +212,38 @@ class PluginsServiceImpl implements PluginsService {
     request: KibanaRequest;
     pluginId: string;
   }): Promise<void> {
-    const { pluginClient, skillClient } = this.getScopedClients({ request });
-    const plugin = await pluginClient.get(pluginId);
-    await skillClient.deleteByPluginId(plugin.name);
-    await pluginClient.delete(pluginId);
+    const { registry, skillClient } = this.getRequestContext({ request });
+
+    const plugin = await registry.get(pluginId);
+    if (plugin.readonly) {
+      throw createBadRequestError(`Plugin "${pluginId}" is read-only and can't be deleted`);
+    }
+
+    await skillClient.deleteByPluginId(plugin.id);
+    await registry.delete(pluginId);
   }
 }
 
 const toSkillCreateRequest = ({
   skill,
   pluginName,
+  pluginId,
 }: {
   skill: ParsedSkillFile;
   pluginName: string;
+  pluginId: string;
 }): PersistedSkillCreateRequest => {
+  const id = `${pluginName}-${skill.dirName}`;
+  const validationError = validateSkillId(id);
+  if (validationError) {
+    throw createBadRequestError(
+      `Invalid skill ID "${id}" generated from plugin "${pluginName}": ${validationError}`
+    );
+  }
   return {
-    id: `${pluginName}-${skill.dirName}`,
+    id,
     name: skill.meta.name ?? skill.dirName,
+    base_path: `/skills/${pluginName}`,
     description: skill.meta.description ?? '',
     content: skill.content,
     referenced_content: skill.referencedFiles.map((file) => ({
@@ -161,7 +251,7 @@ const toSkillCreateRequest = ({
       relativePath: file.relativePath,
       content: file.content,
     })),
-    tool_ids: [],
-    plugin_id: pluginName,
+    tool_ids: skill.meta.allowedTools ?? [],
+    plugin_id: pluginId,
   };
 };

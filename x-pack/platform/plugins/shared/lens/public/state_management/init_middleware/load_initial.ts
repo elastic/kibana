@@ -24,7 +24,7 @@ import { setState, initExisting, initEmpty } from '..';
 import { type InitialAppState, disableAutoApply, getPreloadedState } from '../lens_slice';
 import { getInitialDatasourceId, getInitialDataViewsObject } from '../../utils';
 import { initializeSources } from '../../editor_frame_service/editor_frame';
-import { getEditPath, getFullPath, LENS_EMBEDDABLE_TYPE } from '../../../common/constants';
+import { getEditPath, getFullPath } from '../../../common/constants';
 
 interface PersistedDoc {
   doc: LensDocument;
@@ -48,8 +48,8 @@ export const getFromPreloaded = async ({
 
   try {
     // If we already have the attributes for a by reference visualization, avoid loading from the library
-    const docFromSavedObject = await (initialInput.savedObjectId && !initialInput.attributes
-      ? attributeService.loadFromLibrary(initialInput.savedObjectId)
+    const docFromSavedObject = await (initialInput.ref_id && !initialInput.attributes
+      ? attributeService.loadFromLibrary(initialInput.ref_id)
       : undefined);
 
     if (!docFromSavedObject) {
@@ -62,8 +62,7 @@ export const getFromPreloaded = async ({
       return {
         doc: {
           ...attributes,
-          type: LENS_EMBEDDABLE_TYPE,
-          ...(initialInput.savedObjectId ? { savedObjectId: initialInput.savedObjectId } : {}),
+          savedObjectId: initialInput.ref_id,
         },
         sharingSavedObjectProps: {
           outcome: 'exactMatch',
@@ -92,8 +91,7 @@ export const getFromPreloaded = async ({
     return {
       doc: {
         ...attributes,
-        type: LENS_EMBEDDABLE_TYPE,
-        savedObjectId: initialInput.savedObjectId,
+        savedObjectId: initialInput.ref_id,
       },
       sharingSavedObjectProps: {
         aliasTargetId: sharingSavedObjectProps?.aliasTargetId,
@@ -118,6 +116,7 @@ interface LoaderSharedArgs {
   storage: LensStoreDeps['lensServices']['storage'];
   eventAnnotationService: LensStoreDeps['lensServices']['eventAnnotationService'];
   defaultIndexPatternId: string;
+  http: LensStoreDeps['lensServices']['http'];
 }
 
 type PreloadedState = Omit<
@@ -373,6 +372,7 @@ export async function loadInitial(
     storage: lensServices.storage,
     eventAnnotationService: lensServices.eventAnnotationService,
     defaultIndexPatternId: lensServices.uiSettings.get('defaultIndex'),
+    http: lensServices.http,
   };
 
   let activeDatasourceId: string | undefined;
@@ -421,7 +421,8 @@ export async function loadInitial(
 
   if (
     !initialInput ||
-    (initialInput.savedObjectId && initialInput.savedObjectId === lens.persistedDoc?.savedObjectId)
+    // TODO is it savedObjectId or ref_id?
+    (initialInput.ref_id && initialInput.ref_id === lens.persistedDoc?.savedObjectId)
   ) {
     const newFilters =
       initialContext && 'searchFilters' in initialContext && initialContext.searchFilters
@@ -457,7 +458,7 @@ export async function loadInitial(
       try {
         return loadFromSavedObject(
           store,
-          initialInput.savedObjectId,
+          initialInput.ref_id,
           persisted,
           loaderSharedArgs,
           lensServices,

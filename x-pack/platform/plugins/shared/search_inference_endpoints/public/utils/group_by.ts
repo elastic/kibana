@@ -6,9 +6,10 @@
  */
 
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-import { i18n } from '@kbn/i18n';
 import { SERVICE_PROVIDERS, ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
+import { i18n } from '@kbn/i18n';
 
+import { isInferenceEndpointWithDisplayCreatorMetadata } from '../../common/type_guards';
 import {
   type GroupedInferenceEndpointsData,
   type GroupByViewOptions,
@@ -19,12 +20,6 @@ import { getModelId } from './get_model_id';
 import { KNOWN_MODEL_GROUPS, ELASTIC_GROUP_ID } from './known_models';
 
 export const UNKNOWN_MODEL_ID_FALLBACK = 'unknown_model';
-const UNKNOWN_MODEL_LABEL_FALLBACK = i18n.translate(
-  'xpack.searchInferenceEndpoints.groupedEndpoints.unknownModelLabel',
-  {
-    defaultMessage: 'Unknown Model',
-  }
-);
 
 export const GroupByModelReducer = (
   acc: Record<string, GroupedInferenceEndpointsData>,
@@ -32,9 +27,19 @@ export const GroupByModelReducer = (
 ): Record<string, GroupedInferenceEndpointsData> => {
   const modelId = getModelId(endpoint) ?? UNKNOWN_MODEL_ID_FALLBACK;
 
-  // Test model against predefined known model groups. If it matches, group by the known group.
-  // otherwise group by the model ID. In the future endpoints should have metadata that allows for more robust grouping,
-  // but this is a start to make the UI more user friendly.
+  if (isInferenceEndpointWithDisplayCreatorMetadata(endpoint)) {
+    const creator = endpoint.metadata.display.model_creator;
+    if (creator in acc) {
+      acc[creator].endpoints.push(endpoint);
+    } else {
+      acc[creator] = {
+        groupId: creator,
+        groupLabel: creator,
+        endpoints: [endpoint],
+      };
+    }
+    return acc;
+  }
   const knownGroup = KNOWN_MODEL_GROUPS.find((group) => group.groupTest(modelId));
   if (knownGroup) {
     if (knownGroup.groupId in acc) {
@@ -46,18 +51,23 @@ export const GroupByModelReducer = (
         endpoints: [endpoint],
       };
     }
-  } else {
-    if (modelId in acc) {
-      acc[modelId].endpoints.push(endpoint);
-    } else {
-      acc[modelId] = {
-        groupId: modelId,
-        groupLabel: modelId === UNKNOWN_MODEL_ID_FALLBACK ? UNKNOWN_MODEL_LABEL_FALLBACK : modelId,
-        endpoints: [endpoint],
-      };
-    }
+    return acc;
   }
 
+  if (modelId in acc) {
+    acc[modelId].endpoints.push(endpoint);
+  } else {
+    acc[modelId] = {
+      groupId: modelId,
+      groupLabel:
+        modelId === UNKNOWN_MODEL_ID_FALLBACK
+          ? i18n.translate('xpack.searchInferenceEndpoints.groupedEndpoints.unknownModelLabel', {
+              defaultMessage: 'Unknown Model',
+            })
+          : modelId,
+      endpoints: [endpoint],
+    };
+  }
   return acc;
 };
 

@@ -26,6 +26,7 @@ jest.mock('../utils', () => ({
   getTemplateUrlFromPackageInfo: jest.fn(),
   updatePolicyWithInputs: jest.fn(),
   getCloudCredentialVarsConfig: jest.fn().mockReturnValue({}),
+  findVariableDef: jest.fn(),
   gcpField: {
     fields: {
       'gcp.project_id': { label: 'Project ID', type: 'text' },
@@ -396,7 +397,7 @@ describe('GcpCredentialsFormAgentless', () => {
 
         const launchButton = screen.getByTestId('launchGoogleCloudShellAgentlessButton');
         expect(launchButton).toHaveAttribute('target', '_blank');
-        expect(launchButton.querySelector('[data-euiicon-type="launch"]')).toBeInTheDocument();
+        expect(launchButton.querySelector('[data-euiicon-type="rocket"]')).toBeInTheDocument();
       });
 
       it('handles missing cloud shell URL gracefully', () => {

@@ -22,7 +22,16 @@ const argv = [];
 const tracingExporters = process.env.TRACING_EXPORTERS;
 if (tracingExporters) {
   JSON.parse(tracingExporters); // validate parseable JSON; throws early if malformed
+
+  // CI sets ELASTIC_APM_ACTIVE=true globally. The APM config loader merges env vars
+  // after Kibana config (CLI args), so the env var would override our --elastic.apm.active=false.
+  // Override the env vars here so getConfigFromEnv doesn't re-enable APM.
+  process.env.ELASTIC_APM_ACTIVE = 'false';
+  process.env.ELASTIC_APM_CONTEXT_PROPAGATION_ONLY = 'false';
+
   argv.push(
+    '--elastic.apm.active=false',
+    '--elastic.apm.contextPropagationOnly=false',
     '--telemetry.enabled=true',
     '--telemetry.tracing.enabled=true',
     '--telemetry.tracing.sample_rate=1',

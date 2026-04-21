@@ -21,7 +21,7 @@ jest.mock('@kbn/agent-builder-server/allow_lists', () => ({
   isAllowedBuiltinSkill: jest.fn().mockReturnValue(true),
 }));
 
-jest.mock('../runner/store/volumes/skills/utils', () => ({
+jest.mock('../execution/runner/store/volumes/skills/utils', () => ({
   getSkillEntryPath: jest.fn(({ skill }) => `${skill.basePath}/${skill.name}/SKILL.md`),
 }));
 
@@ -151,10 +151,18 @@ describe('createSkillService', () => {
       const skill = createMockSkillDefinition({ id: 'builtin-1' });
       registerSkill(skill);
 
+      const mockSoClient = { get: jest.fn() } as any;
+      const mockUiSettings = {
+        asScopedToClient: jest.fn().mockReturnValue({ get: jest.fn().mockResolvedValue(false) }),
+      } as any;
+      const mockSavedObjects = { getScopedClient: jest.fn().mockReturnValue(mockSoClient) } as any;
+
       const { getRegistry } = service.start({
         elasticsearch: { client: { asInternalUser: {} } } as any,
         logger: { warn: jest.fn() } as any,
         getToolRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
+        uiSettings: mockUiSettings,
+        savedObjects: mockSavedObjects,
       });
 
       const registry = await getRegistry({ request: {} as any });

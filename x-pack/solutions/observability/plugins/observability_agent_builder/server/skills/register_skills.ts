@@ -7,7 +7,8 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { ObservabilityAgentBuilderPluginSetupDependencies } from '../types';
-import { createLogSearchSkill } from './log_search';
+import { createRcaSkill } from './rca';
+import { createInvestigationSkill } from './investigation';
 
 export const registerSkills = ({
   plugins,
@@ -16,6 +17,7 @@ export const registerSkills = ({
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   logger: Logger;
 }) => {
-  plugins.agentBuilder.skills.register(createLogSearchSkill());
+  plugins.agentBuilder.skills.register(createRcaSkill());
+  plugins.agentBuilder.skills.register(createInvestigationSkill());
   logger.debug('Successfully registered observability skills in agent-builder');
 };

@@ -102,6 +102,7 @@ export type {
   CategorySummaryList,
   PackageInfo,
   PackageMetadata,
+  RegistrySection,
   RegistryVarsEntry,
   RegistryInput,
   RegistryStream,
@@ -147,6 +148,7 @@ export type {
   BulkGetAgentPoliciesResponse,
   RegistryPolicyIntegrationTemplate,
   EnrollmentSettingsFleetServerPolicy,
+  EnrollmentSettingsProxy,
   GetEnrollmentSettingsRequest,
   GetEnrollmentSettingsResponse,
   GetSpaceSettingsResponse,
@@ -163,6 +165,7 @@ export type {
   AwsCloudConnectorVars,
   CloudConnectorSecretReference,
   ComponentHealth,
+  ProxyConfig,
 } from '../../common/types';
 export {
   entries,

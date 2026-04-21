@@ -9,6 +9,7 @@ import * as React from 'react';
 import { Suspense } from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router-dom';
 import { BehaviorSubject } from 'rxjs';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -148,13 +149,15 @@ const queryClient = new QueryClient({
   },
 });
 
-const renderWithProviders = (ui: React.ReactElement) => {
+const renderWithProviders = (ui: React.ReactElement, initialEntries?: string[]) => {
   return render(
-    <IntlProvider locale="en" messages={{}}>
-      <Suspense fallback={null}>
-        <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
-      </Suspense>
-    </IntlProvider>
+    <MemoryRouter initialEntries={initialEntries}>
+      <IntlProvider locale="en" messages={{}}>
+        <Suspense fallback={null}>
+          <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
+        </Suspense>
+      </IntlProvider>
+    </MemoryRouter>
   );
 };
 
@@ -347,23 +350,25 @@ describe('rules', () => {
     jest.setSystemTime(fakeNow);
 
     rerender(
-      <IntlProvider locale="en" messages={{}}>
-        <Suspense fallback={null}>
-          <QueryClientProvider client={queryClient}>
-            <RuleComponent
-              {...mockAPIs}
-              rule={rule}
-              ruleType={ruleType}
-              ruleSummary={ruleSummary}
-              readOnly={false}
-              refreshToken={{
-                resolve: () => undefined,
-                reject: () => undefined,
-              }}
-            />
-          </QueryClientProvider>
-        </Suspense>
-      </IntlProvider>
+      <MemoryRouter>
+        <IntlProvider locale="en" messages={{}}>
+          <Suspense fallback={null}>
+            <QueryClientProvider client={queryClient}>
+              <RuleComponent
+                {...mockAPIs}
+                rule={rule}
+                ruleType={ruleType}
+                ruleSummary={ruleSummary}
+                readOnly={false}
+                refreshToken={{
+                  resolve: () => undefined,
+                  reject: () => undefined,
+                }}
+              />
+            </QueryClientProvider>
+          </Suspense>
+        </IntlProvider>
+      </MemoryRouter>
     );
 
     expect(mockAlertsTable).toHaveBeenCalledWith(
@@ -562,6 +567,64 @@ describe('disable/enable functionality', () => {
 });
 
 describe('tabbed content', () => {
+  it('defaults to alerts tab when no tabId is in the URL', async () => {
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(
+      (feature: string) => {
+        if (feature === 'rulesDetailLogs') {
+          return true;
+        }
+        return false;
+      }
+    );
+
+    const rule = mockRule();
+    const ruleType = mockRuleType();
+    const ruleSummary = mockRuleSummary();
+
+    renderWithProviders(
+      <RuleComponent
+        {...mockAPIs}
+        rule={rule}
+        ruleType={ruleType}
+        ruleSummary={ruleSummary}
+        readOnly={false}
+      />,
+      ['/rule/123']
+    );
+
+    const alertListTab = await screen.findByRole('tab', { name: /alerts/i });
+    expect(alertListTab).toHaveAttribute('aria-selected', 'true');
+  });
+
+  it('defaults to history tab when tabId=history is in the URL', async () => {
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(
+      (feature: string) => {
+        if (feature === 'rulesDetailLogs') {
+          return true;
+        }
+        return false;
+      }
+    );
+
+    const rule = mockRule();
+    const ruleType = mockRuleType();
+    const ruleSummary = mockRuleSummary();
+
+    renderWithProviders(
+      <RuleComponent
+        {...mockAPIs}
+        rule={rule}
+        ruleType={ruleType}
+        ruleSummary={ruleSummary}
+        readOnly={false}
+      />,
+      ['/rule/123?tabId=history']
+    );
+
+    const historyTab = await screen.findByRole('tab', { name: /history/i });
+    expect(historyTab).toHaveAttribute('aria-selected', 'true');
+  });
+
   it('tabbed content renders when the event log experiment is on', async () => {
     (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(
       (feature: string) => {

@@ -7,18 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { UnifiedHistogramLayout } from '@kbn/unified-histogram';
 import { OutPortal } from 'react-reverse-portal';
+import { PanelsToggle } from '../../../../components/panels_toggle';
 import { type DiscoverMainContentProps, DiscoverMainContent } from './discover_main_content';
 import {
   DEFAULT_HISTOGRAM_KEY_PREFIX,
   useCurrentChartPortalNode,
   useCurrentTabRuntimeState,
+  useAppStateSelector,
 } from '../../state_management/redux';
 
 export const DiscoverHistogramLayout = ({
-  panelsToggle,
+  sidebarToggleState$,
   ...mainContentProps
 }: DiscoverMainContentProps) => {
   const chartPortalNode = useCurrentChartPortalNode();
@@ -26,6 +28,13 @@ export const DiscoverHistogramLayout = ({
     (tab) => tab.unifiedHistogramConfig$
   );
   const layoutProps = layoutPropsMap[localStorageKeyPrefix ?? DEFAULT_HISTOGRAM_KEY_PREFIX];
+  const isMainPanelHidden = useAppStateSelector((state) => Boolean(state.hideTable));
+  const panelsToggle = useMemo(
+    () => (
+      <PanelsToggle sidebarToggleState$={sidebarToggleState$} dataTestSubjSuffix="InHistogram" />
+    ),
+    [sidebarToggleState$]
+  );
 
   if (!layoutProps) {
     return null;
@@ -36,9 +45,10 @@ export const DiscoverHistogramLayout = ({
       unifiedHistogramChart={
         chartPortalNode ? <OutPortal node={chartPortalNode} panelsToggle={panelsToggle} /> : null
       }
+      isMainPanelHidden={isMainPanelHidden}
       {...layoutProps}
     >
-      <DiscoverMainContent {...mainContentProps} panelsToggle={panelsToggle} />
+      <DiscoverMainContent {...mainContentProps} sidebarToggleState$={sidebarToggleState$} />
     </UnifiedHistogramLayout>
   );
 };

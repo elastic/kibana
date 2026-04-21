@@ -185,18 +185,6 @@ export default function ({ getService }: FtrProviderContext) {
             .expect(400);
         });
 
-        it('should reject empty endpoints array', async () => {
-          await supertestWithoutAuth
-            .put(API_PATH)
-            .send({
-              features: [{ feature_id: 'agent_builder', endpoints: [] }],
-            })
-            .set('kbn-xsrf', 'xxx')
-            .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSION)
-            .auth(USERS.ALL.username, USERS.ALL.password)
-            .expect(400);
-        });
-
         it('should reject missing features field', async () => {
           await supertestWithoutAuth
             .put(API_PATH)

@@ -11,7 +11,7 @@ import { useGetWatchlistFormData } from './use_get_watchlist_form_data';
 import type { WatchlistFormState } from './use_watchlist_form_state';
 import {
   getDefaultWatchlist,
-  getWatchlistNameValidation,
+  getWatchlistFieldLengthValidation,
   useResetEditsOnFlyoutOpen,
 } from './use_watchlist_form_state_shared';
 
@@ -37,6 +37,7 @@ export const useEditWatchlistFormState = ({
     useState<CreateWatchlistRequestBodyInput>(defaultWatchlist);
   const [watchlist, setWatchlist] = useState<CreateWatchlistRequestBodyInput>(defaultWatchlist);
   const [hasUserEdits, setHasUserEdits] = useState(false);
+  const [isSourceValid, setSourceValid] = useState(true);
 
   const setWatchlistField = <K extends keyof CreateWatchlistRequestBodyInput>(
     key: K,
@@ -46,7 +47,8 @@ export const useEditWatchlistFormState = ({
     setHasUserEdits(true);
   };
 
-  const { initialWatchlist: fetchedWatchlist } = useGetWatchlistFormData(normalizedWatchlistId);
+  const { initialWatchlist: fetchedWatchlist, ruleBasedSourceIds } =
+    useGetWatchlistFormData(normalizedWatchlistId);
 
   useResetEditsOnFlyoutOpen(setHasUserEdits);
 
@@ -65,22 +67,30 @@ export const useEditWatchlistFormState = ({
     }
   }, [normalizedWatchlistId]);
 
-  const isNameChanged = watchlist.name.trim() !== initialWatchlist.name.trim();
-  const { isNameInvalid } = getWatchlistNameValidation(watchlist.name, isNameChanged);
-
   const isMissingId = !normalizedWatchlistId;
   const hasChanges =
     watchlist.name.trim() !== initialWatchlist.name.trim() ||
     watchlist.description?.trim() !== initialWatchlist.description?.trim() ||
-    watchlist.riskModifier !== initialWatchlist.riskModifier;
-  const isDisabled = isMissingId || isNameInvalid || !hasChanges;
+    watchlist.riskModifier !== initialWatchlist.riskModifier ||
+    JSON.stringify(watchlist.entitySources) !== JSON.stringify(initialWatchlist.entitySources);
+  const { isNameTooLong, isDescriptionTooLong } = getWatchlistFieldLengthValidation(watchlist);
+  const isDisabled =
+    isMissingId ||
+    !watchlist.name.trim() ||
+    !hasChanges ||
+    isNameTooLong ||
+    isDescriptionTooLong ||
+    !isSourceValid;
 
   return {
     watchlist,
     normalizedWatchlistId,
+    ruleBasedSourceIds: ruleBasedSourceIds ?? {},
     isEditMode: true,
     isDisabled,
-    isNameInvalid,
+    isNameTooLong,
+    isDescriptionTooLong,
     setWatchlistField,
+    setSourceValid,
   };
 };

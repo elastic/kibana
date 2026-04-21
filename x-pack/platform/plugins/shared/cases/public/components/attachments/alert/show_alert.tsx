@@ -41,7 +41,7 @@ const UserActionShowAlertComponent = ({
         aria-label={i18n.SHOW_ALERT_TOOLTIP}
         data-test-subj={`comment-action-show-alert-${id}`}
         onClick={onClick}
-        iconType="arrowRight"
+        iconType="chevronSingleRight"
         id={`${id}-show-alert`}
       />
     </EuiToolTip>

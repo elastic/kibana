@@ -19,7 +19,7 @@ import type { Meta } from '../../../../../common/types/pagination';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 import { EuiLinkTo } from '../../../shared/react_router_helpers/eui_components';
-import { CONNECTOR_DETAIL_PATH, SEARCH_INDEX_PATH } from '../../routes';
+import { CONNECTOR_DETAIL_PATH } from '../../routes';
 import {
   connectorStatusToColor,
   connectorStatusToText,
@@ -53,8 +53,8 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
   onDelete,
 }) => {
   const { navigateToUrl, share } = useValues(KibanaLogic);
-  const searchIndicesLocator = useMemo(
-    () => share?.url.locators.get('SEARCH_INDEX_DETAILS_LOCATOR_ID'),
+  const indexManagementLocator = useMemo(
+    () => share?.url.locators.get('SEARCH_INDEX_MANAGEMENT_LOCATOR_ID'),
     [share]
   );
 
@@ -88,7 +88,7 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
       ),
       render: (connector: ConnectorViewItem) =>
         connector.index_name ? (
-          connector.indexExists && searchIndicesLocator ? (
+          connector.indexExists && indexManagementLocator ? (
             <ConnectorViewIndexLink indexName={connector.index_name} />
           ) : (
             connector.index_name
@@ -167,7 +167,8 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
                 'xpack.enterpriseSearch.content.connectors.connectorTable.columns.actions.viewIndex',
                 { defaultMessage: 'View this connector' }
               ),
-          enabled: (connector) => !!connector.index_name,
+          enabled: (connector) =>
+            !!connector.index_name && (!isCrawler || !!indexManagementLocator),
           icon: 'eye',
           isPrimary: false,
           name: (connector) =>
@@ -182,13 +183,11 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
             ),
           onClick: (connector) => {
             if (isCrawler) {
-              // crawler always has an index this is to satisfy TS
-              if (connector.index_name) {
-                navigateToUrl(
-                  generateEncodedPath(SEARCH_INDEX_PATH, {
-                    indexName: connector.index_name,
-                  })
-                );
+              if (connector.index_name && indexManagementLocator) {
+                indexManagementLocator.navigate({
+                  indexName: connector.index_name,
+                  page: 'index_details',
+                });
               }
             } else {
               navigateToUrl(

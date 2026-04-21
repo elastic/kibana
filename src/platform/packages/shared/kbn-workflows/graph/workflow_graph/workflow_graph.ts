@@ -32,6 +32,7 @@ export class WorkflowGraph {
   private graph: graphlib.Graph<GraphNodeUnion>;
   private __topologicalOrder: string[] | null = null;
   private stepIdsSet: Set<string> | null = null;
+  private innerStepIdsCache = new Map<string, Set<string>>();
 
   constructor(graph: graphlib.Graph<GraphNodeUnion>) {
     this.graph = graph;
@@ -69,6 +70,7 @@ export class WorkflowGraph {
       'enterForeach_',
       'enterCondition_',
       'enterWhile_',
+      'enterSwitch_',
     ];
 
     for (const prefix of nodePrefixes) {
@@ -189,5 +191,26 @@ export class WorkflowGraph {
     const directPredecessors = this.graph.predecessors(nodeId) || [];
     directPredecessors.forEach((predId) => collectPredecessors(predId));
     return Array.from(visited).map((id) => this.graph.node(id));
+  }
+
+  /**
+   * Returns the set of unique child stepIds contained within a compound step
+   * (foreach, while, if, switch, etc.), excluding the compound step itself.
+   *
+   * Results are cached because the graph is immutable after construction and
+   * this method may be called on every loop exit (including inner loops that
+   * exit once per outer iteration).
+   */
+  public getInnerStepIds(compoundStepId: string): Set<string> {
+    const cached = this.innerStepIdsCache.get(compoundStepId);
+    if (cached) {
+      return cached;
+    }
+
+    const subGraph = this.getStepGraph(compoundStepId);
+    const stepIds = new Set(subGraph.getAllNodes().map((n) => n.stepId));
+    stepIds.delete(compoundStepId);
+    this.innerStepIdsCache.set(compoundStepId, stepIds);
+    return stepIds;
   }
 }

@@ -16,7 +16,7 @@
 
 import { z } from '@kbn/zod/v4';
 
-import { EntitySourceType, Matcher, Filter, MonitoringEntitySource } from './common.gen';
+import { EntitySourceType, Matcher, Filter, DateRange, MonitoringEntitySource } from './common.gen';
 
 export type CreateWatchlistEntitySourceRequestParams = z.infer<
   typeof CreateWatchlistEntitySourceRequestParams
@@ -36,9 +36,22 @@ export const CreateWatchlistEntitySourceRequestBody = z
     type: EntitySourceType,
     name: z.string(),
     indexPattern: z.string().optional(),
+    /**
+     * Required when type is entity_analytics_integration. One of entityanalytics_okta, entityanalytics_ad.
+     */
+    integrationName: z.string().optional(),
     enabled: z.boolean().optional(),
+    /**
+     * Field used to query the entity store for index-type sources
+     */
+    identifierField: z.string().optional(),
+    /**
+     * KQL query used to filter data from the provided index patterns
+     */
+    queryRule: z.string().optional(),
     matchers: z.array(Matcher).optional(),
     filter: Filter.optional(),
+    range: DateRange.optional(),
   })
   .strict();
 export type CreateWatchlistEntitySourceRequestBodyInput = z.input<

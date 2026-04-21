@@ -828,7 +828,7 @@ describe('Color util transforms', () => {
             color: { type: 'color_code', value: '#ff0000' },
           },
         ],
-        unassignedColor: { type: 'color_code', value: '#00ff00' },
+        unassigned: { type: 'color_code', value: '#00ff00' },
       };
 
       const lensState = fromColorMappingAPIToLensState(originalColorMapping);
@@ -884,7 +884,7 @@ describe('Color util transforms', () => {
           { type: 'from_palette', index: 2, palette: 'no_default' },
         ],
         sort: 'asc',
-        unassignedColor: { type: 'from_palette', palette: SEMANTIC_PALETTE, index: 2 },
+        unassigned: { type: 'from_palette', palette: SEMANTIC_PALETTE, index: 2 },
       };
 
       const lensState = fromColorMappingAPIToLensState(originalColorMapping);

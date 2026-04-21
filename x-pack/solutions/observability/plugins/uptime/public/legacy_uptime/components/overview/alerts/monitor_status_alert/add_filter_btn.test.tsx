@@ -23,7 +23,7 @@ describe('AddFilterButton component', () => {
             data-test-subj="uptimeCreateAlertAddFilter"
             disabled={false}
             flush="left"
-            iconType="plusInCircleFilled"
+            iconType="plusCircle"
             onClick={[Function]}
             size="s"
           >
@@ -89,7 +89,7 @@ describe('AddFilterButton component', () => {
             data-test-subj="uptimeCreateAlertAddFilter"
             disabled={false}
             flush="left"
-            iconType="plusInCircleFilled"
+            iconType="plusCircle"
             onClick={[Function]}
             size="s"
           >
@@ -142,7 +142,7 @@ describe('AddFilterButton component', () => {
             data-test-subj="uptimeCreateAlertAddFilter"
             disabled={true}
             flush="left"
-            iconType="plusInCircleFilled"
+            iconType="plusCircle"
             onClick={[Function]}
             size="s"
           >

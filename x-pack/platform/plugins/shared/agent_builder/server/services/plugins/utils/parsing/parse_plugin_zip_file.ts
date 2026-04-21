@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type {
   PluginManifest,
   ParsedPluginArchive,
@@ -14,11 +14,11 @@ import type {
 } from '@kbn/agent-builder-common';
 import type { ZipArchive } from '../archive';
 import { parseSkillFile } from './parse_skill_file';
+import { readCommands } from './parse_command_files';
 
 const manifestPaths = ['.claude-plugin/plugin.json', 'plugin.json'];
 
 const defaultSkillsDir = 'skills/';
-const defaultCommandsDir = 'commands/';
 const defaultAgentsDir = 'agents/';
 const defaultHooksConfig = 'hooks/hooks.json';
 const defaultHooksDir = 'hooks/';
@@ -29,16 +29,35 @@ const defaultLspConfig = '.lsp.json';
 /**
  * Parses and validates a Claude plugin zip archive.
  *
- * Extracts the manifest, parses skill files, and detects
- * unmanaged assets (commands, agents, hooks, etc.) that are
+ * Extracts the manifest, parses skill and command files, and detects
+ * unmanaged assets (agents, hooks, etc.) that are
  * present in the archive but not yet supported for installation.
  */
 export const parsePluginZipFile = async (archive: ZipArchive): Promise<ParsedPluginArchive> => {
   const manifest = await readAndValidateManifest(archive);
   const skills = await readSkills(archive, manifest);
+  const commands = await readCommands(archive, manifest);
   const unmanagedAssets = detectUnmanagedAssets(archive, manifest);
 
-  return { manifest, skills, unmanagedAssets };
+  // Many Claude plugins ship a command with the same name as a skill
+  // (the command just loads the skill). Drop such commands to avoid
+  // name collisions.
+  const skillNames = new Set(skills.map((s) => s.dirName));
+  const dedupedCommands = commands.filter((cmd) => !skillNames.has(cmd.dirName));
+
+  const allSkills = [...skills, ...dedupedCommands];
+
+  const seen = new Set<string>();
+  for (const skill of allSkills) {
+    if (seen.has(skill.dirName)) {
+      throw new PluginArchiveError(
+        `Duplicate skill name "${skill.dirName}" found in archive. Skills and commands must have unique names.`
+      );
+    }
+    seen.add(skill.dirName);
+  }
+
+  return { manifest, skills: allSkills, unmanagedAssets };
 };
 
 const readAndValidateManifest = async (archive: ZipArchive): Promise<PluginManifest> => {
@@ -198,7 +217,6 @@ const detectUnmanagedAssets = (
   const entries = archive.getEntryPaths();
 
   return {
-    commands: findAssetEntries(entries, defaultCommandsDir, manifest.commands),
     agents: findAssetEntries(entries, defaultAgentsDir, manifest.agents),
     hooks: findAssetEntries(entries, defaultHooksDir, manifest.hooks, defaultHooksConfig),
     mcp_servers: findAssetEntries(entries, undefined, manifest.mcpServers, defaultMcpConfig),

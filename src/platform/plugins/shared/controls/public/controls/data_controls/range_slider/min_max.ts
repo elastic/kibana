@@ -30,7 +30,7 @@ export function minMax$({
   controlFetch$: Observable<FetchContext>;
   dataViews$: PublishesDataViews['dataViews$'];
   fieldName$: PublishingSubject<string>;
-  useGlobalFilters$: PublishingSubject<boolean | undefined>;
+  useGlobalFilters$: PublishingSubject<boolean>;
   setIsLoading: (isLoading: boolean) => void;
 }) {
   let prevRequestAbortController: AbortController | undefined;

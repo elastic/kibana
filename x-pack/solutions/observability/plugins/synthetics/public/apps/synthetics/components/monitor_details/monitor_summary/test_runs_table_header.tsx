@@ -68,7 +68,7 @@ export const TestRunsTableHeader = ({
             <EuiButtonEmpty
               data-test-subj="monitorStatusChartViewHistoryButton"
               size="xs"
-              iconType="list"
+              iconType="listBullet"
             >
               {i18n.translate('xpack.synthetics.monitorDetails.summary.viewHistory', {
                 defaultMessage: 'View History',

@@ -9,7 +9,7 @@
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { normalizeFieldsToJsonSchema } from '@kbn/workflows/spec/lib/field_conversion';
-import { searchWorkflows } from '@kbn/workflows-ui';
+import { WorkflowApi } from '@kbn/workflows-ui';
 import type { WorkflowsServices } from '../../../../../types';
 import type { WorkflowsResponse } from '../../../model/types';
 import type { RootState } from '../../types';
@@ -31,10 +31,8 @@ export const loadWorkflowsThunk = createAsyncThunk<
 >('detail/loadWorkflowsThunk', async (_, { dispatch, rejectWithValue, extra: { services } }) => {
   const { http, notifications } = services;
   try {
-    const response = await searchWorkflows(http, {
-      size: MAX_WORKFLOWS_LOOKUP_SIZE,
-      page: 1,
-    });
+    const api = new WorkflowApi(http);
+    const response = await api.getWorkflows({ size: MAX_WORKFLOWS_LOOKUP_SIZE, page: 1 });
 
     const workflowsMap: WorkflowsResponse['workflows'] = {};
     response.results.forEach((workflow) => {

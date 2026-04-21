@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { LiveHistoryRow, SourceFilter } from '../../../common/api/unified_history/types';
+import type { LiveHistoryRow } from '../../../common/api/unified_history/types';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { getResultCountsForActions } from '../../lib/get_result_counts_for_actions';
 import { mapLiveHitToRow } from './map_live_hit_to_row';
@@ -17,7 +17,6 @@ export interface ProcessLiveHistoryParams {
   liveHits: LiveActionHit[];
   osqueryContext: OsqueryAppContext;
   spaceId: string;
-  activeFilters?: Set<SourceFilter>;
   logger: Logger;
 }
 
@@ -37,7 +36,6 @@ export const processLiveHistory = async ({
   liveHits,
   osqueryContext,
   spaceId,
-  activeFilters,
   logger,
 }: ProcessLiveHistoryParams): Promise<ProcessLiveHistoryResult> => {
   const liveRows: LiveHistoryRow[] = liveHits.map(mapLiveHitToRow);
@@ -61,15 +59,7 @@ export const processLiveHistory = async ({
     }
   }
 
-  const filteredLiveRows = activeFilters
-    ? liveRows.filter((row) => {
-        if (row.source === 'Rule') return activeFilters.has('rule');
-
-        return activeFilters.has('live');
-      })
-    : liveRows;
-
-  return { liveRows: filteredLiveRows, sortValuesMap };
+  return { liveRows, sortValuesMap };
 };
 
 const enrichWithResultCounts = async (

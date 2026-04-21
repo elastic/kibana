@@ -26,6 +26,7 @@ export interface DatasetQualityRouteHandlerResources {
     };
   };
   getEsCapabilities: () => Promise<ElasticsearchCapabilities>;
+  getIsSecurityEnabled: () => Promise<boolean>;
 }
 
 export interface DatasetQualityRouteCreateOptions {

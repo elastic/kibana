@@ -11,6 +11,7 @@ import React, { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import type { ESQLSourceResult } from '@kbn/esql-types';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { DataSourceBrowser } from '../data_source_browser';
 
 const mockDataSources: ESQLSourceResult[] = [
@@ -40,22 +41,31 @@ type Story = StoryObj<typeof DataSourceBrowser>;
 
 const InteractiveWrapper = ({ selectedSources = [] }: { selectedSources?: string[] }) => {
   const [isOpen, setIsOpen] = useState(true);
+  const services = {
+    core: {
+      // Not used by this story (we preload sources), but required by `useKibana`.
+      http: {} as any,
+      application: { capabilities: {} } as any,
+    },
+  };
 
   return (
-    <DataSourceBrowser
-      isOpen={isOpen}
-      isLoading={false}
-      onClose={() => {
-        setIsOpen(false);
-        action('onClose')();
-      }}
-      onSelect={(sourceName, change) => {
-        action('onSelect')({ sourceName, change });
-      }}
-      allSources={mockDataSources}
-      selectedSources={selectedSources}
-      position={{ top: 100, left: 100 }}
-    />
+    <KibanaContextProvider services={services as any}>
+      <DataSourceBrowser
+        isOpen={isOpen}
+        onClose={() => {
+          setIsOpen(false);
+          action('onClose')();
+        }}
+        onSelect={(sourceName, change) => {
+          action('onSelect')({ sourceName, change });
+        }}
+        preloadedSources={mockDataSources}
+        selectedSources={selectedSources}
+        position={{ top: 100, left: 100 }}
+        isTimeseries={false}
+      />
+    </KibanaContextProvider>
   );
 };
 

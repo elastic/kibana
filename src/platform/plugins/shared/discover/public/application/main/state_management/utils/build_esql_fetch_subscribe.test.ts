@@ -7,20 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { waitFor } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import type { EsHitRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import { omit } from 'lodash';
 import { FetchStatus } from '../../../types';
+import type { InternalStateMockToolkit } from '../../../../__mocks__/discover_state.mock';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { internalStateActions } from '../redux';
 import type { DiscoverAppState } from '../redux';
 import { dataViewAdHoc } from '../../../../__mocks__/data_view_complex';
+import type { DiscoverDataStateContainer } from '../discover_data_state_container';
+
+// Track resources from the last test for cleanup in afterEach
+let lastTestToolkit: InternalStateMockToolkit | undefined;
+let lastTestDataState: DiscoverDataStateContainer | undefined;
 
 async function getTestProps({
   query,
@@ -44,6 +48,10 @@ async function getTestProps({
     skipWaitForDataFetching: true,
   });
 
+  // Track for cleanup in afterEach
+  lastTestToolkit = toolkit;
+  lastTestDataState = dataState;
+
   toolkit.internalState.dispatch(
     toolkit.injectCurrentTab(internalStateActions.updateAppState)({
       appState: { columns: [], ...appState },
@@ -52,13 +60,8 @@ async function getTestProps({
 
   // Reset the profile state to match the expected initial state for tests
   toolkit.internalState.dispatch(
-    toolkit.injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
-      resetDefaultProfileState: {
-        columns: false,
-        rowHeight: false,
-        breakdownField: false,
-        hideChart: false,
-      },
+    toolkit.injectCurrentTab(internalStateActions.setProfileStateFieldsToReset)({
+      fieldsToReset: 'none',
     })
   );
 
@@ -122,13 +125,23 @@ const setupTest = async ({
 // Testing buildEsqlFetchSubscribe through the state container
 // since the logic is pretty intertwined with the state management
 describe('buildEsqlFetchSubscribe', () => {
+  afterEach(() => {
+    // Cancel pending URL state storage updates (uses Promise.resolve().then(flush) batching)
+    // and stop leaked throttled middleware timers (lodash.throttle with 300ms trailing setTimeout)
+    lastTestToolkit?.stateStorageContainer.cancel();
+    // Cancel running queries and abort controllers in the data state container
+    lastTestDataState?.cancel();
+    lastTestToolkit = undefined;
+    lastTestDataState = undefined;
+    jest.restoreAllMocks();
+  });
   test('an ES|QL query should change state when loading and finished', async () => {
     const { replaceUrlState, dataState, tabId } = await setupTest();
 
     replaceUrlState.mockClear();
 
     dataState.data$.documents$.next(msgComplete);
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+    expect(replaceUrlState).toHaveBeenCalledTimes(1);
     expect(replaceUrlState).toHaveBeenCalledWith({
       tabId,
       appState: { columns: ['field1', 'field2'] },
@@ -142,7 +155,7 @@ describe('buildEsqlFetchSubscribe', () => {
       },
     });
 
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
+    expect(replaceUrlState).toHaveBeenCalledTimes(0);
   });
 
   test('should change viewMode to undefined (default) if it was PATTERN_LEVEL', async () => {
@@ -152,7 +165,7 @@ describe('buildEsqlFetchSubscribe', () => {
       },
     });
 
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+    expect(replaceUrlState).toHaveBeenCalledTimes(1);
     expect(replaceUrlState).toHaveBeenCalledWith({
       tabId,
       appState: { viewMode: undefined },
@@ -177,13 +190,10 @@ describe('buildEsqlFetchSubscribe', () => {
       // transformational command
       query: { esql: 'from the-data-view-title | keep field1' },
     });
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
-
-    await waitFor(() => {
-      expect(replaceUrlState).toHaveBeenCalledWith({
-        tabId,
-        appState: { columns: ['field1'] },
-      });
+    expect(replaceUrlState).toHaveBeenCalledTimes(1);
+    expect(replaceUrlState).toHaveBeenCalledWith({
+      tabId,
+      appState: { columns: ['field1'] },
     });
   });
 
@@ -204,13 +214,10 @@ describe('buildEsqlFetchSubscribe', () => {
       ],
       query: { esql: 'from the-data-view-2' },
     });
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
-
-    await waitFor(() => {
-      expect(replaceUrlState).toHaveBeenCalledWith({
-        tabId,
-        appState: { columns: ['field1'] },
-      });
+    expect(replaceUrlState).toHaveBeenCalledTimes(1);
+    expect(replaceUrlState).toHaveBeenCalledWith({
+      tabId,
+      appState: { columns: ['field1'] },
     });
   });
 
@@ -218,7 +225,7 @@ describe('buildEsqlFetchSubscribe', () => {
     const { replaceUrlState, dataState, tabId } = await setupTest({});
     const documents$ = dataState.data$.documents$;
     documents$.next(msgComplete);
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+    expect(replaceUrlState).toHaveBeenCalledTimes(1);
     replaceUrlState.mockClear();
 
     documents$.next({
@@ -233,7 +240,7 @@ describe('buildEsqlFetchSubscribe', () => {
       // non transformational command, same columns as msgComplete
       query: { esql: 'from the-data-view-title | where field1 > 0' },
     });
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
+    expect(replaceUrlState).toHaveBeenCalledTimes(0);
     replaceUrlState.mockClear();
 
     documents$.next({
@@ -248,11 +255,9 @@ describe('buildEsqlFetchSubscribe', () => {
       // non transformational command, different index
       query: { esql: 'from the-data-view-title2 | where field1 > 0' },
     });
-    await waitFor(() => {
-      expect(replaceUrlState).toHaveBeenCalledWith({
-        tabId,
-        appState: { columns: ['field1', 'field2'] },
-      });
+    expect(replaceUrlState).toHaveBeenCalledWith({
+      tabId,
+      appState: { columns: ['field1', 'field2'] },
     });
   });
 
@@ -261,7 +266,7 @@ describe('buildEsqlFetchSubscribe', () => {
     const documents$ = dataState.data$.documents$;
 
     documents$.next(msgComplete);
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+    expect(replaceUrlState).toHaveBeenCalledTimes(1);
     replaceUrlState.mockClear();
 
     documents$.next({
@@ -275,12 +280,10 @@ describe('buildEsqlFetchSubscribe', () => {
       ],
       query: { esql: 'from the-data-view-title | keep field1' },
     });
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
-    await waitFor(() => {
-      expect(replaceUrlState).toHaveBeenCalledWith({
-        tabId,
-        appState: { columns: ['field1'] },
-      });
+    expect(replaceUrlState).toHaveBeenCalledTimes(1);
+    expect(replaceUrlState).toHaveBeenCalledWith({
+      tabId,
+      appState: { columns: ['field1'] },
     });
     replaceUrlState.mockClear();
 
@@ -296,7 +299,7 @@ describe('buildEsqlFetchSubscribe', () => {
       query: { esql: 'from the-data-view-title | keep field 1 | WHERE field1=1' },
     });
 
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
+    expect(replaceUrlState).toHaveBeenCalledTimes(0);
   });
 
   test('if its not an ES|QL query coming along, it should be ignored', async () => {
@@ -304,7 +307,7 @@ describe('buildEsqlFetchSubscribe', () => {
     const documents$ = dataState.data$.documents$;
 
     documents$.next(msgComplete);
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+    expect(replaceUrlState).toHaveBeenCalledTimes(1);
     replaceUrlState.mockClear();
 
     documents$.next({
@@ -330,11 +333,9 @@ describe('buildEsqlFetchSubscribe', () => {
       query: { esql: 'from the-data-view-title | keep field 1 | WHERE field1=1' },
     });
 
-    await waitFor(() => {
-      expect(replaceUrlState).toHaveBeenCalledWith({
-        tabId,
-        appState: { columns: ['field1'] },
-      });
+    expect(replaceUrlState).toHaveBeenCalledWith({
+      tabId,
+      appState: { columns: ['field1'] },
     });
   });
 
@@ -359,12 +360,10 @@ describe('buildEsqlFetchSubscribe', () => {
       query: { esql: 'from the-data-view-title | keep field 1 | WHERE field1=1' },
     });
 
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
-    await waitFor(() => {
-      expect(replaceUrlState).toHaveBeenCalledWith({
-        tabId,
-        appState: { columns: ['field1', 'field2'] },
-      });
+    expect(replaceUrlState).toHaveBeenCalledTimes(1);
+    expect(replaceUrlState).toHaveBeenCalledWith({
+      tabId,
+      appState: { columns: ['field1', 'field2'] },
     });
     replaceUrlState.mockClear();
 
@@ -379,7 +378,7 @@ describe('buildEsqlFetchSubscribe', () => {
       ],
       query: { esql: 'from the-data-view-title | keep field1' },
     });
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+    expect(replaceUrlState).toHaveBeenCalledTimes(1);
     expect(replaceUrlState).toHaveBeenCalledWith({
       tabId,
       appState: { columns: ['field1'] },
@@ -408,12 +407,10 @@ describe('buildEsqlFetchSubscribe', () => {
       query: { esql: 'from the-data-view-title | keep field 1' },
     });
 
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
-    await waitFor(() => {
-      expect(replaceUrlState).toHaveBeenCalledWith({
-        tabId,
-        appState: { columns: ['field1'] },
-      });
+    expect(replaceUrlState).toHaveBeenCalledTimes(1);
+    expect(replaceUrlState).toHaveBeenCalledWith({
+      tabId,
+      appState: { columns: ['field1'] },
     });
   });
 
@@ -460,7 +457,7 @@ describe('buildEsqlFetchSubscribe', () => {
       ],
       query: { esql: 'from the-data-view-title | WHERE field2=1' },
     });
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+    expect(replaceUrlState).toHaveBeenCalledTimes(1);
     expect(replaceUrlState).toHaveBeenCalledWith({
       tabId,
       appState: { columns: ['field1', 'field2'] },
@@ -482,7 +479,7 @@ describe('buildEsqlFetchSubscribe', () => {
       ],
       query: { esql: 'from the-data-view-title | WHERE field2=1' },
     });
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+    expect(replaceUrlState).toHaveBeenCalledTimes(1);
     expect(replaceUrlState).toHaveBeenCalledWith({
       tabId,
       appState: { columns: ['field1', 'field2'] },
@@ -499,7 +496,7 @@ describe('buildEsqlFetchSubscribe', () => {
       ],
       query: { esql: 'from the-data-view-title | keep field1' },
     });
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+    expect(replaceUrlState).toHaveBeenCalledTimes(1);
     expect(replaceUrlState).toHaveBeenCalledWith({
       tabId,
       appState: { columns: ['field1'] },
@@ -530,7 +527,7 @@ describe('buildEsqlFetchSubscribe', () => {
       ],
       query: { esql: 'from the-data-view-title | WHERE field1=2' },
     });
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+    expect(replaceUrlState).toHaveBeenCalledTimes(1);
     toolkit.internalState.dispatch(
       toolkit.injectCurrentTab(internalStateActions.updateAppState)({
         appState: { columns: ['field1', 'field2'] },
@@ -564,7 +561,7 @@ describe('buildEsqlFetchSubscribe', () => {
       query: { esql: 'from the-data-view-title | keep field1' },
     });
 
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+    expect(replaceUrlState).toHaveBeenCalledTimes(1);
     expect(replaceUrlState).toHaveBeenCalledWith({
       tabId,
       appState: { columns: ['field1'] },
@@ -576,7 +573,7 @@ describe('buildEsqlFetchSubscribe', () => {
     const documents$ = dataState.data$.documents$;
 
     documents$.next(msgComplete);
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+    expect(replaceUrlState).toHaveBeenCalledTimes(1);
     replaceUrlState.mockClear();
 
     documents$.next({
@@ -595,28 +592,20 @@ describe('buildEsqlFetchSubscribe', () => {
         dataView: dataViewAdHoc,
       })
     );
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
-
-    await waitFor(() => {
-      expect(replaceUrlState).toHaveBeenCalledWith({
-        tabId,
-        appState: { columns: ['field1'] },
-      });
+    expect(replaceUrlState).toHaveBeenCalledTimes(1);
+    expect(replaceUrlState).toHaveBeenCalledWith({
+      tabId,
+      appState: { columns: ['field1'] },
     });
   });
 
-  it('should call setResetDefaultProfileState correctly when index pattern changes', async () => {
+  it('should call setProfileStateFieldsToReset correctly when index pattern changes', async () => {
     const { toolkit, dataState } = await setupTest({
       appState: { query: { esql: 'from pattern' } },
       defaultFetchStatus: FetchStatus.LOADING,
     });
     const documents$ = dataState.data$.documents$;
-    expect(omit(toolkit.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-      columns: false,
-      hideChart: false,
-      rowHeight: false,
-      breakdownField: false,
-    });
+    expect(toolkit.getCurrentTab().defaultProfileState.fieldsToReset).toEqual('none');
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
       query: { esql: 'from pattern' },
@@ -630,26 +619,14 @@ describe('buildEsqlFetchSubscribe', () => {
       fetchStatus: FetchStatus.LOADING,
       query: { esql: 'from pattern1' },
     });
-    await waitFor(() =>
-      expect(omit(toolkit.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-        columns: true,
-        hideChart: true,
-        rowHeight: true,
-        breakdownField: true,
-      })
-    );
+    expect(toolkit.getCurrentTab().defaultProfileState.fieldsToReset).toEqual('all');
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
       query: { esql: 'from pattern1' },
     });
     toolkit.internalState.dispatch(
-      toolkit.injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
-        resetDefaultProfileState: {
-          columns: false,
-          rowHeight: false,
-          breakdownField: false,
-          hideChart: false,
-        },
+      toolkit.injectCurrentTab(internalStateActions.setProfileStateFieldsToReset)({
+        fieldsToReset: 'none',
       })
     );
     toolkit.internalState.dispatch(
@@ -661,14 +638,7 @@ describe('buildEsqlFetchSubscribe', () => {
       fetchStatus: FetchStatus.LOADING,
       query: { esql: 'from pattern1' },
     });
-    await waitFor(() =>
-      expect(omit(toolkit.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-        columns: false,
-        rowHeight: false,
-        breakdownField: false,
-        hideChart: false,
-      })
-    );
+    expect(toolkit.getCurrentTab().defaultProfileState.fieldsToReset).toEqual('none');
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
       query: { esql: 'from pattern1' },
@@ -682,14 +652,7 @@ describe('buildEsqlFetchSubscribe', () => {
       fetchStatus: FetchStatus.LOADING,
       query: { esql: 'from pattern2' },
     });
-    await waitFor(() =>
-      expect(omit(toolkit.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-        columns: true,
-        rowHeight: true,
-        breakdownField: true,
-        hideChart: true,
-      })
-    );
+    expect(toolkit.getCurrentTab().defaultProfileState.fieldsToReset).toEqual('all');
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
       query: { esql: 'from pattern2' },
@@ -742,49 +705,30 @@ describe('buildEsqlFetchSubscribe', () => {
       query: { esql: 'from the-data-view-title' },
     });
 
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+    expect(replaceUrlState).toHaveBeenCalledTimes(1);
     expect(replaceUrlState).toHaveBeenCalledWith({
       tabId,
       appState: { columns: expectedColumns },
     });
   });
 
-  it('should call setResetDefaultProfileState correctly when columns change', async () => {
+  it('should call setProfileStateFieldsToReset correctly when columns change', async () => {
     const { toolkit, dataState } = await setupTest({});
     const documents$ = dataState.data$.documents$;
     const result1 = [buildDataTableRecord({ message: 'foo' } as EsHitRecord)];
     const result2 = [buildDataTableRecord({ message: 'foo', extension: 'bar' } as EsHitRecord)];
-    expect(omit(toolkit.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-      columns: false,
-      rowHeight: false,
-      breakdownField: false,
-      hideChart: false,
-    });
+    expect(toolkit.getCurrentTab().defaultProfileState.fieldsToReset).toEqual('none');
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
       query: { esql: 'from pattern' },
       result: result1,
     });
-    await waitFor(() =>
-      expect(omit(toolkit.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-        columns: false,
-        rowHeight: false,
-        breakdownField: false,
-        hideChart: false,
-      })
-    );
+    expect(toolkit.getCurrentTab().defaultProfileState.fieldsToReset).toEqual('none');
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
       query: { esql: 'from pattern' },
       result: result2,
     });
-    await waitFor(() =>
-      expect(omit(toolkit.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-        columns: true,
-        rowHeight: false,
-        breakdownField: false,
-        hideChart: false,
-      })
-    );
+    expect(toolkit.getCurrentTab().defaultProfileState.fieldsToReset).toEqual(['columns']);
   });
 });

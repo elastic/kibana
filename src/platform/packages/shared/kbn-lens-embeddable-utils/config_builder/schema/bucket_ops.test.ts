@@ -18,7 +18,9 @@ import {
 import {
   LENS_HISTOGRAM_EMPTY_ROWS_DEFAULT,
   LENS_HISTOGRAM_GRANULARITY_DEFAULT_VALUE,
-  LENS_TERMS_SIZE_DEFAULT,
+  LENS_PERCENTILE_DEFAULT_VALUE,
+  LENS_PERCENTILE_RANK_DEFAULT_VALUE,
+  LENS_TERMS_LIMIT_DEFAULT,
 } from './constants';
 
 describe('Bucket Operation Schemas', () => {
@@ -52,14 +54,14 @@ describe('Bucket Operation Schemas', () => {
         fields: ['category'],
       };
       const validated = bucketTermsOperationSchema.validate(input);
-      expect(validated).toEqual({ ...input, size: LENS_TERMS_SIZE_DEFAULT });
+      expect(validated).toEqual({ ...input, limit: LENS_TERMS_LIMIT_DEFAULT });
     });
 
     it('validates a valid terms configuration', () => {
       const input = {
         operation: 'terms',
         fields: ['category'],
-        size: 10,
+        limit: 10,
         increase_accuracy: true,
         includes: {
           values: ['value1', 'value2'],
@@ -92,8 +94,8 @@ describe('Bucket Operation Schemas', () => {
           type: 'significant' as const,
         },
         {
-          type: 'column' as const,
-          metric: 1,
+          type: 'metric' as const,
+          metric_index: 1,
           direction: 'desc' as const,
         },
         {
@@ -115,6 +117,78 @@ describe('Bucket Operation Schemas', () => {
         expect(validated.rank_by).toEqual(rankBy);
       });
     });
+
+    it('validates rank_by custom with percentile operation', () => {
+      const input = {
+        operation: 'terms',
+        fields: ['category'],
+        rank_by: {
+          type: 'custom',
+          operation: 'percentile',
+          field: 'latency',
+          direction: 'desc',
+          percentile: 90,
+        },
+      };
+
+      const validated = bucketTermsOperationSchema.validate(input);
+      expect(validated.rank_by).toEqual(input.rank_by);
+    });
+
+    it('validates rank_by custom with percentile operation uses default', () => {
+      const input = {
+        operation: 'terms',
+        fields: ['category'],
+        rank_by: {
+          type: 'custom',
+          operation: 'percentile',
+          field: 'latency',
+          direction: 'desc',
+        },
+      };
+
+      const validated = bucketTermsOperationSchema.validate(input);
+      expect(validated.rank_by).toEqual({
+        ...input.rank_by,
+        percentile: LENS_PERCENTILE_DEFAULT_VALUE,
+      });
+    });
+
+    it('validates rank_by custom with percentile_rank operation', () => {
+      const input = {
+        operation: 'terms',
+        fields: ['category'],
+        rank_by: {
+          type: 'custom',
+          operation: 'percentile_rank',
+          field: 'latency',
+          direction: 'asc',
+          rank: 500,
+        },
+      };
+
+      const validated = bucketTermsOperationSchema.validate(input);
+      expect(validated.rank_by).toEqual(input.rank_by);
+    });
+
+    it('validates rank_by custom with percentile_rank operation uses default', () => {
+      const input = {
+        operation: 'terms',
+        fields: ['category'],
+        rank_by: {
+          type: 'custom',
+          operation: 'percentile_rank',
+          field: 'latency',
+          direction: 'asc',
+        },
+      };
+
+      const validated = bucketTermsOperationSchema.validate(input);
+      expect(validated.rank_by).toEqual({
+        ...input.rank_by,
+        rank: LENS_PERCENTILE_RANK_DEFAULT_VALUE,
+      });
+    });
   });
 
   describe('filter operation', () => {
@@ -125,8 +199,8 @@ describe('Bucket Operation Schemas', () => {
           {
             label: 'My Filter',
             filter: {
-              language: 'kuery',
-              query: 'category: "electronics"',
+              language: 'kql',
+              expression: 'category: "electronics"',
             },
           },
         ],
@@ -201,7 +275,7 @@ describe('Bucket Operation Schemas', () => {
         {
           operation: 'terms',
           fields: ['category'],
-          size: LENS_TERMS_SIZE_DEFAULT,
+          limit: LENS_TERMS_LIMIT_DEFAULT,
         },
         {
           operation: 'histogram',
@@ -219,7 +293,7 @@ describe('Bucket Operation Schemas', () => {
           filters: [
             {
               label: 'Filter',
-              filter: { language: 'kuery', query: 'status:active' },
+              filter: { language: 'kql', expression: 'status:active' },
             },
           ],
         },

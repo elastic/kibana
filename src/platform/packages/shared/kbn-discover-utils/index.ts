@@ -16,6 +16,7 @@ export {
   DOC_HIDE_TIME_COLUMN_SETTING,
   FIELDS_LIMIT_SETTING,
   HIDE_ANNOUNCEMENTS,
+  IS_ESQL_DEFAULT_FEATURE_FLAG_KEY,
   MAX_DOC_FIELDS_DISPLAYED,
   MODIFY_COLUMNS_ON_SWITCH,
   ROW_HEIGHT_OPTION,
@@ -37,7 +38,8 @@ export {
   createStacktraceControl,
   fieldConstants,
   formatFieldValue,
-  formatHit,
+  formatFieldValueReact,
+  formatHitReact,
   getDocId,
   getLogDocumentOverview,
   getTraceDocumentOverview,
@@ -65,6 +67,7 @@ export {
   dismissAllFlyoutsExceptFor,
   dismissFlyouts,
   prepareDataViewForEditing,
+  getEsqlDataView,
   LogLevelBadge,
   getDefaultSort,
   getSort,
@@ -73,6 +76,7 @@ export {
   getEsQuerySort,
   getTieBreakerFieldName,
   escapeAndPreserveHighlightTags,
+  getHighlightedFieldValue,
   severityOrder,
 } from './src';
 

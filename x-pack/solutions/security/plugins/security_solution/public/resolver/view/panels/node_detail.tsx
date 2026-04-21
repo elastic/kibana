@@ -10,17 +10,18 @@ import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
-  htmlIdGenerator,
+  EuiInMemoryTable,
+  EuiLink,
   EuiSpacer,
-  EuiTitle,
   EuiText,
   EuiTextColor,
-  EuiLink,
-  EuiInMemoryTable,
+  EuiTitle,
+  htmlIdGenerator,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
-import { EventKind } from '../../../flyout/document_details/shared/constants/event_kinds';
+import type { CellActionRenderer } from '../../../flyout_v2/shared/components/cell_actions';
+import { EventKind } from '../../../flyout_v2/document/constants/event_kinds';
 import { StyledTitle } from './styles';
 import * as selectors from '../../store/selectors';
 import * as eventModel from '../../../../common/endpoint/models/event';
@@ -37,7 +38,6 @@ import { useFormattedDate } from './use_formatted_date';
 import { PanelContentError } from './panel_content_error';
 import type { State } from '../../../common/store/types';
 import type { NodeEventOnClick } from './node_events_of_type';
-import type { ResolverCellActionRenderer } from '../../types';
 
 const StyledCubeForProcess = styled(CubeForProcess)`
   position: relative;
@@ -57,7 +57,7 @@ export const NodeDetail = memo(function ({
   id: string;
   nodeID: string;
   nodeEventOnClick?: NodeEventOnClick;
-  renderCellActions: ResolverCellActionRenderer;
+  renderCellActions: CellActionRenderer;
 }) {
   const processEvent = useSelector((state: State) =>
     nodeDataModel.firstEvent(selectors.nodeDataForID(state.analyzer[id])(nodeID))
@@ -102,7 +102,7 @@ export const NodeDetailView = memo(function ({
   processEvent: SafeResolverEvent;
   nodeID: string;
   nodeEventOnClick?: NodeEventOnClick;
-  renderCellActions: ResolverCellActionRenderer;
+  renderCellActions: CellActionRenderer;
 }) {
   const processName = eventModel.processNameSafeVersion(processEvent);
   const nodeState = useSelector((state: State) =>

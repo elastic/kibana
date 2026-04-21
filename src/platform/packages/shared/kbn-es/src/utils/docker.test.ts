@@ -10,7 +10,7 @@
 import mockFs from 'mock-fs';
 
 import Fsp from 'fs/promises';
-import { basename } from 'path';
+import { basename, join } from 'path';
 
 import type { ServerlessOptions, ServerlessProjectType } from './docker';
 import * as dockerUiam from './docker_uiam';
@@ -42,6 +42,7 @@ import {
   SERVERLESS_CONFIG_PATH,
   SERVERLESS_RESOURCES_PATHS,
   SERVERLESS_SECRETS_PATH,
+  SERVERLESS_SECRETS_SSL_PATH,
   SERVERLESS_JWKS_PATH,
   SERVERLESS_IDP_METADATA_PATH,
   SERVERLESS_OPERATOR_PATH,
@@ -52,6 +53,17 @@ import * as mockIdpPluginUtil from '@kbn/mock-idp-utils';
 
 jest.mock('execa');
 const execa = jest.requireMock('execa');
+
+jest.mock('./read_string_secrets', () => ({
+  readStringSecrets: jest.fn().mockResolvedValue({}),
+}));
+
+const readStringSecretsMock = (
+  jest.requireMock('./read_string_secrets') as {
+    readStringSecrets: jest.MockedFunction<(path: string) => Promise<Record<string, string>>>;
+  }
+).readStringSecrets;
+
 jest.mock('@elastic/elasticsearch', () => {
   return {
     Client: jest.fn(),
@@ -862,6 +874,51 @@ describe('setupServerlessVolumes()', () => {
     );
     await expect(Fsp.access(`${baseEsPath}/${dataPath}`)).resolves.not.toThrow();
   });
+
+  test('should embed readStringSecrets output in operator settings.json', async () => {
+    mockFs(existingObjectStore);
+    const stringSecretsFixture = {
+      'xpack.security.transport.ssl.keystore.secure_password': 'storepass',
+      'xpack.security.authc.realms.jwt.jwt1.client_authentication.shared_secret': 'my_super_secret',
+    };
+    readStringSecretsMock.mockResolvedValue(stringSecretsFixture);
+
+    const volumeCmd = await setupServerlessVolumes(log, {
+      projectType,
+      basePath: baseEsPath,
+    });
+
+    await volumeCmdTest(volumeCmd);
+    expect(readStringSecretsMock).toHaveBeenCalledWith(SERVERLESS_SECRETS_PATH);
+    const settings = JSON.parse(
+      await Fsp.readFile(join(SERVERLESS_OPERATOR_PATH, 'settings.json'), 'utf-8')
+    );
+    expect(settings.state.cluster_secrets.string_secrets).toEqual(stringSecretsFixture);
+  });
+
+  test('should use SSL secrets file and embed string_secrets when ssl is enabled', async () => {
+    mockFs(existingObjectStore);
+    createMockIdpMetadataMock.mockResolvedValue('<xml/>');
+    const stringSecretsFixture = {
+      'xpack.security.http.ssl.keystore.secure_password': 'storepass',
+    };
+    readStringSecretsMock.mockResolvedValue(stringSecretsFixture);
+
+    const volumeCmd = await setupServerlessVolumes(log, {
+      projectType,
+      basePath: baseEsPath,
+      ssl: true,
+      kibanaUrl: 'https://localhost:5603/',
+    });
+
+    expect(volumeCmd).toHaveLength(26);
+    expect(volumeCmd.some((cmd) => cmd.includes(SERVERLESS_SECRETS_SSL_PATH))).toBe(true);
+    expect(readStringSecretsMock).toHaveBeenCalledWith(SERVERLESS_SECRETS_SSL_PATH);
+    const settings = JSON.parse(
+      await Fsp.readFile(join(SERVERLESS_OPERATOR_PATH, 'settings.json'), 'utf-8')
+    );
+    expect(settings.state.cluster_secrets.string_secrets).toEqual(stringSecretsFixture);
+  });
 });
 
 describe('runServerlessEsNode()', () => {
@@ -923,7 +980,7 @@ describe('runServerlessCluster()', () => {
     // docker inspect (1)
     // docker run (3)
     // docker logs (1)
-    expect(execa.mock.calls).toHaveLength(17);
+    expect(execa.mock.calls).toHaveLength(18);
 
     // UIAM containers should not be started when `--uiam` is not passed
     expect(runUiamContainerMock).not.toHaveBeenCalled();
@@ -947,7 +1004,7 @@ describe('runServerlessCluster()', () => {
     // docker inspect (2 = image info call for ES nodes is memoized in the previous test, 2 for UIAM containers)
     // docker run (3)
     // docker logs (1)
-    expect(execa.mock.calls).toHaveLength(20);
+    expect(execa.mock.calls).toHaveLength(21);
 
     expect(runUiamContainerMock).toHaveBeenCalledTimes(2);
     expect(runUiamContainerMock).toHaveBeenCalledWith(
@@ -1114,7 +1171,7 @@ describe('runDockerContainer()', () => {
     // docker pull (1)
     // docker inspect (1)
     // docker run (1)
-    expect(execa.mock.calls).toHaveLength(14);
+    expect(execa.mock.calls).toHaveLength(15);
   });
 });
 

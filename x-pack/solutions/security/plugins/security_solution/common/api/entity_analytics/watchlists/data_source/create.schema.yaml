@@ -31,14 +31,25 @@ paths:
                   type: string
                 indexPattern:
                   type: string
+                integrationName:
+                  type: string
+                  description: Required when type is entity_analytics_integration. One of entityanalytics_okta, entityanalytics_ad.
                 enabled:
                   type: boolean
+                identifierField:
+                  type: string
+                  description: Field used to query the entity store for index-type sources
+                queryRule:
+                  type: string
+                  description: KQL query used to filter data from the provided index patterns
                 matchers:
                   type: array
                   items:
                     $ref: "./common.schema.yaml#/components/schemas/Matcher"
                 filter:
                   $ref: "./common.schema.yaml#/components/schemas/Filter"
+                range:
+                  $ref: "./common.schema.yaml#/components/schemas/DateRange"
       responses:
         "200":
           description: Entity source created successfully

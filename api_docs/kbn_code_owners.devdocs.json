@@ -32,7 +32,7 @@
           "(owner: string) => \"search\" | \"security\" | \"observability\" | \"workplaceai\" | \"platform\" | undefined"
         ],
         "path": "src/platform/packages/private/kbn-code-owners/src/code_owner_areas.ts",
-        "lineNumber": 93,
+        "lineNumber": 94,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -50,7 +50,7 @@
               "string"
             ],
             "path": "src/platform/packages/private/kbn-code-owners/src/code_owner_areas.ts",
-            "lineNumber": 99,
+            "lineNumber": 100,
             "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
@@ -418,7 +418,7 @@
               "string[]"
             ],
             "path": "src/platform/packages/private/kbn-code-owners/src/code_owner_areas.ts",
-            "lineNumber": 54,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -434,7 +434,7 @@
               "string[]"
             ],
             "path": "src/platform/packages/private/kbn-code-owners/src/code_owner_areas.ts",
-            "lineNumber": 55,
+            "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -450,7 +450,7 @@
               "string[]"
             ],
             "path": "src/platform/packages/private/kbn-code-owners/src/code_owner_areas.ts",
-            "lineNumber": 71,
+            "lineNumber": 72,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -466,7 +466,7 @@
               "string[]"
             ],
             "path": "src/platform/packages/private/kbn-code-owners/src/code_owner_areas.ts",
-            "lineNumber": 90,
+            "lineNumber": 91,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

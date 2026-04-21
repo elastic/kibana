@@ -9,14 +9,9 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 
-import { coreMock } from '@kbn/core/public/mocks';
-import { featuresPluginMock } from '@kbn/features-plugin/public/mocks';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { SolutionViewSwitchCalloutInternal } from './solution_view_switch_callout_internal';
-import type { PluginsStart } from '../../plugin';
-import { spacesManagerMock } from '../../spaces_manager/mocks';
-import { SOLUTION_VIEW_SWITCH_STORAGE_KEY_PREFIX } from '../constants';
 import type { SupportedSolutionView } from '../types';
 
 jest.mock('./modal', () => ({
@@ -43,80 +38,45 @@ jest.mock('./modal', () => ({
 describe('SolutionViewSwitchCalloutInternal', () => {
   const setup = ({ updateSpaceRejects }: { updateSpaceRejects?: Error } = {}) => {
     const user = userEvent.setup();
-
-    const { getStartServices } = coreMock.createSetup();
-    const coreStart = coreMock.createStart();
-    const pluginsStart: PluginsStart = {
-      features: featuresPluginMock.createStart(),
-    };
-    getStartServices.mockResolvedValue([coreStart, pluginsStart, undefined]);
-
-    const spacesManager = spacesManagerMock.create();
-    spacesManager.getActiveSpace.mockResolvedValue({
-      id: 'default',
-      name: 'Default',
-      disabledFeatures: [],
-    });
-
-    if (updateSpaceRejects) {
-      spacesManager.updateSpace.mockRejectedValue(updateSpaceRejects);
-    } else {
-      spacesManager.updateSpace.mockResolvedValue(undefined);
-    }
-
-    const setItemSpy = jest.spyOn(Storage.prototype, 'setItem');
+    const updateSpace = updateSpaceRejects
+      ? jest.fn().mockRejectedValue(updateSpaceRejects)
+      : jest.fn().mockResolvedValue(undefined);
+    const showError = jest.fn();
 
     renderWithI18n(
       <SolutionViewSwitchCalloutInternal
-        spacesManager={spacesManager}
-        getStartServices={getStartServices}
         currentSolution="es"
+        manageSpacesUrl="app/management/kibana/spaces"
+        updateSpace={updateSpace}
+        showError={showError}
+        onDismiss={jest.fn()}
       />
     );
 
-    return { user, coreStart, spacesManager, setItemSpy };
+    return { user, updateSpace, showError };
   };
 
-  afterEach(() => {
-    jest.restoreAllMocks();
-  });
-
-  test('switches solution and sets the per-space localStorage flag', async () => {
-    const { user, spacesManager, setItemSpy } = setup();
+  test('calls updateSpace when switching', async () => {
+    const { user, updateSpace, showError } = setup();
 
     await user.click(screen.getByRole('button', { name: /learn more/i }));
     await user.click(screen.getByRole('button', { name: /mock switch/i }));
 
     await waitFor(() => {
-      expect(spacesManager.getActiveSpace).toHaveBeenCalledTimes(1);
-      expect(spacesManager.updateSpace).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: 'default',
-          solution: 'oblt',
-        })
-      );
+      expect(updateSpace).toHaveBeenCalledWith('oblt');
     });
-
-    expect(setItemSpy).toHaveBeenCalledWith(
-      `${SOLUTION_VIEW_SWITCH_STORAGE_KEY_PREFIX}:default`,
-      'true'
-    );
+    expect(showError).not.toHaveBeenCalled();
   });
 
-  test('toasts on error', async () => {
+  test('calls showError when updateSpace rejects', async () => {
     const error = new Error('Another error');
-    const { user, coreStart } = setup({ updateSpaceRejects: error });
+    const { user, showError } = setup({ updateSpaceRejects: error });
 
     await user.click(screen.getByRole('button', { name: /learn more/i }));
     await user.click(screen.getByRole('button', { name: /mock switch/i }));
 
     await waitFor(() => {
-      expect(coreStart.notifications.toasts.addError).toHaveBeenCalledWith(
-        error,
-        expect.objectContaining({
-          title: expect.stringContaining('Error switching solution view'),
-        })
-      );
+      expect(showError).toHaveBeenCalledWith(error);
     });
   });
 });

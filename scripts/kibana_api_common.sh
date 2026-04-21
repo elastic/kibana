@@ -34,7 +34,7 @@ _try_kibana() {
   http_code="$(curl -s -o /dev/null -w "%{http_code}" -k -u "$auth" \
     -H "kbn-xsrf: true" \
     -H "x-elastic-internal-origin: Kibana" \
-    "$url/api/data_sources" 2>/dev/null || echo "000")"
+    "$url/api/security/v1/me" 2>/dev/null || echo "000")"
   [[ "$http_code" != "000" && "$http_code" != "401" ]]
 }
 

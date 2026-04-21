@@ -22,9 +22,11 @@ import {
   FEATURE_TAGS,
   FEATURE_META,
   FEATURE_EXPIRES_AT,
+  FEATURE_EXCLUDED_AT,
   FEATURE_ID,
   FEATURE_FILTER,
   FEATURE_EVIDENCE_DOC_IDS,
+  FEATURE_SEARCH_EMBEDDING,
 } from './fields';
 
 export const featureStorageSettings = {
@@ -47,9 +49,24 @@ export const featureStorageSettings = {
       [FEATURE_TAGS]: types.keyword(),
       [FEATURE_META]: types.object({ enabled: false }),
       [FEATURE_EXPIRES_AT]: types.date(),
+      [FEATURE_EXCLUDED_AT]: types.date(),
       [FEATURE_FILTER]: types.object({ enabled: false }),
+      [FEATURE_SEARCH_EMBEDDING]: types.semantic_text(),
     },
   },
 } satisfies IndexStorageSettings;
 
 export type FeatureStorageSettings = typeof featureStorageSettings;
+
+export const getFeatureStorageSettings = (inferenceId: string): IndexStorageSettings => ({
+  name: featureStorageSettings.name,
+  schema: {
+    properties: {
+      ...featureStorageSettings.schema.properties,
+      // The semantic_text field is always declared in the mapping regardless of
+      // inference availability — ES does not validate the inference_id at mapping
+      // time, so this is safe even when ML is disabled or ELSER is not deployed.
+      [FEATURE_SEARCH_EMBEDDING]: types.semantic_text({ inference_id: inferenceId }),
+    },
+  },
+});

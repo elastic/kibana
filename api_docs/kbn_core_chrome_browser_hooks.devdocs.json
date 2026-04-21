@@ -5,6 +5,43 @@
     "functions": [
       {
         "parentPluginId": "@kbn/core-chrome-browser-hooks",
+        "id": "def-public.RegisterAppMenu",
+        "type": "Function",
+        "tags": [],
+        "label": "RegisterAppMenu",
+        "description": [],
+        "signature": [
+          "({ config }: AppMenuProps) => null"
+        ],
+        "path": "src/core/packages/chrome/browser-hooks/components/app_menu.tsx",
+        "lineNumber": 18,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-browser-hooks",
+            "id": "def-public.RegisterAppMenu.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ config }",
+            "description": [],
+            "signature": [
+              "AppMenuProps"
+            ],
+            "path": "src/core/packages/chrome/browser-hooks/components/app_menu.tsx",
+            "lineNumber": 18,
+            "columnNumber": 33,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser-hooks",
         "id": "def-public.useActiveSolutionNavId",
         "type": "Function",
         "tags": [],
@@ -101,6 +138,27 @@
           "() => { isCollapsed: boolean; setIsCollapsed: (isCollapsed: boolean) => void; }"
         ],
         "path": "src/core/packages/chrome/browser-hooks/use_side_nav_collapsed.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser-hooks",
+        "id": "def-public.useSideNavWidth",
+        "type": "Function",
+        "tags": [],
+        "label": "useSideNavWidth",
+        "description": [
+          "\nReturns the effective side nav pixel width."
+        ],
+        "signature": [
+          "() => number"
+        ],
+        "path": "src/core/packages/chrome/browser-hooks/use_side_nav_width.ts",
         "lineNumber": 14,
         "columnNumber": 1,
         "deprecated": false,

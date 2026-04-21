@@ -11,7 +11,7 @@ import React from 'react';
 import { DayPicker, type DateRange } from 'react-day-picker';
 import { useEuiTheme } from '@elastic/eui';
 
-import './calendar_view_base.css';
+import 'react-day-picker/style.css';
 import { calendarViewStyles } from './calendar_view.styles';
 
 interface CalendarViewProps {
@@ -48,7 +48,6 @@ export const CalendarView = function CalendarView({
       css={styles.dayPicker}
       disableNavigation
       hideNavigation
-      fixedWeeks
       mode="range"
       month={new Date(year, monthIndex, 1)}
       onSelect={setRange}

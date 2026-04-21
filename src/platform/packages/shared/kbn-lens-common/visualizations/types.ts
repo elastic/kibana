@@ -33,7 +33,7 @@ import {
   type LENS_NUMBER_DISPLAY,
   type LENS_LAYER_TYPES,
 } from './constants';
-import type { SeriesType, XYState } from './xy/types';
+import type { SeriesType, XYVisualizationState } from './xy/types';
 import type { LensTagCloudState } from './tagcloud/types';
 import type { LensPartitionVisualizationState } from './partition/types';
 import type { MetricVisualizationState } from './metric/types';
@@ -90,7 +90,7 @@ export type LensLayerType = (typeof LENS_LAYER_TYPES)[keyof typeof LENS_LAYER_TY
 export type CollapseFunction = (typeof LENS_COLLAPSE_FUNCTIONS)[number];
 
 export type LensConfiguration =
-  | XYState
+  | XYVisualizationState
   | DatatableVisualizationState
   | LensPartitionVisualizationState
   | MetricVisualizationState
@@ -245,6 +245,12 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
    * Supported triggers of this visualization type when embedded somewhere
    */
   triggers?: string[];
+  /**
+   * Optional priority used to sort suggestions when multiple visualizations
+   * compete. Higher values are sorted first. Defaults to 0.
+   */
+  suggestionPriority?: number;
+
   /**
    * Visualizations must provide at least one type for the chart switcher,
    * but can register multiple subtypes

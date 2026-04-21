@@ -17,8 +17,6 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiComboBox,
-  EuiFormAppend,
-  EuiFormPrepend,
 } from '@elastic/eui';
 import type { VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
 import { Position, LegendValue } from '@elastic/charts';
@@ -99,14 +97,6 @@ export interface LegendSettingsProps<LegendStats extends LegendValue = XYLegendV
    */
   onMaxLinesChange?: (value: number) => void;
   /**
-   * Sets the max label width in pixels (list layout only)
-   */
-  listLayoutMaxWidth?: number;
-  /**
-   * Callback on max width limit option change
-   */
-  onListLayoutMaxWidthChange?: (value: number) => void;
-  /**
    * Defines if the legend items will be truncated or not
    */
   shouldTruncate?: boolean;
@@ -173,9 +163,6 @@ export interface LegendSettingsProps<LegendStats extends LegendValue = XYLegendV
 const DEFAULT_TRUNCATE_LINES = 1;
 const MAX_TRUNCATE_LINES = 5;
 const MIN_TRUNCATE_LINES = 1;
-const DEFAULT_TRUNCATE_WIDTH_LIMIT = 250;
-const MIN_TRUNCATE_WIDTH_LIMIT = 50;
-const MAX_TRUNCATE_WIDTH_LIMIT = 1000;
 
 export const MaxLinesInput = ({
   value,
@@ -208,43 +195,6 @@ export const MaxLinesInput = ({
         // we want to automatically change the values to the limits
         // if the user enters a value that is outside the limits
         handleInputChange(Math.min(MAX_TRUNCATE_LINES, Math.max(val, MIN_TRUNCATE_LINES)));
-      }}
-    />
-  );
-};
-
-export const WidthLimitInput = ({
-  value,
-  setValue,
-  disabled,
-}: {
-  value: number;
-  setValue: (value: number) => void;
-  disabled?: boolean;
-}) => {
-  const { inputValue, handleInputChange } = useDebouncedValue({ value, onChange: setValue });
-  const pixelLimitLabel = i18n.translate('xpack.lens.shared.widthLimitLabel', {
-    defaultMessage: 'Width limit',
-  });
-  return (
-    <EuiFieldNumber
-      id="lensLegendWidthLimitInput"
-      disabled={disabled}
-      fullWidth
-      prepend={<EuiFormPrepend compressed label={pixelLimitLabel} />}
-      append={<EuiFormAppend compressed label="px" inputId="" />}
-      aria-label={pixelLimitLabel}
-      data-test-subj="lens-legend-width-limit-input"
-      value={inputValue}
-      min={MIN_TRUNCATE_WIDTH_LIMIT}
-      max={MAX_TRUNCATE_WIDTH_LIMIT}
-      step={10}
-      compressed
-      onChange={(e) => {
-        const val = Number(e.target.value);
-        handleInputChange(
-          Math.min(MAX_TRUNCATE_WIDTH_LIMIT, Math.max(val, MIN_TRUNCATE_WIDTH_LIMIT))
-        );
       }}
     />
   );
@@ -335,8 +285,6 @@ export function LegendSettings<LegendStats extends LegendValue = XYLegendValue>(
   onLegendStatsChange = noop,
   maxLines,
   onMaxLinesChange = noop,
-  listLayoutMaxWidth,
-  onListLayoutMaxWidthChange = noop,
   shouldTruncate,
   onTruncateLegendChange = noop,
   legendSize,
@@ -365,7 +313,7 @@ export function LegendSettings<LegendStats extends LegendValue = XYLegendValue>(
     position,
     layout,
   });
-  const usesWidthLimitTruncation = effectiveLayout === LegendLayout.List;
+  const hasLayoutTruncation = effectiveLayout !== LegendLayout.List;
 
   const showsLegendTitleSetting = isTableLayout && !!onLegendTitleChange;
 
@@ -520,7 +468,7 @@ export function LegendSettings<LegendStats extends LegendValue = XYLegendValue>(
         </EuiFormRow>
       )}
 
-      {isLegendNotHidden && (
+      {isLegendNotHidden && hasLayoutTruncation && (
         <EuiFormRow
           display="columnCompressed"
           label={labelTruncationLabel}
@@ -542,19 +490,11 @@ export function LegendSettings<LegendStats extends LegendValue = XYLegendValue>(
               />
             </EuiFlexItem>
             <EuiFlexItem grow>
-              {usesWidthLimitTruncation ? (
-                <WidthLimitInput
-                  disabled={!shouldTruncate}
-                  value={listLayoutMaxWidth ?? DEFAULT_TRUNCATE_WIDTH_LIMIT}
-                  setValue={onListLayoutMaxWidthChange}
-                />
-              ) : (
-                <MaxLinesInput
-                  disabled={!shouldTruncate}
-                  value={maxLines ?? DEFAULT_TRUNCATE_LINES}
-                  setValue={onMaxLinesChange}
-                />
-              )}
+              <MaxLinesInput
+                disabled={!shouldTruncate}
+                value={maxLines ?? DEFAULT_TRUNCATE_LINES}
+                setValue={onMaxLinesChange}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFormRow>

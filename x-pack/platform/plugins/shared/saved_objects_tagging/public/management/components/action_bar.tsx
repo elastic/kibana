@@ -19,6 +19,7 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import type { TagBulkAction } from '../types';
 
 export interface ActionBarProps {
@@ -93,6 +94,10 @@ export const ActionBar: FC<ActionBarProps> = ({
                 isOpen={isPopoverOpened}
                 closePopover={closePopover}
                 panelPaddingSize="none"
+                aria-label={i18n.translate(
+                  'xpack.savedObjectsTagging.management.actionBar.actionsAriaLabel',
+                  { defaultMessage: 'Actions' }
+                )}
                 button={
                   <EuiText size="xs">
                     <EuiLink onClick={togglePopover} data-test-subj="actionBar-contextMenuButton">
@@ -107,6 +112,7 @@ export const ActionBar: FC<ActionBarProps> = ({
                         className="tagMgt__actionBarIcon"
                         type="chevronSingleDown"
                         size="s"
+                        aria-hidden={true}
                       />
                     </EuiLink>
                   </EuiText>

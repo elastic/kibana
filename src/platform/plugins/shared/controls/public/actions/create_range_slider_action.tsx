@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
+import { DEFAULT_RANGE_SLIDER_STATE, RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
 import type { RangeSliderControlState } from '@kbn/controls-schemas';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
@@ -27,7 +27,7 @@ export const createRangeSliderControlAction =
       id: RANGE_SLIDER_ACTION,
       type: RANGE_SLIDER_CONTROL,
       order: 0,
-      getIconType: () => 'controlsHorizontal',
+      getIconType: () => 'controls',
       getDisplayName: () =>
         i18n.translate('controls.rangeSlider.displayName', {
           defaultMessage: 'Range slider',
@@ -39,7 +39,12 @@ export const createRangeSliderControlAction =
         return Boolean(field && isFieldCompatible(field));
       },
       execute: async ({ embeddable, state, controlId, isPinned }) => {
-        createDataControlOfType(RANGE_SLIDER_CONTROL, { embeddable, state, controlId, isPinned });
+        createDataControlOfType(RANGE_SLIDER_CONTROL, {
+          embeddable,
+          state: { ...DEFAULT_RANGE_SLIDER_STATE, ...state },
+          controlId,
+          isPinned,
+        });
       },
       extension: {
         CustomOptionsComponent: RangeSliderEditorOptions,

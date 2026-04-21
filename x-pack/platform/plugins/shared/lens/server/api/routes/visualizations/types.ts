@@ -22,9 +22,8 @@ import type {
   lensUpdateRequestParamsSchema,
   lensUpdateResponseBodySchema,
 } from './schema';
-import type { lensItemMetaSchema, lensResponseItemSchema } from './schema/common';
+import type { lensResponseItemSchema } from './schema/common';
 
-export type LensItemMeta = TypeOf<typeof lensItemMetaSchema>;
 export type LensResponseItem = TypeOf<typeof lensResponseItemSchema>;
 
 export type LensCreateRequestQuery = TypeOf<typeof lensCreateRequestQuerySchema>;

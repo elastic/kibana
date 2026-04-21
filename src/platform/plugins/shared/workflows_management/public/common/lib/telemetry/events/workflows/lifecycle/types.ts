@@ -57,6 +57,11 @@ export interface ReportWorkflowCreatedActionParams
    */
   workflowId?: string;
   /**
+   * Whether the workflow was created with AI assistance (user accepted at least
+   * one AI proposal, or saved from the chat attachment renderer).
+   */
+  aiAssisted?: boolean;
+  /**
    * Whether the workflow is enabled.
    * Always extracted from workflow definition (defaults to false if not provided).
    */
@@ -113,6 +118,11 @@ export interface ReportWorkflowCreatedActionParams
    * Number of constants defined in the workflow.
    */
   constCount: number;
+  /**
+   * Whether any configured trigger has a non-empty on.condition.
+   * Only presence is tracked; condition contents are never reported.
+   */
+  hasTriggerConditions: boolean;
 }
 
 /**
@@ -121,6 +131,11 @@ export interface ReportWorkflowCreatedActionParams
 export interface ReportWorkflowUpdatedActionParams extends BaseResultActionParams {
   eventName: string;
   workflowId: string;
+  /**
+   * Whether the workflow was updated with AI assistance (user accepted at least
+   * one AI proposal, or saved from the chat attachment renderer).
+   */
+  aiAssisted?: boolean;
   /**
    * Whether the update resulted in validation errors
    */

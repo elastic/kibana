@@ -166,11 +166,11 @@ A concise, non-technical map of the Discover Profile extension points (what they
 
 ### Doc viewer — `getDocViewer`
 
-**Changes:** Flyout title, custom header, and tabs (add/modify).
+**Changes:** Flyout title, custom header, custom footer, and tabs (add/modify).
 
-**Use when:** Add "Related events", "Stack trace", "Analysis", or custom header section.
+**Use when:** Add "Related events", "Stack trace", "Analysis", custom header section, or sticky footer.
 
-**Returns:** `{ title?, docViewsRegistry(prev) => DocViewsRegistry, renderHeader?(props) => ReactElement }`
+**Returns:** `{ title?, docViewsRegistry(prev) => DocViewsRegistry, renderHeader?(props) => ReactElement, renderFooter?(props) => ReactElement }`
 
 **Screenshot:**
 ![Doc viewer example](./docs/extension_points/get_doc_viewer.png)

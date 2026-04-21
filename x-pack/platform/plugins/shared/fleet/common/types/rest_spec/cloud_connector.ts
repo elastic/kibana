@@ -15,6 +15,7 @@ import type {
 // Request interfaces
 export interface CreateCloudConnectorRequest {
   name: string;
+  namespace?: string;
   vars: CloudConnectorVars;
   cloudProvider: CloudProvider;
   accountType?: AccountType;

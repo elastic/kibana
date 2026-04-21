@@ -46,6 +46,8 @@ jest.mock('../../../../../common/containers/source', () => ({
 import { useFetchIndex } from '../../../../../common/containers/source';
 
 describe('Trusted devices form', () => {
+  jest.setTimeout(10000);
+
   const formPrefix = 'trustedDevices-form';
   let resetHTMLElementOffsetWidth: ReturnType<typeof forceHTMLElementOffsetWidth>;
 
@@ -119,11 +121,9 @@ describe('Trusted devices form', () => {
     textField: HTMLInputElement | HTMLTextAreaElement,
     value: string
   ) => {
-    // For EuiComboBox (has role="combobox"), use userEvent.type
     if (textField.getAttribute('role') === 'combobox') {
       await userEvent.clear(textField);
-      await userEvent.type(textField, value);
-      // Press Enter to create the custom option
+      await userEvent.paste(value);
       await userEvent.keyboard('{Enter}');
     } else {
       // For regular text fields
@@ -298,8 +298,7 @@ describe('Trusted devices form', () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/253353
-  describe.skip('Conditions', () => {
+  describe('Conditions', () => {
     beforeEach(async () => {
       await render();
     });

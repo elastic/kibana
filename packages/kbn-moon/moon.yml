@@ -18,6 +18,7 @@ project:
   sourceRoot: packages/kbn-moon
 dependsOn:
   - '@kbn/repo-info'
+  - '@kbn/dev-utils'
   - '@kbn/dev-cli-runner'
   - '@kbn/repo-packages'
   - '@kbn/tooling-log'
@@ -26,9 +27,12 @@ tags:
   - package
   - dev
   - group-undefined
+  - jest-unit-tests
 fileGroups:
   src:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
+  jest-config:
+    - jest.config.js
 tasks: {}

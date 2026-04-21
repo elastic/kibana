@@ -29,6 +29,7 @@
       "ecsDataQualityDashboard",
       "elasticAssistant",
       "embeddable",
+      "entityStore",
       "eventLog",
       "features",
       "fieldFormats",
@@ -66,10 +67,10 @@
       "telemetry",
       "elasticAssistantSharedState",
       "share",
-      "entityStore"
     ],
     "optionalPlugins": [
       "encryptedSavedObjects",
+      "evals",
       "fleet",
       "ml",
       "newsfeed",
@@ -87,7 +88,8 @@
       "llmTasks",
       "workflowsManagement",
       "workflowsExtensions",
-      "cps"
+      "cps",
+      "searchInferenceEndpoints"
     ],
     "requiredBundles": [
       "esUiShared",

@@ -9,7 +9,13 @@ import React from 'react';
 import { ApmMainTemplate } from '../../routing/templates/apm_main_template';
 import { Breadcrumb } from '../breadcrumb';
 
-export function TraceOverview({ children }: { children: React.ReactElement }) {
+export function TraceOverview({
+  children,
+  searchBar,
+}: {
+  children: React.ReactElement;
+  searchBar?: React.ReactNode;
+}) {
   const title = i18n.translate('xpack.apm.views.traceOverview.title', {
     defaultMessage: 'Traces',
   });
@@ -18,6 +24,7 @@ export function TraceOverview({ children }: { children: React.ReactElement }) {
     <Breadcrumb href="/traces" title={title} omitOnServerless>
       <ApmMainTemplate
         pageTitle={title}
+        searchBar={searchBar}
         pageSectionProps={{
           contentProps: {
             style: {

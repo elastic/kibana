@@ -10,6 +10,7 @@
 import { z } from '@kbn/zod/v4';
 import { convertLegacyFieldsToJsonSchema } from './field_conversion';
 import { type ConnectorContractUnion } from '../..';
+import { getDeprecatedStepMessage, getStepDeprecationInfo } from '../deprecated_step_metadata';
 import { KIBANA_TYPE_ALIASES } from '../kibana/aliases';
 import {
   BaseConnectorStepSchema,
@@ -19,11 +20,12 @@ import {
   getMergeStepSchema,
   getOnFailureStepSchema,
   getParallelStepSchema,
-  getTriggerSchema,
+  getSwitchStepSchema,
   getWhileStepSchema,
   getWorkflowSettingsSchema,
   LoopBreakStepSchema,
   LoopContinueStepSchema,
+  WaitForInputStepSchema,
   WaitStepSchema,
   WorkflowExecuteAsyncStepSchema,
   WorkflowExecuteStepSchema,
@@ -34,6 +36,7 @@ import {
   WorkflowSettingsSchema,
 } from '../schema';
 import type { JsonModelSchema } from '../schema/common/json_model_schema';
+import { getTriggerSchema } from '../schema/triggers';
 
 export function getStepId(stepName: string): string {
   // Using step name as is, don't do any escaping to match the workflow engine behavior
@@ -108,6 +111,7 @@ function createRecursiveStepSchema(
     const forEachSchema = getForEachStepSchema(stepSchema, loose);
     const whileSchema = getWhileStepSchema(stepSchema, loose);
     const ifSchema = getIfStepSchema(stepSchema, loose);
+    const switchSchema = getSwitchStepSchema(stepSchema, loose);
     const parallelSchema = getParallelStepSchema(stepSchema, loose);
     const mergeSchema = getMergeStepSchema(stepSchema, loose);
 
@@ -125,9 +129,11 @@ function createRecursiveStepSchema(
       forEachSchema,
       whileSchema,
       ifSchema,
+      switchSchema,
       parallelSchema,
       mergeSchema,
       WaitStepSchema,
+      WaitForInputStepSchema,
       DataSetStepSchema,
       WorkflowExecuteStepSchema,
       WorkflowExecuteAsyncStepSchema,
@@ -184,10 +190,14 @@ function generateAliasSchemas(
     if (connector) {
       // Create a schema with the old type name but same params/output
       const newSchema = generateStepSchemaForConnector(connector, stepSchema, loose);
+      const deprecation = getStepDeprecationInfo(oldType);
+      const description = deprecation
+        ? getDeprecatedStepMessage(oldType, deprecation)
+        : `Deprecated: Use ${newType} instead`;
       aliasSchemas.push(
         newSchema.extend({
           // Mark as deprecated in description so it's clear this is a legacy alias
-          type: z.literal(oldType).describe(`Deprecated: Use ${newType} instead`),
+          type: z.literal(oldType).describe(description),
         })
       );
     }

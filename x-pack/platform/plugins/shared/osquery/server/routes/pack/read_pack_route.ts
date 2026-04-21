@@ -7,7 +7,7 @@
 
 import { filter, map, mapValues } from 'lodash';
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
-import type { IRouter } from '@kbn/core/server';
+import { type IRouter, SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import type { ReadPacksRequestParamsSchema } from '../../../common/api';
@@ -22,6 +22,7 @@ import { convertShardsToObject } from '../utils';
 import type { ReadPackResponseData } from './types';
 import { readPacksRequestParamsSchema } from '../../../common/api';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { readPackResponseSchema } from './response_schemas';
 
 export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -44,6 +45,11 @@ export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
               ReadPacksRequestParamsSchema
             >(readPacksRequestParamsSchema),
           },
+          response: {
+            200: {
+              body: () => readPackResponseSchema,
+            },
+          },
         },
       },
       async (context, request, response) => {
@@ -52,14 +58,30 @@ export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
           request
         );
 
-        const { attributes, references, id, ...rest } =
-          await spaceScopedClient.get<PackSavedObject>(packSavedObjectType, request.params.id);
+        let packSO;
+        try {
+          packSO = await spaceScopedClient.get<PackSavedObject>(
+            packSavedObjectType,
+            request.params.id
+          );
+        } catch (err) {
+          if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+            return response.notFound({
+              body: { message: `Pack ${request.params.id} not found` },
+            });
+          }
+
+          throw err;
+        }
+
+        const { attributes, references, id, ...rest } = packSO;
 
         const policyIds = map(
           filter(references, ['type', LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE]),
           'id'
         );
-        const osqueryPackAssetReference = !!filter(references, ['type', 'osquery-pack-asset']);
+        const osqueryPackAssetReference = !!filter(references, ['type', 'osquery-pack-asset'])
+          .length;
 
         const data: ReadPackResponseData = {
           type: rest.type,

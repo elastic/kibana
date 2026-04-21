@@ -41,7 +41,7 @@ export const UploadFileButton: React.FC<Props> = ({ isSetup }) => {
       {isSetup ? (
         <EuiButtonEmpty
           flush="right"
-          iconType="importAction"
+          iconType="download"
           onClick={() => showFileUploadFlyout()}
           data-test-subj="uploadFileButtonEmpty"
           aria-label={i18n.translate(
@@ -61,7 +61,7 @@ export const UploadFileButton: React.FC<Props> = ({ isSetup }) => {
           color="text"
           size="s"
           fill={false}
-          iconType="plusInCircle"
+          iconType="plusCircle"
           onClick={() => showFileUploadFlyout()}
           data-test-subj="uploadFileButton"
         >

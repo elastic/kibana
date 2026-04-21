@@ -1,5 +1,5 @@
 {
-  "sha1": "4c219ca6e3dc090b706bf0f9fd91cf3eca1262ab",
+  "sha1": "94a5321ad614b48e9a9d53fc22bd8758f8f47bb1",
   "tests": [
     {
       "id": "3cc9409cebf2cef-744ce32675c025c",
@@ -15,82 +15,84 @@
     {
       "id": "886ec55acce7b69-e0176e372fb48de",
       "title": "Attachments shows empty attachments prompt when navigating to attachments tab",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/attachments/attachments.spec.ts",
-        "line": 139,
+        "line": 140,
         "column": 7
       }
     },
     {
       "id": "886ec55acce7b69-17f1921df3c07a9",
       "title": "Attachments opens add attachment flyout and shows available attachments",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/attachments/attachments.spec.ts",
-        "line": 146,
+        "line": 147,
         "column": 7
       }
     },
     {
       "id": "886ec55acce7b69-78a107722ab10ab",
       "title": "Attachments adds and removes all attachments from the stream",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/attachments/attachments.spec.ts",
-        "line": 161,
+        "line": 162,
         "column": 7
       }
     },
     {
       "id": "886ec55acce7b69-7bcc2f437dac5d2",
       "title": "Attachments opens attachment details flyout and verifies information for each type",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/attachments/attachments.spec.ts",
-        "line": 201,
+        "line": 202,
         "column": 7
       }
     },
     {
       "id": "ca5617d2526fece-4f1df209bb20bf0",
       "title": "Advanced tab with basic license should NOT show enterprise features on wired stream Advanced tab with basic license",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_advanced/license_basic.spec.ts",
-        "line": 34,
+        "line": 38,
         "column": 7
       }
     },
     {
       "id": "ca5617d2526fece-6a2b3b1f642b875",
       "title": "Advanced tab with basic license should NOT show enterprise features on classic stream Advanced tab with basic license",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_advanced/license_basic.spec.ts",
-        "line": 75,
+        "line": 79,
         "column": 7
       }
     },
@@ -154,7 +156,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_advanced/permissions_wired.spec.ts",
-        "line": 23,
+        "line": 28,
         "column": 9
       }
     },
@@ -170,7 +172,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_advanced/permissions_wired.spec.ts",
-        "line": 31,
+        "line": 36,
         "column": 9
       }
     },
@@ -186,7 +188,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_advanced/permissions_wired.spec.ts",
-        "line": 39,
+        "line": 44,
         "column": 9
       }
     },
@@ -419,12 +421,14 @@
       "title": "Stream data processing - condition filtering and match rate should display condition match rate badge on WHERE blocks",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/condition_filtering.spec.ts",
-        "line": 34,
+        "line": 35,
         "column": 9
       }
     },
@@ -433,12 +437,14 @@
       "title": "Stream data processing - condition filtering and match rate should show 0% match rate when condition matches no documents",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/condition_filtering.spec.ts",
-        "line": 55,
+        "line": 56,
         "column": 9
       }
     },
@@ -447,12 +453,14 @@
       "title": "Stream data processing - condition filtering and match rate should show 100% match rate when condition matches all documents",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/condition_filtering.spec.ts",
-        "line": 73,
+        "line": 74,
         "column": 9
       }
     },
@@ -461,12 +469,14 @@
       "title": "Stream data processing - condition filtering and match rate should show selected documents percentage when editing processor under a condition",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/condition_filtering.spec.ts",
-        "line": 91,
+        "line": 92,
         "column": 9
       }
     },
@@ -475,12 +485,14 @@
       "title": "Stream data processing - condition filtering and match rate should maintain match rate badge after saving condition",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/condition_filtering.spec.ts",
-        "line": 118,
+        "line": 119,
         "column": 9
       }
     },
@@ -489,12 +501,14 @@
       "title": "Stream data processing - condition filtering and match rate should show match rate badge for nested conditions",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/condition_filtering.spec.ts",
-        "line": 140,
+        "line": 141,
         "column": 9
       }
     },
@@ -505,12 +519,11 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 39,
+        "line": 40,
         "column": 9
       }
     },
@@ -521,12 +534,11 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 54,
+        "line": 57,
         "column": 9
       }
     },
@@ -537,12 +549,11 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 65,
+        "line": 68,
         "column": 9
       }
     },
@@ -553,12 +564,11 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 73,
+        "line": 76,
         "column": 9
       }
     },
@@ -569,12 +579,11 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 94,
+        "line": 97,
         "column": 9
       }
     },
@@ -585,12 +594,11 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 116,
+        "line": 119,
         "column": 9
       }
     },
@@ -601,12 +609,11 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 135,
+        "line": 138,
         "column": 9
       }
     },
@@ -617,12 +624,11 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 158,
+        "line": 161,
         "column": 9
       }
     },
@@ -633,12 +639,11 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 174,
+        "line": 177,
         "column": 9
       }
     },
@@ -649,12 +654,11 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 194,
+        "line": 197,
         "column": 9
       }
     },
@@ -665,12 +669,11 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 209,
+        "line": 212,
         "column": 9
       }
     },
@@ -887,13 +890,15 @@
       "title": "Stream data processing - grok highlighting should display grok highlighting when pattern extracts into the same field it reads from (message → message)",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/grok_highlighting.spec.ts",
-        "line": 33,
-        "column": 7
+        "line": 37,
+        "column": 9
       }
     },
     {
@@ -901,13 +906,15 @@
       "title": "Stream data processing - grok highlighting should display grok highlighting for additive patterns (non-overwriting)",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/grok_highlighting.spec.ts",
-        "line": 60,
-        "column": 7
+        "line": 64,
+        "column": 9
       }
     },
     {
@@ -915,13 +922,15 @@
       "title": "Stream data processing - grok highlighting should use original field value for highlighting when pattern overwrites source field",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/grok_highlighting.spec.ts",
-        "line": 85,
-        "column": 7
+        "line": 89,
+        "column": 9
       }
     },
     {
@@ -1353,7 +1362,7 @@
     {
       "id": "8431b9ecd24de8b-5410dfb47f53d9f",
       "title": "Stream data processing - simulation preview should display default samples when no processors are configured",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1362,14 +1371,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/processing_simulation_preview.spec.ts",
-        "line": 39,
+        "line": 40,
         "column": 9
       }
     },
     {
       "id": "8431b9ecd24de8b-4d4434a7ddc103d",
       "title": "Stream data processing - simulation preview should automatically update the simulation preview when changing a new processor config",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1378,14 +1387,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/processing_simulation_preview.spec.ts",
-        "line": 54,
+        "line": 55,
         "column": 9
       }
     },
     {
       "id": "8431b9ecd24de8b-659f0680e911a10",
       "title": "Stream data processing - simulation preview should update the simulation preview to previous state when discarding a new processor",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1394,14 +1403,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/processing_simulation_preview.spec.ts",
-        "line": 87,
+        "line": 88,
         "column": 9
       }
     },
     {
       "id": "8431b9ecd24de8b-a7813857083cd20",
       "title": "Stream data processing - simulation preview should update the simulation preview with outcome of multiple new processors",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1410,14 +1419,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/processing_simulation_preview.spec.ts",
-        "line": 122,
+        "line": 123,
         "column": 9
       }
     },
     {
       "id": "8431b9ecd24de8b-3346718a174e09f",
       "title": "Stream data processing - simulation preview should update the simulation preview with processed dates from another locale/timezone",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1426,14 +1435,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/processing_simulation_preview.spec.ts",
-        "line": 176,
+        "line": 177,
         "column": 9
       }
     },
     {
       "id": "8431b9ecd24de8b-d4e223d8a2dab6e",
       "title": "Stream data processing - simulation preview should show dropped documents in the simulation preview",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1442,7 +1451,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/processing_simulation_preview.spec.ts",
-        "line": 220,
+        "line": 221,
         "column": 9
       }
     },
@@ -1758,7 +1767,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 60,
+        "line": 62,
         "column": 7
       }
     },
@@ -1774,7 +1783,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 76,
+        "line": 78,
         "column": 7
       }
     },
@@ -1790,7 +1799,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 89,
+        "line": 91,
         "column": 7
       }
     },
@@ -1804,7 +1813,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 105,
+        "line": 107,
         "column": 7
       }
     },
@@ -1820,7 +1829,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 128,
+        "line": 130,
         "column": 7
       }
     },
@@ -1836,7 +1845,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 149,
+        "line": 151,
         "column": 7
       }
     },
@@ -1852,7 +1861,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 165,
+        "line": 167,
         "column": 7
       }
     },
@@ -1868,7 +1877,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 181,
+        "line": 183,
         "column": 7
       }
     },
@@ -1882,7 +1891,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 202,
+        "line": 204,
         "column": 7
       }
     },
@@ -1898,7 +1907,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 225,
+        "line": 227,
         "column": 7
       }
     },
@@ -1914,7 +1923,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 244,
+        "line": 246,
         "column": 7
       }
     },
@@ -1930,7 +1939,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 256,
+        "line": 258,
         "column": 7
       }
     },
@@ -1946,7 +1955,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 278,
+        "line": 280,
         "column": 7
       }
     },
@@ -1962,7 +1971,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 294,
+        "line": 296,
         "column": 7
       }
     },
@@ -1978,7 +1987,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 317,
+        "line": 319,
         "column": 7
       }
     },
@@ -2337,112 +2346,112 @@
     {
       "id": "9349667e5bca40e-4c30a41802efe9b",
       "title": "Stream data routing - AI suggestions button should show button when AI features are enabled",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_button.spec.ts",
-        "line": 42,
-        "column": 7
+        "line": 46,
+        "column": 9
       }
     },
     {
       "id": "9349667e5bca40e-2cd846c5324c829",
       "title": "Stream data routing - AI suggestions button should disable button when no connector is selected",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_button.spec.ts",
-        "line": 48,
-        "column": 7
+        "line": 52,
+        "column": 9
       }
     },
     {
       "id": "9349667e5bca40e-8238485c9b8c08f",
       "title": "Stream data routing - AI suggestions button should show connector dropdown when multiple connectors exist",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_button.spec.ts",
-        "line": 62,
-        "column": 7
+        "line": 66,
+        "column": 9
       }
     },
     {
       "id": "954b6fa16b3e83e-098e105b5880d71",
       "title": "Stream data routing - AI suggestions editing validation should show error when editing suggestion with empty name",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_editing_validation.spec.ts",
-        "line": 62,
+        "line": 63,
         "column": 9
       }
     },
     {
       "id": "954b6fa16b3e83e-c9fb9d27893c2ba",
       "title": "Stream data routing - AI suggestions editing validation should show error when editing suggestion with name containing dots",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_editing_validation.spec.ts",
-        "line": 74,
+        "line": 75,
         "column": 9
       }
     },
     {
       "id": "954b6fa16b3e83e-fe89c36564d8512",
       "title": "Stream data routing - AI suggestions editing validation should show error when editing suggestion with name exceeding max length",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_editing_validation.spec.ts",
-        "line": 92,
+        "line": 93,
         "column": 9
       }
     },
     {
       "id": "954b6fa16b3e83e-c0db288e902915d",
       "title": "Stream data routing - AI suggestions editing validation should show error when editing suggestion with duplicate name",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_editing_validation.spec.ts",
-        "line": 109,
+        "line": 110,
         "column": 9
       }
     },
     {
       "id": "954b6fa16b3e83e-255ea6600fc8ce1",
       "title": "Stream data routing - AI suggestions editing validation should allow editing suggestion with valid condition",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_editing_validation.spec.ts",
-        "line": 145,
+        "line": 146,
         "column": 9
       }
     },
@@ -2477,98 +2486,98 @@
     {
       "id": "bc6ace18083cf6a-0033ff890a80016",
       "title": "Stream data routing - AI suggestions interactions should preview suggestion",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_interactions.spec.ts",
-        "line": 54,
+        "line": 55,
         "column": 9
       }
     },
     {
       "id": "bc6ace18083cf6a-59031b3e126feaa",
       "title": "Stream data routing - AI suggestions interactions should edit suggestion",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_interactions.spec.ts",
-        "line": 61,
+        "line": 62,
         "column": 9
       }
     },
     {
       "id": "bc6ace18083cf6a-481f21a0ac903d1",
       "title": "Stream data routing - AI suggestions interactions should reject suggestion",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_interactions.spec.ts",
-        "line": 70,
+        "line": 71,
         "column": 9
       }
     },
     {
       "id": "bc6ace18083cf6a-25b391c252a342c",
       "title": "Stream data routing - AI suggestions interactions should regenerate suggestions",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_interactions.spec.ts",
-        "line": 79,
+        "line": 80,
         "column": 9
       }
     },
     {
       "id": "bc6ace18083cf6a-599c1773006248e",
       "title": "Stream data routing - AI suggestions interactions should update suggestion name when editing and accepting",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_interactions.spec.ts",
-        "line": 101,
+        "line": 109,
         "column": 9
       }
     },
     {
       "id": "bc6ace18083cf6a-8a8b94aca37cb16",
       "title": "Stream data routing - AI suggestions interactions should update suggestion condition when editing and accepting",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_interactions.spec.ts",
-        "line": 131,
+        "line": 139,
         "column": 9
       }
     },
     {
       "id": "bc6ace18083cf6a-b1112374737687d",
       "title": "Stream data routing - AI suggestions interactions should cancel editing and revert to original suggestion",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_interactions.spec.ts",
-        "line": 165,
+        "line": 173,
         "column": 9
       }
     },
@@ -3328,7 +3337,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/enable_wired_streams_flow.spec.ts",
-        "line": 98,
+        "line": 100,
         "column": 9
       }
     },
@@ -3344,7 +3353,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/enable_wired_streams_flow.spec.ts",
-        "line": 122,
+        "line": 126,
         "column": 9
       }
     },
@@ -3358,7 +3367,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/create_query_stream.spec.ts",
-        "line": 38,
+        "line": 42,
         "column": 7
       }
     },
@@ -3372,7 +3381,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/create_query_stream.spec.ts",
-        "line": 46,
+        "line": 51,
         "column": 7
       }
     },
@@ -3386,7 +3395,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/create_query_stream.spec.ts",
-        "line": 74,
+        "line": 80,
         "column": 7
       }
     },
@@ -3402,6 +3411,62 @@
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/delete_query_stream.spec.ts",
         "line": 45,
         "column": 7
+      }
+    },
+    {
+      "id": "1e16afa035dea97-1cd2ae1f95337e5",
+      "title": "Query streams - Inline edit and delete on classic stream partitioning view should edit a query stream inline from the classic stream partitioning view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/edit_query_stream_classic_partitioning.spec.ts",
+        "line": 64,
+        "column": 9
+      }
+    },
+    {
+      "id": "1e16afa035dea97-62d132f57e94ce4",
+      "title": "Query streams - Inline edit and delete on classic stream partitioning view should delete a query stream from the inline edit form on classic stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/edit_query_stream_classic_partitioning.spec.ts",
+        "line": 102,
+        "column": 9
+      }
+    },
+    {
+      "id": "1f578c7e255c724-6d1781c1e9bac72",
+      "title": "Query streams - Inline edit and delete from partitioning view should edit a query stream inline from the partitioning view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/edit_query_stream_partitioning.spec.ts",
+        "line": 53,
+        "column": 9
+      }
+    },
+    {
+      "id": "1f578c7e255c724-37017f1fb2cbbbd",
+      "title": "Query streams - Inline edit and delete from partitioning view should delete a query stream from the inline edit form in partitioning view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/edit_query_stream_partitioning.spec.ts",
+        "line": 93,
+        "column": 9
       }
     },
     {
@@ -3495,7 +3560,7 @@
     {
       "id": "5cc5f39235bac27-cbc15fc0aafc245",
       "title": "Stream list view - table values should display correct doc count in the table",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -3504,14 +3569,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/streams_list_view/streams_table_values.spec.ts",
-        "line": 116,
+        "line": 117,
         "column": 9
       }
     },
     {
       "id": "5cc5f39235bac27-33b9b0d2d910060",
       "title": "Stream list view - table values should display correct data quality badge",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -3520,14 +3585,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/streams_list_view/streams_table_values.spec.ts",
-        "line": 127,
+        "line": 128,
         "column": 9
       }
     },
     {
       "id": "5cc5f39235bac27-960cbddcfc2d99e",
       "title": "Stream list view - table values should display correct retention in the table",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -3536,14 +3601,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/streams_list_view/streams_table_values.spec.ts",
-        "line": 133,
+        "line": 134,
         "column": 9
       }
     },
     {
       "id": "5cc5f39235bac27-273d9e3abd6bc69",
       "title": "Stream list view - table values should provide Discover actions with correct ESQL queries",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -3552,7 +3617,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/streams_list_view/streams_table_values.spec.ts",
-        "line": 143,
+        "line": 144,
         "column": 9
       }
     },

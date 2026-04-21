@@ -149,15 +149,6 @@ export default function ({ getService }: FtrProviderContext) {
             .expect(400);
         });
 
-        it('should reject empty endpoints array', async () => {
-          await adminSupertest
-            .put(API_PATH)
-            .send({
-              features: [{ feature_id: 'agent_builder', endpoints: [] }],
-            })
-            .expect(400);
-        });
-
         it('should reject missing features field', async () => {
           await adminSupertest.put(API_PATH).send({}).expect(400);
         });

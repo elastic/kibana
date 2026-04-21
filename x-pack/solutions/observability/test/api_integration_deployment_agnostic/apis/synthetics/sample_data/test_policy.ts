@@ -25,13 +25,13 @@ interface PolicyProps {
 }
 
 export const getTestSyntheticsPolicy = (props: PolicyProps): PackagePolicy => {
-  const { namespace } = props;
+  const { namespace, spaceId } = props;
   return {
     id: '2bfd7da0-22ed-11ed-8c6b-09a2d21dfbc3-27337270-22ed-11ed-8c6b-09a2d21dfbc3-default',
     version: 'WzE2MjYsMV0=',
     name: 'test-monitor-name-Test private location 0-default',
     namespace: namespace ?? 'testnamespace',
-    spaceIds: ['default'],
+    spaceIds: [spaceId ?? 'default'],
     package: {
       name: 'synthetics',
       title: 'Elastic Synthetics',
@@ -205,9 +205,11 @@ export const getHttpInput = ({
             fields: {
               'monitor.fleet_managed': true,
               config_id: id,
+              ...(projectId
+                ? { 'monitor.project.name': projectId, 'monitor.project.id': projectId }
+                : {}),
+              'monitor.interval': 300,
               meta: { space_id: spaceId ?? 'default' },
-              'monitor.project.name': projectId,
-              'monitor.project.id': projectId,
             },
             target: '',
           },
@@ -305,14 +307,15 @@ export const getHttpInput = ({
       {
         add_fields: {
           fields: {
+            'monitor.fleet_managed': true,
             config_id: id,
+            ...(projectId
+              ? { 'monitor.project.name': projectId, 'monitor.project.id': projectId }
+              : {}),
+            'monitor.interval': 300,
             meta: {
               space_id: spaceId ?? 'default',
             },
-            'monitor.fleet_managed': true,
-            ...(projectId
-              ? { 'monitor.project.id': projectId, 'monitor.project.name': projectId }
-              : {}),
           },
           target: '',
         },

@@ -24,6 +24,7 @@ export {
 export {
   extractTextContent,
   extractToolCalls,
+  extractToolCallsWithReasoning,
   extractToolReturn,
   createUserMessage,
   createAIMessage,
@@ -31,6 +32,7 @@ export {
   createToolCallMessage,
   generateFakeToolCallId,
   type ToolCall,
+  type ToolCallWithReasoning,
 } from './messages';
 export {
   toolsToLangchain,

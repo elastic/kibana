@@ -325,24 +325,21 @@ class MyPlugin {
 }
 ```
 
-There are two main categories of attachment types:
+Attachments are created in two ways; both use the same [`AttachmentTypeDefinition`](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/agent-builder/agent-builder-server/attachments/type_definition.ts) (there is no separate `inline` / `reference` discriminator on the definition):
 
-- `inline`: attachment is self-contained, with the data attached to it.
-  `reference`: reference a persisted resource (for example, a dashboard, an alert, etc) by its id, and resolve it dynamically when needed.
-  - (Not implemented yet)
+- **By-value:** the client sends `data`. The server runs `validate` and stores that payload. `origin` stays unset unless you later call `updateOrigin` (see below).
+- **By-reference:** the client sends an **`origin` string** (for example a saved object ID). If the type implements the optional **`resolve`** hook, the framework calls it once at add time, persists the returned content as `data`, and records `origin` plus `origin_snapshot_at`. Optional **`isStale`** detects when the live source changed so the UI can offer a resync. See [By-reference attachments with `resolve`](#by-reference-attachments-with-resolve) and [Detecting stale attachments with `isStale`](#detecting-stale-attachments-with-isstale).
 
-**Example of inline attachment type definition:**
+**Example of attachment type definition (by-value only, no `resolve`):**
 
 ```ts
 const textDataSchema = z.object({
   content: z.string(),
 });
 
-const textArrachmentType: InlineAttachmentTypeDefinition = {
+const textAttachmentType: AttachmentTypeDefinition = {
   // unique id of the attachment type
   id: AttachmentType.text,
-  // type: inline or reference
-  type: 'inline',
   // validate and parse the input when received from the client
   validate: (input) => {
     const parseResult = textDataSchema.safeParse(input);
@@ -353,14 +350,36 @@ const textArrachmentType: InlineAttachmentTypeDefinition = {
     }
   },
   // format the data to be exposed to the LLM
-  format: (input) => {
-    return { type: 'text', value: input.content };
+  format: (attachment) => {
+    return { type: 'text', value: attachment.data.content };
   },
 };
 ```
 
 Refer to [`AttachmentTypeDefinition`](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/agent-builder/agent-builder-server/attachments/type_definition.ts)
 for the full list of available configuration options.
+
+#### `getAgentDescription` — describing inline rendering to the agent
+
+When your attachment type supports inline rendering, `getAgentDescription` should tell
+the agent **what** it looks like when rendered inline. This description is injected into the
+`ATTACHMENT TYPES` prompt block whenever an attachment of your type is present in the
+conversation.
+
+Keep the description focused on the **user-visible outcome** of rendering — not on when or why:
+
+```ts
+const myAttachmentType: AttachmentTypeDefinition = {
+  id: 'image',
+  validate: ...,
+  format: ...,
+  getAgentDescription: () =>
+    'Represents an image attachment. Rendering this attachment inline displays the image inside the conversation UI.',
+};
+```
+
+Do **not** include guidance on *when* to render inline — that is the responsibility of the
+skill that owns the relevant task. See [Inline rendering guidance in skills](#inline-rendering-guidance-in-skills).
 
 ### Browser-side registration
 
@@ -546,7 +565,7 @@ const MyCanvasContent: React.FC<MyCanvasContentProps> = ({
         handler: async () => {
           const savedObjectId = await api.save();
           // Link the attachment to the saved object
-          await updateOrigin({ saved_object_id: savedObjectId });
+          await updateOrigin(savedObjectId);
         },
       },
     ]);
@@ -589,7 +608,7 @@ The `updateOrigin` callback allows you to link a by-value attachment to its pers
 
 This callback is available in two places:
 - **`getActionButtons` params** - for static action buttons defined at registration time
-- **`renderCanvasContent` callbacks** - for dynamic buttons registered at runtime (see [Registering action buttons dynamically](#registering-action-buttons-dynamically) above)
+- **`renderCanvasContent` callbacks** - for dynamic buttons registered at runtime (see [Dynamic canvas buttons with registerActionButtons](#dynamic-canvas-buttons-with-registeractionbuttons) above)
 
 **When to use `updateOrigin`:**
 
@@ -619,19 +638,19 @@ getActionButtons: ({ attachment, updateOrigin, isCanvas }) => {
         const savedObjectId = await myApi.saveToLibrary(attachment.data);
 
         // 2. Link the attachment to the saved object
-        await updateOrigin({ saved_object_id: savedObjectId });
+        await updateOrigin(savedObjectId);
       },
     });
   }
 
-  // Show "Open in App" if already linked
-  if (attachment.origin?.saved_object_id) {
+  // Show "Open in App" if already linked (`origin` is a string, e.g. saved object id)
+  if (attachment.origin) {
     buttons.push({
       label: 'Open in App',
       icon: 'popout',
       type: ActionButtonType.SECONDARY,
       handler: () => {
-        window.open(`/app/myApp/${attachment.origin.saved_object_id}`, '_blank');
+        window.open(`/app/myApp/${attachment.origin}`, '_blank');
       },
     });
   }
@@ -640,17 +659,9 @@ getActionButtons: ({ attachment, updateOrigin, isCanvas }) => {
 },
 ```
 
-**Origin shape:**
+**`origin` is a string:**
 
-The `origin` parameter accepts any shape - it will be validated by the attachment type's `validateOrigin` function on the server. For saved object references, the common pattern is:
-
-```ts
-{
-  saved_object_id: string;
-  title?: string;
-  description?: string;
-}
-```
+On the wire and in `Attachment`, **`origin` is always a string** (for example a saved object ID). The same string is passed to your type’s **`resolve`** hook when the attachment is added or resynced. `updateOrigin` and `updateAttachmentOrigin` also take that string — not an object.
 
 #### Updating origin from outside attachment context
 
@@ -661,16 +672,144 @@ If you need to update an attachment's origin from outside the `getActionButtons`
 class MyPlugin {
   start(core: CoreStart, { agentBuilder }: { agentBuilder: AgentBuilderPluginStart }) {
     // Update an attachment's origin directly
-    await agentBuilder.updateAttachmentOrigin(
-      conversationId,
-      attachmentId,
-      { saved_object_id: savedObjectId }
-    );
+    await agentBuilder.updateAttachmentOrigin(conversationId, attachmentId, savedObjectId);
   }
 }
 ```
 
 This is useful when the save operation happens outside the attachment's UI, such as when a separate "Save to library" workflow completes asynchronously. It is your responsibility to pass the `conversationId` and `attachmentId` to your plugin when navigating away from the chat - how you do this is up to you (e.g., URL parameters, local storage, or other mechanisms).
+
+#### By-reference attachments with `resolve`
+
+The optional `resolve` hook in `AttachmentTypeDefinition` enables **by-reference attachment creation**: instead of providing inline `data`, the caller provides an `origin` string (e.g. a saved object ID), and the framework calls `resolve` once at add time to fetch and store the content.
+
+```ts
+const myAttachmentType: AttachmentTypeDefinition<'my_type', MyContent> = {
+  id: 'my_type',
+  validate: (input) => { /* ... */ },
+  format: (attachment) => { /* ... */ },
+
+  /**
+   * Called once when an attachment is added with an `origin`.
+   * Returns the current content for that origin, or undefined if not found.
+   */
+  resolve: async (origin, context) => {
+    const savedObject = await context.savedObjectsClient?.get('my_type', origin);
+    if (!savedObject) return undefined;
+    return { content: savedObject.attributes.content };
+  },
+};
+```
+
+- `origin` — the reference string passed by the caller (typically a saved object ID)
+- `context.savedObjectsClient` — scoped to the current user; use it to fetch saved objects
+- `context.request` / `context.spaceId` — available for other service lookups
+- Return `undefined` if the origin cannot be resolved (the add operation will fail with an error)
+- **Only called once** at add time; the resolved content is stored as `data` in the attachment version, and an `origin_snapshot_at` timestamp is recorded
+
+Refer to [`AttachmentTypeDefinition`](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/agent-builder/agent-builder-server/attachments/type_definition.ts) for the full type signature.
+
+#### Detecting stale attachments with `isStale`
+
+When an attachment is linked to a persistent origin (e.g. a dashboard saved object), the underlying data can change after the attachment was created. The optional `isStale` hook lets your attachment type detect this so the UI can prompt the user to refresh.
+
+```ts
+const myAttachmentType: AttachmentTypeDefinition<'my_type', MyContent> = {
+  id: 'my_type',
+  validate: (input) => { /* ... */ },
+  format: (attachment) => { /* ... */ },
+  resolve: async (origin, context) => { /* ... */ },
+
+  /**
+   * Called to check whether the stored attachment data is behind the current state
+   * of the referenced origin. Return true if the attachment is stale.
+   *
+   * Only invoked for attachments that have a populated `origin`.
+   * No automatic fallback — staleness detection is opt-in per type.
+   */
+  isStale: async (attachment, context) => {
+    const savedObject = await context.savedObjectsClient?.get('my_type', attachment.origin);
+    if (!savedObject) return false;
+    // Compare the saved object's last-modified time against when the attachment was snapshotted
+    return (
+      Boolean(savedObject.updated_at) &&
+      Boolean(attachment.origin_snapshot_at) &&
+      new Date(savedObject.updated_at) > new Date(attachment.origin_snapshot_at)
+    );
+  },
+};
+```
+
+- `attachment.origin_snapshot_at` — ISO timestamp of when `resolve` last ran; use it to compare against the origin's current version
+- `context` — same `AttachmentResolveContext` as `resolve` (includes `savedObjectsClient`, `request`, `spaceId`)
+- Return `true` if the stored data is outdated; the framework will call `resolve` again to fetch fresh content and surface a resync prompt in the UI
+- Staleness checking is **only triggered for attachments with a populated `origin`**; inline-only types that never set `origin` will never have `isStale` called
+
+**How the resync flow works end-to-end:**
+
+1. User focuses the conversation input → the UI calls `GET /{conversationId}/attachments/stale`
+2. The server calls `isStale` for each active attachment that has an `origin`
+3. For stale attachments, `resolve` is called again to fetch fresh content
+4. The UI shows a panel listing stale attachments, letting the user add the refreshed version or dismiss
+
+Refer to [`AttachmentStaleCheckResult`](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/agent-builder/agent-builder-common/attachments/stale_check.ts) for the result types returned by the stale check API.
+
+#### Attachment lifecycle hook: onAttachmentMount
+
+The `onAttachmentMount` lifecycle hook allows you to run side effects when an attachment is mounted to a conversation, and clean them up when the attachment is removed.
+
+**When to use `onAttachmentMount`:**
+
+- Setting up subscriptions that should live for the duration of the attachment's presence in the conversation
+- Syncing attachment state with external systems
+- Any side effect that needs cleanup when the attachment is removed
+
+**Important:** This hook is called once per attachment (not per version). The framework tracks attachment presence at the conversation level, so you don't need to handle deduplication.
+
+**Parameters:**
+
+```ts
+interface AttachmentLifecycleParams<TAttachment> {
+  /** The attachment instance */
+  attachment: TAttachment;
+  /** The conversation ID containing this attachment */
+  conversationId: string;
+  /** Whether the attachment is rendered in the sidebar context */
+  isSidebar: boolean;
+}
+```
+
+**Example: Syncing attachment origin when a dashboard is saved**
+
+```tsx
+export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
+  getLabel: () => 'My attachment',
+  getIcon: () => 'document',
+
+  onAttachmentMount: ({ attachment, conversationId }) => {
+    // Set up a subscription when the attachment is added
+    const subscription = someObservable$.subscribe((newValue) => {
+      if (newValue !== attachment.origin) {
+        // Update the attachment's origin using the plugin API
+        agentBuilder.updateAttachmentOrigin(conversationId, attachment.id, newValue);
+      }
+    });
+
+    // Return cleanup function - called when the attachment is removed from the conversation
+    return () => {
+      subscription.unsubscribe();
+    };
+  },
+
+  // ... other definition properties
+};
+```
+
+**Cleanup behavior:**
+
+- The cleanup function is called when the attachment is removed from the conversation
+- It's also called when the conversation component unmounts (e.g., navigating away)
+- If `onAttachmentMount` returns `undefined` or `void`, no cleanup is performed
 
 ## Registering skills
 
@@ -740,6 +879,46 @@ agentBuilder.skills.register({
 });
 ```
 
+### Inline rendering guidance in skills
+
+Whether and when the agent should render an attachment inline depends on the task it is
+performing. Skills that create or modify attachments should therefore include explicit
+guidance on this in their instructions.
+
+**Rule of thumb:** tell the agent exactly which attachment to render and at what point in
+the task.
+
+**Examples:**
+
+- A skill that creates a single visualization:
+  > "Once you have created the visualization, render it inline so the user can see it."
+
+- A skill that builds a dashboard (composed of multiple visualizations):
+  > "Render the dashboard attachment inline once you have finished building it. Do NOT
+  >  render each individual visualization inline — only the final dashboard."
+
+This per-skill guidance is what controls inline rendering behaviour across different tasks:
+the attachment type definition (via `getAgentDescription`) tells the agent *what* rendering
+does; the skill tells it *when* to do it.
+
+### Marking a skill as experimental
+
+Individual built-in skills can be flagged as experimental by setting `experimental: true` on their definition. 
+Experimental skills are only visible and usable when the `agentBuilder:experimentalFeatures` uiSetting is enabled.
+
+**Example:**
+
+```ts
+agentBuilder.skills.register({
+  id: 'my-experimental-skill',
+  name: 'my-experimental-skill',
+  basePath: 'skills/platform',
+  description: 'An experimental skill only visible when experimental features are on',
+  experimental: true,
+  content: 'Skill instructions...',
+});
+```
+
 ## Semantic Metadata Layer (SML) — Developer Guide
 
 ### 1. What is SML?
@@ -789,7 +968,7 @@ attach them to a conversation.
 | **Crawler** | A Task Manager background task that periodically calls your `list()` and `getSmlData()` hooks, indexing content into system indices. Uses mark-and-sweep with `last_crawled_at` timestamps for efficient change detection. |
 | **SML Document** | A single indexed chunk stored in the `.chat-sml-data` system index, containing title, content, permissions, and space information. |
 | **`sml_search` tool** | A built-in Agent Builder tool the AI uses to keyword-search SML documents. Results are filtered by the requesting user's space and permissions. |
-| **`sml_attach` tool** | A built-in Agent Builder tool the AI uses to convert an SML search result into a conversation attachment (e.g. a rendered Lens visualization). |
+| **`sml_attach` tool** | A built-in Agent Builder tool the AI uses to convert SML search hits into conversation attachments. It accepts `chunk_ids` from `sml_search`;  `chunk_id` format is `attachment_type:origin_id:uuid`. |
 | **Origin ID** | The unique identifier for the source asset (typically a saved object ID). Used to link SML documents back to their source. |
 
 #### Data flow
@@ -803,9 +982,7 @@ attach them to a conversation.
 3. **Search**: When the AI agent calls `sml_search`, the SML service queries
    the data index, filtering by the user's current space and checking Kibana
    privileges against each result's `permissions` array.
-4. **Attach**: When the AI agent calls `sml_attach`, the service resolves
-   the saved object via your `toAttachment()` hook and adds the result as a
-   conversation attachment.
+4. **Attach**: When the AI agent calls `sml_attach` with `chunk_ids`, the service loads each chunk, resolves the saved object via your `toAttachment()` hook, and adds the result as a conversation attachment (with `origin` when applicable).
 
 #### Security model
 
@@ -956,6 +1133,12 @@ handles saved object aliasing (e.g. after a space migration).
 Return `undefined` if the item can no longer be resolved. The `sml_attach`
 tool will report a per-item error to the AI agent without failing the entire
 call.
+
+You may include an optional `description` string on the object returned from
+`toAttachment`. It is stored on the conversation
+attachment and shown in the Agent Builder UI (for example, the “Attachment
+added: …” line). If you omit it, a default label is derived from the SML
+document’s type and title.
 
 ##### `fetchFrequency` — Choose an appropriate interval
 

@@ -150,12 +150,20 @@ export {
   contextWindowFromModelName,
   type InferenceConnector,
   type InferenceConnectorCapabilities,
+  type RawConnector,
+  type RawInferenceConnector,
 } from './src/connectors';
 export {
   defaultInferenceEndpoints,
   InferenceEndpointProvider,
   elasticModelIds,
 } from './src/inference_endpoints';
+
+export {
+  INFERENCE_CONNECTORS_INTERNAL_API_PATH,
+  type ApiInferenceConnector,
+  type InferenceConnectorsApiResponseBody,
+} from './src/inference_connectors_api';
 
 export { type Model, ModelFamily, ModelPlatform, ModelProvider } from './src/model_provider';
 

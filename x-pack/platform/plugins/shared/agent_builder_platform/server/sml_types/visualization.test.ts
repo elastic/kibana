@@ -9,7 +9,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { SmlListItem } from '@kbn/agent-builder-plugin/server';
 import { visualizationSmlType } from './visualization';
 
-jest.mock('@kbn/lens-embeddable-utils/config_builder', () => ({
+jest.mock('@kbn/lens-embeddable-utils', () => ({
   LensConfigBuilder: jest.fn().mockImplementation(() => ({
     toAPIFormat: jest.fn().mockReturnValue({ type: 'lnsXY', layers: [] }),
   })),
@@ -372,7 +372,7 @@ describe('visualizationSmlType', () => {
     });
 
     it('uses LensConfigBuilder to convert attributes', async () => {
-      const { LensConfigBuilder } = jest.requireMock('@kbn/lens-embeddable-utils/config_builder');
+      const { LensConfigBuilder } = jest.requireMock('@kbn/lens-embeddable-utils');
       const toAPIFormatMock = jest.fn().mockReturnValue({
         type: 'lnsPie',
         layers: [{ id: 'layer1' }],
@@ -404,11 +404,12 @@ describe('visualizationSmlType', () => {
 
       expect(LensConfigBuilder).toHaveBeenCalled();
       expect(toAPIFormatMock).toHaveBeenCalled();
-      expect(result!.data.visualization).toEqual({
+      const data = result!.data as Record<string, unknown>;
+      expect(data.visualization).toEqual({
         type: 'lnsPie',
         layers: [{ id: 'layer1' }],
       });
-      expect(result!.data.chart_type).toBe('lnsPie');
+      expect(data.chart_type).toBe('lnsPie');
     });
   });
 });

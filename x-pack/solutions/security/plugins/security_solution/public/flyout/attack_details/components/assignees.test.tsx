@@ -95,6 +95,7 @@ const defaultContext = {
   getFieldsData: jest.fn(),
   dataFormattedForFieldBrowser: [],
   scopeId: 'test-scope-id',
+  isPreviewMode: false,
 } as ReturnType<typeof useAttackDetailsContext>;
 
 const defaultHeaderData = {
@@ -236,5 +237,16 @@ describe('Assignees', () => {
     renderAssignees();
 
     expect(screen.getByTestId('attack-details-flyout-header-assignees-empty')).toBeInTheDocument();
+  });
+
+  it('disables the add button for a remote/CCS index', () => {
+    mockUseAttackDetailsContext.mockReturnValue({
+      ...defaultContext,
+      indexName: 'remote-cluster:.alerts-security.alerts-default',
+    });
+
+    renderAssignees();
+
+    expect(screen.getByTestId(HEADER_ASSIGNEES_ADD_BUTTON_TEST_ID)).toBeDisabled();
   });
 });

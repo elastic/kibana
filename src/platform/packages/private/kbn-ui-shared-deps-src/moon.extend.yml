@@ -1,16 +1,56 @@
+fileGroups:
+  src:
+    - 'version_dependencies.txt'
 tags:
   - is-webpack-built
 dependsOn:
   - '@kbn/ui-shared-deps-npm'
 tasks:
+  extract-version-dependencies:
+    command: node
+    args:
+      - scripts/extract_version_dependencies.js
+      - src/platform/packages/private/kbn-ui-shared-deps-src/version_dependencies.txt
+      - --collect
+      - '@babel/plugin-transform-numeric-separator'
+      - --collect
+      - babel-loader
+      - --collect
+      - chroma-js
+      - --collect
+      - css-loader
+      - --collect
+      - dompurify
+      - --collect
+      - mini-css-extract-plugin
+      - --collect
+      - monaco-editor
+      - --collect
+      - monaco-yaml
+      - --collect
+      - react-use
+      - --collect
+      - webpack
+      - --transitive
+    env:
+      CI_STATS_DISABLED: 'true'
+    inputs:
+      - /package.json
+      - /yarn.lock
+    outputs:
+      - version_dependencies.txt
+    options:
+      runFromWorkspaceRoot: true
   build-webpack:
     command: yarn
     args:
       - build
     deps:
+      - ~:extract-version-dependencies
       - '^:build-webpack'
     inputs:
       - '@group(src)'
+      - 'package.json'
       - 'webpack.config.js'
       - '/src/platform/packages/shared/kbn-repo-info/**/*.{js,ts,tsx}'
       - '/src/platform/packages/shared/kbn-ui-theme/**/*.{js,ts,tsx}'
@@ -39,6 +79,7 @@ tasks:
       - '/src/platform/packages/shared/react/kibana_mount/**/*.{js,ts,tsx}'
       - '/src/core/packages/chrome/sidebar/sidebar-context/**/*.{js,ts,tsx}'
       - '/src/core/packages/chrome/browser-context/**/*.{js,ts,tsx}'
+      - '/src/core/packages/di/browser/**/*.{js,ts,tsx}'
       - '!/src/**/*.test.{js,ts,tsx}'
     outputs:
       - /target/build/src/platform/packages/private/kbn-ui-shared-deps-src
@@ -51,9 +92,11 @@ tasks:
       - build
       - '--watch'
     deps:
+      - extract-version-dependencies
       - '^:build-webpack'
     inputs:
       - '@group(src)'
+      - 'package.json'
       - 'webpack.config.js'
     outputs:
       - /target/build/src/platform/packages/private/kbn-ui-shared-deps-src

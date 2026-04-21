@@ -86,16 +86,10 @@ export const allowedExperimentalValues = Object.freeze({
    * Entity Analytics: Disables the Risk Score AI Assistant tool.
    */
   riskScoreAssistantToolDisabled: false,
-
   /**
-   * Entity Analytics: Disables the Risk Score AI Assistant tool.
+   * Enables the new Entity Analytics home page experience.
    */
-  entityDetailsHighlightsEnabled: true,
-
-  /**
-   * Enables the experimental Threat Hunting home experience.
-   */
-  entityThreatHuntingEnabled: false,
+  entityAnalyticsNewHomePageEnabled: false,
 
   /**
    * Enables the lead generation pipeline for Entity Analytics.
@@ -105,21 +99,14 @@ export const allowedExperimentalValues = Object.freeze({
   leadGenerationEnabled: false,
 
   /**
-   * Enables lead generation details: the "i" icon on lead cards/list items
-   * and the "How this lead was generated" flyout.
-   * Requires `leadGenerationEnabled` to also be true.
-   */
-  leadGenerationDetailsEnabled: false,
-
-  /**
    * disables ES|QL rules
    */
   esqlRulesDisabled: false,
 
   /**
-   * Enables the storing of gaps in the event log
+   * Enables gap reason display in the gaps table and reason-based filtering.
    */
-  storeGapsInEventLogEnabled: true,
+  gapReasonDetectionEnabled: false,
 
   /**
    * Adds a new option to filter descendants of a process for Management / Trusted Apps
@@ -135,7 +122,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables AI rule creation feature
    */
-  aiRuleCreationEnabled: false,
+  aiRuleCreationEnabled: true,
 
   /**
    * Disables the siem migrations feature
@@ -183,10 +170,6 @@ export const allowedExperimentalValues = Object.freeze({
    */
   automaticDashboardsMigration: true,
 
-  /**
-   * Enables the SIEM Readiness Dashboard feature
-   */
-  siemReadinessDashboard: false,
   /**
    * Enables Microsoft Defender for Endpoint's Cancel command
    * Release: 9.2.0
@@ -250,6 +233,12 @@ export const allowedExperimentalValues = Object.freeze({
    * Uses entity store v2 for entity analytics skill
    */
   entityAnalyticsEntityStoreV2: false,
+
+  /**
+   * Enables the deprecated prebuilt rules UI
+   * Release: 9.4
+   */
+  prebuiltRulesDeprecationUIEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

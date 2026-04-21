@@ -177,7 +177,7 @@
               "\nConnect to the MCP client and return the connected status and capabilities."
             ],
             "signature": [
-              "() => Promise<{ connected: boolean; capabilities?: any; }>"
+              "() => Promise<{ connected: boolean; capabilities?: { experimental?: { [x: string]: object; } | undefined; logging?: object | undefined; completions?: object | undefined; prompts?: { listChanged?: boolean | undefined; } | undefined; resources?: { subscribe?: boolean | undefined; listChanged?: boolean | undefined; } | undefined; tools?: { listChanged?: boolean | undefined; } | undefined; tasks?: { [x: string]: unknown; list?: object | undefined; cancel?: object | undefined; requests?: { [x: string]: unknown; tools?: { [x: string]: unknown; call?: object | undefined; } | undefined; } | undefined; } | undefined; } | undefined; }>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/client.ts",
             "lineNumber": 98,
@@ -242,7 +242,7 @@
             "tags": [],
             "label": "callTool",
             "description": [
-              "\nCall a tool on the MCP client.\nThis method only returns text content.\nIt does not support other content types such as images, audio, etc."
+              "\nCall a tool on the MCP client.\nThis method returns text content, plus resource links and embedded resources.\nIt does not support other content types such as images and audio."
             ],
             "signature": [
               "(params: ",
@@ -505,7 +505,7 @@
           "\nResponse from calling a tool on the MCP client."
         ],
         "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
-        "lineNumber": 68,
+        "lineNumber": 111,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -528,7 +528,7 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
-            "lineNumber": 72,
+            "lineNumber": 115,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -553,7 +553,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
-            "lineNumber": 73,
+            "lineNumber": 116,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -628,7 +628,7 @@
           "\nResponse from listing the tools available on the MCP client."
         ],
         "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
-        "lineNumber": 121,
+        "lineNumber": 164,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -653,7 +653,7 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
-            "lineNumber": 125,
+            "lineNumber": 168,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -787,10 +787,10 @@
         "tags": [],
         "label": "NonTextPart",
         "description": [
-          "\nNon-text content as part of a tool call response."
+          "\nNon-text (or otherwise unknown) content returned as part of a tool call response."
         ],
         "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
-        "lineNumber": 40,
+        "lineNumber": 63,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -803,7 +803,7 @@
             "label": "type",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
-            "lineNumber": 44,
+            "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -819,54 +819,7 @@
               "[key: string]:  unknown"
             ],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
-            "lineNumber": 45,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/mcp-client",
-        "id": "def-common.TextPart",
-        "type": "Interface",
-        "tags": [],
-        "label": "TextPart",
-        "description": [
-          "\nA text content as part of a tool call response."
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
-        "lineNumber": 48,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/mcp-client",
-            "id": "def-common.TextPart.type",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "signature": [
-              "\"text\""
-            ],
-            "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
-            "lineNumber": 52,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/mcp-client",
-            "id": "def-common.TextPart.text",
-            "type": "string",
-            "tags": [],
-            "label": "text",
-            "description": [],
-            "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
-            "lineNumber": 53,
+            "lineNumber": 68,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -884,7 +837,7 @@
           "\nA tool available on the MCP client."
         ],
         "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
-        "lineNumber": 107,
+        "lineNumber": 150,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -897,7 +850,7 @@
             "label": "name",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
-            "lineNumber": 111,
+            "lineNumber": 154,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -913,7 +866,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
-            "lineNumber": 112,
+            "lineNumber": 155,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -929,7 +882,7 @@
               "{ [x: string]: unknown; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
-            "lineNumber": 113,
+            "lineNumber": 156,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -954,7 +907,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
-            "lineNumber": 114,
+            "lineNumber": 157,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -972,7 +925,7 @@
           "\nMetadata about the provider of a tool.\nUsed for attribution, audit trails, and UI display."
         ],
         "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
-        "lineNumber": 80,
+        "lineNumber": 123,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -987,7 +940,7 @@
               "\nProvider identifier (e.g., 'mcp.github')"
             ],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
-            "lineNumber": 85,
+            "lineNumber": 128,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1002,7 +955,7 @@
               "\nHuman-readable provider name (e.g., 'GitHub MCP Server')"
             ],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
-            "lineNumber": 89,
+            "lineNumber": 132,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1020,7 +973,7 @@
               "\"mcp\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
-            "lineNumber": 93,
+            "lineNumber": 136,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1035,7 +988,7 @@
               "\nUnique ID of the MCP connector (from config.uniqueId)"
             ],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
-            "lineNumber": 97,
+            "lineNumber": 140,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1053,7 +1006,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
-            "lineNumber": 101,
+            "lineNumber": 144,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1072,14 +1025,15 @@
         "label": "ContentPart",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/mcp-client",
-            "scope": "common",
-            "docId": "kibKbnMcpClientPluginApi",
-            "section": "def-common.TextPart",
-            "text": "TextPart"
-          },
-          " | ",
+          "{ type: \"text\"; text: string; annotations?: { audience?: ",
+          "node_modules/zod/v4/core/schemas",
+          "$InferEnumOutput<{ user: \"user\"; assistant: \"assistant\"; }>[] | undefined; priority?: number | undefined; lastModified?: string | undefined; } | undefined; _meta?: { [x: string]: unknown; } | undefined; } | { uri: string; name: string; type: \"resource_link\"; description?: string | undefined; mimeType?: string | undefined; annotations?: { audience?: ",
+          "node_modules/zod/v4/core/schemas",
+          "$InferEnumOutput<{ user: \"user\"; assistant: \"assistant\"; }>[] | undefined; priority?: number | undefined; lastModified?: string | undefined; } | undefined; _meta?: { [x: string]: unknown; } | undefined; icons?: { src: string; mimeType?: string | undefined; sizes?: string[] | undefined; theme?: ",
+          "node_modules/zod/v4/core/schemas",
+          "$InferEnumOutput<{ light: \"light\"; dark: \"dark\"; }> | undefined; }[] | undefined; title?: string | undefined; } | { type: \"resource\"; resource: { uri: string; text: string; mimeType?: string | undefined; _meta?: { [x: string]: unknown; } | undefined; } | { uri: string; blob: string; mimeType?: string | undefined; _meta?: { [x: string]: unknown; } | undefined; }; annotations?: { audience?: ",
+          "node_modules/zod/v4/core/schemas",
+          "$InferEnumOutput<{ user: \"user\"; assistant: \"assistant\"; }>[] | undefined; priority?: number | undefined; lastModified?: string | undefined; } | undefined; _meta?: { [x: string]: unknown; } | undefined; } | ",
           {
             "pluginId": "@kbn/mcp-client",
             "scope": "common",
@@ -1089,7 +1043,28 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
-        "lineNumber": 56,
+        "lineNumber": 76,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mcp-client",
+        "id": "def-common.EmbeddedResourcePart",
+        "type": "Type",
+        "tags": [],
+        "label": "EmbeddedResourcePart",
+        "description": [
+          "\nEmbedded resource returned as part of a tool call response.\nServers may embed resource contents (text or base64 blob) inline."
+        ],
+        "signature": [
+          "{ type: \"resource\"; resource: { uri: string; text: string; mimeType?: string | undefined; _meta?: { [x: string]: unknown; } | undefined; } | { uri: string; blob: string; mimeType?: string | undefined; _meta?: { [x: string]: unknown; } | undefined; }; annotations?: { audience?: ",
+          "node_modules/zod/v4/core/schemas",
+          "$InferEnumOutput<{ user: \"user\"; assistant: \"assistant\"; }>[] | undefined; priority?: number | undefined; lastModified?: string | undefined; } | undefined; _meta?: { [x: string]: unknown; } | undefined; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+        "lineNumber": 57,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1147,6 +1122,69 @@
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mcp-client",
+        "id": "def-common.ResourceAnnotations",
+        "type": "Type",
+        "tags": [],
+        "label": "ResourceAnnotations",
+        "description": [
+          "\nA resource link returned as part of a tool call response.\nLinks are references to resources that can be fetched via resources/read."
+        ],
+        "signature": [
+          "{ audience?: ",
+          "node_modules/zod/v4/core/schemas",
+          "$InferEnumOutput<{ user: \"user\"; assistant: \"assistant\"; }>[] | undefined; priority?: number | undefined; lastModified?: string | undefined; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+        "lineNumber": 50,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mcp-client",
+        "id": "def-common.ResourceLinkPart",
+        "type": "Type",
+        "tags": [],
+        "label": "ResourceLinkPart",
+        "description": [],
+        "signature": [
+          "{ uri: string; name: string; type: \"resource_link\"; description?: string | undefined; mimeType?: string | undefined; annotations?: { audience?: ",
+          "node_modules/zod/v4/core/schemas",
+          "$InferEnumOutput<{ user: \"user\"; assistant: \"assistant\"; }>[] | undefined; priority?: number | undefined; lastModified?: string | undefined; } | undefined; _meta?: { [x: string]: unknown; } | undefined; icons?: { src: string; mimeType?: string | undefined; sizes?: string[] | undefined; theme?: ",
+          "node_modules/zod/v4/core/schemas",
+          "$InferEnumOutput<{ light: \"light\"; dark: \"dark\"; }> | undefined; }[] | undefined; title?: string | undefined; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+        "lineNumber": 55,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mcp-client",
+        "id": "def-common.TextPart",
+        "type": "Type",
+        "tags": [],
+        "label": "TextPart",
+        "description": [
+          "\nA text content as part of a tool call response."
+        ],
+        "signature": [
+          "{ type: \"text\"; text: string; annotations?: { audience?: ",
+          "node_modules/zod/v4/core/schemas",
+          "$InferEnumOutput<{ user: \"user\"; assistant: \"assistant\"; }>[] | undefined; priority?: number | undefined; lastModified?: string | undefined; } | undefined; _meta?: { [x: string]: unknown; } | undefined; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+        "lineNumber": 71,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

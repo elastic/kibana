@@ -30,15 +30,15 @@ export const GridSectionTitle = React.memo(
     sectionId,
     editTitleOpen,
     setEditTitleOpen,
-    toggleIsCollapsed,
     collapseButtonRef,
+    toggleIsCollapsed,
   }: {
     readOnly: boolean;
     sectionId: string;
     editTitleOpen: boolean;
     setEditTitleOpen: (value: boolean) => void;
-    toggleIsCollapsed: () => void;
     collapseButtonRef: React.MutableRefObject<HTMLButtonElement | null>;
+    toggleIsCollapsed: () => void;
   }) => {
     const { gridLayoutStateManager } = useGridLayoutContext();
 
@@ -96,6 +96,16 @@ export const GridSectionTitle = React.memo(
       [sectionId, setEditTitleOpen, gridLayoutStateManager.gridLayout$]
     );
 
+    const handleKeyDown = useCallback(
+      /** Prevents default drag from firing on key down and forces toggle instead */
+      (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          toggleIsCollapsed();
+        }
+      },
+      [toggleIsCollapsed]
+    );
+
     return (
       <>
         <EuiFlexItem grow={false} css={styles.titleButton}>
@@ -105,11 +115,11 @@ export const GridSectionTitle = React.memo(
             aria-label={i18n.translate('kbnGridLayout.section.toggleCollapse', {
               defaultMessage: 'Toggle collapse',
             })}
-            iconType={'arrowDown'}
-            onClick={toggleIsCollapsed}
+            iconType="chevronSingleDown"
+            onKeyDown={handleKeyDown}
             size="m"
             id={`kbnGridSectionTitle-${sectionId}`}
-            aria-controls={`kbnGridSection-${sectionId}`}
+            aria-controls={`kbnGridSectionHeader-${sectionId}`}
             aria-expanded={!currentSection?.isCollapsed}
             data-test-subj={`kbnGridSectionTitle-${sectionId}`}
             textProps={false}
@@ -127,6 +137,7 @@ export const GridSectionTitle = React.memo(
           <EuiFlexItem grow={true} css={styles.editTitleInput}>
             {/* @ts-ignore - EUI typing issue that will be resolved with https://github.com/elastic/eui/pull/8307 */}
             <EuiInlineEditTitle
+              data-no-drag
               size="xs"
               heading="h2"
               defaultValue={sectionTitle}
@@ -150,6 +161,7 @@ export const GridSectionTitle = React.memo(
             {!readOnly && (
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon
+                  data-no-drag
                   iconType="pencil"
                   onClick={() => setEditTitleOpen(true)}
                   color="text"

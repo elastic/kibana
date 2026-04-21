@@ -26,11 +26,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('observability security feature controls', function () {
     this.tags(['skipFirefox', 'skipFIPS']);
     before(async () => {
-      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/cases/default');
+      await kibanaServer.importExport.load(
+        'x-pack/platform/test/functional/fixtures/kbn_archives/cases/default/cases.json'
+      );
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/cases/default');
+      await kibanaServer.importExport.unload(
+        'x-pack/platform/test/functional/fixtures/kbn_archives/cases/default/cases.json'
+      );
       // Since the above unload removes the default config,
       // the following command will set it back to avoid changing the test environment
       await kibanaServer.uiSettings.update(config.get('uiSettings.defaults'));

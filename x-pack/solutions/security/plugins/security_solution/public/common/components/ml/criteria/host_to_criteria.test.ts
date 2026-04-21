@@ -41,4 +41,19 @@ describe('host_to_criteria', () => {
     };
     expect(hostToCriteria(hostItem)).toEqual([]);
   });
+
+  test('prefers host.id over host.name when id is non-empty', () => {
+    const hostItem: HostItem = {
+      host: {
+        id: ['hid-1'],
+        name: ['host-name'],
+      },
+    };
+    expect(hostToCriteria(hostItem)).toEqual([
+      {
+        fieldName: 'host.id',
+        fieldValue: 'hid-1',
+      },
+    ]);
+  });
 });

@@ -153,7 +153,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
             {hasSchemaConflicts && (
               <>
                 <EuiFlexItem>
-                  <EuiIcon type="alert" color="danger" />
+                  <EuiIcon type="warning" color="danger" />
                 </EuiFlexItem>
                 {!isTourClosed && <EuiSpacer size="xs" />}
               </>
@@ -198,7 +198,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
             <EuiFlexItem>
               <EuiButtonEmpty
                 color="primary"
-                iconType="arrowDown"
+                iconType="chevronSingleDown"
                 iconSide="right"
                 onClick={setCloseConfiguration}
               >
@@ -230,7 +230,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
 
           <EuiContextMenuItem
             key="Indices"
-            icon="tableDensityExpanded"
+            icon="tableDensityLow"
             onClick={() =>
               navigateToUrl(
                 generateEncodedPath(SEARCH_APPLICATION_CONTENT_PATH, {
@@ -249,7 +249,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
           </EuiContextMenuItem>
           <EuiContextMenuItem
             key="Schema"
-            icon={hasSchemaConflicts ? <EuiIcon type="warning" color="danger" /> : 'kqlField'}
+            icon={hasSchemaConflicts ? <EuiIcon type="warning" color="danger" /> : 'queryField'}
             onClick={() =>
               navigateToUrl(
                 generateEncodedPath(SEARCH_APPLICATION_CONTENT_PATH, {

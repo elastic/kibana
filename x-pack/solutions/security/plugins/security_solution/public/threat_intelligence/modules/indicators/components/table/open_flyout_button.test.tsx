@@ -22,6 +22,6 @@ describe('<IndicatorsFlyout />', () => {
       </TestProvidersComponent>
     );
 
-    expect(getByTestId(BUTTON_TEST_ID).innerHTML).toContain('expand');
+    expect(getByTestId(BUTTON_TEST_ID).innerHTML).toContain('maximize');
   });
 });

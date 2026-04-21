@@ -6,18 +6,13 @@
  */
 
 import React, { memo } from 'react';
-import { EuiHorizontalRule, EuiPanel } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiHorizontalRule } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import type { CellActionRenderer } from '../../shared/components/cell_actions';
 import { AboutSection } from '../components/about_section';
+import { InsightsSection } from '../components/insights_section';
 import { InvestigationSection } from '../components/investigation_section';
 import { VisualizationsSection } from '../components/visualizations_section';
-import type { ResolverCellActionRenderer } from '../../../resolver/types';
-
-const OVERVIEW_ARIA_LABEL = i18n.translate(
-  'xpack.securitySolution.flyout.document.overview.overviewContentAriaLabel',
-  { defaultMessage: 'Overview' }
-);
 
 export interface OverviewTabProps {
   /**
@@ -27,22 +22,30 @@ export interface OverviewTabProps {
   /**
    * Pass cell action renderer to the analyzer graph in the visualizations section of the overview tab.
    */
-  renderCellActions: ResolverCellActionRenderer;
+  renderCellActions: CellActionRenderer;
+  /**
+   * Callback invoked after alert mutations to refresh parent flyout content.
+   */
+  onAlertUpdated: () => void;
 }
 
 /**
  * Overview view displayed in the document details expandable flyout right section
  */
-export const OverviewTab = memo(({ hit, renderCellActions }: OverviewTabProps) => {
-  return (
-    <EuiPanel hasBorder={false} hasShadow={false} aria-label={OVERVIEW_ARIA_LABEL}>
-      <AboutSection hit={hit} />
-      <EuiHorizontalRule margin="m" />
-      <InvestigationSection hit={hit} />
-      <EuiHorizontalRule margin="m" />
-      <VisualizationsSection hit={hit} renderCellActions={renderCellActions} />
-    </EuiPanel>
-  );
-});
+export const OverviewTab = memo(({ hit, renderCellActions, onAlertUpdated }: OverviewTabProps) => (
+  <>
+    <AboutSection hit={hit} />
+    <EuiHorizontalRule margin="m" />
+    <InvestigationSection hit={hit} renderCellActions={renderCellActions} />
+    <EuiHorizontalRule margin="m" />
+    <VisualizationsSection
+      hit={hit}
+      renderCellActions={renderCellActions}
+      onAlertUpdated={onAlertUpdated}
+    />
+    <EuiHorizontalRule margin="m" />
+    <InsightsSection hit={hit} onAlertUpdated={onAlertUpdated} />
+  </>
+));
 
 OverviewTab.displayName = 'OverviewTab';

@@ -41,7 +41,7 @@ export const useSystemPromptTable = () => {
               {prompt?.name}
               {prompt.isNewConversationDefault && (
                 <EuiIcon
-                  type="starFilled"
+                  type="starFill"
                   aria-label={SYSTEM_PROMPT_DEFAULT_NEW_CONVERSATION}
                   className="eui-alignTop"
                 />
