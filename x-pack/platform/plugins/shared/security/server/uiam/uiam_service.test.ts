@@ -1044,6 +1044,22 @@ describe('UiamService', () => {
         })
       ).rejects.toThrowError('Client not found');
     });
+
+    it('encodes reserved characters in the client id path segment', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => ({ id: 'weird/id?x#y', resource: 'urn:test' }),
+      });
+
+      await uiamService.updateOAuthClient('access-token', 'weird/id?x#y', {
+        client_name: 'Updated',
+      });
+
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/oauth/clients/weird%2Fid%3Fx%23y',
+        expect.objectContaining({ method: 'PATCH' })
+      );
+    });
   });
 
   describe('#revokeOAuthClient', () => {
@@ -1089,6 +1105,20 @@ describe('UiamService', () => {
 
       await expect(uiamService.revokeOAuthClient('access-token', 'client-id')).rejects.toThrowError(
         'Already revoked'
+      );
+    });
+
+    it('encodes reserved characters in the client id path segment', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => ({ id: 'weird/id?x#y', resource: 'urn:test', revoked: true }),
+      });
+
+      await uiamService.revokeOAuthClient('access-token', 'weird/id?x#y');
+
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/oauth/clients/weird%2Fid%3Fx%23y/_revoke',
+        expect.objectContaining({ method: 'POST' })
       );
     });
   });
@@ -1196,6 +1226,25 @@ describe('UiamService', () => {
       await expect(
         uiamService.revokeOAuthConnection('access-token', 'client-id', 'conn-id')
       ).rejects.toThrowError('Connection not found');
+    });
+
+    it('encodes reserved characters in both path segments', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          id: 'conn/id?x',
+          client_id: 'client/id#y',
+          resource: 'urn:test',
+          revoked: true,
+        }),
+      });
+
+      await uiamService.revokeOAuthConnection('access-token', 'client/id#y', 'conn/id?x');
+
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/oauth/clients/client%2Fid%23y/connections/conn%2Fid%3Fx/_revoke',
+        expect.objectContaining({ method: 'POST' })
+      );
     });
   });
 });

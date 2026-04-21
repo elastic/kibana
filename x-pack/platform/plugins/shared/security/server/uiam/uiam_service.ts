@@ -606,17 +606,20 @@ export class UiamService implements UiamServicePublic {
       this.#logger.debug(`Attempting to update OAuth client: ${clientId}`);
 
       const response = await UiamService.#parseUiamResponse(
-        await fetch(`${this.#config.url}/uiam/api/v1/oauth/clients/${clientId}`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify(body),
-          // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
-          dispatcher: this.#dispatcher,
-        })
+        await fetch(
+          `${this.#config.url}/uiam/api/v1/oauth/clients/${encodeURIComponent(clientId)}`,
+          {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
+              Authorization: `Bearer ${accessToken}`,
+            },
+            body: JSON.stringify(body),
+            // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+            dispatcher: this.#dispatcher,
+          }
+        )
       );
 
       this.#logger.debug(`Successfully updated OAuth client: ${clientId}`);
@@ -641,17 +644,20 @@ export class UiamService implements UiamServicePublic {
       this.#logger.debug(`Attempting to revoke OAuth client: ${clientId}`);
 
       const response = await UiamService.#parseUiamResponse(
-        await fetch(`${this.#config.url}/uiam/api/v1/oauth/clients/${clientId}/_revoke`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify({ reason }),
-          // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
-          dispatcher: this.#dispatcher,
-        })
+        await fetch(
+          `${this.#config.url}/uiam/api/v1/oauth/clients/${encodeURIComponent(clientId)}/_revoke`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
+              Authorization: `Bearer ${accessToken}`,
+            },
+            body: JSON.stringify({ reason }),
+            // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+            dispatcher: this.#dispatcher,
+          }
+        )
       );
 
       this.#logger.debug(`Successfully revoked OAuth client: ${clientId}`);
@@ -717,9 +723,9 @@ export class UiamService implements UiamServicePublic {
 
       const response = await UiamService.#parseUiamResponse(
         await fetch(
-          `${
-            this.#config.url
-          }/uiam/api/v1/oauth/clients/${clientId}/connections/${connectionId}/_revoke`,
+          `${this.#config.url}/uiam/api/v1/oauth/clients/${encodeURIComponent(
+            clientId
+          )}/connections/${encodeURIComponent(connectionId)}/_revoke`,
           {
             method: 'POST',
             headers: {
