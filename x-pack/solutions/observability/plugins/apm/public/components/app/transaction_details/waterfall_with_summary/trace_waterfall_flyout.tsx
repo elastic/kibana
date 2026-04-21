@@ -9,6 +9,7 @@ import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eu
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 import { FullTraceWaterfallRenderer } from '../../../shared/trace_waterfall/full_trace_waterfall_renderer';
 
 export interface TraceWaterfallDetailFlyoutProps {
@@ -37,6 +38,7 @@ export function TraceWaterfallFlyout({
   renderDetailFlyout,
 }: Props) {
   const { core } = useApmPluginContext();
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
 
   if (!isOpen) return null;
@@ -55,8 +57,8 @@ export function TraceWaterfallFlyout({
       <EuiFlyoutBody>
         <FullTraceWaterfallRenderer
           traceId={traceId}
-          rangeFrom={rangeFrom}
-          rangeTo={rangeTo}
+          rangeFrom={start}
+          rangeTo={end}
           core={core}
           contextSpanIds={contextSpanIds}
           onNodeClick={setSelectedDocId}
