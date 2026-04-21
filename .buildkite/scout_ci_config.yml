@@ -12,6 +12,7 @@ plugins:
     - custom_branding
     - dashboard
     - dashboard_markdown
+    - data
     - data_views
     - discover
     - discover_enhanced
@@ -25,6 +26,7 @@ plugins:
     - infra
     - intercepts
     - lens
+    - logstash
     - maps
     - navigation
     - observability
@@ -44,6 +46,7 @@ plugins:
     - streams
     - streams_app
     - synthetics
+    - task_manager
     - transform
     - triggers_actions_ui
     - uptime
@@ -63,3 +66,4 @@ packages:
 # Define test configs to be excluded from automatic discovery & execution in CI environment (process.env.CI=true)
 excluded_configs:
   - x-pack/solutions/security/plugins/cloud_security_posture/test/scout_cspm_agentless/ui/parallel.playwright.config.ts
+  - src/platform/plugins/shared/workflows_management/test/scout_workflows_oom_testing/api/playwright.config.ts

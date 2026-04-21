@@ -29,7 +29,7 @@ import type {
 import type { EmbeddableRegistryDefinition, EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import type { SharePluginSetup } from '@kbn/share-plugin/server';
-import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
+import { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import {
   LENS_CONTENT_TYPE,
   LENS_ITEM_LATEST_VERSION,
