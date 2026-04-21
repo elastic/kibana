@@ -23,6 +23,7 @@ import {
 import type { UseEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
+import type { ReactNode } from 'react';
 import { QueryDetailsFlyout } from './query_details_flyout';
 import { PackResultsHeader } from './pack_results_header';
 import { Direction } from '../../../common/search_strategy';
@@ -113,7 +114,7 @@ const DocsColumnResults: React.FC<DocsColumnResultsProps> = ({ count, isLive }) 
   </EuiFlexGroup>
 );
 
-interface AgentsColumnResultsProps {
+export interface AgentsColumnResultsProps {
   successful?: number;
   pending?: number;
   failed?: number;
@@ -121,7 +122,7 @@ interface AgentsColumnResultsProps {
 
 const agentsSeparatorCss = ({ euiTheme }: UseEuiTheme) => ({ color: euiTheme.colors.subduedText });
 
-const AgentsColumnResults: React.FC<AgentsColumnResultsProps> = ({
+export const AgentsColumnResults: React.FC<AgentsColumnResultsProps> = ({
   successful,
   pending,
   failed,
@@ -174,6 +175,7 @@ interface PackQueriesStatusTableProps {
   packName?: string;
   tags?: string[];
   onSaveQuery?: () => void;
+  renderAboutTab?: (queryItem: PackQueryStatusItem) => ReactNode;
 }
 
 const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = ({
@@ -190,6 +192,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   packName,
   tags,
   onSaveQuery,
+  renderAboutTab,
 }) => {
   const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
   const [queryDetailsFlyoutOpen, setQueryDetailsFlyoutOpen] = useState<{
@@ -349,6 +352,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
                   addToTimeline={addToTimeline}
                   scheduleId={scheduleId}
                   executionCount={executionCount}
+                  aboutTab={renderAboutTab?.(item)}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -358,7 +362,16 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         return itemIdToExpandedRowMapValues;
       });
     },
-    [actionId, startDate, expirationDate, agentIds, addToTimeline, scheduleId, executionCount]
+    [
+      actionId,
+      startDate,
+      expirationDate,
+      agentIds,
+      addToTimeline,
+      scheduleId,
+      executionCount,
+      renderAboutTab,
+    ]
   );
 
   const renderToggleResultsAction = useCallback(
@@ -648,9 +661,54 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   );
 
   useEffect(() => {
-    // reset the expanded row map when the data changes
     setItemIdToExpandedRowMap({});
   }, [queryId, actionId]);
+
+  useEffect(() => {
+    setItemIdToExpandedRowMap((prevMap) => {
+      const expandedIds = Object.keys(prevMap);
+      if (!expandedIds.length || !data) return prevMap;
+
+      const updated: Record<string, React.ReactNode> = {};
+      for (const id of expandedIds) {
+        const item = data.find((q) => q.id === id);
+        if (item) {
+          updated[id] = (
+            <EuiFlexGroup gutterSize="none">
+              <EuiFlexItem>
+                <ResultTabs
+                  liveQueryActionId={actionId}
+                  actionId={item.action_id!}
+                  startDate={startDate}
+                  ecsMapping={item.ecs_mapping}
+                  endDate={expirationDate}
+                  agentIds={agentIds}
+                  failedAgentsCount={(item as any)?.failed ?? 0}
+                  error={item.error}
+                  addToTimeline={addToTimeline}
+                  scheduleId={scheduleId}
+                  executionCount={executionCount}
+                  aboutTab={renderAboutTab?.(item as any)}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          );
+        }
+      }
+
+      return updated;
+    });
+  }, [
+    renderAboutTab,
+    data,
+    actionId,
+    startDate,
+    expirationDate,
+    agentIds,
+    addToTimeline,
+    scheduleId,
+    executionCount,
+  ]);
 
   useEffect(() => {
     const shouldAutoExpand =

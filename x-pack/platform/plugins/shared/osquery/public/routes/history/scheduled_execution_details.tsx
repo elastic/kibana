@@ -32,10 +32,40 @@ import {
   mapScheduledDetailsToQueryData,
 } from '../../actions/use_scheduled_execution_details';
 import { PackQueriesStatusTable } from '../../live_queries/form/pack_queries_status_table';
+import { AboutTab } from '../live_queries/details/about_tab';
+import type { QueryItemAgents } from '../live_queries/details/about_tab';
+import type { LiveQueryDetailsItem } from '../../actions/use_live_query_details';
+import type { ScheduledExecutionDetailsItem } from '../../actions/use_scheduled_execution_details';
 
 const tableWrapperCss = {
   paddingLeft: '10px',
 };
+
+function mapToLiveQueryDetailsItem(
+  details: ScheduledExecutionDetailsItem,
+  schedId: string
+): LiveQueryDetailsItem {
+  return {
+    action_id: schedId,
+    '@timestamp': details.timestamp,
+    agent_all: false,
+    agent_ids: [],
+    agent_platforms: [],
+    agent_policy_ids: [],
+    pack_id: details.packId,
+    pack_name: details.packName,
+    status: 'completed',
+    queries: [
+      {
+        action_id: schedId,
+        id: details.queryName || schedId,
+        query: details.queryText || '',
+        agents: [],
+        interval: details.queryInterval,
+      },
+    ],
+  };
+}
 
 const ScheduledExecutionDetailsPageComponent = () => {
   const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
@@ -61,6 +91,31 @@ const ScheduledExecutionDetailsPageComponent = () => {
     executionCount,
     skip: !isValid,
   });
+
+  const isResultCountsEnabled = useIsExperimentalFeatureEnabled('resultCountsEnabled');
+
+  const aboutData = useMemo(
+    () => (data ? mapToLiveQueryDetailsItem(data, scheduleId) : undefined),
+    [data, scheduleId]
+  );
+
+  const renderAboutTab = useMemo(() => {
+    if (!isResultCountsEnabled || !aboutData) {
+      return undefined;
+    }
+
+    const AboutTabRenderer = (queryItem: QueryItemAgents) => (
+      <AboutTab
+        data={aboutData}
+        queryItemAgents={queryItem}
+        isScheduled
+        executionCount={executionCount}
+      />
+    );
+    AboutTabRenderer.displayName = 'AboutTabRenderer';
+
+    return AboutTabRenderer;
+  }, [isResultCountsEnabled, aboutData, executionCount]);
 
   const queryData = useMemo(
     () => (data ? mapScheduledDetailsToQueryData(data, scheduleId) : undefined),
@@ -109,6 +164,7 @@ const ScheduledExecutionDetailsPageComponent = () => {
         scheduleId={scheduleId}
         executionCount={executionCount}
         packName={data?.packName}
+        renderAboutTab={renderAboutTab}
       />
     </div>
   );

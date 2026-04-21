@@ -8,6 +8,7 @@
 import { EuiTabbedContent, EuiNotificationBadge, EuiPanel } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import type { ReactNode } from 'react';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 
 import { ResultsTable } from '../../../results/results_table';
@@ -33,6 +34,7 @@ interface ResultTabsProps {
   addToTimeline?: AddToTimelineHandler;
   scheduleId?: string;
   executionCount?: number;
+  aboutTab?: ReactNode;
 }
 
 const ResultTabsComponent: React.FC<ResultTabsProps> = ({
@@ -47,6 +49,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
   addToTimeline,
   scheduleId,
   executionCount,
+  aboutTab,
 }) => {
   const tabs = useMemo(
     () => [
@@ -90,6 +93,16 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
           </EuiNotificationBadge>
         ) : null,
       },
+      ...(aboutTab
+        ? [
+            {
+              id: 'about',
+              name: 'About',
+              'data-test-subj': 'osquery-about-tab',
+              content: <>{aboutTab}</>,
+            },
+          ]
+        : []),
     ],
     [
       actionId,
@@ -103,6 +116,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
       addToTimeline,
       scheduleId,
       executionCount,
+      aboutTab,
     ]
   );
 

@@ -132,7 +132,7 @@ export const FindLiveQueryDetailsResponse = z.object({
        */
       status: z.enum(['completed', 'running']).optional(),
       /**
-      * Aggregated result count statistics for the query. Present when the resultCountsEnabled experimental feature is on and the aggregation succeeds; omitted on aggregation failure. Single-query actions include responded_agents; pack actions include queries_with_results and queries_total instead.
+      * Aggregated result count statistics for the query. May be omitted when aggregation data is unavailable. Single-query actions include responded_agents; pack actions include queries_with_results and queries_total instead.
 
       */
       result_counts: z

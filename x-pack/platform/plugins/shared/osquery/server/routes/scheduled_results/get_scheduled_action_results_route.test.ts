@@ -139,13 +139,19 @@ describe('getScheduledActionResultsRoute', () => {
         service: {
           getActiveSpace: jest.fn().mockResolvedValue({ id: 'space-a' }),
         },
+        experimentalFeatures: { resultCountsEnabled: false },
       } as unknown as OsqueryAppContext;
 
       const soGet = jest.fn().mockResolvedValue({
         attributes: {
           name: 'My Pack',
           queries: [
-            { schedule_id: 'sched-1', name: 'uptime_query', query: 'SELECT * FROM uptime;' },
+            {
+              schedule_id: 'sched-1',
+              name: 'uptime_query',
+              query: 'SELECT * FROM uptime;',
+              interval: 3600,
+            },
           ],
         },
       });
@@ -190,6 +196,114 @@ describe('getScheduledActionResultsRoute', () => {
           },
         }),
       });
+    });
+  });
+
+  describe('queryInterval metadata (resultCountsEnabled)', () => {
+    it('includes queryInterval from pack query when resultCountsEnabled is true', async () => {
+      const mockSearchFn = jest.fn().mockReturnValue(
+        of(
+          createMockScheduledResponse({
+            edges: [{ _id: 'hit-1' }],
+            total: 1,
+            successCount: 1,
+            errorCount: 0,
+            rowsCount: 1,
+            packId: 'pack-1',
+          })
+        )
+      );
+
+      const mockOsqueryContext = {
+        service: {
+          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+        },
+        experimentalFeatures: { resultCountsEnabled: true },
+      } as unknown as OsqueryAppContext;
+
+      const soGet = jest.fn().mockResolvedValue({
+        attributes: {
+          name: 'Pack',
+          queries: [
+            {
+              schedule_id: 'sched-1',
+              name: 'q1',
+              query: 'SELECT 1',
+              interval: 7200,
+            },
+          ],
+        },
+      });
+
+      registerRoute(mockOsqueryContext);
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { scheduleId: 'sched-1', executionCount: 1 },
+        query: {},
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(
+        createMockContext(mockSearchFn, { get: soGet }) as any,
+        mockRequest,
+        mockResponse
+      );
+
+      const responseBody = (mockResponse.ok as jest.Mock).mock.calls[0][0].body;
+      expect(responseBody.metadata.queryInterval).toBe(7200);
+    });
+
+    it('omits queryInterval when resultCountsEnabled is false', async () => {
+      const mockSearchFn = jest.fn().mockReturnValue(
+        of(
+          createMockScheduledResponse({
+            edges: [{ _id: 'hit-1' }],
+            total: 1,
+            successCount: 1,
+            errorCount: 0,
+            rowsCount: 1,
+            packId: 'pack-1',
+          })
+        )
+      );
+
+      const mockOsqueryContext = {
+        service: {
+          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+        },
+        experimentalFeatures: { resultCountsEnabled: false },
+      } as unknown as OsqueryAppContext;
+
+      const soGet = jest.fn().mockResolvedValue({
+        attributes: {
+          name: 'Pack',
+          queries: [
+            {
+              schedule_id: 'sched-1',
+              name: 'q1',
+              query: 'SELECT 1',
+              interval: 7200,
+            },
+          ],
+        },
+      });
+
+      registerRoute(mockOsqueryContext);
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { scheduleId: 'sched-1', executionCount: 1 },
+        query: {},
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(
+        createMockContext(mockSearchFn, { get: soGet }) as any,
+        mockRequest,
+        mockResponse
+      );
+
+      const responseBody = (mockResponse.ok as jest.Mock).mock.calls[0][0].body;
+      expect(responseBody.metadata.queryInterval).toBeUndefined();
     });
   });
 

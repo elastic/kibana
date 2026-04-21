@@ -9,7 +9,8 @@ paths:
       description: >
         Get paginated per-agent action results for a specific scheduled query
         execution, with success/failure aggregation and execution metadata
-        (pack name, query name/text, timestamp).
+        (pack name, query name/text, timestamp, and optionally queryInterval when
+        the resultCountsEnabled experimental feature is enabled).
       operationId: OsqueryGetScheduledActionResults
       x-codegen-enabled: true
       x-labels: [ serverless, ess ]
@@ -80,6 +81,7 @@ paths:
                       queryName: 'uptime'
                       queryText: 'select * from uptime;'
                       timestamp: '2024-07-26T09:00:00.000Z'
+                      queryInterval: 3600
                     edges:
                       - _id: 'result-001'
                         fields:
