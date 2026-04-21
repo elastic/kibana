@@ -8,7 +8,13 @@
 export { Streams, streamDefinitionSchema } from './src/models/streams';
 export { IngestBase, type IngestStreamIndexMode } from './src/models/ingest/base';
 export { Ingest, IngestStream, IngestUpsertRequest } from './src/models/ingest';
-export { WiredIngest, WiredStream, WiredIngestUpsertRequest } from './src/models/ingest/wired';
+export {
+  WiredIngest,
+  WiredStream,
+  WiredIngestUpsertRequest,
+  isDraftStream,
+  type DraftStreamDefinition,
+} from './src/models/ingest/wired';
 export {
   ClassicIngest,
   ClassicStream,
