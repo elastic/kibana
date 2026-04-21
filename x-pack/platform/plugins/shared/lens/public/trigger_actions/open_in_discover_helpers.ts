@@ -54,13 +54,13 @@ async function getDiscoverLocationParams({
   timeFieldName,
 }: Pick<Context, 'dataViews' | 'embeddable' | 'filters' | 'timeFieldName'>) {
   if (!isLensApi(embeddable)) {
-    // shouldn't be executed because of the isCompatible check
+    // Shouldn't be executed because of the isCompatible check
     throw new Error('Can only be executed in the context of Lens visualization');
   }
 
   const args = embeddable.getViewUnderlyingDataArgs();
   if (!args) {
-    // shouldn't be executed because of the isCompatible check
+    // Shouldn't be executed because of the isCompatible check
     throw new Error('Underlying data is not ready');
   }
 
@@ -68,7 +68,10 @@ async function getDiscoverLocationParams({
 
   let filtersToApply = [...(filters || []), ...args.filters];
   let timeRangeToApply = args.timeRange;
-  if (timeFieldName && dataView.isTimeBased() && dataView.timeFieldName === timeFieldName) {
+
+  const shouldExtractTimeRangeForDiscover =
+    timeFieldName && dataView.isTimeBased() && dataView.timeFieldName === timeFieldName;
+  if (shouldExtractTimeRangeForDiscover) {
     const { extractTimeRange } = await import('@kbn/es-query');
     const { restOfFilters, timeRange } = extractTimeRange(filtersToApply, timeFieldName);
     filtersToApply = restOfFilters;
@@ -83,21 +86,20 @@ async function getDiscoverLocationParams({
 
   const useGeneratedFromFilters = embeddable.isTextBasedLanguage() && (filters || []).length > 0;
 
-  const query: AggregateQuery | Query | undefined = useGeneratedFromFilters
+  const discoverQuery: AggregateQuery | Query | undefined = useGeneratedFromFilters
     ? { esql: getInitialESQLQuery(dataView, undefined, filtersToApply) }
     : args.query;
 
   // When filters are baked into the ES|QL string, do not pass the same DSL filters again
-  // (Discover would apply them twice: in the query text and via the filter bar).
   const filtersForDiscover = useGeneratedFromFilters ? [] : filtersToApply;
 
   const columns = useGeneratedFromFilters ? [] : args.columns;
 
-  const esqlQueryForControls = useGeneratedFromFilters ? query : args.query;
+  const esqlQueryForControls = useGeneratedFromFilters ? discoverQuery : args.query;
 
   return {
     ...args,
-    query,
+    query: discoverQuery,
     columns,
     filters: filtersForDiscover,
     timeRange: timeRangeToApply,
