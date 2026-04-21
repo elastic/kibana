@@ -8,7 +8,10 @@
 import expect from '@kbn/expect';
 import expect_ from 'expect';
 import type { MlJobUsageMetric } from '@kbn/security-solution-plugin/server/usage/detections/ml_jobs/types';
-import type { RulesTypeUsage } from '@kbn/security-solution-plugin/server/usage/detections/rules/types';
+import type {
+  RulesTypeUsage,
+  SingleEventMetric,
+} from '@kbn/security-solution-plugin/server/usage/detections/rules/types';
 import type { DetectionMetrics } from '@kbn/security-solution-plugin/server/usage/detections/types';
 import type {
   ThreatMatchRuleCreateProps,
@@ -45,6 +48,66 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const retry = getService('retry');
   const es = getService('es');
+
+  // DEBUG: dumps raw execution-metrics docs for a given rule category along with
+  // the index/search/enrichment duration slices from the stats payload, so we
+  // can see whether each field was stored as 0, as a small rounded int, or was
+  // never written.
+  const dumpExecutionMetrics = async (
+    ruleCategory: string,
+    statsMetrics: SingleEventMetric | undefined
+  ): Promise<void> => {
+    try {
+      const result = await es.search({
+        index: '.kibana-event-log-*',
+        size: 20,
+        query: {
+          bool: {
+            filter: [
+              { term: { 'event.action': 'execution-metrics' } },
+              { term: { 'rule.category': ruleCategory } },
+            ],
+          },
+        },
+        sort: [{ '@timestamp': { order: 'asc' } }],
+        _source: ['@timestamp', 'kibana.alert.rule.execution.metrics', 'rule.category'],
+      });
+      const hits = (result.hits.hits ?? []).map((h) => h._source);
+      log.info(
+        `[debug] ${ruleCategory} execution-metrics docs (${hits.length}): ${JSON.stringify(
+          hits,
+          null,
+          2
+        )}`
+      );
+      log.info(
+        `[debug] ${ruleCategory} stats durations: ${JSON.stringify({
+          index_duration: statsMetrics?.index_duration,
+          search_duration: statsMetrics?.search_duration,
+          enrichment_duration: statsMetrics?.enrichment_duration,
+        })}`
+      );
+    } catch (e) {
+      log.warning(`[debug] dumpExecutionMetrics failed for ${ruleCategory}: ${e}`);
+    }
+  };
+
+  // DEBUG: logs the stats slice again at the start of a failing-style it block,
+  // so that the attribution is unambiguous in mocha's output (the before-all
+  // dump is visually attached to the first it in the describe, which can be a
+  // different test than the one that fails).
+  const logStatsForIt = (
+    ruleCategory: string,
+    statsMetrics: SingleEventMetric | undefined
+  ): void => {
+    log.info(
+      `[debug] it(${ruleCategory}) durations: ${JSON.stringify({
+        index_duration: statsMetrics?.index_duration,
+        search_duration: statsMetrics?.search_duration,
+        enrichment_duration: statsMetrics?.enrichment_duration,
+      })}`
+    );
+  };
 
   describe('@ess @serverless Detection rule status telemetry', () => {
     before(async () => {
@@ -85,6 +148,10 @@ export default ({ getService }: FtrProviderContext) => {
             1
           );
         });
+        await dumpExecutionMetrics(
+          'siem.queryRule',
+          stats?.detection_rules.detection_rule_status.custom_rules.query
+        );
       });
 
       it('should have an empty "ml_jobs"', () => {
@@ -177,6 +244,10 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('@skipInServerlessMKI should have non zero values for "index_duration"', () => {
+        logStatsForIt(
+          'siem.queryRule',
+          stats?.detection_rules.detection_rule_status.custom_rules.query
+        );
         expect(
           stats?.detection_rules.detection_rule_status.custom_rules.query.index_duration.max
         ).to.be.above(1);
@@ -272,6 +343,10 @@ export default ({ getService }: FtrProviderContext) => {
             1
           );
         });
+        await dumpExecutionMetrics(
+          'siem.eqlRule',
+          stats?.detection_rules.detection_rule_status.custom_rules.eql
+        );
       });
 
       it('should have an empty "ml_jobs"', () => {
@@ -363,6 +438,10 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should have non zero values for "index_duration"', () => {
+        logStatsForIt(
+          'siem.eqlRule',
+          stats?.detection_rules.detection_rule_status.custom_rules.eql
+        );
         expect(
           stats?.detection_rules.detection_rule_status.custom_rules.eql.index_duration.max
         ).to.be.above(1);
@@ -464,6 +543,10 @@ export default ({ getService }: FtrProviderContext) => {
             1
           );
         });
+        await dumpExecutionMetrics(
+          'siem.thresholdRule',
+          stats?.detection_rules.detection_rule_status.custom_rules.threshold
+        );
       });
 
       it('should have an empty "ml_jobs"', () => {
@@ -557,6 +640,10 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should have non zero values for "index_duration"', () => {
+        logStatsForIt(
+          'siem.thresholdRule',
+          stats?.detection_rules.detection_rule_status.custom_rules.threshold
+        );
         expect(
           stats?.detection_rules.detection_rule_status.custom_rules.threshold.index_duration.max
         ).to.be.above(1);
@@ -672,6 +759,10 @@ export default ({ getService }: FtrProviderContext) => {
             1
           );
         });
+        await dumpExecutionMetrics(
+          'siem.indicatorRule',
+          stats?.detection_rules.detection_rule_status.custom_rules.threat_match
+        );
       });
 
       it('should have an empty "ml_jobs"', () => {
@@ -767,6 +858,10 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should have non zero values for "index_duration"', () => {
+        logStatsForIt(
+          'siem.indicatorRule',
+          stats?.detection_rules.detection_rule_status.custom_rules.threat_match
+        );
         expect(
           stats?.detection_rules.detection_rule_status.custom_rules.threat_match.index_duration.max
         ).to.be.above(1);
