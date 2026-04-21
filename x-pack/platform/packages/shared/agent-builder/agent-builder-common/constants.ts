@@ -12,10 +12,7 @@ export const AGENT_BUILDER_INFERENCE_FEATURE_ID = 'agent_builder';
  */
 export const SYSTEM_USER_ID = 'system';
 export const AGENT_BUILDER_RECOMMENDED_ENDPOINTS = [
-  '.anthropic-claude-4.6-opus-chat_completion',
   '.anthropic-claude-4.6-sonnet-chat_completion',
-  '.google-gemini-3.0-flash-chat_completion',
-  '.google-gemini-3.1-pro-chat_completion',
+  '.anthropic-claude-4.6-opus-chat_completion',
   '.openai-gpt-5.2-chat_completion',
-  '.openai-gpt-oss-20b-chat_completion',
 ];
