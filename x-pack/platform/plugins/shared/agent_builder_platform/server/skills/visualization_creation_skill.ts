@@ -17,7 +17,7 @@ export const visualizationCreationSkill = defineSkillType({
   name: 'visualization-creation',
   basePath: 'skills/platform/visualization',
   description:
-    'Create standalone or reusable visualizations from grounded index and field context.',
+    'Create standalone or reusable visualizations from grounded index and field context, outside dashboard-scoped requests.',
   content: `## When to Use This Skill
 
 Use this skill when:

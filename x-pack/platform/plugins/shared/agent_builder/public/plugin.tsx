@@ -57,7 +57,11 @@ import type {
   AgentBuilderStartDependencies,
   ConversationSidebarRef,
 } from './types';
-import type { EmbeddableConversationProps } from './embeddable/types';
+import type {
+  ConversationChangeHandler,
+  EmbeddableConversationChange,
+  EmbeddableConversationProps,
+} from './embeddable/types';
 import type { OpenConversationSidebarOptions } from './sidebar/types';
 import {
   setSidebarServices,
@@ -87,8 +91,12 @@ export class AgentBuilderPlugin
     updateProps: (props: EmbeddableConversationProps) => void;
     resetBrowserApiTools: () => void;
     addAttachment: (attachment: AttachmentInput) => void;
+    invalidateConversation: () => void;
   } | null = null;
+  private conversationChangeListeners = new Set<ConversationChangeHandler>();
+  private latestConversationChange: EmbeddableConversationChange | null = null;
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+  private chatOpenState$ = new BehaviorSubject<boolean>(false);
   private experimentalDeepLinksSubscription?: Subscription;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
@@ -166,6 +174,10 @@ export class AgentBuilderPlugin
 
     const hasAgentBuilder = core.application.capabilities.agentBuilder?.show === true;
     const sidebar = core.chrome.sidebar.getApp('agentBuilder');
+    const notifyConversationChange = (conversation: EmbeddableConversationChange) => {
+      this.latestConversationChange = conversation;
+      this.conversationChangeListeners.forEach((listener) => listener(conversation));
+    };
 
     const openSidebarInternal = (options?: OpenConversationSidebarOptions) => {
       const config = options ?? this.conversationActiveConfig;
@@ -179,12 +191,15 @@ export class AgentBuilderPlugin
       // Set runtime context before opening
       setSidebarRuntimeContext({
         options: config,
+        onConversationChange: notifyConversationChange,
         onRegisterCallbacks: (callbacks) => {
           this.sidebarCallbacks = callbacks;
         },
         onClose: () => {
           this.activeSidebarRef = null;
           this.sidebarCallbacks = null;
+          this.latestConversationChange = null;
+          this.chatOpenState$.next(false);
           clearSidebarRuntimeContext();
         },
       });
@@ -196,11 +211,14 @@ export class AgentBuilderPlugin
           sidebar.close();
           this.activeSidebarRef = null;
           this.sidebarCallbacks = null;
+          this.latestConversationChange = null;
+          this.chatOpenState$.next(false);
           clearSidebarRuntimeContext();
         },
       };
 
       this.activeSidebarRef = sidebarRef;
+      this.chatOpenState$.next(true);
       return { chatRef: sidebarRef };
     };
 
@@ -222,6 +240,7 @@ export class AgentBuilderPlugin
       openSidebarConversation: (options?: OpenConversationSidebarOptions) => {
         return openSidebarInternal(options);
       },
+      notifyConversationChange,
     };
 
     this.internalServices = internalServices;
@@ -242,6 +261,7 @@ export class AgentBuilderPlugin
       attachments: createPublicAttachmentContract({ attachmentsService }),
       tools: createPublicToolContract({ toolsService }),
       events: createPublicEventsContract({ eventsService }),
+      chatOpen$: this.chatOpenState$.pipe(distinctUntilChanged()),
       addAttachment: (attachment: AttachmentInput) => {
         if (this.sidebarCallbacks) {
           this.sidebarCallbacks.addAttachment(attachment);
@@ -259,9 +279,19 @@ export class AgentBuilderPlugin
       clearChatConfig: () => {
         this.conversationActiveConfig = {};
         if (this.activeSidebarRef && this.sidebarCallbacks) {
-          // Removes stale browserApiTools from the sidebar
           this.sidebarCallbacks.resetBrowserApiTools();
         }
+      },
+      subscribeToConversationChanges: (listener: ConversationChangeHandler) => {
+        this.conversationChangeListeners.add(listener);
+
+        if (this.latestConversationChange) {
+          listener(this.latestConversationChange);
+        }
+
+        return () => {
+          this.conversationChangeListeners.delete(listener);
+        };
       },
       openChat: (options?: OpenConversationSidebarOptions) => {
         return openSidebarInternal(options);
@@ -273,14 +303,29 @@ export class AgentBuilderPlugin
           // synchronously invoke our onClose callback.
           this.activeSidebarRef = null;
           this.sidebarCallbacks = null;
+          this.chatOpenState$.next(false);
           sidebarRef.close();
           return;
         }
 
         openSidebarInternal(options);
       },
-      updateAttachmentOrigin: (conversationId: string, attachmentId: string, origin: string) => {
-        return attachmentsService.updateOrigin(conversationId, attachmentId, origin);
+      updateAttachmentOrigin: async (
+        conversationId: string,
+        attachmentId: string,
+        origin: string
+      ) => {
+        const response = await attachmentsService.updateOrigin(
+          conversationId,
+          attachmentId,
+          origin
+        );
+
+        if (this.latestConversationChange?.id === conversationId && this.sidebarCallbacks) {
+          this.sidebarCallbacks.invalidateConversation();
+        }
+
+        return response;
       },
     };
 

@@ -684,22 +684,6 @@ getActionButtons: ({ attachment, updateOrigin, isCanvas }) => {
 
 On the wire and in `Attachment`, **`origin` is always a string** (for example a saved object ID). The same string is passed to your type’s **`resolve`** hook when the attachment is added or resynced. `updateOrigin` and `updateAttachmentOrigin` also take that string — not an object.
 
-#### Updating origin from outside attachment context
-
-If you need to update an attachment's origin from outside the `getActionButtons` context (e.g., from a different plugin or component that has the conversation and attachment IDs), you can use the `updateAttachmentOrigin` API from the `agentBuilder` plugin's start contract:
-
-```ts
-// In your plugin
-class MyPlugin {
-  start(core: CoreStart, { agentBuilder }: { agentBuilder: AgentBuilderPluginStart }) {
-    // Update an attachment's origin directly
-    await agentBuilder.updateAttachmentOrigin(conversationId, attachmentId, savedObjectId);
-  }
-}
-```
-
-This is useful when the save operation happens outside the attachment's UI, such as when a separate "Save to library" workflow completes asynchronously. It is your responsibility to pass the `conversationId` and `attachmentId` to your plugin when navigating away from the chat - how you do this is up to you (e.g., URL parameters, local storage, or other mechanisms).
-
 #### By-reference attachments with `resolve`
 
 The optional `resolve` hook in `AttachmentTypeDefinition` enables **by-reference attachment creation**: instead of providing inline `data`, the caller provides an `origin` string (e.g. a saved object ID), and the framework calls `resolve` once at add time to fetch and store the content.
@@ -775,62 +759,166 @@ const myAttachmentType: AttachmentTypeDefinition<'my_type', MyContent> = {
 
 Refer to [`AttachmentStaleCheckResult`](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/agent-builder/agent-builder-common/attachments/stale_check.ts) for the result types returned by the stale check API.
 
-#### Attachment lifecycle hook: onAttachmentMount
+## Chat integration and pending attachments
 
-The `onAttachmentMount` lifecycle hook allows you to run side effects when an attachment is mounted to a conversation, and clean them up when the attachment is removed.
+Plugins can integrate with the active chat surface (the embeddable sidebar and the full-page routed chat) through the `agentBuilder` start contract.
 
-**When to use `onAttachmentMount`:**
+This is useful when the surrounding application wants to attach page context only under specific conditions, and react when the active chat binds to a new or existing conversation.
 
-- Setting up subscriptions that should live for the duration of the attachment's presence in the conversation
-- Syncing attachment state with external systems
-- Any side effect that needs cleanup when the attachment is removed
+A **pending attachment** is a client-only attachment attached to the active conversation that has not yet been persisted to a round; it lives in the chat UI until the user submits the next message, at which point it is sent with that round and persisted.
 
-**Important:** This hook is called once per attachment (not per version). The framework tracks attachment presence at the conversation level, so you don't need to handle deduplication.
+Not every API on the start contract applies to both chat surfaces. Use this table to check scope before wiring something up:
 
-**Parameters:**
+| API                               | Sidebar | Full-page chat | Notes                                                              |
+| --------------------------------- | :-----: | :------------: | ------------------------------------------------------------------ |
+| `setChatConfig(...)`              |   ✅    |       ❌       | Configures the next (or active) sidebar open.                      |
+| `clearChatConfig()`               |   ✅    |       ❌       | Clears the runtime sidebar config.                                 |
+| `chatOpen$`                       |   ✅    |       ❌       | Tracks sidebar open state only.                                    |
+| `subscribeToConversationChanges(...)` |   ✅    |       ✅       | Fires for both sidebar and routed/full-page chat.                  |
+| `addAttachment(...)`              |   ✅    |       ❌       | Silently ignored when no sidebar is open.                          |
+| `updateAttachmentOrigin(...)`     |   ✅    |       ✅       | Conversation-scoped — works regardless of which surface is active. |
+
+### `setChatConfig(...)`
+
+> **Scope:** sidebar only.
+
+`setChatConfig(...)` configures the next sidebar open, or updates the active sidebar if it is already open.
+
+It supports the regular embeddable conversation props, including:
+
+- `newConversation` - force the sidebar to start a fresh conversation instead of restoring the persisted one
+- `attachments` - pre-populate the pending attachment list for the active sidebar conversation
+
+Use `clearChatConfig()` to remove that runtime configuration.
+
+#### `newConversation`
+
+Set `newConversation: true` when the sidebar must always bind to a fresh conversation:
 
 ```ts
-interface AttachmentLifecycleParams<TAttachment> {
-  /** The attachment instance */
-  attachment: TAttachment;
-  /** The conversation ID containing this attachment */
-  conversationId: string;
-  /** Whether the attachment is rendered in the sidebar context */
-  isSidebar: boolean;
+agentBuilder.setChatConfig({
+  newConversation: true,
+});
+```
+
+#### `attachments`
+
+Set `attachments` when you want the sidebar to open with one or more pending attachments already present:
+
+```ts
+agentBuilder.setChatConfig({
+  attachments: [
+    {
+      id: 'my-context',
+      type: 'my_type',
+      data: { ... },
+    },
+  ],
+});
+```
+
+### `chatOpen$`
+
+`chatOpen$` is an `Observable<boolean>` that emits `true` while the conversation sidebar is open and `false` otherwise. Use it to gate integrations so they only run while chat is actually present, and to tear them down cleanly when the sidebar closes.
+
+It is emitted from the `agentBuilder` start contract and is hot: new subscribers receive the current value immediately (it is backed by a `BehaviorSubject`).
+
+Typical usage combines `chatOpen$` with `subscribeToConversationChanges(...)`: activate the conversation subscription only while chat is open, and dispose of it when it closes.
+
+```ts
+import { combineLatest } from 'rxjs';
+
+const subscription = combineLatest([myAppActive$, agentBuilder.chatOpen$]).subscribe(
+  ([appActive, chatOpen]) => {
+    const shouldActivate = appActive && chatOpen;
+
+    if (shouldActivate && !unsubscribeConversationChanges) {
+      unsubscribeConversationChanges = agentBuilder.subscribeToConversationChanges(
+        ({ id, attachments }) => {
+          // react to the active conversation
+        }
+      );
+      return;
+    }
+
+    if (!shouldActivate && unsubscribeConversationChanges) {
+      unsubscribeConversationChanges();
+      unsubscribeConversationChanges = undefined;
+    }
+  }
+);
+```
+
+### `subscribeToConversationChanges(...)`
+
+Use `subscribeToConversationChanges(...)` when you need to react to the conversation currently bound to the active chat surface (both the embeddable sidebar and the full-page routed chat).
+
+The listener fires whenever that binding changes, and if a chat surface is already active it is called immediately with the latest binding.
+
+The payload is:
+
+- `id?: string` - the currently bound conversation id, or `undefined` when the chat is currently bound to a new conversation
+- `attachments?: VersionedAttachment[]` - existing attachments when the chat switches to an existing conversation
+
+```ts
+class MyPlugin {
+  private unsubscribeConversationChanges?: () => void;
+
+  start(core: CoreStart, { agentBuilder }: { agentBuilder: AgentBuilderPluginStart }) {
+    this.unsubscribeConversationChanges = agentBuilder.subscribeToConversationChanges(
+      ({ id, attachments }) => {
+        if (!id) {
+          agentBuilder.addAttachment({
+            id: 'my-pending-context',
+            type: 'my_type',
+            data: { ... },
+          });
+          return;
+        }
+
+        const hasMyAttachment = attachments?.some(
+          (attachment) => attachment.id === 'my-pending-context'
+        );
+
+        if (!hasMyAttachment) {
+          // Handle the switch away from the pending attachment in your plugin state.
+        }
+      }
+    );
+  }
+
+  stop() {
+    this.unsubscribeConversationChanges?.();
+  }
 }
 ```
 
-**Example: Syncing attachment origin when a dashboard is saved**
+### `addAttachment(...)`
 
-```tsx
-export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
-  getLabel: () => 'My attachment',
-  getIcon: () => 'document',
+> **Scope:** sidebar only. If no sidebar is open, the call is silently ignored.
 
-  onAttachmentMount: ({ attachment, conversationId }) => {
-    // Set up a subscription when the attachment is added
-    const subscription = someObservable$.subscribe((newValue) => {
-      if (newValue !== attachment.origin) {
-        // Update the attachment's origin using the plugin API
-        agentBuilder.updateAttachmentOrigin(conversationId, attachment.id, newValue);
-      }
-    });
+`addAttachment(...)` adds or updates a pending attachment in the active sidebar conversation.
 
-    // Return cleanup function - called when the attachment is removed from the conversation
-    return () => {
-      subscription.unsubscribe();
-    };
-  },
-
-  // ... other definition properties
-};
+```ts
+agentBuilder.addAttachment({
+  id: 'my-pending-context',
+  type: 'my_type',
+  data: { ... },
+  origin: 'saved-object-id',
+});
 ```
 
-**Cleanup behavior:**
+Pending attachments added through `agentBuilder.addAttachment(...)` can include an `origin` string, just like other attachment inputs sent to the Agent Builder APIs. Use this when your pending attachment already corresponds to a persistent resource (for example, a saved object-backed dashboard or visualization), and your attachment type expects `origin` to be present.
 
-- The cleanup function is called when the attachment is removed from the conversation
-- It's also called when the conversation component unmounts (e.g., navigating away)
-- If `onAttachmentMount` returns `undefined` or `void`, no cleanup is performed
+### `updateAttachmentOrigin(...)`
+
+Use `updateAttachmentOrigin(...)` when you need to update an attachment's `origin` from outside the attachment UI itself.
+
+```ts
+await agentBuilder.updateAttachmentOrigin(conversationId, attachmentId, savedObjectId);
+```
+
+This is useful when the save workflow completes somewhere else in your plugin, but you still know which conversation attachment should be linked to the newly created persistent resource.
 
 ## Registering skills
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Observable } from 'rxjs';
 import type { LensPublicSetup, LensPublicStart } from '@kbn/lens-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type {
@@ -32,7 +33,7 @@ import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-action
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { AttachmentInput, UpdateOriginResponse } from '@kbn/agent-builder-common/attachments';
 import type { EvalsPublicStart } from '@kbn/evals-plugin/public';
-import type { EmbeddableConversationProps } from './embeddable/types';
+import type { ConversationChangeHandler, EmbeddableConversationProps } from './embeddable/types';
 import type { OpenConversationSidebarOptions } from './sidebar/types';
 export interface ConversationSidebarRef {
   close(): void;
@@ -95,6 +96,10 @@ export interface AgentBuilderPluginStart {
    */
   events: EventsServiceStartContract;
   /**
+   * Emits whether the conversation sidebar is currently open.
+   */
+  chatOpen$: Observable<boolean>;
+  /**
    * Opens the conversation sidebar.
    *
    * @param options - Configuration options for the sidebar
@@ -120,6 +125,15 @@ export interface AgentBuilderPluginStart {
   toggleChat: (options?: OpenConversationSidebarOptions) => void;
   setChatConfig: (config: EmbeddableConversationProps) => void;
   clearChatConfig: () => void;
+  /**
+   * Subscribes to conversation changes from both the full chat app and sidebar.
+   * The listener is called whenever the active conversation changes.
+   * If a conversation is already active, the listener is called immediately with the current conversation.
+   *
+   * @param listener - Listener invoked when the conversation changes
+   * @returns Cleanup function that removes the listener
+   */
+  subscribeToConversationChanges: (listener: ConversationChangeHandler) => () => void;
   /**
    * Adds an attachment to the active conversation sidebar.
    * If no sidebar is open, the attachment is ignored.

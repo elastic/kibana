@@ -18,13 +18,17 @@ import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 import { useConversationActions } from './use_conversation_actions';
 import { queryKeys } from '../../query_keys';
 import { upsertAttachmentsIntoList } from './upsert_attachments_into_list';
+import type { ConversationChangeHandler } from '../../../embeddable/types';
+import { useNotifyConversationChange } from './use_notify_conversation_change';
 
 interface RoutedConversationsProviderProps {
   children: React.ReactNode;
+  onConversationChange?: ConversationChangeHandler;
 }
 
 export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderProps> = ({
   children,
+  onConversationChange,
 }) => {
   const queryClient = useQueryClient();
   const { conversationsService } = useAgentBuilderServices();
@@ -145,6 +149,12 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
       removeAttachment,
     ]
   );
+
+  useNotifyConversationChange({
+    conversationId,
+    conversationsService,
+    onConversationChange,
+  });
 
   return (
     <ConversationContext.Provider value={contextValue}>{children}</ConversationContext.Provider>

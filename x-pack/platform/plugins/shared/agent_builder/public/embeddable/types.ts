@@ -7,13 +7,28 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
-import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { AttachmentInput, VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { AgentBuilderInternalService } from '../services';
 
 export interface EmbeddableConversationDependencies {
   services: AgentBuilderInternalService;
   coreStart: CoreStart;
 }
+
+export interface EmbeddableConversationChange {
+  /**
+   * Active conversation id, if one already exists.
+   * Undefined means we're currently in a new conversation.
+   */
+  id?: string;
+  /**
+   * Existing attachments in the conversation we changed to.
+   * Only present when switching to an existing conversation (when id is defined).
+   */
+  attachments?: VersionedAttachment[];
+}
+
+export type ConversationChangeHandler = (conversation: EmbeddableConversationChange) => void;
 
 export interface EmbeddableConversationProps {
   /**
@@ -95,6 +110,12 @@ export interface EmbeddableConversationSidebarProps {
   onClose: () => void;
   ariaLabelledBy: string;
   /**
+   * Optional internal listener fired whenever the conversation changes.
+   * Used to publish conversation changes through the agent builder start contract.
+   * @internal
+   */
+  onConversationChange?: ConversationChangeHandler;
+  /**
    * Callback to register sidebar control methods.
    * Used internally to update sidebar props and clear browser API tools.
    * @internal
@@ -103,6 +124,7 @@ export interface EmbeddableConversationSidebarProps {
     updateProps: (props: EmbeddableConversationProps) => void;
     resetBrowserApiTools: () => void;
     addAttachment: (attachment: AttachmentInput) => void;
+    invalidateConversation: () => void;
   }) => void;
 }
 

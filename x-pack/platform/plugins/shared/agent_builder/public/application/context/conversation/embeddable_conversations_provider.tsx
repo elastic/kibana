@@ -20,6 +20,7 @@ import { upsertAttachmentsIntoList } from './upsert_attachments_into_list';
 import { AgentBuilderServicesContext } from '../agent_builder_services_context';
 import { SendMessageProvider } from '../send_message/send_message_context';
 import { useConversationActions } from './use_conversation_actions';
+import { useNotifyConversationChange } from './use_notify_conversation_change';
 import { usePersistedConversationId } from '../../hooks/use_persisted_conversation_id';
 import { AppLeaveContext } from '../app_leave_context';
 
@@ -37,6 +38,9 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
   // Track current props, starting with initial props
   const [currentProps, setCurrentProps] = useState<EmbeddableConversationProps>(contextProps);
 
+  // Refs to allow callbacks to access latest values
+  const invalidateConversationRef = useRef<(() => void) | null>(null);
+
   // Register callbacks to allow parent to update props and clear browserApiTools
   const onRegisterCallbacks = contextProps.onRegisterCallbacks;
   useEffect(() => {
@@ -50,6 +54,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
             ...prevProps,
             attachments: upsertAttachmentsIntoList(prevProps.attachments, [attachment]),
           })),
+        invalidateConversation: () => invalidateConversationRef.current?.(),
       });
     }
   }, [onRegisterCallbacks]);
@@ -148,6 +153,16 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     conversationsService: services.conversationsService,
     onConversationCreated,
     onDeleteConversation,
+  });
+
+  useEffect(() => {
+    invalidateConversationRef.current = conversationActions.invalidateConversation;
+  }, [conversationActions.invalidateConversation]);
+
+  useNotifyConversationChange({
+    conversationId,
+    conversationsService: services.conversationsService,
+    onConversationChange: contextProps.onConversationChange,
   });
 
   // Resets the {initialMessage} and {autoSendInitialMessage} flags after an initial message has been sent or set in the {ConversationInput} component

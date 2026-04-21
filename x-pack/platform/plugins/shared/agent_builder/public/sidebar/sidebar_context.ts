@@ -10,7 +10,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { AgentBuilderInternalService } from '../services';
 import type { OpenConversationSidebarOptions } from './types';
-import type { EmbeddableConversationProps } from '../embeddable/types';
+import type { ConversationChangeHandler, EmbeddableConversationProps } from '../embeddable/types';
 
 /**
  * Services set once at plugin start
@@ -35,10 +35,12 @@ export const setSidebarServices = (coreStart: CoreStart, services: AgentBuilderI
 export interface SidebarRuntimeContext {
   options: OpenConversationSidebarOptions;
   onClose?: () => void;
+  onConversationChange?: ConversationChangeHandler;
   onRegisterCallbacks?: (callbacks: {
     updateProps: (props: EmbeddableConversationProps) => void;
     resetBrowserApiTools: () => void;
     addAttachment: (attachment: AttachmentInput) => void;
+    invalidateConversation: () => void;
   }) => void;
 }
 
