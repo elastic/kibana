@@ -29,8 +29,15 @@ apiTest.describe(
       adminApiCredentials = await requestAuth.getApiKey('admin');
     });
 
-    apiTest.beforeEach(async ({ esClient, kbnClient }) => {
-      await kbnClient.savedObjects.cleanStandardList();
+    // The "returns false" assertion needs a guaranteed empty starting state. Instead of
+    // `cleanStandardList()` (a cluster-wide saved-object wipe that can break other suites
+    // sharing the deployment) we narrowly delete just the existing index patterns and the
+    // two test indices the suite reads from.
+    apiTest.beforeEach(async ({ esClient, apiServices }) => {
+      const { data: existing } = await apiServices.dataViews.getAll();
+      for (const dv of existing) {
+        await apiServices.dataViews.delete(dv.id);
+      }
       for (const index of ['metrics-test', 'logs-test']) {
         if (await esClient.indices.exists({ index })) {
           await esClient.indices.delete({ index });
@@ -45,9 +52,7 @@ apiTest.describe(
       createdIds = [];
     });
 
-    apiTest('returns false if no index patterns exist', async ({ apiClient, kbnClient }) => {
-      await kbnClient.savedObjects.cleanStandardList();
-
+    apiTest('returns false if no index patterns exist', async ({ apiClient }) => {
       const response = await apiClient.get(HAS_USER_INDEX_PATTERN_PATH, {
         headers: { ...INTERNAL_COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
         responseType: 'json',

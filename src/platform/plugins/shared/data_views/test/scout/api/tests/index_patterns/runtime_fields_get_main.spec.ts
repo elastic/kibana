@@ -80,7 +80,9 @@ apiTest.describe(
       expect(getResponse).toHaveStatusCode(200);
       expect(getResponse.body[SERVICE_KEY_LEGACY]).toBeDefined();
 
-      const field = getResponse.body.fields[0];
+      // The legacy endpoint returns the runtime field under a singular `field` key; the modern
+      // data-view endpoint uses `fields[0]` instead.
+      const field = getResponse.body.field;
       expect(typeof field).toBe('object');
       expect(field.name).toBe('runtimeFoo');
       expect(field.type).toBe('string');

@@ -84,8 +84,9 @@ apiTest.describe(
         }
       );
       expect(fooResponse).toHaveStatusCode(200);
-      // After overwriting, runtimeFoo should now be a number (long) rather than a string (keyword)
-      expect(fooResponse.body.fields[0].type).toBe('number');
+      // Legacy endpoint returns `body.field` (singular) rather than `body.fields[0]`.
+      // After overwriting, runtimeFoo should now be a number (long) rather than a string (keyword).
+      expect(fooResponse.body.field.type).toBe('number');
 
       const barResponse = await apiClient.get(
         `${DATA_VIEW_PATH_LEGACY}/${id}/runtime_field/runtimeBar`,
@@ -96,7 +97,7 @@ apiTest.describe(
       );
       expect(barResponse).toHaveStatusCode(200);
       // runtimeBar should be unaffected - still keyword (type string)
-      expect(barResponse.body.fields[0].type).toBe('string');
+      expect(barResponse.body.field.type).toBe('string');
     });
 
     apiTest('can add a new runtime field', async ({ apiClient }) => {
@@ -143,7 +144,8 @@ apiTest.describe(
 
       expect(getResponse).toHaveStatusCode(200);
       expect(getResponse.body[SERVICE_KEY_LEGACY]).toBeDefined();
-      expect(typeof getResponse.body.fields[0].runtimeField).toBe('object');
+      // Legacy endpoint returns `body.field` (singular) rather than `body.fields[0]`.
+      expect(typeof getResponse.body.field.runtimeField).toBe('object');
     });
   }
 );

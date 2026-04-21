@@ -89,7 +89,8 @@ apiTest.describe(
           expect(getResponse).toHaveStatusCode(200);
           expect(getResponse.body[SERVICE_KEY_LEGACY]).toBeDefined();
 
-          const field = getResponse.body.fields[0];
+          // Legacy endpoint returns `body.field` (singular) rather than `body.fields[0]`.
+          const field = getResponse.body.field;
           expect(field.type).toBe('string');
           expect(field.runtimeField.type).toBe('keyword');
           expect(field.runtimeField.script.source).toBe("doc['something_new'].value");
@@ -110,7 +111,8 @@ apiTest.describe(
           );
 
           expect(partialResponse).toHaveStatusCode(200);
-          expect(partialResponse.body.fields[0].runtimeField.script.source).toBe(
+          // Legacy endpoint returns `body.field` (singular) rather than `body.fields[0]`.
+          expect(partialResponse.body.field.runtimeField.script.source).toBe(
             "doc['partial_update'].value"
           );
         });

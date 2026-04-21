@@ -35,6 +35,8 @@ apiTest.describe(
         responseType: 'json',
         body: { [SERVICE_KEY_LEGACY]: { title: 'ba*ic_index' } },
       });
+      // Fail fast in setup so suite-level errors don't cascade as confusing assertion errors.
+      expect(createResponse).toHaveStatusCode(200);
       sharedIndexPatternId = createResponse.body[SERVICE_KEY_LEGACY].id;
     });
 

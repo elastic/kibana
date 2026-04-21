@@ -75,11 +75,21 @@ apiTest.describe(
   { tag: tags.deploymentAgnostic },
   () => {
     let viewerApiCredentials: RoleApiCredentials;
+    // Tracks the temporary index created by the "returns empty set" test so cleanup runs
+    // from a hook even if the test times out before reaching its inline cleanup.
+    let tempIndexName: string | undefined;
 
     apiTest.beforeAll(async ({ esArchiver, requestAuth }) => {
       // Route only reads field metadata, so `viewer` is sufficient.
       viewerApiCredentials = await requestAuth.getApiKey('viewer');
       await esArchiver.loadIfNeeded(ES_ARCHIVE_BASIC_INDEX);
+    });
+
+    apiTest.afterAll(async ({ esClient }) => {
+      if (tempIndexName) {
+        await esClient.indices.delete({ index: tempIndexName, ignore_unavailable: true });
+        tempIndexName = undefined;
+      }
     });
 
     apiTest('returns a flattened version of the fields in es', async ({ apiClient }) => {
@@ -321,31 +331,29 @@ apiTest.describe(
     apiTest(
       'returns empty set when no fields even if meta fields are supplied',
       async ({ apiClient, esClient }) => {
-        const indexName = 'fields-for-wildcard-000001';
+        // Unique per run so concurrent re-runs don't collide; cleanup happens in afterAll.
+        const indexName = `fields-for-wildcard-${Date.now()}`;
+        tempIndexName = indexName;
         await esClient.indices.create({ index: indexName });
 
-        try {
-          const params = new URLSearchParams();
-          params.append('pattern', indexName);
-          params.append('meta_fields', '_id');
-          params.append('meta_fields', '_index');
+        const params = new URLSearchParams();
+        params.append('pattern', indexName);
+        params.append('meta_fields', '_id');
+        params.append('meta_fields', '_index');
 
-          const response = await apiClient.get(`${FIELDS_FOR_WILDCARD_PATH}?${params.toString()}`, {
-            headers: {
-              ...INTERNAL_COMMON_HEADERS,
-              ...viewerApiCredentials.apiKeyHeader,
-            },
-            responseType: 'json',
-          });
+        const response = await apiClient.get(`${FIELDS_FOR_WILDCARD_PATH}?${params.toString()}`, {
+          headers: {
+            ...INTERNAL_COMMON_HEADERS,
+            ...viewerApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+        });
 
-          expect(response).toHaveStatusCode(200);
-          expect(response.body).toStrictEqual({
-            fields: [],
-            indices: [indexName],
-          });
-        } finally {
-          await esClient.indices.delete({ index: indexName, ignore_unavailable: true });
-        }
+        expect(response).toHaveStatusCode(200);
+        expect(response.body).toStrictEqual({
+          fields: [],
+          indices: [indexName],
+        });
       }
     );
   }

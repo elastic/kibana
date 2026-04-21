@@ -49,6 +49,8 @@ apiTest.describe('data views integration (data view api)', { tag: tags.deploymen
 
       expect(createResponse).toHaveStatusCode(200);
       const id = createResponse.body[SERVICE_KEY].id;
+      // Track immediately so cleanup runs even if the test fails before the recreate step.
+      createdIds.push(id);
 
       const runtimeFieldResponse = await apiClient.post(`${DATA_VIEW_PATH}/${id}/runtime_field`, {
         headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
@@ -126,7 +128,7 @@ apiTest.describe('data views integration (data view api)', { tag: tags.deploymen
 
       expect(recreateResponse).toHaveStatusCode(200);
       const recreatedDataView = recreateResponse.body[SERVICE_KEY];
-      createdIds.push(recreatedDataView.id);
+      // `override: true` reuses the same id, so the original push above already covers cleanup.
 
       // The retrieved object should be transient, so a clone re-created from it should
       // match the original (ignoring `version`/`namespaces` which are assigned server-side).

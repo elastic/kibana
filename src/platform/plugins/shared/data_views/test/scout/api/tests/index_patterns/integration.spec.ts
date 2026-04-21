@@ -52,6 +52,8 @@ apiTest.describe(
 
         expect(createResponse).toHaveStatusCode(200);
         const id = createResponse.body[SERVICE_KEY_LEGACY].id;
+        // Track immediately so cleanup runs even if the test fails before the recreate step.
+        createdIds.push(id);
 
         const runtimeFieldResponse = await apiClient.post(
           `${DATA_VIEW_PATH_LEGACY}/${id}/runtime_field`,
@@ -134,7 +136,7 @@ apiTest.describe(
 
         expect(recreateResponse).toHaveStatusCode(200);
         const recreatedIndexPattern = recreateResponse.body[SERVICE_KEY_LEGACY];
-        createdIds.push(recreatedIndexPattern.id);
+        // `override: true` reuses the same id, so the original push above already covers cleanup.
 
         // The retrieved object should be transient, so a clone re-created from it should
         // match the original (ignoring `version`/`namespaces` which are assigned server-side).

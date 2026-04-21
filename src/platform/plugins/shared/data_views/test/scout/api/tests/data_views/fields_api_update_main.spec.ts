@@ -35,6 +35,8 @@ apiTest.describe(
         responseType: 'json',
         body: { [SERVICE_KEY]: { title: 'ba*ic_index' } },
       });
+      // Fail fast in setup so suite-level errors don't cascade as confusing assertion errors.
+      expect(createResponse).toHaveStatusCode(200);
       sharedDataViewId = createResponse.body[SERVICE_KEY].id;
     });
 

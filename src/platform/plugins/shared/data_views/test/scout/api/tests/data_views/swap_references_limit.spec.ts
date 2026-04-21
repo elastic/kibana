@@ -37,6 +37,8 @@ apiTest.describe(
         responseType: 'json',
         body: { [SERVICE_KEY]: { title: 'logs-*' } },
       });
+      // Fail fast in setup so suite-level errors don't cascade as confusing assertion errors.
+      expect(createResponse).toHaveStatusCode(200);
       dataViewId = createResponse.body[SERVICE_KEY].id;
     });
 
