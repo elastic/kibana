@@ -344,7 +344,7 @@ export const BareNote = NoteCreatedAndUpdatedMetadata.merge(
      */
     note: z.string().nullable().optional(),
     /**
-     * The `savedObjectId` of the Timeline this note belongs to (not the note's own id).
+     * The `savedObjectId` of the Timeline this note belongs to (not the note's own ID).
      */
     timelineId: z.string(),
   })

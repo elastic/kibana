@@ -34,13 +34,13 @@ export type AssociatedFilterTypeEnum = typeof AssociatedFilterType.enum;
 export const AssociatedFilterTypeEnum = AssociatedFilterType.enum;
 
 /**
- * One document id or an array of ids (Elasticsearch `_id` of the event).
+ * One document ID or an array of IDs (Elasticsearch `_id` of the event).
  */
 export type DocumentIds = z.infer<typeof DocumentIds>;
 export const DocumentIds = z.union([z.array(z.string()), z.string()]);
 
 /**
- * One Timeline saved object id or an array of ids.
+ * One Timeline saved object ID or an array of IDs.
  */
 export type SavedObjectIds = z.infer<typeof SavedObjectIds>;
 export const SavedObjectIds = z.union([z.array(z.string()), z.string()]);

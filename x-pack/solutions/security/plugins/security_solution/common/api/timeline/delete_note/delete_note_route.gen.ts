@@ -21,7 +21,7 @@ export const DeleteNoteRequestBody = z.union([
   z
     .object({
       /**
-       * Saved object id of the note to delete.
+       * Saved object ID of the note to delete.
        */
       noteId: z.string(),
     })
@@ -29,7 +29,7 @@ export const DeleteNoteRequestBody = z.union([
   z
     .object({
       /**
-       * Saved object ids of the notes to delete.
+       * Saved object IDs of the notes to delete.
        */
       noteIds: z.array(z.string()).nullable(),
     })

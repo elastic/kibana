@@ -85,7 +85,7 @@ const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
       .send(props.body as object);
   },
   /**
-      * Deletes notes by saved object id. Send either `noteId` (single id) or `noteIds` (array of ids) in the JSON body.
+      * Deletes notes by saved object ID. Send either `noteId` (single ID) or `noteIds` (array of IDs) in the JSON body.
 
 The response has HTTP 200 with an empty body on success.
 
@@ -228,9 +228,9 @@ Requires the **Timeline and Notes** read privilege (`notes_read`).
   /**
       * Creates a new note or updates an existing one.
 
-**Create:** Send `note` as a `BareNote` (required fields include `timelineId`). Omit `noteId` to create a new saved object.
+**Create:** Send `note` and omit `noteId` to create a new saved object.
 
-**Update:** Send `note` with the changed fields and set `noteId` to the note's saved object id. Optionally include `version` for optimistic concurrency when the client has it from a prior read.
+**Update:** Send `note` with the changed fields and set `noteId` to the note's saved object ID. Optionally include `version` for optimistic concurrency when the client has it from a prior read.
 
 Requires the **Timeline and Notes** write privilege (`notes_write`).
 
