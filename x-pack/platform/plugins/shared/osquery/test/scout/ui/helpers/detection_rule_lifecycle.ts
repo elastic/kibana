@@ -10,6 +10,9 @@ import { OSQUERY_API_VERSION } from '../../common/constants';
 
 const unique = () => `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
+const detectionEngineBasePath = (spaceId?: string) =>
+  spaceId && spaceId !== 'default' ? `/s/${spaceId}/api/detection_engine` : '/api/detection_engine';
+
 const INVESTIGATION_GUIDE_NOTE =
   `!{osquery{"query":"SELECT * FROM os_version where name='{{host.os.name}}';","label":"Get processes","ecs_mapping":{"host.os.platform":{"field":"platform"}}}}\n\n` +
   `!{osquery{"query":"select * from users;","label":"Get users"}}`;
@@ -107,11 +110,12 @@ export const buildOsqueryAlertTestRule = (options: {
 
 export const createDetectionRule = async (
   kbnClient: KbnClient,
-  body: Record<string, unknown>
+  body: Record<string, unknown>,
+  spaceId?: string
 ): Promise<{ id: string; name: string }> => {
   const { data } = await kbnClient.request<{ id: string; name: string }>({
     method: 'POST',
-    path: '/api/detection_engine/rules',
+    path: `${detectionEngineBasePath(spaceId)}/rules`,
     headers: { 'elastic-api-version': OSQUERY_API_VERSION },
     body,
   });
@@ -119,10 +123,14 @@ export const createDetectionRule = async (
   return data;
 };
 
-export const deleteDetectionRule = async (kbnClient: KbnClient, ruleId: string): Promise<void> => {
+export const deleteDetectionRule = async (
+  kbnClient: KbnClient,
+  ruleId: string,
+  spaceId?: string
+): Promise<void> => {
   await kbnClient.request({
     method: 'DELETE',
-    path: `/api/detection_engine/rules?id=${ruleId}`,
+    path: `${detectionEngineBasePath(spaceId)}/rules?id=${ruleId}`,
     headers: { 'elastic-api-version': OSQUERY_API_VERSION },
     ignoreErrors: [404],
   });

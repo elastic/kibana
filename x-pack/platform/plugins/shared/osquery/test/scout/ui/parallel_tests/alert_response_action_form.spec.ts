@@ -83,7 +83,7 @@ test.describe('Pack-based Osquery response actions in the rule editor', { tag: l
 
     const savePromise = page.waitForResponse(
       (resp) =>
-        resp.url().includes('/api/detection_engine/rules') && resp.request().method() === 'PUT',
+        resp.url().includes('detection_engine/rules') && resp.request().method() === 'PUT',
       { timeout: 60_000 }
     );
 
@@ -114,7 +114,7 @@ test.describe('Pack-based Osquery response actions in the rule editor', { tag: l
 
     const secondSavePromise = page.waitForResponse(
       (resp) =>
-        resp.url().includes('/api/detection_engine/rules') && resp.request().method() === 'PUT',
+        resp.url().includes('detection_engine/rules') && resp.request().method() === 'PUT',
       { timeout: 60_000 }
     );
 

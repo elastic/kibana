@@ -20,13 +20,12 @@ test.describe('Inventory host Osquery tab', { tag: statefulLocalOnly }, () => {
     browserAuth,
     page,
     pageObjects,
-    scoutSpace,
   }) => {
     test.setTimeout(300_000);
     await browserAuth.loginAsAdmin();
 
     const hostname = 'scout-osquery-agent-0';
-    await pageObjects.osqueryInventoryHostOsquery.gotoHostOsqueryTab(scoutSpace.id, hostname);
+    await pageObjects.osqueryInventoryHostOsquery.gotoHostOsqueryTab('default', hostname);
     await pageObjects.osqueryInventoryHostOsquery.submitSimpleEmbeddedQuery('select * from uptime limit 1;');
 
     await expect(page.testSubj.locator('osqueryResultsTable')).toBeVisible({ timeout: 180_000 });

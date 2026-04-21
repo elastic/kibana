@@ -13,7 +13,10 @@ const OSQUERY_UI_GLOBAL_SETUP_TIMEOUT_MS = 600_000;
 
 const baseConfig = createPlaywrightConfig({
   testDir: './parallel_tests',
-  workers: 2,
+  // Osquery Scout UI targets the default Kibana space (Fleet + agents from global setup). A single
+  // worker avoids parallel tests mutating the same saved objects and Chrome sessions. Revisit raising
+  // this only if tests gain strong isolation (unique names alone are not enough for Fleet-backed flows).
+  workers: 1,
   runGlobalSetup: true,
 });
 
