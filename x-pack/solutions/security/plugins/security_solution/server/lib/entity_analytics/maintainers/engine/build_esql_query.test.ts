@@ -101,6 +101,9 @@ describe('buildEsqlQuery', () => {
     it('does NOT include host ID filter when targetEntityType is user', () => {
       const query = buildEsqlQuery(commWithUserConfig, 'default');
       expect(query).toContain('communicates_with');
+      // host ID filter line should not be present for user targets
+      // The host filter would be "AND (`host.id` IS NOT NULL..." on a new line after userIdFilter
+      expect(query).not.toMatch(/AND \(`host\.(id|name|hostname)`/);
     });
 
     it('uses targetEvalOverride when provided', () => {

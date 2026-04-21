@@ -20,7 +20,7 @@ function buildAccessesEsql(config: RelationshipIntegrationConfig, namespace: str
   const userIdFilter = euid.esql.getEuidDocumentsContainsIdFilter('user');
   const hostIdFilter = euid.esql.getEuidDocumentsContainsIdFilter('host');
   const actorEval = config.actorEvalOverride ?? euid.esql.getEuidEvaluation('user', { withTypeId: true });
-  const targetEval = config.targetEvalOverride ?? euid.esql.getEuidEvaluation('host', { withTypeId: true });
+  const targetEval = config.targetEvalOverride ?? euid.esql.getEuidEvaluation(config.targetEntityType, { withTypeId: true });
   const threshold = config.frequencyThreshold ?? DEFAULT_FREQUENCY_THRESHOLD;
   const additionalTargetFilter = config.additionalTargetFilter ? `\n    ${config.additionalTargetFilter}` : '';
 
@@ -61,10 +61,7 @@ function buildCommunicatesWithEsql(config: RelationshipIntegrationConfig, namesp
 
   const actorEval = config.actorEvalOverride ?? euid.esql.getEuidEvaluation('user', { withTypeId: true });
 
-  const defaultTargetEval =
-    config.targetEntityType === 'host'
-      ? euid.esql.getEuidEvaluation('host', { withTypeId: true })
-      : euid.esql.getEuidEvaluation('user', { withTypeId: true });
+  const defaultTargetEval = euid.esql.getEuidEvaluation(config.targetEntityType, { withTypeId: true });
 
   const targetEval = config.targetEvalOverride ?? defaultTargetEval;
   const additionalTargetFilter = config.additionalTargetFilter ? `\n    ${config.additionalTargetFilter}` : '';
