@@ -15,6 +15,7 @@ import { registerFeaturePrivileges } from '../lib/security/privileges';
 import { TaskDefinition } from '../lib/services/task_run_scope_service/create_task_runner';
 import { registerSavedObjects } from '../saved_objects';
 import { dispatcherUiSettings } from '../lib/dispatcher/ui_settings';
+import { experimentalFeaturesUiSettings } from '../ui_settings/experimental_features_setting';
 import { EsServiceInternalToken } from '../lib/services/es_service/tokens';
 import { registerProposedChangeAttachmentType } from '../agent_builder/proposed_change_attachment';
 import { registerAlertingV2Tools } from '../agent_builder/register_tools';
@@ -48,7 +49,9 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
       alertingVTwo: {},
     }));
 
-    container.get(CoreSetup('uiSettings')).registerGlobal(dispatcherUiSettings);
+    container
+      .get(CoreSetup('uiSettings'))
+      .registerGlobal({ ...dispatcherUiSettings, ...experimentalFeaturesUiSettings });
 
     // Trigger task registration via onActivation callbacks
     container.getAll(TaskDefinition);

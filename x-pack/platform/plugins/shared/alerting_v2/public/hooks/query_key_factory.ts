@@ -45,10 +45,6 @@ export const ruleDoctorExecutionKeys = {
   lists: () => [...ruleDoctorExecutionKeys.all, 'list'] as const,
 };
 
-export const ruleDoctorSettingsKeys = {
-  all: ['ruleDoctorSettings'] as const,
-};
-
 export const notificationPolicyKeys = {
   all: ['notificationPolicy'] as const,
   detail: (id: string) => [...notificationPolicyKeys.all, 'detail', id] as const,

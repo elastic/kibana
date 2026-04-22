@@ -37,6 +37,12 @@ const DEFAULT_TYPE_COLOR = '#95A5A6';
 
 const getTypeColor = (type: string): string => TYPE_COLORS[type] ?? DEFAULT_TYPE_COLOR;
 
+const IMPACT_BADGE: Record<string, { color: 'danger' | 'warning' | 'default'; label: string }> = {
+  high: { color: 'danger', label: 'High impact' },
+  medium: { color: 'warning', label: 'Medium impact' },
+  low: { color: 'default', label: 'Low impact' },
+};
+
 const formatTypeName = (type: string): string =>
   type
     .split('_')
@@ -121,6 +127,11 @@ export const FindingCard: React.FC<FindingCardProps> = ({ finding, analyzedAt, s
       <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiBadge color={typeColor}>{formatTypeName(finding.type)}</EuiBadge>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiBadge color={IMPACT_BADGE[finding.impact]?.color ?? 'default'}>
+            {IMPACT_BADGE[finding.impact]?.label ?? finding.impact}
+          </EuiBadge>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText size="s">

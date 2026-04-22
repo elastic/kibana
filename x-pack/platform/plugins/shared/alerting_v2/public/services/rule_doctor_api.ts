@@ -16,7 +16,7 @@ export interface FindingDoc {
   status: string;
   type: string;
   action: string;
-  risk: 'low' | 'medium' | 'high';
+  impact: 'low' | 'medium' | 'high';
   confidence: 'low' | 'medium' | 'high';
   summary: string;
   explanation: string;
@@ -45,13 +45,6 @@ export interface ExecutionSummary {
 
 export interface ListExecutionsResponse {
   executions: ExecutionSummary[];
-}
-
-export interface RuleDoctorSettings {
-  scheduleEnabled: boolean;
-  scheduleType: 'interval' | 'rrule';
-  interval?: string;
-  rrule?: Record<string, unknown>;
 }
 
 @injectable()
@@ -100,15 +93,4 @@ export class RuleDoctorApi {
     );
   }
 
-  public async getSettings(): Promise<RuleDoctorSettings> {
-    return this.http.get<RuleDoctorSettings>(
-      '/internal/alerting/v2/rule_doctor/settings'
-    );
-  }
-
-  public async enableRuleDoctor(): Promise<{ enabled: boolean; spaceId: string }> {
-    return this.http.post<{ enabled: boolean; spaceId: string }>(
-      '/internal/alerting/v2/rule_doctor/_enable'
-    );
-  }
 }

@@ -39,11 +39,8 @@ import { DeleteNotificationPolicyRoute } from '../routes/notification_policies/d
 import { MatcherValueSuggestionsRoute } from '../routes/suggestions/matcher_value_suggestions_route';
 import { MatcherDataFieldsRoute } from '../routes/suggestions/matcher_data_fields_route';
 import { NotificationPolicyTagsRoute } from '../routes/suggestions/notification_policy_tags_route';
-import { EnableRuleDoctorRoute } from '../routes/rule_doctor/enable_rule_doctor_route';
 import { RunRuleDoctorRoute } from '../routes/rule_doctor/run_rule_doctor_route';
 import { SeedRulesRoute } from '../routes/rule_doctor/seed_rules_route';
-import { GetRuleDoctorSettingsRoute } from '../routes/rule_doctor/get_settings_route';
-import { UpdateRuleDoctorSettingsRoute } from '../routes/rule_doctor/update_settings_route';
 import { ListRuleDoctorExecutionsRoute } from '../routes/rule_doctor/list_executions_route';
 import { StreamExecutionsRoute } from '../routes/rule_doctor/stream_executions_route';
 import { GetRuleDoctorExecutionRoute } from '../routes/rule_doctor/get_execution_route';
@@ -84,11 +81,8 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(MatcherValueSuggestionsRoute);
   bind(Route).toConstantValue(MatcherDataFieldsRoute);
   bind(Route).toConstantValue(NotificationPolicyTagsRoute);
-  bind(Route).toConstantValue(EnableRuleDoctorRoute);
   bind(Route).toConstantValue(RunRuleDoctorRoute);
   bind(Route).toConstantValue(SeedRulesRoute);
-  bind(Route).toConstantValue(GetRuleDoctorSettingsRoute);
-  bind(Route).toConstantValue(UpdateRuleDoctorSettingsRoute);
   bind(Route).toConstantValue(ListRuleDoctorExecutionsRoute);
   bind(Route).toConstantValue(StreamExecutionsRoute);
   bind(Route).toConstantValue(GetRuleDoctorExecutionRoute);

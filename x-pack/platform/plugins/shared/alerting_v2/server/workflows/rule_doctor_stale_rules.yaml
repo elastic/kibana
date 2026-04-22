@@ -83,7 +83,7 @@ steps:
                 action:
                   type: string
                   enum: [disable, delete, re_enable_and_tune]
-                risk:
+                impact:
                   type: string
                   enum: [low, medium, high]
                 confidence:
@@ -119,7 +119,7 @@ steps:
                     required: [field, previousValue, proposedValue]
                 explanation:
                   type: string
-              required: [id, type, action, risk, confidence, summary, ruleIds, explanation, details, proposed, diffs]
+              required: [id, type, action, impact, confidence, summary, ruleIds, explanation, details, proposed, diffs]
         required: [findings]
     timeout: 300s
 
@@ -333,7 +333,7 @@ steps:
             status: 'open'
             type: '${{ foreach.item.meta.type }}'
             action: '${{ foreach.item.meta.action }}'
-            risk: '${{ foreach.item.meta.risk }}'
+            impact: '${{ foreach.item.meta.impact }}'
             confidence: '${{ foreach.item.meta.confidence }}'
             summary: '${{ foreach.item.meta.summary }}'
             explanation: '${{ foreach.item.meta.explanation }}'

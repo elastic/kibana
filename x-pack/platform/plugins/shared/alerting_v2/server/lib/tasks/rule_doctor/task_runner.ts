@@ -7,7 +7,7 @@
 
 import { Logger as PluginLogger, PluginStart } from '@kbn/core-di';
 import { Request } from '@kbn/core-di-server';
-import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { RunContext, RunResult } from '@kbn/task-manager-plugin/server/task';
 import { inject, injectable } from 'inversify';
@@ -16,16 +16,11 @@ import type { RulesSavedObjectServiceContract } from '../../services/rules_saved
 import { transformRuleSoAttributesToRuleApiResponse } from '../../rules_client/utils';
 import { RuleDoctorWorkflowServiceToken } from '../../../workflows/tokens';
 import type { RuleDoctorWorkflowService } from '../../../workflows/rule_doctor_workflow';
-import {
-  RuleDoctorSettingsSavedObjectsClientToken,
-  RULE_DOCTOR_SETTINGS_SO_ID,
-  DEFAULT_RULE_DOCTOR_SETTINGS,
-} from '../../rule_doctor_settings';
-import type { RuleDoctorSettings } from '../../rule_doctor_settings';
 import type { AlertingServerStartDependencies } from '../../../types';
-import { RULE_DOCTOR_SETTINGS_SAVED_OBJECT_TYPE } from '../../../saved_objects';
-import { settingsToSchedule } from './schedule_task';
-import { RULE_DOCTOR_DEFAULT_INTERVAL } from './task_definition';
+import {
+  RuleDoctorSettingsProviderToken,
+  type RuleDoctorSettingsProvider,
+} from './task_definition';
 
 interface RuleDoctorTaskState {
   runs: number;
@@ -46,8 +41,8 @@ export class RuleDoctorTaskRunner {
     private readonly spaces: SpacesPluginStart,
     @inject(RuleDoctorWorkflowServiceToken)
     private readonly ruleDoctorService: RuleDoctorWorkflowService,
-    @inject(RuleDoctorSettingsSavedObjectsClientToken)
-    private readonly soClient: SavedObjectsClientContract
+    @inject(RuleDoctorSettingsProviderToken)
+    private readonly settingsProvider: RuleDoctorSettingsProvider
   ) {}
 
   public async run({ taskInstance }: TaskRunParams): Promise<RunResult> {
@@ -55,6 +50,8 @@ export class RuleDoctorTaskRunner {
     const runs = (state.runs ?? 0) + 1;
     let lastExecutionIds: string[] = state.lastExecutionIds ?? [];
     const spaceId = (taskInstance.params as { spaceId?: string }).spaceId ?? 'default';
+
+    const { intervalHours, continuous } = await this.loadSettings();
 
     try {
       const namespace = this.spaces.spacesService.spaceIdToNamespace(spaceId);
@@ -84,24 +81,24 @@ export class RuleDoctorTaskRunner {
       );
     }
 
-    const settings = await this.loadSettings();
-    const schedule = settingsToSchedule(settings);
+    if (!continuous) {
+      this.logger.info('Rule Doctor continuous mode is off; not rescheduling.');
+      return {
+        state: { runs, lastExecutionId: lastExecutionIds[0] ?? null, lastExecutionIds },
+      };
+    }
 
     return {
       state: { runs, lastExecutionId: lastExecutionIds[0] ?? null, lastExecutionIds },
-      schedule,
+      schedule: { interval: `${intervalHours}h` },
     };
   }
 
-  private async loadSettings(): Promise<RuleDoctorSettings> {
+  private async loadSettings(): Promise<{ intervalHours: number; continuous: boolean }> {
     try {
-      const so = await this.soClient.get<RuleDoctorSettings>(
-        RULE_DOCTOR_SETTINGS_SAVED_OBJECT_TYPE,
-        RULE_DOCTOR_SETTINGS_SO_ID
-      );
-      return so.attributes;
+      return await this.settingsProvider();
     } catch {
-      return { ...DEFAULT_RULE_DOCTOR_SETTINGS, interval: RULE_DOCTOR_DEFAULT_INTERVAL };
+      return { intervalHours: 24, continuous: false };
     }
   }
 }

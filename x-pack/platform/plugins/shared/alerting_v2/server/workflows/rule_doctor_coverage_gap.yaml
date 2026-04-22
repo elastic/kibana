@@ -101,7 +101,7 @@ steps:
                   items:
                     type: string
                   description: IDs of existing rules that highlight this gap
-                risk:
+                impact:
                   type: string
                   enum: [low, medium, high]
                 confidence:
@@ -110,7 +110,7 @@ steps:
                 explanation:
                   type: string
                   description: Why this gap matters
-              required: [id, summary, missingDimension, suggestedIndexPattern, suggestedMetric, relatedRuleIds, risk, confidence, explanation]
+              required: [id, summary, missingDimension, suggestedIndexPattern, suggestedMetric, relatedRuleIds, impact, confidence, explanation]
         required: [gaps]
     timeout: 180s
 
@@ -167,7 +167,7 @@ steps:
             Also include finding metadata:
             - `type`: "coverage_gap"
             - `action`: "create"
-            - `risk`: "{{ foreach.item.risk }}"
+            - `impact`: "{{ foreach.item.impact }}"
             - `confidence`: "{{ foreach.item.confidence }}"
             - `summary`: "{{ foreach.item.summary }}"
             - `explanation`: "{{ foreach.item.explanation }}"
@@ -194,7 +194,7 @@ steps:
                     action:
                       type: string
                       enum: [create]
-                    risk:
+                    impact:
                       type: string
                       enum: [low, medium, high]
                     confidence:
@@ -217,7 +217,7 @@ steps:
                         type: object
                     explanation:
                       type: string
-                  required: [id, type, action, risk, confidence, summary, ruleIds, details, proposed, diffs, explanation]
+                  required: [id, type, action, impact, confidence, summary, ruleIds, details, proposed, diffs, explanation]
             required: [findings]
         timeout: 120s
 
@@ -436,7 +436,7 @@ steps:
             status: 'open'
             type: '${{ foreach.item.meta.type }}'
             action: '${{ foreach.item.meta.action }}'
-            risk: '${{ foreach.item.meta.risk }}'
+            impact: '${{ foreach.item.meta.impact }}'
             confidence: '${{ foreach.item.meta.confidence }}'
             summary: '${{ foreach.item.meta.summary }}'
             explanation: '${{ foreach.item.meta.explanation }}'

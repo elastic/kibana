@@ -31,7 +31,7 @@
       "share"
     ],
     "optionalPlugins": ["usageCollection", "agentBuilder", "inference"],
-    "requiredBundles": ["alerting", "kibanaReact", "esUiShared"],
+    "requiredBundles": ["alerting", "kibanaReact"],
     "extraPublicDirs": []
   }
 }

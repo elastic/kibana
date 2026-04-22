@@ -77,7 +77,21 @@ export class ListRuleDoctorFindingsRoute extends BaseAlertingRoute {
     const response = await this.esClient.search({
       index: RULE_DOCTOR_FINDINGS_INDEX,
       size: 100,
-      sort: [{ '@timestamp': { order: 'desc' } }],
+      sort: [
+        {
+          _script: {
+            type: 'number',
+            order: 'desc',
+            script: {
+              lang: 'painless',
+              source:
+                "doc['impact'].size()==0 ? 0 : params.order.getOrDefault(doc['impact'].value, 0)",
+              params: { order: { high: 3, medium: 2, low: 1 } },
+            },
+          },
+        },
+        { '@timestamp': { order: 'desc' } },
+      ],
       query: {
         bool: {
           filter: [{ term: { status } }, { term: { space_id: spaceId } }],

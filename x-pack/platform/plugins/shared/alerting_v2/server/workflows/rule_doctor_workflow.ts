@@ -225,7 +225,7 @@ export interface RuleDoctorFinding {
   id: string;
   type: string;
   action: string;
-  risk: 'low' | 'medium' | 'high';
+  impact: 'low' | 'medium' | 'high';
   confidence: 'low' | 'medium' | 'high';
   summary: string;
   ruleIds: string[];

@@ -31,7 +31,7 @@ const toFinding = (doc: FindingDoc): RuleDoctorFinding => ({
   id: doc.finding_id,
   type: doc.type,
   action: doc.action,
-  risk: doc.risk,
+  impact: doc.impact,
   confidence: doc.confidence,
   summary: doc.summary,
   explanation: doc.explanation,

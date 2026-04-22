@@ -8,21 +8,15 @@
 import React, { useCallback, useState } from 'react';
 import {
   EuiButton,
-  EuiButtonIcon,
-  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner,
   EuiPageHeader,
   EuiSpacer,
 } from '@elastic/eui';
-import { useHistory } from 'react-router-dom';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { OverviewTab } from './overview_tab';
 import { ExecutionsTab } from './executions_tab';
-import { useFetchRuleDoctorSettings } from '../../hooks/use_fetch_rule_doctor_settings';
-import { useEnableRuleDoctor } from '../../hooks/use_enable_rule_doctor';
 import { useRunAnalysis } from '../../hooks/use_run_analysis';
 import { useExecutionStream } from '../../hooks/use_execution_stream';
 
@@ -30,12 +24,9 @@ type TabId = 'overview' | 'executions';
 
 export const RuleDoctorPage = () => {
   const http = useService(CoreStart('http'));
-  const history = useHistory();
   const [activeTab, setActiveTab] = useState<TabId>('overview');
   const [seedState, setSeedState] = useState<'idle' | 'seeding' | 'done' | 'error'>('idle');
 
-  const { data: settings, isLoading: isLoadingSettings } = useFetchRuleDoctorSettings();
-  const enableMutation = useEnableRuleDoctor();
   const runAnalysisMutation = useRunAnalysis();
   const executionStream = useExecutionStream();
 
@@ -62,48 +53,6 @@ export const RuleDoctorPage = () => {
     setActiveTab('executions');
   }, []);
 
-  if (isLoadingSettings) {
-    return <EuiLoadingSpinner size="xl" />;
-  }
-
-  const isEnabled = settings?.scheduleEnabled === true;
-
-  if (!isEnabled) {
-    return (
-      <EuiEmptyPrompt
-        iconType="inspect"
-        title={
-          <h2>
-            {i18n.translate('xpack.alertingV2.ruleDoctor.enablePromptTitle', {
-              defaultMessage: 'Enable Rule Doctor',
-            })}
-          </h2>
-        }
-        body={
-          <p>
-            {i18n.translate('xpack.alertingV2.ruleDoctor.enablePromptBody', {
-              defaultMessage:
-                'Rule Doctor provides AI-powered analysis of your rules to detect duplicates, threshold drift, coverage gaps, and stale configurations. Enable it for this space to get started.',
-            })}
-          </p>
-        }
-        actions={[
-          <EuiButton
-            fill
-            color="primary"
-            onClick={() => enableMutation.mutate()}
-            isLoading={enableMutation.isLoading}
-            key="enable"
-          >
-            {i18n.translate('xpack.alertingV2.ruleDoctor.enableButton', {
-              defaultMessage: 'Enable Rule Doctor',
-            })}
-          </EuiButton>,
-        ]}
-      />
-    );
-  }
-
   return (
     <>
       <EuiPageHeader
@@ -116,17 +65,6 @@ export const RuleDoctorPage = () => {
         })}
         rightSideItems={[
           <EuiFlexGroup gutterSize="s" alignItems="center" key="actions">
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                display="base"
-                iconType="gear"
-                size="m"
-                aria-label={i18n.translate('xpack.alertingV2.ruleDoctor.settingsButton', {
-                  defaultMessage: 'Rule Doctor settings',
-                })}
-                onClick={() => history.push('/doctor/settings')}
-              />
-            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
                 size="s"

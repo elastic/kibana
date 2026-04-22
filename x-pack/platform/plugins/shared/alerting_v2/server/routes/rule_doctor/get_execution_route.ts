@@ -24,7 +24,7 @@ const findingSchema = z.object({
   id: z.string(),
   type: z.string(),
   action: z.string(),
-  risk: z.enum(['low', 'medium', 'high']),
+  impact: z.enum(['low', 'medium', 'high']),
   confidence: z.enum(['low', 'medium', 'high']),
   summary: z.string(),
   ruleIds: z.array(z.string()),

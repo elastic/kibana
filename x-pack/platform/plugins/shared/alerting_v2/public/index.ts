@@ -23,6 +23,7 @@ import {
   ALERTING_V2_EPISODES_APP_ID,
   ALERTING_V2_RULE_DOCTOR_APP_ID,
 } from './constants';
+import { ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID } from '../common/experimental_features';
 import { NotificationPoliciesApi } from './services/notification_policies_api';
 import { RulesApi } from './services/rules_api';
 import { RuleDoctorApi } from './services/rule_doctor_api';
@@ -129,7 +130,7 @@ export const module = new ContainerModule(({ bind }) => {
       },
     });
 
-    alertingV2Section.registerApp({
+    const ruleDoctorApp = alertingV2Section.registerApp({
       id: ALERTING_V2_RULE_DOCTOR_APP_ID,
       title: 'Rule Doctor',
       order: 4,
@@ -141,6 +142,16 @@ export const module = new ContainerModule(({ bind }) => {
         );
         return () => {};
       },
+    });
+
+    getStartServices().then(([coreStart]) => {
+      const isEnabled = coreStart.uiSettings.get<boolean>(
+        ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID,
+        false
+      );
+      if (!isEnabled) {
+        ruleDoctorApp.disable();
+      }
     });
   });
 });

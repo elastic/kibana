@@ -60,7 +60,6 @@ import { ApiKeyServiceSavedObjectsClientToken } from '../lib/services/api_key_se
 import {
   API_KEY_PENDING_INVALIDATION_TYPE,
   NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
-  RULE_DOCTOR_SETTINGS_SAVED_OBJECT_TYPE,
   RULE_SAVED_OBJECT_TYPE,
 } from '../saved_objects';
 import {
@@ -71,7 +70,11 @@ import { MatcherSuggestionsService } from '../lib/services/matcher_suggestions_s
 import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
 import { createRuleDoctorWorkflowService } from '../workflows/rule_doctor_workflow';
 import { RuleDoctorWorkflowServiceToken } from '../workflows/tokens';
-import { RuleDoctorSettingsSavedObjectsClientToken } from '../lib/rule_doctor_settings';
+import { RuleDoctorSettingsProviderToken } from '../lib/tasks/rule_doctor/task_definition';
+import {
+  ALERTING_V2_RULE_DOCTOR_INTERVAL_SETTING_ID,
+  ALERTING_V2_RULE_DOCTOR_CONTINUOUS_SETTING_ID,
+} from '../../common/experimental_features';
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(AlertActionsClient).toSelf().inRequestScope();
@@ -229,16 +232,6 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     })
     .inSingletonScope();
 
-  bind(RuleDoctorSettingsSavedObjectsClientToken)
-    .toResolvedValue(
-      (savedObjectsClientFactory) =>
-        savedObjectsClientFactory({
-          includedHiddenTypes: [RULE_DOCTOR_SETTINGS_SAVED_OBJECT_TYPE],
-        }),
-      [SavedObjectsClientFactory]
-    )
-    .inRequestScope();
-
   bind(RuleDoctorWorkflowServiceToken)
     .toDynamicValue(({ get }) => {
       const logger = get(Logger);
@@ -262,6 +255,22 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
         const soClient = savedObjects.createInternalRepository();
         const client = uiSettings.globalAsScopedToClient(soClient);
         return client.get<boolean>(DISPATCHER_ENABLED_SETTING_ID);
+      };
+    })
+    .inSingletonScope();
+
+  bind(RuleDoctorSettingsProviderToken)
+    .toDynamicValue(({ get }) => {
+      const savedObjects = get(CoreStart('savedObjects'));
+      const uiSettings = get(CoreStart('uiSettings'));
+      return async () => {
+        const soClient = savedObjects.createInternalRepository();
+        const client = uiSettings.globalAsScopedToClient(soClient);
+        const [intervalHours, continuous] = await Promise.all([
+          client.get<number>(ALERTING_V2_RULE_DOCTOR_INTERVAL_SETTING_ID),
+          client.get<boolean>(ALERTING_V2_RULE_DOCTOR_CONTINUOUS_SETTING_ID),
+        ]);
+        return { intervalHours, continuous };
       };
     })
     .inSingletonScope();

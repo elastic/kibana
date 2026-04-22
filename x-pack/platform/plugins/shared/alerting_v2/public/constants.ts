@@ -37,7 +37,6 @@ export const paths = {
   alertEpisodeDetails: (episodeId: string) =>
     `${ALERTING_V2_EPISODES_BASE_PATH}/${encodeURIComponent(episodeId)}`,
   ruleDoctor: `${ALERTING_V2_RULES_BASE_PATH}/doctor`,
-  ruleDoctorSettings: `${ALERTING_V2_RULES_BASE_PATH}/doctor/settings`,
   ruleDoctorExecutionDetail: (executionId: string) =>
     `${ALERTING_V2_RULES_BASE_PATH}/doctor/executions/${encodeURIComponent(executionId)}`,
   ruleDoctorFix: (findingId: string) =>
