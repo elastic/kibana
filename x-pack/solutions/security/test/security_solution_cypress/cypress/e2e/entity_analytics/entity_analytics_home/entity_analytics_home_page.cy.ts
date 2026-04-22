@@ -56,7 +56,7 @@ describe(
 
     it('renders page as expected', () => {
       cy.get(PAGE_TITLE).should('exist');
-      cy.get('h1').contains('Entity Analytics').should('be.visible');
+      cy.get('h1').contains('Entity analytics').should('be.visible');
     });
 
     it('renders KQL search bar', () => {
