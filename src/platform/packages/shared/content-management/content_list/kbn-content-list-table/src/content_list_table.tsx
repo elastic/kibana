@@ -10,6 +10,7 @@
 import React, { useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { EuiBasicTable, useEuiTheme } from '@elastic/eui';
+import type { EuiBreakpointSize } from '@elastic/eui';
 import { cssFavoriteHoverWithinEuiTableRow } from '@kbn/content-management-favorites-public';
 import {
   useContentListConfig,
@@ -23,8 +24,9 @@ import {
   UpdatedAtColumn,
   ActionsColumn,
   StarredColumn,
+  CreatedByColumn,
 } from './column';
-import { Action as BaseAction, EditAction, DeleteAction } from './action';
+import { Action as BaseAction, EditAction, DeleteAction, InspectAction } from './action';
 import { useColumns, useSorting, useSelection } from './hooks';
 import { EmptyState } from './empty_state';
 
@@ -38,6 +40,23 @@ export interface ContentListTableProps {
   tableLayout?: 'fixed' | 'auto';
   /** Compressed table style. */
   compressed?: boolean;
+  /**
+   * Whether to enable horizontal scrolling when columns exceed the container width.
+   * Required for sticky columns (e.g. `Column.Actions` with `sticky: true`).
+   *
+   * @default true
+   */
+  scrollableInline?: boolean;
+  /**
+   * Named breakpoint below which the table collapses into responsive cards.
+   * Set to `false` to always render as a table, or `true` to always render cards.
+   *
+   * Content List defaults to `false` because the card layout does not support
+   * selection checkboxes, tag badges, star buttons, or action columns.
+   *
+   * @default false
+   */
+  responsiveBreakpoint?: EuiBreakpointSize | boolean;
   /**
    * Custom empty state component.
    * If not provided, uses default empty state.
@@ -120,6 +139,8 @@ const ContentListTableComponent = ({
   title,
   tableLayout = 'auto',
   compressed = false,
+  scrollableInline = true,
+  responsiveBreakpoint = false,
   emptyState: customEmptyState,
   children,
   filter,
@@ -161,6 +182,8 @@ const ContentListTableComponent = ({
         onChange={onChange}
         sorting={sorting}
         selection={selection}
+        scrollableInline={scrollableInline}
+        responsiveBreakpoint={responsiveBreakpoint}
         tableLayout={tableLayout}
         data-test-subj={dataTestSubj}
       />
@@ -175,12 +198,14 @@ export const Column = Object.assign(BaseColumn, {
   UpdatedAt: UpdatedAtColumn,
   Actions: ActionsColumn,
   Starred: StarredColumn,
+  CreatedBy: CreatedByColumn,
 });
 
 // Create Action namespace with sub-components.
 export const Action = Object.assign(BaseAction, {
   Edit: EditAction,
   Delete: DeleteAction,
+  Inspect: InspectAction,
 });
 
 export const ContentListTable = Object.assign(ContentListTableComponent, {

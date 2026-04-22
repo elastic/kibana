@@ -112,6 +112,7 @@ export default function (ctx: FtrProviderContext) {
       });
 
       after(async () => {
+        await security.forceLogout();
         await securityService.role.delete('global_discover_all_role');
         await securityService.user.delete('global_discover_all_user');
       });
@@ -187,6 +188,7 @@ export default function (ctx: FtrProviderContext) {
       });
 
       after(async () => {
+        await security.forceLogout();
         await securityService.role.delete('global_discover_read_role');
         await securityService.user.delete('global_discover_read_user');
         await spaces.delete('readonly-solution-space');
@@ -298,6 +300,7 @@ export default function (ctx: FtrProviderContext) {
       });
 
       after(async () => {
+        await security.forceLogout();
         await securityService.user.delete('global_discover_read_url_create_user');
         await securityService.role.delete('global_discover_read_url_create_role');
       });
@@ -375,6 +378,7 @@ export default function (ctx: FtrProviderContext) {
       });
 
       after(async () => {
+        await security.forceLogout();
         await securityService.role.delete('global_discover_visualize_read_role');
         await securityService.user.delete('global_discover_visualize_read_user');
       });
@@ -428,6 +432,7 @@ export default function (ctx: FtrProviderContext) {
       });
 
       after(async () => {
+        await security.forceLogout();
         await securityService.role.delete('no_discover_privileges_role');
         await securityService.user.delete('no_discover_privileges_user');
       });
@@ -506,7 +511,7 @@ export default function (ctx: FtrProviderContext) {
             ],
           })
           .expect(200);
-
+        await security.forceLogout();
         await securityService.role.delete('discover_only_data_views_role');
         await securityService.user.delete('discover_only_data_views_user');
       });
