@@ -112,6 +112,27 @@ apiTest.describe(
       expect(query).toContain('version');
     });
 
+    apiTest('should omit original from USER_AGENT properties in ES|QL (unsupported there)', async () => {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'user_agent',
+            from: 'agent_string',
+            to: 'parsed_agent',
+            properties: ['name', 'original', 'version'],
+          } as UserAgentProcessor,
+        ],
+      };
+
+      const { query } = await transpile(streamlangDSL);
+
+      expect(query).toContain('USER_AGENT');
+      expect(query).toContain('properties');
+      expect(query).toContain('name');
+      expect(query).toContain('version');
+      expect(query).not.toMatch(/["']original["']/);
+    });
+
     apiTest('should generate USER_AGENT command with all options', async () => {
       const streamlangDSL: StreamlangDSL = {
         steps: [
@@ -140,24 +161,6 @@ apiTest.describe(
       expect(query).toMatch(/extract_device_type":\s*TRUE/i);
     });
 
-    apiTest('should handle ignore_missing with conditional execution', async () => {
-      const streamlangDSL: StreamlangDSL = {
-        steps: [
-          {
-            action: 'user_agent',
-            from: 'agent_string',
-            to: 'parsed_agent',
-            ignore_missing: true,
-          } as UserAgentProcessor,
-        ],
-      };
-
-      const { query } = await transpile(streamlangDSL);
-
-      expect(query).toContain('USER_AGENT');
-      expect(query).toContain('CASE');
-      expect(query).toContain('agent_string');
-    });
 
     apiTest('should handle where condition with conditional execution', async () => {
       const streamlangDSL: StreamlangDSL = {

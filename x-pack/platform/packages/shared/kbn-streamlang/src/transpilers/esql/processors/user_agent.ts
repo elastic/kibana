@@ -7,7 +7,7 @@
 
 import { Builder } from '@elastic/esql';
 import type { ESQLAstCommand, ESQLAstItem, ESQLMapEntry } from '@elastic/esql/types';
-import type { UserAgentProcessor, UserAgentProperty } from '../../../../types/processors';
+import type { UserAgentProcessor } from '../../../../types/processors';
 import { conditionToESQLAst } from '../condition_to_esql';
 import { buildIgnoreMissingFilter, buildWhereCondition } from './common';
 
@@ -18,16 +18,15 @@ import { buildIgnoreMissingFilter, buildWhereCondition } from './common';
  * including browser name, version, OS, and device information.
  *
  * Conditional execution logic:
- *  - If neither `ignore_missing` nor `where` is provided: emit a single USER_AGENT command.
- *  - Otherwise, use inline CASE expression to conditionally pass source field:
+ *  - Emit `USER_AGENT target = source` when no `where` clause.
+ *  - When `where` is provided, use inline CASE so parsing is skipped unless the condition holds:
  *      * USER_AGENT target = CASE(condition, source, "") WITH {...}
- *    Condition: (exists(from) if ignore_missing) AND (where condition, if provided)
  *
  * @example
  *    ```typescript
  *    const processor: UserAgentProcessor = {
  *      action: 'user_agent',
- *      from: 'http.user_agent',
+ *      from: 'user_agent.original',
  *      to: 'parsed_agent',
  *      regex_file: 'myregexes.yaml',
  *      extract_device_type: true,
@@ -36,13 +35,13 @@ import { buildIgnoreMissingFilter, buildWhereCondition } from './common';
  *
  *    Generates:
  *    ```txt
- *    | USER_AGENT parsed_agent = http.user_agent WITH {"regex_file": "myregexes.yaml", "extract_device_type": true}
+ *    | USER_AGENT parsed_agent = user_agent.original WITH {"regex_file": "myregexes.yaml", "extract_device_type": true}
  *    ```
  */
 export function convertUserAgentProcessorToESQL(processor: UserAgentProcessor): ESQLAstCommand[] {
   const {
     from,
-    to = 'user_agent', // default target field
+    to = 'user_agent',
     regex_file,
     properties,
     extract_device_type,
@@ -50,89 +49,52 @@ export function convertUserAgentProcessorToESQL(processor: UserAgentProcessor): 
     where,
   } = processor;
 
-  const fromColumn = Builder.expression.column(from);
-  const toColumn = Builder.expression.column(to);
   const commands: ESQLAstCommand[] = [];
-
-  // Add missing field filter if needed (ignore_missing = false)
   const missingFieldFilter = buildIgnoreMissingFilter(ignore_missing, from);
   if (missingFieldFilter) {
     commands.push(missingFieldFilter);
   }
 
-  // Check if conditional execution is needed for 'where' clauses
-  const needConditional = ignore_missing || Boolean(where);
+  const fromColumn = Builder.expression.column(from);
+  const toColumn = Builder.expression.column(to);
+  let conditionalSource: ESQLAstItem = fromColumn;
 
-  if (!needConditional) {
-    // Simple case: just emit the USER_AGENT command
-    commands.push(
-      buildUserAgentCommand(toColumn, fromColumn, regex_file, properties, extract_device_type)
-    );
-  } else {
-    // Build condition for when USER_AGENT should execute
+  if (where) {
     const userAgentCondition = buildWhereCondition(from, ignore_missing, where, conditionToESQLAst);
-
-    // Create CASE expression: CASE(condition, source, "")
-    const conditionalSource = Builder.expression.func.call('CASE', [
+    conditionalSource = Builder.expression.func.call('CASE', [
       userAgentCondition,
       fromColumn,
-      Builder.expression.literal.string(''), // Empty string when condition false
+      Builder.expression.literal.string(''),
     ]);
-
-    // Apply USER_AGENT with inline CASE expression
-    commands.push(
-      buildUserAgentCommand(
-        toColumn,
-        conditionalSource,
-        regex_file,
-        properties,
-        extract_device_type
-      )
-    );
   }
 
-  return commands;
-}
-
-/**
- * Builds the USER_AGENT command with optional WITH clause for options.
- *
- * Syntax: USER_AGENT target = source [WITH { options }]
- */
-function buildUserAgentCommand(
-  toColumn: ESQLAstItem,
-  fromColumn: ESQLAstItem,
-  regexFile?: string,
-  properties?: UserAgentProperty[],
-  extractDeviceType?: boolean
-): ESQLAstCommand {
-  const args: ESQLAstItem[] = [Builder.expression.func.binary('=', [toColumn, fromColumn])];
+  const args: ESQLAstItem[] = [Builder.expression.func.binary('=', [toColumn, conditionalSource])];
   const cmd = Builder.command({ name: 'user_agent', args });
-
   const mapEntries: ESQLMapEntry[] = [];
 
-  if (regexFile !== undefined) {
+  if (regex_file) {
     mapEntries.push(
-      Builder.expression.entry('regex_file', Builder.expression.literal.string(regexFile))
+      Builder.expression.entry('regex_file', Builder.expression.literal.string(regex_file))
     );
   }
 
-  if (properties !== undefined && properties.length > 0) {
+  const filteredProperties = properties?.filter((prop) => prop !== 'original');
+  if (filteredProperties?.length) {
     mapEntries.push(
       Builder.expression.entry(
         'properties',
         Builder.expression.list.literal({
-          values: properties.map((prop) => Builder.expression.literal.string(prop)),
+          values: filteredProperties.map((prop) => Builder.expression.literal.string(prop)),
         })
       )
     );
   }
 
-  if (extractDeviceType !== undefined) {
+  if (extract_device_type !== undefined) {
     mapEntries.push(
       Builder.expression.entry(
         'extract_device_type',
-        Builder.expression.literal.boolean(extractDeviceType)
+        Builder.expression.literal.boolean(extract_device_type)
       )
     );
   }
@@ -146,5 +108,6 @@ function buildUserAgentCommand(
     );
   }
 
-  return cmd;
+  commands.push(cmd);
+  return commands;
 }
