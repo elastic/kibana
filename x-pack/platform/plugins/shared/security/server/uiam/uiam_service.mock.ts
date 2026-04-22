@@ -34,6 +34,12 @@ export const uiamServiceMock = {
       .fn()
       .mockResolvedValue({ id: 'mock-client-id', resource: 'urn:test', revoked: true }),
     listOAuthConnections: jest.fn().mockResolvedValue({ connections: [] }),
+    updateOAuthConnection: jest.fn().mockResolvedValue({
+      id: 'mock-connection-id',
+      client_id: 'mock-client-id',
+      resource: 'urn:test',
+      name: 'mock-connection-name',
+    }),
     revokeOAuthConnection: jest.fn().mockResolvedValue({
       id: 'mock-connection-id',
       client_id: 'mock-client-id',

@@ -11,6 +11,37 @@ import { schema } from '@kbn/config-schema';
 const CLIENT_LOGO_MAX_DATA_LENGTH = 262144;
 
 export const clientLogoSchema = schema.object({
-  media_type: schema.string(),
-  data: schema.string({ maxLength: CLIENT_LOGO_MAX_DATA_LENGTH }),
+  media_type: schema.oneOf([
+    schema.literal('image/png'),
+    schema.literal('image/jpeg'),
+    schema.literal('image/gif'),
+  ]),
+  data: schema.string({ minLength: 1, maxLength: CLIENT_LOGO_MAX_DATA_LENGTH }),
+});
+
+export const clientTypeSchema = schema.oneOf([
+  schema.literal('public'),
+  schema.literal('confidential'),
+]);
+
+export const redirectUrisSchema = schema.arrayOf(schema.string({ minLength: 1 }));
+
+export const createClientBodySchema = schema.object({
+  resource: schema.string(),
+  client_name: schema.maybe(schema.string()),
+  client_type: schema.maybe(clientTypeSchema),
+  client_metadata: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+  client_logo: schema.maybe(clientLogoSchema),
+  redirect_uris: schema.maybe(redirectUrisSchema),
+});
+
+export const updateClientBodySchema = schema.object({
+  client_name: schema.maybe(schema.nullable(schema.string())),
+  client_metadata: schema.maybe(schema.recordOf(schema.string(), schema.nullable(schema.string()))),
+  client_logo: schema.maybe(schema.nullable(clientLogoSchema)),
+  redirect_uris: schema.maybe(redirectUrisSchema),
+});
+
+export const updateConnectionBodySchema = schema.object({
+  name: schema.string({ minLength: 1 }),
 });

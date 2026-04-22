@@ -19,18 +19,21 @@ export interface UiamOAuthConnectionsSummary {
   revoked?: string[];
 }
 
+export type UiamOAuthClientType = 'public' | 'confidential';
+
 export interface UiamOAuthClientResponse {
   id: string;
   client_name?: string;
   client_secret?: string;
   resource: string;
-  type?: string;
+  type?: UiamOAuthClientType;
   creation?: string;
   revoked?: boolean;
   revocation?: string;
   revocation_reason?: string;
   client_metadata?: Record<string, string>;
   client_logo?: UiamOAuthClientLogo;
+  redirect_uris?: string[];
   connections?: UiamOAuthConnectionsSummary;
 }
 
@@ -46,20 +49,24 @@ export interface UiamOAuthConnectionResponse {
   scopes?: string[];
 }
 
-export type UiamOAuthClientType = 'public' | 'confidential';
-
 export interface CreateUiamOAuthClientParams {
   resource: string;
   client_name?: string;
   client_type?: UiamOAuthClientType;
   client_metadata?: Record<string, string>;
   client_logo?: UiamOAuthClientLogo;
+  redirect_uris?: string[];
 }
 
 export interface UpdateUiamOAuthClientParams {
   client_name?: string | null;
   client_metadata?: Record<string, string | null>;
   client_logo?: UiamOAuthClientLogo | null;
+  redirect_uris?: string[];
+}
+
+export interface UpdateUiamOAuthConnectionParams {
+  name: string;
 }
 
 /**
@@ -121,6 +128,20 @@ export interface UiamOAuthType {
     clientId?: string,
     connectionId?: string
   ): Promise<{ connections: UiamOAuthConnectionResponse[] } | null>;
+
+  /**
+   * Updates an OAuth connection's display name.
+   * @param request The Kibana request containing the authorization header.
+   * @param clientId The ID of the client owning the connection.
+   * @param connectionId The ID of the connection to update.
+   * @param params The parameters for updating the OAuth connection.
+   */
+  updateConnection(
+    request: KibanaRequest,
+    clientId: string,
+    connectionId: string,
+    params: UpdateUiamOAuthConnectionParams
+  ): Promise<UiamOAuthConnectionResponse | null>;
 
   /**
    * Revokes an OAuth connection.

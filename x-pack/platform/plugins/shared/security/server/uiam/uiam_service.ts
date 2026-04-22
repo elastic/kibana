@@ -18,6 +18,7 @@ import type {
   UiamOAuthClientType,
   UiamOAuthConnectionResponse,
   UpdateUiamOAuthClientParams,
+  UpdateUiamOAuthConnectionParams,
 } from '@kbn/core-security-server';
 import type {
   ClientAuthentication,
@@ -104,6 +105,19 @@ export type OAuthClientResponse = UiamOAuthClientResponse;
 export type OAuthConnectionResponse = UiamOAuthConnectionResponse;
 export type CreateOAuthClientRequestBody = CreateUiamOAuthClientParams;
 export type PatchOAuthClientRequestBody = UpdateUiamOAuthClientParams;
+export type PatchOAuthConnectionRequestBody = UpdateUiamOAuthConnectionParams;
+
+/**
+ * Shape of the `error` object inside a UIAM non-2xx response payload, mirroring
+ * UIAM's `ErrorDetails` schema. All fields are optional per the UIAM contract.
+ * @see https://github.com/elastic/uiam/blob/main/api/openapi.yaml
+ */
+interface UiamErrorDetails {
+  code?: string;
+  message?: string;
+  resource?: string;
+  type?: string;
+}
 
 /**
  * Response containing a list of OAuth clients.
@@ -236,6 +250,20 @@ export interface UiamServicePublic {
     clientId?: string,
     connectionId?: string
   ): Promise<OAuthConnectionsResponse>;
+
+  /**
+   * Updates an OAuth connection's display name via the UIAM service.
+   * @param accessToken UIAM session access token.
+   * @param clientId The ID of the client owning the connection.
+   * @param connectionId The ID of the connection to update.
+   * @param body The request body for updating the OAuth connection.
+   */
+  updateOAuthConnection(
+    accessToken: string,
+    clientId: string,
+    connectionId: string,
+    body: PatchOAuthConnectionRequestBody
+  ): Promise<OAuthConnectionResponse>;
 
   /**
    * Revokes an OAuth connection via the UIAM service.
@@ -710,6 +738,47 @@ export class UiamService implements UiamServicePublic {
   }
 
   /**
+   * See {@link UiamServicePublic.updateOAuthConnection}.
+   */
+  async updateOAuthConnection(
+    accessToken: string,
+    clientId: string,
+    connectionId: string,
+    body: PatchOAuthConnectionRequestBody
+  ): Promise<OAuthConnectionResponse> {
+    try {
+      this.#logger.debug(`Attempting to update OAuth connection: ${connectionId}`);
+
+      const response = await UiamService.#parseUiamResponse(
+        await fetch(
+          `${this.#config.url}/uiam/api/v1/oauth/clients/${encodeURIComponent(
+            clientId
+          )}/connections/${encodeURIComponent(connectionId)}`,
+          {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
+              Authorization: `Bearer ${accessToken}`,
+            },
+            body: JSON.stringify(body),
+            // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+            dispatcher: this.#dispatcher,
+          }
+        )
+      );
+
+      this.#logger.debug(`Successfully updated OAuth connection: ${connectionId}`);
+      return response;
+    } catch (err) {
+      this.#logger.error(
+        () => `Failed to update OAuth connection ${connectionId}: ${getDetailedErrorMessage(err)}`
+      );
+      throw err;
+    }
+  }
+
+  /**
    * See {@link UiamServicePublic.revokeOAuthConnection}.
    */
   async revokeOAuthConnection(
@@ -794,7 +863,11 @@ export class UiamService implements UiamServicePublic {
   }
 
   /**
-   * Parses the UIAM service response as free-form JSON if it's a successful response, otherwise throws a Boom error based on the error response from the UIAM service.
+   * Parses the UIAM service response as free-form JSON if it's a successful response, otherwise
+   * throws a Boom error derived from UIAM's {@link https://github.com/elastic/uiam/blob/main/api/openapi.yaml ErrorDetails}
+   * payload (`{ code, message, resource, type }`). The full payload is preserved on
+   * `err.output.payload` so downstream loggers pick up the additional context via
+   * {@link getDetailedErrorMessage}.
    */
   static async #parseUiamResponse(response: Response) {
     if (response.ok) {
@@ -806,7 +879,17 @@ export class UiamService implements UiamServicePublic {
     }
 
     const payload = await response.json();
-    const err = new Boom.Boom(payload?.error?.message || 'Unknown error');
+    const { code, message, resource, type }: UiamErrorDetails = payload?.error ?? {};
+
+    // Build a compact, greppable summary for log output: `[code/type] message (resource: ...)`.
+    const qualifiers: string[] = [];
+    if (code) qualifiers.push(code);
+    if (type) qualifiers.push(type);
+    const prefix = qualifiers.length > 0 ? `[${qualifiers.join('/')}] ` : '';
+    const suffix = resource ? ` (resource: ${resource})` : '';
+    const summary = `${prefix}${message ?? 'Unknown error'}${suffix}`;
+
+    const err = new Boom.Boom(summary);
 
     err.output = {
       statusCode: response.status,

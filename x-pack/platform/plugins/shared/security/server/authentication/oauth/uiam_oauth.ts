@@ -15,6 +15,7 @@ import type {
   UiamOAuthConnectionResponse,
   UiamOAuthType,
   UpdateUiamOAuthClientParams,
+  UpdateUiamOAuthConnectionParams,
 } from '@kbn/core-security-server';
 
 import type { SecurityLicense } from '../../../common';
@@ -142,6 +143,36 @@ export class UiamOAuth implements UiamOAuthType {
       return result;
     } catch (e) {
       this.logger.error(`Failed to list OAuth connections: ${getDetailedErrorMessage(e)}`);
+      throw e;
+    }
+  }
+
+  async updateConnection(
+    request: KibanaRequest,
+    clientId: string,
+    connectionId: string,
+    params: UpdateUiamOAuthConnectionParams
+  ): Promise<UiamOAuthConnectionResponse | null> {
+    if (!this.license.isEnabled()) {
+      return null;
+    }
+
+    const accessToken = UiamOAuth.getAccessToken(request);
+    this.logger.debug(`Attempting to update OAuth connection ${connectionId}`);
+
+    try {
+      const result = await this.uiam.updateOAuthConnection(
+        accessToken,
+        clientId,
+        connectionId,
+        params
+      );
+      this.logger.debug(`OAuth connection ${connectionId} updated successfully`);
+      return result;
+    } catch (e) {
+      this.logger.error(
+        `Failed to update OAuth connection ${connectionId}: ${getDetailedErrorMessage(e)}`
+      );
       throw e;
     }
   }

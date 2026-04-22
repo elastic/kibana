@@ -936,6 +936,56 @@ describe('UiamService', () => {
         uiamService.createOAuthClient('access-token', { resource: 'urn:test' })
       ).rejects.toThrowError('Bad request');
     });
+
+    it('forwards redirect_uris, client_logo, and client_metadata verbatim to UIAM', async () => {
+      const mockResponse: OAuthClientResponse = {
+        id: 'client-id',
+        resource: 'urn:test',
+        redirect_uris: ['https://example.com/cb'],
+        client_logo: { media_type: 'image/png', data: 'abc' },
+      };
+
+      fetchSpy.mockResolvedValue({ ok: true, json: async () => mockResponse });
+
+      const body = {
+        resource: 'urn:test',
+        client_type: 'confidential' as const,
+        client_metadata: { owner: 'admin' },
+        client_logo: { media_type: 'image/png', data: 'abc' },
+        redirect_uris: ['https://example.com/cb'],
+      };
+
+      await expect(uiamService.createOAuthClient('access-token', body)).resolves.toEqual(
+        mockResponse
+      );
+
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/oauth/clients',
+        expect.objectContaining({ method: 'POST', body: JSON.stringify(body) })
+      );
+    });
+
+    it('surfaces UIAM ErrorDetails (code, type, resource) in the thrown Boom message', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 400,
+        headers: new Headers(),
+        json: async () => ({
+          error: {
+            code: 'INVALID_REDIRECT_URI',
+            type: 'validation_error',
+            resource: 'redirect_uris[0]',
+            message: 'Redirect URI must not contain a fragment',
+          },
+        }),
+      });
+
+      await expect(
+        uiamService.createOAuthClient('access-token', { resource: 'urn:test' })
+      ).rejects.toThrowError(
+        '[INVALID_REDIRECT_URI/validation_error] Redirect URI must not contain a fragment (resource: redirect_uris[0])'
+      );
+    });
   });
 
   describe('#listOAuthClients', () => {
@@ -1177,6 +1227,76 @@ describe('UiamService', () => {
 
       await expect(uiamService.listOAuthConnections('access-token')).rejects.toThrowError(
         'Internal Server Error'
+      );
+    });
+  });
+
+  describe('#updateOAuthConnection', () => {
+    it('properly calls UIAM service to update an OAuth connection', async () => {
+      const mockResponse: OAuthConnectionResponse = {
+        id: 'conn-id',
+        client_id: 'client-id',
+        resource: 'urn:test',
+        name: 'New name',
+      };
+
+      fetchSpy.mockResolvedValue({ ok: true, json: async () => mockResponse });
+
+      await expect(
+        uiamService.updateOAuthConnection('access-token', 'client-id', 'conn-id', {
+          name: 'New name',
+        })
+      ).resolves.toEqual(mockResponse);
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/oauth/clients/client-id/connections/conn-id',
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+            Authorization: 'Bearer access-token',
+          },
+          body: JSON.stringify({ name: 'New name' }),
+          dispatcher: AGENT_MOCK,
+        }
+      );
+    });
+
+    it('throws error if update fails', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 404,
+        headers: new Headers(),
+        json: async () => ({ error: { message: 'Connection not found' } }),
+      });
+
+      await expect(
+        uiamService.updateOAuthConnection('access-token', 'client-id', 'missing', {
+          name: 'x',
+        })
+      ).rejects.toThrowError('Connection not found');
+    });
+
+    it('encodes reserved characters in both path segments', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          id: 'conn/id?x',
+          client_id: 'client/id#y',
+          resource: 'urn:test',
+          name: 'n',
+        }),
+      });
+
+      await uiamService.updateOAuthConnection('access-token', 'client/id#y', 'conn/id?x', {
+        name: 'n',
+      });
+
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/oauth/clients/client%2Fid%23y/connections/conn%2Fid%3Fx',
+        expect.objectContaining({ method: 'PATCH' })
       );
     });
   });

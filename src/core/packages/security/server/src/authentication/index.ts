@@ -45,6 +45,7 @@ export type {
   UiamOAuthConnectionResponse,
   CreateUiamOAuthClientParams,
   UpdateUiamOAuthClientParams,
+  UpdateUiamOAuthConnectionParams,
 } from './oauth';
 
 export { HTTPAuthorizationHeader } from './http_authentication';

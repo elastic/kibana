@@ -13,6 +13,7 @@ import { defineListOAuthConnectionsRoute } from './list_connections';
 import { defineRevokeOAuthClientRoute } from './revoke_client';
 import { defineRevokeOAuthConnectionRoute } from './revoke_connection';
 import { defineUpdateOAuthClientRoute } from './update_client';
+import { defineUpdateOAuthConnectionRoute } from './update_connection';
 import type { RouteDefinitionParams } from '..';
 
 export function defineOAuthRoutes(params: RouteDefinitionParams) {
@@ -23,5 +24,6 @@ export function defineOAuthRoutes(params: RouteDefinitionParams) {
   defineRevokeOAuthClientRoute(params);
   defineGetOAuthConnectionRoute(params);
   defineListOAuthConnectionsRoute(params);
+  defineUpdateOAuthConnectionRoute(params);
   defineRevokeOAuthConnectionRoute(params);
 }

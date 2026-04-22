@@ -16,4 +16,5 @@ export type {
   UiamOAuthConnectionResponse,
   CreateUiamOAuthClientParams,
   UpdateUiamOAuthClientParams,
+  UpdateUiamOAuthConnectionParams,
 } from './uiam_oauth';

@@ -13,12 +13,12 @@ import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { UiamOAuthType } from '@kbn/core-security-server';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
-import { defineUpdateOAuthClientRoute } from './update_client';
+import { defineUpdateOAuthConnectionRoute } from './update_connection';
 import type { InternalAuthenticationServiceStart } from '../../authentication';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
 import { routeDefinitionParamsMock } from '../index.mock';
 
-describe('Update OAuth Client route', () => {
+describe('Update OAuth Connection route', () => {
   function getMockContext(
     licenseCheckResult: { state: string; message?: string } = { state: 'valid' }
   ) {
@@ -36,64 +36,37 @@ describe('Update OAuth Client route', () => {
     const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
     mockRouteDefinitionParams.getAuthenticationService.mockReturnValue(authc);
 
-    defineUpdateOAuthClientRoute(mockRouteDefinitionParams);
+    defineUpdateOAuthConnectionRoute(mockRouteDefinitionParams);
 
     const [, handler] = mockRouteDefinitionParams.router.patch.mock.calls.find(
-      ([{ path }]) => path === '/internal/security/oauth/clients/{client_id}'
+      ([{ path }]) =>
+        path === '/internal/security/oauth/clients/{client_id}/connections/{connection_id}'
     )!;
     routeHandler = handler;
   });
 
-  it('returns updated client on success', async () => {
-    const mockClient = { id: 'c1', resource: 'urn:test', client_name: 'Updated' };
-    oauthMock.updateClient.mockResolvedValue(mockClient);
+  it('returns updated connection on success', async () => {
+    const mockConnection = {
+      id: 'conn1',
+      client_id: 'c1',
+      resource: 'urn:test',
+      name: 'Updated',
+    };
+    oauthMock.updateConnection.mockResolvedValue(mockConnection);
 
     const response = await routeHandler(
       getMockContext(),
       httpServerMock.createKibanaRequest({
-        params: { client_id: 'c1' },
-        body: { client_name: 'Updated', client_metadata: {} },
+        params: { client_id: 'c1', connection_id: 'conn1' },
+        body: { name: 'Updated' },
       }),
       kibanaResponseFactory
     );
 
     expect(response.status).toBe(200);
-    expect(response.payload).toEqual(mockClient);
-  });
-
-  it('defaults client_metadata to {} when omitted to satisfy UIAM PATCH contract', async () => {
-    oauthMock.updateClient.mockResolvedValue({ id: 'c1', resource: 'urn:test' });
-
-    await routeHandler(
-      getMockContext(),
-      httpServerMock.createKibanaRequest({
-        params: { client_id: 'c1' },
-        body: { client_name: 'Updated' },
-      }),
-      kibanaResponseFactory
-    );
-
-    expect(oauthMock.updateClient).toHaveBeenCalledWith(expect.anything(), 'c1', {
-      client_name: 'Updated',
-      client_metadata: {},
-    });
-  });
-
-  it('forwards redirect_uris to the service when provided', async () => {
-    oauthMock.updateClient.mockResolvedValue({ id: 'c1', resource: 'urn:test' });
-
-    await routeHandler(
-      getMockContext(),
-      httpServerMock.createKibanaRequest({
-        params: { client_id: 'c1' },
-        body: { redirect_uris: ['https://example.com/cb'] },
-      }),
-      kibanaResponseFactory
-    );
-
-    expect(oauthMock.updateClient).toHaveBeenCalledWith(expect.anything(), 'c1', {
-      redirect_uris: ['https://example.com/cb'],
-      client_metadata: {},
+    expect(response.payload).toEqual(mockConnection);
+    expect(oauthMock.updateConnection).toHaveBeenCalledWith(expect.anything(), 'c1', 'conn1', {
+      name: 'Updated',
     });
   });
 
@@ -103,8 +76,23 @@ describe('Update OAuth Client route', () => {
     const response = await routeHandler(
       getMockContext(),
       httpServerMock.createKibanaRequest({
-        params: { client_id: 'c1' },
-        body: { client_metadata: {} },
+        params: { client_id: 'c1', connection_id: 'conn1' },
+        body: { name: 'Updated' },
+      }),
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(404);
+  });
+
+  it('returns 404 when license-disabled service returns null', async () => {
+    oauthMock.updateConnection.mockResolvedValue(null);
+
+    const response = await routeHandler(
+      getMockContext(),
+      httpServerMock.createKibanaRequest({
+        params: { client_id: 'c1', connection_id: 'conn1' },
+        body: { name: 'Updated' },
       }),
       kibanaResponseFactory
     );
@@ -113,13 +101,13 @@ describe('Update OAuth Client route', () => {
   });
 
   it('returns error from service', async () => {
-    oauthMock.updateClient.mockRejectedValue(Boom.notFound('Not found'));
+    oauthMock.updateConnection.mockRejectedValue(Boom.notFound('Connection not found'));
 
     const response = await routeHandler(
       getMockContext(),
       httpServerMock.createKibanaRequest({
-        params: { client_id: 'c1' },
-        body: { client_metadata: {} },
+        params: { client_id: 'c1', connection_id: 'missing' },
+        body: { name: 'Updated' },
       }),
       kibanaResponseFactory
     );

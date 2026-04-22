@@ -68,6 +68,32 @@ describe('UiamOAuth', () => {
       });
     });
 
+    it('forwards logo, metadata, and redirect_uris when provided', async () => {
+      const mockResponse = {
+        id: 'client-id',
+        resource: 'urn:test',
+        client_name: 'Test',
+        redirect_uris: ['https://example.com/cb'],
+        client_logo: { media_type: 'image/png', data: 'abc' },
+      };
+      mockUiam.createOAuthClient.mockResolvedValue(mockResponse);
+      const request = createMockRequest('Bearer essu_access_token');
+
+      const params = {
+        resource: 'urn:test',
+        client_name: 'Test',
+        client_type: 'confidential' as const,
+        client_metadata: { owner: 'admin' },
+        client_logo: { media_type: 'image/png', data: 'abc' },
+        redirect_uris: ['https://example.com/cb'],
+      };
+
+      const result = await uiamOAuth.createClient(request, params);
+
+      expect(result).toEqual(mockResponse);
+      expect(mockUiam.createOAuthClient).toHaveBeenCalledWith('essu_access_token', params);
+    });
+
     it('logs and throws error when UIAM call fails', async () => {
       mockUiam.createOAuthClient.mockRejectedValue(new Error('UIAM error'));
       const request = createMockRequest('Bearer essu_access_token');
@@ -128,6 +154,26 @@ describe('UiamOAuth', () => {
         client_metadata: { k: 'v' },
       });
     });
+
+    it('forwards redirect_uris replacement to UIAM', async () => {
+      const mockResponse = {
+        id: 'c1',
+        resource: 'urn:test',
+        redirect_uris: ['https://new.example/cb'],
+      };
+      mockUiam.updateOAuthClient.mockResolvedValue(mockResponse);
+      const request = createMockRequest('Bearer essu_access_token');
+
+      const params = {
+        client_metadata: {},
+        redirect_uris: ['https://new.example/cb'],
+      };
+
+      const result = await uiamOAuth.updateClient(request, 'c1', params);
+
+      expect(result).toEqual(mockResponse);
+      expect(mockUiam.updateOAuthClient).toHaveBeenCalledWith('essu_access_token', 'c1', params);
+    });
   });
 
   describe('revokeClient()', () => {
@@ -176,6 +222,54 @@ describe('UiamOAuth', () => {
         'essu_access_token',
         'c1',
         'conn1'
+      );
+    });
+  });
+
+  describe('updateConnection()', () => {
+    it('returns null when license is not enabled', async () => {
+      mockLicense.isEnabled.mockReturnValue(false);
+      const request = createMockRequest('Bearer essu_token');
+
+      const result = await uiamOAuth.updateConnection(request, 'c1', 'conn1', { name: 'New' });
+
+      expect(result).toBeNull();
+      expect(mockUiam.updateOAuthConnection).not.toHaveBeenCalled();
+    });
+
+    it('updates connection successfully', async () => {
+      const mockResponse = {
+        id: 'conn1',
+        client_id: 'c1',
+        resource: 'urn:test',
+        name: 'New name',
+      };
+      mockUiam.updateOAuthConnection.mockResolvedValue(mockResponse);
+      const request = createMockRequest('Bearer essu_access_token');
+
+      const result = await uiamOAuth.updateConnection(request, 'c1', 'conn1', {
+        name: 'New name',
+      });
+
+      expect(result).toEqual(mockResponse);
+      expect(mockUiam.updateOAuthConnection).toHaveBeenCalledWith(
+        'essu_access_token',
+        'c1',
+        'conn1',
+        { name: 'New name' }
+      );
+    });
+
+    it('logs and throws error when UIAM call fails', async () => {
+      mockUiam.updateOAuthConnection.mockRejectedValue(new Error('UIAM error'));
+      const request = createMockRequest('Bearer essu_access_token');
+
+      await expect(
+        uiamOAuth.updateConnection(request, 'c1', 'conn1', { name: 'x' })
+      ).rejects.toThrow('UIAM error');
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'Failed to update OAuth connection conn1: UIAM error'
       );
     });
   });

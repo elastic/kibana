@@ -481,6 +481,7 @@ export class AuthenticationService {
             updateClient: uiamOAuth.updateClient.bind(uiamOAuth),
             revokeClient: uiamOAuth.revokeClient.bind(uiamOAuth),
             listConnections: uiamOAuth.listConnections.bind(uiamOAuth),
+            updateConnection: uiamOAuth.updateConnection.bind(uiamOAuth),
             revokeConnection: uiamOAuth.revokeConnection.bind(uiamOAuth),
           }
         : null,

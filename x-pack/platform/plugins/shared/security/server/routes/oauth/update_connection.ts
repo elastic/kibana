@@ -7,18 +7,18 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { updateClientBodySchema } from './schemas';
+import { updateConnectionBodySchema } from './schemas';
 import type { RouteDefinitionParams } from '..';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
-export function defineUpdateOAuthClientRoute({
+export function defineUpdateOAuthConnectionRoute({
   router,
   getAuthenticationService,
 }: RouteDefinitionParams) {
   router.patch(
     {
-      path: '/internal/security/oauth/clients/{client_id}',
+      path: '/internal/security/oauth/clients/{client_id}/connections/{connection_id}',
       security: {
         authz: {
           enabled: false,
@@ -29,8 +29,9 @@ export function defineUpdateOAuthClientRoute({
       validate: {
         params: schema.object({
           client_id: schema.string(),
+          connection_id: schema.string(),
         }),
-        body: updateClientBodySchema,
+        body: updateConnectionBodySchema,
       },
       options: {
         access: 'internal',
@@ -45,10 +46,12 @@ export function defineUpdateOAuthClientRoute({
           });
         }
 
-        const result = await oauth.updateClient(request, request.params.client_id, {
-          ...request.body,
-          client_metadata: request.body.client_metadata ?? {},
-        });
+        const result = await oauth.updateConnection(
+          request,
+          request.params.client_id,
+          request.params.connection_id,
+          request.body
+        );
         if (!result) {
           return response.notFound({
             body: { message: 'OAuth management is not available: security features are disabled' },
