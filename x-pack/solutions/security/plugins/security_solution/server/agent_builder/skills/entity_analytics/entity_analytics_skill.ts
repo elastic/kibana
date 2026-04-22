@@ -29,15 +29,30 @@ export interface EntityAnalyticsSkillsContext {
 }
 
 const entityStoreV2Content = `
+## Choosing the right \`attachments.add\` type (entity card vs entity list vs dashboard)
+
+Three different rich UIs exist. The user’s **words** decide \`type\` — not how many rows your search happened to return.
+
+| What the user wants | Typical phrases | \`attachments.add\` \`type\` | Canvas / UI pattern |
+| --- | --- | --- | --- |
+| **One entity** — **details**, **profile**, **deep dive**, **card**, **flyout-style** summary, “everything about **this** host/user”, **the** riskiest **host** (singular), **tell me about** … | entity card, card, details, detail, profile, flyout, drill down, investigate this one, summarize **this** entity, **the** top / #1 host or user | \`security.entity_card\` | **Entity card** (flyout-shaped sections: summary, risk, resolution, insights). **Not** the wide **entities table** list. |
+| **Several entities** in a **table** to scan or compare | list, table, top 5, top N, which hosts/users, rank, compare, who are the riskiest (**many**), enumerate | \`security.entity_list\` | **Entity list** — **multi-row table** in Canvas. Payload needs **≥2** rows in \`data.entities\`; one row is **invalid** — use \`security.entity_card\` instead. |
+| **Entity Analytics home** layout (donut, highlights, entities together) | Entity Analytics dashboard, home, overview page, same layout as Entity Analytics | \`security.entity_analytics_dashboard\` | **Dashboard snapshot** Canvas (risk breakdown + highlights + table). |
+
+**Mandatory disambiguation before \`attachments.add\`**
+1. Count the **primary deliverable**: one EUID → **card** path; two or more EUIDs the user cares about as a set → **list** path (if ≥2 rows).
+2. If the user said **details**, **detail**, **more about**, **profile**, **card**, or **flyout** for **one** entity → **\`security.entity_card\`** after \`security.get_entity\`, **never** \`security.entity_list\` as the main rich attachment (wrong table UI; list also rejects a single row).
+3. If you only need **one** winner from search (e.g. “the riskiest host”), set \`security.search_entities\` \`maxResults\`: **1**, then **\`security.entity_card\`**. If search returned extra rows, pick **one** winner for the card; mention others in **prose only** — do **not** attach a list “for context” when they asked for **details** / **card** for one entity.
+
 ## Critical rule — single winner or explicit entity card (overrides entity list)
 
-Use this block when the user’s **main deliverable is exactly one entity** or they **explicitly ask for an entity card** / **card** / **flyout-style** view (e.g. “show me the **entity card** for…”, “**card** for the riskiest host”, “**the** riskiest **host**”, “**the** highest-risk **user**”, “#1 host”, “the host at the top of the list”). Singular phrasing (**the** + one entity type) means **one** primary entity, not a multi-row list attachment.
+Applies when the **Choosing** table above says \`security.entity_card\`: one primary EUID, or explicit **card** / **details** / **profile** / **flyout** language for that entity (including “**the** riskiest **host**”, “**the** highest-risk **user**”).
 
-- Call \`security.search_entities\` with \`maxResults\`: **1** (and the right \`entityTypes\`, e.g. \`["host"]\` for hosts) unless the user clearly asked for several entities. That keeps the investigation aligned with a **single** EUID.
-- Call \`security.get_entity\` for that EUID, then \`attachments.add\` with \`type\` exactly \`security.entity_card\` (see **Rich single-entity card**). **Do not** use \`security.entity_list\` as the rich attachment for this answer — the conversation UI’s **Preview → Canvas** **entity card** layout requires \`security.entity_card\`. **Note:** \`security.entity_list\` **rejects** payloads with fewer than two rows; a mistaken list call will error until you use \`security.entity_card\`.
-- If \`security.search_entities\` returned **multiple** rows (for example default sizing), you **still** must **not** attach \`security.entity_list\` for this intent: pick the **one** winner (highest \`risk_score_norm\` unless the user specified otherwise), mention any runners-up only in prose, and add **only** \`security.entity_card\` for that winner.
+- Call \`security.search_entities\` with \`maxResults\`: **1** and correct \`entityTypes\` when discovery must yield a single winner unless the user clearly asked for several entities.
+- Call \`security.get_entity\` for that EUID, then \`attachments.add\` with \`type\` exactly \`security.entity_card\` (see **Rich single-entity card**). **Do not** use \`security.entity_list\` for this answer — wrong Canvas. \`security.entity_list\` **rejects** fewer than two \`entities\` rows.
+- If search returned **multiple** rows, still follow **Choosing** step 3: one \`security.entity_card\` for the winner, no list attachment for singular intent.
 
-This rule **outranks** the “ranked / multi-entity” block below when intent is singular or the user says **entity card**, even if the wording includes “riskiest” or “highest risk”.
+This rule **outranks** the “ranked / multi-entity” block when intent is **one** entity or **details/card/profile** for one entity, even if wording includes “riskiest” or “highest risk”.
 
 ## Critical rule — Entity Analytics "dashboard" / home / overview
 
@@ -64,7 +79,9 @@ or by surfacing risky entities based on their risk scores, asset criticality lev
 ## When to Use This Skill
 
 Use this skill when:
-- The user asks about the **Entity Analytics dashboard**, **Entity Analytics home / overview**, or wants a view **like the built-in Entity Analytics page** (risk levels, anomalies-style context, entities table) scoped to their question
+- The user asks about the **Entity Analytics dashboard**, **Entity Analytics home / overview**, or wants a view **like the built-in Entity Analytics page** (risk levels, anomalies-style context, entities table) scoped to their question → \`security.entity_analytics_dashboard\` when that is the main ask (see **Choosing** table).
+- They want **one entity’s details / card / profile / flyout-style** view (by EUID or by “the riskiest host” etc.) → follow **Choosing** + **Rich single-entity card** (\`security.entity_card\`).
+- They want a **multi-entity table** (compare, rank, top N with N≥2, “which hosts…”) → follow **Choosing** + **Rich entity list attachment** (\`security.entity_list\` with ≥2 rows).
 - Investigating the current behavior of a specific entity using its ID (EUID)
 - Looking up the current profile for a specific entity using its ID (EUID), including risk score, asset criticality and watchlists
 - Analyzing the historical behavior of a specific entity using its ID (EUID)
@@ -131,6 +148,7 @@ You MUST use the \`security.get_entity\` tool to get entity profiles for EACH en
 if 10 entities are found using \`security.search_entities\`, you MUST call \`security.get_entity\` 10 times to get the full profiles for each entity.
 
 ### 3. Interpret and summarize output
+- **Pick \`attachments.add\` \`type\`** using the **Choosing** section before you add anything: **details / card / profile / one entity** → \`security.entity_card\`; **two or more entities as the main table** → \`security.entity_list\`; **EA home-style page** → \`security.entity_analytics_dashboard\`. Do not substitute a **list** attachment when the user asked for **entity details** or a **card** — they are different UIs in the product.
 - For \`security.get_entity\` tool results, summarize the current profile and identify whether the entity is considered risky
 - If the result contains 'risk_score_inputs', summarize the alerts that contributed to the risk score calculation
 - If the result contains 'profile_history', summarize the history of this entity over time, which may include:
@@ -138,7 +156,7 @@ if 10 entities are found using \`security.search_entities\`, you MUST call \`sec
   - Whether the entity asset criticality has become more or less critical over time
   - Whether the entity has been added to or removed from watchlists over time
   - Whether the entity has exhibited new behaviors or stopped exhibiting certain behaviors over time
-- For \`security.search_entities\` tool results with **two or more** entities, you **MUST** add \`security.entity_list\` (see "Rich entity list attachment") after \`security.get_entity\` — a markdown-only table is **not** sufficient. For a **single** row, use the single-entity card when a rich UI helps (see "Rich single-entity card"), or prose. **Exception:** if the user asked for the **Entity Analytics dashboard / home / overview UI** (see that **dashboard** critical rule above), use \`security.entity_analytics_dashboard\` as the primary rich UI; you may still add \`security.entity_list\` if a separate compact list attachment helps (requires **two or more** entities in the list payload). The table MUST have the following columns if data is available for them:
+- For \`security.search_entities\` with **two or more** entities **and** the user wants a **list/table/compare** deliverable (see **Choosing**), you **MUST** add \`security.entity_list\` (see "Rich entity list attachment") after \`security.get_entity\` — a markdown-only table is **not** sufficient. For **one** primary entity, or any **details/card/profile** ask, use \`security.entity_card\` (see "Rich single-entity card"), or prose without a list attachment — **not** \`security.entity_list\`. **Exception:** if the user asked for the **Entity Analytics dashboard / home / overview UI** (see that **dashboard** critical rule above), use \`security.entity_analytics_dashboard\` as the primary rich UI; you may still add \`security.entity_list\` only if you have **two or more** entities for that separate list. The entity list table MUST have the following columns if data is available for them:
   - risk score
   - asset criticality
   - first_seen
@@ -147,7 +165,7 @@ if 10 entities are found using \`security.search_entities\`, you MUST call \`sec
 
 ## Rich single-entity card (Canvas UI)
 
-When the investigation is about **one primary entity** (single EUID) and you have called \`security.get_entity\` for it:
+Use \`security.entity_card\` when the user wants **entity details** or the **card** experience for **one** EUID — **not** the multi-entity **list** table. When the investigation is about **one primary entity** (single EUID) and you have called \`security.get_entity\` for it:
 1. Call \`attachments.add\` with \`type\` set to exactly \`security.entity_card\`.
 2. Populate \`data\` at minimum with \`entity_type\` and \`entity_id\`. Map the tool response and your analysis into optional fields:
    - Identity: \`entity_name\`, \`attachmentLabel\` (short card title).
@@ -162,7 +180,7 @@ When the investigation is about **one primary entity** (single EUID) and you hav
 
 ## Rich entity list attachment (Canvas UI)
 
-When your answer depends on **two or more entities** and you have already fetched their profiles with \`security.get_entity\`:
+Use \`security.entity_list\` only for a **multi-entity table** in Canvas (scan, sort, compare **several** EUIDs). It is **not** the attachment for “show me **details**” or “**entity card**” for one host/user. When your answer depends on **two or more entities** (and the **Choosing** table says list, not card) and you have already fetched their profiles with \`security.get_entity\`:
 1. Call the \`attachments.add\` tool with \`type\` set to exactly \`security.entity_list\`.
 2. Set \`data\` to a JSON object with:
    - \`attachmentLabel\`: a short title for the list (for example, "Highest-risk users — last 7 days").
@@ -243,8 +261,14 @@ User query: Show me the entity card for the most risky host.
 Steps:
 1. Use \`security.search_entities\` with \`entityTypes\`: \`["host"]\`, sort implicitly by risk (tool returns highest risk first), and \`maxResults\`: **1**.
 2. Use \`security.get_entity\` for that host’s EUID.
-3. Call \`attachments.add\` with \`type\` \`security.entity_card\` (not \`security.entity_list\`) and populate \`data\` from the profile (see **Rich single-entity card**).
+3. Call \`attachments.add\` with \`type\` \`security.entity_card\` (not \`security.entity_list\`) and populate \`data\` from the profile (see **Rich single-entity card**). \`security.entity_list\` is the wrong Canvas for this question and cannot carry a single row anyway.
 4. Summarize in prose why this host is the riskiest among hosts in scope.
+
+### Example 6: “Details / profile” vs “List / compare” wording
+
+- User: “**Details** on the riskiest host”, “**more about** that host”, “**profile** / **deep dive** for this user” → treat like Example 5: one winner, \`security.entity_card\` after \`security.get_entity\`. **Never** \`security.entity_list\` for that intent.
+
+- User: “**List** the **five** riskiest hosts”, “**compare** these hosts”, “**who are** the riskiest users” (many) → \`security.search_entities\` with matching \`maxResults\`, \`security.get_entity\` per row, then \`security.entity_list\` with **at least two** entities in \`data.entities\`.
 
 ## Best Practices
 - Always use \`calculated_score_norm\` (0-100) when reporting risk scores
@@ -371,6 +395,7 @@ export const getEntityAnalyticsSkill = (ctx: EntityAnalyticsSkillsContext) =>
     name: 'entity-analytics',
     basePath: 'skills/security/entities',
     description: `Guide to finding and investigating security entities (hosts, users, services, generic).
+      Rich UI: security.entity_card for one-entity details/card/flyout-style Canvas; security.entity_list only for two or more entities in a table; security.entity_analytics_dashboard for Entity Analytics home-style overview (see skill "Choosing" table).
       Includes the Entity Analytics dashboard / home overview: use the security.entity_analytics_dashboard attachment so the user gets Preview→Canvas with risk breakdown, highlights, and entities (see skill content).
       Analyze how an entity's risk score, criticality, behaviors and attributes have changed over time (e.g. last 90 days).
       Analyze how alerts contribute to an entity's risk score.

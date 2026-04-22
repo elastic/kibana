@@ -8,7 +8,10 @@
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { CoreStart } from '@kbn/core/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
-import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
+import {
+  markPreserveAgentBuilderSessionDuringNextSecurityNavigation,
+  readLastAgentBuilderAgentIdForSecuritySession,
+} from '../../../common/agent_builder_navigation_gate';
 
 import { EntityType } from '../../../common/entity_analytics/types';
 import { ENTITY_ANALYTICS_HOME_PAGE_PATH, SecurityPageName } from '../../../common/constants';
@@ -20,13 +23,6 @@ import { UsersTableType } from '../../explore/users/store/model';
 const INVALID_PLACEHOLDER_ENTITY_NAME = 'name';
 
 const USER_EUID_PREFIX = 'user:';
-
-/**
- * Same key as agent_builder `storageKeys.agentId` — last selected agent for the sidebar.
- * Passing this into `openChat` keeps `usePersistedConversationId` on the same storage bucket
- * as the active conversation (Agent Builder `updateProps` replaces props in full).
- */
-const AGENT_BUILDER_LAST_AGENT_ID_STORAGE_KEY = 'agentBuilder.agentId';
 
 const AGENT_BUILDER_SIDEBAR_APP_ID = 'agentBuilder' as const;
 
@@ -40,20 +36,8 @@ export const isAgentBuilderSidebarOpen = (chrome?: SecurityAgentBuilderChrome): 
   chrome?.sidebar.getCurrentAppId() === AGENT_BUILDER_SIDEBAR_APP_ID;
 
 /** Exported for unit tests — mirrors agent_builder `getLastAgentId` storage shape. */
-export const getAgentBuilderLastAgentIdForSecurityOpenChat = (): string => {
-  if (typeof window === 'undefined' || window.localStorage == null) {
-    return agentBuilderDefaultAgentId;
-  }
-  const stored = window.localStorage.getItem(AGENT_BUILDER_LAST_AGENT_ID_STORAGE_KEY);
-  if (stored == null || stored === '') {
-    return agentBuilderDefaultAgentId;
-  }
-  try {
-    return JSON.parse(stored) as string;
-  } catch {
-    return stored;
-  }
-};
+export const getAgentBuilderLastAgentIdForSecurityOpenChat =
+  readLastAgentBuilderAgentIdForSecuritySession;
 
 const openSecurityAgentBuilderChatPreservingConversation = (
   agentBuilder: AgentBuilderPluginStart
@@ -61,7 +45,7 @@ const openSecurityAgentBuilderChatPreservingConversation = (
   agentBuilder.openChat({
     sessionTag: 'security',
     newConversation: false,
-    agentId: getAgentBuilderLastAgentIdForSecurityOpenChat(),
+    agentId: readLastAgentBuilderAgentIdForSecuritySession(),
   });
 };
 
@@ -176,6 +160,7 @@ export const navigateToSecurityEntityInApp = ({
   agentBuilder?: AgentBuilderPluginStart;
   chrome?: SecurityAgentBuilderChrome;
 }): void => {
+  markPreserveAgentBuilderSessionDuringNextSecurityNavigation();
   const { deepLinkId, path } = getSecurityEntityExploreNavigateTarget(row);
   const sidebarAlreadyOpen = isAgentBuilderSidebarOpen(chrome);
   if (agentBuilder?.openChat && !sidebarAlreadyOpen) {
@@ -218,6 +203,7 @@ export const navigateToEntityAnalyticsHomePageInApp = ({
     ? `${ENTITY_ANALYTICS_HOME_PAGE_PATH}?${query}`
     : ENTITY_ANALYTICS_HOME_PAGE_PATH;
 
+  markPreserveAgentBuilderSessionDuringNextSecurityNavigation();
   const sidebarAlreadyOpen = isAgentBuilderSidebarOpen(chrome);
   if (agentBuilder?.openChat && !sidebarAlreadyOpen) {
     openSecurityAgentBuilderChatPreservingConversation(agentBuilder);
