@@ -61,7 +61,9 @@ export async function getAlertSnoozeSnapshot({
     }, {});
   } catch (error) {
     logger.error(
-      `Error fetching snooze snapshot for alertId: ${alertId} and ruleId: ${ruleId} - ${error.message}`
+      `Error fetching snooze snapshot for alertId: ${alertId} and ruleId: ${ruleId} - ${
+        error instanceof Error ? error.message : String(error)
+      }`
     );
     return null;
   }

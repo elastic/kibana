@@ -322,4 +322,34 @@ describe('mute alert instance', () => {
 
     expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
   });
+
+  it('rejects expiresAt that is not a full ISO 8601 date-time string', async () => {
+    await expect(() =>
+      muteInstance(context, {
+        params: { alertId: '1', alertInstanceId: 'instance1' },
+        query: { validateAlertsExistence: false },
+        body: {
+          expiresAt: '2026-04-14',
+          conditions: [{ type: 'field_change', field: 'host.name' }],
+        },
+      })
+    ).rejects.toThrow('Failed to validate body');
+
+    expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
+  });
+
+  it('rejects expiresAt that is missing milliseconds (not YYYY-MM-DDTHH:mm:ss.sssZ)', async () => {
+    await expect(() =>
+      muteInstance(context, {
+        params: { alertId: '1', alertInstanceId: 'instance1' },
+        query: { validateAlertsExistence: false },
+        body: {
+          expiresAt: '2026-04-14T12:00:00Z',
+          conditions: [{ type: 'field_change', field: 'host.name' }],
+        },
+      })
+    ).rejects.toThrow('Failed to validate body');
+
+    expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
+  });
 });

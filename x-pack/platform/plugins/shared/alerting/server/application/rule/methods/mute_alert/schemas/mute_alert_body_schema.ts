@@ -6,6 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { MAX_SNOOZED_INSTANCE_CONDITIONS } from '../../../../../../common/max_alert_limit';
+import { isoDateSchema } from '../../../schemas/date_schema';
 import { snoozedInstanceConditionSchema } from '../../../schemas/rule_schemas';
 
 const validateMuteAlertBody = (value: {
@@ -28,13 +30,10 @@ const validateMuteAlertBody = (value: {
 
 export const muteAlertBodySchema = schema.object(
   {
-    expiresAt: schema.maybe(
-      schema.string({
-        validate: (value) =>
-          Number.isNaN(Date.parse(value)) ? 'must be a valid ISO 8601 date string' : undefined,
-      })
+    expiresAt: schema.maybe(isoDateSchema),
+    conditions: schema.maybe(
+      schema.arrayOf(snoozedInstanceConditionSchema, { maxSize: MAX_SNOOZED_INSTANCE_CONDITIONS })
     ),
-    conditions: schema.maybe(schema.arrayOf(snoozedInstanceConditionSchema)),
     conditionOperator: schema.maybe(schema.oneOf([schema.literal('any'), schema.literal('all')])),
   },
   {

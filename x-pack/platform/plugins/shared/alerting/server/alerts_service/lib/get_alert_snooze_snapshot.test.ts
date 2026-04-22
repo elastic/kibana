@@ -137,7 +137,7 @@ describe('getAlertSnoozeSnapshot', () => {
     });
   });
 
-  test('logs an error when search fails', async () => {
+  test('logs an error when search fails with an Error instance', async () => {
     const logger = loggingSystemMock.createLogger();
     const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
@@ -155,6 +155,27 @@ describe('getAlertSnoozeSnapshot', () => {
     expect(result).toBeNull();
     expect(logger.error).toHaveBeenCalledWith(
       'Error fetching snooze snapshot for alertId: test-alert-id and ruleId: test-rule-id - Test error'
+    );
+  });
+
+  test('logs an error when search fails with a non-Error thrown value', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    clusterClient.search.mockRejectedValueOnce('unexpected string error');
+
+    const result = await getAlertSnoozeSnapshot({
+      logger,
+      esClient: clusterClient,
+      indices: ['test-index'],
+      alertId: 'test-alert-id',
+      ruleId: 'test-rule-id',
+      fields: ['host.name'],
+    });
+
+    expect(result).toBeNull();
+    expect(logger.error).toHaveBeenCalledWith(
+      'Error fetching snooze snapshot for alertId: test-alert-id and ruleId: test-rule-id - unexpected string error'
     );
   });
 });
