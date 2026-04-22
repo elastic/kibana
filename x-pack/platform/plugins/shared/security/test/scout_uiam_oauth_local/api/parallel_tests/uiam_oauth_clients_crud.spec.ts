@@ -50,72 +50,82 @@ apiTest.describe(
         const initialRedirectUri = 'https://example.test/callback';
         const secondRedirectUri = 'https://example.test/callback-2';
 
-        const createResponse = await apiClient.post(CLIENTS_BASE, {
-          headers: authHeaders,
-          responseType: 'json',
-          body: {
-            resource,
-            client_name: clientName,
-            client_type: 'public',
-            client_metadata: { owner: 'scout-crud' },
-            redirect_uris: [initialRedirectUri],
-          },
-        });
-        expect(createResponse.statusCode).toBe(200);
-        const created = createResponse.body;
-        expect(created.id).toBeDefined();
-        expect(created.client_name).toBe(clientName);
-        expect(created.type).toBe('public');
-        expect(created.redirect_uris).toStrictEqual([initialRedirectUri]);
-
-        const clientId: string = created.id;
+        let clientId: string | undefined;
 
         try {
-          const getResponse = await apiClient.get(
-            `${CLIENTS_BASE}/${encodeURIComponent(clientId)}`,
-            { headers: authHeaders, responseType: 'json' }
-          );
-          expect(getResponse.statusCode).toBe(200);
-          expect(getResponse.body.id).toBe(clientId);
-          expect(getResponse.body.redirect_uris).toStrictEqual([initialRedirectUri]);
-
-          const listResponse = await apiClient.get(CLIENTS_BASE, {
-            headers: authHeaders,
-            responseType: 'json',
-          });
-          expect(listResponse.statusCode).toBe(200);
-          const listed = (listResponse.body.clients as Array<{ id: string }>).find(
-            (c) => c.id === clientId
-          );
-          expect(listed).toBeDefined();
-
-          const patchResponse = await apiClient.patch(
-            `${CLIENTS_BASE}/${encodeURIComponent(clientId)}`,
-            {
+          await apiTest.step('create client', async () => {
+            const createResponse = await apiClient.post(CLIENTS_BASE, {
               headers: authHeaders,
               responseType: 'json',
               body: {
-                client_name: `${clientName}-renamed`,
-                client_metadata: { owner: 'scout-crud', updated: 'true' },
-                redirect_uris: [initialRedirectUri, secondRedirectUri],
+                resource,
+                client_name: clientName,
+                client_type: 'public',
+                client_metadata: { owner: 'scout-crud' },
+                redirect_uris: [initialRedirectUri],
               },
-            }
-          );
-          expect(patchResponse.statusCode).toBe(200);
-          expect(patchResponse.body.client_name).toBe(`${clientName}-renamed`);
-          const patchedUris: string[] = patchResponse.body.redirect_uris ?? [];
-          expect(patchedUris).toContain(initialRedirectUri);
-          expect(patchedUris).toContain(secondRedirectUri);
+            });
+            expect(createResponse.statusCode).toBe(200);
+            const created = createResponse.body;
+            expect(created.id).toBeDefined();
+            expect(created.client_name).toBe(clientName);
+            expect(created.type).toBe('public');
+            expect(created.redirect_uris).toStrictEqual([initialRedirectUri]);
+
+            clientId = created.id;
+          });
+
+          await apiTest.step('get client by id', async () => {
+            const getResponse = await apiClient.get(
+              `${CLIENTS_BASE}/${encodeURIComponent(clientId!)}`,
+              { headers: authHeaders, responseType: 'json' }
+            );
+            expect(getResponse.statusCode).toBe(200);
+            expect(getResponse.body.id).toBe(clientId);
+            expect(getResponse.body.redirect_uris).toStrictEqual([initialRedirectUri]);
+          });
+
+          await apiTest.step('list clients includes the new client', async () => {
+            const listResponse = await apiClient.get(CLIENTS_BASE, {
+              headers: authHeaders,
+              responseType: 'json',
+            });
+            expect(listResponse.statusCode).toBe(200);
+            const listed = (listResponse.body.clients as Array<{ id: string }>).find(
+              (c) => c.id === clientId
+            );
+            expect(listed).toBeDefined();
+          });
+
+          await apiTest.step('patch client (including redirect_uris)', async () => {
+            const patchResponse = await apiClient.patch(
+              `${CLIENTS_BASE}/${encodeURIComponent(clientId!)}`,
+              {
+                headers: authHeaders,
+                responseType: 'json',
+                body: {
+                  client_name: `${clientName}-renamed`,
+                  client_metadata: { owner: 'scout-crud', updated: 'true' },
+                  redirect_uris: [initialRedirectUri, secondRedirectUri],
+                },
+              }
+            );
+            expect(patchResponse.statusCode).toBe(200);
+            expect(patchResponse.body.client_name).toBe(`${clientName}-renamed`);
+            const patchedUris: string[] = patchResponse.body.redirect_uris ?? [];
+            expect(patchedUris).toContain(initialRedirectUri);
+            expect(patchedUris).toContain(secondRedirectUri);
+          });
         } finally {
-          const revokeResponse = await apiClient.post(
-            `${CLIENTS_BASE}/${encodeURIComponent(clientId)}/_revoke`,
-            {
+          // Best-effort cleanup (only if the client was successfully created above).
+          // eslint-disable-next-line playwright/no-conditional-in-test
+          if (clientId) {
+            await apiClient.post(`${CLIENTS_BASE}/${encodeURIComponent(clientId)}/_revoke`, {
               headers: authHeaders,
               responseType: 'json',
               body: { reason: 'scout cleanup' },
-            }
-          );
-          expect([200, 204]).toContain(revokeResponse.statusCode);
+            });
+          }
         }
       }
     );

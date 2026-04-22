@@ -10,6 +10,12 @@ import { schema } from '@kbn/config-schema';
 // Max base64-encoded logo data length (256KB), consistent with the UIAM API.
 const CLIENT_LOGO_MAX_DATA_LENGTH = 262144;
 
+// Upper bound on registered redirect URIs per OAuth client. UIAM does not enforce
+// a server-side cap, so this guards Kibana against unbounded-array DoS inputs.
+// 32 leaves ample headroom versus realistic client usage (localhost + a handful
+// of environment-specific callbacks).
+const REDIRECT_URIS_MAX_SIZE = 32;
+
 export const clientLogoSchema = schema.object({
   media_type: schema.oneOf([
     schema.literal('image/png'),
@@ -24,7 +30,9 @@ export const clientTypeSchema = schema.oneOf([
   schema.literal('confidential'),
 ]);
 
-export const redirectUrisSchema = schema.arrayOf(schema.string({ minLength: 1 }));
+export const redirectUrisSchema = schema.arrayOf(schema.string({ minLength: 1 }), {
+  maxSize: REDIRECT_URIS_MAX_SIZE,
+});
 
 export const createClientBodySchema = schema.object({
   resource: schema.string(),
