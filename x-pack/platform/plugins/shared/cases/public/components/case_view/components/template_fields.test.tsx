@@ -28,6 +28,7 @@ const mockTemplate: ParsedTemplate = {
   deletedAt: null,
   isLatest: true,
   latestVersion: 1,
+  definitionString: 'name: Test Template\nfields: []',
   definition: {
     name: 'Test Template',
     fields: [

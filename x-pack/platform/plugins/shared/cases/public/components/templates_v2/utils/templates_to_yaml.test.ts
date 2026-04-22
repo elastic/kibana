@@ -304,6 +304,7 @@ describe('RADIO_GROUP field serialization', () => {
     isLatest: true,
     deletedAt: null,
     definition: { name: 'Radio template', fields: [] },
+    definitionString: 'name: Radio template\nfields: []',
   };
 
   it('serializes options as a YAML sequence and default as a scalar', () => {
@@ -375,6 +376,7 @@ describe('CHECKBOX_GROUP field serialization', () => {
     isLatest: true,
     deletedAt: null,
     definition: { name: 'Checkbox template', fields: [] },
+    definitionString: 'name: Checkbox template\nfields: []',
   };
 
   it('serializes options and defaults as YAML sequences', () => {
@@ -477,6 +479,7 @@ describe('display and validation serialization', () => {
     isLatest: true,
     deletedAt: null,
     definition: { name: 'Conditions template', fields: [] },
+    definitionString: 'name: Conditions template\nfields: []',
   };
 
   it('serializes display.show_when with a simple condition rule', () => {
@@ -658,6 +661,7 @@ describe('templateToYaml', () => {
       templateVersion: 1,
       latestVersion: 1,
       isLatest: true,
+      definitionString: 'name: My template\nfields: []',
       deletedAt: null,
       definition: {
         name: 'My template',
