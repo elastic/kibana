@@ -34,6 +34,41 @@ import { getLiveQueryDetailsResponseSchema } from './response_schemas';
 import { getResultCountsForActions } from '../../lib/get_result_counts_for_actions';
 import { hasConnectedRemoteClusters } from '../../utils/ccs_utils';
 import { buildPackResultCounts, buildSingleQueryResultCounts } from '../../lib/build_result_counts';
+import type { ResultCounts } from '../../../common/api/live_query/result_counts';
+
+const fetchResultCounts = async (
+  osqueryContext: OsqueryAppContext,
+  queryActionIds: string[],
+  spaceId: string,
+  isPack: boolean
+): Promise<ResultCounts | undefined> => {
+  if (!osqueryContext.experimentalFeatures.resultCountsEnabled) {
+    return undefined;
+  }
+
+  try {
+    const [coreStartServices] = await osqueryContext.getStartServices();
+    const esClient = coreStartServices.elasticsearch.client.asInternalUser;
+    const ccsEnabled = await hasConnectedRemoteClusters(esClient);
+    const resultCountsMap = await getResultCountsForActions(
+      esClient,
+      queryActionIds,
+      spaceId,
+      ccsEnabled
+    );
+
+    return isPack
+      ? buildPackResultCounts(queryActionIds, resultCountsMap)
+      : buildSingleQueryResultCounts(queryActionIds[0], resultCountsMap);
+  } catch (err) {
+    const logger = osqueryContext.logFactory.get('liveQueryDetails');
+    logger.warn(
+      `Failed to fetch result_counts for actions [${queryActionIds.join(',')}]: ${String(err)}`
+    );
+
+    return undefined;
+  }
+};
 
 export const getLiveQueryDetailsRoute = (
   router: IRouter<DataRequestHandlerContext>,
@@ -113,35 +148,18 @@ export const getLiveQueryDetailsRoute = (
           const agentByActionIdStatusMap = mapKeys(responseData, 'action_id');
 
           const queryActionIds = map(queries, 'action_id').filter((id): id is string => !!id);
-          let resultCounts;
-          if (osqueryContext.experimentalFeatures.resultCountsEnabled) {
-            try {
-              const [coreStartServices] = await osqueryContext.getStartServices();
-              const esClient = coreStartServices.elasticsearch.client.asInternalUser;
-              const ccsEnabled = await hasConnectedRemoteClusters(esClient);
-              const resultCountsMap = await getResultCountsForActions(
-                esClient,
-                queryActionIds,
-                spaceId,
-                ccsEnabled
-              );
-
-              resultCounts = actionDetails._source?.pack_id
-                ? buildPackResultCounts(queryActionIds, resultCountsMap)
-                : buildSingleQueryResultCounts(queryActionIds[0], resultCountsMap);
-            } catch (err) {
-              const logger = osqueryContext.logFactory.get('liveQueryDetails');
-              logger.warn(
-                `Failed to fetch result_counts for action ${request.params.id}: ${String(err)}`
-              );
-            }
-          }
+          const resultCounts = await fetchResultCounts(
+            osqueryContext,
+            queryActionIds,
+            spaceId,
+            !!actionDetails._source?.pack_id
+          );
 
           return response.ok({
             body: {
               data: {
                 ...pick(
-                  actionDetails?._source,
+                  actionDetails._source,
                   'action_id',
                   'expiration',
                   '@timestamp',

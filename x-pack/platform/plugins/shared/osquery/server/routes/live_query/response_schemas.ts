@@ -64,15 +64,15 @@ const findLiveQueryItemSchema = schema.object(
           queries: schema.maybe(schema.arrayOf(liveQueryQueryItemSchema)),
           result_counts: schema.maybe(
             schema.object({
-              total_rows: schema.maybe(schema.number()),
+              total_rows: schema.number(),
               // Single-query fields
               responded_agents: schema.maybe(schema.number()),
               // Pack-specific fields
               queries_with_results: schema.maybe(schema.number()),
               queries_total: schema.maybe(schema.number()),
               // Common fields
-              successful_agents: schema.maybe(schema.number()),
-              error_agents: schema.maybe(schema.number()),
+              successful_agents: schema.number(),
+              error_agents: schema.number(),
             })
           ),
         },
@@ -146,12 +146,12 @@ export const getLiveQueryDetailsResponseSchema = schema.object({
         queries: schema.maybe(schema.arrayOf(liveQueryDetailsQueryItemSchema)),
         result_counts: schema.maybe(
           schema.object({
-            total_rows: schema.maybe(schema.number()),
+            total_rows: schema.number(),
             responded_agents: schema.maybe(schema.number()),
             queries_with_results: schema.maybe(schema.number()),
             queries_total: schema.maybe(schema.number()),
-            successful_agents: schema.maybe(schema.number()),
-            error_agents: schema.maybe(schema.number()),
+            successful_agents: schema.number(),
+            error_agents: schema.number(),
           })
         ),
       },

@@ -5,29 +5,16 @@
  * 2.0.
  */
 
+import type {
+  SingleQueryResultCounts,
+  PackResultCounts,
+} from '../../common/api/live_query/result_counts';
 import type { ResultCountsMap } from './get_result_counts_for_actions';
-
-export interface SingleQueryResultCountsResponse {
-  total_rows: number;
-  responded_agents: number;
-  successful_agents: number;
-  error_agents: number;
-}
-
-export interface PackResultCountsResponse {
-  total_rows: number;
-  queries_with_results: number;
-  queries_total: number;
-  successful_agents: number;
-  error_agents: number;
-}
-
-export type ResultCountsResponse = SingleQueryResultCountsResponse | PackResultCountsResponse;
 
 export const buildPackResultCounts = (
   queryActionIds: string[],
   resultCountsMap: ResultCountsMap
-): PackResultCountsResponse => {
+): PackResultCounts => {
   let totalRows = 0;
   let queriesWithResults = 0;
   let successfulAgents = 0;
@@ -65,7 +52,7 @@ export const buildPackResultCounts = (
 export const buildSingleQueryResultCounts = (
   queryActionId: string | undefined,
   resultCountsMap: ResultCountsMap
-): SingleQueryResultCountsResponse => {
+): SingleQueryResultCounts => {
   const counts = queryActionId ? resultCountsMap.get(queryActionId) : undefined;
 
   return {

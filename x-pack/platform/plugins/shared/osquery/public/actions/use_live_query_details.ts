@@ -11,8 +11,11 @@ import { i18n } from '@kbn/i18n';
 import { filter } from 'lodash';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { API_VERSIONS } from '../../common/constants';
+import type { ResultCounts } from '../../common/api/live_query/result_counts';
 import { useKibana } from '../common/lib/kibana';
 import { useErrorToast } from '../common/hooks/use_error_toast';
+
+export type { SingleQueryResultCounts, PackResultCounts, ResultCounts } from '../../common/api/live_query/result_counts';
 
 interface UseLiveQueryDetails {
   actionId?: string;
@@ -35,23 +38,6 @@ export interface PackQueriesQuery {
   timeout?: number;
   interval?: number | string;
 }
-
-export interface SingleQueryResultCounts {
-  total_rows: number;
-  responded_agents: number;
-  successful_agents: number;
-  error_agents: number;
-}
-
-export interface PackResultCounts {
-  total_rows: number;
-  queries_with_results: number;
-  queries_total: number;
-  successful_agents: number;
-  error_agents: number;
-}
-
-export type ResultCounts = SingleQueryResultCounts | PackResultCounts;
 
 export interface LiveQueryDetailsItem {
   action_id: string;
