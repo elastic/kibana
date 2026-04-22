@@ -8,6 +8,9 @@
 import {
   ALLOWED_MAX_ALERTS,
   MAX_SNOOZED_INSTANCE_CONDITIONS,
+  MAX_SNOOZED_INSTANCE_ID_LENGTH,
+  MAX_SNOOZED_BY_LENGTH,
+  MAX_SNOOZED_CONDITION_FIELD_LENGTH,
 } from '../../../../common/max_alert_limit';
 import { rawRuleSchema } from './v12';
 
@@ -91,6 +94,37 @@ describe('rawRuleSchemaV12', () => {
     expect(() => rawRuleSchema.validate(baseRule)).not.toThrow();
   });
 
+  it('accepts a valid ISO snoozedAt without expiresAt', () => {
+    expect(() =>
+      rawRuleSchema.validate({
+        ...baseRule,
+        snoozedInstances: [
+          {
+            instanceId: 'alert-1',
+            snoozedAt: '2024-01-02T12:00:00.000Z',
+            snoozedBy: 'elastic',
+          },
+        ],
+      })
+    ).not.toThrow();
+  });
+
+  it('accepts a valid ISO expiresAt alongside a valid ISO snoozedAt', () => {
+    expect(() =>
+      rawRuleSchema.validate({
+        ...baseRule,
+        snoozedInstances: [
+          {
+            instanceId: 'alert-1',
+            expiresAt: '2024-01-03T00:00:00.000Z',
+            snoozedAt: '2024-01-02T12:00:00.000Z',
+            snoozedBy: 'elastic',
+          },
+        ],
+      })
+    ).not.toThrow();
+  });
+
   it('rejects snoozedInstances when conditions exceed the schema max', () => {
     const conditions = Array.from({ length: MAX_SNOOZED_INSTANCE_CONDITIONS + 1 }, () => ({
       type: 'severity_change' as const,
@@ -122,6 +156,116 @@ describe('rawRuleSchemaV12', () => {
       rawRuleSchema.validate({
         ...baseRule,
         snoozedInstances,
+      })
+    ).toThrow();
+  });
+
+  it('rejects snoozedInstances when snoozedAt is not a valid ISO date', () => {
+    expect(() =>
+      rawRuleSchema.validate({
+        ...baseRule,
+        snoozedInstances: [
+          {
+            instanceId: 'alert-1',
+            snoozedAt: 'not-a-date',
+            snoozedBy: 'elastic',
+          },
+        ],
+      })
+    ).toThrow();
+  });
+
+  it('rejects snoozedInstances when snoozedAt is a valid date but not ISO format', () => {
+    expect(() =>
+      rawRuleSchema.validate({
+        ...baseRule,
+        snoozedInstances: [
+          {
+            instanceId: 'alert-1',
+            snoozedAt: 'Jan 2 2024 12:00:00',
+            snoozedBy: 'elastic',
+          },
+        ],
+      })
+    ).toThrow();
+  });
+
+  it('rejects snoozedInstances when expiresAt is not a valid ISO date', () => {
+    expect(() =>
+      rawRuleSchema.validate({
+        ...baseRule,
+        snoozedInstances: [
+          {
+            instanceId: 'alert-1',
+            expiresAt: 'not-a-date',
+            snoozedAt: '2024-01-02T12:00:00.000Z',
+            snoozedBy: 'elastic',
+          },
+        ],
+      })
+    ).toThrow();
+  });
+
+  it('rejects snoozedInstances when expiresAt is a valid date but not ISO format', () => {
+    expect(() =>
+      rawRuleSchema.validate({
+        ...baseRule,
+        snoozedInstances: [
+          {
+            instanceId: 'alert-1',
+            expiresAt: 'Jan 3 2024 12:00:00',
+            snoozedAt: '2024-01-02T12:00:00.000Z',
+            snoozedBy: 'elastic',
+          },
+        ],
+      })
+    ).toThrow();
+  });
+
+  it('rejects snoozedInstances when instanceId exceeds max length', () => {
+    expect(() =>
+      rawRuleSchema.validate({
+        ...baseRule,
+        snoozedInstances: [
+          {
+            instanceId: 'a'.repeat(MAX_SNOOZED_INSTANCE_ID_LENGTH + 1),
+            snoozedAt: '2024-01-02T12:00:00.000Z',
+            snoozedBy: 'elastic',
+          },
+        ],
+      })
+    ).toThrow();
+  });
+
+  it('rejects snoozedInstances when snoozedBy exceeds max length', () => {
+    expect(() =>
+      rawRuleSchema.validate({
+        ...baseRule,
+        snoozedInstances: [
+          {
+            instanceId: 'alert-1',
+            snoozedAt: '2024-01-02T12:00:00.000Z',
+            snoozedBy: 'a'.repeat(MAX_SNOOZED_BY_LENGTH + 1),
+          },
+        ],
+      })
+    ).toThrow();
+  });
+
+  it('rejects snoozedInstances when a field_change condition field exceeds max length', () => {
+    expect(() =>
+      rawRuleSchema.validate({
+        ...baseRule,
+        snoozedInstances: [
+          {
+            instanceId: 'alert-1',
+            conditions: [
+              { type: 'field_change', field: 'a'.repeat(MAX_SNOOZED_CONDITION_FIELD_LENGTH + 1) },
+            ],
+            snoozedAt: '2024-01-02T12:00:00.000Z',
+            snoozedBy: 'elastic',
+          },
+        ],
       })
     ).toThrow();
   });

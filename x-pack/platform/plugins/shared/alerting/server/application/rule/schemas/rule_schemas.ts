@@ -10,6 +10,9 @@ import { ruleParamsSchema } from '@kbn/response-ops-rule-params';
 import {
   ALLOWED_MAX_ALERTS,
   MAX_SNOOZED_INSTANCE_CONDITIONS,
+  MAX_SNOOZED_INSTANCE_ID_LENGTH,
+  MAX_SNOOZED_BY_LENGTH,
+  MAX_SNOOZED_CONDITION_FIELD_LENGTH,
 } from '../../../../common/max_alert_limit';
 import {
   ruleLastRunOutcomeValues,
@@ -18,7 +21,7 @@ import {
   ruleExecutionStatusWarningReason,
 } from '../constants';
 import { rRuleSchema } from '../../r_rule/schemas';
-import { dateSchema } from './date_schema';
+import { dateSchema, isoDateSchema } from './date_schema';
 import { notifyWhenSchema } from './notify_when_schema';
 import { actionSchema, systemActionSchema } from './action_schemas';
 import { flappingSchema } from './flapping_schema';
@@ -160,7 +163,7 @@ export const snoozeScheduleSchema = schema.object({
 export const snoozedInstanceConditionSchema = schema.oneOf([
   schema.object({
     type: schema.literal('field_change'),
-    field: schema.string(),
+    field: schema.string({ maxLength: MAX_SNOOZED_CONDITION_FIELD_LENGTH }),
   }),
   schema.object({
     type: schema.literal('severity_change'),
@@ -178,15 +181,15 @@ export const snoozedInstanceConditionSchema = schema.oneOf([
 ]);
 
 export const snoozedInstanceSchema = schema.object({
-  instanceId: schema.string(),
-  expiresAt: schema.maybe(schema.string()),
+  instanceId: schema.string({ maxLength: MAX_SNOOZED_INSTANCE_ID_LENGTH }),
+  expiresAt: schema.maybe(isoDateSchema),
   conditions: schema.maybe(
     schema.arrayOf(snoozedInstanceConditionSchema, { maxSize: MAX_SNOOZED_INSTANCE_CONDITIONS })
   ),
   conditionOperator: schema.maybe(schema.oneOf([schema.literal('any'), schema.literal('all')])),
   snoozeSnapshot: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-  snoozedAt: schema.string(),
-  snoozedBy: schema.string(),
+  snoozedAt: isoDateSchema,
+  snoozedBy: schema.string({ maxLength: MAX_SNOOZED_BY_LENGTH }),
 });
 
 export const alertDelaySchema = schema.object({
