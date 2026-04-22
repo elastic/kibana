@@ -11,16 +11,19 @@ import { Form, Formik, type FormikProps } from 'formik';
 import React from 'react';
 
 import { SUPPORTED_LOCALE_IDS } from '@kbn/i18n';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { FormChangesProvider, useFormChanges } from '@kbn/security-form-components';
 import type { LocaleValue } from '@kbn/user-profile-components';
 
 import { UserLocaleEditor, type UserProfileFormValues } from './user_profile';
 
 interface LocaleEditorArgs {
-  /** The server admin's `i18n.locale` config (from kibana.yml). Drives the "Server default (Label)" parenthetical. */
-  configLocale: string;
-  /** The locale saved in the user profile. Empty string `""` represents "no explicit choice" and pre-selects "Server default". */
+  /**
+   * The locale value in Formik state. In the real app this is derived by
+   * `useUserProfileForm` from the user's saved profile, falling back to the
+   * server-configured locale via `toCanonicalLocaleId(i18n.getLocale())` when
+   * no preference is saved. By the time the component renders, this is always
+   * a concrete supported locale id.
+   */
   storedLocale: LocaleValue;
 }
 
@@ -31,31 +34,20 @@ export default {
     docs: {
       description: {
         component:
-          'The locale selector in the User Profile page. Includes a “Server default” ' +
-          'pseudo-option that falls back to the server’s `i18n.locale` config. The ' +
-          'parenthetical label reflects whichever locale the admin has configured.',
+          'The locale selector in the User Profile page. The form is initialized ' +
+          "with the user's saved profile locale, or — when no preference exists — " +
+          'with the server-configured locale from `kibana.yml`.',
       },
     },
   },
   argTypes: {
-    configLocale: {
-      description: "The server admin's `i18n.locale` config (from kibana.yml).",
+    storedLocale: {
+      description: 'The locale value in Formik state (i.e., what `useUserProfileForm` produces).',
       control: { type: 'select' },
       options: SUPPORTED_LOCALE_IDS,
     },
-    storedLocale: {
-      description:
-        'The locale saved in the user profile. `""` = no explicit choice (Server default).',
-      control: { type: 'select' },
-      options: ['', ...SUPPORTED_LOCALE_IDS],
-    },
   },
 } as Meta<LocaleEditorArgs>;
-
-/** Minimal stub of `CoreStart` services needed by `UserLocaleEditor` via `useKibana`. */
-const makeServices = (configLocale: string) => ({
-  i18n: { getConfigLocale: () => configLocale },
-});
 
 /** Mirrors the initial values shape that `useUserProfileForm` produces. */
 const makeInitialValues = (storedLocale: LocaleValue): UserProfileFormValues => ({
@@ -73,70 +65,38 @@ const makeInitialValues = (storedLocale: LocaleValue): UserProfileFormValues => 
 
 const mockSubmitHandlerAction = action('Form submitted with values');
 
-const LocaleEditorHarness: React.FC<LocaleEditorArgs> = ({ configLocale, storedLocale }) => {
+const LocaleEditorHarness: React.FC<LocaleEditorArgs> = ({ storedLocale }) => {
   const formChanges = useFormChanges();
   return (
-    <KibanaContextProvider services={makeServices(configLocale)}>
-      <Formik<UserProfileFormValues>
-        enableReinitialize
-        initialValues={makeInitialValues(storedLocale)}
-        onSubmit={(values) => {
-          mockSubmitHandlerAction(values);
-        }}
-      >
-        {(formik: FormikProps<UserProfileFormValues>) => (
-          <FormChangesProvider value={formChanges}>
-            <Form>
-              <UserLocaleEditor
-                formik={formik as unknown as Parameters<typeof UserLocaleEditor>[0]['formik']}
-              />
-            </Form>
-          </FormChangesProvider>
-        )}
-      </Formik>
-    </KibanaContextProvider>
+    <Formik<UserProfileFormValues>
+      enableReinitialize
+      initialValues={makeInitialValues(storedLocale)}
+      onSubmit={(values) => {
+        mockSubmitHandlerAction(values);
+      }}
+    >
+      {(formik: FormikProps<UserProfileFormValues>) => (
+        <FormChangesProvider value={formChanges}>
+          <Form>
+            <UserLocaleEditor
+              formik={formik as unknown as Parameters<typeof UserLocaleEditor>[0]['formik']}
+            />
+          </Form>
+        </FormChangesProvider>
+      )}
+    </Formik>
   );
 };
 
 const Template: StoryFn<LocaleEditorArgs> = (args) => <LocaleEditorHarness {...args} />;
 
 /**
- * New user (no stored locale) on a default deployment. The dropdown pre-selects
- * "Server default (English)" — the user hasn't made an explicit choice.
+ * English is pre-selected. This is the state either:
+ *   - for a user with `locale: "en"` saved in their profile, or
+ *   - for a user with no saved preference on a default (`i18n.locale: en`) deployment,
+ *     where `useUserProfileForm` falls back to the loaded locale.
  */
-export const DefaultDeploymentNoUserChoice = Template.bind({});
-DefaultDeploymentNoUserChoice.args = {
-  configLocale: 'en',
-  storedLocale: '',
-};
-
-/**
- * New user on a deployment where the admin set `i18n.locale: fr-FR`. The dropdown
- * shows "Server default (Français)" — the user sees French by inheritance,
- * and the label makes it explicit what the fallback resolves to.
- */
-export const ServerConfiguredFrenchNoUserChoice = Template.bind({});
-ServerConfiguredFrenchNoUserChoice.args = {
-  configLocale: 'fr-FR',
-  storedLocale: '',
-};
-
-/**
- * User has explicitly picked French, overriding whatever the admin configured.
- * The dropdown shows "Français" selected.
- */
-export const UserChoseFrench = Template.bind({});
-UserChoseFrench.args = {
-  configLocale: 'en',
-  storedLocale: 'fr-FR',
-};
-
-/**
- * User has explicitly picked Japanese on a server configured for French.
- * Shows that user profile overrides the server config.
- */
-export const UserOverridesServerConfig = Template.bind({});
-UserOverridesServerConfig.args = {
-  configLocale: 'fr-FR',
-  storedLocale: 'ja-JP',
+export const English = Template.bind({});
+English.args = {
+  storedLocale: 'en',
 };

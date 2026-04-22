@@ -57,6 +57,7 @@ import type {
 } from '@kbn/user-profile-components';
 import { UserAvatar, useUpdateUserProfile } from '@kbn/user-profile-components';
 
+import { usePrimeUserLocale } from './use_prime_user_locale';
 import { createImageHandler, getRandomColor, VALID_HEX_COLOR } from './utils';
 import type { AuthenticatedUser } from '../../../common';
 import { IMAGE_FILE_TYPES } from '../../../common/constants';
@@ -709,6 +710,10 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
   const formChanges = useFormChanges();
   const titleId = useGeneratedHtmlId();
   const [showChangePasswordForm, setShowChangePasswordForm] = useState(false);
+
+  // Silently primes the user's profile locale to match the server-configured locale
+  // if they have no saved preference, ensuring the form shows a concrete value.
+  usePrimeUserLocale();
 
   const isCloudUser = user.elastic_cloud_user;
 
