@@ -14827,6 +14827,13 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              initEntityStoreRequest:
+                summary: Initialize with default settings
+                value:
+                  entityTypes:
+                    - host
+                    - user
             schema:
               type: object
               properties:
@@ -15073,6 +15080,16 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              initEntityEngineRequest:
+                summary: Initialize a host engine with default settings
+                value:
+                  delay: 1m
+                  fieldHistoryLength: 10
+                  frequency: 1m
+                  indexPattern: ''
+                  lookbackPeriod: 3h
+                  timestampField: '@timestamp'
             schema:
               type: object
               properties:
@@ -15385,6 +15402,22 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                listEntitiesResponse:
+                  summary: A page of host entities
+                  value:
+                    page: 1
+                    per_page: 10
+                    records:
+                      - entity:
+                          id: web-server-01
+                          name: web-server-01
+                          type: host
+                        host:
+                          ip:
+                            - 10.0.0.1
+                          name: web-server-01
+                    total: 1
               schema:
                 type: object
                 properties:
