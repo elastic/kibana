@@ -10,14 +10,15 @@
 import { i18n } from '@kbn/i18n';
 import { EsqlQuery, mutate } from '@elastic/esql';
 import type { QuickFix } from './types';
+import type { ErrorTypes } from '../../commands/definitions/types';
 import { EsqlSettingNames } from '../../commands/definitions/generated/settings';
 import { UnmappedFieldsStrategy } from '../../commands/registry/types';
 import { hasWiredStreamsInQuery } from '../../commands/definitions/utils/sources';
 
 /**
- * Registry of quick fixes by validation message code.
+ * Registry of quick fixes by error code.
  */
-export const fixesByMessageCode: Record<string, QuickFix> = {
+export const fixesByMessageCode: Partial<Record<ErrorTypes, QuickFix>> = {
   unknownColumn: {
     title: i18n.translate('kbn-esql-language.esql.quickFix.loadUnmappedFields', {
       defaultMessage: 'Load unmapped fields',

@@ -9,6 +9,7 @@
 
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import type { QuickFix } from './types';
+import type { ErrorTypes } from '../../commands/definitions/types';
 import { fixesByMessageCode } from './fixes_by_message_code';
 
 export interface EsqlCodeAction {
@@ -32,7 +33,7 @@ export async function getQuickFixForMessage({
   };
   callbacks?: ESQLCallbacks;
 }): Promise<EsqlCodeAction | undefined> {
-  const quickFix = fixesByMessageCode[message.code];
+  const quickFix = fixesByMessageCode[message.code as ErrorTypes];
   if (!quickFix) {
     return undefined;
   }

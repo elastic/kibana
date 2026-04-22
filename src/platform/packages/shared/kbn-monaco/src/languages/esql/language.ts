@@ -126,9 +126,6 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
 
       const queryString = model.getValue();
 
-      // For each marker, resolve its source message and request its quick
-      // fixes. Results are paired with the marker so the Monaco action can
-      // attach it back as a diagnostic.
       await Promise.all(
         context.markers.map(async (marker) => {
           const message = findMessageByMarker(allMessages, marker);

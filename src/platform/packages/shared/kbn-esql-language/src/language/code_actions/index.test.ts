@@ -83,8 +83,8 @@ describe('getQuickFixForMessage', () => {
     });
 
     it('returns undefined when fixQuery throws', async () => {
-      const { fixQuery } = fixesByMessageCode.unknownColumn;
-      fixesByMessageCode.unknownColumn.fixQuery = () => {
+      const { fixQuery } = fixesByMessageCode.unknownColumn!;
+      fixesByMessageCode.unknownColumn!.fixQuery = () => {
         throw new Error('mutator failed');
       };
 
@@ -99,7 +99,7 @@ describe('getQuickFixForMessage', () => {
 
         expect(result).toBeUndefined();
       } finally {
-        fixesByMessageCode.unknownColumn.fixQuery = fixQuery;
+        fixesByMessageCode.unknownColumn!.fixQuery = fixQuery;
       }
     });
   });
