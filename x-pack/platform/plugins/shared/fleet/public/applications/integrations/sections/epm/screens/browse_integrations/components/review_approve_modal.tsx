@@ -12,6 +12,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiCheckbox,
   EuiComboBox,
   EuiEmptyPrompt,
   EuiFieldText,
@@ -29,6 +30,7 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiText,
+  htmlIdGenerator,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -145,6 +147,7 @@ export const ReviewApproveModal: React.FC<{
     version: string,
     categories: string[]
   ) => Promise<void>;
+  onInstallToCluster?: (integrationId: string) => Promise<void>;
   DataStreamResultsFlyoutComponent?: DataStreamResultsFlyoutComponent;
 }> = ({
   isOpen,
@@ -153,6 +156,7 @@ export const ReviewApproveModal: React.FC<{
   onEdit,
   onFetchReviewDetails,
   onApproveAndDeploy,
+  onInstallToCluster,
   DataStreamResultsFlyoutComponent,
 }) => {
   const { automaticImport } = useStartServices();
@@ -165,6 +169,12 @@ export const ReviewApproveModal: React.FC<{
   const [selectedDataStreamForFlyout, setSelectedDataStreamForFlyout] =
     useState<ReviewDataStream | null>(null);
   const [selectedCategories, setSelectedCategories] = useState<EuiComboBoxOptionOption[]>([]);
+  const [autoInstallAfterApproval, setAutoInstallAfterApproval] = useState(true);
+
+  const autoInstallCheckboxId = useMemo(
+    () => htmlIdGenerator('manageIntegrationReviewAutoInstall')(),
+    []
+  );
 
   const { data: categoriesData } = useGetCategoriesQuery({ prerelease: false });
   const categoryOptions = useMemo<EuiComboBoxOptionOption[]>(
@@ -219,6 +229,7 @@ export const ReviewApproveModal: React.FC<{
       setReviewError(null);
       setSelectedDataStreamForFlyout(null);
       setSelectedCategories([]);
+      setAutoInstallAfterApproval(true);
       loadReviewDetails();
     }
   }, [isOpen, loadReviewDetails]);
@@ -303,6 +314,9 @@ export const ReviewApproveModal: React.FC<{
     setReviewError(null);
     try {
       await onApproveAndDeploy(integrationId, version, categoryIds);
+      if (autoInstallAfterApproval && onInstallToCluster) {
+        await onInstallToCluster(integrationId);
+      }
       onClose();
     } catch (error) {
       setReviewError(
@@ -317,9 +331,11 @@ export const ReviewApproveModal: React.FC<{
     }
   }, [
     automaticImport,
+    autoInstallAfterApproval,
     integrationId,
     onApproveAndDeploy,
     onClose,
+    onInstallToCluster,
     reviewDetails,
     reviewVersion,
     selectedCategories,
@@ -491,6 +507,20 @@ export const ReviewApproveModal: React.FC<{
                 onChange={(options) => setSelectedCategories(options)}
               />
             </EuiFormRow>
+            <EuiSpacer size="m" />
+            <EuiCheckbox
+              id={autoInstallCheckboxId}
+              data-test-subj="manageIntegrationReviewAutoInstallCheckbox"
+              label={i18n.translate(
+                'xpack.fleet.epmList.manageIntegrations.actions.reviewModalAutoInstallLabel',
+                {
+                  defaultMessage: 'Automatically install integration after approval',
+                }
+              )}
+              checked={autoInstallAfterApproval}
+              onChange={(event) => setAutoInstallAfterApproval(event.target.checked)}
+              disabled={isApproving}
+            />
           </>
         )}
         {reviewError && (

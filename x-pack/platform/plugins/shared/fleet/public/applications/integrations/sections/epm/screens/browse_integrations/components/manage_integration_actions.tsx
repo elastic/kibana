@@ -347,6 +347,7 @@ export const ManageIntegrationActions: React.FC<{
         onEdit={onEdit}
         onFetchReviewDetails={onFetchReviewDetails}
         onApproveAndDeploy={onApproveAndDeploy}
+        onInstallToCluster={onInstallToCluster}
         DataStreamResultsFlyoutComponent={DataStreamResultsFlyoutComponent}
       />
     </>
