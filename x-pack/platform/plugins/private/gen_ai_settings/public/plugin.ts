@@ -98,7 +98,7 @@ export class GenAiSettingsPlugin
           (hasConnectorsReadPrivilege || hasAnonymizationPrivilege)
         ) {
           this.registeredApp.enable();
-        } else {
+        } else if (this.registeredApp) {
           this.registeredApp.disable();
         }
       });
