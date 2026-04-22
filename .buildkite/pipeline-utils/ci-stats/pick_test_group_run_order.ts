@@ -444,8 +444,7 @@ export async function pickTestGroupRunOrder() {
 
         // Route to API group if ALL configs in this group are API-only
         const isApiGroup =
-          allApiConfigNames.size > 0 &&
-          group.names.every((n: string) => allApiConfigNames.has(n));
+          allApiConfigNames.size > 0 && group.names.every((n: string) => allApiConfigNames.has(n));
 
         const targetList = isApiGroup ? functionalApiGroups : functionalGroups;
         targetList.push({
