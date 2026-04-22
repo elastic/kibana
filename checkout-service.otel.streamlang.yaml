@@ -1,0 +1,25 @@
+steps:
+  - description: Application billing/payment log, Payment processing log
+    action: grok
+    from: body.text
+    patterns:
+      - "%{WORD:attributes.event.action}\\s%{NOTSPACE:attributes.user.name}\\s%\
+        {GREEDYDATA:attributes.custom.amount}"
+      - "%{WORD:attributes.event.action}\\s%{WORD:attributes.event.outcome}\\s%\
+        {NOTSPACE:attributes.user.name}\\s%{GREEDYDATA:attributes.custom.amount\
+        }"
+    pattern_definitions: {}
+  - description: Remove noisy grok artifact attributes.custom.amount — values
+      contain 'amount=' prefix and are unreliable for Pattern 2 matches (where
+      Pattern 1 greedily captured 'user=... amount=...'). Original data
+      preserved in body.text.
+    action: remove
+    from: attributes.custom.amount
+    ignore_missing: true
+  - description: Remove unreliable grok artifact attributes.user.name — Pattern 1
+      captures 'user=frank' (with prefix) for successful charges and 'failed'
+      (misparse of event.outcome) for failed charges. Original data preserved in
+      body.text.
+    action: remove
+    from: attributes.user.name
+    ignore_missing: true

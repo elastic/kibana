@@ -23,6 +23,17 @@ export {
   conditionToESQL,
   conditionToESQLAst,
 } from './src/transpilers/esql';
+export {
+  transpile as transpileOtelCollector,
+  conditionToOttl,
+} from './src/transpilers/otel_collector';
+export type {
+  OtelCollectorTranspilationResult,
+  OtelFilterProcessorConfig,
+  OtelProcessorConfig,
+  OtelTransformProcessorConfig,
+  OtelUnsupportedPlaceholder,
+} from './src/transpilers/otel_collector';
 export * from './types/processors';
 export * from './types/conditions';
 export type * from './types/ui';
