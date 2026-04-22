@@ -1222,6 +1222,7 @@ x-pack/solutions/observability/packages/alert-details @elastic/actionable-obs-te
 x-pack/solutions/observability/packages/alerting-test-data @elastic/actionable-obs-team
 x-pack/solutions/observability/packages/get-padded-alert-time-range-util @elastic/actionable-obs-team
 x-pack/solutions/observability/packages/kbn-alerts-grouping @elastic/response-ops
+x-pack/solutions/observability/packages/kbn-apm-embeddable-common @elastic/obs-presentation-team
 x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant @elastic/obs-ai-team
 x-pack/solutions/observability/packages/kbn-evals-suite-observability-ai @elastic/obs-ai-team
 x-pack/solutions/observability/packages/kbn-genai-cli @elastic/obs-ai-team
