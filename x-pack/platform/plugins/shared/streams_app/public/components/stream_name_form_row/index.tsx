@@ -70,8 +70,7 @@ export const getErrorMessage = (
     });
   }
   if (isDotPresent) {
-    // Callers that disable root-child lookups (query streams) don't have a meaningful
-    // child-stream link to point at — show a simple message without the link.
+    // Query streams don't have a meaningful child-stream link to point at.
     if (!checkRootChildExists) {
       return i18n.translate(
         'xpack.streams.streamDetailRouting.nameContainsDotErrorMessageSimple',
@@ -131,11 +130,8 @@ interface UseChildStreamInputOptions {
 /**
  * Custom hook that handles computations necessary for child stream input component instances.
  * Used by parent components to lift up the states needed for the local input field so validation concerns can be shared across components.
- * @param options.streamName - The stream name to use for the local input field.
- * @param options.readOnly - Whether the input field is read only.
- * @param options.checkRootChildExists - When true (default), dot-related validation surfaces root-child existence errors. Set to false for query streams where the parent is always the viewed stream.
- * @param options.additionalExistingNames - Extra full stream names to include in the duplicate-name check. Used to cover siblings that don't live in the wired routing array (e.g. existing query-stream children of the parent).
- * @returns An object containing local states, input validation flags, and help/error messages.
+ * @param options.checkRootChildExists - When true (default), surfaces a root-child existence error on dot. Set to false for query streams.
+ * @param options.additionalExistingNames - Extra full names for the duplicate check — covers siblings not present in the wired routing array.
  * @example
  * const { setLocalStreamName, isStreamNameValid, prefix, partitionName, helpText, errorMessage } = useChildStreamInput({ streamName: 'logs.linux' });
  * return (
@@ -184,16 +180,20 @@ export const useChildStreamInput = ({
   // Use shared validation for basic stream name checks
   const baseValidation = validateStreamName(localStreamName);
   const isStreamNameEmpty = localStreamName.length <= prefix.length;
-  // Base validation passes if the name is valid according to shared validator
-  // However, we also need to check if the partition (the part after the prefix) is empty
+
+  // `validateStreamName` only checks the start of the full name, so query-stream flows
+  // also validate the partition segment to catch e.g. "-x" under "logs.ecs.android".
+  const partitionValidation =
+    !checkRootChildExists && !isStreamNameEmpty ? validateStreamName(partitionName) : undefined;
+
   const baseValidationError =
-    !baseValidation.valid && !isStreamNameEmpty ? baseValidation.message : undefined;
+    (!baseValidation.valid && !isStreamNameEmpty && baseValidation.message) ||
+    (partitionValidation && !partitionValidation.valid && partitionValidation.message) ||
+    undefined;
 
   const helpText = getHelpText(isStreamNameEmpty, readOnly);
 
-  // Skip dot-in-partition detection when the field is read-only: the value is already
-  // persisted (e.g. edit mode, in-flight save), and re-flagging existing dotted names
-  // would surface false-positive errors the user cannot act on.
+  // Skip dot detection when read-only — the value is already persisted and unactionable.
   const isDotPresent = !readOnly && partitionName.includes('.');
 
   const errorMessage = getErrorMessage(
@@ -211,7 +211,11 @@ export const useChildStreamInput = ({
     localStreamName,
     setLocalStreamName,
     isStreamNameValid:
-      baseValidation.valid && !isStreamNameEmpty && !isDotPresent && !isDuplicatedName,
+      baseValidation.valid &&
+      (partitionValidation?.valid ?? true) &&
+      !isStreamNameEmpty &&
+      !isDotPresent &&
+      !isDuplicatedName,
     prefix,
     partitionName,
     helpText,
@@ -220,8 +224,8 @@ export const useChildStreamInput = ({
 };
 
 export function StreamNameFormRow({
-  onChange = (value: string) => {},
-  setLocalStreamName = () => {},
+  onChange = (value: string) => { },
+  setLocalStreamName = () => { },
   readOnly = false,
   autoFocus = false,
   error,

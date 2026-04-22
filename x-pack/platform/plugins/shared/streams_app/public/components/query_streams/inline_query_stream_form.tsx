@@ -37,8 +37,7 @@ export interface InlineQueryStreamFormProps {
    */
   initialEsqlQuery?: string;
   /**
-   * Callback when save is clicked with the form data.
-   * `name` is the partition suffix only — it does not include the parent prefix.
+   * Callback when save is clicked. `name` is the partition suffix only (no parent prefix).
    */
   onSave: (data: { name: string; esqlQuery: string }) => void | Promise<void>;
   /**
@@ -70,20 +69,15 @@ export interface InlineQueryStreamFormProps {
    */
   onDelete?: () => void;
   /**
-   * Full names of existing query-stream siblings to include in the duplicate-name check.
-   * Query-stream siblings are not in the wired routing array, so callers must pass them
-   * explicitly to prevent silent overwrites.
+   * Full names of existing query-stream siblings — required for the duplicate-name check
+   * because query siblings are not present in the wired routing array.
    */
   existingSiblingNames?: readonly string[];
 }
 
 /**
- * Inline form for creating or editing a query stream.
- *
- * Couples to `StreamRoutingContext` via `useChildStreamInput` and reads the parent
- * stream name from `definition.stream.name` — render within the
- * `stream_detail_routing` subtree (or any context that provides
- * `StreamRoutingContext`).
+ * Inline form for creating or editing a query stream. Must be rendered within a
+ * `StreamRoutingContext` subtree — it reads the parent stream name from that context.
  *
  * @example
  * ```tsx

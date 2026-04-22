@@ -300,6 +300,21 @@ describe('StreamNameFormRow', () => {
       expect(result.current.errorMessage).toBe('A stream with this name already exists');
     });
 
+    it('rejects a partition whose own first character is an invalid prefix (checkRootChildExists: false)', () => {
+      mockRoutingContext.routing = [];
+
+      const { result } = renderHook(() =>
+        useChildStreamInput({
+          streamName: 'logs.-x',
+          readOnly: false,
+          checkRootChildExists: false,
+        })
+      );
+
+      expect(result.current.isStreamNameValid).toBe(false);
+      expect(result.current.errorMessage).toBe('Stream name cannot start with "-".');
+    });
+
     it('still rejects invalid characters when checkRootChildExists is false', () => {
       mockRoutingContext.routing = [];
 

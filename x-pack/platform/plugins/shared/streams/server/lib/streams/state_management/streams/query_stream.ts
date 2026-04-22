@@ -191,6 +191,20 @@ export class QueryStream extends StreamActiveRecord<Streams.QueryStream.Definiti
       };
     }
 
+    // validateStreamName's prefix/reserved-name rules only check the start of the full name,
+    // so validate the partition segment separately to catch e.g. "-x" under "logs.ecs".
+    const parent = getParentId(this._definition.name);
+    const partition = parent
+      ? this._definition.name.slice(parent.length + 1)
+      : this._definition.name;
+    const partitionValidation = validateStreamName(partition);
+    if (!partitionValidation.valid) {
+      return {
+        isValid: false,
+        errors: [new Error(partitionValidation.message)],
+      };
+    }
+
     // Validate that query is defined
     if (!this._definition.query) {
       errors.push(new Error('Query is required for query streams'));
