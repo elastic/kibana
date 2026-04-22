@@ -19,6 +19,7 @@ export const createEntityAnalyticsNavigationTree = (
       id: SecurityPageName.entityAnalyticsHomePage,
       icon: 'chartBarVerticalStack',
       link: securityLink(SecurityPageName.entityAnalyticsHomePage),
+      badgeType: 'new',
     };
   } else {
     return {
