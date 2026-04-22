@@ -140,6 +140,8 @@ interface AgentBase {
   capabilities?: string[];
   health?: ComponentHealth;
   effective_config?: any;
+  effective_config_hash?: string;
+  effective_config_label?: string;
 }
 
 export enum UnhealthyReason {
@@ -423,6 +425,8 @@ export interface FleetServerAgent {
   capabilities?: string[];
   health?: ComponentHealth;
   effective_config?: any;
+  effective_config_hash?: string;
+  effective_config_label?: string;
 }
 
 export interface ComponentHealth {

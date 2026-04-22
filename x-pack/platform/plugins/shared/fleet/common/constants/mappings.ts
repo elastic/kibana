@@ -540,6 +540,12 @@ export const AGENT_MAPPINGS = {
         },
       },
     },
+    effective_config_hash: {
+      type: 'keyword',
+    },
+    effective_config_label: {
+      type: 'keyword',
+    },
   },
 } as const;
 

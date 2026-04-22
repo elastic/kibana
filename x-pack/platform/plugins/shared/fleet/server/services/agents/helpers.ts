@@ -108,6 +108,8 @@ export function searchHitToAgent(
     sequence_num: hit._source?.sequence_num,
     capabilities: hit._source?.capabilities,
     health: hit._source?.health,
+    effective_config_hash: hit._source?.effective_config_hash,
+    effective_config_label: hit._source?.effective_config_label,
   };
 
   if (!hit.fields?.status?.length) {
