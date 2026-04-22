@@ -852,7 +852,7 @@ export const ManageIntegrationsTable: React.FC<{
                   : undefined
               }
             >
-              <span>
+              <span tabIndex={0}>
                 <EuiButton
                   size="s"
                   iconType="exportAction"
