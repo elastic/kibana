@@ -69,8 +69,10 @@ export async function getMenuItemGroups(api: DashboardApi): Promise<MenuItemGrou
   });
 
   /** Handle special time slider case */
-  const timeSliderAction = await getTimeSliderActionItem(api);
-  if (timeSliderAction) pushItem(groups.controls, timeSliderAction);
+  if (groups.controls) {
+    const timeSliderAction = await getTimeSliderActionItem(api);
+    if (timeSliderAction) pushItem(groups.controls, timeSliderAction);
+  }
 
   return Object.values(groups)
     .map((group) => {
