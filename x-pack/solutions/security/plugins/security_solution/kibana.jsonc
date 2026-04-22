@@ -70,6 +70,7 @@
     ],
     "optionalPlugins": [
       "encryptedSavedObjects",
+      "evals",
       "fleet",
       "ml",
       "newsfeed",
@@ -85,6 +86,7 @@
       "serverless",
       "agentBuilder",
       "llmTasks",
+      "workflowsExtensions",
       "cps",
       "searchInferenceEndpoints"
     ],

@@ -215,6 +215,7 @@ export const oauthAuthorizeRoute = (
               baseAuthorizationUrl: oauthConfig.authorizationUrl,
               clientId: oauthConfig.clientId,
               scope: oauthConfig.scope,
+              scopeParamName: oauthConfig.scopeParamName,
               redirectUri,
               state: state.state,
               codeChallenge,

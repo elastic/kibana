@@ -115,8 +115,8 @@ describe('created_by filter', () => {
   test("shouldn't render created by filter when createdBy is disabled", async () => {
     render(<TableListView {...requiredProps} />);
 
-    // wait until first render
-    expect(await screen.findByTestId('itemsInMemTable')).toBeVisible();
+    // wait until loading is complete
+    expect(await screen.findByTestId('table-is-ready')).toBeInTheDocument();
 
     expect(() => screen.getByTestId('userFilterPopoverButton')).toThrow();
   });
@@ -124,8 +124,8 @@ describe('created_by filter', () => {
   test('shows creator filter options when popover is opened', async () => {
     render(<TableListView {...requiredProps} createdByEnabled={true} />);
 
-    // wait until first render
-    expect(await screen.findByTestId('itemsInMemTable')).toBeVisible();
+    // wait until loading is complete
+    expect(await screen.findByTestId('table-is-ready')).toBeInTheDocument();
 
     // 4 items in the list
     expect(screen.getAllByTestId(/userContentListingTitleLink/)).toHaveLength(4);
@@ -171,8 +171,8 @@ describe('created_by filter', () => {
   test('should be able to filter by "no creators"', async () => {
     render(<TableListView {...requiredProps} createdByEnabled={true} />);
 
-    // wait until first render
-    expect(await screen.findByTestId('itemsInMemTable')).toBeVisible();
+    // wait until loading is complete
+    expect(await screen.findByTestId('table-is-ready')).toBeInTheDocument();
 
     // 4 items in the list
     expect(screen.getAllByTestId(/userContentListingTitleLink/)).toHaveLength(4);
@@ -199,8 +199,8 @@ describe('created_by filter', () => {
       />
     );
 
-    // wait until first render
-    expect(await screen.findByTestId('itemsInMemTable')).toBeVisible();
+    // wait until loading is complete
+    expect(await screen.findByTestId('table-is-ready')).toBeInTheDocument();
     // 3 items in the list
     expect(screen.getAllByTestId(/userContentListingTitleLink/)).toHaveLength(3);
 
@@ -224,8 +224,8 @@ describe('created_by filter', () => {
       />
     );
 
-    // wait until first render
-    expect(await screen.findByTestId('itemsInMemTable')).toBeVisible();
+    // wait until loading is complete
+    expect(await screen.findByTestId('table-is-ready')).toBeInTheDocument();
     // 1 item in the list
     expect(screen.getAllByTestId(/userContentListingTitleLink/)).toHaveLength(1);
 

@@ -5,43 +5,51 @@
  * 2.0.
  */
 
-import type { ContainerModuleLoadOptions } from 'inversify';
-import { Route } from '@kbn/core-di-server';
-import { CreateRuleRoute } from '../routes/rules/create_rule_route';
-import { UpdateRuleRoute } from '../routes/rules/update_rule_route';
-import { GetRulesRoute } from '../routes/rules/get_rules_route';
-import { BulkGetRulesRoute } from '../routes/rules/get_rules_bulk_route';
-import { GetRuleRoute } from '../routes/rules/get_rule_route';
-import { DeleteRuleRoute } from '../routes/rules/delete_rule_route';
-import { BulkDeleteRulesRoute } from '../routes/rules/bulk_delete_rules_route';
-import { BulkEnableRulesRoute } from '../routes/rules/bulk_enable_rules_route';
-import { BulkDisableRulesRoute } from '../routes/rules/bulk_disable_rules_route';
-import { GetRuleTagsRoute } from '../routes/rules/get_rule_tags_route';
-import { BulkCreateAlertActionRoute } from '../routes/alert_actions/bulk_create_alert_action_route';
-import { CreateAckAlertActionRoute } from '../routes/alert_actions/create_ack_alert_action_route';
-import { CreateUnackAlertActionRoute } from '../routes/alert_actions/create_unack_alert_action_route';
-import { CreateTagAlertActionRoute } from '../routes/alert_actions/create_tag_alert_action_route';
-import { CreateSnoozeAlertActionRoute } from '../routes/alert_actions/create_snooze_alert_action_route';
-import { CreateUnsnoozeAlertActionRoute } from '../routes/alert_actions/create_unsnooze_alert_action_route';
-import { CreateActivateAlertActionRoute } from '../routes/alert_actions/create_activate_alert_action_route';
-import { CreateDeactivateAlertActionRoute } from '../routes/alert_actions/create_deactivate_alert_action_route';
-import { BulkActionNotificationPoliciesRoute } from '../routes/notification_policies/bulk_action_notification_policies_route';
-import { CreateNotificationPolicyRoute } from '../routes/notification_policies/create_notification_policy_route';
-import { DisableNotificationPolicyRoute } from '../routes/notification_policies/disable_notification_policy_route';
-import { EnableNotificationPolicyRoute } from '../routes/notification_policies/enable_notification_policy_route';
-import { GetNotificationPolicyRoute } from '../routes/notification_policies/get_notification_policy_route';
-import { ListNotificationPoliciesRoute } from '../routes/notification_policies/list_notification_policies_route';
-import { SnoozeNotificationPolicyRoute } from '../routes/notification_policies/snooze_notification_policy_route';
-import { UnsnoozeNotificationPolicyRoute } from '../routes/notification_policies/unsnooze_notification_policy_route';
-import { UpdateNotificationPolicyRoute } from '../routes/notification_policies/update_notification_policy_route';
-import { UpdateNotificationPolicyApiKeyRoute } from '../routes/notification_policies/update_notification_policy_api_key_route';
-import { DeleteNotificationPolicyRoute } from '../routes/notification_policies/delete_notification_policy_route';
-import { MatcherValueSuggestionsRoute } from '../routes/suggestions/matcher_value_suggestions_route';
-import { MatcherDataFieldsRoute } from '../routes/suggestions/matcher_data_fields_route';
-import { NotificationPolicyTagsRoute } from '../routes/suggestions/notification_policy_tags_route';
-import { GetRuleExecutionLogRoute } from '../routes/rules/get_rule_execution_log_route';
-import { GetRuleExecutionKpiRoute } from '../routes/rules/get_rule_execution_kpi_route';
-import { GetRuleExecutionBreakdownRoute } from '../routes/rules/get_rule_execution_breakdown_route';
+import type { ContainerModuleLoadOptions } from "inversify";
+import { Route } from "@kbn/core-di-server";
+import { CreateRuleRoute } from "../routes/rules/create_rule_route";
+import { UpdateRuleRoute } from "../routes/rules/update_rule_route";
+import { GetRulesRoute } from "../routes/rules/get_rules_route";
+import { BulkGetRulesRoute } from "../routes/rules/get_rules_bulk_route";
+import { GetRuleRoute } from "../routes/rules/get_rule_route";
+import { DeleteRuleRoute } from "../routes/rules/delete_rule_route";
+import { BulkDeleteRulesRoute } from "../routes/rules/bulk_delete_rules_route";
+import { BulkEnableRulesRoute } from "../routes/rules/bulk_enable_rules_route";
+import { BulkDisableRulesRoute } from "../routes/rules/bulk_disable_rules_route";
+import { GetRuleTagsRoute } from "../routes/rules/get_rule_tags_route";
+import { BulkCreateAlertActionRoute } from "../routes/alert_actions/bulk_create_alert_action_route";
+import { CreateAckAlertActionRoute } from "../routes/alert_actions/create_ack_alert_action_route";
+import { CreateAssignAlertActionRoute } from "../routes/alert_actions/create_assign_alert_action_route";
+import { CreateUnackAlertActionRoute } from "../routes/alert_actions/create_unack_alert_action_route";
+import { CreateTagAlertActionRoute } from "../routes/alert_actions/create_tag_alert_action_route";
+import { CreateSnoozeAlertActionRoute } from "../routes/alert_actions/create_snooze_alert_action_route";
+import { CreateUnsnoozeAlertActionRoute } from "../routes/alert_actions/create_unsnooze_alert_action_route";
+import { CreateActivateAlertActionRoute } from "../routes/alert_actions/create_activate_alert_action_route";
+import { CreateDeactivateAlertActionRoute } from "../routes/alert_actions/create_deactivate_alert_action_route";
+import { BulkActionNotificationPoliciesRoute } from "../routes/notification_policies/bulk_action_notification_policies_route";
+import { CreateNotificationPolicyRoute } from "../routes/notification_policies/create_notification_policy_route";
+import { DisableNotificationPolicyRoute } from "../routes/notification_policies/disable_notification_policy_route";
+import { EnableNotificationPolicyRoute } from "../routes/notification_policies/enable_notification_policy_route";
+import { GetNotificationPolicyRoute } from "../routes/notification_policies/get_notification_policy_route";
+import { ListNotificationPoliciesRoute } from "../routes/notification_policies/list_notification_policies_route";
+import { SnoozeNotificationPolicyRoute } from "../routes/notification_policies/snooze_notification_policy_route";
+import { UnsnoozeNotificationPolicyRoute } from "../routes/notification_policies/unsnooze_notification_policy_route";
+import { UpdateNotificationPolicyRoute } from "../routes/notification_policies/update_notification_policy_route";
+import { UpdateNotificationPolicyApiKeyRoute } from "../routes/notification_policies/update_notification_policy_api_key_route";
+import { DeleteNotificationPolicyRoute } from "../routes/notification_policies/delete_notification_policy_route";
+import { MatcherValueSuggestionsRoute } from "../routes/suggestions/matcher_value_suggestions_route";
+import { MatcherDataFieldsRoute } from "../routes/suggestions/matcher_data_fields_route";
+import { NotificationPolicyTagsRoute } from "../routes/suggestions/notification_policy_tags_route";
+import { GetRuleExecutionLogRoute } from "../routes/rules/get_rule_execution_log_route";
+import { GetRuleExecutionKpiRoute } from "../routes/rules/get_rule_execution_kpi_route";
+import { GetRuleExecutionBreakdownRoute } from "../routes/rules/get_rule_execution_breakdown_route";
+
+/**
+ * TODO: https://github.com/elastic/rna-program/issues/426
+ * Remove this route and its binding before GA.
+ */
+
+import { ResetResourcesRoute } from "../routes/reset_resources_route";
 
 export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(CreateRuleRoute);
@@ -55,6 +63,7 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(BulkDisableRulesRoute);
   bind(Route).toConstantValue(GetRuleTagsRoute);
   bind(Route).toConstantValue(CreateAckAlertActionRoute);
+  bind(Route).toConstantValue(CreateAssignAlertActionRoute);
   bind(Route).toConstantValue(CreateUnackAlertActionRoute);
   bind(Route).toConstantValue(CreateTagAlertActionRoute);
   bind(Route).toConstantValue(CreateSnoozeAlertActionRoute);
@@ -79,4 +88,6 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(GetRuleExecutionLogRoute);
   bind(Route).toConstantValue(GetRuleExecutionKpiRoute);
   bind(Route).toConstantValue(GetRuleExecutionBreakdownRoute);
+  // TODO(rna-program#426): remove this binding before GA.
+  bind(Route).toConstantValue(ResetResourcesRoute);
 }

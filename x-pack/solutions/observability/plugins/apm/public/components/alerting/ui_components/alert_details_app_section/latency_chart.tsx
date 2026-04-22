@@ -13,18 +13,9 @@ import { EuiFlexItem, EuiPanel, EuiFlexGroup, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { BoolQuery } from '@kbn/es-query';
 import { getDurationFormatter } from '@kbn/observability-plugin/common';
-import { ALERT_RULE_TYPE_ID, ALERT_EVALUATION_THRESHOLD, ALERT_END } from '@kbn/rule-data-utils';
 import type { TopAlert } from '@kbn/observability-plugin/public';
-import {
-  AlertActiveTimeRangeAnnotation,
-  AlertThresholdAnnotation,
-  AlertThresholdTimeRangeRect,
-  AlertAnnotation,
-} from '@kbn/observability-alert-details';
-import { useEuiTheme } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import moment from 'moment';
 import { filterNil } from '../../../shared/charts/latency_chart';
 import { LatencyAggregationTypeSelect } from '../../../shared/charts/latency_chart/latency_aggregation_type_select';
 import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
@@ -37,13 +28,14 @@ import { useFetcher } from '../../../../hooks/use_fetcher';
 import { getLatencyChartSelector } from '../../../../selectors/latency_chart_selectors';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { isLatencyThresholdRuleType } from './helpers';
+import { useGetChartAlertAnnotations } from './use_get_chart_alert_annotations';
 import { ApmDocumentType } from '../../../../../common/document_type';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
-import { CHART_SETTINGS, DEFAULT_DATE_FORMAT } from './constants';
+import { CHART_SETTINGS, DEFAULT_DATE_FORMAT, THRESHOLD_SIDEBAR_MIN_WIDTH } from './constants';
 import { TransactionTypeSelect } from './transaction_type_select';
-import { ViewInAPMButton } from './view_in_apm_button';
+import { RedMetricsChartActions } from './red_metrics_chart_actions';
 
-function LatencyChart({
+export function LatencyChart({
   alert,
   transactionType,
   transactionTypes,
@@ -63,6 +55,7 @@ function LatencyChart({
   kuery = '',
   filters,
   threshold,
+  ruleTypeId,
 }: {
   alert: TopAlert;
   transactionType: string;
@@ -83,7 +76,12 @@ function LatencyChart({
   threshold?: ReactElement;
   kuery?: string;
   filters?: BoolQuery;
+  ruleTypeId?: string;
 }) {
+  const {
+    services: { uiSettings },
+  } = useKibana();
+
   const preferred = usePreferredDataSourceAndBucketSize({
     start,
     end,
@@ -93,10 +91,7 @@ function LatencyChart({
       ? ApmDocumentType.TransactionMetric
       : ApmDocumentType.ServiceTransactionMetric,
   });
-  const { euiTheme } = useEuiTheme();
-  const {
-    services: { uiSettings },
-  } = useKibana();
+
   const { data, status } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end && transactionType && latencyAggregationType && preferred) {
@@ -136,54 +131,16 @@ function LatencyChart({
       filters,
     ]
   );
-  const alertEvalThreshold =
-    customAlertEvaluationThreshold || alert.fields[ALERT_EVALUATION_THRESHOLD];
 
-  const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]).valueOf() : undefined;
+  const dateFormat = (uiSettings && uiSettings.get(UI_SETTINGS.DATE_FORMAT)) || DEFAULT_DATE_FORMAT;
 
-  const alertEvalThresholdChartData = alertEvalThreshold
-    ? [
-        <AlertThresholdTimeRangeRect
-          key={'alertThresholdRect'}
-          id={'alertThresholdRect'}
-          threshold={alertEvalThreshold}
-          color={euiTheme.colors.danger}
-        />,
-        <AlertThresholdAnnotation
-          id={'alertThresholdAnnotation'}
-          key={'alertThresholdAnnotation'}
-          color={euiTheme.colors.danger}
-          threshold={alertEvalThreshold}
-        />,
-      ]
-    : [];
+  const alertAnnotations = useGetChartAlertAnnotations({
+    alert,
+    customAlertEvaluationThreshold,
+    isMatchingRuleType: isLatencyThresholdRuleType,
+    dateFormat,
+  });
 
-  const getLatencyChartAdditionalData = () => {
-    if (
-      isLatencyThresholdRuleType(alert.fields[ALERT_RULE_TYPE_ID]) ||
-      customAlertEvaluationThreshold
-    ) {
-      return [
-        <AlertActiveTimeRangeAnnotation
-          alertStart={alert.start}
-          alertEnd={alertEnd}
-          color={euiTheme.colors.danger}
-          id={'alertActiveRect'}
-          key={'alertActiveRect'}
-        />,
-        <AlertAnnotation
-          key={'alertAnnotationStart'}
-          id={'alertAnnotationStart'}
-          alertStart={alert.start}
-          color={euiTheme.colors.danger}
-          dateFormat={
-            (uiSettings && uiSettings.get(UI_SETTINGS.DATE_FORMAT)) || DEFAULT_DATE_FORMAT
-          }
-        />,
-        ...alertEvalThresholdChartData,
-      ];
-    }
-  };
   const memoizedData = useMemo(
     () =>
       getLatencyChartSelector({
@@ -199,9 +156,12 @@ function LatencyChart({
     currentPeriod,
     comparisonEnabled && isTimeComparison(offset) ? previousPeriod : undefined,
   ].filter(filterNil);
+
   const latencyMaxY = getMaxY(timeseriesLatency);
   const latencyFormatter = getDurationFormatter(latencyMaxY);
+
   const showTransactionTypeSelect = transactionTypes && setTransactionType;
+
   return (
     <EuiFlexItem>
       <EuiPanel hasBorder={true}>
@@ -235,14 +195,16 @@ function LatencyChart({
           <EuiFlexItem>
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <ViewInAPMButton
-                  serviceName={serviceName}
-                  environment={environment}
-                  from={start}
-                  to={end}
-                  kuery={kuery}
-                  transactionName={transactionName}
-                  transactionType={transactionType}
+                <RedMetricsChartActions
+                  queryParams={{
+                    serviceName,
+                    environment,
+                    transactionName,
+                    transactionType,
+                    kuery,
+                  }}
+                  timeRange={{ from: start, to: end }}
+                  ruleTypeId={ruleTypeId}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -250,14 +212,14 @@ function LatencyChart({
         </EuiFlexGroup>
         <EuiFlexGroup direction="row" gutterSize="m">
           {!!threshold && (
-            <EuiFlexItem style={{ minWidth: 180 }} grow={1}>
+            <EuiFlexItem style={{ minWidth: THRESHOLD_SIDEBAR_MIN_WIDTH }} grow={1}>
               {threshold}
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={!!threshold ? 5 : undefined}>
             <TimeseriesChart
               id="latencyChart"
-              annotations={getLatencyChartAdditionalData()}
+              annotations={alertAnnotations}
               height={200}
               comparisonEnabled={comparisonEnabled}
               offset={offset}
@@ -274,6 +236,3 @@ function LatencyChart({
     </EuiFlexItem>
   );
 }
-
-// eslint-disable-next-line import/no-default-export
-export default LatencyChart;

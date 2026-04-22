@@ -78,6 +78,9 @@ export class QueryThresholdHelpPopover extends Component<{}, State> {
       <EuiPopover
         id="thresholdHelpPopover"
         data-test-subj="thresholdHelpPopover"
+        aria-label={i18n.translate('xpack.stackAlerts.esQuery.ui.thresholdHelpPopover.ariaLabel', {
+          defaultMessage: 'Threshold help',
+        })}
         anchorPosition="upLeft"
         button={
           <EuiButtonIcon
