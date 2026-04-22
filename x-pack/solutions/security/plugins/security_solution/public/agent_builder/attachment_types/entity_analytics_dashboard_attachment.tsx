@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButtonEmpty,
@@ -13,12 +13,14 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
+  EuiResizeObserver,
   EuiSpacer,
   EuiStat,
   EuiText,
   EuiTitle,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
+import type { EuiResizeObserverProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type {
@@ -62,6 +64,13 @@ const rootCanvasStyles = css({
   height: '100%',
   minHeight: 400,
 });
+
+/**
+ * Width (in px) below which the risk breakdown table and donut chart stack
+ * vertically instead of sitting side-by-side. Chosen to avoid a cramped row
+ * when the Canvas flyout / left column is narrow.
+ */
+const RISK_LEVEL_PANEL_STACK_WIDTH_THRESHOLD = 500;
 
 const mergeSeverityCount = (partial?: SeverityCount): SeverityCount => ({
   ...EMPTY_SEVERITY_COUNT,
@@ -137,6 +146,11 @@ const EntityAnalyticsDashboardCanvasContent: React.FC<
 > = ({ attachment, application, agentBuilder, chrome, openSidebarConversation }) => {
   const data = attachment.data;
   const isXlScreen = useIsWithinBreakpoints(['l', 'xl']);
+  const [isRiskPanelNarrow, setIsRiskPanelNarrow] = useState(false);
+  const onRiskPanelResize = useCallback<EuiResizeObserverProps['onResize']>((dimensions) => {
+    if (!dimensions) return;
+    setIsRiskPanelNarrow(dimensions.width < RISK_LEVEL_PANEL_STACK_WIDTH_THRESHOLD);
+  }, []);
   const hasExplicitSeverityCount = data.severity_count != null;
   const inferredFromEntities = useMemo(
     () => inferSeverityCountFromEntities(data.entities ?? []),
@@ -242,14 +256,32 @@ const EntityAnalyticsDashboardCanvasContent: React.FC<
                 </h3>
               </EuiTitle>
               <EuiSpacer size="m" />
-              <EuiFlexGroup alignItems="center" gutterSize="l" responsive={false}>
-                <EuiFlexItem grow={4}>
-                  <RiskLevelBreakdownTable severityCount={severityCountForChart} loading={false} />
-                </EuiFlexItem>
-                <EuiFlexItem grow={1}>
-                  <RiskScoreDonutChart showLegend={false} severityCount={severityCountForChart} />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <EuiResizeObserver onResize={onRiskPanelResize}>
+                {(resizeRef) => (
+                  <div ref={resizeRef}>
+                    <EuiFlexGroup
+                      alignItems={isRiskPanelNarrow ? 'stretch' : 'center'}
+                      direction={isRiskPanelNarrow ? 'column' : 'row'}
+                      gutterSize="l"
+                      responsive={false}
+                      data-test-subj="riskLevelPanelInnerRow"
+                    >
+                      <EuiFlexItem grow={4}>
+                        <RiskLevelBreakdownTable
+                          severityCount={severityCountForChart}
+                          loading={false}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={1}>
+                        <RiskScoreDonutChart
+                          showLegend={false}
+                          severityCount={severityCountForChart}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </div>
+                )}
+              </EuiResizeObserver>
               {data.distribution_note ? (
                 <>
                   <EuiSpacer size="s" />
