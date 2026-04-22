@@ -16,8 +16,7 @@ servers:
 paths:
   /api/detection_engine/rules/{id}/exceptions:
     post:
-      description: >-
-        Create exception items that apply to a single detection rule.
+      description: Create exception items that apply to a single detection rule.
       operationId: CreateRuleExceptionListItems
       parameters:
         - description: Detection rule's identifier
@@ -35,8 +34,7 @@ paths:
             schema:
               example:
                 items:
-                  - description: >-
-                      This is a sample detection type exception item.
+                  - description: This is a sample detection type exception item.
                     entries:
                       - field: actingProcess.file.signer
                         operator: excluded
@@ -77,8 +75,7 @@ paths:
                       comments: []
                       created_at: '2025-01-07T20:07:33.119Z'
                       created_by: elastic
-                      description: >-
-                        This is a sample detection type exception item.
+                      description: This is a sample detection type exception item.
                       entries:
                         - field: actingProcess.file.signer
                           operator: excluded
@@ -170,8 +167,7 @@ paths:
         - Security Exceptions API
   /api/exception_lists:
     delete:
-      description: >-
-        Delete an exception list using the `id` or `list_id` field.
+      description: Delete an exception list using the `id` or `list_id` field.
       operationId: DeleteExceptionList
       parameters:
         - description: >-
@@ -217,8 +213,7 @@ paths:
                     _version: WzIsMV0=
                     created_at: '2025-01-07T19:34:27.942Z'
                     created_by: elastic
-                    description: >-
-                      This is a sample detection type exception list.
+                    description: This is a sample detection type exception list.
                     id: 9e5fc75a-a3da-46c5-96e3-a2ec59c6bb85
                     immutable: false
                     list_id: simple_list
@@ -291,8 +286,7 @@ paths:
               examples:
                 notFound:
                   value:
-                    message: >-
-                      exception list list_id: "foo" does not exist
+                    message: 'exception list list_id: "foo" does not exist'
                     status_code: 404
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
@@ -354,8 +348,7 @@ paths:
                     _version: WzIsMV0=
                     created_at: '2025-01-07T19:34:27.942Z'
                     created_by: elastic
-                    description: >-
-                      This is a sample detection type exception list.
+                    description: This is a sample detection type exception list.
                     id: 9e5fc75a-a3da-46c5-96e3-a2ec59c6bb85
                     immutable: false
                     list_id: simple_list
@@ -448,10 +441,19 @@ paths:
       tags:
         - Security Exceptions API
     post:
-      description: |
-        An exception list groups exception items and can be associated with detection rules. You can assign exception lists to multiple detection rules.
+      description: >
+        An exception list groups exception items and can be associated with
+        detection rules. You can assign exception lists to multiple detection
+        rules.
+
         > info
-        > All exception items added to the same list are evaluated using `OR` logic. That is, if any of the items in a list evaluate to `true`, the exception prevents the rule from generating an alert. Likewise, `OR` logic is used for evaluating exceptions when more than one exception list is assigned to a rule. To use the `AND` operator, you can define multiple clauses (`entries`) in a single exception item.
+
+        > All exception items added to the same list are evaluated using `OR`
+        logic. That is, if any of the items in a list evaluate to `true`, the
+        exception prevents the rule from generating an alert. Likewise, `OR`
+        logic is used for evaluating exceptions when more than one exception
+        list is assigned to a rule. To use the `AND` operator, you can define
+        multiple clauses (`entries`) in a single exception item.
       operationId: CreateExceptionList
       requestBody:
         content:
@@ -527,8 +529,7 @@ paths:
                     _version: WzUsMV0=
                     created_at: '2025-01-09T01:10:36.369Z'
                     created_by: elastic
-                    description: >-
-                      This is a sample agnostic endpoint type exception.
+                    description: This is a sample agnostic endpoint type exception.
                     id: 1a744e77-22ca-4b6b-9085-54f55275ebe5
                     immutable: false
                     list_id: b935eb55-7b21-4c1c-b235-faa1df23b3d6
@@ -548,8 +549,7 @@ paths:
                     _version: WzIsMV0=
                     created_at: '2025-01-07T19:34:27.942Z'
                     created_by: elastic
-                    description: >-
-                      This is a sample detection type exception list.
+                    description: This is a sample detection type exception list.
                     id: 9e5fc75a-a3da-46c5-96e3-a2ec59c6bb85
                     immutable: false
                     list_id: simple_list
@@ -569,8 +569,7 @@ paths:
                     _version: WzQsMV0=
                     created_at: '2025-01-09T01:07:49.658Z'
                     created_by: elastic
-                    description: >-
-                      This is a sample endpoint type exception list.
+                    description: This is a sample endpoint type exception list.
                     id: a79f4730-6e32-4278-abfc-349c0add7d54
                     immutable: false
                     list_id: endpoint_list
@@ -639,8 +638,7 @@ paths:
               examples:
                 alreadyExists:
                   value:
-                    message: >-
-                      exception list id: "simple_list" already exists
+                    message: 'exception list id: "simple_list" already exists'
                     status_code: 409
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
@@ -660,8 +658,7 @@ paths:
       tags:
         - Security Exceptions API
     put:
-      description: >-
-        Update an exception list using the `id` or `list_id` field.
+      description: Update an exception list using the `id` or `list_id` field.
       operationId: UpdateExceptionList
       requestBody:
         content:
@@ -952,8 +949,7 @@ paths:
         - Security Exceptions API
   /api/exception_lists/_export:
     post:
-      description: >-
-        Export an exception list and its associated items to an NDJSON file.
+      description: Export an exception list and its associated items to an NDJSON file.
       operationId: ExportExceptionList
       parameters:
         - in: query
@@ -995,9 +991,25 @@ paths:
             application/ndjson:
               examples:
                 exportSavedObjectsResponse:
-                  value: |
-                    {"_version":"WzExNDU5LDFd","created_at":"2025-01-09T16:18:17.757Z","created_by":"elastic","description":"This is a sample detection type exception","id":"c86c2da0-2ab6-4343-b81c-216ef27e8d75","immutable":false,"list_id":"simple_list","name":"Sample Detection Exception List","namespace_type":"single","os_types":[],"tags":["user added string for a tag","malware"],"tie_breaker_id":"cf4a7b92-732d-47f0-a0d5-49a35a1736bf","type":"detection","updated_at":"2025-01-09T16:18:17.757Z","updated_by":"elastic","version":1}
-                    {"_version":"WzExNDYxLDFd","comments":[],"created_at":"2025-01-09T16:18:42.308Z","created_by":"elastic","description":"This is a sample endpoint type exception","entries":[{"type":"exists","field":"actingProcess.file.signer","operator":"excluded"},{"type":"match_any","field":"host.name","value":["some host","another host"],"operator":"included"}],"id":"f37597ce-eaa7-4b64-9100-4301118f6806","item_id":"simple_list_item","list_id":"simple_list","name":"Sample Endpoint Exception List","namespace_type":"single","os_types":["linux"],"tags":["user added string for a tag","malware"],"tie_breaker_id":"4ca3ef3e-9721-42c0-8107-cf47e094d40f","type":"simple","updated_at":"2025-01-09T16:18:42.308Z","updated_by":"elastic"}
+                  value: >
+                    {"_version":"WzExNDU5LDFd","created_at":"2025-01-09T16:18:17.757Z","created_by":"elastic","description":"This
+                    is a sample detection type
+                    exception","id":"c86c2da0-2ab6-4343-b81c-216ef27e8d75","immutable":false,"list_id":"simple_list","name":"Sample
+                    Detection Exception
+                    List","namespace_type":"single","os_types":[],"tags":["user
+                    added string for a
+                    tag","malware"],"tie_breaker_id":"cf4a7b92-732d-47f0-a0d5-49a35a1736bf","type":"detection","updated_at":"2025-01-09T16:18:17.757Z","updated_by":"elastic","version":1}
+
+                    {"_version":"WzExNDYxLDFd","comments":[],"created_at":"2025-01-09T16:18:42.308Z","created_by":"elastic","description":"This
+                    is a sample endpoint type
+                    exception","entries":[{"type":"exists","field":"actingProcess.file.signer","operator":"excluded"},{"type":"match_any","field":"host.name","value":["some
+                    host","another
+                    host"],"operator":"included"}],"id":"f37597ce-eaa7-4b64-9100-4301118f6806","item_id":"simple_list_item","list_id":"simple_list","name":"Sample
+                    Endpoint Exception
+                    List","namespace_type":"single","os_types":["linux"],"tags":["user
+                    added string for a
+                    tag","malware"],"tie_breaker_id":"4ca3ef3e-9721-42c0-8107-cf47e094d40f","type":"simple","updated_at":"2025-01-09T16:18:42.308Z","updated_by":"elastic"}
+
                     {"exported_exception_list_count":1,"exported_exception_list_item_count":1,"missing_exception_list_item_count":0,"missing_exception_list_items":[],"missing_exception_lists":[],"missing_exception_lists_count":0}
               schema:
                 description: >-
@@ -1084,20 +1096,28 @@ paths:
       description: Get a list of all exception list containers.
       operationId: FindExceptionLists
       parameters:
-        - description: |
-            Filters the returned results according to the value of the specified field.
+        - description: >
+            Filters the returned results according to the value of the specified
+            field.
 
-            Uses the `so type.field name:field` value syntax, where `so type` can be:
+
+            Uses the `so type.field name:field` value syntax, where `so type`
+            can be:
+
 
             - `exception-list`: Specify a space-aware exception list.
-            - `exception-list-agnostic`: Specify an exception list that is shared across spaces.
+
+            - `exception-list-agnostic`: Specify an exception list that is
+            shared across spaces.
           in: query
           name: filter
           required: false
           schema:
             $ref: '#/components/schemas/FindExceptionListsFilter'
-        - description: |
-            Determines whether the returned containers are Kibana associated with a Kibana space
+        - description: >
+            Determines whether the returned containers are Kibana associated
+            with a Kibana space
+
             or available in all spaces (`agnostic` or `single`)
           examples:
             agnostic:
@@ -1136,8 +1156,7 @@ paths:
           schema:
             example: name
             type: string
-        - description: >-
-            Determines the sort order, which can be `desc` or `asc`.
+        - description: Determines the sort order, which can be `desc` or `asc`.
           in: query
           name: sort_order
           required: false
@@ -1158,8 +1177,7 @@ paths:
                       - _version: WzIsMV0=
                         created_at: '2025-01-07T19:34:27.942Z'
                         created_by: elastic
-                        description: >-
-                          This is a sample detection type exception list.
+                        description: This is a sample detection type exception list.
                         id: 9e5fc75a-a3da-46c5-96e3-a2ec59c6bb85
                         immutable: false
                         list_id: simple_list
@@ -1262,13 +1280,15 @@ paths:
         - Security Exceptions API
   /api/exception_lists/_import:
     post:
-      description: >-
-        Import an exception list and its associated items from an NDJSON file.
+      description: Import an exception list and its associated items from an NDJSON file.
       operationId: ImportExceptionList
       parameters:
-        - description: |
-            Determines whether existing exception lists with the same `list_id` are overwritten.
-            If any exception items have the same `item_id`, those are also overwritten.
+        - description: >
+            Determines whether existing exception lists with the same `list_id`
+            are overwritten.
+
+            If any exception items have the same `item_id`, those are also
+            overwritten.
           in: query
           name: overwrite
           required: false
@@ -1276,9 +1296,13 @@ paths:
             default: false
             example: false
             type: boolean
-        - description: |
-            Determines whether the list being imported will have a new `list_id` generated.
-            Additional `item_id`'s are generated for each exception item. Both the exception
+        - description: >
+            Determines whether the list being imported will have a new `list_id`
+            generated.
+
+            Additional `item_id`'s are generated for each exception item. Both
+            the exception
+
             list and its items are overwritten.
           in: query
           name: as_new_list
@@ -1294,11 +1318,25 @@ paths:
               type: object
               properties:
                 file:
-                  description: >-
-                    A `.ndjson` file containing the exception list
-                  example: |
-                    {"_version":"WzExNDU5LDFd","created_at":"2025-01-09T16:18:17.757Z","created_by":"elastic","description":"This is a sample detection type exception","id":"c86c2da0-2ab6-4343-b81c-216ef27e8d75","immutable":false,"list_id":"simple_list","name":"Sample Detection Exception List","namespace_type":"single","os_types":[],"tags":["user added string for a tag","malware"],"tie_breaker_id":"cf4a7b92-732d-47f0-a0d5-49a35a1736bf","type":"detection","updated_at":"2025-01-09T16:18:17.757Z","updated_by":"elastic","version":1}
-                    {"_version":"WzExNDYxLDFd","comments":[],"created_at":"2025-01-09T16:18:42.308Z","created_by":"elastic","description":"This is a sample endpoint type exception","entries":[{"type":"exists","field":"actingProcess.file.signer","operator":"excluded"},{"type":"match_any","field":"host.name","value":["some host","another host"],"operator":"included"}],"id":"f37597ce-eaa7-4b64-9100-4301118f6806","item_id":"simple_list_item","list_id":"simple_list","name":"Sample Endpoint Exception List","namespace_type":"single","os_types":["linux"],"tags":["user added string for a tag","malware"],"tie_breaker_id":"4ca3ef3e-9721-42c0-8107-cf47e094d40f","type":"simple","updated_at":"2025-01-09T16:18:42.308Z","updated_by":"elastic"}
+                  description: A `.ndjson` file containing the exception list
+                  example: >
+                    {"_version":"WzExNDU5LDFd","created_at":"2025-01-09T16:18:17.757Z","created_by":"elastic","description":"This
+                    is a sample detection type
+                    exception","id":"c86c2da0-2ab6-4343-b81c-216ef27e8d75","immutable":false,"list_id":"simple_list","name":"Sample
+                    Detection Exception
+                    List","namespace_type":"single","os_types":[],"tags":["user
+                    added string for a
+                    tag","malware"],"tie_breaker_id":"cf4a7b92-732d-47f0-a0d5-49a35a1736bf","type":"detection","updated_at":"2025-01-09T16:18:17.757Z","updated_by":"elastic","version":1}
+
+                    {"_version":"WzExNDYxLDFd","comments":[],"created_at":"2025-01-09T16:18:42.308Z","created_by":"elastic","description":"This
+                    is a sample endpoint type
+                    exception","entries":[{"type":"exists","field":"actingProcess.file.signer","operator":"excluded"},{"type":"match_any","field":"host.name","value":["some
+                    host","another
+                    host"],"operator":"included"}],"id":"f37597ce-eaa7-4b64-9100-4301118f6806","item_id":"simple_list_item","list_id":"simple_list","name":"Sample
+                    Endpoint Exception
+                    List","namespace_type":"single","os_types":["linux"],"tags":["user
+                    added string for a
+                    tag","malware"],"tie_breaker_id":"4ca3ef3e-9721-42c0-8107-cf47e094d40f","type":"simple","updated_at":"2025-01-09T16:18:42.308Z","updated_by":"elastic"}
                   format: binary
                   type: string
         required: true
@@ -1425,8 +1463,7 @@ paths:
         - Security Exceptions API
   /api/exception_lists/items:
     delete:
-      description: >-
-        Delete an exception list item using the `id` or `item_id` field.
+      description: Delete an exception list item using the `id` or `item_id` field.
       operationId: DeleteExceptionListItem
       parameters:
         - description: >-
@@ -1468,8 +1505,7 @@ paths:
                     comments: []
                     created_at: '2025-01-07T20:07:33.119Z'
                     created_by: elastic
-                    description: >-
-                      This is a sample detection type exception item.
+                    description: This is a sample detection type exception item.
                     entries:
                       - field: actingProcess.file.signer
                         operator: excluded
@@ -1549,8 +1585,7 @@ paths:
               examples:
                 notFound:
                   value:
-                    message: >-
-                      exception list item item_id: \"foo\" does not exist
+                    message: 'exception list item item_id: \"foo\" does not exist'
                     status_code: 404
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
@@ -1614,8 +1649,7 @@ paths:
                     comments: []
                     created_at: '2025-01-07T20:07:33.119Z'
                     created_by: elastic
-                    description: >-
-                      This is a sample detection type exception item.
+                    description: This is a sample detection type exception item.
                     entries:
                       - field: actingProcess.file.signer
                         operator: excluded
@@ -1697,8 +1731,7 @@ paths:
               examples:
                 notFound:
                   value:
-                    message: >-
-                      exception list item item_id: \"foo\" does not exist
+                    message: 'exception list item item_id: \"foo\" does not exist'
                     status_code: 404
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
@@ -1718,9 +1751,12 @@ paths:
       tags:
         - Security Exceptions API
     post:
-      description: |
-        Create an exception item and associate it with the specified exception list.
+      description: >
+        Create an exception item and associate it with the specified exception
+        list.
+
         > info
+
         > Before creating exception items, you must create an exception list.
       operationId: CreateExceptionListItem
       requestBody:
@@ -1779,8 +1815,7 @@ paths:
                     comments: []
                     created_at: '2025-01-07T20:07:33.119Z'
                     created_by: elastic
-                    description: >-
-                      This is a sample detection type exception item.
+                    description: This is a sample detection type exception item.
                     entries:
                       - field: actingProcess.file.signer
                         operator: excluded
@@ -1804,8 +1839,7 @@ paths:
                     comments: []
                     created_at: '2025-01-07T20:07:33.119Z'
                     created_by: elastic
-                    description: >-
-                      This is a sample detection type exception item.
+                    description: This is a sample detection type exception item.
                     entries:
                       - field: actingProcess.file.signer
                         operator: excluded
@@ -1829,8 +1863,7 @@ paths:
                     comments: []
                     created_at: '2025-01-07T20:07:33.119Z'
                     created_by: elastic
-                    description: >-
-                      This is a sample detection type exception item.
+                    description: This is a sample detection type exception item.
                     entries:
                       - field: host.name
                         operator: included
@@ -1857,8 +1890,7 @@ paths:
                     comments: []
                     created_at: '2025-01-07T20:07:33.119Z'
                     created_by: elastic
-                    description: >-
-                      This is a sample detection type exception item.
+                    description: This is a sample detection type exception item.
                     entries:
                       - field: actingProcess.file.signer
                         operator: included
@@ -1883,8 +1915,7 @@ paths:
                     comments: []
                     created_at: '2025-01-07T20:07:33.119Z'
                     created_by: elastic
-                    description: >-
-                      This is a sample detection type exception item.
+                    description: This is a sample detection type exception item.
                     entries:
                       - entries:
                           - field: signer
@@ -1929,8 +1960,7 @@ paths:
                     id: deb26876-297d-4677-8a1f-35467d2f1c4f
                     item_id: 686b129e-9b8d-4c59-8d8d-c93a9ea82c71
                     list_id: 8c1aae4c-1ef5-4bce-a2e3-16584b501783
-                    name: >-
-                      Filter out good guys ip and agent.name rock01
+                    name: Filter out good guys ip and agent.name rock01
                     namespace_type: single
                     os_types: []
                     tags:
@@ -2016,8 +2046,7 @@ paths:
       tags:
         - Security Exceptions API
     put:
-      description: >-
-        Update an exception list item using the `id` or `item_id` field.
+      description: Update an exception list item using the `id` or `item_id` field.
       operationId: UpdateExceptionListItem
       requestBody:
         content:
@@ -2123,8 +2152,7 @@ paths:
               examples:
                 notFound:
                   value:
-                    message: >-
-                      exception list item item_id: \"foo\" does not exist
+                    message: 'exception list item item_id: \"foo\" does not exist'
                     status_code: 404
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
@@ -2145,8 +2173,7 @@ paths:
         - Security Exceptions API
   /api/exception_lists/items/_find:
     get:
-      description: >-
-        Get a list of all exception list items in the specified list.
+      description: Get a list of all exception list items in the specified list.
       operationId: FindExceptionListItems
       parameters:
         - description: The `list_id`s of the items to fetch.
@@ -2157,8 +2184,10 @@ paths:
             items:
               $ref: '#/components/schemas/ExceptionListHumanId'
             type: array
-        - description: |
-            Filters the returned results according to the value of the specified field,
+        - description: >
+            Filters the returned results according to the value of the specified
+            field,
+
             using the `<field name>:<field value>` syntax.
           examples:
             singleFilter:
@@ -2172,8 +2201,10 @@ paths:
             items:
               $ref: '#/components/schemas/FindExceptionListItemsFilter'
             type: array
-        - description: |
-            Determines whether the returned containers are Kibana associated with a Kibana space
+        - description: >
+            Determines whether the returned containers are Kibana associated
+            with a Kibana space
+
             or available in all spaces (`agnostic` or `single`)
           examples:
             single:
@@ -2217,8 +2248,7 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/NonEmptyString'
-        - description: >-
-            Determines the sort order, which can be `desc` or `asc`.
+        - description: Determines the sort order, which can be `desc` or `asc`.
           in: query
           name: sort_order
           required: false
@@ -2346,8 +2376,7 @@ paths:
               examples:
                 notFound:
                   value:
-                    message: >-
-                      exception list list_id: "foo" does not exist
+                    message: 'exception list list_id: "foo" does not exist'
                     status_code: 404
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
@@ -2506,10 +2535,19 @@ paths:
         - Security Exceptions API
   /api/exceptions/shared:
     post:
-      description: |
-        An exception list groups exception items and can be associated with detection rules. A shared exception list can apply to multiple detection rules.
+      description: >
+        An exception list groups exception items and can be associated with
+        detection rules. A shared exception list can apply to multiple detection
+        rules.
+
         > info
-        > All exception items added to the same list are evaluated using `OR` logic. That is, if any of the items in a list evaluate to `true`, the exception prevents the rule from generating an alert. Likewise, `OR` logic is used for evaluating exceptions when more than one exception list is assigned to a rule. To use the `AND` operator, you can define multiple clauses (`entries`) in a single exception item.
+
+        > All exception items added to the same list are evaluated using `OR`
+        logic. That is, if any of the items in a list evaluate to `true`, the
+        exception prevents the rule from generating an alert. Likewise, `OR`
+        logic is used for evaluating exceptions when more than one exception
+        list is assigned to a rule. To use the `AND` operator, you can define
+        multiple clauses (`entries`) in a single exception item.
       operationId: CreateSharedExceptionList
       requestBody:
         content:
@@ -2544,8 +2582,7 @@ paths:
                     _version: WzIsMV0=
                     created_at: '2025-01-07T19:34:27.942Z'
                     created_by: elastic
-                    description: >-
-                      This is a sample detection type exception list.
+                    description: This is a sample detection type exception list.
                     id: 9e5fc75a-a3da-46c5-96e3-a2ec59c6bb85
                     immutable: false
                     list_id: simple_list
@@ -2610,8 +2647,7 @@ paths:
               examples:
                 alreadyExists:
                   value:
-                    message: >-
-                      exception list id: "simple_list" already exists
+                    message: 'exception list id: "simple_list" already exists'
                     status_code: 409
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
@@ -2666,8 +2702,7 @@ components:
         - value
         - operator
     BlocklistLinuxProperties:
-      description: >-
-        Blocklist list item properties (Linux, code signature not supported).
+      description: Blocklist list item properties (Linux, code signature not supported).
       type: object
       properties:
         entries:
@@ -2698,8 +2733,7 @@ components:
       required:
         - list_id
     BlocklistMacProperties:
-      description: >-
-        Blocklist list item properties (macOS, code signature not supported).
+      description: Blocklist list item properties (macOS, code signature not supported).
       type: object
       properties:
         entries:
@@ -2784,8 +2818,7 @@ components:
         - type
         - entries
     BlocklistWindowsProperties:
-      description: >-
-        Blocklist list item properties (Windows, supports code signature).
+      description: Blocklist list item properties (Windows, supports code signature).
       type: object
       properties:
         entries:
@@ -3002,10 +3035,14 @@ components:
       properties:
         entries:
           $ref: '#/components/schemas/ExceptionListItemEntryArray'
-          description: |
-            Exception entries for endpoint security exceptions (used to prevent detection rule alerts).
+          description: >
+            Exception entries for endpoint security exceptions (used to prevent
+            detection rule alerts).
 
-            **Fully flexible:** Supports any field name for maximum compatibility with detection rules. No field restrictions are enforced.
+
+            **Fully flexible:** Supports any field name for maximum
+            compatibility with detection rules. No field restrictions are
+            enforced.
         list_id:
           enum:
             - endpoint_list
@@ -3383,8 +3420,7 @@ components:
       format: date-time
       type: string
     ExceptionListItemHumanId:
-      description: >-
-        Human readable string identifier, e.g. `trusted-linux-processes`
+      description: Human readable string identifier, e.g. `trusted-linux-processes`
       example: simple_list_item
       format: nonempty
       minLength: 1
@@ -3436,8 +3472,7 @@ components:
         - windows
       type: string
     ExceptionListOsTypeArray:
-      description: >-
-        Use this field to specify the operating system. Only enter one value.
+      description: Use this field to specify the operating system. Only enter one value.
       items:
         $ref: '#/components/schemas/ExceptionListOsType'
       type: array
@@ -3492,14 +3527,21 @@ components:
       minimum: 1
       type: integer
     ExceptionNamespaceType:
-      description: |
-        Determines whether the exception container is available in all Kibana spaces or just the space
+      description: >
+        Determines whether the exception container is available in all Kibana
+        spaces or just the space
+
         in which it is created, where:
 
+
         - `single`: Only available in the Kibana space in which it is created.
+
         - `agnostic`: Available in all Kibana spaces.
 
-        For endpoint artifacts, the `namespace_type` must always be `agnostic`. Space awareness for endpoint artifacts is enforced based on Elastic Defend policy assignments.
+
+        For endpoint artifacts, the `namespace_type` must always be `agnostic`.
+        Space awareness for endpoint artifacts is enforced based on Elastic
+        Defend policy assignments.
       enum:
         - agnostic
         - single
@@ -3514,8 +3556,7 @@ components:
       type: object
       properties:
         entries:
-          description: >-
-            Exactly one entry allowed for host isolation exceptions
+          description: Exactly one entry allowed for host isolation exceptions
           items:
             type: object
             properties:
@@ -3553,8 +3594,7 @@ components:
           example: endpoint_host_isolation_exceptions
           type: string
         os_types:
-          description: >-
-            Must include all three operating systems (windows, linux, macos)
+          description: Must include all three operating systems (windows, linux, macos)
           items:
             enum:
               - windows
@@ -3575,12 +3615,17 @@ components:
       minLength: 1
       type: string
     ListType:
-      description: |
-        Specifies the Elasticsearch data type of excludes the list container holds. Some common examples:
+      description: >
+        Specifies the Elasticsearch data type of excludes the list container
+        holds. Some common examples:
+
 
         - `keyword`: Many ECS fields are Elasticsearch keywords
+
         - `ip`: IP addresses
-        - `ip_range`: Range of IP addresses (supports IPv4, IPv6, and CIDR notation)
+
+        - `ip_range`: Range of IP addresses (supports IPv4, IPv6, and CIDR
+        notation)
       enum:
         - binary
         - boolean
@@ -3797,8 +3842,7 @@ components:
       type: object
       properties:
         entries:
-          description: >-
-            Process hash, executable path, or code signature entries
+          description: Process hash, executable path, or code signature entries
           items:
             oneOf:
               - $ref: '#/components/schemas/TrustedAppHashEntry'
@@ -3829,8 +3873,7 @@ components:
       type: object
       properties:
         entries:
-          description: >-
-            Process hash, executable path, or code signature entries
+          description: Process hash, executable path, or code signature entries
           items:
             oneOf:
               - $ref: '#/components/schemas/TrustedAppHashEntry'
@@ -4057,8 +4100,7 @@ components:
           example: endpoint_trusted_devices
           type: string
         os_types:
-          description: >-
-            Must include both Windows and macOS (username field not allowed)
+          description: Must include both Windows and macOS (username field not allowed)
           items:
             enum:
               - windows
@@ -4085,8 +4127,7 @@ components:
             type: object
             properties:
               field:
-                description: >-
-                  Device field to match against (user.name is Windows-only)
+                description: Device field to match against (user.name is Windows-only)
                 enum:
                   - device.serial_number
                   - device.type
@@ -4279,23 +4320,55 @@ components:
 security:
   - BasicAuth: []
 tags:
-  - description: |
-      Exceptions are associated with detection and endpoint rules, and are used to prevent a rule from generating an alert from incoming events, even when the rule's other criteria are met. They can help reduce the number of false positives and prevent trusted processes and network activity from generating unnecessary alerts.
+  - description: >
+      Exceptions are associated with detection and endpoint rules, and are used
+      to prevent a rule from generating an alert from incoming events, even when
+      the rule's other criteria are met. They can help reduce the number of
+      false positives and prevent trusted processes and network activity from
+      generating unnecessary alerts.
+
 
       Exceptions are made up of:
 
-      * **Exception containers**: A container for related exceptions. Generally, a single exception container contains all the exception items relevant for a subset of rules. For example, a container can be used to group together network-related exceptions that are relevant for a large number of network rules. The container can then be associated with all the relevant rules.
-      * **Exception items**: The query (fields, values, and logic) used to prevent rules from generating alerts. When an exception item's query evaluates to `true`, the rule does not generate an alert.
 
-      For detection rules, you can also use lists to define rule exceptions. A list holds multiple values of the same Elasticsearch data type, such as IP addresses. These values are used to determine when an exception prevents an alert from being generated.
+      * **Exception containers**: A container for related exceptions. Generally,
+      a single exception container contains all the exception items relevant for
+      a subset of rules. For example, a container can be used to group together
+      network-related exceptions that are relevant for a large number of network
+      rules. The container can then be associated with all the relevant rules.
+
+      * **Exception items**: The query (fields, values, and logic) used to
+      prevent rules from generating alerts. When an exception item's query
+      evaluates to `true`, the rule does not generate an alert.
+
+
+      For detection rules, you can also use lists to define rule exceptions. A
+      list holds multiple values of the same Elasticsearch data type, such as IP
+      addresses. These values are used to determine when an exception prevents
+      an alert from being generated.
+
       > info
+
       > You cannot use lists with endpoint rule exceptions.
 
+
       > info
-      > Only exception containers can be associated with rules. You cannot directly associate an exception item or a list container with a rule. To use list exceptions, create an exception item that references the relevant list container.
+
+      > Only exception containers can be associated with rules. You cannot
+      directly associate an exception item or a list container with a rule. To
+      use list exceptions, create an exception item that references the relevant
+      list container.
+
 
       ## Exceptions requirements
 
-      Before you can start working with exceptions that use value lists, you must create the `.lists` and `.items` data streams for the relevant Kibana space. To do this, use the [Create list data streams](../operation/operation-createlistindex) endpoint. Once these data streams are created, your role needs privileges to manage rules. For a complete list of requirements, refer to [Enable and access detections](https://www.elastic.co/guide/en/serverless/current/security-detections-requirements.html#enable-detections-ui).
+
+      Before you can start working with exceptions that use value lists, you
+      must create the `.lists` and `.items` data streams for the relevant Kibana
+      space. To do this, use the [Create list data
+      streams](../operation/operation-createlistindex) endpoint. Once these data
+      streams are created, your role needs privileges to manage rules. For a
+      complete list of requirements, refer to [Enable and access
+      detections](https://www.elastic.co/guide/en/serverless/current/security-detections-requirements.html#enable-detections-ui).
     name: Security Exceptions API
     x-displayName: Security exceptions

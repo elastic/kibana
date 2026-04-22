@@ -50,14 +50,12 @@ paths:
               A search string to filter history entries by pack name, query
               text, or query ID.
             type: string
-        - description: >-
-            Comma-separated list of user IDs to filter live query history.
+        - description: Comma-separated list of user IDs to filter live query history.
           in: query
           name: userIds
           required: false
           schema:
-            description: >-
-              Comma-separated list of user IDs to filter live query history.
+            description: Comma-separated list of user IDs to filter live query history.
             example: elastic,admin
             type: string
         - description: >-
@@ -207,8 +205,7 @@ paths:
           name: id
           required: true
           schema:
-            description: >-
-              The ID of the live query result you want to retrieve.
+            description: The ID of the live query result you want to retrieve.
             example: 3c42c847-eb30-4452-80e0-728584042334
             type: string
       responses:
@@ -223,8 +220,7 @@ paths:
         - Security Osquery API
   /api/osquery/live_queries/{id}/results/{actionId}:
     get:
-      description: >-
-        Get the results of a live query using the query action ID.
+      description: Get the results of a live query using the query action ID.
       operationId: OsqueryGetLiveQueryResults
       parameters:
         - description: The ID of the live query.
@@ -232,8 +228,7 @@ paths:
           name: id
           required: true
           schema:
-            description: >-
-              The ID of the live query result you want to retrieve.
+            description: The ID of the live query result you want to retrieve.
             example: 3c42c847-eb30-4452-80e0-728584042334
             type: string
         - description: The ID of the query action.
@@ -677,8 +672,7 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/PageOrUndefined'
-        - description: >-
-            The number of results to return per page. The default is 20.
+        - description: The number of results to return per page. The default is 20.
           in: query
           name: pageSize
           required: false
@@ -770,8 +764,7 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/PageOrUndefined'
-        - description: >-
-            The number of results to return per page. The default is 20.
+        - description: The number of results to return per page. The default is 20.
           in: query
           name: pageSize
           required: false
@@ -789,14 +782,12 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/SortOrderOrUndefined'
-        - description: >-
-            The start date filter (ISO 8601) to narrow down results.
+        - description: The start date filter (ISO 8601) to narrow down results.
           in: query
           name: startDate
           required: false
           schema:
-            description: >-
-              The start date filter (ISO 8601) to narrow down results.
+            description: The start date filter (ISO 8601) to narrow down results.
             example: '2024-01-01T00:00:00Z'
             type: string
       responses:
@@ -925,8 +916,7 @@ components:
               description: The saved object ID of the copied pack.
               type: string
             shards:
-              description: >-
-                Shard configuration as an array of key-value pairs.
+              description: Shard configuration as an array of key-value pairs.
               items:
                 type: object
                 properties:
@@ -1064,8 +1054,7 @@ components:
             type: string
           type: array
         metadata:
-          description: >-
-            Custom metadata object associated with the live query.
+          description: Custom metadata object associated with the live query.
           nullable: true
           type: object
         pack_id:
@@ -1285,8 +1274,7 @@ components:
               description: The saved object ID of the pack.
               type: string
             shards:
-              description: >-
-                Shard configuration as an array of key-value pairs.
+              description: Shard configuration as an array of key-value pairs.
               items:
                 type: object
                 properties:
@@ -1304,8 +1292,7 @@ components:
               nullable: true
               type: string
             updated_by_profile_uid:
-              description: >-
-                The profile UID of the user who last updated the pack.
+              description: The profile UID of the user who last updated the pack.
               type: string
             version:
               description: The pack version number.
@@ -1451,8 +1438,7 @@ components:
         $ref: '#/components/schemas/ECSMappingArrayItem'
       type: array
     ECSMappingArrayItem:
-      description: >-
-        ECS mapping item in saved-object storage format (key-value pair).
+      description: ECS mapping item in saved-object storage format (key-value pair).
       type: object
       properties:
         key:
@@ -1579,8 +1565,7 @@ components:
                     type: integer
               type: array
             status:
-              description: >-
-                Global status of the live query (completed, running).
+              description: Global status of the live query (completed, running).
               enum:
                 - completed
                 - running
@@ -1742,8 +1727,7 @@ components:
             queries:
               $ref: '#/components/schemas/ObjectQueries'
             read_only:
-              description: >-
-                Whether the pack is read-only (true for prebuilt packs).
+              description: Whether the pack is read-only (true for prebuilt packs).
               type: boolean
             saved_object_id:
               description: The saved object ID of the pack.
@@ -1846,8 +1830,7 @@ components:
                       type: string
                 type: array
               read_only:
-                description: >-
-                  Whether the pack is read-only (true for prebuilt packs).
+                description: Whether the pack is read-only (true for prebuilt packs).
                 type: boolean
               saved_object_id:
                 description: The saved object ID of the pack.
@@ -2195,14 +2178,12 @@ components:
       type: object
       properties:
         data:
-          description: >-
-            The list of unified history rows for the current page.
+          description: The list of unified history rows for the current page.
           items:
             $ref: '#/components/schemas/UnifiedHistoryRow'
           type: array
         hasMore:
-          description: >-
-            Whether there are more results beyond the current page.
+          description: Whether there are more results beyond the current page.
           type: boolean
         nextPage:
           description: >-
@@ -2255,8 +2236,7 @@ components:
               description: ECS mapping configuration used for the query.
               type: object
             queriesTotal:
-              description: >-
-                The total number of sub-queries in the live action.
+              description: The total number of sub-queries in the live action.
               type: integer
             queriesWithResults:
               description: The number of sub-queries that returned results.
@@ -2285,8 +2265,7 @@ components:
               description: The ID of the user who ran the query.
               type: string
             userProfileUid:
-              description: >-
-                The user profile UID of the user who ran the query.
+              description: The user profile UID of the user who ran the query.
               type: string
           required:
             - sourceType
@@ -2339,8 +2318,7 @@ components:
       nullable: true
       type: integer
     PageSizeOrUndefined:
-      description: >-
-        The number of results to return per page. The default is 20.
+      description: The number of results to return per page. The default is 20.
       example: 20
       nullable: true
       type: integer
@@ -2438,8 +2416,7 @@ components:
           description: The schedule ID for the scheduled query.
           type: string
         timestamp:
-          description: >-
-            The timestamp of the most recent response for this execution.
+          description: The timestamp of the most recent response for this execution.
           type: string
     ScheduledHistoryRow:
       allOf:
@@ -2450,8 +2427,7 @@ components:
               description: The execution count for this scheduled query run.
               type: integer
             plannedTime:
-              description: >-
-                The planned execution time for the scheduled query.
+              description: The planned execution time for the scheduled query.
               type: string
             scheduleId:
               description: The schedule ID for the scheduled query.
@@ -2544,8 +2520,7 @@ components:
           description: The timestamp of the query execution.
           type: string
         totalRows:
-          description: >-
-            The total number of result rows returned across all agents.
+          description: The total number of result rows returned across all agents.
           nullable: true
           type: integer
       required:

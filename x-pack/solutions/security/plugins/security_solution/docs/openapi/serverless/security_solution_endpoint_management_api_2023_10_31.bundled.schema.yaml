@@ -1,7 +1,6 @@
 openapi: 3.0.3
 info:
-  description: >-
-    Interact with and manage endpoints running the Elastic Defend integration.
+  description: Interact with and manage endpoints running the Elastic Defend integration.
   title: Security Endpoint Management API (Elastic Cloud Serverless)
   version: '2023-10-31'
 servers:
@@ -79,8 +78,7 @@ paths:
         - Security Endpoint Management API
   /api/endpoint/action_status:
     get:
-      description: >-
-        Get the status of response actions for the specified agent IDs.
+      description: Get the status of response actions for the specified agent IDs.
       operationId: EndpointGetActionsStatus
       parameters:
         - description: A list of agent IDs to get the action status for.
@@ -123,7 +121,7 @@ paths:
         - Security Endpoint Management API
   /api/endpoint/action/{action_id}/file/{file_id}:
     get:
-      description: >
+      description: |
         Get information for the specified response action file download.
       operationId: EndpointFileInfo
       parameters:
@@ -159,8 +157,7 @@ paths:
                         description: The agent ID that generated the file.
                         type: string
                       agentType:
-                        description: >-
-                          The type of agent that generated the file.
+                        description: The type of agent that generated the file.
                         type: string
                       created:
                         description: The date and time the file was created.
@@ -193,10 +190,17 @@ paths:
         - Security Endpoint Management API
   /api/endpoint/action/{action_id}/file/{file_id}/download:
     get:
-      description: |
-        Download a file associated with a response action. Files are downloaded in a password-protected `.zip` archive to prevent the file from running. Use password `elastic` to open the `.zip` in a safe environment.
+      description: >
+        Download a file associated with a response action. Files are downloaded
+        in a password-protected `.zip` archive to prevent the file from running.
+        Use password `elastic` to open the `.zip` in a safe environment.
+
         > info
-        > Files retrieved from third-party-protected hosts require a different password. Refer to [Third-party response actions](https://www.elastic.co/docs/solutions/security/endpoint-response-actions/third-party-response-actions) for your system's password.
+
+        > Files retrieved from third-party-protected hosts require a different
+        password. Refer to [Third-party response
+        actions](https://www.elastic.co/docs/solutions/security/endpoint-response-actions/third-party-response-actions)
+        for your system's password.
       operationId: EndpointFileDownload
       parameters:
         - description: The ID of the response action that generated the file.
@@ -242,8 +246,7 @@ paths:
                   host
                 value:
                   agent_type: microsoft_defender_endpoint
-                  comment: >-
-                    Cancelling action due to change in requirements
+                  comment: Cancelling action due to change in requirements
                   endpoint_ids:
                     - ed518850-681a-4d60-bb98-e22640cae2a8
                   parameters:
@@ -425,8 +428,7 @@ paths:
                   endpoint_ids:
                     - ed518850-681a-4d60-bb98-e22640cae2a8
               with_case_id:
-                summary: >-
-                  Isolates a single host with a case_id value of 1234
+                summary: Isolates a single host with a case_id value of 1234
                 value:
                   case_ids:
                     - 4976be38-c134-4554-bd5e-0fd89ce63667
@@ -682,8 +684,7 @@ paths:
         - Security Endpoint Management API
   /api/endpoint/action/runscript:
     post:
-      description: >-
-        Run a script on a host. Currently supported only for some agent types.
+      description: Run a script on a host. Currently supported only for some agent types.
       operationId: RunScriptAction
       requestBody:
         content:
@@ -691,8 +692,7 @@ paths:
             examples:
               MDE:
                 description: Microsoft Defender Endpoint runscript
-                summary: >-
-                  Run a script against a Microsoft Defender Endpoint agent
+                summary: Run a script against a Microsoft Defender Endpoint agent
                 value:
                   agent_type: microsoft_defender_endpoint
                   endpoint_ids:
@@ -753,8 +753,7 @@ paths:
         - Security Endpoint Management API
   /api/endpoint/action/scan:
     post:
-      description: >-
-        Scan a specific file or directory on an endpoint for malware.
+      description: Scan a specific file or directory on an endpoint for malware.
       operationId: EndpointScanAction
       requestBody:
         content:
@@ -887,8 +886,7 @@ paths:
         - Security Endpoint Management API
   /api/endpoint/action/unisolate:
     post:
-      description: >-
-        Release an isolated endpoint, allowing it to rejoin a network.
+      description: Release an isolated endpoint, allowing it to rejoin a network.
       operationId: EndpointUnisolateAction
       requestBody:
         content:
@@ -910,8 +908,7 @@ paths:
                   endpoint_ids:
                     - ed518850-681a-4d60-bb98-e22640cae2a8
               withCaseId:
-                summary: >-
-                  Releases hosts with an associated case; includes a comment.
+                summary: Releases hosts with an associated case; includes a comment.
                 value:
                   case_ids:
                     - 4976be38-c134-4554-bd5e-0fd89ce63667
@@ -1138,8 +1135,7 @@ paths:
       description: Get the protection updates note for a package policy.
       operationId: GetProtectionUpdatesNote
       parameters:
-        - description: >-
-            The package policy ID to retrieve the protection updates note for.
+        - description: The package policy ID to retrieve the protection updates note for.
           in: path
           name: package_policy_id
           required: true
@@ -1156,8 +1152,7 @@ paths:
       tags:
         - Security Endpoint Management API
     post:
-      description: >-
-        Create or update the protection updates note for a package policy.
+      description: Create or update the protection updates note for a package policy.
       operationId: CreateUpdateProtectionUpdatesNote
       parameters:
         - description: >-
@@ -1411,11 +1406,12 @@ components:
       type: object
       properties:
         downloadUri:
-          description: |
-            The server relative URI to download the file associated with the output of the response action.
+          description: >
+            The server relative URI to download the file associated with the
+            output of the response action.
+
             URI does **not** include the space prefix
-          example: >-
-            /api/endpoint/action/497f6eca-6276/file/35645-6276-4993/download
+          example: /api/endpoint/action/497f6eca-6276/file/35645-6276-4993/download
           format: uri-reference
           type: string
     EndDate:
@@ -1423,8 +1419,7 @@ components:
       example: '2023-10-31T23:59:59.999Z'
       type: string
     EndpointIds:
-      description: >-
-        List of endpoint IDs (cannot contain empty strings). Max of 250.
+      description: List of endpoint IDs (cannot contain empty strings). Max of 250.
       example:
         - endpoint-id-1
         - endpoint-id-2
@@ -1502,8 +1497,7 @@ components:
               Ext:
                 variant: Windows 10 Enterprise Evaluation
               family: windows
-              full: >-
-                Windows 10 Enterprise Evaluation 20H2 (10.0.19042.906)
+              full: Windows 10 Enterprise Evaluation 20H2 (10.0.19042.906)
               kernel: 20H2 (10.0.19042.906)
               name: Windows
               platform: windows
@@ -1699,8 +1693,7 @@ components:
             $ref: '#/components/schemas/ResponseActionDetails'
           type: array
         elasticAgentIds:
-          description: >-
-            The list of elastic agent IDs the query was filtered by.
+          description: The list of elastic agent IDs the query was filtered by.
           items:
             type: string
           type: array
@@ -1722,8 +1715,7 @@ components:
             type: string
           type: array
         total:
-          description: >-
-            The total number of response actions matching the query.
+          description: The total number of response actions matching the query.
           type: integer
         userIds:
           description: The list of user IDs the query was filtered by.
@@ -1816,8 +1808,7 @@ components:
               type: object
               properties:
                 path:
-                  description: >-
-                    The full file path to retrieve from the endpoint.
+                  description: The full file path to retrieve from the endpoint.
                   type: string
               required:
                 - path
@@ -1843,8 +1834,7 @@ components:
           minItems: 1
           type: array
         case_ids:
-          description: >-
-            The IDs of cases where the action taken will be logged. Max of 50.
+          description: The IDs of cases where the action taken will be logged. Max of 50.
           example:
             - case-id-1
             - case-id-2
@@ -1948,8 +1938,7 @@ components:
                 - type: object
                   properties:
                     pid:
-                      description: >-
-                        The process ID (PID) of the process to terminate.
+                      description: The process ID (PID) of the process to terminate.
                       minimum: 1
                       type: number
                 - type: object
@@ -2013,8 +2002,7 @@ components:
                 - type: object
                   properties:
                     pid:
-                      description: >-
-                        The process ID (PID) of the process to terminate.
+                      description: The process ID (PID) of the process to terminate.
                       example: 123
                       minimum: 1
                       type: integer
@@ -2057,8 +2045,7 @@ components:
           minLength: 1
           type: string
         scriptName:
-          description: >-
-            The name of the script to execute from the cloud storage.
+          description: The name of the script to execute from the cloud storage.
           minLength: 1
           type: string
       required:
@@ -2084,8 +2071,7 @@ components:
                           memory dump is written to disk
                         type: number
                       file_size:
-                        description: >-
-                          The size of the memory dump compressed file in bytes
+                        description: The size of the memory dump compressed file in bytes
                         type: string
                       path:
                         description: >-
@@ -2112,8 +2098,7 @@ components:
                       description: The process ID (PID)
                       type: number
                     type:
-                      description: >-
-                        Process-level memory dump using a process ID
+                      description: Process-level memory dump using a process ID
                       enum:
                         - process
                       type: string
@@ -2127,8 +2112,7 @@ components:
                       description: The process entity ID
                       type: string
                     type:
-                      description: >-
-                        Process-level memory dump using an entity ID
+                      description: Process-level memory dump using an entity ID
                       enum:
                         - process
                       type: string
@@ -2193,8 +2177,7 @@ components:
                       type: string
                   required:
                     - type
-                - description: >-
-                    Dump the entire memory of a process using the PID.
+                - description: Dump the entire memory of a process using the PID.
                   type: object
                   properties:
                     pid:
@@ -2206,8 +2189,7 @@ components:
                   required:
                     - type
                     - pid
-                - description: >-
-                    Dump the entire memory of a process using the entity ID.
+                - description: Dump the entire memory of a process using the entity ID.
                   type: object
                   properties:
                     entity_id:
@@ -2376,8 +2358,7 @@ components:
                   Ext:
                     variant: Windows 10 Enterprise Evaluation
                   family: windows
-                  full: >-
-                    Windows 10 Enterprise Evaluation 20H2 (10.0.19042.906)
+                  full: Windows 10 Enterprise Evaluation 20H2 (10.0.19042.906)
                   kernel: 20H2 (10.0.19042.906)
                   name: Windows
                   platform: windows
@@ -2439,8 +2420,7 @@ components:
               description: Number of pending kill-process actions.
             running-processes:
               $ref: '#/components/schemas/PendingActionDataType'
-              description: >-
-                Number of pending running-processes (get processes) actions.
+              description: Number of pending running-processes (get processes) actions.
             scan:
               $ref: '#/components/schemas/PendingActionDataType'
               description: Number of pending scan actions.
@@ -2511,8 +2491,7 @@ components:
       type: object
       properties:
         agents:
-          description: >-
-            The agent IDs for the hosts that the response action was sent to
+          description: The agent IDs for the hosts that the response action was sent to
           items:
             format: uuid
             type: string
@@ -2528,12 +2507,10 @@ components:
                   agent ID
                 type: string
               isCompleted:
-                description: >-
-                  Whether the response action is completed for the agent ID
+                description: Whether the response action is completed for the agent ID
                 type: boolean
               wasSuccessful:
-                description: >-
-                  Whether the response action was successful for the agent ID
+                description: Whether the response action was successful for the agent ID
                 type: boolean
           description: >-
             The state of the response action for each agent ID that it was sent
@@ -2594,9 +2571,12 @@ components:
               - content
             title: Agent ID
             type: object
-          description: |
-            The outputs of the response action for each agent ID that it was sent to. Content different depending on the
-            response action command and will only be present for agents that have responded to the response action
+          description: >
+            The outputs of the response action for each agent ID that it was
+            sent to. Content different depending on the
+
+            response action command and will only be present for agents that
+            have responded to the response action
           type: object
         parameters:
           description: >-
@@ -2753,7 +2733,7 @@ components:
         - type: object
           properties:
             parameters:
-              description: >
+              description: |
                 One of the following set of parameters must be provided
               oneOf:
                 - $ref: '#/components/schemas/RawScriptParameters'
@@ -2830,8 +2810,7 @@ components:
               type: object
               properties:
                 path:
-                  description: >-
-                    The folder or file's full path (including the file name).
+                  description: The folder or file's full path (including the file name).
                   example: /usr/my-file.txt
                   type: string
               required:
@@ -2847,8 +2826,7 @@ components:
           - endpoint-id-1
         parameters:
           scriptId: 1111-2222-3333-4444-5555-6666-7777-8888
-          scriptInput: >-
-            --delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt
+          scriptInput: --delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt
       properties:
         scriptId:
           description: >-
@@ -2856,8 +2834,7 @@ components:
           minLength: 1
           type: string
         scriptInput:
-          description: >-
-            The input parameter arguments for the script that was selected.
+          description: The input parameter arguments for the script that was selected.
           minLength: 1
           type: string
       required:
@@ -2925,8 +2902,7 @@ components:
                 - type: object
                   properties:
                     pid:
-                      description: >-
-                        The process ID (PID) of the process to terminate.
+                      description: The process ID (PID) of the process to terminate.
                       minimum: 1
                       type: number
                 - type: object
@@ -2983,8 +2959,7 @@ components:
                 - type: object
                   properties:
                     pid:
-                      description: >-
-                        The process ID (PID) of the process to suspend.
+                      description: The process ID (PID) of the process to suspend.
                       example: 123
                       minimum: 1
                       type: integer
@@ -3046,8 +3021,10 @@ components:
                         type: string
               type: object
             parameters:
-              description: |
-                The parameters for upload returned on the details are derived via the API from the file that
+              description: >
+                The parameters for upload returned on the details are derived
+                via the API from the file that
+
                 was uploaded at the time that the response action was submitted
               type: object
               properties:
@@ -3112,8 +3089,7 @@ components:
               properties:
                 overwrite:
                   default: false
-                  description: >-
-                    Overwrite the file on the host if it already exists.
+                  description: Overwrite the file on the host if it already exists.
                   example: false
                   type: boolean
           required:

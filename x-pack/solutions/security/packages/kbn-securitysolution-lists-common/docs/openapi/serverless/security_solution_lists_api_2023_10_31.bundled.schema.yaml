@@ -1,7 +1,6 @@
 openapi: 3.0.3
 info:
-  description: >-
-    Lists API allows you to manage lists of keywords, IPs or IP ranges items.
+  description: Lists API allows you to manage lists of keywords, IPs or IP ranges items.
   title: Security Lists API (Elastic Cloud Serverless)
   version: '2023-10-31'
 servers:
@@ -241,8 +240,7 @@ paths:
       tags:
         - Security Lists API
     patch:
-      description: >-
-        Update specific fields of an existing list using the list `id`.
+      description: Update specific fields of an existing list using the list `id`.
       operationId: PatchList
       requestBody:
         content:
@@ -299,8 +297,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: >-
-                      [request body]: name: Expected string, received number
+                    message: '[request body]: name: Expected string, received number'
                     statusCode: 400
               schema:
                 oneOf:
@@ -392,8 +389,7 @@ paths:
                 value:
                   description: This parses the first found ipv4 only
                   id: keyword_custom_format_list
-                  name: >-
-                    Simple list with a keyword using a custom format
+                  name: Simple list with a keyword using a custom format
                   type: keyword
             schema:
               type: object
@@ -477,8 +473,7 @@ paths:
                     description: This parses the first found ipv4 only
                     id: keyword_custom_format_list
                     immutable: false
-                    name: >-
-                      Simple list with a keyword using a custom format
+                    name: Simple list with a keyword using a custom format
                     tie_breaker_id: 8247ae63-b780-47b8-9a89-948b643e9ec2
                     type: keyword
                     updated_at: '2025-01-09T18:25:39.604Z'
@@ -539,8 +534,7 @@ paths:
               examples:
                 alreadyExists:
                   value:
-                    message: >-
-                      list id: "keyword_custom_format_list" already exists
+                    message: 'list id: "keyword_custom_format_list" already exists'
                     status_code: 409
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
@@ -560,9 +554,12 @@ paths:
       tags:
         - Security Lists API
     put:
-      description: |
-        Update a value list using the list `id`. The original list is replaced, and all unspecified fields are deleted.
+      description: >
+        Update a value list using the list `id`. The original list is replaced,
+        and all unspecified fields are deleted.
+
         > info
+
         > You cannot modify the `id` value.
       operationId: UpdateList
       requestBody:
@@ -623,8 +620,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: >-
-                      [request body]: id: Expected string, received number
+                    message: '[request body]: id: Expected string, received number'
                     statusCode: 400
               schema:
                 oneOf:
@@ -717,8 +713,7 @@ paths:
             format: nonempty
             minLength: 1
             type: string
-        - description: >-
-            Determines the sort order, which can be `desc` or `asc`
+        - description: Determines the sort order, which can be `desc` or `asc`
           in: query
           name: sort_order
           required: false
@@ -738,8 +733,10 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/FindListsCursor'
-        - description: |
-            Filters the returned results according to the value of the specified field,
+        - description: >
+            Filters the returned results according to the value of the specified
+            field,
+
             using the <field name>:<field value> syntax.
           in: query
           name: filter
@@ -757,9 +754,9 @@ paths:
                       WzIwLFsiZjU1MDgxODgtYjFlOS00ZTZlLTk2NjItZDAzOWE3ZDg5ODk5Il1d
                     data:
                       - _version: WzAsMV0=
-                        '@timestamp': >
+                        '@timestamp': |
                           2025-01-08T04:47:34.273Z
-                        created_at: >
+                        created_at: |
                           2025-01-08T04:47:34.273Z
                         created_by: elastic
                         description: This list describes bad internet ip
@@ -768,7 +765,7 @@ paths:
                         name: Simple list with an ip
                         tie_breaker_id: f5508188-b1e9-4e6e-9662-d039a7d89899
                         type: ip
-                        updated_at: >
+                        updated_at: |
                           2025-01-08T04:47:34.273Z
                         updated_by: elastic
                         version: 1
@@ -807,8 +804,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: >-
-                      [request query]: page: Expected number, received nan
+                    message: '[request query]: page: Expected number, received nan'
                     statusCode: 400
               schema:
                 oneOf:
@@ -999,8 +995,7 @@ paths:
         - Security Lists API
     post:
       deprecated: true
-      description: >-
-        Create `.lists` and `.items` data streams in the relevant space.
+      description: Create `.lists` and `.items` data streams in the relevant space.
       operationId: CreateListIndex
       responses:
         '200':
@@ -1087,8 +1082,7 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/ListItemId'
-        - description: >-
-            Value list's identifier. Required if `id` is not specified.
+        - description: Value list's identifier. Required if `id` is not specified.
           in: query
           name: list_id
           required: false
@@ -1195,8 +1189,7 @@ paths:
               examples:
                 notFound:
                   value:
-                    message: >-
-                      list item with id: \"pd1WRJQBs4HAK3VQeHFI\" not found
+                    message: 'list item with id: \"pd1WRJQBs4HAK3VQeHFI\" not found'
                     status_code: 404
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
@@ -1473,11 +1466,16 @@ paths:
       tags:
         - Security Lists API
     post:
-      description: |
+      description: >
         Create a value list item and associate it with the specified value list.
 
-        All value list items in the same list must be the same type. For example, each list item in an `ip` list must define a specific IP address.
+
+        All value list items in the same list must be the same type. For
+        example, each list item in an `ip` list must define a specific IP
+        address.
+
         > info
+
         > Before creating a list item, you must create a list.
       operationId: CreateListItem
       requestBody:
@@ -1653,9 +1651,12 @@ paths:
       tags:
         - Security Lists API
     put:
-      description: |
-        Update a value list item using the list item ID. The original list item is replaced, and all unspecified fields are deleted.
+      description: >
+        Update a value list item using the list item ID. The original list item
+        is replaced, and all unspecified fields are deleted.
+
         > info
+
         > You cannot modify the `id` value.
       operationId: UpdateListItem
       requestBody:
@@ -1708,8 +1709,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: >-
-                      [request body]: id: Expected string, received number
+                    message: '[request body]: id: Expected string, received number'
                     statusCode: 400
               schema:
                 oneOf:
@@ -1789,8 +1789,7 @@ paths:
           content:
             application/ndjson:
               schema:
-                description: >-
-                  A `.txt` file containing list items from the specified list
+                description: A `.txt` file containing list items from the specified list
                 example: |
                   127.0.0.1
                   127.0.0.2
@@ -1903,8 +1902,7 @@ paths:
             format: nonempty
             minLength: 1
             type: string
-        - description: >-
-            Determines the sort order, which can be `desc` or `asc`
+        - description: Determines the sort order, which can be `desc` or `asc`
           in: query
           name: sort_order
           required: false
@@ -1919,8 +1917,10 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/FindListItemsCursor'
-        - description: |
-            Filters the returned results according to the value of the specified field,
+        - description: >
+            Filters the returned results according to the value of the specified
+            field,
+
             using the <field name>:<field value> syntax.
           in: query
           name: filter
@@ -2039,8 +2039,10 @@ paths:
         - Security Lists API
   /api/lists/items/_import:
     post:
-      description: |
-        Import value list items from a TXT or CSV file. The maximum file size is 9 million bytes.
+      description: >
+        Import value list items from a TXT or CSV file. The maximum file size is
+        9 million bytes.
+
 
         You can import items to a new or existing list.
       operationId: ImportListItems
@@ -2131,8 +2133,7 @@ paths:
               examples:
                 badRequest:
                   value:
-                    message: >-
-                      Either type or list_id need to be defined in the query
+                    message: Either type or list_id need to be defined in the query
                     status_code: 400
               schema:
                 oneOf:
@@ -2342,8 +2343,7 @@ components:
         call (use the `cursor` value returned in the previous call). This
         parameter uses the `tie_breaker_id` field to ensure all items are sorted
         and returned correctly.
-      example: >-
-        WzIwLFsiYjU3Yzc2MmMtMzAzNi00NjVjLTliZmItN2JmYjVlNmU1MTVhIl1d
+      example: WzIwLFsiYjU3Yzc2MmMtMzAzNi00NjVjLTliZmItN2JmYjVlNmU1MTVhIl1d
       format: nonempty
       minLength: 1
       type: string
@@ -2351,8 +2351,7 @@ components:
       example: value:127.0.0.1
       type: string
     FindListsCursor:
-      example: >-
-        WzIwLFsiYjU3Yzc2MmMtMzAzNi00NjVjLTliZmItN2JmYjVlNmU1MTVhIl1d
+      example: WzIwLFsiYjU3Yzc2MmMtMzAzNi00NjVjLTliZmItN2JmYjVlNmU1MTVhIl1d
       format: nonempty
       minLength: 1
       type: string
@@ -2562,12 +2561,17 @@ components:
         - index
         - application
     ListType:
-      description: |
-        Specifies the Elasticsearch data type of excludes the list container holds. Some common examples:
+      description: >
+        Specifies the Elasticsearch data type of excludes the list container
+        holds. Some common examples:
+
 
         - `keyword`: Many ECS fields are Elasticsearch keywords
+
         - `ip`: IP addresses
-        - `ip_range`: Range of IP addresses (supports IPv4, IPv6, and CIDR notation)
+
+        - `ip_range`: Range of IP addresses (supports IPv4, IPv6, and CIDR
+        notation)
       enum:
         - binary
         - boolean
@@ -2634,12 +2638,16 @@ components:
 security:
   - BasicAuth: []
 tags:
-  - description: |
-      Lists can be used with detection rule exceptions to define values that prevent a rule from generating alerts.
+  - description: >
+      Lists can be used with detection rule exceptions to define values that
+      prevent a rule from generating alerts.
+
 
       Lists are made up of:
 
-      * **List containers**: A container for values of the same Elasticsearch data type. The following data types can be used:
+
+      * **List containers**: A container for values of the same Elasticsearch
+      data type. The following data types can be used:
           * `boolean`
           * `byte`
           * `date`
@@ -2659,21 +2667,50 @@ tags:
           * `long_range`
           * `short`
           * `text`
-      * **List items**: The values used to determine whether the exception prevents an alert from being generated.
+      * **List items**: The values used to determine whether the exception
+      prevents an alert from being generated.
 
-      All list items in the same list container must be of the same data type, and each item defines a single value. For example, an IP list container named `internal-ip-addresses-southport` contains five items, where each item defines one internal IP address:
+
+      All list items in the same list container must be of the same data type,
+      and each item defines a single value. For example, an IP list container
+      named `internal-ip-addresses-southport` contains five items, where each
+      item defines one internal IP address:
+
       1. `192.168.1.1`
+
       2. `192.168.1.3`
+
       3. `192.168.1.18`
+
       4. `192.168.1.12`
+
       5. `192.168.1.7`
 
-      To use these IP addresses as values for defining rule exceptions, use the Security exceptions API to [create an exception list item](../operation/operation-createexceptionlistitem) that references the `internal-ip-addresses-southport` list.
+
+      To use these IP addresses as values for defining rule exceptions, use the
+      Security exceptions API to [create an exception list
+      item](../operation/operation-createexceptionlistitem) that references the
+      `internal-ip-addresses-southport` list.
+
       > info
-      > Lists cannot be added directly to rules, nor do they define the operators used to determine when exceptions are applied (`is in list`, `is not in list`). Use an exception item to define the operator and associate it with an [exception container](../operation/operation-createexceptionlist). You can then add the exception container to a rule's `exceptions_list` object.
+
+      > Lists cannot be added directly to rules, nor do they define the
+      operators used to determine when exceptions are applied (`is in list`, `is
+      not in list`). Use an exception item to define the operator and associate
+      it with an [exception
+      container](../operation/operation-createexceptionlist). You can then add
+      the exception container to a rule's `exceptions_list` object.
+
 
       ## Lists requirements
 
-      Before you can start using lists, you must create the `.lists` and `.items` data streams for the relevant Kibana space. To do this, use the [Create list data streams](../operation/operation-createlistindex) endpoint. Once these data streams are created, your role needs privileges to manage rules. Refer to [Enable and access detections](https://www.elastic.co/guide/en/serverless/current/security-detections-requirements.html#enable-detections-ui) for a complete list of requirements.
+
+      Before you can start using lists, you must create the `.lists` and
+      `.items` data streams for the relevant Kibana space. To do this, use the
+      [Create list data streams](../operation/operation-createlistindex)
+      endpoint. Once these data streams are created, your role needs privileges
+      to manage rules. Refer to [Enable and access
+      detections](https://www.elastic.co/guide/en/serverless/current/security-detections-requirements.html#enable-detections-ui)
+      for a complete list of requirements.
     name: Security Lists API
     x-displayName: Security lists

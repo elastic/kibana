@@ -15,10 +15,13 @@ servers:
 paths:
   /api/note:
     delete:
-      description: |
-        Deletes notes by saved object ID. Send either `noteId` (single ID) or `noteIds` (array of IDs) in the JSON body.
+      description: >
+        Deletes notes by saved object ID. Send either `noteId` (single ID) or
+        `noteIds` (array of IDs) in the JSON body.
+
 
         The response has HTTP 200 with an empty body on success.
+
 
         Requires the **Timeline and Notes** write privilege (`notes_write`).
       operationId: DeleteNote
@@ -46,14 +49,16 @@ paths:
                       type: array
                   required:
                     - noteIds
-        description: |
-          Exactly one shape: `{ "noteId": "<id>" }` for a single delete, or `{ "noteIds": ["<id>", ...] }` for bulk delete.
-          `noteIds` may be null in some clients; prefer an empty array or omit unused fields when possible.
+        description: >
+          Exactly one shape: `{ "noteId": "<id>" }` for a single delete, or `{
+          "noteIds": ["<id>", ...] }` for bulk delete.
+
+          `noteIds` may be null in some clients; prefer an empty array or omit
+          unused fields when possible.
         required: true
       responses:
         '200':
-          description: >-
-            The notes were deleted successfully. Response body is empty.
+          description: The notes were deleted successfully. Response body is empty.
       summary: Delete one or more notes
       tags:
         - Security Timeline API
@@ -128,8 +133,7 @@ paths:
           schema:
             nullable: true
             type: string
-        - description: >-
-            Field to sort by for saved-objects find (list mode only).
+        - description: Field to sort by for saved-objects find (list mode only).
           in: query
           name: sortField
           schema:
@@ -223,9 +227,13 @@ paths:
                   type: string
               required:
                 - note
-        description: |
-          Body must include the `note` object. For updates, include `noteId` (and optionally `version`).
-          To attach a note to a specific event, set `note.eventId` to that event's document `_id`; for a timeline-wide note, omit or clear `eventId` per product rules.
+        description: >
+          Body must include the `note` object. For updates, include `noteId`
+          (and optionally `version`).
+
+          To attach a note to a specific event, set `note.eventId` to that
+          event's document `_id`; for a timeline-wide note, omit or clear
+          `eventId` per product rules.
         required: true
       responses:
         '200':
@@ -249,13 +257,11 @@ paths:
               type: object
               properties:
                 eventId:
-                  description: >-
-                    The `_id` of the associated event for this pinned event.
+                  description: The `_id` of the associated event for this pinned event.
                   example: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bc
                   type: string
                 pinnedEventId:
-                  description: >-
-                    The `savedObjectId` of the pinned event you want to unpin.
+                  description: The `savedObjectId` of the pinned event you want to unpin.
                   example: 10r1929b-0af7-42bd-85a8-56e234f98h2f3
                   nullable: true
                   type: string
@@ -268,8 +274,7 @@ paths:
               required:
                 - eventId
                 - timelineId
-        description: >-
-          The pinned event to add or unpin, along with additional metadata.
+        description: The pinned event to add or unpin, along with additional metadata.
         required: true
       responses:
         '200':
@@ -317,8 +322,7 @@ paths:
                   type: array
               required:
                 - savedObjectIds
-        description: >-
-          The IDs of the Timelines or Timeline templates to delete.
+        description: The IDs of the Timelines or Timeline templates to delete.
         required: true
       responses:
         '200':
@@ -328,12 +332,10 @@ paths:
         - Security Timeline API
         - access:securitySolution
     get:
-      description: >-
-        Get the details of an existing saved Timeline or Timeline template.
+      description: Get the details of an existing saved Timeline or Timeline template.
       operationId: GetTimeline
       parameters:
-        - description: >-
-            The `savedObjectId` of the template timeline to retrieve
+        - description: The `savedObjectId` of the template timeline to retrieve
           in: query
           name: template_timeline_id
           schema:
@@ -349,8 +351,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TimelineResponse'
-          description: >-
-            Indicates that the (template) Timeline was found and returned.
+          description: Indicates that the (template) Timeline was found and returned.
       summary: Get Timeline or Timeline template details
       tags:
         - Security Timeline API
@@ -390,8 +391,7 @@ paths:
                 - timelineId
                 - version
                 - timeline
-        description: >-
-          The Timeline updates, along with the Timeline ID and version.
+        description: The Timeline updates, along with the Timeline ID and version.
         required: true
       responses:
         '200':
@@ -433,8 +433,7 @@ paths:
                   $ref: '#/components/schemas/TimelineStatus'
                   nullable: true
                 templateTimelineId:
-                  description: >-
-                    A unique identifier for the Timeline template.
+                  description: A unique identifier for the Timeline template.
                   example: 6ce1b592-84e3-4b4a-9552-f189d4b82075
                   nullable: true
                   type: string
@@ -482,15 +481,14 @@ paths:
                   statusCode:
                     example: 405
                     type: number
-          description: >-
-            Indicates that there was an error in the Timeline creation.
+          description: Indicates that there was an error in the Timeline creation.
       summary: Create a Timeline or Timeline template
       tags:
         - Security Timeline API
         - access:securitySolution
   /api/timeline/_copy:
     get:
-      description: >
+      description: |
         Copies and returns a timeline or timeline template.
       operationId: CopyTimeline
       requestBody:
@@ -513,8 +511,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PersistTimelineResponse'
-          description: >-
-            Indicates that the timeline has been successfully copied.
+          description: Indicates that the timeline has been successfully copied.
       summary: Copies timeline or timeline template
       tags:
         - Security Timeline API
@@ -538,8 +535,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PersistTimelineResponse'
-          description: >-
-            Indicates that the draft Timeline was successfully retrieved.
+          description: Indicates that the draft Timeline was successfully retrieved.
         '403':
           content:
             application/json:
@@ -573,10 +569,13 @@ paths:
         - Security Timeline API
         - access:securitySolution
     post:
-      description: |
+      description: >
         Create a clean draft Timeline or Timeline template for the current user.
+
         > info
-        > If the user already has a draft Timeline, the existing draft Timeline is cleared and returned.
+
+        > If the user already has a draft Timeline, the existing draft Timeline
+        is cleared and returned.
       operationId: CleanDraftTimelines
       requestBody:
         content:
@@ -683,8 +682,7 @@ paths:
         - access:securitySolution
   /api/timeline/_favorite:
     patch:
-      description: >-
-        Favorite a Timeline or Timeline template for the current user.
+      description: Favorite a Timeline or Timeline template for the current user.
       operationId: PersistFavoriteRoute
       requestBody:
         content:
@@ -709,8 +707,7 @@ paths:
                 - templateTimelineId
                 - templateTimelineVersion
                 - timelineType
-        description: >-
-          The required fields used to favorite a (template) Timeline.
+        description: The required fields used to favorite a (template) Timeline.
         required: true
       responses:
         '200':
@@ -718,8 +715,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FavoriteTimelineResponse'
-          description: >-
-            Indicates the favorite status was successfully updated.
+          description: Indicates the favorite status was successfully updated.
         '403':
           content:
             application/json:
@@ -924,8 +920,7 @@ paths:
           name: sort_field
           schema:
             $ref: '#/components/schemas/SortFieldTimeline'
-        - description: >-
-            Whether to sort the results `ascending` or `descending`
+        - description: Whether to sort the results `ascending` or `descending`
           in: query
           name: sort_order
           schema:
@@ -964,13 +959,11 @@ paths:
                 type: object
                 properties:
                   customTemplateTimelineCount:
-                    description: >-
-                      The amount of custom Timeline templates in the results
+                    description: The amount of custom Timeline templates in the results
                     example: 2
                     type: number
                   defaultTimelineCount:
-                    description: >-
-                      The amount of `default` type Timelines in the results
+                    description: The amount of `default` type Timelines in the results
                     example: 90
                     type: number
                   elasticTemplateTimelineCount:
@@ -983,8 +976,7 @@ paths:
                     example: 5
                     type: number
                   templateTimelineCount:
-                    description: >-
-                      The amount of Timeline templates in the results
+                    description: The amount of Timeline templates in the results
                     example: 10
                     type: number
                   timeline:
@@ -998,8 +990,7 @@ paths:
                 required:
                   - timeline
                   - totalCount
-          description: >-
-            Indicates that the (template) Timelines were found and returned.
+          description: Indicates that the (template) Timelines were found and returned.
         '400':
           content:
             application/json:
@@ -1071,8 +1062,7 @@ components:
         - type: object
           properties:
             eventId:
-              description: >-
-                The `_id` of the associated event for this pinned event.
+              description: The `_id` of the associated event for this pinned event.
               example: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bc
               type: string
             timelineId:
@@ -1182,8 +1172,7 @@ components:
         - template
       type: string
     DocumentIds:
-      description: >-
-        One document ID or an array of IDs (Elasticsearch `_id` of the event).
+      description: One document ID or an array of IDs (Elasticsearch `_id` of the event).
       oneOf:
         - items:
             type: string
@@ -1325,8 +1314,7 @@ components:
                 type: object
                 properties:
                   message:
-                    description: >-
-                      The reason why the timeline could not be imported
+                    description: The reason why the timeline could not be imported
                     example: Malformed JSON
                     type: string
                   status_code:
@@ -1339,8 +1327,7 @@ components:
                 type: string
           type: array
         success:
-          description: >-
-            Indicates whether any of the Timelines were successfully imports
+          description: Indicates whether any of the Timelines were successfully imports
           type: boolean
         success_count:
           description: The amount of successfully imported/updated Timelines
@@ -1406,8 +1393,7 @@ components:
       type: object
       properties:
         created:
-          description: >-
-            The time the note was created, using a 13-digit Epoch timestamp.
+          description: The time the note was created, using a 13-digit Epoch timestamp.
           example: 1587468588922
           nullable: true
           type: number
@@ -1433,8 +1419,7 @@ components:
         - type: object
           properties:
             unpinned:
-              description: >-
-                Indicates whether the event was successfully unpinned
+              description: Indicates whether the event was successfully unpinned
               type: boolean
           required:
             - unpinned
@@ -1705,8 +1690,9 @@ components:
           nullable: true
           type: array
         kqlMode:
-          description: |-
-            Indicates whether the KQL bar filters the query results or searches for additional results, where:
+          description: >-
+            Indicates whether the KQL bar filters the query results or searches
+            for additional results, where:
               * `filter`: filters query results
               * `search`: displays additional search results
           example: search
@@ -1716,14 +1702,12 @@ components:
           $ref: '#/components/schemas/SerializedFilterQueryResult'
           nullable: true
         savedQueryId:
-          description: >-
-            The ID of the saved query that might be used in the Query tab
+          description: The ID of the saved query that might be used in the Query tab
           example: c7b16904-02d7-4f32-b8f2-cc20f9625d6e
           nullable: true
           type: string
         savedSearchId:
-          description: >-
-            The ID of the saved search that is used in the ES|QL tab
+          description: The ID of the saved search that is used in the ES|QL tab
           example: 6ce1b592-84e3-4b4a-9552-f189d4b82075
           nullable: true
           type: string
@@ -1772,8 +1756,7 @@ components:
         - type: object
           properties:
             savedObjectId:
-              description: >-
-                The `savedObjectId` of the Timeline or Timeline template
+              description: The `savedObjectId` of the Timeline or Timeline template
               example: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
               type: string
             version:
@@ -1826,8 +1809,7 @@ components:
         - created
       type: string
     SortObject:
-      description: >-
-        Object indicating how rows are sorted in the Timeline's grid
+      description: Object indicating how rows are sorted in the Timeline's grid
       example:
         columnId: '@timestamp'
         sortDirection: desc
@@ -1849,8 +1831,7 @@ components:
         - type: object
           properties:
             eventIdToNoteIds:
-              description: >-
-                A list of all the notes that are associated to this Timeline.
+              description: A list of all the notes that are associated to this Timeline.
               items:
                 $ref: '#/components/schemas/Note'
               nullable: true
@@ -1866,8 +1847,7 @@ components:
               nullable: true
               type: array
             notes:
-              description: >-
-                A list of all the notes that are associated to this Timeline.
+              description: A list of all the notes that are associated to this Timeline.
               items:
                 $ref: '#/components/schemas/Note'
               nullable: true

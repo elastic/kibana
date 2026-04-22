@@ -1,8 +1,7 @@
 openapi: 3.0.3
 info:
   description: Endpoint Exceptions API allow you to manage Endpoint lists.
-  title: >-
-    Security Endpoint Exceptions API (Elastic Cloud and self-hosted)
+  title: Security Endpoint Exceptions API (Elastic Cloud and self-hosted)
   version: '2023-10-31'
 servers:
   - url: http://{kibana_host}:{port}
@@ -26,8 +25,7 @@ paths:
             application/json:
               examples:
                 alreadyExists:
-                  summary: >-
-                    Endpoint exception list already exists (empty response)
+                  summary: Endpoint exception list already exists (empty response)
                   value: {}
                 newList:
                   summary: Endpoint exception list created
@@ -265,8 +263,7 @@ paths:
               matchAny:
                 summary: Exclude multiple process names
                 value:
-                  description: >-
-                    Exclude common security tools from endpoint protection
+                  description: Exclude common security tools from endpoint protection
                   entries:
                     - field: process.name
                       operator: included
@@ -534,8 +531,10 @@ paths:
       description: Get a list of all Elastic Endpoint exception list items.
       operationId: FindEndpointListItems
       parameters:
-        - description: |
-            Filters the returned results according to the value of the specified field,
+        - description: >
+            Filters the returned results according to the value of the specified
+            field,
+
             using the `<field name>:<field value>` syntax.
           in: query
           name: filter
@@ -562,8 +561,7 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/NonEmptyString'
-        - description: >-
-            Determines the sort order, which can be `desc` or `asc`
+        - description: Determines the sort order, which can be `desc` or `asc`
           in: query
           name: sort_order
           required: false
@@ -584,8 +582,7 @@ paths:
                       - comments: []
                         created_at: '2025-01-01T12:00:00.000Z'
                         created_by: elastic
-                        description: >-
-                          Blocks a known malicious file by its hash
+                        description: Blocks a known malicious file by its hash
                         entries:
                           - field: file.hash.sha256
                             operator: included
@@ -628,8 +625,7 @@ paths:
                     description: The point-in-time ID for pagination.
                     type: string
                   total:
-                    description: >-
-                      The total number of endpoint exception list items.
+                    description: The total number of endpoint exception list items.
                     minimum: 0
                     type: integer
                 required:
@@ -1023,8 +1019,7 @@ components:
       format: date-time
       type: string
     ExceptionListItemHumanId:
-      description: >-
-        Human readable string identifier, e.g. `trusted-linux-processes`
+      description: Human readable string identifier, e.g. `trusted-linux-processes`
       example: simple_list_item
       format: nonempty
       minLength: 1
@@ -1076,8 +1071,7 @@ components:
         - windows
       type: string
     ExceptionListOsTypeArray:
-      description: >-
-        Use this field to specify the operating system. Only enter one value.
+      description: Use this field to specify the operating system. Only enter one value.
       items:
         $ref: '#/components/schemas/ExceptionListOsType'
       type: array
@@ -1107,14 +1101,21 @@ components:
       minimum: 1
       type: integer
     ExceptionNamespaceType:
-      description: |
-        Determines whether the exception container is available in all Kibana spaces or just the space
+      description: >
+        Determines whether the exception container is available in all Kibana
+        spaces or just the space
+
         in which it is created, where:
 
+
         - `single`: Only available in the Kibana space in which it is created.
+
         - `agnostic`: Available in all Kibana spaces.
 
-        For endpoint artifacts, the `namespace_type` must always be `agnostic`. Space awareness for endpoint artifacts is enforced based on Elastic Defend policy assignments.
+
+        For endpoint artifacts, the `namespace_type` must always be `agnostic`.
+        Space awareness for endpoint artifacts is enforced based on Elastic
+        Defend policy assignments.
       enum:
         - agnostic
         - single
@@ -1128,12 +1129,17 @@ components:
       minLength: 1
       type: string
     ListType:
-      description: |
-        Specifies the Elasticsearch data type of excludes the list container holds. Some common examples:
+      description: >
+        Specifies the Elasticsearch data type of excludes the list container
+        holds. Some common examples:
+
 
         - `keyword`: Many ECS fields are Elasticsearch keywords
+
         - `ip`: IP addresses
-        - `ip_range`: Range of IP addresses (supports IPv4, IPv6, and CIDR notation)
+
+        - `ip_range`: Range of IP addresses (supports IPv4, IPv6, and CIDR
+        notation)
       enum:
         - binary
         - boolean
