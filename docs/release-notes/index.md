@@ -37,8 +37,8 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Alert deletion is now generally available [#247465]({{kib-pull}}247465).
 
 **Connectivity**:
-* Adds the `region` implementation to the Bedrock Connector [#252960]({{kib-pull}}252960).
-* Adds the `region` parameter to the Bedrock Connector schema [#252956]({{kib-pull}}252956).
+* Adds support for the `region` parameter to the Bedrock Connector [#252956]({{kib-pull}}252956).
+* Adds a SharePoint Server connector, enabling you to connect to on-prem SharePoint instances and search, browse, and retrieve documents and site content [#258014]({{kib-pull}}258014).
 
 **Dashboards and Visualizations**:
 % main features
@@ -62,15 +62,21 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Adds library support for markdown panels [#248779]({{kib-pull}}248779).
 * Allows panels to be dragged while they're in focus for editing [#251327]({{kib-pull}}251327).
 * Redesigns the panel titles [#251720]({{kib-pull}}251720).
+* Refreshes the Dashboards app menu [#246153]({{kib-pull}}246153).
 
 % esql + viz
+* Clicking on a filterable field value in a Discover {{esql}} session embedded in a dashboard now creates a DSL filter, consistent with how filtering works elsewhere [#249357]({{kib-pull}}249357).
+* Adds a tab selector to Discover session panels in Dashboards, with improved warning messages when a tab or data view can't be retrieved [#252311]({{kib-pull}}252311).
 * Adds {{esql}} support to Vega visualizations [#247186]({{kib-pull}}247186).
 * Enables {{esql}} multi-terms charts in Lens [#244743]({{kib-pull}}244743).
 * Allows filtering from legend actions when possible for {{esql}} visualizations [#248789]({{kib-pull}}248789).
 * Suggests line charts for timeseries {{esql}} queries (TS / PromQL) in Lens [#252661]({{kib-pull}}252661).
 * Retrieves variable types from the {{esql}} query response [#254436]({{kib-pull}}254436).
+* Enables dashboard and URL drilldown for {{esql}} charts. [#253223]({{kib-pull}}253223).
 
 % chart options and improvements
+* Adds a **Discover session** panel option to dashboards [#256293]({{kib-pull}}256293).
+* Editing an unlinked Discover session panel in a dashboard now saves changes back to that panel without affecting the original saved session [#250438]({{kib-pull}}250438).
 * Defaults the visualization type a to line chart when the x-axis contains a timestamp, instead of a bar chart [#253930]({{kib-pull}}253930).
 * Adds a new optimized color palette for line charts [#253437]({{kib-pull}}253437).
 * Adds a **Badge** color option for table values in Lens, allowing cell values to be displayed as colored badges instead of text or background coloring [#257408]({{kib-pull}}257408).
@@ -80,6 +86,11 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Improves tick labels for time-based X axes in {{esql}} heatmap visualizations [#259218]({{kib-pull}}259218).
 * Improves datatable visualization performance for large datasets in Lens [#256234]({{kib-pull}}256234).
 * Enables monospace numeric font features for Lens renderers [#251576]({{kib-pull}}251576).
+* Introduces a Severity color palette in Lens color mapping [#250198]({{kib-pull}}250198).
+* Improves the badge colors for metric trend indicators in Lens [#256255]({{kib-pull}}256255).
+* Legend actions in Lens XY and Partition charts now only appear on hover [#255616]({{kib-pull}}255616).
+* Removes the font-weight configuration option from Lens Metric chart titles, defaulting to medium weight [#254941]({{kib-pull}}254941).
+* Updates axis title and label colors in Lens and dashboard charts to be less visually prominent [#254587]({{kib-pull}}254587).
 
 **Data ingestion and Fleet**:
 * Allows remote {{es}} outputs and service tokens in Serverless [#262101]({{kib-pull}}262101).
@@ -104,58 +115,49 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Improves memory usage during {{fleet}} setup by deferring package reinstalls to async tasks [#248235]({{kib-pull}}248235).
 
 **Discover**:
+* Redesigns the {{esql}} editor footer in Discover: removes the row limit and timestamp indicators, and adds query run statistics [#244284]({{kib-pull}}244284).
 * Adds `hideTable` to the app state and connects it with a layout toggle [#259083]({{kib-pull}}259083).
-* Adds fields browser to the {{esql}} editor in Discover [#252749]({{kib-pull}}252749).
-* Adds a tab selector to Discover session panels in Dashboards, with improved warning messages when a tab or data view can't be retrieved [#252311]({{kib-pull}}252311).
-* Adds a data source browser to the {{esql}} editor [#251897]({{kib-pull}}251897).
-* Redesigns the {{esql}} editor interface [#251223]({{kib-pull}}251223).
-* Adds PromQL validation params [#249708]({{kib-pull}}249708).
-* Renders `tdigest` and `exponential_histogram` metric types in metrics grid [#249269]({{kib-pull}}249269).
-* Adds PromQL editor support [#249230]({{kib-pull}}249230).
-* Adds an opt-in to the flyout session in UnifiedDocViewerFlyout [#246719]({{kib-pull}}246719).
-* Adds {{esql}} `STATS` cascaded documents support [#220119]({{kib-pull}}220119).
-* Supports views in the editor [#261907]({{kib-pull}}261907).
-* Makes the `FORK` command generally available [#261904]({{kib-pull}}261904).
-* Adds `USER_AGENT` command support [#261314]({{kib-pull}}261314).
-* Hides the main table when the metrics profile resolves [#260607]({{kib-pull}}260607).
-* Adds a **Save Discover Table to Dashboard** button [#259626]({{kib-pull}}259626).
-* Converts DSL filters to {{esql}} when possible [#259260]({{kib-pull}}259260).
+* Adds a fields browser to the {{esql}} editor in Discover [#252749]({{kib-pull}}252749).
+* Adds support for visualizing histogram metrics in the unified metrics grid by introducing `PERCENTILE` aggregations based on the metric's instrument and field type, which enables rendering of `tdigest` and `exponential_histogram` metric types. [#249269]({{kib-pull}}249269).
+* Adds a grouped view in Discover for {{esql}} queries that use `STATS ... BY` with a single grouping field. A new toolbar selector lets you pivot by that field or switch back to the standard table view. [#220119]({{kib-pull}}220119).
+* Hides the data table by default when the metrics-specific Discover experience is triggered [#260607]({{kib-pull}}260607).
+* Adds a **Save Discover table to dashboard** option [#259626]({{kib-pull}}259626).
+* Converts DSL filters to {{esql}} when possible when switching to {{esql}} mode [#259260]({{kib-pull}}259260).
 * Moves the inspector menu item to the tab menu [#258767]({{kib-pull}}258767).
 * Highlights multiple word occurrences in search results [#258764]({{kib-pull}}258764).
-* Enables PromQL in the editor [#257619]({{kib-pull}}257619).
-* Improves query pretty printing [#257440]({{kib-pull}}257440).
-* Enables the `MMR` command [#257208]({{kib-pull}}257208).
-* Adds a **New Discover session** option for dashboards [#256293]({{kib-pull}}256293).
-* Uses same return navigation path for by-ref and by-value editing [#255816]({{kib-pull}}255816).
 * Returns to the Discover session after **Save As** [#255323]({{kib-pull}}255323).
 * Shows a table view for indexes and views with a small number of columns [#255292]({{kib-pull}}255292).
-* Improves commenting behavior [#254851]({{kib-pull}}254851).
-* Adds an EUI Tour to the **Tab** menu for Switch to Classic / {{esql}} [#254183]({{kib-pull}}254183).
-* Simplifies the update button states for {{esql}} queries [#254121]({{kib-pull}}254121).
-* Adds `MMR` autocomplete and validation [#254014]({{kib-pull}}254014).
-* Restores the recently closed tab groups [#253365]({{kib-pull}}253365).
-* Enables dashboard and URL drilldown for {{esql}} charts. [#253223]({{kib-pull}}253223).
-* Makes the `RERANK` command generally available [#252242]({{kib-pull}}252242).
+* Adds a feature tour to the **Tab** menu for Switch to classic / {{esql}} modes [#254183]({{kib-pull}}254183).
+* Adds the ability to restore recently closed tab groups [#253365]({{kib-pull}}253365).
+* Hovering over an entry in the recently closed tabs menu now shows a preview of what the tab contained [#246973]({{kib-pull}}246973).
 * Uses a restorable state in doc viewer's **JSON** tab [#252054]({{kib-pull}}252054).
-* Adds a query stats display [#251029]({{kib-pull}}251029).
-* Adds a by-value embeddable editor flow [#250438]({{kib-pull}}250438).
-* Persists the query mode to local storage [#250388]({{kib-pull}}250388).
-* Adds notifications when background search completes [#249857]({{kib-pull}}249857).
-* Adds basic support in Kibana [#249854]({{kib-pull}}249854).
-* Uses a restorable state in doc viewer's **Table** tab [#249682]({{kib-pull}}249682).
-* Supports autocomplete inside the KQL function [#249510]({{kib-pull}}249510).
-* Allows filtering of {{esql}} sessions in a dashboard [#249357]({{kib-pull}}249357).
-* Adds support for a restorable state for doc viewer flyout tabs [#249030]({{kib-pull}}249030).
-* Adds a new `approximate` setting [#248946]({{kib-pull}}248946).
-* Supports unmapped fields [#248606]({{kib-pull}}248606).
-* Supports timezone handling [#247917]({{kib-pull}}247917).
-* Adds an {{esql}} indentation shortcut in the editor [#247234]({{kib-pull}}247234).
-* Supports KQL in the visor [#247224]({{kib-pull}}247224).
-* Marks the `MATCH_PHRASE` second argument as `constantOnly` [#247003]({{kib-pull}}247003).
-* Improves the recently closed tabs menu with preview on hover [#246973]({{kib-pull}}246973).
-* Adds a tab-scoped retainable flyout [#246612]({{kib-pull}}246612).
-* Saves the chart interval to the saved object [#246426]({{kib-pull}}246426).
-* Updates the footer of the editor [#244284]({{kib-pull}}244284).
+* Adds notifications for background search completion [#249857]({{kib-pull}}249857).
+* Persists the query mode ({{esql}} or classic) to local storage so that the next sessions open with the last mode used [#250388]({{kib-pull}}250388).
+* The document viewer **Table** tab now restores your previous state — including search, filters, pinned fields, and pagination — when you reopen the flyout [#249682]({{kib-pull}}249682).
+* The doc viewer flyout now stays open when switching between Discover tabs and remembers which tab (such as **Table** or **JSON**) was active in each [#246612]({{kib-pull}}246612).
+* The chart interval is now saved with Discover sessions and restored when reopening them [#246426]({{kib-pull}}246426).
+
+**{{esql}} editor:
+* Adds PromQL support in {{kib}} through {{esql}} [#249854]({{kib-pull}}249854).
+* Redesigns the {{esql}} editor interface [#251223]({{kib-pull}}251223).
+* Adds a data source browser to the {{esql}} editor [#251897]({{kib-pull}}251897).
+* Adds support for {{esql}} views to the editor [#261907]({{kib-pull}}261907).
+* Adds support for KQL syntax to the quick search option [#247224]({{kib-pull}}247224).
+* Adds autocomplete to the KQL function [#249510]({{kib-pull}}249510).
+* Adds support for unmapped fields [#248606]({{kib-pull}}248606).
+* Adds support for timezone handling [#247917]({{kib-pull}}247917).
+* Adds query stats [#251029]({{kib-pull}}251029).
+* Makes the `FORK` command generally available [#261904]({{kib-pull}}261904).
+* Makes the `RERANK` command generally available [#252242]({{kib-pull}}252242).
+* Adds support for the `USER_AGENT` command [#261314]({{kib-pull}}261314).
+* Adds support for the `MMR` command [#257208]({{kib-pull}}257208).
+* Adds autocomplete and validation support for the `approximate` setting in the {{esql}} editor [#248946]({{kib-pull}}248946).
+* Improves {{esql}} editor autocomplete for full-text search functions: `MATCH_PHRASE`'s second argument now only suggests literal values, and FTS functions are excluded from `EVAL` suggestions except inside `SCORE()` [#247003]({{kib-pull}}247003).
+* Improves commenting behavior [#254851]({{kib-pull}}254851).
+* Improves query pretty printing [#257440]({{kib-pull}}257440).
+* Adds an {{esql}} indentation shortcut to the editor [#247234]({{kib-pull}}247234).
+* Simplifies the update button states for {{esql}} queries [#254121]({{kib-pull}}254121).
+
 
 **Elastic Observability solution**:
 For the Elastic Observability 9.4.0 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
@@ -164,14 +166,11 @@ For the Elastic Observability 9.4.0 release information, refer to [Elastic Obser
 For the Elastic Security 9.4.0 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
 
 **Kibana platform**:
-* Adds the ability to configure a space-level default project routing expression in the **Space Management** UI [#250990]({{kib-pull}}250990).
-* Sets the heap limit to min(60%, 4GB) for containers if unset. Containers now set the default Node.js heap to 75% of available memory up to a maximum of 4096 MB [#246073]({{kib-pull}}246073).
-* Adds a feedback plugin [#225074]({{kib-pull}}225074).
-* Remembers the user grid state when navigating back from edit [#261152]({{kib-pull}}261152).
+* Sets the heap limit to `min(60%, 4GB)` for containers if unset. Containers now set the default Node.js heap to 75% of available memory up to a maximum of 4096 MB [#246073]({{kib-pull}}246073).
+* Adds a feedback button to {{kib}}'s header [#225074]({{kib-pull}}225074).
+* Remembers the pagination state when navigating back from an edit on the **Users** page, instead of always returning to page 1 and resetting the search [#261152]({{kib-pull}}261152).
 * Distinguishes between session idle timeouts and session lifespan timeouts [#252779]({{kib-pull}}252779).
-* Adds a new `check_package_docs` CLI for validating plugin and package API documentation. The `--stats` flag on `build_api_docs` is deprecated in favor of this new dedicated validation command [#249305]({{kib-pull}}249305).
-* Adds `maxSize` for entries in security endpoints related API schemas [#246359]({{kib-pull}}246359).
-* Integrates the new app menu with dashboards [#246153]({{kib-pull}}246153).
+* Improves Index Management index list load performance on large clusters with many indices [#246276]({{kib-pull}}246276).
 
 **Machine Learning**:
 * Updates Security ML jobs to use entity analytics fields for host and user fields [#255339]({{kib-pull}}255339).
@@ -179,9 +178,6 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Adds a link to manage anomaly detection jobs in the Machine Learning left navigation [#260605]({{kib-pull}}260605).
 * Anomaly detection now automatically closes the job when stopping a datafeed [#259603]({{kib-pull}}259603).
 * Adds aria labels to job wizard combo boxes [#258509]({{kib-pull}}258509).
-* Adds CPS-unsupported labels to ML rules [#258162]({{kib-pull}}258162).
-* Adds a cross-project search warning to the anomaly detection jobs list [#256713]({{kib-pull}}256713).
-* Adds CPS compatibility for AIOps and data visualizer [#256244]({{kib-pull}}256244).
 * Updates the `v3_rare_process_by_host_windows` bucket span to two hours [#255855]({{kib-pull}}255855).
 * Changes the rare process by host Windows job bucket span from 15m to 4h [#255385]({{kib-pull}}255385).
 * Adds a new single APM Correlations endpoint for latency and failed transactions [#254607]({{kib-pull}}254607).
@@ -204,17 +200,12 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Marks 429 errors as user errors in Inference/AI Connector [#246640]({{kib-pull}}246640).
 * Opens matching pattern docs in a new Discover tab [#245695]({{kib-pull}}245695).
 
-**Management**:
-* Improves Index Management index list load performance on large clusters with many indices [#246276]({{kib-pull}}246276).
-* Adds an option to convert an index to a lookup index in the **Manage index** dropdown in serverless mode [#248730]({{kib-pull}}248730).
-
 **Search**:
 * Adds warnings to the **Feature Settings** page for models that are invalid [#262262]({{kib-pull}}262262).
 * Deprecates search indices in favor of index management [#260210]({{kib-pull}}260210).
 * Adds a **Models** page for inference management [#259374]({{kib-pull}}259374).
 * Adds a **Model Settings** UI for inference endpoint assignments [#258871]({{kib-pull}}258871).
-* Adds a SharePoint Server (on-premises) connector for Workplace AI, enabling users to connect to on-prem SharePoint instances and search, browse, and retrieve documents and site content [#258014]({{kib-pull}}258014).
-* Allows all connectors in ES3, rather than an explicit allowlist [#257924]({{kib-pull}}257924).
+
 * Ensures Jina is the default in semantic text if available [#257464]({{kib-pull}}257464).
 * Adds an AI assistant-led onboarding option to the Elasticsearch getting started page [#255192]({{kib-pull}}255192).
 * Adds the ability to dynamically create AI Connectors for Elastic Inference Service preconfigured inference endpoints [#254826]({{kib-pull}}254826).
@@ -267,7 +258,6 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Adds SharePoint Online data source and workflows [#251544]({{kib-pull}}251544).
 * Adds a Jira Cloud datasource [#251345]({{kib-pull}}251345).
 * Adds a gap scheduler error callout [#250393]({{kib-pull}}250393).
-* Introduces a Severity Color palette in color mapping [#250198]({{kib-pull}}250198).
 * Adds metrics grid {{esql}} WHERE propagation [#249103]({{kib-pull}}249103).
 * Adds a SharePoint Online connector to the available list of connectors [#248737]({{kib-pull}}248737).
 * Displays row numbers for the data table by default [#247834]({{kib-pull}}247834).
@@ -278,10 +268,6 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Adds **Default model** and **Disallow all other models** settings to the **Model Settings** page [#259932]({{kib-pull}}259932).
 * Adds the `entries` Liquid filter for iterating over object keys [#259249]({{kib-pull}}259249).
 * Agent Builder's default agent is no longer read-only and can now be customized per Kibana space [#256333]({{kib-pull}}256333).
-* Improves the badge style for metrics trends [#256255]({{kib-pull}}256255).
-* Improves the legend UI by showing actions on hover [#255616]({{kib-pull}}255616).
-* Removes the font-weight parameter for Metric chart titles. Titles now use a consistent default font weight of Medium [#254941]({{kib-pull}}254941).
-* Updates axis title and labels colors in Lens and dashboard [#254587]({{kib-pull}}254587).
 * Adds agent and tools RBAC sub features [#254464]({{kib-pull}}254464).
 * Respects `observability:enableInspectEsQueries` in Hosts UI [#253618]({{kib-pull}}253618).
 * Adds server-side support for user-created skills in Agent Builder [#252493]({{kib-pull}}252493).
@@ -378,27 +364,28 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 
 **Discover**:
 * Fixes the date picker showing empty when switching from KQL to {{esql}} [#261175]({{kib-pull}}261175).
-* Correctly reports controls server-side errors [#263020]({{kib-pull}}263020).
 * Fixes a tab URL state leak when leaving Discover [#262929]({{kib-pull}}262929).
 * Resets the time field when the updated index pattern does not have it [#262001]({{kib-pull}}262001).
-* Fixes {{esql}} multi-value filtering with `STATS` [#260998]({{kib-pull}}260998).
-* Fixes `STATS` generated columns with inline `WHERE` [#260196]({{kib-pull}}260196).
-* Takes remote indices into consideration when there is no local data [#257340]({{kib-pull}}257340).
-* Fixes autocomplete fetches piling up without cancellation [#255664]({{kib-pull}}255664).
 * Resets the default profile state when transitioning between tab modes [#255226]({{kib-pull}}255226).
 * Makes matches expandable for long filter matches [#255093]({{kib-pull}}255093).
 * Aborts in-flight long-running queries [#254487]({{kib-pull}}254487).
 * Fixes incorrect KQL bar results for some indices [#254119]({{kib-pull}}254119).
-* Fixes incorrect validation of TS [#253635]({{kib-pull}}253635).
-* Fixes the handling of missing values [#251892]({{kib-pull}}251892).
-* Supports functions and aggregators in PromQL autocomplete [#250078]({{kib-pull}}250078).
+* Fixes URL, Badge, Color, and other field formatters incorrectly rendering fields with missing or null values [#251892]({{kib-pull}}251892).
 * Fixes filtering out null values from the Discover histogram legend in {{esql}} mode [#249302]({{kib-pull}}249302).
 * Fixes **Search entire time range** for date nanos [#248495]({{kib-pull}}248495).
 * Prevents loss of UI state in signal-specific Discover fly-out tabs when refreshing a query [#248203]({{kib-pull}}248203).
 * Fixes query drafts when switching tabs [#247968]({{kib-pull}}247968).
 * Allows completing all quickly opened tabs [#246941]({{kib-pull}}246941).
-* Fixes unrecognized GROK patterns [#246871]({{kib-pull}}246871).
 * Fixes the default app state handling when detecting unsaved changes [#246664]({{kib-pull}}246664).
+
+**{{esql}} editor:
+* Fixes {{esql}} multi-value filtering with `STATS` [#260998]({{kib-pull}}260998).
+* Fixes `STATS` generated columns with inline `WHERE` [#260196]({{kib-pull}}260196).
+* When no local indices are available, the {{esql}} query suggestion now correctly considers remote indices [#257340]({{kib-pull}}257340).
+* Fixes {{esql}} variable controls not displaying server-side errors in the editor [#263020]({{kib-pull}}263020).
+* Fixes autocomplete fetches piling up without cancellation when typing rapidly in the {{esql}} editor [#255664]({{kib-pull}}255664).
+* Fixes incorrect validation of the `TS` (time series) command [#253635]({{kib-pull}}253635).
+* Fixes some `GROK` patterns not being recognized, which caused columns to appear as unknown [#246871]({{kib-pull}}246871).
 
 **Elastic Observability solution**:
 For the Elastic Observability 9.4.0 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
@@ -431,7 +418,6 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 **Machine Learning**:
 * Ensures the single metric chart shows anomaly actions correctly in Anomaly Explorer [#263925]({{kib-pull}}263925).
 * Formats `time_of_day` / `time_of_week` values in anomaly detection alerting rule notifications and results preview [#261034]({{kib-pull}}261034).
-* Ensures local routing is used for anomaly results searches [#260058]({{kib-pull}}260058).
 * Fixes the anomaly swim lane embeddable refresh in Anomaly Detection [#259962]({{kib-pull}}259962).
 * Fixes a jobs list console error in Data frame analytics [#258591]({{kib-pull}}258591).
 * Disables Start/Update deployment actions for Rerank models in trained models [#257400]({{kib-pull}}257400).
