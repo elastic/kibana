@@ -303,7 +303,7 @@ class SavedObjectFinderUiClass extends React.Component<
               onClick={
                 onChoose
                   ? (e: React.MouseEvent) => {
-                      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) {
+                      if (getHref && (e.ctrlKey || e.metaKey)) {
                         return;
                       }
                       e.preventDefault();
