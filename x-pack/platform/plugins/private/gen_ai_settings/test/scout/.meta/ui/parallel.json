@@ -1,5 +1,5 @@
 {
-  "sha1": "03e069fcc73bffc266d059c218288270fe463d38",
+  "sha1": "e831d6ffc69d6b0f316619b7d711aff21c59a034",
   "tests": [
     {
       "id": "30ebe9a34bf659d-a632a3af2fa3cab",
@@ -82,23 +82,6 @@
       "location": {
         "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/ai_assistant_visibility.spec.ts",
         "line": 27,
-        "column": 14
-      }
-    },
-    {
-      "id": "4efc85dbb40716c-9961aec1448fe75",
-      "title": "GenAI Settings - Confirmation Modal should cancel Agent selection without saving changes",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/confirmation_modal.spec.ts",
-        "line": 35,
         "column": 14
       }
     },
