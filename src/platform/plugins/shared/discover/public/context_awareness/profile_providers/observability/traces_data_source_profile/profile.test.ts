@@ -125,6 +125,26 @@ describe('tracesDataSourceProfileProvider', () => {
     ).toEqual(RESOLUTION_MISMATCH);
   });
 
+  it('should return the correct default app state', () => {
+    const getDefaultAppState = tracesDataSourceProfileProvider.profile.getDefaultAppState?.(
+      () => ({}),
+      { context: RESOLUTION_MATCH.context }
+    );
+    expect(getDefaultAppState?.({ dataView: {} as unknown as DataView })).toMatchObject({
+      hideTable: false,
+      columns: [
+        { name: '@timestamp', width: 212 },
+        { name: 'service.name' },
+        { name: 'transaction.name' },
+        { name: 'span.name' },
+        { name: 'transaction.duration.us' },
+        { name: 'span.duration.us' },
+        { name: 'event.outcome' },
+      ],
+      rowHeight: 1,
+    });
+  });
+
   it('should NOT match when the solutionType is NOT Observability', () => {
     expect(
       tracesDataSourceProfileProvider.resolve({

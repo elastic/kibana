@@ -127,6 +127,17 @@ describe('logsDataSourceProfileProvider', () => {
     ).toEqual(RESOLUTION_MISMATCH);
   });
 
+  it('should return the correct default app state', () => {
+    const getDefaultAppState = logsDataSourceProfileProvider.profile.getDefaultAppState?.(
+      () => ({}),
+      { context: RESOLUTION_MATCH.context }
+    );
+    expect(getDefaultAppState?.({ dataView: dataViewWithTimefieldMock })).toMatchObject({
+      hideTable: false,
+      breakdownField: 'log.level',
+    });
+  });
+
   const dataViewWithLogLevel = createStubIndexPattern({
     spec: {
       title: VALID_IMPLICIT_DATA_INDEX_PATTERN,
