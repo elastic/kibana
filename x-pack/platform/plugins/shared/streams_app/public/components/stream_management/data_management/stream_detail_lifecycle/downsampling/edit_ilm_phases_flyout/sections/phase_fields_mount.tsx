@@ -7,16 +7,16 @@
 
 import React from 'react';
 import type { PhaseName } from '@kbn/streams-schema';
-import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { Controller, useFormContext } from 'react-hook-form';
 import { PHASE_MOUNT_PATHS } from '../constants';
+import type { IlmPhasesFlyoutFormInternal } from '../form';
 
 export const PhaseFieldsMount = ({ phase }: { phase: PhaseName }) => {
+  const { control } = useFormContext<IlmPhasesFlyoutFormInternal>();
   return (
     <>
       {PHASE_MOUNT_PATHS[phase].map((path) => (
-        <UseField key={path} path={path}>
-          {() => null}
-        </UseField>
+        <Controller key={path} name={path} control={control} render={() => <></>} />
       ))}
     </>
   );

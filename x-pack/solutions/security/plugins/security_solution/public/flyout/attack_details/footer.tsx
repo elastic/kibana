@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import { isCCSRemoteIndexName } from '@kbn/es-query';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -29,7 +30,8 @@ export { FLYOUT_FOOTER_TEST_ID };
  * Bottom section of the flyout that contains the take action button
  */
 export const PanelFooter = () => {
-  const { attack, refetch } = useAttackDetailsContext();
+  const { attack, indexName, refetch } = useAttackDetailsContext();
+  const isRemoteDocument = useMemo(() => isCCSRemoteIndexName(indexName), [indexName]);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -90,6 +92,7 @@ export const PanelFooter = () => {
                 size="s"
                 telemetrySource="attacks_page_flyout_take_action"
                 showAiAssistantAction={false}
+                isRemoteDocument={isRemoteDocument}
               />
             </EuiPopover>
           </EuiFlexItem>
