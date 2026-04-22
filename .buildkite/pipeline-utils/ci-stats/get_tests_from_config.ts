@@ -10,10 +10,7 @@ import { dirname, resolve } from 'path';
 import * as globby from 'globby';
 import { getKibanaDir } from '#pipeline-utils';
 
-const TEST_FILE_PATTERNS = [
-  '**/*.test.{ts,tsx,js,jsx,mjs}',
-  '**/*.spec.{ts,tsx,js,jsx,mjs}',
-];
+const TEST_FILE_PATTERNS = ['**/*.test.{ts,tsx,js,jsx,mjs}', '**/*.spec.{ts,tsx,js,jsx,mjs}'];
 
 /**
  * Fast check for whether a jest config's directory contains any test files.
