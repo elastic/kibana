@@ -94,7 +94,10 @@
     "@kbn/utility-types",
     "@kbn/usage-collection-plugin",
     "@kbn/share-plugin",
-    "@kbn/deeplinks-analytics"
+    "@kbn/deeplinks-analytics",
+    "@kbn/agent-builder-plugin",
+    "@kbn/agent-builder-server",
+    "@kbn/agent-builder-common"
   ],
   "exclude": ["target/**/*"]
 }

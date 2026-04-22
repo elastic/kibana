@@ -6,7 +6,7 @@
  */
 
 import { Logger, OnSetup, PluginSetup, PluginStart } from '@kbn/core-di';
-import { CoreSetup } from '@kbn/core-di-server';
+import { CoreSetup, CoreStart } from '@kbn/core-di-server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
 import { registerTelemetryTask } from '../lib/usage/task_definition';
@@ -16,6 +16,7 @@ import { TaskDefinition } from '../lib/services/task_run_scope_service/create_ta
 import { registerSavedObjects } from '../saved_objects';
 import { dispatcherUiSettings } from '../lib/dispatcher/ui_settings';
 import { EsServiceInternalToken } from '../lib/services/es_service/tokens';
+import { registerAlertingV2Tools } from '../agent_builder/register_tools';
 
 export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
   bind(OnSetup).toConstantValue((container) => {
@@ -59,6 +60,15 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
 
       registerAlertingV2UsageCollector(getTaskManagerStart, usageCollection);
       registerTelemetryTask(logger, taskManager, getEsClient);
+    }
+
+    const agentBuilderToken =
+      PluginSetup<NonNullable<AlertingServerSetupDependencies['agentBuilder']>>('agentBuilder');
+    if (container.isBound(agentBuilderToken)) {
+      const agentBuilder = container.get(agentBuilderToken);
+      
+      const getInjection = () => container.get(CoreStart('injection'));
+      registerAlertingV2Tools({ agentBuilder, getInjection });
     }
   });
 }
