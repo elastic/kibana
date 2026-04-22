@@ -8,6 +8,7 @@
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter, EuiPanel } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { EsHitRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { useDocumentDetailsContext } from '../shared/context';
@@ -22,6 +23,13 @@ interface PanelFooterProps {
   isRulePreview: boolean;
 }
 
+const footerStyles = css`
+  @media (max-width: 767px) {
+    max-height: 40vh;
+    overflow: auto;
+  }
+`;
+
 /**
  * Bottom section of the flyout that contains the take action button
  */
@@ -32,7 +40,7 @@ export const PanelFooter: FC<PanelFooterProps> = ({ isRulePreview }) => {
   if (isRulePreview) return null;
 
   return (
-    <EuiFlyoutFooter data-test-subj={FLYOUT_FOOTER_TEST_ID}>
+    <EuiFlyoutFooter data-test-subj={FLYOUT_FOOTER_TEST_ID} css={footerStyles}>
       <EuiPanel color="transparent">
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
           <EuiFlexItem grow={false}>
