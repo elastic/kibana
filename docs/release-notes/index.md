@@ -117,7 +117,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Allows filtering from legend actions when possible for {{esql}} visualizations [#248789]({{kib-pull}}248789).
 * Suggests line charts for timeseries {{esql}} queries (TS / PromQL) in Lens [#252661]({{kib-pull}}252661).
 * Retrieves variable types from the {{esql}} query response [#254436]({{kib-pull}}254436).
-* Enables dashboard and URL drilldown for {{esql}} charts. [#253223]({{kib-pull}}253223).
+* Enables dashboard and URL drilldown for {{esql}} charts [#253223]({{kib-pull}}253223).
 
 % chart options and improvements
 * Adds a **Discover session** panel option to dashboards [#256293]({{kib-pull}}256293).
@@ -130,7 +130,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Adds a middle position option for the primary metric styling settings of metric charts [#260902]({{kib-pull}}260902).
 * Improves tick labels for time-based X axes in {{esql}} heatmap visualizations [#259218]({{kib-pull}}259218).
 * Improves datatable visualization performance for large datasets in Lens [#256234]({{kib-pull}}256234).
-* Enables monospace numeric font features for Lens renderers [#251576]({{kib-pull}}251576).
+* Enables fixed-width number formatting in Lens visualizations for cleaner alignment [#251576]({{kib-pull}}251576).
 * Introduces a Severity color palette in Lens color mapping [#250198]({{kib-pull}}250198).
 * Improves the badge colors for metric trend indicators in Lens [#256255]({{kib-pull}}256255).
 * Legend actions in Lens XY and Partition charts now only appear on hover [#255616]({{kib-pull}}255616).
@@ -164,9 +164,9 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Redesigns the {{esql}} editor footer in Discover: removes the row limit and timestamp indicators, and adds query run statistics [#244284]({{kib-pull}}244284).
 * Filters from the top-level {{esql}} WHERE clause now propagate into per-metric charts in the Discover metrics grid [#249103]({{kib-pull}}249103).
 * Shows Streams field descriptions in the {{esql}} editor and field sidebar [#260582]({{kib-pull}}260582).
-* Adds `hideTable` to the app state and connects it with a layout toggle [#259083]({{kib-pull}}259083).
+* Adds a layout toggle to show or hide the data table in Discover, with the state persisted in the URL [#259083]({{kib-pull}}259083).
 * Adds a fields browser to the {{esql}} editor in Discover [#252749]({{kib-pull}}252749).
-* Adds support for visualizing histogram metrics in the unified metrics grid by introducing `PERCENTILE` aggregations based on the metric's instrument and field type, which enables rendering of `tdigest` and `exponential_histogram` metric types. [#249269]({{kib-pull}}249269).
+* Adds support for visualizing `tdigest` and `exponential_histogram` histogram metrics in the Discover metrics grid [#249269]({{kib-pull}}249269).
 * Adds a grouped view in Discover for {{esql}} queries that use `STATS ... BY` with a single grouping field. A new toolbar selector lets you pivot by that field or switch back to the standard table view. [#220119]({{kib-pull}}220119).
 * Hides the data table by default when the metrics-specific Discover experience is triggered [#260607]({{kib-pull}}260607).
 * Adds a **Save Discover table to dashboard** option [#259626]({{kib-pull}}259626).
@@ -194,17 +194,17 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Adds autocomplete to the KQL function [#249510]({{kib-pull}}249510).
 * Adds support for unmapped fields [#248606]({{kib-pull}}248606).
 * Adds support for timezone handling [#247917]({{kib-pull}}247917).
-* Adds query stats [#251029]({{kib-pull}}251029).
+* Adds {{esql}} query statistics to the editor [#251029]({{kib-pull}}251029).
 * Makes the `FORK` command generally available [#261904]({{kib-pull}}261904).
 * Makes the `RERANK` command generally available [#252242]({{kib-pull}}252242).
 * Adds support for the `USER_AGENT` command [#261314]({{kib-pull}}261314).
 * Adds support for the `MMR` command [#257208]({{kib-pull}}257208).
 * Adds autocomplete and validation support for the `approximate` setting in the {{esql}} editor [#248946]({{kib-pull}}248946).
 * Improves {{esql}} editor autocomplete for full-text search functions: `MATCH_PHRASE`'s second argument now only suggests literal values, and FTS functions are excluded from `EVAL` suggestions except inside `SCORE()` [#247003]({{kib-pull}}247003).
-* Improves commenting behavior [#254851]({{kib-pull}}254851).
+* Improves line commenting in the {{esql}} editor to match standard IDE conventions [#254851]({{kib-pull}}254851).
 * Improves query pretty printing [#257440]({{kib-pull}}257440).
 * Adds an {{esql}} indentation shortcut to the editor [#247234]({{kib-pull}}247234).
-* Simplifies the update button states for {{esql}} queries [#254121]({{kib-pull}}254121).
+* Simplifies the **Run** and **Cancel** button states in the {{esql}} editor [#254121]({{kib-pull}}254121).
 
 
 **Elastic Observability solution**:
@@ -384,12 +384,12 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Fixes URL, Badge, Color, and other field formatters incorrectly rendering fields with missing or null values [#251892]({{kib-pull}}251892).
 * Fixes filtering out null values from the Discover histogram legend in {{esql}} mode [#249302]({{kib-pull}}249302).
 * Fixes **Search entire time range** for date nanos [#248495]({{kib-pull}}248495).
-* Prevents loss of UI state in signal-specific Discover fly-out tabs when refreshing a query [#248203]({{kib-pull}}248203).
-* Fixes `ToolbarSelector` when clicking on tabs [#247836]({{kib-pull}}247836).
+* Prevents doc viewer flyout tabs from unnecessarily re-mounting on query refresh [#248203]({{kib-pull}}248203).
+* Fixes the toolbar mode selector not responding when clicking on tabs [#247836]({{kib-pull}}247836).
 * Makes static-lookup formatter work with aggregated boolean fields [#249311]({{kib-pull}}249311).
 * Adds a check to ensure {{esql}} is valid before matching the Metrics profile [#248917]({{kib-pull}}248917).
 * Fixes query drafts when switching tabs [#247968]({{kib-pull}}247968).
-* Allows completing all quickly opened tabs [#246941]({{kib-pull}}246941).
+* Fixes an issue where quickly opened tabs could not complete loading [#246941]({{kib-pull}}246941).
 * Fixes the default app state handling when detecting unsaved changes [#246664]({{kib-pull}}246664).
 
 **{{esql}} editor**:
