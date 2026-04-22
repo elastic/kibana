@@ -12,14 +12,16 @@ import type {
   ScoutTestFixtures,
   ScoutWorkerFixtures,
 } from '@kbn/scout';
-import { createLazyPageObject, test as baseTest } from '@kbn/scout';
+import { createLazyPageObject, test as baseTest, spaceTest as spaceBaseTest } from '@kbn/scout';
 import {
   getOsqueryApiService,
   type OsqueryApiService,
 } from '../../common/services/osquery_api_service';
 import {
   AlertFlyoutPage,
+  CustomSpacePage,
   EcsMappingEditorPage,
+  FleetIntegrationPage,
   InventoryHostOsqueryPage,
   LiveQueryFormPage,
   OsqueryCasesPage,
@@ -50,6 +52,8 @@ export interface OsqueryUiTestFixtures extends ScoutTestFixtures {
     osqueryRuleEditor: RuleEditorPage;
     osqueryCasesPage: OsqueryCasesPage;
     osqueryInventoryHostOsquery: InventoryHostOsqueryPage;
+    osqueryFleetIntegration: FleetIntegrationPage;
+    osqueryCustomSpace: CustomSpacePage;
   };
 }
 
@@ -100,8 +104,74 @@ export const uiTest = baseTest.extend<
       osqueryRuleEditor: createLazyPageObject(RuleEditorPage, page),
       osqueryCasesPage: createLazyPageObject(OsqueryCasesPage, page),
       osqueryInventoryHostOsquery: createLazyPageObject(InventoryHostOsqueryPage, page, kbnUrl),
+      osqueryFleetIntegration: createLazyPageObject(FleetIntegrationPage, page),
+      osqueryCustomSpace: createLazyPageObject(CustomSpacePage, page, kbnUrl),
     };
 
+    await use(extendedPageObjects);
+  },
+});
+
+/**
+ * Space-scoped variant of `uiTest` for tests that exercise non-default Kibana spaces
+ * (e.g. `custom_space.spec.ts`). The Scout-assigned `scoutSpace.id` is forwarded to
+ * `getOsqueryApiService` so all osquery HTTP paths are prefixed with `/s/{scoutSpace.id}`.
+ * Default-space `uiTest` is unchanged.
+ */
+export const customSpaceUiTest = spaceBaseTest.extend<
+  OsqueryUiTestFixtures,
+  { apiServices: OsqueryUiApiServicesFixture } & ScoutWorkerFixtures & {
+      scoutSpace: { id: string };
+    }
+>({
+  apiServices: [
+    async (
+      {
+        apiServices,
+        kbnClient,
+        log,
+        scoutSpace,
+      }: {
+        apiServices: ApiServicesFixture;
+        kbnClient: ScoutWorkerFixtures['kbnClient'];
+        log: ScoutWorkerFixtures['log'];
+        scoutSpace: { id: string };
+      },
+      use: (extendedApiServices: OsqueryUiApiServicesFixture) => Promise<void>
+    ) => {
+      await use({
+        ...apiServices,
+        osquery: getOsqueryApiService({ kbnClient, log, spaceId: scoutSpace.id }),
+      } as OsqueryUiApiServicesFixture);
+    },
+    { scope: 'worker' },
+  ],
+  pageObjects: async (
+    {
+      pageObjects,
+      page,
+      kbnUrl,
+    }: {
+      pageObjects: OsqueryUiTestFixtures['pageObjects'];
+      page: OsqueryUiTestFixtures['page'];
+      kbnUrl: KibanaUrl;
+    },
+    use: (pageObjects: OsqueryUiTestFixtures['pageObjects']) => Promise<void>
+  ) => {
+    const extendedPageObjects = {
+      ...pageObjects,
+      osqueryNavigation: createLazyPageObject(OsqueryNavigation, page),
+      osqueryLiveQueryForm: createLazyPageObject(LiveQueryFormPage, page),
+      osquerySavedQuery: createLazyPageObject(SavedQueryPage, page),
+      osqueryEcsMappingEditor: createLazyPageObject(EcsMappingEditorPage, page),
+      osqueryPackForm: createLazyPageObject(PackFormPage, page),
+      osqueryAlertFlyout: createLazyPageObject(AlertFlyoutPage, page),
+      osqueryRuleEditor: createLazyPageObject(RuleEditorPage, page),
+      osqueryCasesPage: createLazyPageObject(OsqueryCasesPage, page),
+      osqueryInventoryHostOsquery: createLazyPageObject(InventoryHostOsqueryPage, page, kbnUrl),
+      osqueryFleetIntegration: createLazyPageObject(FleetIntegrationPage, page),
+      osqueryCustomSpace: createLazyPageObject(CustomSpacePage, page, kbnUrl),
+    };
     await use(extendedPageObjects);
   },
 });

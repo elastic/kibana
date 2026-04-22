@@ -94,6 +94,27 @@ test.describe('Pack CRUD from UI', { tag: localTags }, () => {
 
     await pageObjects.osqueryPackForm.setPagination50Rows();
     await pageObjects.osqueryPackForm.openPackFromList(packName);
+
+    await test.step('captures the Lens locator URL for pack results', async () => {
+      const viewInLensButton = page.getByLabel('View in Lens');
+      await viewInLensButton.waitFor({ state: 'visible', timeout: 30_000 });
+      const [popup] = await Promise.all([page.waitForEvent('popup'), viewInLensButton.click()]);
+      // Lens stores its `_a` app state in browser session storage — the URL is
+      // only `/app/lens#/edit_by_value?_g=...` with no pack name. The pack's
+      // `action_id` lands in the Unified Search filter bar as a filter badge
+      // (`action_id: pack_default--${packName}_${savedQueryLabel}`). Asserting
+      // on the filter badge is more robust than the breadcrumb (which renders
+      // its last crumb truncated as a non-link `<span>`) and doesn't depend on
+      // URL hash state. `[data-test-subj^="filter-badge"]` comes from Unified
+      // Search's `filter_view/index.tsx`.
+      const actionIdFragment = `pack_default--${packName}`;
+      const filterBadge = popup.locator('[data-test-subj^="filter-badge"]').filter({
+        hasText: actionIdFragment,
+      });
+      await expect(filterBadge).toBeVisible({ timeout: 30_000 });
+      await popup.close();
+    });
+
     await pageObjects.osqueryPackForm.openEditPack();
     await page.getByRole('button', { name: /^Delete pack$/ }).click();
     await page.getByRole('button', { name: 'Confirm' }).click();

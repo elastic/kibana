@@ -43,16 +43,22 @@ export interface OsqueryApiService {
 export const getOsqueryApiService = ({
   kbnClient,
   log,
+  spaceId,
 }: {
   kbnClient: KbnClient;
   log: ScoutLogger;
+  spaceId?: string;
 }): OsqueryApiService => {
   const headers = {
     'elastic-api-version': OSQUERY_API_VERSION,
   };
 
-  const buildPath = (basePath: string, space?: string) =>
-    space && space !== 'default' ? `/s/${space}${basePath}` : basePath;
+  /** Returns the space-prefixed path. `spaceOverride` takes precedence over the service-level `spaceId`. */
+  const buildPath = (basePath: string, spaceOverride?: string): string => {
+    const space = spaceOverride ?? spaceId;
+
+    return space && space !== 'default' ? `/s/${space}${basePath}` : basePath;
+  };
 
   return {
     packs: {
@@ -76,7 +82,7 @@ export const getOsqueryApiService = ({
           async () =>
             await kbnClient.request({
               method: 'GET',
-              path: `${OSQUERY_PACKS_URL}/${id}`,
+              path: `${buildPath(OSQUERY_PACKS_URL)}/${id}`,
               headers,
             })
         ),
@@ -88,7 +94,7 @@ export const getOsqueryApiService = ({
           async () =>
             await kbnClient.request({
               method: 'GET',
-              path: OSQUERY_PACKS_URL,
+              path: buildPath(OSQUERY_PACKS_URL),
               headers,
             })
         ),
@@ -111,7 +117,7 @@ export const getOsqueryApiService = ({
           async () =>
             kbnClient.request({
               method: 'GET',
-              path: '/internal/osquery/fleet_wrapper/package_policies',
+              path: buildPath('/internal/osquery/fleet_wrapper/package_policies'),
               headers: { ...headers, ...FLEET_WRAPPER_HEADERS },
             })
         ),
@@ -125,7 +131,7 @@ export const getOsqueryApiService = ({
           async () =>
             await kbnClient.request({
               method: 'POST',
-              path: OSQUERY_SAVED_QUERIES_URL,
+              path: buildPath(OSQUERY_SAVED_QUERIES_URL),
               headers,
               body,
             })
@@ -138,7 +144,7 @@ export const getOsqueryApiService = ({
           async () =>
             await kbnClient.request({
               method: 'GET',
-              path: OSQUERY_SAVED_QUERIES_URL,
+              path: buildPath(OSQUERY_SAVED_QUERIES_URL),
               headers,
               query: { pageSize: 100 },
             })
@@ -148,7 +154,7 @@ export const getOsqueryApiService = ({
         await measurePerformanceAsync(log, `osquery.savedQueries.delete [${id}]`, async () => {
           await kbnClient.request({
             method: 'DELETE',
-            path: `${OSQUERY_SAVED_QUERIES_URL}/${id}`,
+            path: `${buildPath(OSQUERY_SAVED_QUERIES_URL)}/${id}`,
             headers,
             ignoreErrors: [404],
           });
@@ -164,7 +170,7 @@ export const getOsqueryApiService = ({
           async () =>
             await kbnClient.request({
               method: 'POST',
-              path: OSQUERY_LIVE_QUERIES_URL,
+              path: buildPath(OSQUERY_LIVE_QUERIES_URL),
               headers,
               body,
             })
@@ -177,7 +183,7 @@ export const getOsqueryApiService = ({
           async () =>
             await kbnClient.request({
               method: 'GET',
-              path: `${OSQUERY_LIVE_QUERIES_URL}/${id}`,
+              path: `${buildPath(OSQUERY_LIVE_QUERIES_URL)}/${id}`,
               headers,
             })
         ),
@@ -189,7 +195,7 @@ export const getOsqueryApiService = ({
           async () =>
             await kbnClient.request({
               method: 'GET',
-              path: `${OSQUERY_LIVE_QUERIES_URL}/${id}/results/${actionId}`,
+              path: `${buildPath(OSQUERY_LIVE_QUERIES_URL)}/${id}/results/${actionId}`,
               headers,
             })
         ),

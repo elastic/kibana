@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+/* eslint-disable @kbn/eslint/scout_test_file_naming */
 import execa from 'execa';
+// eslint-disable-next-line no-restricted-imports
 import { test as base } from '@playwright/test';
 
 /**
@@ -27,11 +29,7 @@ import { test as base } from '@playwright/test';
  * no-op, so a skipped setup (Docker unavailable, reuse-existing path, etc.)
  * still teardown cleanly.
  */
-const CONTAINERS = [
-  'scout-fleet-server',
-  'scout-osquery-agent-0',
-  'scout-osquery-agent-1',
-];
+const CONTAINERS = ['scout-fleet-server', 'scout-osquery-agent-0', 'scout-osquery-agent-1'];
 
 const teardown = base;
 

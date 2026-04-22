@@ -90,13 +90,13 @@ test.describe('Alert flyout Osquery case creation', { tag: localTags }, () => {
         await pageObjects.osqueryAlertFlyout.switchFlyoutToPackMode();
         await pageObjects.osqueryAlertFlyout.selectFlyoutPack(packName);
         await pageObjects.osqueryAlertFlyout.clickSubmitInFlyout();
-        // Pack-mode alert submissions fan out per query to each agent; 180s is
-        // tight on a cold Fleet stack (we hit it here in round 2). Extend to
-        // match the `packs_agent_triggered` ceiling, covered by the 360s
-        // `test.setTimeout` declared at the top of this test.
-        await page.testSubj
-          .locator('osqueryResultsTable')
-          .waitFor({ state: 'visible', timeout: 300_000 });
+        // Pack mode renders results inside a tab — `waitForResults` clicks the
+        // results tab (if visible) and polls until `osqueryResultsTable` or any
+        // data cell appears, handling the pack-vs-single-query UI difference.
+        // In pack mode only the data cell may appear (no `osqueryResultsTable`
+        // test-subj), so the race inside `waitForResults` is the correct stop
+        // condition — do NOT re-wait on `osqueryResultsTable` afterwards.
+        await pageObjects.osqueryLiveQueryForm.waitForResults();
       });
 
       await test.step('attach results to the pre-seeded existing case', async () => {

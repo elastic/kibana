@@ -7,7 +7,9 @@
 
 export { AlertFlyoutPage } from './alert_flyout';
 export { OsqueryCasesPage } from './cases';
+export { CustomSpacePage } from './custom_space';
 export { EcsMappingEditorPage } from './ecs_mapping_editor';
+export { FleetIntegrationPage } from './fleet_integration';
 export { InventoryHostOsqueryPage } from './inventory_host_osquery';
 export { LiveQueryFormPage } from './live_query_form';
 export { OsqueryNavigation } from './navigation';
