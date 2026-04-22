@@ -534,7 +534,7 @@ describe('PluginsService', () => {
             sourceType: 'file',
             skillCount: 2,
           });
-          expect(mockTrackingService.trackPluginImport).toHaveBeenCalledWith('upload');
+          expect(mockTrackingService.trackPluginImport).toHaveBeenCalledWith('file');
         });
 
         it('does not throw when trackingService is undefined', async () => {
