@@ -8,11 +8,15 @@
 import { isValidWatchlistRiskModifier } from './use_watchlist_form_state_shared';
 
 describe('isValidWatchlistRiskModifier', () => {
-  it.each([0, 0.5, 1, 1.5, 2])('accepts step value %s', (value) => {
+  it.each([0, 0.5, 1, 1.5, 2])('accepts in-range on-step (0.5) value %s', (value) => {
     expect(isValidWatchlistRiskModifier(value)).toBe(true);
   });
 
-  it.each([-0.01, 2.01, 1.55, 0.25])('rejects out-of-range or off-step value %s', (value) => {
+  it.each([0.25, 1.55, 1.65])('rejects in-range but off-step value %s', (value) => {
+    expect(isValidWatchlistRiskModifier(value)).toBe(false);
+  });
+
+  it.each([-0.01, 2.01])('rejects out-of-range value %s', (value) => {
     expect(isValidWatchlistRiskModifier(value)).toBe(false);
   });
 
