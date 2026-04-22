@@ -112,6 +112,9 @@ const soToAnnotation = (so: { id: string; attributes: SavedObjectAttributes }): 
   pathname: so.attributes.pathname ?? '',
 });
 
+const isLegacyAnnotation = (so: { attributes: Record<string, unknown> }): boolean =>
+  !so.attributes.anchor && (so.attributes.clientX != null || so.attributes.selector != null);
+
 const MAX_ANCHOR_AREA_RATIO = 0.4;
 
 const isAnchorTooLarge = (node: Element): boolean => {
@@ -120,11 +123,43 @@ const isAnchorTooLarge = (node: Element): boolean => {
   return (rect.width * rect.height) / viewportArea > MAX_ANCHOR_AREA_RATIO;
 };
 
+const isInsideFloating = (el: Element): boolean =>
+  Boolean(el.closest('.euiFlyout') || el.closest('.euiModal'));
+
+/**
+ * Returns a scope (flyout/modal ancestor or document) that matches how the
+ * annotation will later be resolved. We check uniqueness against this scope —
+ * a `data-test-subj` that's unique within a flyout is a safe anchor even if
+ * there's an identical one on the page, and vice versa.
+ */
+const searchRootFor = (el: Element): ParentNode =>
+  el.closest('.euiFlyout') ?? el.closest('.euiModal') ?? document;
+
+const isUniqueInScope = (el: Element, selector: string): boolean => {
+  try {
+    const root = searchRootFor(el);
+    const matches = root.querySelectorAll(selector);
+    let count = 0;
+    for (const m of Array.from(matches)) {
+      // Same-scope filter when searching the document: a page annotation should
+      // ignore matches inside open flyouts/modals, matching resolveAnchorElement.
+      if (root === document && isInsideFloating(m) && !isInsideFloating(el)) continue;
+      count++;
+      if (count > 1) return false;
+    }
+    return count === 1;
+  } catch {
+    return false;
+  }
+};
+
 /**
  * Walk up from an element to find the best stable anchor.
  * Priority: data-test-subj > id > aria-label > CSS path fallback.
- * Skips candidates that cover more than 40% of the viewport — relative
- * offsets on large containers break across different viewport widths.
+ * Candidates are skipped if they cover more than 40% of the viewport (relative
+ * offsets on huge containers break across viewports) or if they aren't unique
+ * in their scope (e.g. `dataGridRowCell` appears on every cell in a grid — we
+ * need a more specific anchor to pick the right one).
  * Returns the resolved anchor element so the caller can compute offsets against it.
  */
 const resolveAnchorFromElement = (
@@ -135,7 +170,11 @@ const resolveAnchorFromElement = (
   while (current && current !== document.body && depth < 10) {
     if (!isAnchorTooLarge(current)) {
       const testSubj = current.getAttribute('data-test-subj');
-      if (testSubj && !/["#[\]\\,]/.test(testSubj)) {
+      if (
+        testSubj &&
+        !/["#[\]\\,]/.test(testSubj) &&
+        isUniqueInScope(current, `[data-test-subj="${testSubj}"]`)
+      ) {
         return {
           anchor: testSubj,
           anchorType: 'testSubj',
@@ -145,8 +184,15 @@ const resolveAnchorFromElement = (
       }
 
       const id = current.id;
-      if (id && !/^\d/.test(id) && !id.startsWith('css-') && !id.startsWith('react-') &&
-          !id.startsWith(':') && !id.startsWith('EuiPageTemplate')) {
+      if (
+        id &&
+        !/^\d/.test(id) &&
+        !id.startsWith('css-') &&
+        !id.startsWith('react-') &&
+        !id.startsWith(':') &&
+        !id.startsWith('EuiPageTemplate') &&
+        isUniqueInScope(current, `#${CSS.escape(id)}`)
+      ) {
         return {
           anchor: id,
           anchorType: 'id',
@@ -156,7 +202,12 @@ const resolveAnchorFromElement = (
       }
 
       const ariaLabel = current.getAttribute('aria-label');
-      if (ariaLabel && ariaLabel.length > 2 && ariaLabel.length < 100) {
+      if (
+        ariaLabel &&
+        ariaLabel.length > 2 &&
+        ariaLabel.length < 100 &&
+        isUniqueInScope(current, `[aria-label="${ariaLabel}"]`)
+      ) {
         return {
           anchor: ariaLabel,
           anchorType: 'ariaLabel',
@@ -206,23 +257,69 @@ const buildCssPath = (el: Element): string => {
   return parts.join(' > ');
 };
 
+/**
+ * Returns a search root for the annotation's context.
+ * - `flyout`/`modal`: the open flyout/modal element, or `null` if none is open
+ *   (null signals "dormant" — the pin should not render and the sidebar should
+ *   show it as not-in-view).
+ * - `page`: the document, excluding any open flyout/modal so a page annotation
+ *   doesn't accidentally match an element inside a flyout that happens to
+ *   share the same anchor.
+ */
+const resolveSearchScope = (
+  ctx: AnnotationContext
+): { root: ParentNode; excludeFloating: boolean } | null => {
+  if (ctx === 'flyout') {
+    const el = document.querySelector('.euiFlyout');
+    return el ? { root: el, excludeFloating: false } : null;
+  }
+  if (ctx === 'modal') {
+    const el = document.querySelector('.euiModal');
+    return el ? { root: el, excludeFloating: false } : null;
+  }
+  return { root: document, excludeFloating: true };
+};
+
+const firstMatch = (
+  nodes: NodeListOf<Element> | Element[],
+  excludeFloating: boolean
+): Element | null => {
+  for (const node of Array.from(nodes)) {
+    if (excludeFloating && isInsideFloating(node)) continue;
+    return node;
+  }
+  return null;
+};
+
 const resolveAnchorElement = (ann: Annotation): Element | null => {
   try {
+    const scope = resolveSearchScope(ann.context);
+    if (!scope) return null;
+    const { root, excludeFloating } = scope;
     switch (ann.anchorType) {
       case 'testSubj': {
-        const matches = document.querySelectorAll(`[data-test-subj="${ann.anchor}"]`);
-        return matches.length > 0 ? matches[0] : null;
+        return firstMatch(
+          root.querySelectorAll(`[data-test-subj="${ann.anchor}"]`),
+          excludeFloating
+        );
       }
       case 'id': {
-        return document.getElementById(ann.anchor);
+        const el =
+          root === document
+            ? document.getElementById(ann.anchor)
+            : (root as Element).querySelector(`#${CSS.escape(ann.anchor)}`);
+        if (!el) return null;
+        if (excludeFloating && isInsideFloating(el)) return null;
+        return el;
       }
       case 'ariaLabel': {
-        const matches = document.querySelectorAll(`[aria-label="${ann.anchor}"]`);
-        return matches.length > 0 ? matches[0] : null;
+        return firstMatch(
+          root.querySelectorAll(`[aria-label="${ann.anchor}"]`),
+          excludeFloating
+        );
       }
       case 'cssPath': {
-        const matches = document.querySelectorAll(ann.anchor);
-        return matches.length > 0 ? matches[0] : null;
+        return firstMatch(root.querySelectorAll(ann.anchor), excludeFloating);
       }
       default:
         return null;
@@ -411,7 +508,7 @@ const AnnotationSidebar: React.FC<AnnotationSidebarProps> = ({
   const resolvedByAnchor = useMemo(() => {
     const map = new Map<string, { el: Element | null; annotations: Annotation[] }>();
     for (const ann of pageAnnotations) {
-      const key = `${ann.anchorType}:${ann.anchor}`;
+      const key = `${ann.context}:${ann.anchorType}:${ann.anchor}`;
       if (!map.has(key)) {
         map.set(key, { el: resolveAnchorElement(ann), annotations: [] });
       }
@@ -616,7 +713,10 @@ export const CommentOverlay: React.FC<CommentOverlayProps> = ({ http }) => {
     designerAnnotationStore.getCanvasVisible
   );
 
-  // Force re-render ticker for live pin positions
+  // Force re-render ticker for live pin positions.
+  // Only reposition pins on scroll, resize, and coarse DOM changes (flyout
+  // open/close). A longer debounce on mutations avoids the continuous
+  // re-render storm that Kibana's busy DOM would otherwise cause.
   const [, forceUpdate] = useState(0);
 
   useEffect(() => {
@@ -629,14 +729,12 @@ export const CommentOverlay: React.FC<CommentOverlayProps> = ({ http }) => {
     };
     const debouncedBump = () => {
       clearTimeout(debounce);
-      debounce = window.setTimeout(bump, 60);
+      debounce = window.setTimeout(bump, 300);
     };
     const observer = new MutationObserver(debouncedBump);
     observer.observe(document.body, {
       childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ['class', 'style', 'hidden', 'aria-hidden'],
+      subtree: false,
     });
     window.addEventListener('resize', bump);
     const scrollEl = document.getElementById('app-main-scroll');
@@ -673,7 +771,7 @@ export const CommentOverlay: React.FC<CommentOverlayProps> = ({ http }) => {
     };
   }, []);
 
-  // Load annotations
+  // Load annotations — delete legacy (pre-anchor) entries in the background
   useEffect(() => {
     setLoading(true);
     http
@@ -682,11 +780,20 @@ export const CommentOverlay: React.FC<CommentOverlayProps> = ({ http }) => {
         { query: { type: DESIGNER_UI_COMMENT_SO_TYPE, per_page: 500 } }
       )
       .then(({ saved_objects }) => {
+        const legacy = saved_objects.filter(isLegacyAnnotation);
+        const current = saved_objects.filter((so) => !isLegacyAnnotation(so));
         setAnnotations(
-          saved_objects.map((so) =>
+          current.map((so) =>
             soToAnnotation(so as unknown as { id: string; attributes: SavedObjectAttributes })
           )
         );
+        if (legacy.length > 0) {
+          Promise.allSettled(
+            legacy.map((so) =>
+              http.delete(`/api/saved_objects/${DESIGNER_UI_COMMENT_SO_TYPE}/${so.id}`)
+            )
+          ).catch(() => {});
+        }
       })
       .catch(() => {})
       .finally(() => setLoading(false));
