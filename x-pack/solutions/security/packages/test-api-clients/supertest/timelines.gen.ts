@@ -255,7 +255,7 @@ Requires the **Timeline and Notes** write privilege (`notes_write`).
       .send(props.body as object);
   },
   /**
-   * Resolve a timeline or template through the saved-object resolve API, surfacing outcomes such as `exactMatch`, `aliasMatch`, or `conflict` when object ids have been remapped during upgrades or imports. Provide **either** `id` for default timelines or `template_timeline_id` for templates—mirrors `GET /api/timeline` parameter semantics.
+   * Resolve a Timeline or Timeline template, surfacing outcomes such as `exactMatch`, `aliasMatch`, or `conflict` when object IDs have been remapped during upgrades or imports. Provide **either** `id` for default Timelines or `template_timeline_id` for templates.
    */
   resolveTimeline(props: ResolveTimelineProps, kibanaSpace: string = 'default') {
     return supertest
