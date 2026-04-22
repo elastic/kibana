@@ -91,8 +91,6 @@ const ActiveToolsList: React.FC<{
                 <EuiBadge color="hollow">
                   {labels.agentTools.elasticCapabilitiesReadOnlyBadge}
                 </EuiBadge>
-              ) : isBuiltIn ? (
-                <EuiBadge color="hollow">{labels.agentTools.readOnlyBadge}</EuiBadge>
               ) : undefined
             }
             canEditAgent={canEditAgent}
