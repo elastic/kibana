@@ -10,12 +10,24 @@ paths:
       x-codegen-enabled: true
       operationId: CreatePrivMonUser
       summary: Create a new monitored user
+      description: Creates a new privileged user to be monitored by the Privilege Monitoring Engine.
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: "./common.schema.yaml#/components/schemas/UserName"
+            examples:
+              CreatePrivMonUserRequest:
+                summary: Create a monitored user
+                value:
+                  user:
+                    name: john.doe
+                  entity_analytics_monitoring:
+                    labels:
+                      - field: department
+                        value: IT
+                        source: api
 
       responses:
         "200":
@@ -24,3 +36,19 @@ paths:
             application/json:
               schema:
                 $ref: "./common.schema.yaml#/components/schemas/MonitoredUserDoc"
+              examples:
+                CreatePrivMonUserResponse:
+                  summary: Created monitored user
+                  value:
+                    id: user-abc-123
+                    user:
+                      name: john.doe
+                      is_privileged: true
+                    entity_analytics_monitoring:
+                      labels:
+                        - field: department
+                          value: IT
+                          source: api
+                    "@timestamp": "2026-01-28T12:00:00.000Z"
+                    event:
+                      ingested: "2026-01-28T12:00:00.000Z"

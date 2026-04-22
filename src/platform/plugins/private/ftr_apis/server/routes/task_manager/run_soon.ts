@@ -14,10 +14,7 @@ import type {
   KibanaResponseFactory,
   RequestHandlerContext,
 } from '@kbn/core/server';
-import {
-  TaskAlreadyRunningError,
-  type TaskManagerStartContract,
-} from '@kbn/task-manager-plugin/server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
 export const registerTaskManagerRunSoonRoute = (
   router: IRouter,
@@ -25,7 +22,7 @@ export const registerTaskManagerRunSoonRoute = (
 ) => {
   router.post(
     {
-      path: '/internal/task_manager/tasks/{taskId}/run_soon',
+      path: '/internal/ftr/task_manager/{taskId}/run_soon',
       security: {
         authz: {
           requiredPrivileges: ['ftrApis'],
@@ -35,12 +32,13 @@ export const registerTaskManagerRunSoonRoute = (
         params: schema.object({
           taskId: schema.string(),
         }),
-        query: schema.object({
-          force: schema.boolean({ defaultValue: false }),
-        }),
       },
     },
-    async (_context: RequestHandlerContext, req: KibanaRequest, res: KibanaResponseFactory) => {
+    async (
+      _context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ) => {
       const startContract = getStartContract();
       if (!startContract) {
         return res.customError({
@@ -49,22 +47,13 @@ export const registerTaskManagerRunSoonRoute = (
         });
       }
 
-      const { taskId } = req.params as { taskId: string };
-      const { force } = req.query as { force: boolean };
+      const { taskId } = req.params;
 
       try {
-        await startContract.runSoon(taskId, force);
+        return res.ok({ body: await startContract.runSoon(taskId) });
       } catch (err) {
-        if (err instanceof TaskAlreadyRunningError) {
-          return res.customError({
-            statusCode: 409,
-            body: { message: err.message },
-          });
-        }
-        throw err;
+        return res.ok({ body: { id: taskId, error: `${err}` } });
       }
-
-      return res.ok({ body: { id: taskId } });
     }
   );
 };

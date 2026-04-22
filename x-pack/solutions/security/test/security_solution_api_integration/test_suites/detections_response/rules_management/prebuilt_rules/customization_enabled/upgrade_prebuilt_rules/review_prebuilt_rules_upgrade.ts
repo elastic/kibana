@@ -9,8 +9,13 @@ import expect from 'expect';
 import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
+  createPrebuiltRuleAssetSavedObjects,
+  createRuleAssetSavedObject,
+  createDeprecatedPrebuiltRuleAssetSavedObjects,
   deleteAllPrebuiltRuleAssets,
   fetchFirstPrebuiltRuleUpgradeReviewDiff,
+  installPrebuiltRules,
+  reviewPrebuiltRulesToUpgrade,
 } from '../../../../utils';
 import { setUpRuleUpgrade } from '../../../../utils/rules/prebuilt_rules/set_up_rule_upgrade';
 
@@ -289,5 +294,31 @@ export default ({ getService }: FtrProviderContext): void => {
         }
       );
     }
+
+    describe('Deprecated rule exclusion', () => {
+      it('does not include deprecated rule assets in the upgrade review', async () => {
+        // Install rule-a and rule-b at version 1
+        await createPrebuiltRuleAssetSavedObjects(es, [
+          createRuleAssetSavedObject({ rule_id: 'rule-a', version: 1 }),
+          createRuleAssetSavedObject({ rule_id: 'rule-b', version: 1 }),
+        ]);
+        await installPrebuiltRules(es, supertest);
+
+        // Replace assets: active upgrade for rule-a, deprecated asset for rule-b
+        await deleteAllPrebuiltRuleAssets(es, log);
+        await createPrebuiltRuleAssetSavedObjects(es, [
+          createRuleAssetSavedObject({ rule_id: 'rule-a', version: 2 }),
+        ]);
+        await createDeprecatedPrebuiltRuleAssetSavedObjects(es, [
+          { rule_id: 'rule-b', version: 2 },
+        ]);
+
+        const response = await reviewPrebuiltRulesToUpgrade(supertest);
+
+        const ruleIds = response.rules.map((r: { rule_id: string }) => r.rule_id);
+        expect(ruleIds).toContain('rule-a');
+        expect(ruleIds).not.toContain('rule-b');
+      });
+    });
   });
 };

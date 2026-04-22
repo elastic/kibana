@@ -9,6 +9,7 @@
 
 import type { IRouter } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { registerTaskManagerRunSoonRoute } from './run_soon';
 import { registerTaskManagerDeleteRoute } from './delete';
 import { registerTaskManagerRunSoonRoute } from './run_soon';
 import { registerTaskManagerScheduleRoute } from './schedule';
@@ -17,6 +18,7 @@ export const registerTaskManagerRoutes = (
   router: IRouter,
   getStartContract: () => TaskManagerStartContract | undefined
 ) => {
+  registerTaskManagerRunSoonRoute(router, getStartContract);
   registerTaskManagerScheduleRoute(router, getStartContract);
   registerTaskManagerRunSoonRoute(router, getStartContract);
   registerTaskManagerDeleteRoute(router, getStartContract);
