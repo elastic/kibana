@@ -23,6 +23,7 @@ export class FeatureSettingsPage {
   // Default Model Section
   readonly defaultModelSection: Locator;
   readonly defaultModelComboBox: Locator;
+  readonly defaultModelComboBoxInput: Locator;
   readonly disallowOtherModelsCheckbox: Locator;
 
   // Feature Sections
@@ -64,6 +65,9 @@ export class FeatureSettingsPage {
     // Default Model Section
     this.defaultModelSection = this.page.testSubj.locator('defaultModelSection');
     this.defaultModelComboBox = this.page.testSubj.locator('defaultModelComboBox');
+    // EuiComboBox renders its native input as a nested <input>; keeping the EUI
+    // internal selector scoped to the page object so specs don't reach into it.
+    this.defaultModelComboBoxInput = this.defaultModelComboBox.locator('input');
     this.disallowOtherModelsCheckbox = this.page.testSubj.locator('disallowOtherModelsCheckbox');
 
     // Feature Sections

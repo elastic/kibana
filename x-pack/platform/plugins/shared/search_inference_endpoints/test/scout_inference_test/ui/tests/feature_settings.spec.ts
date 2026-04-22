@@ -122,7 +122,7 @@ test.describe(
 
       await test.step('default-model section stays visible but combobox is disabled', async () => {
         await expect(featureSettings.defaultModelSection).toBeVisible();
-        await expect(featureSettings.defaultModelComboBox.locator('input')).toBeDisabled();
+        await expect(featureSettings.defaultModelComboBoxInput).toBeDisabled();
       });
 
       await test.step('hide-selection switch and feature sections are gone', async () => {
