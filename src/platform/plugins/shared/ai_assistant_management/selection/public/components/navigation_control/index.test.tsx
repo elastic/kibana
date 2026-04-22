@@ -196,7 +196,7 @@ describe('AIAssistantHeaderButton', () => {
     });
   });
 
-  describe('AI Agent Confirmation Modal Flow', () => {
+  describe('AI Agent Selection Flow', () => {
     beforeEach(async () => {
       renderComponent();
       fireEvent.click(screen.getByTestId('aiAssistantHeaderButton'));
@@ -206,47 +206,13 @@ describe('AIAssistantHeaderButton', () => {
       });
     });
 
-    it('should open confirmation modal when AI Agent is selected and Continue is clicked', async () => {
+    it('should apply settings directly when AI Agent is selected and Continue is clicked', async () => {
       await waitFor(() => {
         expect(screen.getByTestId('aiAssistantAgentCard')).toBeInTheDocument();
       });
 
       fireEvent.click(screen.getByTestId('aiAssistantAgentCard'));
       fireEvent.click(screen.getByTestId('aiAssistantApplyButton'));
-
-      await waitFor(
-        () => {
-          expect(screen.getByText(/Switch to AI Agent/i)).toBeInTheDocument();
-        },
-        { timeout: 5000 }
-      );
-    });
-
-    it('should not open confirmation modal for Classic AI Assistant selections', () => {
-      fireEvent.click(screen.getByTestId('aiAssistantObservabilityCard'));
-      fireEvent.click(screen.getByTestId('aiAssistantApplyButton'));
-
-      expect(screen.queryByText('Switch to AI Agent')).not.toBeInTheDocument();
-    });
-
-    it('should close both modals and apply selection when Confirm is clicked in confirmation modal', async () => {
-      await waitFor(() => {
-        expect(screen.getByTestId('aiAssistantAgentCard')).toBeInTheDocument();
-      });
-
-      fireEvent.click(screen.getByTestId('aiAssistantAgentCard'));
-      fireEvent.click(screen.getByTestId('aiAssistantApplyButton'));
-
-      await waitFor(
-        () => {
-          expect(screen.getByText(/Switch to AI Agent/i)).toBeInTheDocument();
-        },
-        { timeout: 5000 }
-      );
-
-      // Find and click Confirm button in confirmation modal
-      const confirmButtons = screen.getAllByText('Confirm');
-      fireEvent.click(confirmButtons[0]);
 
       await waitFor(() => {
         expect(mockCoreStart.settings.client.set).toHaveBeenCalled();

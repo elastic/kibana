@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export { AIAgentConfirmationModal } from './ai_agent_confirmation_modal';
-export type { AIAgentConfirmationModalProps } from './ai_agent_confirmation_modal';
+/** Docs link for Release notes CTA until a dedicated release-notes URL is provided. */
+export const AGENT_BUILDER_RELEASE_NOTES_URL =
+  'https://www.elastic.co/docs/explore-analyze/ai-features/elastic-agent-builder';

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../../../../..',
-  roots: ['<rootDir>/x-pack/platform/packages/shared/ai-assistant/ai-agent-confirmation-modal'],
-};
+/** Props for variant body + footer (modal chrome lives in the parent). */
+export interface AnnouncementModalVariantProps {
+  onContinue: () => void;
+  onRevert: () => void;
+}

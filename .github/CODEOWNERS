@@ -972,7 +972,6 @@ x-pack/platform/packages/shared/agent-builder/agent-builder-common @elastic/work
 x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils @elastic/workchat-eng
 x-pack/platform/packages/shared/agent-builder/agent-builder-server @elastic/workchat-eng
 x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder @elastic/workchat-eng
-x-pack/platform/packages/shared/ai-assistant/ai-agent-confirmation-modal @elastic/appex-ai-infra
 x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action @elastic/appex-sharedux
 x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta @elastic/appex-sharedux
 x-pack/platform/packages/shared/ai-assistant/common @elastic/search-kibana
