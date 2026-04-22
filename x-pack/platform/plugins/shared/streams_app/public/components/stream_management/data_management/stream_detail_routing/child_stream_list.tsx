@@ -258,9 +258,10 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
   const canReorderRoutingRules = useStreamsRoutingSelector((snapshot) =>
     snapshot.can({ type: 'routingRule.reorder', routing: snapshot.context.routing })
   );
-  const canManageRoutingRules = definition.privileges.manage;
+  const canManageRoutingRules = 'privileges' in definition ? definition.privileges.manage : true;
   const isAtMaxNestingLevel = getSegments(definition.stream.name).length >= MAX_NESTING_LEVEL;
-  const shouldDisplayCreateButton = definition.privileges.simulate;
+  const shouldDisplayCreateButton =
+    'privileges' in definition ? definition.privileges.simulate : true;
   const CreateButtonComponent = aiFeatures && aiFeatures.enabled ? EuiButtonEmpty : EuiButton;
   const scrollToSuggestions = useScrollToActive(!!suggestions);
   const isEditingOrReorderingStreams = useStreamsRoutingSelector(

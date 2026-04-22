@@ -488,7 +488,7 @@ const getAbsoluteTimestamps = (data: DataPublicPluginStart) => {
  * ingest in the painless condition checks.
  */
 function getRuntimeMappings(
-  definition: Streams.ingest.all.GetResponse,
+  definition: PartitionableDefinition,
   condition?: Condition
 ): MappingRuntimeFields {
   if (!condition) return {};
