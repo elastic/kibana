@@ -143,3 +143,234 @@ export const CancelStatementInputSchema = z.object({
     ),
 });
 export type CancelStatementInput = z.infer<typeof CancelStatementInputSchema>;
+
+// ---------------------------------------------------------------------------
+// Snowflake REST API v2 — shared list/paging query params
+// https://docs.snowflake.com/en/developer-guide/snowflake-rest-api/reference
+// ---------------------------------------------------------------------------
+
+export const ListCommonQueryParamsSchema = z.object({
+  like: z
+    .string()
+    .optional()
+    .describe(
+      'Case-insensitive SQL pattern to filter by object name. Supports "%" (any sequence) and "_" (single char) wildcards. Examples: "CUST%", "%_LOG", "ORDERS". Omit to return all visible objects.'
+    ),
+  startsWith: z
+    .string()
+    .optional()
+    .describe(
+      'Case-sensitive prefix filter on the object name. Unlike like, this does not use wildcards. Example: "PROD_" returns only names starting with exactly "PROD_".'
+    ),
+  showLimit: z
+    .number()
+    .int()
+    .min(1)
+    .max(10000)
+    .optional()
+    .describe(
+      'Maximum number of rows to return (1–10000). Prefer <=100 to keep LLM context small. When omitted, Snowflake applies a server-side default.'
+    ),
+  fromName: z
+    .string()
+    .optional()
+    .describe(
+      'Cursor for pagination. Returns only rows whose name sorts after this value (case-sensitive, alphabetical). Use the last name from a previous page to fetch the next page.'
+    ),
+});
+
+// ---------------------------------------------------------------------------
+// listDatabases
+// ---------------------------------------------------------------------------
+
+export const ListDatabasesInputSchema = ListCommonQueryParamsSchema.extend({
+  history: z
+    .boolean()
+    .optional()
+    .describe(
+      'If true, include dropped databases that have not yet been purged. Defaults to false.'
+    ),
+});
+export type ListDatabasesInput = z.infer<typeof ListDatabasesInputSchema>;
+
+// ---------------------------------------------------------------------------
+// listSchemas
+// ---------------------------------------------------------------------------
+
+export const ListSchemasInputSchema = ListCommonQueryParamsSchema.extend({
+  database: z
+    .string()
+    .min(1)
+    .describe(
+      'Case-sensitive database name (e.g. "PROD_DB") whose schemas to list. Use listDatabases to discover available databases.'
+    ),
+});
+export type ListSchemasInput = z.infer<typeof ListSchemasInputSchema>;
+
+// ---------------------------------------------------------------------------
+// listTables
+// ---------------------------------------------------------------------------
+
+export const ListTablesInputSchema = ListCommonQueryParamsSchema.extend({
+  database: z
+    .string()
+    .min(1)
+    .describe(
+      'Case-sensitive database name containing the schema. Use listDatabases to discover available databases.'
+    ),
+  schema: z
+    .string()
+    .min(1)
+    .describe(
+      'Case-sensitive schema name whose tables to list (e.g. "PUBLIC"). Use listSchemas to discover available schemas.'
+    ),
+  history: z
+    .boolean()
+    .optional()
+    .describe('If true, include dropped tables that have not yet been purged. Defaults to false.'),
+});
+export type ListTablesInput = z.infer<typeof ListTablesInputSchema>;
+
+// ---------------------------------------------------------------------------
+// listViews
+// ---------------------------------------------------------------------------
+
+export const ListViewsInputSchema = ListCommonQueryParamsSchema.extend({
+  database: z
+    .string()
+    .min(1)
+    .describe(
+      'Case-sensitive database name containing the schema. Use listDatabases to discover available databases.'
+    ),
+  schema: z
+    .string()
+    .min(1)
+    .describe(
+      'Case-sensitive schema name whose views to list (e.g. "PUBLIC"). Use listSchemas to discover available schemas.'
+    ),
+});
+export type ListViewsInput = z.infer<typeof ListViewsInputSchema>;
+
+// ---------------------------------------------------------------------------
+// describeTable
+// ---------------------------------------------------------------------------
+
+export const DescribeTableInputSchema = z.object({
+  database: z
+    .string()
+    .min(1)
+    .describe(
+      'Case-sensitive database name containing the table (e.g. "PROD_DB"). Must match the value returned by listDatabases.'
+    ),
+  schema: z
+    .string()
+    .min(1)
+    .describe(
+      'Case-sensitive schema name containing the table (e.g. "PUBLIC"). Must match the value returned by listSchemas.'
+    ),
+  name: z
+    .string()
+    .min(1)
+    .describe(
+      'Case-sensitive table name (e.g. "ORDERS"). Must match the value returned by listTables. Returns columns (name, type, nullable, default, comment), clustering keys, row count, and other metadata.'
+    ),
+});
+export type DescribeTableInput = z.infer<typeof DescribeTableInputSchema>;
+
+// ---------------------------------------------------------------------------
+// describeView
+// ---------------------------------------------------------------------------
+
+export const DescribeViewInputSchema = z.object({
+  database: z
+    .string()
+    .min(1)
+    .describe(
+      'Case-sensitive database name containing the view. Must match the value returned by listDatabases.'
+    ),
+  schema: z
+    .string()
+    .min(1)
+    .describe(
+      'Case-sensitive schema name containing the view. Must match the value returned by listSchemas.'
+    ),
+  name: z
+    .string()
+    .min(1)
+    .describe(
+      'Case-sensitive view name. Must match the value returned by listViews. Returns the view definition, columns, and the underlying query text.'
+    ),
+});
+export type DescribeViewInput = z.infer<typeof DescribeViewInputSchema>;
+
+// ---------------------------------------------------------------------------
+// Cortex Search
+// https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-search/query-cortex-search-service
+// ---------------------------------------------------------------------------
+
+export const ListCortexSearchServicesInputSchema = ListCommonQueryParamsSchema.omit({
+  startsWith: true,
+}).extend({
+  database: z
+    .string()
+    .min(1)
+    .describe(
+      'Case-sensitive database name containing the schema. Use listDatabases to discover available databases.'
+    ),
+  schema: z
+    .string()
+    .min(1)
+    .describe(
+      'Case-sensitive schema name whose Cortex Search services to list. Use listSchemas to discover available schemas.'
+    ),
+});
+export type ListCortexSearchServicesInput = z.infer<typeof ListCortexSearchServicesInputSchema>;
+
+export const CortexSearchInputSchema = z.object({
+  database: z
+    .string()
+    .min(1)
+    .describe(
+      'Case-sensitive database name containing the Cortex Search service. Use listDatabases or listCortexSearchServices to discover.'
+    ),
+  schema: z
+    .string()
+    .min(1)
+    .describe(
+      'Case-sensitive schema name containing the Cortex Search service. Use listCortexSearchServices to discover.'
+    ),
+  serviceName: z
+    .string()
+    .min(1)
+    .describe(
+      'Case-sensitive name of the Cortex Search service to query. Use listCortexSearchServices to discover available services.'
+    ),
+  query: z
+    .string()
+    .min(1)
+    .describe(
+      "Natural-language search query to run against the service's indexed search column. Cortex Search performs semantic + lexical matching automatically."
+    ),
+  columns: z
+    .array(z.string())
+    .optional()
+    .describe(
+      "Additional columns to return for each result. Must be included in the service's source query. If omitted, only the indexed search column is returned."
+    ),
+  filter: z
+    .record(z.string(), z.unknown())
+    .optional()
+    .describe(
+      'Filter object restricting results by ATTRIBUTES columns. Supported operators: @eq (text/numeric equality), @contains (array membership), @gte/@lte (numeric/date range), @and, @or, @not. Examples: {"@eq": {"REGION": "US"}}; {"@and": [{"@gte": {"LIKES": 50}}, {"@contains": {"TAGS": "ai"}}]}.'
+    ),
+  limit: z
+    .number()
+    .int()
+    .min(1)
+    .max(1000)
+    .optional()
+    .describe(
+      'Maximum number of results to return (1–1000). Defaults to 10. Prefer <=20 to keep LLM context small.'
+    ),
+});
+export type CortexSearchInput = z.infer<typeof CortexSearchInputSchema>;

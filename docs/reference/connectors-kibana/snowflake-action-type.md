@@ -1,7 +1,7 @@
 ---
 navigation_title: "Snowflake"
 type: reference
-description: "Use the Snowflake connector to execute SQL queries, check statement status, and cancel running statements via the Snowflake SQL REST API."
+description: "Use the Snowflake connector to execute SQL, discover databases, schemas, tables and views, and run semantic searches via Cortex Search."
 applies_to:
   stack: preview 9.4
   serverless: preview
@@ -9,7 +9,7 @@ applies_to:
 
 # Snowflake connector [snowflake-action-type]
 
-The Snowflake connector executes SQL statements against the [Snowflake SQL REST API](https://docs.snowflake.com/en/developer-guide/sql-api/reference). It supports asynchronous query execution, result polling, and statement cancellation.
+The Snowflake connector wraps the [Snowflake SQL REST API](https://docs.snowflake.com/en/developer-guide/sql-api/reference), the [Snowflake REST API v2](https://docs.snowflake.com/en/developer-guide/snowflake-rest-api/reference), and [Cortex Search](https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-search/query-cortex-search-service). Use it to execute arbitrary SQL asynchronously, discover databases, schemas, tables and views, describe their structure, and run semantic searches via Cortex Search.
 
 ## Create connectors in {{kib}} [define-snowflake-ui]
 
@@ -61,8 +61,64 @@ Cancel statement
 :   Cancel a running SQL statement. Only works on statements that are still executing.
     - `statementHandle` (required): The statement handle of the running statement to cancel.
 
+List databases
+:   List Snowflake databases visible to the connector's role. Returns JSON objects (not SQL row arrays). Does not require a warehouse.
+    - `like` (optional): Case-insensitive SQL pattern (for example, `PROD%`, `%_LOG`) to filter by database name.
+    - `startsWith` (optional): Case-sensitive prefix filter on the database name.
+    - `showLimit` (optional): Maximum number of rows to return (1–10000). Prefer `<=100` to keep results small. When omitted, Snowflake applies a server-side default.
+    - `fromName` (optional): Cursor for pagination. Returns only rows whose name sorts after this value.
+    - `history` (optional): If `true`, include dropped databases that have not yet been purged.
+
+List schemas
+:   List schemas inside a database. Returns JSON objects with name, owner, comment, and other metadata. Does not require a warehouse.
+    - `database` (required): Case-sensitive database name (for example, `PROD_DB`).
+    - `like`, `startsWith`, `showLimit`, `fromName` (optional): Same semantics as *List databases*.
+
+List tables
+:   List tables inside a schema. Returns JSON objects with name, kind, row count, byte size, clustering, comment, and other metadata. Does not require a warehouse.
+    - `database` (required): Case-sensitive database name.
+    - `schema` (required): Case-sensitive schema name.
+    - `like`, `startsWith`, `showLimit`, `fromName` (optional): Same semantics as *List databases*.
+    - `history` (optional): If `true`, include dropped tables that have not yet been purged.
+
+List views
+:   List views inside a schema. Returns JSON objects with name, owner, comment, and other metadata. Does not require a warehouse.
+    - `database` (required): Case-sensitive database name.
+    - `schema` (required): Case-sensitive schema name.
+    - `like`, `startsWith`, `showLimit`, `fromName` (optional): Same semantics as *List databases*.
+
+Describe table
+:   Return a full `Table` object including columns (name, type, nullable, default, comment), clustering keys, row count, and byte size. Does not require a warehouse.
+    - `database` (required): Case-sensitive database name.
+    - `schema` (required): Case-sensitive schema name.
+    - `name` (required): Case-sensitive table name.
+
+Describe view
+:   Return a full `View` object including columns and the underlying SELECT query text. Does not require a warehouse.
+    - `database` (required): Case-sensitive database name.
+    - `schema` (required): Case-sensitive schema name.
+    - `name` (required): Case-sensitive view name.
+
+List Cortex Search services
+:   Discover [Cortex Search](https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-search/cortex-search-overview) services available in a schema. Cortex Search provides semantic + lexical search over indexed text columns.
+    - `database` (required): Case-sensitive database name.
+    - `schema` (required): Case-sensitive schema name.
+    - `like`, `showLimit`, `fromName` (optional): Same semantics as *List databases*.
+
+Cortex Search
+:   Run a natural-language query against a Cortex Search service. Hybrid semantic + lexical matching over the service's indexed search column.
+    - `database` (required): Case-sensitive database name.
+    - `schema` (required): Case-sensitive schema name.
+    - `serviceName` (required): Case-sensitive name of the Cortex Search service.
+    - `query` (required): Natural-language search string.
+    - `columns` (optional): Additional columns to return for each result. Must be included in the service's source query.
+    - `filter` (optional): Filter object restricting results by `ATTRIBUTES` columns. Operators: `@eq`, `@contains`, `@gte`, `@lte`, `@and`, `@or`, `@not`. Example: `{"@and": [{"@eq": {"REGION": "US"}}, {"@gte": {"YEAR": 2024}}]}`.
+    - `limit` (optional): Maximum number of results to return (1–1000, default 10). Prefer `<=20` to keep results small.
+
 ::::{tip}
 Use *Execute statement* to submit a query, then poll with *Get statement status* using the returned `statementHandle`. If the response status is 202, the query is still running — wait and poll again. A 200 response contains the result data and column metadata. Use *Cancel statement* to stop long-running queries.
+
+For AI agents without prior knowledge of the target data, discover before querying: *List databases* → *List schemas* → *List tables* → *Describe table* → *Execute statement*. Discovery actions return clean JSON and do not require a warehouse, so they are faster and cheaper than equivalent `SHOW` / `DESCRIBE` calls via *Execute statement*.
 ::::
 
 ## Connector networking configuration [snowflake-connector-networking-configuration]

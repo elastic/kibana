@@ -70,6 +70,53 @@ describe('Snowflake', () => {
     });
   });
 
+  describe('accountUrl normalization', () => {
+    const snowflakeSchema = Snowflake.schema;
+    if (!snowflakeSchema) {
+      throw new Error('Snowflake spec is missing a config schema');
+    }
+
+    it('should strip a trailing slash from accountUrl so URLs do not double-slash', async () => {
+      mockClient.get.mockResolvedValue({ status: 200, data: [] });
+
+      const parsedConfig = snowflakeSchema.parse({
+        ...baseConfig,
+        accountUrl: `${ACCOUNT_URL}/`,
+      });
+      const trailingSlashContext = {
+        ...mockContext,
+        config: parsedConfig,
+      } as unknown as ActionContext;
+
+      await Snowflake.actions.listDatabases.handler(trailingSlashContext, {});
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        `${ACCOUNT_URL}/api/v2/databases`,
+        expect.any(Object)
+      );
+    });
+
+    it('should strip multiple trailing slashes', async () => {
+      mockClient.get.mockResolvedValue({ status: 200, data: [] });
+
+      const parsedConfig = snowflakeSchema.parse({
+        ...baseConfig,
+        accountUrl: `${ACCOUNT_URL}///`,
+      });
+      const manySlashesContext = {
+        ...mockContext,
+        config: parsedConfig,
+      } as unknown as ActionContext;
+
+      await Snowflake.actions.listDatabases.handler(manySlashesContext, {});
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        `${ACCOUNT_URL}/api/v2/databases`,
+        expect.any(Object)
+      );
+    });
+  });
+
   describe('executeStatement action', () => {
     it('should execute a simple SQL statement asynchronously', async () => {
       const mockResponse = {
@@ -359,6 +406,297 @@ describe('Snowflake', () => {
 
       expect(result?.ok).toBe(true);
       expect(result?.message).toContain('handle-test');
+    });
+  });
+
+  describe('listDatabases action', () => {
+    it('should GET /api/v2/databases with list query params', async () => {
+      const mockResponse = {
+        status: 200,
+        data: [{ name: 'PROD_DB' }, { name: 'DEV_DB' }],
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await Snowflake.actions.listDatabases.handler(mockContext, {
+        like: 'PROD%',
+        showLimit: 50,
+        history: true,
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        `${ACCOUNT_URL}/api/v2/databases`,
+        expect.objectContaining({
+          params: { like: 'PROD%', showLimit: 50, history: true },
+        })
+      );
+      expect(result).toEqual([{ name: 'PROD_DB' }, { name: 'DEV_DB' }]);
+    });
+
+    it('should propagate API errors', async () => {
+      mockClient.get.mockRejectedValue(new Error('Forbidden'));
+
+      await expect(Snowflake.actions.listDatabases.handler(mockContext, {})).rejects.toThrow(
+        'Forbidden'
+      );
+    });
+  });
+
+  describe('listSchemas action', () => {
+    it('should GET /api/v2/databases/{database}/schemas with common params', async () => {
+      const mockResponse = {
+        status: 200,
+        data: [{ name: 'PUBLIC' }, { name: 'ANALYTICS' }],
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      await Snowflake.actions.listSchemas.handler(mockContext, {
+        database: 'PROD_DB',
+        startsWith: 'ANAL',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        `${ACCOUNT_URL}/api/v2/databases/PROD_DB/schemas`,
+        expect.objectContaining({ params: { startsWith: 'ANAL' } })
+      );
+    });
+
+    it('should URL-encode database name', async () => {
+      mockClient.get.mockResolvedValue({ status: 200, data: [] });
+
+      await Snowflake.actions.listSchemas.handler(mockContext, {
+        database: 'DB with space',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        `${ACCOUNT_URL}/api/v2/databases/DB%20with%20space/schemas`,
+        expect.any(Object)
+      );
+    });
+
+    it('should propagate API errors', async () => {
+      mockClient.get.mockRejectedValue(new Error('Database not found'));
+
+      await expect(
+        Snowflake.actions.listSchemas.handler(mockContext, { database: 'MISSING' })
+      ).rejects.toThrow('Database not found');
+    });
+  });
+
+  describe('listTables action', () => {
+    it('should GET the schema tables endpoint and pass the history flag', async () => {
+      mockClient.get.mockResolvedValue({ status: 200, data: [] });
+
+      await Snowflake.actions.listTables.handler(mockContext, {
+        database: 'PROD_DB',
+        schema: 'PUBLIC',
+        like: '%LOG',
+        history: true,
+        showLimit: 25,
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        `${ACCOUNT_URL}/api/v2/databases/PROD_DB/schemas/PUBLIC/tables`,
+        expect.objectContaining({
+          params: { like: '%LOG', showLimit: 25, history: true },
+        })
+      );
+    });
+
+    it('should propagate API errors', async () => {
+      mockClient.get.mockRejectedValue(new Error('Schema not found'));
+
+      await expect(
+        Snowflake.actions.listTables.handler(mockContext, {
+          database: 'PROD_DB',
+          schema: 'MISSING',
+        })
+      ).rejects.toThrow('Schema not found');
+    });
+  });
+
+  describe('listViews action', () => {
+    it('should GET the schema views endpoint', async () => {
+      mockClient.get.mockResolvedValue({
+        status: 200,
+        data: [{ name: 'SALES_BY_REGION' }],
+      });
+
+      const result = await Snowflake.actions.listViews.handler(mockContext, {
+        database: 'PROD_DB',
+        schema: 'PUBLIC',
+        fromName: 'A',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        `${ACCOUNT_URL}/api/v2/databases/PROD_DB/schemas/PUBLIC/views`,
+        expect.objectContaining({ params: { fromName: 'A' } })
+      );
+      expect(result).toEqual([{ name: 'SALES_BY_REGION' }]);
+    });
+
+    it('should propagate API errors', async () => {
+      mockClient.get.mockRejectedValue(new Error('Unauthorized'));
+
+      await expect(
+        Snowflake.actions.listViews.handler(mockContext, {
+          database: 'PROD_DB',
+          schema: 'PUBLIC',
+        })
+      ).rejects.toThrow('Unauthorized');
+    });
+  });
+
+  describe('describeTable action', () => {
+    it('should GET the single-table endpoint', async () => {
+      mockClient.get.mockResolvedValue({
+        status: 200,
+        data: { name: 'ORDERS', columns: [{ name: 'ID', type: 'NUMBER' }] },
+      });
+
+      const result = await Snowflake.actions.describeTable.handler(mockContext, {
+        database: 'PROD_DB',
+        schema: 'PUBLIC',
+        name: 'ORDERS',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        `${ACCOUNT_URL}/api/v2/databases/PROD_DB/schemas/PUBLIC/tables/ORDERS`
+      );
+      expect(result.columns).toEqual([{ name: 'ID', type: 'NUMBER' }]);
+    });
+
+    it('should propagate API errors', async () => {
+      mockClient.get.mockRejectedValue(new Error('Table not found'));
+
+      await expect(
+        Snowflake.actions.describeTable.handler(mockContext, {
+          database: 'PROD_DB',
+          schema: 'PUBLIC',
+          name: 'MISSING',
+        })
+      ).rejects.toThrow('Table not found');
+    });
+  });
+
+  describe('describeView action', () => {
+    it('should GET the single-view endpoint', async () => {
+      mockClient.get.mockResolvedValue({
+        status: 200,
+        data: { name: 'SALES_BY_REGION', text: 'SELECT ...' },
+      });
+
+      const result = await Snowflake.actions.describeView.handler(mockContext, {
+        database: 'PROD_DB',
+        schema: 'PUBLIC',
+        name: 'SALES_BY_REGION',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        `${ACCOUNT_URL}/api/v2/databases/PROD_DB/schemas/PUBLIC/views/SALES_BY_REGION`
+      );
+      expect(result.text).toBe('SELECT ...');
+    });
+
+    it('should propagate API errors', async () => {
+      mockClient.get.mockRejectedValue(new Error('View not found'));
+
+      await expect(
+        Snowflake.actions.describeView.handler(mockContext, {
+          database: 'PROD_DB',
+          schema: 'PUBLIC',
+          name: 'MISSING',
+        })
+      ).rejects.toThrow('View not found');
+    });
+  });
+
+  describe('listCortexSearchServices action', () => {
+    it('should GET the cortex-search-services endpoint', async () => {
+      mockClient.get.mockResolvedValue({
+        status: 200,
+        data: [{ name: 'PRODUCT_SEARCH' }],
+      });
+
+      const result = await Snowflake.actions.listCortexSearchServices.handler(mockContext, {
+        database: 'PROD_DB',
+        schema: 'PUBLIC',
+        like: 'PRODUCT%',
+        showLimit: 10,
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        `${ACCOUNT_URL}/api/v2/databases/PROD_DB/schemas/PUBLIC/cortex-search-services`,
+        expect.objectContaining({ params: { like: 'PRODUCT%', showLimit: 10 } })
+      );
+      expect(result).toEqual([{ name: 'PRODUCT_SEARCH' }]);
+    });
+
+    it('should propagate API errors', async () => {
+      mockClient.get.mockRejectedValue(new Error('Feature not enabled'));
+
+      await expect(
+        Snowflake.actions.listCortexSearchServices.handler(mockContext, {
+          database: 'PROD_DB',
+          schema: 'PUBLIC',
+        })
+      ).rejects.toThrow('Feature not enabled');
+    });
+  });
+
+  describe('cortexSearch action', () => {
+    it('should POST to the cortex-search :query endpoint with the query body', async () => {
+      mockClient.post.mockResolvedValue({
+        status: 200,
+        data: { results: [{ TITLE: 'Wireless headphones', score: 0.91 }] },
+      });
+
+      const result = await Snowflake.actions.cortexSearch.handler(mockContext, {
+        database: 'PROD_DB',
+        schema: 'PUBLIC',
+        serviceName: 'PRODUCT_SEARCH',
+        query: 'noise cancelling headphones',
+        columns: ['TITLE', 'PRICE'],
+        filter: { '@eq': { REGION: 'US' } },
+        limit: 5,
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        `${ACCOUNT_URL}/api/v2/databases/PROD_DB/schemas/PUBLIC/cortex-search-services/PRODUCT_SEARCH:query`,
+        {
+          query: 'noise cancelling headphones',
+          columns: ['TITLE', 'PRICE'],
+          filter: { '@eq': { REGION: 'US' } },
+          limit: 5,
+        }
+      );
+      expect(result.results[0].TITLE).toBe('Wireless headphones');
+    });
+
+    it('should send only the query when optional fields are omitted', async () => {
+      mockClient.post.mockResolvedValue({ status: 200, data: { results: [] } });
+
+      await Snowflake.actions.cortexSearch.handler(mockContext, {
+        database: 'PROD_DB',
+        schema: 'PUBLIC',
+        serviceName: 'PRODUCT_SEARCH',
+        query: 'red shoes',
+      });
+
+      const [, body] = mockClient.post.mock.calls[0];
+      expect(body).toEqual({ query: 'red shoes' });
+    });
+
+    it('should propagate API errors', async () => {
+      mockClient.post.mockRejectedValue(new Error('Service not found'));
+
+      await expect(
+        Snowflake.actions.cortexSearch.handler(mockContext, {
+          database: 'PROD_DB',
+          schema: 'PUBLIC',
+          serviceName: 'MISSING',
+          query: 'hello',
+        })
+      ).rejects.toThrow('Service not found');
     });
   });
 });
