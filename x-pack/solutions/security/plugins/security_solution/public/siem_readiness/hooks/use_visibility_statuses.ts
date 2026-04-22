@@ -65,6 +65,7 @@ const computeCoverageStatus = (
   const hasCategories = Boolean(categoriesData?.mainCategoriesMap?.length);
 
   if (!hasCategories && !hasDetectionRules) return 'noData';
+  if (hasCategories && !hasDetectionRules) return 'actionsRequired';
 
   const hasMissing =
     hasDetectionRules && hasMissingIntegrations(ruleIntegrationCoverage?.missingIntegrations);

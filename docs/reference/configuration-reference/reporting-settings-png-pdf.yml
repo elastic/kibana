@@ -1,0 +1,225 @@
+---
+# This file is used to generate "PNG/PDF settings in Kibana" page in the product docs
+# For the schema and an example refer to the automated settings reference: 
+# https://github.com/elastic/docs-builder/blob/main/docs/syntax/automated_settings.md
+
+product: Kibana
+collection: PNG/PDF settings in Kibana
+id: reporting-settings-png-pdf
+note: |
+  We recommend using PNG/PDF reports to export moderate amounts of data only. The feature enables a high-level export capability, but it's not intended for bulk export. If you need to export several pages of image data, consider using multiple report jobs to export a small number of pages at a time. If the screenshot of exported dashboard contains a large number of pixels, consider splitting the large dashboard into smaller artifacts to use less memory and CPU resources.
+
+  For the most reliable configuration of PDF/PNG {{report-features}}, consider installing {{kib}} using [Docker](docs-content://deploy-manage/deploy/self-managed/install-kibana-with-docker.md) or using [Elastic Cloud](docs-content://deploy-manage/deploy/elastic-cloud.md).
+
+groups:
+  - group: PNG/PDF capture settings
+    id: reporting-capture-settings
+    description: |
+      To generate PDF and PNG files, Reporting uses an internal "screenshotting" plugin which manages a headless browser that captures screenshots from {{kib}}.
+
+      The following settings control the capturing process.
+    note: |
+      If any timeouts from `xpack.screenshotting.capture.timeouts.*` settings occur when running a report job, Reporting will log the error and try to continue capturing the page with a screenshot. As a result, a download will be available, but there will likely be errors in the visualizations in the report.
+    settings:
+
+      - setting: xpack.screenshotting.capture.timeouts.openUrl
+        description: |
+          Specify the [time](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#time-units) to allow the Reporting browser to wait for the "Loading…" screen to dismiss and find the initial data for the page. If the time is exceeded, a screenshot is captured showing the current page, and the download link shows a warning message. Can be specified as number of milliseconds. Defaults to `1m`.
+        datatype: string
+        default: 1m
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: xpack.screenshotting.capture.timeouts.waitForElements
+        description: |
+          Specify the [time](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#time-units) to allow the Reporting browser to wait for all visualization panels to load on the page. If the time is exceeded, a screenshot is captured showing the current page, and the download link shows a warning message. Can be specified as number of milliseconds. Defaults to `1m`.
+        datatype: string
+        default: 1m
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: xpack.screenshotting.capture.timeouts.renderComplete
+        description: |
+          Specify the [time](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#time-units) to allow the Reporting browser to wait for all visualizations to fetch and render the data. If the time is exceeded, a screenshot is captured showing the current page, and the download link shows a warning message. Can be specified as number of milliseconds. Defaults to `2m`.
+        datatype: string
+        default: 2m
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: xpack.screenshotting.capture.loadDelay
+        description: |
+          Specify the [amount of time](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#time-units) before taking a screenshot when visualizations are not evented. All visualizations that ship with {{kib}} are evented, so this setting should not have much effect. If you are seeing empty images instead of visualizations, try increasing this value. **NOTE**: This setting exists for backwards compatibility, but is unused and therefore does not have an affect on reporting performance.
+        datatype: string
+        applies_to:
+          stack: deprecated 8.0
+          self: deprecated
+          ech: unavailable
+        deprecation_details: "This setting was deprecated in 8.0.0."
+
+  - group: Chromium headless browser settings
+    id: reporting-chromium-settings
+    description: |
+      For PDF and PNG reports, Reporting spawns a headless Chromium browser process on the server to load and capture a screenshot of the {{kib}} app. When installing {{kib}} on Linux and Windows platforms, the Chromium binary comes bundled with the {{kib}} download. For Mac platforms, the Chromium binary is downloaded the first time {{kib}} is started.
+    settings:
+
+      - setting: xpack.screenshotting.browser.chromium.disableSandbox
+        description: |
+          It is recommended that you research the feasibility of enabling unprivileged user namespaces. An exception is if you are running {{kib}} in Docker because the container runs in a user namespace with the built-in seccomp/bpf filters. For more information, refer to [Chromium sandbox](docs-content://deploy-manage/kibana-reporting-configuration.md#reporting-chromium-sandbox). Defaults to `false` for all operating systems except CentOS, Debian, and Red Hat Linux, which use `true`.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable
+
+      - setting: xpack.screenshotting.browser.chromium.proxy.enabled
+        description: |
+          Enables the proxy for Chromium to use. When set to `true`, you must also specify the `xpack.screenshotting.browser.chromium.proxy.server` setting. Defaults to `false`.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable
+
+      - setting: xpack.screenshotting.browser.chromium.proxy.server
+        description: |
+          The uri for the proxy server. Providing the username and password for the proxy server via the uri is not supported.
+        datatype: string
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable
+
+      - setting: xpack.screenshotting.browser.chromium.proxy.bypass
+        description: |
+          An array of hosts that should not go through the proxy server and should use a direct connection instead. Examples of valid entries are "elastic.co", "*.elastic.co", ".elastic.co", ".elastic.co:5601".
+        datatype: string
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable
+
+  - group: Kibana server settings for headless browser connection
+    id: reporting-kibana-server-settings
+    description: |
+      To generate screenshots for PNG and PDF reports, Reporting opens the {{kib}} web interface using a local connection to the server. In most cases, using a local connection to the {{kib}} server presents no issue. If you prefer the headless browser to connect to {{kib}} using a specific hostname, there are a number of settings that allow the headless browser to connect to {{kib}} through a proxy, rather than directly.
+    note: |
+      The `xpack.reporting.kibanaServer` settings are optional. Take caution when editing these settings. Adding these settings can cause the PDF/PNG {{report-features}} to fail. If reports fail, inspect the server logs and pay attention to errors regarding the headless browser being unable to connect to the server. The full {{kib}} URL that Reporting is attempting to open is logged during report execution.
+    settings:
+
+      - setting: xpack.reporting.kibanaServer.port
+        description: |
+          The port for accessing {{kib}}.
+        datatype: int
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable
+
+      - setting: xpack.reporting.kibanaServer.protocol
+        description: |
+          The protocol for accessing {{kib}}, typically `http` or `https`.
+        datatype: string
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable
+
+      - setting: xpack.reporting.kibanaServer.hostname
+        id: xpack-kibanaServer-hostname
+        description: |
+          The hostname for accessing {{kib}}.
+        datatype: string
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable
+
+  - group: Network policy settings for headless Chromium restrictions
+    id: reporting-network-policy
+    description: |
+      To generate PDF reports, Reporting uses a headless Chromium browser to fully load the {{kib}} page on the server. This potentially involves sending requests to external hosts. For example, a request might go to an external image server to show a field formatted as an image, or to show an image in a Markdown visualization.
+
+      If the headless Chromium browser is asked to send a request that violates the network policy, it will stop processing the page before the request goes out, and the report is marked as a failure. Additional information about the event is in the {{kib}} server logs.
+    note: |
+      {{kib}} installations are not designed to be publicly accessible over the internet. The Reporting network policy and other capabilities of the Elastic Stack security features do not change this condition.
+    settings:
+
+      - setting: xpack.screenshotting.networkPolicy
+        description: |
+          Capturing a screenshot from a {{kib}} page involves sending out requests for all the linked web assets. For example, a Markdown visualization can show an image from a remote server.
+        datatype: string
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable
+
+      - setting: xpack.screenshotting.networkPolicy.enabled
+        description: |
+          When `false`, disables the headless browser network policy. Defaults to `true`.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable
+
+      - setting: xpack.screenshotting.networkPolicy.rules
+        description: |
+          A policy is specified as an array of objects that describe what to allow or deny based on a host or protocol. If a host or protocol is not specified, the rule matches any host or protocol.
+
+          The rule objects are evaluated sequentially from the beginning to the end of the array, and continue until there is a matching rule. If no rules allow a request, the request is denied.
+        datatype: string
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable
+        note: |
+          The `file:` protocol is always denied, even if no network policy is configured.
+        example: |
+          ```yaml
+          # Only allow requests to elastic.co
+          xpack.screenshotting.networkPolicy:
+            rules: [ { allow: true, host: "elastic.co" } ]
+          ```
+
+          ```yaml
+          # Only allow HTTPS requests to https://elastic.co
+          xpack.screenshotting.networkPolicy:
+            rules: [ { allow: true, host: "elastic.co", protocol: "https:" } ]
+          ```
+
+          Example of a baseline configuration for disallowing all requests to external paths:
+
+          ```yaml
+          xpack.screenshotting.networkPolicy:
+            rules: [ { allow: true, host: "localhost:5601", protocol: "http:" } ]
+          ```
+
+          Typically, Chromium will connect to {{kib}} on a local interface, but this may be different based on the environment and specific [headless browser connection settings](#reporting-kibana-server-settings).
+
+          A final `allow` rule with no host or protocol allows all requests that are not explicitly denied:
+
+          ```yaml
+          # Denies requests from http://elastic.co, but anything else is allowed.
+          xpack.screenshotting.networkPolicy:
+            rules: [{ allow: false, host: "elastic.co", protocol: "http:" }, { allow: true }];
+          ```
+
+          A network policy can be composed of multiple rules:
+
+          ```yaml
+          # Allow any request to http://elastic.co but for any other host, https is required
+          xpack.screenshotting.networkPolicy
+            rules: [
+              { allow: true, host: "elastic.co", protocol: "http:" },
+              { allow: true, protocol: "https:" },
+            ]
+          ```

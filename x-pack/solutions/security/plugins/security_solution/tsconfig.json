@@ -287,11 +287,13 @@
     "@kbn/controls-constants",
     "@kbn/anonymization-plugin",
     "@kbn/anonymization-common",
+    "@kbn/workflows-extensions",
     "@kbn/shared-ux-ai-components",
     "@kbn/controls-schemas",
     "@kbn/search-inference-endpoints",
     "@kbn/evals-plugin",
     "@kbn/shared-ux-column-presets",
     "@kbn/core-overlays-browser",
+    "@kbn/workflows-management-plugin",
   ]
 }

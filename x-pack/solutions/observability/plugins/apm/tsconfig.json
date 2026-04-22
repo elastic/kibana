@@ -16,6 +16,7 @@
     "server/**/*.json"
   ],
   "kbn_references": [
+    "@kbn/apm-embeddable-common",
     "@kbn/core",
     "@kbn/data-plugin",
     "@kbn/embeddable-plugin",
