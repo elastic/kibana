@@ -19,22 +19,19 @@ jest.mock('./use_kibana');
 
 const mockUseKibana = useKibana as jest.Mock;
 
-interface SettingsStore {
-  [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: string;
-  [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: boolean;
-}
+type SettingsStore = Record<string, unknown>;
 
-const buildSettingsClient = (initial: Partial<SettingsStore> = {}) => {
+const buildSettingsClient = (initial: SettingsStore = {}) => {
   const store: SettingsStore = {
     [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: NO_DEFAULT_MODEL,
     [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: false,
     ...initial,
   };
-  const update$ = new Subject<{ key: keyof SettingsStore }>();
+  const update$ = new Subject<{ key: string }>();
   return {
-    get: jest.fn(<T>(key: keyof SettingsStore, _defaultValue: T): T => store[key] as T),
-    set: jest.fn(async (key: keyof SettingsStore, value: unknown) => {
-      (store as Record<string, unknown>)[key] = value;
+    get: jest.fn(<T>(key: string, _defaultValue: T): T => store[key] as T),
+    set: jest.fn(async (key: string, value: unknown) => {
+      store[key] = value;
       update$.next({ key });
     }),
     getUpdate$: () => update$.asObservable(),
