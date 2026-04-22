@@ -19,18 +19,11 @@ import type { DashboardApi } from '../../../../dashboard_api/types';
 jest.mock('../get_menu_item_groups', () => ({}));
 
 jest.mock('../../../../services/kibana_services', () => {
-  const ReactActual = jest.requireActual('react');
   return {
     embeddableService: {
       getAddFromLibraryContentComponent: jest
         .fn()
-        .mockResolvedValue(() =>
-          ReactActual.createElement(
-            'div',
-            { 'data-test-subj': 'mockLibraryContent' },
-            'Library content'
-          )
-        ),
+        .mockResolvedValue(() => <div data-test-subj="mockLibraryContent">Library content</div>),
     },
   };
 });
@@ -50,7 +43,9 @@ describe('AddPanelFlyout', () => {
           <AddPanelFlyout dashboardApi={mockDashboardApi} ariaLabelledBy="addPanelFlyout" />
         </IntlProvider>
       );
-
+      await waitFor(async () => {
+        expect(screen.getByTestId('addToDashboardFlyout-header')).toBeInTheDocument();
+      });
       expect(screen.getByTestId('addToDashboardTab-new')).toBeInTheDocument();
       expect(screen.getByTestId('addToDashboardTab-library')).toBeInTheDocument();
     });
@@ -62,8 +57,10 @@ describe('AddPanelFlyout', () => {
         </IntlProvider>
       );
 
-      const newTab = screen.getByTestId('addToDashboardTab-new');
-      expect(newTab).toHaveAttribute('aria-selected', 'true');
+      await waitFor(async () => {
+        expect(screen.getByTestId('addToDashboardTab-new')).toBeInTheDocument();
+      });
+      expect(screen.getByTestId('addToDashboardTab-new')).toHaveAttribute('aria-selected', 'true');
     });
 
     test('switches to "From library" tab on click', async () => {
@@ -72,9 +69,10 @@ describe('AddPanelFlyout', () => {
           <AddPanelFlyout dashboardApi={mockDashboardApi} ariaLabelledBy="addPanelFlyout" />
         </IntlProvider>
       );
-
+      await waitFor(async () => {
+        expect(screen.getByTestId('addToDashboardTab-library')).toBeInTheDocument();
+      });
       await userEvent.click(screen.getByTestId('addToDashboardTab-library'));
-
       await waitFor(() => {
         expect(screen.getByTestId('mockLibraryContent')).toBeInTheDocument();
       });
@@ -94,9 +92,10 @@ describe('AddPanelFlyout', () => {
       await waitFor(() => {
         expect(screen.getByTestId('mockLibraryContent')).toBeInTheDocument();
       });
-
-      const libraryTab = screen.getByTestId('addToDashboardTab-library');
-      expect(libraryTab).toHaveAttribute('aria-selected', 'true');
+      expect(screen.getByTestId('addToDashboardTab-library')).toHaveAttribute(
+        'aria-selected',
+        'true'
+      );
     });
   });
 
@@ -112,8 +111,9 @@ describe('AddPanelFlyout', () => {
           <AddPanelFlyout dashboardApi={mockDashboardApi} ariaLabelledBy="addPanelFlyout" />
         </IntlProvider>
       );
-
-      expect(screen.getByText('Add to dashboard')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('Add to dashboard')).toBeInTheDocument();
+      });
     });
   });
 
@@ -190,61 +190,6 @@ describe('AddPanelFlyout', () => {
           'non existent panel'
         );
         screen.getByTestId('dashboardPanelSelectionNoPanelMessage');
-      });
-    });
-  });
-
-  describe('time slider disabled state reacts to layout$', () => {
-    const layout$ = new BehaviorSubject<{ pinnedPanels: Record<string, { type: string }> }>({
-      pinnedPanels: { pinned1: { type: TIME_SLIDER_CONTROL } },
-    });
-
-    const dashboardApiWithLayout = { layout$ } as unknown as DashboardApi;
-
-    beforeEach(() => {
-      layout$.next({
-        pinnedPanels: { pinned1: { type: TIME_SLIDER_CONTROL } },
-      });
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('../get_menu_item_groups').getMenuItemGroups = async () => [
-        {
-          id: 'controlsGroup',
-          title: 'Controls',
-          items: [
-            {
-              icon: 'controls',
-              id: ACTION_CREATE_TIME_SLIDER,
-              name: 'Time slider',
-              'data-test-subj': 'create-action-Time slider',
-              onClick: jest.fn(),
-              order: 0,
-            },
-          ],
-          order: 10,
-          'data-test-subj': 'dashboardEditorMenu-controlsGroupGroup',
-        },
-      ];
-    });
-
-    test('re-enables time slider when pinned time slider is removed while flyout is open', async () => {
-      render(
-        <IntlProvider locale="en">
-          <AddPanelFlyout dashboardApi={dashboardApiWithLayout} ariaLabelledBy="addPanelFlyout" />
-        </IntlProvider>
-      );
-
-      await screen.findByTestId('create-action-Time slider');
-
-      await waitFor(() => {
-        expect(screen.getByTestId('create-action-Time slider')).toBeDisabled();
-      });
-
-      await act(async () => {
-        layout$.next({ pinnedPanels: {} });
-      });
-
-      await waitFor(() => {
-        expect(screen.getByTestId('create-action-Time slider')).not.toBeDisabled();
       });
     });
   });

@@ -297,7 +297,7 @@ export function AddPanelFlyout({
 
   return (
     <>
-      <EuiFlyoutHeader hasBorder={false}>
+      <EuiFlyoutHeader hasBorder={false} data-test-subj="addToDashboardFlyout-header">
         <EuiTitle size="s">
           <h1 id={ariaLabelledBy}>
             <FormattedMessage
