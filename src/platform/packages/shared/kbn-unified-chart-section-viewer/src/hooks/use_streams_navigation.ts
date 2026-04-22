@@ -12,21 +12,23 @@ import { STREAMS_APP_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import { isCCSRemoteIndexName } from '@kbn/es-query';
 import type { ExternalServices } from '../types';
 
+export interface UseStreamsNavigationResult {
+  canNavigate: boolean;
+  getStreamUrl: (name: string) => string | undefined;
+}
+
 /**
  * Encapsulates Streams app navigation logic: permission gating, CCS filtering,
- * and URL generation via the Streams locator.
+ * wildcard rejection, and URL generation via the Streams locator.
  *
- * Returns `{ canNavigate, getStreamUrl }`. `getStreamUrl(name, isDataStream)`
- * yields a URL when the user can navigate to the given stream, or `undefined`
- * when the source isn't a data stream, the name is invalid (wildcard, CCS),
- * or the user lacks permissions.
+ * Returns `{ canNavigate, getStreamUrl }`. `getStreamUrl(name)` yields a URL
+ * when the given name is navigable in the Streams app, or `undefined` when the
+ * name is invalid (empty, wildcard, CCS) or the user lacks permissions.
+ *
  */
 export const useStreamsNavigation = (
   externalServices?: ExternalServices
-): {
-  canNavigate: boolean;
-  getStreamUrl: (name: string, isDataStream: boolean) => string | undefined;
-} => {
+): UseStreamsNavigationResult => {
   const canNavigate = useMemo(
     () => Boolean(externalServices?.discoverShared?.features.registry.getById('streams')),
     [externalServices?.discoverShared]
@@ -38,12 +40,19 @@ export const useStreamsNavigation = (
   );
 
   const getStreamUrl = useCallback(
-    (name: string, isDataStream: boolean): string | undefined => {
+    (name: string): string | undefined => {
       if (
-        !isDataStream ||
+        // Streams feature not registered or locator unavailable in the host app.
         !canNavigate ||
+        // Defensive: empty / falsy names cannot produce a valid Streams URL.
         !name ||
+        // Streams locator routes to a single concrete stream (`/{name}`),
+        // so index-pattern wildcards like `metrics-*` are not navigable.
         name.includes('*') ||
+        // Product decision (see https://github.com/elastic/kibana/issues/239387):
+        // suppress the link when the data stream lives in a remote cluster
+        // (CCS / CPS) because the URL would target the local cluster and not
+        // the remote one.
         isCCSRemoteIndexName(name)
       ) {
         return undefined;

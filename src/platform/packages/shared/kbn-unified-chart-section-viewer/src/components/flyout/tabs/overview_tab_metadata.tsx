@@ -26,7 +26,7 @@ export const OverviewTabMetadata = ({ metricItem, externalServices }: OverviewTa
   const { euiTheme } = useEuiTheme();
   const { getStreamUrl } = useStreamsNavigation(externalServices);
   const isDataStream = metricItem.sourceKind === 'data_stream';
-  const streamUrl = getStreamUrl(metricItem.dataStream, isDataStream);
+  const streamUrl = isDataStream ? getStreamUrl(metricItem.dataStream) : undefined;
 
   const { rows, labelMinWidthPx } = useMemo(() => {
     const labelMinWidthPxInner = euiTheme.base * 11.25;

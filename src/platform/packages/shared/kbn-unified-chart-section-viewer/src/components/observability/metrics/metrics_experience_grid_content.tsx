@@ -34,7 +34,13 @@ import { extractWhereCommand } from '../../../utils/extract_where_command';
 export interface MetricsExperienceGridContentProps
   extends Pick<
     UnifiedMetricsGridProps,
-    'services' | 'fetchParams' | 'onBrushEnd' | 'onFilter' | 'actions' | 'histogramCss' | 'externalServices'
+    | 'services'
+    | 'fetchParams'
+    | 'onBrushEnd'
+    | 'onFilter'
+    | 'actions'
+    | 'histogramCss'
+    | 'externalServices'
   > {
   discoverFetch$: UnifiedMetricsGridProps['fetch$'];
   metricItems: ParsedMetricItem[];
