@@ -219,7 +219,6 @@ export const buildHelpLinks = ({
           })
         : link.content,
       key: `extension-${index}`,
-      icon: link.iconType,
       href: link.href,
       target: link.target ?? (isDocumentation ? '_blank' : undefined),
       rel: link.rel ?? (isDocumentation ? 'noopener' : undefined),
