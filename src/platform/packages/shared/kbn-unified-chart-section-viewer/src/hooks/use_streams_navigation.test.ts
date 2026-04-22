@@ -8,7 +8,6 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { OBSERVABILITY_STREAMS_FEATURE_ID } from '@kbn/discover-shared-plugin/public';
 import type { ExternalServices } from '../types';
 import { useStreamsNavigation } from './use_streams_navigation';
 
@@ -35,7 +34,7 @@ const createMockExternalServices = ({
       features: {
         registry: {
           getById: jest.fn((id: string) =>
-            hasStreamsFeature && id === OBSERVABILITY_STREAMS_FEATURE_ID ? {} : undefined
+            hasStreamsFeature && id === 'streams' ? {} : undefined
           ),
         },
       },

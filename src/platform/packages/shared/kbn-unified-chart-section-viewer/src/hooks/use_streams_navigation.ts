@@ -10,7 +10,6 @@
 import { useCallback, useMemo } from 'react';
 import { STREAMS_APP_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import { isCCSRemoteIndexName } from '@kbn/es-query';
-import { OBSERVABILITY_STREAMS_FEATURE_ID } from '@kbn/discover-shared-plugin/public';
 import type { ExternalServices } from '../types';
 
 /**
@@ -29,12 +28,7 @@ export const useStreamsNavigation = (
   getStreamUrl: (name: string, isDataStream: boolean) => string | undefined;
 } => {
   const canNavigate = useMemo(
-    () =>
-      Boolean(
-        externalServices?.discoverShared?.features.registry.getById(
-          OBSERVABILITY_STREAMS_FEATURE_ID
-        )
-      ),
+    () => Boolean(externalServices?.discoverShared?.features.registry.getById('streams')),
     [externalServices?.discoverShared]
   );
 

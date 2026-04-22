@@ -10,7 +10,6 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { OBSERVABILITY_STREAMS_FEATURE_ID } from '@kbn/discover-shared-plugin/public';
 import type { ParsedMetricItem, ExternalServices } from '../../../types';
 import { OverviewTab } from './overview_tab';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
@@ -367,9 +366,7 @@ describe('Metric Flyout Overview Tab', () => {
       discoverShared: {
         features: {
           registry: {
-            getById: jest.fn((id: string) =>
-              id === OBSERVABILITY_STREAMS_FEATURE_ID ? {} : undefined
-            ),
+            getById: jest.fn((id: string) => (id === 'streams' ? {} : undefined)),
           },
         },
       },

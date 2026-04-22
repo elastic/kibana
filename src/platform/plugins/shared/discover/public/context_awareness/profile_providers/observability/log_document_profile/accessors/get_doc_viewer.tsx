@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  OBSERVABILITY_STREAMS_FEATURE_ID,
-  type ObservabilityLogsAIAssistantFeature,
-  type ObservabilityLogsAIInsightFeature,
-  type ObservabilityStreamsFeature,
+import type {
+  ObservabilityLogsAIAssistantFeature,
+  ObservabilityLogsAIInsightFeature,
+  ObservabilityStreamsFeature,
 } from '@kbn/discover-shared-plugin/public';
 import type { ObservabilityIndexes } from '@kbn/discover-utils/src';
 import { i18n } from '@kbn/i18n';
@@ -41,9 +40,7 @@ export const createGetDocViewer =
       'observability-logs-ai-insight'
     );
 
-    const streamsFeature = services.discoverShared.features.registry.getById(
-      OBSERVABILITY_STREAMS_FEATURE_ID
-    );
+    const streamsFeature = services.discoverShared.features.registry.getById('streams');
     const cpsHasLinkedProjects = (services.cps?.cpsManager?.getTotalProjectCount() ?? 0) > 1;
 
     const indexes = {
