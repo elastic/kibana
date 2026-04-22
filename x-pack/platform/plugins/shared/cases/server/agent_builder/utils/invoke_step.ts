@@ -26,9 +26,7 @@ export async function invokeStepHandler(
       throw new Error('getContext is not available in the agent builder execution context');
     },
     getScopedEsClient: () => {
-      throw new Error(
-        'getScopedEsClient is not available in the agent builder execution context'
-      );
+      throw new Error('getScopedEsClient is not available in the agent builder execution context');
     },
     renderInputTemplate: <T>(v: T) => v,
   };

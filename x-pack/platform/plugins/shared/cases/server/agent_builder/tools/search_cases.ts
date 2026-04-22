@@ -207,7 +207,9 @@ Returns case details with \`markdown_link\` (pre-formatted clickable link). **CR
           return createResult(
             enrichedCases,
             null,
-            `Retrieved ${enrichedCases.length} case(s)${bulkResult.errors.length > 0 ? `, ${bulkResult.errors.length} error(s)` : ''}`
+            `Retrieved ${enrichedCases.length} case(s)${
+              bulkResult.errors.length > 0 ? `, ${bulkResult.errors.length} error(s)` : ''
+            }`
           );
         }
 
@@ -247,11 +249,19 @@ Returns case details with \`markdown_link\` (pre-formatted clickable link). **CR
             );
           }
 
-          const casesData = enhanceCases(cases, shouldIncludeComments, request, coreServices, logger);
+          const casesData = enhanceCases(
+            cases,
+            shouldIncludeComments,
+            request,
+            coreServices,
+            logger
+          );
           return createResult(
             casesData,
             null,
-            `Found ${casesData.length} unique case(s) containing alert ID(s): ${alert_ids.join(', ')}`
+            `Found ${casesData.length} unique case(s) containing alert ID(s): ${alert_ids.join(
+              ', '
+            )}`
           );
         }
 
