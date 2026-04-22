@@ -489,7 +489,6 @@ export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
   RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v9.2',
   TIMELINES: 'securitySolution.security.timelineFlyoutHeader.saveTimelineTour',
   DEFAULT_LLM: `elasticAssistant.elasticLLM.costAwarenessTour.assistantHeader.v8.19.default`,
-  AGENT_BUILDER_TOUR: 'elasticAssistant.agentBuilderTour.v9.3.default',
 };
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
@@ -722,3 +721,7 @@ export enum SecurityAgentBuilderAttachments {
 }
 
 export const SECURITY_RULE_ATTACHMENT_ID = 'ai-rule-creation';
+
+export const REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG =
+  'securitySolution.registerAlertValidationStepsEnabled' as const;
+export const REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT = false as const;
