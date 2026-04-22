@@ -181,8 +181,39 @@ export const resolveIndexRoute = createServerRoute({
   },
 });
 
+const BULK_GET_SUMMARIES_MAX_NAMES = 10_000;
+
+export interface StreamSummary {
+  name: string;
+  type: string;
+  description: string;
+}
+
+export const bulkGetStreamSummariesRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/_bulk_get_summaries',
+  options: {
+    access: 'internal',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    body: z.object({
+      names: z.array(z.string()).max(BULK_GET_SUMMARIES_MAX_NAMES),
+    }),
+  }),
+  handler: async ({ params, request, getScopedClients }): Promise<{ streams: StreamSummary[] }> => {
+    const { streamsClient } = await getScopedClients({ request });
+    const streams = await streamsClient.getStreamSummaries(params.body.names);
+    return { streams };
+  },
+});
+
 export const internalCrudRoutes = {
   ...listStreamsRoute,
   ...streamDetailRoute,
   ...resolveIndexRoute,
+  ...bulkGetStreamSummariesRoute,
 };

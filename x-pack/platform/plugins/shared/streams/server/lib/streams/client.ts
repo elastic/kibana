@@ -878,6 +878,22 @@ export class StreamsClient {
   }
 
   /**
+   * Fetches a summary (name, type, description) for each requested stream name.
+   * Stream names for which no managed stream exists are ignored.
+   */
+  async getStreamSummaries(
+    names: string[]
+  ): Promise<Array<{ name: string; type: string; description: string }>> {
+    if (names.length === 0) {
+      return [];
+    }
+    const streams = await this.getManagedStreams({
+      query: { terms: { name: names } },
+    });
+    return streams.map(({ name, type, description }) => ({ name, type, description }));
+  }
+
+  /**
    * Lists both managed and unmanaged streams
    */
   async listStreams(): Promise<Streams.all.Definition[]> {
