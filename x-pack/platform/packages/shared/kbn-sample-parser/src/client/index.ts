@@ -6,7 +6,7 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { LoghubTimestampLayout, MetadataOverride } from '../loghub/create_loghub_generator';
+import type { LoghubTimestampLayout } from '../loghub/create_loghub_generator';
 import { getLoghubGenerators } from '../loghub/get_loghub_generators';
 import { getServerlessGenerators } from '../serverless/get_serverless_generators';
 import type { StreamLogGenerator } from '../types';
@@ -37,7 +37,6 @@ export class SampleParserClient {
     systems = {},
     streamType = 'wired',
     loghubTimestampLayout,
-    loghubMetadataOverrides,
   }: {
     rpm?: number;
     distribution?: 'relative' | 'uniform';
@@ -48,8 +47,6 @@ export class SampleParserClient {
     streamType?: 'classic' | 'wired';
     /** LogHub only; default preserves upstream log timestamps. */
     loghubTimestampLayout?: LoghubTimestampLayout;
-    /** LogHub only; per-system metadata overrides. */
-    loghubMetadataOverrides?: Record<string, MetadataOverride>;
   }): Promise<StreamLogGenerator[]> {
     const { loghub, serverless } = systems;
 
@@ -68,9 +65,6 @@ export class SampleParserClient {
             rpm,
             streamType,
             timestampLayout: loghubTimestampLayout,
-            metadataOverrides: loghubMetadataOverrides as
-              | Record<string, MetadataOverride>
-              | undefined,
           })
         : Promise.resolve([]),
       includeServerless
