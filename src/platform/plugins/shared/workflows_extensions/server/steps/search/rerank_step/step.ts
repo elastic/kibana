@@ -8,8 +8,8 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { createServerStepDefinition } from '../../../step_registry/types';
 import { rerankStepCommonDefinition } from '../../../../common/steps/search/rerank_step';
+import { createServerStepDefinition } from '../../../step_registry/types';
 
 interface InferenceEndpoint {
   inference_id: string;

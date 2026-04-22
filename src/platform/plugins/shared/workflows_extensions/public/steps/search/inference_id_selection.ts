@@ -11,9 +11,9 @@ import type { HttpStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type {
   PropertySelectionHandler,
-  SelectionOption,
-  SelectionDetails,
   SelectionContext,
+  SelectionDetails,
+  SelectionOption,
 } from '@kbn/workflows';
 
 const TRANSLATIONS = {

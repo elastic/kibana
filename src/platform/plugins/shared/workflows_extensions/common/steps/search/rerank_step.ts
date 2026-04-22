@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
-import type { CommonStepDefinition } from '../../step_registry/types';
 import { StepCategory } from '@kbn/workflows';
+import { z } from '@kbn/zod/v4';
+import type { CommonStepDefinition } from '../../step_registry/types';
 
 /**
  * Step type ID for the rerank workflow step

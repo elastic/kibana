@@ -9,9 +9,9 @@
 
 import React from 'react';
 import type { CoreSetup, HttpStart } from '@kbn/core/public';
-import { createPublicStepDefinition } from '../../step_registry/types';
-import { rerankStepCommonDefinition } from '../../../common/steps/search/rerank_step';
 import { createInferenceIdSelectionHandler } from './inference_id_selection';
+import { rerankStepCommonDefinition } from '../../../common/steps/search/rerank_step';
+import { createPublicStepDefinition } from '../../step_registry/types';
 
 export const createRerankStepDefinition = (core: CoreSetup) => {
   let httpPromise: Promise<HttpStart> | null = null;

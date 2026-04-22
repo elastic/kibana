@@ -8,10 +8,13 @@
  */
 
 import type { CoreSetup } from '@kbn/core/public';
-import type { PublicStepRegistry } from '../step_registry';
 import { createRerankStepDefinition } from './search/rerank_step';
+import type { PublicStepRegistry } from '../step_registry';
 
-export const registerInternalStepDefinitions = (stepRegistry: PublicStepRegistry, core: CoreSetup) => {
+export const registerInternalStepDefinitions = (
+  stepRegistry: PublicStepRegistry,
+  core: CoreSetup
+) => {
   stepRegistry.register(() => import('./data/data_map_step').then((m) => m.dataMapStepDefinition));
   stepRegistry.register(() =>
     import('./data/data_dedupe_step').then((m) => m.dataDedupeStepDefinition)
