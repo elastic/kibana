@@ -7,18 +7,9 @@
 
 const mockSpanState: { current: null | { addLabels: jest.Mock } } = { current: null };
 
-jest.mock('elastic-apm-node', () => ({
-  __esModule: true,
-  default: {
-    get currentSpan() {
-      return mockSpanState.current;
-    },
-  },
-}));
-
 jest.mock('@kbn/apm-utils', () => ({
   __esModule: true,
-  withSpan: jest.fn(async (_opts, cb) => cb()),
+  withSpan: jest.fn(async (_opts, cb) => cb(mockSpanState.current)),
 }));
 
 import { withSpan } from '@kbn/apm-utils';
@@ -50,7 +41,7 @@ describe('withDispatcherSpan', () => {
     expect(result).toEqual({ ok: true });
   });
 
-  it('attaches dynamic labels from the factory to the current span after the callback resolves', async () => {
+  it('attaches dynamic labels from the factory to the span provided by withSpan', async () => {
     const addLabels = jest.fn();
     mockSpanState.current = { addLabels };
 
@@ -63,7 +54,7 @@ describe('withDispatcherSpan', () => {
     expect(addLabels).toHaveBeenCalledWith({ count_episodes: 42 });
   });
 
-  it('does not throw when no active span exists', async () => {
+  it('does not throw when withSpan provides no span', async () => {
     mockSpanState.current = null;
 
     await expect(

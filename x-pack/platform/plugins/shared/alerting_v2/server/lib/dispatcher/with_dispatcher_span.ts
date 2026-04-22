@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import apm from 'elastic-apm-node';
 import { withSpan } from '@kbn/apm-utils';
 
 export type DispatcherSpanLabels = Record<string, string | number | boolean>;
@@ -15,9 +14,9 @@ export type DispatcherSpanLabels = Record<string, string | number | boolean>;
  *
  * `labelsFactory` is invoked after `cb` resolves and is intended to derive
  * cardinality-safe, aggregatable labels (counts, booleans) from the step's
- * output. Labels are attached to the active span on a best-effort basis; any
- * failure while computing or applying labels is swallowed and never affects
- * the wrapped callback's result.
+ * output. Labels are attached to the span created by `withSpan` on a
+ * best-effort basis; any failure while computing or applying labels is
+ * swallowed and never affects the wrapped callback's result.
  */
 export async function withDispatcherSpan<T>(
   name: string,
@@ -26,22 +25,16 @@ export async function withDispatcherSpan<T>(
 ): Promise<T> {
   return withSpan(
     { name: `dispatcher:${name}`, type: 'dispatcher', labels: { plugin: 'alerting_v2' } },
-    async () => {
+    async (span) => {
       const result = await cb();
-      if (labelsFactory) {
-        applyLabels(labelsFactory, result);
+      if (labelsFactory && span) {
+        try {
+          span.addLabels(labelsFactory(result));
+        } catch {
+          // best-effort: never let label failures affect pipeline correctness
+        }
       }
       return result;
     }
   );
-}
-
-function applyLabels<T>(labelsFactory: (result: T) => DispatcherSpanLabels, result: T): void {
-  try {
-    const span = apm.currentSpan;
-    if (!span) return;
-    span.addLabels(labelsFactory(result));
-  } catch {
-    // best-effort: never let label failures affect pipeline correctness
-  }
 }
