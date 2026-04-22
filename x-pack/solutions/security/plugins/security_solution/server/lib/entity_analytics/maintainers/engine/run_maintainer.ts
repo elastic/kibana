@@ -9,7 +9,12 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { EntityUpdateClient } from '@kbn/entity-store/server';
 
-import type { RelationshipIntegrationConfig, CompositeAfterKey, CompositeBucket, ProcessedEngineRecord } from './types';
+import type {
+  RelationshipIntegrationConfig,
+  CompositeAfterKey,
+  CompositeBucket,
+  ProcessedEngineRecord,
+} from './types';
 import { buildCompositeAgg, buildBucketFilter } from './build_composite_agg';
 import { buildEsqlQuery } from './build_esql_query';
 import { postprocessEsqlResults } from './postprocess_records';
@@ -108,7 +113,9 @@ export const runGenericMaintainer = async ({
         );
       } catch (err) {
         if (isIndexNotFound(err)) {
-          logger.info(`[${config.id}] Index "${config.indexPattern(namespace)}" not found, skipping`);
+          logger.info(
+            `[${config.id}] Index "${config.indexPattern(namespace)}" not found, skipping`
+          );
           break;
         }
         logger.error(`[${config.id}] Composite aggregation failed: ${errMsg(err)}`);
@@ -135,7 +142,10 @@ export const runGenericMaintainer = async ({
 
       let esqlResult;
       try {
-        esqlResult = await esClient.esql.query({ query: esqlQuery, filter: esqlFilter }, transportOpts);
+        esqlResult = await esClient.esql.query(
+          { query: esqlQuery, filter: esqlFilter },
+          transportOpts
+        );
       } catch (err) {
         logger.error(`[${config.id}] ES|QL query failed: ${errMsg(err)}`);
         break;

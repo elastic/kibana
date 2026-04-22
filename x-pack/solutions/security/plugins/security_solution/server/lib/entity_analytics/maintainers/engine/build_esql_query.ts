@@ -19,10 +19,15 @@ function buildAccessesEsql(config: RelationshipIntegrationConfig, namespace: str
   const userFieldEvalsLine = userFieldEvals ? `| EVAL ${userFieldEvals}\n` : '';
   const userIdFilter = euid.esql.getEuidDocumentsContainsIdFilter('user');
   const hostIdFilter = euid.esql.getEuidDocumentsContainsIdFilter('host');
-  const actorEval = config.actorEvalOverride ?? euid.esql.getEuidEvaluation('user', { withTypeId: true });
-  const targetEval = config.targetEvalOverride ?? euid.esql.getEuidEvaluation(config.targetEntityType, { withTypeId: true });
+  const actorEval =
+    config.actorEvalOverride ?? euid.esql.getEuidEvaluation('user', { withTypeId: true });
+  const targetEval =
+    config.targetEvalOverride ??
+    euid.esql.getEuidEvaluation(config.targetEntityType, { withTypeId: true });
   const threshold = config.frequencyThreshold ?? DEFAULT_FREQUENCY_THRESHOLD;
-  const additionalTargetFilter = config.additionalTargetFilter ? `\n    ${config.additionalTargetFilter}` : '';
+  const additionalTargetFilter = config.additionalTargetFilter
+    ? `\n    ${config.additionalTargetFilter}`
+    : '';
 
   return `SET unmapped_fields="nullify";
 FROM ${indexPattern}
@@ -48,7 +53,10 @@ ${userFieldEvalsLine}| EVAL actorUserId = ${actorEval}
 | LIMIT ${COMPOSITE_PAGE_SIZE}`;
 }
 
-function buildCommunicatesWithEsql(config: RelationshipIntegrationConfig, namespace: string): string {
+function buildCommunicatesWithEsql(
+  config: RelationshipIntegrationConfig,
+  namespace: string
+): string {
   const indexPattern = config.indexPattern(namespace);
   const userFieldEvals = getFieldEvaluationsEsql('user');
   const userFieldEvalsLine = userFieldEvals ? `| EVAL ${userFieldEvals}\n` : '';
@@ -59,12 +67,17 @@ function buildCommunicatesWithEsql(config: RelationshipIntegrationConfig, namesp
       ? `    AND (${euid.esql.getEuidDocumentsContainsIdFilter('host')})\n`
       : '';
 
-  const actorEval = config.actorEvalOverride ?? euid.esql.getEuidEvaluation('user', { withTypeId: true });
+  const actorEval =
+    config.actorEvalOverride ?? euid.esql.getEuidEvaluation('user', { withTypeId: true });
 
-  const defaultTargetEval = euid.esql.getEuidEvaluation(config.targetEntityType, { withTypeId: true });
+  const defaultTargetEval = euid.esql.getEuidEvaluation(config.targetEntityType, {
+    withTypeId: true,
+  });
 
   const targetEval = config.targetEvalOverride ?? defaultTargetEval;
-  const additionalTargetFilter = config.additionalTargetFilter ? `\n    ${config.additionalTargetFilter}` : '';
+  const additionalTargetFilter = config.additionalTargetFilter
+    ? `\n    ${config.additionalTargetFilter}`
+    : '';
 
   return `SET unmapped_fields="nullify";
 FROM ${indexPattern}
