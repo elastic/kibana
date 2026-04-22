@@ -83,7 +83,10 @@ export async function hasTestsInPlaywrightConfig(
   log.info(`scout: Validate Playwright config has tests`);
   try {
     const validationCmd = [cmd, ...cmdArgs, '--list'].join(' ');
-    log.debug(`scout: running '${validationCmd}'`);
+    log.debug(
+      `scout: running 'SCOUT_REPORTER_ENABLED=false ${validationCmd}' ` +
+        `(NODE_OPTIONS extended with --require=@kbn/babel-register/install)`
+    );
 
     const result = await execPromise(validationCmd, {
       env: withKibanaBabelRegister({
