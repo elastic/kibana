@@ -497,6 +497,29 @@ describe('verify_permissions_task', () => {
       );
     });
 
+    it('should query verifier policies across all spaces during cleanup and gate check', async () => {
+      mockedAgentPolicyService.list
+        .mockResolvedValueOnce({ items: [] } as any)
+        .mockResolvedValueOnce({ items: [] } as any);
+
+      mockSoClient.find.mockResolvedValue({ saved_objects: [] });
+
+      await taskRunner.run();
+
+      expect(mockedAgentPolicyService.list).toHaveBeenCalledWith(
+        mockSoClient,
+        expect.objectContaining({
+          kuery: expect.stringContaining('is_verifier: true'),
+          spaceId: '*',
+        })
+      );
+      // Both the cleanup (Phase 1) and the gate check (Phase 2) must fan out across spaces,
+      // otherwise verifier policies in non-default spaces are invisible and leak forever.
+      expect(mockedAgentPolicyService.list).toHaveBeenCalledTimes(2);
+      expect(mockedAgentPolicyService.list.mock.calls[0][1]).toMatchObject({ spaceId: '*' });
+      expect(mockedAgentPolicyService.list.mock.calls[1][1]).toMatchObject({ spaceId: '*' });
+    });
+
     it('should not cleanup verifier policies within TTL', async () => {
       const twoMinutesAgo = minutesAgo(2);
 

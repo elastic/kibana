@@ -3122,6 +3122,26 @@ describe('Agent policy', () => {
       expect(deploySpy).not.toHaveBeenCalled();
     });
 
+    it('should roll back the verifier policy and re-throw when deployPolicy fails', async () => {
+      jest
+        .spyOn(agentPolicyService, 'deployPolicy')
+        .mockRejectedValueOnce(new Error('agentless provisioning limit'));
+      const deleteSpy = jest
+        .spyOn(agentPolicyService, 'deleteVerifierPolicy')
+        .mockResolvedValue(undefined);
+
+      await expect(
+        agentPolicyService.createVerifierPolicy(
+          soClient,
+          esClient,
+          baseConnector as any,
+          baseVerificationInfo
+        )
+      ).rejects.toThrow('agentless provisioning limit');
+
+      expect(deleteSpy).toHaveBeenCalledWith(soClient, esClient, 'mocked');
+    });
+
     it('should propagate secret_references from created package policy', async () => {
       mockedPackagePolicyService.create.mockResolvedValueOnce({
         id: 'pp-id',

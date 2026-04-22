@@ -130,6 +130,7 @@ async function runPermissionVerifierTask(abortController: AbortController) {
     const activeVerifiers = await agentPolicyService.list(soClient, {
       kuery: `${saveObjectType}.is_verifier: true`,
       perPage: 1,
+      spaceId: '*',
     });
 
     if (activeVerifiers.items.length > 0) {
@@ -244,6 +245,7 @@ async function cleanupExpiredVerifierPolicies(
     const verifierPolicies = await agentPolicyService.list(soClient, {
       kuery: `${saveObjectType}.is_verifier: true`,
       perPage: 50,
+      spaceId: '*',
     });
 
     logger.info(
