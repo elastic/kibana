@@ -11,10 +11,11 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { uiTest as test } from '../fixtures';
 import { waitForAtLeastOneAgentOnline } from '../helpers/fleet_agents';
 
-const statefulLocalOnly = ['@local-stateful-classic'];
+const statefulLocalOnly = tags.stateful.classic;
 
 test.describe('Inventory host Osquery tab', { tag: statefulLocalOnly }, () => {
   test('submits a simple query from the embedded Osquery form', async ({
@@ -25,7 +26,7 @@ test.describe('Inventory host Osquery tab', { tag: statefulLocalOnly }, () => {
   }) => {
     test.setTimeout(300_000);
     await waitForAtLeastOneAgentOnline(kbnClient);
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsOsqueryPowerUser();
 
     const hostname = 'scout-osquery-agent-0';
     await pageObjects.osqueryInventoryHostOsquery.gotoHostOsqueryTab('default', hostname);

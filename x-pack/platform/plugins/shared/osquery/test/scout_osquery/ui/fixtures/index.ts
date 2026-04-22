@@ -7,6 +7,7 @@
 
 import type {
   ApiServicesFixture,
+  BrowserAuthFixture,
   KibanaUrl,
   PageObjects,
   ScoutTestFixtures,
@@ -30,6 +31,18 @@ import {
   RuleEditorPage,
   SavedQueryPage,
 } from '../page_objects';
+import { osqueryPowerUserRole } from './osquery_power_user_role';
+
+/**
+ * Extends `@kbn/scout`'s `BrowserAuthFixture` with `loginAsOsqueryPowerUser()`.
+ * Backed by `loginWithCustomRole(osqueryPowerUserRole)` so the same descriptor
+ * works on stateful and serverless without importing `@kbn/scout-security`.
+ * Replaces `loginAsAdmin()` in every parallel_tests spec; admin login remains
+ * reserved for `global.setup.ts` / `global.teardown.ts` superuser operations.
+ */
+export interface OsqueryBrowserAuthFixture extends BrowserAuthFixture {
+  loginAsOsqueryPowerUser: () => Promise<void>;
+}
 
 export interface OsqueryUiApiServicesFixture extends ApiServicesFixture {
   osquery: OsqueryApiService;
@@ -42,6 +55,7 @@ export interface OsqueryUiApiServicesFixture extends ApiServicesFixture {
  * Phase 5.4 re-introduces a `spaceTest`-based variant alongside multi-worker execution.
  */
 export interface OsqueryUiTestFixtures extends ScoutTestFixtures {
+  browserAuth: OsqueryBrowserAuthFixture;
   pageObjects: PageObjects & {
     osqueryNavigation: OsqueryNavigation;
     osqueryLiveQueryForm: LiveQueryFormPage;
@@ -81,6 +95,17 @@ export const uiTest = baseTest.extend<
     },
     { scope: 'worker' },
   ],
+  browserAuth: async (
+    {
+      browserAuth,
+    }: {
+      browserAuth: BrowserAuthFixture;
+    },
+    use: (extendedBrowserAuth: OsqueryBrowserAuthFixture) => Promise<void>
+  ) => {
+    const loginAsOsqueryPowerUser = () => browserAuth.loginWithCustomRole(osqueryPowerUserRole);
+    await use({ ...browserAuth, loginAsOsqueryPowerUser });
+  },
   pageObjects: async (
     {
       pageObjects,
@@ -146,6 +171,17 @@ export const customSpaceUiTest = spaceBaseTest.extend<
     },
     { scope: 'worker' },
   ],
+  browserAuth: async (
+    {
+      browserAuth,
+    }: {
+      browserAuth: BrowserAuthFixture;
+    },
+    use: (extendedBrowserAuth: OsqueryBrowserAuthFixture) => Promise<void>
+  ) => {
+    const loginAsOsqueryPowerUser = () => browserAuth.loginWithCustomRole(osqueryPowerUserRole);
+    await use({ ...browserAuth, loginAsOsqueryPowerUser });
+  },
   pageObjects: async (
     {
       pageObjects,

@@ -5,12 +5,20 @@
  * 2.0.
  */
 
-import type { KibanaUrl, ScoutPage } from '@kbn/scout';
+import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout';
 import { waitForKibanaChromeLoadingFinished } from '../../common/wait_for_kibana_loading_finished';
 
 /** Page object for Osquery operations inside a user-defined (non-default) Kibana space. */
 export class CustomSpacePage {
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
+  public readonly submitButton: Locator;
+  public readonly packsTable: Locator;
+  public readonly discoverLink: Locator;
+
+  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+    this.submitButton = this.page.testSubj.locator('liveQuerySubmitButton');
+    this.packsTable = this.page.testSubj.locator('packsTable');
+    this.discoverLink = this.page.getByRole('link', { name: 'View in Discover' });
+  }
 
   async gotoOsqueryInSpace(spaceId: string): Promise<void> {
     await this.page.goto(this.kbnUrl.app('osquery', { space: spaceId }));
@@ -18,22 +26,20 @@ export class CustomSpacePage {
   }
 
   async gotoNewLiveQueryInSpace(spaceId: string): Promise<void> {
-    const submitButton = this.page.testSubj.locator('liveQuerySubmitButton');
-
     await this.page.goto(this.kbnUrl.app('osquery/new', { space: spaceId }));
     await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
     try {
       // 60s: first render in a freshly-created Scout space must wait for
       // Kibana to mount osquery + resolve capabilities + hit the app's
       // initial queries. 30s is too tight under CI load.
-      await submitButton.waitFor({ state: 'visible', timeout: 60_000 });
+      await this.submitButton.waitFor({ state: 'visible', timeout: 60_000 });
     } catch {
       // Reload once: the Scout-created space occasionally misses the first
       // app mount (router redirect lands before capabilities are resolved).
       // A reload re-runs the mount against a now-ready space.
       await this.page.reload();
       await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
-      await submitButton.waitFor({ state: 'visible', timeout: 60_000 });
+      await this.submitButton.waitFor({ state: 'visible', timeout: 60_000 });
     }
   }
 
@@ -43,10 +49,7 @@ export class CustomSpacePage {
     // Wait for the packs table to actually render before callers start
     // hunting for a specific row — otherwise `runPackByName`'s default
     // 10 s click budget is spent waiting for the list query, not the row.
-    await this.page.testSubj
-      .locator('packsTable')
-      .waitFor({ state: 'visible', timeout: 30_000 })
-      .catch(() => {});
+    await this.packsTable.waitFor({ state: 'visible', timeout: 30_000 }).catch(() => {});
   }
 
   /**
@@ -54,10 +57,9 @@ export class CustomSpacePage {
    * The href should route to `/s/{spaceId}/app/discover/...`.
    */
   async getDiscoverLinkHref(): Promise<string | null> {
-    const discoverLink = this.page.getByRole('link', { name: 'View in Discover' });
-    await discoverLink.waitFor({ state: 'visible', timeout: 30_000 });
+    await this.discoverLink.waitFor({ state: 'visible', timeout: 30_000 });
 
-    return discoverLink.getAttribute('href');
+    return this.discoverLink.getAttribute('href');
   }
 
   /**

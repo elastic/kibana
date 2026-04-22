@@ -6,6 +6,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { uiTest as test } from '../fixtures';
 import {
   buildOsqueryAlertTestRule,
@@ -13,7 +14,7 @@ import {
   deleteDetectionRule,
 } from '../helpers/detection_rule_lifecycle';
 
-const localTags = ['@local-stateful-classic', '@local-serverless-security_complete'];
+const localTags = [...tags.stateful.classic, ...tags.serverless.security.complete];
 
 test.describe('Alert flyout Osquery case creation', { tag: localTags }, () => {
   let ruleId: string;
@@ -79,7 +80,7 @@ test.describe('Alert flyout Osquery case creation', { tag: localTags }, () => {
     const existingCaseId = existingCase.data.id;
 
     try {
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsOsqueryPowerUser();
 
       await test.step('submit osquery in pack mode from the alert flyout', async () => {
         await pageObjects.osqueryRuleEditor.openRuleAlertsView(ruleName);

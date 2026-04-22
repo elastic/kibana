@@ -9,8 +9,10 @@ import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 import { uiTest as test } from '../fixtures';
 import { getMinimalSavedQuery } from '../../api/fixtures/constants';
+import { cleanOsquerySavedQueriesByPrefix } from '../helpers/defensive_cleanup';
 
 const mkiTags = [...tags.stateful.classic, ...tags.serverless.security.complete];
+const SAVED_QUERY_PREFIXES = ['scout-sq-create-', 'scout-sq-edit-', 'scout-sq-delete-'];
 
 test.describe('Saved queries CRUD from UI', { tag: mkiTags }, () => {
   // Track user-visible saved-query IDs created during each test so `afterEach`
@@ -18,6 +20,13 @@ test.describe('Saved queries CRUD from UI', { tag: mkiTags }, () => {
   // them. UI-driven creates don't expose the SO id, so the list lookup is the
   // only cleanup path that works for every creation flow in this suite.
   const createdSavedQueryLabels: string[] = [];
+
+  test.beforeAll(async ({ apiServices }) => {
+    // Defensive: a prior crashed run can leave `scout-sq-*` custom queries
+    // behind. The list endpoint includes prebuilts (~80) so prefix-matching
+    // only touches the handful of test-specific labels.
+    await cleanOsquerySavedQueriesByPrefix(apiServices, SAVED_QUERY_PREFIXES);
+  });
 
   test.afterEach(async ({ apiServices }) => {
     const labels = createdSavedQueryLabels.splice(0);
@@ -42,7 +51,7 @@ test.describe('Saved queries CRUD from UI', { tag: mkiTags }, () => {
   }) => {
     test.setTimeout(180_000);
 
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsOsqueryPowerUser();
     await pageObjects.osqueryNavigation.gotoSavedQueries();
     await pageObjects.osquerySavedQuery.clickCreateQuery();
 
@@ -91,7 +100,7 @@ test.describe('Saved queries CRUD from UI', { tag: mkiTags }, () => {
     const inner = (created.data as { data: { saved_object_id: string; id: string } }).data;
     createdSavedQueryLabels.push(inner.id);
 
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsOsqueryPowerUser();
     await pageObjects.osquerySavedQuery.navigateToList();
     await pageObjects.osquerySavedQuery.openRowActionsMenu(inner.id);
     await pageObjects.osquerySavedQuery.chooseEditQuery();
@@ -117,7 +126,7 @@ test.describe('Saved queries CRUD from UI', { tag: mkiTags }, () => {
     // handles it idempotently if the UI delete races with teardown.
     createdSavedQueryLabels.push(inner.id);
 
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsOsqueryPowerUser();
     await pageObjects.osquerySavedQuery.navigateToList();
 
     // osquery_manager ships ~80 prebuilt saved queries. With page size 50, the
@@ -157,7 +166,7 @@ test.describe('Saved queries CRUD from UI', { tag: mkiTags }, () => {
   }) => {
     test.setTimeout(120_000);
 
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsOsqueryPowerUser();
     await pageObjects.osquerySavedQuery.navigateToList();
 
     await page.testSubj.locator('tablePaginationPopoverButton').click();

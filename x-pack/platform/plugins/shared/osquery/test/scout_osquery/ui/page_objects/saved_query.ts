@@ -5,47 +5,67 @@
  * 2.0.
  */
 
-import type { ScoutPage } from '@kbn/scout';
+import type { Locator, ScoutPage } from '@kbn/scout';
 import { waitForKibanaChromeLoadingFinished } from '../../common/wait_for_kibana_loading_finished';
 
 export class SavedQueryPage {
-  constructor(private readonly page: ScoutPage) {}
+  public readonly savedQueriesTable: Locator;
+  public readonly createQueryButton: Locator;
+  public readonly rowActionsDialog: Locator;
+  public readonly editQueryButton: Locator;
+  public readonly duplicateQueryButton: Locator;
+  public readonly deleteQueryButton: Locator;
+  public readonly updateQueryButton: Locator;
+  public readonly confirmModalButton: Locator;
+  public readonly idInput: Locator;
+  public readonly descriptionInput: Locator;
+  public readonly intervalInput: Locator;
+
+  constructor(private readonly page: ScoutPage) {
+    this.savedQueriesTable = this.page.testSubj.locator('savedQueriesTable');
+    this.createQueryButton = this.page.testSubj.locator('savedQueriesCreateQueryButton');
+    // The row-actions menu renders inside an EuiPopover with `role="dialog"` (not
+    // a `menu` role), and each action is a plain `<button>` — NOT an EUI context
+    // menu's `menuitem`. Source: `public/routes/saved_queries/list/saved_query_row_actions.tsx`.
+    // Scope to the popover dialog so we match the right button when multiple rows
+    // render the same label elsewhere on the page.
+    this.rowActionsDialog = this.page.getByRole('dialog');
+    this.editQueryButton = this.rowActionsDialog.getByRole('button', { name: 'Edit query' });
+    this.duplicateQueryButton = this.rowActionsDialog.getByRole('button', {
+      name: 'Duplicate query',
+    });
+    this.deleteQueryButton = this.rowActionsDialog.getByRole('button', { name: 'Delete query' });
+    this.updateQueryButton = this.page.testSubj.locator('update-query-button');
+    this.confirmModalButton = this.page.testSubj.locator('confirmModalConfirmButton');
+    this.idInput = this.page.getByRole('textbox', { name: 'ID' });
+    this.descriptionInput = this.page.getByRole('textbox', { name: 'Description (optional)' });
+    this.intervalInput = this.page.testSubj.locator('osquery-interval-field');
+  }
 
   async navigateToList(): Promise<void> {
     await this.page.gotoApp('osquery/saved_queries');
     await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
-    await this.page.testSubj
-      .locator('savedQueriesTable')
-      .waitFor({ state: 'visible', timeout: 30_000 });
+    await this.savedQueriesTable.waitFor({ state: 'visible', timeout: 30_000 });
   }
 
   async clickCreateQuery(): Promise<void> {
-    await this.page.testSubj.locator('savedQueriesCreateQueryButton').click();
+    await this.createQueryButton.click();
   }
 
   async openRowActionsMenu(queryId: string): Promise<void> {
     await this.page.getByRole('button', { name: `Actions for ${queryId}` }).click();
   }
 
-  // The row-actions menu renders inside an EuiPopover with `role="dialog"` (not
-  // a `menu` role), and each action is a plain `<button>` — NOT an EUI context
-  // menu's `menuitem`. Source: `public/routes/saved_queries/list/saved_query_row_actions.tsx`.
-  // Scope to the popover dialog so we match the right button when multiple rows
-  // render the same label elsewhere on the page.
-  private rowActionsDialog() {
-    return this.page.getByRole('dialog');
-  }
-
   async chooseEditQuery(): Promise<void> {
-    await this.rowActionsDialog().getByRole('button', { name: 'Edit query' }).click();
+    await this.editQueryButton.click();
   }
 
   async chooseDuplicateQuery(): Promise<void> {
-    await this.rowActionsDialog().getByRole('button', { name: 'Duplicate query' }).click();
+    await this.duplicateQueryButton.click();
   }
 
   async chooseDeleteQuery(): Promise<void> {
-    await this.rowActionsDialog().getByRole('button', { name: 'Delete query' }).click();
+    await this.deleteQueryButton.click();
   }
 
   async clickRunSavedQuery(queryId: string): Promise<void> {
@@ -53,28 +73,25 @@ export class SavedQueryPage {
   }
 
   async clickUpdateButton(): Promise<void> {
-    await this.page.testSubj.locator('update-query-button').click();
+    await this.updateQueryButton.click();
   }
 
   async fillIdField(id: string): Promise<void> {
-    const idInput = this.page.getByRole('textbox', { name: 'ID' });
-    await idInput.clear();
-    await idInput.fill(id);
+    await this.idInput.clear();
+    await this.idInput.fill(id);
   }
 
   async fillDescriptionField(description: string): Promise<void> {
-    const descInput = this.page.getByRole('textbox', { name: 'Description (optional)' });
-    await descInput.clear();
-    await descInput.fill(description);
+    await this.descriptionInput.clear();
+    await this.descriptionInput.fill(description);
   }
 
   async fillIntervalField(interval: string): Promise<void> {
-    const intervalInput = this.page.testSubj.locator('osquery-interval-field');
-    await intervalInput.clear();
-    await intervalInput.fill(interval);
+    await this.intervalInput.clear();
+    await this.intervalInput.fill(interval);
   }
 
   async confirmDeleteModal(): Promise<void> {
-    await this.page.testSubj.locator('confirmModalConfirmButton').click();
+    await this.confirmModalButton.click();
   }
 }

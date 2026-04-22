@@ -13,7 +13,7 @@ const noAgentTags = [...tags.stateful.classic, ...tags.serverless.security.compl
 
 test.describe('Live query submission without enrolled agents', { tag: noAgentTags }, () => {
   test.beforeEach(async ({ browserAuth, page, pageObjects }) => {
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsOsqueryPowerUser();
     await pageObjects.osqueryNavigation.gotoNewLiveQuery();
     // EuiCard's `selectable` prop renders a footer `<button>` whose class is an
     // emotion-compiled string ending in `-euiCardSelect` (e.g.

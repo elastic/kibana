@@ -6,7 +6,7 @@
  */
 
 import rison from '@kbn/rison';
-import type { KibanaUrl, ScoutPage } from '@kbn/scout';
+import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout';
 import { waitForKibanaChromeLoadingFinished } from '../../common/wait_for_kibana_loading_finished';
 import { submitLiveQuery } from '../../common/submit_live_query';
 
@@ -15,7 +15,15 @@ import { submitLiveQuery } from '../../common/submit_live_query';
  * Owned by osquery Scout UI per OpenSpec decision 14 (design.md).
  */
 export class InventoryHostOsqueryPage {
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
+  public readonly overviewTab: Locator;
+  public readonly osqueryTab: Locator;
+  public readonly liveQueryForm: Locator;
+
+  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+    this.overviewTab = this.page.testSubj.locator('infraAssetDetailsOverviewTab');
+    this.osqueryTab = this.page.testSubj.locator('infraAssetDetailsOsqueryTab');
+    this.liveQueryForm = this.page.testSubj.locator('liveQueryForm');
+  }
 
   async gotoHostOsqueryTab(spaceId: string, hostname: string): Promise<void> {
     // The Osquery tab is only rendered when the host uses the ECS schema
@@ -33,13 +41,9 @@ export class InventoryHostOsqueryPage {
     const path = `${spacePrefix}/app/metrics/detail/host/${encodeURIComponent(hostname)}`;
     await this.page.goto(this.kbnUrl.get(path, { params: { assetDetails: assetDetails ?? '' } }));
     await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
-    await this.page.testSubj
-      .locator('infraAssetDetailsOverviewTab')
-      .waitFor({ state: 'visible', timeout: 120_000 });
-    await this.page.testSubj.locator('infraAssetDetailsOsqueryTab').click();
-    await this.page.testSubj
-      .locator('liveQueryForm')
-      .waitFor({ state: 'visible', timeout: 60_000 });
+    await this.overviewTab.waitFor({ state: 'visible', timeout: 120_000 });
+    await this.osqueryTab.click();
+    await this.liveQueryForm.waitFor({ state: 'visible', timeout: 60_000 });
   }
 
   async submitSimpleEmbeddedQuery(query: string): Promise<void> {
@@ -47,8 +51,7 @@ export class InventoryHostOsqueryPage {
     // target the osquery-owned wrapper (added in public/editor/index.tsx) rather than
     // the generic `.kibanaCodeEditor` class which also appears in other CodeEditor
     // instances on the page.
-    const liveQueryForm = this.page.testSubj.locator('liveQueryForm');
-    const editor = liveQueryForm.getByTestId('osqueryEditor');
+    const editor = this.liveQueryForm.getByTestId('osqueryEditor');
     await editor.waitFor({ state: 'visible', timeout: 60_000 });
     await editor.click();
     await editor.pressSequentially(query, { delay: 5 });
@@ -58,7 +61,7 @@ export class InventoryHostOsqueryPage {
     // field empty on the first click. See `common/submit_live_query.ts`.
     await submitLiveQuery(
       this.page,
-      liveQueryForm.locator('[data-test-subj="liveQuerySubmitButton"]')
+      this.liveQueryForm.locator('[data-test-subj="liveQuerySubmitButton"]')
     );
   }
 }

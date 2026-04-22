@@ -6,11 +6,12 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { uiTest as test } from '../fixtures';
 import { getMinimalLiveQuery } from '../../api/fixtures/constants';
 import { waitForAtLeastOneAgentOnline } from '../helpers/fleet_agents';
 
-const localTags = ['@local-stateful-classic', '@local-serverless-security_complete'];
+const localTags = [...tags.stateful.classic, ...tags.serverless.security.complete];
 
 test.describe('Live query history', { tag: localTags }, () => {
   test.beforeAll(async ({ kbnClient, apiServices }) => {
@@ -37,7 +38,7 @@ test.describe('Live query history', { tag: localTags }, () => {
   }) => {
     test.setTimeout(300_000);
 
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsOsqueryPowerUser();
     await pageObjects.osqueryNavigation.gotoNewLiveQuery();
     await pageObjects.osqueryLiveQueryForm.selectAllAgents();
 
@@ -85,7 +86,7 @@ test.describe('Live query history', { tag: localTags }, () => {
       })
     );
 
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsOsqueryPowerUser();
     await pageObjects.osqueryNavigation.gotoHistory();
 
     // eslint-disable-next-line playwright/no-nth-methods -- open details for the most-recent history row (our just-seeded entry)
@@ -97,7 +98,7 @@ test.describe('Live query history', { tag: localTags }, () => {
   test('paginates the query history list', async ({ browserAuth, page, pageObjects }) => {
     test.setTimeout(180_000);
 
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsOsqueryPowerUser();
     await pageObjects.osqueryNavigation.gotoHistory();
 
     await page.testSubj.locator('tablePaginationPopoverButton').click();

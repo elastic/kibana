@@ -33,7 +33,7 @@ test.describe('Fleet integration', { tag: mkiTags }, () => {
     pageObjects,
   }) => {
     test.setTimeout(120_000);
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsOsqueryPowerUser();
 
     const policyName = `scout-fleet-int-${Date.now()}`;
     const integrationName = `scout-osquery-int-${Date.now()}`;
@@ -62,7 +62,7 @@ test.describe('Fleet integration', { tag: mkiTags }, () => {
     apiServices,
   }) => {
     test.setTimeout(120_000);
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsOsqueryPowerUser();
 
     const policyName = `scout-upgrade-${Date.now()}`;
     const packName = `scout-pack-${Date.now()}`;
@@ -113,7 +113,7 @@ test.describe('Fleet integration', { tag: mkiTags }, () => {
     pageObjects,
   }) => {
     test.setTimeout(60_000);
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsOsqueryPowerUser();
     await pageObjects.osqueryFleetIntegration.gotoFleetAgentPolicies();
     await pageObjects.osqueryFleetIntegration.closeFleetTourIfVisible();
     await expect(page.testSubj.locator('createAgentPolicyButton')).toBeVisible({

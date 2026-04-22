@@ -47,6 +47,12 @@ export class LiveQueryFormPage {
   public readonly resultsTable: Locator;
   public readonly agentSelection: Locator;
   public readonly resultsPanel: Locator;
+  public readonly newLiveQueryButton: Locator;
+  public readonly resultsTab: Locator;
+  public readonly statusTab: Locator;
+  public readonly packResultsHeading: Locator;
+  public readonly advancedButton: Locator;
+  public readonly timeoutInput: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.queryEditor = this.page.testSubj.locator('kibanaCodeEditor');
@@ -54,18 +60,24 @@ export class LiveQueryFormPage {
     this.resultsTable = this.page.testSubj.locator('osqueryResultsTable');
     this.agentSelection = this.page.testSubj.locator('agentSelection');
     this.resultsPanel = this.page.testSubj.locator('osqueryResultsPanel');
+    this.newLiveQueryButton = this.page.testSubj.locator('newLiveQueryButton');
+    this.resultsTab = this.page.testSubj.locator('osquery-results-tab');
+    this.statusTab = this.page.testSubj.locator('osquery-status-tab');
+    this.packResultsHeading = this.page.getByRole('heading', { name: 'Results' });
+    this.advancedButton = this.page.getByRole('button', { name: 'Advanced' });
+    this.timeoutInput = this.page.testSubj
+      .locator('advanced-accordion-content')
+      .getByTestId('timeout-input');
   }
 
   async navigateToList(): Promise<void> {
     await this.page.gotoApp('osquery');
-    await this.page.testSubj
-      .locator('newLiveQueryButton')
-      .waitFor({ state: 'visible', timeout: 30_000 });
+    await this.newLiveQueryButton.waitFor({ state: 'visible', timeout: 30_000 });
   }
 
   async clickNewLiveQuery(): Promise<void> {
     await this.navigateToList();
-    await this.page.testSubj.locator('newLiveQueryButton').click();
+    await this.newLiveQueryButton.click();
     await this.submitButton.waitFor({ state: 'visible', timeout: 30_000 });
   }
 
@@ -145,11 +157,9 @@ export class LiveQueryFormPage {
 
     // Results UI lands as either a tab (single query) or a heading (pack).
     // Do a best-effort wait so callers can chain on results visibility.
-    const resultsTab = this.page.testSubj.locator('osquery-results-tab');
-    const packResultsHeading = this.page.getByRole('heading', { name: 'Results' });
     await Promise.race([
-      resultsTab.waitFor({ state: 'visible', timeout: 30_000 }),
-      packResultsHeading.waitFor({ state: 'visible', timeout: 30_000 }),
+      this.resultsTab.waitFor({ state: 'visible', timeout: 30_000 }),
+      this.packResultsHeading.waitFor({ state: 'visible', timeout: 30_000 }),
     ]).catch(() => {});
   }
 
@@ -157,31 +167,28 @@ export class LiveQueryFormPage {
     const start = Date.now();
     const maxWaitMs = OSQUERY_UI_RESULTS_TIMEOUT_MS;
 
-    const resultsTab = this.page.testSubj.locator('osquery-results-tab');
-    if (await resultsTab.isVisible().catch(() => false)) {
-      await resultsTab.click();
+    if (await this.resultsTab.isVisible().catch(() => false)) {
+      await this.resultsTab.click();
     }
 
     while (Date.now() - start < maxWaitMs) {
-      const resultsTable = this.page.testSubj.locator('osqueryResultsTable');
       // eslint-disable-next-line playwright/no-nth-methods -- any populated cell indicates results loaded
       const dataCell = this.page.testSubj.locator('dataGridRowCell').first();
 
       try {
         await Promise.race([
-          resultsTable.waitFor({ state: 'visible', timeout: 20_000 }),
+          this.resultsTable.waitFor({ state: 'visible', timeout: 20_000 }),
           dataCell.waitFor({ state: 'visible', timeout: 20_000 }),
         ]);
 
         return;
       } catch {
         try {
-          const statusTab = this.page.testSubj.locator('osquery-status-tab');
-          if (await statusTab.isVisible().catch(() => false)) {
-            await statusTab.click();
-            await resultsTab.waitFor({ state: 'visible', timeout: 10_000 }).catch(() => {});
-            if (await resultsTab.isVisible().catch(() => false)) {
-              await resultsTab.click();
+          if (await this.statusTab.isVisible().catch(() => false)) {
+            await this.statusTab.click();
+            await this.resultsTab.waitFor({ state: 'visible', timeout: 10_000 }).catch(() => {});
+            if (await this.resultsTab.isVisible().catch(() => false)) {
+              await this.resultsTab.click();
             }
           } else {
             await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
@@ -196,15 +203,12 @@ export class LiveQueryFormPage {
   }
 
   async clickAdvanced(): Promise<void> {
-    await this.page.getByRole('button', { name: 'Advanced' }).click();
+    await this.advancedButton.click();
   }
 
   async fillInQueryTimeout(timeout: string): Promise<void> {
-    const timeoutInput = this.page.testSubj
-      .locator('advanced-accordion-content')
-      .getByTestId('timeout-input');
-    await timeoutInput.clear();
-    await timeoutInput.fill(timeout);
+    await this.timeoutInput.clear();
+    await this.timeoutInput.fill(timeout);
   }
 
   async getQueryEditorHeight(): Promise<number> {

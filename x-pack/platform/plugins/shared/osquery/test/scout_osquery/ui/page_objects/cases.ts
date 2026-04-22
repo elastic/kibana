@@ -9,7 +9,29 @@ import type { Locator, ScoutPage } from '@kbn/scout';
 import { waitForKibanaChromeLoadingFinished } from '../../common/wait_for_kibana_loading_finished';
 
 export class OsqueryCasesPage {
-  constructor(private readonly page: ScoutPage) {}
+  public readonly packQueriesKebabs: Locator;
+  public readonly addToCaseLabel: Locator;
+  public readonly selectCaseText: Locator;
+  public readonly casesFilterBarAddButton: Locator;
+  public readonly createCaseFlyout: Locator;
+  public readonly caseTitleInput: Locator;
+  public readonly caseDescriptionInput: Locator;
+  public readonly createCaseSubmit: Locator;
+  public readonly viewCaseText: Locator;
+  public readonly osqueryAttachmentText: Locator;
+
+  constructor(private readonly page: ScoutPage) {
+    this.packQueriesKebabs = this.page.locator('[data-test-subj^="packQueriesTableKebab-"]');
+    this.addToCaseLabel = this.page.getByLabel('Add to Case');
+    this.selectCaseText = this.page.getByText('Select case');
+    this.casesFilterBarAddButton = this.page.testSubj.locator('cases-table-add-case-filter-bar');
+    this.createCaseFlyout = this.page.testSubj.locator('create-case-flyout');
+    this.caseTitleInput = this.page.locator('input[aria-describedby="caseTitle"]');
+    this.caseDescriptionInput = this.page.getByLabel('caseDescription');
+    this.createCaseSubmit = this.page.testSubj.locator('create-case-submit');
+    this.viewCaseText = this.page.getByText('View case');
+    this.osqueryAttachmentText = this.page.getByText(/attached Osquery results/);
+  }
 
   async openLiveQueryRowDetails(actionId: string): Promise<void> {
     const row = this.page.testSubj.locator(`row-${actionId}`);
@@ -18,53 +40,50 @@ export class OsqueryCasesPage {
 
   async addToCaseFromRowKebab(caseId: string): Promise<void> {
     // eslint-disable-next-line playwright/no-nth-methods -- pack results render one kebab per query row; using the first exercises the generic add-to-case flow without coupling to a specific query row
-    const kebab = this.page.locator('[data-test-subj^="packQueriesTableKebab-"]').first();
+    const kebab = this.packQueriesKebabs.first();
     if (await kebab.isVisible().catch(() => false)) {
       await kebab.click();
       await this.page.locator('.euiContextMenuPanel').getByText('Add to Case').click();
     } else {
       // eslint-disable-next-line playwright/no-nth-methods -- fallback for layouts without the row kebab (single-query pack header renders the Add-to-Case button directly)
-      await this.page.getByLabel('Add to Case').first().click();
+      await this.addToCaseLabel.first().click();
     }
 
-    await this.page.getByText('Select case').waitFor({ state: 'visible', timeout: 30_000 });
+    await this.selectCaseText.waitFor({ state: 'visible', timeout: 30_000 });
     await this.page.testSubj.locator(`cases-table-row-select-${caseId}`).click();
   }
 
   async addToCaseFromHeader(caseId: string): Promise<void> {
     // eslint-disable-next-line playwright/no-nth-methods -- the results header renders a single Add-to-Case button but Playwright treats `getByLabel` as strict-multi; first() matches the header variant specifically
-    await this.page.getByLabel('Add to Case').first().click();
-    await this.page.getByText('Select case').waitFor({ state: 'visible', timeout: 30_000 });
+    await this.addToCaseLabel.first().click();
+    await this.selectCaseText.waitFor({ state: 'visible', timeout: 30_000 });
     await this.page.testSubj.locator(`cases-table-row-select-${caseId}`).click();
   }
 
   async openCreateCaseFlyoutFromFilterBar(): Promise<void> {
-    await this.page.testSubj.locator('cases-table-add-case-filter-bar').click();
-    await this.page.testSubj
-      .locator('create-case-flyout')
-      .waitFor({ state: 'visible', timeout: 30_000 });
+    await this.casesFilterBarAddButton.click();
+    await this.createCaseFlyout.waitFor({ state: 'visible', timeout: 30_000 });
   }
 
   async fillNewCaseTitle(title: string): Promise<void> {
-    await this.page.locator('input[aria-describedby="caseTitle"]').fill(title);
+    await this.caseTitleInput.fill(title);
   }
 
   async fillNewCaseDescription(description: string): Promise<void> {
-    await this.page.getByLabel('caseDescription').fill(description);
+    await this.caseDescriptionInput.fill(description);
   }
 
   async submitCreateCase(): Promise<void> {
-    await this.page.testSubj.locator('create-case-submit').click();
+    await this.createCaseSubmit.click();
   }
 
   async clickViewCaseFromToast(): Promise<void> {
-    await this.page.getByText('View case').click();
+    await this.viewCaseText.click();
   }
 
   async expectOsqueryAttachmentVisible(): Promise<void> {
-    const attachment = this.page.getByText(/attached Osquery results/);
     // eslint-disable-next-line playwright/no-nth-methods -- a case body may render multiple "attached Osquery results" entries when several queries are attached; first-match readiness is sufficient for the assertion
-    const firstAttachment = attachment.first();
+    const firstAttachment = this.osqueryAttachmentText.first();
     await firstAttachment.waitFor({ state: 'visible', timeout: 60_000 });
   }
 
@@ -84,6 +103,6 @@ export class OsqueryCasesPage {
   }
 
   getAddToCaseLocator(): Locator {
-    return this.page.getByLabel('Add to Case');
+    return this.addToCaseLabel;
   }
 }

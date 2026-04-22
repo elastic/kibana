@@ -6,6 +6,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { uiTest as test } from '../fixtures';
 import {
   buildOsqueryAlertTestRule,
@@ -13,7 +14,7 @@ import {
   deleteDetectionRule,
 } from '../helpers/detection_rule_lifecycle';
 
-const localTags = ['@local-stateful-classic', '@local-serverless-security_complete'];
+const localTags = [...tags.stateful.classic, ...tags.serverless.security.complete];
 
 test.describe('Alert flyout take action and investigation guide', { tag: localTags }, () => {
   let ruleId: string;
@@ -36,7 +37,7 @@ test.describe('Alert flyout take action and investigation guide', { tag: localTa
     pageObjects,
   }) => {
     test.setTimeout(300_000);
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsOsqueryPowerUser();
 
     await pageObjects.osqueryRuleEditor.navigateToRuleEdit(ruleId);
     await pageObjects.osqueryRuleEditor.goToActionsTab();
@@ -60,7 +61,7 @@ test.describe('Alert flyout take action and investigation guide', { tag: localTa
     pageObjects,
   }) => {
     test.setTimeout(300_000);
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsOsqueryPowerUser();
 
     await pageObjects.osqueryRuleEditor.openRuleAlertsView(ruleName);
     await pageObjects.osqueryAlertFlyout.expandFirstAlert();
@@ -99,7 +100,7 @@ test.describe('Alert flyout take action and investigation guide', { tag: localTa
     pageObjects,
   }) => {
     test.setTimeout(300_000);
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsOsqueryPowerUser();
 
     // First, verify via the API that test 1 actually persisted the IG response
     // actions to the rule. The `Save changes` UI flow can pop up a confirmation

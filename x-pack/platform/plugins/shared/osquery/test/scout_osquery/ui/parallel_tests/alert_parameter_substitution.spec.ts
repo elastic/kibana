@@ -6,6 +6,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { uiTest as test } from '../fixtures';
 import {
   buildOsqueryAlertTestRule,
@@ -13,7 +14,7 @@ import {
   deleteDetectionRule,
 } from '../helpers/detection_rule_lifecycle';
 
-const localTags = ['@local-stateful-classic', '@local-serverless-security_complete'];
+const localTags = [...tags.stateful.classic, ...tags.serverless.security.complete];
 
 test.describe('Osquery parameter substitution from alerts', { tag: localTags }, () => {
   let ruleId: string;
@@ -45,7 +46,7 @@ test.describe('Osquery parameter substitution from alerts', { tag: localTags }, 
     pageObjects,
   }) => {
     test.setTimeout(300_000);
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsOsqueryPowerUser();
 
     await pageObjects.osqueryRuleEditor.openRuleAlertsView(ruleName);
     await pageObjects.osqueryAlertFlyout.expandFirstAlert();
@@ -68,7 +69,7 @@ test.describe('Osquery parameter substitution from alerts', { tag: localTags }, 
     pageObjects,
   }) => {
     test.setTimeout(300_000);
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsOsqueryPowerUser();
 
     await pageObjects.osqueryRuleEditor.openRuleAlertsView(ruleName);
     // eslint-disable-next-line playwright/no-nth-methods -- one "send alert to timeline" button per alert row; first-match drives the first alert into Timeline which is the only required fixture for this test

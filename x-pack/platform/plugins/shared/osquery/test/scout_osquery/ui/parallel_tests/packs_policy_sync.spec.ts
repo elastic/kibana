@@ -6,16 +6,26 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { uiTest as test } from '../fixtures';
 import { getMinimalSavedQuery } from '../../api/fixtures/constants';
+import {
+  cleanOsqueryPacksByPrefix,
+  cleanOsquerySavedQueriesByPrefix,
+} from '../helpers/defensive_cleanup';
 
-const localTags = ['@local-stateful-classic', '@local-serverless-security_complete'];
+const localTags = [...tags.stateful.classic, ...tags.serverless.security.complete];
+const PACK_PREFIXES = ['scout-policy-pack-', 'scout-dup-'];
+const SAVED_QUERY_PREFIXES = ['scout-policy-sq-'];
 
 test.describe('Pack Fleet policy sync', { tag: localTags }, () => {
   let savedQueryId: string;
   let savedQueryLabel: string;
 
   test.beforeAll(async ({ apiServices }) => {
+    await cleanOsqueryPacksByPrefix(apiServices, PACK_PREFIXES);
+    await cleanOsquerySavedQueriesByPrefix(apiServices, SAVED_QUERY_PREFIXES);
+
     const body = getMinimalSavedQuery({
       id: `scout-policy-sq-${Date.now()}`,
       query: 'select * from uptime;',
@@ -37,7 +47,7 @@ test.describe('Pack Fleet policy sync', { tag: localTags }, () => {
     apiServices,
   }) => {
     test.setTimeout(300_000);
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsOsqueryPowerUser();
 
     const policiesResponse = await apiServices.osquery.packs.listFleetWrapperPackagePolicies();
     const firstPolicyId = (policiesResponse.data as { items: Array<{ policy_ids: string[] }> })
@@ -85,7 +95,7 @@ test.describe('Pack Fleet policy sync', { tag: localTags }, () => {
     apiServices,
   }) => {
     test.setTimeout(300_000);
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsOsqueryPowerUser();
 
     const policiesResponse = await apiServices.osquery.packs.listFleetWrapperPackagePolicies();
     const firstPolicyId = (policiesResponse.data as { items: Array<{ policy_ids: string[] }> })

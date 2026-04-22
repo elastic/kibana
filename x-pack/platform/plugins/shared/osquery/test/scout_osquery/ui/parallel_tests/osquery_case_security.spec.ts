@@ -6,11 +6,12 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { uiTest as test } from '../fixtures';
 import { getMinimalLiveQuery } from '../../api/fixtures/constants';
 import { waitForAtLeastOneAgentOnline } from '../helpers/fleet_agents';
 
-const localTags = ['@local-stateful-classic', '@local-serverless-security_complete'];
+const localTags = [...tags.stateful.classic, ...tags.serverless.security.complete];
 
 test.describe('Osquery results attached to Security cases', { tag: localTags }, () => {
   test('adds a live query result to a Security case from history', async ({
@@ -44,7 +45,7 @@ test.describe('Osquery results attached to Security cases', { tag: localTags }, 
     });
     const caseId = createdCase.data.id;
 
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsOsqueryPowerUser();
     await pageObjects.osqueryCasesPage.navigateToHistory();
     await pageObjects.osqueryCasesPage.openLiveQueryRowDetails(actionId);
     await pageObjects.osqueryCasesPage.addToCaseFromRowKebab(caseId);

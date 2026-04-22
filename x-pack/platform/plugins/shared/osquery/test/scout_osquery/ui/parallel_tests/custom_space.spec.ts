@@ -15,13 +15,14 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { customSpaceUiTest as test } from '../fixtures';
 import {
   shareOsqueryPoliciesWithSpace,
   waitForAtLeastOneAgentOnline,
 } from '../helpers/fleet_agents';
 
-const localTags = ['@local-stateful-classic', '@local-serverless-security_complete'];
+const localTags = [...tags.stateful.classic, ...tags.serverless.security.complete];
 
 test.describe('Osquery in a custom space', { tag: localTags }, () => {
   let packId: string | undefined;
@@ -36,7 +37,7 @@ test.describe('Osquery in a custom space', { tag: localTags }, () => {
     restoreOsqueryPolicies = await shareOsqueryPoliciesWithSpace(kbnClient, scoutSpace.id);
   });
 
-  test.afterAll(async ({ apiServices }) => {
+  test.afterAll(async ({ apiServices, scoutSpace }) => {
     if (packId) {
       await apiServices.osquery.packs.delete(packId).catch(() => {});
     }
@@ -44,6 +45,12 @@ test.describe('Osquery in a custom space', { tag: localTags }, () => {
     if (restoreOsqueryPolicies) {
       await restoreOsqueryPolicies().catch(() => {});
     }
+
+    // Skill-mandated catch-all for spaceTest-based specs: removes any
+    // standard-list SOs the test harness tracked inside the Scout space.
+    // Runs AFTER the domain-specific cleanup so a failure there still lets the
+    // generic sweep fire.
+    await scoutSpace.savedObjects.cleanStandardList().catch(() => {});
   });
 
   test('runs a live query in the custom space and asserts the Discover link routes to that space', async ({
@@ -57,7 +64,7 @@ test.describe('Osquery in a custom space', { tag: localTags }, () => {
     test.setTimeout(360_000);
 
     await waitForAtLeastOneAgentOnline(kbnClient);
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsOsqueryPowerUser();
 
     await test.step('navigate to new live query in custom space', async () => {
       await pageObjects.osqueryCustomSpace.gotoNewLiveQueryInSpace(scoutSpace.id);
@@ -96,7 +103,7 @@ test.describe('Osquery in a custom space', { tag: localTags }, () => {
     test.setTimeout(360_000);
 
     await waitForAtLeastOneAgentOnline(kbnClient);
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsOsqueryPowerUser();
 
     const packName = `scout-custom-space-pack-${Date.now()}`;
     const packResp = await apiServices.osquery.packs.create({

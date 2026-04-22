@@ -5,17 +5,40 @@
  * 2.0.
  */
 
-import type { ScoutPage } from '@kbn/scout';
+import type { Locator, ScoutPage } from '@kbn/scout';
 import { waitForKibanaChromeLoadingFinished } from '../../common/wait_for_kibana_loading_finished';
 
 export class FleetIntegrationPage {
-  constructor(private readonly page: ScoutPage) {}
+  public readonly gotItButton: Locator;
+  public readonly createAgentPolicyButton: Locator;
+  public readonly createAgentPolicyNameField: Locator;
+  public readonly createAgentPolicyFlyoutBtn: Locator;
+  public readonly agentPolicyNameLink: Locator;
+  public readonly addPackagePolicyButton: Locator;
+  public readonly addIntegrationFlyout: Locator;
+  public readonly addIntegrationFlyoutSubmit: Locator;
+  public readonly comboBoxInput: Locator;
+  public readonly packagePolicyNameInput: Locator;
+  public readonly integrationPolicyUpgradeBtn: Locator;
+
+  constructor(private readonly page: ScoutPage) {
+    this.gotItButton = this.page.getByRole('button', { name: 'Got it' });
+    this.createAgentPolicyButton = this.page.testSubj.locator('createAgentPolicyButton');
+    this.createAgentPolicyNameField = this.page.testSubj.locator('createAgentPolicyNameField');
+    this.createAgentPolicyFlyoutBtn = this.page.testSubj.locator('createAgentPolicyFlyoutBtn');
+    this.agentPolicyNameLink = this.page.testSubj.locator('agentPolicyNameLink');
+    this.addPackagePolicyButton = this.page.testSubj.locator('addPackagePolicyButton');
+    this.addIntegrationFlyout = this.page.testSubj.locator('addIntegrationFlyout');
+    this.addIntegrationFlyoutSubmit = this.page.testSubj.locator('addIntegrationFlyout.submitBtn');
+    this.comboBoxInput = this.page.testSubj.locator('comboBoxInput');
+    this.packagePolicyNameInput = this.page.testSubj.locator('packagePolicyNameInput');
+    this.integrationPolicyUpgradeBtn = this.page.testSubj.locator('integrationPolicyUpgradeBtn');
+  }
 
   /** Fleet tour shows a "Got it" button on first visit. Dismiss it if present. */
   async closeFleetTourIfVisible(): Promise<void> {
-    const gotItButton = this.page.getByRole('button', { name: 'Got it' });
-    if (await gotItButton.isVisible().catch(() => false)) {
-      await gotItButton.click();
+    if (await this.gotItButton.isVisible().catch(() => false)) {
+      await this.gotItButton.click();
     }
   }
 
@@ -41,36 +64,35 @@ export class FleetIntegrationPage {
 
   async createAgentPolicy(policyName: string): Promise<void> {
     await this.closeFleetTourIfVisible();
-    await this.page.testSubj.locator('createAgentPolicyButton').click();
-    await this.page.testSubj.locator('createAgentPolicyNameField').fill(policyName);
-    await this.page.testSubj.locator('createAgentPolicyFlyoutBtn').click();
+    await this.createAgentPolicyButton.click();
+    await this.createAgentPolicyNameField.fill(policyName);
+    await this.createAgentPolicyFlyoutBtn.click();
     await this.closeFleetTourIfVisible();
   }
 
   async openAgentPolicy(policyName: string): Promise<void> {
     await this.closeFleetTourIfVisible();
-    await this.page.testSubj.locator('agentPolicyNameLink').filter({ hasText: policyName }).click();
+    await this.agentPolicyNameLink.filter({ hasText: policyName }).click();
     await this.closeFleetTourIfVisible();
   }
 
   async addOsqueryManagerIntegrationToPolicy(integrationName: string): Promise<void> {
-    await this.page.testSubj.locator('addPackagePolicyButton').click();
-    await this.page.testSubj.locator('addIntegrationFlyout').waitFor({ state: 'visible' });
+    await this.addPackagePolicyButton.click();
+    await this.addIntegrationFlyout.waitFor({ state: 'visible' });
     await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
 
-    const comboBox = this.page.testSubj.locator('comboBoxInput');
-    await comboBox.fill('osquery manager');
+    await this.comboBoxInput.fill('osquery manager');
     await this.page.keyboard.press('ArrowDown');
     await this.page.keyboard.press('Enter');
 
-    await this.page.testSubj.locator('packagePolicyNameInput').fill('');
-    await this.page.testSubj.locator('packagePolicyNameInput').fill(integrationName);
-    await this.page.testSubj.locator('addIntegrationFlyout.submitBtn').click();
+    await this.packagePolicyNameInput.fill('');
+    await this.packagePolicyNameInput.fill(integrationName);
+    await this.addIntegrationFlyoutSubmit.click();
     await this.page.locator(`[title="${integrationName}"]`).waitFor({ timeout: 60_000 });
   }
 
   async clickUpgradeIntegrationPolicy(integrationName: string): Promise<void> {
     const row = this.page.locator(`tr:has([title="${integrationName}"])`);
-    await row.locator(this.page.testSubj.locator('integrationPolicyUpgradeBtn')).click();
+    await row.locator(this.integrationPolicyUpgradeBtn).click();
   }
 }

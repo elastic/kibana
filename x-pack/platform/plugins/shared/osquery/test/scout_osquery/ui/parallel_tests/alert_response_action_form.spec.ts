@@ -6,6 +6,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { uiTest as test } from '../fixtures';
 import {
   buildOsqueryAlertTestRule,
@@ -14,7 +15,7 @@ import {
 } from '../helpers/detection_rule_lifecycle';
 import { getMinimalPack } from '../../api/fixtures/constants';
 
-const localTags = ['@local-stateful-classic', '@local-serverless-security_complete'];
+const localTags = [...tags.stateful.classic, ...tags.serverless.security.complete];
 
 test.describe('Pack-based Osquery response actions in the rule editor', { tag: localTags }, () => {
   let ruleId: string;
@@ -86,7 +87,7 @@ test.describe('Pack-based Osquery response actions in the rule editor', { tag: l
     pageObjects,
   }) => {
     test.setTimeout(300_000);
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsOsqueryPowerUser();
 
     await pageObjects.osqueryRuleEditor.navigateToRulesList();
     await pageObjects.osqueryRuleEditor.openRuleByName(ruleName);

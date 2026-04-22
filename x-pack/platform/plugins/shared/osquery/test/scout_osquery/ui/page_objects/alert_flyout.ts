@@ -29,8 +29,15 @@ export class AlertFlyoutPage {
   public readonly investigationGuideButton: Locator;
   public readonly submitButton: Locator;
   public readonly sendAlertToTimelineButton: Locator;
+  public readonly flyoutBody: Locator;
+  public readonly addToTimelineButton: Locator;
+  public readonly cancelButton: Locator;
+  private readonly flyoutOsqueryEditor: Locator;
+  private readonly agentSelection: Locator;
 
   constructor(private readonly page: ScoutPage) {
+    this.flyoutBody = this.page.testSubj.locator(FLYOUT_OSQUERY_EDITOR);
+    this.flyoutOsqueryEditor = this.flyoutBody.getByTestId('osqueryEditor');
     this.expandEventButton = this.page.testSubj.locator('expand-event');
     this.flyoutFooterDropdown = this.page.testSubj.locator(
       'securitySolutionFlyoutFooterDropdownButton'
@@ -39,10 +46,11 @@ export class AlertFlyoutPage {
     this.investigationGuideButton = this.page.testSubj.locator(
       'securitySolutionFlyoutInvestigationGuideButton'
     );
-    this.submitButton = this.page.testSubj
-      .locator(FLYOUT_OSQUERY_EDITOR)
-      .locator('[data-test-subj="liveQuerySubmitButton"]');
+    this.submitButton = this.flyoutBody.locator('[data-test-subj="liveQuerySubmitButton"]');
     this.sendAlertToTimelineButton = this.page.testSubj.locator('send-alert-to-timeline-button');
+    this.addToTimelineButton = this.page.testSubj.locator('add-to-timeline');
+    this.cancelButton = this.page.getByRole('button', { name: 'Cancel' });
+    this.agentSelection = this.page.testSubj.locator('agentSelection');
   }
 
   async expandFirstAlert(): Promise<void> {
@@ -71,8 +79,7 @@ export class AlertFlyoutPage {
 
   async clickFlyoutMonacoEditor(): Promise<void> {
     await this.waitForFlyoutEditorReady();
-    const editor = this.page.testSubj.locator(FLYOUT_OSQUERY_EDITOR).getByTestId('osqueryEditor');
-    await editor.click();
+    await this.flyoutOsqueryEditor.click();
   }
 
   // Monaco's React wrapper syncs the editor value into react-hook-form on the
@@ -83,12 +90,11 @@ export class AlertFlyoutPage {
   // letting the caller proceed to Submit.
   async inputFlyoutQuery(query: string): Promise<void> {
     await this.waitForFlyoutEditorReady();
-    const editor = this.page.testSubj.locator(FLYOUT_OSQUERY_EDITOR).getByTestId('osqueryEditor');
-    await editor.click();
-    await editor.pressSequentially(query, { delay: 5 });
+    await this.flyoutOsqueryEditor.click();
+    await this.flyoutOsqueryEditor.pressSequentially(query, { delay: 5 });
 
     // Blur Monaco without pressing Tab/Enter (those would insert characters).
-    await editor.evaluate((el: HTMLElement) => {
+    await this.flyoutOsqueryEditor.evaluate((el: HTMLElement) => {
       el.querySelector<HTMLTextAreaElement>('textarea')?.blur();
     });
 
@@ -114,7 +120,6 @@ export class AlertFlyoutPage {
   // chip first (matches the `N agent(s) selected` label the Cypress flow relied on) and
   // then for the osquery-scoped editor wrapper.
   async waitForFlyoutEditorReady(): Promise<void> {
-    const flyoutBody = this.page.testSubj.locator(FLYOUT_OSQUERY_EDITOR);
     // The "Take action" path auto-selects the alert's host agent and renders
     // the "N agents selected" confirmation text. The "Investigation guide"
     // path doesn't auto-select — the user picks an agent manually — so the
@@ -123,9 +128,9 @@ export class AlertFlyoutPage {
     // visible (editor presence alone is sufficient to know the form mounted).
     await Promise.race([
       this.page.getByText(/\d+ agents? selected/).waitFor({ state: 'visible', timeout: 60_000 }),
-      flyoutBody.getByTestId('osqueryEditor').waitFor({ state: 'visible', timeout: 60_000 }),
+      this.flyoutOsqueryEditor.waitFor({ state: 'visible', timeout: 60_000 }),
     ]);
-    await flyoutBody.getByTestId('osqueryEditor').waitFor({ state: 'visible', timeout: 60_000 });
+    await this.flyoutOsqueryEditor.waitFor({ state: 'visible', timeout: 60_000 });
   }
 
   // The mode selector is an `EuiCard` with the `selectable` prop. The card's onClick
@@ -133,8 +138,7 @@ export class AlertFlyoutPage {
   // the description via `getByText` frequently fails to toggle the mode. Target the
   // card's role+name, then assert the pack selector's INPUT renders before continuing.
   async switchFlyoutToPackMode(): Promise<void> {
-    const flyoutBody = this.page.testSubj.locator(FLYOUT_OSQUERY_EDITOR);
-    const packCard = flyoutBody.locator('.euiCard', {
+    const packCard = this.flyoutBody.locator('.euiCard', {
       has: this.page.getByText('Run a set of queries in a pack.'),
     });
     await packCard.waitFor({ state: 'visible', timeout: 15_000 });
@@ -143,9 +147,7 @@ export class AlertFlyoutPage {
     // EuiComboBox wrapper re-renders a few times as React settles after the
     // mode toggle; the inner `comboBoxSearchInput` is a stable leaf so its
     // readiness is the cleanest signal that the selector is actually interactable.
-    await flyoutBody
-      .locator('[data-test-subj="select-live-pack"] [data-test-subj="comboBoxSearchInput"]')
-      .waitFor({ state: 'visible', timeout: 15_000 });
+    await this.packSearchInput.waitFor({ state: 'visible', timeout: 15_000 });
   }
 
   async selectFlyoutPack(packName: string): Promise<void> {
@@ -156,10 +158,7 @@ export class AlertFlyoutPage {
     // `comboBoxSearchInput` is a stable leaf node that Playwright's auto-retry
     // resolves freshly on every action. Scope to the flyout body + the pack-
     // selector so we don't cross-match a different combobox elsewhere on the page.
-    const flyoutBody = this.page.testSubj.locator(FLYOUT_OSQUERY_EDITOR);
-    const searchInput = flyoutBody.locator(
-      '[data-test-subj="select-live-pack"] [data-test-subj="comboBoxSearchInput"]'
-    );
+    const searchInput = this.packSearchInput;
     await searchInput.click();
     await searchInput.fill(packName);
     await this.page.keyboard.press('ArrowDown');
@@ -175,20 +174,17 @@ export class AlertFlyoutPage {
   }
 
   async clickAddToCaseFromResults(): Promise<void> {
-    const addToCase = this.page.testSubj
-      .locator(FLYOUT_OSQUERY_EDITOR)
-      .getByRole('button', { name: 'Add to Case' });
+    const addToCase = this.flyoutBody.getByRole('button', { name: 'Add to Case' });
     // eslint-disable-next-line playwright/no-nth-methods -- the results panel renders an aggregate header "Add to Case" plus one per row; first-match targets the aggregate header action that drives the new-case flow (same semantics as the Cypress helper that preceded it)
     await addToCase.first().click();
   }
 
   async clearAgentsAndSelectAllAgents(): Promise<void> {
-    const agentSelection = this.page.testSubj.locator('agentSelection');
-    await agentSelection.getByTestId('comboBoxClearButton').click();
+    await this.agentSelection.getByTestId('comboBoxClearButton').click();
     // `comboBoxInput` is the wrapper `<div tabindex="-1">` around the combobox;
     // Playwright's `.fill()` refuses to type into non-editable elements. The
     // actual typing target is `comboBoxSearchInput` — the inner `<input>`.
-    const input = agentSelection.getByTestId('comboBoxSearchInput');
+    const input = this.agentSelection.getByTestId('comboBoxSearchInput');
     await input.click();
     await input.fill('All');
     await this.page.keyboard.press('ArrowDown');
@@ -212,10 +208,16 @@ export class AlertFlyoutPage {
       .getByText('Add to Timeline investigation')
       .waitFor({ state: 'visible', timeout: 180_000 });
     // eslint-disable-next-line playwright/no-nth-methods -- the live-query results table renders several add-to-timeline buttons (one per row); clicking the first attaches the aggregate action used by the flyout flow
-    await this.page.testSubj.locator('add-to-timeline').first().click();
+    await this.addToTimelineButton.first().click();
   }
 
   async clickCancelInFlyout(): Promise<void> {
-    await this.page.getByRole('button', { name: 'Cancel' }).click();
+    await this.cancelButton.click();
+  }
+
+  private get packSearchInput(): Locator {
+    return this.flyoutBody.locator(
+      '[data-test-subj="select-live-pack"] [data-test-subj="comboBoxSearchInput"]'
+    );
   }
 }

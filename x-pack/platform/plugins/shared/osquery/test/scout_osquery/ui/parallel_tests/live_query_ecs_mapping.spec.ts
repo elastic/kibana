@@ -6,15 +6,16 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { uiTest as test } from '../fixtures';
 import { waitForAtLeastOneAgentOnline } from '../helpers/fleet_agents';
 
-const localTags = ['@local-stateful-classic', '@local-serverless-security_complete'];
+const localTags = [...tags.stateful.classic, ...tags.serverless.security.complete];
 
 test.describe('Live query ECS mapping', { tag: localTags }, () => {
   test.beforeEach(async ({ browserAuth, kbnClient, pageObjects }) => {
     await waitForAtLeastOneAgentOnline(kbnClient);
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsOsqueryPowerUser();
     await pageObjects.osqueryNavigation.gotoNewLiveQuery();
     await pageObjects.osqueryLiveQueryForm.selectAllAgents();
   });

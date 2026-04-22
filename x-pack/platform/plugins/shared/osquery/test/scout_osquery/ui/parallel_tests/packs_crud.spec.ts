@@ -6,10 +6,17 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { uiTest as test } from '../fixtures';
 import { getMinimalSavedQuery } from '../../api/fixtures/constants';
+import {
+  cleanOsqueryPacksByPrefix,
+  cleanOsquerySavedQueriesByPrefix,
+} from '../helpers/defensive_cleanup';
 
-const localTags = ['@local-stateful-classic', '@local-serverless-security_complete'];
+const localTags = [...tags.stateful.classic, ...tags.serverless.security.complete];
+const PACK_PREFIXES = ['scout-pack-', 'scout-pack-edit-', 'scout-pack-delete-'];
+const SAVED_QUERY_PREFIXES = ['scout-pack-sq-', 'scout-pack-sq-extra-'];
 
 test.describe('Pack CRUD from UI', { tag: localTags }, () => {
   let savedQueryId: string;
@@ -22,6 +29,12 @@ test.describe('Pack CRUD from UI', { tag: localTags }, () => {
   let extraSavedQueryLabel: string;
 
   test.beforeAll(async ({ apiServices }) => {
+    // Defensive: a previously-crashed run may have left `scout-pack-*` SOs
+    // behind. Clean them before seeding this run's fixtures so Fleet policy
+    // sync doesn't surface a stale pack on our agents.
+    await cleanOsqueryPacksByPrefix(apiServices, PACK_PREFIXES);
+    await cleanOsquerySavedQueriesByPrefix(apiServices, SAVED_QUERY_PREFIXES);
+
     const body = getMinimalSavedQuery({
       id: `scout-pack-sq-${Date.now()}`,
       query: 'select * from uptime;',
@@ -56,7 +69,7 @@ test.describe('Pack CRUD from UI', { tag: localTags }, () => {
     apiServices,
   }) => {
     test.setTimeout(300_000);
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsOsqueryPowerUser();
 
     const packName = `scout-pack-${Date.now()}`;
 
@@ -98,15 +111,18 @@ test.describe('Pack CRUD from UI', { tag: localTags }, () => {
     await test.step('captures the Lens locator params for pack results', async () => {
       const viewInLensButton = page.getByLabel('View in Lens');
       await viewInLensButton.waitFor({ state: 'visible', timeout: 30_000 });
-      const [popup] = await Promise.all([page.waitForEvent('popup'), viewInLensButton.click()]);
-      // Lens stores its `_a` app state in browser session storage — the URL is
-      // only `/app/lens#/edit_by_value?_g=...` with no pack name. The pack's
-      // `action_id` lands in the Unified Search filter bar as a filter badge
-      // (`action_id: pack_default--${packName}_${savedQueryLabel}`). Asserting
-      // on the filter badge is more robust than the breadcrumb (which renders
-      // its last crumb truncated as a non-link `<span>`) and doesn't depend on
-      // URL hash state. `[data-test-subj^="filter-badge"]` comes from Unified
-      // Search's `filter_view/index.tsx`.
+      // Register the popup listener BEFORE triggering the click so no event is
+      // missed under CI load (serverless security_complete previously flaked
+      // here). Assert on the Unified Search filter badge rather than the URL —
+      // Lens stores its `_a` app state in browser session storage, so the URL
+      // is only `/app/lens#/edit_by_value?_g=...` with no pack-name fragment.
+      // The pack's `action_id` lands in the filter bar as a filter badge
+      // (`action_id: pack_default--${packName}_${savedQueryLabel}`), and that
+      // badge is the reliable cross-arch signal. `[data-test-subj^="filter-badge"]`
+      // comes from Unified Search's `filter_view/index.tsx`.
+      const popupPromise = page.waitForEvent('popup', { timeout: 30_000 });
+      await viewInLensButton.click();
+      const popup = await popupPromise;
       const actionIdFragment = `pack_default--${packName}`;
       const filterBadge = popup.locator('[data-test-subj^="filter-badge"]').filter({
         hasText: actionIdFragment,
@@ -128,7 +144,7 @@ test.describe('Pack CRUD from UI', { tag: localTags }, () => {
     apiServices,
   }) => {
     test.setTimeout(300_000);
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsOsqueryPowerUser();
 
     const policiesResponse = await apiServices.osquery.packs.listFleetWrapperPackagePolicies();
     const firstPolicyId = (policiesResponse.data as { items: Array<{ policy_ids: string[] }> })
@@ -184,7 +200,7 @@ test.describe('Pack CRUD from UI', { tag: localTags }, () => {
     apiServices,
   }) => {
     test.setTimeout(300_000);
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsOsqueryPowerUser();
 
     // Seed via API so the test focuses on the UI delete flow rather than the
     // create flow that is already covered by the first test in this file.

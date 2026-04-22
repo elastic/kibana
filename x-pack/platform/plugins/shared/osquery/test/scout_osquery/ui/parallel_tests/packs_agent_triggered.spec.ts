@@ -6,10 +6,13 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { uiTest as test } from '../fixtures';
 import { waitForAtLeastOneAgentOnline } from '../helpers/fleet_agents';
+import { cleanOsqueryPacksByPrefix } from '../helpers/defensive_cleanup';
 
-const localTags = ['@local-stateful-classic', '@local-serverless-security_complete'];
+const localTags = [...tags.stateful.classic, ...tags.serverless.security.complete];
+const PACK_PREFIXES = ['scout-fast-pack-'];
 
 interface UnifiedHistoryRow {
   id: string;
@@ -27,6 +30,13 @@ test.describe('Pack agent-triggered results', { tag: localTags }, () => {
   // actual `logs-osquery_manager.result-*` ingest. The rewrite asserts on
   // user-visible behaviour instead: the scheduled pack results land on the
   // unified history page, and the row's details page renders.
+  test.beforeAll(async ({ apiServices }) => {
+    // A crashed run can leave a `scout-fast-pack-*` assigned to an agent
+    // policy, causing Fleet to ship stale scheduled results that cross-match
+    // our new pack's unified-history lookup. Clean before the test seeds.
+    await cleanOsqueryPacksByPrefix(apiServices, PACK_PREFIXES);
+  });
+
   test('shows pack query results in history after scheduled agent execution', async ({
     browserAuth,
     page,
@@ -109,7 +119,7 @@ test.describe('Pack agent-triggered results', { tag: localTags }, () => {
         capturedExecutionCount = matched!.executionCount;
       });
 
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsOsqueryPowerUser();
 
       await test.step('unified history page renders the scheduled row', async () => {
         await pageObjects.osqueryNavigation.gotoHistory();

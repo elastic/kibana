@@ -11,9 +11,14 @@ import { uiTest as test } from '../fixtures';
 import { getMinimalLiveQuery } from '../../api/fixtures/constants';
 import { waitForAtLeastOneAgentOnline } from '../helpers/fleet_agents';
 
-const mkiTags = [...tags.stateful.classic, ...tags.serverless.security.complete];
+// Observability-owner Cases are not available in serverless security projects —
+// `feature_observabilityCases` is not wired into the security project type, so a
+// POST /api/cases with `owner: 'observability'` returns 403 there. Keep this spec
+// stateful-classic-only; the serverless-security counterpart lives in
+// `osquery_case_security.spec.ts` (securitySolution owner).
+const statefulOnlyTags = tags.stateful.classic;
 
-test.describe('Osquery results attached to Observability cases', { tag: mkiTags }, () => {
+test.describe('Osquery results attached to Observability cases', { tag: statefulOnlyTags }, () => {
   test('adds a live query result to an Observability case from history', async ({
     browserAuth,
     page,
@@ -46,7 +51,7 @@ test.describe('Osquery results attached to Observability cases', { tag: mkiTags 
     });
     const caseId = createdCase.data.id;
 
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsOsqueryPowerUser();
     await pageObjects.osqueryCasesPage.navigateToHistory();
     await pageObjects.osqueryCasesPage.openLiveQueryRowDetails(actionId);
     await pageObjects.osqueryCasesPage.addToCaseFromRowKebab(caseId);

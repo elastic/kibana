@@ -16,6 +16,20 @@ export class PackFormPage {
   public readonly queryFlyoutSaveButton: Locator;
   public readonly policyComboBox: Locator;
   public readonly savedQuerySelect: Locator;
+  public readonly packNameInput: Locator;
+  public readonly packDescriptionInput: Locator;
+  public readonly queryIdInput: Locator;
+  public readonly osqueryEditor: Locator;
+  public readonly intervalField: Locator;
+  public readonly timeoutInput: Locator;
+  public readonly editPackButton: Locator;
+  public readonly confirmModalButton: Locator;
+  public readonly flyoutTitle: Locator;
+  public readonly attachNextQueryText: Locator;
+  public readonly paginationPopover: Locator;
+  public readonly pagination50Rows: Locator;
+  public readonly contextMenuPanel: Locator;
+  public readonly docsLoading: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.addPackButton = this.page.testSubj.locator('add-pack-button');
@@ -25,6 +39,20 @@ export class PackFormPage {
     this.queryFlyoutSaveButton = this.page.testSubj.locator('query-flyout-save-button');
     this.policyComboBox = this.page.testSubj.locator('policyIdsComboBox');
     this.savedQuerySelect = this.page.testSubj.locator('savedQuerySelect');
+    this.packNameInput = this.page.locator('input[name="name"]');
+    this.packDescriptionInput = this.page.locator('input[name="description"]');
+    this.queryIdInput = this.page.locator('input[name="id"]');
+    this.osqueryEditor = this.page.testSubj.locator('osqueryEditor');
+    this.intervalField = this.page.testSubj.locator('osquery-interval-field');
+    this.timeoutInput = this.page.testSubj.locator('timeout-input');
+    this.editPackButton = this.page.testSubj.locator('edit-pack-button');
+    this.confirmModalButton = this.page.testSubj.locator('confirmModalConfirmButton');
+    this.flyoutTitle = this.page.locator('h2#flyoutTitle');
+    this.attachNextQueryText = this.page.getByText('Attach next query');
+    this.paginationPopover = this.page.testSubj.locator('tablePaginationPopoverButton');
+    this.pagination50Rows = this.page.testSubj.locator('tablePagination-50-rows');
+    this.contextMenuPanel = this.page.locator('.euiContextMenuPanel');
+    this.docsLoading = this.page.testSubj.locator('docsLoading');
   }
 
   async navigateToPacksList(): Promise<void> {
@@ -39,15 +67,13 @@ export class PackFormPage {
   }
 
   async fillPackName(name: string): Promise<void> {
-    const nameInput = this.page.locator('input[name="name"]');
-    await nameInput.waitFor({ state: 'visible', timeout: 15_000 });
-    await nameInput.fill(name);
+    await this.packNameInput.waitFor({ state: 'visible', timeout: 15_000 });
+    await this.packNameInput.fill(name);
   }
 
   async fillPackDescription(text: string): Promise<void> {
-    const desc = this.page.locator('input[name="description"]');
-    if (await desc.isVisible().catch(() => false)) {
-      await desc.fill(text);
+    if (await this.packDescriptionInput.isVisible().catch(() => false)) {
+      await this.packDescriptionInput.fill(text);
     }
   }
 
@@ -62,20 +88,18 @@ export class PackFormPage {
 
   async openAddQueryFlyout(): Promise<void> {
     await this.addQueryButton.click();
-    await this.page.getByText('Attach next query').waitFor({ state: 'visible', timeout: 30_000 });
+    await this.attachNextQueryText.waitFor({ state: 'visible', timeout: 30_000 });
   }
 
   async fillQueryId(id: string): Promise<void> {
-    const idInput = this.page.locator('input[name="id"]');
-    await idInput.waitFor({ state: 'visible', timeout: 15_000 });
-    await idInput.fill(id);
+    await this.queryIdInput.waitFor({ state: 'visible', timeout: 15_000 });
+    await this.queryIdInput.fill(id);
   }
 
   async fillQueryInFlyoutFromMonaco(query: string): Promise<void> {
-    const editor = this.page.testSubj.locator('osqueryEditor');
-    await editor.waitFor({ state: 'visible', timeout: 30_000 });
-    await editor.click();
-    await editor.pressSequentially(query, { delay: 5 });
+    await this.osqueryEditor.waitFor({ state: 'visible', timeout: 30_000 });
+    await this.osqueryEditor.click();
+    await this.osqueryEditor.pressSequentially(query, { delay: 5 });
 
     // Monaco's React wrapper syncs typed text into RHF via a 500ms debounce on
     // the onChange callback. If the next action (e.g. Save) lands before the
@@ -83,7 +107,7 @@ export class PackFormPage {
     // save silently — the flyout never closes. Blur the hidden textarea AND
     // wait for the Monaco model to carry the text before returning, mirroring
     // the same guard used by `alert_flyout.ts::inputFlyoutQuery`.
-    await editor.evaluate((el: HTMLElement) => {
+    await this.osqueryEditor.evaluate((el: HTMLElement) => {
       el.querySelector<HTMLTextAreaElement>('textarea')?.blur();
     });
     await this.page.waitForFunction(
@@ -103,16 +127,14 @@ export class PackFormPage {
   }
 
   async setQueryIntervalSeconds(seconds: string): Promise<void> {
-    const interval = this.page.testSubj.locator('osquery-interval-field');
-    await interval.click();
-    await interval.clear();
-    await interval.fill(seconds);
+    await this.intervalField.click();
+    await this.intervalField.clear();
+    await this.intervalField.fill(seconds);
   }
 
   async setQueryTimeout(timeout: string): Promise<void> {
-    const timeoutInput = this.page.testSubj.locator('timeout-input');
-    await timeoutInput.clear();
-    await timeoutInput.fill(timeout);
+    await this.timeoutInput.clear();
+    await this.timeoutInput.fill(timeout);
   }
 
   async saveQueryFlyout(): Promise<void> {
@@ -123,8 +145,7 @@ export class PackFormPage {
     // "Attach next query" as the title (source: `public/packs/queries/query_flyout.tsx:103-122`).
     // Detached flyout means the portal's pointer-event capture is gone, so the
     // outer pack form's Update button is clickable again.
-    const flyoutTitle = this.page.locator('h2#flyoutTitle');
-    await flyoutTitle.waitFor({ state: 'hidden', timeout: 15_000 });
+    await this.flyoutTitle.waitFor({ state: 'hidden', timeout: 15_000 });
   }
 
   async attachSavedQuery(savedQueryLabel: string): Promise<void> {
@@ -151,9 +172,8 @@ export class PackFormPage {
   // the subsequent assertions (success toast, navigation) never land because the
   // overlay intercepts pointer events on the next action.
   async confirmPolicyChangeModalIfVisible(): Promise<void> {
-    const confirm = this.page.testSubj.locator('confirmModalConfirmButton');
-    if (await confirm.isVisible({ timeout: 3_000 }).catch(() => false)) {
-      await confirm.click();
+    if (await this.confirmModalButton.isVisible({ timeout: 3_000 }).catch(() => false)) {
+      await this.confirmModalButton.click();
     }
   }
 
@@ -162,12 +182,12 @@ export class PackFormPage {
   }
 
   async openEditPack(): Promise<void> {
-    await this.page.testSubj.locator('edit-pack-button').click();
+    await this.editPackButton.click();
   }
 
   async setPagination50Rows(): Promise<void> {
-    await this.page.testSubj.locator('tablePaginationPopoverButton').click();
-    await this.page.testSubj.locator('tablePagination-50-rows').click();
+    await this.paginationPopover.click();
+    await this.pagination50Rows.click();
   }
 
   getEditSavedQueryButton(savedQueryName: string): Locator {
@@ -179,7 +199,7 @@ export class PackFormPage {
   }
 
   async chooseContextMenuItem(label: string | RegExp): Promise<void> {
-    await this.page.locator('.euiContextMenuPanel').getByText(label).click();
+    await this.contextMenuPanel.getByText(label).click();
   }
 
   async togglePackActiveFromList(packName: string): Promise<void> {
@@ -194,8 +214,7 @@ export class PackFormPage {
   }
 
   async waitForDocsLoadingGone(): Promise<void> {
-    const loading = this.page.testSubj.locator('docsLoading');
-    await loading.waitFor({ state: 'visible', timeout: 10_000 }).catch(() => {});
-    await loading.waitFor({ state: 'hidden', timeout: 120_000 });
+    await this.docsLoading.waitFor({ state: 'visible', timeout: 10_000 }).catch(() => {});
+    await this.docsLoading.waitFor({ state: 'hidden', timeout: 120_000 });
   }
 }

@@ -6,10 +6,11 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { uiTest as test } from '../fixtures';
 import { waitForAtLeastOneAgentOnline } from '../helpers/fleet_agents';
 
-const localTags = ['@local-stateful-classic', '@local-serverless-security_complete'];
+const localTags = [...tags.stateful.classic, ...tags.serverless.security.complete];
 
 test.describe('Live query submission with enrolled agents', { tag: localTags }, () => {
   // Single submission, multiple orthogonal assertions. Per design decision
@@ -28,7 +29,7 @@ test.describe('Live query submission with enrolled agents', { tag: localTags }, 
     test.setTimeout(360_000);
 
     await waitForAtLeastOneAgentOnline(kbnClient);
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsOsqueryPowerUser();
     await pageObjects.osqueryNavigation.gotoNewLiveQuery();
 
     await test.step('submit against all agents with a custom 120s timeout', async () => {

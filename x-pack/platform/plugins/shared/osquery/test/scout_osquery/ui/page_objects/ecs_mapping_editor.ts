@@ -9,14 +9,20 @@ import type { Locator, ScoutPage } from '@kbn/scout';
 import { waitForKibanaChromeLoadingFinished } from '../../common/wait_for_kibana_loading_finished';
 
 export class EcsMappingEditorPage {
-  constructor(private readonly page: ScoutPage) {}
+  public readonly mappingForm: Locator;
+  public readonly advancedAccordion: Locator;
+
+  constructor(private readonly page: ScoutPage) {
+    this.mappingForm = this.page.testSubj.locator('ECSMappingEditorForm');
+    this.advancedAccordion = this.page.testSubj.locator('advanced-accordion-content');
+  }
 
   ecsMappingForm(): Locator {
-    return this.page.testSubj.locator('ECSMappingEditorForm');
+    return this.mappingForm;
   }
 
   async toggleAdvancedSection(): Promise<void> {
-    await this.page.testSubj.locator('advanced-accordion-content').click();
+    await this.advancedAccordion.click();
   }
 
   async typeColumnValue(text: string, index = 0): Promise<void> {

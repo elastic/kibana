@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ScoutPage } from '@kbn/scout';
+import type { Locator, ScoutPage } from '@kbn/scout';
 import { waitForKibanaChromeLoadingFinished } from '../../common/wait_for_kibana_loading_finished';
 
 /**
@@ -16,7 +16,11 @@ import { waitForKibanaChromeLoadingFinished } from '../../common/wait_for_kibana
  * path (`/app/osquery/new`), matching Cypress (`/app/osquery/new`). A URL hash does not activate routes.
  */
 export class OsqueryNavigation {
-  constructor(private readonly page: ScoutPage) {}
+  public readonly liveQuerySubmitButton: Locator;
+
+  constructor(private readonly page: ScoutPage) {
+    this.liveQuerySubmitButton = this.page.testSubj.locator('liveQuerySubmitButton');
+  }
 
   async gotoRoot(): Promise<void> {
     await this.page.gotoApp('osquery');
@@ -47,17 +51,13 @@ export class OsqueryNavigation {
   async gotoNewLiveQuery(): Promise<void> {
     await this.page.gotoApp('osquery/new');
     await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
-    await this.page.testSubj
-      .locator('liveQuerySubmitButton')
-      .waitFor({ state: 'visible', timeout: 30_000 });
+    await this.liveQuerySubmitButton.waitFor({ state: 'visible', timeout: 30_000 });
   }
 
   /** Legacy deep link; with queryHistoryRework, router redirects to `/new`. */
   async gotoNewLiveQueryLegacyPath(): Promise<void> {
     await this.page.gotoApp('osquery/live_queries/new');
     await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
-    await this.page.testSubj
-      .locator('liveQuerySubmitButton')
-      .waitFor({ state: 'visible', timeout: 30_000 });
+    await this.liveQuerySubmitButton.waitFor({ state: 'visible', timeout: 30_000 });
   }
 }
