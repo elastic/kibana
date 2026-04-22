@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -15,9 +15,10 @@ import type { FeedbackFormData, FeedbackRegistryEntry } from '../types';
 import { FeedbackHeader } from './header';
 import { FeedbackBody } from './body/feedback_body';
 import { FeedbackFooter } from './footer/feedback_footer';
+import { FeedbackContainerSkeleton } from './feedback_container_skeleton';
 
 interface Props {
-  getQuestions: (appId: string) => FeedbackRegistryEntry[];
+  getQuestions: (appId: string) => Promise<FeedbackRegistryEntry[]>;
   getAppDetails: () => { title: string; id: string; url: string };
   getCurrentUserEmail: () => Promise<string | undefined>;
   sendFeedback: (data: FeedbackFormData) => Promise<void>;
@@ -42,8 +43,46 @@ export const FeedbackContainer = ({
   const [isEmailValid, setIsEmailValid] = useState(true);
   const [forceShowEmailError, setForceShowEmailError] = useState(false);
 
+  const [questions, setQuestions] = useState<FeedbackRegistryEntry[]>([]);
+  const [isLoadingQuestions, setIsLoadingQuestions] = useState(true);
+
   const { title: appTitle, id: appId, url: appUrl } = getAppDetails();
-  const questions = getQuestions(appId);
+
+  const containerCss = css`
+    padding: ${euiTheme.size.l};
+    width: 576px;
+  `;
+
+  useEffect(() => {
+    const abortController = new AbortController();
+    setIsLoadingQuestions(true);
+    getQuestions(appId)
+      .then((q) => {
+        if (!abortController.signal.aborted) {
+          setQuestions(q);
+          setIsLoadingQuestions(false);
+        }
+      })
+      .catch(() => {
+        if (!abortController.signal.aborted) {
+          setIsLoadingQuestions(false);
+          hideFeedbackContainer();
+          showToast(
+            i18n.translate('feedback.loadQuestionsFailureToast.title', {
+              defaultMessage: 'Failed to load feedback form. Please try again later.',
+            }),
+            'error'
+          );
+        }
+      });
+    return () => {
+      abortController.abort();
+    };
+  }, [getQuestions, appId, hideFeedbackContainer, showToast]);
+
+  if (isLoadingQuestions) {
+    return <FeedbackContainerSkeleton />;
+  }
 
   const isFormFilled =
     selectedCsatOptionId ||
@@ -120,11 +159,6 @@ export const FeedbackContainer = ({
       setIsSubmitting(false);
     }
   };
-
-  const containerCss = css`
-    padding: ${euiTheme.size.l};
-    width: 576px;
-  `;
 
   return (
     <EuiFlexGroup
