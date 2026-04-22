@@ -7735,6 +7735,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/measure-component@link:src/platform/packages/shared/kbn-measure-component":
+  version "0.0.0"
+  uid ""
+
 "@kbn/metrics-config@link:src/platform/packages/private/opentelemetry/kbn-metrics-config":
   version "0.0.0"
   uid ""
