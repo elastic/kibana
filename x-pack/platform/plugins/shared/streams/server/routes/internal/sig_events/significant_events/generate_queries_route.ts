@@ -8,7 +8,7 @@
 import type { SignificantEventsQueriesGenerationResult } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
-import { generateSignificantEventsQueries } from '../../../../lib/sig_events/significant_events_generation_service';
+import { generateKIQueries } from '../../../../lib/sig_events/ki_queries_generation_service';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
@@ -37,8 +37,7 @@ const generateQueriesRoute = createServerRoute({
   options: {
     access: 'internal',
     summary: 'Generate significant events queries',
-    description:
-      'Runs a single iteration of significant events query generation for the given stream. Designed for use by the Workflows Management orchestrator.',
+    description: 'Runs a single iteration of KI queries generation for the given stream.',
   },
   security: {
     authz: {
@@ -71,7 +70,7 @@ const generateQueriesRoute = createServerRoute({
 
     const [featureClient, queryClient] = await Promise.all([getFeatureClient(), getQueryClient()]);
 
-    const { queries, tokensUsed } = await generateSignificantEventsQueries(
+    const { queries, tokensUsed } = await generateKIQueries(
       { streamName, connectorId, maxExistingQueriesForContext },
       {
         streamsClient,

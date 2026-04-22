@@ -13,7 +13,7 @@ import type { TaskContext } from '../../tasks/task_definitions';
 import type { TaskParams } from '../../tasks/types';
 import { cancellableTask } from '../../tasks/cancellable_task';
 import { isDefinitionNotFoundError } from '../../streams/errors/definition_not_found_error';
-import { generateSignificantEventsQueries } from '../significant_events_generation_service';
+import { generateKIQueries } from '../ki_queries_generation_service';
 
 export interface SignificantEventsQueriesGenerationTaskParams {
   start: number;
@@ -73,7 +73,7 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                   getQueryClient(),
                 ]);
 
-                const result = await generateSignificantEventsQueries(
+                const result = await generateKIQueries(
                   { streamName, connectorId: connectorIdOverride },
                   {
                     streamsClient,

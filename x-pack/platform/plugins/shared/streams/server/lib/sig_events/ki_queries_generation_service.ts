@@ -33,13 +33,13 @@ import { generateSignificantEventDefinitions } from './generate_significant_even
 import { MemoryServiceImpl } from '../memory';
 import { createMemoryDiscoveryTools } from './memory_discovery_tools';
 
-export interface GenerateSignificantEventsQueriesParams {
+export interface GenerateKIQueriesParams {
   streamName: string;
   connectorId?: string;
   maxExistingQueriesForContext?: number;
 }
 
-export interface GenerateSignificantEventsQueriesDependencies {
+export interface GenerateKIQueriesDependencies {
   streamsClient: StreamsClient;
   inferenceClient: InferenceClient;
   soClient: SavedObjectsClientContract;
@@ -54,9 +54,9 @@ export interface GenerateSignificantEventsQueriesDependencies {
   telemetry: EbtTelemetryClient;
 }
 
-export async function generateSignificantEventsQueries(
-  params: GenerateSignificantEventsQueriesParams,
-  deps: GenerateSignificantEventsQueriesDependencies
+export async function generateKIQueries(
+  params: GenerateKIQueriesParams,
+  deps: GenerateKIQueriesDependencies
 ): Promise<SignificantEventsQueriesGenerationResult & { toolUsage: SignificantEventsToolUsage }> {
   const { streamName, connectorId: connectorIdOverride, maxExistingQueriesForContext } = params;
   const {
