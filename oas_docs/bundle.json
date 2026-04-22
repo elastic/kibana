@@ -10297,7 +10297,7 @@
                               ],
                               "type": "object"
                             },
-                            "maxItems": 10,
+                            "maxItems": 100,
                             "type": "array"
                           },
                           "has_fleet_server": {
@@ -11344,7 +11344,7 @@
                       ],
                       "type": "object"
                     },
-                    "maxItems": 10,
+                    "maxItems": 100,
                     "type": "array"
                   },
                   "has_fleet_server": {
@@ -11672,7 +11672,7 @@
                             ],
                             "type": "object"
                           },
-                          "maxItems": 10,
+                          "maxItems": 100,
                           "type": "array"
                         },
                         "has_fleet_server": {
@@ -12748,7 +12748,7 @@
                               ],
                               "type": "object"
                             },
-                            "maxItems": 10,
+                            "maxItems": 100,
                             "type": "array"
                           },
                           "has_fleet_server": {
@@ -14077,7 +14077,7 @@
                             ],
                             "type": "object"
                           },
-                          "maxItems": 10,
+                          "maxItems": 100,
                           "type": "array"
                         },
                         "has_fleet_server": {
@@ -15124,7 +15124,7 @@
                       ],
                       "type": "object"
                     },
-                    "maxItems": 10,
+                    "maxItems": 100,
                     "type": "array"
                   },
                   "has_fleet_server": {
@@ -15452,7 +15452,7 @@
                             ],
                             "type": "object"
                           },
-                          "maxItems": 10,
+                          "maxItems": 100,
                           "type": "array"
                         },
                         "has_fleet_server": {
@@ -16623,7 +16623,7 @@
                             ],
                             "type": "object"
                           },
-                          "maxItems": 10,
+                          "maxItems": 100,
                           "type": "array"
                         },
                         "has_fleet_server": {
@@ -25286,7 +25286,7 @@
                             "items": {
                               "type": "string"
                             },
-                            "maxItems": 10,
+                            "maxItems": 100,
                             "type": "array"
                           },
                           "conditions": {
@@ -25347,7 +25347,7 @@
                                   ],
                                   "type": "object"
                                 },
-                                "maxItems": 10,
+                                "maxItems": 100,
                                 "type": "array"
                               },
                               "fields": {
@@ -25363,7 +25363,7 @@
                                   ],
                                   "type": "object"
                                 },
-                                "maxItems": 10,
+                                "maxItems": 100,
                                 "type": "array"
                               }
                             },
@@ -25403,7 +25403,7 @@
                               ],
                               "type": "object"
                             },
-                            "maxItems": 10,
+                            "maxItems": 100,
                             "type": "array"
                           },
                           "id": {
@@ -25749,7 +25749,7 @@
                               "additionalProperties": {},
                               "type": "object"
                             },
-                            "maxItems": 100,
+                            "maxItems": 1000,
                             "type": "array"
                           },
                           "readme": {
@@ -26971,7 +26971,7 @@
                               ],
                               "type": "object"
                             },
-                            "maxItems": 10,
+                            "maxItems": 100,
                             "type": "array"
                           },
                           "name": {
@@ -27488,14 +27488,14 @@
                                 "items": {
                                   "type": "string"
                                 },
-                                "maxItems": 100,
+                                "maxItems": 1000,
                                 "type": "array"
                               },
                               "asset_types": {
                                 "items": {
                                   "type": "string"
                                 },
-                                "maxItems": 10,
+                                "maxItems": 100,
                                 "type": "array"
                               },
                               "text": {
@@ -27518,7 +27518,7 @@
                           "items": {
                             "type": "string"
                           },
-                          "maxItems": 10,
+                          "maxItems": 100,
                           "type": "array"
                         },
                         "conditions": {
@@ -27579,7 +27579,7 @@
                                 ],
                                 "type": "object"
                               },
-                              "maxItems": 10,
+                              "maxItems": 100,
                               "type": "array"
                             },
                             "fields": {
@@ -27595,7 +27595,7 @@
                                 ],
                                 "type": "object"
                               },
-                              "maxItems": 10,
+                              "maxItems": 100,
                               "type": "array"
                             }
                           },
@@ -27639,7 +27639,7 @@
                             ],
                             "type": "object"
                           },
-                          "maxItems": 10,
+                          "maxItems": 100,
                           "type": "array"
                         },
                         "installationInfo": {
@@ -27991,7 +27991,7 @@
                             "additionalProperties": {},
                             "type": "object"
                           },
-                          "maxItems": 100,
+                          "maxItems": 1000,
                           "type": "array"
                         },
                         "readme": {
@@ -28033,7 +28033,7 @@
                             ],
                             "type": "object"
                           },
-                          "maxItems": 10,
+                          "maxItems": 100,
                           "type": "array"
                         },
                         "signature_path": {
@@ -28476,14 +28476,14 @@
                                 "items": {
                                   "type": "string"
                                 },
-                                "maxItems": 100,
+                                "maxItems": 1000,
                                 "type": "array"
                               },
                               "asset_types": {
                                 "items": {
                                   "type": "string"
                                 },
-                                "maxItems": 10,
+                                "maxItems": 100,
                                 "type": "array"
                               },
                               "text": {
@@ -28506,7 +28506,7 @@
                           "items": {
                             "type": "string"
                           },
-                          "maxItems": 10,
+                          "maxItems": 100,
                           "type": "array"
                         },
                         "conditions": {
@@ -28567,7 +28567,7 @@
                                 ],
                                 "type": "object"
                               },
-                              "maxItems": 10,
+                              "maxItems": 100,
                               "type": "array"
                             },
                             "fields": {
@@ -28583,7 +28583,7 @@
                                 ],
                                 "type": "object"
                               },
-                              "maxItems": 10,
+                              "maxItems": 100,
                               "type": "array"
                             }
                           },
@@ -28627,7 +28627,7 @@
                             ],
                             "type": "object"
                           },
-                          "maxItems": 10,
+                          "maxItems": 100,
                           "type": "array"
                         },
                         "installationInfo": {
@@ -28979,7 +28979,7 @@
                             "additionalProperties": {},
                             "type": "object"
                           },
-                          "maxItems": 100,
+                          "maxItems": 1000,
                           "type": "array"
                         },
                         "readme": {
@@ -29021,7 +29021,7 @@
                             ],
                             "type": "object"
                           },
-                          "maxItems": 10,
+                          "maxItems": 100,
                           "type": "array"
                         },
                         "signature_path": {
