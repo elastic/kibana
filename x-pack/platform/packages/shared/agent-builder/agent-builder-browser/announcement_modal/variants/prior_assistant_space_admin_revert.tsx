@@ -27,9 +27,13 @@ import * as i18n from '../translations';
 import type { AnnouncementModalVariantProps } from './types';
 
 /**
- * Users who already used AI Assistant and can switch back via GenAI Settings.
+ * Users who already used AI Assistant and can revert the space-level chat
+ * experience back to AI Assistant via GenAI Settings.
  */
-export function PriorAssistantSelfRevert({ onContinue, onRevert }: AnnouncementModalVariantProps) {
+export function PriorAssistantSpaceAdminRevert({
+  onContinue,
+  onRevert,
+}: AnnouncementModalVariantProps) {
   const { euiTheme } = useEuiTheme();
 
   const calloutWrapperCss = css`

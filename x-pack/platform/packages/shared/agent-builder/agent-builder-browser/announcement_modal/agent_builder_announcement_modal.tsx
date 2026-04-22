@@ -20,7 +20,7 @@ import * as i18n from './translations';
 import type { AnnouncementModalVariantProps } from './variants/types';
 import { NoPriorAssistantUsage } from './variants/no_prior_assistant_usage';
 import { PriorAssistantAdminRevert } from './variants/prior_assistant_admin_revert';
-import { PriorAssistantSelfRevert } from './variants/prior_assistant_self_revert';
+import { PriorAssistantSpaceAdminRevert } from './variants/prior_assistant_space_admin_revert';
 
 export type { AgentBuilderAnnouncementVariant } from './translations';
 
@@ -35,7 +35,7 @@ const VARIANT_CONTENT: Record<
   ComponentType<AnnouncementModalVariantProps>
 > = {
   '1a': NoPriorAssistantUsage,
-  '1b': PriorAssistantSelfRevert,
+  '1b': PriorAssistantSpaceAdminRevert,
   '2a': PriorAssistantAdminRevert,
 };
 
