@@ -14,7 +14,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { isAllowedBuiltinPlugin } from '@kbn/agent-builder-server/allow_lists';
 import type { BuiltInPluginDefinition } from '@kbn/agent-builder-server/plugins';
 import type { AgentBuilderConfig } from '../../config';
-import type { AnalyticsService } from '../../telemetry';
+import type { AnalyticsService, TrackingService } from '../../telemetry';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { PluginClient, PersistedPluginDefinition } from './client';
 import { createClient, parsedArchiveToCreateRequest } from './client';
@@ -61,6 +61,7 @@ export interface PluginsServiceStartDeps {
   spaces?: SpacesPluginStart;
   config: AgentBuilderConfig;
   analyticsService?: AnalyticsService;
+  trackingService?: TrackingService;
 }
 
 export const createPluginsService = (): PluginsService => {
@@ -186,12 +187,13 @@ class PluginsServiceImpl implements PluginsService {
 
     const created = await pluginClient.create(createRequest);
 
-    const { analyticsService } = this.getStartDeps();
+    const { analyticsService, trackingService } = this.getStartDeps();
     analyticsService?.reportPluginImported({
       pluginId: created.id,
       sourceType: source.type,
       skillCount: createRequests.length,
     });
+    trackingService?.trackPluginImport(source.type);
 
     return created;
   }
