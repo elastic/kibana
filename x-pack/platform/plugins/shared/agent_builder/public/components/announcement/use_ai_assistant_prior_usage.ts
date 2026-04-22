@@ -11,6 +11,7 @@ import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
 } from '@kbn/elastic-assistant-common';
+import type { AgentBuilderAnnouncementVariant } from '@kbn/agent-builder-browser';
 
 const OBSERVABILITY_CONVERSATIONS_ROUTE = '/internal/observability_ai_assistant/conversations';
 

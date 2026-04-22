@@ -836,7 +836,7 @@ const TOOL_CALL_SUCCESS_EVENT: AgentBuilderTelemetryEvent = {
       _meta: {
         description:
           'ID of the agent (normalized: built-in agents keep ID, custom agents become "custom-<sha256_prefix>")',
-        optional: false,
+        optional: true,
       },
     },
     conversation_id: {
@@ -913,7 +913,7 @@ const TOOL_CALL_ERROR_EVENT: AgentBuilderTelemetryEvent = {
       _meta: {
         description:
           'ID of the agent (normalized: built-in agents keep ID, custom agents become "custom-<sha256_prefix>")',
-        optional: false,
+        optional: true,
       },
     },
     conversation_id: {
