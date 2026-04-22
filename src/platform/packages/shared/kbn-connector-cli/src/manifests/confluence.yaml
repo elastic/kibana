@@ -1,0 +1,11 @@
+spec_id: .confluence-cloud
+name: "Confluence Cloud (testing)"
+auth_type: basic
+config:
+  subdomain: "workplace-search"
+secrets:
+  username:
+    value: "workplace-search@elastic.co"
+  password:
+    vault: secret/ent-search-team/connectors-sources/jira-confluence-cloud
+    field: api-token

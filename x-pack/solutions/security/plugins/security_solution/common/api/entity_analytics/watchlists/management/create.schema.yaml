@@ -13,6 +13,7 @@ paths:
       x-state: Technical Preview
       operationId: CreateWatchlist
       summary: Create a new watchlist
+      description: Creates a new entity analytics watchlist with an optional set of entity sources. Watchlists apply a risk score modifier to matched entities.
       requestBody:
         required: true
         content:
