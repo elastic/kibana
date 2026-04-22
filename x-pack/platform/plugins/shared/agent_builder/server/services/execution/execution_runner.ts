@@ -30,6 +30,7 @@ import type {
   ConversationAgentExecution,
   StandaloneAgentExecution,
 } from '@kbn/agent-builder-server/execution';
+import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { ConversationService, ConversationClient } from '../conversation';
 import type { AgentsServiceStart } from '../agents';
 import {
@@ -67,6 +68,7 @@ export interface AgentExecutionDeps {
   meteringService: MeteringService;
   trackingService?: TrackingService;
   analyticsService?: AnalyticsService;
+  searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
 }
 
 /**

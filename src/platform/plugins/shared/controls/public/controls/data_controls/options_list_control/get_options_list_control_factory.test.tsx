@@ -15,6 +15,8 @@ import { waitFor } from '@testing-library/react';
 import { dataViewsService } from '../../../services/kibana_services';
 import { getMockedFinalizeApi } from '../../mocks/control_mocks';
 import { getOptionsListControlFactory } from './get_options_list_control_factory';
+import { optionsListDSLControlSchema } from '@kbn/controls-schemas';
+import { firstValueFrom, of } from 'rxjs';
 
 describe('Options List Control Api', () => {
   const uuid = 'myControl1';
@@ -267,6 +269,50 @@ describe('Options List Control Api', () => {
           },
         ]);
       });
+    });
+  });
+
+  describe('unsaved changes', () => {
+    test('should have unsaved changes when there are changes', async () => {
+      const lastSavedState = optionsListDSLControlSchema.validate({
+        data_view_id: 'oldDataViewId',
+        field_name: 'myFieldName',
+      });
+      const initialState = {
+        ...lastSavedState,
+        data_view_id: 'newDataViewId',
+      };
+      const embeddable = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
+        initialState,
+        finalizeApi,
+        uuid,
+        parentApi: {
+          lastSavedStateForChild$: () => of(lastSavedState),
+          getLastSavedStateForChild: lastSavedState,
+        },
+      });
+      const hasUnsavedChanges = await firstValueFrom(embeddable.api.hasUnsavedChanges$);
+      expect(hasUnsavedChanges).toBe(true);
+    });
+
+    test('should not have unsaved changes when there are no changes', async () => {
+      const initialState = optionsListDSLControlSchema.validate({
+        data_view_id: 'myDataViewId',
+        field_name: 'myFieldName',
+      });
+      const embeddable = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
+        initialState,
+        finalizeApi,
+        uuid,
+        parentApi: {
+          lastSavedStateForChild$: () => of(initialState),
+          getLastSavedStateForChild: initialState,
+        },
+      });
+      const hasUnsavedChanges = await firstValueFrom(embeddable.api.hasUnsavedChanges$);
+      expect(hasUnsavedChanges).toBe(false);
     });
   });
 });

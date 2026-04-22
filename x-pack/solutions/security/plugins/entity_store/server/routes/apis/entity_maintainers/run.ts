@@ -20,6 +20,8 @@ export function registerRunMaintainer(router: EntityStorePluginRouter) {
     .post({
       path: ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_RUN,
       access: 'internal',
+      summary: 'Run entity maintainer',
+      description: 'Trigger an immediate run of a registered entity maintainer task.',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },
