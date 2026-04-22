@@ -180,7 +180,7 @@ export class DashboardAddPanelService extends FtrService {
 
   async isAddPanelOpen() {
     this.log.debug('DashboardAddPanel.isAddPanelOpen');
-    return await this.testSubjects.exists('dashboardAddPanel', { timeout: 500 });
+    return await this.testSubjects.exists('dashboardPanelSelectionFlyout', { timeout: 500 });
   }
 
   async ensureAddPanelIsShowing() {
