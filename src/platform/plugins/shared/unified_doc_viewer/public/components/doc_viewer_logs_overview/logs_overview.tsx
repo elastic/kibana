@@ -16,7 +16,6 @@ import {
   TRACE_ID_FIELD,
   TRANSACTION_ID_FIELD,
   getLogDocumentOverview,
-  getFieldValue,
 } from '@kbn/discover-utils';
 import type {
   ObservabilityLogsAIAssistantFeature,
@@ -25,6 +24,7 @@ import type {
 } from '@kbn/discover-shared-plugin/public';
 import type { LogDocument, ObservabilityIndexes } from '@kbn/discover-utils/src';
 import { getStacktraceFields } from '@kbn/discover-utils/src';
+import { getFieldValueWithFallback } from '@kbn/discover-utils/src/utils/get_field_value_with_fallback';
 import { css } from '@emotion/react';
 import type { DocViewActions } from '@kbn/unified-doc-viewer/src/services/types';
 import type { RestorableStateProviderProps } from '@kbn/restorable-state';
@@ -46,6 +46,10 @@ import { DataSourcesProvider } from '../../hooks/use_data_sources';
 import { SimilarErrors } from './sub_components/similar_errors';
 import { hasErrorFields } from './utils/has_error_fields';
 import { DocViewerExtensionActionsProvider } from '../../hooks/use_doc_viewer_extension_actions';
+
+interface StringFieldValue {
+  value: string | undefined | null;
+}
 
 export type LogsOverviewProps = DocViewRenderProps &
   RestorableStateProviderProps<TraceWaterfallRestorableState> & {
@@ -94,12 +98,24 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
     const isStacktraceAvailable = Object.values(stacktraceFields).some(Boolean);
 
     // Get raw string values for ID fields (not formatted ReactNode)
-    const traceId = getFieldValue(hit, TRACE_ID_FIELD) as string | undefined;
-    const transactionId = getFieldValue(hit, TRANSACTION_ID_FIELD) as string | undefined;
-    const spanId = getFieldValue(hit, SPAN_ID_FIELD) as string | undefined;
-    const serviceName = getFieldValue(hit, SERVICE_NAME_FIELD) as string | undefined;
+    const { value: traceId } = getFieldValueWithFallback(
+      hit.flattened,
+      TRACE_ID_FIELD
+    ) as StringFieldValue;
+    const { value: transactionId } = getFieldValueWithFallback(
+      hit.flattened,
+      TRANSACTION_ID_FIELD
+    ) as StringFieldValue;
+    const { value: spanId } = getFieldValueWithFallback(
+      hit.flattened,
+      SPAN_ID_FIELD
+    ) as StringFieldValue;
+    const { value: serviceName } = getFieldValueWithFallback(
+      hit.flattened,
+      SERVICE_NAME_FIELD
+    ) as StringFieldValue;
 
-    const showSimilarErrors = formattedDoc[TRACE_ID_FIELD] && hasErrorFields(formattedDoc);
+    const showSimilarErrors = Boolean(traceId) && hasErrorFields(formattedDoc);
     const qualityIssuesSectionRef = useRef<ScrollableSectionWrapperApi>(null);
     const stackTraceSectionRef = useRef<ScrollableSectionWrapperApi>(null);
     const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
@@ -169,8 +185,8 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
               {traceId && showTraceWaterfall ? (
                 <TraceWaterfall
                   traceId={traceId}
-                  docId={transactionId || spanId}
-                  serviceName={serviceName}
+                  docId={transactionId || spanId || undefined}
+                  serviceName={serviceName || undefined}
                   dataView={dataView}
                   initialState={initialState}
                   onInitialStateChange={onInitialStateChange}
