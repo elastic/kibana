@@ -2291,6 +2291,8 @@ x-pack/platform/test/plugin_api_integration/test_suites/platform/ @elastic/kiban
 /x-pack/platform/plugins/private/telemetry_collection_xpack/schema/*.json
 ## But keep the ownership of the snapshots for the tests: they are updated when human review is needed (refer to the tests in src/platform/plugins/shared/telemetry/schema/schema_checks.test.ts)
 /src/platform/plugins/shared/telemetry/schema/__snapshots__/ @elastic/kibana-telemetry
+## The test is co-owned by the telemetry team and the core team.
+/src/platform/plugins/shared/telemetry/schema/schema_checks.test.ts @elastic/kibana-telemetry @elastic/kibana-core
 x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/config.ts @elastic/kibana-core @shahinakmal
 
 # Kibana Localization
