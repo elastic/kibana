@@ -346,12 +346,10 @@ export function EpisodeDetailsPage() {
                 {
                   title: i18n.LABEL_ASSIGNEE,
                   description: (
-                    <div data-test-subj="alertingV2EpisodeDetailsAssignee">
-                      <EpisodeAssigneeCell
-                        assigneeUid={episodeAction?.lastAssigneeUid}
-                        userProfile={services.userProfile}
-                      />
-                    </div>
+                    <EpisodeAssigneeCell
+                      assigneeUid={episodeAction?.lastAssigneeUid}
+                      userProfile={services.userProfile}
+                    />
                   ),
                 },
               ]}

@@ -70,7 +70,7 @@ function AssigneeFlyoutEmptyListMessage() {
   return (
     <AssigneeFlyoutSelectableMessage
       data-test-subj="alertingV2EditEpisodeAssigneeEmptyList"
-      title={i18n.ASSIGNEE_FLYOUT_EMPTY_LIST_TITLE}
+      title={i18n.ASSIGNEE_FLYOUT_EMPTY_LIST_TITLE(1)}
       body={i18n.ASSIGNEE_FLYOUT_EMPTY_LIST_HELP}
     />
   );

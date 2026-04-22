@@ -17,13 +17,8 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 /**
- * Kibana context services for the Alert Episodes management UI (`mountEpisodesApp` +
- * `KibanaContextProvider`).
- *
- * Extends `CoreStart` with plugin starts from the episodes mount. Assignee UX relies on
- * `userProfile` (`bulkGet` for cells, `suggest` against the alerting v2 internal suggest route) and
- * on `toastNotifications`, which is the same object as `coreStart.notifications.toasts` passed
- * through for convenience.
+ * Kibana context services for the Alert episodes management UI
+ * (`mountEpisodesApp` + `KibanaContextProvider`).
  */
 export type AlertEpisodesKibanaServices = CoreStart & {
   share: SharePluginStart;

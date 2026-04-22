@@ -11,9 +11,6 @@ import { createRouteDependencies } from '../test_utils';
 import { SuggestUserProfilesRoute } from './suggest_user_profiles_route';
 
 const request = httpServerMock.createKibanaRequest({ body: { name: 'john', size: 10 } });
-const requestWithDataPath = httpServerMock.createKibanaRequest({
-  body: { name: 'john', size: 10, dataPath: 'avatar' },
-});
 const securityStart = securityMock.createStart();
 
 describe('SuggestUserProfilesRoute', () => {
@@ -36,6 +33,9 @@ describe('SuggestUserProfilesRoute', () => {
 
   it('accepts dataPath in body', async () => {
     const { ctx } = createRouteDependencies();
+    const requestWithDataPath = httpServerMock.createKibanaRequest({
+      body: { name: 'john', size: 10, dataPath: 'avatar' },
+    });
 
     securityStart.userProfiles.suggest.mockResolvedValue([]);
 
