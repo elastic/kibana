@@ -2286,8 +2286,11 @@ x-pack/platform/test/plugin_api_integration/test_suites/platform/ @elastic/kiban
 # Kibana Telemetry
 /.telemetryrc.json @elastic/kibana-core
 /x-pack/.telemetryrc.json @elastic/kibana-core
-/src/platform/plugins/shared/telemetry/schema/ @elastic/kibana-telemetry
-/x-pack/platform/plugins/private/telemetry_collection_xpack/schema/ @elastic/kibana-telemetry
+## Remove the ownership of the telemetry schemas to avoid the need of a human PR review every time the schemas are updated.
+/src/platform/plugins/shared/telemetry/schema/*.json
+/x-pack/platform/plugins/private/telemetry_collection_xpack/schema/*.json
+## But keep the ownership of the snapshots for the tests: they are updated when human review is needed (refer to the tests in src/platform/plugins/shared/telemetry/schema/schema_checks.test.ts)
+/src/platform/plugins/shared/telemetry/schema/__snapshots__/ @elastic/kibana-telemetry
 x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/config.ts @elastic/kibana-core @shahinakmal
 
 # Kibana Localization
