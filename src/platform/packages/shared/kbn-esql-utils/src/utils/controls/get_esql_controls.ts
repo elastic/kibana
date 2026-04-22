@@ -17,7 +17,7 @@ import {
   apiHasUniqueId,
 } from '@kbn/presentation-publishing';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
-import { getESQLQueryVariables } from './query_parsing_helpers';
+import { getESQLQueryVariables } from '../query_parsing_helpers';
 
 type EsqlControlState = OptionsListESQLControlState & {
   type: typeof ESQL_CONTROL;
