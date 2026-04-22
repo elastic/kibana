@@ -11,6 +11,7 @@ import type { Task } from '../lib';
 import { exec } from '../lib';
 
 const YARN_EXEC = process.env.npm_execpath || 'yarn';
+const NODE_EXEC = process.execPath || 'node';
 
 export const InstallDependencies: Task = {
   description: 'Installing node_modules, including production builds of packages',
@@ -38,7 +39,7 @@ export const InstallDependencies: Task = {
 
     await exec(
       log,
-      'node',
+      NODE_EXEC,
       [
         config.resolveFromRepo('node_modules/.bin/patch-package'),
         '--error-on-fail',
