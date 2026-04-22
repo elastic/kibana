@@ -21,6 +21,7 @@ export interface IdentifyComputedFeaturesOptions {
   featureClient: FeatureClient;
   logger: Logger;
   featureTtlDays?: number;
+  runId: string;
 }
 
 export async function identifyComputedFeatures({
@@ -32,6 +33,7 @@ export async function identifyComputedFeatures({
   featureClient,
   logger,
   featureTtlDays,
+  runId,
 }: IdentifyComputedFeaturesOptions): Promise<Feature[]> {
   const computedFeatures = await generateAllComputedFeatures({
     stream,
@@ -45,6 +47,7 @@ export async function identifyComputedFeatures({
     computedFeatures,
     streamName,
     featureTtlDays,
+    runId,
   });
 
   if (reconciledComputedFeatures.length > 0) {

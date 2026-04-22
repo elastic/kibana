@@ -1,5 +1,5 @@
 {
-  "sha1": "05325aa03637b259d89d009b98f8d10f11106fd5",
+  "sha1": "169861cdd67757b2c1bf07c95843daad181845d0",
   "tests": [
     {
       "id": "5e91b4cbd08e25e-f2cd2d3cdc77643",
@@ -18,6 +18,90 @@
       }
     },
     {
+      "id": "4799fe461e33a92-c74e20529e96d27",
+      "title": "Alert details - Explore in APM Stateful - View in APM link from alert details page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_apm.spec.ts",
+        "line": 87,
+        "column": 7
+      }
+    },
+    {
+      "id": "4799fe461e33a92-31a86326526525f",
+      "title": "Alert details - Explore in APM Serverless - View in APM link from alert details page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_apm.spec.ts",
+        "line": 93,
+        "column": 7
+      }
+    },
+    {
+      "id": "a8b772722b95dac-345cf8b9ba5e4fc",
+      "title": "Alert details - Chart layout Stateful - Latency threshold renders correct chart layout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_chart_layout.spec.ts",
+        "line": 72,
+        "column": 7
+      }
+    },
+    {
+      "id": "a8b772722b95dac-064ee06ae3efb3a",
+      "title": "Alert details - Chart layout Serverless - Latency threshold renders correct chart layout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_chart_layout.spec.ts",
+        "line": 78,
+        "column": 7
+      }
+    },
+    {
+      "id": "a8b772722b95dac-06f72cdbe1613f9",
+      "title": "Alert details - Chart layout Stateful - Failed transaction rate renders correct chart layout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_chart_layout.spec.ts",
+        "line": 84,
+        "column": 7
+      }
+    },
+    {
+      "id": "a8b772722b95dac-03c7c4e61ee8c9e",
+      "title": "Alert details - Chart layout Serverless - Failed transaction rate renders correct chart layout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_chart_layout.spec.ts",
+        "line": 90,
+        "column": 7
+      }
+    },
+    {
       "id": "93959537d8145bf-66043be86cebc43",
       "title": "Alerts Can create an error count rule from service inventory",
       "expectedStatus": "passed",
@@ -29,7 +113,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/error_count.spec.ts",
-        "line": 144,
+        "line": 95,
         "column": 7
       }
     },
@@ -43,7 +127,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/error_count.spec.ts",
-        "line": 187,
+        "line": 138,
         "column": 7
       }
     },
@@ -57,7 +141,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/error_count.spec.ts",
-        "line": 193,
+        "line": 144,
         "column": 7
       }
     },
@@ -505,7 +589,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_dashboards/service_dashboards.spec.ts",
-        "line": 66,
+        "line": 73,
         "column": 9
       }
     },
@@ -521,7 +605,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_dashboards/service_dashboards.spec.ts",
-        "line": 90,
+        "line": 97,
         "column": 9
       }
     },
@@ -649,7 +733,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_a11y.spec.ts",
-        "line": 68,
+        "line": 66,
         "column": 9
       }
     },
@@ -854,6 +938,22 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map.spec.ts",
         "line": 45,
+        "column": 9
+      }
+    },
+    {
+      "id": "431bbf1927933f1-306551b6afaacbe",
+      "title": "Service map options panel: find in page, filter placeholders, and Ctrl+K focus",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map.spec.ts",
+        "line": 57,
         "column": 9
       }
     },

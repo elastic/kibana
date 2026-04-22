@@ -6,7 +6,6 @@
  */
 
 import { useAbortController } from '@kbn/react-hooks';
-import type { StreamQuery } from '@kbn/streams-schema';
 import { useMemo } from 'react';
 import { useKibana } from '../use_kibana';
 
@@ -19,7 +18,6 @@ interface QueriesApi {
   promote: ({ queryIds }: { queryIds: string[] }) => Promise<PromoteResult>;
   demote: ({ queryIds }: { queryIds: string[] }) => Promise<{ demoted: number }>;
   promoteAll: (opts?: { minSeverityScore?: number }) => Promise<PromoteResult>;
-  upsertQuery: ({ query, streamName }: { query: StreamQuery; streamName: string }) => Promise<void>;
   removeQuery: ({ queryId, streamName }: { queryId: string; streamName: string }) => Promise<void>;
   deleteQueriesInBulk: ({
     queryIds,
@@ -61,23 +59,6 @@ export function useQueriesApi(): QueriesApi {
           signal: null,
         });
       },
-      upsertQuery: async ({ query, streamName }: { query: StreamQuery; streamName: string }) => {
-        const { id, type: _type, ...body } = query;
-
-        await streamsRepositoryClient.fetch(
-          'PUT /api/streams/{name}/queries/{queryId} 2023-10-31',
-          {
-            signal,
-            params: {
-              path: {
-                name: streamName,
-                queryId: id,
-              },
-              body,
-            },
-          }
-        );
-      },
       removeQuery: async ({ queryId, streamName }: { queryId: string; streamName: string }) => {
         await streamsRepositoryClient.fetch(
           'DELETE /api/streams/{name}/queries/{queryId} 2023-10-31',
@@ -100,7 +81,7 @@ export function useQueriesApi(): QueriesApi {
         streamName: string;
       }) => {
         await streamsRepositoryClient.fetch('POST /api/streams/{name}/queries/_bulk 2023-10-31', {
-          signal,
+          signal: null,
           params: {
             path: {
               name: streamName,

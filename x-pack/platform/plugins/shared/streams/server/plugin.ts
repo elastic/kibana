@@ -255,12 +255,15 @@ export class StreamsPlugin
       };
     };
 
+    const telemetryClient = this.ebtTelemetryService.getClient();
+
     if (plugins.agentBuilder) {
       registerStreamsAgentBuilder({
         agentBuilder: plugins.agentBuilder,
         getScopedClients,
         server: this.server,
         logger: this.logger,
+        telemetry: telemetryClient,
         isMemoryEnabled: async () => {
           try {
             const [coreStart] = await core.getStartServices();
@@ -302,8 +305,6 @@ export class StreamsPlugin
         managementApi,
       });
     }
-
-    const telemetryClient = this.ebtTelemetryService.getClient();
 
     taskService.registerTasks({
       getScopedClients,

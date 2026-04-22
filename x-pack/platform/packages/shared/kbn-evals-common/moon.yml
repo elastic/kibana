@@ -9,6 +9,8 @@ owners:
   defaultOwner: '@elastic/obs-ai-team'
 toolchains:
   default: node
+  javascript:
+    rootPackageDependenciesOnly: false
 language: typescript
 project:
   title: '@kbn/evals-common'

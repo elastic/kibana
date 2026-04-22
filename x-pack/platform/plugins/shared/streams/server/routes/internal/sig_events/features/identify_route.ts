@@ -8,8 +8,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { z } from '@kbn/zod/v4';
 import {
-  featureSchema,
-  iterationResultSchema,
   getStreamTypeFromDefinition,
   STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
 } from '@kbn/streams-schema';
@@ -51,12 +49,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
         start: z.number().optional(),
         end: z.number().optional(),
         runId: z.string().optional(),
-        // Caller must pass back discoveredFeatures from previous iterations so
-        // the service can distinguish intra-run features (merge semantics) from
-        // stored features (full replace). These are already persisted to ES but
-        // cannot be distinguished from pre-existing features without this context.
-        discoveredFeatures: z.array(featureSchema).optional().default([]),
-        iterationResults: z.array(iterationResultSchema).optional().default([]),
+        iteration: z.number().optional(),
         featureTtlDays: z.number().optional(),
         sampleSize: z.number().optional(),
         entityFilteredRatio: z.number().min(0).max(1).optional(),
@@ -64,6 +57,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
         maxEntityFilters: z.number().optional(),
         maxExcludedFeaturesInPrompt: z.number().optional(),
         maxPreviouslyIdentifiedFeatures: z.number().optional(),
+        diverseOffset: z.number().min(0).optional(),
       })
       .nullable()
       .optional(),
@@ -90,8 +84,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
       end = now,
       connectorId: connectorIdOverride,
       runId = uuidv4(),
-      discoveredFeatures = [],
-      iterationResults = [],
+      iteration,
       featureTtlDays = tuningConfig.feature_ttl_days,
       sampleSize = tuningConfig.sample_size,
       entityFilteredRatio = tuningConfig.entity_filtered_ratio,
@@ -99,6 +92,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
       maxEntityFilters = tuningConfig.max_entity_filters,
       maxExcludedFeaturesInPrompt = tuningConfig.max_excluded_features_in_prompt,
       maxPreviouslyIdentifiedFeatures,
+      diverseOffset,
     } = params.body ?? {};
 
     const [connectorId, stream, featureClient] = await Promise.all([
@@ -129,7 +123,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
         start,
         end,
         runId,
-        state: { discoveredFeatures, iterationResults },
+        iteration,
         tuning: {
           feature_ttl_days: featureTtlDays,
           sample_size: sampleSize,
@@ -139,20 +133,21 @@ const identifyInferredFeaturesRoute = createServerRoute({
           max_excluded_features_in_prompt: maxExcludedFeaturesInPrompt,
           maxPreviouslyIdentifiedFeatures,
         },
+        diverseOffset,
         trackFeaturesIdentified: (data) => telemetry.trackFeaturesIdentified(data),
       });
     } catch (error) {
       routeLogger.error(
-        `Inferred feature identification failed for stream [${streamName}] after ${
-          iterationResults.length
-        } completed iterations: ${error instanceof Error ? error.message : String(error)}`
+        `Inferred feature identification failed for stream [${streamName}]: ${
+          error instanceof Error ? error.message : String(error)
+        }`
       );
 
       telemetry.trackFeaturesIdentified(
         buildTelemetry(
           {
             run_id: runId,
-            iteration: iterationResults.length + 1,
+            iteration: iteration ?? 1,
             stream_name: streamName,
             stream_type: streamType,
             docs_count: 0,
@@ -201,6 +196,7 @@ const identifyComputedFeaturesRoute = createServerRoute({
       .object({
         start: z.number().optional(),
         end: z.number().optional(),
+        runId: z.string().optional(),
         featureTtlDays: z.number().optional(),
       })
       .nullable()
@@ -224,6 +220,7 @@ const identifyComputedFeaturesRoute = createServerRoute({
     const {
       start = now - MS_PER_DAY,
       end = now,
+      runId = uuidv4(),
       featureTtlDays = tuningConfig.feature_ttl_days,
     } = params.body ?? {};
 
@@ -242,6 +239,7 @@ const identifyComputedFeaturesRoute = createServerRoute({
         featureClient,
         logger: routeLogger,
         featureTtlDays,
+        runId,
       });
 
       return {

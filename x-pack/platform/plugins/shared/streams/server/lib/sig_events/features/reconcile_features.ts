@@ -38,14 +38,19 @@ export const toFeatureProjection = ({
   properties,
 });
 
-export function createFeatureMetadata(
-  featureTtlDays: number = DEFAULT_SIG_EVENTS_TUNING_CONFIG.feature_ttl_days
-) {
+export function createFeatureMetadata({
+  featureTtlDays = DEFAULT_SIG_EVENTS_TUNING_CONFIG.feature_ttl_days,
+  runId,
+}: {
+  featureTtlDays?: number;
+  runId: string;
+}) {
   const now = Date.now();
   return {
     status: 'active' as const,
     last_seen: new Date(now).toISOString(),
     expires_at: new Date(now + featureTtlDays * MS_PER_DAY).toISOString(),
+    run_id: runId,
   };
 }
 
@@ -53,12 +58,14 @@ export function reconcileComputedFeatures({
   computedFeatures,
   streamName,
   featureTtlDays,
+  runId,
 }: {
   computedFeatures: BaseFeature[];
   streamName: string;
   featureTtlDays?: number;
+  runId: string;
 }): Feature[] {
-  const metadata = createFeatureMetadata(featureTtlDays);
+  const metadata = createFeatureMetadata({ featureTtlDays, runId });
   return computedFeatures.map((feature) => ({
     ...feature,
     ...metadata,
@@ -104,6 +111,7 @@ export function reconcileInferredFeatures({
   ignoredFeatures,
   excludedFeatures,
   featureTtlDays,
+  runId,
   logger,
 }: {
   rawFeatures: BaseFeature[];
@@ -112,9 +120,10 @@ export function reconcileInferredFeatures({
   ignoredFeatures: IgnoredFeature[];
   excludedFeatures: ReadonlyArray<Feature>;
   featureTtlDays?: number;
+  runId: string;
   logger: Logger;
 }): { newFeatures: Feature[]; updatedFeatures: Feature[]; codeIgnoredCount: number } {
-  const metadata = createFeatureMetadata(featureTtlDays);
+  const metadata = createFeatureMetadata({ featureTtlDays, runId });
   const newFeatures: Feature[] = [];
   const updatedFeatures: Feature[] = [];
 

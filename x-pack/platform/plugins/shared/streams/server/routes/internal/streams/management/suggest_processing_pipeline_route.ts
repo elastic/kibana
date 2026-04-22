@@ -6,7 +6,16 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { suggestProcessingPipeline, type SuggestProcessingPipelineResult } from '@kbn/streams-ai';
+import {
+  buildDocumentStructureOverviewForPipelinePrompt,
+  formatUpstreamSeedParsingContextForPromptMarkdown,
+  fetchMappedFieldsForStreamProcessingSuggestions,
+  mergeSeedParsingProcessorIntoSuggestedPipeline,
+  pipelineDefinitionSchema,
+  postParsePipelineDefinitionSchema,
+  suggestProcessingPipeline,
+  type SuggestProcessingPipelineResult,
+} from '@kbn/streams-ai';
 import { from, map, catchError } from 'rxjs';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
 import { createSSEInternalError, createSSERequestError, isSSEError } from '@kbn/sse-utils';
@@ -16,6 +25,7 @@ import {
   type FlattenRecord,
   flattenRecord,
   getStreamTypeFromDefinition,
+  isOtelStream,
 } from '@kbn/streams-schema';
 import { type StreamlangDSL, type GrokProcessor, type DissectProcessor } from '@kbn/streamlang';
 import { type InferenceClient, isInferenceError } from '@kbn/inference-common';
@@ -43,6 +53,7 @@ import { reviewGrokFields } from '../processing/grok_suggestions_handler';
 import { reviewDissectFields } from '../processing/dissect_suggestions_handler';
 import { isNoLLMSuggestionsError } from '../processing/no_llm_suggestions_error';
 import type { IPatternExtractionService } from '../../../../lib/pattern_extraction/pattern_extraction_service';
+import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
 
 export interface SuggestIngestPipelineParams {
   path: { name: string };
@@ -69,6 +80,7 @@ type SuggestProcessingPipelineResponse = Observable<
 
 const MAX_REVIEW_MESSAGES = 10;
 const NUM_REVIEW_EXAMPLES = 10;
+const SYSTEM_PARSING_PRE_SIM_ID = 'system-suggested-parsing-pre-step';
 
 export const suggestProcessingPipelineRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{name}/_suggest_processing_pipeline',
@@ -116,7 +128,20 @@ export const suggestProcessingPipelineRoute = createServerRoute({
           );
         }
 
-        const abortController = new AbortController();
+        // Get the request abort signal to respect client disconnections
+        const requestAbortSignal = getRequestAbortSignal(request);
+
+        // Create a timeout-based AbortSignal for grok/dissect and pipeline suggestions
+        // 2 minute timeout for the entire operation
+        const OPERATION_TIMEOUT_MS = 2 * 60 * 1000;
+        const timeoutSignal = AbortSignal.timeout(OPERATION_TIMEOUT_MS);
+
+        // Combine request abort and timeout signals
+        const timeoutAbortController = new AbortController();
+        const cleanup = () => timeoutAbortController.abort();
+        requestAbortSignal.addEventListener('abort', cleanup);
+        timeoutSignal.addEventListener('abort', cleanup);
+
         let parsingProcessor: GrokProcessor | DissectProcessor | undefined;
 
         const fieldName = getDefaultTextField(params.body.documents, PRIORITIZED_CONTENT_FIELDS);
@@ -149,7 +174,7 @@ export const suggestProcessingPipelineRoute = createServerRoute({
               scopedClusterClient,
               streamsClient,
               fieldsMetadataClient,
-              signal: abortController.signal,
+              signal: timeoutAbortController.signal,
               logger: log,
             })
           );
@@ -166,7 +191,7 @@ export const suggestProcessingPipelineRoute = createServerRoute({
               scopedClusterClient,
               streamsClient,
               fieldsMetadataClient,
-              signal: abortController.signal,
+              signal: timeoutAbortController.signal,
               logger: log,
             })
           );
@@ -214,26 +239,98 @@ export const suggestProcessingPipelineRoute = createServerRoute({
         const maxSteps = 6; // Limit reasoning steps for latency and token cost
         const startTime = Date.now();
 
-        const result = await suggestProcessingPipeline({
+        let documentsForAgent = params.body.documents;
+        let effectiveParsingProcessor: GrokProcessor | DissectProcessor | undefined =
+          parsingProcessor;
+
+        const isOtel = isOtelStream(stream);
+        const mappedFields = await fetchMappedFieldsForStreamProcessingSuggestions(
+          scopedClusterClient.asCurrentUser,
+          stream.name
+        );
+
+        if (parsingProcessor) {
+          const { parsedDocuments, definitionError } = await extractParsedSampleDocuments({
+            streamName: stream.name,
+            documents: params.body.documents,
+            parsingProcessor,
+            scopedClusterClient,
+            streamsClient,
+            fieldsMetadataClient,
+            logger: log,
+          });
+
+          if (definitionError) {
+            effectiveParsingProcessor = undefined;
+            documentsForAgent = params.body.documents;
+          } else if (parsedDocuments.length > 0) {
+            documentsForAgent = parsedDocuments;
+            log.debug(
+              `Agent will use ${parsedDocuments.length}/${params.body.documents.length}` +
+                ` fully parsed samples (stream=${stream.name})`
+            );
+          } else {
+            log.warn(
+              `No fully parsed documents after system parsing step (stream=${stream.name}); ` +
+                `falling back to raw samples without system-managed parser mode`
+            );
+            effectiveParsingProcessor = undefined;
+            documentsForAgent = params.body.documents;
+          }
+        }
+
+        const initialDatasetAnalysisJson = JSON.stringify(
+          await buildDocumentStructureOverviewForPipelinePrompt(
+            documentsForAgent,
+            fieldsMetadataClient,
+            isOtel,
+            mappedFields
+          )
+        );
+
+        const agentPipelineSchema = effectiveParsingProcessor
+          ? postParsePipelineDefinitionSchema
+          : pipelineDefinitionSchema;
+
+        const suggestion = await suggestProcessingPipeline({
           definition: stream,
           inferenceClient: inferenceClient.bindTo({ connectorId }),
-          parsingProcessor,
+          agentPipelineSchema,
           maxSteps,
-          signal: abortController.signal,
-          documents: params.body.documents,
+          maxDurationMs: 180_000, // 3 minutes - surface errors faster than infrastructure timeout
+          signal: timeoutAbortController.signal,
+          documents: documentsForAgent,
           esClient: scopedClusterClient.asCurrentUser,
           fieldsMetadataClient,
+          initialDatasetAnalysisJson,
+          mappedFields,
+          upstreamSeedParsingContextMarkdown: effectiveParsingProcessor
+            ? formatUpstreamSeedParsingContextForPromptMarkdown(effectiveParsingProcessor)
+            : undefined,
           simulatePipeline: (pipeline: StreamlangDSL) =>
             simulateProcessing({
               params: {
                 path: { name: stream.name },
-                body: { processing: pipeline, documents: params.body.documents },
+                body: { processing: pipeline, documents: documentsForAgent },
               },
               esClient: scopedClusterClient.asCurrentUser,
               streamsClient,
               fieldsMetadataClient,
             }),
         });
+
+        const pipeline =
+          suggestion.pipeline && effectiveParsingProcessor
+            ? mergeSeedParsingProcessorIntoSuggestedPipeline(
+                effectiveParsingProcessor,
+                suggestion.pipeline
+              )
+            : suggestion.pipeline;
+
+        const result: SuggestProcessingPipelineResult = {
+          ...suggestion,
+          pipeline,
+        };
 
         const durationMs = Date.now() - startTime;
         log.debug(
@@ -285,6 +382,56 @@ export const suggestProcessingPipelineRoute = createServerRoute({
     );
   },
 });
+
+/**
+ * Runs the seed grok/dissect processor alone so fully parsed sample shapes can be passed to the agent.
+ */
+async function extractParsedSampleDocuments({
+  streamName,
+  documents,
+  parsingProcessor,
+  scopedClusterClient,
+  streamsClient,
+  fieldsMetadataClient,
+  logger,
+}: {
+  streamName: string;
+  documents: FlattenRecord[];
+  parsingProcessor: GrokProcessor | DissectProcessor;
+  scopedClusterClient: IScopedClusterClient;
+  streamsClient: StreamsClient;
+  fieldsMetadataClient: IFieldsMetadataClient;
+  logger: Logger;
+}): Promise<{ parsedDocuments: FlattenRecord[]; definitionError: boolean }> {
+  const simulationResult = await simulateProcessing({
+    params: {
+      path: { name: streamName },
+      body: {
+        documents,
+        processing: {
+          steps: [{ ...parsingProcessor, customIdentifier: SYSTEM_PARSING_PRE_SIM_ID }],
+        },
+      },
+    },
+    esClient: scopedClusterClient.asCurrentUser,
+    streamsClient,
+    fieldsMetadataClient,
+  });
+
+  if (simulationResult.definition_error) {
+    logger.warn(
+      `Parsing pre-simulation failed (stream=${streamName}): ${simulationResult.definition_error.message}`
+    );
+    return { parsedDocuments: [], definitionError: true };
+  }
+
+  return {
+    parsedDocuments: simulationResult.documents
+      .filter((doc) => doc.status === 'parsed')
+      .map((doc) => doc.value),
+    definitionError: false,
+  };
+}
 
 const getErrorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
