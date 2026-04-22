@@ -181,10 +181,12 @@ export class HostsPage {
 
   // KPI helpers
 
+  public getKPITileValueLocator(type: string) {
+    return this.kpiGrid.getByTestId(`hostsViewKPI-${type}`).locator('.echMetricText__value');
+  }
+
   public async getKPITileValue(type: string) {
-    const element = this.kpiGrid.getByTestId(`hostsViewKPI-${type}`);
-    const valueDiv = element.locator('.echMetricText__value');
-    return valueDiv.getAttribute('title');
+    return this.getKPITileValueLocator(type).getAttribute('title');
   }
 
   // Metrics tab

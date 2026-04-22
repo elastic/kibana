@@ -119,17 +119,16 @@ test.describe(
       });
     });
 
-    test('Processes Tab', async ({ pageObjects: { hostsPage }, page }) => {
+    test('Processes Tab', async ({ pageObjects: { hostsPage, assetDetailsPage } }) => {
       await hostsPage.openHostFlyout(HOST1_NAME);
 
       await test.step('navigate to processes tab', async () => {
-        const processesTab = page.getByTestId('infraAssetDetailsProcessesTab');
-        await processesTab.click();
-        await expect(processesTab).toHaveAttribute('aria-selected', 'true');
+        await assetDetailsPage.processesTab.clickTab();
+        await expect(assetDetailsPage.processesTab.tab).toHaveAttribute('aria-selected', 'true');
       });
 
       await test.step('verify processes content is visible', async () => {
-        await expect(page.getByTestId('infraAssetDetailsProcessesTabContent')).toBeVisible({
+        await expect(assetDetailsPage.processesTab.content).toBeVisible({
           timeout: EXTENDED_TIMEOUT,
         });
       });
@@ -175,7 +174,7 @@ test.describe(
       });
     });
 
-    test('Dashboards Tab', async ({ pageObjects: { hostsPage }, page, kbnClient }) => {
+    test('Dashboards Tab', async ({ pageObjects: { hostsPage, assetDetailsPage }, kbnClient }) => {
       const CUSTOM_DASHBOARDS_SETTING = 'observability:enableInfrastructureAssetCustomDashboards';
 
       await kbnClient.uiSettings.update({ [CUSTOM_DASHBOARDS_SETTING]: true });
@@ -190,13 +189,12 @@ test.describe(
         await hostsPage.openHostFlyout(HOST1_NAME);
 
         await test.step('navigate to dashboards tab', async () => {
-          const dashboardsTab = page.getByTestId('infraAssetDetailsDashboardsTab');
-          await dashboardsTab.click();
-          await expect(dashboardsTab).toHaveAttribute('aria-selected', 'true');
+          await assetDetailsPage.dashboardsTab.clickTab();
+          await expect(assetDetailsPage.dashboardsTab.tab).toHaveAttribute('aria-selected', 'true');
         });
 
         await test.step('verify dashboards splash screen is visible', async () => {
-          await expect(page.getByTestId('infraAddDashboard')).toBeVisible({
+          await expect(assetDetailsPage.dashboardsTab.addDashboardButton).toBeVisible({
             timeout: EXTENDED_TIMEOUT,
           });
         });

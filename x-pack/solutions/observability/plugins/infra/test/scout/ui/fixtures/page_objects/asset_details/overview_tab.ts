@@ -178,4 +178,8 @@ export class OverviewTab extends AssetDetailsTab {
       'infraAssetDetailsMetricChartdiskIOReadWrite'
     );
   }
+
+  public getKPIValue(metric: string): Locator {
+    return this.page.getByTestId(`infraAssetDetailsKPI${metric}`).locator('.echMetricText__value');
+  }
 }
