@@ -40,7 +40,7 @@ export function PriorAssistantSpaceAdminRevert({
   `;
 
   const notesListCss = css`
-    && ul {
+    && {
       margin: ${euiTheme.size.s} 0 0;
       margin-left: 0;
       margin-bottom: 0;
@@ -48,7 +48,7 @@ export function PriorAssistantSpaceAdminRevert({
       list-style-position: inside;
     }
 
-    && ul li + li {
+    && li + li {
       margin-top: ${euiTheme.size.xs};
     }
   `;
