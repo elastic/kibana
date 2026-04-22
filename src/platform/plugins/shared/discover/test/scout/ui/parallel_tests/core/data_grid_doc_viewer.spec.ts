@@ -89,7 +89,8 @@ spaceTest.describe('Discover data grid - doc viewer', { tag: testData.DISCOVER_C
 
     // Open the full flyout on the source tab and confirm it shows the same doc.
     await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
-    await page.testSubj.click('docViewerTab-doc_view_source');
+    const flyoutDoc = await readMonacoJson(page);
+    expect(flyoutDoc._id).toBe(popoverDoc._id);
     expect(flyoutDoc._id).toBe(popoverDoc._id);
 
     await closeDocViewerFlyout(page);
