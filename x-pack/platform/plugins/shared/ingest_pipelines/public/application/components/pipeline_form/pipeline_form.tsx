@@ -205,7 +205,6 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  fill
                   color="success"
                   iconType="check"
                   onClick={form.submit}
