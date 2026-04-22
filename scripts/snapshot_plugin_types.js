@@ -13,10 +13,10 @@ var command = process.argv[2];
 
 switch (command) {
   case 'snapshot':
-    require('../src/dev/so_migration/so_migration_snapshot_cli');
+    require('@kbn/dev/so_migration/so_migration_snapshot_cli');
     break;
   case 'compare':
-    require('../src/dev/so_migration/so_migration_compare_cli');
+    require('@kbn/dev/so_migration/so_migration_compare_cli');
     break;
   default:
     printHelp();

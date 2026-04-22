@@ -8,4 +8,4 @@
  */
 
 require('@kbn/setup-node-env');
-require('../src/dev/chromium_version');
+require('@kbn/dev/chromium_version');

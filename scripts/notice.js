@@ -8,4 +8,4 @@
  */
 
 require('@kbn/setup-node-env');
-require('../src/dev/notice/cli');
+require('@kbn/dev/notice/cli');
