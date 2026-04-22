@@ -17,7 +17,7 @@ import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provid
 import { useInitDataViewManager } from '../../data_view_manager/hooks/use_init_data_view_manager';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
-const DataViewManagerBootstrap = () => {
+export const DataViewManagerBootstrap = () => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const initDataViewManager = useInitDataViewManager();
   const sharedStatus = useSelector((state: State) => state.dataViewManager.shared.status);

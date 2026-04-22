@@ -27,6 +27,10 @@ jest.mock('../../network_details', () => ({
   ),
 }));
 
+jest.mock('../../../one_discover/alert_flyout_overview_tab_component', () => ({
+  DataViewManagerBootstrap: () => null,
+}));
+
 describe('buildFlyoutContent', () => {
   it('should return a Network element for a source IP field', () => {
     const result = buildFlyoutContent('source.ip', '10.0.0.1');
