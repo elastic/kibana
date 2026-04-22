@@ -9,12 +9,15 @@ import type { Logger } from '@kbn/core/server';
 import type { CreateRuleBody, IRulesManagementClient, UpdateRuleBody } from './rules_management_client';
 
 /**
- * Routes writes to the primary client only, but sends deletes to both primary and legacy.
+ * Routes writes to the primary client and cleans up the legacy client on every operation.
  *
- * Used while the alerting v2 flag is ON to clean up pre-existing v1 rules whenever a query
- * is removed or its ES|QL changes (breaking change → delete + recreate). Once all legacy
- * rules are gone the legacy adapter becomes a no-op. Errors from the legacy adapter are
- * logged and swallowed so a missing legacy rule never blocks the primary operation.
+ * Used in both flag states:
+ * - Flag ON:  primary = v2, legacy = v1 — creates on v2, cleans up stale v1 rules.
+ * - Flag OFF: primary = v1, legacy = v2 — creates on v1, cleans up orphaned v2 rules.
+ *
+ * On create/update the legacy side's rule is deleted (best-effort). On bulk delete both
+ * sides are targeted. Errors from the legacy adapter are logged and swallowed so a
+ * missing legacy rule never blocks the primary operation.
  */
 export class DualCleanupRulesAdapter implements IRulesManagementClient {
   constructor(
@@ -23,12 +26,14 @@ export class DualCleanupRulesAdapter implements IRulesManagementClient {
     private readonly logger: Logger
   ) {}
 
-  createRule(id: string, body: CreateRuleBody): Promise<void> {
-    return this.primary.createRule(id, body);
+  async createRule(id: string, body: CreateRuleBody): Promise<void> {
+    await this.primary.createRule(id, body);
+    await this.cleanupLegacyRule(id);
   }
 
-  updateRule(id: string, body: UpdateRuleBody): Promise<void> {
-    return this.primary.updateRule(id, body);
+  async updateRule(id: string, body: UpdateRuleBody): Promise<void> {
+    await this.primary.updateRule(id, body);
+    await this.cleanupLegacyRule(id);
   }
 
   async bulkDeleteRules(ids: string[]): Promise<void> {
@@ -39,7 +44,7 @@ export class DualCleanupRulesAdapter implements IRulesManagementClient {
 
     if (legacyResult.status === 'rejected') {
       this.logger.warn(
-        `Legacy rule cleanup failed for ${ids.length} rule(s) — orphaned v1 rules may continue running: ${
+        `Legacy rule cleanup failed for ${ids.length} rule(s) — orphaned rules may continue running: ${
           legacyResult.reason instanceof Error
             ? legacyResult.reason.message
             : String(legacyResult.reason)
@@ -49,6 +54,18 @@ export class DualCleanupRulesAdapter implements IRulesManagementClient {
 
     if (primaryResult.status === 'rejected') {
       throw primaryResult.reason;
+    }
+  }
+
+  private async cleanupLegacyRule(id: string): Promise<void> {
+    try {
+      await this.legacy.bulkDeleteRules([id]);
+    } catch (error) {
+      this.logger.debug(
+        `Legacy rule cleanup for "${id}" failed (may not exist): ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
     }
   }
 }

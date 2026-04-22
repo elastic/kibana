@@ -39,28 +39,26 @@ export class V1RulesAdapter implements IRulesManagementClient {
   }
 
   async updateRule(id: string, body: UpdateRuleBody): Promise<void> {
-    await this.rulesClient
-      .update<EsqlRuleParams>({ id, data: body })
-      .catch((error) => {
-        if (isBoom(error) && error.output.statusCode === 404) {
-          // Rule missing — recreate. `enabled: true` is intentional: this path is only
-          // reached from installQueries for queries the system determined should be active.
-          return this.rulesClient.create<EsqlRuleParams>({
-            data: {
-              name: body.name,
-              consumer: STREAMS_RULE_CONSUMER,
-              alertTypeId: STREAMS_ESQL_RULE_TYPE_ID,
-              actions: body.actions,
-              params: body.params,
-              enabled: true,
-              tags: body.tags,
-              schedule: body.schedule,
-            },
-            options: { id },
-          });
-        }
-        throw error;
-      });
+    await this.rulesClient.update<EsqlRuleParams>({ id, data: body }).catch((error) => {
+      if (isBoom(error) && error.output.statusCode === 404) {
+        // Rule missing — recreate. `enabled: true` is intentional: this path is only
+        // reached from installQueries for queries the system determined should be active.
+        return this.rulesClient.create<EsqlRuleParams>({
+          data: {
+            name: body.name,
+            consumer: STREAMS_RULE_CONSUMER,
+            alertTypeId: STREAMS_ESQL_RULE_TYPE_ID,
+            actions: body.actions,
+            params: body.params,
+            enabled: true,
+            tags: body.tags,
+            schedule: body.schedule,
+          },
+          options: { id },
+        });
+      }
+      throw error;
+    });
   }
 
   async bulkDeleteRules(ids: string[]): Promise<void> {

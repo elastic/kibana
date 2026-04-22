@@ -201,19 +201,16 @@ export class QueryService {
     );
 
     const v1Adapter = new V1RulesAdapter(alertingRulesClient);
+    const v2Client = new V2RulesHttpClient(
+      request,
+      coreStart.http.getServerInfo(),
+      coreStart.http.basePath.serverBasePath,
+      this.logger
+    );
 
     const rulesManagementClient = alertingV2Enabled
-      ? new DualCleanupRulesAdapter(
-          new V2RulesHttpClient(
-            request,
-            coreStart.http.getServerInfo(),
-            coreStart.http.basePath.serverBasePath,
-            this.logger
-          ),
-          v1Adapter,
-          this.logger
-        )
-      : v1Adapter;
+      ? new DualCleanupRulesAdapter(v2Client, v1Adapter, this.logger)
+      : new DualCleanupRulesAdapter(v1Adapter, v2Client, this.logger);
 
     return new QueryClient(
       {

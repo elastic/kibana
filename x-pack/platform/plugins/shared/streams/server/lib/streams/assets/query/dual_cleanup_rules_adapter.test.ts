@@ -45,8 +45,10 @@ const updateBody: UpdateRuleBody = {
 const logger = loggerMock.create();
 
 describe('DualCleanupRulesAdapter', () => {
+  beforeEach(() => jest.clearAllMocks());
+
   describe('createRule', () => {
-    it('delegates to primary only', async () => {
+    it('creates on primary and deletes the legacy counterpart', async () => {
       const primary = makeMockClient();
       const legacy = makeMockClient();
       const adapter = new DualCleanupRulesAdapter(primary, legacy, logger);
@@ -55,11 +57,35 @@ describe('DualCleanupRulesAdapter', () => {
 
       expect(primary.createRule).toHaveBeenCalledWith('id-1', createBody);
       expect(legacy.createRule).not.toHaveBeenCalled();
+      expect(legacy.bulkDeleteRules).toHaveBeenCalledWith(['id-1']);
+    });
+
+    it('swallows legacy cleanup errors without affecting the primary result', async () => {
+      const primary = makeMockClient();
+      const legacy = makeMockClient();
+      legacy.bulkDeleteRules.mockRejectedValueOnce(new Error('legacy 404'));
+      const adapter = new DualCleanupRulesAdapter(primary, legacy, logger);
+
+      await expect(adapter.createRule('id-1', createBody)).resolves.toBeUndefined();
+      expect(primary.createRule).toHaveBeenCalledWith('id-1', createBody);
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('Legacy rule cleanup for "id-1" failed')
+      );
+    });
+
+    it('propagates primary create errors without attempting legacy cleanup', async () => {
+      const primary = makeMockClient();
+      const legacy = makeMockClient();
+      primary.createRule.mockRejectedValueOnce(new Error('primary exploded'));
+      const adapter = new DualCleanupRulesAdapter(primary, legacy, logger);
+
+      await expect(adapter.createRule('id-1', createBody)).rejects.toThrow('primary exploded');
+      expect(legacy.bulkDeleteRules).not.toHaveBeenCalled();
     });
   });
 
   describe('updateRule', () => {
-    it('delegates to primary only', async () => {
+    it('updates on primary and deletes the legacy counterpart', async () => {
       const primary = makeMockClient();
       const legacy = makeMockClient();
       const adapter = new DualCleanupRulesAdapter(primary, legacy, logger);
@@ -68,6 +94,30 @@ describe('DualCleanupRulesAdapter', () => {
 
       expect(primary.updateRule).toHaveBeenCalledWith('id-2', updateBody);
       expect(legacy.updateRule).not.toHaveBeenCalled();
+      expect(legacy.bulkDeleteRules).toHaveBeenCalledWith(['id-2']);
+    });
+
+    it('swallows legacy cleanup errors without affecting the primary result', async () => {
+      const primary = makeMockClient();
+      const legacy = makeMockClient();
+      legacy.bulkDeleteRules.mockRejectedValueOnce(new Error('legacy 404'));
+      const adapter = new DualCleanupRulesAdapter(primary, legacy, logger);
+
+      await expect(adapter.updateRule('id-2', updateBody)).resolves.toBeUndefined();
+      expect(primary.updateRule).toHaveBeenCalledWith('id-2', updateBody);
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('Legacy rule cleanup for "id-2" failed')
+      );
+    });
+
+    it('propagates primary update errors without attempting legacy cleanup', async () => {
+      const primary = makeMockClient();
+      const legacy = makeMockClient();
+      primary.updateRule.mockRejectedValueOnce(new Error('primary exploded'));
+      const adapter = new DualCleanupRulesAdapter(primary, legacy, logger);
+
+      await expect(adapter.updateRule('id-2', updateBody)).rejects.toThrow('primary exploded');
+      expect(legacy.bulkDeleteRules).not.toHaveBeenCalled();
     });
   });
 

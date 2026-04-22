@@ -28,7 +28,7 @@ export interface StreamDocCountsFetch {
 
 interface UseDocCountFetchProps {
   groupTotalCountByTimestamp: boolean;
-  getCanReadFailureStore: (streamName?: string) => boolean;
+  getCanReadFailureStore: (streamName: string) => boolean;
   numDataPoints: number;
 }
 
@@ -51,13 +51,16 @@ export function useStreamDocCountsFetch({
     core: { uiSettings },
   } = useKibana();
 
-  const docCountsPromiseCache = useRef<Partial<Record<string, StreamDocCountsFetch>>>({});
+  const docCountsPromiseCache = useRef<StreamDocCountsFetch | null>(null);
   const histogramPromiseCache = useRef<Partial<Record<string, Promise<UnparsedEsqlResponse>>>>({});
   const abortControllerRef = useRef<AbortController>();
 
   if (!abortControllerRef.current) {
     abortControllerRef.current = new AbortController();
   }
+
+  // No longer need to clear cache based on global canReadFailureStore
+  // since we now check per-stream privileges
 
   useEffect(() => {
     return () => {
@@ -71,7 +74,7 @@ export function useStreamDocCountsFetch({
         const shouldRefresh = kind !== 'initial';
 
         if (shouldRefresh) {
-          docCountsPromiseCache.current = {};
+          docCountsPromiseCache.current = null;
           histogramPromiseCache.current = {};
           abortControllerRef.current?.abort();
           abortControllerRef.current = new AbortController();
@@ -85,9 +88,8 @@ export function useStreamDocCountsFetch({
 
   return {
     getStreamDocCounts(streamName?: string) {
-      const cacheKey = streamName ?? '__aggregate__';
-      if (docCountsPromiseCache.current[cacheKey]) {
-        return docCountsPromiseCache.current[cacheKey]!;
+      if (docCountsPromiseCache.current) {
+        return docCountsPromiseCache.current;
       }
 
       const abortController = abortControllerRef.current;
@@ -109,7 +111,8 @@ export function useStreamDocCountsFetch({
           : {}),
       });
 
-      const canReadFailureStore = getCanReadFailureStore(streamName);
+      // Check per-stream privilege
+      const canReadFailureStore = streamName ? getCanReadFailureStore(streamName) : false;
 
       const failedCountPromise = canReadFailureStore
         ? streamsRepositoryClient.fetch('GET /internal/streams/doc_counts/failed', {
@@ -146,12 +149,12 @@ export function useStreamDocCountsFetch({
         degradedDocCount: degradedCountPromise,
       };
 
-      docCountsPromiseCache.current[cacheKey] = docCountsFetch;
+      docCountsPromiseCache.current = docCountsFetch;
 
       return docCountsFetch;
     },
     getStreamHistogram(streamName: string): Promise<UnparsedEsqlResponse> {
-      const cacheKey = `${streamName}::${timeState.start}::${timeState.end}::${getCanReadFailureStore(streamName)}`;
+      const cacheKey = `${streamName}::${timeState.start}::${timeState.end}`;
       const cachedPromise = histogramPromiseCache.current[cacheKey];
       if (cachedPromise) {
         return cachedPromise;
@@ -163,6 +166,7 @@ export function useStreamDocCountsFetch({
       }
 
       const minInterval = Math.floor((timeState.end - timeState.start) / numDataPoints);
+      // Check per-stream privilege
       const canReadFailureStore = getCanReadFailureStore(streamName);
       const source = canReadFailureStore ? `${streamName},${streamName}::failures` : streamName;
       const timezone = uiSettings?.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
