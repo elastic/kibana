@@ -1,10 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import type { HttpStart } from '@kbn/core/public';
@@ -15,20 +13,21 @@ import type {
   SelectionDetails,
   SelectionOption,
 } from '@kbn/workflows';
+import { internalApiPath } from '../../common/constants';
 
 const TRANSLATIONS = {
   service: (service: string) =>
-    i18n.translate('workflowsExtensions.rerank.inferenceIdSelection.service', {
+    i18n.translate('xpack.agentBuilder.rerankStep.inferenceIdSelection.service', {
       defaultMessage: 'Service: {service}',
       values: { service },
     }),
   connectedToEndpoint: (service: string) =>
-    i18n.translate('workflowsExtensions.rerank.inferenceIdSelection.connectedToEndpoint', {
+    i18n.translate('xpack.agentBuilder.rerankStep.inferenceIdSelection.connectedToEndpoint', {
       defaultMessage: 'Connected to endpoint ({service})',
       values: { service },
     }),
   notFound: (input: string) =>
-    i18n.translate('workflowsExtensions.rerank.inferenceIdSelection.notFound', {
+    i18n.translate('xpack.agentBuilder.rerankStep.inferenceIdSelection.notFound', {
       defaultMessage: 'Inference endpoint "{input}" not found',
       values: { input },
     }),
@@ -46,7 +45,7 @@ interface InferenceEndpointsResponse {
 
 async function loadInferenceEndpoints(http: HttpStart): Promise<InferenceEndpoint[]> {
   const response = await http.get<InferenceEndpointsResponse>(
-    '/internal/workflowsExtensions/inference_endpoints'
+    `${internalApiPath}/inference_endpoints`
   );
   return response.inference_endpoints.filter((ep) => ep.task_type === 'rerank');
 }

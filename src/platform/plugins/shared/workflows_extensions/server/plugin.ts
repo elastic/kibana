@@ -16,7 +16,6 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { emitEvent } from './emit_event';
-import { registerGetInferenceEndpointsRoute } from './routes/get_inference_endpoints';
 import { registerGetStepDefinitionsRoute } from './routes/get_step_definitions';
 import { registerGetTriggerDefinitionsRoute } from './routes/get_trigger_definitions';
 import { ServerStepRegistry } from './step_registry';
@@ -65,7 +64,6 @@ export class WorkflowsExtensionsServerPlugin
     const router = core.http.createRouter();
 
     // Register HTTP routes
-    registerGetInferenceEndpointsRoute(router);
     registerGetStepDefinitionsRoute(router, this.stepRegistry);
     // Register HTTP route to expose trigger definitions for testing
     registerGetTriggerDefinitionsRoute(router, this.triggerRegistry);

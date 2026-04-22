@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import type { CoreSetup } from '@kbn/core/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import { runAgentStepDefinition } from './run_agent_step';
+import { createRerankStepDefinition } from './rerank_step';
 
 export function registerWorkflowSteps(
-  workflowsExtensions: WorkflowsExtensionsPublicPluginSetup
+  workflowsExtensions: WorkflowsExtensionsPublicPluginSetup,
+  core: CoreSetup
 ): void {
   // Register steps
   workflowsExtensions.registerStepDefinition(runAgentStepDefinition);
+  workflowsExtensions.registerStepDefinition(createRerankStepDefinition(core));
 }
