@@ -1,0 +1,16 @@
+spec_id: .gmail
+name: "Gmail (testing)"
+auth_type: oauth_authorization_code
+secrets:
+  authorizationUrl:
+    value: "https://accounts.google.com/o/oauth2/v2/auth"
+  tokenUrl:
+    value: "https://oauth2.googleapis.com/token"
+  scope:
+    value: "https://www.googleapis.com/auth/gmail.readonly"
+  clientId:
+    vault: secret/ent-search-team/workplace-ai-oauth/dev/google
+    field: client_id
+  clientSecret:
+    vault: secret/ent-search-team/workplace-ai-oauth/dev/google
+    field: client_secret
