@@ -6,10 +6,10 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiInMemoryTable, EuiPageSection, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiButton, EuiInMemoryTable, EuiPageSection, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { DataSourceListItem } from '../common/sample_data_sources';
 import { SAMPLE_DATA_SOURCES } from '../common/sample_data_sources';
 
@@ -18,6 +18,8 @@ export interface DataSourcesPageProps {
 }
 
 export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({ pageTitle }) => {
+  const [selectedItems, setSelectedItems] = useState<DataSourceListItem[]>([]);
+
   const columns: Array<EuiBasicTableColumn<DataSourceListItem>> = [
     {
       field: 'name',
@@ -63,6 +65,41 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({ pageT
               },
             },
           },
+          toolsLeft:
+            selectedItems.length > 0 ? (
+              <EuiButton
+                color="danger"
+                data-test-subj="dataSourceManagementDeleteButton"
+                iconType="trash"
+                onClick={() => {
+                  window.alert('delete');
+                  setSelectedItems([]);
+                }}
+              >
+                {i18n.translate('dataSourceManagement.deleteButtonLabel', {
+                  defaultMessage: 'Delete',
+                })}
+              </EuiButton>
+            ) : undefined,
+          toolsRight: (
+            <EuiButton
+              color="primary"
+              data-test-subj="dataSourceManagementCreateButton"
+              iconType="plusInCircle"
+              onClick={() => {
+                window.alert('create');
+              }}
+            >
+              {i18n.translate('dataSourceManagement.addButtonLabel', {
+                defaultMessage: 'Add',
+              })}
+            </EuiButton>
+          ),
+        }}
+        rowHeader="name"
+        selection={{
+          selected: selectedItems,
+          onSelectionChange: setSelectedItems,
         }}
         sorting
         pagination={{
