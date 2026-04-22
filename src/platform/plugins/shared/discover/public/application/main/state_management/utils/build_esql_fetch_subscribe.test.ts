@@ -197,6 +197,32 @@ describe('buildEsqlFetchSubscribe', () => {
     });
   });
 
+  test('should keep resetId stable when a transformational fetch requests a columns reset', async () => {
+    const { toolkit, dataState } = await setupTest({});
+    const documents$ = dataState.data$.documents$;
+
+    documents$.next(msgComplete);
+
+    const prevDefaultProfileState = toolkit.getCurrentTab().defaultProfileState;
+
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [
+        {
+          id: '1',
+          raw: { field1: 1 },
+          flattened: { field1: 1 },
+        } as unknown as DataTableRecord,
+      ],
+      query: { esql: 'from the-data-view-title | keep field1' },
+    });
+
+    const nextDefaultProfileState = toolkit.getCurrentTab().defaultProfileState;
+
+    expect(nextDefaultProfileState.fieldsToReset).toEqual(['columns']);
+    expect(nextDefaultProfileState.resetId).toBe(prevDefaultProfileState.resetId);
+  });
+
   test('changing an ES|QL query with same result columns but a different index pattern should change state when loading and finished', async () => {
     const { replaceUrlState, dataState, tabId } = await setupTest({});
     const documents$ = dataState.data$.documents$;
