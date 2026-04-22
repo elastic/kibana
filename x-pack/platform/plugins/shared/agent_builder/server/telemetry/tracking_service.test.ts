@@ -527,9 +527,7 @@ describe('TrackingService', () => {
 
       trackingService.trackSkillInvocation('builtin');
 
-      expect(logger.error).toHaveBeenCalledWith(
-        'Failed to track skill invocation: Counter error'
-      );
+      expect(logger.error).toHaveBeenCalledWith('Failed to track skill invocation: Counter error');
     });
   });
 
