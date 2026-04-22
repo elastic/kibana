@@ -130,6 +130,8 @@
       "@kbn/apm-data-access-plugin/*": ["x-pack/solutions/observability/plugins/apm_data_access/*"],
       "@kbn/apm-data-view": ["src/platform/packages/shared/kbn-apm-data-view"],
       "@kbn/apm-data-view/*": ["src/platform/packages/shared/kbn-apm-data-view/*"],
+      "@kbn/apm-embeddable-common": ["x-pack/solutions/observability/packages/kbn-apm-embeddable-common"],
+      "@kbn/apm-embeddable-common/*": ["x-pack/solutions/observability/packages/kbn-apm-embeddable-common/*"],
       "@kbn/apm-ftr-e2e": ["x-pack/solutions/observability/plugins/apm/ftr_e2e"],
       "@kbn/apm-ftr-e2e/*": ["x-pack/solutions/observability/plugins/apm/ftr_e2e/*"],
       "@kbn/apm-plugin": ["x-pack/solutions/observability/plugins/apm"],
