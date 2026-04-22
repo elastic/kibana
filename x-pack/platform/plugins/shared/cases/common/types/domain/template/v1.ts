@@ -131,6 +131,11 @@ export const ParsedTemplateSchema = TemplateSchema.omit({
    * Parsed definition for the template. Needs to be validated programmatically.
    */
   definition: ParsedTemplateDefinitionSchema,
+  /**
+   * Original YAML definition string with preserved formatting and comments.
+   * This should be used when editing templates to preserve user formatting.
+   */
+  definitionString: z.string(),
   isLatest: z.boolean(),
   latestVersion: z.number(),
 });
