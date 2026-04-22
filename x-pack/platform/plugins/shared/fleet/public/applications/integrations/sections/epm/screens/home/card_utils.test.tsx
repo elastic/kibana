@@ -266,11 +266,9 @@ describe('Card utils', () => {
         title: 'Test',
         version: '1.0.0',
         type: 'integration',
-        policy_templates: [
+        pkgDeploymentInfo: [
           {
             name: 'test',
-            title: 'Test',
-            description: '',
             deployment_modes: {
               agentless: { enabled: true },
               default: { enabled: false },
@@ -281,11 +279,9 @@ describe('Card utils', () => {
 
       const dualModeItem = {
         ...agentlessOnlyItem,
-        policy_templates: [
+        pkgDeploymentInfo: [
           {
             name: 'test',
-            title: 'Test',
-            description: '',
             deployment_modes: {
               agentless: { enabled: true },
               default: { enabled: true },
@@ -296,11 +292,9 @@ describe('Card utils', () => {
 
       const dualModeDefaultAgentlessItem = {
         ...agentlessOnlyItem,
-        policy_templates: [
+        pkgDeploymentInfo: [
           {
             name: 'test',
-            title: 'Test',
-            description: '',
             deployment_modes: {
               agentless: { enabled: true, is_default: true },
               default: { enabled: true },
@@ -337,11 +331,9 @@ describe('Card utils', () => {
       it('should not override release when agentless release is GA', () => {
         const gaItem = {
           ...agentlessOnlyItem,
-          policy_templates: [
+          pkgDeploymentInfo: [
             {
               name: 'test',
-              title: 'Test',
-              description: '',
               deployment_modes: {
                 agentless: { enabled: true, release: 'ga' },
                 default: { enabled: false },

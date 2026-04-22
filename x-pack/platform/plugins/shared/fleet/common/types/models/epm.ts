@@ -688,6 +688,8 @@ export type PackageListItem = Installable<RegistrySearchResult> & {
   savedObject?: InstallableSavedObject;
   installationInfo?: InstallationInfo;
   packagePoliciesInfo?: { count: number };
+  /** Policy template deployment info for release evaluation */
+  pkgDeploymentInfo?: InstallationPolicyTemplateDeploymentInfo[];
 };
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;
 export type PackageInfo =

@@ -83,8 +83,14 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
       ...restOfPackage
     } = pkg;
 
+    const pkgDeploymentInfo = policyTemplates.map(({ name, deployment_modes }) => ({
+      name,
+      deployment_modes,
+    }));
+
     const topPackage = {
       ...restOfPackage,
+      pkgDeploymentInfo,
       categories: getAllCategoriesFromIntegrations(pkg),
     };
 
@@ -99,6 +105,7 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
           const allCategories = [...topCategories, ...categories];
           return {
             ...restOfPackage,
+            pkgDeploymentInfo,
             id: `${restOfPackage.id}-${name}`,
             integration: name,
             title,
@@ -146,8 +153,10 @@ export type AvailablePackagesHookType = typeof useAvailablePackages;
 
 export const useAvailablePackages = ({
   prereleaseIntegrationsEnabled,
+  isAgentlessContext,
 }: {
   prereleaseIntegrationsEnabled: boolean;
+  isAgentlessContext?: boolean;
 }) => {
   const [preference, setPreference] = useState<IntegrationPreferenceType>('agent');
 
@@ -212,7 +221,6 @@ export const useAvailablePackages = ({
 
   const cards: IntegrationCardItem[] = useMemo(() => {
     const eprAndCustomPackages = [...mergedEprPackages, ...(appendCustomIntegrations || [])];
-
     return (
       eprAndCustomPackages
         // If only showing agentless integrations, filter out non-agentless ones
@@ -229,7 +237,10 @@ export const useAvailablePackages = ({
             item,
             addBasePath,
             packageVerificationKeyId,
-            filterState: { selectedCategory, onlyAgentless: onlyAgentlessFilter },
+            filterState: {
+              selectedCategory,
+              onlyAgentless: onlyAgentlessFilter || isAgentlessContext,
+            },
           });
         })
         .sort((a, b) => a.title.localeCompare(b.title))
@@ -239,9 +250,10 @@ export const useAvailablePackages = ({
     appendCustomIntegrations,
     getAbsolutePath,
     getHref,
+    isAgentlessContext,
+    isAgentlessEnabled,
     mergedEprPackages,
     onlyAgentlessFilter,
-    isAgentlessEnabled,
     packageVerificationKeyId,
     selectedCategory,
   ]);

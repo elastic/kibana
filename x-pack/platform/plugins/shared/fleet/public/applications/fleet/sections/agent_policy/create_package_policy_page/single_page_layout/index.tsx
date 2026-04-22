@@ -507,7 +507,9 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
   const setupTechnologySelector = useMemo(() => {
     if (!addIntegrationFlyoutProps && isAgentless && packageInfo) {
-      const showBetaBadge = resolveEffectiveRelease(packageInfo, integrationToEnable) !== 'ga';
+      const showBetaBadge =
+        resolveEffectiveRelease(packageInfo, integrationToEnable, { isAgentlessContext: true }) !==
+        'ga';
       return (
         <SetupTechnologySelector
           disabled={false}

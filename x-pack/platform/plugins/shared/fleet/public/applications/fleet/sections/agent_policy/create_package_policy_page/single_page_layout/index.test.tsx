@@ -198,6 +198,7 @@ describe('When on the package policy create page', () => {
       release?: AgentlessDeploymentReleaseStatus;
       isDefault?: boolean;
     };
+    dualMode?: boolean;
   }) {
     const { agentless } = options ?? {};
     return {
@@ -230,6 +231,7 @@ describe('When on the package policy create page', () => {
                       ...(agentless.release !== undefined && { release: agentless.release }),
                       ...(agentless.isDefault !== undefined && { is_default: agentless.isDefault }),
                     },
+                    ...(options?.dualMode && { default: { enabled: true } }),
                   }
                 : { agentless: { enabled: false } },
             },
@@ -893,7 +895,26 @@ describe('When on the package policy create page', () => {
         });
       });
 
-      test('should not show beta badge when package semver is GA', async () => {
+      test('should show beta badge for a dual-mode package with GA semver and no explicit release', async () => {
+        (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue(
+          getMockPackageInfo({
+            agentless: { enabled: true },
+            dualMode: true,
+          })
+        );
+        await act(async () => {
+          render();
+        });
+
+        await waitFor(() => {
+          expect(renderResult.getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ)).toBeInTheDocument();
+          expect(
+            renderResult.getByTestId(SETUP_TECHNOLOGY_SELECTOR_BETA_BADGE_TEST_SUBJ)
+          ).toBeInTheDocument();
+        });
+      });
+
+      test('should not show beta badge when only-agentless package semver is GA', async () => {
         (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue(
           getMockPackageInfo({ agentless: { enabled: true } })
         );

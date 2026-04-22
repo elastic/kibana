@@ -144,8 +144,8 @@ export const mapToCard = ({
   const integration = 'integration' in item ? item.integration || '' : '';
   const installationInfo = 'installationInfo' in item ? item.installationInfo : undefined;
 
-  // When a newer version is available, prefer the installed version's stored deployment info
-  // so the agentless release badge reflects the installed package's maturity.
+  // When an update is available, use the installed version's SO data so the badge reflects
+  // installed maturity. Otherwise use the tile's pkgDeploymentInfo.
   const packageItemForRelease =
     isUpdateAvailable && installationInfo?.policy_templates_deployment_info
       ? {
@@ -153,7 +153,7 @@ export const mapToCard = ({
           version: installationInfo.version,
         }
       : {
-          policy_templates: 'policy_templates' in item ? item.policy_templates : undefined,
+          policy_templates: 'pkgDeploymentInfo' in item ? item.pkgDeploymentInfo : undefined,
           version,
         };
 
@@ -163,7 +163,6 @@ export const mapToCard = ({
     integration,
     { isAgentlessContext: filterState?.onlyAgentless }
   );
-
   let extraLabelsBadges: React.ReactNode[] | undefined;
   if (item.type === 'integration' || item.type === 'content') {
     extraLabelsBadges = getIntegrationLabels(item);
