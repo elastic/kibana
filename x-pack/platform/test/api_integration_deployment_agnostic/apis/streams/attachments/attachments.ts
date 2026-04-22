@@ -10,6 +10,7 @@ import {
   enableStreams,
   indexDocument,
   putStream,
+  putQueryStream,
   deleteStream,
   linkAttachment,
   unlinkAttachment,
@@ -1091,6 +1092,121 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ],
           spaceId: TEST_SPACE_ID,
         });
+      });
+    });
+
+    describe('query stream attachments', () => {
+      const QUERY_ATTACH_TEST_STREAM = '$.logs.otel.query_attach_test';
+
+      before(async () => {
+        await putQueryStream(apiClient, QUERY_ATTACH_TEST_STREAM, {
+          query: { esql: 'FROM logs.otel' },
+        });
+        await loadDashboards(kibanaServer, DASHBOARD_ARCHIVES, SPACE_ID);
+        await kibanaServer.importExport.load(RULE_ARCHIVE, { space: SPACE_ID });
+      });
+
+      after(async () => {
+        for (const attempt of [
+          () =>
+            unlinkAttachment({
+              apiClient,
+              stream: QUERY_ATTACH_TEST_STREAM,
+              type: 'dashboard',
+              id: SEARCH_DASHBOARD_ID,
+            }),
+          () =>
+            unlinkAttachment({
+              apiClient,
+              stream: QUERY_ATTACH_TEST_STREAM,
+              type: 'rule',
+              id: FIRST_RULE_ID,
+            }),
+        ]) {
+          try {
+            await attempt();
+          } catch {
+            // Best-effort cleanup (e.g. link already removed).
+          }
+        }
+
+        try {
+          await deleteStream(apiClient, QUERY_ATTACH_TEST_STREAM);
+        } catch {
+          // Stream may already be absent if a prior step failed.
+        }
+
+        await unloadDashboards(kibanaServer, DASHBOARD_ARCHIVES, SPACE_ID);
+        await kibanaServer.importExport.unload(RULE_ARCHIVE, { space: SPACE_ID });
+      });
+
+      it('attaches a dashboard to a query stream', async () => {
+        const linkResponse = await linkAttachment({
+          apiClient,
+          stream: QUERY_ATTACH_TEST_STREAM,
+          type: 'dashboard',
+          id: SEARCH_DASHBOARD_ID,
+        });
+        expect(linkResponse.acknowledged).to.eql(true);
+
+        const listResponse = await getAttachments({
+          apiClient,
+          stream: QUERY_ATTACH_TEST_STREAM,
+          filters: { types: ['dashboard'] },
+        });
+        expect(listResponse.attachments.length).to.eql(1);
+        expect(listResponse.attachments[0].id).to.eql(SEARCH_DASHBOARD_ID);
+      });
+
+      it('attaches a rule to a query stream', async () => {
+        const linkResponse = await linkAttachment({
+          apiClient,
+          stream: QUERY_ATTACH_TEST_STREAM,
+          type: 'rule',
+          id: FIRST_RULE_ID,
+        });
+        expect(linkResponse.acknowledged).to.eql(true);
+
+        const listResponse = await getAttachments({
+          apiClient,
+          stream: QUERY_ATTACH_TEST_STREAM,
+          filters: { types: ['rule'] },
+        });
+        expect(listResponse.attachments.length).to.eql(1);
+        expect(listResponse.attachments[0].id).to.eql(FIRST_RULE_ID);
+      });
+
+      it('lists all attachments on a query stream', async () => {
+        const response = await getAttachments({ apiClient, stream: QUERY_ATTACH_TEST_STREAM });
+
+        expect(response.attachments.length).to.eql(2);
+        const types = response.attachments.map((a) => a.type).sort();
+        expect(types).to.eql(['dashboard', 'rule']);
+      });
+
+      it('unlinks an attachment from a query stream', async () => {
+        const unlinkResponse = await unlinkAttachment({
+          apiClient,
+          stream: QUERY_ATTACH_TEST_STREAM,
+          type: 'dashboard',
+          id: SEARCH_DASHBOARD_ID,
+        });
+        expect(unlinkResponse.acknowledged).to.eql(true);
+
+        const dashboards = await getAttachments({
+          apiClient,
+          stream: QUERY_ATTACH_TEST_STREAM,
+          filters: { types: ['dashboard'] },
+        });
+        expect(dashboards.attachments.length).to.eql(0);
+
+        const rules = await getAttachments({
+          apiClient,
+          stream: QUERY_ATTACH_TEST_STREAM,
+          filters: { types: ['rule'] },
+        });
+        expect(rules.attachments.length).to.eql(1);
+        expect(rules.attachments[0].id).to.eql(FIRST_RULE_ID);
       });
     });
 
