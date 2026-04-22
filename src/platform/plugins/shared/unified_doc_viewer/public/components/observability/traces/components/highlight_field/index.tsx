@@ -15,7 +15,7 @@ import type { FieldConfigValue } from '../../../../content_framework';
 interface Props {
   value?: FieldConfigValue;
   formattedValue?: ReactNode;
-  children?: (props: { content: ReactNode }) => ReactNode | ReactNode;
+  children?: (props: { content: ReactNode }) => ReactNode;
   textSize?: EuiTextProps['size'];
 
   as?: keyof JSX.IntrinsicElements;

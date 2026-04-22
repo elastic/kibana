@@ -116,6 +116,20 @@ describe('ContentBreakdown', () => {
       expect(container.querySelector('john')).toBeNull();
     });
 
+    it('renders pretty-printed JSON when message is valid JSON and skips reactConvert', () => {
+      const json = { foo: { bar: true } };
+      const message = JSON.stringify(json);
+      const hit = buildHit({ message });
+      const formattedDoc = { message } as any;
+
+      render(<ContentBreakdown dataView={mockDataView} formattedDoc={formattedDoc} hit={hit} />);
+
+      const codeBlock = screen.getByTestId('codeBlock');
+      expect(codeBlock.textContent).toBe(JSON.stringify(json, null, 2));
+      // The JSON path uses formattedValue directly — reactConvert should not be called
+      expect(mockReactConvert).not.toHaveBeenCalled();
+    });
+
     it('applies highlights even when field is not in data view (e.g., OTel body.text)', () => {
       const fieldName = 'body.text';
       const message = 'OTel log message with search term';

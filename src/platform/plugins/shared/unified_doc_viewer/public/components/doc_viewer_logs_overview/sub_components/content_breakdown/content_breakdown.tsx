@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiCodeBlock,
   EuiFlexGroup,
@@ -48,19 +48,23 @@ export const ContentBreakdown = ({
 
   const rawFieldValue = hit && field ? hit.flattened[field] : undefined;
 
-  const messageCodeBlockProps = formattedValue
-    ? { language: 'json', children: formattedValue }
-    : {
-        language: 'txt',
-        // Pass field name for highlight lookup in hit.highlight.
-        // The field may not exist in the data view (e.g., OTel body.text) but highlights should still apply.
-        children: fieldFormats
-          .getDefaultInstance(KBN_FIELD_TYPES.STRING)
-          .reactConvert(value ?? '', {
-            hit: hit.raw,
-            field: field ? { name: field } : undefined,
-          }),
-      };
+  const messageCodeBlockProps = useMemo(
+    () =>
+      formattedValue
+        ? { language: 'json', children: formattedValue }
+        : {
+            language: 'txt',
+            // Pass field name for highlight lookup in hit.highlight.
+            // The field may not exist in the data view (e.g., OTel body.text) but highlights should still apply.
+            children: fieldFormats
+              .getDefaultInstance(KBN_FIELD_TYPES.STRING)
+              .reactConvert(value ?? '', {
+                hit: hit.raw,
+                field: field ? { name: field } : undefined,
+              }),
+          },
+    [field, fieldFormats, formattedValue, hit.raw, value]
+  );
   const hasMessageField = field && value;
 
   return (
