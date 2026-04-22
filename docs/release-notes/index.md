@@ -280,6 +280,7 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Makes the manual run API public [#253010]({{kib-pull}}253010).
 * Whitelists Streams APIs as Kibana workflow steps [#252068]({{kib-pull}}252068).
 * Adds the `entries` Liquid filter for iterating over object keys [#259249]({{kib-pull}}259249).
+
 ### Fixes [kibana-9.4.0-fixes]
 
 **Alerting**:
@@ -301,6 +302,7 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Fixes rule execution failing due to null execution UUIDs [#252618]({{kib-pull}}252618).
 * Improves handling of `204` responses [#251090]({{kib-pull}}251090).
 * Fixes timestamp override for {{esql}} CSV scheduled reports with relative time ranges [#248169]({{kib-pull}}248169).
+* Fixes **Failed to check if maintenance windows are active** error [#261048]({{kib-pull}}261048).
 * Updates `total_event` in ES document when attaching an event [#247996]({{kib-pull}}247996).
 * Encodes the search term in the cases page [#247992]({{kib-pull}}247992).
 * Adds max character validation to the email connector params and config [#246453]({{kib-pull}}246453).
@@ -309,6 +311,7 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 **Connectivity**:
 * Fixes `defaultModel` not being injected for the **Other** OpenAI provider on run and test sub-actions [#260747]({{kib-pull}}260747).
 * Fixes MCP connectors ignoring the proxy and SSL configuration from the actions plugin [#255813]({{kib-pull}}255813).
+* Adds the datasource name to the namespace to allow creating multiple sources of the same type [#249123]({{kib-pull}}249123).
 
 **Dashboards and Visualizations**:
 * Fixes an issue that could prevent a dashboard from showing its latest saved state [#262695]({{kib-pull}}262695).
@@ -382,6 +385,9 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Fixes filtering out null values from the Discover histogram legend in {{esql}} mode [#249302]({{kib-pull}}249302).
 * Fixes **Search entire time range** for date nanos [#248495]({{kib-pull}}248495).
 * Prevents loss of UI state in signal-specific Discover fly-out tabs when refreshing a query [#248203]({{kib-pull}}248203).
+* Fixes `ToolbarSelector` when clicking on tabs [#247836]({{kib-pull}}247836).
+* Makes static-lookup formatter work with aggregated boolean fields [#249311]({{kib-pull}}249311).
+* Adds a check to ensure {{esql}} is valid before matching the Metrics profile [#248917]({{kib-pull}}248917).
 * Fixes query drafts when switching tabs [#247968]({{kib-pull}}247968).
 * Allows completing all quickly opened tabs [#246941]({{kib-pull}}246941).
 * Fixes the default app state handling when detecting unsaved changes [#246664]({{kib-pull}}246664).
@@ -422,6 +428,7 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Fixes Stack Monitoring Recent Log Entries timestamps to respect Kibana's time zone setting (`dateFormat:tz`) [#249016]({{kib-pull}}249016).
 * Fixes an issue with share modal where all time ranges were being shared as absolute [#248804]({{kib-pull}}248804).
 * Fixes `createAuditEvents` always returning failure as outcome [#247152]({{kib-pull}}247152).
+* Fixes the monitoring breadcrumbs for the solution view [#249751]({{kib-pull}}249751).
 
 **Machine Learning**:
 * Ensures the single metric chart shows anomaly actions correctly in Anomaly Explorer [#263925]({{kib-pull}}263925).
@@ -445,6 +452,9 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Disables {{esql}} field stats for TS command [#247641]({{kib-pull}}247641).
 * Fixes the display of the map view for small screen sizes in Data Visualizer [#247615]({{kib-pull}}247615).
 * Fixes an anomaly chart empty query bug [#246841]({{kib-pull}}246841).
+* Fixes deanonymization offset drift and adds regression coverage [#256112]({{kib-pull}}256112).
+* Improves anonymization error messages when the NER model is not available [#247696]({{kib-pull}}247696).
+* Adds a refusal field to assistant conversations [#243423]({{kib-pull}}243423).
 
 **Management**:
 * Fixes the code box stale announcement for accessibility [#261921]({{kib-pull}}261921).
@@ -469,6 +479,7 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Fixes syntax highlighting for strings with unicode characters in **Dev Tools Console** [#255649]({{kib-pull}}255649).
 * Fixes an issue in **Dev Tools Console** where closing nested braces broke syntax highlighting for subsequent elements [#255426]({{kib-pull}}255426).
 * Fixes autocomplete not working in embedded console [#253306]({{kib-pull}}253306).
+* Prevents cloned managed ILM policies from being marked as managed [#248586]({{kib-pull}}248586).
 
 **Search**:
 * Fixes an unnecessary comma in the External inference description [#263769]({{kib-pull}}263769).
@@ -508,26 +519,22 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Adds RBAC checks to new Agentic pages [#261895]({{kib-pull}}261895).
 * Fixes a bug with resetting of agent id [#263044]({{kib-pull}}263044).
 * Upgrades hono and @hono/node-server dependency [#263794]({{kib-pull}}263794).
+* Renders an inline attachment loading skeleton during streaming [#264408]({{kib-pull}}264408).
+* Adds attachment origin to Converse API — accepts optional `origin` on attachments for by-reference flows, and rejects attachments with neither `data` nor `origin` [#259043]({{kib-pull}}259043).
+* Fixes a bug in the `platform.core.search` tool and `index_search` tool type where nested fields were ignored when searching for matching documents [#255914]({{kib-pull}}255914).
+* Fixes {{esql}} test tool failing when the numerical value is zero [#251901]({{kib-pull}}251901).
+* Fixes a bug where Agent Builder Index Search tools would fail on aliases that contained `semantic_text` fields [#247877]({{kib-pull}}247877).
 
 **Workflows**:
-* Renders an inline attachment loading skeleton during streaming [#264408]({{kib-pull}}264408).
 * Fixes connector step icons falling back to plugs in workflow list [#263880]({{kib-pull}}263880).
-* Fixes the preview time picker not updating on chart brush [#262112]({{kib-pull}}262112).
-* Fixes **Failed to check if maintenance windows are active** error [#261048]({{kib-pull}}261048).
 * Adds input text sanitization [#259262]({{kib-pull}}259262).
-* Adds attachment origin to Converse API. Converse accepts optional `origin` on attachments for by-reference flows and rejects attachments with neither `data` nor `origin` [#259043]({{kib-pull}}259043).
-* Supports Logs AI Insight in {{esql}} mode in Discover [#258595]({{kib-pull}}258595).
-* Cancels in-flight metrics requests on breakdown change [#258473]({{kib-pull}}258473).
 * Validates HTTP connector URL against `allowedHosts` at execution time [#258080]({{kib-pull}}258080).
 * Uses correct URL in `viewInAppUrl` and fixes `??` bug in redirect [#257910]({{kib-pull}}257910).
 * Fixes false validation errors for item/index in `data.map` steps [#257703]({{kib-pull}}257703).
 * Fixes an accessibility issue in the table with zoom [#257097]({{kib-pull}}257097).
 * Adds support for native YAML arrays for foreach step [#256298]({{kib-pull}}256298).
 * Fixes false Liquid validation errors from YAML comments [#256237]({{kib-pull}}256237).
-* Fixes deanonymization offset drift and adds regression coverage [#256112]({{kib-pull}}256112).
 * Adds a generate API key server-side implementation [#256083]({{kib-pull}}256083).
-* Fixes a bug in the `platform.core.search` tool and `index_search` tool type where nested fields were ignored when searching for matching documents [#255914]({{kib-pull}}255914).
-* Returns an error when submitting a scan job but malware protection is not enabled [#255597]({{kib-pull}}255597).
 * Fixes liquidjs validation for variables used before assignment [#255337]({{kib-pull}}255337).
 * Fixes glitchy **Attributes** rendering [#255173]({{kib-pull}}255173).
 * Propagates inference errors [#254815]({{kib-pull}}254815).
@@ -535,23 +542,10 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Fixes execution tree clipping when the foreach step has many iterations [#253576]({{kib-pull}}253576).
 * Fixes the scrollbars color in Safari when the macOS appearance setting is the opposite of the selected Kibana Color Mode [#253484]({{kib-pull}}253484).
 * Fixes false validation errors for template-local variables in Liquid templates [#253405]({{kib-pull}}253405).
-* Fixes Beats tutorial authentication instructions in serverless environments to show correct API key-based configuration [#253164]({{kib-pull}}253164).
 * Adds datemath support to KQL evaluator [#252840]({{kib-pull}}252840).
 * Fixes the create new tool page when switching types [#252811]({{kib-pull}}252811).
 * Prevents table sorting when toggling the workflow enable state [#252724]({{kib-pull}}252724).
 * Strips system-managed date fields from ingest pipelines before PUT [#252579]({{kib-pull}}252579).
-* Fixes Entity Store Install API parameter validations [#252366]({{kib-pull}}252366).
-* Fixes {{esql}} test tool failing when the numerical value is zero [#251901]({{kib-pull}}251901).
-* Fixes the monitoring breadcrumbs for the solution view [#249751]({{kib-pull}}249751).
-* Makes static-lookup formatter work with aggregated boolean fields [#249311]({{kib-pull}}249311).
-* Adds the datasource name to the namespace [#249123]({{kib-pull}}249123).
-* Adds a check to ensure {{esql}} is valid before matching the Metrics profile [#248917]({{kib-pull}}248917).
-* Prevents cloned managed ILM policies from being marked as managed [#248586]({{kib-pull}}248586).
-* Fixes a bug where Agent Builder Index Search tools would fail on aliases that contained `semantic_text` fields [#247877]({{kib-pull}}247877).
-* Fixes `ToolbarSelector` when clicking on tabs [#247836]({{kib-pull}}247836).
-* Improves anonymization error messages when the NER model is not available [#247696]({{kib-pull}}247696).
-* Adds a table caption for empty top categories in the logs category table [#246041]({{kib-pull}}246041).
-* Adds a refusal field to assistant conversations [#243423]({{kib-pull}}243423).
 
 ## 9.3.3 [kibana-9.3.3-release-notes]
 
