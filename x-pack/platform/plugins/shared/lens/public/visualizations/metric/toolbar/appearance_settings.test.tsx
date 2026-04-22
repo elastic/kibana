@@ -8,8 +8,7 @@
 import React from 'react';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { fireEvent, render, screen } from '@testing-library/react';
-import type { Alignment, MetricVisualizationState, PrimaryMetricPosition } from '@kbn/lens-common';
-import { LENS_METRIC_LAYOUT_BY_POSITION } from '@kbn/lens-common';
+import type { Alignment, MetricVisualizationState } from '@kbn/lens-common';
 import { EuiButtonGroupTestHarness } from '@kbn/test-eui-helpers';
 import { MetricAppearanceSettings } from './appearance_settings';
 
@@ -267,33 +266,4 @@ describe('appearance settings', () => {
 
     expect(screen.queryByTestId('lens-metric-appearance-other-icon-position-btn')).toBeDisabled();
   });
-
-  it.each<[PrimaryMetricPosition, string, PrimaryMetricPosition, string]>([
-    ['top', 'Top', 'bottom', 'Bottom'],
-    ['middle', 'Middle', 'bottom', 'Bottom'],
-    ['bottom', 'Bottom', 'top', 'Top'],
-    ['bottom', 'Bottom', 'middle', 'Middle'],
-    ['middle', 'Middle', 'top', 'Top'],
-    ['top', 'Top', 'middle', 'Middle'],
-  ])(
-    'should set default config when changing from %j (%s) to %j (%s)',
-    (newPosition, newLabel, prevPosition, prevLabel) => {
-      renderComponent({ primaryPosition: prevPosition });
-
-      const btnGroup = new EuiButtonGroupTestHarness(
-        'lens-metric-appearance-primary-metric-position-btn'
-      );
-
-      expect(btnGroup.getSelected()?.textContent).toBe(prevLabel);
-
-      btnGroup.select(newLabel);
-
-      expect(mockSetState).toHaveBeenCalledWith(
-        expect.objectContaining({
-          primaryPosition: newPosition,
-          ...LENS_METRIC_LAYOUT_BY_POSITION[newPosition],
-        })
-      );
-    }
-  );
 });

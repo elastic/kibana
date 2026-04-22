@@ -127,7 +127,6 @@ export function MetricAppearanceSettings({
                 setState({
                   ...state,
                   primaryPosition: id,
-                  ...getDefaultLayoutConfig(id, { hasMetricIcon, hasSecondaryMetric }),
                 });
               }}
               dataTestSubj="lens-metric-appearance-primary-metric-position-btn"
