@@ -95,7 +95,8 @@
     "@kbn/utility-types",
     "@kbn/usage-collection-plugin",
     "@kbn/share-plugin",
-    "@kbn/deeplinks-analytics"
+    "@kbn/deeplinks-analytics",
+    "@kbn/core-user-profile-browser"
   ],
   "exclude": ["target/**/*"]
 }
