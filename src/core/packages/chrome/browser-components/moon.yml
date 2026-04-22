@@ -39,6 +39,8 @@ dependsOn:
   - '@kbn/core-custom-branding-common'
   - '@kbn/core-doc-links-browser'
   - '@kbn/core-doc-links-browser-mocks'
+  - '@kbn/core-hotkeys-browser'
+  - '@kbn/core-hotkeys-browser-mocks'
   - '@kbn/core-http-browser'
   - '@kbn/core-http-browser-mocks'
   - '@kbn/core-mount-utils-browser'

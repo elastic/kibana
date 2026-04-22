@@ -28,6 +28,7 @@ import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { getAppInfo } from '@kbn/core-application-browser-internal';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { hotkeysServiceMock } from '@kbn/core-hotkeys-browser-mocks';
 
 import {
   ChromeComponentsProvider,
@@ -245,6 +246,7 @@ describe('start', () => {
       http: startDeps.http,
       docLinks: startDeps.docLinks,
       customBranding: startDeps.customBranding,
+      hotkeys: hotkeysServiceMock.createStartContract(),
     });
 
     it('ClassicHeader renders within ChromeComponentsProvider', async () => {
