@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isCCSRemoteIndexName } from '@kbn/es-query';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import type { RemoteMonitorInfo } from '../../common/runtime_types';
 import type { SyntheticsServerSetup } from '../types';
 
@@ -20,7 +20,7 @@ export const isCCSEnabled = (
  * Example: "cluster1:synthetics-*" → "cluster1"
  */
 export function getRemoteClusterName(index: string): string | undefined {
-  if (isCCSRemoteIndexName(index)) {
+  if (isNonLocalIndexName(index)) {
     return index.substring(0, index.indexOf(':'));
   }
 }

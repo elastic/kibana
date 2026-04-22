@@ -31,16 +31,31 @@ paths:
                     - 'false'
                   description: Whether the Timeline should be immutable
                 file: {}
+            examples:
+              multipartPlaceholder:
+                summary: Request shape (file is a stream of NDJSON lines at runtime)
+                value:
+                  isImmutable: 'false'
+                  file: '{"savedObjectId":"15c1929b-0af7-42bd-85a8-56e234cc7c4e","version":"WzE0LDFd"}\n'
       responses:
         '200':
-          description: Indicates the import of Timelines was successful.
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
                 $ref: '../model/components.schema.yaml#/components/schemas/ImportTimelineResult'
+              examples:
+                importSummary:
+                  summary: Import summary
+                  value:
+                    success: true
+                    success_count: 5
+                    timelines_installed: 3
+                    timelines_updated: 2
+                    errors: []
 
         '400':
-          description: Indicates the import of Timelines was unsuccessful because of an invalid file extension.
+          description: Bad Request response.
           content:
             application/json:
               schema:
@@ -53,9 +68,15 @@ paths:
                   statusCode:
                     type: number
                     example: 400
+              examples:
+                badRequest:
+                  summary: Invalid import
+                  value:
+                    body: Invalid file extension
+                    statusCode: 400
 
         '404':
-          description: Indicates that we were unable to locate the saved object client necessary to handle the import.
+          description: Not found response.
           content:
             application/json:
               schema:
@@ -68,6 +89,12 @@ paths:
                   statusCode:
                     type: number
                     example: 404
+              examples:
+                notFound:
+                  summary: Saved objects client missing
+                  value:
+                    body: Unable to find saved object client
+                    statusCode: 404
         '409':
           description: Indicates the import of Timelines was unsuccessful.
           content:
@@ -82,3 +109,9 @@ paths:
                   statusCode:
                     type: number
                     example: 409
+              examples:
+                conflict:
+                  summary: Import conflict
+                  value:
+                    body: Could not import timelines
+                    statusCode: 409
