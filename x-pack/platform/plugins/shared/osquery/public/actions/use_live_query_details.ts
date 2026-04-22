@@ -15,7 +15,11 @@ import type { ResultCounts } from '../../common/api/live_query/result_counts';
 import { useKibana } from '../common/lib/kibana';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 
-export type { SingleQueryResultCounts, PackResultCounts, ResultCounts } from '../../common/api/live_query/result_counts';
+export type {
+  SingleQueryResultCounts,
+  PackResultCounts,
+  ResultCounts,
+} from '../../common/api/live_query/result_counts';
 
 interface UseLiveQueryDetails {
   actionId?: string;
