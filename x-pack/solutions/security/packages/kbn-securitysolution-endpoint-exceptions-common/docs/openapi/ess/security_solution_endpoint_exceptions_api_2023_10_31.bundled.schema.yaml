@@ -1,8 +1,9 @@
 openapi: 3.0.3
 info:
   description: Endpoint Exceptions API allow you to manage Endpoint lists.
-  title: Security Endpoint Exceptions API (Elastic Cloud and self-hosted)
-  version: '2023-10-31'
+  title: >-
+    Security Endpoint Exceptions API (Elastic Cloud and self-hosted)
+  version: 2023-10-31
 servers:
   - url: http://{kibana_host}:{port}
     variables:
@@ -25,12 +26,13 @@ paths:
             application/json:
               examples:
                 alreadyExists:
-                  summary: Endpoint exception list already exists (empty response)
+                  summary: >-
+                    Endpoint exception list already exists (empty response)
                   value: {}
                 newList:
                   summary: Endpoint exception list created
                   value:
-                    created_at: '2025-01-01T00:00:00.000Z'
+                    created_at: 2025-01-01T00:00:00.000Z
                     created_by: elastic
                     description: Endpoint Security Exception List
                     id: 2e23a8c4-ef7e-4c10-adfa-3eae4e4b4b8b
@@ -42,7 +44,7 @@ paths:
                     tags: []
                     tie_breaker_id: e3c5a8e0-5b6a-4b4b-8b3a-2e23a8c4ef7e
                     type: endpoint
-                    updated_at: '2025-01-01T00:00:00.000Z'
+                    updated_at: 2025-01-01T00:00:00.000Z
                     updated_by: elastic
                     version: 1
               schema:
@@ -105,14 +107,15 @@ paths:
                   summary: Deleted endpoint exception list item
                   value:
                     comments: []
-                    created_at: '2025-01-01T12:00:00.000Z'
+                    created_at: 2025-01-01T12:00:00.000Z
                     created_by: elastic
                     description: Blocks a known malicious file by its hash
                     entries:
                       - field: file.hash.sha256
                         operator: included
                         type: match
-                        value: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+                        value: >-
+                          e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
                     id: d4b0c1e2-3f4a-5b6c-7d8e-9f0a1b2c3d4e
                     item_id: block-malicious-file
                     list_id: endpoint_list
@@ -123,7 +126,7 @@ paths:
                     tags: []
                     tie_breaker_id: f1e2d3c4-b5a6-7890-abcd-ef1234567890
                     type: simple
-                    updated_at: '2025-01-01T12:00:00.000Z'
+                    updated_at: 2025-01-01T12:00:00.000Z
                     updated_by: elastic
               schema:
                 $ref: '#/components/schemas/EndpointListItem'
@@ -190,14 +193,15 @@ paths:
                   summary: Endpoint exception list item
                   value:
                     comments: []
-                    created_at: '2025-01-01T12:00:00.000Z'
+                    created_at: 2025-01-01T12:00:00.000Z
                     created_by: elastic
                     description: Blocks a known malicious file by its hash
                     entries:
                       - field: file.hash.sha256
                         operator: included
                         type: match
-                        value: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+                        value: >-
+                          e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
                     id: d4b0c1e2-3f4a-5b6c-7d8e-9f0a1b2c3d4e
                     item_id: block-malicious-file
                     list_id: endpoint_list
@@ -209,7 +213,7 @@ paths:
                       - policy:all
                     tie_breaker_id: f1e2d3c4-b5a6-7890-abcd-ef1234567890
                     type: simple
-                    updated_at: '2025-01-01T12:00:00.000Z'
+                    updated_at: 2025-01-01T12:00:00.000Z
                     updated_by: elastic
               schema:
                 $ref: '#/components/schemas/EndpointListItem'
@@ -261,7 +265,8 @@ paths:
               matchAny:
                 summary: Exclude multiple process names
                 value:
-                  description: Exclude common security tools from endpoint protection
+                  description: >-
+                    Exclude common security tools from endpoint protection
                   entries:
                     - field: process.name
                       operator: included
@@ -281,7 +286,8 @@ paths:
                     - field: file.hash.sha256
                       operator: included
                       type: match
-                      value: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+                      value: >-
+                        e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
                   name: Block malicious file
                   os_types:
                     - windows
@@ -292,12 +298,15 @@ paths:
               type: object
               properties:
                 comments:
-                  $ref: '#/components/schemas/ExceptionListItemCommentArray'
+                  $ref: >-
+                    #/components/schemas/ExceptionListItemCommentArray
                   default: []
                 description:
-                  $ref: '#/components/schemas/ExceptionListItemDescription'
+                  $ref: >-
+                    #/components/schemas/ExceptionListItemDescription
                 entries:
-                  $ref: '#/components/schemas/ExceptionListItemEntryArray'
+                  $ref: >-
+                    #/components/schemas/ExceptionListItemEntryArray
                 item_id:
                   $ref: '#/components/schemas/ExceptionListItemHumanId'
                 meta:
@@ -305,7 +314,8 @@ paths:
                 name:
                   $ref: '#/components/schemas/ExceptionListItemName'
                 os_types:
-                  $ref: '#/components/schemas/ExceptionListItemOsTypeArray'
+                  $ref: >-
+                    #/components/schemas/ExceptionListItemOsTypeArray
                   default: []
                 tags:
                   $ref: '#/components/schemas/ExceptionListItemTags'
@@ -328,14 +338,15 @@ paths:
                   summary: Endpoint exception list item created
                   value:
                     comments: []
-                    created_at: '2025-01-01T12:00:00.000Z'
+                    created_at: 2025-01-01T12:00:00.000Z
                     created_by: elastic
                     description: Blocks a known malicious file by its hash
                     entries:
                       - field: file.hash.sha256
                         operator: included
                         type: match
-                        value: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+                        value: >-
+                          e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
                     id: d4b0c1e2-3f4a-5b6c-7d8e-9f0a1b2c3d4e
                     item_id: block-malicious-file
                     list_id: endpoint_list
@@ -347,7 +358,7 @@ paths:
                       - policy:all
                     tie_breaker_id: f1e2d3c4-b5a6-7890-abcd-ef1234567890
                     type: simple
-                    updated_at: '2025-01-01T12:00:00.000Z'
+                    updated_at: 2025-01-01T12:00:00.000Z
                     updated_by: elastic
               schema:
                 $ref: '#/components/schemas/EndpointListItem'
@@ -404,7 +415,8 @@ paths:
                     - field: file.hash.sha256
                       operator: included
                       type: match
-                      value: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+                      value: >-
+                        e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
                   item_id: block-malicious-file
                   name: Block malicious file (updated)
                   os_types:
@@ -421,12 +433,15 @@ paths:
                     latest version.
                   type: string
                 comments:
-                  $ref: '#/components/schemas/ExceptionListItemCommentArray'
+                  $ref: >-
+                    #/components/schemas/ExceptionListItemCommentArray
                   default: []
                 description:
-                  $ref: '#/components/schemas/ExceptionListItemDescription'
+                  $ref: >-
+                    #/components/schemas/ExceptionListItemDescription
                 entries:
-                  $ref: '#/components/schemas/ExceptionListItemEntryArray'
+                  $ref: >-
+                    #/components/schemas/ExceptionListItemEntryArray
                 id:
                   $ref: '#/components/schemas/ExceptionListItemId'
                   description: Either `id` or `item_id` must be specified
@@ -438,7 +453,8 @@ paths:
                 name:
                   $ref: '#/components/schemas/ExceptionListItemName'
                 os_types:
-                  $ref: '#/components/schemas/ExceptionListItemOsTypeArray'
+                  $ref: >-
+                    #/components/schemas/ExceptionListItemOsTypeArray
                   default: []
                 tags:
                   $ref: '#/components/schemas/ExceptionListItemTags'
@@ -460,14 +476,15 @@ paths:
                   summary: Endpoint exception list item updated
                   value:
                     comments: []
-                    created_at: '2025-01-01T12:00:00.000Z'
+                    created_at: 2025-01-01T12:00:00.000Z
                     created_by: elastic
                     description: Updated description for the exception
                     entries:
                       - field: file.hash.sha256
                         operator: included
                         type: match
-                        value: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+                        value: >-
+                          e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
                     id: d4b0c1e2-3f4a-5b6c-7d8e-9f0a1b2c3d4e
                     item_id: block-malicious-file
                     list_id: endpoint_list
@@ -480,7 +497,7 @@ paths:
                       - policy:all
                     tie_breaker_id: f1e2d3c4-b5a6-7890-abcd-ef1234567890
                     type: simple
-                    updated_at: '2025-01-15T09:30:00.000Z'
+                    updated_at: 2025-01-15T09:30:00.000Z
                     updated_by: elastic
               schema:
                 $ref: '#/components/schemas/EndpointListItem'
@@ -553,7 +570,8 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/NonEmptyString'
-        - description: Determines the sort order, which can be `desc` or `asc`
+        - description: >-
+            Determines the sort order, which can be `desc` or `asc`
           in: query
           name: sort_order
           required: false
@@ -572,14 +590,16 @@ paths:
                   value:
                     data:
                       - comments: []
-                        created_at: '2025-01-01T12:00:00.000Z'
+                        created_at: 2025-01-01T12:00:00.000Z
                         created_by: elastic
-                        description: Blocks a known malicious file by its hash
+                        description: >-
+                          Blocks a known malicious file by its hash
                         entries:
                           - field: file.hash.sha256
                             operator: included
                             type: match
-                            value: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+                            value: >-
+                              e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
                         id: d4b0c1e2-3f4a-5b6c-7d8e-9f0a1b2c3d4e
                         item_id: block-malicious-file
                         list_id: endpoint_list
@@ -591,7 +611,7 @@ paths:
                           - policy:all
                         tie_breaker_id: f1e2d3c4-b5a6-7890-abcd-ef1234567890
                         type: simple
-                        updated_at: '2025-01-01T12:00:00.000Z'
+                        updated_at: 2025-01-01T12:00:00.000Z
                         updated_by: elastic
                     page: 1
                     per_page: 20
@@ -616,7 +636,8 @@ paths:
                     description: The point-in-time ID for pagination.
                     type: string
                   total:
-                    description: The total number of endpoint exception list items.
+                    description: >-
+                      The total number of endpoint exception list items.
                     minimum: 0
                     type: integer
                 required:
@@ -704,7 +725,8 @@ components:
         tags:
           $ref: '#/components/schemas/ExceptionListTags'
         tie_breaker_id:
-          description: Field used in search to ensure all containers are sorted and
+          description: >-
+            Field used in search to ensure all containers are sorted and
             returned correctly.
           type: string
         type:
@@ -799,7 +821,8 @@ components:
         tags:
           $ref: '#/components/schemas/ExceptionListItemTags'
         tie_breaker_id:
-          description: Field used in search to ensure all containers are sorted and
+          description: >-
+            Field used in search to ensure all containers are sorted and
             returned correctly.
           type: string
         type:
@@ -868,7 +891,8 @@ components:
         - $ref: '#/components/schemas/ExceptionListItemEntryList'
         - $ref: '#/components/schemas/ExceptionListItemEntryExists'
         - $ref: '#/components/schemas/ExceptionListItemEntryNested'
-        - $ref: '#/components/schemas/ExceptionListItemEntryMatchWildcard'
+        - $ref: >-
+            #/components/schemas/ExceptionListItemEntryMatchWildcard
       discriminator:
         propertyName: type
     ExceptionListItemEntryArray:
@@ -978,7 +1002,8 @@ components:
       properties:
         entries:
           items:
-            $ref: '#/components/schemas/ExceptionListItemEntryNestedEntryItem'
+            $ref: >-
+              #/components/schemas/ExceptionListItemEntryNestedEntryItem
           minItems: 1
           type: array
         field:
@@ -1008,7 +1033,8 @@ components:
       format: date-time
       type: string
     ExceptionListItemHumanId:
-      description: Human readable string identifier, e.g. `trusted-linux-processes`
+      description: >-
+        Human readable string identifier, e.g. `trusted-linux-processes`
       example: simple_list_item
       format: nonempty
       minLength: 1
@@ -1033,8 +1059,9 @@ components:
       type: array
     ExceptionListItemTags:
       items:
-        description: String array containing words and phrases to help categorize
-          exception items.
+        description: >-
+          String array containing words and phrases to help categorize exception
+          items.
         format: nonempty
         minLength: 1
         type: string
@@ -1059,7 +1086,8 @@ components:
         - windows
       type: string
     ExceptionListOsTypeArray:
-      description: Use this field to specify the operating system. Only enter one value.
+      description: >-
+        Use this field to specify the operating system. Only enter one value.
       items:
         $ref: '#/components/schemas/ExceptionListOsType'
       type: array

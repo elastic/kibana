@@ -8,7 +8,7 @@ info:
     you which users and hosts are involved, how alerts correspond to the MITRE
     ATT&CK matrix, and which threat actor might be responsible.
   title: Security Attack discovery API (Elastic Cloud Serverless)
-  version: '2023-10-31'
+  version: 2023-10-31
 servers:
   - url: http://{kibana_host}:{port}
     variables:
@@ -32,16 +32,19 @@ paths:
               update:
                 enable_field_rendering: false
                 ids:
-                  - c0c8a8bbb4a6561856a974ee9e461f0c82e673a1f0d83f86c5a8d80fc8de4c4f
-                  - 5aa8f2900c0b03854b3b1a52a19558c5ea9893865c78235d4ad3dcc46196f4c7
+                  - >-
+                    c0c8a8bbb4a6561856a974ee9e461f0c82e673a1f0d83f86c5a8d80fc8de4c4f
+                  - >-
+                    5aa8f2900c0b03854b3b1a52a19558c5ea9893865c78235d4ad3dcc46196f4c7
                 kibana_alert_workflow_status: acknowledged
                 with_replacements: true
             schema:
               type: object
               properties:
                 update:
-                  description: Configuration object containing all parameters for the bulk update
-                    operation
+                  description: >-
+                    Configuration object containing all parameters for the bulk
+                    update operation
                   type: object
                   properties:
                     enable_field_rendering:
@@ -57,8 +60,10 @@ paths:
                     ids:
                       description: Array of Attack Discovery IDs to update
                       example:
-                        - c0c8a8bbb4a6561856a974ee9e461f0c82e673a1f0d83f86c5a8d80fc8de4c4f
-                        - 5aa8f2900c0b03854b3b1a52a19558c5ea9893865c78235d4ad3dcc46196f4c7
+                        - >-
+                          c0c8a8bbb4a6561856a974ee9e461f0c82e673a1f0d83f86c5a8d80fc8de4c4f
+                        - >-
+                          5aa8f2900c0b03854b3b1a52a19558c5ea9893865c78235d4ad3dcc46196f4c7
                       items:
                         type: string
                       type: array
@@ -104,7 +109,8 @@ paths:
             application/json:
               example:
                 data:
-                  - id: c0c8a8bbb4a6561856a974ee9e461f0c82e673a1f0d83f86c5a8d80fc8de4c4f
+                  - id: >-
+                      c0c8a8bbb4a6561856a974ee9e461f0c82e673a1f0d83f86c5a8d80fc8de4c4f
                     title: Suspicious process execution on host-01
                     workflow_status: acknowledged
               schema:
@@ -116,7 +122,8 @@ paths:
                       includes the applied modifications from the bulk update
                       request.
                     items:
-                      $ref: '#/components/schemas/AttackDiscoveryApiAlert'
+                      $ref: >-
+                        #/components/schemas/AttackDiscoveryApiAlert
                     type: array
                 required:
                   - data
@@ -177,7 +184,8 @@ paths:
         text search, filtering, pagination, and sorting.
       operationId: AttackDiscoveryFind
       parameters:
-        - description: Filter results to Attack discoveries that include any of the
+        - description: >-
+            Filter results to Attack discoveries that include any of the
             provided alert IDs
           in: query
           name: alert_ids
@@ -220,7 +228,8 @@ paths:
           required: false
           schema:
             type: string
-        - description: Filter results to the Attack discoveries with the specified IDs
+        - description: >-
+            Filter results to the Attack discoveries with the specified IDs
           in: query
           name: ids
           required: false
@@ -238,7 +247,8 @@ paths:
           required: false
           schema:
             type: boolean
-        - description: Page number to return (used for pagination). Defaults to 1.
+        - description: >-
+            Page number to return (used for pagination). Defaults to 1.
           example: 1
           in: query
           name: page
@@ -353,7 +363,8 @@ paths:
                   - GPT-5 Chat
                 data:
                   - connector_name: GPT-5 Chat
-                    id: c0c8a8bbb4a6561856a974ee9e461f0c82e673a1f0d83f86c5a8d80fc8de4c4f
+                    id: >-
+                      c0c8a8bbb4a6561856a974ee9e461f0c82e673a1f0d83f86c5a8d80fc8de4c4f
                     title: Suspicious process execution on host-01
                 page: 1
                 per_page: 10
@@ -375,17 +386,20 @@ paths:
                       Array of matched Attack discovery objects. Each item
                       follows the `AttackDiscoveryApiAlert` schema.
                     items:
-                      $ref: '#/components/schemas/AttackDiscoveryApiAlert'
+                      $ref: >-
+                        #/components/schemas/AttackDiscoveryApiAlert
                     type: array
                   page:
-                    description: Current page number of the paginated result set.
+                    description: >-
+                      Current page number of the paginated result set.
                     type: integer
                   per_page:
                     description: Number of items requested per page.
                     type: integer
                   total:
-                    description: Total number of Attack discoveries matching the query (across all
-                      pages).
+                    description: >-
+                      Total number of Attack discoveries matching the query
+                      (across all pages).
                     type: integer
                   unique_alert_ids:
                     description: >-
@@ -476,7 +490,8 @@ paths:
               start: now-24h
               subAction: invokeAI
             schema:
-              $ref: '#/components/schemas/AttackDiscoveryGenerationConfig'
+              $ref: >-
+                #/components/schemas/AttackDiscoveryGenerationConfig
         required: true
       responses:
         '200':
@@ -512,7 +527,8 @@ paths:
                     example: Bad Request
                     type: string
                   message:
-                    description: Human-readable error message describing what went wrong
+                    description: >-
+                      Human-readable error message describing what went wrong
                     example: Invalid request parameters.
                     type: string
                   status_code:
@@ -1513,11 +1529,12 @@ paths:
                   - alerts_context_count: 75
                     connector_id: chatGpt5_0ChatAzure
                     discoveries: 3
-                    end: '2025-09-29T06:42:44.810Z'
+                    end: 2025-09-29T06:42:44.810Z
                     execution_uuid: 46b218d5-535d-4329-be56-d0f6af6986b7
-                    loading_message: AI is analyzing up to 100 alerts in the last 24 hours to
+                    loading_message: >-
+                      AI is analyzing up to 100 alerts in the last 24 hours to
                       generate discoveries.
-                    start: '2025-09-29T06:42:08.962Z'
+                    start: 2025-09-29T06:42:08.962Z
                     status: succeeded
               schema:
                 type: object
@@ -1525,7 +1542,8 @@ paths:
                   generations:
                     description: List of Attack Discovery generations
                     items:
-                      $ref: '#/components/schemas/AttackDiscoveryGeneration'
+                      $ref: >-
+                        #/components/schemas/AttackDiscoveryGeneration
                     type: array
                 required:
                   - generations
@@ -1535,7 +1553,8 @@ paths:
             application/json:
               example:
                 error: Bad Request
-                message: Invalid size parameter. Must be a positive number.
+                message: >-
+                  Invalid size parameter. Must be a positive number.
                 status_code: 400
               schema:
                 type: object
@@ -1546,14 +1565,16 @@ paths:
                     type: string
                   message:
                     description: Human-readable error message
-                    example: Invalid size parameter. Must be a positive number.
+                    example: >-
+                      Invalid size parameter. Must be a positive number.
                     type: string
                   status_code:
                     description: HTTP status code
                     example: 400
                     type: number
           description: Bad Request response.
-      summary: Get the latest Attack Discovery generations metadata for the current user
+      summary: >-
+        Get the latest Attack Discovery generations metadata for the current user
       tags:
         - Security Attack discovery API
       x-code-samples:
@@ -1611,25 +1632,30 @@ paths:
             application/json:
               example:
                 data:
-                  - id: c0c8a8bbb4a6561856a974ee9e461f0c82e673a1f0d83f86c5a8d80fc8de4c4f
+                  - id: >-
+                      c0c8a8bbb4a6561856a974ee9e461f0c82e673a1f0d83f86c5a8d80fc8de4c4f
                     title: Suspicious process execution on host-01
                 generation:
                   alerts_context_count: 50
                   discoveries: 1
-                  end: '2025-09-29T06:42:44.810Z'
+                  end: 2025-09-29T06:42:44.810Z
                   execution_uuid: 2e13f386-46cf-4d65-9e2b-68609e132ba5
-                  start: '2025-09-29T06:42:08.962Z'
+                  start: 2025-09-29T06:42:08.962Z
                   status: succeeded
               schema:
                 type: object
                 properties:
                   data:
-                    description: Array of Attack discoveries generated during this execution.
+                    description: >-
+                      Array of Attack discoveries generated during this
+                      execution.
                     items:
-                      $ref: '#/components/schemas/AttackDiscoveryApiAlert'
+                      $ref: >-
+                        #/components/schemas/AttackDiscoveryApiAlert
                     type: array
                   generation:
-                    $ref: '#/components/schemas/AttackDiscoveryGeneration'
+                    $ref: >-
+                      #/components/schemas/AttackDiscoveryGeneration
                     description: >-
                       Optional metadata about the attack discovery generation
                       process, metadata including execution status and
@@ -1653,8 +1679,9 @@ paths:
                     example: Bad Request
                     type: string
                   message:
-                    description: Human-readable error message describing what went wrong with the
-                      request
+                    description: >-
+                      Human-readable error message describing what went wrong
+                      with the request
                     example: Invalid request parameters.
                     type: string
                   status_code:
@@ -1706,23 +1733,26 @@ paths:
                 alerts_context_count: 75
                 connector_id: chatGpt5_0ChatAzure
                 discoveries: 3
-                end: '2025-09-29T06:42:44.810Z'
+                end: 2025-09-29T06:42:44.810Z
                 execution_uuid: 46b218d5-535d-4329-be56-d0f6af6986b7
-                loading_message: AI is analyzing up to 100 alerts in the last 24 hours to
+                loading_message: >-
+                  AI is analyzing up to 100 alerts in the last 24 hours to
                   generate discoveries.
-                start: '2025-09-29T06:42:08.962Z'
+                start: 2025-09-29T06:42:08.962Z
                 status: dismissed
               schema:
                 type: object
                 properties:
                   alerts_context_count:
-                    description: The number of alerts that were sent as context to the LLM for this
-                      generation.
+                    description: >-
+                      The number of alerts that were sent as context to the LLM
+                      for this generation.
                     example: 75
                     type: number
                   connector_id:
-                    description: The unique identifier of the connector used to generate the attack
-                      discoveries.
+                    description: >-
+                      The unique identifier of the connector used to generate
+                      the attack discoveries.
                     example: chatGpt5_0ChatAzure
                     type: string
                   connector_stats:
@@ -1739,13 +1769,15 @@ paths:
                         example: 47958500000
                         type: number
                       successful_generations:
-                        description: The total number of Attack discoveries successfully created for
-                          this generation
+                        description: >-
+                          The total number of Attack discoveries successfully
+                          created for this generation
                         example: 2
                         type: number
                   discoveries:
-                    description: The number of attack discoveries that were generated during this
-                      execution.
+                    description: >-
+                      The number of attack discoveries that were generated
+                      during this execution.
                     example: 3
                     type: number
                   end:
@@ -1753,7 +1785,7 @@ paths:
                       The timestamp when the generation process completed, in
                       ISO 8601 format. This field may be absent for generations
                       that haven't finished.
-                    example: '2025-09-29T06:42:44.810Z'
+                    example: 2025-09-29T06:42:44.810Z
                     type: string
                   execution_uuid:
                     description: >-
@@ -1767,8 +1799,9 @@ paths:
                       A human-readable message describing the current state or
                       progress of the generation process. Provides context about
                       what the AI is analyzing.
-                    example: AI is analyzing up to 100 alerts in the last 24 hours to generate
-                      discoveries.
+                    example: >-
+                      AI is analyzing up to 100 alerts in the last 24 hours to
+                      generate discoveries.
                     type: string
                   reason:
                     description: >-
@@ -1781,7 +1814,7 @@ paths:
                     description: >-
                       The timestamp when the generation process began, in ISO
                       8601 format. This marks the beginning of the AI analysis.
-                    example: '2025-09-29T06:42:08.962Z'
+                    example: 2025-09-29T06:42:08.962Z
                     type: string
                   status:
                     description: >-
@@ -1818,12 +1851,14 @@ paths:
                     example: Bad Request
                     type: string
                   message:
-                    description: Human-readable error message describing what went wrong with the
-                      request.
+                    description: >-
+                      Human-readable error message describing what went wrong
+                      with the request.
                     example: Invalid request parameters.
                     type: string
                   status_code:
-                    description: HTTP status code indicating the type of client error
+                    description: >-
+                      HTTP status code indicating the type of client error
                     example: 400
                     type: number
                 required:
@@ -1869,7 +1904,8 @@ paths:
               schedule:
                 interval: 24h
             schema:
-              $ref: '#/components/schemas/AttackDiscoveryApiScheduleCreateProps'
+              $ref: >-
+                #/components/schemas/AttackDiscoveryApiScheduleCreateProps
         description: >-
           Attack Discovery schedule configuration including name, parameters,
           schedule interval, and actions
@@ -1880,7 +1916,7 @@ paths:
             application/json:
               example:
                 actions: []
-                created_at: '2023-10-31T10:00:00.000Z'
+                created_at: 2023-10-31T10:00:00.000Z
                 created_by: elastic
                 enabled: true
                 id: 12345678-1234-1234-1234-123456789012
@@ -1896,11 +1932,12 @@ paths:
                   start: now-24h
                 schedule:
                   interval: 24h
-                updated_at: '2023-10-31T10:00:00.000Z'
+                updated_at: 2023-10-31T10:00:00.000Z
                 updated_by: elastic
               schema:
                 $ref: '#/components/schemas/AttackDiscoveryApiSchedule'
-          description: The Attack Discovery schedule was successfully created.
+          description: >-
+            The Attack Discovery schedule was successfully created.
         '400':
           content:
             application/json:
@@ -1909,7 +1946,8 @@ paths:
                 message: Invalid request parameters.
                 status_code: 400
               schema:
-                $ref: '#/components/schemas/AttackDiscoveryGenericError'
+                $ref: >-
+                  #/components/schemas/AttackDiscoveryGenericError
           description: Bad Request response.
       summary: Create Attack Discovery schedule
       tags:
@@ -1963,7 +2001,8 @@ paths:
         pagination and sorting by various fields.
       operationId: FindAttackDiscoverySchedules
       parameters:
-        - description: Page number to return (used for pagination). Defaults to 1.
+        - description: >-
+            Page number to return (used for pagination). Defaults to 1.
           example: 1
           in: query
           name: page
@@ -2007,7 +2046,7 @@ paths:
               example:
                 data:
                   - actions: []
-                    created_at: '2023-10-31T10:00:00.000Z'
+                    created_at: 2023-10-31T10:00:00.000Z
                     created_by: elastic
                     enabled: true
                     id: 12345678-1234-1234-1234-123456789012
@@ -2023,7 +2062,7 @@ paths:
                       start: now-24h
                     schedule:
                       interval: 24h
-                    updated_at: '2023-10-31T10:00:00.000Z'
+                    updated_at: 2023-10-31T10:00:00.000Z
                     updated_by: elastic
                 page: 1
                 per_page: 10
@@ -2032,12 +2071,15 @@ paths:
                 type: object
                 properties:
                   data:
-                    description: Array of matched Attack Discovery schedule objects.
+                    description: >-
+                      Array of matched Attack Discovery schedule objects.
                     items:
-                      $ref: '#/components/schemas/AttackDiscoveryApiSchedule'
+                      $ref: >-
+                        #/components/schemas/AttackDiscoveryApiSchedule
                     type: array
                   page:
-                    description: Current page number of the paginated result set.
+                    description: >-
+                      Current page number of the paginated result set.
                     type: number
                   per_page:
                     description: Number of items requested per page.
@@ -2076,7 +2118,8 @@ paths:
                     example: 400
                     type: number
           description: Bad Request response.
-      summary: Find Attack Discovery schedules that match the search criteria
+      summary: >-
+        Find Attack Discovery schedules that match the search criteria
       tags:
         - Security Attack discovery API
       x-code-samples:
@@ -2115,7 +2158,9 @@ paths:
                 properties:
                   id:
                     $ref: '#/components/schemas/NonEmptyString'
-                    description: The unique identifier of the deleted Attack Discovery schedule
+                    description: >-
+                      The unique identifier of the deleted Attack Discovery
+                      schedule
                 required:
                   - id
           description: >-
@@ -2129,7 +2174,8 @@ paths:
                 message: Invalid request parameters.
                 status_code: 400
               schema:
-                $ref: '#/components/schemas/AttackDiscoveryGenericError'
+                $ref: >-
+                  #/components/schemas/AttackDiscoveryGenericError
           description: Bad Request response.
       summary: Delete Attack Discovery schedule
       tags:
@@ -2165,12 +2211,12 @@ paths:
             application/json:
               example:
                 actions: []
-                created_at: '2023-10-31T10:00:00.000Z'
+                created_at: 2023-10-31T10:00:00.000Z
                 created_by: elastic
                 enabled: true
                 id: 12345678-1234-1234-1234-123456789012
                 last_execution:
-                  date: '2023-10-31T10:00:00.000Z'
+                  date: 2023-10-31T10:00:00.000Z
                   last_duration: 45.2
                   status: ok
                 name: Daily Security Analysis
@@ -2185,7 +2231,7 @@ paths:
                   start: now-24h
                 schedule:
                   interval: 24h
-                updated_at: '2023-10-31T10:00:00.000Z'
+                updated_at: 2023-10-31T10:00:00.000Z
                 updated_by: elastic
               schema:
                 $ref: '#/components/schemas/AttackDiscoveryApiSchedule'
@@ -2200,7 +2246,8 @@ paths:
                 message: Invalid request parameters.
                 status_code: 400
               schema:
-                $ref: '#/components/schemas/AttackDiscoveryGenericError'
+                $ref: >-
+                  #/components/schemas/AttackDiscoveryGenericError
           description: Bad Request response.
       summary: Get Attack Discovery schedule by ID
       tags:
@@ -2249,7 +2296,8 @@ paths:
               schedule:
                 interval: 12h
             schema:
-              $ref: '#/components/schemas/AttackDiscoveryApiScheduleUpdateProps'
+              $ref: >-
+                #/components/schemas/AttackDiscoveryApiScheduleUpdateProps
         description: >-
           Updated Attack Discovery schedule configuration. All fields are
           required as this replaces the entire schedule configuration.
@@ -2260,7 +2308,7 @@ paths:
             application/json:
               example:
                 actions: []
-                created_at: '2023-10-31T10:00:00.000Z'
+                created_at: 2023-10-31T10:00:00.000Z
                 created_by: elastic
                 enabled: true
                 id: 12345678-1234-1234-1234-123456789012
@@ -2276,7 +2324,7 @@ paths:
                   start: now-48h
                 schedule:
                   interval: 12h
-                updated_at: '2023-10-31T12:00:00.000Z'
+                updated_at: 2023-10-31T12:00:00.000Z
                 updated_by: elastic
               schema:
                 $ref: '#/components/schemas/AttackDiscoveryApiSchedule'
@@ -2291,7 +2339,8 @@ paths:
                 message: Invalid request parameters.
                 status_code: 400
               schema:
-                $ref: '#/components/schemas/AttackDiscoveryGenericError'
+                $ref: >-
+                  #/components/schemas/AttackDiscoveryGenericError
           description: Bad Request response.
       summary: Update Attack Discovery schedule
       tags:
@@ -2352,7 +2401,9 @@ paths:
                 properties:
                   id:
                     $ref: '#/components/schemas/NonEmptyString'
-                    description: The unique identifier of the disabled Attack Discovery schedule
+                    description: >-
+                      The unique identifier of the disabled Attack Discovery
+                      schedule
                 required:
                   - id
           description: >-
@@ -2366,7 +2417,8 @@ paths:
                 message: Invalid request parameters.
                 status_code: 400
               schema:
-                $ref: '#/components/schemas/AttackDiscoveryGenericError'
+                $ref: >-
+                  #/components/schemas/AttackDiscoveryGenericError
           description: Bad Request response.
       summary: Disable Attack Discovery schedule
       tags:
@@ -2409,7 +2461,9 @@ paths:
                 properties:
                   id:
                     $ref: '#/components/schemas/NonEmptyString'
-                    description: The unique identifier of the enabled Attack Discovery schedule
+                    description: >-
+                      The unique identifier of the enabled Attack Discovery
+                      schedule
                 required:
                   - id
           description: >-
@@ -2423,7 +2477,8 @@ paths:
                 message: Invalid request parameters.
                 status_code: 400
               schema:
-                $ref: '#/components/schemas/AttackDiscoveryGenericError'
+                $ref: >-
+                  #/components/schemas/AttackDiscoveryGenericError
           description: Bad Request response.
       summary: Enable Attack Discovery schedule
       tags:
@@ -2442,7 +2497,8 @@ components:
       type: object
       properties:
         allowed:
-          description: Whether this field is allowed to be sent to the model.
+          description: >-
+            Whether this field is allowed to be sent to the model.
           example: true
           type: boolean
         anonymized:
@@ -2450,11 +2506,13 @@ components:
           example: false
           type: boolean
         createdAt:
-          description: Timestamp of when the anonymization field was created.
-          example: '2023-10-31T12:00:00Z'
+          description: >-
+            Timestamp of when the anonymization field was created.
+          example: 2023-10-31T12:00:00Z
           type: string
         createdBy:
-          description: Username of the person who created the anonymization field.
+          description: >-
+            Username of the person who created the anonymization field.
           example: user1
           type: string
         field:
@@ -2465,15 +2523,17 @@ components:
           $ref: '#/components/schemas/NonEmptyString'
           description: The ID of the anonymization field.
         namespace:
-          description: Kibana space in which this anonymization field exists.
+          description: >-
+            Kibana space in which this anonymization field exists.
           example: default
           type: string
         timestamp:
           $ref: '#/components/schemas/NonEmptyTimestamp'
-          description: Timestamp when the anonymization field was initially created.
+          description: >-
+            Timestamp when the anonymization field was initially created.
         updatedAt:
           description: Timestamp of the last update.
-          example: '2023-10-31T12:00:00Z'
+          example: 2023-10-31T12:00:00Z
           type: string
         updatedBy:
           description: Username of the person who last updated the field.
@@ -2509,7 +2569,8 @@ components:
         - connectorId
         - actionTypeId
     AttackDiscoveryApiAlert:
-      description: An attack discovery that's also an alert (Public API with snake_case)
+      description: >-
+        An attack discovery that's also an alert (Public API with snake_case)
       type: object
       properties:
         alert_ids:
@@ -2523,37 +2584,46 @@ components:
             attack discovery (not applicable to ad hock runs)
           type: string
         alert_start:
-          description: The optional time the attack discovery alert was created
+          description: >-
+            The optional time the attack discovery alert was created
           type: string
         alert_updated_at:
-          description: The optional time the attack discovery alert was last updated
+          description: >-
+            The optional time the attack discovery alert was last updated
           type: string
         alert_updated_by_user_id:
-          description: The optional id of the user who last updated the attack discovery
+          description: >-
+            The optional id of the user who last updated the attack discovery
             alert
           type: string
         alert_updated_by_user_name:
-          description: The optional username of the user who updated the attack discovery
+          description: >-
+            The optional username of the user who updated the attack discovery
             alert
           type: string
         alert_workflow_status:
-          description: The optional kibana.alert.workflow_status of this attack discovery
+          description: >-
+            The optional kibana.alert.workflow_status of this attack discovery
           type: string
         alert_workflow_status_updated_at:
-          description: The optional time the attack discovery alert workflow status was
+          description: >-
+            The optional time the attack discovery alert workflow status was
             last updated
           type: string
         assignees:
-          description: The optional array of user-IDs who have been assigned the attack
+          description: >-
+            The optional array of user-IDs who have been assigned the attack
           items:
             type: string
           type: array
         connector_id:
-          description: The ID of the connector that generated the attack discovery
+          description: >-
+            The ID of the connector that generated the attack discovery
           type: string
         connector_name:
-          description: The (human readable) name of the connector that generated the
-            attack discovery
+          description: >-
+            The (human readable) name of the connector that generated the attack
+            discovery
           type: string
         details_markdown:
           description: >-
@@ -2567,30 +2637,36 @@ components:
             they are applicable), using the same syntax
           type: string
         generation_uuid:
-          description: The generation ID of the run that created the attack discovery
+          description: >-
+            The generation ID of the run that created the attack discovery
           type: string
         id:
           description: The unique ID of the attack discovery
           type: string
         index:
-          description: The concrete Elasticsearch index where this attack discovery is
+          description: >-
+            The concrete Elasticsearch index where this attack discovery is
             stored
           type: string
         mitre_attack_tactics:
-          description: An optional array of MITRE ATT&CK tactic for the attack discovery
+          description: >-
+            An optional array of MITRE ATT&CK tactic for the attack discovery
           items:
             type: string
           type: array
         replacements:
           $ref: '#/components/schemas/Replacements'
-          description: Key-value pairs that are used to replace placeholders in the
+          description: >-
+            Key-value pairs that are used to replace placeholders in the
             markdown fields
         risk_score:
-          description: The optional, (but typically populated after generation) risk score
+          description: >-
+            The optional, (but typically populated after generation) risk score
             of the alert
           type: integer
         summary_markdown:
-          description: A markdown summary of attack discovery, using the same syntax
+          description: >-
+            A markdown summary of attack discovery, using the same syntax
           type: string
         tags:
           description: The optional array of tags assigned the attack
@@ -2604,7 +2680,8 @@ components:
           description: A title for the attack discovery, in plain text
           type: string
         user_id:
-          description: The optional id of the user who generated the attack discovery
+          description: >-
+            The optional id of the user who generated the attack discovery
           type: string
         user_name:
           description: >-
@@ -2635,7 +2712,8 @@ components:
         actions:
           description: The Attack Discovery schedule actions
           items:
-            $ref: '#/components/schemas/AttackDiscoveryApiScheduleAction'
+            $ref: >-
+              #/components/schemas/AttackDiscoveryApiScheduleAction
           type: array
         created_at:
           description: The date the schedule was created
@@ -2651,14 +2729,16 @@ components:
           description: UUID of Attack Discovery schedule
           type: string
         last_execution:
-          $ref: '#/components/schemas/AttackDiscoveryApiScheduleExecution'
+          $ref: >-
+            #/components/schemas/AttackDiscoveryApiScheduleExecution
           description: The Attack Discovery schedule last execution summary
         name:
           description: The name of the schedule
           type: string
         params:
           $ref: '#/components/schemas/AttackDiscoveryApiScheduleParams'
-          description: The Attack Discovery schedule configuration parameters
+          description: >-
+            The Attack Discovery schedule configuration parameters
         schedule:
           $ref: '#/components/schemas/IntervalApiSchedule'
           description: The Attack Discovery schedule interval
@@ -2682,8 +2762,10 @@ components:
         - actions
     AttackDiscoveryApiScheduleAction:
       oneOf:
-        - $ref: '#/components/schemas/AttackDiscoveryApiScheduleGeneralAction'
-        - $ref: '#/components/schemas/AttackDiscoveryApiScheduleSystemAction'
+        - $ref: >-
+            #/components/schemas/AttackDiscoveryApiScheduleGeneralAction
+        - $ref: >-
+            #/components/schemas/AttackDiscoveryApiScheduleSystemAction
     AttackDiscoveryApiScheduleActionAlertsFilter:
       additionalProperties: true
       type: object
@@ -2694,21 +2776,24 @@ components:
       type: object
       properties:
         notify_when:
-          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionNotifyWhen'
+          $ref: >-
+            #/components/schemas/AttackDiscoveryApiScheduleActionNotifyWhen
         summary:
           description: >-
             Action summary indicates whether we will send a summary notification
             about all the generate alerts or notification per individual alert
           type: boolean
         throttle:
-          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionThrottle'
+          $ref: >-
+            #/components/schemas/AttackDiscoveryApiScheduleActionThrottle
           nullable: true
       required:
         - summary
         - notify_when
         - throttle
     AttackDiscoveryApiScheduleActionGroup:
-      description: Groups actions by use cases. Use `default` for alert notifications.
+      description: >-
+        Groups actions by use cases. Use `default` for alert notifications.
       type: string
     AttackDiscoveryApiScheduleActionId:
       description: The connector ID.
@@ -2742,7 +2827,8 @@ components:
         actions:
           description: The Attack Discovery schedule actions
           items:
-            $ref: '#/components/schemas/AttackDiscoveryApiScheduleAction'
+            $ref: >-
+              #/components/schemas/AttackDiscoveryApiScheduleAction
           type: array
         enabled:
           description: Indicates whether the schedule is enabled
@@ -2752,7 +2838,8 @@ components:
           type: string
         params:
           $ref: '#/components/schemas/AttackDiscoveryApiScheduleParams'
-          description: The Attack Discovery schedule configuration parameters
+          description: >-
+            The Attack Discovery schedule configuration parameters
         schedule:
           $ref: '#/components/schemas/IntervalApiSchedule'
           description: The Attack Discovery schedule interval
@@ -2774,7 +2861,8 @@ components:
         message:
           type: string
         status:
-          $ref: '#/components/schemas/AttackDiscoveryApiScheduleExecutionStatus'
+          $ref: >-
+            #/components/schemas/AttackDiscoveryApiScheduleExecutionStatus
           description: Status of the execution
       required:
         - date
@@ -2796,15 +2884,20 @@ components:
           description: The action type used for sending notifications.
           type: string
         alerts_filter:
-          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionAlertsFilter'
+          $ref: >-
+            #/components/schemas/AttackDiscoveryApiScheduleActionAlertsFilter
         frequency:
-          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionFrequency'
+          $ref: >-
+            #/components/schemas/AttackDiscoveryApiScheduleActionFrequency
         group:
-          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionGroup'
+          $ref: >-
+            #/components/schemas/AttackDiscoveryApiScheduleActionGroup
         id:
-          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionId'
+          $ref: >-
+            #/components/schemas/AttackDiscoveryApiScheduleActionId
         params:
-          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionParams'
+          $ref: >-
+            #/components/schemas/AttackDiscoveryApiScheduleActionParams
         uuid:
           $ref: '#/components/schemas/NonEmptyString'
       required:
@@ -2854,9 +2947,11 @@ components:
           description: The action type used for sending notifications.
           type: string
         id:
-          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionId'
+          $ref: >-
+            #/components/schemas/AttackDiscoveryApiScheduleActionId
         params:
-          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionParams'
+          $ref: >-
+            #/components/schemas/AttackDiscoveryApiScheduleActionParams
         uuid:
           $ref: '#/components/schemas/NonEmptyString'
       required:
@@ -2870,14 +2965,16 @@ components:
         actions:
           description: The Attack Discovery schedule actions
           items:
-            $ref: '#/components/schemas/AttackDiscoveryApiScheduleAction'
+            $ref: >-
+              #/components/schemas/AttackDiscoveryApiScheduleAction
           type: array
         name:
           description: The name of the schedule
           type: string
         params:
           $ref: '#/components/schemas/AttackDiscoveryApiScheduleParams'
-          description: The Attack Discovery schedule configuration parameters
+          description: >-
+            The Attack Discovery schedule configuration parameters
         schedule:
           $ref: '#/components/schemas/IntervalApiSchedule'
           description: The Attack Discovery schedule interval
@@ -2930,11 +3027,13 @@ components:
           description: When generation ended (max event.end)
           type: string
         execution_uuid:
-          description: The unique identifier (kibana.alert.rule.execution.uuid) for the
+          description: >-
+            The unique identifier (kibana.alert.rule.execution.uuid) for the
             generation
           type: string
         loading_message:
-          description: Generation loading message (kibana.alert.rule.execution.status)
+          description: >-
+            Generation loading message (kibana.alert.rule.execution.status)
           type: string
         reason:
           description: Reason for failed generations (event.reason)
@@ -3031,7 +3130,8 @@ components:
         - size
         - subAction
     AttackDiscoveryGenericError:
-      description: Generic error response for Attack Discovery schedule operations
+      description: >-
+        Generic error response for Attack Discovery schedule operations
       type: object
       properties:
         error:
@@ -3039,7 +3139,8 @@ components:
           example: Bad Request
           type: string
         message:
-          description: Human-readable error message describing what went wrong
+          description: >-
+            Human-readable error message describing what went wrong
           example: Invalid request parameters.
           type: string
         status_code:
@@ -3061,7 +3162,8 @@ components:
       required:
         - interval
     NonEmptyString:
-      description: A string that does not contain only whitespace characters.
+      description: >-
+        A string that does not contain only whitespace characters.
       example: I am a string
       format: nonempty
       minLength: 1
@@ -3070,7 +3172,7 @@ components:
       description: >-
         A string that represents a timestamp in ISO 8601 format and does not
         contain only whitespace characters.
-      example: '2023-10-31T12:00:00Z'
+      example: 2023-10-31T12:00:00Z
       format: nonempty
       minLength: 1
       type: string
@@ -3099,7 +3201,8 @@ components:
     Replacements:
       additionalProperties:
         type: string
-      description: Replacements object used to anonymize/deanonymize messages
+      description: >-
+        Replacements object used to anonymize/deanonymize messages
       type: object
     SortOrder:
       description: The order in which results are sorted.

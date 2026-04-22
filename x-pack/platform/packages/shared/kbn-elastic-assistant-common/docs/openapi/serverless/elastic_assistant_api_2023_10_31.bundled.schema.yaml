@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   description: Manage and interact with Security Assistant resources.
   title: Security AI Assistant API (Elastic Cloud Serverless)
-  version: '2023-10-31'
+  version: 2023-10-31
 servers:
   - url: http://{kibana_host}:{port}
     variables:
@@ -47,7 +47,8 @@ paths:
                 create:
                   description: Array of anonymization fields to create.
                   items:
-                    $ref: '#/components/schemas/AnonymizationFieldCreateProps'
+                    $ref: >-
+                      #/components/schemas/AnonymizationFieldCreateProps
                   type: array
                 delete:
                   description: >-
@@ -71,7 +72,8 @@ paths:
                 update:
                   description: Array of anonymization fields to update.
                   items:
-                    $ref: '#/components/schemas/AnonymizationFieldUpdateProps'
+                    $ref: >-
+                      #/components/schemas/AnonymizationFieldUpdateProps
                   type: array
       responses:
         '200':
@@ -84,13 +86,13 @@ paths:
                     created:
                       - allowed: false
                         anonymized: true
-                        createdAt: '2023-10-31T12:00:00Z'
+                        createdAt: 2023-10-31T12:00:00Z
                         createdBy: user1
                         field: host.name
                         id: field2
                         namespace: default
-                        timestamp: '2023-10-31T12:00:00Z'
-                        updatedAt: '2023-10-31T12:00:00Z'
+                        timestamp: 2023-10-31T12:00:00Z
+                        updatedAt: 2023-10-31T12:00:00Z
                         updatedBy: user1
                     deleted:
                       - field3
@@ -101,13 +103,13 @@ paths:
                     updated:
                       - allowed: true
                         anonymized: false
-                        createdAt: '2023-10-31T12:00:00Z'
+                        createdAt: 2023-10-31T12:00:00Z
                         createdBy: user1
                         field: url.domain
                         id: field8
                         namespace: default
-                        timestamp: '2023-10-31T12:00:00Z'
-                        updatedAt: '2023-10-31T12:00:00Z'
+                        timestamp: 2023-10-31T12:00:00Z
+                        updatedAt: 2023-10-31T12:00:00Z
                         updatedBy: user1
                   summary:
                     failed: 1
@@ -118,7 +120,8 @@ paths:
                 status_code: 200
                 success: true
               schema:
-                $ref: '#/components/schemas/AnonymizationFieldsBulkCrudActionResponse'
+                $ref: >-
+                  #/components/schemas/AnonymizationFieldsBulkCrudActionResponse
           description: Indicates a successful call.
         '400':
           content:
@@ -175,7 +178,8 @@ paths:
           name: sort_field
           required: false
           schema:
-            $ref: '#/components/schemas/FindAnonymizationFieldsSortField'
+            $ref: >-
+              #/components/schemas/FindAnonymizationFieldsSortField
         - description: Sort order
           example: asc
           in: query
@@ -226,24 +230,24 @@ paths:
                 all:
                   - allowed: true
                     anonymized: true
-                    createdAt: '2023-10-31T12:00:00Z'
+                    createdAt: 2023-10-31T12:00:00Z
                     createdBy: user1
                     field: user.name
                     id: '1'
                     namespace: default
-                    timestamp: '2023-10-31T12:00:00Z'
-                    updatedAt: '2023-10-31T12:00:00Z'
+                    timestamp: 2023-10-31T12:00:00Z
+                    updatedAt: 2023-10-31T12:00:00Z
                     updatedBy: user1
                 data:
                   - allowed: true
                     anonymized: true
-                    createdAt: '2023-10-31T12:00:00Z'
+                    createdAt: 2023-10-31T12:00:00Z
                     createdBy: user1
                     field: user.name
                     id: '1'
                     namespace: default
-                    timestamp: '2023-10-31T12:00:00Z'
-                    updatedAt: '2023-10-31T12:00:00Z'
+                    timestamp: 2023-10-31T12:00:00Z
+                    updatedAt: 2023-10-31T12:00:00Z
                     updatedBy: user1
                 page: 1
                 perPage: 20
@@ -280,11 +284,13 @@ paths:
                                     type: integer
                   all:
                     items:
-                      $ref: '#/components/schemas/AnonymizationFieldResponse'
+                      $ref: >-
+                        #/components/schemas/AnonymizationFieldResponse
                     type: array
                   data:
                     items:
-                      $ref: '#/components/schemas/AnonymizationFieldResponse'
+                      $ref: >-
+                        #/components/schemas/AnonymizationFieldResponse
                     type: array
                   page:
                     type: integer
@@ -324,7 +330,8 @@ paths:
       description: Create a model response for the given chat conversation.
       operationId: ChatComplete
       parameters:
-        - description: If true, the response will not include content references.
+        - description: >-
+            If true, the response will not include content references.
           example: false
           in: query
           name: content_references_disabled
@@ -389,7 +396,8 @@ paths:
         - Chat Complete API
   /api/security_ai_assistant/current_user/conversations:
     delete:
-      description: This endpoint allows users to permanently delete all conversations.
+      description: >-
+        This endpoint allows users to permanently delete all conversations.
       operationId: DeleteAllConversations
       requestBody:
         content:
@@ -425,7 +433,8 @@ paths:
                   totalDeleted:
                     example: 10
                     type: number
-          description: Indicates a successful call. The conversations were deleted
+          description: >-
+            Indicates a successful call. The conversations were deleted
             successfully.
         '400':
           content:
@@ -442,7 +451,8 @@ paths:
                   statusCode:
                     example: 400
                     type: number
-          description: Generic Error. This response indicates an issue with the request.
+          description: >-
+            Generic Error. This response indicates an issue with the request.
       summary: Delete conversations
       tags:
         - Security AI Assistant API
@@ -465,7 +475,7 @@ paths:
               messages:
                 - content: Hello, how can I assist you today?
                   role: system
-                  timestamp: '2023-10-31T12:00:00Z'
+                  timestamp: 2023-10-31T12:00:00Z
               replacements: {}
               title: Security Discussion
             schema:
@@ -480,22 +490,23 @@ paths:
                   actionTypeId: '67890'
                   connectorId: '12345'
                 category: assistant
-                createdAt: '2023-10-31T12:01:00Z'
+                createdAt: 2023-10-31T12:01:00Z
                 excludeFromLastConversationStorage: false
                 id: abc123
                 messages:
                   - content: Hello, how can I assist you today?
                     role: system
-                    timestamp: '2023-10-31T12:00:00Z'
+                    timestamp: 2023-10-31T12:00:00Z
                 replacements: {}
                 title: Security Discussion
-                updatedAt: '2023-10-31T12:01:00Z'
+                updatedAt: 2023-10-31T12:01:00Z
                 users:
                   - id: user1
                     name: John Doe
               schema:
                 $ref: '#/components/schemas/ConversationResponse'
-          description: Indicates a successful call. The conversation was created
+          description: >-
+            Indicates a successful call. The conversation was created
             successfully.
         '400':
           content:
@@ -568,7 +579,8 @@ paths:
           schema:
             $ref: '#/components/schemas/SortOrder'
             example: desc
-        - description: The page number of the results to retrieve. Default is 1.
+        - description: >-
+            The page number of the results to retrieve. Default is 1.
           in: query
           name: page
           required: false
@@ -577,7 +589,8 @@ paths:
             example: 1
             minimum: 1
             type: integer
-        - description: The number of conversations to return per page. Default is 20.
+        - description: >-
+            The number of conversations to return per page. Default is 20.
           in: query
           name: per_page
           required: false
@@ -617,7 +630,9 @@ paths:
                     example: 20
                     type: integer
                   total:
-                    description: The total number of conversations matching the filter criteria.
+                    description: >-
+                      The total number of conversations matching the filter
+                      criteria.
                     example: 100
                     type: integer
                 required:
@@ -673,22 +688,23 @@ paths:
                   actionTypeId: '67890'
                   connectorId: '12345'
                 category: assistant
-                createdAt: '2023-10-31T12:01:00Z'
+                createdAt: 2023-10-31T12:01:00Z
                 excludeFromLastConversationStorage: false
                 id: abc123
                 messages:
                   - content: The conversation has been deleted.
                     role: system
-                    timestamp: '2023-10-31T12:35:00Z'
+                    timestamp: 2023-10-31T12:35:00Z
                 replacements: {}
                 title: Deleted Security Discussion
-                updatedAt: '2023-10-31T12:01:00Z'
+                updatedAt: 2023-10-31T12:01:00Z
                 users:
                   - id: user1
                     name: John Doe
               schema:
                 $ref: '#/components/schemas/ConversationResponse'
-          description: Indicates a successful call. The conversation was deleted
+          description: >-
+            Indicates a successful call. The conversation was deleted
             successfully.
         '400':
           content:
@@ -705,7 +721,8 @@ paths:
                   statusCode:
                     example: 400
                     type: number
-          description: Generic Error. This response indicates an issue with the request.
+          description: >-
+            Generic Error. This response indicates an issue with the request.
       summary: Delete a conversation
       tags:
         - Security AI Assistant API
@@ -717,7 +734,8 @@ paths:
         ID.
       operationId: ReadConversation
       parameters:
-        - description: The conversation's `id` value, a unique identifier for the
+        - description: >-
+            The conversation's `id` value, a unique identifier for the
             conversation.
           example: abc123
           in: path
@@ -734,22 +752,23 @@ paths:
                   actionTypeId: '67890'
                   connectorId: '12345'
                 category: assistant
-                createdAt: '2023-10-31T12:01:00Z'
+                createdAt: 2023-10-31T12:01:00Z
                 excludeFromLastConversationStorage: false
                 id: abc123
                 messages:
                   - content: Hello, how can I assist you today?
                     role: system
-                    timestamp: '2023-10-31T12:00:00Z'
+                    timestamp: 2023-10-31T12:00:00Z
                 replacements: {}
                 title: Security Discussion
-                updatedAt: '2023-10-31T12:01:00Z'
+                updatedAt: 2023-10-31T12:01:00Z
                 users:
                   - id: user1
                     name: John Doe
               schema:
                 $ref: '#/components/schemas/ConversationResponse'
-          description: Indicates a successful call. The conversation details are returned.
+          description: >-
+            Indicates a successful call. The conversation details are returned.
         '400':
           content:
             application/json:
@@ -765,7 +784,8 @@ paths:
                   statusCode:
                     example: 400
                     type: number
-          description: Generic Error. The request could not be processed due to an error.
+          description: >-
+            Generic Error. The request could not be processed due to an error.
       summary: Get a conversation
       tags:
         - Security AI Assistant API
@@ -795,7 +815,7 @@ paths:
               messages:
                 - content: The issue was resolved.
                   role: assistant
-                  timestamp: '2023-10-31T12:30:00Z'
+                  timestamp: 2023-10-31T12:30:00Z
               replacements: {}
               title: Updated Security Discussion
             schema:
@@ -810,22 +830,23 @@ paths:
                   actionTypeId: '09876'
                   connectorId: '54321'
                 category: insights
-                createdAt: '2023-10-31T12:01:00Z'
+                createdAt: 2023-10-31T12:01:00Z
                 excludeFromLastConversationStorage: true
                 id: abc123
                 messages:
                   - content: The issue was resolved.
                     role: assistant
-                    timestamp: '2023-10-31T12:30:00Z'
+                    timestamp: 2023-10-31T12:30:00Z
                 replacements: {}
                 title: Updated Security Discussion
-                updatedAt: '2023-10-31T12:31:00Z'
+                updatedAt: 2023-10-31T12:31:00Z
                 users:
                   - id: user1
                     name: John Doe
               schema:
                 $ref: '#/components/schemas/ConversationResponse'
-          description: Indicates a successful call. The conversation was updated
+          description: >-
+            Indicates a successful call. The conversation was updated
             successfully.
         '400':
           content:
@@ -859,7 +880,8 @@ paths:
             application/json:
               examples:
                 KnowledgeBaseReadResponse200Example2:
-                  summary: A response that returns information about the knowledge base.
+                  summary: >-
+                    A response that returns information about the knowledge base.
                   value:
                     defend_insights_exists: true
                     elser_exists: false
@@ -869,7 +891,8 @@ paths:
                     security_labs_exists: false
                     user_data_exists: true
               schema:
-                $ref: '#/components/schemas/KnowledgeBaseReadResponse200'
+                $ref: >-
+                  #/components/schemas/KnowledgeBaseReadResponse200
           description: Indicates a successful call.
         '400':
           content:
@@ -909,7 +932,8 @@ paths:
             application/json:
               examples:
                 KnowledgeBaseResponse200Example2:
-                  summary: A response that indicates that the request was successful.
+                  summary: >-
+                    A response that indicates that the request was successful.
                   value:
                     success: true
               schema:
@@ -920,8 +944,9 @@ paths:
             application/json:
               examples:
                 KnowledgeBaseResponse400Example2:
-                  summary: A response for a request that failed due to an invalid query parameter
-                    value.
+                  summary: >-
+                    A response for a request that failed due to an invalid query
+                    parameter value.
                   value: >
                     statusCode: 400 error: Bad Request message: "[request
                     query]: ignoreSecurityLabs: Invalid enum value. Expected
@@ -936,7 +961,8 @@ paths:
         - KnowledgeBase API
   /api/security_ai_assistant/knowledge_base/{resource}:
     get:
-      description: Read a knowledge base with a specific resource identifier.
+      description: >-
+        Read a knowledge base with a specific resource identifier.
       operationId: ReadKnowledgeBase
       parameters:
         - description: The KnowledgeBase `resource` value.
@@ -952,7 +978,8 @@ paths:
             application/json:
               examples:
                 KnowledgeBaseReadResponse200Example1:
-                  summary: A response that returns information about the knowledge base.
+                  summary: >-
+                    A response that returns information about the knowledge base.
                   value:
                     defend_insights_exists: true
                     elser_exists: false
@@ -962,7 +989,8 @@ paths:
                     security_labs_exists: false
                     user_data_exists: true
               schema:
-                $ref: '#/components/schemas/KnowledgeBaseReadResponse200'
+                $ref: >-
+                  #/components/schemas/KnowledgeBaseReadResponse200
           description: Indicates a successful call.
         '400':
           content:
@@ -975,7 +1003,8 @@ paths:
         - Security AI Assistant API
         - KnowledgeBase API
     post:
-      description: Create a knowledge base with a specific resource identifier.
+      description: >-
+        Create a knowledge base with a specific resource identifier.
       operationId: CreateKnowledgeBase
       parameters:
         - description: The KnowledgeBase `resource` value.
@@ -1010,7 +1039,8 @@ paths:
             application/json:
               examples:
                 KnowledgeBaseResponse200Example1:
-                  summary: A response that indicates that the request was successful.
+                  summary: >-
+                    A response that indicates that the request was successful.
                   value:
                     success: true
               schema:
@@ -1021,8 +1051,9 @@ paths:
             application/json:
               examples:
                 KnowledgeBaseResponse400Example1:
-                  summary: A response for a request that failed due to an invalid query parameter
-                    value.
+                  summary: >-
+                    A response for a request that failed due to an invalid query
+                    parameter value.
                   value: >
                     statusCode: 400 error: Bad Request message: "[request
                     query]: ignoreSecurityLabs: Invalid enum value. Expected
@@ -1043,7 +1074,8 @@ paths:
         content:
           application/json:
             example:
-              content: To reset your password, go to the settings page and click 'Reset
+              content: >-
+                To reset your password, go to the settings page and click 'Reset
                 Password'.
               tags:
                 - password
@@ -1051,15 +1083,17 @@ paths:
                 - help
               title: How to reset a password
             schema:
-              $ref: '#/components/schemas/KnowledgeBaseEntryCreateProps'
+              $ref: >-
+                #/components/schemas/KnowledgeBaseEntryCreateProps
         required: true
       responses:
         '200':
           content:
             application/json:
               example:
-                content: To reset your password, go to the settings page and click 'Reset
-                  Password'.
+                content: >-
+                  To reset your password, go to the settings page and click
+                  'Reset Password'.
                 id: '12345'
                 tags:
                   - password
@@ -1076,8 +1110,10 @@ paths:
                 error: Invalid input
                 message: The 'title' field is required.
               schema:
-                $ref: '#/components/schemas/KnowledgeBaseEntryErrorSchema'
-          description: A generic error occurred, such as invalid input or missing required
+                $ref: >-
+                  #/components/schemas/KnowledgeBaseEntryErrorSchema
+          description: >-
+            A generic error occurred, such as invalid input or missing required
             fields.
       summary: Create a Knowledge Base Entry
       tags:
@@ -1101,7 +1137,8 @@ paths:
                     - content: This is the content of the new entry.
                       title: New Entry
                   items:
-                    $ref: '#/components/schemas/KnowledgeBaseEntryCreateProps'
+                    $ref: >-
+                      #/components/schemas/KnowledgeBaseEntryCreateProps
                   type: array
                 delete:
                   type: object
@@ -1127,20 +1164,23 @@ paths:
                       id: '123'
                       title: Updated Entry
                   items:
-                    $ref: '#/components/schemas/KnowledgeBaseEntryUpdateProps'
+                    $ref: >-
+                      #/components/schemas/KnowledgeBaseEntryUpdateProps
                   type: array
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/KnowledgeBaseEntryBulkCrudActionResponse'
+                $ref: >-
+                  #/components/schemas/KnowledgeBaseEntryBulkCrudActionResponse
           description: Successful bulk operation request
         '400':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/KnowledgeBaseEntryErrorSchema'
+                $ref: >-
+                  #/components/schemas/KnowledgeBaseEntryErrorSchema
           description: Generic Error
       summary: Applies a bulk action to multiple Knowledge Base Entries
       tags:
@@ -1164,7 +1204,8 @@ paths:
             items:
               type: string
             type: array
-        - description: Search query to filter Knowledge Base Entries by specific criteria.
+        - description: >-
+            Search query to filter Knowledge Base Entries by specific criteria.
           in: query
           name: filter
           required: false
@@ -1176,7 +1217,8 @@ paths:
           name: sort_field
           required: false
           schema:
-            $ref: '#/components/schemas/FindKnowledgeBaseEntriesSortField'
+            $ref: >-
+              #/components/schemas/FindKnowledgeBaseEntriesSortField
             example: created_at
         - description: Sort order for the results, either asc or desc.
           in: query
@@ -1194,7 +1236,8 @@ paths:
             example: 2
             minimum: 1
             type: integer
-        - description: Number of Knowledge Base Entries to return per page. Defaults to 20.
+        - description: >-
+            Number of Knowledge Base Entries to return per page. Defaults to 20.
           in: query
           name: per_page
           required: false
@@ -1211,20 +1254,24 @@ paths:
                 type: object
                 properties:
                   data:
-                    description: The list of Knowledge Base Entries for the current page.
+                    description: >-
+                      The list of Knowledge Base Entries for the current page.
                     items:
-                      $ref: '#/components/schemas/KnowledgeBaseEntryResponse'
+                      $ref: >-
+                        #/components/schemas/KnowledgeBaseEntryResponse
                     type: array
                   page:
                     description: The current page number.
                     example: 1
                     type: integer
                   perPage:
-                    description: The number of Knowledge Base Entries returned per page.
+                    description: >-
+                      The number of Knowledge Base Entries returned per page.
                     example: 20
                     type: integer
                   total:
-                    description: The total number of Knowledge Base Entries available.
+                    description: >-
+                      The total number of Knowledge Base Entries available.
                     example: 100
                     type: integer
                 required:
@@ -1232,7 +1279,8 @@ paths:
                   - perPage
                   - total
                   - data
-          description: Successful response containing the paginated Knowledge Base Entries.
+          description: >-
+            Successful response containing the paginated Knowledge Base Entries.
         '400':
           content:
             application/json:
@@ -1261,7 +1309,8 @@ paths:
       description: Delete a Knowledge Base Entry by its unique `id`.
       operationId: DeleteKnowledgeBaseEntry
       parameters:
-        - description: The unique identifier (`id`) of the Knowledge Base Entry to delete.
+        - description: >-
+            The unique identifier (`id`) of the Knowledge Base Entry to delete.
           example: '12345'
           in: path
           name: id
@@ -1277,19 +1326,24 @@ paths:
                 message: Knowledge Base Entry successfully deleted.
               schema:
                 $ref: '#/components/schemas/DeleteResponseFields'
-          description: Successful request returning the `id` of the deleted Knowledge Base
+          description: >-
+            Successful request returning the `id` of the deleted Knowledge Base
             Entry.
         '400':
           content:
             application/json:
               example:
                 error: Not Found
-                message: No Knowledge Base Entry found with the provided `id`.
+                message: >-
+                  No Knowledge Base Entry found with the provided `id`.
               schema:
-                $ref: '#/components/schemas/KnowledgeBaseEntryErrorSchema'
-          description: A generic error occurred, such as an invalid `id` or the entry not
+                $ref: >-
+                  #/components/schemas/KnowledgeBaseEntryErrorSchema
+          description: >-
+            A generic error occurred, such as an invalid `id` or the entry not
             being found.
-      summary: Deletes a single Knowledge Base Entry using the `id` field
+      summary: >-
+        Deletes a single Knowledge Base Entry using the `id` field
       tags:
         - Security AI Assistant API
         - Knowledge Base Entries API
@@ -1297,7 +1351,8 @@ paths:
       description: Retrieve a Knowledge Base Entry by its unique `id`.
       operationId: ReadKnowledgeBaseEntry
       parameters:
-        - description: The unique identifier (`id`) of the Knowledge Base Entry to retrieve.
+        - description: >-
+            The unique identifier (`id`) of the Knowledge Base Entry to retrieve.
           example: '12345'
           in: path
           name: id
@@ -1309,8 +1364,9 @@ paths:
           content:
             application/json:
               example:
-                content: To reset your password, go to the settings page and click 'Reset
-                  Password'.
+                content: >-
+                  To reset your password, go to the settings page and click
+                  'Reset Password'.
                 id: '12345'
                 tags:
                   - password
@@ -1319,26 +1375,32 @@ paths:
                 title: How to reset a password
               schema:
                 $ref: '#/components/schemas/KnowledgeBaseEntryResponse'
-          description: Successful request returning the requested Knowledge Base Entry.
+          description: >-
+            Successful request returning the requested Knowledge Base Entry.
         '400':
           content:
             application/json:
               example:
                 error: Not Found
-                message: No Knowledge Base Entry found with the provided `id`.
+                message: >-
+                  No Knowledge Base Entry found with the provided `id`.
               schema:
-                $ref: '#/components/schemas/KnowledgeBaseEntryErrorSchema'
-          description: A generic error occurred, such as an invalid `id` or the entry not
+                $ref: >-
+                  #/components/schemas/KnowledgeBaseEntryErrorSchema
+          description: >-
+            A generic error occurred, such as an invalid `id` or the entry not
             being found.
       summary: Read a Knowledge Base Entry
       tags:
         - Security AI Assistant API
         - Knowledge Base Entries API
     put:
-      description: Update an existing Knowledge Base Entry by its unique `id`.
+      description: >-
+        Update an existing Knowledge Base Entry by its unique `id`.
       operationId: UpdateKnowledgeBaseEntry
       parameters:
-        - description: The unique identifier (`id`) of the Knowledge Base Entry to update.
+        - description: >-
+            The unique identifier (`id`) of the Knowledge Base Entry to update.
           example: '12345'
           in: path
           name: id
@@ -1359,7 +1421,8 @@ paths:
                 - update
               title: How to reset a password (updated)
             schema:
-              $ref: '#/components/schemas/KnowledgeBaseEntryUpdateRouteProps'
+              $ref: >-
+                #/components/schemas/KnowledgeBaseEntryUpdateRouteProps
         required: true
       responses:
         '200':
@@ -1378,7 +1441,8 @@ paths:
                 title: How to reset a password (updated)
               schema:
                 $ref: '#/components/schemas/KnowledgeBaseEntryResponse'
-          description: Successful request returning the updated Knowledge Base Entry.
+          description: >-
+            Successful request returning the updated Knowledge Base Entry.
         '400':
           content:
             application/json:
@@ -1386,8 +1450,10 @@ paths:
                 error: Invalid input
                 message: The 'content' field cannot be empty.
               schema:
-                $ref: '#/components/schemas/KnowledgeBaseEntryErrorSchema'
-          description: A generic error occurred, such as invalid input or the entry not
+                $ref: >-
+                  #/components/schemas/KnowledgeBaseEntryErrorSchema
+          description: >-
+            A generic error occurred, such as invalid input or the entry not
             being found.
       summary: Update a Knowledge Base Entry
       tags:
@@ -1482,8 +1548,10 @@ paths:
                     status_code: 200
                     success: true
               schema:
-                $ref: '#/components/schemas/PromptsBulkCrudActionResponse'
-          description: Indicates a successful call with the results of the bulk action.
+                $ref: >-
+                  #/components/schemas/PromptsBulkCrudActionResponse
+          description: >-
+            Indicates a successful call with the results of the bulk action.
         '400':
           content:
             application/json:
@@ -1496,7 +1564,8 @@ paths:
                     type: string
                   message:
                     description: A detailed error message.
-                    example: Invalid prompt ID or missing required fields.
+                    example: >-
+                      Invalid prompt ID or missing required fields.
                     type: string
                   statusCode:
                     description: The HTTP status code for the error.
@@ -1509,11 +1578,13 @@ paths:
         - Bulk API
   /api/security_ai_assistant/prompts/_find:
     get:
-      description: Get a list of all prompts based on optional filters, sorting, and
+      description: >-
+        Get a list of all prompts based on optional filters, sorting, and
         pagination.
       operationId: FindPrompts
       parameters:
-        - description: List of specific fields to include in each returned prompt.
+        - description: >-
+            List of specific fields to include in each returned prompt.
           in: query
           name: fields
           required: false
@@ -1525,7 +1596,8 @@ paths:
             items:
               type: string
             type: array
-        - description: Search query string to filter prompts by matching fields.
+        - description: >-
+            Search query string to filter prompts by matching fields.
           in: query
           name: filter
           required: false
@@ -1574,8 +1646,9 @@ paths:
                         - logging
                       color: '#FF5733'
                       consumer: security
-                      content: If you encounter an error, check the logs and retry.
-                      createdAt: '2025-04-20T21:00:00Z'
+                      content: >-
+                        If you encounter an error, check the logs and retry.
+                      createdAt: 2025-04-20T21:00:00Z
                       createdBy: jdoe
                       id: prompt-123
                       isDefault: true
@@ -1583,8 +1656,8 @@ paths:
                       name: Error Troubleshooting Prompt
                       namespace: default
                       promptType: standard
-                      timestamp: '2025-04-30T22:30:00Z'
-                      updatedAt: '2025-04-30T22:45:00Z'
+                      timestamp: 2025-04-30T22:30:00Z
+                      updatedAt: 2025-04-30T22:45:00Z
                       updatedBy: jdoe
                       users:
                         - full_name: John Doe
@@ -1595,8 +1668,9 @@ paths:
                 type: object
                 properties:
                   data:
-                    description: The list of prompts returned based on the search query, sorting,
-                      and pagination.
+                    description: >-
+                      The list of prompts returned based on the search query,
+                      sorting, and pagination.
                     items:
                       $ref: '#/components/schemas/PromptResponse'
                     type: array
@@ -1636,7 +1710,8 @@ paths:
                     description: HTTP status code for the error.
                     example: 400
                     type: number
-          description: Bad request due to invalid parameters or malformed query.
+          description: >-
+            Bad request due to invalid parameters or malformed query.
       summary: Get prompts
       tags:
         - Security AI Assistant API
@@ -1647,7 +1722,8 @@ components:
       type: object
       properties:
         allowed:
-          description: Whether this field is allowed to be sent to the model.
+          description: >-
+            Whether this field is allowed to be sent to the model.
           example: true
           type: boolean
         anonymized:
@@ -1677,7 +1753,8 @@ components:
       type: object
       properties:
         allowed:
-          description: Whether this field is allowed to be sent to the model.
+          description: >-
+            Whether this field is allowed to be sent to the model.
           example: true
           type: boolean
         anonymized:
@@ -1685,11 +1762,13 @@ components:
           example: false
           type: boolean
         createdAt:
-          description: Timestamp of when the anonymization field was created.
-          example: '2023-10-31T12:00:00Z'
+          description: >-
+            Timestamp of when the anonymization field was created.
+          example: 2023-10-31T12:00:00Z
           type: string
         createdBy:
-          description: Username of the person who created the anonymization field.
+          description: >-
+            Username of the person who created the anonymization field.
           example: user1
           type: string
         field:
@@ -1700,15 +1779,17 @@ components:
           $ref: '#/components/schemas/NonEmptyString'
           description: The ID of the anonymization field.
         namespace:
-          description: Kibana space in which this anonymization field exists.
+          description: >-
+            Kibana space in which this anonymization field exists.
           example: default
           type: string
         timestamp:
           $ref: '#/components/schemas/NonEmptyTimestamp'
-          description: Timestamp when the anonymization field was initially created.
+          description: >-
+            Timestamp when the anonymization field was initially created.
         updatedAt:
           description: Timestamp of the last update.
-          example: '2023-10-31T12:00:00Z'
+          example: 2023-10-31T12:00:00Z
           type: string
         updatedBy:
           description: Username of the person who last updated the field.
@@ -1726,15 +1807,18 @@ components:
       type: object
       properties:
         id:
-          description: The ID of the anonymization field that was not modified.
+          description: >-
+            The ID of the anonymization field that was not modified.
           example: field4
           type: string
         name:
-          description: Name of the anonymization field that was not modified.
+          description: >-
+            Name of the anonymization field that was not modified.
           example: user.name
           type: string
         skip_reason:
-          $ref: '#/components/schemas/AnonymizationFieldsBulkActionSkipReason'
+          $ref: >-
+            #/components/schemas/AnonymizationFieldsBulkActionSkipReason
           description: Reason why the anonymization field was not modified.
       required:
         - id
@@ -1750,19 +1834,23 @@ components:
           type: object
           properties:
             errors:
-              description: List of errors that occurred during the bulk operation.
+              description: >-
+                List of errors that occurred during the bulk operation.
               items:
-                $ref: '#/components/schemas/NormalizedAnonymizationFieldError'
+                $ref: >-
+                  #/components/schemas/NormalizedAnonymizationFieldError
               type: array
             results:
-              $ref: '#/components/schemas/AnonymizationFieldsBulkCrudActionResults'
+              $ref: >-
+                #/components/schemas/AnonymizationFieldsBulkCrudActionResults
             summary:
               $ref: '#/components/schemas/BulkCrudActionSummary'
           required:
             - results
             - summary
         message:
-          description: Message providing information about the bulk action result.
+          description: >-
+            Message providing information about the bulk action result.
           example: Bulk action completed successfully
           type: string
         status_code:
@@ -1785,14 +1873,17 @@ components:
           type: array
         deleted:
           items:
-            description: Array of IDs of anonymization fields that were deleted.
+            description: >-
+              Array of IDs of anonymization fields that were deleted.
             example: field3
             type: string
           type: array
         skipped:
-          description: List of anonymization fields that were skipped during the operation.
+          description: >-
+            List of anonymization fields that were skipped during the operation.
           items:
-            $ref: '#/components/schemas/AnonymizationFieldsBulkActionSkipResult'
+            $ref: >-
+              #/components/schemas/AnonymizationFieldsBulkActionSkipResult
           type: array
         updated:
           description: List of anonymization fields successfully updated.
@@ -1808,7 +1899,8 @@ components:
       type: object
       properties:
         allowed:
-          description: Whether this field is allowed to be sent to the model.
+          description: >-
+            Whether this field is allowed to be sent to the model.
           example: true
           type: boolean
         anonymized:
@@ -1877,11 +1969,13 @@ components:
       type: object
       properties:
         expired:
-          description: Whether the interrupt has expired and can no longer be resumed.
+          description: >-
+            Whether the interrupt has expired and can no longer be resumed.
           example: false
           type: boolean
         threadId:
-          description: Thread ID of the graph execution that produced this message.
+          description: >-
+            Thread ID of the graph execution that produced this message.
           example: <UUID>
           type: string
         type:
@@ -1993,7 +2087,8 @@ components:
           $ref: '#/components/schemas/MessageData'
           description: Metadata to attach to the context of the message.
         fields_to_anonymize:
-          description: List of field names within the data object that should be anonymized.
+          description: >-
+            List of field names within the data object that should be anonymized.
           example:
             - user.name
             - source.ip
@@ -2016,10 +2111,13 @@ components:
     ContentReferences:
       additionalProperties:
         oneOf:
-          - $ref: '#/components/schemas/KnowledgeBaseEntryContentReference'
+          - $ref: >-
+              #/components/schemas/KnowledgeBaseEntryContentReference
           - $ref: '#/components/schemas/SecurityAlertContentReference'
-          - $ref: '#/components/schemas/SecurityAlertsPageContentReference'
-          - $ref: '#/components/schemas/ProductDocumentationContentReference'
+          - $ref: >-
+              #/components/schemas/SecurityAlertsPageContentReference
+          - $ref: >-
+              #/components/schemas/ProductDocumentationContentReference
           - $ref: '#/components/schemas/EsqlContentReference'
           - $ref: '#/components/schemas/HrefContentReference'
             additionalProperties: false
@@ -2074,7 +2172,7 @@ components:
           example: assistant
         createdAt:
           description: The time conversation was created.
-          example: '2025-04-30T14:00:00Z'
+          example: 2025-04-30T14:00:00Z
           type: string
         createdBy:
           $ref: '#/components/schemas/User'
@@ -2103,7 +2201,7 @@ components:
           type: string
         updatedAt:
           description: The last time conversation was updated.
-          example: '2025-04-30T16:30:00Z'
+          example: 2025-04-30T16:30:00Z
           type: string
         users:
           items:
@@ -2161,7 +2259,8 @@ components:
         - type: object
           properties:
             global:
-              description: Whether this Knowledge Base Entry is global, defaults to false.
+              description: >-
+                Whether this Knowledge Base Entry is global, defaults to false.
               example: false
               type: boolean
             name:
@@ -2191,7 +2290,8 @@ components:
         - type: object
           properties:
             global:
-              description: Whether this Knowledge Base Entry is global, defaults to false.
+              description: >-
+                Whether this Knowledge Base Entry is global, defaults to false.
               example: false
               type: boolean
             name:
@@ -2217,7 +2317,8 @@ components:
       type: object
       properties:
         required:
-          description: Whether this resource should always be included, defaults to false.
+          description: >-
+            Whether this resource should always be included, defaults to false.
           example: false
           type: boolean
         vector:
@@ -2255,7 +2356,8 @@ components:
         - type: object
           properties:
             global:
-              description: Whether this Knowledge Base Entry is global, defaults to false.
+              description: >-
+                Whether this Knowledge Base Entry is global, defaults to false.
               example: false
               type: boolean
             id:
@@ -2296,10 +2398,10 @@ components:
               type: object
               properties:
                 from:
-                  example: '2025-04-01T00:00:00Z'
+                  example: 2025-04-01T00:00:00Z
                   type: string
                 to:
-                  example: '2025-04-30T23:59:59Z'
+                  example: 2025-04-30T23:59:59Z
                   type: string
               required:
                 - from
@@ -2374,7 +2476,8 @@ components:
         - type: object
           properties:
             global:
-              description: Whether this Knowledge Base Entry is global, defaults to false.
+              description: >-
+                Whether this Knowledge Base Entry is global, defaults to false.
               example: false
               type: boolean
             name:
@@ -2404,7 +2507,8 @@ components:
         - type: object
           properties:
             global:
-              description: Whether this Knowledge Base Entry is global, defaults to false.
+              description: >-
+                Whether this Knowledge Base Entry is global, defaults to false.
               example: false
               type: boolean
             name:
@@ -2455,14 +2559,16 @@ components:
           example: content
           type: string
         index:
-          description: Index or Data Stream to query for Knowledge Base content.
+          description: >-
+            Index or Data Stream to query for Knowledge Base content.
           example: knowledge_base_index
           type: string
         queryDescription:
           description: >-
             Description of query field used to fetch Knowledge Base content.
             Passed to the LLM as part of the tool input schema.
-          example: Search for documents containing the specified keywords.
+          example: >-
+            Search for documents containing the specified keywords.
           type: string
         type:
           description: Entry type.
@@ -2485,7 +2591,8 @@ components:
         - type: object
           properties:
             global:
-              description: Whether this Knowledge Base Entry is global, defaults to false.
+              description: >-
+                Whether this Knowledge Base Entry is global, defaults to false.
               example: false
               type: boolean
             id:
@@ -2543,7 +2650,8 @@ components:
               example: INPUT_TEXT
               type: string
             value:
-              description: Text value used to resume the graph execution with.
+              description: >-
+                Text value used to resume the graph execution with.
               example: .logs*
               type: string
           required:
@@ -2557,7 +2665,8 @@ components:
           properties:
             description:
               description: Description of action required
-              example: What is the index you would like to use for the query.
+              example: >-
+                What is the index you would like to use for the query.
               type: string
             placeholder:
               description: Placeholder text for the input field
@@ -2592,7 +2701,8 @@ components:
         - $ref: '#/components/schemas/InputTextInterruptValue'
           additionalProperties: false
     KnowledgeBaseEntryBulkActionSkipReason:
-      description: Reason why a Knowledge Base Entry was skipped during the bulk action.
+      description: >-
+        Reason why a Knowledge Base Entry was skipped during the bulk action.
       enum:
         - KNOWLEDGE_BASE_ENTRY_NOT_MODIFIED
       type: string
@@ -2608,7 +2718,8 @@ components:
           example: Skipped Entry
           type: string
         skip_reason:
-          $ref: '#/components/schemas/KnowledgeBaseEntryBulkActionSkipReason'
+          $ref: >-
+            #/components/schemas/KnowledgeBaseEntryBulkActionSkipReason
       required:
         - id
         - skip_reason
@@ -2619,7 +2730,8 @@ components:
           type: object
           properties:
             errors:
-              description: List of errors encountered during the bulk action.
+              description: >-
+                List of errors encountered during the bulk action.
               example:
                 - err_code: UPDATE_FAILED
                   knowledgeBaseEntries:
@@ -2628,12 +2740,15 @@ components:
                   message: Failed to update entry.
                   statusCode: 400
               items:
-                $ref: '#/components/schemas/NormalizedKnowledgeBaseEntryError'
+                $ref: >-
+                  #/components/schemas/NormalizedKnowledgeBaseEntryError
               type: array
             results:
-              $ref: '#/components/schemas/KnowledgeBaseEntryBulkCrudActionResults'
+              $ref: >-
+                #/components/schemas/KnowledgeBaseEntryBulkCrudActionResults
             summary:
-              $ref: '#/components/schemas/KnowledgeBaseEntryBulkCrudActionSummary'
+              $ref: >-
+                #/components/schemas/KnowledgeBaseEntryBulkCrudActionSummary
           required:
             - results
             - summary
@@ -2659,7 +2774,8 @@ components:
       type: object
       properties:
         created:
-          description: List of Knowledge Base Entries that were successfully created.
+          description: >-
+            List of Knowledge Base Entries that were successfully created.
           example:
             - content: This is the content of the new entry.
               id: '456'
@@ -2668,24 +2784,28 @@ components:
             $ref: '#/components/schemas/KnowledgeBaseEntryResponse'
           type: array
         deleted:
-          description: List of IDs of Knowledge Base Entries that were successfully deleted.
+          description: >-
+            List of IDs of Knowledge Base Entries that were successfully deleted.
           example:
             - '789'
           items:
             type: string
           type: array
         skipped:
-          description: List of Knowledge Base Entries that were skipped during the bulk
+          description: >-
+            List of Knowledge Base Entries that were skipped during the bulk
             action.
           example:
             - id: '123'
               name: Skipped Entry
               skip_reason: KNOWLEDGE_BASE_ENTRY_NOT_MODIFIED
           items:
-            $ref: '#/components/schemas/KnowledgeBaseEntryBulkActionSkipResult'
+            $ref: >-
+              #/components/schemas/KnowledgeBaseEntryBulkActionSkipResult
           type: array
         updated:
-          description: List of Knowledge Base Entries that were successfully updated.
+          description: >-
+            List of Knowledge Base Entries that were successfully updated.
           example:
             - content: Updated content.
               id: '123'
@@ -2702,11 +2822,13 @@ components:
       type: object
       properties:
         failed:
-          description: Number of Knowledge Base Entries that failed during the bulk action.
+          description: >-
+            Number of Knowledge Base Entries that failed during the bulk action.
           example: 2
           type: integer
         skipped:
-          description: Number of Knowledge Base Entries that were skipped during the bulk
+          description: >-
+            Number of Knowledge Base Entries that were skipped during the bulk
             action.
           example: 1
           type: integer
@@ -2717,7 +2839,8 @@ components:
           example: 5
           type: integer
         total:
-          description: Total number of Knowledge Base Entries involved in the bulk action.
+          description: >-
+            Total number of Knowledge Base Entries involved in the bulk action.
           example: 8
           type: integer
       required:
@@ -2761,11 +2884,13 @@ components:
       type: object
       properties:
         id:
-          description: ID of the Knowledge Base Entry that encountered an error.
+          description: >-
+            ID of the Knowledge Base Entry that encountered an error.
           example: '456'
           type: string
         name:
-          description: Name of the Knowledge Base Entry that encountered an error.
+          description: >-
+            Name of the Knowledge Base Entry that encountered an error.
           example: Error Entry
           type: string
       required:
@@ -2821,28 +2946,34 @@ components:
       type: object
       properties:
         defend_insights_exists:
-          description: Indicates if Defend Insights documentation exists in the
+          description: >-
+            Indicates if Defend Insights documentation exists in the
             KnowledgeBase.
           example: true
           type: boolean
         elser_exists:
-          description: Indicates if the ELSER model exists for the KnowledgeBase.
+          description: >-
+            Indicates if the ELSER model exists for the KnowledgeBase.
           example: true
           type: boolean
         is_setup_available:
-          description: Indicates if the setup process is available for the KnowledgeBase.
+          description: >-
+            Indicates if the setup process is available for the KnowledgeBase.
           example: true
           type: boolean
         is_setup_in_progress:
-          description: Indicates if the setup process is currently in progress.
+          description: >-
+            Indicates if the setup process is currently in progress.
           example: false
           type: boolean
         product_documentation_status:
-          description: The status of the product documentation in the KnowledgeBase.
+          description: >-
+            The status of the product documentation in the KnowledgeBase.
           example: complete
           type: string
         security_labs_exists:
-          description: Indicates if Security Labs documentation exists in the KnowledgeBase.
+          description: >-
+            Indicates if Security Labs documentation exists in the KnowledgeBase.
           example: true
           type: boolean
         user_data_exists:
@@ -2904,7 +3035,8 @@ components:
           $ref: '#/components/schemas/Reader'
           description: Message content.
         refusal:
-          description: Refusal reason returned by the model when content is filtered.
+          description: >-
+            Refusal reason returned by the model when content is filtered.
           type: string
         role:
           $ref: '#/components/schemas/MessageRole'
@@ -2913,7 +3045,7 @@ components:
         timestamp:
           $ref: '#/components/schemas/NonEmptyTimestamp'
           description: The timestamp message was sent or received.
-          example: '2025-04-30T15:30:00Z'
+          example: 2025-04-30T15:30:00Z
         traceData:
           $ref: '#/components/schemas/TraceData'
           description: Trace data
@@ -2959,7 +3091,8 @@ components:
       example: assistant
       type: string
     NonEmptyString:
-      description: A string that does not contain only whitespace characters.
+      description: >-
+        A string that does not contain only whitespace characters.
       example: I am a string
       format: nonempty
       minLength: 1
@@ -2968,7 +3101,7 @@ components:
       description: >-
         A string that represents a timestamp in ISO 8601 format and does not
         contain only whitespace characters.
-      example: '2023-10-31T12:00:00Z'
+      example: 2023-10-31T12:00:00Z
       format: nonempty
       minLength: 1
       type: string
@@ -2978,7 +3111,8 @@ components:
         anonymization_fields:
           description: Array of anonymization fields that caused the error.
           items:
-            $ref: '#/components/schemas/AnonymizationFieldDetailsInError'
+            $ref: >-
+              #/components/schemas/AnonymizationFieldDetailsInError
           type: array
         err_code:
           description: Error code indicating the type of failure.
@@ -3004,9 +3138,11 @@ components:
           example: UPDATE_FAILED
           type: string
         knowledgeBaseEntries:
-          description: List of Knowledge Base Entries that encountered the error.
+          description: >-
+            List of Knowledge Base Entries that encountered the error.
           items:
-            $ref: '#/components/schemas/KnowledgeBaseEntryDetailsInError'
+            $ref: >-
+              #/components/schemas/KnowledgeBaseEntryDetailsInError
           type: array
         message:
           description: Error message describing the issue.
@@ -3092,7 +3228,8 @@ components:
           example: false
           type: boolean
         isNewConversationDefault:
-          description: Whether this prompt should be the default for new conversations.
+          description: >-
+            Whether this prompt should be the default for new conversations.
           example: true
           type: boolean
         name:
@@ -3147,7 +3284,8 @@ components:
           description: Whether this prompt is the default.
           type: boolean
         isNewConversationDefault:
-          description: Whether this prompt is the default for new conversations.
+          description: >-
+            Whether this prompt is the default for new conversations.
           type: boolean
         name:
           description: The name of the prompt.
@@ -3297,7 +3435,8 @@ components:
           example: true
           type: boolean
         isNewConversationDefault:
-          description: Whether the prompt should be the default for new conversations.
+          description: >-
+            Whether the prompt should be the default for new conversations.
           example: false
           type: boolean
       required:
@@ -3316,14 +3455,15 @@ components:
     Replacements:
       additionalProperties:
         type: string
-      description: Replacements object used to anonymize/deanonymize messages
+      description: >-
+        Replacements object used to anonymize/deanonymize messages
       type: object
     ResponseFields:
       type: object
       properties:
         createdAt:
           description: Time the Knowledge Base Entry was created.
-          example: '2023-01-01T12:00:00Z'
+          example: 2023-01-01T12:00:00Z
           type: string
         createdBy:
           description: User who created the Knowledge Base Entry.
@@ -3333,7 +3473,7 @@ components:
           $ref: '#/components/schemas/NonEmptyString'
         updatedAt:
           description: Time the Knowledge Base Entry was last updated.
-          example: '2023-01-02T12:00:00Z'
+          example: 2023-01-02T12:00:00Z
           type: string
         updatedBy:
           description: User who last updated the Knowledge Base Entry.
@@ -3413,7 +3553,9 @@ components:
               example: SELECT_OPTION
               type: string
             value:
-              description: The value of the selected option to resume the graph execution with
+              description: >-
+                The value of the selected option to resume the graph execution
+                with
               example: option_1
               type: string
           required:
@@ -3446,7 +3588,8 @@ components:
             - type
             - description
             - options
-      description: Interrupt that requests user to select one of the provided options
+      description: >-
+        Interrupt that requests user to select one of the provided options
     SortOrder:
       description: The order in which results are sorted.
       enum:

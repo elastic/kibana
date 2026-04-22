@@ -1,8 +1,9 @@
 openapi: 3.0.3
 info:
-  description: Lists API allows you to manage lists of keywords, IPs or IP ranges items.
+  description: >-
+    Lists API allows you to manage lists of keywords, IPs or IP ranges items.
   title: Security Lists API (Elastic Cloud Serverless)
-  version: '2023-10-31'
+  version: 2023-10-31
 servers:
   - url: http://{kibana_host}:{port}
     variables:
@@ -52,8 +53,8 @@ paths:
                 ipList:
                   value:
                     _version: WzIsMV0=
-                    '@timestamp': '2025-01-08T04:47:34.273Z'
-                    created_at: '2025-01-08T04:47:34.273Z'
+                    '@timestamp': 2025-01-08T04:47:34.273Z
+                    created_at: 2025-01-08T04:47:34.273Z
                     created_by: elastic
                     description: List of bad internet ips.
                     id: 21b01cfb-058d-44b9-838c-282be16c91cd
@@ -61,7 +62,7 @@ paths:
                     name: Bad ips
                     tie_breaker_id: f5508188-b1e9-4e6e-9662-d039a7d89899
                     type: ip
-                    updated_at: '2025-01-08T05:39:39.292Z'
+                    updated_at: 2025-01-08T05:39:39.292Z
                     updated_by: elastic
                     version: 3
               schema:
@@ -155,8 +156,8 @@ paths:
                 ip:
                   value:
                     _version: WzEsMV0=
-                    '@timestamp': '2025-01-08T04:47:34.273Z'
-                    created_at: '2025-01-08T04:47:34.273Z'
+                    '@timestamp': 2025-01-08T04:47:34.273Z
+                    created_at: 2025-01-08T04:47:34.273Z
                     created_by: elastic
                     description: This list describes bad internet ip
                     id: ip_list
@@ -164,7 +165,7 @@ paths:
                     name: My bad ips
                     tie_breaker_id: f5508188-b1e9-4e6e-9662-d039a7d89899
                     type: ip
-                    updated_at: '2025-01-08T05:21:53.843Z'
+                    updated_at: 2025-01-08T05:21:53.843Z
                     updated_by: elastic
                     version: 1
               schema:
@@ -240,7 +241,8 @@ paths:
       tags:
         - Security Lists API
     patch:
-      description: Update specific fields of an existing list using the list `id`.
+      description: >-
+        Update specific fields of an existing list using the list `id`.
       operationId: PatchList
       requestBody:
         content:
@@ -275,8 +277,8 @@ paths:
                 ip:
                   value:
                     _version: WzEsMV0=
-                    '@timestamp': '2025-01-08T04:47:34.273Z'
-                    created_at: '2025-01-08T04:47:34.273Z'
+                    '@timestamp': 2025-01-08T04:47:34.273Z
+                    created_at: 2025-01-08T04:47:34.273Z
                     created_by: elastic
                     description: This list describes bad internet ips
                     id: ip_list
@@ -284,7 +286,7 @@ paths:
                     name: Bad ips list - UPDATED
                     tie_breaker_id: f5508188-b1e9-4e6e-9662-d039a7d89899
                     type: ip
-                    updated_at: '2025-01-08T05:21:53.843Z'
+                    updated_at: 2025-01-08T05:21:53.843Z
                     updated_by: elastic
                     version: 2
               schema:
@@ -297,7 +299,8 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: '[request body]: name: Expected string, received number'
+                    message: >-
+                      [request body]: name: Expected string, received number
                     statusCode: 400
               schema:
                 oneOf:
@@ -389,7 +392,8 @@ paths:
                 value:
                   description: This parses the first found ipv4 only
                   id: keyword_custom_format_list
-                  name: Simple list with a keyword using a custom format
+                  name: >-
+                    Simple list with a keyword using a custom format
                   type: keyword
             schema:
               type: object
@@ -422,8 +426,8 @@ paths:
                 ip:
                   value:
                     _version: WzAsMV0=
-                    '@timestamp': '2025-01-08T04:47:34.273Z'
-                    created_at: '2025-01-08T04:47:34.273Z'
+                    '@timestamp': 2025-01-08T04:47:34.273Z
+                    created_at: 2025-01-08T04:47:34.273Z
                     created_by: elastic
                     description: This list describes bad internet ips
                     id: ip_list
@@ -431,14 +435,14 @@ paths:
                     name: Simple list with ips
                     tie_breaker_id: f5508188-b1e9-4e6e-9662-d039a7d89899
                     type: ip
-                    updated_at: '2025-01-08T04:47:34.273Z'
+                    updated_at: 2025-01-08T04:47:34.273Z
                     updated_by: elastic
                     version: 1
                 ip_range:
                   value:
                     _version: WzAsMV0=
-                    '@timestamp': '2025-01-09T18:23:52.241Z'
-                    created_at: '2025-01-09T18:23:52.241Z'
+                    '@timestamp': 2025-01-09T18:23:52.241Z
+                    created_at: 2025-01-09T18:23:52.241Z
                     created_by: elastic
                     description: This list has ip ranges
                     id: ip_range_list
@@ -446,14 +450,14 @@ paths:
                     name: Simple list with ip ranges
                     tie_breaker_id: 74aebdaf-601f-4940-b351-155728ff7003
                     type: ip_range
-                    updated_at: '2025-01-09T18:23:52.241Z'
+                    updated_at: 2025-01-09T18:23:52.241Z
                     updated_by: elastic
                     version: 1
                 keyword:
                   value:
                     _version: WzEsMV0=
-                    '@timestamp': '2025-01-09T18:24:55.786Z'
-                    created_at: '2025-01-09T18:24:55.786Z'
+                    '@timestamp': 2025-01-09T18:24:55.786Z
+                    created_at: 2025-01-09T18:24:55.786Z
                     created_by: elastic
                     description: This list describes bad host names
                     id: keyword_list
@@ -461,22 +465,23 @@ paths:
                     name: Simple list with a keyword
                     tie_breaker_id: f7e7dbaa-daf7-4c9a-a3dc-56643923ef68
                     type: keyword
-                    updated_at: '2025-01-09T18:24:55.786Z'
+                    updated_at: 2025-01-09T18:24:55.786Z
                     updated_by: elastic
                     version: 1
                 keyword_custom_format:
                   value:
                     _version: WzIsMV0=
-                    '@timestamp': '2025-01-09T18:25:39.604Z'
-                    created_at: '2025-01-09T18:25:39.604Z'
+                    '@timestamp': 2025-01-09T18:25:39.604Z
+                    created_at: 2025-01-09T18:25:39.604Z
                     created_by: elastic
                     description: This parses the first found ipv4 only
                     id: keyword_custom_format_list
                     immutable: false
-                    name: Simple list with a keyword using a custom format
+                    name: >-
+                      Simple list with a keyword using a custom format
                     tie_breaker_id: 8247ae63-b780-47b8-9a89-948b643e9ec2
                     type: keyword
-                    updated_at: '2025-01-09T18:25:39.604Z'
+                    updated_at: 2025-01-09T18:25:39.604Z
                     updated_by: elastic
                     version: 1
               schema:
@@ -534,7 +539,8 @@ paths:
               examples:
                 alreadyExists:
                   value:
-                    message: 'list id: "keyword_custom_format_list" already exists'
+                    message: >-
+                      list id: "keyword_custom_format_list" already exists
                     status_code: 409
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
@@ -595,8 +601,8 @@ paths:
                 ip:
                   value:
                     _version: WzIsMV0=
-                    '@timestamp': '2025-01-08T04:47:34.273Z'
-                    created_at: '2025-01-08T04:47:34.273Z'
+                    '@timestamp': 2025-01-08T04:47:34.273Z
+                    created_at: 2025-01-08T04:47:34.273Z
                     created_by: elastic
                     description: Latest list of bad ips
                     id: ip_list
@@ -604,7 +610,7 @@ paths:
                     name: Bad ips - updated
                     tie_breaker_id: f5508188-b1e9-4e6e-9662-d039a7d89899
                     type: ip
-                    updated_at: '2025-01-08T05:39:39.292Z'
+                    updated_at: 2025-01-08T05:39:39.292Z
                     updated_by: elastic
                     version: 3
               schema:
@@ -617,7 +623,8 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: '[request body]: id: Expected string, received number'
+                    message: >-
+                      [request body]: id: Expected string, received number
                     statusCode: 400
               schema:
                 oneOf:
@@ -710,7 +717,8 @@ paths:
             format: nonempty
             minLength: 1
             type: string
-        - description: Determines the sort order, which can be `desc` or `asc`
+        - description: >-
+            Determines the sort order, which can be `desc` or `asc`
           in: query
           name: sort_order
           required: false
@@ -745,7 +753,8 @@ paths:
               examples:
                 ipList:
                   value:
-                    cursor: WzIwLFsiZjU1MDgxODgtYjFlOS00ZTZlLTk2NjItZDAzOWE3ZDg5ODk5Il1d
+                    cursor: >-
+                      WzIwLFsiZjU1MDgxODgtYjFlOS00ZTZlLTk2NjItZDAzOWE3ZDg5ODk5Il1d
                     data:
                       - _version: WzAsMV0=
                         '@timestamp': >
@@ -798,7 +807,8 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: '[request query]: page: Expected number, received nan'
+                    message: >-
+                      [request query]: page: Expected number, received nan
                     statusCode: 400
               schema:
                 oneOf:
@@ -989,7 +999,8 @@ paths:
         - Security Lists API
     post:
       deprecated: true
-      description: Create `.lists` and `.items` data streams in the relevant space.
+      description: >-
+        Create `.lists` and `.items` data streams in the relevant space.
       operationId: CreateListIndex
       responses:
         '200':
@@ -1040,7 +1051,9 @@ paths:
               examples:
                 alreadyExists:
                   value:
-                    message: 'data stream: \".lists-default\" and \".items-default\" already exists'
+                    message: >-
+                      data stream: \".lists-default\" and \".items-default\"
+                      already exists
                     status_code: 409
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
@@ -1061,8 +1074,9 @@ paths:
         - Security Lists API
   /api/lists/items:
     delete:
-      description: Delete a value list item using its `id`, or its `list_id` and
-        `value` fields.
+      description: >-
+        Delete a value list item using its `id`, or its `list_id` and `value`
+        fields.
       operationId: DeleteListItem
       parameters:
         - description: >-
@@ -1073,13 +1087,15 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/ListItemId'
-        - description: Value list's identifier. Required if `id` is not specified.
+        - description: >-
+            Value list's identifier. Required if `id` is not specified.
           in: query
           name: list_id
           required: false
           schema:
             $ref: '#/components/schemas/ListId'
-        - description: The value used to evaluate exceptions. Required if `id` is not
+        - description: >-
+            The value used to evaluate exceptions. Required if `id` is not
             specified.
           in: query
           name: value
@@ -1087,7 +1103,8 @@ paths:
           schema:
             example: 255.255.255.255
             type: string
-        - description: Determines when changes made by the request are made visible to
+        - description: >-
+            Determines when changes made by the request are made visible to
             search.
           in: query
           name: refresh
@@ -1108,14 +1125,14 @@ paths:
                 ip:
                   value:
                     _version: WzIwLDFd
-                    '@timestamp': '2025-01-08T05:15:05.159Z'
-                    created_at: '2025-01-08T05:15:05.159Z'
+                    '@timestamp': 2025-01-08T05:15:05.159Z
+                    created_at: 2025-01-08T05:15:05.159Z
                     created_by: elastic
                     id: pd1WRJQBs4HAK3VQeHFI
                     list_id: ip_list
                     tie_breaker_id: eee41dc7-1666-4876-982f-8b0f7b59eca3
                     type: ip
-                    updated_at: '2025-01-08T05:44:14.009Z'
+                    updated_at: 2025-01-08T05:44:14.009Z
                     updated_by: elastic
                     value: 255.255.255.255
               schema:
@@ -1131,7 +1148,9 @@ paths:
               examples:
                 badRequest:
                   value:
-                    message: Either \"list_id\" or \"id\" needs to be defined in the request
+                    message: >-
+                      Either \"list_id\" or \"id\" needs to be defined in the
+                      request
                     status_code: 400
               schema:
                 oneOf:
@@ -1176,7 +1195,8 @@ paths:
               examples:
                 notFound:
                   value:
-                    message: 'list item with id: \"pd1WRJQBs4HAK3VQeHFI\" not found'
+                    message: >-
+                      list item with id: \"pd1WRJQBs4HAK3VQeHFI\" not found
                     status_code: 404
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
@@ -1199,21 +1219,24 @@ paths:
       description: Get the details of a value list item.
       operationId: ReadListItem
       parameters:
-        - description: Value list item identifier. Required if `list_id` and `value` are
+        - description: >-
+            Value list item identifier. Required if `list_id` and `value` are
             not specified.
           in: query
           name: id
           required: false
           schema:
             $ref: '#/components/schemas/ListId'
-        - description: Value list item list's `id` identfier. Required if `id` is not
+        - description: >-
+            Value list item list's `id` identfier. Required if `id` is not
             specified.
           in: query
           name: list_id
           required: false
           schema:
             $ref: '#/components/schemas/ListId'
-        - description: The value used to evaluate exceptions. Required if `id` is not
+        - description: >-
+            The value used to evaluate exceptions. Required if `id` is not
             specified.
           in: query
           name: value
@@ -1229,14 +1252,14 @@ paths:
                 ip:
                   value:
                     _version: WzExLDFd
-                    '@timestamp': '2025-01-08T05:16:25.882Z'
-                    created_at: '2025-01-08T05:16:25.882Z'
+                    '@timestamp': 2025-01-08T05:16:25.882Z
+                    created_at: 2025-01-08T05:16:25.882Z
                     created_by: elastic
                     id: qN1XRJQBs4HAK3VQs3Gc
                     list_id: ip_list
                     tie_breaker_id: a9a34c02-a385-436e-86a0-02a3942f3537
                     type: ip
-                    updated_at: '2025-01-08T05:16:25.882Z'
+                    updated_at: 2025-01-08T05:16:25.882Z
                     updated_by: elastic
                     value: 127.0.0.2
               schema:
@@ -1252,7 +1275,9 @@ paths:
               examples:
                 badRequest:
                   value:
-                    message: Either \"list_id\" or \"id\" needs to be defined in the request
+                    message: >-
+                      Either \"list_id\" or \"id\" needs to be defined in the
+                      request
                     status_code: 400
               schema:
                 oneOf:
@@ -1317,8 +1342,9 @@ paths:
       tags:
         - Security Lists API
     patch:
-      description: Update specific fields of an existing value list item using the
-        item `id`.
+      description: >-
+        Update specific fields of an existing value list item using the item
+        `id`.
       operationId: PatchListItem
       requestBody:
         content:
@@ -1336,8 +1362,9 @@ paths:
                 meta:
                   $ref: '#/components/schemas/ListItemMetadata'
                 refresh:
-                  description: Determines when changes made by the request are made visible to
-                    search.
+                  description: >-
+                    Determines when changes made by the request are made visible
+                    to search.
                   enum:
                     - 'true'
                     - 'false'
@@ -1357,14 +1384,14 @@ paths:
                 ipItem:
                   value:
                     _version: WzE5LDFd
-                    '@timestamp': '2025-01-08T05:15:05.159Z'
-                    created_at: '2025-01-08T05:15:05.159Z'
+                    '@timestamp': 2025-01-08T05:15:05.159Z
+                    created_at: 2025-01-08T05:15:05.159Z
                     created_by: elastic
                     id: pd1WRJQBs4HAK3VQeHFI
                     list_id: ip_list
                     tie_breaker_id: eee41dc7-1666-4876-982f-8b0f7b59eca3
                     type: ip
-                    updated_at: '2025-01-08T05:23:37.602Z'
+                    updated_at: 2025-01-08T05:23:37.602Z
                     updated_by: elastic
                     value: 255.255.255.255
               schema:
@@ -1479,8 +1506,9 @@ paths:
                 meta:
                   $ref: '#/components/schemas/ListItemMetadata'
                 refresh:
-                  description: Determines when changes made by the request are made visible to
-                    search.
+                  description: >-
+                    Determines when changes made by the request are made visible
+                    to search.
                   enum:
                     - 'true'
                     - 'false'
@@ -1502,40 +1530,40 @@ paths:
                 ip:
                   value:
                     _version: WzAsMV0=
-                    '@timestamp': '2025-01-08T04:59:06.154Z'
-                    created_at: '2025-01-08T04:59:06.154Z'
+                    '@timestamp': 2025-01-08T04:59:06.154Z
+                    created_at: 2025-01-08T04:59:06.154Z
                     created_by: elastic
                     id: 21b01cfb-058d-44b9-838c-282be16c91cc
                     list_id: ip_list
                     tie_breaker_id: b57c762c-3036-465c-9bfb-7bfb5e6e515a
                     type: ip
-                    updated_at: '2025-01-08T04:59:06.154Z'
+                    updated_at: 2025-01-08T04:59:06.154Z
                     updated_by: elastic
                     value: 127.0.0.1
                 ip_range:
                   value:
                     _version: WzEsMV0=
-                    '@timestamp': '2025-01-09T18:33:08.202Z'
-                    created_at: '2025-01-09T18:33:08.202Z'
+                    '@timestamp': 2025-01-09T18:33:08.202Z
+                    created_at: 2025-01-09T18:33:08.202Z
                     created_by: elastic
                     id: ip_range_item
                     list_id: ip_range_list
                     tie_breaker_id: ea1b4189-efda-4637-b8f9-74655a5ebb61
                     type: ip_range
-                    updated_at: '2025-01-09T18:33:08.202Z'
+                    updated_at: 2025-01-09T18:33:08.202Z
                     updated_by: elastic
                     value: 192.168.0.0/16
                 keyword:
                   value:
                     _version: WzIsMV0=
-                    '@timestamp': '2025-01-09T18:34:29.422Z'
-                    created_at: '2025-01-09T18:34:29.422Z'
+                    '@timestamp': 2025-01-09T18:34:29.422Z
+                    created_at: 2025-01-09T18:34:29.422Z
                     created_by: elastic
                     id: 7f24737d-1da8-4626-a568-33070591bb4e
                     list_id: keyword_list
                     tie_breaker_id: 2108ced2-5e5d-401e-a88e-4dd69fc5fa27
                     type: keyword
-                    updated_at: '2025-01-09T18:34:29.422Z'
+                    updated_at: 2025-01-09T18:34:29.422Z
                     updated_by: elastic
                     value: zeek
               schema:
@@ -1660,14 +1688,14 @@ paths:
                 ip:
                   value:
                     _version: WzIwLDFd
-                    '@timestamp': '2025-01-08T05:15:05.159Z'
-                    created_at: '2025-01-08T05:15:05.159Z'
+                    '@timestamp': 2025-01-08T05:15:05.159Z
+                    created_at: 2025-01-08T05:15:05.159Z
                     created_by: elastic
                     id: pd1WRJQBs4HAK3VQeHFI
                     list_id: ip_list
                     tie_breaker_id: eee41dc7-1666-4876-982f-8b0f7b59eca3
                     type: ip
-                    updated_at: '2025-01-08T05:44:14.009Z'
+                    updated_at: 2025-01-08T05:44:14.009Z
                     updated_by: elastic
                     value: 255.255.255.255
               schema:
@@ -1680,7 +1708,8 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: '[request body]: id: Expected string, received number'
+                    message: >-
+                      [request body]: id: Expected string, received number
                     statusCode: 400
               schema:
                 oneOf:
@@ -1760,7 +1789,8 @@ paths:
           content:
             application/ndjson:
               schema:
-                description: A `.txt` file containing list items from the specified list
+                description: >-
+                  A `.txt` file containing list items from the specified list
                 example: |
                   127.0.0.1
                   127.0.0.2
@@ -1780,7 +1810,8 @@ paths:
               examples:
                 badRequest:
                   value:
-                    error: 'Bad Request","message":"[request query]: list_id: Required'
+                    error: >-
+                      Bad Request","message":"[request query]: list_id: Required
                     statusCode: 400
               schema:
                 oneOf:
@@ -1872,7 +1903,8 @@ paths:
             format: nonempty
             minLength: 1
             type: string
-        - description: Determines the sort order, which can be `desc` or `asc`
+        - description: >-
+            Determines the sort order, which can be `desc` or `asc`
           in: query
           name: sort_order
           required: false
@@ -1902,17 +1934,18 @@ paths:
               examples:
                 ip:
                   value:
-                    cursor: WzIwLFsiYjU3Yzc2MmMtMzAzNi00NjVjLTliZmItN2JmYjVlNmU1MTVhIl1d
+                    cursor: >-
+                      WzIwLFsiYjU3Yzc2MmMtMzAzNi00NjVjLTliZmItN2JmYjVlNmU1MTVhIl1d
                     data:
                       - _version: WzAsMV0=
-                        '@timestamp': '2025-01-08T04:59:06.154Z'
-                        created_at: '2025-01-08T04:59:06.154Z'
+                        '@timestamp': 2025-01-08T04:59:06.154Z
+                        created_at: 2025-01-08T04:59:06.154Z
                         created_by: elastic
                         id: 21b01cfb-058d-44b9-838c-282be16c91cc
                         list_id: ip_list
                         tie_breaker_id: b57c762c-3036-465c-9bfb-7bfb5e6e515a
                         type: ip
-                        updated_at: '2025-01-08T04:59:06.154Z'
+                        updated_at: 2025-01-08T04:59:06.154Z
                         updated_by: elastic
                         value: 127.0.0.1
                     page: 1
@@ -2033,7 +2066,8 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/ListType'
-        - description: Determines when changes made by the request are made visible to
+        - description: >-
+            Determines when changes made by the request are made visible to
             search.
           in: query
           name: refresh
@@ -2052,7 +2086,9 @@ paths:
               type: object
               properties:
                 file:
-                  description: A `.txt` or `.csv` file containing newline separated list items.
+                  description: >-
+                    A `.txt` or `.csv` file containing newline separated list
+                    items.
                   example: |
                     127.0.0.1
                     127.0.0.2
@@ -2074,8 +2110,8 @@ paths:
                 ip:
                   value:
                     _version: WzAsMV0=
-                    '@timestamp': '2025-01-08T04:47:34.273Z'
-                    created_at: '2025-01-08T04:47:34.273Z'
+                    '@timestamp': 2025-01-08T04:47:34.273Z
+                    created_at: 2025-01-08T04:47:34.273Z
                     created_by: elastic
                     description: This list describes bad internet ip
                     id: ip_list
@@ -2083,7 +2119,7 @@ paths:
                     name: Simple list with an ip
                     tie_breaker_id: f5508188-b1e9-4e6e-9662-d039a7d89899
                     type: ip
-                    updated_at: '2025-01-08T04:47:34.273Z'
+                    updated_at: 2025-01-08T04:47:34.273Z
                     updated_by: elastic
                     version: 1
               schema:
@@ -2095,7 +2131,8 @@ paths:
               examples:
                 badRequest:
                   value:
-                    message: Either type or list_id need to be defined in the query
+                    message: >-
+                      Either type or list_id need to be defined in the query
                     status_code: 400
               schema:
                 oneOf:
@@ -2305,7 +2342,8 @@ components:
         call (use the `cursor` value returned in the previous call). This
         parameter uses the `tie_breaker_id` field to ensure all items are sorted
         and returned correctly.
-      example: WzIwLFsiYjU3Yzc2MmMtMzAzNi00NjVjLTliZmItN2JmYjVlNmU1MTVhIl1d
+      example: >-
+        WzIwLFsiYjU3Yzc2MmMtMzAzNi00NjVjLTliZmItN2JmYjVlNmU1MTVhIl1d
       format: nonempty
       minLength: 1
       type: string
@@ -2313,7 +2351,8 @@ components:
       example: value:127.0.0.1
       type: string
     FindListsCursor:
-      example: WzIwLFsiYjU3Yzc2MmMtMzAzNi00NjVjLTliZmItN2JmYjVlNmU1MTVhIl1d
+      example: >-
+        WzIwLFsiYjU3Yzc2MmMtMzAzNi00NjVjLTliZmItN2JmYjVlNmU1MTVhIl1d
       format: nonempty
       minLength: 1
       type: string
@@ -2326,12 +2365,12 @@ components:
         _version:
           $ref: '#/components/schemas/ListVersionId'
         '@timestamp':
-          example: '2025-01-08T04:47:34.273Z'
+          example: 2025-01-08T04:47:34.273Z
           format: date-time
           type: string
         created_at:
           description: Autogenerated date of object creation.
-          example: '2025-01-08T04:47:34.273Z'
+          example: 2025-01-08T04:47:34.273Z
           format: date-time
           type: string
         created_by:
@@ -2349,7 +2388,8 @@ components:
         name:
           $ref: '#/components/schemas/ListName'
         tie_breaker_id:
-          description: Field used in search to ensure all containers are sorted and
+          description: >-
+            Field used in search to ensure all containers are sorted and
             returned correctly.
           example: f5508188-b1e9-4e6e-9662-d039a7d89899
           type: string
@@ -2357,7 +2397,7 @@ components:
           $ref: '#/components/schemas/ListType'
         updated_at:
           description: Autogenerated date of last object update.
-          example: '2025-01-08T04:47:34.273Z'
+          example: 2025-01-08T04:47:34.273Z
           format: date-time
           type: string
         updated_by:
@@ -2395,12 +2435,12 @@ components:
         _version:
           $ref: '#/components/schemas/ListVersionId'
         '@timestamp':
-          example: '2025-01-08T04:47:34.273Z'
+          example: 2025-01-08T04:47:34.273Z
           format: date-time
           type: string
         created_at:
           description: Autogenerated date of object creation.
-          example: '2025-01-08T04:47:34.273Z'
+          example: 2025-01-08T04:47:34.273Z
           format: date-time
           type: string
         created_by:
@@ -2414,7 +2454,8 @@ components:
         meta:
           $ref: '#/components/schemas/ListItemMetadata'
         tie_breaker_id:
-          description: Field used in search to ensure all containers are sorted and
+          description: >-
+            Field used in search to ensure all containers are sorted and
             returned correctly.
           example: f5508188-b1e9-4e6e-9662-d039a7d89899
           type: string
@@ -2422,7 +2463,7 @@ components:
           $ref: '#/components/schemas/ListType'
         updated_at:
           description: Autogenerated date of last object update.
-          example: '2025-01-08T04:47:34.273Z'
+          example: 2025-01-08T04:47:34.273Z
           format: date-time
           type: string
         updated_by:

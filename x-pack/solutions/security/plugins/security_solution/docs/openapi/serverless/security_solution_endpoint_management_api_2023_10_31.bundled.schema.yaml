@@ -1,8 +1,9 @@
 openapi: 3.0.3
 info:
-  description: Interact with and manage endpoints running the Elastic Defend integration.
+  description: >-
+    Interact with and manage endpoints running the Elastic Defend integration.
   title: Security Endpoint Management API (Elastic Cloud Serverless)
-  version: '2023-10-31'
+  version: 2023-10-31
 servers:
   - url: http://{kibana_host}:{port}
     variables:
@@ -71,14 +72,16 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetEndpointActionListResponse'
+                $ref: >-
+                  #/components/schemas/GetEndpointActionListResponse
           description: Indicates a successful call.
       summary: Get response actions
       tags:
         - Security Endpoint Management API
   /api/endpoint/action_status:
     get:
-      description: Get the status of response actions for the specified agent IDs.
+      description: >-
+        Get the status of response actions for the specified agent IDs.
       operationId: EndpointGetActionsStatus
       parameters:
         - description: A list of agent IDs to get the action status for.
@@ -92,7 +95,8 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ActionStatusSuccessResponse'
+                $ref: >-
+                  #/components/schemas/ActionStatusSuccessResponse
           description: Indicates a successful call.
       summary: Get response actions status
       tags:
@@ -157,7 +161,8 @@ paths:
                         description: The agent ID that generated the file.
                         type: string
                       agentType:
-                        description: The type of agent that generated the file.
+                        description: >-
+                          The type of agent that generated the file.
                         type: string
                       created:
                         description: The date and time the file was created.
@@ -225,18 +230,22 @@ paths:
         - Security Endpoint Management API
   /api/endpoint/action/cancel:
     post:
-      description: Cancel a running or pending response action (Applies only to some
-        agent types).
+      description: >-
+        Cancel a running or pending response action (Applies only to some agent
+        types).
       operationId: CancelAction
       requestBody:
         content:
           application/json:
             examples:
               MicrosoftDefenderEndpoint:
-                summary: Cancel a response action on a Microsoft Defender for Endpoint host
+                summary: >-
+                  Cancel a response action on a Microsoft Defender for Endpoint
+                  host
                 value:
                   agent_type: microsoft_defender_endpoint
-                  comment: Cancelling action due to change in requirements
+                  comment: >-
+                    Cancelling action due to change in requirements
                   endpoint_ids:
                     - ed518850-681a-4d60-bb98-e22640cae2a8
                   parameters:
@@ -271,11 +280,12 @@ paths:
                       outputs: {}
                       parameters:
                         id: 7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d
-                      startedAt: '2022-07-29T19:08:49.126Z'
+                      startedAt: 2022-07-29T19:08:49.126Z
                       status: pending
                       wasSuccessful: false
               schema:
-                $ref: '#/components/schemas/ResponseActionCreateSuccessResponse'
+                $ref: >-
+                  #/components/schemas/ResponseActionCreateSuccessResponse
           description: Indicates a successful call.
       summary: Cancel a response action
       tags:
@@ -328,11 +338,12 @@ paths:
                       parameters:
                         command: ls -al
                         timeout: 600
-                      startedAt: '2023-07-28T18:43:27.362Z'
+                      startedAt: 2023-07-28T18:43:27.362Z
                       status: pending
                       wasSuccessful: false
               schema:
-                $ref: '#/components/schemas/ResponseActionCreateSuccessResponse'
+                $ref: >-
+                  #/components/schemas/ResponseActionCreateSuccessResponse
           description: Indicates a successful call.
       summary: Run a command
       tags:
@@ -383,11 +394,12 @@ paths:
                       outputs: {}
                       parameters:
                         path: /usr/my-file.txt
-                      startedAt: '2023-07-28T19:00:03.911Z'
+                      startedAt: 2023-07-28T19:00:03.911Z
                       status: pending
                       wasSuccessful: false
               schema:
-                $ref: '#/components/schemas/ResponseActionCreateSuccessResponse'
+                $ref: >-
+                  #/components/schemas/ResponseActionCreateSuccessResponse
           description: Indicates a successful call.
       summary: Get a file
       tags:
@@ -418,7 +430,8 @@ paths:
                   endpoint_ids:
                     - ed518850-681a-4d60-bb98-e22640cae2a8
               with_case_id:
-                summary: Isolates a single host with a case_id value of 1234
+                summary: >-
+                  Isolates a single host with a case_id value of 1234
                 value:
                   case_ids:
                     - 4976be38-c134-4554-bd5e-0fd89ce63667
@@ -446,7 +459,9 @@ paths:
                   minItems: 1
                   type: array
                 case_ids:
-                  description: The IDs of cases where the action taken will be logged. Max of 50.
+                  description: >-
+                    The IDs of cases where the action taken will be logged. Max
+                    of 50.
                   example:
                     - case-id-1
                     - case-id-2
@@ -491,7 +506,7 @@ paths:
                       isCompleted: false
                       isExpired: false
                       outputs: {}
-                      startedAt: '2022-07-29T19:08:49.126Z'
+                      startedAt: 2022-07-29T19:08:49.126Z
                       status: pending
                       wasSuccessful: false
               schema:
@@ -553,11 +568,12 @@ paths:
                       outputs: {}
                       parameters:
                         entity_id: abc123
-                      startedAt: '2022-07-29T19:08:49.126Z'
+                      startedAt: 2022-07-29T19:08:49.126Z
                       status: pending
                       wasSuccessful: false
               schema:
-                $ref: '#/components/schemas/ResponseActionCreateSuccessResponse'
+                $ref: >-
+                  #/components/schemas/ResponseActionCreateSuccessResponse
           description: Indicates a successful call.
       summary: Terminate a process
       tags:
@@ -611,11 +627,12 @@ paths:
                       parameters:
                         entity_id: abc123
                         type: process
-                      startedAt: '2022-07-29T19:08:49.126Z'
+                      startedAt: 2022-07-29T19:08:49.126Z
                       status: pending
                       wasSuccessful: false
               schema:
-                $ref: '#/components/schemas/ResponseActionCreateSuccessResponse'
+                $ref: >-
+                  #/components/schemas/ResponseActionCreateSuccessResponse
           description: Indicates a successful call.
       summary: Generate a memory dump from the host machine
       tags:
@@ -661,18 +678,20 @@ paths:
                       isCompleted: false
                       isExpired: false
                       outputs: {}
-                      startedAt: '2022-07-29T19:08:49.126Z'
+                      startedAt: 2022-07-29T19:08:49.126Z
                       status: pending
                       wasSuccessful: false
               schema:
-                $ref: '#/components/schemas/ResponseActionCreateSuccessResponse'
+                $ref: >-
+                  #/components/schemas/ResponseActionCreateSuccessResponse
           description: Indicates a successful call.
       summary: Get running processes
       tags:
         - Security Endpoint Management API
   /api/endpoint/action/runscript:
     post:
-      description: Run a script on a host. Currently supported only for some agent types.
+      description: >-
+        Run a script on a host. Currently supported only for some agent types.
       operationId: RunScriptAction
       requestBody:
         content:
@@ -680,7 +699,8 @@ paths:
             examples:
               MDE:
                 description: Microsoft Defender Endpoint runscript
-                summary: Run a script against a Microsoft Defender Endpoint agent
+                summary: >-
+                  Run a script against a Microsoft Defender Endpoint agent
                 value:
                   agent_type: microsoft_defender_endpoint
                   endpoint_ids:
@@ -697,7 +717,9 @@ paths:
                     - ed518850-681a-4d60-bb98-e22640cae2a8
                   parameters:
                     scriptId: 1111-2222-3333-4444-5555-6666-7777-8888
-                    scriptInput: --delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt
+                    scriptInput: >-
+                      --delete --paths-to-delete
+                      /tmp/temp_file.txt,/tmp/random_file.txt
             schema:
               $ref: '#/components/schemas/RunScriptRouteRequestBody'
         required: true
@@ -728,18 +750,20 @@ paths:
                       outputs: {}
                       parameters:
                         scriptId: 1111-2222-3333-4444-5555-6666-7777-8888
-                      startedAt: '2022-07-29T19:08:49.126Z'
+                      startedAt: 2022-07-29T19:08:49.126Z
                       status: pending
                       wasSuccessful: false
               schema:
-                $ref: '#/components/schemas/ResponseActionCreateSuccessResponse'
+                $ref: >-
+                  #/components/schemas/ResponseActionCreateSuccessResponse
           description: Indicates a successful call.
       summary: Run a script
       tags:
         - Security Endpoint Management API
   /api/endpoint/action/scan:
     post:
-      description: Scan a specific file or directory on an endpoint for malware.
+      description: >-
+        Scan a specific file or directory on an endpoint for malware.
       operationId: EndpointScanAction
       requestBody:
         content:
@@ -783,18 +807,20 @@ paths:
                       outputs: {}
                       parameters:
                         path: /usr/my-file.txt
-                      startedAt: '2023-07-28T19:00:03.911Z'
+                      startedAt: 2023-07-28T19:00:03.911Z
                       status: pending
                       wasSuccessful: false
               schema:
-                $ref: '#/components/schemas/ResponseActionCreateSuccessResponse'
+                $ref: >-
+                  #/components/schemas/ResponseActionCreateSuccessResponse
           description: Indicates a successful call.
       summary: Scan a file or directory
       tags:
         - Security Endpoint Management API
   /api/endpoint/action/state:
     get:
-      description: Get a response actions state, which reports whether encryption is
+      description: >-
+        Get a response actions state, which reports whether encryption is
         enabled.
       operationId: EndpointGetActionsState
       responses:
@@ -831,7 +857,8 @@ paths:
                   parameters:
                     pid: 1234
             schema:
-              $ref: '#/components/schemas/SuspendProcessRouteRequestBody'
+              $ref: >-
+                #/components/schemas/SuspendProcessRouteRequestBody
         required: true
       responses:
         '200':
@@ -860,18 +887,20 @@ paths:
                       outputs: {}
                       parameters:
                         entity_id: abc123
-                      startedAt: '2022-07-29T19:08:49.126Z'
+                      startedAt: 2022-07-29T19:08:49.126Z
                       status: pending
                       wasSuccessful: false
               schema:
-                $ref: '#/components/schemas/ResponseActionCreateSuccessResponse'
+                $ref: >-
+                  #/components/schemas/ResponseActionCreateSuccessResponse
           description: Indicates a successful call.
       summary: Suspend a process
       tags:
         - Security Endpoint Management API
   /api/endpoint/action/unisolate:
     post:
-      description: Release an isolated endpoint, allowing it to rejoin a network.
+      description: >-
+        Release an isolated endpoint, allowing it to rejoin a network.
       operationId: EndpointUnisolateAction
       requestBody:
         content:
@@ -893,7 +922,8 @@ paths:
                   endpoint_ids:
                     - ed518850-681a-4d60-bb98-e22640cae2a8
               withCaseId:
-                summary: Releases hosts with an associated case; includes a comment.
+                summary: >-
+                  Releases hosts with an associated case; includes a comment.
                 value:
                   case_ids:
                     - 4976be38-c134-4554-bd5e-0fd89ce63667
@@ -921,7 +951,9 @@ paths:
                   minItems: 1
                   type: array
                 case_ids:
-                  description: The IDs of cases where the action taken will be logged. Max of 50.
+                  description: >-
+                    The IDs of cases where the action taken will be logged. Max
+                    of 50.
                   example:
                     - case-id-1
                     - case-id-2
@@ -966,7 +998,7 @@ paths:
                       isCompleted: false
                       isExpired: false
                       outputs: {}
-                      startedAt: '2022-07-29T19:08:49.126Z'
+                      startedAt: 2022-07-29T19:08:49.126Z
                       status: pending
                       wasSuccessful: false
               schema:
@@ -1013,13 +1045,15 @@ paths:
                       parameters:
                         file_id: 10e4ce3d-4abb-4f93-a0cd-eaf63a489280
                         file_name: fix-malware.sh
-                        file_sha256: a0bed94220193ba4895c0aa5b4e7e293381d15765cb164ddf7be5cdd010ae42a
+                        file_sha256: >-
+                          a0bed94220193ba4895c0aa5b4e7e293381d15765cb164ddf7be5cdd010ae42a
                         file_size: 69
-                      startedAt: '2023-07-03T15:07:22.837Z'
+                      startedAt: 2023-07-03T15:07:22.837Z
                       status: pending
                       wasSuccessful: false
               schema:
-                $ref: '#/components/schemas/ResponseActionCreateSuccessResponse'
+                $ref: >-
+                  #/components/schemas/ResponseActionCreateSuccessResponse
           description: Indicates a successful call.
       summary: Upload a file
       tags:
@@ -1117,7 +1151,8 @@ paths:
       description: Get the protection updates note for a package policy.
       operationId: GetProtectionUpdatesNote
       parameters:
-        - description: The package policy ID to retrieve the protection updates note for.
+        - description: >-
+            The package policy ID to retrieve the protection updates note for.
           in: path
           name: package_policy_id
           required: true
@@ -1128,16 +1163,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProtectionUpdatesNoteResponse'
+                $ref: >-
+                  #/components/schemas/ProtectionUpdatesNoteResponse
           description: Indicates a successful call.
       summary: Get a protection updates note
       tags:
         - Security Endpoint Management API
     post:
-      description: Create or update the protection updates note for a package policy.
+      description: >-
+        Create or update the protection updates note for a package policy.
       operationId: CreateUpdateProtectionUpdatesNote
       parameters:
-        - description: The package policy ID to create or update the protection updates
+        - description: >-
+            The package policy ID to create or update the protection updates
             note for.
           in: path
           name: package_policy_id
@@ -1159,7 +1197,8 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProtectionUpdatesNoteResponse'
+                $ref: >-
+                  #/components/schemas/ProtectionUpdatesNoteResponse
           description: Indicates a successful call.
       summary: Create or update a protection updates note
       tags:
@@ -1205,8 +1244,9 @@ components:
               type: object
               properties:
                 canEncrypt:
-                  description: Whether the Kibana instance has encryption enabled for response
-                    actions.
+                  description: >-
+                    Whether the Kibana instance has encryption enabled for
+                    response actions.
                   type: boolean
           required:
             - data
@@ -1301,7 +1341,9 @@ components:
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged. Max of 50.
+              description: >-
+                The IDs of cases where the action taken will be logged. Max of
+                50.
               example:
                 - case-id-1
                 - case-id-2
@@ -1387,15 +1429,17 @@ components:
           description: |
             The server relative URI to download the file associated with the output of the response action.
             URI does **not** include the space prefix
-          example: /api/endpoint/action/497f6eca-6276/file/35645-6276-4993/download
+          example: >-
+            /api/endpoint/action/497f6eca-6276/file/35645-6276-4993/download
           format: uri-reference
           type: string
     EndDate:
       description: An end date in ISO format or Date Math format.
-      example: '2023-10-31T23:59:59.999Z'
+      example: 2023-10-31T23:59:59.999Z
       type: string
     EndpointIds:
-      description: List of endpoint IDs (cannot contain empty strings). Max of 250.
+      description: >-
+        List of endpoint IDs (cannot contain empty strings). Max of 250.
       example:
         - endpoint-id-1
         - endpoint-id-2
@@ -1408,9 +1452,9 @@ components:
     EndpointMetadataResponse:
       example:
         host_status: healthy
-        last_checkin: '2023-07-04T15:48:57.360Z'
+        last_checkin: 2023-07-04T15:48:57.360Z
         metadata:
-          '@timestamp': '2023-07-04T15:48:57.3609346Z'
+          '@timestamp': 2023-07-04T15:48:57.3609346Z
           agent:
             build:
               original: >-
@@ -1448,10 +1492,10 @@ components:
             agent_id_status: verified
             category:
               - host
-            created: '2023-07-04T15:48:57.3609346Z'
+            created: 2023-07-04T15:48:57.3609346Z
             dataset: endpoint.metadata
             id: MNtRc++KoKHXXwlj+++++OhZ
-            ingested: '2023-07-04T15:48:58Z'
+            ingested: 2023-07-04T15:48:58Z
             kind: metric
             module: endpoint
             sequence: 43757
@@ -1473,7 +1517,8 @@ components:
               Ext:
                 variant: Windows 10 Enterprise Evaluation
               family: windows
-              full: Windows 10 Enterprise Evaluation 20H2 (10.0.19042.906)
+              full: >-
+                Windows 10 Enterprise Evaluation 20H2 (10.0.19042.906)
               kernel: 20H2 (10.0.19042.906)
               name: Windows
               platform: windows
@@ -1556,7 +1601,9 @@ components:
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged. Max of 50.
+              description: >-
+                The IDs of cases where the action taken will be logged. Max of
+                50.
               example:
                 - case-id-1
                 - case-id-2
@@ -1584,7 +1631,8 @@ components:
                   minLength: 1
                   type: string
                 timeout:
-                  description: The maximum timeout value in seconds before the command is
+                  description: >-
+                    The maximum timeout value in seconds before the command is
                     terminated.
                   minimum: 1
                   type: integer
@@ -1599,47 +1647,47 @@ components:
               - afdc366c-e2e0-4cdb-ae1d-94575bd2d8e0
             agentType: endpoint
             command: running-processes
-            completedAt: '2022-08-08T09:50:47.672Z'
+            completedAt: 2022-08-08T09:50:47.672Z
             createdBy: elastic
             id: b3d6de74-36b0-4fa8-be46-c375bf1771bf
             isCompleted: true
             isExpired: false
-            startedAt: '2022-08-08T15:24:57.402Z'
+            startedAt: 2022-08-08T15:24:57.402Z
             wasSuccessful: true
           - agents:
               - afdc366c-e2e0-4cdb-ae1d-94575bd2d8e0
             agentType: endpoint
             command: isolate
-            completedAt: '2022-08-08T10:41:57.352Z'
+            completedAt: 2022-08-08T10:41:57.352Z
             createdBy: elastic
             id: 43b4098b-8752-4fbb-a7a7-6df7c74d0ee3
             isCompleted: true
             isExpired: false
-            startedAt: '2022-08-08T15:23:37.359Z'
+            startedAt: 2022-08-08T15:23:37.359Z
             wasSuccessful: true
           - agents:
               - afdc366c-e2e0-4cdb-ae1d-94575bd2d8e0
             agentType: endpoint
             command: kill-process
             comment: bad process - taking up too much cpu
-            completedAt: '2022-08-08T09:44:50.952Z'
+            completedAt: 2022-08-08T09:44:50.952Z
             createdBy: elastic
             id: 5bc92c86-b8e6-42dd-837f-12ad29e09caa
             isCompleted: true
             isExpired: false
-            startedAt: '2022-08-08T14:38:44.125Z'
+            startedAt: 2022-08-08T14:38:44.125Z
             wasSuccessful: true
           - agents:
               - afdc366c-e2e0-4cdb-ae1d-94575bd2d8e0
             agentType: endpoint
             command: unisolate
             comment: Not a threat to the network
-            completedAt: '2022-08-08T09:40:47.398Z'
+            completedAt: 2022-08-08T09:40:47.398Z
             createdBy: elastic
             id: 790d54e0-3aa3-4e5b-8255-3ce9d851246a
             isCompleted: true
             isExpired: false
-            startedAt: '2022-08-08T14:38:15.391Z'
+            startedAt: 2022-08-08T14:38:15.391Z
             wasSuccessful: true
         elasticAgentIds:
           - afdc366c-e2e0-4cdb-ae1d-94575bd2d8e0
@@ -1666,7 +1714,8 @@ components:
             $ref: '#/components/schemas/ResponseActionDetails'
           type: array
         elasticAgentIds:
-          description: The list of elastic agent IDs the query was filtered by.
+          description: >-
+            The list of elastic agent IDs the query was filtered by.
           items:
             type: string
           type: array
@@ -1688,7 +1737,8 @@ components:
             type: string
           type: array
         total:
-          description: The total number of response actions matching the query.
+          description: >-
+            The total number of response actions matching the query.
           type: integer
         userIds:
           description: The list of user IDs the query was filtered by.
@@ -1755,7 +1805,9 @@ components:
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged. Max of 50.
+              description: >-
+                The IDs of cases where the action taken will be logged. Max of
+                50.
               example:
                 - case-id-1
                 - case-id-2
@@ -1779,7 +1831,8 @@ components:
               type: object
               properties:
                 path:
-                  description: The full file path to retrieve from the endpoint.
+                  description: >-
+                    The full file path to retrieve from the endpoint.
                   type: string
               required:
                 - path
@@ -1805,7 +1858,8 @@ components:
           minItems: 1
           type: array
         case_ids:
-          description: The IDs of cases where the action taken will be logged. Max of 50.
+          description: >-
+            The IDs of cases where the action taken will be logged. Max of 50.
           example:
             - case-id-1
             - case-id-2
@@ -1909,7 +1963,8 @@ components:
                 - type: object
                   properties:
                     pid:
-                      description: The process ID (PID) of the process to terminate.
+                      description: >-
+                        The process ID (PID) of the process to terminate.
                       minimum: 1
                       type: number
                 - type: object
@@ -1921,8 +1976,9 @@ components:
                 - type: object
                   properties:
                     process_name:
-                      description: The name of the process to terminate. Valid for SentinelOne agent
-                        type only.
+                      description: >-
+                        The name of the process to terminate. Valid for
+                        SentinelOne agent type only.
                       type: string
     KillProcessRouteRequestBody:
       allOf:
@@ -1945,7 +2001,9 @@ components:
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged. Max of 50.
+              description: >-
+                The IDs of cases where the action taken will be logged. Max of
+                50.
               example:
                 - case-id-1
                 - case-id-2
@@ -1970,7 +2028,8 @@ components:
                 - type: object
                   properties:
                     pid:
-                      description: The process ID (PID) of the process to terminate.
+                      description: >-
+                        The process ID (PID) of the process to terminate.
                       example: 123
                       minimum: 1
                       type: integer
@@ -1984,8 +2043,9 @@ components:
                 - type: object
                   properties:
                     process_name:
-                      description: The name of the process to terminate. Valid for SentinelOne agent
-                        type only.
+                      description: >-
+                        The name of the process to terminate. Valid for
+                        SentinelOne agent type only.
                       example: Elastic
                       minLength: 1
                       type: string
@@ -2012,7 +2072,8 @@ components:
           minLength: 1
           type: string
         scriptName:
-          description: The name of the script to execute from the cloud storage.
+          description: >-
+            The name of the script to execute from the cloud storage.
           minLength: 1
           type: string
       required:
@@ -2038,10 +2099,13 @@ components:
                           memory dump is written to disk
                         type: number
                       file_size:
-                        description: The size of the memory dump compressed file in bytes
+                        description: >-
+                          The size of the memory dump compressed file in bytes
                         type: string
                       path:
-                        description: The path to the memory dump compressed file on the host machine
+                        description: >-
+                          The path to the memory dump compressed file on the
+                          host machine
                         type: string
                     title: Memory dump output
                     type: object
@@ -2063,7 +2127,8 @@ components:
                       description: The process ID (PID)
                       type: number
                     type:
-                      description: Process-level memory dump using a process ID
+                      description: >-
+                        Process-level memory dump using a process ID
                       enum:
                         - process
                       type: string
@@ -2077,7 +2142,8 @@ components:
                       description: The process entity ID
                       type: string
                     type:
-                      description: Process-level memory dump using an entity ID
+                      description: >-
+                        Process-level memory dump using an entity ID
                       enum:
                         - process
                       type: string
@@ -2109,7 +2175,9 @@ components:
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged. Max of 50.
+              description: >-
+                The IDs of cases where the action taken will be logged. Max of
+                50.
               example:
                 - case-id-1
                 - case-id-2
@@ -2140,7 +2208,8 @@ components:
                       type: string
                   required:
                     - type
-                - description: Dump the entire memory of a process using the PID.
+                - description: >-
+                    Dump the entire memory of a process using the PID.
                   type: object
                   properties:
                     pid:
@@ -2152,7 +2221,8 @@ components:
                   required:
                     - type
                     - pid
-                - description: Dump the entire memory of a process using the entity ID.
+                - description: >-
+                    Dump the entire memory of a process using the entity ID.
                   type: object
                   properties:
                     entity_id:
@@ -2170,9 +2240,9 @@ components:
       example:
         data:
           - host_status: healthy
-            last_checkin: '2023-07-04T15:47:57.432Z'
+            last_checkin: 2023-07-04T15:47:57.432Z
             metadata:
-              '@timestamp': '2023-07-04T15:47:57.432173535Z'
+              '@timestamp': 2023-07-04T15:47:57.432173535Z
               agent:
                 build:
                   original: >-
@@ -2210,10 +2280,10 @@ components:
                 agent_id_status: verified
                 category:
                   - host
-                created: '2023-07-04T15:47:57.432173535Z'
+                created: 2023-07-04T15:47:57.432173535Z
                 dataset: endpoint.metadata
                 id: MNtSXK/SkhEBnmgt++++++7S
-                ingested: '2023-07-04T15:47:58Z'
+                ingested: 2023-07-04T15:47:58Z
                 kind: metric
                 module: endpoint
                 sequence: 400
@@ -2236,7 +2306,9 @@ components:
                     variant: Ubuntu
                   family: ubuntu
                   full: Ubuntu 20.04.2
-                  kernel: '5.8.0-59-generic #66~20.04.1-Ubuntu SMP Thu Jun 17 11:14:10 UTC 2021'
+                  kernel: >-
+                    5.8.0-59-generic #66~20.04.1-Ubuntu SMP Thu Jun 17 11:14:10
+                    UTC 2021
                   name: Linux
                   platform: ubuntu
                   type: linux
@@ -2254,9 +2326,9 @@ components:
                 id: d5371dcd-93b7-4627-af88-4084f7d6aa3e
                 revision: 2
           - host_status: healthy
-            last_checkin: '2023-07-04T15:44:31.491Z'
+            last_checkin: 2023-07-04T15:44:31.491Z
             metadata:
-              '@timestamp': '2023-07-04T15:44:31.4917849Z'
+              '@timestamp': 2023-07-04T15:44:31.4917849Z
               agent:
                 build:
                   original: >-
@@ -2294,10 +2366,10 @@ components:
                 agent_id_status: verified
                 category:
                   - host
-                created: '2023-07-04T15:44:31.4917849Z'
+                created: 2023-07-04T15:44:31.4917849Z
                 dataset: endpoint.metadata
                 id: MNtRc++KoKHXXwlj+++++/N9
-                ingested: '2023-07-04T15:44:33Z'
+                ingested: 2023-07-04T15:44:33Z
                 kind: metric
                 module: endpoint
                 sequence: 5159
@@ -2319,7 +2391,8 @@ components:
                   Ext:
                     variant: Windows 10 Enterprise Evaluation
                   family: windows
-                  full: Windows 10 Enterprise Evaluation 20H2 (10.0.19042.906)
+                  full: >-
+                    Windows 10 Enterprise Evaluation 20H2 (10.0.19042.906)
                   kernel: 20H2 (10.0.19042.906)
                   name: Windows
                   platform: windows
@@ -2381,7 +2454,8 @@ components:
               description: Number of pending kill-process actions.
             running-processes:
               $ref: '#/components/schemas/PendingActionDataType'
-              description: Number of pending running-processes (get processes) actions.
+              description: >-
+                Number of pending running-processes (get processes) actions.
             scan:
               $ref: '#/components/schemas/PendingActionDataType'
               description: Number of pending scan actions.
@@ -2400,7 +2474,8 @@ components:
       type: object
       properties:
         note:
-          description: A note associated with the protection updates for the given package
+          description: >-
+            A note associated with the protection updates for the given package
             policy.
           type: string
     RawScriptParameters:
@@ -2440,7 +2515,7 @@ components:
           isExpired: false
           outputs: {}
           parameters: {}
-          startedAt: '2022-07-29T19:08:49.126Z'
+          startedAt: 2022-07-29T19:08:49.126Z
           status: pending
           wasSuccessful: false
       type: object
@@ -2451,7 +2526,8 @@ components:
       type: object
       properties:
         agents:
-          description: The agent IDs for the hosts that the response action was sent to
+          description: >-
+            The agent IDs for the hosts that the response action was sent to
           items:
             format: uuid
             type: string
@@ -2462,16 +2538,20 @@ components:
             type: object
             properties:
               completedAt:
-                description: The date and time the response action was completed for the agent
-                  ID
+                description: >-
+                  The date and time the response action was completed for the
+                  agent ID
                 type: string
               isCompleted:
-                description: Whether the response action is completed for the agent ID
+                description: >-
+                  Whether the response action is completed for the agent ID
                 type: boolean
               wasSuccessful:
-                description: Whether the response action was successful for the agent ID
+                description: >-
+                  Whether the response action was successful for the agent ID
                 type: boolean
-          description: The state of the response action for each agent ID that it was sent
+          description: >-
+            The state of the response action for each agent ID that it was sent
             to
           type: object
         agentType:
@@ -2561,8 +2641,10 @@ components:
                 properties:
                   content:
                     oneOf:
-                      - $ref: '#/components/schemas/RunningProcessesOutputEndpoint'
-                      - $ref: '#/components/schemas/RunningProcessesOutputSentinelOne'
+                      - $ref: >-
+                          #/components/schemas/RunningProcessesOutputEndpoint
+                      - $ref: >-
+                          #/components/schemas/RunningProcessesOutputSentinelOne
               type: object
     RunningProcessesOutputEndpoint:
       description: Processes output for `agentType` of `endpoint`
@@ -2665,7 +2747,9 @@ components:
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged. Max of 50.
+              description: >-
+                The IDs of cases where the action taken will be logged. Max of
+                50.
               example:
                 - case-id-1
                 - case-id-2
@@ -2692,7 +2776,8 @@ components:
                 - $ref: '#/components/schemas/RawScriptParameters'
                 - $ref: '#/components/schemas/HostPathScriptParameters'
                 - $ref: '#/components/schemas/CloudFileScriptParameters'
-                - $ref: '#/components/schemas/SentinelOneRunScriptParameters'
+                - $ref: >-
+                    #/components/schemas/SentinelOneRunScriptParameters
                 - $ref: '#/components/schemas/MDERunScriptParameters'
           required:
             - parameters
@@ -2737,7 +2822,9 @@ components:
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged. Max of 50.
+              description: >-
+                The IDs of cases where the action taken will be logged. Max of
+                50.
               example:
                 - case-id-1
                 - case-id-2
@@ -2761,7 +2848,8 @@ components:
               type: object
               properties:
                 path:
-                  description: The folder or file's full path (including the file name).
+                  description: >-
+                    The folder or file's full path (including the file name).
                   example: /usr/my-file.txt
                   type: string
               required:
@@ -2769,21 +2857,25 @@ components:
           required:
             - parameters
     SentinelOneRunScriptParameters:
-      description: Parameters for Run Script response action against SentinelOne agent type.
+      description: >-
+        Parameters for Run Script response action against SentinelOne agent type.
       example:
         agent_type: sentinel_one
         endpoint_ids:
           - endpoint-id-1
         parameters:
           scriptId: 1111-2222-3333-4444-5555-6666-7777-8888
-          scriptInput: --delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt
+          scriptInput: >-
+            --delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt
       properties:
         scriptId:
-          description: The script ID from SentinelOne scripts library that will be executed.
+          description: >-
+            The script ID from SentinelOne scripts library that will be executed.
           minLength: 1
           type: string
         scriptInput:
-          description: The input parameter arguments for the script that was selected.
+          description: >-
+            The input parameter arguments for the script that was selected.
           minLength: 1
           type: string
       required:
@@ -2813,7 +2905,7 @@ components:
       type: string
     StartDate:
       description: A start date in ISO 8601 format or Date Math format.
-      example: '2023-10-31T00:00:00.000Z'
+      example: 2023-10-31T00:00:00.000Z
       type: string
     SuccessResponse:
       description: A generic successful response.
@@ -2851,7 +2943,8 @@ components:
                 - type: object
                   properties:
                     pid:
-                      description: The process ID (PID) of the process to terminate.
+                      description: >-
+                        The process ID (PID) of the process to terminate.
                       minimum: 1
                       type: number
                 - type: object
@@ -2881,7 +2974,9 @@ components:
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged. Max of 50.
+              description: >-
+                The IDs of cases where the action taken will be logged. Max of
+                50.
               example:
                 - case-id-1
                 - case-id-2
@@ -2906,7 +3001,8 @@ components:
                 - type: object
                   properties:
                     pid:
-                      description: The process ID (PID) of the process to suspend.
+                      description: >-
+                        The process ID (PID) of the process to suspend.
                       example: 123
                       minimum: 1
                       type: integer
@@ -3002,7 +3098,9 @@ components:
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged. Max of 50.
+              description: >-
+                The IDs of cases where the action taken will be logged. Max of
+                50.
               example:
                 - case-id-1
                 - case-id-2
@@ -3032,7 +3130,8 @@ components:
               properties:
                 overwrite:
                   default: false
-                  description: Overwrite the file on the host if it already exists.
+                  description: >-
+                    Overwrite the file on the host if it already exists.
                   example: false
                   type: boolean
           required:
@@ -3075,6 +3174,7 @@ components:
 security:
   - BasicAuth: []
 tags:
-  - description: Interact with and manage endpoints running the Elastic Defend integration.
+  - description: >-
+      Interact with and manage endpoints running the Elastic Defend integration.
     name: Security Endpoint Management API
     x-displayName: Security endpoint management

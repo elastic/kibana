@@ -7,7 +7,7 @@ info:
     **Alerts** page and can be assigned and triaged, using the alert status to
     mark them as open, closed, or acknowledged.
   title: Security Detections API (Elastic Cloud and self-hosted)
-  version: '2023-10-31'
+  version: 2023-10-31
 servers:
   - url: http://{kibana_host}:{port}
     variables:
@@ -305,13 +305,14 @@ paths:
                 example1:
                   summary: Example response for a retrieved rule
                   value:
-                    created_at: '2020-02-03T11:19:04.259Z'
+                    created_at: 2020-02-03T11:19:04.259Z
                     created_by: elastic
-                    description: Process started by MS Office program in user folder
+                    description: >-
+                      Process started by MS Office program in user folder
                     enabled: false
                     execution_summary:
                       last_execution:
-                        date: '2022-03-23T16:06:12.787Z'
+                        date: 2022-03-23T16:06:12.787Z
                         message: >-
                           This rule attempted to query data from Elasticsearch
                           indices listed in the "Index pattern" section of the
@@ -327,7 +328,8 @@ paths:
                       - query:
                           match:
                             event.action:
-                              query: 'Process Create (rule: ProcessCreate)'
+                              query: >-
+                                Process Create (rule: ProcessCreate)
                               type: phrase
                     from: now-4200s
                     id: c41d170b-8ba6-4de6-b8ec-76440a35ace3
@@ -366,14 +368,16 @@ paths:
                         tactic:
                           id: TA0001
                           name: Initial Access
-                          reference: https://attack.mitre.org/tactics/TA0001
+                          reference: >-
+                            https://attack.mitre.org/tactics/TA0001
                         technique:
                           - id: T1193
                             name: Spearphishing Attachment
-                            reference: https://attack.mitre.org/techniques/T1193
+                            reference: >-
+                              https://attack.mitre.org/techniques/T1193
                     to: now-300s
                     type: query
-                    updated_at: '2020-02-03T11:19:04.462Z'
+                    updated_at: 2020-02-03T11:19:04.462Z
                     updated_by: elastic
                     version: 1
               schema:
@@ -414,7 +418,8 @@ paths:
               example2:
                 summary: Patch EQL rule
                 value:
-                  rule_id: process_started_by_ms_office_program_possible_payload
+                  rule_id: >-
+                    process_started_by_ms_office_program_possible_payload
                   threat:
                     - framework: MITRE ATT&CK
                       tactic:
@@ -424,12 +429,15 @@ paths:
                       technique:
                         - id: T1193
                           name: Spearphishing Attachment
-                          reference: https://attack.mitre.org/techniques/T1193
+                          reference: >-
+                            https://attack.mitre.org/techniques/T1193
               example3:
                 summary: Patch threshold rule
                 value:
                   id: 005d2c4f-51ca-493d-a2bd-20ef076339b1
-                  query: 'agent.version : * and agent.id : "243d9b4f-ca01-4311-8e5c-9abbee91afd8"'
+                  query: >-
+                    agent.version : * and agent.id :
+                    "243d9b4f-ca01-4311-8e5c-9abbee91afd8"
                   threshold:
                     cardinality: []
                     field: []
@@ -440,7 +448,8 @@ paths:
                   history_window_start: now-3d
                   id: 569aac91-40dc-4807-a8ae-a2c8698089c4
                   new_terms_fields:
-                    - Endpoint.policy.applied.artifacts.global.identifiers.name
+                    - >-
+                      Endpoint.policy.applied.artifacts.global.identifiers.name
               example5:
                 summary: Patch esql rule
                 value:
@@ -480,7 +489,7 @@ paths:
                   summary: Example response for an updated rule
                   value:
                     actions: []
-                    created_at: '2020-04-07T14:51:09.755Z'
+                    created_at: 2020-04-07T14:51:09.755Z
                     created_by: elastic
                     description: Updated description for the rule.
                     enabled: false
@@ -516,7 +525,7 @@ paths:
                     threat: []
                     to: now
                     type: query
-                    updated_at: '2020-04-07T14:51:09.970Z'
+                    updated_at: 2020-04-07T14:51:09.970Z
                     updated_by: elastic
                     version: 2
               schema:
@@ -588,10 +597,12 @@ paths:
           application/json:
             examples:
               example1:
-                description: Query rule that searches for processes started by MS Office
+                description: >-
+                  Query rule that searches for processes started by MS Office
                 summary: Query rule
                 value:
-                  description: Process started by MS Office program - possible payload
+                  description: >-
+                    Process started by MS Office program - possible payload
                   enabled: false
                   filters:
                     - query:
@@ -642,7 +653,8 @@ paths:
                     - winlogbeat-*
                   interval: 2m
                   name: Windows server prml-19
-                  query: host.name:prml-19 and event.category:authentication and
+                  query: >-
+                    host.name:prml-19 and event.category:authentication and
                     event.outcome:failure
                   required_fields:
                     - name: source.ip
@@ -688,7 +700,8 @@ paths:
                       params:
                         message: 'Urgent: {{context.rule.description}}'
                   anomaly_threshold: 70
-                  description: Generates alerts when the job discovers anomalies over 70
+                  description: >-
+                    Generates alerts when the job discovers anomalies over 70
                   enabled: true
                   from: now-6m
                   interval: 5m
@@ -697,7 +710,8 @@ paths:
                   note: Shut down the internet.
                   risk_score: 70
                   rule_id: ml_linux_network_high_threshold
-                  setup: This rule requires data coming in from Elastic Defend.
+                  setup: >-
+                    This rule requires data coming in from Elastic Defend.
                   severity: high
                   tags:
                     - machine learning
@@ -752,7 +766,9 @@ paths:
                 summary: Indicator match rule
                 value:
                   actions: []
-                  description: Checks for bad IP addresses listed in the ip-threat-list index
+                  description: >-
+                    Checks for bad IP addresses listed in the ip-threat-list
+                    index
                   index:
                     - packetbeat-*
                   name: Bad IP threat match
@@ -783,11 +799,13 @@ paths:
                   threat_query: '*:*'
                   type: threat_match
               example6:
-                description: New terms rule that creates alerts a new IP address is detected for
-                  a user
+                description: >-
+                  New terms rule that creates alerts a new IP address is
+                  detected for a user
                 summary: New terms rule
                 value:
-                  description: Detects a user associated with a new IP address
+                  description: >-
+                    Detects a user associated with a new IP address
                   history_window_start: now-30d
                   index:
                     - auditbeat*
@@ -806,7 +824,8 @@ paths:
                   severity: medium
                   type: new_terms
               example7:
-                description: esql rule that creates alerts from events that match an Excel
+                description: >-
+                  esql rule that creates alerts from events that match an Excel
                   parent process
                 summary: Esql rule
                 value:
@@ -841,7 +860,8 @@ paths:
                     group_by:
                       - process.parent.name
                     missing_fields_strategy: suppress
-                  description: Process started by MS Office program - possible payload
+                  description: >-
+                    Process started by MS Office program - possible payload
                   enabled: false
                   filters:
                     - query:
@@ -880,16 +900,18 @@ paths:
                   summary: Query rule response
                   value:
                     actions: []
-                    created_at: '2020-04-07T14:51:09.755Z'
+                    created_at: 2020-04-07T14:51:09.755Z
                     created_by: elastic
-                    description: Process started by MS Office program - possible payload
+                    description: >-
+                      Process started by MS Office program - possible payload
                     enabled: false
                     false_positives: []
                     filters:
                       - query:
                           match:
                             event.action:
-                              query: 'Process Create (rule: ProcessCreate)'
+                              query: >-
+                                Process Create (rule: ProcessCreate)
                               type: phrase
                     from: now-70m
                     id: 6541b99a-dee9-4f6d-a86d-dbd1869d73b1
@@ -926,11 +948,12 @@ paths:
                     threat: []
                     to: now
                     type: query
-                    updated_at: '2020-04-07T14:51:09.970Z'
+                    updated_at: 2020-04-07T14:51:09.970Z
                     updated_by: elastic
                     version: 1
                 example2:
-                  description: Example response for a machine learning job rule
+                  description: >-
+                    Example response for a machine learning job rule
                   summary: Machine learning response
                   value:
                     actions:
@@ -944,9 +967,10 @@ paths:
                         params:
                           message: 'Urgent: {{context.rule.description}}'
                     anomaly_threshold: 70
-                    created_at: '2020-04-07T14:45:15.679Z'
+                    created_at: 2020-04-07T14:45:15.679Z
                     created_by: elastic
-                    description: Generates alerts when the job discovers anomalies over 70
+                    description: >-
+                      Generates alerts when the job discovers anomalies over 70
                     enabled: true
                     false_positives: []
                     from: now-6m
@@ -965,14 +989,14 @@ paths:
                     setup: ''
                     severity: high
                     status: going to run
-                    status_date: '2020-04-07T14:45:21.685Z'
+                    status_date: 2020-04-07T14:45:21.685Z
                     tags:
                       - machine learning
                       - Linux
                     threat: []
                     to: now
                     type: machine_learning
-                    updated_at: '2020-04-07T14:45:15.892Z'
+                    updated_at: 2020-04-07T14:45:15.892Z
                     updated_by: elastic
                     version: 1
                 example3:
@@ -981,7 +1005,7 @@ paths:
                   value:
                     actions: []
                     author: []
-                    created_at: '2020-07-22T10:27:23.486Z'
+                    created_at: 2020-07-22T10:27:23.486Z
                     created_by: elastic
                     description: >-
                       Detects when there are 20 or more failed login attempts
@@ -1001,7 +1025,8 @@ paths:
                     language: kuery
                     max_signals: 100
                     name: Windows server prml-19
-                    query: host.name:prml-19 and event.category:authentication and
+                    query: >-
+                      host.name:prml-19 and event.category:authentication and
                       event.outcome:failure
                     references: []
                     related_integrations:
@@ -1041,7 +1066,7 @@ paths:
                       value: 20
                     to: now
                     type: threshold
-                    updated_at: '2020-07-22T10:27:23.673Z'
+                    updated_at: 2020-07-22T10:27:23.673Z
                     updated_by: elastic
                     version: 1
                 example4:
@@ -1049,7 +1074,7 @@ paths:
                   summary: EQL rule response
                   value:
                     author: []
-                    created_at: '2020-10-05T09:06:16.392Z'
+                    created_at: 2020-10-05T09:06:16.392Z
                     created_by: elastic
                     description: Unusual rundll32.exe network connection
                     enabled: true
@@ -1109,7 +1134,7 @@ paths:
                     throttle: no_actions
                     to: now
                     type: eql
-                    updated_at: '2020-10-05T09:06:16.403Z'
+                    updated_at: 2020-10-05T09:06:16.403Z
                     updated_by: elastic
                     version: 1
                 example5:
@@ -1117,9 +1142,11 @@ paths:
                   summary: Indicator match rule response
                   value:
                     author: []
-                    created_at: '2020-10-06T07:07:58.227Z'
+                    created_at: 2020-10-06T07:07:58.227Z
                     created_by: elastic
-                    description: Checks for bad IP addresses listed in the ip-threat-list index
+                    description: >-
+                      Checks for bad IP addresses listed in the ip-threat-list
+                      index
                     enabled: true
                     exceptions_list: []
                     false_positives: []
@@ -1172,7 +1199,7 @@ paths:
                     threat_query: '*:*'
                     to: now
                     type: threat_match
-                    updated_at: '2020-10-06T07:07:58.237Z'
+                    updated_at: 2020-10-06T07:07:58.237Z
                     updated_by: elastic
                     version: 1
                 example6:
@@ -1180,9 +1207,10 @@ paths:
                   summary: New terms rule response
                   value:
                     author: []
-                    created_at: '2020-10-06T07:07:58.227Z'
+                    created_at: 2020-10-06T07:07:58.227Z
                     created_by: elastic
-                    description: Detects a user associated with a new IP address
+                    description: >-
+                      Detects a user associated with a new IP address
                     enabled: true
                     exceptions_list: []
                     false_positives: []
@@ -1221,7 +1249,7 @@ paths:
                     threat: []
                     to: now
                     type: new_terms
-                    updated_at: '2020-10-06T07:07:58.237Z'
+                    updated_at: 2020-10-06T07:07:58.237Z
                     updated_by: elastic
                     version: 1
                 example7:
@@ -1230,7 +1258,7 @@ paths:
                   value:
                     actions: []
                     author: []
-                    created_at: '2023-10-18T10:55:14.269Z'
+                    created_at: 2023-10-18T10:55:14.269Z
                     created_by: elastic
                     description: Find Excel events
                     enabled: false
@@ -1244,8 +1272,9 @@ paths:
                     max_signals: 100
                     name: Find Excel events
                     output_index: ''
-                    query: from auditbeat-8.10.2 METADATA _id | where process.parent.name ==
-                      "EXCEL.EXE"
+                    query: >-
+                      from auditbeat-8.10.2 METADATA _id | where
+                      process.parent.name == "EXCEL.EXE"
                     references: []
                     related_integrations:
                       - package: o365
@@ -1265,7 +1294,7 @@ paths:
                     threat: []
                     to: now
                     type: esql
-                    updated_at: '2023-10-18T10:55:14.269Z'
+                    updated_at: 2023-10-18T10:55:14.269Z
                     updated_by: elastic
                     version: 1
               schema:
@@ -1317,7 +1346,9 @@ paths:
                   id: 005d2c4f-51ca-493d-a2bd-20ef076339b1
                   language: kuery
                   name: New name for threat rule
-                  query: 'agent.version : * and agent.id : "243d9b4f-ca01-4311-8e5c-9abbee91afd8"'
+                  query: >-
+                    agent.version : * and agent.id :
+                    "243d9b4f-ca01-4311-8e5c-9abbee91afd8"
                   risk_score: 21
                   severity: low
                   tags:
@@ -1336,7 +1367,8 @@ paths:
                   interval: 5m
                   name: New terms rule name
                   new_terms_fields:
-                    - Endpoint.policy.applied.artifacts.global.identifiers.name
+                    - >-
+                      Endpoint.policy.applied.artifacts.global.identifiers.name
                   query: 'agent.version : "9.1.0"'
                   risk_score: 21
                   severity: low
@@ -1409,7 +1441,7 @@ paths:
                   summary: Example response for an updated rule
                   value:
                     actions: []
-                    created_at: '2020-04-07T14:51:09.755Z'
+                    created_at: 2020-04-07T14:51:09.755Z
                     created_by: elastic
                     description: Updated description for the rule.
                     enabled: false
@@ -1445,7 +1477,7 @@ paths:
                     threat: []
                     to: now
                     type: query
-                    updated_at: '2020-04-07T14:51:09.970Z'
+                    updated_at: 2020-04-07T14:51:09.970Z
                     updated_by: elastic
                     version: 2
               schema:
@@ -1486,20 +1518,23 @@ paths:
           application/json:
             examples:
               example01:
-                description: The following request activates all rules with the test tag.
+                description: >-
+                  The following request activates all rules with the test tag.
                 summary: Enable - Enable all rules with the test tag
                 value:
                   action: enable
                   query: 'alert.attributes.tags: "test"'
               example02:
-                description: The following request enables the rule with the specified ID.
+                description: >-
+                  The following request enables the rule with the specified ID.
                 summary: Enable - Enable a specific rule by ID.
                 value:
                   action: enable
                   ids:
                     - 748694f0-6977-4ea5-8384-cd2e39730779
               example03:
-                description: The following request disables the rule with the specified ID.
+                description: >-
+                  The following request disables the rule with the specified ID.
                 summary: Disable - Disable a specific rule by ID
                 value:
                   action: disable
@@ -1519,7 +1554,8 @@ paths:
                     - 748694f0-6977-4ea5-8384-cd2e39730779
                     - 461a4c22-416e-4009-a9a7-cf79656454bf
               example05:
-                description: The following request deletes the rule with the specified ID.
+                description: >-
+                  The following request deletes the rule with the specified ID.
                 summary: Delete - Delete a specific rule by ID
                 value:
                   action: delete
@@ -1535,10 +1571,11 @@ paths:
                   ids:
                     - 748694f0-6977-4ea5-8384-cd2e39730779
                   run:
-                    end_date: '2025-03-10T23:59:59.999Z'
-                    start_date: '2025-03-01T00:00:00.000Z'
+                    end_date: 2025-03-10T23:59:59.999Z
+                    start_date: 2025-03-01T00:00:00.000Z
               example07:
-                description: The following request exports the rules with the specified IDs.
+                description: >-
+                  The following request exports the rules with the specified IDs.
                 summary: Export - Export specific rules by ID
                 value:
                   action: export
@@ -1551,7 +1588,8 @@ paths:
                   three rules. The dry_run parameter is specified in query
                   parameters, e.g. POST
                   api/detection_engine/rules/_bulk_action?dry_run=true
-                summary: Edit - dry run - Validate add_index_patterns bulk action
+                summary: >-
+                  Edit - dry run - Validate add_index_patterns bulk action
                 value:
                   action: edit
                   edit:
@@ -1614,7 +1652,8 @@ paths:
                   the rules with the specified IDs, overwriting any existing
                   tags. If the set of tags is the same as the existing tags, no
                   changes are made.
-                summary: Edit - Set (overwrite existing) tags for rules (idempotent)
+                summary: >-
+                  Edit - Set (overwrite existing) tags for rules (idempotent)
                 value:
                   action: edit
                   edit:
@@ -1645,7 +1684,8 @@ paths:
                   The following request removes the index pattern "test-*" from
                   the rules with the specified IDs. If the index pattern does
                   not exist for a rule, no changes are made.
-                summary: Edit - Remove index patterns from rules (idempotent)
+                summary: >-
+                  Edit - Remove index patterns from rules (idempotent)
                 value:
                   action: edit
                   edit:
@@ -1661,8 +1701,9 @@ paths:
                   "prod-*" for the rules with the specified IDs, overwriting any
                   existing index patterns. If the set of index patterns is the
                   same as the existing index patterns, no changes are made.
-                summary: Edit - Set (overwrite existing) index patterns for rules patterns
-                  (idempotent)
+                summary: >-
+                  Edit - Set (overwrite existing) index patterns for rules
+                  patterns (idempotent)
                 value:
                   action: edit
                   edit:
@@ -1692,7 +1733,8 @@ paths:
                   The following request deletes investigation fields from the
                   rules with the specified IDs. If the field does not exist for
                   a rule, no changes are made.
-                summary: Edit - Delete investigation fields from rules (idempotent)
+                summary: >-
+                  Edit - Delete investigation fields from rules (idempotent)
                 value:
                   action: edit
                   edit:
@@ -1709,7 +1751,8 @@ paths:
                   with the specified IDs, overwriting any existing investigation
                   fields. If the set of investigation fields is the same as the
                   existing investigation fields, no changes are made.
-                summary: Edit - Set (overwrite existing) investigation fields for rules
+                summary: >-
+                  Edit - Set (overwrite existing) investigation fields for rules
                   (idempotent)
                 value:
                   action: edit
@@ -1726,7 +1769,8 @@ paths:
                   The following request sets a timeline template for the rules
                   with the specified IDs. If the same timeline template is
                   already set for a rule, no changes are made.
-                summary: Edit - Set (overwrite existing) timeline template for rules
+                summary: >-
+                  Edit - Set (overwrite existing) timeline template for rules
                   (idempotent)
                 value:
                   action: edit
@@ -1742,7 +1786,8 @@ paths:
                   The following request sets a schedule for the rules with the
                   specified IDs. If the same schedule is already set for a rule,
                   no changes are made.
-                summary: Edit - Set (overwrite existing) schedule for rules (idempotent)
+                summary: >-
+                  Edit - Set (overwrite existing) schedule for rules (idempotent)
                 value:
                   action: edit
                   edit:
@@ -1756,7 +1801,8 @@ paths:
                 description: >-
                   The following request adds rule actions to the rules with the
                   specified IDs. Each new action receives its own unique ID.
-                summary: Edit - Add rule actions to rules (non-idempotent)
+                summary: >-
+                  Edit - Add rule actions to rules (non-idempotent)
                 value:
                   action: edit
                   edit:
@@ -1773,7 +1819,9 @@ paths:
                 description: >-
                   The following request sets rule actions for the rules with the
                   specified IDs. Each action receives its own unique ID.
-                summary: Edit - Set (overwrite existing) rule actions for rules (non-idempotent)
+                summary: >-
+                  Edit - Set (overwrite existing) rule actions for rules
+                  (non-idempotent)
                 value:
                   action: edit
                   edit:
@@ -1790,7 +1838,8 @@ paths:
                 description: >-
                   The following request adds rule actions to the rules with the
                   specified IDs. Each new action receives its own unique ID.
-                summary: Edit - Add rule actions to rules for a webhook connector
+                summary: >-
+                  Edit - Add rule actions to rules for a webhook connector
                 value:
                   action: edit
                   edit:
@@ -1807,7 +1856,8 @@ paths:
                 description: >-
                   The following request adds rule actions to the rules with the
                   specified IDs. Each new action receives its own unique ID.
-                summary: Edit - Add rule actions to rules for an email connector
+                summary: >-
+                  Edit - Add rule actions to rules for an email connector
                 value:
                   action: edit
                   edit:
@@ -1826,7 +1876,8 @@ paths:
                 description: >-
                   The following request adds rule actions to the rules with the
                   specified IDs. Each new action receives its own unique ID.
-                summary: Edit - Add rule actions to rules for a slack connector
+                summary: >-
+                  Edit - Add rule actions to rules for a slack connector
                 value:
                   action: edit
                   edit:
@@ -1843,7 +1894,8 @@ paths:
                 description: >-
                   The following request adds rule actions to the rules with the
                   specified IDs. Each new action receives its own unique ID.
-                summary: Edit - Add rule actions to rules for a PagerDuty connector
+                summary: >-
+                  Edit - Add rule actions to rules for a PagerDuty connector
                 value:
                   action: edit
                   edit:
@@ -1856,13 +1908,15 @@ paths:
                               eventAction: trigger
                               severity: critical
                               summary: The message body
-                              timestamp: '2023-10-31T00:00:00.000Z'
+                              timestamp: 2023-10-31T00:00:00Z
                   ids:
                     - 9e946bfc-3118-4c77-bb25-67d781191921
               example27:
-                description: The following request set alert suppression to the rules with the
-                  specified IDs.
-                summary: Edit - Set alert suppression to rules (idempotent)
+                description: >-
+                  The following request set alert suppression to the rules with
+                  the specified IDs.
+                summary: >-
+                  Edit - Set alert suppression to rules (idempotent)
                 value:
                   action: edit
                   edit:
@@ -1881,7 +1935,8 @@ paths:
                 description: >-
                   The following request set alert suppression to threshold rules
                   with the specified IDs.
-                summary: Edit - Set alert suppression to threshold rules (idempotent)
+                summary: >-
+                  Edit - Set alert suppression to threshold rules (idempotent)
                 value:
                   action: edit
                   edit:
@@ -1898,7 +1953,8 @@ paths:
                   The following request removes alert suppression from the rules
                   with the specified IDs. If the rules do not have alert
                   suppression, no changes are made.
-                summary: Edit - Removes alert suppression from rules (idempotent)
+                summary: >-
+                  Edit - Removes alert suppression from rules (idempotent)
                 value:
                   action: edit
                   edit:
@@ -1910,15 +1966,17 @@ paths:
                 description: >-
                   The following request triggers the filling of gaps for the
                   specified rule ids and time range
-                summary: Fill Gaps - Manually trigger the filling of gaps for specified rules
+                summary: >-
+                  Fill Gaps - Manually trigger the filling of gaps for specified
+                  rules
                 value:
                   action: fill_gaps
                   ids:
                     - 748694f0-6977-4ea5-8384-cd2e39730779
                     - 164d0918-f720-4c9f-9f5c-c5122587cf19
                   run:
-                    end_date: '2025-03-10T23:59:59.999Z'
-                    start_date: '2025-03-01T00:00:00.000Z'
+                    end_date: 2025-03-10T23:59:59.999Z
+                    start_date: 2025-03-01T00:00:00.000Z
             schema:
               oneOf:
                 - $ref: '#/components/schemas/BulkDeleteRules'
@@ -1953,7 +2011,7 @@ paths:
                           - anomaly_threshold: 50
                             author:
                               - Elastic
-                            created_at: '2022-02-21T14:14:13.801Z'
+                            created_at: 2022-02-21T14:14:13.801Z
                             created_by: elastic
                             description: >-
                               A machine learning job detected unusually large
@@ -1968,7 +2026,7 @@ paths:
                             exceptions_list: []
                             execution_summary:
                               last_execution:
-                                date: '2022-03-23T16:06:12.787Z'
+                                date: 2022-03-23T16:06:12.787Z
                                 message: >-
                                   This rule attempted to query data from
                                   Elasticsearch indices listed in the "Index
@@ -1996,7 +2054,8 @@ paths:
                             max_signals: 100
                             name: DNS Tunneling [Duplicate]
                             references:
-                              - https://www.elastic.co/docs/reference/machine-learning/ootb-ml-jobs-siem
+                              - >-
+                                https://www.elastic.co/docs/reference/machine-learning/ootb-ml-jobs-siem
                             related_integrations: []
                             required_fields: []
                             risk_score: 21
@@ -2013,7 +2072,7 @@ paths:
                             threat: []
                             to: now
                             type: machine_learning
-                            updated_at: '2022-02-21T17:05:50.883Z'
+                            updated_at: 2022-02-21T17:05:50.883Z
                             updated_by: elastic
                             version: 6
                       summary:
@@ -2038,7 +2097,8 @@ paths:
                               Index patterns can't be added. Machine learning
                               rule doesn't have index patterns property
                             rules:
-                              - id: 8bc7dad0-9320-11ec-9265-8b772383a08d
+                              - id: >-
+                                  8bc7dad0-9320-11ec-9265-8b772383a08d
                                 name: DNS Tunneling [Duplicate]
                             status_code: 500
                         results:
@@ -2049,7 +2109,7 @@ paths:
                             - actions: []
                               author:
                                 - Elastic
-                              created_at: '2022-02-21T14:14:17.883Z'
+                              created_at: 2022-02-21T14:14:17.883Z
                               created_by: elastic
                               description: >-
                                 Generates a detection alert for each external
@@ -2060,7 +2120,7 @@ paths:
                               exceptions_list: []
                               execution_summary:
                                 last_execution:
-                                  date: '2022-03-23T16:06:12.787Z'
+                                  date: 2022-03-23T16:06:12.787Z
                                   message: >-
                                     This rule attempted to query data from
                                     Elasticsearch indices listed in the "Index
@@ -2074,7 +2134,8 @@ paths:
                                   status_order: 20
                               false_positives: []
                               from: now-6m
-                              id: 8e5c1a40-9320-11ec-9265-8b772383a08d
+                              id: >-
+                                8e5c1a40-9320-11ec-9265-8b772383a08d
                               immutable: false
                               index:
                                 - apm-*-transaction*
@@ -2101,7 +2162,8 @@ paths:
                                 - field: event.risk_score
                                   operator: equals
                                   value: ''
-                              rule_id: 941faf98-0cdc-4569-b16d-4af962914d61
+                              rule_id: >-
+                                941faf98-0cdc-4569-b16d-4af962914d61
                               rule_name_override: message
                               setup: ''
                               severity: medium
@@ -2133,7 +2195,7 @@ paths:
                               timestamp_override: event.ingested
                               to: now
                               type: query
-                              updated_at: '2022-02-21T16:56:22.818Z'
+                              updated_at: 2022-02-21T16:56:22.818Z
                               updated_by: elastic
                               version: 5
                         summary:
@@ -2162,14 +2224,18 @@ paths:
                         - err_code: IMMUTABLE
                           message: Elastic rule can't be edited
                           rules:
-                            - id: 81aa0480-06af-11ed-94fb-dd1a0597d8d2
+                            - id: >-
+                                81aa0480-06af-11ed-94fb-dd1a0597d8d2
                               name: Unusual AWS Command for a User
                           status_code: 500
                         - err_code: MACHINE_LEARNING_INDEX_PATTERN
-                          message: Machine learning rule doesn't have index patterns
+                          message: >-
+                            Machine learning rule doesn't have index patterns
                           rules:
-                            - id: dc015d10-0831-11ed-ac8b-05a222bd8d4a
-                              name: Suspicious Powershell Script [Duplicate]
+                            - id: >-
+                                dc015d10-0831-11ed-ac8b-05a222bd8d4a
+                              name: >-
+                                Suspicious Powershell Script [Duplicate]
                           status_code: 500
                       results:
                         created: []
@@ -2199,7 +2265,7 @@ paths:
                         updated:
                           - actions: []
                             author: []
-                            created_at: '2025-03-25T11:46:41.899Z'
+                            created_at: 2025-03-25T11:46:41.899Z
                             created_by: elastic
                             description: test
                             enabled: false
@@ -2224,7 +2290,8 @@ paths:
                             license: ''
                             max_signals: 100
                             meta:
-                              kibana_siem_app_url: http://localhost:5601/kbn/app/security
+                              kibana_siem_app_url: >-
+                                http://localhost:5601/kbn/app/security
                             name: Rule 1
                             output_index: ''
                             query: '*'
@@ -2246,7 +2313,7 @@ paths:
                             threat: []
                             to: now
                             type: query
-                            updated_at: '2025-03-25T11:47:11.350Z'
+                            updated_at: 2025-03-25T11:47:11.350Z
                             updated_by: elastic
                             version: 2
                           - actions:
@@ -2256,12 +2323,14 @@ paths:
                                   summary: true
                                   throttle: null
                                 group: default
-                                id: 20fbf986-a270-460e-80f3-7b83c08b430f
+                                id: >-
+                                  20fbf986-a270-460e-80f3-7b83c08b430f
                                 params:
                                   body: Hello
-                                uuid: 580e2e16-5e91-411c-999b-7b75a11ed441
+                                uuid: >-
+                                  580e2e16-5e91-411c-999b-7b75a11ed441
                             author: []
-                            created_at: '2025-03-25T09:49:08.343Z'
+                            created_at: 2025-03-25T09:49:08.343Z
                             created_by: elastic
                             description: test
                             enabled: false
@@ -2285,13 +2354,15 @@ paths:
                             investigation_fields:
                               field_names:
                                 - alert.status
-                                - Endpoint.policy.applied.artifacts.global.channel
+                                - >-
+                                  Endpoint.policy.applied.artifacts.global.channel
                             language: kuery
                             license: ''
                             max_signals: 100
                             meta:
                               from: 3m
-                              kibana_siem_app_url: http://localhost:5601/kbn/app/security
+                              kibana_siem_app_url: >-
+                                http://localhost:5601/kbn/app/security
                             name: Rule 2
                             output_index: ''
                             query: '*'
@@ -2312,10 +2383,11 @@ paths:
                               - tag-2
                             threat: []
                             timeline_id: 3e827bab-838a-469f-bd1e-5e19a2bff2fd
-                            timeline_title: Alerts Involving a Single User Timeline
+                            timeline_title: >-
+                              Alerts Involving a Single User Timeline
                             to: now
                             type: query
-                            updated_at: '2025-03-25T11:47:11.357Z'
+                            updated_at: 2025-03-25T11:47:11.357Z
                             updated_by: elastic
                             version: 24
                       summary:
@@ -2376,12 +2448,14 @@ paths:
                                   summary: true
                                   throttle: null
                                 group: default
-                                id: 20fbf986-a270-460e-80f3-7b83c08b430f
+                                id: >-
+                                  20fbf986-a270-460e-80f3-7b83c08b430f
                                 params:
                                   body: Hello
-                                uuid: 580e2e16-5e91-411c-999b-7b75a11ed441
+                                uuid: >-
+                                  580e2e16-5e91-411c-999b-7b75a11ed441
                             author: []
-                            created_at: '2025-03-25T09:49:08.343Z'
+                            created_at: 2025-03-25T09:49:08.343Z
                             created_by: elastic
                             description: test
                             enabled: false
@@ -2405,13 +2479,15 @@ paths:
                             investigation_fields:
                               field_names:
                                 - alert.status
-                                - Endpoint.policy.applied.artifacts.global.channel
+                                - >-
+                                  Endpoint.policy.applied.artifacts.global.channel
                             language: kuery
                             license: ''
                             max_signals: 100
                             meta:
                               from: 3m
-                              kibana_siem_app_url: http://localhost:5601/kbn/app/security
+                              kibana_siem_app_url: >-
+                                http://localhost:5601/kbn/app/security
                             name: Test rule
                             output_index: ''
                             query: '*'
@@ -2433,10 +2509,11 @@ paths:
                               - tag-4
                             threat: []
                             timeline_id: 3e827bab-838a-469f-bd1e-5e19a2bff2fd
-                            timeline_title: Alerts Involving a Single User Timeline
+                            timeline_title: >-
+                              Alerts Involving a Single User Timeline
                             to: now
                             type: query
-                            updated_at: '2025-03-25T11:55:12.752Z'
+                            updated_at: 2025-03-25T11:55:12.752Z
                             updated_by: elastic
                             version: 25
                       summary:
@@ -2467,12 +2544,14 @@ paths:
                                   summary: true
                                   throttle: null
                                 group: default
-                                id: 20fbf986-a270-460e-80f3-7b83c08b430f
+                                id: >-
+                                  20fbf986-a270-460e-80f3-7b83c08b430f
                                 params:
                                   body: Hello
-                                uuid: e48428e5-efac-4856-b8ad-b271c14eaa91
+                                uuid: >-
+                                  e48428e5-efac-4856-b8ad-b271c14eaa91
                             author: []
-                            created_at: '2025-03-25T09:49:08.343Z'
+                            created_at: 2025-03-25T09:49:08.343Z
                             created_by: elastic
                             description: test
                             enabled: false
@@ -2496,13 +2575,15 @@ paths:
                             investigation_fields:
                               field_names:
                                 - alert.status
-                                - Endpoint.policy.applied.artifacts.global.channel
+                                - >-
+                                  Endpoint.policy.applied.artifacts.global.channel
                             language: kuery
                             license: ''
                             max_signals: 100
                             meta:
                               from: 3m
-                              kibana_siem_app_url: http://localhost:5601/kbn/app/security
+                              kibana_siem_app_url: >-
+                                http://localhost:5601/kbn/app/security
                             name: Test rule
                             output_index: ''
                             query: '*'
@@ -2524,10 +2605,11 @@ paths:
                               - tag-4
                             threat: []
                             timeline_id: 3e827bab-838a-469f-bd1e-5e19a2bff2fd
-                            timeline_title: Alerts Involving a Single User Timeline
+                            timeline_title: >-
+                              Alerts Involving a Single User Timeline
                             to: now
                             type: query
-                            updated_at: '2025-03-25T12:17:40.528Z'
+                            updated_at: 2025-03-25T12:17:40.528Z
                             updated_by: elastic
                             version: 30
                       summary:
@@ -2558,22 +2640,26 @@ paths:
                                   summary: true
                                   throttle: null
                                 group: default
-                                id: 76af173d-38d8-4a9a-b2cc-a3c695b845b4
+                                id: >-
+                                  76af173d-38d8-4a9a-b2cc-a3c695b845b4
                                 params:
                                   body: Message body
-                                uuid: 0309347e-3954-429c-9168-5da2663389af
+                                uuid: >-
+                                  0309347e-3954-429c-9168-5da2663389af
                               - action_type_id: .webhook
                                 frequency:
                                   notifyWhen: onActiveAlert
                                   summary: true
                                   throttle: null
                                 group: default
-                                id: 76af173d-38d8-4a9a-b2cc-a3c695b845b4
+                                id: >-
+                                  76af173d-38d8-4a9a-b2cc-a3c695b845b4
                                 params:
                                   body: Message body
-                                uuid: 49ddaa94-d63d-410e-90dc-8c1bad9552bd
+                                uuid: >-
+                                  49ddaa94-d63d-410e-90dc-8c1bad9552bd
                             author: []
-                            created_at: '2025-04-02T12:42:03.400Z'
+                            created_at: 2025-04-02T12:42:03.400Z
                             created_by: elastic
                             description: test
                             enabled: false
@@ -2598,7 +2684,8 @@ paths:
                             license: ''
                             max_signals: 100
                             meta:
-                              kibana_siem_app_url: http://localhost:5601/kbn/app/security
+                              kibana_siem_app_url: >-
+                                http://localhost:5601/kbn/app/security
                             name: Jacek test rule
                             output_index: ''
                             query: '*'
@@ -2618,7 +2705,7 @@ paths:
                             threat: []
                             to: now
                             type: query
-                            updated_at: '2025-04-02T12:51:40.215Z'
+                            updated_at: 2025-04-02T12:51:40.215Z
                             updated_by: elastic
                             version: 2
                       summary:
@@ -2631,7 +2718,8 @@ paths:
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/BulkEditActionResponse'
-                  - $ref: '#/components/schemas/BulkExportActionResponse'
+                  - $ref: >-
+                      #/components/schemas/BulkExportActionResponse
           description: OK
       summary: Apply a bulk action to detection rules
       tags:
@@ -2651,7 +2739,8 @@ paths:
         > Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
       operationId: ExportRules
       parameters:
-        - description: Determines whether a summary of the exported rules is returned.
+        - description: >-
+            Determines whether a summary of the exported rules is returned.
           in: query
           name: exclude_export_details
           required: false
@@ -2799,7 +2888,8 @@ paths:
             items:
               $ref: '#/components/schemas/GapFillStatus'
             type: array
-        - description: Gap auto fill scheduler ID used to determine gap fill status for
+        - description: >-
+            Gap auto fill scheduler ID used to determine gap fill status for
             rules
           in: query
           name: gap_auto_fill_scheduler_id
@@ -2814,7 +2904,7 @@ paths:
                 example1:
                   value:
                     data:
-                      - created_at: '2020-02-02T10:05:19.613Z'
+                      - created_at: 2020-02-02T10:05:19.613Z
                         created_by: elastic
                         description: >-
                           Identifies a PowerShell process launched by either
@@ -2824,7 +2914,7 @@ paths:
                         enabled: false
                         execution_summary:
                           last_execution:
-                            date: '2022-03-23T16:06:12.787Z'
+                            date: 2022-03-23T16:06:12.787Z
                             message: >-
                               This rule attempted to query data from
                               Elasticsearch indices listed in the "Index
@@ -2876,14 +2966,16 @@ paths:
                             tactic:
                               id: TA0002
                               name: Execution
-                              reference: https://attack.mitre.org/tactics/TA0002/
+                              reference: >-
+                                https://attack.mitre.org/tactics/TA0002/
                             technique:
                               - id: T1193
                                 name: Spearphishing Attachment
-                                reference: https://attack.mitre.org/techniques/T1193/
+                                reference: >-
+                                  https://attack.mitre.org/techniques/T1193/
                         to: now
                         type: query
-                        updated_at: '2020-02-02T10:05:19.830Z'
+                        updated_at: 2020-02-02T10:05:19.830Z
                         updated_by: elastic
                     page: 1
                     perPage: 5
@@ -2945,7 +3037,8 @@ paths:
         > Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
       operationId: ImportRules
       parameters:
-        - description: Determines whether existing rules with the same `rule_id` are
+        - description: >-
+            Determines whether existing rules with the same `rule_id` are
             overwritten.
           in: query
           name: overwrite
@@ -2972,7 +3065,8 @@ paths:
           schema:
             default: false
             type: boolean
-        - description: Generates a new list ID for each imported exception list.
+        - description: >-
+            Generates a new list ID for each imported exception list.
           in: query
           name: as_new_list
           required: false
@@ -3153,11 +3247,14 @@ paths:
                     minimum: 0
                     type: integer
                   rules_installed:
-                    description: The total number of installed prebuilt rules
+                    description: >-
+                      The total number of installed prebuilt rules
                     minimum: 0
                     type: integer
                   rules_not_installed:
-                    description: The total number of available prebuilt rules that are not installed
+                    description: >-
+                      The total number of available prebuilt rules that are not
+                      installed
                     minimum: 0
                     type: integer
                   rules_not_updated:
@@ -3165,16 +3262,19 @@ paths:
                     minimum: 0
                     type: integer
                   timelines_installed:
-                    description: The total number of installed prebuilt timelines
+                    description: >-
+                      The total number of installed prebuilt timelines
                     minimum: 0
                     type: integer
                   timelines_not_installed:
-                    description: The total number of available prebuilt timelines that are not
-                      installed
+                    description: >-
+                      The total number of available prebuilt timelines that are
+                      not installed
                     minimum: 0
                     type: integer
                   timelines_not_updated:
-                    description: The total number of outdated prebuilt timelines
+                    description: >-
+                      The total number of outdated prebuilt timelines
                     minimum: 0
                     type: integer
                 required:
@@ -3186,7 +3286,8 @@ paths:
                   - timelines_not_installed
                   - timelines_not_updated
           description: Indicates a successful call
-      summary: Retrieve the status of prebuilt detection rules and Timelines
+      summary: >-
+        Retrieve the status of prebuilt detection rules and Timelines
       tags:
         - Security Detections API
         - Prebuilt Rules API
@@ -3214,19 +3315,24 @@ paths:
                     - $ref: '#/components/schemas/QueryRuleCreateProps'
                     - $ref: '#/components/schemas/RulePreviewParams'
                 - allOf:
-                    - $ref: '#/components/schemas/SavedQueryRuleCreateProps'
+                    - $ref: >-
+                        #/components/schemas/SavedQueryRuleCreateProps
                     - $ref: '#/components/schemas/RulePreviewParams'
                 - allOf:
-                    - $ref: '#/components/schemas/ThresholdRuleCreateProps'
+                    - $ref: >-
+                        #/components/schemas/ThresholdRuleCreateProps
                     - $ref: '#/components/schemas/RulePreviewParams'
                 - allOf:
-                    - $ref: '#/components/schemas/ThreatMatchRuleCreateProps'
+                    - $ref: >-
+                        #/components/schemas/ThreatMatchRuleCreateProps
                     - $ref: '#/components/schemas/RulePreviewParams'
                 - allOf:
-                    - $ref: '#/components/schemas/MachineLearningRuleCreateProps'
+                    - $ref: >-
+                        #/components/schemas/MachineLearningRuleCreateProps
                     - $ref: '#/components/schemas/RulePreviewParams'
                 - allOf:
-                    - $ref: '#/components/schemas/NewTermsRuleCreateProps'
+                    - $ref: >-
+                        #/components/schemas/NewTermsRuleCreateProps
                     - $ref: '#/components/schemas/RulePreviewParams'
                 - allOf:
                     - $ref: '#/components/schemas/EsqlRuleCreateProps'
@@ -3293,7 +3399,8 @@ paths:
               add:
                 $ref: '#/components/examples/SetAlertAssigneesBodyAdd'
               remove:
-                $ref: '#/components/examples/SetAlertAssigneesBodyRemove'
+                $ref: >-
+                  #/components/examples/SetAlertAssigneesBodyRemove
             schema:
               $ref: '#/components/schemas/SetAlertAssigneesBody'
         required: true
@@ -3365,11 +3472,12 @@ paths:
                         id: 924f7c50-505f-11eb-ae0a-3fa2e626a51d
                         sourceIndex: .siem-signals-default-000002
                         status: success
-                        updated: '2021-01-06T22:05:56.859Z'
+                        updated: 2021-01-06T22:05:56.859Z
                         version: 16
               schema:
                 items:
-                  $ref: '#/components/schemas/MigrationFinalizationResult'
+                  $ref: >-
+                    #/components/schemas/MigrationFinalizationResult
                 type: array
           description: Successful response
         '400':
@@ -3439,7 +3547,7 @@ paths:
                         id: 924f7c50-505f-11eb-ae0a-3fa2e626a51d
                         sourceIndex: .siem-signals-default-000002
                         status: success
-                        updated: '2021-01-06T22:05:56.859Z'
+                        updated: 2021-01-06T22:05:56.859Z
                         version: 16
               schema:
                 items:
@@ -3518,9 +3626,12 @@ paths:
                   indices:
                     items:
                       oneOf:
-                        - $ref: '#/components/schemas/AlertsIndexMigrationSuccess'
-                        - $ref: '#/components/schemas/AlertsIndexMigrationError'
-                        - $ref: '#/components/schemas/SkippedAlertsIndexMigration'
+                        - $ref: >-
+                            #/components/schemas/AlertsIndexMigrationSuccess
+                        - $ref: >-
+                            #/components/schemas/AlertsIndexMigrationError
+                        - $ref: >-
+                            #/components/schemas/SkippedAlertsIndexMigration
                     type: array
                 required:
                   - indices
@@ -3581,7 +3692,7 @@ paths:
                         migrations:
                           - id: 924f7c50-505f-11eb-ae0a-3fa2e626a51d
                             status: pending
-                            updated: '2021-01-06T20:41:37.173Z'
+                            updated: 2021-01-06T20:41:37.173Z
                             version: 16
                         signal_versions:
                           - count: 100
@@ -3632,7 +3743,8 @@ paths:
         - Alerts migration API
   /api/detection_engine/signals/search:
     post:
-      description: Find and/or aggregate detection alerts that match the given query.
+      description: >-
+        Find and/or aggregate detection alerts that match the given query.
       operationId: SearchAlerts
       requestBody:
         content:
@@ -3658,12 +3770,13 @@ paths:
                             must: []
                             must_not:
                               - exists:
-                                  field: kibana.alert.building_block_type
+                                  field: >-
+                                    kibana.alert.building_block_type
                             should: []
                         - range:
                             '@timestamp':
-                              gte: '2025-01-17T08:00:00.000Z'
-                              lte: '2025-01-18T07:59:59.999Z'
+                              gte: 2025-01-17T08:00:00.000Z
+                              lte: 2025-01-18T07:59:59.999Z
                   runtime_mappings: {}
                   size: 0
             schema:
@@ -3740,7 +3853,8 @@ paths:
               byId:
                 value:
                   signal_ids:
-                    - 80e1383f856e67c1b7f7a1634744fa6d66b6e2ef7aa26d226e57afb5a7b2b4a1
+                    - >-
+                      80e1383f856e67c1b7f7a1634744fa6d66b6e2ef7aa26d226e57afb5a7b2b4a1
                   status: closed
               byQuery:
                 value:
@@ -3750,8 +3864,8 @@ paths:
                       filter:
                         - '@timestamp':
                             format: strict_date_optional_time
-                            gte: '2024-10-23T07:00:00.000Z'
-                            lte: '2025-01-21T20:12:11.704Z'
+                            gte: 2024-10-23T07:00:00.000Z
+                            lte: 2025-01-21T20:12:11.704Z
                           range: null
                         - bool:
                             filter:
@@ -3761,13 +3875,14 @@ paths:
                                       kibana.alert.workflow_status: open
                                   - '@timestamp':
                                       format: strict_date_optional_time
-                                      gte: '2024-10-23T07:00:00.000Z'
-                                      lte: '2025-01-21T20:12:11.704Z'
+                                      gte: 2024-10-23T07:00:00.000Z
+                                      lte: 2025-01-21T20:12:11.704Z
                                     range: null
                                 must: []
                                 must_not:
                                   - exists:
-                                      field: kibana.alert.building_block_type
+                                      field: >-
+                                        kibana.alert.building_block_type
                                 should: []
                       must: []
                       must_not: []
@@ -3956,7 +4071,8 @@ components:
             - u_MxY0jbrft7EcfC6iNZSUGeI_n6iYrSwZj5mWF5EqmSU_0
           remove: []
         ids:
-          - 681c2a707335aa7df5f349b70013d87254746191712ecf0ced9b3e2d538503a6
+          - >-
+            681c2a707335aa7df5f349b70013d87254746191712ecf0ced9b3e2d538503a6
     SetAlertAssigneesBodyRemove:
       value:
         assignees:
@@ -3964,11 +4080,13 @@ components:
           remove:
             - u_MxY0jbrft7EcfC6iNZSUGeI_n6iYrSwZj5mWF5EqmSU_0
         ids:
-          - 681c2a707335aa7df5f349b70013d87254746191712ecf0ced9b3e2d538503a6
+          - >-
+            681c2a707335aa7df5f349b70013d87254746191712ecf0ced9b3e2d538503a6
     SetAlertTagsBodyAdd:
       value:
         ids:
-          - 549c7129c76cbd554aba1bd638f8a49dde95088f5832e50218358e7eca1cf16e
+          - >-
+            549c7129c76cbd554aba1bd638f8a49dde95088f5832e50218358e7eca1cf16e
         tags:
           tags_to_add:
             - Duplicate
@@ -3976,7 +4094,8 @@ components:
     SetAlertTagsBodyRemove:
       value:
         ids:
-          - 549c7129c76cbd554aba1bd638f8a49dde95088f5832e50218358e7eca1cf16e
+          - >-
+            549c7129c76cbd554aba1bd638f8a49dde95088f5832e50218358e7eca1cf16e
         tags:
           tags_to_add: []
           tags_to_remove:
@@ -4102,7 +4221,8 @@ components:
         group_by:
           $ref: '#/components/schemas/AlertSuppressionGroupBy'
         missing_fields_strategy:
-          $ref: '#/components/schemas/AlertSuppressionMissingFieldsStrategy'
+          $ref: >-
+            #/components/schemas/AlertSuppressionMissingFieldsStrategy
       required:
         - group_by
     AlertSuppressionDuration:
@@ -4177,17 +4297,23 @@ components:
     BulkActionEditPayload:
       anyOf:
         - $ref: '#/components/schemas/BulkActionEditPayloadTags'
-        - $ref: '#/components/schemas/BulkActionEditPayloadIndexPatterns'
-        - $ref: '#/components/schemas/BulkActionEditPayloadInvestigationFields'
+        - $ref: >-
+            #/components/schemas/BulkActionEditPayloadIndexPatterns
+        - $ref: >-
+            #/components/schemas/BulkActionEditPayloadInvestigationFields
         - $ref: '#/components/schemas/BulkActionEditPayloadTimeline'
         - $ref: '#/components/schemas/BulkActionEditPayloadRuleActions'
         - $ref: '#/components/schemas/BulkActionEditPayloadSchedule'
-        - $ref: '#/components/schemas/BulkActionEditPayloadAlertSuppression'
+        - $ref: >-
+            #/components/schemas/BulkActionEditPayloadAlertSuppression
     BulkActionEditPayloadAlertSuppression:
       anyOf:
-        - $ref: '#/components/schemas/BulkActionEditPayloadSetAlertSuppression'
-        - $ref: '#/components/schemas/BulkActionEditPayloadSetAlertSuppressionForThreshold'
-        - $ref: '#/components/schemas/BulkActionEditPayloadDeleteAlertSuppression'
+        - $ref: >-
+            #/components/schemas/BulkActionEditPayloadSetAlertSuppression
+        - $ref: >-
+            #/components/schemas/BulkActionEditPayloadSetAlertSuppressionForThreshold
+        - $ref: >-
+            #/components/schemas/BulkActionEditPayloadDeleteAlertSuppression
     BulkActionEditPayloadDeleteAlertSuppression:
       type: object
       properties:
@@ -4408,7 +4534,8 @@ components:
             - delete
           type: string
         gap_auto_fill_scheduler_id:
-          description: Gap auto fill scheduler ID used to determine gap fill status for
+          description: >-
+            Gap auto fill scheduler ID used to determine gap fill status for
             rules
           type: string
         gap_fill_statuses:
@@ -4445,7 +4572,8 @@ components:
             - disable
           type: string
         gap_auto_fill_scheduler_id:
-          description: Gap auto fill scheduler ID used to determine gap fill status for
+          description: >-
+            Gap auto fill scheduler ID used to determine gap fill status for
             rules
           type: string
         gap_fill_statuses:
@@ -4482,20 +4610,23 @@ components:
             - duplicate
           type: string
         duplicate:
-          description: Duplicate object that describes applying an update action.
+          description: >-
+            Duplicate object that describes applying an update action.
           type: object
           properties:
             include_exceptions:
               description: Whether to copy exceptions from the original rule
               type: boolean
             include_expired_exceptions:
-              description: Whether to copy expired exceptions from the original rule
+              description: >-
+                Whether to copy expired exceptions from the original rule
               type: boolean
           required:
             - include_exceptions
             - include_expired_exceptions
         gap_auto_fill_scheduler_id:
-          description: Gap auto fill scheduler ID used to determine gap fill status for
+          description: >-
+            Gap auto fill scheduler ID used to determine gap fill status for
             rules
           type: string
         gap_fill_statuses:
@@ -4612,7 +4743,8 @@ components:
           minItems: 1
           type: array
         gap_auto_fill_scheduler_id:
-          description: Gap auto fill scheduler ID used to determine gap fill status for
+          description: >-
+            Gap auto fill scheduler ID used to determine gap fill status for
             rules
           type: string
         gap_fill_statuses:
@@ -4654,7 +4786,8 @@ components:
             - enable
           type: string
         gap_auto_fill_scheduler_id:
-          description: Gap auto fill scheduler ID used to determine gap fill status for
+          description: >-
+            Gap auto fill scheduler ID used to determine gap fill status for
             rules
           type: string
         gap_fill_statuses:
@@ -4693,7 +4826,8 @@ components:
             - export
           type: string
         gap_auto_fill_scheduler_id:
-          description: Gap auto fill scheduler ID used to determine gap fill status for
+          description: >-
+            Gap auto fill scheduler ID used to determine gap fill status for
             rules
           type: string
         gap_fill_statuses:
@@ -4749,7 +4883,8 @@ components:
             - start_date
             - end_date
         gap_auto_fill_scheduler_id:
-          description: Gap auto fill scheduler ID used to determine gap fill status for
+          description: >-
+            Gap auto fill scheduler ID used to determine gap fill status for
             rules
           type: string
         gap_fill_statuses:
@@ -4787,7 +4922,8 @@ components:
             - run
           type: string
         gap_auto_fill_scheduler_id:
-          description: Gap auto fill scheduler ID used to determine gap fill status for
+          description: >-
+            Gap auto fill scheduler ID used to determine gap fill status for
             rules
           type: string
         gap_fill_statuses:
@@ -4815,7 +4951,8 @@ components:
           description: Query to filter rules.
           type: string
         run:
-          description: Object that describes applying a manual rule run action.
+          description: >-
+            Object that describes applying a manual rule run action.
           type: object
           properties:
             end_date:
@@ -4970,9 +5107,11 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasPurpose
             alias_target_id:
-              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasTargetId
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -5050,7 +5189,8 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+              $ref: >-
+                #/components/schemas/TimestampOverrideFallbackDisabled
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -5096,9 +5236,11 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasPurpose
             alias_target_id:
-              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasTargetId
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -5178,7 +5320,8 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+              $ref: >-
+                #/components/schemas/TimestampOverrideFallbackDisabled
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -5216,9 +5359,11 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasPurpose
             alias_target_id:
-              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasTargetId
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -5300,7 +5445,8 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+              $ref: >-
+                #/components/schemas/TimestampOverrideFallbackDisabled
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -5322,9 +5468,11 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasPurpose
             alias_target_id:
-              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasTargetId
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -5406,7 +5554,8 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+              $ref: >-
+                #/components/schemas/TimestampOverrideFallbackDisabled
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -5460,9 +5609,11 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasPurpose
             alias_target_id:
-              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasTargetId
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -5540,7 +5691,8 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+              $ref: >-
+                #/components/schemas/TimestampOverrideFallbackDisabled
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -5586,9 +5738,11 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasPurpose
             alias_target_id:
-              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasTargetId
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -5668,7 +5822,8 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+              $ref: >-
+                #/components/schemas/TimestampOverrideFallbackDisabled
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -5696,9 +5851,11 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasPurpose
             alias_target_id:
-              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasTargetId
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -5784,7 +5941,8 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+              $ref: >-
+                #/components/schemas/TimestampOverrideFallbackDisabled
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             type:
@@ -5827,9 +5985,11 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasPurpose
             alias_target_id:
-              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasTargetId
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -5911,7 +6071,8 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+              $ref: >-
+                #/components/schemas/TimestampOverrideFallbackDisabled
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -5983,9 +6144,12 @@ components:
         - createdAt
         - enabled
         - execution_summary.last_execution.date
-        - execution_summary.last_execution.metrics.execution_gap_duration_s
-        - execution_summary.last_execution.metrics.total_indexing_duration_ms
-        - execution_summary.last_execution.metrics.total_search_duration_ms
+        - >-
+          execution_summary.last_execution.metrics.execution_gap_duration_s
+        - >-
+          execution_summary.last_execution.metrics.total_indexing_duration_ms
+        - >-
+          execution_summary.last_execution.metrics.total_search_duration_ms
         - execution_summary.last_execution.status
         - name
         - risk_score
@@ -6094,7 +6258,8 @@ components:
         - lucene
       type: string
     MachineLearningJobId:
-      description: Machine learning job ID(s) the rule monitors for anomaly scores.
+      description: >-
+        Machine learning job ID(s) the rule monitors for anomaly scores.
       oneOf:
         - type: string
         - items:
@@ -6113,9 +6278,11 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasPurpose
             alias_target_id:
-              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasTargetId
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -6193,7 +6360,8 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+              $ref: >-
+                #/components/schemas/TimestampOverrideFallbackDisabled
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -6239,9 +6407,11 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasPurpose
             alias_target_id:
-              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasTargetId
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -6321,7 +6491,8 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+              $ref: >-
+                #/components/schemas/TimestampOverrideFallbackDisabled
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -6363,9 +6534,11 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasPurpose
             alias_target_id:
-              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasTargetId
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -6447,7 +6620,8 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+              $ref: >-
+                #/components/schemas/TimestampOverrideFallbackDisabled
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -6485,9 +6659,11 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasPurpose
             alias_target_id:
-              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasTargetId
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -6569,7 +6745,8 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+              $ref: >-
+                #/components/schemas/TimestampOverrideFallbackDisabled
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -6705,9 +6882,11 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasPurpose
             alias_target_id:
-              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasTargetId
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -6785,7 +6964,8 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+              $ref: >-
+                #/components/schemas/TimestampOverrideFallbackDisabled
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -6832,9 +7012,11 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasPurpose
             alias_target_id:
-              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasTargetId
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -6914,7 +7096,8 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+              $ref: >-
+                #/components/schemas/TimestampOverrideFallbackDisabled
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -6970,9 +7153,11 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasPurpose
             alias_target_id:
-              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasTargetId
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -7054,7 +7239,8 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+              $ref: >-
+                #/components/schemas/TimestampOverrideFallbackDisabled
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -7101,9 +7287,11 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasPurpose
             alias_target_id:
-              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasTargetId
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -7185,7 +7373,8 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+              $ref: >-
+                #/components/schemas/TimestampOverrideFallbackDisabled
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -7389,9 +7578,11 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasPurpose
             alias_target_id:
-              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasTargetId
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -7469,7 +7660,8 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+              $ref: >-
+                #/components/schemas/TimestampOverrideFallbackDisabled
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -7516,9 +7708,11 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasPurpose
             alias_target_id:
-              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasTargetId
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -7598,7 +7792,8 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+              $ref: >-
+                #/components/schemas/TimestampOverrideFallbackDisabled
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -7652,9 +7847,11 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasPurpose
             alias_target_id:
-              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasTargetId
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -7736,7 +7933,8 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+              $ref: >-
+                #/components/schemas/TimestampOverrideFallbackDisabled
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -7777,9 +7975,11 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasPurpose
             alias_target_id:
-              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasTargetId
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -7861,7 +8061,8 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+              $ref: >-
+                #/components/schemas/TimestampOverrideFallbackDisabled
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -8056,12 +8257,14 @@ components:
       minimum: 0
       type: integer
     RiskScoreMapping:
-      description: Overrides generated alerts' risk_score with a value from the source event
+      description: >-
+        Overrides generated alerts' risk_score with a value from the source event
       items:
         type: object
         properties:
           field:
-            description: Source event field used to override the default `risk_score`.
+            description: >-
+              Source event field used to override the default `risk_score`.
             type: string
           operator:
             enum:
@@ -8153,7 +8356,8 @@ components:
         - notifyWhen
         - throttle
     RuleActionGroup:
-      description: Optionally groups actions by use cases. Use `default` for alert
+      description: >-
+        Optionally groups actions by use cases. Use `default` for alert
         notifications.
       type: string
     RuleActionId:
@@ -8267,7 +8471,8 @@ components:
           minLength: 1
           type: string
         namespace_type:
-          description: Determines the exceptions validity in rule's Kibana space
+          description: >-
+            Determines the exceptions validity in rule's Kibana space
           enum:
             - agnostic
             - single
@@ -8311,7 +8516,9 @@ components:
           type: object
           properties:
             type:
-              description: The type of reason for the gap (rule_disabled or rule_did_not_run)
+              description: >-
+                The type of reason for the gap (rule_disabled or
+                rule_did_not_run)
               enum:
                 - rule_disabled
                 - rule_did_not_run
@@ -8319,12 +8526,14 @@ components:
           required:
             - type
         total_enrichment_duration_ms:
-          description: Total time spent enriching documents during current rule execution
+          description: >-
+            Total time spent enriching documents during current rule execution
             cycle
           minimum: 0
           type: integer
         total_indexing_duration_ms:
-          description: Total time spent indexing documents during current rule execution
+          description: >-
+            Total time spent indexing documents during current rule execution
             cycle
           minimum: 0
           type: integer
@@ -8608,7 +8817,8 @@ components:
         scriptInput:
           type: string
         timeout:
-          description: Specify the timeout in seconds for the script execution
+          description: >-
+            Specify the timeout in seconds for the script execution
           example: 60
           type: integer
     RunscriptParams:
@@ -8668,9 +8878,11 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasPurpose
             alias_target_id:
-              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasTargetId
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -8748,7 +8960,8 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+              $ref: >-
+                #/components/schemas/TimestampOverrideFallbackDisabled
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -8795,9 +9008,11 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasPurpose
             alias_target_id:
-              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasTargetId
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -8877,7 +9092,8 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+              $ref: >-
+                #/components/schemas/TimestampOverrideFallbackDisabled
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -8931,9 +9147,11 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasPurpose
             alias_target_id:
-              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasTargetId
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -9015,7 +9233,8 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+              $ref: >-
+                #/components/schemas/TimestampOverrideFallbackDisabled
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -9056,9 +9275,11 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasPurpose
             alias_target_id:
-              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasTargetId
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -9140,7 +9361,8 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+              $ref: >-
+                #/components/schemas/TimestampOverrideFallbackDisabled
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -9254,12 +9476,14 @@ components:
         - critical
       type: string
     SeverityMapping:
-      description: Overrides generated alerts' severity with values from the source event
+      description: >-
+        Overrides generated alerts' severity with values from the source event
       items:
         type: object
         properties:
           field:
-            description: Source event field used to override the default `severity`.
+            description: >-
+              Source event field used to override the default `severity`.
             type: string
           operator:
             enum:
@@ -9309,7 +9533,8 @@ components:
         tactic:
           $ref: '#/components/schemas/ThreatTactic'
         technique:
-          description: Array containing information on the attack techniques (optional)
+          description: >-
+            Array containing information on the attack techniques (optional)
           items:
             $ref: '#/components/schemas/ThreatTechnique'
           type: array
@@ -9327,12 +9552,14 @@ components:
           Elasticsearch index containing the threat values
       type: array
     ThreatIndex:
-      description: Elasticsearch indices used to check which field values generate alerts.
+      description: >-
+        Elasticsearch indices used to check which field values generate alerts.
       items:
         type: string
       type: array
     ThreatIndicatorPath:
-      description: Defines the path to the threat indicator in the indicator documents
+      description: >-
+        Defines the path to the threat indicator in the indicator documents
         (optional)
       type: string
     ThreatMapping:
@@ -9384,9 +9611,11 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasPurpose
             alias_target_id:
-              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasTargetId
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -9464,7 +9693,8 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+              $ref: >-
+                #/components/schemas/TimestampOverrideFallbackDisabled
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -9511,9 +9741,11 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasPurpose
             alias_target_id:
-              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasTargetId
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -9593,7 +9825,8 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+              $ref: >-
+                #/components/schemas/TimestampOverrideFallbackDisabled
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -9663,9 +9896,11 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasPurpose
             alias_target_id:
-              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasTargetId
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -9747,7 +9982,8 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+              $ref: >-
+                #/components/schemas/TimestampOverrideFallbackDisabled
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -9797,9 +10033,11 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasPurpose
             alias_target_id:
-              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasTargetId
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -9881,7 +10119,8 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+              $ref: >-
+                #/components/schemas/TimestampOverrideFallbackDisabled
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -9979,7 +10218,8 @@ components:
         type: object
         properties:
           field:
-            description: The field on which to calculate and compare the cardinality.
+            description: >-
+              The field on which to calculate and compare the cardinality.
             type: string
           value:
             description: >-
@@ -10015,9 +10255,11 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasPurpose
             alias_target_id:
-              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasTargetId
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -10095,7 +10337,8 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+              $ref: >-
+                #/components/schemas/TimestampOverrideFallbackDisabled
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -10142,9 +10385,11 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasPurpose
             alias_target_id:
-              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasTargetId
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -10224,7 +10469,8 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+              $ref: >-
+                #/components/schemas/TimestampOverrideFallbackDisabled
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -10280,9 +10526,11 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasPurpose
             alias_target_id:
-              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasTargetId
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -10364,7 +10612,8 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+              $ref: >-
+                #/components/schemas/TimestampOverrideFallbackDisabled
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -10408,9 +10657,11 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasPurpose
             alias_target_id:
-              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
+              $ref: >-
+                #/components/schemas/SavedObjectResolveAliasTargetId
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -10492,7 +10743,8 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+              $ref: >-
+                #/components/schemas/TimestampOverrideFallbackDisabled
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
