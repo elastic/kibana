@@ -77,7 +77,7 @@ pageLoadAssetSize:
   filesManagement: 5208
   fileUpload: 22957
   fleet: 209495
-  genAiSettings: 5663
+  genAiSettings: 6400
   globalSearch: 6890
   globalSearchBar: 26122
   globalSearchProviders: 4646
@@ -102,7 +102,7 @@ pageLoadAssetSize:
   kibanaUtils: 54161
   kql: 15428
   kubernetesSecurity: 6807
-  lens: 86000
+  lens: 90000
   licenseManagement: 8265
   licensing: 10073
   links: 8620
@@ -162,7 +162,7 @@ pageLoadAssetSize:
   searchQueryRules: 6689
   searchSynonyms: 6371
   security: 79627
-  securitySolution: 157027
+  securitySolution: 160000
   securitySolutionEss: 38689
   securitySolutionServerless: 52082
   serverless: 7412
@@ -176,7 +176,7 @@ pageLoadAssetSize:
   spaces: 28871
   stackAlerts: 31499
   stackConnectors: 85421
-  streams: 14000
+  streams: 15434
   streamsApp: 25375
   synthetics: 31571
   telemetry: 25755
