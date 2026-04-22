@@ -284,6 +284,18 @@
         },
         "type": "nested"
       },
+      "snoozedInstances": {
+        "properties": {
+          "instanceId": {
+            "type": "keyword"
+          },
+          "snoozeSnapshot": {
+            "dynamic": false,
+            "type": "object"
+          }
+        },
+        "type": "nested"
+      },
       "tags": {
         "type": "keyword"
       },
@@ -4944,6 +4956,16 @@
       },
       "name": {
         "type": "text"
+      },
+      "range": {
+        "properties": {
+          "end": {
+            "type": "keyword"
+          },
+          "start": {
+            "type": "keyword"
+          }
+        }
       },
       "type": {
         "type": "keyword"
