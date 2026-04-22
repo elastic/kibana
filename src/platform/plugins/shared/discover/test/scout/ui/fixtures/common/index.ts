@@ -16,5 +16,4 @@ export {
   expandGridCell,
   setChartInterval,
   toggleColumnInDocViewer,
-  waitForDiscoverToSettle,
 } from './page_helpers';

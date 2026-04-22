@@ -13,7 +13,8 @@
 
 import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { testData, waitForDiscoverToSettle } from '../../fixtures/common';
+import type { ScoutPage } from '@kbn/scout';
+import { testData } from '../../fixtures/common';
 
 const NARROWED_TIME_RANGE = {
   from: 'Sep 20, 2015 @ 23:00:00.000',
@@ -22,10 +23,7 @@ const NARROWED_TIME_RANGE = {
 
 const EXTRA_COLUMNS = ['phpmemory', 'ip'];
 
-const addColumnFromSidebar = async (
-  page: Parameters<typeof waitForDiscoverToSettle>[0],
-  column: string
-) => {
+const addColumnFromSidebar = async (page: ScoutPage, column: string) => {
   await page.testSubj.fill('fieldListFiltersFieldSearch', column);
   await page.testSubj.click(`fieldToggle-${column}`);
 };
@@ -39,11 +37,11 @@ spaceTest.describe('Discover data grid - doc table', { tag: testData.DISCOVER_CO
     await scoutSpace.uiSettings.set({ 'discover:rowHeightOption': 0 });
   });
 
-  spaceTest.beforeEach(async ({ browserAuth, page, pageObjects }) => {
+  spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
     // Viewer is sufficient for read-only grid interactions.
     await browserAuth.loginAsViewer();
     await pageObjects.discover.goto();
-    await waitForDiscoverToSettle(page);
+    await pageObjects.discover.waitUntilSearchingHasFinished();
   });
 
   spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -67,7 +65,7 @@ spaceTest.describe('Discover data grid - doc table', { tag: testData.DISCOVER_CO
     expect(initialCount).toBeGreaterThan(0);
 
     await pageObjects.datePicker.setAbsoluteRange(NARROWED_TIME_RANGE);
-    await waitForDiscoverToSettle(page);
+    await pageObjects.discover.waitUntilSearchingHasFinished();
 
     const finalCount = await rows.count();
     expect(finalCount).toBeLessThan(initialCount);
@@ -77,7 +75,7 @@ spaceTest.describe('Discover data grid - doc table', { tag: testData.DISCOVER_CO
     for (const column of EXTRA_COLUMNS) {
       await addColumnFromSidebar(page, column);
     }
-    await waitForDiscoverToSettle(page);
+    await pageObjects.discover.waitUntilSearchingHasFinished();
 
     for (const column of EXTRA_COLUMNS) {
       await expect(
@@ -92,12 +90,12 @@ spaceTest.describe('Discover data grid - doc table', { tag: testData.DISCOVER_CO
     for (const column of EXTRA_COLUMNS) {
       await addColumnFromSidebar(page, column);
     }
-    await waitForDiscoverToSettle(page);
+    await pageObjects.discover.waitUntilSearchingHasFinished();
 
     const [firstColumn, secondColumn] = EXTRA_COLUMNS;
     await page.testSubj.fill('fieldListFiltersFieldSearch', secondColumn);
     await page.testSubj.click(`fieldToggle-${secondColumn}`);
-    await waitForDiscoverToSettle(page);
+    await pageObjects.discover.waitUntilSearchingHasFinished();
 
     await expect(pageObjects.discover.getColumnHeader(secondColumn)).toBeHidden();
     await expect(pageObjects.discover.getColumnHeader(firstColumn)).toBeVisible();

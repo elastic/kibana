@@ -178,9 +178,21 @@ export class DiscoverApp {
   }
 
   async waitUntilSearchingHasFinished() {
+    // Give the grid-updating indicator a brief window to appear. Without this,
+    // `waitForSelector({ state: 'hidden' })` returns immediately when the
+    // indicator hasn't yet mounted — callers would then observe pre-search
+    // state (e.g. request-count assertions reading 0 before the search fires).
+    try {
+      await this.page.testSubj.waitForSelector('discoverDataGridUpdating', {
+        state: 'visible',
+        timeout: 2_000,
+      });
+    } catch {
+      // Indicator never appeared — assume nothing was in flight.
+    }
     await this.page.testSubj.waitForSelector('discoverDataGridUpdating', {
       state: 'hidden',
-      timeout: 30000,
+      timeout: 30_000,
     });
   }
 

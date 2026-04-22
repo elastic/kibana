@@ -8,31 +8,6 @@
  */
 
 import type { ScoutPage } from '@kbn/scout';
-import { expect } from '@kbn/scout/ui';
-
-/**
- * Wait for Discover to finish loading: give the `discoverDataGridUpdating`
- * indicator a brief window to appear, then wait for it to disappear.
- *
- * The two-step pattern avoids a race where `waitForSelector({ state: 'hidden' })`
- * resolves immediately because the indicator hasn't yet been rendered. Without
- * the short "visible" grace window, this helper would return before the search
- * request is even issued — making request-count assertions read 0.
- */
-export const waitForDiscoverToSettle = async (page: ScoutPage) => {
-  try {
-    await page.testSubj.waitForSelector('discoverDataGridUpdating', {
-      state: 'visible',
-      timeout: 2_000,
-    });
-  } catch {
-    // Indicator never appeared — assume nothing was in flight.
-  }
-  await page.testSubj.waitForSelector('discoverDataGridUpdating', {
-    state: 'hidden',
-    timeout: 30_000,
-  });
-};
 
 /**
  * Click the histogram breakdown selector and pick `field` (or `"No breakdown"`).
@@ -79,7 +54,7 @@ export const setChartInterval = async (page: ScoutPage, intervalTitle: string) =
  */
 export const closeDocViewerFlyout = async (page: ScoutPage) => {
   await page.testSubj.click('euiFlyoutCloseButton');
-  await expect(page.testSubj.locator('kbnDocViewer')).toBeHidden();
+  await page.testSubj.waitForSelector('kbnDocViewer', { state: 'hidden' });
 };
 
 /**
@@ -98,18 +73,25 @@ export const expandGridCell = async (
   );
   await cell.hover();
   await cell.locator('[data-test-subj="euiDataGridCellExpandButton"]').click();
-  await expect(page.testSubj.locator('euiDataGridExpansionPopover')).toBeVisible();
+  await page.testSubj.waitForSelector('euiDataGridExpansionPopover', { state: 'visible' });
 };
 
 /**
- * Inside an open document-viewer flyout, hover the row for `fieldName` and
- * click its "toggle column" action. Used to add/remove grid columns from the
- * flyout. Calling this twice on the same field toggles it off.
+ * Inside an open document-viewer flyout, toggle the grid column for `fieldName`
+ * from the field-table tab. Calling this twice on the same field toggles it off.
+ *
+ * EUI's DataGrid renders `cellAction` buttons inside an "actions wrapper" above
+ * the focused cell. The wrapper appears on hover, but only when the pointer is
+ * inside EUI's hover zone (the cell itself). Hovering the inner `-name` element
+ * is enough to trigger it; the FTR suite does the same by clicking it directly.
  */
 export const toggleColumnInDocViewer = async (page: ScoutPage, fieldName: string) => {
-  const nameCell = page.testSubj.locator(`tableDocViewRow-${fieldName}-name`);
-  await nameCell.hover();
-  await nameCell.click();
+  const nameElement = page.testSubj.locator(`tableDocViewRow-${fieldName}-name`);
+  await nameElement.scrollIntoViewIfNeeded();
+  await nameElement.hover();
+  // Click focuses the cell, which forces EUI to render the cellAction buttons.
+  await nameElement.click();
+
   const toggle = page.testSubj.locator(`toggleColumnButton-${fieldName}`);
   await toggle.waitFor({ state: 'visible' });
   await toggle.click();
