@@ -50,9 +50,9 @@ export const ScheduledExecutionMetadata = z.object({
    */
   timestamp: z.string().optional(),
   /**
-   * Interval in seconds from the pack saved object query definition. Present only when
-   * the resultCountsEnabled experimental feature is enabled and the pack query defines an interval.
-   */
+      * Interval in seconds from the pack saved object query definition. Present only when the resultCountsEnabled experimental feature is enabled and the pack query defines an interval.
+
+      */
   queryInterval: z.number().int().optional(),
 });
 
