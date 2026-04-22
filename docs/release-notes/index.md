@@ -36,13 +36,26 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Adds additional workflow steps [#256922]({{kib-pull}}256922).
 * Alert deletion is now generally available [#247465]({{kib-pull}}247465).
 
+**Elastic Agent Builder**:
+* Updates Test tool flyout to support datetime picker [#249549]({{kib-pull}}249549).
+* Simplifies the {{esql}} test tool parameter types [#249855]({{kib-pull}}249855).
+* Exposes `configuration_overrides` in `agent_builder/converse` API [#249256]({{kib-pull}}249256).
+* Adds support for array parameter types in {{esql}} tools [#250386]({{kib-pull}}250386).
+* Migrates the flyout to a sidebar [#252918]({{kib-pull}}252918).
+* Adds server-side support for user-created skills in Agent Builder [#252493]({{kib-pull}}252493).
+* Adds agent and tools RBAC sub features [#254464]({{kib-pull}}254464).
+* Agent Builder's default agent is no longer read-only and can now be customized per Kibana space [#256333]({{kib-pull}}256333).
+* Adds user-created skills to Agent Builder [#252221]({{kib-pull}}252221).
+* Allows Agent Builder to detect outdated attachments and lets users refresh them into the next message [#257658]({{kib-pull}}257658).
+* Allows {{esql}} generation to search index patterns [#253492]({{kib-pull}}253492).
+
 **Connectivity**:
 * Adds the `region` implementation to the Bedrock Connector [#252960]({{kib-pull}}252960).
 * Adds the `region` parameter to the Bedrock Connector schema [#252956]({{kib-pull}}252956).
 
 **Dashboards and Visualizations**:
 % main features
-* A new Dashboard skill is now available in Agent Builder. This skill allows you to create and update dashboards through natural language [chat](/explore-analyze/ai-features/agent-builder/chat.md), using the chat UI in {{product.kibana}}, the [Chat API](/explore-analyze/ai-features/agent-builder/kibana-api.md), or the [MCP server](/explore-analyze/ai-features/agent-builder/mcp-server.md). Describe what you want to visualize and the agent builds a dashboard with [{{esql}}](/explore-analyze/query-filter/languages/esql-kibana.md)-powered visualizations. [#261530]({{kib-pull}}261530).
+* A new Dashboard skill is now available in Agent Builder. This skill allows you to create and update dashboards through natural language [chat](docs-content://explore-analyze/ai-features/agent-builder/chat.md), using the chat UI in {{product.kibana}}, the [Chat API](docs-content://explore-analyze/ai-features/agent-builder/kibana-api.md), or the [MCP server](docs-content://explore-analyze/ai-features/agent-builder/mcp-server.md). Describe what you want to visualize and the agent builds a dashboard with [{{esql}}](docs-content://explore-analyze/query-filter/languages/esql-kibana.md)-powered visualizations. [#261530]({{kib-pull}}261530).
 * New API endpoints are now available in technical preview to manage your dashboards and visulization library. The Dashboards API gives you full read and write access to dashboards, including their panels, controls, sections, and display options. The Visualizations API lets you create and manage visualizations as standalone saved objects in the {{product.kibana}} Visualizations library. [#256302]({{kib-pull}}256302).
 * Adds the ability to show and export Dashboard API JSON in a flyout [#255382]({{kib-pull}}255382).
 
@@ -243,7 +256,6 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Enables OAuth on Google connectors [#259528]({{kib-pull}}259528).
 * Creates an initialization endpoint and migrates the list index creation flow [#258891]({{kib-pull}}258891).
 * Adds import and export features for workflows [#257976]({{kib-pull}}257976).
-* Allows Agent Builder to detect outdated attachments and lets users refresh them into the next message [#257658]({{kib-pull}}257658).
 * Adds the `workflows.executionFailed` trigger so you can run workflows when another workflow fails. Use it to send notifications (e.g., Slack), run cleanup, or trigger retries [#257633]({{kib-pull}}257633).
 * Adds leads cards, flyouts, and Agent Builder integration [#257610]({{kib-pull}}257610).
 * Adds Confluence Cloud as a data source for Workplace AI. Users can connect to Confluence Cloud (REST API v2) with Basic auth and use agent tools to list and retrieve spaces and pages [#256508]({{kib-pull}}256508).
@@ -254,15 +266,12 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Adds a Zendesk data source [#254739]({{kib-pull}}254739).
 * Adds a server-side workflow validation endpoint [#254502]({{kib-pull}}254502).
 * Adds a connector for Amazon S3 list and get file from bucket [#253753]({{kib-pull}}253753).
-* Allows {{esql}} generation to search index patterns [#253492]({{kib-pull}}253492).
 * Makes the manual run API public [#253010]({{kib-pull}}253010).
 * Adds a Slack data source for Workplace AI [#252972]({{kib-pull}}252972).
-* Migrates the flyout to a sidebar [#252918]({{kib-pull}}252918).
 * Adds a Google Calendar connector [#252740]({{kib-pull}}252740).
 * Adds a Tavily data source [#252717]({{kib-pull}}252717).
 * Adds agent pre-execution workflows [#252452]({{kib-pull}}252452).
 * Adds ServiceNow: Search connector for searching across records and knowledge bases [#252430]({{kib-pull}}252430).
-* Adds user-created skills to Agent Builder [#252221]({{kib-pull}}252221).
 * Whitelists Streams APIs as Kibana workflow steps [#252068]({{kib-pull}}252068).
 * Adds SharePoint Online data source and workflows [#251544]({{kib-pull}}251544).
 * Adds a Jira Cloud datasource [#251345]({{kib-pull}}251345).
@@ -277,20 +286,13 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Updates OAS docs for Alerting create rule route [#260497]({{kib-pull}}260497).
 * Adds **Default model** and **Disallow all other models** settings to the **Model Settings** page [#259932]({{kib-pull}}259932).
 * Adds the `entries` Liquid filter for iterating over object keys [#259249]({{kib-pull}}259249).
-* Agent Builder's default agent is no longer read-only and can now be customized per Kibana space [#256333]({{kib-pull}}256333).
 * Improves the badge style for metrics trends [#256255]({{kib-pull}}256255).
 * Improves the legend UI by showing actions on hover [#255616]({{kib-pull}}255616).
 * Removes the font-weight parameter for Metric chart titles. Titles now use a consistent default font weight of Medium [#254941]({{kib-pull}}254941).
 * Updates axis title and labels colors in Lens and dashboard [#254587]({{kib-pull}}254587).
-* Adds agent and tools RBAC sub features [#254464]({{kib-pull}}254464).
 * Respects `observability:enableInspectEsQueries` in Hosts UI [#253618]({{kib-pull}}253618).
-* Adds server-side support for user-created skills in Agent Builder [#252493]({{kib-pull}}252493).
 * Adds audit logging for agent and tool actions [#252143]({{kib-pull}}252143).
 * Reduces output tokens in the `get_anomaly_detection_jobs` tool [#251415]({{kib-pull}}251415).
-* Adds support for array parameter types in {{esql}} tools [#250386]({{kib-pull}}250386).
-* Simplifies the {{esql}} test tool parameter types [#249855]({{kib-pull}}249855).
-* Updates Test tool flyout to support datetime picker [#249549]({{kib-pull}}249549).
-* Exposes `configuration_overrides` in `agent_builder/converse` API [#249256]({{kib-pull}}249256).
 * Adds **Steps** configuration options for infrastructure inventory metrics [#248360]({{kib-pull}}248360).
 
 ### Fixes [kibana-9.4.0-fixes]
@@ -504,16 +506,23 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Fixes **Show API key** button aria-label not updating to **Hide API key** when toggled for accessibility [#247982]({{kib-pull}}247982).
 * Fixes the token count display showing "NaN" in Search Playground [#246589]({{kib-pull}}246589).
 
+**Elastic Agent Builder**:
+* Fixes an EIS OpenAI GPT-OSS 120B reasoning error [#248943]({{kib-pull}}248943).
+* Fixes the server-side search in the user prompts API [#250882]({{kib-pull}}250882).
+* Fixes Agent Builder index search support for special text fields `match_only_text` and `pattern_text` [#252082]({{kib-pull}}252082).
+* Propagates connector API errors [#252372]({{kib-pull}}252372).
+* Fixes a UI bug with the workflow tool type [#252563]({{kib-pull}}252563).
+* Fixes workflow tools: choice parameters accepted invalid inputs [#259282]({{kib-pull}}259282).
+* Adds RBAC checks to new Agentic pages [#261895]({{kib-pull}}261895).
+* Fixes a bug with resetting of agent id [#263044]({{kib-pull}}263044).
+* Upgrades hono and @hono/node-server dependency [#263794]({{kib-pull}}263794).
+
 **Workflows**:
 * Renders an inline attachment loading skeleton during streaming [#264408]({{kib-pull}}264408).
 * Fixes connector step icons falling back to plugs in workflow list [#263880]({{kib-pull}}263880).
-* Upgrades hono and @hono/node-server dependency [#263794]({{kib-pull}}263794).
-* Fixes a bug with resetting of agent id [#263044]({{kib-pull}}263044).
 * Fixes the preview time picker not updating on chart brush [#262112]({{kib-pull}}262112).
-* Adds RBAC checks to new Agentic pages [#261895]({{kib-pull}}261895).
 * Fixes **Failed to check if maintenance windows are active** error [#261048]({{kib-pull}}261048).
 * Fixes `defaultModel` not injected for **Other** OpenAI provider on run/test subActions in OpenAI connector [#260747]({{kib-pull}}260747).
-* Fixes workflow tools: choice parameters accepted invalid inputs [#259282]({{kib-pull}}259282).
 * Adds input text sanitization [#259262]({{kib-pull}}259262).
 * Adds attachment origin to Converse API. Converse accepts optional `origin` on attachments for by-reference flows and rejects attachments with neither `data` nor `origin` [#259043]({{kib-pull}}259043).
 * Supports Logs AI Insight in {{esql}} mode in Discover [#258595]({{kib-pull}}258595).
@@ -543,16 +552,11 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Fixes the create new tool page when switching types [#252811]({{kib-pull}}252811).
 * Prevents table sorting when toggling the workflow enable state [#252724]({{kib-pull}}252724).
 * Strips system-managed date fields from ingest pipelines before PUT [#252579]({{kib-pull}}252579).
-* Fixes a UI bug with the workflow tool type [#252563]({{kib-pull}}252563).
-* Propagates connector API errors [#252372]({{kib-pull}}252372).
 * Fixes Entity Store Install API parameter validations [#252366]({{kib-pull}}252366).
-* Fixes Agent Builder index search support for special text fields `match_only_text` and `pattern_text` [#252082]({{kib-pull}}252082).
 * Fixes {{esql}} test tool failing when the numerical value is zero [#251901]({{kib-pull}}251901).
-* Fixes the server-side search in the user prompts API [#250882]({{kib-pull}}250882).
 * Fixes the monitoring breadcrumbs for the solution view [#249751]({{kib-pull}}249751).
 * Makes static-lookup formatter work with aggregated boolean fields [#249311]({{kib-pull}}249311).
 * Adds the datasource name to the namespace [#249123]({{kib-pull}}249123).
-* Fixes an EIS OpenAI GPT-OSS 120B reasoning error [#248943]({{kib-pull}}248943).
 * Adds a check to ensure {{esql}} is valid before matching the Metrics profile [#248917]({{kib-pull}}248917).
 * Prevents cloned managed ILM policies from being marked as managed [#248586]({{kib-pull}}248586).
 * Fixes a bug where Agent Builder Index Search tools would fail on aliases that contained `semantic_text` fields [#247877]({{kib-pull}}247877).
