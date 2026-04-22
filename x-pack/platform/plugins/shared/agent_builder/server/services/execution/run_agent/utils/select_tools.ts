@@ -157,7 +157,7 @@ const createVersionedAttachmentTools = ({
 /**
  * Converts a builtin attachment tool to an executable tool that runs through the runner.
  */
-const builtinToolToExecutable = ({
+export const builtinToolToExecutable = ({
   tool,
   runner,
 }: {
