@@ -9,6 +9,7 @@ import { TypeOf } from '@kbn/config-schema';
 import {
   AGENT_POLICY_API_ROUTES,
   CreateAgentPolicyResponse,
+  GetInfoResponse,
   EPM_API_ROUTES,
   PACKAGE_POLICY_API_ROUTES,
 } from '@kbn/fleet-plugin/common';
