@@ -26,15 +26,24 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { json } from 'node:stream/consumers';
 
 /**
- * Matches `-f|-F|--field|--raw-field (space|=)[quote?]event=...[quote?]` flag
- * pairs in a `gh api` invocation. Covers all four flag names, both
- * separators, and shell-quoted values like `-f 'event=APPROVE'` or
- * `--field="event=APPROVE"` so a silent-publish bypass via quoting is
- * impossible. The value match stops at whitespace or a closing quote so
- * malformed input cannot swallow adjacent tokens.
+ * Matches `-f|-F|--field|--raw-field (space|=)…event=…` flag pairs in a
+ * `gh api` invocation. Covers all four flag names, both separators, and
+ * every common shell-quoting shape so a silent-publish bypass via quoting
+ * is impossible:
+ *
+ *   -f event=APPROVE               (bare)
+ *   -f event='APPROVE'             (value single-quoted)
+ *   -f event="APPROVE"             (value double-quoted)
+ *   -f 'event=APPROVE'             (whole pair single-quoted)
+ *   -f "event=APPROVE"             (whole pair double-quoted)
+ *   --field=event='APPROVE'        (ditto with `=` separator)
+ *
+ * Alternation order matters: the value-quoted branches are tried before
+ * the unquoted `[^\s'"]*` branch so a zero-length empty match does not win
+ * and leave the quoted value dangling in the rewritten command.
  */
 const eventFlag =
-  /\s(?:-[fF]\s+|--(?:raw-)?field(?:=|\s+))['"]?event=[^\s'"]*['"]?/g;
+  /\s(?:-[fF]\s+|--(?:raw-)?field(?:=|\s+))(?:event=(?:"[^"]*"|'[^']*'|[^\s'"]*)|['"]event=[^\s'"]*['"])/g;
 
 /**
  * Captures the `--input` value (space- or `=`-separated, double-quoted,
