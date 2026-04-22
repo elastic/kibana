@@ -6,8 +6,8 @@
  */
 
 import type { BaseMessageLike } from '@langchain/core/messages';
+import { cleanPrompt } from '@kbn/agent-builder-esql-utils/prompts';
 import type { SearchTarget } from './types';
-import { cleanPrompt } from '../../prompts';
 
 import {
   naturalLanguageSearchToolName as nlTool,
