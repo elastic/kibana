@@ -17,6 +17,7 @@ project:
   owner: '@elastic/obs-presentation-team'
   sourceRoot: x-pack/solutions/observability/plugins/apm
 dependsOn:
+  - '@kbn/apm-embeddable-common'
   - '@kbn/core'
   - '@kbn/data-plugin'
   - '@kbn/embeddable-plugin'

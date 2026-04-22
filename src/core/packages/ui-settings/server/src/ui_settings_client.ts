@@ -41,8 +41,14 @@ export interface IUiSettingsClient {
   getAll: <T = any>(context?: GetUiSettingsContext) => Promise<Record<string, T>>;
   /**
    * Retrieves a set of all uiSettings values set by the user.
+   *
+   * bypassCache - if true, forces retrieval of user-provided values from the source (e.g. elasticsearch) instead of cache. This is useful in scenarios where we know the cache may be stale and want to ensure we have the latest values, such as during a full page reload. In typical usage, this would be false to take advantage of caching for performance.
+   *
+   * Note: When bypassCache is true, the cache will be eventually be freshened with new values, but other concurrent requests will keep using the existing entry if it exists. This allows for a faster fallback in cases where the cache is stale but still available. This behavior differs from what occurs during a usual cache miss, where the first request would trigger a fetch and populate the cache, while subsequent requests would wait for that fetch to complete and then use the updated cache.
    */
-  getUserProvided: <T = any>() => Promise<Record<string, UserProvidedValues<T>>>;
+  getUserProvided: <T = any>(
+    bypassCache?: boolean
+  ) => Promise<Record<string, UserProvidedValues<T>>>;
   /**
    * Writes multiple uiSettings values and marks them as set by the user.
    */

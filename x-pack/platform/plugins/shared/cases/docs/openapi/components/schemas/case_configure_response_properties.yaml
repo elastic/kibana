@@ -44,6 +44,20 @@ mappings:
       target:
         type: string
         example: summary
+observableTypes:
+  type: array
+  description: Custom observable type configuration details.
+  items:
+    type: object
+    properties:
+      key:
+        type: string
+        description: The observable type key.
+        example: d312efda-ec2b-42ec-9e2c-84981795c581
+      label:
+        type: string
+        description: The observable type label.
+        example: My observable type
 owner:
   $ref: 'owner.yaml'
 templates:
