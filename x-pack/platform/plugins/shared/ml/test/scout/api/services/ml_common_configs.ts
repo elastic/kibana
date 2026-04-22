@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-// Pattern A allows relative imports into common/ from test/scout/**/*
-import type { Job } from '../../../../common/types/anomaly_detection_jobs/job';
-import type { Datafeed } from '../../../../common/types/anomaly_detection_jobs/datafeed';
+import type { estypes } from '@elastic/elasticsearch';
 
 /**
  * Returns a single-metric AD job config for the farequote dataset.
  * Source: FTR x-pack/platform/test/api_integration/services/ml/common_config.ts (FQ_SM_JOB_CONFIG)
  */
-export const getADFqSingleMetricJobConfig = (jobId: string): Partial<Job> => ({
+export const getADFqSingleMetricJobConfig = (jobId: string): Partial<estypes.MlJob> => ({
   job_id: jobId,
   description: 'mean(responsetime) on farequote dataset with 15m bucket span',
   groups: ['farequote', 'automated', 'single-metric'],
@@ -31,7 +29,7 @@ export const getADFqSingleMetricJobConfig = (jobId: string): Partial<Job> => ({
  * Returns a multi-metric AD job config for the farequote dataset.
  * Source: FTR x-pack/platform/test/api_integration/services/ml/common_config.ts (FQ_MM_JOB_CONFIG)
  */
-export const getADFqMultiMetricJobConfig = (jobId: string): Partial<Job> => ({
+export const getADFqMultiMetricJobConfig = (jobId: string): Partial<estypes.MlJob> => ({
   job_id: jobId,
   description:
     'mean/min/max(responsetime) partition=airline on farequote dataset with 1h bucket span',
@@ -54,7 +52,7 @@ export const getADFqMultiMetricJobConfig = (jobId: string): Partial<Job> => ({
  * Returns a datafeed config targeting the ft_farequote index for the given AD job.
  * Source: FTR x-pack/platform/test/api_integration/services/ml/common_config.ts (FQ_DATAFEED_CONFIG)
  */
-export const getADFqDatafeedConfig = (jobId: string): Partial<Datafeed> => ({
+export const getADFqDatafeedConfig = (jobId: string): Partial<estypes.MlDatafeed> => ({
   datafeed_id: `datafeed-${jobId}`,
   job_id: jobId,
   indices: ['ft_farequote'],

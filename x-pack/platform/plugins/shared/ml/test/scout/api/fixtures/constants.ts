@@ -8,24 +8,22 @@
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { KibanaRole } from '@kbn/scout';
 
-// Headers for internal ML endpoints (elastic-api-version: '1')
-export const INTERNAL_API_HEADERS = {
+// Base headers required by all ML API calls
+export const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
   'x-elastic-internal-origin': 'kibana',
+} as const;
+
+// Headers for internal ML endpoints (elastic-api-version: '1')
+export const INTERNAL_API_HEADERS = {
+  ...COMMON_HEADERS,
   [ELASTIC_HTTP_VERSION_HEADER]: '1',
 } as const;
 
 // Headers for public ML endpoints (elastic-api-version: '2023-10-31')
 export const PUBLIC_API_HEADERS = {
-  'kbn-xsrf': 'some-xsrf-token',
-  'x-elastic-internal-origin': 'kibana',
+  ...COMMON_HEADERS,
   [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-} as const;
-
-// Base headers without a version (caller adds the appropriate version header)
-export const COMMON_HEADERS = {
-  'kbn-xsrf': 'some-xsrf-token',
-  'x-elastic-internal-origin': 'kibana',
 } as const;
 
 export const ML_USERS: Record<string, KibanaRole> = {
