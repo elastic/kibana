@@ -485,13 +485,19 @@ The workflows YAML editor uses two in-memory layers to reduce duplicate work whi
 
 Register the step definitions in both server and public plugin setup:
 
+Both `registerStepDefinition` contracts (server and public) accept either a **direct definition** or an **async loader** of the form `() => Promise<Definition | undefined>`. Use the loader form when you need to:
+
+- Keep the step module out of your plugin's main bundle (defer the import).
+- Conditionally register the step based on something only known at runtime (feature flag, license, capabilities, etc.). **Resolve the loader with `undefined` to skip the registration silently** — no error is thrown and no entry is added to the registry.
+
+Loader rejections (and any error thrown while inserting the resolved definition into the registry) are caught and logged via the plugin logger; they do **not** propagate to the caller. This way a single broken loader cannot prevent other steps — or workflow execution as a whole — from working. Consumers that need to wait for all pending registrations can `await workflowsExtensions.isReady()`; it always resolves once every loader has settled.
+
 **Server-side** (`server/plugin.ts`):
 
 ```typescript
 import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
-import { myStepDefinition } from './workflows/step_types/my_step';
-import { getMyStepWithDepsDefinition } from './workflows/step_types/my_step_with_deps';
+import { getMyStepDefinition } from './workflows/step_types/my_step';
 
 export interface MyPluginServerSetupDeps {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
@@ -499,18 +505,29 @@ export interface MyPluginServerSetupDeps {
 
 export class MyPlugin implements Plugin {
   public setup(core: CoreSetup, plugins: MyPluginServerSetupDeps) {
-    // Create the step definition passing the necessary dependencies to factory function
-    const stepDefinition = getMyStepDefinition(core);
+    // Sync registration — definition is built up-front
+    plugins.workflowsExtensions.registerStepDefinition(getMyStepDefinition(core));
 
-    // Register server-side step definition using its factory function result
-    plugins.workflowsExtensions.registerStepDefinition(stepDefinition);
+    // Async / conditional registration — resolve with `undefined` to skip
+    plugins.workflowsExtensions.registerStepDefinition(async () => {
+      const isFeatureFlagEnabled = await checkFeatureFlag();
+      if (!isFeatureFlagEnabled) {
+        return undefined; // Skip step registration
+      }
+      const { getMyOptionalStepDefinition } = await import(
+        './workflows/step_types/my_optional_step'
+      );
+      return getMyOptionalStepDefinition(core);
+    });
   }
 }
 ```
 
+The workflow execution engine awaits `workflowsExtensions.isReady()` before reading a workflow execution, so handlers registered through async loaders are guaranteed to be available when the engine runs.
+
 **Public-side** (`public/plugin.ts`):
 
-Register the public step definition using either a **direct definition** or an **async loader**. Prefer the loader form so the step module (and its dependencies, e.g. zod) are not pulled into your plugin’s main bundle:
+Prefer the loader form so the step module (and its dependencies, e.g. zod) are not pulled into your plugin's main bundle. As on the server, the loader can resolve with `undefined` to skip registration:
 
 ```typescript
 import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
@@ -527,6 +544,18 @@ export class MyPlugin implements Plugin {
       import('./workflows/step_types/my_step').then((m) => m.myStepDefinition)
     );
 
+    // Conditional registration — resolve with `undefined` to skip
+    plugins.workflowsExtensions.registerStepDefinition(async () => {
+      const isFeatureFlagEnabled = await checkFeatureFlag();
+      if (!isFeatureFlagEnabled) {
+        return undefined; // Skip step registration
+      }
+      const { myOptionalStepDefinition } = await import(
+        './workflows/step_types/my_optional_step'
+      );
+      return myOptionalStepDefinition;
+    });
+
     // Alternatively: sync registration (pulls step module into main bundle)
     // import { myStepDefinition } from './workflows/step_types/my_step';
     // plugins.workflowsExtensions.registerStepDefinition(myStepDefinition);
@@ -534,7 +563,9 @@ export class MyPlugin implements Plugin {
 }
 ```
 
-Loaders are resolved in the background after setup. The workflows app waits for `workflowsExtensions.isReady()` before rendering, so step definitions are available when the UI runs.
+Loaders are resolved in the background after setup. The workflows app awaits `workflowsExtensions.isReady()` before rendering, so step definitions are available when the UI runs.
+
+For complete examples of conditional async registration on both sides, see `examples/workflows_extensions_example/server/step_types/index.ts` and `examples/workflows_extensions_example/public/step_types/index.ts`.
 
 ### Step 5: Get Approval
 
@@ -574,6 +605,8 @@ function MyComponent() {
 ```
 
 **Waiting for async step definitions:** If your app mounts before step definitions are needed, you can await `workflowsExtensions.isReady()` before rendering. That ensures all step definitions registered via async loaders have resolved. The workflows app does this in its mount so the step registry is ready when the UI runs.
+
+The same `isReady()` method exists on the server start contract. The workflow execution engine already awaits it before reading a workflow execution; you only need to call it directly if you read the registry from another server-side entry point that runs before async loaders have settled.
 
 ## Step Type Requirements
 
