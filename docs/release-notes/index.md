@@ -285,7 +285,7 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 
 **Alerting**:
 * Fixes stale `uiamApiKey` leaking through object spread in rule updates [#263887]({{kib-pull}}263887).
-* Fixes OpenAPI alerting rule params schemas missing accepted keys for burn-rate windows and ES query `sourceFields` [#263634]({{kib-pull}}263634).
+* Fixes OpenAPI alerting rule params schemas missing accepted keys for burn-rate windows and Elasticsearch query `sourceFields` [#263634]({{kib-pull}}263634).
 * Fixes an index template update failing due to system-managed fields [#262534]({{kib-pull}}262534).
 * Adds the `application/x-zip-compressed` MIME type as an accepted value for cases file attachment [#262414]({{kib-pull}}262414).
 * Fixes alert recovery targeting the wrong document when multiple lifecycles exist for the same instance ID [#261012]({{kib-pull}}261012).
@@ -303,7 +303,7 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Improves handling of `204` responses [#251090]({{kib-pull}}251090).
 * Fixes timestamp override for {{esql}} CSV scheduled reports with relative time ranges [#248169]({{kib-pull}}248169).
 * Fixes **Failed to check if maintenance windows are active** error [#261048]({{kib-pull}}261048).
-* Updates `total_event` in ES document when attaching an event [#247996]({{kib-pull}}247996).
+* Updates `total_event` in the Elasticsearch document when attaching an event [#247996]({{kib-pull}}247996).
 * Encodes the search term in the cases page [#247992]({{kib-pull}}247992).
 * Adds max character validation to the email connector params and config [#246453]({{kib-pull}}246453).
 * Fixes the wrong time zone being applied when a CSV report has a local date comparison [#244405]({{kib-pull}}244405).
@@ -408,7 +408,7 @@ For the Elastic Observability 9.4.0 release information, refer to [Elastic Obser
 For the Elastic Security 9.4.0 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
 
 **Kibana platform**:
-* Sets `auto_expand_replicas` to fix yellow health on single-node ES clusters [#263096]({{kib-pull}}263096).
+* Sets `auto_expand_replicas` to fix yellow health on single-node Elasticsearch clusters [#263096]({{kib-pull}}263096).
 * Allows space color to be cleared, falling back to default [#261826]({{kib-pull}}261826).
 * Fixes the data stream and indices duplication for accessibility [#261786]({{kib-pull}}261786).
 * Fixes an incorrect announcement for accessibility [#261603]({{kib-pull}}261603).
@@ -417,7 +417,7 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Fixes inactive component template row focus and badge accessibility labels [#260719]({{kib-pull}}260719).
 * Fetches the last available version [#259798]({{kib-pull}}259798).
 * Fixes the Stack Monitoring shard legend not showing node placement [#257854]({{kib-pull}}257854).
-* Fixes Stack Monitoring ES nodes CPU usage sorting [#257852]({{kib-pull}}257852).
+* Fixes Stack Monitoring Elasticsearch nodes CPU usage sorting [#257852]({{kib-pull}}257852).
 * Fixes an issue where the Kibana JSON logger could print a JSON object with a large number of numbered keys [#256233]({{kib-pull}}256233).
 * Resolves an issue with the spaces list displaying **No spaces match** text on load [#255654]({{kib-pull}}255654).
 * Adds `waitFor` for the privilege button [#255094]({{kib-pull}}255094).
@@ -482,9 +482,7 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Prevents cloned managed ILM policies from being marked as managed [#248586]({{kib-pull}}248586).
 
 **Search**:
-* Fixes an unnecessary comma in the External inference description [#263769]({{kib-pull}}263769).
 * Fixes the save confirmation message not appearing after saving changes on the **Feature Settings** page [#263768]({{kib-pull}}263768).
-* Fixes incorrect capitalization of **Elastic Inference** and other Model Management labels in the serverless project sidebar [#263176]({{kib-pull}}263176).
 * Fixes the query rules UI rejecting case variants as duplicate values [#259506]({{kib-pull}}259506).
 * Fixes the query ruleset save deleting filtered-out rules [#259503]({{kib-pull}}259503).
 * Fixes the **Convert to lookup index** action being permanently disabled on the index list view in stateful deployments [#259449]({{kib-pull}}259449).
@@ -499,9 +497,7 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Fixes the homepage throwing errors when the license level is below Enterprise [#251484]({{kib-pull}}251484).
 * Reduces background polling on the Index Details page to avoid unnecessary API requests [#251446]({{kib-pull}}251446).
 * Fixes links being visible on Search homepage when user doesn't have access [#251437]({{kib-pull}}251437).
-* Fixes AI Connector creation on serverless failing when adaptive allocations is enabled with the Elasticsearch provider [#251357]({{kib-pull}}251357).
 * Fixes AI Connector form fields incorrectly resetting to default values when users clear them using backspace [#251095]({{kib-pull}}251095).
-* Fixes GenAI Settings description to reference "pre-configured AI connectors" instead of outdated terminology [#250649]({{kib-pull}}250649).
 * Fixes the agents count not updating on the homepage [#248657]({{kib-pull}}248657).
 * Fixes an issue when running Elasticsearch with a Basic license, where users could encounter errors when updating index mappings. Mapping updates now work as expected while advanced semantic text features continue to require the appropriate license [#248462]({{kib-pull}}248462).
 * Fixes OpenAI connector header add flow so the newly added header Key input receives focus for accessibility [#248204]({{kib-pull}}248204).
