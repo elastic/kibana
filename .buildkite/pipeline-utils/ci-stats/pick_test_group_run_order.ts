@@ -173,6 +173,21 @@ export async function pickTestGroupRunOrder() {
           .filter(Boolean)
       : ['build'];
 
+  const FTR_API_CONFIGS_DEPS =
+    process.env.FTR_API_CONFIGS_DEPS !== undefined
+      ? process.env.FTR_API_CONFIGS_DEPS.split(',')
+          .map((t) => t.trim())
+          .filter((t) => Boolean(t) && t !== 'NONE')
+      : [];
+
+  // API-only FTR configs matching these patterns are split into a separate CI group
+  // that has no dependency on the build step (runs Kibana from source).
+  const FTR_API_CONFIG_PATTERNS = process.env.FTR_API_CONFIG_PATTERNS
+    ? process.env.FTR_API_CONFIG_PATTERNS.split(',')
+        .map((t) => t.trim())
+        .filter(Boolean)
+    : [];
+
   const JEST_CONFIGS_DEPS =
     process.env.JEST_CONFIGS_DEPS !== undefined
       ? process.env.JEST_CONFIGS_DEPS.split(',')
@@ -193,6 +208,30 @@ export async function pickTestGroupRunOrder() {
   const ftrConfigsIncluded = LIMIT_CONFIG_TYPE.includes('functional');
 
   if (!ftrConfigsIncluded) ftrConfigsByQueue.clear();
+
+  // Partition API-only configs into a separate map so they get their own CI group
+  const ftrApiConfigsByQueue = new Map<string, string[]>();
+  if (FTR_API_CONFIG_PATTERNS.length > 0) {
+    for (const [queue, names] of ftrConfigsByQueue) {
+      const apiConfigs: string[] = [];
+      const remaining: string[] = [];
+      for (const name of names) {
+        if (FTR_API_CONFIG_PATTERNS.some((pattern) => minimatch(name, pattern))) {
+          apiConfigs.push(name);
+        } else {
+          remaining.push(name);
+        }
+      }
+      if (apiConfigs.length > 0) {
+        ftrApiConfigsByQueue.set(queue, apiConfigs);
+      }
+      if (remaining.length > 0) {
+        ftrConfigsByQueue.set(queue, remaining);
+      } else {
+        ftrConfigsByQueue.delete(queue);
+      }
+    }
+  }
 
   const getJestConfigGlobs = (patterns: string[]) => {
     if (!LIMIT_SOLUTIONS) {
@@ -334,6 +373,17 @@ export async function pickTestGroupRunOrder() {
         warmupMin: 3,
         names,
       })),
+      ...Array.from(ftrApiConfigsByQueue).map(([queue, names]) => ({
+        type: FUNCTIONAL_TYPE,
+        defaultMin: 60,
+        queue,
+        maxMin: FUNCTIONAL_MAX_MINUTES,
+        tooLongMin: FUNCTIONAL_TOO_LONG_MINUTES,
+        minimumIsolationMin: FUNCTIONAL_MINIMUM_ISOLATION_MIN,
+        overheadMin: 0,
+        warmupMin: 3,
+        names,
+      })),
     ],
   });
 
@@ -359,7 +409,22 @@ export async function pickTestGroupRunOrder() {
     { title: string; expectedDurationMin: number; names: string[] }
   > = {};
 
-  if (ftrConfigsByQueue.size) {
+  // Collect all API config names into a Set for fast lookup
+  const allApiConfigNames = new Set<string>();
+  for (const names of ftrApiConfigsByQueue.values()) {
+    for (const name of names) {
+      allApiConfigNames.add(name);
+    }
+  }
+
+  const functionalApiGroups: Array<{
+    title: string;
+    key: string;
+    sortBy: number | string;
+    queue: string;
+  }> = [];
+
+  if (ftrConfigsByQueue.size || ftrApiConfigsByQueue.size) {
     for (const { groups, queue } of getRunGroups(bk, types, FUNCTIONAL_TYPE)) {
       for (const group of groups) {
         if (!group.names.length) {
@@ -377,7 +442,13 @@ export async function pickTestGroupRunOrder() {
           title = `FTR Configs #${sortBy}`;
         }
 
-        functionalGroups.push({
+        // Route to API group if ALL configs in this group are API-only
+        const isApiGroup =
+          allApiConfigNames.size > 0 &&
+          group.names.every((n: string) => allApiConfigNames.has(n));
+
+        const targetList = isApiGroup ? functionalApiGroups : functionalGroups;
+        targetList.push({
           title,
           key,
           sortBy,
@@ -396,8 +467,7 @@ export async function pickTestGroupRunOrder() {
   Fs.writeFileSync('jest_run_order.json', JSON.stringify({ unit, integration }, null, 2));
   bk.uploadArtifacts('jest_run_order.json');
 
-  if (ftrConfigsIncluded) {
-    // write the config for functional steps to an artifact that can be used by the individual functional jobs
+  if (ftrConfigsIncluded || functionalApiGroups.length) {
     Fs.writeFileSync('ftr_run_order.json', JSON.stringify(ftrRunOrder, null, 2));
     bk.uploadArtifacts('ftr_run_order.json');
   }
@@ -486,6 +556,41 @@ export async function pickTestGroupRunOrder() {
             ),
         }
       : [],
+    functionalApiGroups.length
+      ? {
+          group: 'FTR API Configs (no build)',
+          key: 'ftr-api-configs',
+          depends_on: FTR_API_CONFIGS_DEPS,
+          steps: functionalApiGroups
+            .sort((a, b) =>
+              typeof a.sortBy === 'string' && typeof b.sortBy === 'string'
+                ? a.sortBy.localeCompare(b.sortBy)
+                : 0
+            )
+            .map(
+              ({ title, key, queue = defaultQueue }): BuildkiteStep => ({
+                label: title,
+                command: process.env.FTR_API_CONFIGS_SCRIPT || getRequiredEnv('FTR_CONFIGS_SCRIPT'),
+                timeout_in_minutes: 50,
+                key,
+                agents: expandAgentQueue(queue, 105),
+                env: {
+                  FTR_CONFIG_GROUP_KEY: key,
+                  ...ftrExtraArgs,
+                  ...envFromlabels,
+                },
+                retry: {
+                  automatic: [
+                    { exit_status: '-1', limit: 3 },
+                    ...(FTR_CONFIGS_RETRY_COUNT > 0
+                      ? [{ exit_status: '*', limit: FTR_CONFIGS_RETRY_COUNT }]
+                      : []),
+                  ],
+                },
+              })
+            ),
+        }
+      : [],
   ].flat();
 
   // Register cancelable child keys before uploading so a concurrent gate failure
@@ -499,6 +604,9 @@ export async function pickTestGroupRunOrder() {
   // Register child step keys (not the group key) because `buildkite-agent step cancel`
   // does not work on group keys.
   for (const fg of functionalGroups) {
+    bk.setMetadata(`cancel_on_gate_failure:${fg.key}`, 'true');
+  }
+  for (const fg of functionalApiGroups) {
     bk.setMetadata(`cancel_on_gate_failure:${fg.key}`, 'true');
   }
 

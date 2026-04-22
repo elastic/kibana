@@ -154,6 +154,9 @@ steps:
       JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
       FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
       FTR_CONFIGS_DEPS: 'build'
+      FTR_API_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_api_configs.sh'
+      FTR_API_CONFIGS_DEPS: 'NONE'
+      FTR_API_CONFIG_PATTERNS: '**/*api_integration*/**'
     retry:
       automatic:
         - exit_status: '*'
