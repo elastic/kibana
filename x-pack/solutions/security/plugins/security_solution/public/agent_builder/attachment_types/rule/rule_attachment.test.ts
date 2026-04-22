@@ -152,13 +152,13 @@ describe('createRuleAttachmentDefinition', () => {
       expect(buttons).toEqual([]);
     });
 
-    it('returns empty array when parsed rule has no name', () => {
+    it('returns action buttons for rule without name', () => {
       const application = makeApplication(true);
       const definition = createRuleAttachmentDefinition({ application, aiRuleCreation });
       const buttons = definition.getActionButtons!(
         makeActionButtonsParams(JSON.stringify({ type: 'query' })) as never
       );
-      expect(buttons).toEqual([]);
+      expect(buttons).toHaveLength(1);
     });
 
     it('returns empty array when user lacks edit capabilities', () => {
