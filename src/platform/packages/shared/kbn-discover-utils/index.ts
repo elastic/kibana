@@ -39,6 +39,7 @@ export {
   fieldConstants,
   formatFieldValue,
   formatFieldValueReact,
+  formatFieldValueText,
   formatHitReact,
   getDocId,
   getLogDocumentOverview,

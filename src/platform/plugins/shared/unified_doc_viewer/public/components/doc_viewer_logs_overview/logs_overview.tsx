@@ -10,13 +10,7 @@
 import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { EuiSpacer } from '@elastic/eui';
-import {
-  SERVICE_NAME_FIELD,
-  SPAN_ID_FIELD,
-  TRACE_ID_FIELD,
-  TRANSACTION_ID_FIELD,
-  getLogDocumentOverview,
-} from '@kbn/discover-utils';
+import { getLogDocumentOverview, fieldConstants } from '@kbn/discover-utils';
 import type {
   ObservabilityLogsAIAssistantFeature,
   ObservabilityLogsAIInsightFeature,
@@ -24,7 +18,6 @@ import type {
 } from '@kbn/discover-shared-plugin/public';
 import type { LogDocument, ObservabilityIndexes } from '@kbn/discover-utils/src';
 import { getStacktraceFields } from '@kbn/discover-utils/src';
-import { getFieldValueWithFallback } from '@kbn/discover-utils/src/utils/get_field_value_with_fallback';
 import { css } from '@emotion/react';
 import type { DocViewActions } from '@kbn/unified-doc-viewer/src/services/types';
 import type { RestorableStateProviderProps } from '@kbn/restorable-state';
@@ -46,10 +39,6 @@ import { DataSourcesProvider } from '../../hooks/use_data_sources';
 import { SimilarErrors } from './sub_components/similar_errors';
 import { hasErrorFields } from './utils/has_error_fields';
 import { DocViewerExtensionActionsProvider } from '../../hooks/use_doc_viewer_extension_actions';
-
-interface StringFieldValue {
-  value: string | undefined | null;
-}
 
 export type LogsOverviewProps = DocViewRenderProps &
   RestorableStateProviderProps<TraceWaterfallRestorableState> & {
@@ -91,31 +80,13 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
     ref
   ) => {
     const { fieldFormats } = getUnifiedDocViewerServices();
-    const formattedDoc = getLogDocumentOverview(hit, { dataView, fieldFormats });
+    const parsedDoc = getLogDocumentOverview(hit, { dataView, fieldFormats });
     const LogsOverviewAIAssistant = renderAIAssistant;
     const LogsOverviewAIInsight = renderAIInsight;
     const stacktraceFields = getStacktraceFields(hit as LogDocument);
     const isStacktraceAvailable = Object.values(stacktraceFields).some(Boolean);
-
-    // Get raw string values for ID fields (not formatted ReactNode)
-    const { value: traceId } = getFieldValueWithFallback(
-      hit.flattened,
-      TRACE_ID_FIELD
-    ) as StringFieldValue;
-    const { value: transactionId } = getFieldValueWithFallback(
-      hit.flattened,
-      TRANSACTION_ID_FIELD
-    ) as StringFieldValue;
-    const { value: spanId } = getFieldValueWithFallback(
-      hit.flattened,
-      SPAN_ID_FIELD
-    ) as StringFieldValue;
-    const { value: serviceName } = getFieldValueWithFallback(
-      hit.flattened,
-      SERVICE_NAME_FIELD
-    ) as StringFieldValue;
-
-    const showSimilarErrors = Boolean(traceId) && hasErrorFields(formattedDoc);
+    const traceId = parsedDoc[fieldConstants.TRACE_ID_FIELD];
+    const showSimilarErrors = traceId && hasErrorFields(parsedDoc);
     const qualityIssuesSectionRef = useRef<ScrollableSectionWrapperApi>(null);
     const stackTraceSectionRef = useRef<ScrollableSectionWrapperApi>(null);
     const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
@@ -158,7 +129,7 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
         >
           <EuiSpacer size="m" />
           <LogsOverviewHeader
-            formattedDoc={formattedDoc}
+            formattedDoc={parsedDoc}
             hit={hit}
             renderFlyoutStreamProcessingLink={renderFlyoutStreamProcessingLink}
             renderCpsWarning={renderCpsWarning}
@@ -185,8 +156,11 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
               {traceId && showTraceWaterfall ? (
                 <TraceWaterfall
                   traceId={traceId}
-                  docId={transactionId || spanId || undefined}
-                  serviceName={serviceName || undefined}
+                  docId={
+                    parsedDoc[fieldConstants.TRANSACTION_ID_FIELD] ||
+                    parsedDoc[fieldConstants.SPAN_ID_FIELD]
+                  }
+                  serviceName={parsedDoc[fieldConstants.SERVICE_NAME_FIELD]}
                   dataView={dataView}
                   initialState={initialState}
                   onInitialStateChange={onInitialStateChange}

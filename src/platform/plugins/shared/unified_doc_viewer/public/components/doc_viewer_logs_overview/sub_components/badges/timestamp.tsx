@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type ReactNode } from 'react';
+import React from 'react';
 import { EuiBadge } from '@elastic/eui';
 
 interface TimestampProps {
-  timestamp?: ReactNode;
+  timestamp?: string;
 }
 
 export function Timestamp({ timestamp }: TimestampProps) {
