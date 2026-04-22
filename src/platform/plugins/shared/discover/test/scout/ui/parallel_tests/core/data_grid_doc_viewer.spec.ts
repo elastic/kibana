@@ -89,8 +89,7 @@ spaceTest.describe('Discover data grid - doc viewer', { tag: testData.DISCOVER_C
 
     // Open the full flyout on the source tab and confirm it shows the same doc.
     await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
-    await page.locator('#kbn_doc_viewer_tab_doc_view_source').click();
-    const flyoutDoc = await readMonacoJson(page);
+    await page.testSubj.click('docViewerTab-doc_view_source');
     expect(flyoutDoc._id).toBe(popoverDoc._id);
 
     await closeDocViewerFlyout(page);
@@ -112,7 +111,7 @@ spaceTest.describe('Discover data grid - doc viewer', { tag: testData.DISCOVER_C
       expect(popoverDoc._id).toBe(EXPECTED_FIRST_ROW_ID);
 
       await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
-      await page.locator('#kbn_doc_viewer_tab_doc_view_source').click();
+      await page.testSubj.click('docViewerTab-doc_view_source');
       const flyoutDoc = await readMonacoJson(page);
       expect(flyoutDoc._id).toBe(popoverDoc._id);
 
@@ -155,8 +154,7 @@ spaceTest.describe('Discover data grid - doc viewer', { tag: testData.DISCOVER_C
 
     await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
     // The "toggle column" action is only exposed on the field-table tab.
-    await page.locator('#kbn_doc_viewer_tab_doc_view_table').click();
-
+    await page.testSubj.click('docViewerTab-doc_view_table');
     for (const field of fields) {
       await toggleColumnInDocViewer(page, field);
     }
