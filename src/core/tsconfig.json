@@ -2,13 +2,14 @@
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "isolatedModules": true,
+    "isolatedModules": true
   },
   "include": [
     "public/**/*",
     "server/**/*",
     "types/**/*",
     "test_helpers/**/*",
+    "test/scout/**/*",
     "utils/**/*",
     "index.ts"
   ],
@@ -176,8 +177,7 @@
     "@kbn/core-pricing-browser",
     "@kbn/core-pricing-server-internal",
     "@kbn/core-pricing-common",
+    "@kbn/scout"
   ],
-  "exclude": [
-    "target/**/*",
-  ],
+  "exclude": ["target/**/*"]
 }

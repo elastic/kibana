@@ -8,6 +8,7 @@
 @babel/parser@7.24.7
 @babel/plugin-syntax-jsx@7.28.6
 @babel/runtime@7.27.6
+@babel/runtime@7.28.4
 @babel/template@7.26.8
 @babel/traverse@7.26.8
 @babel/types@7.24.7
@@ -110,7 +111,7 @@ baseline-browser-mapping@2.9.14
 bezier-easing@2.1.0
 bn.js@4.11.9
 bn.js@5.2.3
-brace-expansion@1.1.12
+brace-expansion@1.1.13
 brorand@1.1.0
 browser-resolve@2.0.0
 browserify-aes@1.2.0

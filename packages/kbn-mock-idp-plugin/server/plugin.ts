@@ -19,6 +19,7 @@ import {
   STATEFUL_ROLES_ROOT_PATH,
 } from '@kbn/es';
 import { createSAMLResponse, MOCK_IDP_LOGIN_PATH, MOCK_IDP_LOGOUT_PATH } from '@kbn/mock-idp-utils';
+import { getSAMLRequestId } from '@kbn/mock-idp-utils/src/utils';
 
 export interface PluginSetupDependencies {
   cloud: CloudSetup;
@@ -29,6 +30,7 @@ const createSAMLResponseSchema = schema.object({
   full_name: schema.maybe(schema.nullable(schema.string())),
   email: schema.maybe(schema.nullable(schema.string())),
   roles: schema.arrayOf(schema.string()),
+  url: schema.string(),
 });
 
 const projectToAlias = new Map<string, string>([
@@ -54,12 +56,11 @@ const readStatefulRoles = () => {
 
 export type CreateSAMLResponseParams = TypeOf<typeof createSAMLResponseSchema>;
 
-export const plugin: PluginInitializer<
-  void,
-  void,
-  PluginSetupDependencies
-> = async (): Promise<Plugin> => ({
+export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = async (
+  initializerContext
+): Promise<Plugin> => ({
   setup(core, plugins: PluginSetupDependencies) {
+    const logger = initializerContext.logger.get();
     const router = core.http.createRouter();
 
     core.http.resources.register(
@@ -111,17 +112,28 @@ export const plugin: PluginInitializer<
         const { protocol, hostname, port } = core.http.getServerInfo();
         const pathname = core.http.basePath.prepend('/api/security/saml/callback');
 
-        return response.ok({
-          body: {
-            SAMLResponse: await createSAMLResponse({
-              kibanaUrl: `${protocol}://${hostname}:${port}${pathname}`,
-              username: request.body.username,
-              full_name: request.body.full_name ?? undefined,
-              email: request.body.email ?? undefined,
-              roles: request.body.roles,
-            }),
-          },
-        });
+        try {
+          const requestId = await getSAMLRequestId(request.body.url);
+          if (requestId) {
+            logger.info(`Sending SAML response for request ID: ${requestId}`);
+          }
+
+          return response.ok({
+            body: {
+              SAMLResponse: await createSAMLResponse({
+                kibanaUrl: `${protocol}://${hostname}:${port}${pathname}`,
+                username: request.body.username,
+                full_name: request.body.full_name ?? undefined,
+                email: request.body.email ?? undefined,
+                roles: request.body.roles,
+                ...(requestId ? { authnRequestId: requestId } : {}),
+              }),
+            },
+          });
+        } catch (err) {
+          logger.error(`Failed to create SAMLResponse: ${err}`, err);
+          throw err;
+        }
       }
     );
 

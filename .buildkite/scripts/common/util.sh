@@ -26,6 +26,16 @@ is_auto_commit_disabled() {
   is_pr_with_label "ci:no-auto-commit"
 }
 
+should_enable_fips() {
+  case "${TEST_ENABLE_FIPS_VERSION:-}" in
+    140-2|140-3)
+      return 0
+      ;;
+  esac
+
+  is_pr_with_label "ci:enable-fips-140-2-agent" || is_pr_with_label "ci:enable-fips-140-3-agent"
+}
+
 check_for_changed_files() {
   RED='\033[0;31m'
   YELLOW='\033[0;33m'

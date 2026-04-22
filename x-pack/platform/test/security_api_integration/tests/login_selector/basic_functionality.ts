@@ -598,12 +598,14 @@ export default function ({ getService }: FtrProviderContext) {
 
           const cookie = parseCookie(samlHandshakeResponse.headers['set-cookie'][0])!;
           const samlRequestId = await getSAMLRequestId(samlHandshakeResponse.body.location);
+          expect(samlRequestId).not.to.be(undefined);
+
           const samlResponse = await createSAMLResponse({
             issuer: `http://www.elastic.co/saml2`,
             inResponseTo: samlRequestId,
           });
 
-          samlResponseMapByRequestId[samlRequestId] = { samlResponse, cookie };
+          samlResponseMapByRequestId[samlRequestId!] = { samlResponse, cookie };
         }
 
         const preparedCallbacks = [];

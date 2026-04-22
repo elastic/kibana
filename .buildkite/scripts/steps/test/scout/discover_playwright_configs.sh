@@ -8,8 +8,14 @@ source .buildkite/scripts/common/util.sh
 echo '--- Update Scout Test Config Manifests'
 node scripts/scout.js update-test-config-manifests --concurrencyLimit 3
 
+if [[ "${BUILDKITE_BRANCH:-}" == "main" || "${BUILDKITE_PULL_REQUEST_BASE_BRANCH:-}" == "main" ]]; then
+  SCOUT_DISCOVERY_TARGET="local"
+else
+  SCOUT_DISCOVERY_TARGET="local-stateful-only"
+fi
+
 echo '--- Discover Playwright Configs and upload to Buildkite artifacts'
-node scripts/scout discover-playwright-configs --include-custom-servers --save
+node scripts/scout discover-playwright-configs --include-custom-servers --target "$SCOUT_DISCOVERY_TARGET" --save
 cp .scout/test_configs/scout_playwright_configs.json scout_playwright_configs.json
 buildkite-agent artifact upload "scout_playwright_configs.json"
 

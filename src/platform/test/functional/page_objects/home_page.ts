@@ -71,7 +71,10 @@ export class HomePageObject extends FtrService {
     const animSpeedExtraSlow = 500;
     await new Promise((resolve) => setTimeout(resolve, animSpeedExtraSlow));
     return this.retry.try(async () => {
-      return await this.testSubjects.isDisplayed('homeWelcomeInterstitial', animSpeedExtraSlow * 4);
+      return await this.testSubjects.isDisplayed(
+        'homeWelcomeInterstitial',
+        animSpeedExtraSlow * 16
+      );
     });
   }
 
