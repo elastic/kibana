@@ -292,6 +292,40 @@ describe('DatasetQualityControllerStateMachine', () => {
         actor.stop();
       });
 
+      // Regression coverage for https://github.com/elastic/kibana/issues/250827:
+      // the free-text filter (filters.query) is applied client-side only, so
+      // passing it as `datasetQuery` to the stats/degraded/failed endpoints
+      // both triggered a 400 on /stats (the route schema rejected the combo)
+      // and caused the server to treat the substring as a literal data stream
+      // name on /degraded_docs and /failed_docs, returning empty results.
+      it('should not forward filters.query to stats/degraded/failed fetches', async () => {
+        const { machine, dataStreamStatsClient } = buildStateMachine({
+          initialContext: {
+            ...DEFAULT_CONTEXT,
+            filters: {
+              ...DEFAULT_CONTEXT.filters,
+              query: 'synth',
+            },
+          },
+        });
+        const actor = createActor(machine);
+        actor.start();
+
+        await waitForState(actor, 'main.stats.datasets.loaded');
+
+        expect(dataStreamStatsClient.getDataStreamsStats).toHaveBeenCalledWith(
+          expect.not.objectContaining({ datasetQuery: expect.anything() })
+        );
+        expect(dataStreamStatsClient.getDataStreamsDegradedStats).toHaveBeenCalledWith(
+          expect.not.objectContaining({ datasetQuery: expect.anything() })
+        );
+        expect(dataStreamStatsClient.getDataStreamsFailedStats).toHaveBeenCalledWith(
+          expect.not.objectContaining({ datasetQuery: expect.anything() })
+        );
+
+        actor.stop();
+      });
+
       it('should transition datasets to loaded on success', async () => {
         const { machine } = buildStateMachine();
         const actor = createActor(machine);
