@@ -10,19 +10,8 @@
 import { z } from '@kbn/zod/v4';
 import type { AxiosInstance } from 'axios';
 import type { AuthContext, AuthTypeSpec } from '../connector_spec';
+import { normalizeAuthorizationHeaderValue } from './oauth_authz_code_and_ears_helpers';
 import * as i18n from './translations';
-
-/**
- * OAuth token responses often use `token_type: "bearer"` (lowercase). If the stored header begins
- * with `bearer ` (after trim), rewrites the scheme to `Bearer `; otherwise returns the trimmed value.
- */
-export function normalizeAuthorizationHeaderValue(value: string): string {
-  const trimmed = value.trim();
-  if (trimmed.startsWith('bearer ')) {
-    return `Bearer ${trimmed.slice('bearer '.length)}`;
-  }
-  return trimmed;
-}
 
 const authSchema = z
   .object({
