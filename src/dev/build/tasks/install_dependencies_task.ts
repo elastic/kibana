@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { relative } from 'path';
+
 import type { Task } from '../lib';
 import { exec } from '../lib';
 
@@ -44,7 +46,7 @@ export const InstallDependencies: Task = {
         config.resolveFromRepo('node_modules/.bin/patch-package'),
         '--error-on-fail',
         '--patch-dir',
-        config.resolveFromRepo('patches'),
+        relative(build.resolvePath(), config.resolveFromRepo('patches')),
       ],
       {
         cwd: build.resolvePath(),
