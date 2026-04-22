@@ -126,9 +126,9 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
     });
 
     await legacyFlyoutSimulator.resolve('resolver:graph-controls:zoom-in');
-    (
-      await legacyFlyoutSimulator.resolve('resolver:graph-controls:show-panel-button')
-    )?.simulate('click');
+    (await legacyFlyoutSimulator.resolve('resolver:graph-controls:show-panel-button'))?.simulate(
+      'click'
+    );
 
     expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledTimes(1);
   });
