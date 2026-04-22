@@ -63,7 +63,7 @@ export class WorkflowsExtensionsServerPlugin
   ): WorkflowsExtensionsServerPluginSetup {
     const router = core.http.createRouter();
 
-    // Register HTTP routes
+    // Register HTTP route to expose step definitions for testing
     registerGetStepDefinitionsRoute(router, this.stepRegistry);
     // Register HTTP route to expose trigger definitions for testing
     registerGetTriggerDefinitionsRoute(router, this.triggerRegistry);
