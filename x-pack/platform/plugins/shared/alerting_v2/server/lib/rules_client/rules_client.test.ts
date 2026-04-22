@@ -969,6 +969,46 @@ describe('RulesClient', () => {
         })
       );
     });
+
+    it('maps lastExecutionOutcome to last_execution.outcome', async () => {
+      const client = createClient();
+
+      mockSavedObjectsClient.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 20,
+      });
+
+      await client.findRules({ sortField: 'lastExecutionOutcome', sortOrder: 'asc' });
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sortField: 'last_execution.outcome',
+          sortOrder: 'asc',
+        })
+      );
+    });
+
+    it('maps lastExecutionAt to last_execution.timestamp', async () => {
+      const client = createClient();
+
+      mockSavedObjectsClient.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 20,
+      });
+
+      await client.findRules({ sortField: 'lastExecutionAt', sortOrder: 'desc' });
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sortField: 'last_execution.timestamp',
+          sortOrder: 'desc',
+        })
+      );
+    });
   });
 
   describe('bulkDeleteRules', () => {

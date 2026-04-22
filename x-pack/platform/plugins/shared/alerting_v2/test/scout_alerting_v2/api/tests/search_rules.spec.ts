@@ -200,6 +200,51 @@ apiTest.describe('Search rules across all fields', { tag: tags.stateful.classic 
     expect(response.body.items[0].metadata.name).toBe('prod-cpu-alert');
   });
 
+  apiTest(
+    'should accept last_execution sort and filter for rules that have not run yet',
+    async ({ apiClient }) => {
+      const res = await apiClient.post(RULE_API_PATH, {
+        headers: { ...API_HEADERS, ...adminCredentials.apiKeyHeader },
+        body: {
+          kind: 'alert',
+          metadata: { name: 'pre-execution-rule' },
+          time_field: '@timestamp',
+          schedule: { every: '5m' },
+          evaluation: { query: { base: 'FROM logs-* | LIMIT 10' } },
+        },
+        responseType: 'json',
+      });
+      expect(res.statusCode).toBe(200);
+      ruleIds.push(res.body.id);
+
+      // Sort by last execution timestamp — rule has never run, last_execution
+      // should be null/absent and the call should succeed.
+      const sortedResponse = await apiClient.get(
+        `${RULE_API_PATH}?perPage=100&sortField=lastExecutionAt&sortOrder=desc`,
+        {
+          headers: { ...adminCredentials.apiKeyHeader },
+          responseType: 'json',
+        }
+      );
+      expect(sortedResponse).toHaveStatusCode(200);
+      expect(sortedResponse.body.items).toHaveLength(1);
+      expect(sortedResponse.body.items[0].last_execution ?? null).toBeNull();
+
+      // Filter by last_execution.outcome — the unran rule should not match.
+      const filteredResponse = await apiClient.get(
+        `${RULE_API_PATH}?perPage=100&filter=${encodeURIComponent(
+          'last_execution.outcome: success'
+        )}`,
+        {
+          headers: { ...adminCredentials.apiKeyHeader },
+          responseType: 'json',
+        }
+      );
+      expect(filteredResponse).toHaveStatusCode(200);
+      expect(filteredResponse.body.total).toBe(0);
+    }
+  );
+
   apiTest('should return empty results when no fields match', async ({ apiClient }) => {
     const res = await apiClient.post(RULE_API_PATH, {
       headers: { ...API_HEADERS, ...adminCredentials.apiKeyHeader },

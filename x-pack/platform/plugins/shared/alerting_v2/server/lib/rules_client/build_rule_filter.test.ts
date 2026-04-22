@@ -68,6 +68,18 @@ describe('buildRuleSoFilter', () => {
         'alerting_rule.attributes.grouping.fields: "host.name"'
       );
     });
+
+    it('maps last_execution.outcome to SO attributes path', () => {
+      expect(buildRuleSoFilter('last_execution.outcome: success')).toBe(
+        'alerting_rule.attributes.last_execution.outcome: success'
+      );
+    });
+
+    it('maps last_execution.timestamp to SO attributes path', () => {
+      expect(buildRuleSoFilter('last_execution.timestamp: "2026-04-22T00:00:00.000Z"')).toBe(
+        'alerting_rule.attributes.last_execution.timestamp: "2026-04-22T00:00:00.000Z"'
+      );
+    });
   });
 
   describe('compound expressions', () => {

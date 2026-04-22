@@ -157,5 +157,36 @@ describe('utils', () => {
 
       expect(response.metadata.description).toBe('Round-trip desc');
     });
+
+    it('returns last_execution null when unset on the SO', () => {
+      const attrs = createRuleSoAttributes({ metadata: { name: 'no-exec' } });
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
+
+      expect(result.last_execution).toBeNull();
+    });
+
+    it('forwards last_execution from the SO to the API response', () => {
+      const attrs = createRuleSoAttributes({
+        metadata: { name: 'has-exec' },
+        last_execution: {
+          outcome: 'success',
+          timestamp: '2026-04-22T00:00:00.000Z',
+          duration_ms: 1234,
+          message: 'rule executed',
+          error_message: null,
+        },
+      });
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
+
+      expect(result.last_execution).toEqual({
+        outcome: 'success',
+        timestamp: '2026-04-22T00:00:00.000Z',
+        duration_ms: 1234,
+        message: 'rule executed',
+        error_message: null,
+      });
+    });
   });
 });

@@ -71,6 +71,8 @@ const mapSortField = (sortField?: FindRulesSortField): string | undefined => {
     kind: 'kind',
     enabled: 'enabled',
     name: 'metadata.name.keyword',
+    lastExecutionOutcome: 'last_execution.outcome',
+    lastExecutionAt: 'last_execution.timestamp',
   };
 
   return sortFieldMap[sortField];

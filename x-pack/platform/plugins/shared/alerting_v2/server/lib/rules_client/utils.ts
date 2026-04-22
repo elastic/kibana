@@ -169,5 +169,6 @@ export function transformRuleSoAttributesToRuleApiResponse(
     createdAt: attrs.createdAt,
     updatedBy: attrs.updatedBy,
     updatedAt: attrs.updatedAt,
+    last_execution: attrs.last_execution ?? null,
   };
 }

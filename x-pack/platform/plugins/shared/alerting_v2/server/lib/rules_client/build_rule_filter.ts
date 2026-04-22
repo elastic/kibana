@@ -29,6 +29,8 @@ const FIELD_MAP: Record<string, string> = {
   'metadata.owner': `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.owner`,
   'metadata.tags': `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.tags`,
   'grouping.fields': `${RULE_SAVED_OBJECT_TYPE}.attributes.grouping.fields`,
+  'last_execution.outcome': `${RULE_SAVED_OBJECT_TYPE}.attributes.last_execution.outcome`,
+  'last_execution.timestamp': `${RULE_SAVED_OBJECT_TYPE}.attributes.last_execution.timestamp`,
 };
 
 export const ALLOWED_FILTER_FIELDS = Object.keys(FIELD_MAP);

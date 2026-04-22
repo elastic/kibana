@@ -272,6 +272,29 @@ export const updateRuleDataSchema = z
 export type UpdateRuleData = z.infer<typeof updateRuleDataSchema>;
 
 /**
+ * Outcome of the latest rule execution persisted on the rule SO.
+ *
+ * Two-state today (`success` / `failure`) matching the server-side
+ * `ExecutionOutcome`. Clients must treat unknown future values as opaque
+ * strings so we can extend without a breaking change.
+ */
+export const ruleLastExecutionOutcomeSchema = z.enum(['success', 'failure']);
+export type RuleLastExecutionOutcome = z.infer<typeof ruleLastExecutionOutcomeSchema>;
+
+export const ruleLastExecutionSchema = z.object({
+  outcome: ruleLastExecutionOutcomeSchema.describe('Outcome of the latest execution.'),
+  timestamp: z.string().describe('ISO timestamp when the latest execution completed.'),
+  duration_ms: z.number().describe('Duration of the latest execution in milliseconds.'),
+  message: z.string().nullable().describe('Human-readable summary of the latest execution.'),
+  error_message: z
+    .string()
+    .nullable()
+    .describe('Error message from the latest execution if it failed.'),
+});
+
+export type RuleLastExecution = z.infer<typeof ruleLastExecutionSchema>;
+
+/**
  * Schema for rule response data returned from the API.
  * Extends the base rule schema with server-generated fields.
  */
@@ -282,12 +305,22 @@ export const ruleResponseSchema = createRuleDataBaseSchema.extend({
   createdAt: z.string().describe('ISO timestamp when the rule was created.'),
   updatedBy: z.string().nullable().describe('User who last updated the rule.'),
   updatedAt: z.string().describe('ISO timestamp when the rule was last updated.'),
+  last_execution: ruleLastExecutionSchema
+    .nullable()
+    .optional()
+    .describe('Outcome of the latest rule execution. Null/undefined until the rule has run.'),
 });
 
 export type RuleResponse = z.infer<typeof ruleResponseSchema>;
 
 /** Sort field for find rules API. */
-export const findRulesSortFieldSchema = z.enum(['kind', 'enabled', 'name']);
+export const findRulesSortFieldSchema = z.enum([
+  'kind',
+  'enabled',
+  'name',
+  'lastExecutionOutcome',
+  'lastExecutionAt',
+]);
 export type FindRulesSortField = z.infer<typeof findRulesSortFieldSchema>;
 
 /** Paginated list response schema. */
