@@ -175,7 +175,7 @@ export class CsvESQLGenerator {
         new Set(
           requestedColumns.flatMap((column) => (column === '_source' ? sourceInnerKeys : [column]))
         )
-      ).sort();
+      );
 
       const header =
         Array.from(visibleColumns).map(this.escapeValues(settings)).join(settings.separator) + '\n';

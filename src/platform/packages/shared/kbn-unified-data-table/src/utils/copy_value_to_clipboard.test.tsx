@@ -310,6 +310,7 @@ describe('copyValueToClipboard', () => {
     const result = await copyRowsAsJsonToClipboard({
       toastNotifications: servicesMock.toastNotifications,
       selectedRows: [dataTableContextComplexMock.getRowByIndex(0)!],
+      isPlainRecord: false,
     });
 
     expect(result).toBe(jsonOutput);
@@ -326,6 +327,7 @@ describe('copyValueToClipboard', () => {
     const result = await copyRowsAsJsonToClipboard({
       toastNotifications: servicesMock.toastNotifications,
       selectedRows: [dataTableContextComplexMock.getRowByIndex(0)!],
+      isPlainRecord: false,
     });
 
     expect(result).toBe(jsonOutput);

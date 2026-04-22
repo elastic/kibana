@@ -59,7 +59,7 @@ export const DataTableCopyRowsAsText: React.FC<DataTableCopyRowsAsTextProps> = (
           .sort();
         const outputColumns = uniq(
           columns.flatMap((column) => (column === SOURCE_COLUMN ? documentFields : [column]))
-        ).sort();
+        );
 
         const selectedRowIndices = rows
           .map((row, index) => (isDocSelected(row.id) ? index : -1))
