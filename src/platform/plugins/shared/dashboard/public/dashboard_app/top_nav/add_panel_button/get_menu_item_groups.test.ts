@@ -7,67 +7,73 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { buildMockDashboardApi } from '../../../mocks';
 import { getMenuItemGroups } from './get_menu_item_groups';
 
-jest.mock('../../../services/kibana_services', () => ({
-  uiActionsService: {
-    getTriggerCompatibleActions: async () => [
-      {
-        id: 'mockAddPanelAction',
-        type: '',
-        order: 10,
-        grouping: [
-          {
-            id: 'myGroup',
-            order: 900,
-            getDisplayName: (): string => 'My group',
-          },
-        ],
-        getDisplayName: (): string => 'mockAddPanelAction',
-        getIconType: (): string => 'empty',
-        execute: () => {},
-        isCompatible: async (): Promise<boolean> => true,
-      },
-      {
-        id: 'myVis',
-        type: '',
-        order: 10,
-        grouping: [
-          {
-            id: 'visualizations',
-            order: 1000,
-            getDisplayName: (): string => 'Other visualizations',
-          },
-        ],
-        getDisplayName: (): string => 'myVis',
-        getIconType: (): string => 'empty',
-        execute: () => {},
-        isCompatible: async (): Promise<boolean> => true,
-      },
-      {
-        id: 'createTimeSlider',
-        type: '',
-        order: 0,
-        grouping: [
-          {
-            id: 'controls',
-            order: 950,
-            getDisplayName: (): string => 'Controls',
-          },
-        ],
-        getDisplayName: (): string => 'Time slider',
-        getIconType: (): string => 'controls',
-        getDisplayNameTooltip: (): string => 'Only one time slider',
-        execute: () => {},
-        isCompatible: async (): Promise<boolean> => true,
-      },
-    ],
-  },
-}));
+jest.mock('../../../services/kibana_services', () => {
+  const actual = jest.requireActual('../../../services/kibana_services');
+  return {
+    ...actual,
+    uiActionsService: {
+      ...actual.uiActionsService,
+      getTriggerCompatibleActions: async () => [
+        {
+          id: 'mockAddPanelAction',
+          type: '',
+          order: 10,
+          grouping: [
+            {
+              id: 'myGroup',
+              order: 900,
+              getDisplayName: (): string => 'My group',
+            },
+          ],
+          getDisplayName: (): string => 'mockAddPanelAction',
+          getIconType: (): string => 'empty',
+          execute: () => {},
+          isCompatible: async (): Promise<boolean> => true,
+        },
+        {
+          id: 'myVis',
+          type: '',
+          order: 10,
+          grouping: [
+            {
+              id: 'visualizations',
+              order: 1000,
+              getDisplayName: (): string => 'Other visualizations',
+            },
+          ],
+          getDisplayName: (): string => 'myVis',
+          getIconType: (): string => 'empty',
+          execute: () => {},
+          isCompatible: async (): Promise<boolean> => true,
+        },
+        {
+          id: 'createSomeControl',
+          type: '',
+          order: 0,
+          grouping: [
+            {
+              id: 'controls',
+              order: 950,
+              getDisplayName: (): string => 'Controls',
+            },
+          ],
+          getDisplayName: (): string => 'A control',
+          getIconType: (): string => 'controls',
+          execute: () => {},
+          isCompatible: async (): Promise<boolean> => true,
+        },
+      ],
+    },
+  };
+});
 
 describe('getMenuItemGroups', () => {
   test('gets sorted groups from visTypes, visTypeAliases, and add panel actions', async () => {
     const api = {
+      ...buildMockDashboardApi().api,
       getAppContext: () => ({
         currentAppId: 'dashboards',
       }),
@@ -76,7 +82,6 @@ describe('getMenuItemGroups', () => {
     };
     const groups = await getMenuItemGroups(api);
     expect(groups.length).toBe(3);
-
     expect(groups[0].title).toBe('Other visualizations');
     expect(groups[0].items.length).toBe(1);
     expect(groups[1].title).toBe('Controls');
@@ -89,6 +94,7 @@ describe('getMenuItemGroups', () => {
 
   test('disables time slider menu item when a time slider is already pinned', async () => {
     const api = {
+      ...buildMockDashboardApi().api,
       getAppContext: () => ({
         currentAppId: 'dashboards',
       }),
