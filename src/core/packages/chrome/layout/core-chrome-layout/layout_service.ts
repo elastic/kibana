@@ -14,6 +14,7 @@ import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
+import type { HotkeysStart } from '@kbn/core-hotkeys-browser';
 
 export interface LayoutServiceStartDeps {
   application: InternalApplicationStart;
@@ -22,6 +23,7 @@ export interface LayoutServiceStartDeps {
   docLinks: DocLinksStart;
   customBranding: CustomBrandingStart;
   featureFlags: FeatureFlagsStart;
+  hotkeys: HotkeysStart;
 }
 
 /**

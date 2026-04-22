@@ -62,6 +62,7 @@
     "@kbn/core-chrome-browser-components",
     "@kbn/core-chrome-browser-context",
     "@kbn/core-chrome-browser-internal-types",
+    "@kbn/core-hotkeys-browser-mocks",
     "@kbn/use-observable",
     "@kbn/react-kibana-context-env",
   ],

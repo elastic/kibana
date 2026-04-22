@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/core-http-browser-internal'
   - '@kbn/core-doc-links-browser'
   - '@kbn/core-custom-branding-browser'
+  - '@kbn/core-hotkeys-browser'
   - '@kbn/core-application-common'
   - '@kbn/core-application-browser-internal'
   - '@kbn/core-overlays-browser'

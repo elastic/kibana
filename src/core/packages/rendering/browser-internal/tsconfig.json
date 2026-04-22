@@ -45,6 +45,8 @@
     "@kbn/core-http-browser-mocks",
     "@kbn/core-doc-links-browser-mocks",
     "@kbn/core-custom-branding-browser-mocks",
+    "@kbn/core-hotkeys-browser",
+    "@kbn/core-hotkeys-browser-mocks",
   ],
   "exclude": [
     "target/**/*"

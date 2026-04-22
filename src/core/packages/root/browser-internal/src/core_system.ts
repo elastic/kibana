@@ -480,6 +480,7 @@ export class CoreSystem {
           http,
           docLinks,
           customBranding,
+          hotkeys,
         },
         coreUiTargetDomElement
       );
