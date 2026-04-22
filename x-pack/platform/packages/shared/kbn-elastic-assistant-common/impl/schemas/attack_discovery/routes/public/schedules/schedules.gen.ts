@@ -29,13 +29,13 @@ export const Query = z.object({
 });
 
 /**
- * The filter array used to define the conditions for when alerts are selected as an attack discovery context. Defaults to an empty array.
+ * The filter array used to define the conditions for when alerts are selected as an Attack Discovery context. Defaults to an empty array.
  */
 export type Filters = z.infer<typeof Filters>;
 export const Filters = z.array(z.unknown());
 
 /**
- * An attack discovery schedule params
+ * An Attack Discovery schedule params
  */
 export type AttackDiscoveryScheduleParams = z.infer<typeof AttackDiscoveryScheduleParams>;
 export const AttackDiscoveryScheduleParams = z.object({
@@ -170,7 +170,7 @@ export const AttackDiscoveryScheduleAction = z.union([
 ]);
 
 /**
- * An attack discovery schedule execution status
+ * An Attack Discovery schedule execution status
  */
 export type AttackDiscoveryScheduleExecutionStatus = z.infer<
   typeof AttackDiscoveryScheduleExecutionStatus
@@ -188,7 +188,7 @@ export const AttackDiscoveryScheduleExecutionStatusEnum =
   AttackDiscoveryScheduleExecutionStatus.enum;
 
 /**
- * An attack discovery schedule execution information
+ * An Attack Discovery schedule execution information
  */
 export type AttackDiscoveryScheduleExecution = z.infer<typeof AttackDiscoveryScheduleExecution>;
 export const AttackDiscoveryScheduleExecution = z.object({
@@ -208,12 +208,12 @@ export const AttackDiscoveryScheduleExecution = z.object({
 });
 
 /**
- * An attack discovery schedule
+ * An Attack Discovery schedule
  */
 export type AttackDiscoverySchedule = z.infer<typeof AttackDiscoverySchedule>;
 export const AttackDiscoverySchedule = z.object({
   /**
-   * UUID of attack discovery schedule
+   * UUID of Attack Discovery schedule
    */
   id: z.string(),
   /**
@@ -241,25 +241,25 @@ export const AttackDiscoverySchedule = z.object({
    */
   enabled: z.boolean(),
   /**
-   * The attack discovery schedule configuration parameters
+   * The Attack Discovery schedule configuration parameters
    */
   params: AttackDiscoveryScheduleParams,
   /**
-   * The attack discovery schedule interval
+   * The Attack Discovery schedule interval
    */
   schedule: IntervalSchedule,
   /**
-   * The attack discovery schedule actions
+   * The Attack Discovery schedule actions
    */
   actions: z.array(AttackDiscoveryScheduleAction),
   /**
-   * The attack discovery schedule last execution summary
+   * The Attack Discovery schedule last execution summary
    */
   lastExecution: AttackDiscoveryScheduleExecution.optional(),
 });
 
 /**
- * An attack discovery schedule create properties
+ * An Attack Discovery schedule create properties
  */
 export type AttackDiscoveryScheduleCreateProps = z.infer<typeof AttackDiscoveryScheduleCreateProps>;
 export const AttackDiscoveryScheduleCreateProps = z.object({
@@ -272,21 +272,21 @@ export const AttackDiscoveryScheduleCreateProps = z.object({
    */
   enabled: z.boolean().optional(),
   /**
-   * The attack discovery schedule configuration parameters
+   * The Attack Discovery schedule configuration parameters
    */
   params: AttackDiscoveryScheduleParams,
   /**
-   * The attack discovery schedule interval
+   * The Attack Discovery schedule interval
    */
   schedule: IntervalSchedule,
   /**
-   * The attack discovery schedule actions
+   * The Attack Discovery schedule actions
    */
   actions: z.array(AttackDiscoveryScheduleAction).optional(),
 });
 
 /**
- * An attack discovery schedule update properties
+ * An Attack Discovery schedule update properties
  */
 export type AttackDiscoveryScheduleUpdateProps = z.infer<typeof AttackDiscoveryScheduleUpdateProps>;
 export const AttackDiscoveryScheduleUpdateProps = z.object({
@@ -295,15 +295,15 @@ export const AttackDiscoveryScheduleUpdateProps = z.object({
    */
   name: z.string(),
   /**
-   * The attack discovery schedule configuration parameters
+   * The Attack Discovery schedule configuration parameters
    */
   params: AttackDiscoveryScheduleParams,
   /**
-   * The attack discovery schedule interval
+   * The Attack Discovery schedule interval
    */
   schedule: IntervalSchedule,
   /**
-   * The attack discovery schedule actions
+   * The Attack Discovery schedule actions
    */
   actions: z.array(AttackDiscoveryScheduleAction),
 });

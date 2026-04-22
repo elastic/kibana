@@ -4603,10 +4603,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ai-agent-confirmation-modal@link:x-pack/platform/packages/shared/ai-assistant/ai-agent-confirmation-modal":
-  version "0.0.0"
-  uid ""
-
 "@kbn/ai-assistant-common@link:x-pack/platform/packages/shared/ai-assistant/common":
   version "0.0.0"
   uid ""
@@ -4871,6 +4867,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/as-code-shared-telemetry@link:src/platform/packages/shared/as-code/shared-telemetry":
+  version "0.0.0"
+  uid ""
+
 "@kbn/as-code-shared-transforms@link:src/platform/packages/shared/as-code/shared-transforms":
   version "0.0.0"
   uid ""
@@ -5104,6 +5104,10 @@
   uid ""
 
 "@kbn/config@link:src/platform/packages/shared/kbn-config":
+  version "0.0.0"
+  uid ""
+
+"@kbn/connector-cli@link:src/platform/packages/shared/kbn-connector-cli":
   version "0.0.0"
   uid ""
 
@@ -26123,10 +26127,10 @@ linkify-it@^5.0.0:
   dependencies:
     uc.micro "^2.0.0"
 
-liquidjs@10.25.3:
-  version "10.25.3"
-  resolved "https://registry.yarnpkg.com/liquidjs/-/liquidjs-10.25.3.tgz#ee9583a36a2b23b118963ba8da12de048d7ae035"
-  integrity sha512-csoJtC6yTfkUlwy+QKm0tRbFoz5cnzly1ugFvBBDWXA4Oo8ul31hOHDEZVzG93q8YaxRIQ909GFuow8d/q1v2Q==
+liquidjs@10.25.6:
+  version "10.25.6"
+  resolved "https://registry.yarnpkg.com/liquidjs/-/liquidjs-10.25.6.tgz#dddf7ee43cd3c7a2d7768063937bf14e77079afb"
+  integrity sha512-h5ki5HS1PiL9/NmLw3iUcTF1jQswKJd8KLEXNrtSf8XHF0v3c5+d+8llz3N9I5IUdc5rsOuVLb9AVnqvqqscPg==
   dependencies:
     commander "^10.0.0"
 
