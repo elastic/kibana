@@ -6,19 +6,25 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiButton, EuiInMemoryTable, EuiPageSection, EuiSpacer, EuiTitle } from '@elastic/eui';
-import type { DataSourceListItem } from '../common/sample_data_sources';
-import { SAMPLE_DATA_SOURCES } from '../common/sample_data_sources';
+import type { DataSourceListItem } from '../common/sample_data_sources_client';
+import { SampleDataSourcesClient } from '../common/sample_data_sources_client';
 
 export interface DataSourcesPageProps {
   pageTitle: string;
 }
 
 export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({ pageTitle }) => {
+  const dataClient = useMemo(() => new SampleDataSourcesClient(), []);
+  const [items, setItems] = useState<DataSourceListItem[]>([]);
   const [selectedItems, setSelectedItems] = useState<DataSourceListItem[]>([]);
+
+  useEffect(() => {
+    setItems(dataClient.get());
+  }, [dataClient]);
 
   const columns: Array<EuiBasicTableColumn<DataSourceListItem>> = [
     {
@@ -48,7 +54,7 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({ pageT
       </EuiTitle>
       <EuiSpacer size="l" />
       <EuiInMemoryTable<DataSourceListItem>
-        items={SAMPLE_DATA_SOURCES}
+        items={items}
         itemId="id"
         columns={columns}
         search={{
