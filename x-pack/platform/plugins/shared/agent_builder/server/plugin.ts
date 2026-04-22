@@ -195,7 +195,7 @@ export class AgentBuilderPlugin
       getInternalServices,
     });
 
-    registerSkillToolsLoaderHook(serviceSetups);
+    registerSkillToolsLoaderHook(serviceSetups, { analyticsService: this.analyticsService });
 
     const smlTools = createSmlTools({
       getSmlService: () => {

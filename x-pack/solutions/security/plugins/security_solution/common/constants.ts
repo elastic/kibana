@@ -721,3 +721,7 @@ export enum SecurityAgentBuilderAttachments {
 }
 
 export const SECURITY_RULE_ATTACHMENT_ID = 'ai-rule-creation';
+
+export const REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG =
+  'securitySolution.registerAlertValidationStepsEnabled' as const;
+export const REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT = false as const;
