@@ -171,7 +171,7 @@ import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_repo
 import type { TrialCompanionRoutesDeps } from './lib/trial_companion/types';
 import { setupAlertsCapabilitiesSwitcher } from './lib/capabilities/alerts_capabilities_switcher';
 import { securityAlertsProfileInitializer } from './lib/anonymization';
-import { registerWorkflowSteps } from './workflows/step_types';
+import { registerWorkflowSteps as registerWorkflowStepTypes } from './workflows/step_types';
 import { registerWatchlistMaintainer } from './lib/entity_analytics/watchlists/maintainer/register_watchlist_maintainer';
 import { registerEndpointExceptionsRoutes } from './endpoint/routes/endpoint_exceptions_per_policy_opt_in';
 import {
@@ -858,7 +858,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     core
       .getStartServices()
       .then(async ([coreStart]) => {
-        await registerWorkflowSteps(workflowsExtensions, coreStart);
+        await registerWorkflowStepTypes(workflowsExtensions, coreStart);
       })
       .catch((error) => {
         this.logger.error(
