@@ -9,6 +9,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPanel, EuiButton, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { SecurityPageName, useNavigateTo } from '@kbn/security-solution-navigation';
 import { useLocation } from 'react-router-dom';
+import { useKibana } from '../../../../../../../common/lib/kibana';
 import { IconAgent } from '../../../../../../../common/icons/agent';
 import { useGetSecuritySolutionUrl } from '../../../../../../../common/components/link_to';
 import { SIEM_MIGRATIONS_PATH } from '../../../../../../../../common/constants';
@@ -59,9 +60,17 @@ export const MigrationsCallout = memo(() => {
 });
 
 export const useShowMigrationCallout = () => {
+  const {
+    services: { siemMigrations },
+  } = useKibana();
   const { pathname } = useLocation();
 
-  return !pathname.includes(SIEM_MIGRATIONS_PATH);
+  const isSiemMigrationsAvailable = useMemo(
+    () => siemMigrations.rules.isAvailable() || siemMigrations.dashboards.isAvailable(),
+    [siemMigrations.rules, siemMigrations.dashboards]
+  );
+
+  return isSiemMigrationsAvailable && !pathname.includes(SIEM_MIGRATIONS_PATH);
 };
 
 MigrationsCallout.displayName = 'MigrationsCallout';
