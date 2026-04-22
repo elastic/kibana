@@ -94,6 +94,7 @@ export const MultiSelectFilter: React.FC<UseFilterParams> = ({
         onChange={onChange}
         singleSelection={false}
         renderOption={renderOption}
+        listProps={{ paddingSize: 's' }}
       >
         {(list, search) => (
           <div>

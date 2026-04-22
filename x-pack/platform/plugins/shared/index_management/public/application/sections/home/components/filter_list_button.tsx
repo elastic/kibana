@@ -80,7 +80,7 @@ export function FilterListButton<T extends string>({ onChange, filters }: Props<
         button={button}
         isOpen={isPopoverOpen}
         closePopover={closePopover}
-        panelPaddingSize="none"
+        panelPaddingSize="s"
         data-test-subj="filterList"
       >
         <EuiSelectable

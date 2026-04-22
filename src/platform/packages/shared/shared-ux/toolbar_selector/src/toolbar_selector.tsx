@@ -248,6 +248,7 @@ export const ToolbarSelector = ({
           listProps={{
             truncationProps: { truncation: 'middle' },
             isVirtualized: searchable,
+            paddingSize: 's',
           }}
           {...(searchable
             ? {

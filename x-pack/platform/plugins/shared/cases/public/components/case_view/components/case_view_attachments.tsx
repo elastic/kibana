@@ -79,7 +79,7 @@ export const CaseViewAttachments = ({
           label: tab.name,
           'data-test-subj': `case-view-tab-title-${tab.id}`,
           append: tab.badge,
-          isFocused: tab.id === activeTab,
+          checked: tab.id === activeTab ? 'on' : undefined,
           onFocusBadge: false,
           showIcons: false,
           onClick: () => {

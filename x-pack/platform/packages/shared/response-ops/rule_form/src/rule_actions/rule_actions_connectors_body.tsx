@@ -333,7 +333,7 @@ export const RuleActionsConnectorsBody = ({
           button={button}
           closePopover={closeFilterPopover}
           isOpen={isConenctorFilterPopoverOpen}
-          panelPaddingSize="none"
+          panelPaddingSize="s"
         >
           <EuiSelectable singleSelection options={options}>
             {(list) => <div style={{ width: 400 }}>{list}</div>}

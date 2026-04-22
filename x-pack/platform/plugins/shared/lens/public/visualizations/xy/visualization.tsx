@@ -1575,7 +1575,7 @@ const SubtypeSwitch = ({
     <>
       <EuiPopover
         ownFocus
-        panelPaddingSize="none"
+        panelPaddingSize="s"
         button={
           <ToolbarButton
             aria-label={i18n.translate('xpack.lens.xyChart.stackingOptions', {

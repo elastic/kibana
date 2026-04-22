@@ -135,7 +135,7 @@ export function KnowledgeIndicatorsTypeFilter({
         }
         isOpen={isPopoverOpen}
         closePopover={() => setIsPopoverOpen(false)}
-        panelPaddingSize="none"
+        panelPaddingSize="s"
       >
         <EuiSelectable
           aria-label={KNOWLEDGE_INDICATOR_TYPE_FILTER_SELECTABLE_ARIA_LABEL}

@@ -93,7 +93,7 @@ const RuleExecutionStatusSelectorComponent = ({
       closePopover={() => {
         setIsExecutionStatusPopoverOpen(!isExecutionStatusPopoverOpen);
       }}
-      panelPaddingSize="none"
+      panelPaddingSize="s"
       repositionOnScroll
     >
       <EuiSelectable
