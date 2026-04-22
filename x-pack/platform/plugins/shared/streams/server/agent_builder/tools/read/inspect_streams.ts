@@ -39,6 +39,7 @@ import {
   getQualityAssessment,
 } from '../../utils/quality_utils';
 import { buildProcessingChain, buildFieldMappings } from '../../utils/hierarchy_utils';
+import { getStreamConvention, getConventionHint } from '../../utils/convention_utils';
 
 const STREAMS_SUPPORTED_TYPES = new Set<string>(FIELD_DEFINITION_TYPES);
 
@@ -235,6 +236,12 @@ const buildStreamEntry = async ({
       'Cannot modify processing, lifecycle, or failure store.';
   }
 
+  if (Streams.ingest.all.Definition.is(definition)) {
+    const convention = getStreamConvention(definition);
+    const conventionHint = getConventionHint(convention);
+    entry.type_context = `${entry.type_context} ${conventionHint}`;
+  }
+
   if (aspects.has('overview')) {
     entry.overview = {
       name: definition.name,
@@ -244,6 +251,8 @@ const buildStreamEntry = async ({
 
   if (aspects.has('schema') && Streams.ingest.all.Definition.is(definition)) {
     const isClassic = Streams.ClassicStream.Definition.is(definition);
+    const convention = getStreamConvention(definition);
+    const conventionHint = getConventionHint(convention);
 
     const [ancestors, sampleDocs, fieldCapsResponse] = await Promise.all([
       streamsClient.getAncestors(streamName),
@@ -264,6 +273,8 @@ const buildStreamEntry = async ({
         sampleDocs
       );
       entry.schema = {
+        field_convention: convention,
+        field_convention_hint: conventionHint,
         mapped_fields: mappedFields,
         unmapped_fields: unmappedFields,
         total_mapped: mappedFields.length,
@@ -273,6 +284,8 @@ const buildStreamEntry = async ({
       const mappedFields = buildFieldMappings(definition, ancestors);
       const unmappedFields = getUnmappedFields({ definition, ancestors, sampleDocs });
       entry.schema = {
+        field_convention: convention,
+        field_convention_hint: conventionHint,
         mapped_fields: mappedFields,
         unmapped_fields: unmappedFields,
         total_mapped: mappedFields.length,

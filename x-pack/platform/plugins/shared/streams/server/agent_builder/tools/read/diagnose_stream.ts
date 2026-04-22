@@ -23,6 +23,7 @@ import {
 } from '../tool_ids';
 import { classifyError } from '../../utils/error_utils';
 import { computeQualityMetrics } from '../../utils/quality_utils';
+import { getStreamConvention, getConventionHint } from '../../utils/convention_utils';
 import {
   getDocCountsForStreams,
   getDegradedDocCountsForStreams,
@@ -186,7 +187,9 @@ export const createDiagnoseStreamTool = ({
       if (degradedCount > 0) {
         const degradedFields = await getDegradedFieldBreakdown(esClient, name, startMs, endMs);
         if (degradedFields.length > 0) {
+          const convention = getStreamConvention(definition);
           result.degraded_fields = degradedFields;
+          result.degraded_fields_convention_hint = getConventionHint(convention);
         }
       }
 
