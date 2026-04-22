@@ -8,7 +8,8 @@
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { QueryUtils, isIndexNotFoundError } from './query_utils';
+import { QueryUtils } from './query_utils';
+import { isIndexNotFoundError } from '../utils/is_index_not_found_error';
 
 describe('query_utils', () => {
   describe('isIndexNotFoundError', () => {

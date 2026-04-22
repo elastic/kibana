@@ -10,6 +10,7 @@ import type { ServerRouteRepository } from '@kbn/server-route-repository-utils';
 import { apiPrivileges } from '@kbn/agent-builder-plugin/common/features';
 import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
 import { getRequestAbortedSignal } from '@kbn/inference-plugin/server/routes/get_request_aborted_signal';
+import { isIndexNotFoundError } from '@kbn/agent-builder-plugin/server/utils/is_index_not_found_error';
 import { generateErrorAiInsight } from './apm_error/generate_error_ai_insight';
 import { createObservabilityAgentBuilderServerRoute } from '../create_observability_agent_builder_server_route';
 import { getLogAiInsights } from './get_log_ai_insights';
@@ -164,39 +165,47 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
         });
       }
 
-      const [coreStart, startDeps] = await core.getStartServices();
-      const { inference } = startDeps;
+      try {
+        const [coreStart, startDeps] = await core.getStartServices();
+        const { inference } = startDeps;
 
-      const { connectorId, connector } = await resolveConnectorForFeature({
-        searchInferenceEndpoints: startDeps.searchInferenceEndpoints,
-        featureId: OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID,
-        request,
-        logger,
-      });
-
-      const inferenceClient = inference.getClient({ request });
-      const esClient = coreStart.elasticsearch.client.asScoped(request);
-
-      const result = await getLogAiInsights({
-        core,
-        plugins,
-        index,
-        id,
-        fields,
-        inferenceClient,
-        connectorId,
-        connector,
-        request,
-        esClient,
-        logger,
-      });
-
-      return response.ok({
-        body: observableIntoEventSourceStream(result.events$, {
+        const { connectorId, connector } = await resolveConnectorForFeature({
+          searchInferenceEndpoints: startDeps.searchInferenceEndpoints,
+          featureId: OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID,
+          request,
           logger,
-          signal: getRequestAbortedSignal(request),
-        }),
-      });
+        });
+
+        const inferenceClient = inference.getClient({ request });
+        const esClient = coreStart.elasticsearch.client.asScoped(request);
+
+        const result = await getLogAiInsights({
+          core,
+          plugins,
+          index,
+          id,
+          fields,
+          inferenceClient,
+          connectorId,
+          connector,
+          request,
+          esClient,
+          logger,
+        });
+        return response.ok({
+          body: observableIntoEventSourceStream(result.events$, {
+            logger,
+            signal: getRequestAbortedSignal(request),
+          }),
+        });
+      } catch (error) {
+        logger.error(error);
+        if (isIndexNotFoundError(error)) {
+          return response.notFound({
+            body: { message: error.message },
+          });
+        }
+      }
     },
   });
 
