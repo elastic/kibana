@@ -6,6 +6,7 @@
  */
 
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { MlCoreSetup } from '../plugin';
 import {
   ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
@@ -16,7 +17,11 @@ import {
 export * from './constants';
 export type * from './types';
 
-export function registerEmbeddables(embeddable: EmbeddableSetup, core: MlCoreSetup) {
+export function registerEmbeddables(
+  embeddable: EmbeddableSetup,
+  core: MlCoreSetup,
+  usageCollection?: UsageCollectionSetup
+) {
   embeddable.registerReactEmbeddableFactory(ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, async () => {
     const { getAnomalySwimLaneEmbeddableFactory } = await import('./anomaly_swimlane');
     return getAnomalySwimLaneEmbeddableFactory(core.getStartServices);
@@ -26,14 +31,14 @@ export function registerEmbeddables(embeddable: EmbeddableSetup, core: MlCoreSet
     const { getAnomalyChartsReactEmbeddableFactory } = await import(
       './anomaly_charts/anomaly_charts_embeddable_factory'
     );
-    return getAnomalyChartsReactEmbeddableFactory(core.getStartServices);
+    return getAnomalyChartsReactEmbeddableFactory(core.getStartServices, usageCollection);
   });
 
   embeddable.registerReactEmbeddableFactory(
     ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
     async () => {
       const { getSingleMetricViewerEmbeddableFactory } = await import('./single_metric_viewer');
-      return getSingleMetricViewerEmbeddableFactory(core.getStartServices);
+      return getSingleMetricViewerEmbeddableFactory(core.getStartServices, usageCollection);
     }
   );
 }

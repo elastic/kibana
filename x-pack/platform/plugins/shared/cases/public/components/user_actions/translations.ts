@@ -36,13 +36,6 @@ export const ALERT_COMMENT_LABEL_TITLE = i18n.translate(
   }
 );
 
-export const EVENT_COMMENT_LABEL_TITLE = i18n.translate(
-  'xpack.cases.caseView.eventCommentLabelTitle',
-  {
-    defaultMessage: 'added an event',
-  }
-);
-
 export const SHOW_EVENT_TOOLTIP = i18n.translate('xpack.cases.caseView.showEventTooltip', {
   defaultMessage: 'Show event details',
 });
@@ -183,6 +176,20 @@ export const SET_TEMPLATE_FIELD_LABEL_PREFIX = (fieldName: string) =>
 export const EXTENDED_FIELDS = i18n.translate('xpack.cases.caseView.userActions.extendedFields', {
   defaultMessage: 'Template Fields',
 });
+
+export const APPLIED_TEMPLATE = i18n.translate('xpack.cases.caseView.userActions.appliedTemplate', {
+  defaultMessage: 'Applied Template',
+});
+
+export const APPLIED_TEMPLATE_LABEL = i18n.translate(
+  'xpack.cases.caseView.userActions.appliedTemplateLabel',
+  { defaultMessage: 'applied template' }
+);
+
+export const REMOVED_TEMPLATE_LABEL = i18n.translate(
+  'xpack.cases.caseView.userActions.removedTemplateLabel',
+  { defaultMessage: 'removed applied template' }
+);
 
 export const SYNCED_ALERTS_WITH_CLOSE_REASON = (count: number) =>
   i18n.translate('xpack.cases.caseView.userActions.status.syncedAlertsWithCloseReason', {

@@ -68,6 +68,7 @@ import { LazyCustomCriblExtension } from './security_integrations/cribl/componen
 import type { SecurityAppStore } from './common/store/types';
 import { PluginContract } from './plugin_contract';
 import { PluginServices } from './plugin_services';
+import { getEventType } from './cases/attachments/event';
 import { getExternalReferenceAttachmentEndpointRegular } from './cases/attachments/endpoint/external_reference';
 import { isSecuritySolutionAccessible } from './helpers_access';
 import { generateIndicatorAttachmentType } from './cases/attachments/indicator/utils/attachments';
@@ -119,11 +120,27 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   ): PluginSetup {
     this.services.setup(core, plugins);
 
-    const { home, usageCollection, management, cases, share } = plugins;
+    const { home, usageCollection, management, cases, share, workflowsExtensions } = plugins;
     const { productFeatureKeys$ } = this.contract;
 
     if (share) {
       share.url.locators.create(new AIValueReportLocatorDefinition());
+    }
+
+    // Register workflow steps
+    if (workflowsExtensions) {
+      import('./workflows/step_types')
+        .then(async ({ registerWorkflowSteps }) => {
+          const [coreStart] = await core.getStartServices();
+          return registerWorkflowSteps(workflowsExtensions, coreStart);
+        })
+        .catch((error) => {
+          this.logger.error(
+            `Error registering security workflow steps: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+        });
     }
 
     // Lazily instantiate subPlugins and initialize services
@@ -268,10 +285,17 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         }
       });
 
-    cases?.attachmentFramework.registerExternalReference(
+    if (!cases?.attachmentFramework) {
+      throw new Error(
+        'Security Solution requires the Cases setup contract to register security.event attachments'
+      );
+    }
+
+    cases.attachmentFramework.registerExternalReference(
       getExternalReferenceAttachmentEndpointRegular()
     );
-    cases?.attachmentFramework?.registerExternalReference(generateIndicatorAttachmentType());
+    cases.attachmentFramework.registerExternalReference(generateIndicatorAttachmentType());
+    cases.attachmentFramework.registerUnified(getEventType());
 
     this.registerDiscoverSharedFeatures(core, plugins);
 

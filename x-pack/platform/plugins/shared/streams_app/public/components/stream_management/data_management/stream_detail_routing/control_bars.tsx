@@ -18,6 +18,7 @@ import type { EuiButtonPropsForButton } from '@elastic/eui/src/components/button
 import { i18n } from '@kbn/i18n';
 import { useBoolean } from '@kbn/react-hooks';
 import React from 'react';
+import type { Streams } from '@kbn/streams-schema';
 import { StreamDeleteModal } from '../../../stream_delete_modal';
 import { RequestPreviewFlyout } from '../request_preview_flyout';
 import { buildRequestPreviewCodeContent } from '../shared/utils';
@@ -149,7 +150,10 @@ export const EditRoutingRuleControls = ({
 
   const onViewCodeClick = () => {
     const routingPayload = routing.map(routingConverter.toAPIDefinition);
-    const body = buildRoutingSaveRequestPayload(definition, routingPayload);
+    const body = buildRoutingSaveRequestPayload(
+      definition as Streams.WiredStream.GetResponse,
+      routingPayload
+    );
 
     setRequestPreviewCodeContent(
       buildRequestPreviewCodeContent({

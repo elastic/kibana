@@ -38,7 +38,10 @@ const FILTER_PANEL_MAX_HEIGHT = 250; // Maximum height in pixels for the filter 
 
 interface DataSourceBrowserKibanaServices {
   core: Pick<CoreStart, 'application' | 'http'>;
-  esql?: { getLicense?: () => Promise<ILicense | undefined> };
+  esql?: {
+    getLicense?: () => Promise<ILicense | undefined>;
+    enrichSources?: (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>;
+  };
 }
 
 interface DataSourceBrowserProps {
@@ -68,14 +71,15 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
   const { core } = kibana.services;
   const { http, application } = core;
   const getLicense = kibana.services?.esql?.getLicense;
+  const enrichSources = kibana.services?.esql?.enrichSources;
 
   const getTimeseriesIndicesCallback = useCallback(async () => {
     return await getTimeseriesIndices(http);
   }, [http]);
 
   const getSourcesCallback = useCallback(async () => {
-    return await getESQLSources({ http, application }, getLicense);
-  }, [application, getLicense, http]);
+    return await getESQLSources({ http, application }, getLicense, enrichSources);
+  }, [application, enrichSources, getLicense, http]);
 
   const { allSources, isLoading } = useAllSources({
     isOpen,

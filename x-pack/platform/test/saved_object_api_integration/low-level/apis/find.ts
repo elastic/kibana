@@ -15,25 +15,40 @@
 import expect from '@kbn/expect';
 import queryString from 'query-string';
 import { getUrlPrefix } from '../../../alerting_api_integration/common/lib';
+import { getTestDataLoader, SPACE_1, SPACE_2 } from '../../../common/lib/test_data_loader';
 import type { FtrProviderContext } from '../../common/ftr_provider_context';
 
-export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
+export default function (context: FtrProviderContext) {
+  const supertest = context.getService('supertest');
+  const testDataLoader = getTestDataLoader(context);
 
   const defaultNamespace = 'default';
 
   describe('low-level saved object find api integration', () => {
-    before(() =>
-      esArchiver.load(
-        'x-pack/platform/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-      )
-    );
-    after(() =>
-      esArchiver.unload(
-        'x-pack/platform/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-      )
-    );
+    before(async () => {
+      await testDataLoader.createFtrSpaces();
+      await testDataLoader.createFtrSavedObjectsData([
+        {
+          spaceName: null,
+          dataUrl:
+            'x-pack/platform/test/saved_object_api_integration/common/fixtures/kbn_archiver/default_space.json',
+        },
+        {
+          spaceName: SPACE_1.id,
+          dataUrl:
+            'x-pack/platform/test/saved_object_api_integration/common/fixtures/kbn_archiver/space_1.json',
+        },
+        {
+          spaceName: SPACE_2.id,
+          dataUrl:
+            'x-pack/platform/test/saved_object_api_integration/common/fixtures/kbn_archiver/space_2.json',
+        },
+      ]);
+    });
+    after(async () => {
+      await testDataLoader.deleteFtrSavedObjectsData();
+      await testDataLoader.deleteFtrSpaces();
+    });
 
     describe('when the query includes search fields of type nested', () => {
       it('finds the right document, single nested search field', async () => {

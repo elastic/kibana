@@ -211,6 +211,7 @@ enabled:
   - x-pack/platform/test/cases_api_integration/security_and_spaces/config_basic.ts
   - x-pack/platform/test/cases_api_integration/security_and_spaces/config_trial.ts
   - x-pack/platform/test/cases_api_integration/security_and_spaces/config_trial_common.ts
+  - x-pack/platform/test/cases_api_integration/security_and_spaces/config_trial_unified_attachments.ts
   - x-pack/platform/test/cases_api_integration/security_and_spaces/config_no_public_base_url.ts
   - x-pack/platform/test/cases_api_integration/spaces_only/config.ts
   - x-pack/platform/test/disable_ems/config.ts
@@ -319,7 +320,8 @@ enabled:
   - x-pack/platform/test/functional/apps/ml/short_tests/config.ts
   - x-pack/platform/test/functional/apps/ml/stack_management_jobs/config.ts
   - x-pack/platform/test/functional/apps/ml/memory_usage/config.ts
-  - x-pack/platform/test/functional/apps/monitoring/config.ts
+  - x-pack/platform/test/functional/apps/monitoring/config.group1.ts
+  - x-pack/platform/test/functional/apps/monitoring/config.group2.ts
   - x-pack/platform/test/functional/apps/painless_lab/config.ts
   - x-pack/platform/test/functional/apps/remote_clusters/config.ts
   - x-pack/platform/test/functional/apps/reporting_management/config.ts
@@ -380,12 +382,14 @@ enabled:
   - x-pack/platform/test/security_api_integration/http_no_auth_providers.config.ts
   - x-pack/platform/test/security_api_integration/kerberos_anonymous_access.config.ts
   - x-pack/platform/test/security_api_integration/kerberos.config.ts
+  - x-pack/platform/test/security_api_integration/kerberos.http2.config.ts
   - x-pack/platform/test/security_api_integration/login_selector.config.ts
   - x-pack/platform/test/security_api_integration/oidc_implicit_flow.config.ts
   - x-pack/platform/test/security_api_integration/oidc.config.ts
   - x-pack/platform/test/security_api_integration/oidc.http2.config.ts
   - x-pack/platform/test/security_api_integration/oidc_multiple_realms.config.ts
   - x-pack/platform/test/security_api_integration/pki.config.ts
+  - x-pack/platform/test/security_api_integration/pki.http2.config.ts
   - x-pack/platform/test/security_api_integration/saml.config.ts
   - x-pack/platform/test/security_api_integration/saml.http2.config.ts
   - x-pack/platform/test/security_api_integration/saml_cloud.config.ts
@@ -444,7 +448,8 @@ enabled:
   - x-pack/performance/journeys_e2e/tags_listing_page.ts
   - x-pack/performance/journeys_e2e/cloud_security_dashboard.ts
   - x-pack/performance/journeys_e2e/apm_service_inventory.ts
-  - x-pack/performance/journeys_e2e/infra_hosts_view.ts
+  - x-pack/performance/journeys_e2e/infra_hosts_view_ecs.ts
+  - x-pack/performance/journeys_e2e/infra_hosts_view_semconv.ts
   # configs migrated to the new Kibana architecture
   - x-pack/platform/test/api_integration/apis/aiops/config.ts
   - x-pack/platform/test/api_integration/apis/cases/config.ts
@@ -459,16 +464,13 @@ enabled:
   - x-pack/platform/test/api_integration/apis/grok_debugger/config.ts
   - x-pack/platform/test/api_integration/apis/file_upload/config.ts
   - x-pack/platform/test/api_integration/apis/kibana/config.ts
-  - x-pack/platform/test/api_integration/apis/logstash/config.ts
   - x-pack/platform/test/api_integration/apis/management/config.ts
   - x-pack/platform/test/api_integration/apis/management/index_management/disabled_data_enrichers/config.ts
-  - x-pack/platform/test/api_integration/apis/maps/config.ts
   - x-pack/platform/test/api_integration/apis/lens/config.ts
   - x-pack/platform/test/api_integration/apis/ml/config.ts
   - x-pack/platform/test/api_integration/apis/monitoring/config.ts
   - x-pack/platform/test/api_integration/apis/monitoring_collection/config.ts
   - x-pack/platform/test/api_integration/apis/osquery/config.ts
-  - x-pack/platform/test/api_integration/apis/search/config.ts
   - x-pack/platform/test/api_integration/apis/search_inference_endpoints/config.ts
   - x-pack/platform/test/api_integration/apis/searchprofiler/config.ts
   - x-pack/platform/test/api_integration/apis/security/config_security_trial.ts
@@ -496,3 +498,4 @@ enabled:
   - x-pack/platform/test/api_integration_deployment_agnostic/configs/stateful/platform.streams_ccr.stateful.config.ts
   - x-pack/platform/test/api_integration/apis/streams/streams_without_security.config.ts
   - x-pack/platform/test/api_integration_deployment_agnostic/configs/stateful/platform.alerting_v2.stateful.config.ts
+  - x-pack/platform/test/api_integration_deployment_agnostic/configs/stateful/platform.streams_definitions.feature_flag.stateful.config.ts

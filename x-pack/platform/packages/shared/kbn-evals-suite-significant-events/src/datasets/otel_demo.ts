@@ -8,9 +8,6 @@
 import { GCS_BUCKET, OTEL_DEMO_GCS_BASE_PATH_PREFIX, OTEL_DEMO_NAMESPACE } from '../constants';
 import type { DatasetConfig } from './types';
 
-// TODO: Only `healthy-baseline` and `payment-unreachable` have validated criteria and GCS snapshots.
-// The remaining scenarios are unvalidated placeholders — snapshots and criteria will be added as
-// each scenario is validated.
 export const otelDemoDataset: DatasetConfig = {
   id: OTEL_DEMO_NAMESPACE,
   description: 'OpenTelemetry Demo microservices application',
@@ -23,82 +20,111 @@ export const otelDemoDataset: DatasetConfig = {
       output: {
         criteria: [
           {
-            id: 'entity-frontend',
-            text: 'Must identify frontend service as an entity (evidence: resource.attributes.app=frontend OR resource.attributes.app.kubernetes.io/name=frontend OR resource.attributes.k8s.deployment.name=frontend)',
-            score: 1,
-            sampling_filters: [{ term: { 'resource.attributes.app': 'frontend' } }],
-          },
-          {
-            id: 'entity-checkout',
-            text: 'Must identify checkout service as an entity (evidence: resource.attributes.app=checkout)',
-            score: 2,
-            sampling_filters: [{ term: { 'resource.attributes.app': 'checkout' } }],
-          },
-          {
             id: 'entity-cart',
-            text: 'Must identify cart service as an entity (evidence: resource.attributes.app=cart; cartservice logs)',
+            text: 'Must identify cart service as an entity with filter on resource.attributes.app=cart (evidence: 697 docs; ValkeyCartStore operations — GetCartAsync, AddItemAsync, EmptyCartAsync — in body.text)',
             score: 2,
             sampling_filters: [{ term: { 'resource.attributes.app': 'cart' } }],
           },
           {
-            id: 'entity-payment',
-            text: 'Must identify payment service as an entity (evidence: resource.attributes.app=payment; paymentservice container metadata)',
-            score: 1,
-            sampling_filters: [{ term: { 'resource.attributes.app': 'payment' } }],
-          },
-          {
-            id: 'entity-product-catalog',
-            text: 'Must identify product-catalog service as an entity (evidence: resource.attributes.app=product-catalog OR resource.attributes.app.kubernetes.io/name=product-catalog OR resource.attributes.k8s.deployment.name=product-catalog)',
-            score: 1,
-            sampling_filters: [{ term: { 'resource.attributes.app': 'product-catalog' } }],
+            id: 'entity-checkout',
+            text: 'Must identify checkout service as an entity with filter on resource.attributes.app=checkout (evidence: 223 docs; "payment went through (transaction_id: ...)" and "order confirmation email sent to" in body.text)',
+            score: 2,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'checkout' } }],
           },
           {
             id: 'entity-shipping',
-            text: 'Must identify shipping service as an entity (evidence: resource.attributes.app=shipping)',
+            text: 'Must identify shipping service as an entity (evidence: 223 docs; "Sending Quote" and "Received quote" patterns in body.text)',
             score: 1,
             sampling_filters: [{ term: { 'resource.attributes.app': 'shipping' } }],
           },
           {
             id: 'entity-email',
-            text: 'Must identify email service as an entity (evidence: resource.attributes.app=email)',
+            text: 'Must identify email service as an entity (evidence: 157 docs; POST /send_order_confirmation HTTP/1.1 200 in body.text)',
             score: 1,
             sampling_filters: [{ term: { 'resource.attributes.app': 'email' } }],
           },
           {
-            id: 'entity-ad',
-            text: 'Must identify ad service as an entity (evidence: resource.attributes.app=ad)',
+            id: 'entity-payment',
+            text: 'Must identify payment service as an entity (evidence: 154 docs; attributes.msg contains "Charge request received" and "Transaction complete")',
             score: 1,
-            sampling_filters: [{ term: { 'resource.attributes.app': 'ad' } }],
+            sampling_filters: [{ term: { 'resource.attributes.app': 'payment' } }],
           },
           {
             id: 'entity-recommendation',
-            text: 'Must identify recommendation service as an entity (evidence: resource.attributes.app=recommendation)',
+            text: 'Must identify recommendation service as an entity (evidence: 135 docs; "Receive ListRecommendations for product ids" from recommendation_server.py in body.text)',
             score: 1,
             sampling_filters: [{ term: { 'resource.attributes.app': 'recommendation' } }],
           },
           {
+            id: 'entity-ad',
+            text: 'Must identify ad service as an entity (evidence: 131 docs; "oteldemo.AdService - Targeted ad request received" in body.text)',
+            score: 1,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'ad' } }],
+          },
+          {
             id: 'entity-quote',
-            text: 'Must identify quote service as an entity (evidence: resource.attributes.app=quote)',
+            text: 'Must identify quote service as an entity (evidence: 74 docs; POST /getquote HTTP/1.1 200 in body.text)',
             score: 1,
             sampling_filters: [{ term: { 'resource.attributes.app': 'quote' } }],
           },
           {
+            id: 'entity-frontend',
+            text: 'Must identify frontend service as an entity (evidence: resource.attributes.app=frontend; only 3 docs with startup messages)',
+            score: 1,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'frontend' } }],
+          },
+          {
+            id: 'entity-valkey',
+            text: 'Must identify valkey as a cache/data store entity (evidence: 10 docs with background saving/RDB operations; cart service logs reference ValkeyCartStore; container image valkey/valkey:8-alpine)',
+            score: 1,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'valkey' } }],
+          },
+          {
             id: 'dep-checkout-payment',
-            text: 'Must identify the dependency checkout -> payment (evidence: checkout logs mention payment and transaction/charge success)',
+            text: 'Must identify the dependency checkout → payment (evidence: 74 checkout docs log "payment went through (transaction_id: ...)" correlating with payment "Charge request received" / "Transaction complete")',
             score: 2,
+            sampling_filters: [
+              { term: { 'resource.attributes.app': 'checkout' } },
+              { term: { 'resource.attributes.app': 'payment' } },
+            ],
+          },
+          {
+            id: 'dep-cart-valkey',
+            text: 'Must identify the dependency cart → valkey (evidence: cart logs reference cartservice.cartstore.ValkeyCartStore for GetCartAsync/AddItemAsync; valkey runs its own container with valkey/valkey:8-alpine image)',
+            score: 2,
+            sampling_filters: [
+              { term: { 'resource.attributes.app': 'cart' } },
+              { term: { 'resource.attributes.app': 'valkey' } },
+            ],
+          },
+          {
+            id: 'dep-checkout-email',
+            text: 'Should identify the dependency checkout → email (evidence: checkout logs "order confirmation email sent to" at same timestamps as email POST /send_order_confirmation 200)',
+            score: 1,
+            sampling_filters: [
+              {
+                bool: {
+                  filter: [
+                    { term: { 'resource.attributes.app': 'checkout' } },
+                    { match_phrase: { 'body.text': 'order confirmation email sent to' } },
+                  ],
+                },
+              },
+              { term: { 'resource.attributes.app': 'email' } },
+            ],
           },
           {
             id: 'tech-kubernetes',
-            text: 'Must identify Kubernetes as infrastructure (k8s pod/container metadata present)',
+            text: 'Must identify Kubernetes as infrastructure (evidence: resource.attributes.k8s.node.name=minikube, resource.attributes.k8s.namespace.name=otel-demo, deployment/pod/container metadata on all docs)',
             score: 1,
           },
         ],
-        min_features: 4,
-        max_features: 30,
+        min_features: 8,
+        max_features: 25,
         required_types: ['entity'],
         expect_entity_filters: true,
         expected_ground_truth:
-          'entities=[frontend, checkout, cart, payment, product-catalog, recommendation, shipping, email, ad, quote], deps=[checkout->payment, cart->valkey], infra=[kubernetes]',
+          'entities=[cart, checkout, shipping, email, payment, recommendation, ad, quote, frontend, valkey], deps=[checkout->payment, cart->valkey, checkout->email, shipping->quote], infra=[kubernetes/minikube, otel-demo namespace, otel-collector for log aggregation, arm64 architecture]',
       },
       metadata: {
         difficulty: 'easy',
@@ -108,59 +134,140 @@ export const otelDemoDataset: DatasetConfig = {
     {
       input: {
         scenario_id: 'payment-unreachable',
-        log_query_filter: [
-          { terms: { 'resource.attributes.app': ['frontend', 'checkout'] } },
-          {
-            bool: {
-              should: [
-                { match_phrase: { 'body.text': 'failed to charge card' } },
-                { match_phrase: { 'body.text': 'transport: Error while dialing' } },
-                { match_phrase: { 'body.text': 'dial tcp' } },
-                { match_phrase: { 'body.text': 'i/o timeout' } },
-                { match_phrase: { 'body.text': 'deadline exceeded' } },
-              ],
-              minimum_should_match: 1,
-            },
-          },
-        ],
       },
       output: {
         criteria: [
           {
+            id: 'entity-cart',
+            text: 'Must identify cart service as an entity with filter on resource.attributes.app=cart (evidence: 1281 docs; ValkeyCartStore operations — GetCartAsync, AddItemAsync — in body.text)',
+            score: 2,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'cart' } }],
+          },
+          {
             id: 'entity-checkout',
-            text: 'Must identify checkout service as an entity (evidence: resource.attributes.app=checkout)',
+            text: 'Must identify checkout service as an entity with filter on resource.attributes.app=checkout (evidence: 280 docs; "[PlaceOrder] user_id=..." and "order confirmation email sent to" in body.text)',
             score: 2,
             sampling_filters: [{ term: { 'resource.attributes.app': 'checkout' } }],
           },
           {
-            id: 'entity-payment',
-            text: 'Must identify payment service as an entity and downstream target (evidence: resource.attributes.app=payment and/or paymentservice container metadata)',
+            id: 'entity-frontend',
+            text: 'Must identify frontend service as an entity (evidence: 315 docs; gRPC errors including "Error: 13 INTERNAL: failed to charge card" and "Error: 14 UNAVAILABLE: No connection established" with Node.js stack traces)',
             score: 2,
+            sampling_filters: [
+              { term: { 'resource.attributes.app': 'frontend' } },
+              {
+                bool: {
+                  filter: [
+                    { term: { 'resource.attributes.app': 'frontend' } },
+                    { match_phrase: { 'body.text': 'failed to charge card' } },
+                  ],
+                },
+              },
+            ],
+          },
+          {
+            id: 'entity-shipping',
+            text: 'Must identify shipping service as an entity (evidence: 372 docs; "Sending Quote", "Received quote", "Tracking ID Created" patterns in body.text)',
+            score: 1,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'shipping' } }],
+          },
+          {
+            id: 'entity-payment',
+            text: 'Must identify payment service as an entity (evidence: 127 docs; attributes.msg="Charge request received" / "Transaction complete"; partially reachable during this scenario)',
+            score: 1,
             sampling_filters: [{ term: { 'resource.attributes.app': 'payment' } }],
           },
           {
-            id: 'dep-checkout-payment',
-            text: 'Must identify the dependency checkout -> payment (evidence: charge failures/dialing/timeouts toward payment, often surfaced in frontend/checkout logs)',
-            score: 3,
-          },
-          {
-            id: 'entity-frontend',
-            text: 'Must identify frontend service (evidence: resource.attributes.app=frontend; upstream impact)',
+            id: 'entity-email',
+            text: 'Must identify email service as an entity (evidence: 130 docs; POST /send_order_confirmation HTTP/1.1 200 in body.text)',
             score: 1,
-            sampling_filters: [{ term: { 'resource.attributes.app': 'frontend' } }],
+            sampling_filters: [{ term: { 'resource.attributes.app': 'email' } }],
           },
           {
-            id: 'error-signatures',
-            text: 'Must reference error signatures like i/o timeout, dial tcp, deadline exceeded, or gRPC errors in evidence',
+            id: 'entity-recommendation',
+            text: 'Must identify recommendation service as an entity (evidence: 223 docs; "Receive ListRecommendations for product ids" from recommendation_server.py)',
+            score: 1,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'recommendation' } }],
+          },
+          {
+            id: 'entity-ad',
+            text: 'Must identify ad service as an entity (evidence: 250 docs; "oteldemo.AdService - Targeted ad request received" in body.text)',
+            score: 1,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'ad' } }],
+          },
+          {
+            id: 'entity-quote',
+            text: 'Must identify quote service as an entity (evidence: 156 docs; POST /getquote HTTP/1.1 200 in body.text)',
+            score: 1,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'quote' } }],
+          },
+          {
+            id: 'entity-valkey',
+            text: 'Must identify valkey as a cache/data store entity (evidence: 15 docs; cart logs reference ValkeyCartStore; container image valkey/valkey:8-alpine)',
+            score: 1,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'valkey' } }],
+          },
+          {
+            id: 'dep-checkout-payment',
+            text: 'Must identify the dependency checkout → payment (evidence: checkout PlaceOrder triggers payment; frontend shows "failed to charge card: could not charge the card: rpc error: code = Unavailable ... dial tcp 10.98.122.240:9999: i/o timeout")',
+            score: 3,
+            sampling_filters: [
+              { term: { 'resource.attributes.app': 'checkout' } },
+              { term: { 'resource.attributes.app': 'payment' } },
+            ],
+          },
+          {
+            id: 'dep-cart-valkey',
+            text: 'Must identify the dependency cart → valkey (evidence: cart logs reference cartservice.cartstore.ValkeyCartStore for GetCartAsync/AddItemAsync)',
             score: 2,
+            sampling_filters: [
+              { term: { 'resource.attributes.app': 'cart' } },
+              { term: { 'resource.attributes.app': 'valkey' } },
+            ],
+          },
+          {
+            id: 'dep-checkout-email',
+            text: 'Should identify the dependency checkout → email (evidence: checkout logs "order confirmation email sent to" correlating with email POST /send_order_confirmation 200)',
+            score: 1,
+            sampling_filters: [
+              {
+                bool: {
+                  filter: [
+                    { term: { 'resource.attributes.app': 'checkout' } },
+                    { match_phrase: { 'body.text': 'order confirmation email sent to' } },
+                  ],
+                },
+              },
+              { term: { 'resource.attributes.app': 'email' } },
+            ],
+          },
+          {
+            id: 'error-payment-unreachable',
+            text: 'Must reference payment unreachability errors in at least one feature: gRPC code 13 INTERNAL / code 14 UNAVAILABLE, "failed to charge card", "transport: Error while dialing: dial tcp", "i/o timeout", or "connection refused"',
+            score: 3,
+            sampling_filters: [
+              {
+                bool: {
+                  filter: [
+                    { term: { 'resource.attributes.app': 'frontend' } },
+                    { match_phrase: { 'body.text': 'failed to charge card' } },
+                  ],
+                },
+              },
+            ],
+          },
+          {
+            id: 'tech-kubernetes',
+            text: 'Must identify Kubernetes as infrastructure (evidence: resource.attributes.k8s.node.name=minikube, resource.attributes.k8s.namespace.name=otel-demo)',
+            score: 1,
           },
         ],
-        min_features: 3,
-        max_features: 30,
+        min_features: 8,
+        max_features: 25,
         required_types: ['entity', 'dependency'],
         expect_entity_filters: true,
         expected_ground_truth:
-          'entities=[checkout, payment, frontend], deps=[checkout->payment (timeout)], error_signatures=[i/o timeout, dial tcp, deadline exceeded, gRPC transport failure]',
+          'entities=[cart, checkout, frontend, shipping, payment, email, recommendation, ad, quote, valkey], deps=[checkout->payment, cart->valkey, checkout->email, shipping->quote, frontend->checkout], infra=[kubernetes/minikube], error_signatures=[failed to charge card, dial tcp i/o timeout, gRPC code 13 INTERNAL / code 14 UNAVAILABLE, transport: Error while dialing, connection refused; errors observed in frontend service logs]',
       },
       metadata: {
         difficulty: 'medium',
@@ -176,36 +283,153 @@ export const otelDemoDataset: DatasetConfig = {
         criteria: [
           {
             id: 'entity-cart',
-            text: 'Must identify cart service as an entity (failing service)',
+            text: 'Must identify cart service as an entity with filter on resource.attributes.app=cart (evidence: 587 docs; ValkeyCartStore operations in body.text; "Application is shutting down" indicating cart crash after Valkey loss)',
             score: 2,
+            sampling_filters: [
+              { term: { 'resource.attributes.app': 'cart' } },
+              {
+                bool: {
+                  filter: [
+                    { term: { 'resource.attributes.app': 'cart' } },
+                    { match_phrase: { 'body.text': 'connect to redis' } },
+                  ],
+                },
+              },
+              {
+                bool: {
+                  filter: [
+                    { term: { 'resource.attributes.app': 'cart' } },
+                    { match_phrase: { 'body.text': 'Application is shutting down' } },
+                  ],
+                },
+              },
+            ],
           },
           {
-            id: 'dep-cart-valkey',
-            text: 'Must identify the dependency from cart to Valkey/Redis (dead endpoint)',
-            score: 3,
+            id: 'entity-frontend',
+            text: 'Must identify frontend service as an entity (evidence: 1481 docs; gRPC errors "Error: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 10.105.181.182:7070" with getCart/addItem call traces)',
+            score: 2,
+            sampling_filters: [
+              { term: { 'resource.attributes.app': 'frontend' } },
+              {
+                bool: {
+                  filter: [
+                    { term: { 'resource.attributes.app': 'frontend' } },
+                    { match_phrase: { 'body.text': 'ECONNREFUSED' } },
+                  ],
+                },
+              },
+            ],
           },
           {
             id: 'entity-checkout',
-            text: 'Must identify checkout service (affected by cart failures)',
+            text: 'Must identify checkout service as an entity (evidence: 293 docs; "[PlaceOrder]" and "order confirmation email sent to")',
+            score: 2,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'checkout' } }],
+          },
+          {
+            id: 'entity-shipping',
+            text: 'Must identify shipping service as an entity (evidence: 203 docs; "Sending Quote", "Tracking ID Created" patterns in body.text)',
+            score: 1,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'shipping' } }],
+          },
+          {
+            id: 'entity-payment',
+            text: 'Must identify payment service as an entity (evidence: 141 docs; attributes.msg="Charge request received" / "Transaction complete")',
+            score: 1,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'payment' } }],
+          },
+          {
+            id: 'entity-email',
+            text: 'Must identify email service as an entity (evidence: 144 docs; POST /send_order_confirmation HTTP/1.1 200 in body.text)',
+            score: 1,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'email' } }],
+          },
+          {
+            id: 'entity-recommendation',
+            text: 'Must identify recommendation service as an entity (evidence: 232 docs; "Receive ListRecommendations for product ids" from recommendation_server.py)',
+            score: 1,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'recommendation' } }],
+          },
+          {
+            id: 'entity-ad',
+            text: 'Must identify ad service as an entity (evidence: 239 docs; "oteldemo.AdService - Targeted ad request received" in body.text)',
+            score: 1,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'ad' } }],
+          },
+          {
+            id: 'entity-quote',
+            text: 'Must identify quote service as an entity (evidence: 68 docs; POST /getquote HTTP/1.1 200 in body.text)',
+            score: 1,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'quote' } }],
+          },
+          {
+            id: 'entity-valkey',
+            text: 'Must identify valkey as a cache/data store entity (evidence: 10 docs; cart logs reference ValkeyCartStore; container image valkey/valkey:8-alpine)',
+            score: 1,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'valkey' } }],
+          },
+          {
+            id: 'dep-cart-valkey',
+            text: 'Must identify the dependency cart → valkey (evidence: cart logs reference cartservice.cartstore.ValkeyCartStore for GetCartAsync; cart crashed "Application is shutting down" after losing Valkey connection)',
+            score: 3,
+            sampling_filters: [
+              { term: { 'resource.attributes.app': 'cart' } },
+              { term: { 'resource.attributes.app': 'valkey' } },
+            ],
+          },
+          {
+            id: 'dep-frontend-cart',
+            text: 'Must identify the dependency frontend → cart (evidence: 283 frontend gRPC errors "ECONNREFUSED 10.105.181.182:7070" with getCart/addItem call traces showing cart service unreachable)',
+            score: 3,
+            sampling_filters: [
+              { term: { 'resource.attributes.app': 'frontend' } },
+              { term: { 'resource.attributes.app': 'cart' } },
+            ],
+          },
+          {
+            id: 'dep-checkout-email',
+            text: 'Should identify the dependency checkout → email (evidence: checkout logs "order confirmation email sent to" correlating with email POST /send_order_confirmation 200)',
+            score: 1,
+            sampling_filters: [
+              {
+                bool: {
+                  filter: [
+                    { term: { 'resource.attributes.app': 'checkout' } },
+                    { match_phrase: { 'body.text': 'order confirmation email sent to' } },
+                  ],
+                },
+              },
+              { term: { 'resource.attributes.app': 'email' } },
+            ],
+          },
+          {
+            id: 'error-cart-unreachable',
+            text: 'Must reference cart unreachability errors in at least one feature: gRPC code 14 UNAVAILABLE, ECONNREFUSED, "No connection established", "Application is shutting down", or "failed to get user cart during checkout"',
+            score: 3,
+            sampling_filters: [
+              {
+                bool: {
+                  filter: [
+                    { term: { 'resource.attributes.app': 'frontend' } },
+                    { match_phrase: { 'body.text': 'ECONNREFUSED' } },
+                  ],
+                },
+              },
+            ],
+          },
+          {
+            id: 'tech-kubernetes',
+            text: 'Must identify Kubernetes as infrastructure (evidence: resource.attributes.k8s.node.name=minikube, resource.attributes.k8s.namespace.name=otel-demo)',
             score: 1,
           },
-          {
-            id: 'tech-redis',
-            text: 'Must identify Valkey or Redis as technology or dependency',
-            score: 2,
-          },
-          {
-            id: 'error-signatures',
-            text: 'Must reference connection errors to Valkey/Redis (connection refused, ECONNREFUSED, timeout)',
-            score: 2,
-          },
         ],
-        min_features: 3,
-        max_features: 20,
+        min_features: 8,
+        max_features: 25,
         required_types: ['entity', 'dependency'],
         expect_entity_filters: true,
         expected_ground_truth:
-          'entities=[cart, checkout, frontend], deps=[cart->valkey (connection refused)], tech=[valkey/redis], error_signatures=[ECONNREFUSED, connection timeout]',
+          'entities=[cart, frontend, checkout, shipping, payment, email, recommendation, ad, quote, valkey], deps=[cart->valkey, frontend->cart, checkout->email, shipping->quote, frontend->checkout], infra=[kubernetes/minikube, otel-demo namespace, otel-collector, arm64 architecture], error_signatures=[ECONNREFUSED 10.105.181.182:7070 cart unreachable, gRPC code 14 UNAVAILABLE, No connection established, Application is shutting down (cart crash), cart failure: failed to get user cart during checkout; frontend observes cart errors via gRPC]',
       },
       metadata: {
         difficulty: 'medium',
@@ -215,177 +439,124 @@ export const otelDemoDataset: DatasetConfig = {
     },
     {
       input: {
-        scenario_id: 'currency-unreachable',
-      },
-      output: {
-        criteria: [
-          {
-            id: 'entity-checkout',
-            text: 'Must identify checkout service (cannot reach currency)',
-            score: 2,
-          },
-          {
-            id: 'entity-frontend',
-            text: 'Must identify frontend service (cannot reach currency)',
-            score: 2,
-          },
-          {
-            id: 'entity-currency',
-            text: 'Must identify currency service as an entity (unreachable target)',
-            score: 2,
-          },
-          {
-            id: 'dep-checkout-currency',
-            text: 'Must identify the dependency from checkout to currency service',
-            score: 3,
-          },
-          {
-            id: 'dep-frontend-currency',
-            text: 'Must identify the dependency from frontend to currency service',
-            score: 2,
-          },
-        ],
-        min_features: 3,
-        max_features: 20,
-        required_types: ['entity', 'dependency'],
-        expect_entity_filters: true,
-        expected_ground_truth:
-          'entities=[checkout, frontend, currency], deps=[checkout->currency, frontend->currency], error_signatures=[connection refused, deadline exceeded]',
-      },
-      metadata: {
-        difficulty: 'medium',
-        failure_domain: 'currency',
-        failure_mode: 'currency_unreachable',
-      },
-    },
-    {
-      input: {
         scenario_id: 'checkout-memory-starvation',
       },
       output: {
         criteria: [
           {
-            id: 'entity-checkout',
-            text: 'Must identify checkout service as an entity (resource-starved)',
+            id: 'entity-cart',
+            text: 'Must identify cart service as an entity with filter on resource.attributes.app=cart (evidence: 1331 docs, highest volume; ValkeyCartStore GetCartAsync/AddItemAsync/EmptyCartAsync operations)',
             score: 2,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'cart' } }],
           },
           {
-            id: 'resource-exhaustion',
-            text: 'Must identify memory pressure, GC thrashing, or resource exhaustion signals',
-            score: 3,
+            id: 'entity-checkout',
+            text: 'Must identify checkout service as an entity with filter on resource.attributes.app=checkout (evidence: 436 docs; "[PlaceOrder]", "payment went through", "order confirmation email sent to" in body.text)',
+            score: 2,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'checkout' } }],
           },
           {
-            id: 'entity-frontend',
-            text: 'Must identify frontend (upstream, seeing timeouts from checkout)',
+            id: 'entity-shipping',
+            text: 'Must identify shipping service as an entity (evidence: 434 docs; "Sending Quote", "Received quote", "Tracking ID Created" patterns)',
+            score: 1,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'shipping' } }],
+          },
+          {
+            id: 'entity-email',
+            text: 'Must identify email service as an entity (evidence: 298 docs; POST /send_order_confirmation HTTP/1.1 200)',
+            score: 1,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'email' } }],
+          },
+          {
+            id: 'entity-payment',
+            text: 'Must identify payment service as an entity (evidence: 295 docs; attributes.msg="Charge request received" / "Transaction complete")',
+            score: 1,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'payment' } }],
+          },
+          {
+            id: 'entity-ad',
+            text: 'Must identify ad service as an entity (evidence: 244 docs; "oteldemo.AdService - Targeted ad request received")',
+            score: 1,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'ad' } }],
+          },
+          {
+            id: 'entity-recommendation',
+            text: 'Must identify recommendation service as an entity (evidence: 204 docs; "Receive ListRecommendations for product ids" from recommendation_server.py)',
+            score: 1,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'recommendation' } }],
+          },
+          {
+            id: 'entity-quote',
+            text: 'Must identify quote service as an entity (evidence: 145 docs; POST /getquote HTTP/1.1 200)',
+            score: 1,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'quote' } }],
+          },
+          {
+            id: 'entity-valkey',
+            text: 'Must identify valkey as a cache/data store entity (evidence: 15 docs; cart logs reference ValkeyCartStore; container image valkey/valkey:8-alpine)',
+            score: 1,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'valkey' } }],
+          },
+          {
+            id: 'dep-cart-valkey',
+            text: 'Must identify the dependency cart → valkey (evidence: cart logs reference cartservice.cartstore.ValkeyCartStore for GetCartAsync/AddItemAsync/EmptyCartAsync)',
+            score: 2,
+            sampling_filters: [
+              { term: { 'resource.attributes.app': 'cart' } },
+              { term: { 'resource.attributes.app': 'valkey' } },
+            ],
+          },
+          {
+            id: 'dep-checkout-payment',
+            text: 'Should identify the dependency checkout → payment (evidence: checkout logs "payment went through (transaction_id: ...)")',
+            score: 1,
+            sampling_filters: [
+              { term: { 'resource.attributes.app': 'checkout' } },
+              { term: { 'resource.attributes.app': 'payment' } },
+            ],
+          },
+          {
+            id: 'dep-checkout-email',
+            text: 'Should identify the dependency checkout → email (evidence: checkout logs "order confirmation email sent to" correlating with email POST /send_order_confirmation 200)',
+            score: 1,
+            sampling_filters: [
+              {
+                bool: {
+                  filter: [
+                    { term: { 'resource.attributes.app': 'checkout' } },
+                    { match_phrase: { 'body.text': 'order confirmation email sent to' } },
+                  ],
+                },
+              },
+              { term: { 'resource.attributes.app': 'email' } },
+            ],
+          },
+          {
+            id: 'dep-shipping-quote',
+            text: 'Should identify the dependency shipping → quote (evidence: shipping "Received quote" correlating with quote POST /getquote)',
+            score: 1,
+            sampling_filters: [
+              { term: { 'resource.attributes.app': 'shipping' } },
+              { term: { 'resource.attributes.app': 'quote' } },
+            ],
+          },
+          {
+            id: 'tech-kubernetes',
+            text: 'Must identify Kubernetes as infrastructure (evidence: resource.attributes.k8s.node.name=minikube, resource.attributes.k8s.namespace.name=otel-demo)',
             score: 1,
           },
-          {
-            id: 'infra-kubernetes',
-            text: 'Must identify Kubernetes as infrastructure (OOMKilled, container restarts)',
-            score: 2,
-          },
-          {
-            id: 'dep-upstream',
-            text: 'Must identify dependency impact on services calling checkout',
-            score: 2,
-          },
         ],
-        min_features: 3,
-        max_features: 20,
-        required_types: ['entity'],
+        min_features: 8,
+        max_features: 25,
+        required_types: ['entity', 'dependency'],
         expect_entity_filters: true,
         expected_ground_truth:
-          'entities=[checkout, frontend], infra=[kubernetes, memory/GC], error_signatures=[timeout, OOMKilled, GC pressure, 500 errors]',
+          'entities=[cart, checkout, shipping, email, payment, ad, recommendation, quote, valkey], deps=[cart->valkey, checkout->payment, checkout->email, checkout->shipping, shipping->quote], infra=[kubernetes/minikube, otel-demo namespace, otel-collector, arm64 architecture]',
       },
       metadata: {
         difficulty: 'hard',
         failure_domain: 'checkout',
         failure_mode: 'memory_starvation',
-      },
-    },
-    {
-      input: {
-        scenario_id: 'flagd-unreachable',
-      },
-      output: {
-        criteria: [
-          {
-            id: 'entity-cart',
-            text: 'Must identify cart service (cannot reach flagd)',
-            score: 2,
-          },
-          {
-            id: 'entity-payment',
-            text: 'Must identify payment service (cannot reach flagd)',
-            score: 2,
-          },
-          {
-            id: 'dep-services-flagd',
-            text: 'Must identify the dependency from multiple services to flagd (feature flag service)',
-            score: 3,
-          },
-          {
-            id: 'tech-flagd',
-            text: 'Must identify flagd or feature flags as technology/dependency',
-            score: 2,
-          },
-          {
-            id: 'error-signatures',
-            text: 'Must reference flag evaluation failures or connection errors to flagd',
-            score: 1,
-          },
-        ],
-        min_features: 3,
-        max_features: 20,
-        required_types: ['entity', 'dependency'],
-        expect_entity_filters: true,
-        expected_ground_truth:
-          'entities=[cart, payment, recommendation], deps=[cart->flagd, payment->flagd, recommendation->flagd], tech=[flagd/feature-flags], error_signatures=[flag evaluation failed, connection refused]',
-      },
-      metadata: {
-        difficulty: 'medium',
-        failure_domain: 'flagd',
-        failure_mode: 'feature_flags_unreachable',
-      },
-    },
-    {
-      input: {
-        scenario_id: 'load-generator-ramp',
-      },
-      output: {
-        criteria: [
-          {
-            id: 'entity-frontend',
-            text: 'Must identify frontend service (under high load)',
-            score: 2,
-          },
-          {
-            id: 'entity-checkout',
-            text: 'Must identify checkout service (under pressure)',
-            score: 1,
-          },
-          {
-            id: 'latency-signals',
-            text: 'Must identify latency increase or elevated error rates across services',
-            score: 2,
-          },
-          {
-            id: 'multiple-services',
-            text: 'Must identify impact across multiple services (demand surge affects the whole system)',
-            score: 2,
-          },
-        ],
-        min_features: 3,
-        max_features: 20,
-        required_types: ['entity'],
-        expect_entity_filters: true,
-        expected_ground_truth:
-          'entities=[frontend, checkout, cart, ...multiple services], signals=[elevated latency, increased error rates, 500 errors under load]',
-      },
-      metadata: {
-        difficulty: 'hard',
-        failure_domain: 'system-wide',
-        failure_mode: 'demand_surge',
       },
     },
   ],
@@ -427,19 +598,40 @@ export const otelDemoDataset: DatasetConfig = {
       output: {
         criteria: [
           {
-            id: 'healthy-baseline-queries',
-            text: 'Should generate queries for operational monitoring (e.g., service health, throughput, request volume, latency) rather than error-focused detection since this is healthy traffic',
+            id: 'operational-monitoring',
+            text: 'Should generate queries for operational monitoring (e.g., service health, HTTP request patterns, request volume) across the multi-service environment',
             score: 2,
           },
           {
+            id: 'error-monitoring',
+            text: 'Should generate proactive error detection queries (e.g., generic error/exception patterns, connection failures, dependency errors) even though this is healthy traffic — the model should set up error monitoring based on entity and dependency features',
+            score: 2,
+            sampling_filters: [
+              { match_phrase: { 'body.text': 'otel.javaagent' } },
+              { match_phrase: { 'body.text': 'OTLP' } },
+              { match_phrase: { 'body.text': 'context deadline exceeded' } },
+            ],
+          },
+          {
             id: 'multi-service-coverage',
-            text: 'Generated queries should cover multiple services present in the logs (e.g., cart, checkout, shipping, payment) rather than a single service only',
+            text: 'Generated queries should cover multiple services present in the logs (e.g., cart, checkout, shipping, payment, frontend) using entity scoping via resource.attributes.app when appropriate',
             score: 2,
           },
+          {
+            id: 'feature-grounded',
+            text: 'Queries must be grounded in features from the input (entities, dependencies, dataset_analysis, error_logs) rather than being speculative or based solely on the stream name/description',
+            score: 2,
+          },
+          {
+            id: 'stats-aggregate-monitoring',
+            text: 'Should generate at least one STATS query for aggregate monitoring (e.g., error rate, traffic volume) when dataset_analysis reveals fields suitable for aggregation. STATS queries should have calibrated thresholds documented in descriptions.',
+            score: 1,
+          },
         ],
-        expected_categories: ['operational'],
+        expected_categories: ['operational', 'error'],
+        expect_stats: true,
         expected_ground_truth:
-          'queries=[operational monitoring for service health/traffic/latency across cart/checkout/shipping/payment services]',
+          'queries=[operational monitoring and proactive error detection across OTel Demo microservices (cart, checkout, shipping, payment, frontend, email, recommendation, ad, quote, valkey); operational queries for service health and request patterns; error queries for exception/failure detection grounded in entity and dependency features; STATS queries for aggregate monitoring (error rate, traffic volume) with calibrated thresholds]',
       },
       metadata: {
         difficulty: 'easy',
@@ -451,30 +643,35 @@ export const otelDemoDataset: DatasetConfig = {
         scenario_id: 'payment-unreachable',
         stream_name: 'logs',
         stream_description:
-          'OTel Demo logs where the payment service becomes unreachable, causing charge failures with dial tcp / i/o timeout / deadline exceeded and gRPC transport dialing errors',
+          'OTel Demo logs where the payment service becomes unreachable, causing charge failures with dial tcp / i/o timeout / connection refused and gRPC transport dialing errors in frontend logs',
       },
       output: {
         criteria: [
           {
             id: 'payment-error-query',
-            text: 'Must generate an ES|QL query that catches payment-unreachable errors (e.g., failed to charge card, transport: Error while dialing, dial tcp, i/o timeout, deadline exceeded)',
+            text: 'Must generate an ES|QL query that catches payment-unreachable errors (evidence: frontend logs contain "failed to charge card", "transport: Error while dialing: dial tcp", "i/o timeout", "connection refused")',
             score: 3,
           },
           {
             id: 'checkout-impact-query',
-            text: 'Should generate a query that detects user-facing impact in upstream services (frontend and/or checkout) caused by payment unreachability',
+            text: 'Should generate a query that detects user-facing impact caused by payment unreachability (evidence: frontend logs show gRPC code 13 INTERNAL / code 14 UNAVAILABLE errors from failed payment calls during checkout)',
             score: 2,
           },
           {
-            id: 'valid-esql-syntax',
-            text: 'All generated queries must have valid ES|QL syntax that can be parsed without errors',
+            id: 'grpc-transport-query',
+            text: 'Should generate a query targeting gRPC transport or connection errors (evidence: "transport: Error while dialing", gRPC code 13 INTERNAL / code 14 UNAVAILABLE in frontend logs)',
+            score: 1,
+          },
+          {
+            id: 'stats-error-rate-detection',
+            text: 'Should generate a STATS query detecting elevated error rates during the payment-unreachable failure (e.g., error rate spike correlated with the payment service disruption). The STATS query should complement the match-type error detection queries.',
             score: 2,
           },
         ],
         expected_categories: ['error', 'operational'],
-        esql_substrings: ['failed to charge card', 'dial tcp', 'i/o timeout', 'deadline exceeded'],
+        expect_stats: true,
         expected_ground_truth:
-          'queries=[error detection for dial tcp/i/o timeout/deadline exceeded gRPC dialing errors for payment unreachability, upstream impact in frontend/checkout]',
+          'queries=[error detection for payment charge failures (failed to charge card), gRPC transport/dialing errors (dial tcp, i/o timeout, connection refused) in frontend logs, user-facing impact detection in frontend from failed checkout→payment calls, operational monitoring across OTel Demo microservices; STATS queries for aggregate error rate detection during payment disruption]',
       },
       metadata: {
         difficulty: 'medium',
@@ -493,24 +690,37 @@ export const otelDemoDataset: DatasetConfig = {
         criteria: [
           {
             id: 'cache-error-query',
-            text: 'Must generate an ES|QL query that catches Valkey/Redis connection failures (ECONNREFUSED, connection timeout)',
+            text: 'Must generate an ES|QL query that catches Valkey/Redis connection failures (evidence: cart logs contain "Wasn\'t able to connect to redis" and "fail cartservice.cartstore.ValkeyCartStore" — these are the root-cause signals indicating cart lost connectivity to its Valkey backing store)',
             score: 3,
           },
           {
-            id: 'cart-error-query',
-            text: 'Should generate a query detecting cart service errors',
+            id: 'cart-service-error-query',
+            text: 'Should generate a query detecting cart service errors or crash signals (evidence: cart logs show "Application is shutting down"; the cart crash then causes gRPC code 14 UNAVAILABLE errors with "ECONNREFUSED 10.105.181.182:7070" in frontend logs)',
+            score: 2,
+            sampling_filters: [
+              { match_phrase: { 'body.text': 'otel.javaagent' } },
+              { match_phrase: { 'body.text': 'OTLP' } },
+              { match_phrase: { 'body.text': 'context deadline exceeded' } },
+              { match: { 'body.structured.object.reason': 'BackOff' } },
+              { match: { 'body.structured.object.reason': 'Killing' } },
+              { match: { 'body.structured.object.reason': 'Started' } },
+            ],
+          },
+          {
+            id: 'upstream-impact-query',
+            text: 'Should generate a query detecting upstream impact from cart unavailability (evidence: frontend logs show "failed to get user cart during checkout" with gRPC code 13 INTERNAL, and "ECONNREFUSED 10.105.181.182:7070" with gRPC code 14 UNAVAILABLE — checkout has no error logs, all error evidence surfaces in frontend)',
             score: 2,
           },
           {
-            id: 'valid-esql-syntax',
-            text: 'All generated queries must have valid ES|QL syntax',
+            id: 'stats-error-rate-detection',
+            text: 'Should generate a STATS query detecting elevated error rates or degraded cart operation success rates during the Redis cutoff. The threshold should reflect the severity of the cache failure.',
             score: 2,
           },
         ],
         expected_categories: ['error', 'operational'],
-        esql_substrings: ['cart'],
+        expect_stats: true,
         expected_ground_truth:
-          'queries=[error detection for Valkey/Redis connection failures from cart, cart service errors]',
+          'queries=[error detection for Valkey/Redis connection failures in cart logs (connect to redis errors), cart service crash/shutdown detection (Application is shutting down), impact detection in frontend from cart unavailability (gRPC UNAVAILABLE ECONNREFUSED, failed to get user cart during checkout), operational monitoring across OTel Demo microservices; STATS queries for aggregate error rate detection during cart cache failure]',
       },
       metadata: {
         difficulty: 'medium',
@@ -520,142 +730,51 @@ export const otelDemoDataset: DatasetConfig = {
     },
     {
       input: {
-        scenario_id: 'currency-unreachable',
-        stream_name: 'logs',
-        stream_description:
-          'OTel Demo logs where the currency service is unreachable, impacting both checkout and frontend services that depend on currency conversion',
-      },
-      output: {
-        criteria: [
-          {
-            id: 'currency-error-query',
-            text: 'Must generate an ES|QL query that catches currency service connection errors',
-            score: 3,
-          },
-          {
-            id: 'multi-consumer-impact',
-            text: 'Should generate queries reflecting impact on both checkout and frontend services',
-            score: 2,
-          },
-          {
-            id: 'valid-esql-syntax',
-            text: 'All generated queries must have valid ES|QL syntax',
-            score: 2,
-          },
-        ],
-        expected_categories: ['error', 'operational'],
-        expected_ground_truth:
-          'queries=[error detection for currency service connectivity from checkout and frontend, currency connection refused errors]',
-      },
-      metadata: {
-        difficulty: 'medium',
-        failure_domain: 'currency',
-        failure_mode: 'currency_unreachable',
-      },
-    },
-    {
-      input: {
         scenario_id: 'checkout-memory-starvation',
         stream_name: 'logs',
         stream_description:
-          'OTel Demo logs where the checkout service is memory-starved, causing OOMKilled restarts, GC pressure, and cascading timeouts',
+          'OTel Demo logs during a checkout service disruption with Kubernetes pod lifecycle events (pod termination and rolling update) across a multi-service microservice environment',
       },
       output: {
         criteria: [
           {
-            id: 'resource-exhaustion-query',
-            text: 'Must generate an ES|QL query that catches resource exhaustion signals (OOMKilled, memory, GC pressure, container restart)',
+            id: 'multi-service-error-monitoring',
+            text: 'Should generate error detection queries targeting multiple services (e.g., checkout, cart, payment) either by scoping with resource.attributes.app or by filtering on service-specific log patterns in body.text',
             score: 3,
+            sampling_filters: [
+              { match_phrase: { 'body.text': 'otel.javaagent' } },
+              { match_phrase: { 'body.text': 'OTLP' } },
+              { match_phrase: { 'body.text': 'context deadline exceeded' } },
+              { match: { 'body.structured.object.reason': 'Killing' } },
+              { match: { 'body.structured.object.reason': 'ScalingReplicaSet' } },
+              { match: { 'body.structured.object.reason': 'Started' } },
+            ],
           },
           {
-            id: 'checkout-timeout-query',
-            text: 'Should generate a query detecting checkout timeouts or 500 errors',
+            id: 'dependency-aware-queries',
+            text: 'Should generate queries that reflect dependency relationships (e.g., checkout→payment, cart→valkey, checkout→email) by monitoring communication paths or downstream failure patterns',
             score: 2,
           },
           {
-            id: 'valid-esql-syntax',
-            text: 'All generated queries must have valid ES|QL syntax',
+            id: 'operational-monitoring-query',
+            text: 'Should generate operational queries for service health monitoring (e.g., order throughput, transaction completions, email confirmations) grounded in entity features and log patterns observed in the data',
+            score: 2,
+          },
+          {
+            id: 'stats-component-degradation',
+            text: 'Should generate STATS queries detecting per-component error rate spikes or traffic drops that correlate with the checkout disruption. Entity-scoped STATS (BY resource.attributes.app) is preferred when multiple services are affected.',
             score: 2,
           },
         ],
-        expected_categories: ['error', 'resource_health'],
+        expected_categories: ['operational', 'error'],
+        expect_stats: true,
         expected_ground_truth:
-          'queries=[resource health for OOMKilled/memory exhaustion in checkout, error detection for checkout timeouts/500s]',
+          'queries=[entity-scoped error detection for checkout, cart, payment, and shipping services; dependency-aware monitoring for checkout→payment, cart→valkey, checkout→email, shipping→quote communication paths; operational monitoring for order throughput (PlaceOrder), payment transactions, and email confirmations across OTel Demo microservices; STATS queries for per-component error rate spikes and traffic drops during checkout disruption]',
       },
       metadata: {
         difficulty: 'hard',
         failure_domain: 'checkout',
         failure_mode: 'memory_starvation',
-      },
-    },
-    {
-      input: {
-        scenario_id: 'flagd-unreachable',
-        stream_name: 'logs',
-        stream_description:
-          'OTel Demo logs where the flagd feature flag service is unreachable, causing flag evaluation failures across multiple services (cart, payment, recommendation)',
-      },
-      output: {
-        criteria: [
-          {
-            id: 'flag-evaluation-query',
-            text: 'Must generate an ES|QL query that catches flag evaluation failures or flagd connection errors',
-            score: 3,
-          },
-          {
-            id: 'cross-service-impact',
-            text: 'Should capture the cross-service nature of the flagd failure (multiple services affected)',
-            score: 2,
-          },
-          {
-            id: 'valid-esql-syntax',
-            text: 'All generated queries must have valid ES|QL syntax',
-            score: 2,
-          },
-        ],
-        expected_categories: ['error', 'configuration'],
-        expected_ground_truth:
-          'queries=[error detection for flagd/feature-flag evaluation failures, connection errors to flagd across cart/payment/recommendation]',
-      },
-      metadata: {
-        difficulty: 'medium',
-        failure_domain: 'flagd',
-        failure_mode: 'feature_flags_unreachable',
-      },
-    },
-    {
-      input: {
-        scenario_id: 'load-generator-ramp',
-        stream_name: 'logs',
-        stream_description:
-          'OTel Demo logs under ramped-up load where the load generator is sending significantly more traffic, causing latency increases and error rates across the entire system',
-      },
-      output: {
-        criteria: [
-          {
-            id: 'latency-spike-query',
-            text: 'Must generate ES|QL queries that catch elevated latency or increased error rates',
-            score: 2,
-          },
-          {
-            id: 'system-wide-impact',
-            text: 'Should generate queries covering the system-wide nature of the demand surge (not just one service)',
-            score: 2,
-          },
-          {
-            id: 'valid-esql-syntax',
-            text: 'All generated queries must have valid ES|QL syntax',
-            score: 2,
-          },
-        ],
-        expected_categories: ['operational', 'error'],
-        expected_ground_truth:
-          'queries=[operational detection for elevated latency/error rates under load surge across frontend/checkout/cart services]',
-      },
-      metadata: {
-        difficulty: 'hard',
-        failure_domain: 'system-wide',
-        failure_mode: 'demand_surge',
       },
     },
   ],

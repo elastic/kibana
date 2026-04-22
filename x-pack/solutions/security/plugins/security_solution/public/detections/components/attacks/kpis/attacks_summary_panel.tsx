@@ -15,7 +15,6 @@ import { AttacksVolumePanel } from './attacks_volume_panel/attacks_volume_panel'
 import { KpiPanel } from '../../alerts_kpis/common/components';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { KPIS_SECTION } from './kpis_section';
-import { CHART_PANEL_HEIGHT } from './common/constants';
 import type { AttacksKpiPanelBaseProps } from './types';
 
 const StyledFlexGroup = styled(EuiFlexGroup)`
@@ -41,13 +40,7 @@ export interface AttacksSummaryPanelProps extends AttacksKpiPanelBaseProps {
 export const AttacksSummaryPanel: React.FC<AttacksSummaryPanelProps> = React.memo(
   ({ filters, query, dataView, title, isExpanded, setIsExpanded }) => {
     return (
-      <KpiPanel
-        data-test-subj={KPIS_SECTION}
-        hasBorder
-        paddingSize="m"
-        $toggleStatus={isExpanded}
-        height={CHART_PANEL_HEIGHT}
-      >
+      <KpiPanel data-test-subj={KPIS_SECTION} hasBorder paddingSize="m" $toggleStatus={isExpanded}>
         <HeaderSection
           alignHeader="flexStart"
           hideSubtitle
@@ -57,12 +50,7 @@ export const AttacksSummaryPanel: React.FC<AttacksSummaryPanelProps> = React.mem
           toggleQuery={setIsExpanded}
         />
         {isExpanded && (
-          <StyledFlexGroup
-            data-test-subj="summary-view-content"
-            className="eui-yScroll"
-            wrap
-            gutterSize="m"
-          >
+          <StyledFlexGroup data-test-subj="summary-view-content" wrap gutterSize="m">
             <EuiFlexItem grow={false}>
               <AttacksListPanel filters={filters} query={query} dataView={dataView} />
             </EuiFlexItem>

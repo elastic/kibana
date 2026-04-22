@@ -55,9 +55,9 @@ export const useDeprecatedRulesTableCallout = () => {
         buttons={[
           <EuiButton
             color="warning"
-            fill
             onClick={showModal}
             data-test-subj="deprecated-rules-table-view-button"
+            fill
           >
             {i18n.REVIEW_DEPRECATED_RULES}
           </EuiButton>,
@@ -67,7 +67,7 @@ export const useDeprecatedRulesTableCallout = () => {
             disabled={!canEditRules}
             data-test-subj="deprecated-rules-table-delete-button"
           >
-            {i18n.DELETE_RULES(data.rules.length)}
+            {i18n.DELETE_DEPRECATED_RULES}
           </EuiButton>,
         ]}
         onDismiss={dismiss}

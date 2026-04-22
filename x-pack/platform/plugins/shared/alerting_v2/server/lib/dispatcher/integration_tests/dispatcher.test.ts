@@ -77,6 +77,7 @@ const ALERT_EVENTS_TEST_DATA: AlertEvent[] = [
     data: {},
     status: 'breached',
     source: 'internal',
+    space_id: 'default',
   },
   {
     '@timestamp': '2026-01-22T07:25:00.000Z',
@@ -90,6 +91,7 @@ const ALERT_EVENTS_TEST_DATA: AlertEvent[] = [
     data: {},
     status: 'recovered',
     source: 'internal',
+    space_id: 'default',
   },
   {
     '@timestamp': '2026-01-22T07:20:00.000Z',
@@ -103,6 +105,7 @@ const ALERT_EVENTS_TEST_DATA: AlertEvent[] = [
     data: {},
     status: 'breached',
     source: 'internal',
+    space_id: 'default',
   },
   {
     '@timestamp': '2026-01-22T07:15:00.000Z',
@@ -116,6 +119,7 @@ const ALERT_EVENTS_TEST_DATA: AlertEvent[] = [
     data: {},
     status: 'recovered',
     source: 'internal',
+    space_id: 'default',
   },
   {
     '@timestamp': '2026-01-22T07:10:00.000Z',
@@ -129,6 +133,7 @@ const ALERT_EVENTS_TEST_DATA: AlertEvent[] = [
     data: {},
     status: 'breached',
     source: 'internal',
+    space_id: 'default',
   },
 ];
 
@@ -152,6 +157,7 @@ const SUPPRESSION_ALERT_EVENTS: AlertEvent[] = [
       data: {},
       status: 'breached',
       source: 'internal',
+      space_id: 'default',
     })
   ),
   // rule-002: single series, 4 events
@@ -165,6 +171,7 @@ const SUPPRESSION_ALERT_EVENTS: AlertEvent[] = [
       data: {},
       status: 'breached',
       source: 'internal',
+      space_id: 'default',
     })
   ),
   // rule-003 series-1: 4 events, all active
@@ -178,6 +185,7 @@ const SUPPRESSION_ALERT_EVENTS: AlertEvent[] = [
       data: {},
       status: 'breached',
       source: 'internal',
+      space_id: 'default',
     })
   ),
   // rule-003 series-2: episode-1 active then recovered, episode-2 active
@@ -190,6 +198,7 @@ const SUPPRESSION_ALERT_EVENTS: AlertEvent[] = [
     data: {},
     status: 'breached',
     source: 'internal',
+    space_id: 'default',
   },
   {
     '@timestamp': '2026-01-27T16:05:00.000Z',
@@ -200,6 +209,7 @@ const SUPPRESSION_ALERT_EVENTS: AlertEvent[] = [
     data: {},
     status: 'recovered',
     source: 'internal',
+    space_id: 'default',
   },
   {
     '@timestamp': '2026-01-27T16:10:00.000Z',
@@ -210,6 +220,7 @@ const SUPPRESSION_ALERT_EVENTS: AlertEvent[] = [
     data: {},
     status: 'breached',
     source: 'internal',
+    space_id: 'default',
   },
   {
     '@timestamp': '2026-01-27T16:15:00.000Z',
@@ -220,6 +231,7 @@ const SUPPRESSION_ALERT_EVENTS: AlertEvent[] = [
     data: {},
     status: 'breached',
     source: 'internal',
+    space_id: 'default',
   },
   // rule-004 series-1: 4 events
   ...(['16:00', '16:05', '16:10', '16:15'] as const).map(
@@ -232,6 +244,7 @@ const SUPPRESSION_ALERT_EVENTS: AlertEvent[] = [
       data: {},
       status: 'breached',
       source: 'internal',
+      space_id: 'default',
     })
   ),
   // rule-004 series-2: 4 events
@@ -245,6 +258,7 @@ const SUPPRESSION_ALERT_EVENTS: AlertEvent[] = [
       data: {},
       status: 'breached',
       source: 'internal',
+      space_id: 'default',
     })
   ),
   // rule-005 series-1: 4 events
@@ -258,6 +272,7 @@ const SUPPRESSION_ALERT_EVENTS: AlertEvent[] = [
       data: {},
       status: 'breached',
       source: 'internal',
+      space_id: 'default',
     })
   ),
   // rule-005 series-2: 4 events
@@ -271,6 +286,7 @@ const SUPPRESSION_ALERT_EVENTS: AlertEvent[] = [
       data: {},
       status: 'breached',
       source: 'internal',
+      space_id: 'default',
     })
   ),
 ];
@@ -292,6 +308,7 @@ const SUPPRESSION_USER_ACTIONS: AlertAction[] = [
     rule_id: 'rule-001',
     group_hash: 'rule-001-series-1',
     episode_id: 'rule-001-series-1-episode-1',
+    space_id: 'default',
   },
   // rule-001: unack at 16:08 (cancels the ack)
   {
@@ -302,6 +319,7 @@ const SUPPRESSION_USER_ACTIONS: AlertAction[] = [
     rule_id: 'rule-001',
     group_hash: 'rule-001-series-1',
     episode_id: 'rule-001-series-1-episode-1',
+    space_id: 'default',
   },
   // rule-002: ack at 16:03 (no unack → stays suppressed)
   {
@@ -312,6 +330,7 @@ const SUPPRESSION_USER_ACTIONS: AlertAction[] = [
     rule_id: 'rule-002',
     group_hash: 'rule-002-series-1',
     episode_id: 'rule-002-series-1-episode-1',
+    space_id: 'default',
   },
   // rule-004 series-1: snooze at 16:03 (no episode_id, expiry far future)
   {
@@ -322,6 +341,7 @@ const SUPPRESSION_USER_ACTIONS: AlertAction[] = [
     expiry: '2026-01-28T16:03:00.000Z',
     rule_id: 'rule-004',
     group_hash: 'rule-004-series-1',
+    space_id: 'default',
   },
   // rule-004 series-2: snooze at 16:03 (no episode_id, expiry far future)
   {
@@ -332,6 +352,7 @@ const SUPPRESSION_USER_ACTIONS: AlertAction[] = [
     expiry: '2026-01-28T16:03:00.000Z',
     rule_id: 'rule-004',
     group_hash: 'rule-004-series-2',
+    space_id: 'default',
   },
   // rule-005 series-1: deactivate at 16:08
   {
@@ -342,6 +363,7 @@ const SUPPRESSION_USER_ACTIONS: AlertAction[] = [
     rule_id: 'rule-005',
     group_hash: 'rule-005-series-1',
     episode_id: 'rule-005-series-1-episode-1',
+    space_id: 'default',
   },
 ];
 
@@ -359,6 +381,7 @@ const MATCHER_ALERT_EVENTS: AlertEvent[] = [
     data: { severity: 'critical' },
     status: 'breached',
     source: 'internal',
+    space_id: 'default',
   },
   {
     '@timestamp': '2026-02-01T10:05:00.000Z',
@@ -369,6 +392,7 @@ const MATCHER_ALERT_EVENTS: AlertEvent[] = [
     data: { severity: 'critical' },
     status: 'breached',
     source: 'internal',
+    space_id: 'default',
   },
   {
     '@timestamp': '2026-02-01T10:10:00.000Z',
@@ -379,6 +403,7 @@ const MATCHER_ALERT_EVENTS: AlertEvent[] = [
     data: { severity: 'warning' },
     status: 'breached',
     source: 'internal',
+    space_id: 'default',
   },
 ];
 
@@ -396,6 +421,7 @@ const GROUPBY_ALERT_EVENTS: AlertEvent[] = [
     data: { 'host.name': 'server-1' },
     status: 'breached',
     source: 'internal',
+    space_id: 'default',
   },
   {
     '@timestamp': '2026-02-01T11:05:00.000Z',
@@ -406,6 +432,7 @@ const GROUPBY_ALERT_EVENTS: AlertEvent[] = [
     data: { 'host.name': 'server-1' },
     status: 'breached',
     source: 'internal',
+    space_id: 'default',
   },
   {
     '@timestamp': '2026-02-01T11:10:00.000Z',
@@ -416,6 +443,7 @@ const GROUPBY_ALERT_EVENTS: AlertEvent[] = [
     data: { 'host.name': 'server-2' },
     status: 'breached',
     source: 'internal',
+    space_id: 'default',
   },
   {
     '@timestamp': '2026-02-01T11:15:00.000Z',
@@ -426,6 +454,7 @@ const GROUPBY_ALERT_EVENTS: AlertEvent[] = [
     data: { 'host.name': 'server-2' },
     status: 'breached',
     source: 'internal',
+    space_id: 'default',
   },
 ];
 
@@ -435,8 +464,7 @@ const createMockWorkflowsManagement = (): WorkflowsServerPluginSetup['management
     runWorkflow: jest.fn().mockResolvedValue('exec-1'),
   } as unknown as WorkflowsServerPluginSetup['management']);
 
-// Failing: See https://github.com/elastic/kibana/issues/261229
-describe.skip('DispatcherService integration tests', () => {
+describe('DispatcherService integration tests', () => {
   let esServer: TestElasticsearchUtils;
   let kibanaServer: TestKibanaUtils;
   let esClient: ElasticsearchClient;
@@ -649,6 +677,7 @@ describe.skip('DispatcherService integration tests', () => {
           data: {},
           status: 'recovered',
           source: 'internal',
+          space_id: 'default',
         },
       ]);
 
@@ -1029,6 +1058,7 @@ describe.skip('DispatcherService integration tests', () => {
           data: {},
           status: 'breached',
           source: 'internal',
+          space_id: 'default',
         },
       ]);
 

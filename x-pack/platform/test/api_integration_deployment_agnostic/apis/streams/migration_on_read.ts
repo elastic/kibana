@@ -208,6 +208,7 @@ const expectedQueriesResponse = {
   queries: [
     {
       id: '12345',
+      type: 'match',
       title: 'Test',
       description: '',
       esql: {

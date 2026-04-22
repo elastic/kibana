@@ -82,7 +82,7 @@ export const SetViewForm = React.memo<SetViewFormProps>(({ settings, zoom, cente
         label={
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiIcon type="controls" />
+              <EuiIcon type="controls" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem>
               <FormattedMessage
