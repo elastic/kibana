@@ -224,7 +224,14 @@ export interface SmlService {
     logger: Logger;
   }) => Promise<void>;
 
-  /** Fetch SML documents by their chunk IDs, scoped to a space */
+  /**
+   * Fetch SML documents by their chunk IDs, scoped to a space.
+   *
+   * @security This method does NOT perform permission checks. Callers MUST
+   * call `checkItemsAccess` first and filter out unauthorized IDs before
+   * using the returned documents. See `resolveSmlAttachItems` for the
+   * correct access-checked pattern.
+   */
   getDocuments: (params: {
     ids: string[];
     spaceId: string;
