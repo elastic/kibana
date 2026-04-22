@@ -64,5 +64,14 @@ export const ruleMappings: SavedObjectsTypeMappingDefinition = {
     createdAt: { type: 'date' },
     updatedBy: { type: 'keyword' },
     updatedAt: { type: 'date' },
+    // `message` / `error_message` are intentionally unmapped: text varies per
+    // run, and the `dynamic: false` root makes them display-only anyway.
+    last_execution: {
+      properties: {
+        outcome: { type: 'keyword' },
+        timestamp: { type: 'date' },
+        duration_ms: { type: 'long' },
+      },
+    },
   },
 };
