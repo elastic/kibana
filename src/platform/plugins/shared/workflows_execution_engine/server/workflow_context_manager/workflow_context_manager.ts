@@ -55,8 +55,6 @@ export class WorkflowContextManager {
   private fakeRequest: KibanaRequest;
   private coreStart: CoreStart;
   private dependencies: ContextDependencies;
-  private cachedTemplatingContext?: StepContext;
-  private isTemplatingContextCacheClearScheduled = false;
 
   private stackFrames: StackFrame[];
   public readonly node: GraphNodeUnion;
@@ -147,12 +145,19 @@ export class WorkflowContextManager {
    * ```
    */
   public renderValueAccordingToContext<T>(obj: T, additionalContext?: Record<string, unknown>): T {
-    const context = this.getTemplatingContext();
+    return this.renderValueWithContext(obj, this.getContext(), additionalContext);
+  }
+
+  public renderValueWithContext<T>(
+    obj: T,
+    context: Record<string, unknown>,
+    additionalContext?: Record<string, unknown>
+  ): T {
     return this.templateEngine.render(obj, { ...context, ...additionalContext });
   }
 
   public evaluateExpressionInContext(template: string): unknown {
-    const context = this.getTemplatingContext();
+    const context = this.getContext();
     return this.templateEngine.evaluateExpression(template, context);
   }
 
@@ -171,7 +176,7 @@ export class WorkflowContextManager {
 
     if (typeof renderedCondition === 'string') {
       try {
-        return evaluateKql(renderedCondition, this.getTemplatingContext());
+        return evaluateKql(renderedCondition, this.getContext());
       } catch (error) {
         if (error instanceof KQLSyntaxError) {
           throw new Error(
@@ -195,7 +200,7 @@ export class WorkflowContextManager {
 
   public readContextPath(propertyPath: string): { pathExists: boolean; value: unknown } {
     const propertyPathSegments = parseJsPropertyAccess(propertyPath);
-    let result: unknown = this.getTemplatingContext();
+    let result: unknown = this.getContext();
 
     for (const segment of propertyPathSegments) {
       if (result === null || result === undefined || typeof result !== 'object') {
@@ -219,6 +224,10 @@ export class WorkflowContextManager {
    */
   public getEsClientAsUser(): ElasticsearchClient {
     return this.esClient;
+  }
+
+  public getWorkflowSpaceId(): string {
+    return this.workflowExecutionState.getWorkflowExecution().spaceId;
   }
 
   /**
@@ -268,26 +277,6 @@ export class WorkflowContextManager {
   private buildWorkflowContext(): WorkflowContext {
     const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
     return buildWorkflowContext(workflowExecution, this.coreStart, this.dependencies);
-  }
-
-  private getTemplatingContext(): StepContext {
-    if (!this.cachedTemplatingContext) {
-      this.cachedTemplatingContext = this.getContext();
-      this.scheduleTemplatingContextCacheClear();
-    }
-    return this.cachedTemplatingContext;
-  }
-
-  private scheduleTemplatingContextCacheClear(): void {
-    if (this.isTemplatingContextCacheClearScheduled) {
-      return;
-    }
-
-    this.isTemplatingContextCacheClearScheduled = true;
-    queueMicrotask(() => {
-      this.cachedTemplatingContext = undefined;
-      this.isTemplatingContextCacheClearScheduled = false;
-    });
   }
 
   private enrichStepContextWithMockedData(stepContext: StepContext): void {

@@ -171,7 +171,7 @@ const createBroaderSurfaceContainer = () => {
           state: { fetched: true, stepId },
           input: undefined,
           output: largeStepOutputs[stepId as keyof typeof largeStepOutputs],
-          error: null,
+          error: undefined,
         };
       }
 
@@ -214,7 +214,7 @@ describe('WorkflowContextManager post-fix regressions', () => {
     await setImmediateAsync();
 
     const warmupIterations = 10;
-    const iterations = 250;
+    const iterations = 3_500;
     let timerDriftMs = 0;
     let totalElapsedMs = 0;
     let lastSummary = '';
@@ -250,7 +250,7 @@ describe('WorkflowContextManager post-fix regressions', () => {
     expect(lastSummary).toBe(
       'A=Synthetic large case, B=Synthetic large case, C=Synthetic large case'
     );
-    expect(timerDriftMs).toBeLessThan(50);
-    expect(totalElapsedMs).toBeLessThan(50);
+    expect(timerDriftMs).toBeLessThan(110);
+    expect(totalElapsedMs).toBeLessThan(110);
   });
 });
