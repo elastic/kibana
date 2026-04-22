@@ -440,22 +440,22 @@ export const createTestTracks: Command<void> = {
   },
   run: async ({ flagsReader, log }) => {
     const moduleIds: Set<string> = new Set();
-    const moduleFilterPathPath = flagsReader.string('moduleFilterPath');
+    const moduleFilterPath = flagsReader.string('moduleFilterPath');
 
-    if (moduleFilterPathPath) {
+    if (moduleFilterPath) {
       let parsed: unknown;
       try {
-        parsed = JSON.parse(readFileSync(moduleFilterPathPath, 'utf-8'));
+        parsed = JSON.parse(readFileSync(moduleFilterPath, 'utf-8'));
       } catch (e) {
         const message = e instanceof Error ? e.message : String(e);
         throw createFlagError(
-          `Failed to read '${moduleFilterPathPath}': ${message}. ` +
+          `Failed to read '${moduleFilterPath}': ${message}. ` +
             `Ensure the file exists and is a valid JSON array of @kbn/ module IDs.`
         );
       }
 
       if (!Array.isArray(parsed)) {
-        throw createFlagError(`Expected '${moduleFilterPathPath}' to contain a JSON array.`);
+        throw createFlagError(`Expected '${moduleFilterPath}' to contain a JSON array.`);
       }
 
       parsed.forEach((id) => moduleIds.add(id));
@@ -489,7 +489,7 @@ export const createTestTracks: Command<void> = {
     const testLoadsByTarget = selectedTestTargets.reduce((loadsByTarget, target) => {
       loadsByTarget.set(
         target,
-        identifyTestLoads(scoutCIConfig, testConfigStats, target, moduleIds ?? new Set(), log)
+        identifyTestLoads(scoutCIConfig, testConfigStats, target, moduleIds, log)
       );
       return loadsByTarget;
     }, new Map<ScoutTestTarget, ScoutCITestLoad[]>());
