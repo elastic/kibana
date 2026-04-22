@@ -485,9 +485,7 @@ describe('PluginsService', () => {
 
         mockParsePluginFromUrl.mockResolvedValue(archiveWithSkills);
         mockClient.findByName.mockResolvedValue(undefined);
-        mockClient.create.mockResolvedValue(
-          createMockPersistedPlugin({ id: 'created-plugin-id' })
-        );
+        mockClient.create.mockResolvedValue(createMockPersistedPlugin({ id: 'created-plugin-id' }));
         mockSkillClient.bulkCreate.mockResolvedValue([]);
 
         await expect(
