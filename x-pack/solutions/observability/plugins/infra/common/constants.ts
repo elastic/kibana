@@ -18,7 +18,6 @@ export {
 export const DEFAULT_SCHEMA: DataSchemaFormat = 'semconv';
 
 export const METRICS_INDEX_PATTERN = 'metrics-*,metricbeat-*';
-export const LOGS_INDEX_PATTERN = 'logs-*,filebeat-*,kibana_sample_data_logs*';
 export const METRICS_APP = 'metrics';
 export const LOGS_APP = 'logs';
 

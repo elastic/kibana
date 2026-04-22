@@ -179,6 +179,7 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
       panelPaddingSize="s"
       anchorPosition="upRight"
       panelStyle={{ minWidth: 350 }}
+      aria-label={i18n.ADD_VARIABLE_POPOVER_BUTTON}
     >
       <EuiSelectable
         searchable
