@@ -8,12 +8,17 @@
  */
 
 import React from 'react';
-import { EuiLink, EuiText } from '@elastic/eui';
+import { EuiLink, EuiText, euiTextBreakWord } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 interface DataStreamLinkProps {
   dataStream?: string;
   streamUrl?: string;
 }
+
+const wrapStyles = css`
+  ${euiTextBreakWord()}
+`;
 
 /**
  * Renders a data stream name as a navigable link or plain text.
@@ -30,7 +35,7 @@ export const DataStreamLink = ({ dataStream, streamUrl }: DataStreamLinkProps) =
 
   if (!streamUrl) {
     return (
-      <EuiText size="s" data-test-subj="dataStreamText">
+      <EuiText size="s" css={wrapStyles} data-test-subj="dataStreamText">
         {dataStream}
       </EuiText>
     );
@@ -38,7 +43,9 @@ export const DataStreamLink = ({ dataStream, streamUrl }: DataStreamLinkProps) =
 
   return (
     <EuiLink href={streamUrl} data-test-subj="dataStreamLink">
-      <EuiText size="s">{dataStream}</EuiText>
+      <EuiText size="s" css={wrapStyles}>
+        {dataStream}
+      </EuiText>
     </EuiLink>
   );
 };

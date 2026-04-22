@@ -40,6 +40,10 @@ const MAX_DIMENSIONS = 50;
 const MAX_VALUES_PER_DIMENSION = 20;
 const PAGE_SIZE = 20;
 
+// Anchored at module-load time. Each Scout worker re-imports this module
+// and gets a slightly different anchor (typically sub-second drift), but
+// the time windows below are intentionally wide enough to absorb that drift.
+// Avoid asserting on specific time buckets — use range-based assertions only.
 export const TEST_TIME_ANCHOR = Date.now();
 
 export const TIME_OFFSETS = {

@@ -30,8 +30,9 @@ const extractDataStreamNames = (items: MatchedItem[]): Set<string> =>
 /**
  * Classifies metric sources as `'data_stream'` or `'index'` via the
  * `_resolve/index` API. Best-effort: never throws — items fall back to
- * `options.fallbackKind` when `uniqueSources` is empty, or when resolution
- * can't run or fails.
+ * `options.fallbackKind` when `uniqueSources` is empty, when resolution
+ * throws, or when resolution returns an empty result for non-empty input
+ * (treated as a silent upstream failure).
  */
 export const classifyMetricSources = async (
   dataViews: DataViewsPublicPluginStart,
@@ -46,14 +47,26 @@ export const classifyMetricSources = async (
   try {
     // Single _resolve/index call for all unique source names.
     // showAllIndices covers hidden backing indices (.ds-*) for correct
-    // data stream detection. The comma-joined pattern is unlikely to be
-    // a problem in practice because of the quantity of unique sources,
-    // but if it ever is, we'll address it then.
+    // data stream detection. The comma-joined pattern lives in the URL
+    // path; for very large `uniqueSources` (hundreds of streams) this
+    // can hit reverse-proxy URL limits (~8KB) and surface as a 414 or
+    // empty response. That case is contained by the empty-resolved guard
+    // below, which routes to `options.fallbackKind`. If we observe it in
+    // telemetry, the next step is to chunk the request.
     const resolved = await dataViews.getIndices({
       pattern: [...uniqueSources].join(','),
       showAllIndices: true,
       isRollupIndex: () => false,
     });
+
+    // `getIndices` swallows network failures and returns []
+    // (see data_views/public/services/get_indices.ts). When we asked
+    // for N sources and got back zero results, treat it as a silent
+    // resolution failure and route to the configured fallback to
+    // align with the documented intent.
+    if (resolved.length === 0) {
+      return metricItems.map((item) => ({ ...item, sourceKind: options.fallbackKind }));
+    }
 
     const dataStreamNames = extractDataStreamNames(resolved);
 

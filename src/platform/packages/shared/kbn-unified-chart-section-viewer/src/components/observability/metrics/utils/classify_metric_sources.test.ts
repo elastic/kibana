@@ -113,4 +113,40 @@ describe('classifyMetricSources', () => {
     expect(result[0].sourceKind).toBe('index');
     expect(result[1].sourceKind).toBe('index');
   });
+
+  it("stamps fallbackKind='data_stream' on every item when getIndices resolves to an empty array", async () => {
+    const dataViews = createMockDataViews([]);
+    const items = [
+      createMetricItem({ metricName: 'cpu', dataStream: 'metrics-system-default' }),
+      createMetricItem({ metricName: 'disk', dataStream: 'plain-index' }),
+    ];
+
+    const result = await classifyMetricSources(
+      dataViews,
+      items,
+      new Set(['metrics-system-default', 'plain-index']),
+      { fallbackKind: 'data_stream' }
+    );
+
+    expect(result[0].sourceKind).toBe('data_stream');
+    expect(result[1].sourceKind).toBe('data_stream');
+  });
+
+  it("stamps fallbackKind='index' on every item when getIndices resolves to an empty array", async () => {
+    const dataViews = createMockDataViews([]);
+    const items = [
+      createMetricItem({ metricName: 'cpu', dataStream: 'metrics-system-default' }),
+      createMetricItem({ metricName: 'disk', dataStream: 'plain-index' }),
+    ];
+
+    const result = await classifyMetricSources(
+      dataViews,
+      items,
+      new Set(['metrics-system-default', 'plain-index']),
+      { fallbackKind: 'index' }
+    );
+
+    expect(result[0].sourceKind).toBe('index');
+    expect(result[1].sourceKind).toBe('index');
+  });
 });
