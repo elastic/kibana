@@ -5,20 +5,4 @@
  * 2.0.
  */
 
-export {
-  registerRuleAttachment,
-  createRuleAttachmentDefinition,
-  isOnRuleFormPage,
-} from './rule_attachment';
-
-export {
-  ThresholdDetails,
-  ThreatMatchDetails,
-  MachineLearningDetails,
-  NewTermsDetails,
-  SavedQueryDetails,
-  EqlDetails,
-  RuleTypeDetails,
-} from './rule_type_details';
-
-export { FiltersDisplay, getFilterLabel } from './filters_display';
+export { registerRuleAttachment } from './rule_attachment';

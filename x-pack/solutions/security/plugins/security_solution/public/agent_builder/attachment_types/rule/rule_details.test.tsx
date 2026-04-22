@@ -15,10 +15,9 @@ import {
   NewTermsDetails,
   SavedQueryDetails,
   EqlDetails,
-  FiltersDisplay,
-  getFilterLabel,
-  createRuleAttachmentDefinition,
-} from '.';
+} from './rule_type_details';
+import { FiltersDisplay, getFilterLabel } from './filters_display';
+import { createRuleAttachmentDefinition } from './rule_attachment';
 import type { Filter } from '@kbn/es-query';
 import { AiRuleCreationService } from '../../../detection_engine/common/ai_rule_creation_store';
 import type { ApplicationStart } from '@kbn/core-application-browser';
@@ -311,7 +310,7 @@ describe('ThreatMatchDetails', () => {
 });
 
 describe('MachineLearningDetails', () => {
-  it('renders a single ML job ID as badge', () => {
+  it('renders a single ML job ID', () => {
     const rule = {
       ...baseRule,
       type: 'machine_learning',
@@ -326,7 +325,7 @@ describe('MachineLearningDetails', () => {
     expect(text).toContain('v3_linux_anomalous_network_activity');
   });
 
-  it('renders anomaly threshold via reused AnomalyThreshold component', () => {
+  it('renders anomaly threshold', () => {
     const rule = {
       ...baseRule,
       type: 'machine_learning',
@@ -341,7 +340,7 @@ describe('MachineLearningDetails', () => {
     expect(text).toContain('75');
   });
 
-  it('renders multiple ML job IDs as badges', () => {
+  it('renders multiple ML job IDs as comma-separated list', () => {
     const rule = {
       ...baseRule,
       type: 'machine_learning',
@@ -352,9 +351,7 @@ describe('MachineLearningDetails', () => {
     const { container } = render(<MachineLearningDetails rule={rule} />);
     const text = container.textContent ?? '';
 
-    expect(text).toContain('job_one');
-    expect(text).toContain('job_two');
-    expect(text).toContain('job_three');
+    expect(text).toContain('job_one, job_two, job_three');
     expect(text).toContain('50');
   });
 
@@ -366,9 +363,11 @@ describe('MachineLearningDetails', () => {
       anomaly_threshold: 0,
     } as unknown as RuleResponse;
 
-    render(<MachineLearningDetails rule={rule} />);
+    const { container } = render(<MachineLearningDetails rule={rule} />);
+    const text = container.textContent ?? '';
 
-    expect(screen.getByText('0')).toBeInTheDocument();
+    expect(text).toContain('Anomaly score threshold');
+    expect(text).toContain('0');
   });
 
   it('returns null for non-machine_learning rule types', () => {
@@ -400,7 +399,7 @@ describe('NewTermsDetails', () => {
     expect(text).toContain('host.name');
   });
 
-  it('renders history window via reused HistoryWindowSize (date math converted to duration)', () => {
+  it('renders history window size with date math converted to duration', () => {
     const rule = {
       ...baseRule,
       type: 'new_terms',

@@ -48,6 +48,11 @@ import {
   NEW_TERMS_TYPE_DESCRIPTION,
   ESQL_TYPE_DESCRIPTION,
 } from '../../../detection_engine/rule_creation_ui/components/description_step/translations';
+import { FiltersDisplay } from './filters_display';
+import { RuleTypeDetails } from './rule_type_details';
+
+type RuleAttachment = Attachment<string, { text: string; attachmentLabel?: string }>;
+
 const SectionHeading: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <EuiText size="s">
     <strong>{children}</strong>
@@ -63,10 +68,6 @@ const TagsBadgeList: React.FC<{ tags: string[] }> = ({ tags }) => (
     ))}
   </EuiFlexGroup>
 );
-import { FiltersDisplay } from './filters_display';
-import { RuleTypeDetails } from './rule_type_details';
-
-type RuleAttachment = Attachment<string, { text: string; attachmentLabel?: string }>;
 
 export const isOnRuleFormPage = (pathname: string): boolean =>
   pathname.includes(RULES_PATH) && (pathname.includes('/create') || pathname.includes('/edit'));
