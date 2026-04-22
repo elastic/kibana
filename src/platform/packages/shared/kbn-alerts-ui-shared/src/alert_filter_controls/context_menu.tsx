@@ -131,6 +131,7 @@ export const FilterGroupContextMenu = () => {
   return (
     <EuiPopover
       id={TEST_IDS.CONTEXT_MENU.MENU}
+      aria-label={FILTER_GROUP_MENU}
       button={
         <EuiButtonIcon
           aria-label={FILTER_GROUP_MENU}

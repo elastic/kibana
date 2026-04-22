@@ -19,6 +19,7 @@ import { BulkDisableRulesRoute } from '../routes/rules/bulk_disable_rules_route'
 import { GetRuleTagsRoute } from '../routes/rules/get_rule_tags_route';
 import { BulkCreateAlertActionRoute } from '../routes/alert_actions/bulk_create_alert_action_route';
 import { CreateAckAlertActionRoute } from '../routes/alert_actions/create_ack_alert_action_route';
+import { CreateAssignAlertActionRoute } from '../routes/alert_actions/create_assign_alert_action_route';
 import { CreateUnackAlertActionRoute } from '../routes/alert_actions/create_unack_alert_action_route';
 import { CreateTagAlertActionRoute } from '../routes/alert_actions/create_tag_alert_action_route';
 import { CreateSnoozeAlertActionRoute } from '../routes/alert_actions/create_snooze_alert_action_route';
@@ -40,6 +41,13 @@ import { MatcherValueSuggestionsRoute } from '../routes/suggestions/matcher_valu
 import { MatcherDataFieldsRoute } from '../routes/suggestions/matcher_data_fields_route';
 import { NotificationPolicyTagsRoute } from '../routes/suggestions/notification_policy_tags_route';
 
+/**
+ * TODO: https://github.com/elastic/rna-program/issues/426
+ * Remove this route and its binding before GA.
+ */
+
+import { ResetResourcesRoute } from '../routes/reset_resources_route';
+
 export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(CreateRuleRoute);
   bind(Route).toConstantValue(UpdateRuleRoute);
@@ -52,6 +60,7 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(BulkDisableRulesRoute);
   bind(Route).toConstantValue(GetRuleTagsRoute);
   bind(Route).toConstantValue(CreateAckAlertActionRoute);
+  bind(Route).toConstantValue(CreateAssignAlertActionRoute);
   bind(Route).toConstantValue(CreateUnackAlertActionRoute);
   bind(Route).toConstantValue(CreateTagAlertActionRoute);
   bind(Route).toConstantValue(CreateSnoozeAlertActionRoute);
@@ -73,4 +82,6 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(MatcherValueSuggestionsRoute);
   bind(Route).toConstantValue(MatcherDataFieldsRoute);
   bind(Route).toConstantValue(NotificationPolicyTagsRoute);
+  // TODO(rna-program#426): remove this binding before GA.
+  bind(Route).toConstantValue(ResetResourcesRoute);
 }

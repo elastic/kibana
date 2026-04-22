@@ -14,26 +14,28 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { CreateAssetCriticalityRecord, AssetCriticalityRecord } from './common.gen';
 
+export const CreateAssetCriticalityRecordRequestBody = lazySchema(() =>
+  CreateAssetCriticalityRecord.merge(
+    z.object({
+      /**
+       * If 'wait_for' the request will wait for the index refresh.
+       */
+      refresh: z.literal('wait_for').optional(),
+    })
+  )
+);
 export type CreateAssetCriticalityRecordRequestBody = z.infer<
   typeof CreateAssetCriticalityRecordRequestBody
 >;
-export const CreateAssetCriticalityRecordRequestBody = CreateAssetCriticalityRecord.merge(
-  z.object({
-    /**
-     * If 'wait_for' the request will wait for the index refresh.
-     */
-    refresh: z.literal('wait_for').optional(),
-  })
-);
 export type CreateAssetCriticalityRecordRequestBodyInput = z.input<
   typeof CreateAssetCriticalityRecordRequestBody
 >;
 
+export const CreateAssetCriticalityRecordResponse = lazySchema(() => AssetCriticalityRecord);
 export type CreateAssetCriticalityRecordResponse = z.infer<
   typeof CreateAssetCriticalityRecordResponse
 >;
-export const CreateAssetCriticalityRecordResponse = AssetCriticalityRecord;

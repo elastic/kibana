@@ -34,6 +34,8 @@ import type { TableListViewFindItemsFn, ContentListClientServices } from './type
 import { createClientStrategy, filterItems, getCreatorKey } from './strategy';
 import type { ItemDecorator } from './strategy';
 import { ProfilePrimeEffect } from './profile_prime_effect';
+import type { ContentEditorConfig } from './content_editor';
+import { useContentEditorInspect } from './content_editor';
 
 /**
  * Compute per-key item counts from the full item set.
@@ -120,6 +122,15 @@ export type ContentListClientProviderProps = ContentListCoreConfig & {
   services: ContentListClientServices;
   /** Called after each successful item fetch. */
   onFetchSuccess?: DataSourceConfig['onFetchSuccess'];
+  /**
+   * Content editor (metadata editing flyout) configuration.
+   *
+   * When provided, creates an `onInspect` callback on the item config that opens
+   * the Kibana content editor flyout. The consumer must wrap their component tree
+   * with `ContentEditorKibanaProvider` (from `@kbn/content-management-content-editor`)
+   * above this provider.
+   */
+  contentEditor?: ContentEditorConfig;
 };
 
 /**
@@ -150,6 +161,20 @@ export type ContentListClientProviderProps = ContentListCoreConfig & {
  *   <MyContentList />
  * </ContentListClientProvider>
  * ```
+ *
+ * @example With content editor
+ * ```tsx
+ * const openContentEditor = useOpenContentEditor();
+ *
+ * <ContentListClientProvider
+ *   id="my-dashboards"
+ *   labels={{ entity: 'dashboard', entityPlural: 'dashboards' }}
+ *   findItems={myExistingFindItems}
+ *   contentEditor={{ openContentEditor, onSave: handleSave }}
+ * >
+ *   <MyContentList />
+ * </ContentListClientProvider>
+ * ```
  */
 export const ContentListClientProvider = ({
   children,
@@ -157,6 +182,8 @@ export const ContentListClientProvider = ({
   features: featuresProp = {},
   services,
   onFetchSuccess,
+  contentEditor,
+  item: itemConfigProp,
   ...rest
 }: ContentListClientProviderProps): JSX.Element => {
   const favoritesClient = services?.favorites;
@@ -331,12 +358,33 @@ export const ContentListClientProvider = ({
     };
   }, [features, uiSettingsPageSize]);
 
+  // Derive queryKeyScope the same way the base provider does.
+  const queryKeyScope = rest.queryKeyScope ?? `${rest.id}-listing`;
+
+  // Create the onInspect callback from the content editor config.
+  const onInspect = useContentEditorInspect({
+    contentEditor,
+    entityName: rest.labels.entity,
+    isReadOnly: rest.isReadOnly,
+    queryKeyScope,
+  });
+
+  // Merge onInspect into the item config.
+  const itemConfig = useMemo(
+    () => ({
+      ...itemConfigProp,
+      ...(onInspect && { onInspect }),
+    }),
+    [itemConfigProp, onInspect]
+  );
+
   return (
     <ContentListProvider
       dataSource={dataSource}
       features={resolvedFeatures}
       services={services}
       profileCache={profileCache}
+      item={itemConfig}
       {...rest}
     >
       {starredEnabled && <FavoritesSyncEffect favoriteIdsRef={favoriteIdsRef} />}
