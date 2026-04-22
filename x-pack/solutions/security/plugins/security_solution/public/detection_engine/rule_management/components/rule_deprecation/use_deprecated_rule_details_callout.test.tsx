@@ -73,10 +73,12 @@ function TestComponentInner({
   return <>{callout}</>;
 }
 
-function TestComponent(props: Partial<{
-  rule: RuleResponse | null;
-  confirmDeletion: () => Promise<boolean>;
-}>) {
+function TestComponent(
+  props: Partial<{
+    rule: RuleResponse | null;
+    confirmDeletion: () => Promise<boolean>;
+  }>
+) {
   return (
     <I18nProvider>
       <TestComponentInner {...props} />
