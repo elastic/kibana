@@ -13,6 +13,7 @@ import { css } from '@emotion/react';
 import React, { useCallback } from 'react';
 import { Breadcrumbs } from './breadcrumbs';
 import { HeaderHelpMenu } from '../shared/header_help_menu';
+import { HeaderHotkeysMenu } from '../shared/header_hotkeys_menu';
 import { HeaderNavControls } from '../shared/header_nav_controls';
 import { BreadcrumbsWithExtensionsWrapper } from '../shared/breadcrumbs_with_extensions';
 import { HeaderPageAnnouncer } from '../shared/header_page_announcer';
@@ -136,6 +137,10 @@ export const ProjectHeader = React.memo(() => {
             <EuiHeaderSection side="right">
               <EuiHeaderSectionItem>
                 <HeaderNavControls position="center" />
+              </EuiHeaderSectionItem>
+
+              <EuiHeaderSectionItem>
+                <HeaderHotkeysMenu />
               </EuiHeaderSectionItem>
 
               <EuiHeaderSectionItem>

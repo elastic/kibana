@@ -97,6 +97,33 @@ exports[`Header renders 1`] = `
         <div
           class="euiHeaderSectionItem emotion-euiHeaderSectionItem"
         >
+          <button
+            aria-label="Keyboard shortcuts"
+            class="euiButtonEmpty euiHeaderSectionItemButton emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text-euiHeaderSectionItemButton"
+            data-test-subj="hotkeysCheatSheetButton"
+            type="button"
+          >
+            <span
+              class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+            >
+              <span
+                class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
+              >
+                <span
+                  class="euiHeaderSectionItemButton__content emotion-euiHeaderSectionItemButton__content"
+                >
+                  <span
+                    aria-hidden="true"
+                    data-euiicon-type="keyboard"
+                  />
+                </span>
+              </span>
+            </span>
+          </button>
+        </div>
+        <div
+          class="euiHeaderSectionItem emotion-euiHeaderSectionItem"
+        >
           <div
             class="euiPopover emotion-euiPopover-inline-block"
             data-test-subj="helpMenuButton"
