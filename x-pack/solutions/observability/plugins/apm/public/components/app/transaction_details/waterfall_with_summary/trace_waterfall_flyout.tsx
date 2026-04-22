@@ -14,6 +14,7 @@ import {
 import React, { useCallback, useMemo, useState } from 'react';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useAdHocApmDataView } from '../../../../hooks/use_adhoc_apm_data_view';
+import { useLogsIndexPattern } from '../../../../hooks/use_logs_index_pattern';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { FullTraceWaterfallRenderer } from '../../../shared/trace_waterfall/full_trace_waterfall_renderer';
 
@@ -40,15 +41,17 @@ export function TraceWaterfallFlyout({
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const { dataView, apmIndices } = useAdHocApmDataView();
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
+  const { logsIndexPattern } = useLogsIndexPattern();
 
   const indexes = useMemo(
     () => ({
+      logs: logsIndexPattern,
       apm: {
         traces: apmIndices?.transaction,
         errors: apmIndices?.error,
       },
     }),
-    [apmIndices?.transaction, apmIndices?.error]
+    [logsIndexPattern, apmIndices?.transaction, apmIndices?.error]
   );
 
   const closeDetailFlyout = useCallback(() => setSelectedDocId(null), []);
