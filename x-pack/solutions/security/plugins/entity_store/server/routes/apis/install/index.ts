@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import path from 'node:path';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
@@ -19,6 +20,12 @@ export function registerInstall(router: EntityStorePluginRouter) {
     .post({
       path: ENTITY_STORE_ROUTES.public.INSTALL,
       access: 'public',
+      summary: 'Install the Entity Store',
+      description:
+        'Install the Entity Store, creating engines for the specified entity types and configuring log extraction.',
+      options: {
+        tags: ['oas-tag:Security entity store'],
+      },
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },
@@ -31,6 +38,9 @@ export function registerInstall(router: EntityStorePluginRouter) {
           request: {
             body: buildRouteValidationWithZod(BodySchema),
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, '../examples/entity_store_install.yaml'),
         },
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {

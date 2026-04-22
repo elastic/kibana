@@ -14,12 +14,14 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const WarningSchema = lazySchema(() =>
+  z.object({
+    type: z.string(),
+    message: z.string(),
+    actionPath: z.string(),
+    buttonLabel: z.string().optional(),
+  })
+);
 export type WarningSchema = z.infer<typeof WarningSchema>;
-export const WarningSchema = z.object({
-  type: z.string(),
-  message: z.string(),
-  actionPath: z.string(),
-  buttonLabel: z.string().optional(),
-});

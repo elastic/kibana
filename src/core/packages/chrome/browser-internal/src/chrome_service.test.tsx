@@ -581,7 +581,7 @@ describe('start', () => {
       const { chrome, service } = await start();
       const promise = firstValueFrom(chrome.getHelpExtension$().pipe(Rx.take(3), toArray()));
 
-      chrome.setHelpExtension({ appName: 'App name', content: () => null });
+      chrome.setHelpExtension({ appName: 'App name' });
       chrome.setHelpExtension(undefined);
       service.stop();
 
@@ -590,7 +590,6 @@ describe('start', () => {
                 undefined,
                 Object {
                   "appName": "App name",
-                  "content": [Function],
                 },
                 undefined,
               ]
