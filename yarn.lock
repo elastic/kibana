@@ -2408,10 +2408,10 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@114.1.0":
-  version "114.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-114.1.0.tgz#c85fe29f092af1ccbf73c2dc5ea15fceb486852d"
-  integrity sha512-vQo87fKXKN217kLpQ46BY/sKg/AZ9dGhHsZEWfqG5iDATs5Qu9egfxaEU4+QvQn8na0YuGfOtBGj7i4jnZ4GuA==
+"@elastic/eui@114.2.0":
+  version "114.2.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-114.2.0.tgz#04551190586b09ed5d0de86dae3cfe2468b1178a"
+  integrity sha512-jFHflSzBdD8bEV9JaeFlB7mkV8+sh21MwMD4EsV5KVuRGYKgNUjGj1uxitMlYICFIG0qwcCa/YWvY8pUnskBoA==
   dependencies:
     "@elastic/eui-theme-common" "9.0.0"
     "@elastic/prismjs-esql" "^1.1.2"
@@ -2473,10 +2473,10 @@
     progress "^1.1.8"
     through2 "^2.0.0"
 
-"@elastic/monaco-esql@3.3.0":
-  version "3.3.0"
-  resolved "https://registry.yarnpkg.com/@elastic/monaco-esql/-/monaco-esql-3.3.0.tgz#6782c5464e7e6ee4a5eb6718bc60e49b1abd3de3"
-  integrity sha512-pkFiQ146rfm92hD86mzK/PZvSKsk5HrHjp5O2dvE7O12HZH7W0a+06N5AzBoPjjxKuq4xwLZ1icZpPdsfZMp+g==
+"@elastic/monaco-esql@3.3.1":
+  version "3.3.1"
+  resolved "https://registry.yarnpkg.com/@elastic/monaco-esql/-/monaco-esql-3.3.1.tgz#e837f423f44412216937257b66ede326d02cef6e"
+  integrity sha512-b0AORTpYi0Q+corhIndMnUffBumLBsJP3tkD+J+59af8qHiumVjolZZdEgHJZbCGs39awQCtAUec0PXGE2MsuQ==
 
 "@elastic/node-crypto@1.2.3", "@elastic/node-crypto@^1.2.3":
   version "1.2.3"
@@ -4603,10 +4603,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ai-agent-confirmation-modal@link:x-pack/platform/packages/shared/ai-assistant/ai-agent-confirmation-modal":
-  version "0.0.0"
-  uid ""
-
 "@kbn/ai-assistant-common@link:x-pack/platform/packages/shared/ai-assistant/common":
   version "0.0.0"
   uid ""
@@ -4719,10 +4715,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/alerting-v2-fixture@link:x-pack/platform/test/api_integration_deployment_agnostic/plugins/alerting_v2_fixture":
-  version "0.0.0"
-  uid ""
-
 "@kbn/alerting-v2-plugin@link:x-pack/platform/plugins/shared/alerting_v2":
   version "0.0.0"
   uid ""
@@ -4808,6 +4800,10 @@
   uid ""
 
 "@kbn/apm-data-view@link:src/platform/packages/shared/kbn-apm-data-view":
+  version "0.0.0"
+  uid ""
+
+"@kbn/apm-embeddable-common@link:x-pack/solutions/observability/packages/kbn-apm-embeddable-common":
   version "0.0.0"
   uid ""
 
@@ -5108,6 +5104,10 @@
   uid ""
 
 "@kbn/config@link:src/platform/packages/shared/kbn-config":
+  version "0.0.0"
+  uid ""
+
+"@kbn/connector-cli@link:src/platform/packages/shared/kbn-connector-cli":
   version "0.0.0"
   uid ""
 
@@ -7732,6 +7732,10 @@
   uid ""
 
 "@kbn/mcp-dev-server@link:src/platform/packages/shared/kbn-mcp-dev-server":
+  version "0.0.0"
+  uid ""
+
+"@kbn/measure-component@link:src/platform/packages/shared/kbn-measure-component":
   version "0.0.0"
   uid ""
 
@@ -18057,7 +18061,7 @@ chromium-bidi@13.1.1:
     mitt "^3.0.1"
     zod "^3.24.1"
 
-ci-info@^3.2.0:
+ci-info@^3.2.0, ci-info@^3.7.0:
   version "3.8.0"
   resolved "https://registry.yarnpkg.com/ci-info/-/ci-info-3.8.0.tgz#81408265a5380c929f0bc665d62256628ce9ef91"
   integrity sha512-eXTggHWSooYhq49F2opQhuHWgzucfF2YgODK4e1566GQs5BIfP30B0oenwBJHfWxAs2fyPB1s7Mg949zLf61Yw==
@@ -22219,6 +22223,13 @@ find-up@^8.0.0:
     locate-path "^8.0.0"
     unicorn-magic "^0.3.0"
 
+find-yarn-workspace-root@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/find-yarn-workspace-root/-/find-yarn-workspace-root-2.0.0.tgz#f47fb8d239c900eb78179aa81b66673eac88f7bd"
+  integrity sha512-1IMnbjt4KzsQfnhnzNd8wUEgXZ44IzZaZmnLYx7D5FZlaHt2gW20Cri8Q+E/t5tIj4+epTBub+2Zxu/vNILzqQ==
+  dependencies:
+    micromatch "^4.0.2"
+
 fix-esm@1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/fix-esm/-/fix-esm-1.0.1.tgz#e0e2199d841e43ff7db9b5f5ba7496bc45130ebb"
@@ -23074,7 +23085,7 @@ gpt-tokenizer@2.6.2:
   resolved "https://registry.yarnpkg.com/gpt-tokenizer/-/gpt-tokenizer-2.6.2.tgz#90e6932c7b5f73df7c13d360802edb43a2776586"
   integrity sha512-OznIET3z069FiwbLtLFXJ9pVESYAa8EnX0BMogs6YJ4Fn2FIcyeZYEbxsp2grPiK0DVaqP1f+0JR/8t9R7/jlg==
 
-graceful-fs@^4.1.15, graceful-fs@^4.1.2, graceful-fs@^4.1.6, graceful-fs@^4.2.0, graceful-fs@^4.2.10, graceful-fs@^4.2.11, graceful-fs@^4.2.4, graceful-fs@^4.2.6, graceful-fs@^4.2.8, graceful-fs@^4.2.9:
+graceful-fs@^4.1.11, graceful-fs@^4.1.15, graceful-fs@^4.1.2, graceful-fs@^4.1.6, graceful-fs@^4.2.0, graceful-fs@^4.2.10, graceful-fs@^4.2.11, graceful-fs@^4.2.4, graceful-fs@^4.2.6, graceful-fs@^4.2.8, graceful-fs@^4.2.9:
   version "4.2.11"
   resolved "https://registry.yarnpkg.com/graceful-fs/-/graceful-fs-4.2.11.tgz#4183e4e8bf08bb6e05bbb2f7d2e0c8f712ca40e3"
   integrity sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==
@@ -24736,7 +24747,7 @@ is-word-character@^1.0.0:
   resolved "https://registry.yarnpkg.com/is-word-character/-/is-word-character-1.0.1.tgz#5a03fa1ea91ace8a6eb0c7cd770eb86d65c8befb"
   integrity sha1-WgP6HqkazopusMfNdw64bWXIvvs=
 
-is-wsl@^2.2.0:
+is-wsl@^2.1.1, is-wsl@^2.2.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/is-wsl/-/is-wsl-2.2.0.tgz#74a4c76e77ca9fd3f932f290c17ea326cd157271"
   integrity sha512-fKzAra0rGJUUBwGBgNkHZuToZcn+TtXHpeCgmkMJMMYx1sQDYaCSyjJBSCa2nH1DGm7s3n1oBnohoVTBaN7Lww==
@@ -25597,7 +25608,7 @@ json-stable-stringify-without-jsonify@^1.0.1:
   resolved "https://registry.yarnpkg.com/json-stable-stringify-without-jsonify/-/json-stable-stringify-without-jsonify-1.0.1.tgz#9db7b59496ad3f3cfef30a75142d2d930ad72651"
   integrity sha1-nbe1lJatPzz+8wp1FC0tkwrXJlE=
 
-json-stable-stringify@^1.0.1:
+json-stable-stringify@^1.0.1, json-stable-stringify@^1.0.2:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/json-stable-stringify/-/json-stable-stringify-1.3.0.tgz#8903cfac42ea1a0f97f35d63a4ce0518f0cc6a70"
   integrity sha512-qtYiSSFlwot9XHtF9bD9c7rwKjr+RecWT//ZnPvSmEjpV5mmPOCN4j8UjY5hbjNkOwZ/jQv3J6R1/pL7RwgMsg==
@@ -25829,6 +25840,13 @@ kind-of@^6.0.0, kind-of@^6.0.2, kind-of@^6.0.3:
   version "6.0.3"
   resolved "https://registry.yarnpkg.com/kind-of/-/kind-of-6.0.3.tgz#07c05034a6c349fa06e24fa35aa76db4580ce4dd"
   integrity sha512-dcS1ul+9tmeD95T+x28/ehLgd9mENa3LsvDTtzm3vyBEO7RPptvAD+t44WVXaUjTBRcrpFeFlC8WCruUR456hw==
+
+klaw-sync@^6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/klaw-sync/-/klaw-sync-6.0.0.tgz#1fd2cfd56ebb6250181114f0a581167099c2b28c"
+  integrity sha512-nIeuVSzdCCs6TDPTqI8w1Yre34sSq7AkZ4B3sfOBbI2CgVSB4Du4aLQijFU2+lhAFCwt9+42Hel6lQNIv6AntQ==
+  dependencies:
+    graceful-fs "^4.1.11"
 
 kleur@^3.0.3:
   version "3.0.3"
@@ -26127,10 +26145,10 @@ linkify-it@^5.0.0:
   dependencies:
     uc.micro "^2.0.0"
 
-liquidjs@10.25.3:
-  version "10.25.3"
-  resolved "https://registry.yarnpkg.com/liquidjs/-/liquidjs-10.25.3.tgz#ee9583a36a2b23b118963ba8da12de048d7ae035"
-  integrity sha512-csoJtC6yTfkUlwy+QKm0tRbFoz5cnzly1ugFvBBDWXA4Oo8ul31hOHDEZVzG93q8YaxRIQ909GFuow8d/q1v2Q==
+liquidjs@10.25.6:
+  version "10.25.6"
+  resolved "https://registry.yarnpkg.com/liquidjs/-/liquidjs-10.25.6.tgz#dddf7ee43cd3c7a2d7768063937bf14e77079afb"
+  integrity sha512-h5ki5HS1PiL9/NmLw3iUcTF1jQswKJd8KLEXNrtSf8XHF0v3c5+d+8llz3N9I5IUdc5rsOuVLb9AVnqvqqscPg==
   dependencies:
     commander "^10.0.0"
 
@@ -28346,6 +28364,14 @@ open@^10.0.3:
     is-inside-container "^1.0.0"
     is-wsl "^3.1.0"
 
+open@^7.4.2:
+  version "7.4.2"
+  resolved "https://registry.yarnpkg.com/open/-/open-7.4.2.tgz#b8147e26dcf3e426316c730089fd71edd29c2321"
+  integrity sha512-MVHddDVweXZF3awtlAS+6pgKLlm/JgxZ90+/NBurBoQctVOOB/zDdVjcyPzQ+0laDGbsWgrRkflI65sQeOgT9Q==
+  dependencies:
+    is-docker "^2.0.0"
+    is-wsl "^2.1.1"
+
 open@^8.0.4, open@^8.4.0, open@~8.4.0:
   version "8.4.2"
   resolved "https://registry.yarnpkg.com/open/-/open-8.4.2.tgz#5b5ffe2a8f793dcd2aad73e550cb87b59cb084f9"
@@ -28879,6 +28905,26 @@ patch-console@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/patch-console/-/patch-console-2.0.0.tgz#9023f4665840e66f40e9ce774f904a63167433bb"
   integrity sha512-0YNdUceMdaQwoKce1gatDScmMo5pu/tfABfnzEqeG0gtTmd7mh/WcwgUjtAeOU7N8nFFlbQBnFK2gXW5fGvmMA==
+
+patch-package@8.0.1:
+  version "8.0.1"
+  resolved "https://registry.yarnpkg.com/patch-package/-/patch-package-8.0.1.tgz#79d02f953f711e06d1f8949c8a13e5d3d7ba1a60"
+  integrity sha512-VsKRIA8f5uqHQ7NGhwIna6Bx6D9s/1iXlA1hthBVBEbkq+t4kXD0HHt+rJhf/Z+Ci0F/HCB2hvn0qLdLG+Qxlw==
+  dependencies:
+    "@yarnpkg/lockfile" "^1.1.0"
+    chalk "^4.1.2"
+    ci-info "^3.7.0"
+    cross-spawn "^7.0.3"
+    find-yarn-workspace-root "^2.0.0"
+    fs-extra "^10.0.0"
+    json-stable-stringify "^1.0.2"
+    klaw-sync "^6.0.0"
+    minimist "^1.2.6"
+    open "^7.4.2"
+    semver "^7.5.3"
+    slash "^2.0.0"
+    tmp "^0.2.4"
+    yaml "^2.2.2"
 
 path-browserify@^1.0.0, path-browserify@^1.0.1:
   version "1.0.1"
@@ -33878,7 +33924,7 @@ tmp@^0.0.33:
   dependencies:
     os-tmpdir "~1.0.2"
 
-tmp@^0.2.5, tmp@~0.2.4:
+tmp@^0.2.4, tmp@^0.2.5, tmp@~0.2.4:
   version "0.2.5"
   resolved "https://registry.yarnpkg.com/tmp/-/tmp-0.2.5.tgz#b06bcd23f0f3c8357b426891726d16015abfd8f8"
   integrity sha512-voyz6MApa1rQGUxT3E+BK7/ROe8itEx7vD8/HEvt4xwXucvQ5G5oeEiHkmHZJuBO21RpOf+YYm9MOivj709jow==
@@ -36130,7 +36176,7 @@ yaml@2.7.1:
   resolved "https://registry.yarnpkg.com/yaml/-/yaml-2.7.1.tgz#44a247d1b88523855679ac7fa7cda6ed7e135cf6"
   integrity sha512-10ULxpnOCQXxJvBgxsn9ptjq6uviG/htZKk9veJGhlqn3w/DxQ631zFF+nlQXLwmImeS5amR2dl2U8sg6U9jsQ==
 
-yaml@2.8.3:
+yaml@2.8.3, yaml@^2.2.2:
   version "2.8.3"
   resolved "https://registry.yarnpkg.com/yaml/-/yaml-2.8.3.tgz#a0d6bd2efb3dd03c59370223701834e60409bd7d"
   integrity sha512-AvbaCLOO2Otw/lW5bmh9d/WEdcDFdQp2Z2ZUH3pX9U2ihyUY0nvLv7J6TrWowklRGPYbB/IuIMfYgxaCPg5Bpg==
