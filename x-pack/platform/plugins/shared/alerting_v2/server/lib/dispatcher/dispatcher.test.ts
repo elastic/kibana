@@ -728,9 +728,7 @@ describe('DispatcherService', () => {
         expect(stage.counts).toEqual(expect.any(Object));
       }
 
-      const fetchEpisodes = tick.stages.find(
-        (s: { name: string }) => s.name === 'fetch_episodes'
-      );
+      const fetchEpisodes = tick.stages.find((s: { name: string }) => s.name === 'fetch_episodes');
       expect(fetchEpisodes.counts.episodes).toBe(alertEpisodes.length);
 
       expect(result.tick).toEqual(tick);

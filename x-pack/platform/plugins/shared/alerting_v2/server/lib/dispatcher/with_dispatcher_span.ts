@@ -36,10 +36,7 @@ export async function withDispatcherSpan<T>(
   );
 }
 
-function applyLabels<T>(
-  labelsFactory: (result: T) => DispatcherSpanLabels,
-  result: T
-): void {
+function applyLabels<T>(labelsFactory: (result: T) => DispatcherSpanLabels, result: T): void {
   try {
     const span = apm.currentSpan;
     if (!span) return;
