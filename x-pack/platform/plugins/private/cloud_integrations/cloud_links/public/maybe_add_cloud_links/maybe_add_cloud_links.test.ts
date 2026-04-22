@@ -90,17 +90,14 @@ describe('maybeAddCloudLinks', () => {
         Array [
           Object {
             "href": "https://www.elastic.co/docs/get-started",
-            "iconType": "documentation",
-            "title": "Kibana documentation",
+            "title": "Documentation",
           },
           Object {
             "href": "https://www.elastic.co/support",
-            "iconType": "question",
-            "title": "Ask support",
+            "title": "Support",
           },
           Object {
             "dataTestSubj": "connectionDetailsHelpLink",
-            "iconType": "plugs",
             "onClick": [Function],
             "title": "Connection details",
           },
@@ -168,17 +165,14 @@ describe('maybeAddCloudLinks', () => {
         Array [
           Object {
             "href": "https://www.elastic.co/docs/get-started",
-            "iconType": "documentation",
-            "title": "Kibana documentation",
+            "title": "Documentation",
           },
           Object {
             "href": "https://www.elastic.co/support",
-            "iconType": "question",
-            "title": "Ask support",
+            "title": "Support",
           },
           Object {
             "dataTestSubj": "connectionDetailsHelpLink",
-            "iconType": "plugs",
             "onClick": [Function],
             "title": "Connection details",
           },
