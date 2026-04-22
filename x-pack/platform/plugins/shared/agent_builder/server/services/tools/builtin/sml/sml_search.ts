@@ -69,7 +69,7 @@ export const createSmlSearchTool = ({
         query,
         size,
         spaceId,
-        esClient: esClient.asCurrentUser,
+        esClient,
         request,
       });
     } catch (error) {

@@ -6,17 +6,12 @@
  */
 
 import React from 'react';
-import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { useOnFieldErrorsChange } from '../form';
+import { Controller, useFormContext } from 'react-hook-form';
+import type { IlmPhasesFlyoutFormInternal } from '../form';
 
 export const GlobalFieldsMount = () => {
-  const onFieldErrorsChange = useOnFieldErrorsChange();
+  const { control } = useFormContext<IlmPhasesFlyoutFormInternal>();
   return (
-    <UseField
-      path="_meta.searchableSnapshot.repository"
-      onError={(errors) => onFieldErrorsChange?.('_meta.searchableSnapshot.repository', errors)}
-    >
-      {() => null}
-    </UseField>
+    <Controller name="_meta.searchableSnapshot.repository" control={control} render={() => <></>} />
   );
 };

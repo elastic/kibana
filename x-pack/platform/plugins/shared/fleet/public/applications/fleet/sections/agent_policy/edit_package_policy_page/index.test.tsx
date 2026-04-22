@@ -36,6 +36,10 @@ type MockFn = jest.MockedFunction<any>;
 
 let lastStepConfigureProps: any;
 
+jest.mock('../../../../../services/use_yaml', () => ({
+  useYaml: () => require('yaml'),
+}));
+
 jest.mock('../create_package_policy_page/components/steps/components/use_policies', () => {
   return {
     ...jest.requireActual('../create_package_policy_page/components/steps/components/use_policies'),

@@ -120,7 +120,7 @@ interface AgentBase {
   policy_id?: string;
   policy_revision?: number | null;
   last_checkin?: string;
-  last_checkin_status?: 'error' | 'online' | 'degraded' | 'updating' | 'starting';
+  last_checkin_status?: 'error' | 'online' | 'degraded' | 'updating' | 'starting' | 'disconnected';
   last_checkin_message?: string;
   user_provided_metadata?: AgentMetadata;
   local_metadata: AgentMetadata;
@@ -349,7 +349,7 @@ export interface FleetServerAgent {
   /**
    * Last checkin status
    */
-  last_checkin_status?: 'error' | 'online' | 'degraded' | 'updating';
+  last_checkin_status?: 'error' | 'online' | 'degraded' | 'updating' | 'disconnected';
   /**
    * Last checkin message
    */

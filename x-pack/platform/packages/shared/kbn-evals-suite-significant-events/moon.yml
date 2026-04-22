@@ -21,7 +21,6 @@ dependsOn:
   - '@kbn/evals-phoenix-executor'
   - '@kbn/tooling-log'
   - '@kbn/streams-ai'
-  - '@kbn/datemath'
   - '@kbn/scout'
   - '@kbn/streams-schema'
   - '@kbn/kibana-api-cli'
@@ -36,6 +35,7 @@ dependsOn:
   - '@kbn/ai-tools'
   - '@kbn/std'
   - '@kbn/streamlang'
+  - '@kbn/streams-plugin'
 tags:
   - functional-tests
   - package

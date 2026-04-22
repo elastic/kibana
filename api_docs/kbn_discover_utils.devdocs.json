@@ -1576,7 +1576,9 @@
         "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.formatFieldValue",
         "type": "Function",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "formatFieldValue",
         "description": [
           "\nFormats the value of a specific field using the appropriate field formatter if available\nor the default string field formatter otherwise.\n"
@@ -1635,16 +1637,58 @@
             "pluginId": "fieldFormats",
             "scope": "common",
             "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.HtmlContextTypeOptions",
-            "text": "HtmlContextTypeOptions"
+            "section": "def-common.ReactContextTypeOptions",
+            "text": "ReactContextTypeOptions"
           },
           " | undefined) => string"
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_value.ts",
-        "lineNumber": 20,
+        "lineNumber": 22,
         "columnNumber": 1,
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_table/field_row.ts"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_table/field_row.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/platform/plugins/shared/discover/public/components/data_types/logs/service_name_cell.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/platform/plugins/shared/discover/public/components/data_types/logs/service_name_cell.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/home/entities_table/entities_data_table.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/home/entities_table/entities_data_table.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/home/entities_table/entities_data_table.tsx"
+          },
+          {
+            "plugin": "@kbn/discover-contextual-components",
+            "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx"
+          },
+          {
+            "plugin": "@kbn/discover-contextual-components",
+            "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx"
+          },
+          {
+            "plugin": "@kbn/discover-contextual-components",
+            "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "@kbn/discover-utils",
@@ -1659,7 +1703,7 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_value.ts",
-            "lineNumber": 34,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1684,7 +1728,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_value.ts",
-            "lineNumber": 35,
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1709,7 +1753,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_value.ts",
-            "lineNumber": 36,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1735,7 +1779,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_value.ts",
-            "lineNumber": 37,
+            "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1761,7 +1805,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_value.ts",
-            "lineNumber": 38,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1787,7 +1831,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_value.ts",
-            "lineNumber": 39,
+            "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1815,13 +1859,13 @@
                 "pluginId": "fieldFormats",
                 "scope": "common",
                 "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.HtmlContextTypeOptions",
-                "text": "HtmlContextTypeOptions"
+                "section": "def-common.ReactContextTypeOptions",
+                "text": "ReactContextTypeOptions"
               },
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_value.ts",
-            "lineNumber": 40,
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1835,12 +1879,55 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.formatHit",
+        "id": "def-common.formatFieldValueReact",
         "type": "Function",
         "tags": [],
-        "label": "formatHit",
+        "label": "formatFieldValueReact",
         "description": [
-          "\nReturns a formatted document in form of key/value pairs of the fields name and a formatted value.\nThe value returned in each pair is an HTML string which is safe to be applied to the DOM, since\nit's formatted using field formatters."
+          "\nReact equivalent of formatFieldValue. Returns a ReactNode rendered via reactConvert,\nwhich is safe to render directly without dangerouslySetInnerHTML.\n"
+        ],
+        "signature": [
+          "({ value, hit, fieldFormats, dataView, field, options, }: ",
+          "FormatFieldValueReactParams",
+          ") => React.ReactNode"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_value.ts",
+        "lineNumber": 82,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.formatFieldValueReact.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  value,\n  hit,\n  fieldFormats,\n  dataView,\n  field,\n  options,\n}",
+            "description": [],
+            "signature": [
+              "FormatFieldValueReactParams"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_value.ts",
+            "lineNumber": 82,
+            "columnNumber": 39,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "A ReactNode that can be rendered directly"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.formatHitReact",
+        "type": "Function",
+        "tags": [],
+        "label": "formatHitReact",
+        "description": [
+          "\nReturns a formatted document in form of key/value pairs where the value is a ReactNode"
         ],
         "signature": [
           "(hit: ",
@@ -1893,14 +1980,14 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_hit.ts",
-        "lineNumber": 37,
+        "lineNumber": 38,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.formatHit.$1",
+            "id": "def-common.formatHitReact.$1",
             "type": "Object",
             "tags": [],
             "label": "hit",
@@ -1915,7 +2002,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_hit.ts",
-            "lineNumber": 49,
+            "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1923,7 +2010,7 @@
           },
           {
             "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.formatHit.$2",
+            "id": "def-common.formatHitReact.$2",
             "type": "Object",
             "tags": [],
             "label": "dataView",
@@ -1938,7 +2025,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_hit.ts",
-            "lineNumber": 50,
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1946,7 +2033,7 @@
           },
           {
             "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.formatHit.$3",
+            "id": "def-common.formatHitReact.$3",
             "type": "Function",
             "tags": [],
             "label": "shouldShowFieldHandler",
@@ -1961,7 +2048,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_hit.ts",
-            "lineNumber": 51,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1969,7 +2056,7 @@
           },
           {
             "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.formatHit.$4",
+            "id": "def-common.formatHitReact.$4",
             "type": "number",
             "tags": [],
             "label": "maxEntries",
@@ -1978,7 +2065,7 @@
               "number"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_hit.ts",
-            "lineNumber": 52,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1986,7 +2073,7 @@
           },
           {
             "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.formatHit.$5",
+            "id": "def-common.formatHitReact.$5",
             "type": "CompoundType",
             "tags": [],
             "label": "fieldFormats",
@@ -2001,7 +2088,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_hit.ts",
-            "lineNumber": 53,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2009,7 +2096,7 @@
           },
           {
             "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.formatHit.$6",
+            "id": "def-common.formatHitReact.$6",
             "type": "Object",
             "tags": [],
             "label": "columnsMeta",
@@ -2025,7 +2112,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_hit.ts",
-            "lineNumber": 54,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4491,7 +4578,7 @@
         "label": "ApmErrorLogFields",
         "description": [],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-        "lineNumber": 97,
+        "lineNumber": 99,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4504,7 +4591,7 @@
             "label": "'processor.event'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 98,
+            "lineNumber": 100,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4520,7 +4607,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 99,
+            "lineNumber": 101,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4536,7 +4623,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 100,
+            "lineNumber": 102,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4552,7 +4639,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 101,
+            "lineNumber": 103,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4568,7 +4655,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 102,
+            "lineNumber": 104,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4584,7 +4671,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 103,
+            "lineNumber": 105,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4695,7 +4782,7 @@
           "\nDiscover-specific app menu config with typed menu items"
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-        "lineNumber": 78,
+        "lineNumber": 77,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4718,7 +4805,7 @@
               "[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-            "lineNumber": 82,
+            "lineNumber": 81,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4741,7 +4828,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-            "lineNumber": 83,
+            "lineNumber": 82,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4791,22 +4878,6 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.DiscoverAppMenuContext.parentTestId",
-            "type": "string",
-            "tags": [],
-            "label": "parentTestId",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-            "lineNumber": 35,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4832,7 +4903,7 @@
           "AppMenuRunActionParams"
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-        "lineNumber": 38,
+        "lineNumber": 37,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4854,7 +4925,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-            "lineNumber": 42,
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4944,7 +5015,7 @@
         "label": "LogCloudFields",
         "description": [],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-        "lineNumber": 135,
+        "lineNumber": 137,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4960,7 +5031,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 136,
+            "lineNumber": 138,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4976,7 +5047,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 137,
+            "lineNumber": 139,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4992,7 +5063,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 138,
+            "lineNumber": 140,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5008,7 +5079,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 139,
+            "lineNumber": 141,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5024,7 +5095,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 140,
+            "lineNumber": 142,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5098,7 +5169,7 @@
           ">"
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-        "lineNumber": 75,
+        "lineNumber": 77,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5111,7 +5182,7 @@
             "label": "'@timestamp'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 82,
+            "lineNumber": 84,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5127,7 +5198,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 83,
+            "lineNumber": 85,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5143,7 +5214,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 84,
+            "lineNumber": 86,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5159,7 +5230,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 85,
+            "lineNumber": 87,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5175,7 +5246,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 86,
+            "lineNumber": 88,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5191,7 +5262,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 87,
+            "lineNumber": 89,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5207,7 +5278,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 88,
+            "lineNumber": 90,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5223,7 +5294,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 89,
+            "lineNumber": 91,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5239,7 +5310,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 90,
+            "lineNumber": 92,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5255,7 +5326,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 91,
+            "lineNumber": 93,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5268,7 +5339,7 @@
             "label": "'data_stream.namespace'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 92,
+            "lineNumber": 94,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5281,7 +5352,7 @@
             "label": "'data_stream.dataset'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 93,
+            "lineNumber": 95,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5297,7 +5368,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 94,
+            "lineNumber": 96,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5313,7 +5384,7 @@
         "label": "LogOtelStackTraceFields",
         "description": [],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-        "lineNumber": 129,
+        "lineNumber": 131,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5329,7 +5400,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 130,
+            "lineNumber": 132,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5345,7 +5416,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 131,
+            "lineNumber": 133,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5361,7 +5432,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 132,
+            "lineNumber": 134,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5377,7 +5448,7 @@
         "label": "LogResourceFields",
         "description": [],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-        "lineNumber": 111,
+        "lineNumber": 113,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5393,7 +5464,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 112,
+            "lineNumber": 114,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5409,7 +5480,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 113,
+            "lineNumber": 115,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5425,7 +5496,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 114,
+            "lineNumber": 116,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5441,7 +5512,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 115,
+            "lineNumber": 117,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5457,7 +5528,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 116,
+            "lineNumber": 118,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5473,7 +5544,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 117,
+            "lineNumber": 119,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5489,7 +5560,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 118,
+            "lineNumber": 120,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5505,7 +5576,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 119,
+            "lineNumber": 121,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5521,7 +5592,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 120,
+            "lineNumber": 122,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5607,7 +5678,7 @@
         "label": "LogStackTraceFields",
         "description": [],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-        "lineNumber": 123,
+        "lineNumber": 125,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5623,7 +5694,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 124,
+            "lineNumber": 126,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5639,7 +5710,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 125,
+            "lineNumber": 127,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5655,7 +5726,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 126,
+            "lineNumber": 128,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5671,7 +5742,7 @@
         "label": "OtelExceptionLogFields",
         "description": [],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-        "lineNumber": 106,
+        "lineNumber": 108,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5684,7 +5755,7 @@
             "label": "event_name",
             "description": [],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 107,
+            "lineNumber": 109,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5700,7 +5771,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 108,
+            "lineNumber": 110,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6051,7 +6122,7 @@
         "label": "ServiceFields",
         "description": [],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-        "lineNumber": 164,
+        "lineNumber": 166,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6064,7 +6135,7 @@
             "label": "'service.name'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 165,
+            "lineNumber": 167,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6077,7 +6148,7 @@
             "label": "'service.environment'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 166,
+            "lineNumber": 168,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6090,7 +6161,7 @@
             "label": "'agent.name'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 167,
+            "lineNumber": 169,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6106,7 +6177,7 @@
         "label": "SpanFields",
         "description": [],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-        "lineNumber": 177,
+        "lineNumber": 179,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6119,7 +6190,7 @@
             "label": "'span.id'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 178,
+            "lineNumber": 180,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6132,7 +6203,7 @@
             "label": "'span.name'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 179,
+            "lineNumber": 181,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6145,7 +6216,7 @@
             "label": "'span.action'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 180,
+            "lineNumber": 182,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6158,7 +6229,7 @@
             "label": "'span.duration.us'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 181,
+            "lineNumber": 183,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6171,7 +6242,7 @@
             "label": "'span.type'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 182,
+            "lineNumber": 184,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6184,7 +6255,7 @@
             "label": "'span.subtype'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 183,
+            "lineNumber": 185,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6197,7 +6268,7 @@
             "label": "'span.destination.service.resource'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 184,
+            "lineNumber": 186,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6213,7 +6284,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 185,
+            "lineNumber": 187,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6229,7 +6300,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 186,
+            "lineNumber": 188,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6295,7 +6366,7 @@
           ">"
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-        "lineNumber": 143,
+        "lineNumber": 145,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6311,7 +6382,7 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 149,
+            "lineNumber": 151,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6327,7 +6398,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 150,
+            "lineNumber": 152,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6343,7 +6414,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 151,
+            "lineNumber": 153,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6359,7 +6430,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 152,
+            "lineNumber": 154,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6375,7 +6446,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 153,
+            "lineNumber": 155,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6441,7 +6512,7 @@
           ">"
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-        "lineNumber": 194,
+        "lineNumber": 196,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6457,7 +6528,7 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 200,
+            "lineNumber": 202,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6473,7 +6544,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 201,
+            "lineNumber": 203,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6489,7 +6560,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 202,
+            "lineNumber": 204,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6505,7 +6576,7 @@
         "label": "TraceFields",
         "description": [],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-        "lineNumber": 156,
+        "lineNumber": 158,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6518,7 +6589,7 @@
             "label": "'@timestamp'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 157,
+            "lineNumber": 159,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6531,7 +6602,7 @@
             "label": "'trace.id'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 158,
+            "lineNumber": 160,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6547,7 +6618,7 @@
               "\"transaction\" | \"span\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 159,
+            "lineNumber": 161,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6563,7 +6634,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 160,
+            "lineNumber": 162,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6579,7 +6650,7 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 161,
+            "lineNumber": 163,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6595,7 +6666,7 @@
         "label": "TransactionFields",
         "description": [],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-        "lineNumber": 170,
+        "lineNumber": 172,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6608,7 +6679,7 @@
             "label": "'transaction.id'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 171,
+            "lineNumber": 173,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6621,7 +6692,7 @@
             "label": "'transaction.type'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 172,
+            "lineNumber": 174,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6634,7 +6705,7 @@
             "label": "'transaction.name'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 173,
+            "lineNumber": 175,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6650,7 +6721,7 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 174,
+            "lineNumber": 176,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6666,7 +6737,7 @@
         "label": "UserAgentFields",
         "description": [],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-        "lineNumber": 189,
+        "lineNumber": 191,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6679,7 +6750,7 @@
             "label": "'user_agent.name'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 190,
+            "lineNumber": 192,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6692,7 +6763,7 @@
             "label": "'user_agent.version'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 191,
+            "lineNumber": 193,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7301,7 +7372,7 @@
           "[] | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-        "lineNumber": 63,
+        "lineNumber": 62,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7338,7 +7409,7 @@
           "[] | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-        "lineNumber": 52,
+        "lineNumber": 51,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7367,7 +7438,7 @@
           " | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-        "lineNumber": 71,
+        "lineNumber": 70,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7394,7 +7465,7 @@
           ") => void | React.ReactNode | React.ReactElement<any> | Promise<void | React.ReactNode | React.ReactElement<any>>"
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-        "lineNumber": 45,
+        "lineNumber": 44,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7417,7 +7488,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-            "lineNumber": 49,
+            "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7721,13 +7792,13 @@
         "tags": [],
         "label": "FormattedHit",
         "description": [
-          "\nPairs array for each field in the hit"
+          "\nPairs array for each field in the hit where values are ReactNodes"
         ],
         "signature": [
           "FormattedHitPair[]"
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-        "lineNumber": 70,
+        "lineNumber": 72,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

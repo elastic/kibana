@@ -63,7 +63,6 @@ export const PluginLibraryPanel: React.FC<PluginLibraryPanelProps> = ({
       allItems={allPlugins}
       activeItemIdSet={activePluginIdSet}
       onToggleItem={onTogglePlugin}
-      mutatingItemId={null}
       flyoutTitleId="pluginLibraryFlyoutTitle"
       libraryLabels={libraryLabels}
       manageLibraryPath={appPaths.plugins.list}

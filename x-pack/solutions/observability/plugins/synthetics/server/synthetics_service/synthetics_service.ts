@@ -548,7 +548,7 @@ export class SyntheticsService {
     // execute the remaining monitors
     await syncAllLocations();
 
-    await finder.close();
+    finder.close().catch(() => {});
   }
 
   async runOnceConfigs(configs?: ConfigData) {

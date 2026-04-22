@@ -14,7 +14,7 @@ import { expect } from '..';
 import { KibanaCodeEditorWrapper } from '../ui_components';
 
 export class DiscoverApp {
-  private readonly codeEditor: KibanaCodeEditorWrapper;
+  public readonly codeEditor: KibanaCodeEditorWrapper;
 
   constructor(private readonly page: ScoutPage) {
     this.codeEditor = new KibanaCodeEditorWrapper(page);
@@ -287,6 +287,13 @@ export class DiscoverApp {
   getColumnHeader(name: string): Locator {
     return this.page.testSubj.locator(`dataGridHeaderCell-${name}`);
   }
+
+  public readonly controls = {
+    getControlFrame: (controlId: string): Locator =>
+      this.page.locator(`[data-test-subj='control-frame']:has([data-control-id='${controlId}'])`),
+    getControlFrameSelectedValue: (controlId: string, value: string): Locator =>
+      this.controls.getControlFrame(controlId).getByText(value),
+  };
 
   async clickFieldSort(field: string, sortOption: string) {
     const header = this.getColumnHeader(field);

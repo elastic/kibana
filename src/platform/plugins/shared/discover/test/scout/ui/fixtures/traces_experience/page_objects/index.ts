@@ -8,6 +8,7 @@
  */
 
 export { TracesExperiencePage } from './traces_experience';
+export type { TracesControls } from './controls';
 export type { ApmPage } from './apm';
 export type { TracesFlyout } from './flyout';
 export type { TracesGrid } from './grid';

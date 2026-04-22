@@ -32,11 +32,6 @@ export const allowedExperimentalValues = Object.freeze({
   extendedRuleExecutionLoggingEnabled: false,
 
   /**
-   * Enables the SOC trends timerange and stats on D&R page
-   */
-  socTrendsEnabled: false,
-
-  /**
    * `runscript` response actions for SentinelOne hosts.
    *
    * Release: 9.2.0 (earlier for serverless)
@@ -86,12 +81,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Entity Analytics: Disables the Risk Score AI Assistant tool.
    */
   riskScoreAssistantToolDisabled: false,
-
-  /**
-   * Entity Analytics: Disables the Risk Score AI Assistant tool.
-   */
-  entityDetailsHighlightsEnabled: true,
-
   /**
    * Enables the new Entity Analytics home page experience.
    */
@@ -103,13 +92,6 @@ export const allowedExperimentalValues = Object.freeze({
    * API routes, and persistence indices are activated.
    */
   leadGenerationEnabled: false,
-
-  /**
-   * Enables lead generation details: the "i" icon on lead cards/list items
-   * and the "How this lead was generated" flyout.
-   * Requires `leadGenerationEnabled` to also be true.
-   */
-  leadGenerationDetailsEnabled: false,
 
   /**
    * disables ES|QL rules
@@ -135,7 +117,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables AI rule creation feature
    */
-  aiRuleCreationEnabled: false,
+  aiRuleCreationEnabled: true,
 
   /**
    * Disables the siem migrations feature
@@ -191,7 +173,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Protects all the work related to the attacks and alerts alignment effort
    */
-  enableAlertsAndAttacksAlignment: false,
+  enableAlertsAndAttacksAlignment: true,
   /**
    *  Enables the QRadar rules import feature
    */
@@ -252,11 +234,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Release: 9.4
    */
   prebuiltRulesDeprecationUIEnabled: false,
-
-  /**
-   * Classic chrome only: refreshed Security side nav (Launchpad, Manage footer; unified row + panel behavior).
-   */
-  securityClassicNavUpdate: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

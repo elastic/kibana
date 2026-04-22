@@ -13,24 +13,13 @@ import { getAllYamlProviders } from './intercept_monaco_yaml_provider';
 import { getSuggestions, isInsideLoopBody } from './suggestions/get_suggestions';
 import { isInWorkflowOutputWithBlock } from './suggestions/workflow/get_workflow_outputs_suggestions';
 import type { WorkflowKqlCompletionServices } from './suggestions/workflow_kql_completion_services';
+import { isDeprecatedStepType } from '../../../../../common/schema';
 import type { WorkflowDetailState } from '../../../../entities/workflows/store';
 
 // Unique identifier for the workflow completion provider
 export const WORKFLOW_COMPLETION_PROVIDER_ID = 'workflows-yaml-completion-provider';
 // Snippet enum alias to improve code readability
 const INSERT_AS_SNIPPET = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
-
-/**
- * Deprecated type aliases that should NOT be shown in autocomplete suggestions.
- * These are kept for backward compatibility (existing workflows still validate)
- * but we don't want users to use them in new workflows.
- */
-const DEPRECATED_TYPE_ALIASES = new Set([
-  'kibana.createCaseDefaultSpace',
-  'kibana.getCaseDefaultSpace',
-  'kibana.updateCaseDefaultSpace',
-  'kibana.addCaseCommentDefaultSpace',
-]);
 
 /**
  * Step types that are only valid inside loop bodies (foreach / while).
@@ -70,7 +59,7 @@ function getDeduplicationKey(suggestion: monaco.languages.CompletionItem): strin
 
 /**
  * Add suggestions to a deduplicated map, preferring suggestions with snippets over plain text.
- * Filters out deprecated type aliases so they don't appear in autocomplete.
+ * Filters out deprecated step types so they don't appear in autocomplete.
  */
 function mapSuggestions(
   map: Map<string, monaco.languages.CompletionItem>,
@@ -79,9 +68,9 @@ function mapSuggestions(
   for (const suggestion of suggestions) {
     const key = getDeduplicationKey(suggestion);
 
-    // Skip deprecated type aliases - they still work for backward compatibility
+    // Skip deprecated step types - they still work for backward compatibility
     // but we don't want to suggest them to users
-    if (!DEPRECATED_TYPE_ALIASES.has(key)) {
+    if (!isDeprecatedStepType(key)) {
       const existing = map.get(key);
 
       if (existing) {
@@ -181,7 +170,7 @@ export function getCompletionItemProvider(
       // Workflow suggestions always win over YAML duplicates.
       for (const suggestion of workflowSuggestions) {
         const key = getDeduplicationKey(suggestion);
-        if (!DEPRECATED_TYPE_ALIASES.has(key)) {
+        if (!isDeprecatedStepType(key)) {
           deduplicatedMap.set(key, suggestion);
         }
       }
