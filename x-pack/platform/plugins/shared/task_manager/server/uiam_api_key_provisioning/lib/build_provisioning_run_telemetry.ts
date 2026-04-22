@@ -17,28 +17,28 @@ export const failedProvisioningRunTelemetry = (): TaskManagerUiamProvisioningRun
   run_number: 0,
 });
 
+/**
+ * Shapes run telemetry like Alerting's `UiamProvisioningRunEventData`
+ * (`completed` + `failed` + `skipped` = `total`, `has_more_to_provision` from batching).
+ */
 export const buildSuccessProvisioningRunTelemetry = ({
-  apiKeysToConvertCount,
-  convertedCount,
-  skippedInBatch,
-  hasMoreToUpdate,
+  completed,
+  failed,
+  skipped,
+  hasMoreToProvision,
   nextRunNumber,
 }: {
-  apiKeysToConvertCount: number;
-  convertedCount: number;
-  skippedInBatch: number;
-  hasMoreToUpdate: boolean;
+  completed: number;
+  failed: number;
+  skipped: number;
+  hasMoreToProvision: boolean;
   nextRunNumber: number;
-}): TaskManagerUiamProvisioningRunEventData => {
-  const completed = convertedCount;
-  const failed = apiKeysToConvertCount - completed;
-  return {
-    total: completed + failed + skippedInBatch,
-    completed,
-    failed,
-    skipped: skippedInBatch,
-    has_more_to_provision: hasMoreToUpdate,
-    has_error: false,
-    run_number: nextRunNumber,
-  };
-};
+}): TaskManagerUiamProvisioningRunEventData => ({
+  total: completed + failed + skipped,
+  completed,
+  failed,
+  skipped,
+  has_more_to_provision: hasMoreToProvision,
+  has_error: false,
+  run_number: nextRunNumber,
+});

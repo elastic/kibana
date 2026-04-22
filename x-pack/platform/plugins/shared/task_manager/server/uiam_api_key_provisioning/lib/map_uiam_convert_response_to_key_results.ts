@@ -5,42 +5,45 @@
  * 2.0.
  */
 
-import type {
-  ApiKeyToConvert,
-  UiamConvertFailedResult,
-  UiamConvertResponse,
-  UiamConvertSuccessResult,
-  UiamKeyResult,
-} from '../types';
+import type { ConvertUiamAPIKeysResponse } from '@kbn/core-security-server';
+import type { ApiKeyToConvert, ConvertApiKeysResult, UiamKeyResult } from '../types';
+import { createFailedConversionTaskProvisioningStatus } from './task_uiam_provisioning_observability_status';
 
+/**
+ * Maps the UIAM convert API response and input tasks into result rows and failed-conversion status docs.
+ * Caller must ensure `convertResponse.results.length === apiKeysToConvert.length`.
+ */
 export const mapUiamConvertResponseToKeyResults = (
   apiKeysToConvert: ApiKeyToConvert[],
-  response: UiamConvertResponse,
-  onItemFailed: (taskId: string, message: string) => void
-): {
-  converted: UiamKeyResult[];
-  failedConversions: Array<{ taskId: string; message: string }>;
-} => {
+  convertResponse: ConvertUiamAPIKeysResponse
+): ConvertApiKeysResult => {
   const converted: UiamKeyResult[] = [];
-  const failedConversions: Array<{ taskId: string; message: string }> = [];
-  const limit = Math.min(response.results.length, apiKeysToConvert.length);
+  const provisioningStatusForFailedConversions: ConvertApiKeysResult['provisioningStatusForFailedConversions'] =
+    [];
 
-  for (let i = 0; i < limit; i++) {
-    const item = response.results[i];
-    const { taskId } = apiKeysToConvert[i];
+  for (let i = 0; i < convertResponse.results.length && i < apiKeysToConvert.length; i++) {
+    const item = convertResponse.results[i];
+    const { taskId, attributes, version } = apiKeysToConvert[i];
     if (item.status === 'success') {
-      const success = item as UiamConvertSuccessResult;
-      const encodedKey = Buffer.from(`${success.id}:${success.key}`).toString('base64');
       converted.push({
         taskId,
-        uiamApiKey: encodedKey,
-        uiamApiKeyId: success.id,
+        uiamApiKey: Buffer.from(`${item.id}:${item.key}`).toString('base64'),
+        uiamApiKeyId: item.id,
+        attributes,
+        version,
       });
-    } else {
-      const failed = item as UiamConvertFailedResult;
-      onItemFailed(taskId, failed.message);
-      failedConversions.push({ taskId, message: failed.message });
+    } else if (item.status === 'failed') {
+      provisioningStatusForFailedConversions.push(
+        createFailedConversionTaskProvisioningStatus(
+          taskId,
+          `Error generating UIAM API key for the task with ID ${taskId}: ${item.message}`
+        )
+      );
     }
   }
-  return { converted, failedConversions };
+
+  return {
+    converted,
+    provisioningStatusForFailedConversions,
+  };
 };

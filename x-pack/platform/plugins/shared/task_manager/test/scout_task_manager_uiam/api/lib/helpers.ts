@@ -308,6 +308,12 @@ export interface ScheduleDisabledFixtureTaskOptions {
    * key is granted (no UIAM key). Used for UIAM provisioning tests.
    */
   onEsKey?: boolean;
+  /**
+   * When set, the schedule request uses this auth (e.g. `requestAuth.getApiKeyForAdmin().apiKeyHeader`)
+   * instead of the session cookie. The task is then granted the caller’s API key and
+   * `userScope.apiKeyCreatedByUser` is true, matching a user–supplied key at schedule time.
+   */
+  apiKeyHeader?: Record<string, string>;
 }
 
 /**
@@ -322,9 +328,13 @@ export const scheduleDisabledFixtureTask = async (
     taskIdsToCleanup,
     skipRequestForScheduling = false,
     onEsKey = false,
+    apiKeyHeader,
   } = options;
   const scheduleResponse = await apiClient.post('internal/task_manager/schedule', {
-    headers: { ...COMMON_HEADERS, ...cookieHeader },
+    headers: {
+      ...COMMON_HEADERS,
+      ...(apiKeyHeader ?? cookieHeader),
+    },
     body: {
       task: {
         taskType: TEST_TASK_TYPE,

@@ -29,16 +29,16 @@ describe('build_provisioning_run_telemetry', () => {
     it('aggregates counts and flags', () => {
       expect(
         buildSuccessProvisioningRunTelemetry({
-          apiKeysToConvertCount: 10,
-          convertedCount: 7,
-          skippedInBatch: 3,
-          hasMoreToUpdate: true,
+          completed: 7,
+          failed: 2,
+          skipped: 3,
+          hasMoreToProvision: true,
           nextRunNumber: 5,
         })
       ).toEqual({
-        total: 13,
+        total: 12,
         completed: 7,
-        failed: 3,
+        failed: 2,
         skipped: 3,
         has_more_to_provision: true,
         has_error: false,

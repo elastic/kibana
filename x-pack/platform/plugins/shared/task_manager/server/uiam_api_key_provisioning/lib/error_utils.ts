@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-export { rawUiamApiKeysProvisioningStatusSchema as rawUiamApiKeysProvisioningStatusSchemaV1 } from './v1';
-
-export {
-  UiamApiKeyProvisioningEntityType,
-  UiamApiKeyProvisioningStatus,
-} from '@kbn/uiam-api-keys-provisioning-status';
+/** Same as `alerting/server/provisioning/lib/error_utils.ts` for log message parity. */
+export const getErrorMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error);

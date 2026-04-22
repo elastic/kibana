@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-export { rawUiamApiKeysProvisioningStatusSchema as rawUiamApiKeysProvisioningStatusSchemaV1 } from './v1';
+export enum UiamApiKeyProvisioningStatus {
+  COMPLETED = 'completed',
+  FAILED = 'failed',
+  SKIPPED = 'skipped',
+}
 
-export {
-  UiamApiKeyProvisioningEntityType,
-  UiamApiKeyProvisioningStatus,
-} from '@kbn/uiam-api-keys-provisioning-status';
+export enum UiamApiKeyProvisioningEntityType {
+  RULE = 'rule',
+  TASK = 'task',
+}

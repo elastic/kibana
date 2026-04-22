@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-export { rawUiamApiKeysProvisioningStatusSchema as rawUiamApiKeysProvisioningStatusSchemaV1 } from './v1';
-
-export {
-  UiamApiKeyProvisioningEntityType,
-  UiamApiKeyProvisioningStatus,
-} from '@kbn/uiam-api-keys-provisioning-status';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/platform/packages/shared/kbn-uiam-api-keys-provisioning-status'],
+};

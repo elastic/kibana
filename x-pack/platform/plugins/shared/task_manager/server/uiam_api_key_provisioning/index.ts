@@ -15,6 +15,8 @@ export {
 export type { TaskManagerUiamProvisioningRunEventData } from './event_based_telemetry';
 export type {
   ApiKeyToConvert,
+  TaskApiKeyToConvertAttributes,
+  TaskManagerUiamProvisioningRunContext,
   UiamKeyResult,
   UiamConvertResponse,
   UiamConvertSuccessResult,

@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-export { rawUiamApiKeysProvisioningStatusSchema as rawUiamApiKeysProvisioningStatusSchemaV1 } from './v1';
-
 export {
   UiamApiKeyProvisioningEntityType,
   UiamApiKeyProvisioningStatus,
-} from '@kbn/uiam-api-keys-provisioning-status';
+} from './src/uiam_api_key_provisioning_status';

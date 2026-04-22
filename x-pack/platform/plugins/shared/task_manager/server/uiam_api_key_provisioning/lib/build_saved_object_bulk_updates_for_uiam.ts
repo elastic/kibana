@@ -6,22 +6,47 @@
  */
 
 import type { SavedObjectsBulkUpdateObject } from '@kbn/core/server';
+import type { InvalidationTarget } from '../../api_key_strategy';
 import { TASK_SO_NAME } from '../../saved_objects';
-import type { ConcreteTaskInstance, TaskUserScope } from '../../task';
+import type { TaskUserScope } from '../../task';
 import type { UiamKeyResult } from '../types';
 
+/**
+ * {@link markApiKeysForInvalidation} targets from task SO bulk updates built by
+ * {@link buildSavedObjectBulkUpdatesForUiamKeys} (attributes carry UIAM id + secret).
+ */
+export const invalidationTargetsFromUiamTaskBulkUpdates = (
+  updates: Array<SavedObjectsBulkUpdateObject<{ uiamApiKey: string; userScope: TaskUserScope }>>
+): InvalidationTarget[] => {
+  const targets: InvalidationTarget[] = [];
+  for (const u of updates) {
+    const attrs = u.attributes;
+    if (attrs == null) {
+      continue;
+    }
+    const { uiamApiKey, userScope } = attrs;
+    if (userScope == null) {
+      continue;
+    }
+    const uiamId = userScope.uiamApiKeyId;
+    if (uiamId && uiamId.length > 0 && uiamApiKey && uiamApiKey.length > 0) {
+      targets.push({ apiKeyId: uiamId, uiamApiKey });
+    }
+  }
+  return targets;
+};
+
+/**
+ * Saved-object bulk update operations for successful UIAM converts.
+ * Callers only enqueue tasks that passed {@link classifyTaskForUiamProvisioning} with usable
+ * `userScope` / `apiKeyId`, so one update is built per converted result.
+ */
 export const buildSavedObjectBulkUpdatesForUiamKeys = (
-  converted: UiamKeyResult[],
-  tasksById: Map<string, ConcreteTaskInstance>
+  converted: UiamKeyResult[]
 ): Array<SavedObjectsBulkUpdateObject<{ uiamApiKey: string; userScope: TaskUserScope }>> =>
   converted.map((c) => {
-    const task = tasksById.get(c.taskId);
-    const existingUserScope: TaskUserScope = task?.userScope ?? {
-      apiKeyId: '',
-      apiKeyCreatedByUser: false,
-    };
     const mergedUserScope: TaskUserScope = {
-      ...existingUserScope,
+      ...c.attributes.userScope,
       uiamApiKeyId: c.uiamApiKeyId,
     };
     return {
@@ -31,7 +56,7 @@ export const buildSavedObjectBulkUpdatesForUiamKeys = (
         uiamApiKey: c.uiamApiKey,
         userScope: mergedUserScope,
       },
-      ...(task?.version ? { version: task.version } : {}),
+      ...(c.version ? { version: c.version } : {}),
       mergeAttributes: true,
     };
   });

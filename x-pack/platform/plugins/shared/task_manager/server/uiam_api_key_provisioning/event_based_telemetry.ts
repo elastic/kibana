@@ -39,7 +39,8 @@ export const TASK_MANAGER_UIAM_PROVISIONING_RUN_EVENT: EventTypeOpts<TaskManager
       failed: {
         type: 'long',
         _meta: {
-          description: 'Number of tasks whose UIAM conversion failed in this run.',
+          description:
+            'Number of tasks with failed UIAM key conversion or failed task saved-object update in this run.',
           optional: false,
         },
       },

@@ -6,15 +6,19 @@
  */
 
 import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
-import type { CoreSetup, CoreStart, ISavedObjectsRepository } from '@kbn/core/server';
+import type { CoreSetup, CoreStart } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '..';
 import type { TaskScheduling } from '../task_scheduling';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
-import type { FetchResult } from '../task_store';
-import { TASK_SO_NAME } from '../saved_objects';
-import { UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE } from './uiam_api_keys_provisioning_status_saved_object';
 import type { ConcreteTaskInstance } from '../task';
-import type { UiamConvertResponse, ApiKeyToConvert, UiamKeyResult } from './types';
+import type {
+  ApiKeyToConvert,
+  TaskManagerUiamProvisioningRunContext,
+  UiamKeyResult,
+  GetApiKeysToConvertResult,
+  ConvertApiKeysResult,
+  UpdateTasksResult,
+} from './types';
 import type { LatestTaskStateSchema } from './task_state';
 import { emptyState, stateSchemaByVersion } from './task_state';
 import type { TaskManagerPluginsStart } from '../plugin';
@@ -23,8 +27,6 @@ import {
   type TaskManagerUiamProvisioningRunEventData,
 } from './event_based_telemetry';
 import {
-  FETCH_BATCH_SIZE,
-  RUN_AT_BUFFER_MS,
   RUN_AT_INTERVAL_MS,
   SCHEDULE_INTERVAL,
   TAGS,
@@ -32,22 +34,27 @@ import {
   TASK_TYPE,
   UIAM_PROVISIONING_TASK_TITLE,
 } from './constants';
+import { getErrorMessage } from './lib/error_utils';
 import { buildSuccessProvisioningRunTelemetry } from './lib/build_provisioning_run_telemetry';
-import { buildUiamProvisioningFetchQuery } from './lib/deferred_non_running_tasks_query';
-import { partitionFetchedTasksForUiamConversion } from './lib/partition_fetched_tasks_for_uiam_conversion';
+import { createProvisioningRunContext } from './lib/create_provisioning_run_context';
+import { classifyTasksForUiamProvisioning } from './lib/classify_task';
+import { fetchFirstBatchOfTasksToConvert } from './lib/fetch_first_batch_of_tasks_to_convert';
+import { getExcludeTasksFilter } from './lib/get_exclude_tasks_filter';
 import { mapUiamConvertResponseToKeyResults } from './lib/map_uiam_convert_response_to_key_results';
-import { buildSavedObjectBulkUpdatesForUiamKeys } from './lib/build_saved_object_bulk_updates_for_uiam';
+import {
+  buildSavedObjectBulkUpdatesForUiamKeys,
+  invalidationTargetsFromUiamTaskBulkUpdates,
+} from './lib/build_saved_object_bulk_updates_for_uiam';
+import { markApiKeysForInvalidation } from '../api_key_strategy';
+import { statusDocsAndOrphanedUiamKeysFromTaskBulkUpdate } from './lib/task_status_and_orphaned_keys_from_bulk_update';
 import { UiamProvisioningFeatureFlagScheduler } from './lib/uiam_provisioning_feature_flag_scheduler';
 import {
   createUiamProvisioningTaskRunner,
   type UiamProvisioningRunTaskOutcome,
 } from './lib/create_uiam_provisioning_task_runner';
 import {
-  createFailedConversionTaskProvisioningStatus,
-  createSkippedTaskProvisioningStatus,
-  createTaskProvisioningStatusFromBulkUpdateResult,
   writeTaskUiamProvisioningObservabilityStatus,
-  type TaskUiamProvisioningStatusDoc,
+  type TaskProvisioningStatusWritePayload,
 } from './lib/task_uiam_provisioning_observability_status';
 
 interface RegisterUiamApiKeyProvisioningTaskOpts {
@@ -102,165 +109,184 @@ export class UiamApiKeyProvisioningTask {
     this.featureFlagScheduler.stop();
   }
 
-  private async runTask(
+  private runTask = async (
     taskInstance: ConcreteTaskInstance,
     coreSetup: CoreSetup<TaskManagerPluginsStart, TaskManagerStartContract>
-  ): Promise<UiamProvisioningRunTaskOutcome> {
-    const [coreStart, , taskManager] = await coreSetup.getStartServices();
-    const savedObjectsClient = coreStart.savedObjects.createInternalRepository([
-      TASK_SO_NAME,
-      UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE,
-    ]);
+  ): Promise<UiamProvisioningRunTaskOutcome> => {
+    const context = await createProvisioningRunContext(coreSetup);
     const state = (taskInstance.state ?? emptyState) as LatestTaskStateSchema;
 
-    const { apiKeysToConvert, tasksById, hasMoreToUpdate, skippedInBatch, skippedTaskDetails } =
-      await this.getApiKeysToConvert(taskManager);
+    const { apiKeysToConvert, hasMoreToProvision, provisioningStatusForSkippedTasks } =
+      await this.getApiKeysToConvert(context);
 
-    const { converted, failedConversions } = await this.convertApiKeys(apiKeysToConvert, coreStart);
-
-    const bulkUpdateResults = await this.updateTasks(tasksById, converted, savedObjectsClient);
-
-    const skipped = skippedTaskDetails.map((s) =>
-      createSkippedTaskProvisioningStatus(s.taskId, s.message)
+    const { converted, provisioningStatusForFailedConversions } = await this.convertApiKeys(
+      apiKeysToConvert,
+      context
     );
-    const failedConversionDocs = failedConversions.map((f) =>
-      createFailedConversionTaskProvisioningStatus(f.taskId, f.message)
-    );
-    const completed: TaskUiamProvisioningStatusDoc[] = [];
-    const failed: TaskUiamProvisioningStatusDoc[] = [];
-    for (const so of bulkUpdateResults) {
-      const doc = createTaskProvisioningStatusFromBulkUpdateResult(so);
-      if (so.error) {
-        failed.push(doc);
-      } else {
-        completed.push(doc);
-      }
-    }
 
-    await writeTaskUiamProvisioningObservabilityStatus(savedObjectsClient, this.logger, {
-      skipped,
-      failedConversions: failedConversionDocs,
-      completed,
-      failed,
-    });
+    const { provisioningStatusForCompletedTasks, provisioningStatusForFailedTasks } =
+      await this.updateTasks(converted, context);
+
+    await this.updateProvisioningStatus(
+      {
+        skipped: provisioningStatusForSkippedTasks,
+        failedConversions: provisioningStatusForFailedConversions,
+        completed: provisioningStatusForCompletedTasks,
+        failed: provisioningStatusForFailedTasks,
+      },
+      context
+    );
 
     const nextRuns = state.runs + 1;
+    const completed = provisioningStatusForCompletedTasks.length;
+    const failed =
+      provisioningStatusForFailedConversions.length + provisioningStatusForFailedTasks.length;
+    const skipped = provisioningStatusForSkippedTasks.length;
     const telemetry = buildSuccessProvisioningRunTelemetry({
-      apiKeysToConvertCount: apiKeysToConvert.length,
-      convertedCount: converted.length,
-      skippedInBatch,
-      hasMoreToUpdate,
+      completed,
+      failed,
+      skipped,
+      hasMoreToProvision,
       nextRunNumber: nextRuns,
     });
 
     return {
       state: { runs: nextRuns },
-      ...(hasMoreToUpdate ? { runAt: new Date(Date.now() + RUN_AT_INTERVAL_MS) } : {}),
+      ...(hasMoreToProvision ? { runAt: new Date(Date.now() + RUN_AT_INTERVAL_MS) } : {}),
       telemetry,
     };
-  }
+  };
 
-  private reportProvisioningRunEvent(telemetry: TaskManagerUiamProvisioningRunEventData): void {
+  private reportProvisioningRunEvent = (
+    telemetry: TaskManagerUiamProvisioningRunEventData
+  ): void => {
     try {
       this.analytics.reportEvent(TASK_MANAGER_UIAM_PROVISIONING_RUN_EVENT.eventType, telemetry);
     } catch (e) {
       this.logger.debug(`Failed to report UIAM provisioning run telemetry event: ${e}`);
     }
-  }
+  };
 
-  async getApiKeysToConvert(taskManager: TaskManagerStartContract): Promise<{
-    apiKeysToConvert: ApiKeyToConvert[];
-    tasksById: Map<string, ConcreteTaskInstance>;
-    hasMoreToUpdate: boolean;
-    skippedInBatch: number;
-    skippedTaskDetails: Array<{ taskId: string; message: string }>;
-  }> {
-    const now = new Date();
-    const runAtAfter = new Date(now.getTime() + RUN_AT_BUFFER_MS).toISOString();
-    const query = buildUiamProvisioningFetchQuery(runAtAfter);
-
-    let result: FetchResult;
+  private getApiKeysToConvert = async (
+    context: TaskManagerUiamProvisioningRunContext
+  ): Promise<GetApiKeysToConvertResult> => {
     try {
-      result = await taskManager.fetch({
-        query,
-        size: FETCH_BATCH_SIZE,
-      });
+      const excludeTaskEntityIdsWithFinalStatus = await getExcludeTasksFilter(
+        context.savedObjectsClient
+      );
+      const { tasks, hasMore: hasMoreToProvision } = await fetchFirstBatchOfTasksToConvert(
+        context.taskManager,
+        { excludeTaskEntityIdsWithFinalStatus }
+      );
+      const { apiKeysToConvert, provisioningStatusForSkippedTasks } =
+        classifyTasksForUiamProvisioning(tasks);
+      return {
+        apiKeysToConvert,
+        provisioningStatusForSkippedTasks,
+        hasMoreToProvision,
+      };
     } catch (error) {
-      this.logger.error(`Error getting API keys to convert: ${(error as Error).message}`, {
-        error: { stack_trace: (error as Error).stack },
-        tags: TAGS,
+      this.logger.error(`Error getting API keys to convert: ${getErrorMessage(error)}`, {
+        error: { stack_trace: error instanceof Error ? error.stack : undefined, tags: TAGS },
       });
       throw error;
     }
+  };
 
-    return partitionFetchedTasksForUiamConversion(result.docs, FETCH_BATCH_SIZE);
-  }
-
-  async convertApiKeys(
+  private convertApiKeys = async (
     apiKeysToConvert: ApiKeyToConvert[],
-    coreStart: CoreStart
-  ): Promise<{
-    converted: UiamKeyResult[];
-    failedConversions: Array<{ taskId: string; message: string }>;
-  }> {
+    context: TaskManagerUiamProvisioningRunContext
+  ): Promise<ConvertApiKeysResult> => {
     if (apiKeysToConvert.length === 0) {
-      return { converted: [], failedConversions: [] };
+      return { converted: [], provisioningStatusForFailedConversions: [] };
     }
 
-    const keyStrings = apiKeysToConvert.map(({ apiKey }) => apiKey);
-
-    const uiam = coreStart.security?.authc?.apiKeys?.uiam as
-      | { convert?: (keys: string[]) => Promise<UiamConvertResponse> }
-      | null
-      | undefined;
-
-    let response: UiamConvertResponse;
     try {
-      const convertFn = uiam?.convert;
-      if (typeof convertFn !== 'function') {
-        this.logger.debug('UIAM convert API not available, skipping conversion', { tags: TAGS });
-        return { converted: [], failedConversions: [] };
+      const keys = apiKeysToConvert.map(({ attributes }) => attributes.apiKey!);
+      const response = await context.uiamConvert(keys);
+      if (response === null) {
+        throw new Error('License required for the UIAM convert API is not enabled');
       }
-      response = await convertFn(keyStrings);
+      if (response.results.length !== apiKeysToConvert.length) {
+        throw new Error(
+          'Number of converted API keys does not match the number of API keys to convert'
+        );
+      }
+
+      const { converted, provisioningStatusForFailedConversions } =
+        mapUiamConvertResponseToKeyResults(apiKeysToConvert, response);
+
+      return { converted, provisioningStatusForFailedConversions };
     } catch (error) {
-      this.logger.error(`Error converting API keys: ${(error as Error).message}`, {
-        error: { stack_trace: (error as Error).stack },
-        tags: TAGS,
+      this.logger.error(`Error converting API keys: ${getErrorMessage(error)}`, {
+        error: { stack_trace: error instanceof Error ? error.stack : undefined, tags: TAGS },
       });
       throw error;
     }
+  };
 
-    return mapUiamConvertResponseToKeyResults(apiKeysToConvert, response, (taskId, message) => {
-      this.logger.warn(`UIAM convert failed for task ${taskId}: ${message}`, { tags: TAGS });
-    });
-  }
-
-  async updateTasks(
-    tasksById: Map<string, ConcreteTaskInstance>,
+  private updateTasks = async (
     converted: UiamKeyResult[],
-    savedObjectsClient: ISavedObjectsRepository
-  ): Promise<Array<{ id: string; error?: { message?: string } }>> {
+    context: TaskManagerUiamProvisioningRunContext
+  ): Promise<UpdateTasksResult> => {
     if (converted.length === 0) {
-      return [];
+      return {
+        provisioningStatusForCompletedTasks: [],
+        provisioningStatusForFailedTasks: [],
+      };
     }
 
-    const updates = buildSavedObjectBulkUpdatesForUiamKeys(converted, tasksById);
+    const { savedObjectsClient } = context;
+    const updates = buildSavedObjectBulkUpdatesForUiamKeys(converted);
+
+    const uiamKeyByTaskId = new Map(
+      Array.from(converted, (c): [string, UiamKeyResult] => [c.taskId, c])
+    );
 
     try {
       const bulkResponse = await savedObjectsClient.bulkUpdate(updates);
-      return bulkResponse.saved_objects.map((so) => ({
-        id: so.id,
-        ...(so.error ? { error: { message: so.error.message } } : {}),
-      }));
+
+      const {
+        provisioningStatusForCompletedTasks,
+        provisioningStatusForFailedTasks,
+        orphanedInvalidationTargets,
+      } = statusDocsAndOrphanedUiamKeysFromTaskBulkUpdate(
+        bulkResponse.saved_objects,
+        uiamKeyByTaskId
+      );
+      if (orphanedInvalidationTargets.length > 0) {
+        await markApiKeysForInvalidation(
+          orphanedInvalidationTargets,
+          this.logger,
+          savedObjectsClient
+        );
+      }
+
+      return {
+        provisioningStatusForCompletedTasks,
+        provisioningStatusForFailedTasks,
+      };
     } catch (error) {
-      this.logger.error(
-        `Error bulk updating tasks with UIAM API keys: ${(error as Error).message}`,
-        {
-          error: { stack_trace: (error as Error).stack },
-          tags: TAGS,
-        }
+      this.logger.error(`Error bulk updating tasks with UIAM API keys: ${getErrorMessage(error)}`, {
+        error: { stack_trace: error instanceof Error ? error.stack : undefined, tags: TAGS },
+      });
+      await markApiKeysForInvalidation(
+        invalidationTargetsFromUiamTaskBulkUpdates(updates),
+        this.logger,
+        savedObjectsClient
       );
       throw error;
     }
-  }
+  };
+
+  private updateProvisioningStatus = async (
+    payload: TaskProvisioningStatusWritePayload,
+    context: TaskManagerUiamProvisioningRunContext
+  ): Promise<void> => {
+    await writeTaskUiamProvisioningObservabilityStatus(
+      context.savedObjectsClient,
+      this.logger,
+      payload
+    );
+  };
 }

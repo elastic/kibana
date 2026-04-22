@@ -6,16 +6,13 @@
  */
 
 import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
+import {
+  UiamApiKeyProvisioningEntityType,
+  UiamApiKeyProvisioningStatus,
+} from '@kbn/uiam-api-keys-provisioning-status';
 import { UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE } from '../uiam_api_keys_provisioning_status_saved_object';
 import { TAGS } from '../constants';
-
-/** Must stay aligned with `UiamApiKeyProvisioningEntityType.TASK` in alerting raw status schema. */
-const ENTITY_TYPE_TASK = 'task' as const;
-
-/** Must stay aligned with `UiamApiKeyProvisioningStatus` in alerting raw status schema. */
-const STATUS_SKIPPED = 'skipped' as const;
-const STATUS_FAILED = 'failed' as const;
-const STATUS_COMPLETED = 'completed' as const;
+import { getErrorMessage } from './error_utils';
 
 export interface TaskUiamProvisioningStatusDoc {
   type: typeof UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE;
@@ -23,8 +20,11 @@ export interface TaskUiamProvisioningStatusDoc {
   attributes: {
     '@timestamp': string;
     entityId: string;
-    entityType: typeof ENTITY_TYPE_TASK;
-    status: typeof STATUS_SKIPPED | typeof STATUS_FAILED | typeof STATUS_COMPLETED;
+    entityType: typeof UiamApiKeyProvisioningEntityType.TASK;
+    status:
+      | typeof UiamApiKeyProvisioningStatus.SKIPPED
+      | typeof UiamApiKeyProvisioningStatus.FAILED
+      | typeof UiamApiKeyProvisioningStatus.COMPLETED;
     message?: string;
   };
 }
@@ -38,8 +38,8 @@ export const createSkippedTaskProvisioningStatus = (
   attributes: {
     '@timestamp': new Date().toISOString(),
     entityId: taskId,
-    entityType: ENTITY_TYPE_TASK,
-    status: STATUS_SKIPPED,
+    entityType: UiamApiKeyProvisioningEntityType.TASK,
+    status: UiamApiKeyProvisioningStatus.SKIPPED,
     message,
   },
 });
@@ -53,8 +53,8 @@ export const createFailedConversionTaskProvisioningStatus = (
   attributes: {
     '@timestamp': new Date().toISOString(),
     entityId: taskId,
-    entityType: ENTITY_TYPE_TASK,
-    status: STATUS_FAILED,
+    entityType: UiamApiKeyProvisioningEntityType.TASK,
+    status: UiamApiKeyProvisioningStatus.FAILED,
     message,
   },
 });
@@ -68,8 +68,8 @@ export const createTaskProvisioningStatusFromBulkUpdateResult = (so: {
   attributes: {
     '@timestamp': new Date().toISOString(),
     entityId: so.id,
-    entityType: ENTITY_TYPE_TASK,
-    status: so.error ? STATUS_FAILED : STATUS_COMPLETED,
+    entityType: UiamApiKeyProvisioningEntityType.TASK,
+    status: so.error ? UiamApiKeyProvisioningStatus.FAILED : UiamApiKeyProvisioningStatus.COMPLETED,
     ...(so.error
       ? {
           message: `Error bulk updating task ${so.id} with UIAM key: ${
@@ -87,14 +87,42 @@ export interface TaskUiamProvisioningObservabilityStatusPayload {
   failed: TaskUiamProvisioningStatusDoc[];
 }
 
-export const flattenTaskUiamProvisioningObservabilityDocs = (
-  payload: TaskUiamProvisioningObservabilityStatusPayload
-): TaskUiamProvisioningStatusDoc[] => [
-  ...payload.skipped,
-  ...payload.failedConversions,
-  ...payload.completed,
-  ...payload.failed,
-];
+/**
+ * Same shape as Alerting's `ProvisioningStatusWritePayload` for `uiam_api_keys_provisioning_status`.
+ */
+export type TaskProvisioningStatusWritePayload = TaskUiamProvisioningObservabilityStatusPayload;
+
+export interface TaskProvisioningStatusCounts {
+  skipped: number;
+  failedConversions: number;
+  completed: number;
+  failed: number;
+  total: number;
+}
+
+/**
+ * Builds the flat docs array and counts for a provisioning status write (mirrors
+ * `prepareProvisioningStatusWrite` in `alerting/server/provisioning/lib/provisioning_status.ts`).
+ */
+export const prepareTaskProvisioningStatusWrite = (
+  payload: TaskProvisioningStatusWritePayload
+): { docs: TaskUiamProvisioningStatusDoc[]; counts: TaskProvisioningStatusCounts } => {
+  const { skipped, failedConversions, completed, failed } = payload;
+  const docs: TaskUiamProvisioningStatusDoc[] = [
+    ...skipped,
+    ...failedConversions,
+    ...completed,
+    ...failed,
+  ];
+  const counts: TaskProvisioningStatusCounts = {
+    skipped: skipped.length,
+    failedConversions: failedConversions.length,
+    completed: completed.length,
+    failed: failed.length,
+    total: docs.length,
+  };
+  return { docs, counts };
+};
 
 /**
  * Persists provisioning status docs for monitoring only. Swallows errors so execution is unchanged.
@@ -104,22 +132,19 @@ export const writeTaskUiamProvisioningObservabilityStatus = async (
   logger: Logger,
   payload: TaskUiamProvisioningObservabilityStatusPayload
 ): Promise<void> => {
-  const docs = flattenTaskUiamProvisioningObservabilityDocs(payload);
+  const { docs, counts } = prepareTaskProvisioningStatusWrite(payload);
   if (docs.length === 0) {
     return;
   }
   try {
     await savedObjectsClient.bulkCreate(docs, { overwrite: true });
     logger.info(
-      `Task Manager UIAM provisioning observability: wrote ${docs.length} status document(s) (skipped=${payload.skipped.length}, failedConversions=${payload.failedConversions.length}, completed=${payload.completed.length}, failedUpdates=${payload.failed.length}).`,
+      `Wrote provisioning status: ${counts.total} total (${counts.skipped} skipped, ${counts.failedConversions} failed conversions, ${counts.completed} completed, ${counts.failed} failed updates).`,
       { tags: TAGS }
     );
   } catch (e) {
-    logger.warn(
-      `Task Manager UIAM provisioning observability: failed to write status documents (non-fatal): ${
-        e instanceof Error ? e.message : String(e)
-      }`,
-      { tags: TAGS }
-    );
+    logger.error(`Error writing provisioning status: ${getErrorMessage(e)}`, {
+      error: { stack_trace: e instanceof Error ? e.stack : undefined, tags: TAGS },
+    });
   }
 };
