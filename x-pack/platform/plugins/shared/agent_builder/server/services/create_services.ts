@@ -6,6 +6,7 @@
  */
 
 import type { Runner } from '@kbn/agent-builder-server';
+import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
 import type { AgentBuilderConfig } from '../config';
 import type {
   InternalSetupServices,
@@ -120,6 +121,15 @@ export class ServiceManager {
       return runner;
     };
 
+    // eslint-disable-next-line prefer-const
+    let executionService: AgentExecutionService | undefined;
+    const getExecutionService = () => {
+      if (!executionService) {
+        throw new Error('Execution service not yet initialized');
+      }
+      return executionService;
+    };
+
     const attachments = this.services.attachments.start({
       spaces,
       savedObjects,
@@ -184,6 +194,7 @@ export class ServiceManager {
       trackingService,
       analyticsService,
       hooks,
+      getExecutionService,
       searchInferenceEndpoints,
     });
     runner = runnerFactory.getRunner();
@@ -216,7 +227,7 @@ export class ServiceManager {
       searchInferenceEndpoints,
     });
 
-    const execution = createAgentExecutionService({
+    executionService = createAgentExecutionService({
       logger: logger.get('execution'),
       elasticsearch,
       taskManager,
@@ -244,7 +255,7 @@ export class ServiceManager {
       conversations,
       runnerFactory,
       auditLogService,
-      execution,
+      execution: executionService,
       taskHandler,
       hooks,
       spaces,
