@@ -28,3 +28,6 @@ export const DeleteTimelinesRequestBody = z.object({
   searchIds: z.array(z.string()).max(100).optional(),
 });
 export type DeleteTimelinesRequestBodyInput = z.input<typeof DeleteTimelinesRequestBody>;
+
+export type DeleteTimelinesResponse = z.infer<typeof DeleteTimelinesResponse>;
+export const DeleteTimelinesResponse = z.object({}).catchall(z.unknown());

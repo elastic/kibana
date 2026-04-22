@@ -47,6 +47,14 @@ OAuth Client Certificate (Microsoft Entra)
 
     The connector uses the default scope `https://graph.microsoft.com/.default`. See [Get API credentials](#sharepoint-online-api-credentials) for the Entra app-registration and certificate-upload steps.
 
+#### OAuth authorization code (delegated auth)
+
+Authorization URL
+:   The Microsoft Entra ID authorization endpoint. Use the format: `https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/authorize`. Replace `{tenant-id}` with your Azure AD tenant ID.
+
+Token URL
+:   The Microsoft Entra ID token endpoint. Use the format: `https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token`. Replace `{tenant-id}` with your Azure AD tenant ID.
+
 ## Test connectors [sharepoint-online-action-configuration]
 
 You can test connectors when you create or edit the connector in {{kib}}. The test verifies connectivity by accessing the root SharePoint site.
