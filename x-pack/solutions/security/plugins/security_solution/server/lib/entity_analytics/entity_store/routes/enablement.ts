@@ -27,8 +27,8 @@ export const enableEntityStoreRoute = (
 ) => {
   router.versioned
     .post({
-      access: 'public',
-      path: '/api/entity_store/enable',
+      access: 'internal',
+      path: '/internal/entity_store/enable',
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
@@ -37,7 +37,7 @@ export const enableEntityStoreRoute = (
     })
     .addVersion(
       {
-        version: API_VERSIONS.public.v1,
+        version: API_VERSIONS.internal.v1,
         validate: {
           request: {
             body: buildInitRequestBodyValidation(InitEntityStoreRequestBody),

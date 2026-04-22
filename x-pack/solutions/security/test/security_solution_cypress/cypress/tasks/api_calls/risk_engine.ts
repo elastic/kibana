@@ -50,8 +50,12 @@ export const deleteEntityStoreEngines = () => {
   // This endpoint deletes all engines when no entityTypes are specified
   cy.request({
     method: 'DELETE',
-    url: '/api/entity_store/engines?data=true',
+    url: '/internal/entity_store/engines?data=true',
     failOnStatusCode: false,
-    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
+    headers: {
+      'kbn-xsrf': 'cypress-creds',
+      'x-elastic-internal-origin': 'security-solution',
+      'elastic-api-version': '1',
+    },
   });
 };

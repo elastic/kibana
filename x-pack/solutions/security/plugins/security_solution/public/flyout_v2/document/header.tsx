@@ -24,6 +24,7 @@ import { ALERT_SUMMARY_PANEL_TEST_ID } from '../shared/components/test_ids';
 import type { CellActionRenderer } from '../shared/components/cell_actions';
 import { noopCellActionRenderer } from '../shared/components/cell_actions';
 import { useUserPrivileges } from '../../common/components/user_privileges';
+import { RemoteDocumentBadge } from './components/remote_document_badge';
 
 export interface HeaderProps {
   /**
@@ -60,12 +61,13 @@ export const Header: FC<HeaderProps> = memo(
     return (
       <>
         <DocumentSeverity hit={hit}>
-          <EuiSpacer size="m" />
+          <EuiSpacer size="s" />
         </DocumentSeverity>
         <Timestamp hit={hit}>
           <EuiSpacer size="xs" />
         </Timestamp>
         <Title hit={hit} hideLink={!canReadRules} />
+        <RemoteDocumentBadge hit={hit} />
         {isAlert && (
           <>
             <EuiSpacer size="m" />

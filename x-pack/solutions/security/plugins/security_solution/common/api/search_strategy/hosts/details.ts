@@ -21,6 +21,7 @@ export const hostDetailsSchema = requestBasicOptionsSchema.extend({
   timerange,
   sort,
   factoryQueryType: z.literal(HostsQueries.details),
+  entityStoreV2: z.boolean().optional(),
 });
 
 export type HostDetailsRequestOptionsInput = z.input<typeof hostDetailsSchema>;

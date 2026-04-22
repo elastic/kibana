@@ -87,9 +87,17 @@ export async function updateEntityRelationships(
   logger.info(`Updating ${objects.length} entity relationship records via CRUD bulk API`);
   const errors = await crudClient.bulkUpdateEntity({ objects, force: true });
 
+  const missingErrors = errors.filter((e) => e.status === 404);
+  const realErrors = errors.filter((e) => e.status !== 404);
   const updatedCount = objects.length - errors.length;
-  if (errors.length > 0) {
-    logger.error(`Failed to update ${errors.length} entity records: ${JSON.stringify(errors)}`);
+
+  if (missingErrors.length > 0) {
+    logger.debug(`Skipped ${missingErrors.length} records for entities not yet in store`);
+  }
+  if (realErrors.length > 0) {
+    logger.error(
+      `Failed to update ${realErrors.length} entity records: ${JSON.stringify(realErrors)}`
+    );
   }
 
   logger.info(`Updated ${updatedCount} entity relationship records`);

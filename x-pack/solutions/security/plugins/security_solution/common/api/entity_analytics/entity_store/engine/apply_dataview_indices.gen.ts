@@ -11,7 +11,7 @@
  *
  * info:
  *   title: Apply DataView indices to all installed engines
- *   version: 2023-10-31
+ *   version: 1
  */
 
 import { z } from '@kbn/zod/v4';

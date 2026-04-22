@@ -1,9 +1,9 @@
 openapi: 3.0.0
 info:
   title: Delete an Entity Engine
-  version: '2023-10-31'
+  version: '1'
 paths:
-  /api/entity_store/engines:
+  /internal/entity_store/engines:
     delete:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
@@ -54,7 +54,7 @@ paths:
                     items:
                       $ref: '../common.schema.yaml#/components/schemas/EntityType'
 
-  /api/entity_store/engines/{entityType}:
+  /internal/entity_store/engines/{entityType}:
     delete:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
