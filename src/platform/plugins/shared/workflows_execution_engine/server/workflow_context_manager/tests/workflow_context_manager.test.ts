@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { performance } from 'node:perf_hooks';
+import { setImmediate as setImmediateAsync } from 'node:timers/promises';
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type {
   ConnectorStep,
@@ -19,7 +21,7 @@ import type {
 import type { AtomicGraphNode } from '@kbn/workflows/graph';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import { mockContextDependencies } from '../../execution_functions/__mock__/context_dependencies';
-import type { WorkflowTemplatingEngine } from '../../templating_engine';
+import { WorkflowTemplatingEngine } from '../../templating_engine';
 import { WorkflowContextManager } from '../workflow_context_manager';
 import type { WorkflowExecutionState } from '../workflow_execution_state';
 
@@ -64,6 +66,45 @@ describe('WorkflowContextManager', () => {
     configuration: {},
   };
   const fakeStackFrames: StackFrame[] = [];
+
+  const createLargeCaseOutput = () => {
+    const repeatedCommentBody = `# Root Cause Analysis\n${'The workflow engine is carrying too much accumulated case context. '.repeat(
+      150
+    )}`;
+
+    const comments = Array.from({ length: 100 }, (_, index) => ({
+      id: `comment-${index}`,
+      type: 'user',
+      owner: 'observability',
+      created_at: '2026-04-22T10:00:00.000Z',
+      comment: `${repeatedCommentBody}\ncomment=${index}`,
+    }));
+
+    return {
+      id: 'case-1',
+      title: 'Synthetic large case',
+      description: 'Synthetic case used to reproduce event loop blocking in tests',
+      totalComment: comments.length,
+      totalAlerts: 5,
+      customFields: [
+        {
+          key: 'system_environment',
+          type: 'text',
+          value: 'trading-na',
+        },
+      ],
+      comments,
+    };
+  };
+
+  const createLargeStepOutput = (stepId: string) => ({
+    step_id: stepId,
+    case: createLargeCaseOutput(),
+    metadata: {
+      source: 'kibana.request',
+      correlation_id: `${stepId}-correlation`,
+    },
+  });
 
   function createTestContainer(workflow: WorkflowYaml) {
     const workflowExecutionGraph = WorkflowGraph.fromWorkflowDefinition(workflow);
@@ -117,6 +158,51 @@ describe('WorkflowContextManager', () => {
       underTest,
       esClient,
       templatingEngineMock,
+    };
+  }
+
+  function createTestContainerWithRealTemplating(
+    workflow: WorkflowYaml,
+    node: AtomicGraphNode,
+    getLatestStepExecution: (stepId: string) => Partial<EsWorkflowStepExecution> | undefined
+  ) {
+    const workflowExecutionGraph = WorkflowGraph.fromWorkflowDefinition(workflow);
+    const workflowExecutionState: WorkflowExecutionState = {} as WorkflowExecutionState;
+    workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+      scopeStack: [] as StackFrame[],
+      workflowDefinition: workflow,
+    } as EsWorkflowExecution);
+    workflowExecutionState.getStepExecution = jest.fn().mockReturnValue(undefined);
+    workflowExecutionState.getLatestStepExecution = jest
+      .fn()
+      .mockImplementation(getLatestStepExecution);
+    workflowExecutionState.getAllStepExecutions = jest.fn().mockReturnValue([]);
+
+    const esClient = {
+      search: jest.fn(),
+      index: jest.fn(),
+      get: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+    } as any;
+
+    const templatingEngine = new WorkflowTemplatingEngine();
+
+    const underTest = new WorkflowContextManager({
+      templateEngine: templatingEngine,
+      node,
+      stackFrames: fakeStackFrames,
+      workflowExecutionGraph,
+      workflowExecutionState,
+      esClient,
+      dependencies,
+      fakeRequest: {} as KibanaRequest,
+      coreStart: {} as CoreStart,
+    });
+
+    return {
+      workflowExecutionState,
+      underTest,
     };
   }
 
@@ -1454,6 +1540,192 @@ describe('WorkflowContextManager', () => {
         );
       });
     });
+
+    it('shows blocking with real templating and inflated predecessor context in an existing test path', async () => {
+      const broaderWorkflow: WorkflowYaml = {
+        name: 'Broader Surface Repro Workflow',
+        version: '1',
+        description: 'Exercises predecessor accumulation and template rendering',
+        enabled: true,
+        consts: {},
+        triggers: [],
+        steps: [
+          {
+            name: 'fetchCaseA',
+            type: 'console',
+            with: { message: 'fetch-a' },
+          } as ConnectorStep,
+          {
+            name: 'fetchCaseB',
+            type: 'console',
+            with: { message: 'fetch-b' },
+          } as ConnectorStep,
+          {
+            name: 'fetchCaseC',
+            type: 'console',
+            with: { message: 'fetch-c' },
+          } as ConnectorStep,
+          {
+            name: 'renderCombinedPayload',
+            type: 'console',
+            with: { message: '{{ steps.fetchCaseA.output.case.title }}' },
+          } as ConnectorStep,
+        ],
+      };
+
+      const renderNode: AtomicGraphNode = {
+        id: 'renderCombinedPayload',
+        type: 'atomic',
+        stepId: 'renderCombinedPayload',
+        stepType: 'console',
+        configuration: {},
+      };
+
+      const broaderContainer = createTestContainerWithRealTemplating(
+        broaderWorkflow,
+        renderNode,
+        (stepId) => {
+          if (stepId === 'fetchCaseA' || stepId === 'fetchCaseB' || stepId === 'fetchCaseC') {
+            return {
+              state: { fetched: true, stepId },
+              input: undefined,
+              output: createLargeStepOutput(stepId),
+              error: null,
+            };
+          }
+
+          return undefined;
+        }
+      );
+
+      await setImmediateAsync();
+
+      let timerDriftMs = 0;
+      const timerStartedAt = performance.now();
+      const blockedTimer = new Promise<void>((resolve) => {
+        setTimeout(() => {
+          timerDriftMs = performance.now() - timerStartedAt;
+          resolve();
+        }, 0);
+      });
+
+      const renderStart = performance.now();
+      const rendered = broaderContainer.underTest.renderValueAccordingToContext({
+        combinedCases:
+          '{{ steps.fetchCaseA.output.case | json }}{{ steps.fetchCaseB.output.case | json }}{{ steps.fetchCaseC.output.case | json }}',
+        summary:
+          'A={{ steps.fetchCaseA.output.case.title }}, ' +
+          'B={{ steps.fetchCaseB.output.case.title }}, ' +
+          'C={{ steps.fetchCaseC.output.case.title }}',
+      });
+      const renderElapsed = performance.now() - renderStart;
+
+      await blockedTimer;
+
+      expect(typeof rendered.combinedCases).toBe('string');
+      expect((rendered.combinedCases as string).length).toBeGreaterThan(2_000_000);
+      expect(rendered.summary).toContain('A=Synthetic large case');
+      expect(renderElapsed).toBeGreaterThan(1);
+      expect(timerDriftMs).toBeGreaterThan(1);
+    });
+
+    it('can compound repeated large getContext calls into about 10s of event loop drift in an existing test path', async () => {
+      const broaderWorkflow: WorkflowYaml = {
+        name: 'Broader Surface Repro Workflow',
+        version: '1',
+        description: 'Exercises predecessor accumulation and template rendering',
+        enabled: true,
+        consts: {},
+        triggers: [],
+        steps: [
+          {
+            name: 'fetchCaseA',
+            type: 'console',
+            with: { message: 'fetch-a' },
+          } as ConnectorStep,
+          {
+            name: 'fetchCaseB',
+            type: 'console',
+            with: { message: 'fetch-b' },
+          } as ConnectorStep,
+          {
+            name: 'fetchCaseC',
+            type: 'console',
+            with: { message: 'fetch-c' },
+          } as ConnectorStep,
+          {
+            name: 'renderCombinedPayload',
+            type: 'console',
+            with: { message: '{{ steps.fetchCaseA.output.case.title }}' },
+          } as ConnectorStep,
+        ],
+      };
+
+      const renderNode: AtomicGraphNode = {
+        id: 'renderCombinedPayload',
+        type: 'atomic',
+        stepId: 'renderCombinedPayload',
+        stepType: 'console',
+        configuration: {},
+      };
+
+      const broaderContainer = createTestContainerWithRealTemplating(
+        broaderWorkflow,
+        renderNode,
+        (stepId) => {
+          if (stepId === 'fetchCaseA' || stepId === 'fetchCaseB' || stepId === 'fetchCaseC') {
+            return {
+              state: { fetched: true, stepId },
+              input: undefined,
+              output: createLargeStepOutput(stepId),
+              error: null,
+            };
+          }
+
+          return undefined;
+        }
+      );
+
+      await setImmediateAsync();
+
+      const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+      try {
+        let timerDriftMs = 0;
+        let iterations = 0;
+        let lastContextStepCount = 0;
+        let lastCaseTitle = '';
+        const driftTargetMs = 10_000;
+
+        const timerStartedAt = performance.now();
+        const blockedTimer = new Promise<void>((resolve) => {
+          setTimeout(() => {
+            timerDriftMs = performance.now() - timerStartedAt;
+            resolve();
+          }, 0);
+        });
+
+        const workUntil = performance.now() + driftTargetMs + 250;
+
+        while (performance.now() < workUntil) {
+          const context = broaderContainer.underTest.getContext();
+          lastContextStepCount = Object.keys(context.steps).length;
+          lastCaseTitle = String(
+            (context.steps.fetchCaseA as { output: { case: { title: string } } }).output.case.title
+          );
+          iterations++;
+        }
+
+        await blockedTimer;
+
+        expect(iterations).toBeGreaterThan(10);
+        expect(lastContextStepCount).toBe(3);
+        expect(lastCaseTitle).toBe('Synthetic large case');
+        expect(timerDriftMs).toBeGreaterThan(10_000);
+      } finally {
+        consoleWarnSpy.mockRestore();
+      }
+    }, 30_000);
   });
 
   describe('getVariables', () => {
