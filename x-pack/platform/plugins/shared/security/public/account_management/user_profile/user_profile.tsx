@@ -277,21 +277,12 @@ const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
   );
 };
 
-const UserLocaleEditor: FunctionComponent<UserLocaleEditorProps> = ({ formik }) => {
+export const UserLocaleEditor: FunctionComponent<UserLocaleEditorProps> = ({ formik }) => {
   if (!formik.values.data) {
     return null;
   }
 
-  const serverDefaultOption = {
-    value: '',
-    text: i18n.translate('xpack.security.accountManagement.userProfile.localeServerDefaultOption', {
-      defaultMessage: 'Server default',
-    }),
-  };
-  const localeOptions = [
-    serverDefaultOption,
-    ...SUPPORTED_LOCALES.map(({ id, label }) => ({ value: id, text: label })),
-  ];
+  const localeOptions = SUPPORTED_LOCALES.map(({ id, label }) => ({ value: id, text: label }));
 
   return (
     <EuiDescribedFormGroup
@@ -307,7 +298,7 @@ const UserLocaleEditor: FunctionComponent<UserLocaleEditorProps> = ({ formik }) 
       description={
         <FormattedMessage
           id="xpack.security.accountManagement.userProfile.localeGroupDescription"
-          defaultMessage="Select your preferred language for displaying dates, times, and other locale-specific data. Leave as “Server default” to use the language configured by your Kibana administrator."
+          defaultMessage="Select your preferred language for displaying dates, times, and other locale-specific data."
         />
       }
     >

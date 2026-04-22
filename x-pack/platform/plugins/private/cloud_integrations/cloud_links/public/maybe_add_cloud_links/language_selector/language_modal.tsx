@@ -33,16 +33,7 @@ export const LanguageModal: FC<Props> = ({ closeModal }) => {
 
   const { value: locale, initialValue: initialLocaleValue, isLoading, onChange } = useLanguage();
 
-  const serverDefaultOption = {
-    value: '',
-    text: i18n.translate('xpack.cloudLinks.userMenuLinks.languageModalServerDefaultOption', {
-      defaultMessage: 'Server default',
-    }),
-  };
-  const localeOptions = [
-    serverDefaultOption,
-    ...SUPPORTED_LOCALES.map(({ id, label }) => ({ value: id, text: label })),
-  ];
+  const localeOptions = SUPPORTED_LOCALES.map(({ id, label }) => ({ value: id, text: label }));
 
   return (
     <EuiModal aria-labelledby={modalTitleId} onClose={closeModal}>
