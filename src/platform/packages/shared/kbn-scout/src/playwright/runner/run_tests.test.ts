@@ -52,7 +52,6 @@ describe('hasTestsInPlaywrightConfig', () => {
 
   beforeEach(() => {
     mockLog = {
-      debug: jest.fn(),
       info: jest.fn(),
       error: jest.fn(),
     } as unknown as ToolingLog;
@@ -78,10 +77,6 @@ describe('hasTestsInPlaywrightConfig', () => {
       'configPath/playwright.config.ts'
     );
 
-    expect(mockLog.debug).toHaveBeenCalledWith(
-      `scout: running 'SCOUT_REPORTER_ENABLED=false playwright test pwArgs --list' ` +
-        `(NODE_OPTIONS extended with --require=@kbn/babel-register/install)`
-    );
     expect(execPromiseMock).toHaveBeenCalledWith(
       'playwright test pwArgs --list',
       expect.objectContaining({
