@@ -23,13 +23,7 @@ export const RecentAnomaliesHeatmapNoResults: React.FC = () => {
                 defaultMessage="No anomaly results match your search criteria"
               />
             </h3>
-          </EuiTitle>
-          <p>
-            <FormattedMessage
-              id="xpack.securitySolution.entityAnalytics.recentAnomalies.noResultsDescription"
-              defaultMessage={`To get started, click "ML job settings" above to configure and run anomaly detection jobs within your environment.`}
-            />
-          </p>
+          </EuiTitle>   
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
