@@ -155,7 +155,8 @@ export const EntityListTable: React.FC<{
   application: ApplicationStart;
   agentBuilder?: AgentBuilderPluginStart;
   chrome?: SecurityAgentBuilderChrome;
-}> = ({ entities, application, agentBuilder, chrome }) => {
+  openSidebarConversation?: () => void;
+}> = ({ entities, application, agentBuilder, chrome, openSidebarConversation }) => {
   const { euiTheme } = useEuiTheme();
 
   const columns: Array<EuiBasicTableColumn<EntityListRow>> = useMemo(
@@ -187,6 +188,7 @@ export const EntityListTable: React.FC<{
                       row,
                       agentBuilder,
                       chrome,
+                      openSidebarConversation,
                     });
                   }}
                 />
@@ -287,7 +289,7 @@ export const EntityListTable: React.FC<{
         ),
       },
     ],
-    [agentBuilder, application, chrome, euiTheme.font.familyCode]
+    [agentBuilder, application, chrome, euiTheme.font.familyCode, openSidebarConversation]
   );
 
   return (
@@ -312,7 +314,7 @@ const EntityListCanvasContent: React.FC<
     agentBuilder?: AgentBuilderPluginStart;
     chrome?: SecurityAgentBuilderChrome;
   }
-> = ({ attachment, application, agentBuilder, chrome }) => {
+> = ({ attachment, application, agentBuilder, chrome, openSidebarConversation }) => {
   const entities = attachment.data.entities ?? [];
   const title =
     attachment.data.attachmentLabel ??
@@ -331,6 +333,7 @@ const EntityListCanvasContent: React.FC<
         application={application}
         agentBuilder={agentBuilder}
         chrome={chrome}
+        openSidebarConversation={openSidebarConversation}
       />
     </div>
   );

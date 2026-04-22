@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButtonEmpty,
-  EuiCallOut,
+  EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
   EuiSpacer,
+  EuiStat,
   EuiText,
   EuiTitle,
   useIsWithinBreakpoints,
@@ -30,7 +31,7 @@ import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { APP_UI_ID, SecurityAgentBuilderAttachments } from '../../../common/constants';
-import { EMPTY_SEVERITY_COUNT } from '../../../common/search_strategy';
+import { EMPTY_SEVERITY_COUNT, RiskSeverity } from '../../../common/search_strategy';
 import type { SeverityCount } from '../../entity_analytics/components/severity/types';
 import { RiskLevelBreakdownTable } from '../../entity_analytics/components/home/risk_level_breakdown_table';
 import { RiskScoreDonutChart } from '../../entity_analytics/components/risk_score_donut_chart';
@@ -67,6 +68,34 @@ const mergeSeverityCount = (partial?: SeverityCount): SeverityCount => ({
   ...partial,
 });
 
+const parseRiskLevelString = (raw?: string): RiskSeverity => {
+  if (!raw) {
+    return RiskSeverity.Unknown;
+  }
+  const normalized = raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase();
+  const allowed = Object.values(RiskSeverity) as string[];
+  if (allowed.includes(normalized)) {
+    return normalized as RiskSeverity;
+  }
+  return RiskSeverity.Unknown;
+};
+
+const inferSeverityCountFromEntities = (entities: EntityListRow[]): SeverityCount => {
+  const next: SeverityCount = { ...EMPTY_SEVERITY_COUNT };
+  for (const row of entities) {
+    const level = parseRiskLevelString(row.risk_level);
+    next[level] += 1;
+  }
+  return next;
+};
+
+const severityTotal = (c: SeverityCount): number =>
+  c[RiskSeverity.Critical] +
+  c[RiskSeverity.High] +
+  c[RiskSeverity.Moderate] +
+  c[RiskSeverity.Low] +
+  c[RiskSeverity.Unknown];
+
 const EntityAnalyticsDashboardInlineContent: React.FC<
   AttachmentRenderProps<EntityAnalyticsDashboardAttachment>
 > = ({ attachment }) => {
@@ -76,6 +105,8 @@ const EntityAnalyticsDashboardInlineContent: React.FC<
     i18n.translate('xpack.securitySolution.agentBuilder.entityAnalyticsDashboard.inlineTitle', {
       defaultMessage: 'Entity Analytics dashboard',
     });
+  const showRiskInSnapshot =
+    severity_count != null || severityTotal(inferSeverityCountFromEntities(entities ?? [])) > 0;
 
   return (
     <EuiPanel paddingSize="m" hasShadow={false} hasBorder={false}>
@@ -89,7 +120,7 @@ const EntityAnalyticsDashboardInlineContent: React.FC<
             '{entityCount, plural, one {# entity in snapshot} other {# entities in snapshot}}{riskSuffix}',
           values: {
             entityCount: entities.length,
-            riskSuffix: severity_count != null ? ' · Risk distribution included' : '',
+            riskSuffix: showRiskInSnapshot ? ' · Risk chart from snapshot' : '',
           },
         })}
       </EuiText>
@@ -103,11 +134,32 @@ const EntityAnalyticsDashboardCanvasContent: React.FC<
     agentBuilder?: AgentBuilderPluginStart;
     chrome?: SecurityAgentBuilderChrome;
   }
-> = ({ attachment, application, agentBuilder, chrome }) => {
+> = ({ attachment, application, agentBuilder, chrome, openSidebarConversation }) => {
   const data = attachment.data;
   const isXlScreen = useIsWithinBreakpoints(['l', 'xl']);
-  const severityCount = mergeSeverityCount(data.severity_count);
-  const hasSeverityPayload = data.severity_count != null;
+  const hasExplicitSeverityCount = data.severity_count != null;
+  const inferredFromEntities = useMemo(
+    () => inferSeverityCountFromEntities(data.entities ?? []),
+    [data.entities]
+  );
+  const severityCountForChart = useMemo(() => {
+    if (hasExplicitSeverityCount) {
+      return mergeSeverityCount(data.severity_count);
+    }
+    return severityTotal(inferredFromEntities) > 0
+      ? inferredFromEntities
+      : mergeSeverityCount(undefined);
+  }, [data.severity_count, hasExplicitSeverityCount, inferredFromEntities]);
+
+  const entityTypeCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const row of data.entities ?? []) {
+      const t = row.entity_type;
+      counts[t] = (counts[t] ?? 0) + 1;
+    }
+    return counts;
+  }, [data.entities]);
+
   const title =
     data.attachmentLabel ??
     i18n.translate('xpack.securitySolution.agentBuilder.entityAnalyticsDashboard.canvasTitle', {
@@ -141,6 +193,7 @@ const EntityAnalyticsDashboardCanvasContent: React.FC<
                   appId: APP_UI_ID,
                   agentBuilder,
                   chrome,
+                  openSidebarConversation,
                   watchlistId: data.watchlist_id,
                   watchlistName: data.watchlist_name,
                 });
@@ -170,55 +223,69 @@ const EntityAnalyticsDashboardCanvasContent: React.FC<
         <EuiFlexGroup direction={isXlScreen ? 'row' : 'column'} gutterSize="l" responsive={false}>
           <EuiFlexItem grow={1}>
             <EuiPanel hasBorder paddingSize="m">
-              {hasSeverityPayload ? (
+              <EuiTitle size="s">
+                <h3>
+                  {data.watchlist_id ? (
+                    <FormattedMessage
+                      id="xpack.securitySolution.agentBuilder.entityAnalyticsDashboard.riskLevelsWatchlistTitle"
+                      defaultMessage="{watchlistName} risk levels"
+                      values={{
+                        watchlistName: data.watchlist_name ?? data.watchlist_id,
+                      }}
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.securitySolution.agentBuilder.entityAnalyticsDashboard.riskLevelsTitle"
+                      defaultMessage="Entity risk levels"
+                    />
+                  )}
+                </h3>
+              </EuiTitle>
+              <EuiSpacer size="m" />
+              <EuiFlexGroup alignItems="center" gutterSize="l" responsive={false}>
+                <EuiFlexItem grow={4}>
+                  <RiskLevelBreakdownTable severityCount={severityCountForChart} loading={false} />
+                </EuiFlexItem>
+                <EuiFlexItem grow={1}>
+                  <RiskScoreDonutChart showLegend={false} severityCount={severityCountForChart} />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              {data.distribution_note ? (
                 <>
-                  <EuiTitle size="s">
-                    <h3>
-                      <FormattedMessage
-                        id="xpack.securitySolution.agentBuilder.entityAnalyticsDashboard.riskLevelsTitle"
-                        defaultMessage="Entity risk levels"
-                      />
-                    </h3>
-                  </EuiTitle>
-                  <EuiSpacer size="m" />
-                  <EuiFlexGroup alignItems="center" gutterSize="l" responsive={false}>
-                    <EuiFlexItem grow={4}>
-                      <RiskLevelBreakdownTable severityCount={severityCount} loading={false} />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={1}>
-                      <RiskScoreDonutChart showLegend={false} severityCount={severityCount} />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                  {data.distribution_note ? (
-                    <>
-                      <EuiSpacer size="s" />
-                      <EuiText size="xs" color="subdued">
-                        {data.distribution_note}
-                      </EuiText>
-                    </>
-                  ) : null}
+                  <EuiSpacer size="s" />
+                  <EuiText size="xs" color="subdued">
+                    {data.distribution_note}
+                  </EuiText>
                 </>
-              ) : (
-                <EuiCallOut
-                  announceOnMount={false}
-                  title={i18n.translate(
-                    'xpack.securitySolution.agentBuilder.entityAnalyticsDashboard.noRiskCountsTitle',
-                    {
-                      defaultMessage: 'Risk distribution not included in this snapshot',
-                    }
-                  )}
-                  color="primary"
-                  iconType="iInCircle"
-                >
-                  {i18n.translate(
-                    'xpack.securitySolution.agentBuilder.entityAnalyticsDashboard.noRiskCountsBody',
-                    {
-                      defaultMessage:
-                        'Open Entity Analytics in Security for live KPIs, or ask the assistant to add severity_count when summarizing entities you retrieved.',
-                    }
-                  )}
-                </EuiCallOut>
-              )}
+              ) : null}
+              {!hasExplicitSeverityCount && severityTotal(inferredFromEntities) > 0 ? (
+                <>
+                  <EuiSpacer size="s" />
+                  <EuiText size="xs" color="subdued">
+                    {i18n.translate(
+                      'xpack.securitySolution.agentBuilder.entityAnalyticsDashboard.riskInferredFromEntities',
+                      {
+                        defaultMessage:
+                          'Distribution is inferred from risk levels on the entities in this snapshot (not full-environment totals).',
+                      }
+                    )}
+                  </EuiText>
+                </>
+              ) : null}
+              {!hasExplicitSeverityCount && severityTotal(inferredFromEntities) === 0 ? (
+                <>
+                  <EuiSpacer size="s" />
+                  <EuiText size="xs" color="subdued">
+                    {i18n.translate(
+                      'xpack.securitySolution.agentBuilder.entityAnalyticsDashboard.riskNoDataHint',
+                      {
+                        defaultMessage:
+                          'For totals that match the Security home page, ask the assistant to include severity_count from investigation, or open Entity Analytics in Security for live KPIs.',
+                      }
+                    )}
+                  </EuiText>
+                </>
+              ) : null}
             </EuiPanel>
           </EuiFlexItem>
 
@@ -252,21 +319,119 @@ const EntityAnalyticsDashboardCanvasContent: React.FC<
                   ))}
                 </EuiFlexGroup>
               ) : (
-                <EuiText size="s" color="subdued">
-                  {i18n.translate(
-                    'xpack.securitySolution.agentBuilder.entityAnalyticsDashboard.noHighlights',
-                    {
-                      defaultMessage:
-                        'No highlights were attached. Ask for specific anomalies, watchlists, or entity types to populate this panel.',
-                    }
-                  )}
-                </EuiText>
+                <>
+                  <EuiText size="s" color="subdued">
+                    {i18n.translate(
+                      'xpack.securitySolution.agentBuilder.entityAnalyticsDashboard.noHighlightsIntro',
+                      {
+                        defaultMessage:
+                          'This snapshot has no authored highlights yet. The full Entity Analytics home also includes:',
+                      }
+                    )}
+                  </EuiText>
+                  <EuiSpacer size="m" />
+                  <EuiDescriptionList
+                    type="responsiveColumn"
+                    listItems={[
+                      {
+                        title: i18n.translate(
+                          'xpack.securitySolution.agentBuilder.entityAnalyticsDashboard.parityItemAnomalies',
+                          {
+                            defaultMessage: 'Anomaly detection',
+                          }
+                        ),
+                        description: i18n.translate(
+                          'xpack.securitySolution.agentBuilder.entityAnalyticsDashboard.parityItemAnomaliesDesc',
+                          {
+                            defaultMessage:
+                              'ML job timelines and recent anomalies scoped to your filters — live in Security only.',
+                          }
+                        ),
+                      },
+                      {
+                        title: i18n.translate(
+                          'xpack.securitySolution.agentBuilder.entityAnalyticsDashboard.parityItemRiskByType',
+                          {
+                            defaultMessage: 'Risk scores by entity type',
+                          }
+                        ),
+                        description: i18n.translate(
+                          'xpack.securitySolution.agentBuilder.entityAnalyticsDashboard.parityItemRiskByTypeDesc',
+                          {
+                            defaultMessage:
+                              'Separate host, user, and service risk panels with tables — live in Security only.',
+                          }
+                        ),
+                      },
+                      {
+                        title: i18n.translate(
+                          'xpack.securitySolution.agentBuilder.entityAnalyticsDashboard.parityItemLeads',
+                          {
+                            defaultMessage: 'Threat hunting leads',
+                          }
+                        ),
+                        description: i18n.translate(
+                          'xpack.securitySolution.agentBuilder.entityAnalyticsDashboard.parityItemLeadsDesc',
+                          {
+                            defaultMessage:
+                              'Optional lead generation strip when enabled — not part of this attachment.',
+                          }
+                        ),
+                      },
+                    ]}
+                  />
+                  <EuiSpacer size="m" />
+                  <EuiText size="xs" color="subdued">
+                    {i18n.translate(
+                      'xpack.securitySolution.agentBuilder.entityAnalyticsDashboard.noHighlightsAsk',
+                      {
+                        defaultMessage:
+                          'Ask the assistant to populate anomaly_highlights, or use Open Entity Analytics in Security above.',
+                      }
+                    )}
+                  </EuiText>
+                </>
               )}
             </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>
 
         <EuiSpacer size="l" />
+
+        {Object.keys(entityTypeCounts).length > 0 ? (
+          <>
+            <EuiPanel hasBorder paddingSize="m">
+              <EuiTitle size="s">
+                <h3>
+                  <FormattedMessage
+                    id="xpack.securitySolution.agentBuilder.entityAnalyticsDashboard.snapshotByTypeTitle"
+                    defaultMessage="Entities in this snapshot by type"
+                  />
+                </h3>
+              </EuiTitle>
+              <EuiSpacer size="m" />
+              <EuiFlexGroup wrap responsive={false} gutterSize="m">
+                {(['host', 'user', 'service', 'generic'] as const).map((type) => {
+                  const count = entityTypeCounts[type] ?? 0;
+                  if (count === 0) {
+                    return null;
+                  }
+                  return (
+                    <EuiFlexItem grow={false} key={type}>
+                      <EuiStat
+                        title={String(count)}
+                        description={`${type.charAt(0).toUpperCase()}${type.slice(1)}`}
+                        titleSize="m"
+                        textAlign="left"
+                      />
+                    </EuiFlexItem>
+                  );
+                })}
+              </EuiFlexGroup>
+            </EuiPanel>
+            <EuiSpacer size="l" />
+          </>
+        ) : null}
 
         <EuiPanel hasBorder paddingSize="m">
           <EuiTitle size="s">

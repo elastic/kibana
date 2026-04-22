@@ -22,19 +22,9 @@ const entityListRowSchema = z.object({
   last_activity: z.string().optional(),
 });
 
-const entityListAttachmentDataSchema = securityAttachmentDataSchema
-  .extend({
-    entities: z.array(entityListRowSchema).max(100),
-  })
-  .superRefine((val, ctx) => {
-    if (val.entities.length < 2) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['entities'],
-        message: `security.entity_list requires at least two entities in "entities". For exactly one entity (for example the single riskiest host or any one EUID the user cares about), use attachments.add with type "${SecurityAgentBuilderAttachments.entityCard}" instead.`,
-      });
-    }
-  });
+const entityListAttachmentDataSchema = securityAttachmentDataSchema.extend({
+  entities: z.array(entityListRowSchema).min(1).max(100),
+});
 
 export type EntityListAttachmentData = z.infer<typeof entityListAttachmentDataSchema>;
 
@@ -80,6 +70,6 @@ export const createEntityListAttachmentType = (): AttachmentTypeDefinition<
     }),
     getTools: () => [],
     getAgentDescription: () =>
-      `A security entity list attachment is only for **two or more** investigated entities (host, user, service, or generic): EUIDs plus optional risk scores, risk levels, asset criticality, and lifecycle timestamps. The payload **must** include at least two rows in "entities"; otherwise validation fails — for a **single** entity use type "${SecurityAgentBuilderAttachments.entityCard}" (entity card / flyout-style Canvas), not this type. In the conversation UI this attachment opens a **multi-row table** in Canvas. Summarize the key findings in plain text and reference the attachment id. Create with \`attachments.add\`, type "${SecurityAgentBuilderAttachments.entityList}", JSON with "entities" (array of objects with entity_type, entity_id, and optional fields from \`security.get_entity\` / \`security.search_entities\`).`,
+      `A security entity list attachment is for when the user asked for a **list**, **table**, **ranking**, **top N**, or otherwise a **set of entities** (plural / scan-and-compare framing), including **show**/**see**/**give me** **multiple** or **several** entities, **riskiest/top entities**, **entities in the system**, and **one message that names several entity kinds** (e.g. **hosts and users**). Put **every** matching entity in \`data.entities\` — **one or more** rows is valid (a list question can return a single row; still use this type so the user gets the **entities table** Canvas, not the flyout-style card). **Do not** use type "${SecurityAgentBuilderAttachments.entityAnalyticsDashboard}" for this — that type is only when they want the **Entity Analytics home/overview product page** in Canvas, not a generic multi-entity answer. For **one particular** entity, **details**, **profile**, or **entity card** language without list framing, use type "${SecurityAgentBuilderAttachments.entityCard}" instead. Create with \`attachments.add\`, type "${SecurityAgentBuilderAttachments.entityList}", JSON with "entities" (array of entity_type, entity_id, plus optional fields from \`security.get_entity\` / \`security.search_entities\`). **After** a successful add, the assistant message **must** include a markdown line \`<render_attachment id="ATTACHMENT_ID" version="VERSION" />\` (values from the tool result) or the user cannot open Preview/Canvas.`,
   };
 };

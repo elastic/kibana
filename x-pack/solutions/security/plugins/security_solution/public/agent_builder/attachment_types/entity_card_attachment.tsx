@@ -80,6 +80,11 @@ import {
   navigateToSecurityEntityInApp,
   type SecurityAgentBuilderChrome,
 } from './entity_explore_navigation';
+import { EntityCardFlyoutOverviewCanvas } from '../components/entity_card_flyout_overview_canvas';
+import {
+  SecurityReduxEmbeddedProvider,
+  type SecurityCanvasEmbeddedBundle,
+} from '../components/security_redux_embedded_provider';
 
 export type EntityCardAttachment = Attachment<
   typeof SecurityAgentBuilderAttachments.entityCard,
@@ -754,48 +759,100 @@ const EntityCardInlineContent: React.FC<AttachmentRenderProps<EntityCardAttachme
   );
 };
 
+const usesLiveFlyoutOverview = (entityType: EntityCardAttachmentData['entity_type']): boolean =>
+  entityType === EntityType.host ||
+  entityType === EntityType.user ||
+  entityType === EntityType.service;
+
 const EntityCardCanvasContent: React.FC<
   AttachmentRenderProps<EntityCardAttachment> & {
     application: ApplicationStart;
     agentBuilder?: AgentBuilderPluginStart;
     chrome?: SecurityAgentBuilderChrome;
+    resolveSecurityCanvasContext?: () => Promise<SecurityCanvasEmbeddedBundle>;
   }
-> = ({ attachment, application, agentBuilder, chrome }) => {
+> = ({
+  attachment,
+  application,
+  agentBuilder,
+  chrome,
+  openSidebarConversation,
+  resolveSecurityCanvasContext,
+}) => {
   const data = attachment.data;
+  const showLiveFlyoutOverview = usesLiveFlyoutOverview(data.entity_type);
+
+  const openInSecurityToolbar = (
+    <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty
+          size="s"
+          iconType="popout"
+          onClick={() => {
+            navigateToSecurityEntityInApp({
+              application,
+              appId: APP_UI_ID,
+              row: data,
+              agentBuilder,
+              chrome,
+              openSidebarConversation,
+            });
+          }}
+        >
+          {i18n.translate('xpack.securitySolution.agentBuilder.entityCard.openInSecurity', {
+            defaultMessage: 'Open in Security',
+          })}
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 
   return (
     <div css={rootCanvasStyles}>
       <EuiPanel paddingSize="none" hasBorder css={{ overflow: 'auto' }}>
-        <EntityCardFlyoutHeader data={data} application={application} />
-        <FlyoutBody>
-          <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="s"
-                iconType="popout"
-                onClick={() => {
-                  navigateToSecurityEntityInApp({
-                    application,
-                    appId: APP_UI_ID,
-                    row: data,
-                    agentBuilder,
-                    chrome,
-                  });
-                }}
-              >
-                {i18n.translate('xpack.securitySolution.agentBuilder.entityCard.openInSecurity', {
-                  defaultMessage: 'Open in Security',
-                })}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EntityCardSummaryGrid data={data} />
-          <EntityCardFieldsSection data={data} />
-          <EntityCardRiskSummary data={data} />
-          <EntityCardResolution data={data} />
-          <EntityCardInsights data={data} />
-          <EntityCardObservedSection data={data} />
-        </FlyoutBody>
+        {showLiveFlyoutOverview && resolveSecurityCanvasContext ? (
+          <SecurityReduxEmbeddedProvider resolveCanvasContext={resolveSecurityCanvasContext}>
+            <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false}>
+              {openInSecurityToolbar}
+            </EuiPanel>
+            <EntityCardFlyoutOverviewCanvas
+              entityType={data.entity_type as EntityType}
+              entityId={data.entity_id}
+              entityName={data.entity_name}
+              source={data.source}
+              application={application}
+              agentBuilder={agentBuilder}
+              chrome={chrome}
+              openSidebarConversation={openSidebarConversation}
+            />
+          </SecurityReduxEmbeddedProvider>
+        ) : showLiveFlyoutOverview ? (
+          <>
+            <EntityCardFlyoutHeader data={data} application={application} />
+            <FlyoutBody>
+              {openInSecurityToolbar}
+              <EntityCardSummaryGrid data={data} />
+              <EntityCardFieldsSection data={data} />
+              <EntityCardRiskSummary data={data} />
+              <EntityCardResolution data={data} />
+              <EntityCardInsights data={data} />
+              <EntityCardObservedSection data={data} />
+            </FlyoutBody>
+          </>
+        ) : (
+          <>
+            <EntityCardFlyoutHeader data={data} application={application} />
+            <FlyoutBody>
+              {openInSecurityToolbar}
+              <EntityCardSummaryGrid data={data} />
+              <EntityCardFieldsSection data={data} />
+              <EntityCardRiskSummary data={data} />
+              <EntityCardResolution data={data} />
+              <EntityCardInsights data={data} />
+              <EntityCardObservedSection data={data} />
+            </FlyoutBody>
+          </>
+        )}
       </EuiPanel>
     </div>
   );
@@ -806,15 +863,22 @@ export const registerEntityCardAttachment = ({
   application,
   agentBuilder,
   chrome,
+  resolveSecurityCanvasContext,
 }: {
   attachments: AttachmentServiceStartContract;
   application: ApplicationStart;
   agentBuilder?: AgentBuilderPluginStart;
   chrome?: SecurityAgentBuilderChrome;
+  resolveSecurityCanvasContext?: () => Promise<SecurityCanvasEmbeddedBundle>;
 }): void => {
   attachments.addAttachmentType(
     SecurityAgentBuilderAttachments.entityCard,
-    createEntityCardAttachmentDefinition({ application, agentBuilder, chrome })
+    createEntityCardAttachmentDefinition({
+      application,
+      agentBuilder,
+      chrome,
+      resolveSecurityCanvasContext,
+    })
   );
 };
 
@@ -822,10 +886,12 @@ export const createEntityCardAttachmentDefinition = ({
   application,
   agentBuilder,
   chrome,
+  resolveSecurityCanvasContext,
 }: {
   application: ApplicationStart;
   agentBuilder?: AgentBuilderPluginStart;
   chrome?: SecurityAgentBuilderChrome;
+  resolveSecurityCanvasContext?: () => Promise<SecurityCanvasEmbeddedBundle>;
 }): AttachmentUIDefinition<EntityCardAttachment> => ({
   getLabel: (attachment) =>
     attachment.data.attachmentLabel ?? attachment.data.entity_name ?? attachment.data.entity_id,
@@ -837,6 +903,7 @@ export const createEntityCardAttachmentDefinition = ({
       application={application}
       agentBuilder={agentBuilder}
       chrome={chrome}
+      resolveSecurityCanvasContext={resolveSecurityCanvasContext}
     />
   ),
   getActionButtons: ({ openCanvas, isCanvas }) => {

@@ -52,14 +52,14 @@ describe('createEntityListAttachmentType', () => {
       expect(result.valid).toBe(false);
     });
 
-    it('returns invalid when only one entity (use security.entity_card instead)', async () => {
+    it('returns valid when only one entity (list attachment may carry a single-row result)', async () => {
       const input = {
-        attachmentLabel: 'Top host',
+        attachmentLabel: 'Risky hosts',
         entities: [
           {
             entity_type: 'host',
             entity_id: 'euid-1',
-            entity_name: 'lonely-host',
+            entity_name: 'only-host',
             risk_score_norm: 99,
             risk_level: 'Critical',
           },
@@ -68,9 +68,9 @@ describe('createEntityListAttachmentType', () => {
 
       const result = await attachmentType.validate(input);
 
-      expect(result.valid).toBe(false);
-      if (!result.valid) {
-        expect(result.error).toContain('security.entity_card');
+      expect(result.valid).toBe(true);
+      if (result.valid) {
+        expect(result.data.entities).toHaveLength(1);
       }
     });
 
@@ -101,13 +101,6 @@ describe('createEntityListAttachmentType', () => {
               entity_name: 'bob',
               risk_score_norm: 50,
               risk_level: 'Moderate',
-            },
-            {
-              entity_type: 'host',
-              entity_id: 'euid-2',
-              entity_name: 'host-a',
-              risk_score_norm: 40,
-              risk_level: 'High',
             },
           ],
         },

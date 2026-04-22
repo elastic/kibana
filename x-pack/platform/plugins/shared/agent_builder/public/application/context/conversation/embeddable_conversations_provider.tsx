@@ -42,9 +42,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
   useEffect(() => {
     if (onRegisterCallbacks) {
       onRegisterCallbacks({
-        // Merge partial updates (e.g. Security setChatConfig) so agentId/sessionTag and the
-        // active conversation state are not wiped by a full replace.
-        updateProps: (newProps) => setCurrentProps((prevProps) => ({ ...prevProps, ...newProps })),
+        updateProps: (newProps) => setCurrentProps(newProps),
         resetBrowserApiTools: () =>
           setCurrentProps((prevProps) => ({ ...prevProps, browserApiTools: undefined })),
         addAttachment: (attachment) =>

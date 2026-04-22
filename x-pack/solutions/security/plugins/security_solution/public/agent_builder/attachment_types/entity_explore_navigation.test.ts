@@ -108,5 +108,15 @@ describe('entity_explore_navigation', () => {
         entityId,
       });
     });
+
+    it('returns entity analytics home without a redundant path (deep link already defines the base URL)', () => {
+      const { deepLinkId, path } = getSecurityEntityExploreNavigateTarget({
+        entity_type: 'service',
+        entity_id: 'service:abc-123',
+        entity_name: 'api.example',
+      });
+      expect(deepLinkId).toBe(SecurityPageName.entityAnalyticsHomePage);
+      expect(path).toBeUndefined();
+    });
   });
 });

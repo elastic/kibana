@@ -306,6 +306,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         application: core.application,
         agentBuilder: plugins.agentBuilder,
         chrome: core.chrome,
+        resolveSecurityCanvasContext: async () => {
+          const startedSubPlugins = await this.ensureStartedSubPlugins(core, plugins);
+          const [store, kibanaServices] = await Promise.all([
+            this.store(core, plugins, startedSubPlugins),
+            this.services.generateServices(core, plugins as StartPluginsDependencies),
+          ]);
+          return { store, kibanaServices };
+        },
       });
       registerEntityListAttachment({
         attachments: plugins.agentBuilder.attachments,

@@ -8,13 +8,14 @@
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { CoreStart } from '@kbn/core/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import { encodeFlyout } from '@kbn/cloud-security-posture/src/utils/query_utils';
 import {
   markPreserveAgentBuilderSessionDuringNextSecurityNavigation,
   readLastAgentBuilderAgentIdForSecuritySession,
 } from '../../../common/agent_builder_navigation_gate';
 
 import { EntityType } from '../../../common/entity_analytics/types';
-import { ENTITY_ANALYTICS_HOME_PAGE_PATH, SecurityPageName } from '../../../common/constants';
+import { SecurityPageName } from '../../../common/constants';
 import { getHostDetailsUrl } from '../../common/components/link_to/redirect_to_hosts';
 import { getTabsOnUsersDetailsUrl } from '../../common/components/link_to/redirect_to_users';
 import { UsersTableType } from '../../explore/users/store/model';
@@ -29,8 +30,8 @@ const AGENT_BUILDER_SIDEBAR_APP_ID = 'agentBuilder' as const;
 export type SecurityAgentBuilderChrome = CoreStart['chrome'];
 
 /**
- * When the Agent Builder panel is already open, callers must not use `openChat` with new props:
- * the platform replaces embeddable props in full and drops the in-memory conversation/thread.
+ * True when the Chrome sidebar is showing the Agent Builder app (used to coordinate
+ * close → navigate → reopen around in-app Security navigation).
  */
 export const isAgentBuilderSidebarOpen = (chrome?: SecurityAgentBuilderChrome): boolean =>
   chrome?.sidebar.getCurrentAppId() === AGENT_BUILDER_SIDEBAR_APP_ID;
@@ -47,6 +48,40 @@ const openSecurityAgentBuilderChatPreservingConversation = (
     newConversation: false,
     agentId: readLastAgentBuilderAgentIdForSecuritySession(),
   });
+};
+
+/**
+ * Defers reopening the sidebar so `navigateToApp` can apply first (mirrors Dashboard Canvas
+ * "Edit in Dashboards": navigate, then bring the conversation UI back on a fresh mount).
+ */
+const reopenSecurityAgentBuilderAfterNavigation = (agentBuilder: AgentBuilderPluginStart): void => {
+  setTimeout(() => {
+    openSecurityAgentBuilderChatPreservingConversation(agentBuilder);
+  }, 0);
+};
+
+/**
+ * After Security in-app navigation, restore the Agent Builder sidebar the same way Dashboard
+ * Canvas does: prefer the attachment `openSidebarConversation` callback (persists the active
+ * conversation id, then `openSidebarInternal`), otherwise fall back to `openChat` with the
+ * Security session tag and last agent id.
+ */
+const scheduleReopenAgentBuilderAfterSecurityNavigation = ({
+  agentBuilder,
+  openSidebarConversation,
+}: {
+  agentBuilder?: AgentBuilderPluginStart;
+  openSidebarConversation?: () => void;
+}): void => {
+  if (openSidebarConversation) {
+    setTimeout(() => {
+      openSidebarConversation();
+    }, 0);
+    return;
+  }
+  if (agentBuilder?.openChat) {
+    reopenSecurityAgentBuilderAfterNavigation(agentBuilder);
+  }
 };
 
 export interface SecurityEntityExploreRow {
@@ -121,7 +156,7 @@ export const getHostNameForHostDetailsUrl = (row: SecurityEntityExploreRow): str
  */
 export const getSecurityEntityExploreNavigateTarget = (
   row: SecurityEntityExploreRow
-): { deepLinkId: string; path: string } => {
+): { deepLinkId: string; path?: string } => {
   if (row.entity_type === EntityType.host) {
     const displayName = getHostNameForHostDetailsUrl(row);
     return {
@@ -136,16 +171,19 @@ export const getSecurityEntityExploreNavigateTarget = (
       path: getTabsOnUsersDetailsUrl(displayName, UsersTableType.events, undefined, row.entity_id),
     };
   }
+  // `navigateToApp` appends `path` to the deep link's registered path. The EA home deep link
+  // already uses `/entity_analytics_home_page`; passing it again produced a doubled segment,
+  // no matching route, catch-all redirect to `/get_started`, then onboarding could send users to
+  // SIEM migrations (e.g. `/get_started/siem_migrations` → `/siem_migrations/manage`).
   return {
     deepLinkId: SecurityPageName.entityAnalyticsHomePage,
-    path: ENTITY_ANALYTICS_HOME_PAGE_PATH,
   };
 };
 
 /**
- * Opens the Agent Builder conversation sidebar (same session as the rest of Security) when available,
- * then navigates to the entity page. Deferred navigation gives the sidebar a tick to mount so the
- * chat stays visible beside the new page.
+ * Navigates to the entity page in Security, then reopens Agent Builder so the sidebar embeddable
+ * remounts and restores the persisted conversation (same sequence as Dashboard Canvas
+ * "Edit in Dashboards": primary navigation, then restore the chat surface).
  */
 export const navigateToSecurityEntityInApp = ({
   application,
@@ -153,34 +191,70 @@ export const navigateToSecurityEntityInApp = ({
   row,
   agentBuilder,
   chrome,
+  openSidebarConversation,
 }: {
   application: ApplicationStart;
   appId: string;
   row: SecurityEntityExploreRow;
   agentBuilder?: AgentBuilderPluginStart;
   chrome?: SecurityAgentBuilderChrome;
+  /** When rendering from Agent Builder canvas, pass this for the same restore path as "Edit in Dashboards". */
+  openSidebarConversation?: () => void;
 }): void => {
   markPreserveAgentBuilderSessionDuringNextSecurityNavigation();
   const { deepLinkId, path } = getSecurityEntityExploreNavigateTarget(row);
-  const sidebarAlreadyOpen = isAgentBuilderSidebarOpen(chrome);
-  if (agentBuilder?.openChat && !sidebarAlreadyOpen) {
-    openSecurityAgentBuilderChatPreservingConversation(agentBuilder);
-    setTimeout(() => {
-      application.navigateToApp(appId, { deepLinkId, path });
-    }, 0);
-  } else {
-    application.navigateToApp(appId, { deepLinkId, path });
+  if (isAgentBuilderSidebarOpen(chrome) && agentBuilder?.toggleChat) {
+    agentBuilder.toggleChat();
   }
+  application.navigateToApp(appId, { deepLinkId, path, replace: true });
+  scheduleReopenAgentBuilderAfterSecurityNavigation({ agentBuilder, openSidebarConversation });
 };
 
 /**
  * Opens the Entity Analytics home page (same deep link as the product dashboard), optionally scoped to a watchlist.
  */
+/**
+ * Opens Entity Analytics home with a serialized expandable-flyout state (same URL shape as the
+ * product Entity Analytics page). Used from Agent Builder canvas where the in-page flyout
+ * provider is not mounted on the attachment surface.
+ */
+export const navigateToEntityAnalyticsWithFlyoutInApp = ({
+  application,
+  appId,
+  flyout,
+  agentBuilder,
+  chrome,
+  openSidebarConversation,
+}: {
+  application: ApplicationStart;
+  appId: string;
+  flyout: Record<string, unknown>;
+  agentBuilder?: AgentBuilderPluginStart;
+  chrome?: SecurityAgentBuilderChrome;
+  openSidebarConversation?: () => void;
+}): void => {
+  const encoded = encodeFlyout(flyout);
+  if (encoded == null) {
+    return;
+  }
+  markPreserveAgentBuilderSessionDuringNextSecurityNavigation();
+  if (isAgentBuilderSidebarOpen(chrome) && agentBuilder?.toggleChat) {
+    agentBuilder.toggleChat();
+  }
+  application.navigateToApp(appId, {
+    deepLinkId: SecurityPageName.entityAnalyticsHomePage,
+    path: `?${encoded}`,
+    replace: true,
+  });
+  scheduleReopenAgentBuilderAfterSecurityNavigation({ agentBuilder, openSidebarConversation });
+};
+
 export const navigateToEntityAnalyticsHomePageInApp = ({
   application,
   appId,
   agentBuilder,
   chrome,
+  openSidebarConversation,
   watchlistId,
   watchlistName,
 }: {
@@ -188,6 +262,7 @@ export const navigateToEntityAnalyticsHomePageInApp = ({
   appId: string;
   agentBuilder?: AgentBuilderPluginStart;
   chrome?: SecurityAgentBuilderChrome;
+  openSidebarConversation?: () => void;
   watchlistId?: string;
   watchlistName?: string;
 }): void => {
@@ -199,24 +274,16 @@ export const navigateToEntityAnalyticsHomePageInApp = ({
     params.set('watchlistName', watchlistName);
   }
   const query = params.toString();
-  const path = query
-    ? `${ENTITY_ANALYTICS_HOME_PAGE_PATH}?${query}`
-    : ENTITY_ANALYTICS_HOME_PAGE_PATH;
+  const path = query === '' ? undefined : `?${query}`;
 
   markPreserveAgentBuilderSessionDuringNextSecurityNavigation();
-  const sidebarAlreadyOpen = isAgentBuilderSidebarOpen(chrome);
-  if (agentBuilder?.openChat && !sidebarAlreadyOpen) {
-    openSecurityAgentBuilderChatPreservingConversation(agentBuilder);
-    setTimeout(() => {
-      application.navigateToApp(appId, {
-        deepLinkId: SecurityPageName.entityAnalyticsHomePage,
-        path,
-      });
-    }, 0);
-  } else {
-    application.navigateToApp(appId, {
-      deepLinkId: SecurityPageName.entityAnalyticsHomePage,
-      path,
-    });
+  if (isAgentBuilderSidebarOpen(chrome) && agentBuilder?.toggleChat) {
+    agentBuilder.toggleChat();
   }
+  application.navigateToApp(appId, {
+    deepLinkId: SecurityPageName.entityAnalyticsHomePage,
+    path,
+    replace: true,
+  });
+  scheduleReopenAgentBuilderAfterSecurityNavigation({ agentBuilder, openSidebarConversation });
 };
