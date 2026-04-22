@@ -184,6 +184,16 @@ If the plugin centralizes descriptions in a constants file (e.g. `*_DESCRIPTION`
 
 For OAS to include response body documentation, the route must define `validate.response` with a schema and description for each status code. If a route is missing response validation, the generated OAS will have no response schema — add one.
 
+Use these standard response descriptions for consistency across plugins:
+
+| Status | Description |
+|--------|-------------|
+| 200 | Indicates a successful call. |
+| 400 | Bad request. |
+| 401 | Authorization information is missing or invalid. |
+| 403 | Insufficient privileges. |
+| 404 | Object is not found. |
+
 ### Examples and code samples (code-first)
 
 Code-first plugins provide examples via `oasOperationObject` — a lazy function on the route options that returns either an inline object or a path to a YAML file. The result is deep-merged into the auto-generated OAS operation. Check existing routes in the plugin to see which style is already in use.
@@ -257,7 +267,11 @@ cd <plugin_path>/docs/openapi && npx @redocly/cli bundle 2>/dev/null
 
 ### Deprecated routes
 
-For deprecated routes, add a description that warns about deprecation and points to the replacement. Ensure `deprecated: true` is set on the route config where applicable.
+For deprecated routes, set `deprecated: true` on the route config and prefix the description with a deprecation notice. Use one of these forms:
+
+- `Deprecated in <version>. Use <replacement endpoint> instead.` — for routes with a direct replacement.
+- `Deprecated in <version>.` — when no replacement exists.
+- For legacy route mirrors (e.g. `/api/index_patterns` mirroring `/api/data_views`), use the primary route's description prefixed with the deprecation notice.
 
 ### Completeness check
 
@@ -292,3 +306,4 @@ Before moving to verification, confirm every item below is complete. Do not proc
 - **Zod `.meta()` immutability**: `.meta()` returns a new schema. If you call `.meta()` after the schema is already referenced by a route, the route keeps the old schema without your metadata. Always attach `.meta()` at definition time.
 - **OAS-incompatible schema types**: Some `@kbn/config-schema` types (`schema.byteSize()`, `schema.duration()`, `schema.any()`, `schema.conditional()`, etc.) produce poor or lossy OAS. See `dev_docs/tutorials/generating_oas_for_http_apis.mdx` for the full compatibility table and preferred alternatives.
 - **Availability metadata**: Routes and fields can declare `availability: { since, stability }` to generate `x-state` annotations in the OAS. If a route is missing this metadata, flag it to the developer — the values require knowledge of release history.
+- **Trailing periods on summaries**: Summaries must not end with a period. Some existing routes (e.g. maintenance_window) violate this — do not copy that style.
