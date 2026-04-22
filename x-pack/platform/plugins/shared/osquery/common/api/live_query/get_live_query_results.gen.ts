@@ -14,10 +14,10 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
  * The response for getting live query results.
  */
+export const GetLiveQueryResultsResponse = lazySchema(() => z.object({}));
 export type GetLiveQueryResultsResponse = z.infer<typeof GetLiveQueryResultsResponse>;
-export const GetLiveQueryResultsResponse = z.object({});
