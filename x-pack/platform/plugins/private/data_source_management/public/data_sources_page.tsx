@@ -9,7 +9,16 @@ import type { FunctionComponent } from 'react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiButton, EuiInMemoryTable, EuiPageSection, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiInMemoryTable,
+  EuiPageSection,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import type { DataSourceListItem } from '../common/sample_data_sources_client';
 import { SampleDataSourcesClient } from '../common/sample_data_sources_client';
 
@@ -78,7 +87,8 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({ pageT
                 data-test-subj="dataSourceManagementDeleteButton"
                 iconType="trash"
                 onClick={() => {
-                  window.alert('delete');
+                  dataClient.delete(selectedItems.map((item) => item.name));
+                  setItems(dataClient.get());
                   setSelectedItems([]);
                 }}
               >
@@ -88,18 +98,37 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({ pageT
               </EuiButton>
             ) : undefined,
           toolsRight: (
-            <EuiButton
-              color="primary"
-              data-test-subj="dataSourceManagementCreateButton"
-              iconType="plusInCircle"
-              onClick={() => {
-                window.alert('create');
-              }}
-            >
-              {i18n.translate('dataSourceManagement.addButtonLabel', {
-                defaultMessage: 'Add',
-              })}
-            </EuiButton>
+            <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  color="primary"
+                  data-test-subj="dataSourceManagementCreateButton"
+                  iconType="plusInCircle"
+                  onClick={() => {
+                    window.alert('create');
+                  }}
+                >
+                  {i18n.translate('dataSourceManagement.addButtonLabel', {
+                    defaultMessage: 'Add',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  color="primary"
+                  display="fill"
+                  iconType="refresh"
+                  aria-label={i18n.translate('dataSourceManagement.refreshButtonAriaLabel', {
+                    defaultMessage: 'Refresh',
+                  })}
+                  data-test-subj="dataSourceManagementRefreshButton"
+                  onClick={() => {
+                    setItems(dataClient.get());
+                    setSelectedItems([]);
+                  }}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           ),
         }}
         rowHeader="name"
