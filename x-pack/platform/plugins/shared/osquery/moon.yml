@@ -102,7 +102,7 @@ fileGroups:
     - scripts/**/*
     - scripts/**/*.json
     - server/**/*
-    - test/scout/**/*
+    - test/scout_osquery/**/*
     - public/common/schemas/*/*.json
     - '!target/**/*'
   jest-config:
