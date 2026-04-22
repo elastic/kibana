@@ -3377,10 +3377,10 @@
     "@hapi/podium" "^5.0.0"
     "@hapi/validate" "^2.0.1"
 
-"@hapi/content@^6.0.0":
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/@hapi/content/-/content-6.0.0.tgz#2427af3bac8a2f743512fce2a70cbdc365af29df"
-  integrity sha512-CEhs7j+H0iQffKfe5Htdak5LBOz/Qc8TRh51cF+BFv0qnuph3Em4pjGVzJMkI2gfTDdlJKWJISGWS1rK34POGA==
+"@hapi/content@^6.0.1":
+  version "6.0.1"
+  resolved "https://registry.yarnpkg.com/@hapi/content/-/content-6.0.1.tgz#b0afe7523c9f754726852204dd2d32ec1578cb64"
+  integrity sha512-lQ2vOoFMNYxwKVnKf+3Pi3PfoviM4EJYlT9JbrBPfEc0xKMiVDqqXF8UTE1S1oKhHQliWSP5t6zTKNlmaXBGcQ==
   dependencies:
     "@hapi/boom" "^10.0.0"
 
@@ -3421,10 +3421,10 @@
     "@hapi/validate" "^2.0.1"
     "@hapi/wreck" "^18.0.1"
 
-"@hapi/hapi@21.4.4", "@hapi/hapi@^21.1.0":
-  version "21.4.4"
-  resolved "https://registry.yarnpkg.com/@hapi/hapi/-/hapi-21.4.4.tgz#89c239135be1ff2adeb586df157dee7a49593291"
-  integrity sha512-vI6JPLR99WZDKI1nriD0qXDPp8sKFkZfNVGrDDZafDQ8jU+3ERMwS0vPac5aGae6yyyoGZGOBiYExw4N8ScSTQ==
+"@hapi/hapi@21.4.8", "@hapi/hapi@^21.1.0":
+  version "21.4.8"
+  resolved "https://registry.yarnpkg.com/@hapi/hapi/-/hapi-21.4.8.tgz#3f92f9999dd344f754411d752054c569202cb5b7"
+  integrity sha512-l93IrEG4iQyM+yKdngWmkPtajkJGM81yfinmSFmiaNHG+r1fgsWaewwcE1hhsFnqPrVZpU8Y3PiVJMb6uT+01Q==
   dependencies:
     "@hapi/accept" "^6.0.3"
     "@hapi/ammo" "^6.0.1"
@@ -3440,7 +3440,7 @@
     "@hapi/shot" "^6.0.2"
     "@hapi/somever" "^4.1.1"
     "@hapi/statehood" "^8.2.1"
-    "@hapi/subtext" "^8.1.1"
+    "@hapi/subtext" "^8.1.2"
     "@hapi/teamwork" "^6.0.1"
     "@hapi/topo" "^6.0.2"
     "@hapi/validate" "^2.0.1"
@@ -3503,15 +3503,15 @@
     "@hapi/hoek" "^11.0.2"
     "@hapi/vise" "^5.0.1"
 
-"@hapi/pez@^6.1.0":
-  version "6.1.0"
-  resolved "https://registry.yarnpkg.com/@hapi/pez/-/pez-6.1.0.tgz#64d9f95580fc7d8f1d13437ee4a8676709954fda"
-  integrity sha512-+FE3sFPYuXCpuVeHQ/Qag1b45clR2o54QoonE/gKHv9gukxQ8oJJZPR7o3/ydDTK6racnCJXxOyT1T93FCJMIg==
+"@hapi/pez@^6.1.1":
+  version "6.1.1"
+  resolved "https://registry.yarnpkg.com/@hapi/pez/-/pez-6.1.1.tgz#d99a4f62291b1c008179bb534791b8dfc59f7f8d"
+  integrity sha512-yg2OS1tC0S1sHXvhUtWsfRn6lrKl9jKtRhZ+EI0woOW/gqX5vM2PZ1459ypCvCYDRLJ9nIyueeEH5MJV1ZDqIg==
   dependencies:
     "@hapi/b64" "^6.0.1"
     "@hapi/boom" "^10.0.1"
-    "@hapi/content" "^6.0.0"
-    "@hapi/hoek" "^11.0.2"
+    "@hapi/content" "^6.0.1"
+    "@hapi/hoek" "^11.0.7"
     "@hapi/nigel" "^5.0.1"
 
 "@hapi/pinpoint@^2.0.1":
@@ -3557,18 +3557,18 @@
     "@hapi/iron" "^7.0.1"
     "@hapi/validate" "^2.0.1"
 
-"@hapi/subtext@^8.1.1":
-  version "8.1.1"
-  resolved "https://registry.yarnpkg.com/@hapi/subtext/-/subtext-8.1.1.tgz#48b93ab9196f7bf5902060ec92459fc354acba6e"
-  integrity sha512-ex1Y2s/KuJktS8Ww0k6XJ5ysSKrzNym4i5pDVuCwlSgHHviHUsT1JNzE6FYhNU9TTHSNdyfue/t2m89bpkX9Jw==
+"@hapi/subtext@^8.1.2":
+  version "8.1.2"
+  resolved "https://registry.yarnpkg.com/@hapi/subtext/-/subtext-8.1.2.tgz#f625391fed73c76f156f020169d4c30f485a89d9"
+  integrity sha512-2x71YJHmFpCjhIhfiNZdKp63nh3xRPp7RrwH7JoO9R4Sd0DRzzRU/VfX2fMmUR7jcoS5qNET1WyGIaqKpMu/ng==
   dependencies:
     "@hapi/boom" "^10.0.1"
     "@hapi/bourne" "^3.0.0"
-    "@hapi/content" "^6.0.0"
+    "@hapi/content" "^6.0.1"
     "@hapi/file" "^3.0.0"
-    "@hapi/hoek" "^11.0.2"
-    "@hapi/pez" "^6.1.0"
-    "@hapi/wreck" "^18.0.1"
+    "@hapi/hoek" "^11.0.7"
+    "@hapi/pez" "^6.1.1"
+    "@hapi/wreck" "^18.1.0"
 
 "@hapi/teamwork@^6.0.0", "@hapi/teamwork@^6.0.1":
   version "6.0.1"
@@ -3609,7 +3609,7 @@
   dependencies:
     "@hapi/hoek" "^11.0.2"
 
-"@hapi/wreck@18.1.0", "@hapi/wreck@^18.0.1":
+"@hapi/wreck@18.1.0", "@hapi/wreck@^18.0.1", "@hapi/wreck@^18.1.0":
   version "18.1.0"
   resolved "https://registry.yarnpkg.com/@hapi/wreck/-/wreck-18.1.0.tgz#68e631fc7568ebefc6252d5b86cb804466c8dbe6"
   integrity sha512-0z6ZRCmFEfV/MQqkQomJ7sl/hyxvcZM7LtuVqN3vdAO4vM9eBbowl0kaqQj9EJJQab+3Uuh1GxbGIBFy4NfJ4w==
@@ -4871,6 +4871,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/as-code-shared-telemetry@link:src/platform/packages/shared/as-code/shared-telemetry":
+  version "0.0.0"
+  uid ""
+
 "@kbn/as-code-shared-transforms@link:src/platform/packages/shared/as-code/shared-transforms":
   version "0.0.0"
   uid ""
@@ -5104,6 +5108,10 @@
   uid ""
 
 "@kbn/config@link:src/platform/packages/shared/kbn-config":
+  version "0.0.0"
+  uid ""
+
+"@kbn/connector-cli@link:src/platform/packages/shared/kbn-connector-cli":
   version "0.0.0"
   uid ""
 
@@ -26115,10 +26123,10 @@ linkify-it@^5.0.0:
   dependencies:
     uc.micro "^2.0.0"
 
-liquidjs@10.25.3:
-  version "10.25.3"
-  resolved "https://registry.yarnpkg.com/liquidjs/-/liquidjs-10.25.3.tgz#ee9583a36a2b23b118963ba8da12de048d7ae035"
-  integrity sha512-csoJtC6yTfkUlwy+QKm0tRbFoz5cnzly1ugFvBBDWXA4Oo8ul31hOHDEZVzG93q8YaxRIQ909GFuow8d/q1v2Q==
+liquidjs@10.25.6:
+  version "10.25.6"
+  resolved "https://registry.yarnpkg.com/liquidjs/-/liquidjs-10.25.6.tgz#dddf7ee43cd3c7a2d7768063937bf14e77079afb"
+  integrity sha512-h5ki5HS1PiL9/NmLw3iUcTF1jQswKJd8KLEXNrtSf8XHF0v3c5+d+8llz3N9I5IUdc5rsOuVLb9AVnqvqqscPg==
   dependencies:
     commander "^10.0.0"
 
@@ -34416,10 +34424,10 @@ undici-types@~6.21.0:
   resolved "https://registry.yarnpkg.com/undici-types/-/undici-types-6.21.0.tgz#691d00af3909be93a7faa13be61b3a5b50ef12cb"
   integrity sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==
 
-undici@6.23.0, undici@^6.21.1, undici@^6.21.2, undici@^6.23.0:
-  version "6.23.0"
-  resolved "https://registry.yarnpkg.com/undici/-/undici-6.23.0.tgz#7953087744d9095a96f115de3140ca3828aff3a4"
-  integrity sha512-VfQPToRA5FZs/qJxLIinmU59u0r7LXqoJkCzinq3ckNJp3vKEh7jTWN589YQ5+aoAC/TGRLyJLCPKcLQbM8r9g==
+undici@6.24.1, undici@^6.21.1, undici@^6.21.2, undici@^6.23.0:
+  version "6.24.1"
+  resolved "https://registry.yarnpkg.com/undici/-/undici-6.24.1.tgz#9df1425cede20b836d95634347946f79578b7e71"
+  integrity sha512-sC+b0tB1whOCzbtlx20fx3WgCXwkW627p4EA9uM+/tNNPkSS+eSEld6pAs9nDv7WbY1UUljBMYPtu9BCOrCWKA==
 
 undici@^7.19.1:
   version "7.22.0"
