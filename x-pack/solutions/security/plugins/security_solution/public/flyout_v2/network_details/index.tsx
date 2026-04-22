@@ -12,7 +12,7 @@ import type { FlowTargetSourceDest } from '../../../common/search_strategy';
 import { Header } from './header';
 import { Content } from './content';
 
-export interface NetworkProps extends Record<string, unknown> {
+export interface NetworkProps {
   /**
    * IP value
    */
