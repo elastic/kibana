@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { capitalize } from 'lodash/fp';
-import { EntityType } from '../../../../../common/entity_analytics/types';
+import type { EntityType } from '../../../../../common/entity_analytics/types';
 import type { RiskStats } from '../../../../../common/search_strategy';
 import { RiskScoreCell } from '../../../../entity_analytics/components/home/entities_table/risk_score_cell';
 import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
