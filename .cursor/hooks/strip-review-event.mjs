@@ -27,11 +27,15 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { json } from 'node:stream/consumers';
 
 /**
- * Matches `-f|-F|--field|--raw-field (space|=)event=...` flag pairs in a
- * `gh api` invocation. Covers all four flag names and both separators so a
- * silent-publish bypass via long-form flags is impossible.
+ * Matches `-f|-F|--field|--raw-field (space|=)[quote?]event=...[quote?]` flag
+ * pairs in a `gh api` invocation. Covers all four flag names, both
+ * separators, and shell-quoted values like `-f 'event=APPROVE'` or
+ * `--field="event=APPROVE"` so a silent-publish bypass via quoting is
+ * impossible. The value match stops at whitespace or a closing quote so
+ * malformed input cannot swallow adjacent tokens.
  */
-const eventFlag = /\s(?:-[fF]\s+|--(?:raw-)?field(?:=|\s+))event=\S*/g;
+const eventFlag =
+  /\s(?:-[fF]\s+|--(?:raw-)?field(?:=|\s+))['"]?event=[^\s'"]*['"]?/g;
 
 /**
  * Captures the `--input` value (space- or `=`-separated, double-quoted,
@@ -41,26 +45,42 @@ const eventFlag = /\s(?:-[fF]\s+|--(?:raw-)?field(?:=|\s+))event=\S*/g;
 const inputFilePath =
   /--input(?:\s+|=)("(?<doubleQuoted>[^"]+)"|'(?<singleQuoted>[^']+)'|(?<bare>\S+))/;
 
+/**
+ * Optional `NAME=value` env prefix tolerant of shell-quoted values with
+ * embedded spaces (e.g. `FOO='x y' gh api`). Without this, `\S*` stops at
+ * the first whitespace inside the quoted value and the whole invocation
+ * slips past the review-creation detector.
+ */
+const envPrefix = /(?:\w+=(?:"[^"]*"|'[^']*'|\S*)\s+)*/.source;
+
 /** Pipeline segment starts with an optional `gh api` invocation (allowing env prefixes). */
-const apiInvocation = /^\s*(?:\w+=\S*\s+)*gh\s+api\b/;
+const apiInvocation = new RegExp(`^\\s*${envPrefix}gh\\s+api\\b`);
 
 /** Review-creation endpoint: `/pulls/{n}/reviews` not followed by another path segment. */
 const reviewCreation = /pulls\/\d+\/reviews(?!\/)/;
 
 /** Pipeline segment starts with an optional `gh pr review` invocation (allowing env prefixes). */
-const prReviewInvocation = /^\s*(?:\w+=\S*\s+)*gh\s+pr\s+review\b/;
+const prReviewInvocation = new RegExp(`^\\s*${envPrefix}gh\\s+pr\\s+review\\b`);
 
 /**
  * Publishing flags accepted by `gh pr review`. Any of them publishes the
  * review immediately. Covers long forms (`--approve`, `--request-changes`,
  * `--comment`) and short forms (`-a`, `-r`, `-c`), including combined short
- * forms like `-ar` or `-arc` that pflag also accepts.
+ * forms like `-ar` or `-arc` that pflag also accepts. The `g` flag lets the
+ * quote-aware iterator skip matches that fall inside shell-quoted regions
+ * (e.g. review bodies that happen to contain ` -a ` as literal text).
  */
 const prReviewPublishFlag =
-  /(?:^|\s)(?:--(?:approve|request-changes|comment)|-[a-zA-Z]*[arc][a-zA-Z]*)\b/;
+  /(?:^|\s)(?:--(?:approve|request-changes|comment)|-[a-zA-Z]*[arc][a-zA-Z]*)\b/g;
 
-/** Heredoc opener: `<<EOF`, `<<-EOF`, `<<'EOF'`, `<<"EOF"`. */
-const heredoc = /<<-?\s*['"]?\w/;
+/**
+ * Heredoc opener: `<<EOF`, `<<-EOF`, `<<'EOF'`, `<<"EOF"`, `<<\EOF`. The
+ * backslash form is valid shell syntax equivalent to `<<'EOF'`, so it must
+ * gate the rewrite the same way the other quoted forms do — otherwise the
+ * heredoc body can look like a stray `gh api .../reviews` segment and get
+ * its `event=...` flags stripped in place.
+ */
+const heredoc = /<<-?\s*['"\\]?\w/;
 
 /**
  * Shell-expansion characters that the hook cannot evaluate. A `--input` path
@@ -75,7 +95,7 @@ const isReviewCreationCall = (segment) =>
   apiInvocation.test(segment) && reviewCreation.test(segment);
 
 const isPrReviewPublish = (segment) =>
-  prReviewInvocation.test(segment) && prReviewPublishFlag.test(segment);
+  prReviewInvocation.test(segment) && hasPublishFlagOutsideQuotes(segment);
 
 /**
  * Returns `[start, end)` offsets for every quoted region in `src`. Both
@@ -142,6 +162,26 @@ const stripEventFlagsOutsideQuotes = (segment) => {
   }
   result += segment.slice(cursor);
   return { result, dirty: true };
+};
+
+/**
+ * Reports whether any `prReviewPublishFlag` match in `segment` falls outside
+ * a shell-quoted region. The flag regex intentionally over-matches combined
+ * short forms like `-arc`, so the same pattern will also match inside a
+ * `-b "text -a here"` body. Gating on quote state removes that false
+ * positive without loosening the flag pattern.
+ */
+const hasPublishFlagOutsideQuotes = (segment) => {
+  const ranges = getQuotedRanges(segment);
+  prReviewPublishFlag.lastIndex = 0;
+  let m;
+  while ((m = prReviewPublishFlag.exec(segment)) !== null) {
+    const dashOffset = m[0].indexOf('-');
+    if (dashOffset < 0) continue;
+    const dashIdx = m.index + dashOffset;
+    if (!isInsideAnyRange(dashIdx, ranges)) return true;
+  }
+  return false;
 };
 
 /**
@@ -220,10 +260,13 @@ if (!input || typeof input !== 'object') process.exit(0);
 const raw = input?.tool_input?.command ?? '';
 if (typeof raw !== 'string' || raw === '') process.exit(0);
 
-// Normalize line continuations: `\<newline>` becomes a single space so a
-// multi-line `gh api \` <newline> `  --field event=APPROVE` is treated as
-// one segment.
-const cmd = raw.replace(/\\\n/g, ' ');
+// Normalize line continuations the way bash does: `\<newline>` (both
+// outside and inside double quotes) is removed entirely, not replaced with
+// a space. Inserting a space corrupts double-quoted bodies like
+// `-f body="line1 \<nl>line2"` — bash yields `line1 line2`, the space
+// variant would yield `line1  line2` and that lands in the rewritten
+// command emitted to the agent.
+const cmd = raw.replace(/\\\n/g, '');
 
 if (findSegmentSlice(cmd, isPrReviewPublish)) {
   deny(
