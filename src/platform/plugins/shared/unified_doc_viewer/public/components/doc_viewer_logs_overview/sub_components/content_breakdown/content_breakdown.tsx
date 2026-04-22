@@ -60,10 +60,10 @@ export const ContentBreakdown = ({
               .getDefaultInstance(KBN_FIELD_TYPES.STRING)
               .reactConvert(value ?? '', {
                 hit: hit.raw,
-                field: field ? { name: field } : undefined,
+                field: field ? dataView.fields.getByName(field) ?? { name: field } : undefined,
               }),
           },
-    [field, fieldFormats, formattedValue, hit.raw, value]
+    [dataView.fields, field, fieldFormats, formattedValue, hit.raw, value]
   );
   const hasMessageField = field && value;
 

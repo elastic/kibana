@@ -37,7 +37,7 @@ export class FieldRow {
   #isFormattedAsReact: boolean;
 
   #formattedAsText: string | undefined;
-  #formattedAsReact: ReactNode;
+  #formattedAsReact: ReactNode | undefined;
 
   #fieldType: string | undefined;
 
