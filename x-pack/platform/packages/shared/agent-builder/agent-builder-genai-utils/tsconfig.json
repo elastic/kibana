@@ -18,7 +18,6 @@
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-server",
     "@kbn/core-elasticsearch-server",
-    "@kbn/inference-plugin",
     "@kbn/zod",
     "@kbn/logging",
     "@kbn/logging-mocks",
