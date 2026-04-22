@@ -147,8 +147,27 @@ describe('useSearchAlertsQuery', () => {
       },
       {
         abortSignal: expect.any(AbortSignal),
+        projectRouting: undefined,
         strategy: 'privateRuleRegistryAlertsSearchStrategy',
       }
+    );
+  });
+
+  it('forwards projectRouting to search options', async () => {
+    const { result } = renderHook(
+      () => useSearchAlertsQuery({ ...params, projectRouting: '_alias:_origin' }),
+      {
+        wrapper,
+      }
+    );
+
+    await waitFor(() => expect(result.current.data).toBeDefined());
+
+    expect(mockDataPlugin.search.search).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.objectContaining({
+        projectRouting: '_alias:_origin',
+      })
     );
   });
 

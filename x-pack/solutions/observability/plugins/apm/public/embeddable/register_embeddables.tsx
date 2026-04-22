@@ -5,14 +5,14 @@
  * 2.0.
  */
 import type { CoreSetup } from '@kbn/core/public';
-
-import type { ApmPluginStartDeps, ApmPluginStart } from '../plugin';
-import type { EmbeddableDeps } from './types';
 import {
   APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE,
   APM_ALERTING_LATENCY_CHART_EMBEDDABLE,
   APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE,
-} from './alerting/constants';
+} from '@kbn/apm-embeddable-common';
+
+import type { ApmPluginStartDeps, ApmPluginStart } from '../plugin';
+import type { EmbeddableDeps } from './types';
 
 export async function registerEmbeddables(
   deps: Omit<EmbeddableDeps, 'coreStart' | 'pluginsStart'>
