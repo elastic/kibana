@@ -279,10 +279,7 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Adds a server-side workflow validation endpoint [#254502]({{kib-pull}}254502).
 * Makes the manual run API public [#253010]({{kib-pull}}253010).
 * Whitelists Streams APIs as Kibana workflow steps [#252068]({{kib-pull}}252068).
-* Adds the `createConversation` and `inviteToConversation` actions [#260806]({{kib-pull}}260806).
-* Adds **Default model** and **Disallow all other models** settings to the **Model Settings** page [#259932]({{kib-pull}}259932).
 * Adds the `entries` Liquid filter for iterating over object keys [#259249]({{kib-pull}}259249).
-* Respects `observability:enableInspectEsQueries` in Hosts UI [#253618]({{kib-pull}}253618).
 ### Fixes [kibana-9.4.0-fixes]
 
 **Alerting**:
