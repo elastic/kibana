@@ -168,7 +168,6 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
     <EuiButtonIcon
       iconType="boxesVertical"
       display="empty"
-      color="text"
       size="xs"
       aria-label={labels.openMenu}
       aria-expanded={isPopoverOpen}
