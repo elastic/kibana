@@ -10,6 +10,7 @@ import {
   EuiBadge,
   EuiBasicTable,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -22,19 +23,34 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { APP_UI_ID, ENTITY_ANALYTICS_PATH } from '../../../../../common/constants';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import { AssetCriticalityBadge } from '../../../../entity_analytics/components/asset_criticality/asset_criticality_badge';
 import { RiskScoreCell } from '../../../../entity_analytics/components/home/entities_table/risk_score_cell';
 import { EntitySourceBadge } from '../../../../flyout/entity_details/shared/components/entity_source_badge';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
+import { EntityIconByType } from '../../../../entity_analytics/components/entity_store/helpers';
 import { useEntityForAttachment } from '../use_entity_for_attachment';
 import type { EntityForAttachment } from '../use_entity_for_attachment';
 import type { EntityAttachmentIdentifier } from '../types';
 import { formatEntitySource } from './entity_data_source_utils';
+import {
+  navigateToSecurityEntityInApp,
+  type SecurityAgentBuilderChrome,
+} from '../../entity_explore_navigation';
 
-interface EntityTableProps {
+export interface EntityTableProps {
   entities: EntityAttachmentIdentifier[];
+  /**
+   * When provided, the Name column renders a per-row Explore icon that deep-links into the
+   * Security Solution Hosts/Users/Services page for that entity (mirrors the dashboard
+   * `EntityListTable`). Omit in tests or environments without Kibana routing.
+   */
+  application?: ApplicationStart;
+  agentBuilder?: AgentBuilderPluginStart;
+  chrome?: SecurityAgentBuilderChrome;
+  openSidebarConversation?: () => void;
 }
 
 interface EntityRow {
@@ -99,6 +115,11 @@ const LAST_SEEN_TOOLTIP_FIELD_NAME = '@timestamp';
 const OPEN_ENTITY_ANALYTICS_LABEL = i18n.translate(
   'xpack.securitySolution.agentBuilder.entityAttachment.table.openEntityAnalytics',
   { defaultMessage: 'Open Entity Analytics' }
+);
+
+const OPEN_ENTITY_IN_SECURITY_ARIA = i18n.translate(
+  'xpack.securitySolution.agentBuilder.entityAttachment.table.openEntityInSecurityAria',
+  { defaultMessage: 'Open entity in Security' }
 );
 
 const identifierTypeToEntityType = (
@@ -219,8 +240,16 @@ const EntityDataSourceBadges: React.FC<{
   );
 };
 
-export const EntityTable: React.FC<EntityTableProps> = ({ entities }) => {
+export const EntityTable: React.FC<EntityTableProps> = ({
+  entities,
+  application,
+  agentBuilder,
+  chrome,
+  openSidebarConversation,
+}) => {
   const { services } = useKibana<{ application: ApplicationStart }>();
+  const exploreApplication = application ?? services.application;
+  const canExplorePerRow = exploreApplication != null;
   const [pageIndex, setPageIndex] = useState(0);
   const [rowsByKey, setRowsByKey] = useState<Record<string, EntityRow>>({});
 
@@ -268,6 +297,32 @@ export const EntityTable: React.FC<EntityTableProps> = ({ entities }) => {
     services.application?.navigateToApp(APP_UI_ID, { path: ENTITY_ANALYTICS_PATH });
   }, [services.application]);
 
+  const handleOpenEntity = useCallback(
+    (row: EntityRow) => {
+      if (!exploreApplication) {
+        return;
+      }
+      const entityId =
+        row.data?.entityId ?? row.identifier.entityStoreId ?? row.identifier.identifier;
+      const entityName = row.data?.displayName ?? row.identifier.identifier;
+      const sources = row.data?.sources ?? [];
+      navigateToSecurityEntityInApp({
+        application: exploreApplication,
+        appId: APP_UI_ID,
+        row: {
+          entity_type: row.identifier.identifierType,
+          entity_id: entityId,
+          entity_name: entityName,
+          source: sources.length > 0 ? { entity: { source: sources } } : undefined,
+        },
+        agentBuilder,
+        chrome,
+        openSidebarConversation,
+      });
+    },
+    [agentBuilder, chrome, exploreApplication, openSidebarConversation]
+  );
+
   const columns = useMemo<Array<EuiBasicTableColumn<EntityRow>>>(
     () => [
       {
@@ -276,15 +331,35 @@ export const EntityTable: React.FC<EntityTableProps> = ({ entities }) => {
         render: (_value: unknown, row: EntityRow) => {
           const label = row.data?.displayName ?? row.identifier.identifier;
           const tooltipContent = row.data?.entityId ?? NAME_TOOLTIP_NO_ENTITY_ID;
+          const icon =
+            EntityIconByType[
+              row.data?.entityType ?? identifierTypeToEntityType(row.identifier.identifierType)
+            ] ?? 'globe';
           return (
-            <EuiToolTip position="top" content={tooltipContent}>
-              <EuiText size="xs" data-test-subj="entityAttachmentTableName">
-                <strong>{label}</strong>
-              </EuiText>
-            </EuiToolTip>
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              {canExplorePerRow && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    iconType={icon}
+                    display="empty"
+                    size="xs"
+                    aria-label={OPEN_ENTITY_IN_SECURITY_ARIA}
+                    data-test-subj="entityAttachmentTableOpenEntity"
+                    onClick={() => handleOpenEntity(row)}
+                  />
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem grow={false}>
+                <EuiToolTip position="top" content={tooltipContent}>
+                  <EuiText size="xs" data-test-subj="entityAttachmentTableName">
+                    <strong>{label}</strong>
+                  </EuiText>
+                </EuiToolTip>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           );
         },
-        width: '200px',
+        width: '240px',
       },
       {
         field: 'data.sources',
@@ -348,7 +423,7 @@ export const EntityTable: React.FC<EntityTableProps> = ({ entities }) => {
         width: '140px',
       },
     ],
-    []
+    [canExplorePerRow, handleOpenEntity]
   );
 
   /**

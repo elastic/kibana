@@ -11,16 +11,27 @@ import { EuiCallOut, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { QueryClientProvider } from '@kbn/react-query';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
+import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import { normaliseEntityAttachment } from './payload';
 import type { EntityAttachment } from './types';
 import { EntityCard } from './entity_card/entity_card';
 import { EntityTable } from './entity_table/entity_table';
 import { entityAttachmentQueryClient } from './query_client';
+import type { SecurityAgentBuilderChrome } from '../entity_explore_navigation';
 
 export interface EntityAttachmentInlineContentProps
   extends AttachmentRenderProps<EntityAttachment> {
   experimentalFeatures: ExperimentalFeatures;
+  /**
+   * Optional navigation context. When provided, `EntityTable` adds per-row Explore icons that
+   * deep-link into the Security Solution Hosts/Users/Services pages (mirrors the dashboard's
+   * `EntityListTable`). Without them the table renders without per-row navigation.
+   */
+  application?: ApplicationStart;
+  agentBuilder?: AgentBuilderPluginStart;
+  chrome?: SecurityAgentBuilderChrome;
 }
 
 /**
@@ -39,6 +50,10 @@ export const ENTITY_ATTACHMENT_ROOT_CLASS = 'securitySolutionEntityAttachment__r
 export const EntityAttachmentInlineContent: React.FC<EntityAttachmentInlineContentProps> = ({
   attachment,
   experimentalFeatures,
+  application,
+  agentBuilder,
+  chrome,
+  openSidebarConversation,
 }) => {
   const parsed = normaliseEntityAttachment(attachment);
   const { euiTheme } = useEuiTheme();
@@ -115,7 +130,13 @@ export const EntityAttachmentInlineContent: React.FC<EntityAttachmentInlineConte
               privmonModifierEnabled={privmonModifierEnabled}
             />
           ) : (
-            <EntityTable entities={parsed.entities} />
+            <EntityTable
+              entities={parsed.entities}
+              application={application}
+              agentBuilder={agentBuilder}
+              chrome={chrome}
+              openSidebarConversation={openSidebarConversation}
+            />
           )}
         </QueryClientProvider>
       </div>
