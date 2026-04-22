@@ -21,14 +21,22 @@ Use the `Column` compound component to declare columns as children. Order in JSX
 const { Column } = ContentListTable;
 
 <ContentListTable title="Dashboards">
-  <Column.Name width="40%" />
+  <Column.Name width="32em" minWidth="24em" maxWidth="64em" truncateText={false} />
   <Column
     id="status"
     name="Status"
+    width="12em"
+    minWidth="10em"
+    maxWidth="16em"
+    truncateText
     render={(item) => <EuiBadge>{item.status}</EuiBadge>}
   />
 </ContentListTable>
 ```
+
+Column sizing props (`width`, `minWidth`, `maxWidth`, `truncateText`) map to `EuiBasicTable` column layout props. Prefer `em` units for text columns, set `minWidth` so headers remain readable, and set `maxWidth` so user content cannot stretch the table too far. `Column.Actions` is sticky by default for tables with horizontal overflow.
+
+`Column.Name` uses the provider-level `item.getHref` link by default. Passing `onClick` makes the title use that click handler instead of `getHref`; set `shouldUseHref` to preserve native link affordances such as Cmd/Ctrl-click while handling plain clicks with `onClick`.
 
 ### Available column presets
 
