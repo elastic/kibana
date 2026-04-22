@@ -13,6 +13,7 @@ import { getOrEmptyTagFromValue } from '../../common/components/empty_value';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 import { defaultToolsFlyoutProperties } from '../../flyout_v2/shared/hooks/use_default_flyout_properties';
 import { buildFlyoutContent } from '../../flyout_v2/shared/utils/build_flyout_content';
+import { DataViewManagerBootstrap } from '../alert_flyout_overview_tab_component/data_view_manager_bootstrap';
 import type { StartServices } from '../../types';
 import type { SecurityAppStore } from '../../common/store/types';
 
@@ -47,7 +48,12 @@ export const IpCellRenderer = React.memo<IpCellRendererProps>(({ services, store
             services,
             store,
             history,
-            children: flyoutContent,
+            children: (
+              <>
+                <DataViewManagerBootstrap />
+                {flyoutContent}
+              </>
+            ),
           }),
           {
             ...defaultToolsFlyoutProperties,
