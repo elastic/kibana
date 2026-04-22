@@ -92,9 +92,9 @@ export const LanguageModal: FC<Props> = ({ closeModal, configLocale }) => {
 
         <EuiButton
           data-test-subj="languageModalSaveButton"
-          onClick={async () => {
+          onClick={() => {
             if (locale !== initialLocaleValue) {
-              await onChange(locale, true);
+              onChange(locale, true);
             }
             closeModal();
           }}
