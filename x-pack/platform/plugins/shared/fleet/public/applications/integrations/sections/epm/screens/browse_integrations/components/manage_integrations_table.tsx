@@ -99,7 +99,8 @@ export const ManageIntegrationsTable: React.FC<{
   isLoading: boolean;
   isError: boolean;
   onRefetch: () => void;
-}> = ({ integrations, isLoading, isError, onRefetch }) => {
+  prereleaseIntegrationsEnabled: boolean;
+}> = ({ integrations, isLoading, isError, onRefetch, prereleaseIntegrationsEnabled }) => {
   const [isActionsFilterOpen, setIsActionsFilterOpen] = useState(false);
   const [isStatusFilterOpen, setIsStatusFilterOpen] = useState(false);
   const [selectedActions, setSelectedActions] = useState<string[]>([]);
@@ -109,7 +110,9 @@ export const ManageIntegrationsTable: React.FC<{
   const [isBulkInstalling, setIsBulkInstalling] = useState(false);
 
   const queryClient = useQueryClient();
-  const { data: packagesData } = useGetPackagesQuery({});
+  const { data: packagesData } = useGetPackagesQuery({
+    prerelease: prereleaseIntegrationsEnabled,
+  });
   const installedPackageVersions = useMemo(
     () =>
       new Map(
