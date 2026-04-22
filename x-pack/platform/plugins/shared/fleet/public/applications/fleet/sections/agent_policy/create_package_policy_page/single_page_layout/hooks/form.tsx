@@ -538,6 +538,15 @@ export function useOnSubmit({
         !enableVarGroups ||
         isInputVisibleForVarGroupSelections(input, packageInfo, varGroupSelections);
       if (allowedForDeploymentMode && visibleForVarGroup) {
+        // When switching to agentless, enable inputs that are disabled by default in the
+        // package spec so configuration fields are visible and the integration can be deployed.
+        if (isAgentlessSelected && !input.enabled) {
+          return {
+            ...input,
+            enabled: true,
+            streams: input.streams.map((stream) => ({ ...stream, enabled: true })),
+          };
+        }
         return input;
       }
       return { ...input, enabled: false };

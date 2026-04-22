@@ -538,6 +538,91 @@ describe('useOnSubmit', () => {
         expect(metricsInput?.enabled).toBe(true);
       });
     });
+
+    it('should enable inputs with enabled:false when switching to agentless deployment mode', async () => {
+      // Package where streams (and therefore the input) start with enabled:false in the spec.
+      // Switching to agentless should auto-enable them so configuration fields are visible.
+      const packageInfoWithDisabledInputs: PackageInfo = {
+        ...packageInfo,
+        data_streams: [
+          {
+            type: 'logs',
+            dataset: 'test.access',
+            path: 'access',
+            release: 'ga',
+            package: 'apache',
+            ingest_pipeline: 'default',
+            title: 'Apache access logs',
+            streams: [
+              {
+                input: 'logfile',
+                enabled: false,
+                vars: [],
+              },
+            ],
+          },
+        ] as any,
+        policy_templates: [
+          {
+            name: 'apache',
+            title: 'Apache',
+            description: 'Apache integration',
+            deployment_modes: {
+              default: { enabled: true },
+              agentless: { enabled: true },
+            },
+            inputs: [
+              {
+                type: 'logfile',
+                title: 'Log files',
+                description: 'Collect Apache log files',
+                deployment_modes: ['default', 'agentless'],
+              },
+            ],
+          },
+        ],
+      };
+
+      (useConfig as MockFn).mockReturnValue({
+        agentless: { enabled: true },
+      } as any);
+
+      renderResult = testRenderer.renderHook(() =>
+        useOnSubmit({
+          agentCount: 0,
+          packageInfo: packageInfoWithDisabledInputs,
+          withSysMonitoring: false,
+          selectedPolicyTab: SelectedPolicyTab.NEW,
+          newAgentPolicy: { name: 'test', namespace: '', supports_agentless: true },
+          queryParamsPolicyId: undefined,
+          hasFleetAddAgentsPrivileges: true,
+          setNewAgentPolicy: jest.fn(),
+          setSelectedPolicyTab: jest.fn(),
+        })
+      );
+
+      await waitFor(() => new Promise((resolve) => resolve(null)));
+
+      // Verify input starts disabled (stream has enabled:false in spec)
+      await waitFor(() => {
+        const { packagePolicy } = renderResult.result.current;
+        const logfileInput = packagePolicy.inputs.find((input: any) => input.type === 'logfile');
+        expect(logfileInput?.enabled).toBe(false);
+      });
+
+      act(() => {
+        renderResult.result.current.handleSetupTechnologyChange('agentless' as any);
+      });
+
+      await waitFor(() => {
+        const { packagePolicy } = renderResult.result.current;
+        const logfileInput = packagePolicy.inputs.find((input: any) => input.type === 'logfile');
+        // Input should be auto-enabled when switching to agentless so config fields are visible
+        expect(logfileInput?.enabled).toBe(true);
+        // Streams should also be enabled
+        expect(logfileInput?.streams.every((s: any) => s.enabled)).toBe(true);
+      });
+    });
   });
 
   describe('updateAgentlessCloudConnectorConfig', () => {
