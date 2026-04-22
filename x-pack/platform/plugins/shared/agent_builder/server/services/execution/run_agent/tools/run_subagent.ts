@@ -6,9 +6,14 @@
  */
 
 import type { Observable } from 'rxjs';
-import { firstValueFrom, toArray } from 'rxjs';
+import { filter, firstValueFrom } from 'rxjs';
 import { z } from '@kbn/zod/v4';
-import { ToolType, isRoundCompleteEvent, internalTools } from '@kbn/agent-builder-common';
+import {
+  ToolType,
+  isRoundCompleteEvent,
+  internalTools,
+  SubagentExecutionMode,
+} from '@kbn/agent-builder-common';
 import type { AgentCapabilities, ChatEvent, AssistantResponse } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition, SubAgentExecutor } from '@kbn/agent-builder-server';
 import { createErrorResult, createOtherResult } from '@kbn/agent-builder-server';
@@ -113,7 +118,7 @@ export const createSubagentTool = ({
             results: [
               createOtherResult({
                 agent_execution_id: executionId,
-                mode: 'background',
+                mode: SubagentExecutionMode.background,
                 status: 'queued',
               }),
             ],
@@ -122,7 +127,14 @@ export const createSubagentTool = ({
           const response = await extractFinalResponse(events$);
 
           return {
-            results: [createOtherResult({ agent_execution_id: executionId, response })],
+            results: [
+              createOtherResult({
+                agent_execution_id: executionId,
+                mode: SubagentExecutionMode.foreground,
+                status: 'completed',
+                response,
+              }),
+            ],
           };
         }
       } catch (error) {
@@ -140,8 +152,9 @@ export const createSubagentTool = ({
  * from the RoundComplete event.
  */
 const extractFinalResponse = async (events$: Observable<ChatEvent>): Promise<AssistantResponse> => {
-  const events = await firstValueFrom(events$.pipe(toArray()));
-  const roundComplete = events.find(isRoundCompleteEvent);
+  const roundComplete = await firstValueFrom(events$.pipe(filter(isRoundCompleteEvent)), {
+    defaultValue: undefined,
+  });
 
   if (!roundComplete) {
     throw new Error('Sub-agent execution completed without a round complete event');

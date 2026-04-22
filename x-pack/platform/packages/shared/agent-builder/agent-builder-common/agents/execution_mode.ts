@@ -18,3 +18,14 @@ export enum AgentExecutionMode {
    */
   standalone = 'standalone',
 }
+
+export enum SubagentExecutionMode {
+  /**
+   * Sub-agent executed in the foreground, blocking the main agent execution.
+   */
+  foreground = 'foreground',
+  /**
+   * Sub-agent executed in the background, without blocking the main agent execution.
+   */
+  background = 'background',
+}

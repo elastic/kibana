@@ -63,6 +63,8 @@ describe('createSubagentTool', () => {
     expect(result.results![0].data).toEqual({
       agent_execution_id: 'sub-exec-id',
       response: { message: 'Sub-agent response text' },
+      mode: 'foreground',
+      status: 'completed',
     });
   });
 

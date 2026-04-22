@@ -30,7 +30,7 @@ export {
   getKibanaDefaultAgentCapabilities,
 } from './capabilities';
 export { AgentExecutionErrorCode } from './execution_errors';
-export { AgentExecutionMode } from './execution_mode';
+export { AgentExecutionMode, SubagentExecutionMode } from './execution_mode';
 export { ExecutionStatus, type SerializedExecutionError } from './execution_status';
 export {
   type ConfirmPromptColor,

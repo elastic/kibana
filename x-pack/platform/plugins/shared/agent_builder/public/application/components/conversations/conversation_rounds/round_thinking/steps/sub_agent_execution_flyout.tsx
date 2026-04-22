@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { RoundSteps } from './round_steps';
 import { useFollowExecution } from '../../../../../hooks/use_follow_execution';
 
@@ -49,11 +50,22 @@ export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = (
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2 id="subAgentExecutionFlyoutTitle">Sub-agent execution</h2>
+          <h2 id="subAgentExecutionFlyoutTitle">
+            <FormattedMessage
+              id="xpack.agentBuilder.conversation.subAgentExecutionFlyout.title"
+              defaultMessage="Sub-agent execution"
+            />
+          </h2>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiText color="subdued" size="s">
-          <p>Execution ID: {executionId}</p>
+          <p>
+            <FormattedMessage
+              id="xpack.agentBuilder.conversation.subAgentExecutionFlyout.executionId"
+              defaultMessage="Execution ID: {executionId}"
+              values={{ executionId }}
+            />
+          </p>
         </EuiText>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
@@ -79,7 +91,19 @@ export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = (
             <EuiSpacer size="m" />
             <EuiPanel hasBorder paddingSize="m">
               <EuiTitle size="xs">
-                <h3>{response ? 'Final response' : 'Responding...'}</h3>
+                <h3>
+                  {response ? (
+                    <FormattedMessage
+                      id="xpack.agentBuilder.conversation.subAgentExecutionFlyout.finalResponse"
+                      defaultMessage="Final response"
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.agentBuilder.conversation.subAgentExecutionFlyout.responding"
+                      defaultMessage="Responding..."
+                    />
+                  )}
+                </h3>
               </EuiTitle>
               <EuiSpacer size="s" />
               <EuiText size="m">

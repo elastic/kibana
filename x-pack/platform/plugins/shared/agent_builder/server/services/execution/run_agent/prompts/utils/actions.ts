@@ -14,6 +14,7 @@ import {
   generateFakeToolCallId,
 } from '@kbn/agent-builder-genai-utils/langchain/messages';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
+import { generateXmlTree } from '@kbn/agent-builder-genai-utils/tools/utils/formatting';
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
 import type { AgentBuilderAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import type { BackgroundExecutionState } from '@kbn/agent-builder-common/chat';
@@ -176,24 +177,23 @@ const isExecutionError = <TCode extends AgentExecutionErrorCode>(
 export const formatSystemNotice = (execution: BackgroundExecutionState): string => {
   const { status, execution_id: executionId } = execution;
 
-  if (execution.error) {
-    return (
-      `<system_notice>\n` +
-      `  A background agent execution has failed.\n` +
-      `  <execution-id>${executionId}</execution-id>\n` +
-      `  <status>${status}</status>\n` +
-      `  <error>${execution.error.message}</error>\n` +
-      `</system_notice>`
-    );
-  }
+  const outcome = execution.error
+    ? {
+        message: 'A background agent execution has failed.',
+        detail: { tagName: 'error', children: [execution.error.message] },
+      }
+    : {
+        message: 'A background agent execution has completed.',
+        detail: { tagName: 'result', children: [execution.response?.message ?? 'No response'] },
+      };
 
-  const result = execution.response?.message ?? 'No response';
-  return (
-    `<system_notice>\n` +
-    `  A background agent execution has completed.\n` +
-    `  <execution-id>${executionId}</execution-id>\n` +
-    `  <status>${status}</status>\n` +
-    `  <result>${result}</result>\n` +
-    `</system_notice>`
-  );
+  return generateXmlTree({
+    tagName: 'system_notice',
+    children: [
+      { tagName: 'message', children: [outcome.message] },
+      { tagName: 'execution-id', children: [executionId] },
+      { tagName: 'status', children: [status] },
+      outcome.detail,
+    ],
+  });
 };

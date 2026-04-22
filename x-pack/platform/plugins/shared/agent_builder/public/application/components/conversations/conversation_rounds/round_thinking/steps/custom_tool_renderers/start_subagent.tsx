@@ -7,6 +7,7 @@
 
 import type { ToolCallStep } from '@kbn/agent-builder-common/chat/conversation';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
+import { SubagentExecutionMode } from '@kbn/agent-builder-common/agents';
 import type { ReactNode } from 'react';
 import React, { useState } from 'react';
 import { EuiLink, EuiText } from '@elastic/eui';
@@ -20,7 +21,7 @@ import type { ItemFactoryEntry } from '../tool_call_thinking';
 /** Shape of the `data` field in sub-agent tool results. */
 interface SubAgentResultData {
   agent_execution_id?: string;
-  mode?: 'background';
+  mode?: SubagentExecutionMode;
   status?: string;
   response?: { message: string };
 }
@@ -89,7 +90,7 @@ export const getSubAgentThinkingItems = ({
 };
 
 const isBackgroundExecution = (step: ToolCallStep): boolean => {
-  return step.results.some((r) => getResultData(r)?.mode === 'background');
+  return step.results.some((r) => getResultData(r)?.mode === SubagentExecutionMode.background);
 };
 
 /**

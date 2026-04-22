@@ -17,6 +17,8 @@ import type {
   ConversationAction,
   AgentExecutionMode,
   ChatEvent,
+  ExecutionStatus,
+  SerializedExecutionError,
 } from '@kbn/agent-builder-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -83,8 +85,8 @@ export interface SubAgentExecutor {
 
 export interface SubAgentExecution {
   executionId: string;
-  status: string;
-  error?: { code: string; message: string };
+  status: ExecutionStatus;
+  error?: SerializedExecutionError;
   events: ChatEvent[];
 }
 
@@ -203,7 +205,7 @@ export interface AgentHandlerContext {
    * The execution mode for this agent run.
    * NOTE: atm, when 'standalone', the execution is non-interactive (HITL disabled).
    */
-  executionMode?: AgentExecutionMode;
+  executionMode: AgentExecutionMode;
   /**
    * Sub-agent executor for spawning child agent executions.
    */

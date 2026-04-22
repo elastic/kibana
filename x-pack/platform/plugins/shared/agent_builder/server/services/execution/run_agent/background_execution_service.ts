@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import pLimit from 'p-limit';
 import { ExecutionStatus, isRoundCompleteEvent } from '@kbn/agent-builder-common';
 import type { BackgroundExecutionState } from '@kbn/agent-builder-common/chat';
 import type { SubAgentExecutor } from '@kbn/agent-builder-server';
@@ -14,6 +15,8 @@ const TERMINAL_STATUSES = new Set<string>([
   ExecutionStatus.failed,
   ExecutionStatus.aborted,
 ]);
+
+const COMPLETION_CHECK_CONCURRENCY = 5;
 
 export class BackgroundExecutionService {
   private state: Record<string, BackgroundExecutionState>;
@@ -50,32 +53,44 @@ export class BackgroundExecutionService {
 
     if (pending.length === 0) return [];
 
+    const limit = pLimit(COMPLETION_CHECK_CONCURRENCY);
+
+    const results = await Promise.all(
+      pending.map((entry) =>
+        limit(async (): Promise<BackgroundExecutionState | undefined> => {
+          const execution = await this.subAgentExecutor.getExecution(entry.execution_id);
+          if (!execution || !TERMINAL_STATUSES.has(execution.status)) {
+            return undefined;
+          }
+
+          const updated: BackgroundExecutionState = {
+            ...entry,
+            status: execution.status as ExecutionStatus,
+            completed_at: { round_id: roundId, tool_call_group_id: toolCallGroupId },
+          };
+
+          if (execution.status === ExecutionStatus.completed) {
+            const roundComplete = execution.events.find(isRoundCompleteEvent);
+            if (roundComplete) {
+              updated.response = roundComplete.data.round.response;
+            }
+          }
+
+          if (execution.error) {
+            updated.error = execution.error as BackgroundExecutionState['error'];
+          }
+
+          return updated;
+        })
+      )
+    );
+
     const completions: BackgroundExecutionState[] = [];
-
-    for (const entry of pending) {
-      const execution = await this.subAgentExecutor.getExecution(entry.execution_id);
-      if (!execution) continue;
-
-      if (!TERMINAL_STATUSES.has(execution.status)) continue;
-
-      const updated: BackgroundExecutionState = {
-        ...entry,
-        status: execution.status as ExecutionStatus,
-        completed_at: { round_id: roundId, tool_call_group_id: toolCallGroupId },
-      };
-
-      if (execution.status === ExecutionStatus.completed) {
-        const roundComplete = execution.events.find(isRoundCompleteEvent);
-        if (roundComplete) {
-          updated.response = roundComplete.data.round.response;
-        }
+    for (const updated of results) {
+      if (!updated) {
+        continue;
       }
-
-      if (execution.error) {
-        updated.error = execution.error as BackgroundExecutionState['error'];
-      }
-
-      this.state[entry.execution_id] = updated;
+      this.state[updated.execution_id] = updated;
       completions.push(updated);
     }
 

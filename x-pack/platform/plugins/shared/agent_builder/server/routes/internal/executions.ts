@@ -31,12 +31,13 @@ export function registerInternalExecutionRoutes({
           requiredPrivileges: [apiPrivileges.readAgentBuilder],
         },
       },
+      options: { access: 'internal' },
       validate: {
         params: schema.object({
           executionId: schema.string(),
         }),
         query: schema.object({
-          since: schema.maybe(schema.number()),
+          since: schema.maybe(schema.number({ min: 0 })),
         }),
       },
     },

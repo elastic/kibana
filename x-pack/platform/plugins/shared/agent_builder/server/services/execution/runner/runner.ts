@@ -13,29 +13,32 @@ import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { isAgentBuilderError, createInternalError } from '@kbn/agent-builder-common';
-import type { AgentExecutionMode } from '@kbn/agent-builder-common';
-import type { PromptStorageState } from '@kbn/agent-builder-common/agents/prompts';
 import type { Conversation, ConverseInput } from '@kbn/agent-builder-common';
+import {
+  AgentExecutionMode,
+  createInternalError,
+  isAgentBuilderError,
+} from '@kbn/agent-builder-common';
+import type { PromptStorageState } from '@kbn/agent-builder-common/agents/prompts';
 import type {
-  ScopedRunner,
-  ScopedRunnerRunAgentParams,
+  HooksServiceStart,
+  ModelProvider,
+  RunAgentReturn,
   RunContext,
   Runner,
   RunToolReturn,
-  RunAgentReturn,
-  WritableToolResultStore,
-  ModelProvider,
-  HooksServiceStart,
+  ScopedRunner,
+  ScopedRunnerRunAgentParams,
   SubAgentExecutor,
+  WritableToolResultStore,
 } from '@kbn/agent-builder-server';
-import type { WritableSkillsStore } from '@kbn/agent-builder-server/runner';
 import type {
-  ScopedRunnerRunToolsParams,
-  ScopedRunnerRunInternalToolParams,
   ConversationStateManager,
   PromptManager,
+  ScopedRunnerRunInternalToolParams,
+  ScopedRunnerRunToolsParams,
   ToolManager,
+  WritableSkillsStore,
 } from '@kbn/agent-builder-server/runner';
 import type { IFileStore } from '@kbn/agent-builder-server/runner/filestore';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
@@ -47,13 +50,13 @@ import type { AttachmentServiceStart } from '../../attachments';
 import type { ModelProviderFactoryFn } from './model_provider';
 import type { AnalyticsService, TrackingService } from '../../../telemetry';
 import {
-  createEmptyRunContext,
   createConversationStateManager,
-  createToolManager,
+  createEmptyRunContext,
   createSubAgentExecutor,
+  createToolManager,
 } from './utils';
 import { createPromptManager, getAgentPromptStorageState } from './utils/prompts';
-import { runTool, runInternalTool } from './run_tool';
+import { runInternalTool, runTool } from './run_tool';
 import { runAgent } from './run_agent';
 import { createStore } from './store';
 import type { SkillServiceStart } from '../../skills';
@@ -96,7 +99,7 @@ export interface CreateScopedRunnerDeps {
   toolManager: ToolManager;
   filestore: IFileStore;
   /** Execution mode for this runner context. */
-  executionMode?: AgentExecutionMode;
+  executionMode: AgentExecutionMode;
   /** Sub-agent executor for spawning child executions. */
   subAgentExecutor: SubAgentExecutor;
 }
@@ -114,6 +117,7 @@ export type CreateRunnerDeps = Omit<
   | 'filestore'
   | 'toolManager'
   | 'subAgentExecutor'
+  | 'executionMode'
 > & {
   modelProviderFactory: ModelProviderFactoryFn;
   /** Lazy getter for the execution service (breaks circular dep with runner). */
@@ -200,7 +204,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     nextInput?: ConverseInput;
     promptState?: PromptStorageState;
     abortSignal?: AbortSignal;
-    executionMode?: AgentExecutionMode;
+    executionMode: AgentExecutionMode;
   }): Promise<ScopedRunner> => {
     const { resultStore, filestore, skillsStore } = createStore({ conversation });
 
@@ -244,6 +248,8 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         promptState,
         defaultConnectorId,
         abortSignal,
+        // tools always executed in standalone context
+        executionMode: AgentExecutionMode.standalone,
       });
       return runner.runTool(otherParams);
     },
@@ -255,11 +261,19 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         promptState,
         defaultConnectorId,
         abortSignal,
+        // tools always executed in standalone context
+        executionMode: AgentExecutionMode.standalone,
       });
       return runner.runInternalTool(otherParams);
     },
     runAgent: async (params) => {
-      const { request, defaultConnectorId, abortSignal, executionMode, ...otherParams } = params;
+      const {
+        request,
+        defaultConnectorId,
+        abortSignal,
+        executionMode = AgentExecutionMode.conversation,
+        ...otherParams
+      } = params;
       const { nextInput, conversation } = params.agentParams;
       const runner = await createScopedRunnerWithDeps({
         request,
