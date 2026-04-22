@@ -44,6 +44,7 @@ import {
 } from '../../constants';
 import { isSpaceAwarenessEnabled } from '../spaces/helpers';
 import { isNamespaceIndexTemplateEnabled } from '../spaces/space_settings';
+import { throwIfAborted } from '../../tasks/utils';
 
 async function getPackagePolicySavedObjectType(): Promise<string> {
   return (await isSpaceAwarenessEnabled())
@@ -136,12 +137,16 @@ export function insertNamespaceCustomTemplate(
 async function fetchBaseTemplate(
   esClient: ElasticsearchClient,
   templateName: string,
-  logContext: string
+  logContext: string,
+  abortController?: AbortController
 ): Promise<IndexTemplate | undefined> {
   const logger = appContextService.getLogger();
   let rawTemplate;
   try {
-    const res = await esClient.indices.getIndexTemplate({ name: templateName });
+    const res = await esClient.indices.getIndexTemplate(
+      { name: templateName },
+      { signal: abortController?.signal }
+    );
     rawTemplate = res.index_templates[0]?.index_template;
   } catch (err: unknown) {
     if ((err as { meta?: { statusCode?: number } })?.meta?.statusCode !== 404) {
@@ -702,11 +707,13 @@ export async function syncNamespaceTemplates({
   esClient,
   addedNamespaces,
   removedNamespaces,
+  abortController,
 }: {
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
   addedNamespaces: string[];
   removedNamespaces: string[];
+  abortController?: AbortController;
 }): Promise<SyncNamespaceTemplatesSummary> {
   const logger = appContextService.getLogger();
   const summary: SyncNamespaceTemplatesSummary = { created: {}, removed: {} };
@@ -716,6 +723,7 @@ export async function syncNamespaceTemplates({
     const savedObjectType = await getPackagePolicySavedObjectType();
 
     for (const namespace of addedNamespaces) {
+      if (abortController) throwIfAborted(abortController);
       // Query only policies for this namespace rather than fetching all policies and filtering
       // in JS, to avoid scanning every policy in large deployments.
       // For 'default' we must also match policies where the namespace attribute is absent,
@@ -760,11 +768,13 @@ export async function syncNamespaceTemplates({
         await pMap(
           dataStreams,
           async (dataStream) => {
+            if (abortController) throwIfAborted(abortController);
             const templateName = getRegistryDataStreamAssetBaseName(dataStream);
             const baseTemplate = await fetchBaseTemplate(
               esClient,
               templateName,
-              'syncNamespaceTemplates'
+              'syncNamespaceTemplates',
+              abortController
             );
             if (!baseTemplate) return;
 
@@ -775,7 +785,10 @@ export async function syncNamespaceTemplates({
               templateName,
             });
 
-            await esClient.indices.putIndexTemplate({ name: nsName, ...nsTemplate });
+            await esClient.indices.putIndexTemplate(
+              { name: nsName, ...nsTemplate },
+              { signal: abortController?.signal }
+            );
             updatedIndexTemplates.push({ templateName: nsName, indexTemplate: nsTemplate });
           },
           { concurrency: MAX_CONCURRENT_COMPONENT_TEMPLATES }
@@ -817,6 +830,7 @@ export async function syncNamespaceTemplates({
     const allPackages = await getPackageSavedObjects(soClient);
 
     for (const namespace of removedNamespaces) {
+      if (abortController) throwIfAborted(abortController);
       const affectedPackages: string[] = [];
 
       for (const pkgSO of allPackages.saved_objects) {
@@ -837,8 +851,12 @@ export async function syncNamespaceTemplates({
         await pMap(
           nsTemplateRefs,
           async (ref) => {
+            if (abortController) throwIfAborted(abortController);
             try {
-              await esClient.indices.deleteIndexTemplate({ name: ref.id }, { ignore: [404] });
+              await esClient.indices.deleteIndexTemplate(
+                { name: ref.id },
+                { ignore: [404], signal: abortController?.signal }
+              );
             } catch (err: unknown) {
               logger.warn(
                 `[syncNamespaceTemplates] Failed to delete namespace template ${ref.id}: ${

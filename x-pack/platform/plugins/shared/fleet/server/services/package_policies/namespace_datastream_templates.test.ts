@@ -850,7 +850,8 @@ describe('syncNamespaceTemplates', () => {
       expect.objectContaining({
         name: 'logs-nginx.access@namespace.production',
         priority: 250,
-      })
+      }),
+      expect.any(Object)
     );
     expect(summary.created).toEqual({ production: ['nginx'] });
     expect(summary.removed).toEqual({});

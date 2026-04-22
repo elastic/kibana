@@ -23,13 +23,18 @@ export function registerSyncNamespaceTemplatesTask(taskManagerSetup: TaskManager
       title: 'Fleet Sync namespace templates',
       timeout: '5m',
       maxAttempts: 3,
-      createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
+      createTaskRunner: ({
+        taskInstance,
+        abortController,
+      }: {
+        taskInstance: ConcreteTaskInstance;
+        abortController: AbortController;
+      }) => {
         const { addedNamespaces, removedNamespaces, spaceId } = taskInstance.params as {
           addedNamespaces: string[];
           removedNamespaces: string[];
           spaceId: string;
         };
-        let cancelled = false;
         return {
           async run() {
             if (addedNamespaces.length === 0 && removedNamespaces.length === 0) {
@@ -41,10 +46,6 @@ export function registerSyncNamespaceTemplatesTask(taskManagerSetup: TaskManager
               `[syncNamespaceTemplatesTask] Running: adding [${addedNamespaces}], removing [${removedNamespaces}] in space ${spaceId}`
             );
 
-            if (cancelled) {
-              throw new Error('Task has been cancelled');
-            }
-
             const soClient = appContextService.getInternalUserSOClientForSpaceId(spaceId);
             const esClient = appContextService.getInternalUserESClient();
 
@@ -53,10 +54,8 @@ export function registerSyncNamespaceTemplatesTask(taskManagerSetup: TaskManager
               esClient,
               addedNamespaces,
               removedNamespaces,
+              abortController,
             });
-          },
-          async cancel() {
-            cancelled = true;
           },
         };
       },

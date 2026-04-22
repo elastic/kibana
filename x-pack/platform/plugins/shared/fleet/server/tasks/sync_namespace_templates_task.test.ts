@@ -98,14 +98,16 @@ describe('syncNamespaceTemplatesTask', () => {
       registerSyncNamespaceTemplatesTask(taskManager);
       const registeredDef =
         taskManager.registerTaskDefinitions.mock.calls[0][0]['fleet:sync_namespace_templates'];
-      return registeredDef.createTaskRunner({
+      const abortController = new AbortController();
+      const runner = registeredDef.createTaskRunner({
         taskInstance: { params } as any,
-        abortController: new AbortController(),
+        abortController,
       });
+      return { runner, abortController };
     };
 
     it('should call syncNamespaceTemplates with correct parameters', async () => {
-      const runner = createTaskRunner({
+      const { runner, abortController } = createTaskRunner({
         addedNamespaces: ['production'],
         removedNamespaces: ['staging'],
         spaceId: 'my_space',
@@ -120,11 +122,12 @@ describe('syncNamespaceTemplatesTask', () => {
         esClient: mockEsClient,
         addedNamespaces: ['production'],
         removedNamespaces: ['staging'],
+        abortController,
       });
     });
 
     it('should be a no-op when there are no namespace changes', async () => {
-      const runner = createTaskRunner({
+      const { runner } = createTaskRunner({
         addedNamespaces: [],
         removedNamespaces: [],
         spaceId: 'default',
@@ -135,16 +138,20 @@ describe('syncNamespaceTemplatesTask', () => {
       expect(mockedSyncNamespaceTemplates).not.toHaveBeenCalled();
     });
 
-    it('should throw when cancelled', async () => {
-      const runner = createTaskRunner({
+    it('should pass an aborted signal to syncNamespaceTemplates when the task is cancelled', async () => {
+      const { runner, abortController } = createTaskRunner({
         addedNamespaces: ['production'],
         removedNamespaces: [],
         spaceId: 'default',
       });
 
-      await runner.cancel!();
-      await expect(runner.run()).rejects.toThrow('Task has been cancelled');
-      expect(mockedSyncNamespaceTemplates).not.toHaveBeenCalled();
+      abortController.abort();
+      await runner.run();
+
+      expect(mockedSyncNamespaceTemplates).toHaveBeenCalledWith(
+        expect.objectContaining({ abortController })
+      );
+      expect(abortController.signal.aborted).toBe(true);
     });
   });
 });
