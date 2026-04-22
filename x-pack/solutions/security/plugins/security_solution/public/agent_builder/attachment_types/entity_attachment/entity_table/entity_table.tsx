@@ -18,6 +18,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
@@ -44,6 +45,20 @@ interface EntityRow {
 
 const PAGE_SIZE = 10;
 const MAX_VISIBLE_SOURCES = 3;
+
+/**
+ * Horizontal scroll wrapper for the table. The agent chat panel can be
+ * narrower than the sum of the table's columns, so we keep the table at a
+ * readable minimum width and let it overflow with a scrollbar instead of
+ * squeezing the Name column into character-by-character wrapping.
+ */
+const tableScrollStyles = css`
+  overflow-x: auto;
+
+  .euiTable {
+    min-width: 800px;
+  }
+`;
 
 const COLUMN_LABELS = {
   name: i18n.translate('xpack.securitySolution.agentBuilder.entityAttachment.table.name', {
@@ -269,6 +284,7 @@ export const EntityTable: React.FC<EntityTableProps> = ({ entities }) => {
             </EuiToolTip>
           );
         },
+        width: '200px',
       },
       {
         field: 'data.sources',
@@ -280,6 +296,7 @@ export const EntityTable: React.FC<EntityTableProps> = ({ entities }) => {
             hasLastSeenDate={Boolean(row.data?.lastSeen)}
           />
         ),
+        width: '180px',
       },
       {
         field: 'identifier.identifierType',
@@ -372,17 +389,20 @@ export const EntityTable: React.FC<EntityTableProps> = ({ entities }) => {
           onLoaded={handleLoaded}
         />
       ))}
-      <EuiBasicTable
-        aria-label={i18n.translate(
-          'xpack.securitySolution.agentBuilder.entityAttachment.table.caption',
-          { defaultMessage: 'Entities referenced in this message' }
-        )}
-        items={pagedItems}
-        columns={columns}
-        itemId={(row) => keyFor(row.identifier)}
-        tableLayout="auto"
-        {...paginationProps}
-      />
+      <div css={tableScrollStyles}>
+        <EuiBasicTable
+          aria-label={i18n.translate(
+            'xpack.securitySolution.agentBuilder.entityAttachment.table.caption',
+            { defaultMessage: 'Entities referenced in this message' }
+          )}
+          items={pagedItems}
+          columns={columns}
+          itemId={(row) => keyFor(row.identifier)}
+          tableLayout="auto"
+          responsive={false}
+          {...paginationProps}
+        />
+      </div>
       <EuiFlexGroup gutterSize="s" wrap responsive={false} style={{ marginTop: 8 }}>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
