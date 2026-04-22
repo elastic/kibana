@@ -15,8 +15,9 @@ import {
   EuiPanel,
   EuiSkeletonText,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
-import type { EuiBasicTableColumn } from '@elastic/eui';
+import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
@@ -29,6 +30,7 @@ import { FormattedRelativePreferenceDate } from '../../../../common/components/f
 import { useEntityForAttachment } from '../use_entity_for_attachment';
 import type { EntityForAttachment } from '../use_entity_for_attachment';
 import type { EntityAttachmentIdentifier } from '../types';
+import { formatEntitySource } from './entity_data_source_utils';
 
 interface EntityTableProps {
   entities: EntityAttachmentIdentifier[];
@@ -41,6 +43,7 @@ interface EntityRow {
 }
 
 const PAGE_SIZE = 10;
+const MAX_VISIBLE_SOURCES = 3;
 
 const COLUMN_LABELS = {
   name: i18n.translate('xpack.securitySolution.agentBuilder.entityAttachment.table.name', {
@@ -49,20 +52,34 @@ const COLUMN_LABELS = {
   type: i18n.translate('xpack.securitySolution.agentBuilder.entityAttachment.table.type', {
     defaultMessage: 'Type',
   }),
-  risk: i18n.translate('xpack.securitySolution.agentBuilder.entityAttachment.table.risk', {
-    defaultMessage: 'Risk',
-  }),
+  riskScore: i18n.translate(
+    'xpack.securitySolution.agentBuilder.entityAttachment.table.riskScore',
+    { defaultMessage: 'Risk score' }
+  ),
   criticality: i18n.translate(
     'xpack.securitySolution.agentBuilder.entityAttachment.table.criticality',
     { defaultMessage: 'Criticality' }
   ),
-  sources: i18n.translate('xpack.securitySolution.agentBuilder.entityAttachment.table.sources', {
-    defaultMessage: 'Sources',
-  }),
+  dataSource: i18n.translate(
+    'xpack.securitySolution.agentBuilder.entityAttachment.table.dataSource',
+    { defaultMessage: 'Data source' }
+  ),
   lastSeen: i18n.translate('xpack.securitySolution.agentBuilder.entityAttachment.table.lastSeen', {
     defaultMessage: 'Last seen',
   }),
 };
+
+const NAME_TOOLTIP_NO_ENTITY_ID = i18n.translate(
+  'xpack.securitySolution.agentBuilder.entityAttachment.table.nameTooltipNoEntityId',
+  { defaultMessage: 'Entity id not available' }
+);
+
+const SOURCES_OVERFLOW_TOOLTIP_TITLE = i18n.translate(
+  'xpack.securitySolution.agentBuilder.entityAttachment.table.dataSourceOverflowTitle',
+  { defaultMessage: 'Additional data sources' }
+);
+
+const LAST_SEEN_TOOLTIP_FIELD_NAME = 'entity.lifecycle.last_activity';
 
 const OPEN_ENTITY_ANALYTICS_LABEL = i18n.translate(
   'xpack.securitySolution.agentBuilder.entityAttachment.table.openEntityAnalytics',
@@ -122,6 +139,71 @@ const EntityRowLoader: React.FC<{
   return null;
 };
 
+/**
+ * Renders the resolved data sources for an entity row. Shows up to
+ * `MAX_VISIBLE_SOURCES` formatted badges and collapses any overflow into a
+ * single `+N more` badge whose tooltip lists the remaining sources. When no
+ * sources are available we fall back to the legacy `EntitySourceBadge` so the
+ * column still surfaces an "Entity Store" / "Observed" hint for older records.
+ */
+const EntityDataSourceBadges: React.FC<{
+  sources: string[] | undefined;
+  isEntityInStore: boolean;
+  hasLastSeenDate: boolean;
+}> = ({ sources, isEntityInStore, hasLastSeenDate }) => {
+  const list = sources ?? [];
+
+  if (list.length === 0) {
+    return (
+      <EntitySourceBadge
+        isEntityInStore={isEntityInStore}
+        hasLastSeenDate={hasLastSeenDate}
+        data-test-subj="entityAttachmentTableSource"
+      />
+    );
+  }
+
+  const visible = list.slice(0, MAX_VISIBLE_SOURCES);
+  const hidden = list.slice(MAX_VISIBLE_SOURCES);
+
+  return (
+    <EuiFlexGroup
+      gutterSize="xs"
+      alignItems="center"
+      wrap
+      responsive={false}
+      data-test-subj="entityAttachmentTableSources"
+    >
+      {visible.map((source) => (
+        <EuiFlexItem grow={false} key={source}>
+          <EuiBadge color="hollow" data-test-subj="entityAttachmentTableSource">
+            {formatEntitySource(source)}
+          </EuiBadge>
+        </EuiFlexItem>
+      ))}
+      {hidden.length > 0 && (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            position="top"
+            title={SOURCES_OVERFLOW_TOOLTIP_TITLE}
+            content={hidden.map(formatEntitySource).join(', ')}
+          >
+            <EuiBadge color="hollow" data-test-subj="entityAttachmentTableSourcesOverflow">
+              {i18n.translate(
+                'xpack.securitySolution.agentBuilder.entityAttachment.table.dataSourceOverflow',
+                {
+                  defaultMessage: '+{count} more',
+                  values: { count: hidden.length },
+                }
+              )}
+            </EuiBadge>
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  );
+};
+
 export const EntityTable: React.FC<EntityTableProps> = ({ entities }) => {
   const { services } = useKibana<{ application: ApplicationStart }>();
   const [pageIndex, setPageIndex] = useState(0);
@@ -176,10 +258,27 @@ export const EntityTable: React.FC<EntityTableProps> = ({ entities }) => {
       {
         field: 'identifier.identifier',
         name: COLUMN_LABELS.name,
+        render: (_value: unknown, row: EntityRow) => {
+          const label = row.data?.displayName ?? row.identifier.identifier;
+          const tooltipContent = row.data?.entityId ?? NAME_TOOLTIP_NO_ENTITY_ID;
+          return (
+            <EuiToolTip position="top" content={tooltipContent}>
+              <EuiText size="xs" data-test-subj="entityAttachmentTableName">
+                <strong>{label}</strong>
+              </EuiText>
+            </EuiToolTip>
+          );
+        },
+      },
+      {
+        field: 'data.sources',
+        name: COLUMN_LABELS.dataSource,
         render: (_value: unknown, row: EntityRow) => (
-          <EuiText size="xs">
-            <strong>{row.data?.displayName ?? row.identifier.identifier}</strong>
-          </EuiText>
+          <EntityDataSourceBadges
+            sources={row.data?.sources}
+            isEntityInStore={row.data?.isEntityInStore ?? false}
+            hasLastSeenDate={Boolean(row.data?.lastSeen)}
+          />
         ),
       },
       {
@@ -196,7 +295,7 @@ export const EntityTable: React.FC<EntityTableProps> = ({ entities }) => {
       },
       {
         field: 'data.riskScore',
-        name: COLUMN_LABELS.risk,
+        name: COLUMN_LABELS.riskScore,
         render: (_value: unknown, row: EntityRow) =>
           row.isLoading ? (
             <EuiSkeletonText lines={1} />
@@ -217,23 +316,15 @@ export const EntityTable: React.FC<EntityTableProps> = ({ entities }) => {
         width: '150px',
       },
       {
-        field: 'data.sources',
-        name: COLUMN_LABELS.sources,
-        render: (_value: unknown, row: EntityRow) => (
-          <EntitySourceBadge
-            isEntityInStore={row.data?.isEntityInStore ?? false}
-            hasLastSeenDate={Boolean(row.data?.lastSeen)}
-            data-test-subj="entityAttachmentTableSource"
-          />
-        ),
-        width: '120px',
-      },
-      {
         field: 'data.lastSeen',
         name: COLUMN_LABELS.lastSeen,
         render: (_value: unknown, row: EntityRow) =>
           row.data?.lastSeen ? (
-            <FormattedRelativePreferenceDate value={row.data.lastSeen} />
+            <FormattedRelativePreferenceDate
+              value={row.data.lastSeen}
+              relativeThresholdInHrs={Number.MAX_SAFE_INTEGER}
+              tooltipFieldName={LAST_SEEN_TOOLTIP_FIELD_NAME}
+            />
           ) : (
             '—'
           ),
@@ -243,13 +334,27 @@ export const EntityTable: React.FC<EntityTableProps> = ({ entities }) => {
     []
   );
 
-  const pagination = useMemo(
-    () => ({
-      pageIndex,
-      pageSize: PAGE_SIZE,
-      totalItemCount: items.length,
-      showPerPageOptions: false,
-    }),
+  /**
+   * EuiBasicTable's prop signature is split: passing `pagination` makes
+   * `onChange` mandatory, and the inverse variant rejects an `undefined`
+   * `pagination`. Conditionally spreading both keeps a single render path
+   * while satisfying the discriminated union.
+   */
+  const paginationProps = useMemo(
+    () =>
+      items.length > PAGE_SIZE
+        ? {
+            pagination: {
+              pageIndex,
+              pageSize: PAGE_SIZE,
+              totalItemCount: items.length,
+              showPerPageOptions: false,
+            },
+            onChange: ({ page }: Criteria<EntityRow>) => {
+              if (page) setPageIndex(page.index);
+            },
+          }
+        : {},
     [items.length, pageIndex]
   );
 
@@ -274,10 +379,9 @@ export const EntityTable: React.FC<EntityTableProps> = ({ entities }) => {
         )}
         items={pagedItems}
         columns={columns}
-        pagination={pagination}
-        onChange={({ page }) => setPageIndex(page.index)}
         itemId={(row) => keyFor(row.identifier)}
         tableLayout="auto"
+        {...paginationProps}
       />
       <EuiFlexGroup gutterSize="s" wrap responsive={false} style={{ marginTop: 8 }}>
         <EuiFlexItem grow={false}>

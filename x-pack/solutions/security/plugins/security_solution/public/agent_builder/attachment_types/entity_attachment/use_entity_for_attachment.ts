@@ -46,7 +46,14 @@ interface EntityRecordShape {
   entity?: {
     id?: string;
     name?: string;
-    source?: string;
+    /**
+     * `entity.source` is a multi-value field in the entity store (see the
+     * `MV_UNION(recent.entity.source, entity.source)` projection in
+     * `entity_store/server/domain/logs_extraction`). Older snapshots may
+     * still surface a single string, so accept either shape and normalise
+     * downstream.
+     */
+    source?: string | string[];
     attributes?: { watchlists?: string[] };
     lifecycle?: { first_seen?: string; last_activity?: string };
     risk?: Partial<RiskStats> & {
@@ -133,6 +140,13 @@ const shapeRecord = (
       } as RiskStats)
     : undefined;
 
+  const rawSource = entityField?.source;
+  const sources = Array.isArray(rawSource)
+    ? rawSource.filter((s): s is string => typeof s === 'string' && s.length > 0)
+    : typeof rawSource === 'string' && rawSource.length > 0
+    ? [rawSource]
+    : [];
+
   return {
     entityType: toEntityType(identifier.identifierType),
     displayName: entityField?.name ?? identifier.identifier,
@@ -145,7 +159,7 @@ const shapeRecord = (
     riskStats,
     assetCriticality,
     watchlistIds: entityField?.attributes?.watchlists?.slice() ?? [],
-    sources: entityField?.source ? [entityField.source] : [],
+    sources,
   };
 };
 

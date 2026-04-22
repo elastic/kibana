@@ -16,6 +16,7 @@ import {
   ENTITY_LATEST,
 } from '@kbn/entity-store/server';
 import type { Logger } from '@kbn/logging';
+import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import {
   IdentifierType,
   EntityRiskLevels,
@@ -26,6 +27,13 @@ import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugi
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../lib/telemetry/event_based/events';
 import { securityTool } from '../constants';
+import {
+  buildListEntityAttachmentId,
+  buildSingleEntityAttachmentId,
+  describeAttachmentForRow,
+  ensureEntityAttachment,
+  type EntityAttachmentDescriptor,
+} from './entity_attachment_utils';
 
 const ENTITY_STORE_KEEP_FIELDS = [
   '@timestamp',
@@ -121,6 +129,14 @@ const schema = z.object({
     .optional()
     .describe(
       'Filter for entities that belong to any of the specified watchlists (entity.attributes.watchlists).'
+    ),
+  sources: z
+    .array(z.string().min(1))
+    .optional()
+    .describe(
+      'Filter for entities whose `entity.source` (multi-value) includes ANY of the given values. ' +
+        'Values are the raw integration keys from the entity store (e.g. "crowdstrike", "endgame", "okta", "island_browser"). ' +
+        'Compared exactly against the stored value — do not pretty-print (e.g. pass "island_browser", not "Island Browser").'
     ),
   managedOnly: z
     .boolean()
@@ -264,6 +280,7 @@ const buildRiskAndAssetCriticalityFilterClauses = ({
 
 const buildAttributeFilterClauses = ({
   watchlists,
+  sources,
   managedOnly,
   mfaEnabledOnly,
   assetOnly,
@@ -271,6 +288,9 @@ const buildAttributeFilterClauses = ({
   const clauses: string[] = [];
   if (watchlists && watchlists.length > 0) {
     clauses.push(`WHERE ${buildMvContainsClause('entity.attributes.watchlists', watchlists)}`);
+  }
+  if (sources && sources.length > 0) {
+    clauses.push(`WHERE ${buildMvContainsClause('entity.source', sources)}`);
   }
   if (managedOnly === true) {
     clauses.push(`WHERE entity.attributes.managed == true`);
@@ -365,6 +385,106 @@ const buildQuery = (
   return clauses.join('\n| ');
 };
 
+const MULTI_ENTITY_ATTACHMENT_LABEL = 'Entity search results';
+
+/**
+ * Builds the optional `ToolResultType.other` side-effect results that
+ * announce the inline `security.entity` attachment for this search call.
+ *
+ * The attachment is skipped when the rich renderer flag is off, when the
+ * `riskScoreChangeInterval` branch is active (the STATS projection drops the
+ * identity columns, so descriptors cannot be derived reliably), or when no
+ * row yields a valid descriptor. When exactly one descriptor is produced we
+ * reuse the single-entity id scheme used by `security.get_entity` so the two
+ * tools converge on the same attachment/version instead of creating
+ * duplicates.
+ */
+const buildAttachmentSideEffectResults = async ({
+  params,
+  columns,
+  values,
+  attachments,
+  experimentalFeatures,
+  logger,
+}: {
+  params: ToolParams;
+  columns: Array<{ name: string }>;
+  values: unknown[][];
+  attachments: AttachmentStateManager;
+  experimentalFeatures: ExperimentalFeatures;
+  logger: Logger;
+}): Promise<
+  Array<{
+    tool_result_id: string;
+    type: typeof ToolResultType.other;
+    data: { attachmentId: string; version: number };
+  }>
+> => {
+  if (!experimentalFeatures.entityAttachmentRichRenderer) {
+    return [];
+  }
+  if (params.riskScoreChangeInterval) {
+    return [];
+  }
+
+  const descriptors = values
+    .map((row) => describeAttachmentForRow({ columns, row }))
+    .filter((d): d is EntityAttachmentDescriptor => d !== null);
+
+  if (descriptors.length === 0) {
+    return [];
+  }
+
+  let id: string;
+  let data: Record<string, unknown>;
+  let description: string;
+
+  if (descriptors.length === 1) {
+    const [descriptor] = descriptors;
+    id = buildSingleEntityAttachmentId(descriptor.identifierType, descriptor.identifier);
+    data = {
+      identifierType: descriptor.identifierType,
+      identifier: descriptor.identifier,
+      attachmentLabel: descriptor.attachmentLabel,
+    };
+    description = descriptor.attachmentLabel;
+  } else {
+    const entities = descriptors.map(({ identifierType, identifier }) => ({
+      identifierType,
+      identifier,
+    }));
+    id = buildListEntityAttachmentId(entities);
+    data = {
+      entities,
+      attachmentLabel: MULTI_ENTITY_ATTACHMENT_LABEL,
+    };
+    description = `${MULTI_ENTITY_ATTACHMENT_LABEL} (${entities.length})`;
+  }
+
+  const attachmentResult = await ensureEntityAttachment({
+    attachments,
+    id,
+    data,
+    description,
+    logger,
+  });
+
+  if (!attachmentResult) {
+    return [];
+  }
+
+  return [
+    {
+      tool_result_id: getToolResultId(),
+      type: ToolResultType.other,
+      data: {
+        attachmentId: attachmentResult.attachmentId,
+        version: attachmentResult.version,
+      },
+    },
+  ];
+};
+
 export const searchEntitiesTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger,
@@ -374,7 +494,8 @@ export const searchEntitiesTool = (
     id: SECURITY_SEARCH_ENTITIES_TOOL_ID,
     type: ToolType.builtin,
     description: `Search entity store for security entities (host, user, service, generic).
-    Supports filtering by normalized risk score, asset criticality, entity attributes, and lifecycle timestamps.
+    Supports filtering by normalized risk score, asset criticality, entity attributes, lifecycle timestamps,
+    and data source (entity.source) via the "sources" parameter (e.g. ["crowdstrike"]).
     Use this tool to find entities matching specific criteria.
     Do NOT use if entity ID (EUID) is known; use the "security.get_entity" tool instead.`,
     tags: ['security', 'entity-store', 'entity-analytics'],
@@ -419,7 +540,7 @@ export const searchEntitiesTool = (
         }
       },
     },
-    handler: async (params, { spaceId, esClient }) => {
+    handler: async (params, { spaceId, esClient, attachments }) => {
       logger.debug(
         `${SECURITY_SEARCH_ENTITIES_TOOL_ID} tool called with parameters ${JSON.stringify(params)}`
       );
@@ -458,14 +579,25 @@ export const searchEntitiesTool = (
           };
         }
 
+        const esqlResultEntries = values.map((_, rowIdx) => ({
+          tool_result_id: getToolResultId(),
+          type: ToolResultType.esqlResults as const,
+          data: { query, columns, values: [values[rowIdx]] },
+        }));
+
+        const attachmentSideEffectResults = await buildAttachmentSideEffectResults({
+          params,
+          columns,
+          values,
+          attachments,
+          experimentalFeatures,
+          logger,
+        });
+
         success = true;
         entitiesReturned = values.length;
         return {
-          results: values.map((_, rowIdx) => ({
-            tool_result_id: getToolResultId(),
-            type: ToolResultType.esqlResults as const,
-            data: { query, columns, values: [values[rowIdx]] },
-          })),
+          results: [...esqlResultEntries, ...attachmentSideEffectResults],
         };
       } catch (error) {
         errorMessage = error instanceof Error ? error.message : 'Unknown error';

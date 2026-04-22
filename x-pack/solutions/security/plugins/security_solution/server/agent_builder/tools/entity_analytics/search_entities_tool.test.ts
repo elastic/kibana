@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { ToolResultType, type ErrorResult, type EsqlResults } from '@kbn/agent-builder-common';
+import {
+  ToolResultType,
+  type ErrorResult,
+  type EsqlResults,
+  type OtherResult,
+} from '@kbn/agent-builder-common';
 import { executeEsql } from '@kbn/agent-builder-genai-utils';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import type { coreMock } from '@kbn/core/server/mocks';
@@ -17,7 +22,9 @@ import {
   setupMockCoreStartServices,
 } from '../../__mocks__/test_helpers';
 import type { ExperimentalFeatures } from '../../../../common';
+import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../lib/telemetry/event_based/events';
+import { buildListEntityAttachmentId } from './entity_attachment_utils';
 import { searchEntitiesTool, SECURITY_SEARCH_ENTITIES_TOOL_ID } from './search_entities_tool';
 
 jest.mock('../../utils/get_agent_builder_resource_availability', () => ({
@@ -113,6 +120,18 @@ describe('searchEntitiesTool', () => {
 
     it('rejects empty watchlist string', () => {
       const result = tool.schema.safeParse({ watchlists: [''] });
+      expect(result.success).toBe(false);
+    });
+
+    it('accepts sources (raw integration keys)', () => {
+      const result = tool.schema.safeParse({
+        sources: ['crowdstrike', 'island_browser'],
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects empty source string', () => {
+      const result = tool.schema.safeParse({ sources: [''] });
       expect(result.success).toBe(false);
     });
 
@@ -342,6 +361,31 @@ describe('searchEntitiesTool', () => {
       const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
       expect(query).toContain('MV_CONTAINS(entity.attributes.watchlists, "vip")');
       expect(query).toContain('MV_CONTAINS(entity.attributes.watchlists, "threat-actors")');
+    });
+
+    it('includes data source filter using MV_CONTAINS on entity.source', async () => {
+      mockSingleEntityResponse();
+
+      await tool.handler(
+        { sources: ['crowdstrike', 'island_browser'] },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      );
+
+      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      expect(query).toContain('MV_CONTAINS(entity.source, "crowdstrike")');
+      expect(query).toContain('MV_CONTAINS(entity.source, "island_browser")');
+    });
+
+    it('does not include entity.source filter when sources param is absent', async () => {
+      mockSingleEntityResponse();
+
+      await tool.handler(
+        { entityTypes: ['host'] },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      );
+
+      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      expect(query).not.toContain('MV_CONTAINS(entity.source');
     });
 
     it('includes managedOnly filter in query', async () => {
@@ -654,6 +698,7 @@ describe('searchEntitiesTool', () => {
           riskLevels: ['High', 'Critical'],
           criticalityLevels: ['extreme_impact'],
           watchlists: ['vip'],
+          sources: ['crowdstrike'],
           managedOnly: true,
           mfaEnabledOnly: true,
           assetOnly: true,
@@ -670,6 +715,7 @@ describe('searchEntitiesTool', () => {
       expect(query).toContain('WHERE entity.risk.calculated_level IN ("High", "Critical")');
       expect(query).toContain('WHERE asset.criticality IN ("extreme_impact")');
       expect(query).toContain('MV_CONTAINS(entity.attributes.watchlists, "vip")');
+      expect(query).toContain('MV_CONTAINS(entity.source, "crowdstrike")');
       expect(query).toContain('WHERE entity.attributes.managed == true');
       expect(query).toContain('WHERE entity.attributes.mfa_enabled == true');
       expect(query).toContain('WHERE entity.attributes.asset == true');
@@ -677,6 +723,326 @@ describe('searchEntitiesTool', () => {
       expect(query).toContain(EXPECTED_KEEP_CLAUSE);
       expect(query).toContain(EXPECTED_SORT_CLAUSE);
       expect(query).toContain('LIMIT 5');
+    });
+  });
+
+  describe('entity attachment side effect', () => {
+    // Uses a dedicated tool instance so we can flip the experimental flag
+    // without disturbing the rest of the suite, which asserts the legacy
+    // (flag-off) shape of `result.results`.
+    const richTool = searchEntitiesTool(mockCore, mockLogger, {
+      ...mockExperimentalFeatures,
+      entityAttachmentRichRenderer: true,
+    } as ExperimentalFeatures);
+
+    const multiRowResponse = {
+      columns: [
+        { name: 'entity.id', type: 'keyword' },
+        { name: 'entity.name', type: 'keyword' },
+        { name: 'entity.EngineMetadata.Type', type: 'keyword' },
+      ],
+      values: [
+        ['host:server1', 'server1', 'host'],
+        ['host:server2', 'server2', 'host'],
+        ['user:alice', 'alice', 'user'],
+      ],
+    };
+
+    const expectedListEntities = [
+      { identifierType: 'host' as const, identifier: 'server1' },
+      { identifierType: 'host' as const, identifier: 'server2' },
+      { identifierType: 'user' as const, identifier: 'alice' },
+    ];
+    const expectedListAttachmentId = buildListEntityAttachmentId(expectedListEntities);
+
+    const singleRowResponse = {
+      columns: [
+        { name: 'entity.id', type: 'keyword' },
+        { name: 'entity.name', type: 'keyword' },
+        { name: 'entity.EngineMetadata.Type', type: 'keyword' },
+      ],
+      values: [['host:server1', 'server1', 'host']],
+    };
+
+    const expectedSingleAttachmentId = `${SecurityAgentBuilderAttachments.entity}:host:server1`;
+
+    it('creates a list attachment when 3 rows are returned and appends an other result', async () => {
+      (executeEsql as jest.Mock).mockResolvedValueOnce(multiRowResponse);
+
+      const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+      (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce(undefined);
+      (context.attachments.add as jest.Mock).mockResolvedValueOnce({
+        id: expectedListAttachmentId,
+        current_version: 1,
+      });
+
+      const result = (await richTool.handler(
+        {},
+        context
+      )) as ToolHandlerStandardReturn;
+
+      expect(context.attachments.add).toHaveBeenCalledTimes(1);
+      expect(context.attachments.add).toHaveBeenCalledWith({
+        id: expectedListAttachmentId,
+        type: SecurityAgentBuilderAttachments.entity,
+        data: {
+          entities: expectedListEntities,
+          attachmentLabel: 'Entity search results',
+        },
+        description: 'Entity search results (3)',
+      });
+      expect(context.attachments.update).not.toHaveBeenCalled();
+
+      // 3 esqlResults rows + 1 other side-effect
+      expect(result.results).toHaveLength(4);
+      expect(result.results[0].type).toBe(ToolResultType.esqlResults);
+      expect(result.results[1].type).toBe(ToolResultType.esqlResults);
+      expect(result.results[2].type).toBe(ToolResultType.esqlResults);
+
+      const otherResult = result.results[3] as OtherResult<{
+        attachmentId: string;
+        version: number;
+      }>;
+      expect(otherResult.type).toBe(ToolResultType.other);
+      expect(otherResult.data).toEqual({
+        attachmentId: expectedListAttachmentId,
+        version: 1,
+      });
+    });
+
+    it('creates a single-entity attachment (via add) when exactly 1 row is returned', async () => {
+      (executeEsql as jest.Mock).mockResolvedValueOnce(singleRowResponse);
+
+      const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+      (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce(undefined);
+      (context.attachments.add as jest.Mock).mockResolvedValueOnce({
+        id: expectedSingleAttachmentId,
+        current_version: 1,
+      });
+
+      const result = (await richTool.handler(
+        {},
+        context
+      )) as ToolHandlerStandardReturn;
+
+      expect(context.attachments.add).toHaveBeenCalledTimes(1);
+      expect(context.attachments.add).toHaveBeenCalledWith({
+        id: expectedSingleAttachmentId,
+        type: SecurityAgentBuilderAttachments.entity,
+        data: {
+          identifierType: 'host',
+          identifier: 'server1',
+          attachmentLabel: 'host: server1',
+        },
+        description: 'host: server1',
+      });
+      expect(context.attachments.update).not.toHaveBeenCalled();
+
+      expect(result.results).toHaveLength(2);
+      expect(result.results[0].type).toBe(ToolResultType.esqlResults);
+      const otherResult = result.results[1] as OtherResult<{
+        attachmentId: string;
+        version: number;
+      }>;
+      expect(otherResult.type).toBe(ToolResultType.other);
+      expect(otherResult.data).toEqual({
+        attachmentId: expectedSingleAttachmentId,
+        version: 1,
+      });
+    });
+
+    it('updates the existing single-entity attachment (bumping version) when it already exists', async () => {
+      (executeEsql as jest.Mock).mockResolvedValueOnce(singleRowResponse);
+
+      const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+      (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce({
+        id: expectedSingleAttachmentId,
+        current_version: 1,
+      });
+      (context.attachments.update as jest.Mock).mockResolvedValueOnce({
+        id: expectedSingleAttachmentId,
+        current_version: 2,
+      });
+
+      const result = (await richTool.handler(
+        {},
+        context
+      )) as ToolHandlerStandardReturn;
+
+      expect(context.attachments.update).toHaveBeenCalledTimes(1);
+      expect(context.attachments.update).toHaveBeenCalledWith(expectedSingleAttachmentId, {
+        data: {
+          identifierType: 'host',
+          identifier: 'server1',
+          attachmentLabel: 'host: server1',
+        },
+        description: 'host: server1',
+      });
+      expect(context.attachments.add).not.toHaveBeenCalled();
+
+      const otherResult = result.results[1] as OtherResult<{
+        attachmentId: string;
+        version: number;
+      }>;
+      expect(otherResult.type).toBe(ToolResultType.other);
+      expect(otherResult.data).toEqual({
+        attachmentId: expectedSingleAttachmentId,
+        version: 2,
+      });
+    });
+
+    it('filters out rows with an invalid entity.EngineMetadata.Type but still creates the attachment for the valid ones', async () => {
+      (executeEsql as jest.Mock).mockResolvedValueOnce({
+        columns: [
+          { name: 'entity.id', type: 'keyword' },
+          { name: 'entity.name', type: 'keyword' },
+          { name: 'entity.EngineMetadata.Type', type: 'keyword' },
+        ],
+        values: [
+          ['host:server1', 'server1', 'host'],
+          ['device:d1', 'd1', 'device'], // unknown type — must be skipped
+          ['user:alice', 'alice', 'user'],
+        ],
+      });
+
+      const filteredEntities = [
+        { identifierType: 'host' as const, identifier: 'server1' },
+        { identifierType: 'user' as const, identifier: 'alice' },
+      ];
+      const filteredAttachmentId = buildListEntityAttachmentId(filteredEntities);
+
+      const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+      (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce(undefined);
+      (context.attachments.add as jest.Mock).mockResolvedValueOnce({
+        id: filteredAttachmentId,
+        current_version: 1,
+      });
+
+      const result = (await richTool.handler(
+        {},
+        context
+      )) as ToolHandlerStandardReturn;
+
+      expect(context.attachments.add).toHaveBeenCalledTimes(1);
+      expect(context.attachments.add).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: filteredAttachmentId,
+          type: SecurityAgentBuilderAttachments.entity,
+          data: {
+            entities: filteredEntities,
+            attachmentLabel: 'Entity search results',
+          },
+          description: 'Entity search results (2)',
+        })
+      );
+
+      // 3 esqlResults rows preserved + 1 other side-effect
+      expect(result.results).toHaveLength(4);
+      const otherResult = result.results[3] as OtherResult<{
+        attachmentId: string;
+        version: number;
+      }>;
+      expect(otherResult.type).toBe(ToolResultType.other);
+      expect(otherResult.data).toEqual({
+        attachmentId: filteredAttachmentId,
+        version: 1,
+      });
+    });
+
+    it('does not create an attachment when every row has an invalid entity.EngineMetadata.Type', async () => {
+      (executeEsql as jest.Mock).mockResolvedValueOnce({
+        columns: [
+          { name: 'entity.id', type: 'keyword' },
+          { name: 'entity.name', type: 'keyword' },
+          { name: 'entity.EngineMetadata.Type', type: 'keyword' },
+        ],
+        values: [
+          ['device:d1', 'd1', 'device'],
+          ['device:d2', 'd2', 'device'],
+        ],
+      });
+
+      const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+
+      const result = (await richTool.handler(
+        {},
+        context
+      )) as ToolHandlerStandardReturn;
+
+      expect(context.attachments.add).not.toHaveBeenCalled();
+      expect(context.attachments.update).not.toHaveBeenCalled();
+
+      expect(result.results).toHaveLength(2);
+      result.results.forEach((r) => {
+        expect(r.type).toBe(ToolResultType.esqlResults);
+      });
+    });
+
+    it('does not create an attachment when the rich renderer experimental flag is off', async () => {
+      (executeEsql as jest.Mock).mockResolvedValueOnce(multiRowResponse);
+
+      const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+
+      // The top-level `tool` is built from `mockExperimentalFeatures`, which
+      // does NOT include `entityAttachmentRichRenderer`, so the flag is off.
+      const result = (await tool.handler({}, context)) as ToolHandlerStandardReturn;
+
+      expect(context.attachments.add).not.toHaveBeenCalled();
+      expect(context.attachments.update).not.toHaveBeenCalled();
+      expect(result.results).toHaveLength(3);
+      result.results.forEach((r) => {
+        expect(r.type).toBe(ToolResultType.esqlResults);
+      });
+    });
+
+    it('does not create an attachment when riskScoreChangeInterval is set (STATS branch limitation)', async () => {
+      // The STATS projection drops the identity columns, so descriptors
+      // cannot be derived reliably — we skip the attachment side-effect.
+      (executeEsql as jest.Mock).mockResolvedValueOnce({
+        columns: [
+          { name: 'entity.id', type: 'keyword' },
+          { name: 'risk_score_change', type: 'double' },
+        ],
+        values: [
+          ['host:server1', 25.0],
+          ['host:server2', 40.5],
+        ],
+      });
+
+      const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+
+      const result = (await richTool.handler(
+        { riskScoreChangeInterval: '30d' },
+        context
+      )) as ToolHandlerStandardReturn;
+
+      expect(context.attachments.add).not.toHaveBeenCalled();
+      expect(context.attachments.update).not.toHaveBeenCalled();
+      expect(result.results).toHaveLength(2);
+      result.results.forEach((r) => {
+        expect(r.type).toBe(ToolResultType.esqlResults);
+      });
+    });
+
+    it('does not create an attachment when zero rows are returned (returns the existing error result)', async () => {
+      (executeEsql as jest.Mock).mockResolvedValueOnce({
+        columns: [{ name: 'entity.id', type: 'keyword' }],
+        values: [],
+      });
+
+      const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+
+      const result = (await richTool.handler(
+        { riskLevels: ['Critical'] },
+        context
+      )) as ToolHandlerStandardReturn;
+
+      expect(context.attachments.add).not.toHaveBeenCalled();
+      expect(context.attachments.update).not.toHaveBeenCalled();
+      expect(result.results).toHaveLength(1);
+      const errorResult = result.results[0] as ErrorResult;
+      expect(errorResult.type).toBe(ToolResultType.error);
+      expect(errorResult.data.message).toContain('No entities found');
     });
   });
 });

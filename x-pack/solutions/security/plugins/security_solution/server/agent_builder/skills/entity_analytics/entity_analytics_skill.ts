@@ -59,6 +59,7 @@ Use this skill when:
     - entity.attributes.asset - whether this entity is an asset
     - entity.behaviors.rule_names - detection rules associated with this entity
     - entity.behaviors.anomaly_job_ids - anomaly detection jobs that have detected this entity
+    - entity.source - multi-value list of integration/data sources that produced this entity (e.g. crowdstrike, endgame, okta, island_browser). Always lowercase integration keys.
     - entity.lifecycle.first_seen - first time this entity has been seen in the entity store
     - entity.lifecycle.last_activity - last time this entity has been active in the entity store
     - risk_score_inputs - the alert inputs that contributed to the risk score calculation for this entity.
@@ -90,9 +91,29 @@ Rules:
     - entity attributes (watchlists, managed status, MFA status, asset)
     - entity behaviors (behavior rule names, anomaly job IDs)
     - entity lifecycle timestamps (first seen, last activity)
+    - data source (entity.source) - pass the raw integration key(s) via the \`sources\` parameter; e.g. \`sources: ['crowdstrike']\`. Use the stored lowercase key, not a pretty-printed label (so pass \`island_browser\`, not \`Island Browser\`).
     Do NOT use this tool if the entity ID (EUID) is known; use the \`security.get_entity\` tool instead.
     ALWAYS use real entities from the entity store, do not invent entities.
     ALWAYS use the \`security.get_entity\` after using this tool to get the full profile for each entity found.
+
+#### Inline rendering (REQUIRED when 2+ entities are returned)
+When \`security.search_entities\` returns 2 or more entities, it also stores an aggregate
+\`security.entity\` attachment and returns an \`other\` result containing \`attachmentId\` and
+\`version\`. You MUST render that attachment inline using the custom XML element:
+
+    <render_attachment id="ATTACHMENT_ID" version="VERSION" />
+
+Rules:
+- Copy \`id\` and \`version\` verbatim from the \`other\` tool result. Do not invent or alter them.
+- Emit the \`<render_attachment>\` tag BEFORE your prose summary so the user sees the table first.
+- Render each \`security.entity\` attachment at most once per turn.
+- The rendered table REPLACES the prose markdown table for the list — do not also print the
+  markdown columns described in Step 3 when the inline table is shown. A short narrative
+  (top-level takeaways, outliers worth flagging) still belongs in the prose.
+- When exactly one entity is returned, the attachment uses the single-entity id scheme and a
+  follow-up \`security.get_entity\` for the same entity bumps the same version rather than
+  creating a new pill. Prefer letting \`get_entity\` emit the render tag (richer card) in that
+  flow and skip the render tag on the \`search_entities\` result itself.
 
 ## Entity Analysis Investigation Steps
 
@@ -104,14 +125,25 @@ Rules:
 - ONLY call \`security.search_entities\` with a 'riskScoreChangeInterval' parameter if the user is asking about changes or jumps in risk score.
 
 ### 2. Get entity profiles
-For each entity ID, you MUST call \`security.get_entity\` get the full entity profile
+How aggressively you call \`security.get_entity\` depends on how many entities step 1 produced:
+
+- **2+ entities returned** — prefer the inline table rendered from the aggregate
+  \`security.entity\` attachment (see "Inline rendering" above). Do NOT loop
+  \`security.get_entity\` over every row just to populate the table: the list attachment is
+  already sufficient for the user to drill in. Only call \`security.get_entity\` when the user
+  explicitly asks for per-entity profiles, risk score inputs, behavior history, or anomaly
+  details, or when the investigation narrative clearly requires enrichment for a specific
+  entity you are calling out in the prose.
+- **Exactly 1 entity returned** — still call \`security.get_entity\` to pull the enriched
+  profile (risk inputs, history, behaviors). The single-entity attachment id is deterministic,
+  so \`get_entity\` bumps the existing attachment's version instead of creating a duplicate.
+- **Entity ID already known (step 1 skipped)** — call \`security.get_entity\` directly.
+
+General guidance when you do call \`security.get_entity\`:
 
 - Identify if any time interval or specific date is needed for historical analysis
 - Use \`security.get_entity\` to get the full entity profile, including risk score inputs
 - If more than one profile is returned for an entity, order them chronologically to build a picture of entity behavior over time
-
-You MUST use the \`security.get_entity\` tool to get entity profiles for EACH entity found in step 1. For example,
-if 10 entities are found using \`security.search_entities\`, you MUST call \`security.get_entity\` 10 times to get the full profiles for each entity.
 
 ### 3. Interpret and summarize output
 - For \`security.get_entity\` tool results, summarize the current profile and identify whether the entity is considered risky
@@ -172,6 +204,15 @@ Steps:
 2. Analyze the risk scores in the profile history along with the current risk score to determine if the change in risk score is significant (e.g., greater than ${ENTITY_RISK_SCORE_SIGNIFICANT_CHANGE_THRESHOLD} points).
 3. Summarize the trends in risk score changes (stable, increasing, decreasing) and present findings in a concise format showing the previous risk scores, current risk score, and whether the change is significant.
 
+### Example 5: Entities From a Specific Data Source
+
+User query: Can I get all hosts coming from Crowdstrike?
+
+Steps:
+1. Use the 'security.search_entities' tool with \`entityTypes: ['host']\` and \`sources: ['crowdstrike']\` to find hosts whose \`entity.source\` includes the Crowdstrike integration. The \`sources\` value MUST be the raw lowercase integration key as stored in the entity store (e.g. \`crowdstrike\`, \`endgame\`, \`okta\`, \`island_browser\`) — never the pretty-printed label rendered in the UI.
+2. When 2+ entities are returned, render the inline aggregate \`security.entity\` attachment (see "Inline rendering" rules) instead of repeating the markdown table.
+3. In the prose, name the data source the user filtered on (e.g. "9 hosts are sourced from Crowdstrike") and call out the riskiest entries the user may want to investigate.
+
 ## Best Practices
 - Always use \`calculated_score_norm\` (0-100) when reporting risk scores
 - Provide the criticality level of the entity if available, otherwise report as "unknown"
@@ -180,6 +221,7 @@ Steps:
 - Higher scores indicate greater risk to the organization
 - A change in risk score greater than ${ENTITY_RISK_SCORE_SIGNIFICANT_CHANGE_THRESHOLD} points over an interval is considered significant
 - An entity is considered high impact if its criticality level is "high_impact" or "extreme_impact"
+- Data source values (\`entity.source\`) are lowercase integration keys (e.g. \`crowdstrike\`, \`island_browser\`). The inline table renders them title-cased for display, but you MUST always filter using the raw key when calling \`security.search_entities\`.
 - Document your analysis process and reasoning clearly
 - Avoid listing noisy raw data; highlight the most relevant signals
 - Offer a short explanation of why a risk score is considered high or low

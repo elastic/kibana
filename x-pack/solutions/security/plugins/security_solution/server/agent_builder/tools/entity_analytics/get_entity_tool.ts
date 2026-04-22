@@ -9,7 +9,6 @@ import { z } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
-import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { executeEsql } from '@kbn/agent-builder-genai-utils';
 import {
   getHistorySnapshotIndexPattern,
@@ -20,139 +19,22 @@ import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ExperimentalFeatures } from '../../../../common';
 import { IdentifierType } from '../../../../common/api/entity_analytics/common/common.gen';
-import {
-  DEFAULT_ALERTS_INDEX,
-  ESSENTIAL_ALERT_FIELDS,
-  SecurityAgentBuilderAttachments,
-} from '../../../../common/constants';
+import { DEFAULT_ALERTS_INDEX, ESSENTIAL_ALERT_FIELDS } from '../../../../common/constants';
 import { getRiskScoreTimeSeriesIndex } from '../../../../common/entity_analytics/risk_engine/indices';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../lib/telemetry/event_based/events';
 import { securityTool } from '../constants';
+import {
+  buildSingleEntityAttachmentId,
+  describeAttachmentForRow,
+  ensureEntityAttachment,
+  getRowValue,
+  ENTITY_STORE_ENTITY_TYPE_FIELD,
+  ENTITY_STORE_ENTITY_ID_FIELD,
+} from './entity_attachment_utils';
 
 const ENTITY_STORE_RISK_SCORE_NORMALIZED_FIELD = 'entity.risk.calculated_score_norm';
-const ENTITY_STORE_ENTITY_TYPE_FIELD = 'entity.EngineMetadata.Type';
-const ENTITY_STORE_ENTITY_ID_FIELD = 'entity.id';
-const ENTITY_STORE_ENTITY_NAME_FIELD = 'entity.name';
-
-const ATTACHMENT_IDENTIFIER_TYPES = ['host', 'user', 'service', 'generic'] as const;
-type AttachmentIdentifierType = (typeof ATTACHMENT_IDENTIFIER_TYPES)[number];
-
-const isAttachmentIdentifierType = (value: unknown): value is AttachmentIdentifierType =>
-  typeof value === 'string' &&
-  (ATTACHMENT_IDENTIFIER_TYPES as readonly string[]).includes(value);
-
-/**
- * Strips the `{type}:` prefix from a canonical entity id so the attachment
- * receives the bare identity value the rich renderer expects (host.name,
- * user.name, service.name). For `generic` entities we keep the full id because
- * those records are matched on `entity.id` directly.
- */
-const stripEntityIdPrefix = (entityId: string, identifierType: AttachmentIdentifierType): string => {
-  if (identifierType === 'generic') {
-    return entityId;
-  }
-  const prefix = `${identifierType}:`;
-  return entityId.startsWith(prefix) ? entityId.slice(prefix.length) : entityId;
-};
-
-const buildEntityAttachmentId = (
-  identifierType: AttachmentIdentifierType,
-  identifier: string
-): string => `${SecurityAgentBuilderAttachments.entity}:${identifierType}:${identifier}`;
-
-interface EntityAttachmentDescriptor {
-  identifierType: AttachmentIdentifierType;
-  identifier: string;
-  attachmentLabel: string;
-}
-
-/**
- * Derives the attachment payload from a resolved entity row. Returns `null`
- * when we cannot extract a trustworthy identifier (e.g. missing type) so the
- * caller can skip the attachment side-effect instead of emitting garbage.
- */
-const describeAttachmentForRow = ({
-  columns,
-  row,
-}: {
-  columns: Array<{ name: string }>;
-  row: unknown[];
-}): EntityAttachmentDescriptor | null => {
-  const rawType = getRowValue(columns, row, ENTITY_STORE_ENTITY_TYPE_FIELD);
-  if (!isAttachmentIdentifierType(rawType)) {
-    return null;
-  }
-
-  const rawId = getRowValue(columns, row, ENTITY_STORE_ENTITY_ID_FIELD);
-  const rawName = getRowValue(columns, row, ENTITY_STORE_ENTITY_NAME_FIELD);
-
-  const bareFromId = typeof rawId === 'string' ? stripEntityIdPrefix(rawId, rawType) : undefined;
-  const bareName = typeof rawName === 'string' && rawName.length > 0 ? rawName : undefined;
-
-  const identifier = bareName ?? bareFromId;
-  if (!identifier) {
-    return null;
-  }
-
-  return {
-    identifierType: rawType,
-    identifier,
-    attachmentLabel: `${rawType}: ${identifier}`,
-  };
-};
-
-/**
- * Creates (or refreshes) the `security.entity` attachment representing a
- * single resolved entity. Uses a deterministic id so repeated lookups in the
- * same conversation bump the version instead of piling up pills. Failures are
- * logged and swallowed — the tool result itself is still useful without the
- * inline card.
- */
-const ensureEntityAttachment = async ({
-  attachments,
-  descriptor,
-  logger,
-}: {
-  attachments: AttachmentStateManager;
-  descriptor: EntityAttachmentDescriptor;
-  logger: Logger;
-}): Promise<{ attachmentId: string; version: number } | null> => {
-  const attachmentId = buildEntityAttachmentId(descriptor.identifierType, descriptor.identifier);
-  const data = {
-    identifierType: descriptor.identifierType,
-    identifier: descriptor.identifier,
-    attachmentLabel: descriptor.attachmentLabel,
-  };
-  const description = descriptor.attachmentLabel;
-
-  try {
-    const existing = attachments.getAttachmentRecord(attachmentId);
-    if (existing) {
-      const updated = await attachments.update(attachmentId, { data, description });
-      if (!updated) {
-        return null;
-      }
-      return { attachmentId: updated.id, version: updated.current_version };
-    }
-
-    const created = await attachments.add({
-      id: attachmentId,
-      type: SecurityAgentBuilderAttachments.entity,
-      data,
-      description,
-    });
-    return { attachmentId: created.id, version: created.current_version };
-  } catch (error) {
-    logger.warn(
-      `Failed to persist security.entity attachment for ${attachmentId}: ${
-        error instanceof Error ? error.message : String(error)
-      }`
-    );
-    return null;
-  }
-};
 
 const schema = z.object({
   entityType: IdentifierType.describe(
@@ -207,14 +89,6 @@ export const normalizeEntityId = (
   return entityId.startsWith(prefix) ? entityId : `${prefix}${entityId}`;
 };
 
-const getRowValue = (
-  columns: Array<{ name: string }>,
-  row: unknown[],
-  columnName: string
-): unknown => {
-  const idx = columns.findIndex((col) => col.name === columnName);
-  return idx >= 0 ? row[idx] : undefined;
-};
 interface GetAlertIdsFromRiskScoreIndexParams {
   entityId: string;
   entityType: string;
@@ -531,7 +405,17 @@ When exactly one entity is resolved, this tool also stores a \`security.entity\`
               if (!descriptor) {
                 return null;
               }
-              return ensureEntityAttachment({ attachments, descriptor, logger });
+              return ensureEntityAttachment({
+                attachments,
+                id: buildSingleEntityAttachmentId(descriptor.identifierType, descriptor.identifier),
+                data: {
+                  identifierType: descriptor.identifierType,
+                  identifier: descriptor.identifier,
+                  attachmentLabel: descriptor.attachmentLabel,
+                },
+                description: descriptor.attachmentLabel,
+                logger,
+              });
             })()
           : null;
 
