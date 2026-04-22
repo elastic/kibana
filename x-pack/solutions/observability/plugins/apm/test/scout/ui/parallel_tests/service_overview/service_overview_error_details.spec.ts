@@ -134,9 +134,12 @@ test.describe(
           state: 'visible',
           timeout: EXTENDED_TIMEOUT,
         });
-        const errorLink = errorsTable.getByRole('link', {
-          name: testData.EDOT_ERROR_MESSAGE,
-        });
+        const errorLink = serviceDetailsPage.overviewTab.serviceOverviewErrorsTable.getByRole(
+          'link',
+          {
+            name: testData.EDOT_ERROR_MESSAGE,
+          }
+        );
         await expect(errorLink).toBeVisible({ timeout: EXTENDED_TIMEOUT });
       });
 
