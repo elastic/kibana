@@ -69,12 +69,13 @@ const mockUseAttackRunWorkflowContextMenuItems =
   >;
 const mockAttack = getMockAttackDiscoveryAlerts()[0];
 
-function renderAttack(attack: AttackDiscoveryAlert) {
+function renderAttack(attack: AttackDiscoveryAlert, isRemoteDocument = false) {
   return render(
     <TestProviders>
       <AttacksGroupTakeActionItems
         attack={attack}
         telemetrySource="attacks_page_group_take_action"
+        isRemoteDocument={isRemoteDocument}
       />
     </TestProviders>
   );
@@ -294,10 +295,29 @@ describe('AttacksGroupTakeActionItems', () => {
             attack={mockAttack}
             showAiAssistantAction={false}
             telemetrySource="attacks_page_group_take_action"
+            isRemoteDocument={false}
           />
         </TestProviders>
       );
       expect(queryByText('View in AI Assistant')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('when isRemoteDocument is true', () => {
+    it('renders only the Investigate in Timeline action', () => {
+      const { queryByText } = renderAttack(mockAttack, true);
+
+      expect(queryByText('Investigate in timeline')).toBeInTheDocument();
+    });
+
+    it('hides all other actions', () => {
+      const { queryByText } = renderAttack(mockAttack, true);
+
+      expect(queryByText('Mark as acknowledged')).not.toBeInTheDocument();
+      expect(queryByText('View in AI Assistant')).not.toBeInTheDocument();
+      expect(queryByText('Assign alert')).not.toBeInTheDocument();
+      expect(queryByText('Apply alert tags')).not.toBeInTheDocument();
+      expect(queryByText('Run workflow')).not.toBeInTheDocument();
     });
   });
 });

@@ -21,8 +21,27 @@ import { createStoryFindItems, StateDiagnosticPanel } from './stories_helpers';
 // Storybook Meta
 // =============================================================================
 
-const meta: Meta = {
+interface CoreFeaturesStoryArgs {
+  scrollableInline: boolean;
+  responsiveBreakpoint: boolean;
+}
+
+const meta: Meta<CoreFeaturesStoryArgs> = {
   title: 'Content List/Core Features',
+  argTypes: {
+    scrollableInline: {
+      control: 'boolean',
+      description: 'Enable horizontal scrolling when columns exceed container width.',
+    },
+    responsiveBreakpoint: {
+      control: 'boolean',
+      description: 'Collapse the table into responsive cards on narrow viewports.',
+    },
+  },
+  args: {
+    scrollableInline: true,
+    responsiveBreakpoint: false,
+  },
   decorators: [
     (Story) => (
       <div style={{ padding: '20px', maxWidth: '1200px' }}>
@@ -57,7 +76,10 @@ const { Column, Action } = ContentListTable;
  * - [x] Search (PR 4)
  * - [x] Selection + bulk bar (PR 7)
  */
-const CoreFeaturesWrapper = () => {
+const CoreFeaturesWrapper = ({
+  scrollableInline = true,
+  responsiveBreakpoint = false,
+}: CoreFeaturesStoryArgs) => {
   const labels = useMemo(
     () => ({
       entity: 'dashboard',
@@ -125,11 +147,21 @@ const CoreFeaturesWrapper = () => {
         item={itemConfig}
       >
         <ContentListToolbar />
-        <ContentListTable title="dashboards table">{tableChildren}</ContentListTable>
+        <ContentListTable title="dashboards table" {...{ scrollableInline, responsiveBreakpoint }}>
+          {tableChildren}
+        </ContentListTable>
         <ContentListFooter />
       </ContentListProvider>
     ),
-    [labels, dataSource, features, itemConfig, tableChildren]
+    [
+      labels,
+      dataSource,
+      features,
+      itemConfig,
+      tableChildren,
+      scrollableInline,
+      responsiveBreakpoint,
+    ]
   );
 
   return (
@@ -151,7 +183,12 @@ const CoreFeaturesWrapper = () => {
           <ContentListToolbar />
         </EuiFlexItem>
         <EuiFlexItem>
-          <ContentListTable title="dashboards table">{tableChildren}</ContentListTable>
+          <ContentListTable
+            title="dashboards table"
+            {...{ scrollableInline, responsiveBreakpoint }}
+          >
+            {tableChildren}
+          </ContentListTable>
         </EuiFlexItem>
         <EuiFlexItem>
           <ContentListFooter />
@@ -178,7 +215,9 @@ const CoreFeaturesWrapper = () => {
  * composable `ContentListToolbar`, `ContentListTable`, and
  * `ContentListFooter` children that read from the provider via context.
  */
-export const CoreFeatures: StoryObj = {
+type Story = StoryObj<CoreFeaturesStoryArgs>;
+
+export const CoreFeatures: Story = {
   name: 'Core Features',
-  render: () => <CoreFeaturesWrapper />,
+  render: (args) => <CoreFeaturesWrapper {...args} />,
 };
