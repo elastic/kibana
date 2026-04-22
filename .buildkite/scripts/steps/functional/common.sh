@@ -34,7 +34,7 @@ if [[ $download_exit -ne 0 ]]; then
 fi
 
 echo "--- Build platform plugins"
-node scripts/build_kibana_platform_plugins
+NODE_OPTIONS="--max-old-space-size=6144" node scripts/build_kibana_platform_plugins
 
 .buildkite/scripts/setup_es_snapshot_cache.sh
 
