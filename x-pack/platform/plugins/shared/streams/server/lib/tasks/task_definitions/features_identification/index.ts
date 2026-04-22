@@ -157,6 +157,7 @@ async function runFeaturesIdentification(
       featureClient,
       logger: taskLogger,
       featureTtlDays: tuningConfig.feature_ttl_days,
+      runId,
     });
 
     let diverseOffset = 0;

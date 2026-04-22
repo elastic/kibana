@@ -43,14 +43,14 @@ export function createFeatureMetadata({
   runId,
 }: {
   featureTtlDays?: number;
-  runId?: string;
-} = {}) {
+  runId: string;
+}) {
   const now = Date.now();
   return {
     status: 'active' as const,
     last_seen: new Date(now).toISOString(),
     expires_at: new Date(now + featureTtlDays * MS_PER_DAY).toISOString(),
-    ...(runId ? { run_id: runId } : {}),
+    run_id: runId,
   };
 }
 
@@ -58,12 +58,14 @@ export function reconcileComputedFeatures({
   computedFeatures,
   streamName,
   featureTtlDays,
+  runId,
 }: {
   computedFeatures: BaseFeature[];
   streamName: string;
   featureTtlDays?: number;
+  runId: string;
 }): Feature[] {
-  const metadata = createFeatureMetadata({ featureTtlDays });
+  const metadata = createFeatureMetadata({ featureTtlDays, runId });
   return computedFeatures.map((feature) => ({
     ...feature,
     ...metadata,
@@ -118,7 +120,7 @@ export function reconcileInferredFeatures({
   ignoredFeatures: IgnoredFeature[];
   excludedFeatures: ReadonlyArray<Feature>;
   featureTtlDays?: number;
-  runId?: string;
+  runId: string;
   logger: Logger;
 }): { newFeatures: Feature[]; updatedFeatures: Feature[]; codeIgnoredCount: number } {
   const metadata = createFeatureMetadata({ featureTtlDays, runId });

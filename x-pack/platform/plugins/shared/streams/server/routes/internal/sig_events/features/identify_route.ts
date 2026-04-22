@@ -196,6 +196,7 @@ const identifyComputedFeaturesRoute = createServerRoute({
       .object({
         start: z.number().optional(),
         end: z.number().optional(),
+        runId: z.string().optional(),
         featureTtlDays: z.number().optional(),
       })
       .nullable()
@@ -219,6 +220,7 @@ const identifyComputedFeaturesRoute = createServerRoute({
     const {
       start = now - MS_PER_DAY,
       end = now,
+      runId = uuidv4(),
       featureTtlDays = tuningConfig.feature_ttl_days,
     } = params.body ?? {};
 
@@ -237,6 +239,7 @@ const identifyComputedFeaturesRoute = createServerRoute({
         featureClient,
         logger: routeLogger,
         featureTtlDays,
+        runId,
       });
 
       return {
