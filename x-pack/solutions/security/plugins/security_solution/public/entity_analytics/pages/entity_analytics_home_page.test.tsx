@@ -279,7 +279,7 @@ describe('EntityAnalyticsHomePage', () => {
     );
 
     expect(screen.getByTestId('entityStoreDisabledEmptyPrompt')).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Entity Analytics' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Entity analytics' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Enable Entity analytics' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Read the docs/ })).toBeInTheDocument();
     expect(screen.queryByTestId('entityAnalyticsHomePage')).not.toBeInTheDocument();
@@ -298,7 +298,7 @@ describe('EntityAnalyticsHomePage', () => {
     );
 
     expect(screen.getByTestId('entityStoreDisabledEmptyPrompt')).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Entity Analytics' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Entity analytics' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Enable Entity analytics' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Read the docs/ })).toBeInTheDocument();
     expect(screen.queryByTestId('entityAnalyticsHomePage')).not.toBeInTheDocument();
