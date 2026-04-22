@@ -34,6 +34,7 @@ import {
 import { css } from '@emotion/react';
 
 import { useSearchParams, useNavigate } from 'react-router-dom-v5-compat';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { PackageListSearchForm } from '../package_list_search_form/package_list_search_form';
@@ -48,6 +49,7 @@ import {
 import { CardLogoIcon, IntegrationCard } from '../pages/ingest_hub/ingest_hub_components';
 import { useActiveVersion } from '../version_switcher_widget';
 import { Version2ApiEndpointsSplit } from '../version_2_api_endpoints_split';
+import { Version3ApiEndpointsSplit } from '../version_3_api_endpoints_split';
 
 const allSections = [...SECTIONS];
 
@@ -109,11 +111,22 @@ export const OnboardingFlowForm: FunctionComponent = () => {
   const [version2ApiEndpointId, setVersion2ApiEndpointId] = useState(
     API_ENDPOINTS[0]?.id ?? 'endpoint-elasticsearch'
   );
+  /** Package search + results portal target (Version 2: Integrations section below API). */
+  const [version2IntegrationsPackageHost, setVersion2IntegrationsPackageHost] =
+    useState<HTMLDivElement | null>(null);
+  const [version3ApiEndpointId, setVersion3ApiEndpointId] = useState(
+    API_ENDPOINTS[0]?.id ?? 'endpoint-elasticsearch'
+  );
+  const [version3IntegrationsPackageHost, setVersion3IntegrationsPackageHost] =
+    useState<HTMLDivElement | null>(null);
+  const [version3CreatedKeys, setVersion3CreatedKeys] = useState<Record<string, string>>({});
 
   const customCards = useCustomCards(createCollectionCardHandler);
 
+  const isLandingV2OrV3 = activeVersion === 'version2' || activeVersion === 'version3';
+
   useEffect(() => {
-    if (activeVersion === 'version2') {
+    if (activeVersion === 'version2' || activeVersion === 'version3') {
       setOpenAccordionId(null);
     }
   }, [activeVersion]);
@@ -126,6 +139,22 @@ export const OnboardingFlowForm: FunctionComponent = () => {
       setVersion2ApiEndpointId(API_ENDPOINTS[0]!.id);
     }
   }, [activeVersion, version2ApiEndpointId]);
+
+  useEffect(() => {
+    if (activeVersion !== 'version3') {
+      return;
+    }
+    if (!API_ENDPOINTS.some((e) => e.id === version3ApiEndpointId)) {
+      setVersion3ApiEndpointId(API_ENDPOINTS[0]!.id);
+    }
+  }, [activeVersion, version3ApiEndpointId]);
+
+  useEffect(() => {
+    if (activeVersion !== 'version2' && activeVersion !== 'version3') {
+      setVersion2IntegrationsPackageHost(null);
+      setVersion3IntegrationsPackageHost(null);
+    }
+  }, [activeVersion]);
   const searchExcludePackageIdList = isCloud ? ['epr:awsfirehose'] : [];
 
   return (
@@ -138,6 +167,14 @@ export const OnboardingFlowForm: FunctionComponent = () => {
         customCards={customCards.filter((card) => !card.isCollectionCard)}
         excludePackageIdList={searchExcludePackageIdList}
         onLoadingChange={(loading) => setIsPageLoading(loading)}
+        portaledUiContainerEl={
+          activeVersion === 'version2'
+            ? version2IntegrationsPackageHost
+            : activeVersion === 'version3'
+            ? version3IntegrationsPackageHost
+            : undefined
+        }
+        hideSearchBar
       />
 
       {isPageLoading && (
@@ -146,110 +183,117 @@ export const OnboardingFlowForm: FunctionComponent = () => {
         </EuiFlexGroup>
       )}
 
-      {/* Categorized sections — hidden while loading or searching */}
-      {!isPageLoading && !integrationSearch && (
+      {/* Categorized sections — hidden while loading; Version 2/3 stays visible while searching */}
+      {!isPageLoading && (isLandingV2OrV3 || !integrationSearch) && (
         <>
           {/* API ingestion section */}
-          <div style={{ height: 32 }} />
-          <EuiTitle size="s">
-            <h3>API endpoints</h3>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiText size="s" color="subdued">
-            <p>
-              Direct access to your deployment&apos;s endpoints. Create an API key to authenticate.
-            </p>
-          </EuiText>
-          <div style={{ height: 24 }} />
-          {activeVersion === 'version2' ? (
-            <Version2ApiEndpointsSplit
-              searchQuery=""
-              selectedEndpointId={version2ApiEndpointId}
-              onSelectEndpoint={setVersion2ApiEndpointId}
-              prependBasePath={(path) => http.basePath.prepend(path)}
-              dataTestSubjPrefix="obsOnboardingLandingV2ApiEndpoint"
-              secretsByEndpointId={createdKeys}
-              onCreateApiKey={() =>
-                setCreateKeyFlyout({ endpointId: version2ApiEndpointId, keyName: '' })
-              }
-            />
-          ) : (
-            <>
-              <div
-                css={css`
-                  background-color: ${euiTheme.colors.backgroundBaseSubdued};
-                  border-radius: ${euiTheme.border.radius.medium};
-                  padding: 24px;
-                `}
-              >
+          <EuiFlexGroup
+            direction="column"
+            gutterSize="none"
+            alignItems="stretch"
+            /* EuiFlexGroup replaces `css`; alignSelf stretch so API block uses full content width */
+            style={{
+              gap: 24,
+              flexGrow: 0,
+              alignSelf: 'stretch',
+              width: '100%',
+              minWidth: 0,
+            }}
+          >
+            <EuiFlexGroup
+              alignItems="flexStart"
+              responsive={true}
+              gutterSize="m"
+              style={{ flexGrow: 0, width: '100%', minWidth: 0 }}
+            >
+              <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
+                <EuiTitle size="s">
+                  <h3>API endpoints</h3>
+                </EuiTitle>
+                <EuiSpacer size="s" />
+                <EuiText size="s" color="subdued">
+                  <p>
+                    Direct access to your deployment&apos;s endpoints. Create an API key to
+                    authenticate.{' '}
+                    <EuiLink
+                      data-test-subj="obsOnboardingLandingV2ApiEndpointsDocumentation"
+                      href="https://www.elastic.co/docs/deploy-manage/api-keys/elasticsearch-api-keys"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      external
+                    >
+                      {i18n.translate(
+                        'xpack.observabilityOnboarding.version2ApiEndpoints.elasticsearchApiKeysLearnMore',
+                        { defaultMessage: 'Learn more' }
+                      )}
+                    </EuiLink>
+                  </p>
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            {isLandingV2OrV3 ? (
+              activeVersion === 'version3' ? (
+                <Version3ApiEndpointsSplit
+                  searchQuery=""
+                  selectedEndpointId={version3ApiEndpointId}
+                  onSelectEndpoint={setVersion3ApiEndpointId}
+                  dataTestSubjPrefix="obsOnboardingLandingV3ApiEndpoint"
+                  secretsByEndpointId={version3CreatedKeys}
+                  apiKeyManageHref={http.basePath.prepend('/app/management/security/api_keys')}
+                  createApiKeyDataTestSubj="obsOnboardingLandingV3CreateApiKey"
+                  onApiKeyCreated={(result) => {
+                    const endpoint = API_ENDPOINTS.find((e) => e.id === version3ApiEndpointId);
+                    if (
+                      endpoint &&
+                      (endpoint.keyType === 'api_key' || endpoint.keyType === 'kibana_note')
+                    ) {
+                      setVersion3CreatedKeys((prev) => ({
+                        ...prev,
+                        [version3ApiEndpointId]: result.encoded,
+                      }));
+                    }
+                  }}
+                />
+              ) : (
+                <Version2ApiEndpointsSplit
+                  searchQuery=""
+                  selectedEndpointId={version2ApiEndpointId}
+                  onSelectEndpoint={setVersion2ApiEndpointId}
+                  dataTestSubjPrefix="obsOnboardingLandingV2ApiEndpoint"
+                  secretsByEndpointId={createdKeys}
+                  apiKeyManageHref={http.basePath.prepend('/app/management/security/api_keys')}
+                  createApiKeyDataTestSubj="obsOnboardingLandingV2CreateApiKey"
+                  onApiKeyCreated={(result) => {
+                    const endpoint = API_ENDPOINTS.find((e) => e.id === version2ApiEndpointId);
+                    if (
+                      endpoint &&
+                      (endpoint.keyType === 'api_key' || endpoint.keyType === 'kibana_note')
+                    ) {
+                      setCreatedKeys((prev) => ({
+                        ...prev,
+                        [version2ApiEndpointId]: result.encoded,
+                      }));
+                    }
+                  }}
+                />
+              )
+            ) : (
+              <>
                 <div
                   css={css`
-                    display: grid;
-                    grid-template-columns: repeat(2, 1fr);
-                    gap: 12px;
+                    background-color: ${euiTheme.colors.backgroundBaseSubdued};
+                    border-radius: ${euiTheme.border.radius.medium};
+                    padding: 24px;
                   `}
                 >
-                  {API_ENDPOINTS.slice(0, 2).map((endpoint) => {
-                    return (
-                      <EuiCard
-                        key={endpoint.id}
-                        layout="horizontal"
-                        hasBorder
-                        paddingSize="none"
-                        icon={
-                          <div style={{ position: 'relative', display: 'inline-flex' }}>
-                            <CardLogoIcon src={endpoint.logoUrl} alt={endpoint.name} />
-                            <div
-                              style={{
-                                position: 'absolute',
-                                bottom: -5,
-                                right: -5,
-                                width: 20,
-                                height: 20,
-                                borderRadius: 5,
-                                backgroundColor: euiTheme.colors.backgroundBasePlain,
-                                border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                              }}
-                            >
-                              <EuiIcon type="code" size="m" color={euiTheme.colors.textSubdued} />
-                            </div>
-                          </div>
-                        }
-                        title={endpoint.name}
-                        titleElement="h4"
-                        titleSize="xs"
-                        description={endpoint.description}
-                        onClick={() => {
-                          setOpenAccordionId(endpoint.id);
-                          setFlyoutTab('details');
-                        }}
-                        css={css`
-                          border-radius: 6px;
-                          padding: 16px;
-                          box-shadow: none;
-                          cursor: pointer;
-                          .euiCard__top {
-                            margin-inline-end: 12px;
-                            flex-shrink: 0;
-                            align-self: flex-start;
-                          }
-                          .euiCard__content,
-                          .euiCard__children {
-                            margin-bottom: 0;
-                            padding-bottom: 0;
-                          }
-                          & [class*='euiCard__description'] {
-                            margin-block-start: 4px !important;
-                          }
-                        `}
-                      />
-                    );
-                  })}
-                  {showMoreApi &&
-                    API_ENDPOINTS.slice(2).map((endpoint) => {
+                  <div
+                    css={css`
+                      display: grid;
+                      grid-template-columns: repeat(2, 1fr);
+                      gap: 12px;
+                    `}
+                  >
+                    {API_ENDPOINTS.slice(0, 2).map((endpoint) => {
                       return (
                         <EuiCard
                           key={endpoint.id}
@@ -258,7 +302,11 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                           paddingSize="none"
                           icon={
                             <div style={{ position: 'relative', display: 'inline-flex' }}>
-                              <CardLogoIcon src={endpoint.logoUrl} alt={endpoint.name} />
+                              <CardLogoIcon
+                                src={endpoint.logoUrl}
+                                alt={endpoint.name}
+                                logoEuiIcon={endpoint.logoEuiIcon}
+                              />
                               <div
                                 style={{
                                   position: 'absolute',
@@ -308,47 +356,116 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                         />
                       );
                     })}
+                    {showMoreApi &&
+                      API_ENDPOINTS.slice(2).map((endpoint) => {
+                        return (
+                          <EuiCard
+                            key={endpoint.id}
+                            layout="horizontal"
+                            hasBorder
+                            paddingSize="none"
+                            icon={
+                              <div style={{ position: 'relative', display: 'inline-flex' }}>
+                                <CardLogoIcon
+                                  src={endpoint.logoUrl}
+                                  alt={endpoint.name}
+                                  logoEuiIcon={endpoint.logoEuiIcon}
+                                />
+                                <div
+                                  style={{
+                                    position: 'absolute',
+                                    bottom: -5,
+                                    right: -5,
+                                    width: 20,
+                                    height: 20,
+                                    borderRadius: 5,
+                                    backgroundColor: euiTheme.colors.backgroundBasePlain,
+                                    border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                  }}
+                                >
+                                  <EuiIcon
+                                    type="code"
+                                    size="m"
+                                    color={euiTheme.colors.textSubdued}
+                                  />
+                                </div>
+                              </div>
+                            }
+                            title={endpoint.name}
+                            titleElement="h4"
+                            titleSize="xs"
+                            description={endpoint.description}
+                            onClick={() => {
+                              setOpenAccordionId(endpoint.id);
+                              setFlyoutTab('details');
+                            }}
+                            css={css`
+                              border-radius: 6px;
+                              padding: 16px;
+                              box-shadow: none;
+                              cursor: pointer;
+                              .euiCard__top {
+                                margin-inline-end: 12px;
+                                flex-shrink: 0;
+                                align-self: flex-start;
+                              }
+                              .euiCard__content,
+                              .euiCard__children {
+                                margin-bottom: 0;
+                                padding-bottom: 0;
+                              }
+                              & [class*='euiCard__description'] {
+                                margin-block-start: 4px !important;
+                              }
+                            `}
+                          />
+                        );
+                      })}
+                  </div>
                 </div>
-              </div>
-              <div
-                css={css`
-                  position: relative;
-                  text-align: center;
-                  margin-top: 12px;
-                `}
-              >
-                <EuiHorizontalRule
-                  margin="none"
-                  css={css`
-                    position: absolute;
-                    top: 50%;
-                    transform: translateY(-50%);
-                  `}
-                />
-                <span
+                <div
                   css={css`
                     position: relative;
-                    background-color: ${euiTheme.colors.backgroundBasePlain};
-                    padding: 0 8px;
+                    text-align: center;
+                    margin-top: 12px;
                   `}
                 >
-                  <EuiButtonEmpty
-                    data-test-subj="observabilityOnboardingOnboardingFlowFormButton"
-                    size="s"
-                    iconType={showMoreApi ? 'arrowUp' : 'arrowDown'}
-                    iconSide="right"
-                    onClick={() => setShowMoreApi((prev) => !prev)}
+                  <EuiHorizontalRule
+                    margin="none"
+                    css={css`
+                      position: absolute;
+                      top: 50%;
+                      transform: translateY(-50%);
+                    `}
+                  />
+                  <span
+                    css={css`
+                      position: relative;
+                      background-color: ${euiTheme.colors.backgroundBasePlain};
+                      padding: 0 8px;
+                    `}
                   >
-                    {showMoreApi ? 'Show less' : 'Show more'}
-                  </EuiButtonEmpty>
-                </span>
-              </div>
-            </>
-          )}
+                    <EuiButtonEmpty
+                      data-test-subj="observabilityOnboardingOnboardingFlowFormButton"
+                      size="s"
+                      iconType={showMoreApi ? 'arrowUp' : 'arrowDown'}
+                      iconSide="right"
+                      onClick={() => setShowMoreApi((prev) => !prev)}
+                    >
+                      {showMoreApi ? 'Show less' : 'Show more'}
+                    </EuiButtonEmpty>
+                  </span>
+                </div>
+              </>
+            )}
+          </EuiFlexGroup>
 
           {/* API endpoint detail flyout */}
           {openAccordionId &&
-            activeVersion !== 'version2' &&
+            !isLandingV2OrV3 &&
             (() => {
               const endpoint = API_ENDPOINTS.find((e) => e.id === openAccordionId);
               if (!endpoint) return null;
@@ -380,7 +497,11 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                   <EuiFlyoutHeader>
                     <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
                       <EuiFlexItem grow={false}>
-                        <CardLogoIcon src={endpoint.logoUrl} alt={endpoint.name} />
+                        <CardLogoIcon
+                          src={endpoint.logoUrl}
+                          alt={endpoint.name}
+                          logoEuiIcon={endpoint.logoEuiIcon}
+                        />
                       </EuiFlexItem>
                       <EuiFlexItem>
                         <EuiTitle size="s">
@@ -501,7 +622,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
             })()}
 
           {/* Integrations section */}
-          <div style={{ height: 64 }} />
+          <div style={{ height: 40 }} />
           <EuiTitle size="s">
             <h3>Integrations</h3>
           </EuiTitle>
@@ -518,11 +639,58 @@ export const OnboardingFlowForm: FunctionComponent = () => {
               background-color: ${euiTheme.colors.backgroundBaseSubdued};
               border-radius: ${euiTheme.border.radius.medium};
               padding: 24px;
+              min-width: 0;
+              ${activeVersion === 'version2' ? 'margin-bottom: 24px;' : ''}
             `}
           >
-            {allSections.map((section, index) => (
-              <div key={section.title}>
-                <div style={{ height: index === 0 ? 0 : 40 }} />
+            {isLandingV2OrV3 ? (
+              <div
+                ref={
+                  activeVersion === 'version3'
+                    ? setVersion3IntegrationsPackageHost
+                    : setVersion2IntegrationsPackageHost
+                }
+                style={{
+                  /* Only separate portaled package hits from the grid when search is active. */
+                  marginBottom: integrationSearch.trim() ? 40 : 0,
+                }}
+              />
+            ) : null}
+            {(!isLandingV2OrV3 || !integrationSearch) && (
+              <>
+                {allSections.map((section, index) => (
+                  <div key={section.title}>
+                    <div style={{ height: index === 0 ? 0 : 40 }} />
+                    <EuiText
+                      size="s"
+                      css={css`
+                        font-weight: ${euiTheme.font.weight.bold};
+                        color: ${euiTheme.colors.text};
+                        margin-bottom: 8px;
+                      `}
+                    >
+                      <p>{section.title}</p>
+                    </EuiText>
+                    <div
+                      style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}
+                    >
+                      {section.tiles.map((tile) => (
+                        <IntegrationCard
+                          key={tile.id}
+                          name={tile.name}
+                          description={tile.description}
+                          logoDomain={tile.logoDomain}
+                          logoUrl={tile.logoUrl}
+                          layout="horizontal"
+                          onClick={() => navigate(`/add-data/${tile.id}`)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ))}
+
+                {/* Popular integrations row */}
+                <div style={{ height: 40 }} />
                 <EuiText
                   size="s"
                   css={css`
@@ -531,211 +699,185 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                     margin-bottom: 8px;
                   `}
                 >
-                  <p>{section.title}</p>
+                  <p>More integrations</p>
                 </EuiText>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
-                  {section.tiles.map((tile) => (
-                    <IntegrationCard
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(5, minmax(0, 1fr)) minmax(0, 2fr)',
+                    gap: 12,
+                    alignItems: 'start',
+                  }}
+                >
+                  {POPULAR_INTEGRATION_TILES.map((tile) => (
+                    <EuiCard
                       key={tile.id}
-                      name={tile.name}
-                      description={tile.description}
-                      logoDomain={tile.logoDomain}
-                      logoUrl={tile.logoUrl}
-                      layout="horizontal"
-                      onClick={() => navigate(`/add-data/${tile.id}`)}
+                      title={tile.name}
+                      titleElement="h4"
+                      titleSize="xs"
+                      description=""
+                      icon={<CardLogoIcon src={tile.logoUrl ?? ''} alt={`${tile.name} logo`} />}
+                      layout="vertical"
+                      hasBorder
+                      paddingSize="none"
+                      onClick={() => navigate(`/add-data/${tile.id.replace('popular-', '')}`)}
+                      css={css`
+                        border-radius: 6px;
+                        box-shadow: ${euiTheme.shadows.s};
+                        padding: 16px;
+                        cursor: pointer;
+                        text-align: center;
+                        transition: box-shadow 150ms ease-in;
+                        &:hover,
+                        &:focus {
+                          box-shadow: ${euiTheme.shadows.m};
+                        }
+                        .euiCard__top {
+                          display: flex;
+                          justify-content: center;
+                          margin-bottom: 12px;
+                        }
+                        .euiCard__icon {
+                          margin-block-start: 0;
+                        }
+                        .euiCard__title {
+                          font-family: ${euiTheme.font.family};
+                          font-weight: ${euiTheme.font.weight.bold};
+                          color: ${euiTheme.colors.text};
+                        }
+                        .euiCard__description,
+                        .euiCard__children {
+                          display: none;
+                        }
+                        .euiCard__content {
+                          margin-bottom: 0;
+                          padding-bottom: 0;
+                        }
+                      `}
                     />
                   ))}
-                </div>
-              </div>
-            ))}
-
-            {/* Popular integrations row */}
-            <div style={{ height: 40 }} />
-            <EuiText
-              size="s"
-              css={css`
-                font-weight: ${euiTheme.font.weight.bold};
-                color: ${euiTheme.colors.text};
-                margin-bottom: 8px;
-              `}
-            >
-              <p>More integrations</p>
-            </EuiText>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(5, minmax(0, 1fr)) minmax(0, 2fr)',
-                gap: 12,
-                alignItems: 'start',
-              }}
-            >
-              {POPULAR_INTEGRATION_TILES.map((tile) => (
-                <EuiCard
-                  key={tile.id}
-                  title={tile.name}
-                  titleElement="h4"
-                  titleSize="xs"
-                  description=""
-                  icon={<CardLogoIcon src={tile.logoUrl ?? ''} alt={`${tile.name} logo`} />}
-                  layout="vertical"
-                  hasBorder
-                  paddingSize="none"
-                  onClick={() => navigate(`/add-data/${tile.id.replace('popular-', '')}`)}
-                  css={css`
-                    border-radius: 6px;
-                    box-shadow: ${euiTheme.shadows.s};
-                    padding: 16px;
-                    cursor: pointer;
-                    text-align: center;
-                    transition: box-shadow 150ms ease-in;
-                    &:hover,
-                    &:focus {
-                      box-shadow: ${euiTheme.shadows.m};
-                    }
-                    .euiCard__top {
-                      display: flex;
-                      justify-content: center;
-                      margin-bottom: 12px;
-                    }
-                    .euiCard__icon {
-                      margin-block-start: 0;
-                    }
-                    .euiCard__title {
-                      font-family: ${euiTheme.font.family};
-                      font-weight: ${euiTheme.font.weight.bold};
-                      color: ${euiTheme.colors.text};
-                    }
-                    .euiCard__description,
-                    .euiCard__children {
-                      display: none;
-                    }
-                    .euiCard__content {
-                      margin-bottom: 0;
-                      padding-bottom: 0;
-                    }
-                  `}
-                />
-              ))}
-              <EuiCard
-                title="Browse all"
-                titleElement="h4"
-                titleSize="xs"
-                description=""
-                icon={
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      height: 40,
-                      overflow: 'hidden',
-                    }}
-                  >
-                    {[
-                      {
-                        id: 'nginx',
-                        name: 'Nginx',
-                        url: `${ELASTIC_LOGOS}/nginx/img/logo_nginx.svg`,
-                      },
-                      {
-                        id: 'rabbitmq',
-                        name: 'RabbitMQ',
-                        url: `${ELASTIC_LOGOS}/rabbitmq/img/logo_rabbitmq.svg`,
-                      },
-                      {
-                        id: 'apache',
-                        name: 'Apache',
-                        url: `${ELASTIC_LOGOS}/apache/img/logo_apache.svg`,
-                      },
-                      {
-                        id: 'couchbase',
-                        name: 'Couchbase',
-                        url: `${ELASTIC_LOGOS}/couchbase/img/couchbase-logo.svg`,
-                      },
-                      {
-                        id: 'logstash',
-                        name: 'Logstash',
-                        url: `${ELASTIC_LOGOS}/logstash/img/logo_logstash.svg`,
-                      },
-                      {
-                        id: 'redis',
-                        name: 'Redis',
-                        url: `${ELASTIC_LOGOS}/redis/img/logo_redis.svg`,
-                      },
-                      {
-                        id: 'mysql',
-                        name: 'MySQL',
-                        url: `${ELASTIC_LOGOS}/mysql/img/logo_mysql.svg`,
-                      },
-                    ].map((logo, i, arr) => (
+                  <EuiCard
+                    title="Browse all"
+                    titleElement="h4"
+                    titleSize="xs"
+                    description=""
+                    icon={
                       <div
-                        key={logo.id}
                         style={{
-                          width: 40,
-                          height: 40,
-                          borderRadius: 8,
-                          backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-                          border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          marginLeft: i === 0 ? 0 : -10,
-                          zIndex: arr.length - i,
-                          position: 'relative',
+                          height: 40,
                           overflow: 'hidden',
-                          flexShrink: 0,
                         }}
                       >
-                        <img
-                          src={logo.url}
-                          alt={logo.name}
-                          style={{ width: 24, height: 24, objectFit: 'contain' }}
-                        />
+                        {[
+                          {
+                            id: 'nginx',
+                            name: 'Nginx',
+                            url: `${ELASTIC_LOGOS}/nginx/img/logo_nginx.svg`,
+                          },
+                          {
+                            id: 'rabbitmq',
+                            name: 'RabbitMQ',
+                            url: `${ELASTIC_LOGOS}/rabbitmq/img/logo_rabbitmq.svg`,
+                          },
+                          {
+                            id: 'apache',
+                            name: 'Apache',
+                            url: `${ELASTIC_LOGOS}/apache/img/logo_apache.svg`,
+                          },
+                          {
+                            id: 'couchbase',
+                            name: 'Couchbase',
+                            url: `${ELASTIC_LOGOS}/couchbase/img/couchbase-logo.svg`,
+                          },
+                          {
+                            id: 'logstash',
+                            name: 'Logstash',
+                            url: `${ELASTIC_LOGOS}/logstash/img/logo_logstash.svg`,
+                          },
+                          {
+                            id: 'redis',
+                            name: 'Redis',
+                            url: `${ELASTIC_LOGOS}/redis/img/logo_redis.svg`,
+                          },
+                          {
+                            id: 'mysql',
+                            name: 'MySQL',
+                            url: `${ELASTIC_LOGOS}/mysql/img/logo_mysql.svg`,
+                          },
+                        ].map((logo, i, arr) => (
+                          <div
+                            key={logo.id}
+                            style={{
+                              width: 40,
+                              height: 40,
+                              borderRadius: 8,
+                              backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+                              border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              marginLeft: i === 0 ? 0 : -10,
+                              zIndex: arr.length - i,
+                              position: 'relative',
+                              overflow: 'hidden',
+                              flexShrink: 0,
+                            }}
+                          >
+                            <img
+                              src={logo.url}
+                              alt={logo.name}
+                              style={{ width: 24, height: 24, objectFit: 'contain' }}
+                            />
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                }
-                layout="vertical"
-                hasBorder
-                paddingSize="none"
-                onClick={() => application.navigateToApp('integrations', { path: '/browse' })}
-                css={css`
-                  border-radius: 6px;
-                  box-shadow: ${euiTheme.shadows.s};
-                  padding: 16px;
-                  cursor: pointer;
-                  text-align: center;
-                  transition: box-shadow 150ms ease-in;
-                  &:hover,
-                  &:focus {
-                    box-shadow: ${euiTheme.shadows.m};
-                  }
-                  .euiCard__top {
-                    display: flex;
-                    justify-content: center;
-                    margin-bottom: 12px;
-                  }
-                  .euiCard__icon {
-                    margin-block-start: 0;
-                  }
-                  .euiCard__title {
-                    font-family: ${euiTheme.font.family};
-                    font-weight: ${euiTheme.font.weight.bold};
-                    color: ${euiTheme.colors.text};
-                  }
-                  .euiCard__description,
-                  .euiCard__children {
-                    display: none;
-                  }
-                  .euiCard__content {
-                    margin-bottom: 0;
-                    padding-bottom: 0;
-                  }
-                `}
-              />
-            </div>
+                    }
+                    layout="vertical"
+                    hasBorder
+                    paddingSize="none"
+                    onClick={() => application.navigateToApp('integrations', { path: '/browse' })}
+                    css={css`
+                      border-radius: 6px;
+                      box-shadow: ${euiTheme.shadows.s};
+                      padding: 16px;
+                      cursor: pointer;
+                      text-align: center;
+                      transition: box-shadow 150ms ease-in;
+                      &:hover,
+                      &:focus {
+                        box-shadow: ${euiTheme.shadows.m};
+                      }
+                      .euiCard__top {
+                        display: flex;
+                        justify-content: center;
+                        margin-bottom: 12px;
+                      }
+                      .euiCard__icon {
+                        margin-block-start: 0;
+                      }
+                      .euiCard__title {
+                        font-family: ${euiTheme.font.family};
+                        font-weight: ${euiTheme.font.weight.bold};
+                        color: ${euiTheme.colors.text};
+                      }
+                      .euiCard__description,
+                      .euiCard__children {
+                        display: none;
+                      }
+                      .euiCard__content {
+                        margin-bottom: 0;
+                        padding-bottom: 0;
+                      }
+                    `}
+                  />
+                </div>
+              </>
+            )}
           </div>
-          {/* end integrations subdued background */}
+          {/* end integrations content shell */}
         </>
       )}
 
@@ -757,11 +899,15 @@ export const OnboardingFlowForm: FunctionComponent = () => {
               <EuiFlyoutHeader hasBorder>
                 <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                   <EuiFlexItem grow={false}>
-                    <img
-                      src={endpoint.logoUrl}
-                      alt={endpoint.name}
-                      style={{ width: 20, height: 20, objectFit: 'contain' }}
-                    />
+                    {endpoint.logoEuiIcon ? (
+                      <EuiIcon type={endpoint.logoEuiIcon} size="l" title={endpoint.name} />
+                    ) : (
+                      <img
+                        src={endpoint.logoUrl}
+                        alt={endpoint.name}
+                        style={{ width: 20, height: 20, objectFit: 'contain' }}
+                      />
+                    )}
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiTitle size="s">
@@ -868,7 +1014,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
             padding-block-end: 80px;
           `}
         >
-          <div style={{ height: 64 }} />
+          <div style={{ height: 40 }} />
           <EuiTitle size="s">
             <h3>Not ready to add data?</h3>
           </EuiTitle>

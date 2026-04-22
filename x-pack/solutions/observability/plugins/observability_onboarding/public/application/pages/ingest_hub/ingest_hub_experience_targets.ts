@@ -14,5 +14,8 @@ export function isIngestHubVersion2AddDataPage(
   activeVersion: IngestHubVersion,
   activeNavId: string
 ): boolean {
-  return activeVersion === 'version2' && activeNavId === INGEST_HUB_ADD_DATA_NAV_ID;
+  return (
+    (activeVersion === 'version2' || activeVersion === 'version3') &&
+    activeNavId === INGEST_HUB_ADD_DATA_NAV_ID
+  );
 }

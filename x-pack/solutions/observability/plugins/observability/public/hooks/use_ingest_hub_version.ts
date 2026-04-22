@@ -39,8 +39,17 @@ export function useIngestHubVersion(): {
   }, []);
 
   return {
-    isSkipVersion: version === 'streamsUx' || version === 'agentUx' || version === 'version1' || version === 'version2',
-    isAgentVersion: version === 'agentUx' || version === 'version1' || version === 'version2',
+    isSkipVersion:
+      version === 'streamsUx' ||
+      version === 'agentUx' ||
+      version === 'version1' ||
+      version === 'version2' ||
+      version === 'version3',
+    isAgentVersion:
+      version === 'agentUx' ||
+      version === 'version1' ||
+      version === 'version2' ||
+      version === 'version3',
     isVersion1: version === 'version1',
     isVersion2: version === 'version2',
   };

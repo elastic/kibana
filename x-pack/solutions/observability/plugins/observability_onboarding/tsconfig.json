@@ -49,7 +49,8 @@
     "@kbn/react-query",
     "@kbn/core-security-server",
     "@kbn/streams-plugin",
-    "@kbn/data-views-plugin"
+    "@kbn/data-views-plugin",
+    "@kbn/security-api-key-management"
   ],
   "exclude": ["target/**/*"]
 }

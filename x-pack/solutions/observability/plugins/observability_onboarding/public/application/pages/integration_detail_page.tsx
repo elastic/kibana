@@ -11,6 +11,7 @@ import { EuiEmptyPrompt, EuiTitle } from '@elastic/eui';
 import { PageTemplate } from './template';
 import { useFlowBreadcrumb } from '../shared/use_flow_breadcrumbs';
 import { SECTIONS, POPULAR_INTEGRATION_TILES } from './ingest_hub/ingest_hub_data';
+import { AwsOnboardingPage } from './aws_onboarding_page';
 import { KubernetesOnboardingPage } from './kubernetes_onboarding_page';
 import { IntegrationHeader } from '../header/integration_header';
 
@@ -51,6 +52,10 @@ export const IntegrationDetailPage = () => {
 
   if (integration === 'kubernetes') {
     return <KubernetesOnboardingPage />;
+  }
+
+  if (integration === 'aws') {
+    return <AwsOnboardingPage />;
   }
 
   const tile = allTiles.find(

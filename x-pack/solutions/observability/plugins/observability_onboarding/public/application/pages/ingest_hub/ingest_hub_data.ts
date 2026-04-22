@@ -1052,10 +1052,19 @@ export interface ApiIngestionTile extends IntegrationTile {
 export interface ApiEndpoint {
   id: string;
   name: string;
+  /** Short imperative heading for compact detail panels (e.g. Version 3 white area title). */
+  panelActionTitle: string;
+  /** Short badge labels (often “scope + action”); avoid repeating keywords from {@link ApiEndpoint#panelActionTitle}. */
+  useCaseBullets: readonly string[];
   description: string;
+  /** Action-oriented detail heading: lead with the use case, then how (often the endpoint). */
+  detailTitle: string;
+  /** Action / use-case copy for the version-2 detail panel (shown in subdued body color). */
   details: string;
   docsUrl: string;
   logoUrl: string;
+  /** When set, tabs and cards use this EUI built-in logo instead of `logoUrl` (see EUI Icons). */
+  logoEuiIcon?: 'logoCloud';
   getEndpointUrl: (origin: string) => string;
   keyType: 'api_key' | 'enrollment_token' | 'kibana_note';
   /** Example key or token shown until the user creates a real credential in-session. */
@@ -1073,9 +1082,13 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
   {
     id: 'endpoint-elasticsearch',
     name: 'Elasticsearch',
-    description: 'The core datastore URL.',
+    panelActionTitle: 'Index and query data',
+    useCaseBullets: ['Client applications', 'Batch pipelines', 'HTTPS API'],
+    detailTitle: 'Index and query your data via the Elasticsearch REST endpoint',
+    description:
+      'Push and query documents from apps, jobs, and pipelines using the Elasticsearch REST API when you need direct control over reads and writes.',
     details:
-      'The core datastore URL. Use this when connecting directly via the Elasticsearch API or client libraries (Python, JS, Go, etc.).',
+      'Push and query documents from apps, jobs, and pipelines using the Elasticsearch REST API when you need direct control over reads and writes.',
     docsUrl: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/rest-apis.html',
     logoUrl: `${ELASTIC_LOGOS}/elasticsearch/img/logo_elasticsearch.svg`,
     getEndpointUrl: (origin) => `${origin}/elasticsearch`,
@@ -1091,10 +1104,13 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
   {
     id: 'endpoint-otlp',
     name: 'Ingest - OTLP',
+    panelActionTitle: 'Send OpenTelemetry data',
+    useCaseBullets: ['SDK sources', 'Collector tier', 'Spans & metrics'],
+    detailTitle: 'Stream OpenTelemetry signals to the OTLP endpoint',
     description:
-      "Use this if you're sending data through OpenTelemetry, whether from an OTel SDK-instrumented app or an OTel Collector pipeline.",
+      'Send traces, metrics, and logs from OpenTelemetry SDKs or Collectors into Elastic when you standardize on OTel across services.',
     details:
-      "Use this if you're sending data through OpenTelemetry, whether from an OTel SDK-instrumented app or an OTel Collector pipeline.",
+      'Send traces, metrics, and logs from OpenTelemetry SDKs or Collectors into Elastic when you standardize on OTel across services.',
     docsUrl: 'https://www.elastic.co/guide/en/observability/current/opentelemetry.html',
     logoUrl: 'https://opentelemetry.io/img/logos/opentelemetry-logo-nav.png',
     getEndpointUrl: (origin) => `${origin}/otlp`,
@@ -1110,9 +1126,13 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
   {
     id: 'endpoint-apm',
     name: 'Elastic APM',
-    description: 'The endpoint for Elastic APM agents.',
+    panelActionTitle: 'Capture application performance',
+    useCaseBullets: ['Dependency maps', 'Error floods', 'SLO signals'],
+    detailTitle: 'Observe application performance via the Elastic APM endpoint',
+    description:
+      'Instrument your services with Elastic APM agents to capture traces, errors, and latency when you want deep, automatic application performance visibility.',
     details:
-      "The endpoint for Elastic APM agents. Use this when you've instrumented your application with an Elastic APM agent (Java, Node.js, Python, Ruby, etc.).",
+      'Instrument your services with Elastic APM agents to capture traces, errors, and latency when you want deep, automatic application performance visibility.',
     docsUrl: 'https://www.elastic.co/guide/en/apm/guide/current/index.html',
     logoUrl: `${ELASTIC_LOGOS}/apm/img/logo_apm.svg`,
     getEndpointUrl: (origin) => `${origin}/apm`,
@@ -1127,9 +1147,13 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
   {
     id: 'endpoint-fleet',
     name: 'Fleet',
-    description: 'The enrollment endpoint for Elastic Agent.',
+    panelActionTitle: 'Enroll and manage agents',
+    useCaseBullets: ['Endpoint join', 'Config rollout', 'Telemetry egress'],
+    detailTitle: 'Enroll and manage Elastic Agents via the Fleet endpoint',
+    description:
+      'Point Elastic Agents at this URL so hosts enroll, pull policies, and ship data. Use this when you manage agents and configuration from Fleet.',
     details:
-      'The enrollment endpoint for Elastic Agent. Use this to connect agents running on your hosts, VMs, or containers to Fleet for centralized management.',
+      'Point Elastic Agents at this URL so hosts enroll, pull policies, and ship data. Use this when you manage agents and configuration from Fleet.',
     docsUrl: 'https://www.elastic.co/guide/en/fleet/current/fleet-overview.html',
     logoUrl: `${ELASTIC_LOGOS}/fleet_server/img/logo_fleet_server.svg`,
     getEndpointUrl: (origin) => `${origin}/fleet`,
@@ -1146,11 +1170,16 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
   {
     id: 'endpoint-cloud-id',
     name: 'Cloud ID',
-    description: 'A shorthand connection string for Beats and Logstash.',
+    panelActionTitle: 'Connect with Cloud ID',
+    useCaseBullets: ['Beats YAML', 'Logstash URLs', 'Deployment bundle'],
+    detailTitle: 'Connect Beats or Logstash to Elastic Cloud with Cloud ID',
+    description:
+      'Paste Cloud ID into Beats or Logstash so shippers connect to Elastic Cloud without hand-typing hosts, ports, or cluster paths.',
     details:
-      'A shorthand connection string for Beats and Logstash. Use this instead of manually specifying the Elasticsearch and Kibana URLs when configuring your pipelines.',
+      'Paste Cloud ID into Beats or Logstash so shippers connect to Elastic Cloud without hand-typing hosts, ports, or cluster paths.',
     docsUrl: 'https://www.elastic.co/guide/en/cloud/current/ec-cloud-id.html',
     logoUrl: `${ELASTIC_LOGOS}/elasticsearch/img/logo_elasticsearch.svg`,
+    logoEuiIcon: 'logoCloud',
     getEndpointUrl: () =>
       'my-production-deployment:dXMtY2VudHJhbDEuZ2NwLmNsb3VkLmVzLmlvJGFhYWJiYmNjY2RkZGVlZWZmZmdnZ2hoaGlpaWpqamtra2xsbG1tbW5ub29wcXBxcnJzc3N0dHR1dXV2dnd4eHl5enowMTIzNDU2Nzg5QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVphYmNkZWZnaGlqa2xtbm9wcXJzdHV2d3h5ejAxMjM0NTY3ODlhYmNkZWZnaGlqa2xtbm9wcXJzdHV2d3h5ejAxMjM0NTY3ODlhYmNkZWZnaGlqa2xtbm9wcXJzdHV2d3h5ejAxMjM0NTY3OA',
     sampleSecret:
@@ -1164,9 +1193,13 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
   {
     id: 'endpoint-kibana',
     name: 'Kibana',
-    description: 'The URL for the Kibana interface.',
+    panelActionTitle: 'Automate with the Kibana API',
+    useCaseBullets: ['CI workflows', 'Space exports', 'Detection rules'],
+    detailTitle: 'Automate dashboards and alerts using the Kibana API endpoint',
+    description:
+      'Call the Kibana HTTP APIs to automate dashboards, saved objects, and alerting from scripts, CI jobs, or other tools that integrate with Kibana.',
     details:
-      'The URL for the Kibana interface. Use this to access dashboards, Discover, and all Elastic observability and analytics features, or when calling Kibana APIs directly.',
+      'Call the Kibana HTTP APIs to automate dashboards, saved objects, and alerting from scripts, CI jobs, or other tools that integrate with Kibana.',
     docsUrl: 'https://www.elastic.co/guide/en/kibana/current/api.html',
     logoUrl: `${ELASTIC_LOGOS}/kibana/img/logo_kibana.svg`,
     getEndpointUrl: (origin) => origin,

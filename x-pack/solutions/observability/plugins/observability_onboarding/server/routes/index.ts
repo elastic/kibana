@@ -11,12 +11,14 @@ import { firehoseOnboardingRouteRepository } from './firehose/route';
 import { otelHostOnboardingRouteRepository } from './otel_host/route';
 import { otelApmOnboardingRouteRepository } from './otel_apm/route';
 import { cloudforwarderOnboardingRouteRepository } from './cloudforwarder/route';
+import { awsOnboardingRouteRepository } from './aws_onboarding/route';
 
 function getTypedObservabilityOnboardingServerRouteRepository() {
   const repository = {
     ...flowRouteRepository,
     ...kubernetesOnboardingRouteRepository,
     ...firehoseOnboardingRouteRepository,
+    ...awsOnboardingRouteRepository,
     ...otelHostOnboardingRouteRepository,
     ...otelApmOnboardingRouteRepository,
     ...cloudforwarderOnboardingRouteRepository,

@@ -5,66 +5,84 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButton,
   EuiCodeBlock,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiListGroup,
-  EuiListGroupItem,
+  EuiFormLabel,
   EuiPanel,
-  EuiSplitButton,
+  EuiTab,
+  EuiTabs,
   EuiText,
-  EuiTitle,
+  EuiToolTip,
+  euiFontSize,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
+import type { CreateAPIKeyResult } from '@kbn/security-api-key-management';
 import { CardLogoIcon } from './pages/ingest_hub/ingest_hub_components';
 import { API_ENDPOINTS } from './pages/ingest_hub/ingest_hub_data';
+import { Version2ApiEndpointsCreateApiKeyButton } from './version_2_api_endpoints_create_api_key_button';
+
+/** Single-line endpoint / secret row (aligned fields, minimal vertical padding). */
+const CODE_BLOCK_FIXED_HEIGHT_PX = 36;
+
+/**
+ * Vertical space after the tab strip (divider) before the detail title.
+ * Reused below the use-case badges before the Endpoint / API key fields so spacing matches.
+ */
+const API_ENDPOINT_PANEL_SECTION_GAP_PX = 16;
+
+/** Expanded label width for the selected tab (icon-only tabs collapse label via `max-width: 0`). */
+const TAB_SELECTED_NAME_MAX_WIDTH_PX = 240;
 
 export interface Version2ApiEndpointsSplitProps {
   /** Lowercased trimmed filter string, or empty for full list */
   searchQuery: string;
   selectedEndpointId: string;
   onSelectEndpoint: (id: string) => void;
-  prependBasePath?: (path: string) => string;
   /** Prefix for `data-test-subj` attributes */
   dataTestSubjPrefix?: string;
-  /** When set, the primary create action calls this instead of navigating to Stack Management or Fleet. */
-  onCreateApiKey?: () => void;
   /** When set, replaces each endpoint’s `sampleSecret` in the secret code block. */
   secretsByEndpointId?: Record<string, string>;
+  /** Link to Stack Management → API keys (Create API key flyout + Manage). */
+  apiKeyManageHref: string;
+  /** Called when the user creates an API key from the flyout (non-enrollment endpoints). */
+  onApiKeyCreated: (result: CreateAPIKeyResult) => void;
+  /** `data-test-subj` for the Create API key split control (without suffix). */
+  createApiKeyDataTestSubj: string;
 }
 
 export const Version2ApiEndpointsSplit: React.FC<Version2ApiEndpointsSplitProps> = ({
   searchQuery,
   selectedEndpointId,
   onSelectEndpoint,
-  prependBasePath,
   dataTestSubjPrefix = 'obsOnboardingV2ApiEndpoints',
-  onCreateApiKey,
   secretsByEndpointId,
+  apiKeyManageHref,
+  onApiKeyCreated,
+  createApiKeyDataTestSubj,
 }) => {
-  const { euiTheme } = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
+  const endpointCodeLabelId = useGeneratedHtmlId({ prefix: 'obsOnboardingV2EndpointLabel' });
+  const secretCodeLabelId = useGeneratedHtmlId({ prefix: 'obsOnboardingV2SecretLabel' });
   const q = searchQuery;
-  const filteredEndpoints = !q
-    ? API_ENDPOINTS
-    : API_ENDPOINTS.filter(
-        (e) =>
-          e.name.toLowerCase().includes(q) ||
-          e.description.toLowerCase().includes(q) ||
-          e.details.toLowerCase().includes(q)
-      );
-
-  const [splitPanelOpen, setSplitPanelOpen] = useState(false);
-
-  useEffect(() => {
-    setSplitPanelOpen(false);
-  }, [selectedEndpointId, q]);
+  const filteredEndpoints = useMemo(
+    () =>
+      !q
+        ? API_ENDPOINTS
+        : API_ENDPOINTS.filter(
+            (e) =>
+              e.name.toLowerCase().includes(q) ||
+              e.detailTitle.toLowerCase().includes(q) ||
+              e.description.toLowerCase().includes(q) ||
+              e.details.toLowerCase().includes(q) ||
+              e.useCaseBullets.some((b) => b.toLowerCase().includes(q))
+          ),
+    [q]
+  );
 
   if (filteredEndpoints.length === 0) {
     return <EuiText color="subdued">No API endpoints match your search.</EuiText>;
@@ -74,8 +92,6 @@ export const Version2ApiEndpointsSplit: React.FC<Version2ApiEndpointsSplitProps>
     filteredEndpoints.find((e) => e.id === selectedEndpointId) ?? filteredEndpoints[0];
   const origin = window.location.origin;
   const endpointUrl = selected.getEndpointUrl(origin);
-  const keysHref =
-    prependBasePath?.('/app/management/security/api_keys') ?? '/app/management/security/api_keys';
   const secretValue = secretsByEndpointId?.[selected.id];
   const isEnrollment = selected.keyType === 'enrollment_token';
   const secretEmptyPlaceholder = isEnrollment ? 'No enrollment token yet' : 'No API key yet';
@@ -83,35 +99,46 @@ export const Version2ApiEndpointsSplit: React.FC<Version2ApiEndpointsSplitProps>
   const secretIsMissing = displayedSecret === secretEmptyPlaceholder;
   const endpointFieldLabel = selected.id === 'endpoint-cloud-id' ? 'Cloud ID' : 'Endpoint';
   const secretFieldLabel = isEnrollment ? 'Enrollment token' : 'API key';
-  const createPrimaryLabel = isEnrollment ? 'Create enrollment token' : 'Create API key';
-  const createPrimaryHref = onCreateApiKey
-    ? undefined
-    : isEnrollment && selected.openUrl
-    ? selected.openUrl(origin)
-    : keysHref;
-  const showManageApiKeys = selected.keyType === 'api_key' || selected.keyType === 'kibana_note';
-  const showOpenFleetWithFlyout =
-    isEnrollment && Boolean(selected.openUrl) && onCreateApiKey !== undefined;
   const fleetUrl = selected.openUrl?.(origin);
-  /** Same max height for every endpoint so the detail card does not resize when switching. */
-  const codeBlockFixedHeightPx = 56;
+  /** Fixed code block row height so endpoint / secret fields stay aligned. */
   const codeBlockShortCss = css`
+    &.euiCodeBlock {
+      padding-block: 0 !important;
+      box-sizing: border-box;
+      inline-size: 100%;
+      max-inline-size: 100%;
+    }
+    min-block-size: ${CODE_BLOCK_FIXED_HEIGHT_PX}px;
+    max-block-size: ${CODE_BLOCK_FIXED_HEIGHT_PX}px;
     min-inline-size: 0;
-    min-block-size: ${codeBlockFixedHeightPx}px;
-    max-block-size: ${codeBlockFixedHeightPx}px;
     .euiCodeBlock__pre {
+      box-sizing: border-box;
+      inline-size: 100%;
+      min-inline-size: 0;
+      block-size: ${CODE_BLOCK_FIXED_HEIGHT_PX}px;
+      min-block-size: ${CODE_BLOCK_FIXED_HEIGHT_PX}px;
+      max-block-size: ${CODE_BLOCK_FIXED_HEIGHT_PX}px;
+      padding-block: 0 !important;
+      padding-inline: ${euiTheme.size.s};
       display: flex;
       align-items: center;
       overflow: hidden;
-      min-block-size: ${codeBlockFixedHeightPx}px;
-      max-block-size: ${codeBlockFixedHeightPx}px;
+      white-space: nowrap !important;
     }
     .euiCodeBlock__code {
       flex: 1 1 auto;
       min-inline-size: 0;
+      max-inline-size: 100%;
+      display: block;
       overflow: hidden;
       text-overflow: ellipsis;
-      white-space: nowrap;
+      white-space: nowrap !important;
+    }
+    .euiCodeBlock__controls {
+      inset-block-start: 50%;
+      transform: translateY(-50%);
+      height: auto;
+      align-items: center;
     }
   `;
   const secretCodeSubduedCss = secretIsMissing
@@ -123,267 +150,256 @@ export const Version2ApiEndpointsSplit: React.FC<Version2ApiEndpointsSplitProps>
       `
     : undefined;
 
+  const showSecretRowAction =
+    (isEnrollment && Boolean(fleetUrl)) ||
+    selected.keyType === 'api_key' ||
+    selected.keyType === 'kibana_note';
+
+  /**
+   * Logo tabs: 8px gap; 8px under the logo before the tab divider.
+   * `EuiToolTip` sits between `.euiTab__content` and `[data-endpoint-tab-content]`, so use tab
+   * `padding-bottom` instead of a direct-child margin selector (which never matched).
+   */
+  const tabLogoTabsCss = css`
+    flex-shrink: 0;
+    align-self: stretch;
+    margin-bottom: ${API_ENDPOINT_PANEL_SECTION_GAP_PX}px;
+    align-items: flex-start;
+    gap: 8px;
+    .euiTab {
+      align-items: flex-start;
+      padding-top: 4px;
+      padding-inline: 4px;
+      padding-bottom: 8px;
+      transition: color ${euiTheme.animation.fast} ease-out;
+    }
+    .euiTab .euiTab__content {
+      overflow: visible;
+      text-overflow: clip;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      line-height: ${euiFontSize(euiThemeContext, 's').lineHeight};
+    }
+    .euiTab-isSelected [data-endpoint-tab-logo] {
+      display: inline-flex;
+      line-height: 0;
+    }
+  `;
+
   return (
     <EuiPanel
-      data-test-subj={`${dataTestSubjPrefix}Split`}
-      color="subdued"
-      hasBorder={false}
+      data-test-subj={`${dataTestSubjPrefix}Split ${dataTestSubjPrefix}Detail`}
+      hasBorder={true}
       hasShadow={false}
+      color="plain"
       paddingSize="l"
       grow={false}
+      css={css`
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        align-self: stretch;
+        text-align: start;
+        min-width: 0;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+      `}
     >
-      <EuiFlexGroup gutterSize="l" alignItems="stretch" responsive={true}>
-        <EuiFlexItem
-          grow={false}
-          style={{
-            flexShrink: 0,
-            width: 220,
-            minWidth: 200,
-            alignSelf: 'stretch',
-            display: 'flex',
-            flexDirection: 'column',
-            minHeight: 0,
-          }}
-        >
-          <EuiListGroup
-            flush
-            gutterSize="none"
-            data-test-subj={`${dataTestSubjPrefix}List`}
-            style={{ gap: 4, flex: 1, minHeight: 0 }}
-          >
-            {filteredEndpoints.map((endpoint) => {
-              const isEndpointActive = selected.id === endpoint.id;
-              return (
-                <EuiListGroupItem
-                  key={endpoint.id}
-                  size="s"
-                  css={
-                    isEndpointActive
-                      ? css`
-                          border-radius: ${euiTheme.border.radius.large};
-                          overflow: hidden;
-                        `
-                      : undefined
-                  }
-                  label={
-                    <EuiTitle size="xs">
-                      <h4>{endpoint.name}</h4>
-                    </EuiTitle>
-                  }
-                  isActive={isEndpointActive}
-                  icon={
-                    <span style={{ marginInlineEnd: euiTheme.size.m }}>
-                      <CardLogoIcon src={endpoint.logoUrl} alt="" size="list" />
-                    </span>
-                  }
-                  onClick={() => onSelectEndpoint(endpoint.id)}
-                />
-              );
-            })}
-          </EuiListGroup>
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={true}
-          style={{
-            minWidth: 0,
-            minHeight: 0,
-            display: 'flex',
-            flexDirection: 'column',
-            alignSelf: 'stretch',
-          }}
-        >
-          <EuiPanel
-            data-test-subj={`${dataTestSubjPrefix}Detail`}
-            hasBorder={false}
-            hasShadow={false}
-            color="plain"
-            paddingSize="l"
-            grow={false}
-            css={css`
-              flex: 1;
-              min-height: 0;
-              display: flex;
-              flex-direction: column;
-              height: 100%;
-            `}
-          >
-            <EuiFlexGroup
-              alignItems="flexStart"
-              justifyContent="spaceBetween"
-              gutterSize="none"
-              responsive={true}
-              css={css`
-                margin-bottom: 16px;
-                gap: 16px;
-              `}
+      <EuiTabs size="s" data-test-subj={`${dataTestSubjPrefix}Tabs`} css={tabLogoTabsCss}>
+        {filteredEndpoints.map((endpoint) => {
+          const isTabSelected = selected.id === endpoint.id;
+          const nameMaxWidthPx = isTabSelected ? TAB_SELECTED_NAME_MAX_WIDTH_PX : 0;
+
+          return (
+            <EuiTab
+              key={endpoint.id}
+              isSelected={isTabSelected}
+              onClick={() => onSelectEndpoint(endpoint.id)}
+              aria-label={endpoint.name}
+              data-test-subj={`${dataTestSubjPrefix}Tab--${endpoint.id}`}
             >
-              <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
-                <EuiText
-                  size="s"
-                  color="subdued"
+              <EuiToolTip
+                content={endpoint.name}
+                position="top"
+                repositionOnScroll
+                disableScreenReaderOutput
+              >
+                <span
+                  data-endpoint-tab-content
                   css={css`
-                    p {
-                      margin: 0;
-                      display: -webkit-box;
-                      -webkit-line-clamp: 2;
-                      -webkit-box-orient: vertical;
-                      overflow: hidden;
-                    }
+                    display: inline-flex;
+                    align-items: center;
+                    gap: ${euiTheme.size.s};
+                    line-height: 0;
                   `}
                 >
-                  <p>{selected.details}</p>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                {showManageApiKeys ? (
-                  <EuiSplitButton
-                    size="s"
-                    color="primary"
-                    fill={false}
-                    data-test-subj={`${dataTestSubjPrefix}CreateSplit`}
-                  >
-                    <EuiSplitButton.ActionPrimary
-                      data-test-subj={`${dataTestSubjPrefix}CreateApiKey`}
-                      type={onCreateApiKey ? 'button' : undefined}
-                      href={createPrimaryHref}
-                      onClick={onCreateApiKey ? () => onCreateApiKey() : undefined}
-                    >
-                      {createPrimaryLabel}
-                    </EuiSplitButton.ActionPrimary>
-                    <EuiSplitButton.ActionSecondary
-                      data-test-subj={`${dataTestSubjPrefix}ActionsMenu`}
-                      aria-label="More endpoint actions"
-                      onClick={() => setSplitPanelOpen((open) => !open)}
-                      popoverProps={{
-                        isOpen: splitPanelOpen,
-                        closePopover: () => setSplitPanelOpen(false),
-                        panelPaddingSize: 'none',
-                        repositionOnScroll: true,
-                        children: (
-                          <EuiContextMenuPanel
-                            size="s"
-                            items={[
-                              <EuiContextMenuItem
-                                key="manage"
-                                data-test-subj={`${dataTestSubjPrefix}ManageKeys`}
-                                icon="key"
-                                href={keysHref}
-                                onClick={() => setSplitPanelOpen(false)}
-                              >
-                                Manage API keys
-                              </EuiContextMenuItem>,
-                            ]}
-                          />
-                        ),
-                      }}
+                  <span data-endpoint-tab-logo>
+                    <CardLogoIcon
+                      src={endpoint.logoUrl}
+                      alt=""
+                      logoEuiIcon={endpoint.logoEuiIcon}
+                      size="default"
+                      iconBackground="plain"
+                      tileBorderColor={
+                        isTabSelected ? euiTheme.colors.borderStrongPrimary : undefined
+                      }
+                      tileBackgroundColor={
+                        isTabSelected ? euiTheme.colors.backgroundLightPrimary : undefined
+                      }
                     />
-                  </EuiSplitButton>
-                ) : showOpenFleetWithFlyout && fleetUrl ? (
-                  <EuiSplitButton
-                    size="s"
-                    color="primary"
-                    fill={false}
-                    data-test-subj={`${dataTestSubjPrefix}FleetCreateSplit`}
+                  </span>
+                  <span
+                    data-endpoint-tab-name
+                    data-test-subj={`${dataTestSubjPrefix}TabSelectedName--${endpoint.id}`}
+                    aria-hidden={!isTabSelected}
+                    css={css`
+                      display: inline-block;
+                      min-width: 0;
+                      max-width: ${nameMaxWidthPx}px;
+                      overflow: hidden;
+                      white-space: nowrap;
+                      text-overflow: ellipsis;
+                      font-size: ${euiFontSize(euiThemeContext, 's').fontSize};
+                      font-weight: ${euiTheme.font.weight.medium};
+                      color: ${euiTheme.colors.textPrimary};
+                      line-height: ${euiFontSize(euiThemeContext, 's').lineHeight};
+                      vertical-align: middle;
+                      pointer-events: ${isTabSelected ? 'auto' : 'none'};
+                    `}
                   >
-                    <EuiSplitButton.ActionPrimary
-                      data-test-subj={`${dataTestSubjPrefix}CreateApiKey`}
-                      type="button"
-                      onClick={() => {
-                        onCreateApiKey();
-                      }}
-                    >
-                      {createPrimaryLabel}
-                    </EuiSplitButton.ActionPrimary>
-                    <EuiSplitButton.ActionSecondary
-                      data-test-subj={`${dataTestSubjPrefix}ActionsMenu`}
-                      aria-label="More Fleet actions"
-                      onClick={() => setSplitPanelOpen((open) => !open)}
-                      popoverProps={{
-                        isOpen: splitPanelOpen,
-                        closePopover: () => setSplitPanelOpen(false),
-                        panelPaddingSize: 'none',
-                        repositionOnScroll: true,
-                        children: (
-                          <EuiContextMenuPanel
-                            size="s"
-                            items={[
-                              <EuiContextMenuItem
-                                key="open-fleet"
-                                data-test-subj={`${dataTestSubjPrefix}OpenFleet`}
-                                icon="popout"
-                                href={fleetUrl}
-                                onClick={() => setSplitPanelOpen(false)}
-                              >
-                                Open Fleet
-                              </EuiContextMenuItem>,
-                            ]}
-                          />
-                        ),
-                      }}
-                    />
-                  </EuiSplitButton>
-                ) : (
-                  <EuiButton
-                    data-test-subj={`${dataTestSubjPrefix}CreateApiKey`}
-                    size="s"
-                    color="primary"
-                    type={onCreateApiKey ? 'button' : undefined}
-                    href={createPrimaryHref}
-                    onClick={onCreateApiKey ? () => onCreateApiKey() : undefined}
-                  >
-                    {createPrimaryLabel}
-                  </EuiButton>
-                )}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiFlexGroup gutterSize="m" alignItems="flexStart" responsive={true}>
-              <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
-                <EuiFormRow label={endpointFieldLabel} fullWidth style={{ rowGap: 8 }}>
-                  <EuiCodeBlock
-                    language="text"
-                    fontSize="s"
-                    paddingSize="s"
-                    isCopyable
-                    whiteSpace="pre"
-                    title={endpointUrl}
-                    data-test-subj={`${dataTestSubjPrefix}EndpointCode`}
-                    css={codeBlockShortCss}
-                  >
-                    {endpointUrl}
-                  </EuiCodeBlock>
-                </EuiFormRow>
-              </EuiFlexItem>
-              <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
-                <EuiFormRow label={secretFieldLabel} fullWidth style={{ rowGap: 8 }}>
-                  <EuiCodeBlock
-                    language="text"
-                    fontSize="s"
-                    paddingSize="s"
-                    isCopyable={!secretIsMissing}
-                    whiteSpace="pre"
-                    title={displayedSecret}
-                    data-test-subj={`${dataTestSubjPrefix}SecretCode`}
-                    css={
-                      secretCodeSubduedCss
-                        ? [codeBlockShortCss, secretCodeSubduedCss]
-                        : codeBlockShortCss
-                    }
-                  >
-                    {displayedSecret}
-                  </EuiCodeBlock>
-                </EuiFormRow>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <div
-              aria-hidden
-              css={css`
-                flex: 1;
-                min-height: 0;
-              `}
-            />
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+                    {endpoint.name}
+                  </span>
+                </span>
+              </EuiToolTip>
+            </EuiTab>
+          );
+        })}
+      </EuiTabs>
+      <div
+        data-test-subj={`${dataTestSubjPrefix}EndpointSecretGrid`}
+        css={css`
+          display: grid;
+          align-self: stretch;
+          justify-items: stretch;
+          width: 100%;
+          min-width: 0;
+          margin-top: ${API_ENDPOINT_PANEL_SECTION_GAP_PX}px;
+          column-gap: ${euiTheme.size.m};
+          row-gap: ${euiTheme.size.s};
+          grid-template-columns: ${showSecretRowAction
+            ? `minmax(0, 1fr) minmax(0, 1fr) max-content`
+            : `minmax(0, 1fr) minmax(0, 1fr)`};
+          grid-template-areas: ${showSecretRowAction
+            ? `"epLabel secLabel ." "epCode secCode action"`
+            : `"epLabel secLabel" "epCode secCode"`};
+
+          @media (max-width: ${euiTheme.breakpoint.m}px) {
+            grid-template-columns: minmax(0, 1fr);
+            grid-template-areas: ${showSecretRowAction
+              ? `"epLabel" "epCode" "secLabel" "secCode" "action"`
+              : `"epLabel" "epCode" "secLabel" "secCode"`};
+          }
+        `}
+      >
+        <EuiFormLabel
+          id={endpointCodeLabelId}
+          css={css`
+            grid-area: epLabel;
+            margin-block: 0;
+          `}
+        >
+          {endpointFieldLabel}
+        </EuiFormLabel>
+        <EuiFormLabel
+          id={secretCodeLabelId}
+          css={css`
+            grid-area: secLabel;
+            margin-block: 0;
+          `}
+        >
+          {secretFieldLabel}
+        </EuiFormLabel>
+        <div
+          css={css`
+            grid-area: epCode;
+            min-width: 0;
+            min-inline-size: 0;
+            inline-size: 100%;
+          `}
+        >
+          <EuiCodeBlock
+            language="text"
+            fontSize="s"
+            paddingSize="none"
+            isCopyable
+            title={endpointUrl}
+            aria-labelledby={endpointCodeLabelId}
+            data-test-subj={`${dataTestSubjPrefix}EndpointCode`}
+            css={codeBlockShortCss}
+          >
+            {endpointUrl}
+          </EuiCodeBlock>
+        </div>
+        <div
+          css={css`
+            grid-area: secCode;
+            min-width: 0;
+            min-inline-size: 0;
+            inline-size: 100%;
+          `}
+        >
+          <EuiCodeBlock
+            language="text"
+            fontSize="s"
+            paddingSize="none"
+            isCopyable={!secretIsMissing}
+            title={displayedSecret}
+            aria-labelledby={secretCodeLabelId}
+            data-test-subj={`${dataTestSubjPrefix}SecretCode`}
+            css={
+              secretCodeSubduedCss ? [codeBlockShortCss, secretCodeSubduedCss] : codeBlockShortCss
+            }
+          >
+            {displayedSecret}
+          </EuiCodeBlock>
+        </div>
+        {showSecretRowAction ? (
+          <div
+            data-test-subj={`${dataTestSubjPrefix}SecretRowAction`}
+            css={css`
+              grid-area: action;
+              display: flex;
+              align-items: center;
+              justify-content: flex-end;
+              align-self: center;
+              min-width: 0;
+
+              @media (max-width: ${euiTheme.breakpoint.m}px) {
+                justify-self: end;
+              }
+            `}
+          >
+            {isEnrollment && fleetUrl ? (
+              <EuiButton
+                data-test-subj={`${dataTestSubjPrefix}CreateEnrollmentToken`}
+                size="s"
+                color="primary"
+                href={fleetUrl}
+              >
+                Create enrollment token
+              </EuiButton>
+            ) : (
+              <Version2ApiEndpointsCreateApiKeyButton
+                dataTestSubj={createApiKeyDataTestSubj}
+                manageApiKeysHref={apiKeyManageHref}
+                onCreated={onApiKeyCreated}
+              />
+            )}
+          </div>
+        ) : null}
+      </div>
     </EuiPanel>
   );
 };

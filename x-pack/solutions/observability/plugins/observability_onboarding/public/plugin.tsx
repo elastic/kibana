@@ -85,7 +85,7 @@ const VERSION_OPTIONS = [
       <>
         <strong>Version 1</strong>
         <EuiText size="s" color="subdued">
-          <p>Near-term fixes (Add Data, AWS, Kubernetes).</p>
+          <p>Earlier ingest hub prototype in the onboarding app (before the Version 2 canvas).</p>
         </EuiText>
       </>
     ),
@@ -100,6 +100,21 @@ const VERSION_OPTIONS = [
           <p>
             &ldquo;Everything is a stream&rdquo; canvas vision + AI-assisted onboarding +
             AI-generated integrations + progressive disclosure principles.
+          </p>
+        </EuiText>
+      </>
+    ),
+  },
+  {
+    value: 'version3' as IngestHubVersion,
+    inputDisplay: 'Version 3',
+    dropdownDisplay: (
+      <>
+        <strong>Version 3</strong>
+        <EuiText size="s" color="subdued">
+          <p>
+            Same as Version 2: &ldquo;Everything is a stream&rdquo; canvas vision + AI-assisted
+            onboarding + AI-generated integrations + progressive disclosure principles.
           </p>
         </EuiText>
       </>
@@ -311,7 +326,7 @@ const VersionSwitcherNavControl: React.FC<{
       versionStore.setVersion(value);
       sessionStorage.removeItem('ingestHub:showDiscoverTour');
       sessionStorage.removeItem('ingestHub:dataAdded');
-      if (value === 'agentUx' || value === 'version1' || value === 'version2') {
+      if (value === 'agentUx' || value === 'version2' || value === 'version3') {
         navigateToApp?.('observability-overview');
       } else {
         const path = value === 'blockUx' ? '/ingest-hub/integrations' : '/ingest-hub';

@@ -105,6 +105,8 @@ interface CommonApiKeyFlyoutProps {
   defaultMetadata?: string;
   defaultRoleDescriptors?: string;
   defaultExpiration?: string;
+  /** When true, uses the next larger flyout size at each breakpoint (~2× width vs default). */
+  widenFlyout?: boolean;
 }
 
 interface CreateApiKeyFlyoutProps extends CommonApiKeyFlyoutProps {
@@ -184,10 +186,11 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
   readOnly = false,
   currentUser,
   isLoadingCurrentUser,
+  widenFlyout = false,
 }) => {
   const { euiTheme } = useEuiTheme();
   const isSmallScreen = useIsWithinBreakpoints(['xs', 's', 'm']);
-  const flyoutSize = isSmallScreen ? 'm' : 's';
+  const flyoutSize = widenFlyout ? (isSmallScreen ? 'l' : 'm') : isSmallScreen ? 'm' : 's';
   const {
     services: { http, docLinks },
   } = useKibana();
