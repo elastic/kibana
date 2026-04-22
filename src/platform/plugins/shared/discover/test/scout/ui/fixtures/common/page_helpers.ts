@@ -80,19 +80,18 @@ export const expandGridCell = async (
  * Inside an open document-viewer flyout, toggle the grid column for `fieldName`
  * from the field-table tab. Calling this twice on the same field toggles it off.
  *
- * EUI's DataGrid renders `cellAction` buttons inside an "actions wrapper" above
- * the focused cell. The wrapper appears on hover, but only when the pointer is
- * inside EUI's hover zone (the cell itself). Hovering the inner `-name` element
- * is enough to trigger it; the FTR suite does the same by clicking it directly.
+ * EUI's DataGrid renders `cellAction` buttons in several places at once: inline
+ * when the cell is focused AND inside the cell's expansion popover. Multiple
+ * copies share the same data-test-subj, so we scope to the one inside the
+ * focused row's `euiDataGridRowCell__actionsWrapper` to ensure the click hits
+ * the wired-up handler.
  */
 export const toggleColumnInDocViewer = async (page: ScoutPage, fieldName: string) => {
   const nameElement = page.testSubj.locator(`tableDocViewRow-${fieldName}-name`);
   await nameElement.scrollIntoViewIfNeeded();
   await nameElement.hover();
-  // Click focuses the cell, which forces EUI to render the cellAction buttons.
-  await nameElement.click();
 
-  const toggle = page.testSubj.locator(`toggleColumnButton-${fieldName}`);
+  const toggle = page.locator(`[data-test-subj="toggleColumnButton-${fieldName}"]:visible`);
   await toggle.waitFor({ state: 'visible' });
   await toggle.click();
 };
