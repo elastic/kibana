@@ -7,9 +7,12 @@
 
 import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { FullTraceWaterfallOnErrorClick } from '@kbn/apm-types';
 import {
   UnifiedDocViewerObservabilityTraceDocFlyout,
   unifiedDocViewerObservabilityTracesSpanFlyoutId,
+  unifiedDocViewerObservabilityTracesLogsFlyoutId,
+  type UnifiedDocViewerObservabilityTracesDocumentType,
 } from '@kbn/unified-doc-viewer-plugin/public';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
@@ -41,6 +44,12 @@ export function TraceWaterfallFlyout({
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const { dataView, apmIndices } = useAdHocApmDataView();
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
+  const [selectedDocIndex, setSelectedDocIndex] = useState<string | undefined>(undefined);
+  const [activeFlyoutType, setActiveFlyoutType] =
+    useState<UnifiedDocViewerObservabilityTracesDocumentType>(
+      unifiedDocViewerObservabilityTracesSpanFlyoutId
+    );
+  const [activeSection, setActiveSection] = useState<'errors-table' | undefined>(undefined);
   const { logsIndexPattern } = useLogsIndexPattern();
 
   const indexes = useMemo(
@@ -54,7 +63,35 @@ export function TraceWaterfallFlyout({
     [logsIndexPattern, apmIndices?.transaction, apmIndices?.error]
   );
 
-  const closeDetailFlyout = useCallback(() => setSelectedDocId(null), []);
+  const onNodeClick = useCallback((nodeSpanId: string) => {
+    setActiveFlyoutType(unifiedDocViewerObservabilityTracesSpanFlyoutId);
+    setActiveSection(undefined);
+    setSelectedDocIndex(undefined);
+    setSelectedDocId(nodeSpanId);
+  }, []);
+
+  const onErrorClick = useCallback<FullTraceWaterfallOnErrorClick>(
+    ({ docId, errorCount, errorDocId, docIndex }) => {
+      if (errorCount > 1) {
+        setActiveFlyoutType(unifiedDocViewerObservabilityTracesSpanFlyoutId);
+        setActiveSection('errors-table');
+        setSelectedDocIndex(undefined);
+        setSelectedDocId(docId);
+      } else if (errorDocId) {
+        setActiveFlyoutType(unifiedDocViewerObservabilityTracesLogsFlyoutId);
+        setActiveSection(undefined);
+        setSelectedDocIndex(docIndex);
+        setSelectedDocId(errorDocId);
+      }
+    },
+    []
+  );
+
+  const closeDetailFlyout = useCallback(() => {
+    setSelectedDocId(null);
+    setSelectedDocIndex(undefined);
+    setActiveSection(undefined);
+  }, []);
 
   if (!isOpen) return null;
 
@@ -84,16 +121,19 @@ export function TraceWaterfallFlyout({
           rangeTo={end}
           core={core}
           contextSpanIds={contextSpanIds}
-          onNodeClick={setSelectedDocId}
+          onNodeClick={onNodeClick}
+          onErrorClick={onErrorClick}
         />
       </EuiFlyoutBody>
       {selectedDocId && dataView && (
         <UnifiedDocViewerObservabilityTraceDocFlyout
-          type={unifiedDocViewerObservabilityTracesSpanFlyoutId}
+          type={activeFlyoutType}
           docId={selectedDocId}
+          docIndex={selectedDocIndex}
           traceId={traceId}
           dataView={dataView}
           indexes={indexes}
+          activeSection={activeSection}
           onCloseFlyout={closeDetailFlyout}
           size="fill"
         />

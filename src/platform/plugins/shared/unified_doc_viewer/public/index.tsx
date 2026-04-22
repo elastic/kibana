@@ -43,6 +43,7 @@ export { UnifiedDocViewerObservabilityGenericOverview } from './components/obser
 export { UnifiedDocViewerObservabilityAttributesOverview } from './components/observability/attributes/doc_viewer_attributes_overview/lazy_doc_viewer_obs_attributes_overview';
 export { UnifiedDocViewerObservabilityTraceDocFlyout } from './components/observability/traces/components/full_screen_waterfall/waterfall_flyout/lazy_trace_doc_flyout';
 export { spanFlyoutId as unifiedDocViewerObservabilityTracesSpanFlyoutId } from './components/observability/traces/components/full_screen_waterfall/waterfall_flyout/span_flyout';
+export { logsFlyoutId as unifiedDocViewerObservabilityTracesLogsFlyoutId } from './components/observability/traces/components/full_screen_waterfall/waterfall_flyout/logs_flyout';
 export type {
   TraceDocFlyoutProps as UnifiedDocViewerObservabilityTraceDocFlyoutProps,
   DocumentType as UnifiedDocViewerObservabilityTracesDocumentType,
