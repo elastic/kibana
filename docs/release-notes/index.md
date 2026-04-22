@@ -75,6 +75,12 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Adds a GitHub data source connector [#258169]({{kib-pull}}258169).
 * Adds an Azure Blob Storage data source connector [#259439]({{kib-pull}}259439).
 * Adds a GCP Cloud Functions data source connector [#261277]({{kib-pull}}261277).
+* Adds an AbuseIPDB data source connector [#245421]({{kib-pull}}245421).
+* Adds an AlienVault OTX data source connector [#245421]({{kib-pull}}245421).
+* Adds a GreyNoise data source connector [#245421]({{kib-pull}}245421).
+* Adds a Shodan data source connector [#245421]({{kib-pull}}245421).
+* Adds a URLVoid data source connector [#245421]({{kib-pull}}245421).
+* Adds a VirusTotal data source connector [#245421]({{kib-pull}}245421).
 
 **Dashboards and Visualizations**:
 % main features
