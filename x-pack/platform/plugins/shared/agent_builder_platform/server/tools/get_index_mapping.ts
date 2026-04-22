@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
-import type { IndexFieldType, MappingField } from '@kbn/agent-builder-genai-utils';
+import type { MappingField } from '@kbn/agent-builder-genai-utils';
 import { otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
 import { getIndexFields } from '@kbn/agent-builder-genai-utils';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -32,7 +32,7 @@ export const getIndexMappingsTool = (): BuiltinToolDefinition<typeof getIndexMap
   return {
     id: platformCoreTools.getIndexMapping,
     type: ToolType.builtin,
-    description: 'Retrieve mappings for the specified index or indices.',
+    description: 'Retrieve mappings for indices, aliases or datastreams.',
     schema: getIndexMappingsSchema,
     handler: async ({ indices, raw }, { esClient }) => {
       // getIndexFields transparently handles the local-vs-CCS split:
@@ -43,62 +43,22 @@ export const getIndexMappingsTool = (): BuiltinToolDefinition<typeof getIndexMap
         esClient: esClient.asCurrentUser,
       });
 
-      const results = [];
+      const resources = Object.fromEntries(
+        Object.entries(indexFields).map(([name, v]) => {
+          if (raw && v.rawMapping) {
+            return [name, { type: v.type, mappings: v.rawMapping }];
+          }
+          if (raw) {
+            return [
+              name,
+              { type: v.type, fields: v.fields.map(({ path, type }) => ({ path, type })) },
+            ];
+          }
+          return [name, { type: v.type, fields: v.fields.map(formatField).join('\n') }];
+        })
+      );
 
-      if (raw) {
-        // Entries with a rawMapping (concrete indices + data streams):
-        // return full mapping tree for richer LLM context.
-        const mappingEntries = Object.entries(indexFields).filter(([, v]) => v.rawMapping);
-        if (mappingEntries.length > 0) {
-          results.push(
-            otherResult({
-              mappings: Object.fromEntries(
-                mappingEntries.map(([idx, v]) => [idx, { mappings: v.rawMapping }])
-              ),
-              indices: mappingEntries.map(([idx]) => idx),
-              resource_types_by_index: Object.fromEntries(
-                mappingEntries.map(([idx, v]) => [idx, v.type])
-              ) as Record<string, IndexFieldType>,
-            })
-          );
-        }
-        // Entries without a rawMapping (aliases, index patterns, CCS):
-        // return flattened field lists.
-        const fieldListEntries = Object.entries(indexFields).filter(([, v]) => !v.rawMapping);
-        if (fieldListEntries.length > 0) {
-          results.push(
-            otherResult({
-              indices: fieldListEntries.map(([idx]) => idx),
-              fields_by_index: Object.fromEntries(
-                fieldListEntries.map(([idx, v]) => [
-                  idx,
-                  { fields: v.fields.map(({ path, type }) => ({ path, type })) },
-                ])
-              ),
-              resource_types_by_index: Object.fromEntries(
-                fieldListEntries.map(([idx, v]) => [idx, v.type])
-              ) as Record<string, IndexFieldType>,
-            })
-          );
-        }
-      } else {
-        results.push(
-          otherResult({
-            indices: Object.entries(indexFields).map(([idx]) => idx),
-            fields_by_index: Object.fromEntries(
-              Object.entries(indexFields).map(([idx, v]) => [
-                idx,
-                v.fields.map(formatField).join('\n'),
-              ])
-            ),
-            resource_types_by_index: Object.fromEntries(
-              Object.entries(indexFields).map(([idx, v]) => [idx, v.type])
-            ) as Record<string, IndexFieldType>,
-          })
-        );
-      }
-
-      return { results };
+      return { results: [otherResult({ resources })] };
     },
     tags: [],
   };
