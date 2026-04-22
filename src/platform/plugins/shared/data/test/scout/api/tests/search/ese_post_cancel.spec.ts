@@ -59,7 +59,12 @@ apiTest.describe(
       expect(response.body.isPartial).toBe(true);
       expect(response.body.isRunning).toBe(true);
 
-      // Fire a long-polling request and abort it after 2s to create a race
+      // Fire a follow-up poll and abort it after 2s, then race a DELETE to
+      // cancel the search. The key assertion is that Kibana stays healthy
+      // through the abort + delete race; the poll itself may either reject
+      // (aborted) or resolve with a partial response, depending on whether
+      // the route long-polls server-side (continuous polling, 9.4+), so we
+      // don't assert on it on 9.2 / 9.3.
       const controller = new AbortController();
       const pollPromise = apiClient
         .post(`${ESE_API_PATH}/${id}`, {
@@ -76,19 +81,17 @@ apiTest.describe(
         }, 2000)
       );
 
-      // Wait for the abort to fully settle
-      const abortResult = await pollPromise;
-      expect(abortResult instanceof Error).toBe(true);
+      // Wait for the abort to fully settle before issuing DELETE.
+      await pollPromise;
 
       // Delete the search server-side; accept 200 (still alive) or 404 (abort
-      // already triggered server-side cleanup) — the key assertion is that
-      // Kibana did not crash.
+      // already triggered server-side cleanup).
       const deleteResponse = await apiClient.delete(`${ESE_API_PATH}/${id}`, {
         headers: { ...COMMON_HEADERS, ...cookieHeader },
       });
       expect(deleteResponse).toHaveStatusCode({ oneOf: [200, 404] });
 
-      // Confirm the server is still healthy after the abort + delete race
+      // Confirm the server is still healthy after the abort + delete race.
       const healthCheck = await apiClient.get('/api/status', {
         headers: { ...cookieHeader },
       });
