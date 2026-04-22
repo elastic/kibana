@@ -31,3 +31,14 @@ export const SUPPORTED_LOCALES: ReadonlyArray<{ id: SupportedLocaleId; label: st
   { id: 'zh-CN', label: '中文' },
   { id: 'de-DE', label: 'Deutsch' },
 ];
+
+/**
+ * Returns the canonical-casing supported locale id matching the given locale string,
+ * or `"en"` if no match is found. The i18n engine lowercases locales internally
+ * (so `fr-FR` becomes `fr-fr`), but UI options and persistence expect canonical
+ * casing (`fr-FR`).
+ */
+export const toCanonicalLocaleId = (locale: string): SupportedLocaleId => {
+  const lc = locale.toLowerCase();
+  return SUPPORTED_LOCALES.find(({ id }) => id.toLowerCase() === lc)?.id ?? 'en';
+};

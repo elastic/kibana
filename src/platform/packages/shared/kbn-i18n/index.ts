@@ -49,6 +49,10 @@ const i18nLoader = {
 
 export type { Translation, TranslationInput } from './src/translation';
 export type { Formats, TranslateArguments } from './src/core';
-export { SUPPORTED_LOCALE_IDS, SUPPORTED_LOCALES } from './src/locales';
+export {
+  SUPPORTED_LOCALE_IDS,
+  SUPPORTED_LOCALES,
+  toCanonicalLocaleId,
+} from './src/locales';
 export type { SupportedLocaleId } from './src/locales';
 export { i18n, i18nLoader };

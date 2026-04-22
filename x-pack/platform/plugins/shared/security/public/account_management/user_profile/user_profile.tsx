@@ -34,7 +34,7 @@ import React, { useRef, useState } from 'react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
 import type { CoreStart, IUiSettingsClient, ThemeServiceStart } from '@kbn/core/public';
-import { i18n, SUPPORTED_LOCALES } from '@kbn/i18n';
+import { i18n, SUPPORTED_LOCALES, toCanonicalLocaleId } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
@@ -860,7 +860,7 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
           userSettings: {
             darkMode: data.userSettings?.darkMode || 'space_default',
             contrastMode: data.userSettings?.contrastMode || 'system',
-            locale: data.userSettings?.locale ?? '',
+            locale: data.userSettings?.locale || toCanonicalLocaleId(i18n.getLocale()),
           },
         }
       : undefined,
