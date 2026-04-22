@@ -53,7 +53,7 @@ describe('manage_esql_views', () => {
 
       expect(esClient.transport.request).toHaveBeenCalledWith({
         method: 'GET',
-        path: '/_query/view/%24.logs.ecs.android.%E2%80%94xd',
+        path: '/_query/view/%24.logs.ecs.android.%E2%80%94x',
       });
     });
   });
