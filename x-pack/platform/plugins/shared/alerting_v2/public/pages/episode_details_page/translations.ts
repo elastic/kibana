@@ -70,8 +70,7 @@ export const EPISODE_NOT_FOUND_TITLE = i18n.translate(
 export const EPISODE_NOT_FOUND_BODY = i18n.translate(
   'xpack.alertingV2.episodes.episodeNotFoundBody',
   {
-    defaultMessage:
-      'The alert episode could not be found or an error occurred while loading it.',
+    defaultMessage: 'The alert episode could not be found or an error occurred while loading it.',
   }
 );
 
@@ -93,9 +92,12 @@ export const SIDEBAR_TITLE_EPISODE_DETAILS = i18n.translate(
   }
 );
 
-export const SIDEBAR_TITLE_RUNBOOK = i18n.translate('xpack.alertingV2.episodeDetails.runbookTitle', {
-  defaultMessage: 'Runbook',
-});
+export const SIDEBAR_TITLE_RUNBOOK = i18n.translate(
+  'xpack.alertingV2.episodeDetails.runbookTitle',
+  {
+    defaultMessage: 'Runbook',
+  }
+);
 
 export const SIDEBAR_VIEW_LEGEND = i18n.translate(
   'xpack.alertingV2.episodeDetails.sidebarViewLegend',
@@ -138,12 +140,9 @@ export const RULE_OVERVIEW_TITLE = i18n.translate(
   }
 );
 
-export const VIEW_RULE_DETAILS = i18n.translate(
-  'xpack.alertingV2.episodeDetails.viewRuleDetails',
-  {
-    defaultMessage: 'View rule details',
-  }
-);
+export const VIEW_RULE_DETAILS = i18n.translate('xpack.alertingV2.episodeDetails.viewRuleDetails', {
+  defaultMessage: 'View rule details',
+});
 
 export const RULE_STATUS_ENABLED = i18n.translate(
   'xpack.alertingV2.episodeDetails.ruleStatusEnabled',
