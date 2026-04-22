@@ -841,11 +841,11 @@ Pending attachments added through `agentBuilder.addAttachment(...)` can include 
 
 ## Events
 
-The `agentBuilder` start contract exposes observables on the `events.ui` namespace that let plugins react to the chat surface lifecycle (currently the active conversation binding). All observables are backed by a `BehaviorSubject`: new subscribers receive the current value immediately.
+The `agentBuilder` start contract exposes observables on the `events.ui` namespace that let plugins react to the chat surface lifecycle (currently the active conversation binding).
 
 ### Observing sidebar open state
 
-Agent Builder does not re-export the sidebar open state. If you need to know whether the Agent Builder sidebar is currently open, subscribe to the core chrome sidebar primitive and match on the `agentBuilder` app id:
+If you need to know whether the Agent Builder sidebar is currently open, subscribe to the core chrome sidebar primitive and match on the `agentBuilder` app id:
 
 ```ts
 useEffect(() => {
@@ -860,9 +860,7 @@ useEffect(() => {
 
 ### `events.ui.activeConversation$`
 
-Use `events.ui.activeConversation$` when you need to react to the conversation currently bound to the active chat surface (both the embeddable sidebar and the full-page routed chat).
-
-It is an `Observable<ActiveConversation | null>` backed by a `BehaviorSubject`: new subscribers receive the current value immediately, subsequent emissions fire whenever the binding changes, and it emits `null` when no chat surface is currently bound.
+Use `events.ui.activeConversation$` when you need to react to the conversation currently bound to the active chat surface.
 
 The non-null payload is:
 
