@@ -34,8 +34,8 @@ dependsOn:
   - '@kbn/projects-solutions-groups'
   - '@kbn/deeplinks-workflows'
   - '@kbn/deeplinks-agent-builder'
-  - '@kbn/core-chrome-navigation'
   - '@kbn/core-chrome-sidebar'
+  - '@kbn/ui-one-navigation'
 tags:
   - shared-browser
   - package
