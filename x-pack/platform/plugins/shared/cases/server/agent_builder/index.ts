@@ -9,34 +9,26 @@ import type { CoreSetup, KibanaRequest } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { CasesClient } from '../client';
 import type { CasesServerStartDependencies } from '../types';
-import { casesStepRegistry } from '../workflows/registry';
-import { createAgentToolFromCasesStep } from './utils/step_to_tool';
 import { searchCasesTool } from './tools/search_cases';
+import { manageCasesTool } from './tools/manage_cases';
+import { attachmentsTool } from './tools/attachment_tools';
+import { observablesTool } from './tools/observable_tools';
 
 /**
  * Registers all Cases agent builder tools:
  *
- * 1. `platform.core.cases` — rich read/search tool (get by ID, find by alert ID, search/filter)
- *    with URL enrichment and comment summaries.
- * 2. `platform.core.cases.*` — CRUD tools wrapping each active workflow step handler.
- *
- * Workflow-only config (e.g. `push-case`) is not exposed. Config fields that are
- * meaningful to an agent (e.g. `connector-id` for createCase) are promoted to the
- * tool's input schema per the registry entry's `agentToolConfigFields`.
+ * 1. `platform.core.cases` — read/search (get by ID, bulk get, find similar, by alert IDs, search/filter)
+ * 2. `platform.core.cases.manage` — create, update, delete, assign, unassign, add tags, set custom field
+ * 3. `platform.core.cases.attachments` — add comment/alerts/events, get all attachments
+ * 4. `platform.core.cases.observables` — add, update, delete observables
  */
 export function registerCasesAgentBuilderTools(
   agentBuilder: AgentBuilderPluginSetup,
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>,
   coreSetup: CoreSetup<CasesServerStartDependencies>
 ): void {
-  // Rich read/search tool (moved from agent_builder_platform)
   agentBuilder.tools.register(searchCasesTool(coreSetup, getCasesClient));
-
-  // CRUD tools derived from workflow step definitions
-  for (const { toolId, factory, agentToolConfigFields } of casesStepRegistry) {
-    const stepDef = factory(getCasesClient);
-    agentBuilder.tools.register(
-      createAgentToolFromCasesStep(toolId, stepDef, agentToolConfigFields)
-    );
-  }
+  agentBuilder.tools.register(manageCasesTool(getCasesClient));
+  agentBuilder.tools.register(attachmentsTool(getCasesClient));
+  agentBuilder.tools.register(observablesTool(getCasesClient));
 }

@@ -19,7 +19,7 @@ export function registerCaseWorkflowSteps(
     return;
   }
 
-  for (const { factory } of casesStepRegistry) {
+  for (const factory of casesStepRegistry) {
     workflowsExtensions.registerStepDefinition(factory(getCasesClient));
   }
 }

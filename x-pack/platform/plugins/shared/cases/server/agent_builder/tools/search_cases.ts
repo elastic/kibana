@@ -11,12 +11,14 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
 import type { CoreSetup } from '@kbn/core/server';
-import type { CasesFindRequest } from '../../../common/types/api';
-import type { Case, RelatedCase } from '../../../common/types/domain';
 import type { CasesClient } from '../../client';
 import type { CasesServerStartDependencies } from '../../types';
+import { getCaseStepCommonDefinition } from '../../../common/workflows/steps/get_case';
+import { getCasesStepCommonDefinition } from '../../../common/workflows/steps/get_cases';
+import { findCasesStepCommonDefinition } from '../../../common/workflows/steps/find_cases';
+import type { CasesFindRequest } from '../../../common/types/api';
+import type { Case, RelatedCase } from '../../../common/types/domain';
 import {
-  normalizeTimeRange,
   createCommentSummariesFromArray,
   enhanceCaseData,
   createResult,
@@ -28,93 +30,21 @@ import {
 } from './search_cases_helpers';
 
 const casesSchema = z.object({
-  caseId: z
+  ...getCaseStepCommonDefinition.inputSchema.partial().shape,
+  ...getCasesStepCommonDefinition.inputSchema.partial().shape,
+  ...findCasesStepCommonDefinition.inputSchema.partial().shape,
+  // Custom fields not in any step schema:
+  similar_to_case_id: z
     .string()
     .optional()
-    .describe(
-      'Case ID to retrieve a specific case. If provided, returns only that case. Use this for getting a single case by its ID.'
-    ),
-  alertIds: z
-    .array(z.string())
+    .describe('Find cases similar to this case ID based on shared observables.'),
+  alert_ids: z
+    .array(z.string().min(1))
     .optional()
     .describe(
-      'Array of alert IDs to find cases containing these alerts. If provided, cases containing any of these alert IDs will be returned. Alert IDs must be provided via this parameter.'
+      'Array of alert IDs to find cases containing these alerts. Cases containing any of these alert IDs will be returned.'
     ),
-  owner: z
-    .enum(['cases', 'observability', 'securitySolution'])
-    .optional()
-    .describe(
-      'Filter cases by owner. Valid values: "cases" (Stack Management/General Cases), "observability" (Observability), "securitySolution" (Elastic Security). If not provided, returns all cases the user has access to.'
-    ),
-  start: z
-    .string()
-    .optional()
-    .describe(
-      'ISO datetime string for the start time to fetch cases (inclusive). Maps to Cases API "from" parameter. Format: "2025-01-15T00:00:00Z"'
-    ),
-  end: z
-    .string()
-    .optional()
-    .describe(
-      'ISO datetime string for the end time to fetch cases (exclusive). Maps to Cases API "to" parameter. Format: "2025-01-22T00:00:00Z"'
-    ),
-  search: z
-    .string()
-    .optional()
-    .describe(
-      'Elasticsearch simple_query_string query for searching case title and description. Use this to search for text within cases (e.g., "malware", "phishing attack").'
-    ),
-  searchFields: z
-    .array(z.enum(['title', 'description']))
-    .optional()
-    .describe(
-      'Fields to perform the search query against. Valid values: "title", "description". If not provided, searches both fields by default.'
-    ),
-  severity: z
-    .union([
-      z.enum(['low', 'medium', 'high', 'critical']),
-      z.array(z.enum(['low', 'medium', 'high', 'critical'])),
-    ])
-    .optional()
-    .describe(
-      'Filter cases by severity. Valid values: "low", "medium", "high", "critical". Can be a single value or an array for multiple values.'
-    ),
-  status: z
-    .union([
-      z.enum(['open', 'closed', 'in-progress']),
-      z.array(z.enum(['open', 'closed', 'in-progress'])),
-    ])
-    .optional()
-    .describe(
-      'Filter cases by status. Valid values: "open", "closed", "in-progress". Can be a single value or an array for multiple values.'
-    ),
-  tags: z
-    .array(z.string())
-    .optional()
-    .describe('Filter cases by tags. Provide an array of tag names to filter by.'),
-  assignees: z
-    .array(z.string())
-    .optional()
-    .describe('Filter cases by assignees. Provide an array of user profile UIDs (not usernames).'),
-  reporters: z
-    .array(z.string())
-    .optional()
-    .describe(
-      'Filter cases by reporters. Provide an array of reporter usernames who created the cases.'
-    ),
-  category: z
-    .union([z.string(), z.array(z.string())])
-    .optional()
-    .describe(
-      'Filter cases by category. Can be a single category string or an array of categories.'
-    ),
-  includeComments: z
-    .boolean()
-    .optional()
-    .default(false)
-    .describe(
-      'Whether to fetch and include case comments in the response. Set to true when the query is about case contents, details, discussions, or when search text might match comment content. Defaults to false for metadata-only queries (status, severity, tags, etc.).'
-    ),
+  // include_comments, owner, assignees, from, to, search: descriptions inherited from step schemas
 });
 
 async function fetchCaseById(
@@ -209,83 +139,127 @@ export const searchCasesTool = (
   return {
     id: platformCoreTools.cases,
     type: ToolType.builtin,
-    description: `Retrieves cases from Elastic Security, Observability, or Stack Management. Supports three operation modes:
+    description: `Retrieves cases from Elastic Security, Observability, or Stack Management. Supports five operation modes:
 
-**Operation Mode 1: Get case by ID**
-- Provide 'caseId' parameter to retrieve a specific case by its ID
-- Use 'includeComments' to control whether comments are fetched (default: false)
+**Mode 1: Get case by ID**
+- Provide \`case_id\` to retrieve a specific case
+- Use \`include_comments\` to fetch comments (default: false)
 
-**Operation Mode 2: Find cases by alert IDs**
-- Provide 'alertIds' array to find all cases containing any of these alerts
-- Use 'includeComments' or provide 'search' text to fetch comments when relevant
+**Mode 2: Bulk get by IDs**
+- Provide \`case_ids\` (array) to retrieve multiple cases at once
 
-**Operation Mode 3: Search cases**
-- Use search and filter parameters to find cases matching criteria
-- Search parameters:
-  - 'search': Text query for searching case title/description (e.g., "malware", "phishing attack")
-  - 'searchFields': Fields to search - ["title"] or ["description"] or both (default: both)
-- Filter parameters:
-  - 'severity': Filter by severity - "low" | "medium" | "high" | "critical" (single or array)
-  - 'status': Filter by status - "open" | "closed" | "in-progress" (single or array)
-  - 'tags': Filter by tags - array of tag names
-  - 'assignees': Filter by assignees - array of user profile UIDs
-  - 'reporters': Filter by reporters - array of reporter usernames
-  - 'category': Filter by category - string or array
-  - 'owner': Filter by owner - "cases" | "observability" | "securitySolution"
-- Date range:
-  - 'start': ISO datetime string for start time (inclusive), maps to Cases API "from"
-  - 'end': ISO datetime string for end time (exclusive), maps to Cases API "to"
-- Comments:
-  - 'includeComments': Set to true when query is about case contents, details, discussions, or when search text might match comment content
-  - Defaults to false for metadata-only queries (status, severity, tags, etc.)
-  - Automatically set to true if 'search' text is provided
+**Mode 3: Find similar cases**
+- Provide \`similar_to_case_id\` to find cases with shared observables
+- Use \`page\`/\`perPage\` for pagination
 
-**Examples:**
-- "Get case abc-123": { caseId: "abc-123", includeComments: false }
-- "Find cases with alert ID xyz": { alertIds: ["xyz"] }
-- "High severity open cases": { severity: "high", status: "open" }
-- "Cases about malware": { search: "malware", includeComments: true }
-- "Cases with tag security from last week": { tags: ["security"], start: "2025-01-15T00:00:00Z" }
+**Mode 4: Find cases by alert IDs**
+- Provide \`alert_ids\` (array) to find cases containing any of those alerts
 
-Returns case details (id, title, description, status, severity, tags, assignees, observables, alerts/comments). Each case includes 'markdown_link' field with pre-formatted clickable link: [Case Title](url).
+**Mode 5: Search / filter cases**
+- Use search and filter parameters: \`search\`, \`severity\`, \`status\`, \`tags\`, \`assignees\`, \`reporters\`, \`category\`, \`owner\`, \`from\`, \`to\`, \`searchFields\`
+- Set \`include_comments: true\` when the query is about case contents or discussions
 
-**CRITICAL**: ALWAYS include the 'markdown_link' field for each case in your response. Format: brief summary (2-3 sentences) + markdown link. Example: "Security investigation case. Status: open. [View Case](url)"`,
+Returns case details with \`markdown_link\` (pre-formatted clickable link). **CRITICAL**: Always include the \`markdown_link\` in your response for each case. Format: "Brief summary. [View Case](url)"`,
     schema: casesSchema,
     handler: async (
       {
-        caseId,
-        alertIds,
+        case_id,
+        case_ids,
+        similar_to_case_id,
+        alert_ids,
         owner,
-        start,
-        end,
+        from,
+        to,
         search,
         searchFields,
         severity,
+        sortField,
+        sortOrder,
         status,
         tags,
         assignees,
         reporters,
         category,
-        includeComments,
+        include_comments,
+        page,
+        perPage,
       },
       { request, spaceId, logger }
     ) => {
       try {
         const [coreStart] = await coreSetup.getStartServices();
-        const coreServices: CoreServices = {
-          coreStart,
-          spaceId,
-        };
+        const coreServices: CoreServices = { coreStart, spaceId };
 
-        const timeRange = normalizeTimeRange(start, end, logger);
         const casesClient = await getCasesClientFn(request);
-        const shouldIncludeComments = includeComments ?? false;
+        const shouldIncludeComments = include_comments ?? false;
 
-        // Operation mode 1: Get case by ID
-        if (caseId) {
-          logger.info(`[Cases Tool] Getting case by ID: ${caseId}`);
+        // Mode 2: Bulk get by IDs
+        if (case_ids && case_ids.length > 0) {
+          logger.info(`[Cases Tool] Bulk-getting ${case_ids.length} cases`);
+          const bulkResult = await casesClient.cases.bulkGet({ ids: case_ids });
+          const enrichedCases = enhanceCases(
+            bulkResult.cases,
+            shouldIncludeComments,
+            request,
+            coreServices,
+            logger
+          );
+          return createResult(
+            enrichedCases,
+            null,
+            `Retrieved ${enrichedCases.length} case(s)${bulkResult.errors.length > 0 ? `, ${bulkResult.errors.length} error(s)` : ''}`
+          );
+        }
+
+        // Mode 3: Find similar cases
+        if (similar_to_case_id) {
+          logger.info(`[Cases Tool] Finding cases similar to: ${similar_to_case_id}`);
+          const similarResult = await casesClient.cases.similar(similar_to_case_id, {
+            page: page ?? 1,
+            perPage: perPage ?? 20,
+          });
+          return {
+            results: [
+              {
+                type: 'other' as const,
+                data: similarResult,
+              },
+            ],
+          };
+        }
+
+        // Mode 4: Find by alert IDs
+        if (alert_ids && alert_ids.length > 0) {
+          logger.info(`[Cases Tool] Querying cases by alert IDs: ${alert_ids.join(', ')}`);
+          const cases = await fetchCasesByAlertIds(
+            alert_ids,
+            casesClient,
+            owner as string | undefined,
+            shouldIncludeComments,
+            logger
+          );
+
+          if (cases.length === 0) {
+            return createResult(
+              [],
+              null,
+              `No cases found containing alert IDs: ${alert_ids.join(', ')}`
+            );
+          }
+
+          const casesData = enhanceCases(cases, shouldIncludeComments, request, coreServices, logger);
+          return createResult(
+            casesData,
+            null,
+            `Found ${casesData.length} unique case(s) containing alert ID(s): ${alert_ids.join(', ')}`
+          );
+        }
+
+        // Mode 1: Get case by ID
+        if (case_id) {
+          logger.info(`[Cases Tool] Getting case by ID: ${case_id}`);
           const caseData = await fetchCaseById(
-            caseId,
+            case_id,
             casesClient,
             shouldIncludeComments,
             request,
@@ -295,58 +269,23 @@ Returns case details (id, title, description, status, severity, tags, assignees,
           return createResult([caseData], null, `Retrieved case: ${caseData.title}`);
         }
 
-        // Operation mode 2: Find cases by alert IDs
-        if (alertIds && alertIds.length > 0) {
-          logger.info(`[Cases Tool] Querying cases by alert IDs: ${alertIds.join(', ')}`);
-          const cases = await fetchCasesByAlertIds(
-            alertIds,
-            casesClient,
-            owner,
-            shouldIncludeComments,
-            logger
-          );
-
-          if (cases.length === 0) {
-            return createResult(
-              [],
-              timeRange,
-              `No cases found containing alert IDs: ${alertIds.join(', ')}`
-            );
-          }
-
-          const casesData = enhanceCases(
-            cases,
-            shouldIncludeComments,
-            request,
-            coreServices,
-            logger
-          );
-          return createResult(
-            casesData,
-            timeRange,
-            `Found ${casesData.length} unique case(s) containing alert ID(s): ${alertIds.join(
-              ', '
-            )}`
-          );
-        }
-
-        // Operation mode 3: Search cases
+        // Mode 5: Search / filter
         const searchParams: CasesFindRequest = {
-          sortField: 'updatedAt',
-          sortOrder: 'desc',
+          sortField: (sortField as CasesFindRequest['sortField']) ?? 'updatedAt',
+          sortOrder: sortOrder ?? 'desc',
           perPage: 100,
           page: 1,
           ...(owner && { owner }),
           ...(search && { search }),
-          ...(searchFields && searchFields.length > 0 && { searchFields }),
+          ...(searchFields && { searchFields: searchFields as CasesFindRequest['searchFields'] }),
           ...(severity && { severity: severity as CasesFindRequest['severity'] }),
           ...(status && { status: status as CasesFindRequest['status'] }),
-          ...(tags && tags.length > 0 && { tags }),
-          ...(assignees && assignees.length > 0 && { assignees }),
-          ...(reporters && reporters.length > 0 && { reporters }),
+          ...(tags && { tags }),
+          ...(assignees && { assignees }),
+          ...(reporters && { reporters }),
           ...(category && { category }),
-          ...(timeRange?.start && { from: timeRange.start }),
-          ...(timeRange?.end && { to: timeRange.end }),
+          ...(from && { from }),
+          ...(to && { to }),
         };
 
         const allCases = await fetchAllPages(casesClient, searchParams);
@@ -357,7 +296,7 @@ Returns case details (id, title, description, status, severity, tags, assignees,
           coreServices,
           logger
         );
-        return createResult(casesData, timeRange);
+        return createResult(casesData, null);
       } catch (error) {
         return createErrorResponse(
           error,
