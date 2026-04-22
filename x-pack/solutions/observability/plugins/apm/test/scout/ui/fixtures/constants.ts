@@ -42,6 +42,26 @@ export const SERVICE_SYNTH_GO = 'synth-go-1';
 export const SERVICE_SYNTH_GO_2 = 'synth-go-2';
 export const SERVICE_SYNTH_NODE_1 = 'synth-node-1';
 
+// Metrics tab test services — one per dashboard catalog entry
+export const SERVICE_METRICS_JAVA_APM = 'metrics-java-apm';
+export const SERVICE_METRICS_NODEJS_APM = 'metrics-nodejs-apm';
+export const SERVICE_METRICS_RUBY_JRUBY = 'metrics-ruby-jruby';
+export const SERVICE_METRICS_EDOT_JAVA = 'metrics-edot-java';
+export const SERVICE_METRICS_EDOT_NODEJS = 'metrics-edot-nodejs';
+export const SERVICE_METRICS_EDOT_DOTNET_V9 = 'metrics-edot-dotnet-v9';
+export const SERVICE_METRICS_EDOT_DOTNET_V8 = 'metrics-edot-dotnet-v8';
+export const SERVICE_METRICS_OTEL_JAVA = 'metrics-otel-java';
+export const SERVICE_METRICS_OTEL_NODEJS = 'metrics-otel-nodejs';
+export const SERVICE_METRICS_OTEL_DOTNET = 'metrics-otel-dotnet';
+export const SERVICE_METRICS_OTEL_GO = 'metrics-otel-go';
+export const SERVICE_METRICS_OTEL_NATIVE_EDOT_JAVA = 'metrics-on-edot-java';
+export const SERVICE_METRICS_OTEL_NATIVE_EDOT_NODEJS = 'metrics-on-edot-nodejs';
+export const SERVICE_METRICS_OTEL_NATIVE_EDOT_PYTHON = 'metrics-on-edot-python';
+export const SERVICE_METRICS_OTEL_NATIVE_OTEL_JAVA = 'metrics-on-otel-java';
+export const SERVICE_METRICS_OTEL_NATIVE_OTEL_NODEJS = 'metrics-on-otel-nodejs';
+export const SERVICE_METRICS_OTEL_NATIVE_OTEL_PYTHON = 'metrics-on-otel-python';
+export const SERVICE_METRICS_OTEL_NATIVE_OTEL_GO = 'metrics-on-otel-go';
+
 export const PRODUCT_TRANSACTION_NAME = 'GET /api/product';
 export const APPLE_TRANSACTION_NAME = 'GET /apple 🍎';
 export const PRODUCT_BY_ID_TRANSACTION_NAME = 'GET /api/product/:id';

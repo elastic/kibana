@@ -19,6 +19,7 @@ import { adserviceEdot } from '../fixtures/synthtrace/adservice_edot';
 import { mobileServices } from '../fixtures/synthtrace/mobile_services';
 import { awsLambda } from '../fixtures/synthtrace/aws_lambda';
 import { azureFunctions } from '../fixtures/synthtrace/azure_functions';
+import { metricsServices } from '../fixtures/synthtrace/metrics_services';
 import { testData } from '../fixtures';
 import { serviceDataWithRecentErrors } from '../fixtures/synthtrace/recent_errors';
 
@@ -90,6 +91,13 @@ globalSetupHook(
     });
     await apmSynthtraceEsClient.index(azureFunctionsData);
     log.info('Azure Functions service data indexed');
+
+    const metricsData = metricsServices({
+      from: new Date(testData.START_DATE).getTime(),
+      to: new Date(testData.END_DATE).getTime(),
+    });
+    await apmSynthtraceEsClient.index(metricsData);
+    log.info('Metrics services data indexed');
 
     log.info('Cleaning up APM ML indices before running the APM tests');
     const jobs = await esClient.ml.getJobs();
