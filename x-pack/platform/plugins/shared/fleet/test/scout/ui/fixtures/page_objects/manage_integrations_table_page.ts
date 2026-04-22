@@ -106,6 +106,10 @@ export class ManageIntegrationsTablePage {
     return this.page.testSubj.locator('manageIntegrationReviewModalCategories');
   }
 
+  getReviewModalAutoInstallCheckbox() {
+    return this.page.testSubj.locator('manageIntegrationReviewAutoInstallCheckbox');
+  }
+
   getActionsFilterButton() {
     return this.page.testSubj.locator('manageIntegrationsActionsFilterBtn');
   }
