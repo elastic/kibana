@@ -17,7 +17,7 @@ FOLDER_NAME=$(dirname "$ABSOLUTE_PATH")
 
 docker run \
  --mount type=bind,source="$FOLDER_NAME",target=/home/app/ \
-  docker.elastic.co/ci-agent-images/pipelib:0.9.0@sha256:63d83c972bdb7619a22632dcab41beee5bde9a6f8e74003f53732dadc718275f \
+  docker.elastic.co/ci-agent-images/pipelib:0.27.0@sha256:d1713778d27e0b6208f59ba8761f04ef033af4c4237cb2614a09d38584c5ff88 \
   rre validate --backstage-entity-aware "/home/app/$FILE_NAME"
 
 if [ $? -ne 0 ]; then
