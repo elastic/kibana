@@ -109,9 +109,13 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Redesigns the panel titles [#251720]({{kib-pull}}251720).
 * Refreshes the Dashboards app menu [#246153]({{kib-pull}}246153).
 
-% esql + viz
+% discover sessions in dashboards
+* Adds a **Discover session** panel option to dashboards [#256293]({{kib-pull}}256293).
+* Editing an unlinked Discover session panel in a dashboard now saves changes back to that panel without affecting the original saved session [#250438]({{kib-pull}}250438).
 * Clicking on a filterable field value in a Discover {{esql}} session embedded in a dashboard now creates a DSL filter, consistent with how filtering works elsewhere [#249357]({{kib-pull}}249357).
 * Adds a tab selector to Discover session panels in Dashboards, with improved warning messages when a tab or data view can't be retrieved [#252311]({{kib-pull}}252311).
+
+% esql + viz
 * Adds {{esql}} support to Vega visualizations [#247186]({{kib-pull}}247186).
 * Enables {{esql}} multi-terms charts in Lens [#244743]({{kib-pull}}244743).
 * Allows filtering from legend actions when possible for {{esql}} visualizations [#248789]({{kib-pull}}248789).
@@ -120,8 +124,6 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Enables dashboard and URL drilldown for {{esql}} charts [#253223]({{kib-pull}}253223).
 
 % chart options and improvements
-* Adds a **Discover session** panel option to dashboards [#256293]({{kib-pull}}256293).
-* Editing an unlinked Discover session panel in a dashboard now saves changes back to that panel without affecting the original saved session [#250438]({{kib-pull}}250438).
 * Defaults the visualization type to line chart when the x-axis contains a timestamp, instead of a bar chart [#253930]({{kib-pull}}253930).
 * Adds a new optimized color palette for line charts [#253437]({{kib-pull}}253437).
 * Adds a **Badge** color option for table values in Lens, allowing cell values to be displayed as colored badges instead of text or background coloring [#257408]({{kib-pull}}257408).
@@ -161,45 +163,59 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Improves memory usage during {{fleet}} setup by deferring package reinstalls to async tasks [#248235]({{kib-pull}}248235).
 
 **Discover**:
+% esql mode
 * Redesigns the {{esql}} editor footer in Discover: removes the row limit and timestamp indicators, and adds query run statistics [#244284]({{kib-pull}}244284).
-* Filters from the top-level {{esql}} WHERE clause now propagate into per-metric charts in the Discover metrics grid [#249103]({{kib-pull}}249103).
-* Shows Streams field descriptions in the {{esql}} editor and field sidebar [#260582]({{kib-pull}}260582).
-* Adds a layout toggle to show or hide the data table in Discover, with the state persisted in the URL [#259083]({{kib-pull}}259083).
 * Adds a fields browser to the {{esql}} editor in Discover [#252749]({{kib-pull}}252749).
-* Adds support for visualizing `tdigest` and `exponential_histogram` histogram metrics in the Discover metrics grid [#249269]({{kib-pull}}249269).
+* Adds a layout toggle to show or hide the data table in Discover, with the state persisted in the URL [#259083]({{kib-pull}}259083).
 * Adds a grouped view in Discover for {{esql}} queries that use `STATS ... BY` with a single grouping field. A new toolbar selector lets you pivot by that field or switch back to the standard table view. [#220119]({{kib-pull}}220119).
-* Hides the data table by default when the metrics-specific Discover experience is triggered [#260607]({{kib-pull}}260607).
-* Adds a **Save Discover table to dashboard** option [#259626]({{kib-pull}}259626).
 * Converts DSL filters to {{esql}} when possible when switching to {{esql}} mode [#259260]({{kib-pull}}259260).
+* Persists the query mode ({{esql}} or classic) to local storage so that the next sessions open with the last mode used [#250388]({{kib-pull}}250388).
+* Adds a feature tour to the **Tab** menu for Switch to classic / {{esql}} modes [#254183]({{kib-pull}}254183).
+* Shows Streams field descriptions in the {{esql}} editor and field sidebar [#260582]({{kib-pull}}260582).
+
+% metrics
+* Filters from the top-level {{esql}} WHERE clause now propagate into per-metric charts in the Discover metrics grid [#249103]({{kib-pull}}249103).
+* Adds support for visualizing `tdigest` and `exponential_histogram` histogram metrics in the Discover metrics grid [#249269]({{kib-pull}}249269).
+* Hides the data table by default when the metrics-specific Discover experience is triggered [#260607]({{kib-pull}}260607).
+
+% tabs and sessions
+* Adds the ability to restore recently closed tab groups [#253365]({{kib-pull}}253365).
+* Hovering over an entry in the recently closed tabs menu now shows a preview of what the tab contained [#246973]({{kib-pull}}246973).
 * Moves the inspector menu item to the tab menu [#258767]({{kib-pull}}258767).
+* The chart interval is now saved with Discover sessions and restored when reopening them [#246426]({{kib-pull}}246426).
+* Adds notifications for background search completion [#249857]({{kib-pull}}249857).
+* Adds a **Save Discover table to dashboard** option [#259626]({{kib-pull}}259626).
+
+% general
 * Highlights multiple word occurrences in search results [#258764]({{kib-pull}}258764).
 * Returns to the Discover session after **Save As** [#255323]({{kib-pull}}255323).
 * Shows a table view for indexes and views with a small number of columns [#255292]({{kib-pull}}255292).
-* Adds a feature tour to the **Tab** menu for Switch to classic / {{esql}} modes [#254183]({{kib-pull}}254183).
-* Adds the ability to restore recently closed tab groups [#253365]({{kib-pull}}253365).
-* Hovering over an entry in the recently closed tabs menu now shows a preview of what the tab contained [#246973]({{kib-pull}}246973).
-* Uses a restorable state in doc viewer's **JSON** tab [#252054]({{kib-pull}}252054).
-* Adds notifications for background search completion [#249857]({{kib-pull}}249857).
-* Persists the query mode ({{esql}} or classic) to local storage so that the next sessions open with the last mode used [#250388]({{kib-pull}}250388).
+
+% doc viewer
 * The document viewer **Table** tab now restores your previous state — including search, filters, pinned fields, and pagination — when you reopen the flyout [#249682]({{kib-pull}}249682).
 * The doc viewer flyout now stays open when switching between Discover tabs and remembers which tab (such as **Table** or **JSON**) was active in each [#246612]({{kib-pull}}246612).
-* The chart interval is now saved with Discover sessions and restored when reopening them [#246426]({{kib-pull}}246426).
+* Uses a restorable state in doc viewer's **JSON** tab [#252054]({{kib-pull}}252054).
 
 **{{esql}} editor**:
-* Adds PromQL support in {{kib}} through {{esql}} [#249854]({{kib-pull}}249854).
-* Redesigns the {{esql}} editor interface [#251223]({{kib-pull}}251223).
-* Adds a data source browser to the {{esql}} editor [#251897]({{kib-pull}}251897).
-* Adds support for {{esql}} views to the editor [#261907]({{kib-pull}}261907).
+% GA commands
+* Makes the `FORK` command generally available [#261904]({{kib-pull}}261904).
+* Makes the `RERANK` command generally available [#252242]({{kib-pull}}252242).
+
+% new commands and language features
+* Adds support for the `USER_AGENT` command [#261314]({{kib-pull}}261314).
+* Adds support for the `MMR` command [#257208]({{kib-pull}}257208).
+* Adds autocomplete and validation support for the `approximate` setting in the {{esql}} editor [#248946]({{kib-pull}}248946).
 * Adds support for KQL syntax to the quick search option [#247224]({{kib-pull}}247224).
 * Adds autocomplete to the KQL function [#249510]({{kib-pull}}249510).
 * Adds support for unmapped fields [#248606]({{kib-pull}}248606).
 * Adds support for timezone handling [#247917]({{kib-pull}}247917).
+* Adds PromQL support in {{kib}} through {{esql}} [#249854]({{kib-pull}}249854).
+
+% editor UI and experience
+* Redesigns the {{esql}} editor interface [#251223]({{kib-pull}}251223).
+* Adds a data source browser to the {{esql}} editor [#251897]({{kib-pull}}251897).
+* Adds support for {{esql}} views to the editor [#261907]({{kib-pull}}261907).
 * Adds {{esql}} query statistics to the editor [#251029]({{kib-pull}}251029).
-* Makes the `FORK` command generally available [#261904]({{kib-pull}}261904).
-* Makes the `RERANK` command generally available [#252242]({{kib-pull}}252242).
-* Adds support for the `USER_AGENT` command [#261314]({{kib-pull}}261314).
-* Adds support for the `MMR` command [#257208]({{kib-pull}}257208).
-* Adds autocomplete and validation support for the `approximate` setting in the {{esql}} editor [#248946]({{kib-pull}}248946).
 * Improves {{esql}} editor autocomplete for full-text search functions: `MATCH_PHRASE`'s second argument now only suggests literal values, and FTS functions are excluded from `EVAL` suggestions except inside `SCORE()` [#247003]({{kib-pull}}247003).
 * Improves line commenting in the {{esql}} editor to match standard IDE conventions [#254851]({{kib-pull}}254851).
 * Improves query pretty printing [#257440]({{kib-pull}}257440).
