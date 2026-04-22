@@ -8,6 +8,7 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { WorkflowsClientProvider } from '@kbn/workflows/server/types';
 import { registerGetStepDefinitionsRoute } from './routes/get_step_definitions';
 import { registerGetTriggerDefinitionsRoute } from './routes/get_trigger_definitions';
 import { ServerStepRegistry } from './step_registry';
@@ -15,6 +16,7 @@ import { registerInternalStepDefinitions } from './steps';
 import { TriggerRegistry } from './trigger_registry';
 import { registerInternalTriggerDefinitions } from './triggers';
 import type {
+  WorkflowsExtensionsRequestHandlerContext,
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginSetupDeps,
   WorkflowsExtensionsServerPluginStart,
@@ -32,6 +34,7 @@ export class WorkflowsExtensionsServerPlugin
 {
   private readonly stepRegistry: ServerStepRegistry;
   private readonly triggerRegistry: TriggerRegistry;
+  private workflowsClientProvider: WorkflowsClientProvider | undefined;
 
   constructor(_initializerContext: PluginInitializerContext) {
     this.stepRegistry = new ServerStepRegistry();
@@ -42,6 +45,17 @@ export class WorkflowsExtensionsServerPlugin
     core: CoreSetup<WorkflowsExtensionsServerPluginStartDeps>,
     _plugins: WorkflowsExtensionsServerPluginSetupDeps
   ): WorkflowsExtensionsServerPluginSetup {
+    // Register the workflows client provider to the workflows request context
+    core.http.registerRouteHandlerContext<WorkflowsExtensionsRequestHandlerContext, 'workflows'>(
+      'workflows',
+      (_context, request) => {
+        if (!this.workflowsClientProvider) {
+          throw new Error('Workflows client provider not set');
+        }
+        return this.workflowsClientProvider(request);
+      }
+    );
+
     const router = core.http.createRouter();
 
     registerGetStepDefinitionsRoute(router, this.stepRegistry);
@@ -56,6 +70,12 @@ export class WorkflowsExtensionsServerPlugin
       },
       registerTriggerDefinition: (definition) => {
         this.triggerRegistry.register(definition);
+      },
+      registerWorkflowsClientProvider: (provider) => {
+        if (this.workflowsClientProvider) {
+          throw new Error('Workflows client provider already set');
+        }
+        this.workflowsClientProvider = provider;
       },
     };
   }
@@ -81,6 +101,12 @@ export class WorkflowsExtensionsServerPlugin
       },
       getTriggerDefinition: (triggerId: string) => {
         return this.triggerRegistry.get(triggerId);
+      },
+      getClient: async (request) => {
+        if (!this.workflowsClientProvider) {
+          throw new Error('Workflows client provider not set');
+        }
+        return this.workflowsClientProvider(request);
       },
     };
   }

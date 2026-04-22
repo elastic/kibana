@@ -127,6 +127,7 @@ export interface SearchWorkflowExecutionsParams {
 export class WorkflowsService {
   // The following attributes require `ensureInitialized` to be called before use
   private coreStart!: CoreStart;
+  private pluginsStart!: WorkflowsServerPluginStartDeps;
   private workflowsExecutionEngine!: WorkflowsExecutionEnginePluginStart;
   private workflowStorage!: WorkflowStorage;
   private taskScheduler!: WorkflowTaskScheduler;
@@ -150,6 +151,7 @@ export class WorkflowsService {
   private async initialize(startServices: StartServicesAccessor<WorkflowsServerPluginStartDeps>) {
     const [coreStart, pluginsStart] = await startServices();
     this.coreStart = coreStart;
+    this.pluginsStart = pluginsStart;
     this.taskScheduler = new WorkflowTaskScheduler(this.logger, pluginsStart.taskManager);
 
     this.actions = pluginsStart.actions;
@@ -176,6 +178,11 @@ export class WorkflowsService {
   public async getCoreStart(): Promise<CoreStart> {
     await this.ensureInitialized();
     return this.coreStart;
+  }
+
+  public async getPluginsStart(): Promise<WorkflowsServerPluginStartDeps> {
+    await this.ensureInitialized();
+    return this.pluginsStart;
   }
 
   public async getWorkflow(id: string, spaceId: string): Promise<WorkflowDetailDto | null> {

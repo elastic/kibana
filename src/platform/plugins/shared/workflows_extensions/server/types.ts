@@ -8,8 +8,14 @@
  */
 
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import type { CustomRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type {
+  WorkflowsApiRequestHandlerContext,
+  WorkflowsClient,
+  WorkflowsClientProvider,
+} from '@kbn/workflows/server/types';
 import type { z } from '@kbn/zod/v4';
 import type { ServerStepDefinition } from './step_registry/types';
 import type { CommonTriggerDefinition } from '../common';
@@ -41,6 +47,14 @@ export interface WorkflowsExtensionsServerPluginSetup {
    * @throws Error if trigger id is already registered, validation fails, or registration is attempted after setup
    */
   registerTriggerDefinition(definition: ServerTriggerDefinition): void;
+
+  /**
+   * Register the workflows client provider.
+   *
+   * @param provider - The workflows client provider
+   * @throws Error if provider is already registered
+   */
+  registerWorkflowsClientProvider(provider: WorkflowsClientProvider): void;
 }
 
 /**
@@ -60,6 +74,12 @@ export type WorkflowsExtensionsServerPluginStart =
      * @returns The trigger definition, or undefined if not registered
      */
     getTriggerDefinition(triggerId: string): ServerTriggerDefinition | undefined;
+
+    /**
+     * Get the workflows client for the current request.
+     * @returns The workflows client
+     */
+    getClient(request: KibanaRequest): Promise<WorkflowsClient>;
   };
 
 /**
@@ -76,3 +96,7 @@ export interface WorkflowsExtensionsServerPluginStartDeps {
   inference: InferenceServerStart;
   spaces?: SpacesPluginStart;
 }
+
+export type WorkflowsExtensionsRequestHandlerContext = CustomRequestHandlerContext<{
+  workflows: WorkflowsApiRequestHandlerContext;
+}>;

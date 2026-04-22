@@ -35,9 +35,8 @@ export function registerEmitLoopRoute(router: IRouter<ExampleRequestHandlerConte
     async (context, request, response) => {
       try {
         const workflows = await context.workflows;
-        const client = workflows.getWorkflowsClient();
         const iteration = request.body.iteration ?? 0;
-        await client.emitEvent(LOOP_TRIGGER_ID, { iteration });
+        await workflows.emitEvent(LOOP_TRIGGER_ID, { iteration });
         return response.ok({
           body: { ok: true, triggerId: LOOP_TRIGGER_ID, iteration },
         });

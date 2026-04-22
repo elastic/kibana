@@ -91,8 +91,8 @@ export class TriggerEventHandler {
       this.logger.debug('Event-driven triggers are disabled; skipping workflow scheduling.');
       return;
     }
-
     const { triggerId, payload, request } = params;
+
     const spaceId = this.spaces?.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
     this.validateTrigger(triggerId, spaceId, payload);

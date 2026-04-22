@@ -116,32 +116,24 @@ Reference: `examples/workflows_extensions_example/public/triggers/custom_trigger
 When you have an HTTP request, use the request-scoped client so space and request are taken from the current context:
 
 1. Add `workflowsExtensions` to your plugin's `requiredPlugins` in `kibana.jsonc`.
-2. Type your route handler context to include `workflows: WorkflowsRouteHandlerContext` (from `@kbn/workflows-extensions/server`).
+2. Type your route handler context to include `workflows: WorkflowsApiRequestHandlerContext` (from `@kbn/workflows/server`).
 3. In the route handler:
 
 ```typescript
-const client = (await context.workflows).getWorkflowsClient();
-await client.emitEvent(MY_TRIGGER_ID, {
-  message: request.body.message,
-  source: 'my-api',
-  category: 'alerts',
-});
+const workflows = await context.workflows;
+await workflows.emitEvent(MY_TRIGGER_ID, { message: request.body.message, source: 'my-api', category: 'alerts' });
 ```
 
 Reference: `examples/workflows_extensions_example/server/request_context.ts` and `server/routes/emit_event.ts`.
 
 **Option B — Direct (when you have request and space)**
 
-When emitting from background code (e.g. a job) where you have a `KibanaRequest` and `spaceId`, use the start contract:
+1. Add `workflowsExtensions` to your plugin's `requiredPlugins` in `kibana.jsonc`.
+2. When emitting from background code (e.g. a job) where you have a `KibanaRequest`, you can get the workflows client from the start contract of the `workflowsExtension` plugin, to emit an event:
 
 ```typescript
-// In code that has access to workflowsExtensions start (e.g. another plugin):
-await workflowsExtensions.emitEvent({
-  triggerId: MY_TRIGGER_ID,
-  spaceId: targetSpaceId,
-  payload: { message: 'Event from job', source: 'background', category: 'audit' },
-  request: myKibanaRequest, // e.g. system request for background execution
-});
+const workflowsClient = await plugins.workflowsExtensions.getClient(request);
+await workflowsClient.emitEvent(MY_TRIGGER_ID, { message: 'Event from job', source: 'background', category: 'audit' });
 ```
 
 Payload is validated against the trigger's `eventSchema`; if validation fails, `emitEvent` throws. A trigger event handler must be registered (e.g. by `workflows_management`) for workflows to run.

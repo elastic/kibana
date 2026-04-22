@@ -17,7 +17,7 @@ import { registerWorkflowAgentBuilderIntegration } from './agent_builder';
 import { defineRoutes } from './api/routes';
 import { type SmlIndexAttachmentFn, WorkflowsManagementApi } from './api/workflows_management_api';
 import { WorkflowsService } from './api/workflows_management_service';
-import { createWorkflowsRouteHandlerContextProvider } from './api/workflows_route_handler_context_provider';
+import { createWorkflowsClientProvider } from './client/workflows_route_handler_context_provider';
 import type { WorkflowsManagementConfig } from './config';
 import {
   getWorkflowsConnectorAdapter,
@@ -89,9 +89,9 @@ export class WorkflowsPlugin
       }
     }
 
-    core.http.registerRouteHandlerContext(
-      'workflows',
-      createWorkflowsRouteHandlerContextProvider(api, workflowsService, this.logger)
+    // Register public workflows client provider to allow any external plugin use it via the workflowsExtensions plugin
+    plugins.workflowsExtensions.registerWorkflowsClientProvider(
+      createWorkflowsClientProvider(api, workflowsService, this.logger)
     );
 
     const router = core.http.createRouter<WorkflowsRequestHandlerContext>();
@@ -99,9 +99,7 @@ export class WorkflowsPlugin
 
     this.setupAiIntegration(core, api, this.aiTelemetryClient);
 
-    return {
-      management: api,
-    };
+    return {};
   }
 
   public start(core: CoreStart, plugins: WorkflowsServerPluginStartDeps) {

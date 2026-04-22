@@ -1060,14 +1060,14 @@ export class WorkflowsExecutionEnginePlugin
     const triggerEventHandler = new TriggerEventHandler({
       coreStart,
       workflowsExtensions: plugins.workflowsExtensions,
-      spaces: plugins.spaces,
+      spaces: plugins.spaces?.spacesService,
       scheduleWorkflow,
       logger: this.logger,
       config: this.config.eventDriven,
     });
 
     const triggerEvents: TriggerEventsContract = {
-      emitEvent: triggerEventHandler.handleEvent.bind(triggerEventHandler),
+      emitEvent: (params) => triggerEventHandler.handleEvent(params),
       isEnabled: this.config.eventDriven.enabled,
       isLogEventsEnabled: this.config.eventDriven.logEvents,
       maxEventChainDepth: this.config.eventDriven.maxChainDepth,
