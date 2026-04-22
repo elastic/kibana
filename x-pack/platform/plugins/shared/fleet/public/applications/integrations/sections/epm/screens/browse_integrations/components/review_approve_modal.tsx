@@ -319,6 +319,16 @@ export const ReviewApproveModal: React.FC<{
     try {
       const willAutoInstall = autoInstallAfterApproval && Boolean(onInstallToCluster);
       await onApproveAndInstall(integrationId, version, categoryIds, willAutoInstall);
+      if (willAutoInstall) {
+        (automaticImport?.telemetry as AutomaticImportTelemetry)?.reportEvent(
+          'automatic_import_approve_modal_approve_with_auto_install_clicked',
+          {
+            integrationId,
+            version: reviewVersion.trim(),
+            dataStreamCount: reviewDetails?.dataStreams.length ?? 0,
+          }
+        );
+      }
       if (autoInstallAfterApproval && onInstallToCluster) {
         await onInstallToCluster(integrationId, { skipSuccessToast: true });
       }
