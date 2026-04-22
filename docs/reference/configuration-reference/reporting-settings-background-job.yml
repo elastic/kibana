@@ -46,7 +46,7 @@ groups:
         id: xpack-reportingQueue-pollEnabled
         description: |
           When `true`, enables the {{kib}} instance to poll {{es}} for pending jobs and claim them for execution. When `false`, allows the {{kib}} instance to only add new jobs to the reporting queue, list jobs, and provide the downloads to completed reports through the UI. This requires a deployment where at least one other {{kib}} instance in the Elastic cluster has this setting to `true`.
-        note: "Running multiple instances of {{kib}} in a cluster for load balancing of reporting requires identical values for [`xpack.reporting.encryptionKey`](#xpack-reporting-encryptionkey) and, if security is enabled, [`xpack.security.encryptionKey`](/reference/configuration-reference/security-settings.md#xpack-security-encryptionkey)."
+        note: "Running multiple instances of {{kib}} in a cluster for load balancing of reporting requires identical values for [`xpack.reporting.encryptionKey`](/reference/configuration-reference/reporting-settings.md#xpack-reporting-encryptionkey) and, if security is enabled, [`xpack.security.encryptionKey`](/reference/configuration-reference/security-settings.md#xpack-security-encryptionkey)."
         datatype: bool
         default: true
         applies_to:
