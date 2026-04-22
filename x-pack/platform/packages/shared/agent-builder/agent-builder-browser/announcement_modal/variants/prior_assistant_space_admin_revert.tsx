@@ -14,7 +14,6 @@ import {
   EuiFlexItem,
   EuiModalBody,
   EuiModalFooter,
-  EuiText,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -67,12 +66,10 @@ export function PriorAssistantSpaceAdminRevert({
             size="m"
             data-test-subj="agentBuilderAnnouncementImportantNotes"
           >
-            <EuiText size="m">
-              <ul css={notesListCss}>
-                <li>{i18n.NOTE_HISTORY_UNTOUCHED}</li>
-                <li>{i18n.NOTE_REVERT_IN_SETTINGS}</li>
-              </ul>
-            </EuiText>
+            <ul css={notesListCss}>
+              <li>{i18n.NOTE_HISTORY_UNTOUCHED}</li>
+              <li>{i18n.NOTE_REVERT_IN_SETTINGS}</li>
+            </ul>
           </EuiCallOut>
         </div>
       </EuiModalBody>
