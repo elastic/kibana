@@ -27,6 +27,7 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { RulesApp } from './rules_app';
 import { NotificationPoliciesApp } from './notification_policies_app';
@@ -96,6 +97,7 @@ export const mountEpisodesApp = async ({
   const lens = container.get(PluginStart('lens')) as LensPublicStart;
   const charts = container.get(PluginStart('charts')) as ChartsPluginStart;
   const share = container.get(PluginStart('share')) as SharePluginStart;
+  const unifiedDocViewer = container.get(PluginStart('unifiedDocViewer')) as UnifiedDocViewerStart;
 
   const kibanaReactServices: AlertEpisodesKibanaServices = {
     ...coreStart,
@@ -109,6 +111,7 @@ export const mountEpisodesApp = async ({
     charts,
     storage: new Storage(localStorage),
     toastNotifications: coreStart.notifications.toasts,
+    unifiedDocViewer,
   };
 
   ReactDOM.render(
