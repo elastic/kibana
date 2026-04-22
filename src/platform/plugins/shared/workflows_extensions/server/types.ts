@@ -37,7 +37,7 @@ export interface WorkflowsExtensionsServerPluginSetup {
    * @param definition - The step server-side definition
    * @throws Error if definition for the same step type ID is already registered
    */
-  registerStepDefinition(definition: ServerStepDefinition): void;
+  registerStepDefinition(definition: ServerStepDefinitionOrLoader): void;
 
   /**
    * Register a workflow trigger definition.
@@ -87,6 +87,14 @@ export type WorkflowsExtensionsServerPluginStart =
  */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkflowsExtensionsServerPluginSetupDeps {}
+
+export type ServerStepDefinitionOrLoader<
+  Input extends z.ZodType = z.ZodType,
+  Output extends z.ZodType = z.ZodType,
+  Config extends z.ZodObject = z.ZodObject
+> =
+  | ServerStepDefinition<Input, Output, Config>
+  | (() => Promise<ServerStepDefinition<Input, Output, Config> | undefined>);
 
 /**
  * Dependencies for the server plugin start phase.

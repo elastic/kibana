@@ -36,8 +36,9 @@ export class WorkflowsExtensionsServerPlugin
   private readonly triggerRegistry: TriggerRegistry;
   private workflowsClientProvider: WorkflowsClientProvider | undefined;
 
-  constructor(_initializerContext: PluginInitializerContext) {
-    this.stepRegistry = new ServerStepRegistry();
+  constructor(initializerContext: PluginInitializerContext) {
+    const logger = initializerContext.logger.get();
+    this.stepRegistry = new ServerStepRegistry(logger);
     this.triggerRegistry = new TriggerRegistry();
   }
 
@@ -101,6 +102,9 @@ export class WorkflowsExtensionsServerPlugin
       },
       getTriggerDefinition: (triggerId: string) => {
         return this.triggerRegistry.get(triggerId);
+      },
+      isReady: async () => {
+        await this.stepRegistry.whenReady();
       },
       getClient: async (request) => {
         if (!this.workflowsClientProvider) {

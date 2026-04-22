@@ -30,6 +30,7 @@ const createStartMock: () => jest.Mocked<WorkflowsExtensionsServerPluginStart> =
     getClient: jest.fn().mockResolvedValue({
       emitEvent: jest.fn(),
     }),
+    isReady: jest.fn(() => Promise.resolve()),
   };
 };
 
