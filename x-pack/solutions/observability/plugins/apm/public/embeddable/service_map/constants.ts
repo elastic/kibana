@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const APM_SERVICE_MAP_EMBEDDABLE = 'APM_SERVICE_MAP_EMBEDDABLE';
+export const APM_SERVICE_MAP_EMBEDDABLE = 'apm_service_map';
 
 /** Used to register the "Add APM Service Map" option in the dashboard Add panel flyout */
 export const ADD_APM_SERVICE_MAP_PANEL_ACTION_ID = 'ADD_APM_SERVICE_MAP_PANEL_ACTION';
