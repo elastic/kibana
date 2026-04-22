@@ -998,10 +998,19 @@ describe('RuleInlineContent integration', () => {
     expect(screen.getByText('New Rule')).toBeInTheDocument();
   });
 
-  it('renders empty rule content for rule without name', () => {
-    renderInlineContent({ type: 'query', query: '*:*' });
+  it('renders rule fields even when name is missing', () => {
+    const { container } = renderInlineContent({
+      type: 'query',
+      query: '*:*',
+      description: 'No name rule',
+      severity: 'low',
+      risk_score: 10,
+    });
 
-    expect(screen.getByText('New Rule')).toBeInTheDocument();
+    const allText = container.textContent ?? '';
+    expect(allText).toContain('No name rule');
+    expect(allText).toContain('Custom query');
+    expect(allText).toContain('*:*');
   });
 
   it('renders filters between index patterns and type-specific details', () => {
