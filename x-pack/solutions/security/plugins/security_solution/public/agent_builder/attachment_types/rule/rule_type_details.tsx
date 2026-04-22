@@ -6,34 +6,88 @@
  */
 
 import React from 'react';
-import { EuiCodeBlock, EuiSpacer, EuiText } from '@elastic/eui';
-import type { RuleResponse } from '../../../../common/api/detection_engine/model/rule_schema';
+import { i18n } from '@kbn/i18n';
 import {
-  Threshold as ThresholdDisplay,
-  ThreatIndex as ThreatIndexDisplay,
-  constructThreatMappingDescription,
-  NewTermsFields as NewTermsFieldsDisplay,
-} from '../../../detection_engine/rule_management/components/rule_details/rule_definition_section';
+  EuiBadge,
+  EuiCodeBlock,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
+import type { RuleResponse } from '../../../../common/api/detection_engine/model/rule_schema';
 import { convertDateMathToDuration } from '../../../common/utils/date_math';
 import { DEFAULT_HISTORY_WINDOW_SIZE } from '../../../common/constants';
-import {
-  EQL_OPTIONS_EVENT_CATEGORY_FIELD_LABEL,
-  EQL_OPTIONS_EVENT_TIEBREAKER_FIELD_LABEL,
-  EQL_OPTIONS_EVENT_TIMESTAMP_FIELD_LABEL,
-} from '../../../detection_engine/rule_creation/components/eql_query_edit/translations';
-import {
-  THRESHOLD_FIELD_LABEL,
-  ANOMALY_THRESHOLD_FIELD_LABEL,
-  MACHINE_LEARNING_JOB_ID_FIELD_LABEL,
-  THREAT_INDEX_FIELD_LABEL,
-  THREAT_MAPPING_FIELD_LABEL,
-  NEW_TERMS_FIELDS_FIELD_LABEL,
-  HISTORY_WINDOW_SIZE_FIELD_LABEL,
-} from '../../../detection_engine/rule_management/components/rule_details/translations';
-import {
-  SAVED_QUERY_NAME_LABEL,
-  THREAT_QUERY_LABEL,
-} from '../../../detection_engine/rule_creation_ui/components/description_step/translations';
+
+const THRESHOLD_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.thresholdFieldLabel',
+  { defaultMessage: 'Threshold' }
+);
+const ANOMALY_THRESHOLD_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.anomalyThresholdFieldLabel',
+  { defaultMessage: 'Anomaly score threshold' }
+);
+const MACHINE_LEARNING_JOB_ID_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.machineLearningJobIdFieldLabel',
+  { defaultMessage: 'Machine Learning job' }
+);
+const THREAT_INDEX_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.threatIndexFieldLabel',
+  { defaultMessage: 'Indicator index patterns' }
+);
+const THREAT_MAPPING_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.threatMappingFieldLabel',
+  { defaultMessage: 'Indicator mapping' }
+);
+const NEW_TERMS_FIELDS_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.newTermsFieldsFieldLabel',
+  { defaultMessage: 'Fields' }
+);
+const HISTORY_WINDOW_SIZE_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.historyWindowSizeFieldLabel',
+  { defaultMessage: 'History Window Size' }
+);
+const EQL_OPTIONS_EVENT_CATEGORY_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.eqlQueryEdit.eventCategoryFieldLabel',
+  { defaultMessage: 'Event category field' }
+);
+const EQL_OPTIONS_EVENT_TIEBREAKER_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.eqlQueryEdit.tiebreakerFieldLabel',
+  { defaultMessage: 'Tiebreaker field' }
+);
+const EQL_OPTIONS_EVENT_TIMESTAMP_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.eqlQueryEdit.timestampFieldLabel',
+  { defaultMessage: 'Timestamp field' }
+);
+const SAVED_QUERY_NAME_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.savedQueryNameFieldLabel',
+  { defaultMessage: 'Saved query name' }
+);
+const THREAT_QUERY_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThreatQueryLabel',
+  { defaultMessage: 'Indicator index query' }
+);
+const THRESHOLD_RESULTS_ALL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.thresholdResultsAllDescription',
+  { defaultMessage: 'All results' }
+);
+const THRESHOLD_RESULTS_AGGREGATED_BY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.thresholdResultsAggregatedByDescription',
+  { defaultMessage: 'Results aggregated by' }
+);
+const THRESHOLD_CARDINALITY = (
+  thresholdFieldsGroupedBy: string,
+  cardinalityField: string,
+  cardinalityValue: string | number
+) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.ruleDescription.thresholdResultsCardinalityDescription',
+    {
+      defaultMessage:
+        '{thresholdFieldsGroupedBy} when unique values count of {cardinalityField} >= {cardinalityValue}',
+      values: { thresholdFieldsGroupedBy, cardinalityField, cardinalityValue },
+    }
+  );
 const SectionHeading: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <EuiText size="s">
     <strong>{children}</strong>
@@ -45,13 +99,42 @@ export const ThresholdDetails: React.FC<{ rule: RuleResponse }> = ({ rule }) => 
     return null;
   }
 
+  const { threshold } = rule;
+  let description = !threshold.field[0]
+    ? `${THRESHOLD_RESULTS_ALL} >= ${threshold.value}`
+    : `${THRESHOLD_RESULTS_AGGREGATED_BY} ${
+        Array.isArray(threshold.field) ? threshold.field.join(',') : threshold.field
+      } >= ${threshold.value}`;
+
+  if (threshold.cardinality && threshold.cardinality.length > 0) {
+    description = THRESHOLD_CARDINALITY(
+      description,
+      threshold.cardinality[0].field,
+      threshold.cardinality[0].value
+    );
+  }
+
   return (
     <>
       <SectionHeading>{THRESHOLD_FIELD_LABEL}</SectionHeading>
       <EuiSpacer size="xs" />
-      <ThresholdDisplay threshold={rule.threshold} />
+      <div>{description}</div>
     </>
   );
+};
+
+const formatThreatMapping = (
+  threatMapping: Array<{ entries: Array<{ field: string; value: string; negate?: boolean }> }>
+): string => {
+  return threatMapping
+    .map((map) =>
+      (map.entries ?? [])
+        .map((entry) =>
+          `${entry.field} ${entry.negate ? 'DOES NOT MATCH' : 'MATCHES'} ${entry.value}`
+        )
+        .join(' AND ')
+    )
+    .join(' OR ');
 };
 
 export const ThreatMatchDetails: React.FC<{ rule: RuleResponse }> = ({ rule }) => {
@@ -63,7 +146,13 @@ export const ThreatMatchDetails: React.FC<{ rule: RuleResponse }> = ({ rule }) =
     <>
       <SectionHeading>{THREAT_INDEX_FIELD_LABEL}</SectionHeading>
       <EuiSpacer size="xs" />
-      <ThreatIndexDisplay threatIndex={rule.threat_index} />
+      <EuiFlexGroup responsive={false} gutterSize="xs" wrap>
+        {rule.threat_index.map((idx) => (
+          <EuiFlexItem grow={false} key={idx}>
+            <EuiBadge color="hollow">{idx}</EuiBadge>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
       {rule.threat_query && (
         <>
           <EuiSpacer size="xs" />
@@ -80,7 +169,7 @@ export const ThreatMatchDetails: React.FC<{ rule: RuleResponse }> = ({ rule }) =
           {THREAT_MAPPING_FIELD_LABEL}
           {':'}
         </strong>{' '}
-        {constructThreatMappingDescription(rule.threat_mapping)}
+        {formatThreatMapping(rule.threat_mapping)}
       </EuiText>
     </>
   );
@@ -124,7 +213,13 @@ export const NewTermsDetails: React.FC<{ rule: RuleResponse }> = ({ rule }) => {
     <>
       <SectionHeading>{NEW_TERMS_FIELDS_FIELD_LABEL}</SectionHeading>
       <EuiSpacer size="xs" />
-      <NewTermsFieldsDisplay newTermsFields={rule.new_terms_fields} />
+      <EuiFlexGroup responsive={false} gutterSize="xs" wrap>
+        {rule.new_terms_fields.map((field) => (
+          <EuiFlexItem grow={false} key={field}>
+            <EuiBadge color="hollow">{field}</EuiBadge>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
       <EuiSpacer size="xs" />
       <EuiText size="s">
         <strong>
