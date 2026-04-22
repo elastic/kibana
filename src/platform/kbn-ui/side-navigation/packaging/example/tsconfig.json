@@ -21,6 +21,5 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/ui-side-navigation",
   ]
 }
