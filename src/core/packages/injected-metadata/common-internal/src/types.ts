@@ -73,14 +73,6 @@ export interface InjectedMetadata {
   anonymousStatusPage: boolean;
   i18n: {
     translationsUrl: string;
-    /**
-     * The server-configured default locale (from kibana.yml `i18n.locale`).
-     * Not used for translation loading — that's baked into `translationsUrl`.
-     * Surfaced so client-side UI can display "Server default (Français)" labels
-     * when a user views the effective server-configured locale independently
-     * of their own profile override.
-     */
-    configLocale: string;
   };
   theme: InjectedMetadataTheme;
   csp: {

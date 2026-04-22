@@ -28,7 +28,6 @@ const userProfile = { getUserProfile$: () => of(null) };
 
 const i18nStart: I18nStart = {
   Context: ({ children }) => <I18nProvider>{children}</I18nProvider>,
-  getConfigLocale: () => 'en',
 };
 
 const analytics: AnalyticsServiceStart = {

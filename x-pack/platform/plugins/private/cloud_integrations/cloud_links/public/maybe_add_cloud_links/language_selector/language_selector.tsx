@@ -45,7 +45,7 @@ function LanguageSelectorUI({ security, core, closePopover }: Props) {
     modalRef.current = core.overlays.openModal(
       toMountPoint(
         <UserProfilesKibanaProvider core={core} security={security} toMountPoint={toMountPoint}>
-          <LanguageModal closeModal={closeModal} configLocale={core.i18n.getConfigLocale()} />
+          <LanguageModal closeModal={closeModal} />
         </UserProfilesKibanaProvider>,
         core
       ),

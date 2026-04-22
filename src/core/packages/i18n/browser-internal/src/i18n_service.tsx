@@ -19,8 +19,6 @@ import { getEuiContextMapping } from './i18n_eui_mapping';
  * @internal
  */
 export class I18nService {
-  constructor(private readonly configLocale: string = 'en') {}
-
   /**
    * Used exclusively to give a Context component to FatalErrorsService which
    * may render before Core successfully sets up or starts.
@@ -43,7 +41,6 @@ export class I18nService {
           </I18nProvider>
         );
       },
-      getConfigLocale: () => this.configLocale,
     };
   }
 

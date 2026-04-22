@@ -95,7 +95,6 @@ const defaultCoreSystemParams = {
       },
     },
     version: 'version',
-    i18n: { configLocale: 'en' },
   } as any,
 };
 
@@ -167,10 +166,7 @@ describe('constructor', () => {
   });
 
   it('passes injectedMetadata param to InjectedMetadataService', () => {
-    const injectedMetadata = {
-      env: { mode: { dev: true }, packageInfo: { dist: false } },
-      i18n: { configLocale: 'en' },
-    } as any;
+    const injectedMetadata = { env: { mode: { dev: true }, packageInfo: { dist: false } } } as any;
 
     createCoreSystem({
       injectedMetadata,

@@ -20,10 +20,4 @@ export interface I18nStart {
    * React Context provider required as the topmost component for any i18n-compatible React tree.
    */
   Context: ({ children }: { children: React.ReactNode }) => JSX.Element;
-  /**
-   * Returns the server-configured default locale (from kibana.yml `i18n.locale`).
-   * This is distinct from the locale returned by `@kbn/i18n`'s `getLocale()`, which
-   * reflects the effective locale after applying any per-user profile override.
-   */
-  getConfigLocale: () => string;
 }

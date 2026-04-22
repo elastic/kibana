@@ -17,7 +17,6 @@ const createStartContractMock = () => {
   const setupContract: jest.Mocked<I18nStart> = lazyObject({
     // Stubbed provider returning the default message or id
     Context: jest.fn().mockImplementation(I18nProviderMock),
-    getConfigLocale: jest.fn().mockReturnValue('en'),
   });
   return setupContract;
 };

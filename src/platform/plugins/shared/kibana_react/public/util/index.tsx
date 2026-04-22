@@ -33,7 +33,6 @@ const themeStart: ThemeServiceStart = {
 // will be removed when the deprecated usages are removed.
 const i18n: I18nStart = {
   Context: ({ children }: { children: React.ReactNode }) => <I18nProvider>{children}</I18nProvider>,
-  getConfigLocale: () => 'en',
 };
 
 /**

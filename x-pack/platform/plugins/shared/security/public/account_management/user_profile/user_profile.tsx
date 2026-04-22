@@ -277,21 +277,15 @@ const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
   );
 };
 
-export const UserLocaleEditor: FunctionComponent<UserLocaleEditorProps> = ({ formik }) => {
-  const { services } = useKibana<CoreStart>();
+const UserLocaleEditor: FunctionComponent<UserLocaleEditorProps> = ({ formik }) => {
   if (!formik.values.data) {
     return null;
   }
 
-  const configLocale = services.i18n.getConfigLocale();
-  const configLocaleLabel =
-    SUPPORTED_LOCALES.find(({ id }) => id.toLowerCase() === configLocale.toLowerCase())?.label ??
-    configLocale;
   const serverDefaultOption = {
     value: '',
     text: i18n.translate('xpack.security.accountManagement.userProfile.localeServerDefaultOption', {
-      defaultMessage: 'Server default ({configLocaleLabel})',
-      values: { configLocaleLabel },
+      defaultMessage: 'Server default',
     }),
   };
   const localeOptions = [

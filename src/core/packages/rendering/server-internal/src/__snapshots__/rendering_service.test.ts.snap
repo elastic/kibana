@@ -46,7 +46,6 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "configLocale": "en",
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -136,7 +135,6 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "configLocale": "en",
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -222,7 +220,6 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "configLocale": "en",
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -312,7 +309,6 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "configLocale": "en",
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -398,7 +394,6 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "configLocale": "en",
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -484,7 +479,6 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "configLocale": "en",
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -574,7 +568,6 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "configLocale": "en",
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -660,7 +653,6 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "configLocale": "en",
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -746,7 +738,6 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "configLocale": "en",
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -832,7 +823,6 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "configLocale": "en",
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -923,7 +913,6 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "configLocale": "en",
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -1015,7 +1004,6 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "configLocale": "en",
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -1106,7 +1094,6 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "configLocale": "en",
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -1201,7 +1188,6 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "configLocale": "en",
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -1287,7 +1273,6 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "configLocale": "en",
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -1378,7 +1363,6 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "configLocale": "en",
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -1473,7 +1457,6 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "configLocale": "en",
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -1564,7 +1547,6 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "configLocale": "en",
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -1657,7 +1639,6 @@ Object {
     },
   },
   "i18n": Object {
-    "configLocale": "en",
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -1750,7 +1731,6 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "configLocale": "en",
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {

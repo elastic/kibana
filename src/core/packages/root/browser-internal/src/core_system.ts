@@ -144,7 +144,7 @@ export class CoreSystem {
         );
     }
 
-    this.i18n = new I18nService(injectedMetadata.i18n.configLocale);
+    this.i18n = new I18nService();
     this.analytics = new AnalyticsService(this.coreContext);
     this.fatalErrors = new FatalErrorsService(rootDomElement, () => {
       // Stop Core before rendering any fatal errors into the DOM
