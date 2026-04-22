@@ -9,7 +9,7 @@
 
 import { isWellKnownWorkflowTriggerSource } from '@kbn/workflows';
 import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
-import { parseWorkflowYamlForAutocomplete } from '../../../../../common/lib/yaml/parse_workflow_yaml_for_autocomplete';
+import { parseWorkflowYamlForAutocomplete } from '@kbn/workflows-yaml';
 
 /**
  * Determines if a step is a connector step by checking if it has a 'connector-id' field.

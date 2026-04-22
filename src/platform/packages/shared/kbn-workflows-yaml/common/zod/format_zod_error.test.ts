@@ -7,18 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Document } from 'yaml';
 import { parseDocument } from 'yaml';
 import { z } from '@kbn/zod/v4';
+import type { ConnectorParamsSchemaResolver } from './enrich_error_message';
 import { clearEnrichmentCache } from './enrich_error_message';
 import { formatZodError } from './format_zod_error';
-import { getAllConnectors } from '../../schema';
 import type { MockZodError } from '../errors/invalid_yaml_schema';
-
-jest.mock('../../schema', () => ({
-  getAllConnectors: jest.fn(() => []),
-}));
-
-const mockGetAllConnectors = getAllConnectors as jest.MockedFunction<typeof getAllConnectors>;
 
 /**
  * Helper for testing the non-ZodError fallback path.
@@ -27,8 +22,13 @@ const mockGetAllConnectors = getAllConnectors as jest.MockedFunction<typeof getA
  * satisfy the compile-time signature. Centralizing the cast here avoids
  * scattering `as never` throughout every test.
  */
-const formatLoose = (error: Record<string, unknown>, schema?: z.ZodType) =>
-  formatZodError(error as unknown as MockZodError, schema);
+const formatLoose = (error: Record<string, unknown>, schema?: z.ZodType, yamlDocument?: Document) =>
+  formatZodError(error as unknown as MockZodError, { schema, yamlDocument });
+
+/** Build an in-test connector params schema resolver from a flat map. */
+const resolverFromMap = (map: Record<string, z.ZodType>): ConnectorParamsSchemaResolver => {
+  return (stepType) => map[stepType] ?? null;
+};
 
 describe('formatZodError', () => {
   it('should format invalid trigger type', () => {
@@ -98,7 +98,7 @@ describe('formatZodError', () => {
       ],
     };
 
-    const result = formatZodError(mockError as any, casesConnectorSchema);
+    const result = formatZodError(mockError as any, { schema: casesConnectorSchema });
 
     // Should generate dynamic message with union options
     expect(result.message).toContain('connector must be one of:');
@@ -126,7 +126,7 @@ describe('formatZodError', () => {
       other: z.string(),
     });
 
-    const result = formatZodError(mockError as any, simpleSchema);
+    const result = formatZodError(mockError as any, { schema: simpleSchema });
 
     // Should fall back to original message (with received info) since path doesn't exist in schema
     expect(result.message).toBe('Expected "0 | 1 | 2" (received: "unknown") at nonexistent');
@@ -376,7 +376,7 @@ describe('formatZodError', () => {
       const parseResult = schema.safeParse({ mode: 'invalid' });
       expect(parseResult.success).toBe(false);
       if (!parseResult.success) {
-        const result = formatZodError(parseResult.error, schema);
+        const result = formatZodError(parseResult.error, { schema });
         expect(result.message).toContain('mode must be one of:');
       }
     });
@@ -389,7 +389,7 @@ describe('formatZodError', () => {
       const parseResult = schema.safeParse({ mode: 'invalid' });
       expect(parseResult.success).toBe(false);
       if (!parseResult.success) {
-        const result = formatZodError(parseResult.error, schema);
+        const result = formatZodError(parseResult.error, { schema });
         expect(result.message).toContain('mode must be one of:');
       }
     });
@@ -402,7 +402,7 @@ describe('formatZodError', () => {
       const parseResult = schema.safeParse({ mode: 'invalid' });
       expect(parseResult.success).toBe(false);
       if (!parseResult.success) {
-        const result = formatZodError(parseResult.error, schema);
+        const result = formatZodError(parseResult.error, { schema });
         expect(result.message).toContain('mode must be one of:');
       }
     });
@@ -415,7 +415,7 @@ describe('formatZodError', () => {
       const parseResult = schema.safeParse({ mode: 'invalid' });
       expect(parseResult.success).toBe(false);
       if (!parseResult.success) {
-        const result = formatZodError(parseResult.error, schema);
+        const result = formatZodError(parseResult.error, { schema });
         expect(result.message).toContain('mode must be one of:');
       }
     });
@@ -713,7 +713,7 @@ describe('formatZodError', () => {
       const parseResult = schema.safeParse({ name: 123, count: 'not-a-number' });
       expect(parseResult.success).toBe(false);
       if (!parseResult.success) {
-        const result = formatZodError(parseResult.error, schema);
+        const result = formatZodError(parseResult.error, { schema });
         expect(result.message).toBeDefined();
         expect(result.formattedError.issues.length).toBeGreaterThanOrEqual(1);
       }
@@ -755,7 +755,7 @@ describe('Dynamic validation system behavior', () => {
         ],
       };
 
-      const result = formatZodError(mockZodError as any, undefined, yamlDocument);
+      const result = formatZodError(mockZodError as any, { yamlDocument });
 
       // In test environment, our system falls back to generic message
       // In real environment with actual connectors, it would show detailed union info
@@ -791,7 +791,7 @@ describe('Dynamic validation system behavior', () => {
         ],
       };
 
-      const result = formatZodError(mockZodError as any, undefined, yamlDocument);
+      const result = formatZodError(mockZodError as any, { yamlDocument });
 
       // In test environment, falls back to basic message
       // In real environment, would show enhanced object structure
@@ -820,7 +820,7 @@ describe('Dynamic validation system behavior', () => {
         ],
       };
 
-      const result = formatZodError(mockZodError as any, undefined, yamlDocument);
+      const result = formatZodError(mockZodError as any, { yamlDocument });
 
       // Should provide a helpful fallback message
       expect(result.message).toContain('someField has an invalid value');
@@ -846,7 +846,7 @@ describe('Dynamic validation system behavior', () => {
         ],
       };
 
-      const result = formatZodError(mockZodError as any, undefined, yamlDocument);
+      const result = formatZodError(mockZodError as any, { yamlDocument });
 
       // Should enhance the basic type error
       expect(result.message).toMatch(/config expects an object|Expected object, received number/);
@@ -872,7 +872,7 @@ describe('Dynamic validation system behavior', () => {
         ],
       };
 
-      const result = formatZodError(mockZodError as any, undefined, yamlDocument);
+      const result = formatZodError(mockZodError as any, { yamlDocument });
 
       // Should enhance the basic type error
       expect(result.message).toMatch(/items expects a list|Expected array, received number/);
@@ -899,7 +899,7 @@ describe('Dynamic validation system behavior', () => {
         ],
       };
 
-      const result = formatZodError(mockZodError as any, undefined, yamlDocument);
+      const result = formatZodError(mockZodError as any, { yamlDocument });
 
       // Should show available options or fall back to basic message
       expect(result.message).toMatch(/level must be one of:|Invalid enum value/);
@@ -929,7 +929,9 @@ describe('Dynamic validation system behavior', () => {
         ],
       };
 
-      const result1 = formatZodError(missingFieldsError as any, undefined, incompleteYamlDocument);
+      const result1 = formatZodError(missingFieldsError as any, {
+        yamlDocument: incompleteYamlDocument,
+      });
       expect(result1.message).toMatch(/Required fields missing|with expects an object/);
 
       // Scenario 2: Type error (number instead of string for criticality_level)
@@ -945,7 +947,7 @@ describe('Dynamic validation system behavior', () => {
         ],
       };
 
-      const result2 = formatZodError(typeError as any, undefined, incompleteYamlDocument);
+      const result2 = formatZodError(typeError as any, { yamlDocument: incompleteYamlDocument });
       expect(result2.message).toMatch(
         /Expected string, received number|criticality_level expects a string/
       );
@@ -963,7 +965,7 @@ describe('Dynamic validation system behavior', () => {
         ],
       };
 
-      const result3 = formatZodError(enumError as any, undefined, incompleteYamlDocument);
+      const result3 = formatZodError(enumError as any, { yamlDocument: incompleteYamlDocument });
       expect(result3.message).toMatch(/criticality_level must be one of:|Invalid enum value/);
 
       // If it shows enum options, verify they're the correct ones
@@ -1002,7 +1004,7 @@ describe('Dynamic validation system behavior', () => {
         ],
       };
 
-      const result = formatZodError(invalidEnumError as any, undefined, correctYamlDocument);
+      const result = formatZodError(invalidEnumError as any, { yamlDocument: correctYamlDocument });
 
       // Should provide helpful enum validation
       expect(result.message).toMatch(/criticality_level must be one of:|Invalid enum value/);
@@ -1011,22 +1013,16 @@ describe('Dynamic validation system behavior', () => {
 });
 
 describe('Nested step support', () => {
+  const dummySchema = z.object({ steps: z.array(z.any()) });
+
   beforeEach(() => {
-    mockGetAllConnectors.mockReset();
     clearEnrichmentCache();
   });
 
   it('should enrich errors for steps nested in foreach', () => {
-    mockGetAllConnectors.mockReturnValue([
-      {
-        type: 'elasticsearch.index',
-        paramsSchema: z.object({
-          index: z.string(),
-          document: z.object({}),
-        }),
-      },
-    ] as any);
-
+    const connectorParamsSchemaResolver = resolverFromMap({
+      'elasticsearch.index': z.object({ index: z.string(), document: z.object({}) }),
+    });
     const yamlDocument = parseDocument(`
 steps:
   - name: foreachStep
@@ -1046,22 +1042,18 @@ steps:
         },
       ],
     };
-    const dummySchema = z.object({ steps: z.array(z.any()) });
-    const result = formatZodError(mockError as any, dummySchema, yamlDocument);
+    const result = formatZodError(mockError as any, {
+      schema: dummySchema,
+      yamlDocument,
+      connectorParamsSchemaResolver,
+    });
     expect(result.message).toContain('expects an object with: index, document');
   });
 
   it('should enrich errors for steps in if-else branches', () => {
-    mockGetAllConnectors.mockReturnValue([
-      {
-        type: 'slack',
-        paramsSchema: z.object({
-          channel: z.string(),
-          message: z.string(),
-        }),
-      },
-    ] as any);
-
+    const connectorParamsSchemaResolver = resolverFromMap({
+      slack: z.object({ channel: z.string(), message: z.string() }),
+    });
     const yamlDocument = parseDocument(`
 steps:
   - name: conditionalStep
@@ -1086,22 +1078,18 @@ steps:
         },
       ],
     };
-    const dummySchema = z.object({ steps: z.array(z.any()) });
-    const result = formatZodError(mockError as any, dummySchema, yamlDocument);
+    const result = formatZodError(mockError as any, {
+      schema: dummySchema,
+      yamlDocument,
+      connectorParamsSchemaResolver,
+    });
     expect(result.message).toContain('expects an object with: channel, message');
   });
 
   it('should enrich errors for steps in parallel branches', () => {
-    mockGetAllConnectors.mockReturnValue([
-      {
-        type: 'http',
-        paramsSchema: z.object({
-          url: z.string(),
-          method: z.string().optional(),
-        }),
-      },
-    ] as any);
-
+    const connectorParamsSchemaResolver = resolverFromMap({
+      http: z.object({ url: z.string(), method: z.string().optional() }),
+    });
     const yamlDocument = parseDocument(`
 steps:
   - name: parallelStep
@@ -1122,21 +1110,18 @@ steps:
         },
       ],
     };
-    const dummySchema = z.object({ steps: z.array(z.any()) });
-    const result = formatZodError(mockError as any, dummySchema, yamlDocument);
+    const result = formatZodError(mockError as any, {
+      schema: dummySchema,
+      yamlDocument,
+      connectorParamsSchemaResolver,
+    });
     expect(result.message).toContain('expects an object with: url');
   });
 
   it('should enrich errors for deeply nested steps', () => {
-    mockGetAllConnectors.mockReturnValue([
-      {
-        type: 'console',
-        paramsSchema: z.object({
-          message: z.string(),
-        }),
-      },
-    ] as any);
-
+    const connectorParamsSchemaResolver = resolverFromMap({
+      console: z.object({ message: z.string() }),
+    });
     const yamlDocument = parseDocument(`
 steps:
   - name: outerForeach
@@ -1160,8 +1145,11 @@ steps:
         },
       ],
     };
-    const dummySchema = z.object({ steps: z.array(z.any()) });
-    const result = formatZodError(mockError as any, dummySchema, yamlDocument);
+    const result = formatZodError(mockError as any, {
+      schema: dummySchema,
+      yamlDocument,
+      connectorParamsSchemaResolver,
+    });
     expect(result.message).toContain('expects an object with: message');
   });
 });

@@ -14,6 +14,7 @@ import { parseYamlToJSONWithoutValidation } from './parse_workflow_yaml_to_json_
 import { getYamlDocumentErrors } from './validate_yaml_document';
 import { InvalidYamlSchemaError, InvalidYamlSyntaxError } from '../errors';
 import { isDynamicValue, isLiquidTagValue, isVariableValue } from '../regex';
+import type { ConnectorParamsSchemaResolver } from '../zod/enrich_error_message';
 import { formatZodError } from '../zod/format_zod_error';
 
 export type ParseWorkflowYamlToJSONResult<T extends ZodType> = (
@@ -21,9 +22,15 @@ export type ParseWorkflowYamlToJSONResult<T extends ZodType> = (
   | { success: false; error: Error }
 ) & { document: Document };
 
+export interface ParseWorkflowYamlToJSONOptions {
+  /** Optional resolver for connector-specific params schemas, injected from the host plugin */
+  connectorParamsSchemaResolver?: ConnectorParamsSchemaResolver;
+}
+
 export function parseWorkflowYamlToJSON<T extends ZodType>(
   yamlString: string,
-  schema: T
+  schema: T,
+  options: ParseWorkflowYamlToJSONOptions = {}
 ): ParseWorkflowYamlToJSONResult<T> {
   const parseResult = parseYamlToJSONWithoutValidation(yamlString);
   const { document } = parseResult;
@@ -77,7 +84,11 @@ export function parseWorkflowYamlToJSON<T extends ZodType>(
 
     // Use custom error formatter for better user experience
     const filteredError = new ZodError(filteredIssues);
-    const { message, formattedError } = formatZodError(filteredError, schema, document);
+    const { message, formattedError } = formatZodError(filteredError, {
+      schema,
+      yamlDocument: document,
+      connectorParamsSchemaResolver: options.connectorParamsSchemaResolver,
+    });
     return {
       success: false,
       error: new InvalidYamlSchemaError(message, formattedError),

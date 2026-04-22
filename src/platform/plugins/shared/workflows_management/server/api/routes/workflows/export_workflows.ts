@@ -9,9 +9,9 @@
 
 import path from 'path';
 import { schema } from '@kbn/config-schema';
+import { stringifyWorkflowDefinition } from '@kbn/workflows-yaml';
 import type { ExportWorkflowsResponse, WorkflowExportEntry } from '../../../../common/lib/import';
 import { WORKFLOW_EXPORT_VERSION } from '../../../../common/lib/import';
-import { stringifyWorkflowDefinition } from '../../../../common/lib/yaml';
 import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';

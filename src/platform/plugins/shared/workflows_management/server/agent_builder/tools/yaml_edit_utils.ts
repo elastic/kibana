@@ -10,8 +10,8 @@
 import { isEqual } from 'lodash';
 import { Document, isMap, isPair, isScalar, isSeq, parseDocument, stringify } from 'yaml';
 import type { Node, YAMLMap, YAMLSeq } from 'yaml';
+import { WORKFLOW_DEFINITION_KEYS_ORDER } from '@kbn/workflows-yaml';
 import { getStepNode } from '../../../common/lib/yaml/get_step_node';
-import { WORKFLOW_DEFINITION_KEYS_ORDER } from '../../../common/lib/yaml/stringify_workflow_definition';
 
 const FIX_SPLICE_INDENTATION = true;
 const ENABLE_DOT_NOTATION_PATHS = true;

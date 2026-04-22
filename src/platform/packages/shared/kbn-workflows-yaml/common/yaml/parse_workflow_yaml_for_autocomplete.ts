@@ -29,11 +29,10 @@ export function parseWorkflowYamlForAutocomplete(
   const result = WorkflowSchemaForAutocomplete.safeParse(json);
   if (!result.success) {
     // Use custom error formatter for better user experience
-    const { message, formattedError } = formatZodError(
-      result.error,
-      WorkflowSchemaForAutocomplete,
-      parseResult.document
-    );
+    const { message, formattedError } = formatZodError(result.error, {
+      schema: WorkflowSchemaForAutocomplete,
+      yamlDocument: parseResult.document,
+    });
     return {
       success: false,
       error: new InvalidYamlSchemaError(message, formattedError),

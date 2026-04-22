@@ -9,12 +9,12 @@
 
 import { WORKFLOW_ID_MAX_LENGTH } from '@kbn/workflows';
 
+import { WorkflowValidationError } from '@kbn/workflows-yaml';
 import {
   buildCandidateIds,
   resolveUniqueWorkflowIds,
   validateWorkflowId,
 } from './workflow_id_resolver';
-import { WorkflowValidationError } from '../../common/lib/errors';
 import { generateWorkflowId } from '../../common/lib/import';
 
 describe('generateWorkflowId', () => {
