@@ -8,7 +8,6 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
-import { useLocation } from 'react-router-dom';
 
 import { useOnboardingService } from '../../../../../hooks/use_onboarding_service';
 import { AgentlessAvailableCallout } from './agentless_available_callout';
@@ -22,7 +21,6 @@ export const IntegrationCardTopCallout = React.memo<{
   isAgentRequired?: boolean;
   selectedTabId: IntegrationTabId;
 }>(({ activeIntegrationsCount, isAgentRequired, selectedTabId }) => {
-  const { pathname } = useLocation();
   const { isAgentlessAvailable$ } = useOnboardingService();
   const isAgentlessAvailable = useObservable(isAgentlessAvailable$, undefined);
 
