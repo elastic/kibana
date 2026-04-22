@@ -53,8 +53,17 @@ export interface CloudConfigType {
   };
 }
 
+export const CLOUD_DEV_OVERRIDE_KEY = '__kibana_dev_cloud_enabled';
+
+const DEV_CLOUD_DEFAULTS: Partial<CloudConfigType> = {
+  id: 'ftr_fake_cloud_id:aGVsbG8uY29tOjQ0MyRFUzEyM2FiYyRrYm4xMjNhYmM=',
+  deployment_url: 'https://cloud.elastic.co/deployments/your-deployment-id',
+  deployments_url: 'https://cloud.elastic.co/deployments',
+  base_url: 'https://cloud.elastic.co',
+};
+
 export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
-  private readonly config: CloudConfigType;
+  private config: CloudConfigType;
   private readonly isCloudEnabled: boolean;
   private readonly isServerlessEnabled: boolean;
   private readonly contextProviders: Array<FC<PropsWithChildren<unknown>>> = [];
@@ -64,6 +73,26 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<CloudConfigType>();
+
+    // In dev mode, allow overriding cloud via localStorage for local testing.
+    const isDev = initializerContext.env.mode.dev;
+    if (isDev && typeof window !== 'undefined') {
+      try {
+        const devOverride = window.localStorage.getItem(CLOUD_DEV_OVERRIDE_KEY);
+        if (devOverride === 'true' && !this.config.id) {
+          const trialEndDate = new Date();
+          trialEndDate.setFullYear(trialEndDate.getFullYear() + 1);
+          this.config = {
+            ...this.config,
+            ...DEV_CLOUD_DEFAULTS,
+            trial_end_date: trialEndDate.toISOString(),
+          };
+        }
+      } catch {
+        // localStorage may be unavailable
+      }
+    }
+
     this.isCloudEnabled = getIsCloudEnabled(this.config.id);
     this.isServerlessEnabled = !!this.config.serverless?.project_id;
     this.logger = initializerContext.logger.get();
