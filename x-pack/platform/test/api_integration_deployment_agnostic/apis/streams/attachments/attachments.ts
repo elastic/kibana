@@ -5,7 +5,6 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS } from '@kbn/management-settings-ids';
 import {
   disableStreams,
   enableStreams,
@@ -52,9 +51,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
-      await kibanaServer.uiSettings.update({
-        [OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS]: true,
-      });
 
       await indexDocument(esClient, 'logs.otel', {
         '@timestamp': '2024-01-01T00:00:10.000Z',
@@ -64,9 +60,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     after(async () => {
       await disableStreams(apiClient);
-      await kibanaServer.uiSettings.update({
-        [OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS]: false,
-      });
     });
 
     describe('List attachments', () => {
@@ -776,14 +769,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           disabledFeatures: [],
         });
 
-        // Enable attachments setting for the test space
-        await kibanaServer.uiSettings.update(
-          {
-            [OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS]: true,
-          },
-          { space: TEST_SPACE_ID }
-        );
-
         // Load dashboards and rules in the test space
         await loadDashboards(kibanaServer, DASHBOARD_ARCHIVES, TEST_SPACE_ID);
         await kibanaServer.importExport.load(RULE_ARCHIVE, { space: TEST_SPACE_ID });
@@ -944,14 +929,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           name: 'Test Space Unlink Validation',
           disabledFeatures: [],
         });
-
-        // Enable attachments setting for the test space
-        await kibanaServer.uiSettings.update(
-          {
-            [OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS]: true,
-          },
-          { space: TEST_SPACE_ID }
-        );
 
         // Load dashboards and rules only in test space
         // The tests will link from test space and try to unlink from default space
@@ -1221,69 +1198,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               .expect(204);
           }
         }
-      });
-    });
-
-    describe('requires attachments setting', () => {
-      before(async () => {
-        await loadDashboards(kibanaServer, DASHBOARD_ARCHIVES, SPACE_ID);
-        await kibanaServer.importExport.load(RULE_ARCHIVE, { space: SPACE_ID });
-        await kibanaServer.uiSettings.update({
-          [OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS]: false,
-        });
-      });
-
-      after(async () => {
-        await unloadDashboards(kibanaServer, DASHBOARD_ARCHIVES, SPACE_ID);
-        await kibanaServer.importExport.unload(RULE_ARCHIVE, { space: SPACE_ID });
-      });
-
-      it('GET attachments returns 403', async () => {
-        await getAttachments({
-          apiClient,
-          stream: 'logs.otel',
-          expectedStatusCode: 403,
-        });
-      });
-
-      it('PUT link attachment returns 403', async () => {
-        await linkAttachment({
-          apiClient,
-          stream: 'logs.otel',
-          type: 'dashboard',
-          id: SEARCH_DASHBOARD_ID,
-          expectedStatusCode: 403,
-        });
-      });
-
-      it('DELETE unlink attachment returns 403', async () => {
-        await unlinkAttachment({
-          apiClient,
-          stream: 'logs.otel',
-          type: 'dashboard',
-          id: SEARCH_DASHBOARD_ID,
-          expectedStatusCode: 403,
-        });
-      });
-
-      it('POST bulk attachments returns 403', async () => {
-        await bulkAttachments({
-          apiClient,
-          stream: 'logs.otel',
-          operations: [
-            { index: { type: 'dashboard', id: SEARCH_DASHBOARD_ID } },
-            { delete: { type: 'dashboard', id: BASIC_DASHBOARD_ID } },
-          ],
-          expectedStatusCode: 403,
-        });
-      });
-
-      it('GET attachment suggestions returns 403', async () => {
-        await getAttachmentSuggestions({
-          apiClient,
-          stream: 'logs.otel',
-          expectedStatusCode: 403,
-        });
       });
     });
   });
