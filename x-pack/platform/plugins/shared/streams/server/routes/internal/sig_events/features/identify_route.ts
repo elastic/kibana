@@ -24,6 +24,7 @@ import {
   identifyInferredFeatures,
   identifyComputedFeatures,
 } from '../../../../lib/sig_events/features';
+import { areFeaturesRecent } from '../../../../lib/sig_events/features/are_features_recent';
 
 // ---------------------------------------------------------------------------
 // Route 1: Identify inferred features (one iteration: sample + infer + reconcile)
@@ -58,6 +59,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
         maxExcludedFeaturesInPrompt: z.number().optional(),
         maxPreviouslyIdentifiedFeatures: z.number().optional(),
         diverseOffset: z.number().min(0).optional(),
+        recencyThresholdHours: z.number().min(0).nullable().optional(),
       })
       .nullable()
       .optional(),
@@ -93,7 +95,20 @@ const identifyInferredFeaturesRoute = createServerRoute({
       maxExcludedFeaturesInPrompt = tuningConfig.max_excluded_features_in_prompt,
       maxPreviouslyIdentifiedFeatures,
       diverseOffset,
+      recencyThresholdHours,
     } = params.body ?? {};
+
+    if (recencyThresholdHours != null) {
+      const featureClient = await getFeatureClient();
+      const recency = await areFeaturesRecent({
+        featureClient,
+        streamName,
+        thresholdHours: recencyThresholdHours,
+      });
+      if (recency.isRecent) {
+        return { skipped: true, reason: 'features_recent', newestLastSeen: recency.newestLastSeen };
+      }
+    }
 
     const [connectorId, stream, featureClient] = await Promise.all([
       connectorIdOverride
@@ -198,6 +213,7 @@ const identifyComputedFeaturesRoute = createServerRoute({
         end: z.number().optional(),
         runId: z.string().optional(),
         featureTtlDays: z.number().optional(),
+        recencyThresholdHours: z.number().min(0).nullable().optional(),
       })
       .nullable()
       .optional(),
@@ -222,7 +238,25 @@ const identifyComputedFeaturesRoute = createServerRoute({
       end = now,
       runId = uuidv4(),
       featureTtlDays = tuningConfig.feature_ttl_days,
+      recencyThresholdHours,
     } = params.body ?? {};
+
+    if (recencyThresholdHours != null) {
+      const featureClient = await getFeatureClient();
+      const recency = await areFeaturesRecent({
+        featureClient,
+        streamName,
+        thresholdHours: recencyThresholdHours,
+      });
+      if (recency.isRecent) {
+        return {
+          skipped: true,
+          reason: 'features_recent',
+          computedFeatures: [],
+          computedFeaturesCount: 0,
+        };
+      }
+    }
 
     const [featureClient, stream] = await Promise.all([
       getFeatureClient(),
