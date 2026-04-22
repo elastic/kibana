@@ -20,7 +20,10 @@ export function getLogDocumentOverview(
   const formatField = <T extends keyof LogDocumentOverview>(field: T) => {
     // Use fallback to check both ECS and OTel field names
     const result = getFieldValueWithFallback(doc.flattened, field);
-    const value = result.value;
+    let value = result.value;
+    if (value && Array.isArray(value)) {
+      value = value.length === 1 ? value[0] : value;
+    }
     return (
       value !== undefined && value !== null
         ? formatFieldValueText({
