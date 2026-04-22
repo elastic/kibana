@@ -17,7 +17,12 @@ import type { PrebuiltRuleAsset } from '../../../../model/rule_assets/prebuilt_r
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../prebuilt_rule_assets_type';
 import { validatePrebuiltRuleAssets } from '../../prebuilt_rule_assets_validation';
 import type { RuleVersionSpecifier } from '../../../rule_versions/rule_version_specifier';
-import { getPrebuiltRuleAssetSoId, getPrebuiltRuleAssetsSearchNamespace } from '../utils';
+import {
+  PREBUILT_RULE_ASSETS_RUNTIME_MAPPINGS,
+  getPrebuiltRuleAssetSoId,
+  getPrebuiltRuleAssetsSearchNamespace,
+} from '../utils';
+import { buildPrebuiltRuleAssetSourceIncludes } from '../build_source_includes';
 
 export interface FetchAssetsByVersionSearchParams {
   filter?: string;
@@ -27,6 +32,12 @@ export interface FetchAssetsByVersionSearchParams {
   page?: number;
   perPage?: number;
   fields?: string[];
+  /**
+   * When provided, narrows the returned hits to these rule versions via
+   * `post_filter`, while leaving aggregations scoped to the full set defined
+   * by `versions`.
+   */
+  hitsFilterVersions?: RuleVersionSpecifier[];
 }
 
 export interface FetchAssetsByVersionResult {
@@ -63,6 +74,15 @@ export async function fetchAssetsByVersion(
     getPrebuiltRuleAssetSoId(version.rule_id, version.version)
   );
 
+  // `query` defines the scope aggregations run over (the full installable set
+  // when `hitsFilterVersions` is provided). `post_filter` narrows returned
+  // hits to the caller's page without affecting aggregation buckets.
+  const postFilterSoIds = params?.hitsFilterVersions?.map((version) =>
+    getPrebuiltRuleAssetSoId(version.rule_id, version.version)
+  );
+
+  const sourceIncludes = buildPrebuiltRuleAssetSourceIncludes(params?.fields);
+
   const searchResult = await savedObjectsClient.search<
     SavedObjectsRawDocSource & {
       [PREBUILT_RULE_ASSETS_SO_TYPE]: PrebuiltRuleAsset;
@@ -71,10 +91,15 @@ export async function fetchAssetsByVersion(
     type: PREBUILT_RULE_ASSETS_SO_TYPE,
     namespaces: getPrebuiltRuleAssetsSearchNamespace(savedObjectsClient),
     query: buildQuery(soIds, params?.filter),
-    fields: ['enabled'],
+    ...(postFilterSoIds ? { post_filter: { terms: { _id: postFilterSoIds } } } : {}),
+    ...(sourceIncludes ? { _source: { includes: sourceIncludes } } : {}),
+    runtime_mappings: PREBUILT_RULE_ASSETS_RUNTIME_MAPPINGS,
     track_total_hits: params?.trackTotalHits,
     size: params?.perPage,
-    from: params?.page && params.perPage ? (params.page - 1) * params.perPage : undefined,
+    from:
+      params?.page != null && params?.perPage != null
+        ? (params.page - 1) * params.perPage
+        : undefined,
     sort: params?.sort,
     aggs: params?.aggs,
   });

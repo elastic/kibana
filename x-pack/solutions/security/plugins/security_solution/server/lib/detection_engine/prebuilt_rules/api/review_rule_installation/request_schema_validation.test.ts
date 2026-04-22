@@ -61,7 +61,7 @@ describe('validateReviewRuleInstallationRequestBody', () => {
     expect(
       validateReviewRuleInstallationRequestBody({
         ...defaultInput,
-        sort: [{ sort_field: 'name', sort_order: 'asc' }],
+        sort: [{ field: 'name', order: 'asc' }],
       })
     ).toEqual([]);
   });

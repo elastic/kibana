@@ -40,9 +40,9 @@ export const AddPrebuiltRulesTable = React.memo(() => {
       selectedRules,
       isUpgradingSecurityPackages,
       pagination,
-      sort,
+      sortingOptions,
     },
-    actions: { setPagination, setSort, selectRules },
+    actions: { setPagination, setSortingOptions, selectRules },
   } = useAddPrebuiltRulesTableContext();
 
   const rulesColumns = useAddPrebuiltRulesTableColumns();
@@ -50,35 +50,32 @@ export const AddPrebuiltRulesTable = React.memo(() => {
   const shouldShowProgress = isUpgradingSecurityPackages || isRefetching;
 
   const handleTableChange = useCallback(
-    ({ page: { index, size }, sort: tableSort }: CriteriaWithPagination<RuleResponse>) => {
+    ({ page: { index, size }, sort }: CriteriaWithPagination<RuleResponse>) => {
       setPagination({
         page: index + 1,
         perPage: size,
       });
 
-      if (tableSort) {
-        setSort([
-          {
-            sort_field: tableSort.field as PrebuiltRuleAssetsSortField,
-            sort_order: tableSort.direction,
-          },
-        ]);
+      if (sort) {
+        setSortingOptions({
+          field: sort.field as PrebuiltRuleAssetsSortField,
+          order: sort.direction,
+        });
       }
     },
-    [setPagination, setSort]
+    [setPagination, setSortingOptions]
   );
 
   const sortingTableProp = useMemo(() => {
-    const primary = sort?.[0];
-    return primary != null
+    return sortingOptions
       ? {
           sort: {
-            field: primary.sort_field,
-            direction: primary.sort_order,
+            field: sortingOptions.field,
+            direction: sortingOptions.order,
           },
         }
       : {};
-  }, [sort]);
+  }, [sortingOptions]);
 
   return (
     <>

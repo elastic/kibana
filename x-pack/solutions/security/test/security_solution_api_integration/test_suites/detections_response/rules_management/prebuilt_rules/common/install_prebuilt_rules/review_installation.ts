@@ -133,8 +133,15 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const rule = response.rules[0] as Record<string, unknown>;
 
+        // Requested field is present.
         expect(rule.name).toBe('Filtered fields rule');
-        expect(rule).toHaveProperty('query');
+        // Baseline identity fields are always included.
+        expect(rule).toHaveProperty('rule_id');
+        expect(rule).toHaveProperty('type');
+        expect(rule).toHaveProperty('version');
+        // Non-requested, non-baseline fields are omitted.
+        expect(rule).not.toHaveProperty('query');
+        expect(rule).not.toHaveProperty('tags');
       });
     });
 
@@ -196,8 +203,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const page1Response = await reviewPrebuiltRulesToInstall(supertest, {
           page: 1,
           per_page: 2,
-          sort_field: 'name',
-          sort_order: 'asc',
+          sort: [{ field: 'name', order: 'asc' }],
         });
 
         expect(page1Response.rules).toHaveLength(2);
@@ -209,8 +215,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const page2Response = await reviewPrebuiltRulesToInstall(supertest, {
           page: 2,
           per_page: 2,
-          sort_field: 'name',
-          sort_order: 'asc',
+          sort: [{ field: 'name', order: 'asc' }],
         });
 
         expect(page2Response.rules).toHaveLength(2);
@@ -371,8 +376,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
           const ascSortResponse = await reviewPrebuiltRulesToInstall(supertest, {
-            sort_field: 'name',
-            sort_order: 'asc',
+            sort: [{ field: 'name', order: 'asc' }],
           });
 
           expect(ascSortResponse.rules).toEqual([
@@ -391,8 +395,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
           const descSortResponse = await reviewPrebuiltRulesToInstall(supertest, {
-            sort_field: 'name',
-            sort_order: 'desc',
+            sort: [{ field: 'name', order: 'desc' }],
           });
 
           expect(descSortResponse.rules).toEqual([
@@ -414,8 +417,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
           const ascSortResponse = await reviewPrebuiltRulesToInstall(supertest, {
-            sort_field: 'severity',
-            sort_order: 'asc',
+            sort: [{ field: 'severity', order: 'asc' }],
           });
 
           expect(ascSortResponse.rules).toEqual([
@@ -436,8 +438,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
           const descSortResponse = await reviewPrebuiltRulesToInstall(supertest, {
-            sort_field: 'severity',
-            sort_order: 'desc',
+            sort: [{ field: 'severity', order: 'desc' }],
           });
 
           expect(descSortResponse.rules).toEqual([
@@ -459,8 +460,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
           const ascSortResponse = await reviewPrebuiltRulesToInstall(supertest, {
-            sort_field: 'risk_score',
-            sort_order: 'asc',
+            sort: [{ field: 'risk_score', order: 'asc' }],
           });
 
           expect(ascSortResponse.rules).toEqual([
@@ -479,8 +479,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
           const descSortResponse = await reviewPrebuiltRulesToInstall(supertest, {
-            sort_field: 'risk_score',
-            sort_order: 'desc',
+            sort: [{ field: 'risk_score', order: 'desc' }],
           });
 
           expect(descSortResponse.rules).toEqual([
@@ -509,8 +508,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
         const sortResponse = await reviewPrebuiltRulesToInstall(supertest, {
-          sort_field: 'risk_score',
-          sort_order: 'asc',
+          sort: [{ field: 'risk_score', order: 'asc' }],
         });
 
         expect(sortResponse.rules).toEqual([
@@ -878,8 +876,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
         const response = await reviewPrebuiltRulesToInstall(supertest, {
-          sort_field: 'name',
-          sort_order: 'desc',
+          sort: [{ field: 'name', order: 'desc' }],
           filter: 'security-rule.tags: "tag-b"',
         });
 
@@ -975,87 +972,6 @@ export default ({ getService }: FtrProviderContext): void => {
           message: expect.any(Array),
         });
         expect(response.message.some((m) => m.includes('invalid KQL filter'))).toBe(true);
-      });
-    });
-
-    describe('search_after pagination', () => {
-      it('returns 400 when search_after is provided without sort_field and sort_order', async () => {
-        const response = (await reviewPrebuiltRulesToInstall(
-          supertest,
-          {
-            search_after: ['nonsense-sort-token'],
-          },
-          400
-        )) as unknown as { status_code: number; message: string[] };
-        expect(response).toMatchObject({
-          status_code: 400,
-          message: expect.any(Array),
-        });
-        expect(
-          response.message.some((m) =>
-            m.includes('when search_after is provided, sort_field and sort_order must be set')
-          )
-        ).toBe(true);
-      });
-
-      it('paginates with page and returns results in sort order without a search_after cursor', async () => {
-        const ruleAssets = [
-          createRuleAssetSavedObject({ rule_id: 'rule-a', name: 'Aaa cursor rule' }),
-          createRuleAssetSavedObject({ rule_id: 'rule-z', name: 'Zzz cursor rule' }),
-        ];
-        await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
-
-        const first = await reviewPrebuiltRulesToInstall(supertest, {
-          per_page: 1,
-          page: 1,
-          sort_field: 'name',
-          sort_order: 'asc',
-        });
-
-        expect(first.rules).toHaveLength(1);
-        expect(first.total).toBe(2);
-        expect(first.rules[0]?.name).toBe('Aaa cursor rule');
-        expect(first.search_after).toBeDefined();
-
-        const second = await reviewPrebuiltRulesToInstall(supertest, {
-          per_page: 1,
-          page: 2,
-          sort_field: 'name',
-          sort_order: 'asc',
-        });
-
-        expect(second.rules).toHaveLength(1);
-        expect(second.total).toBe(2);
-        expect(second.rules[0]?.name).toBe('Zzz cursor rule');
-      });
-
-      it('continues pagination via search_after cursor', async () => {
-        const ruleAssets = [
-          createRuleAssetSavedObject({ rule_id: 'rule-a', name: 'Aaa cursor rule' }),
-          createRuleAssetSavedObject({ rule_id: 'rule-m', name: 'Mmm cursor rule' }),
-          createRuleAssetSavedObject({ rule_id: 'rule-z', name: 'Zzz cursor rule' }),
-        ];
-        await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
-
-        const first = await reviewPrebuiltRulesToInstall(supertest, {
-          per_page: 1,
-          sort_field: 'name',
-          sort_order: 'asc',
-        });
-
-        expect(first.rules).toHaveLength(1);
-        expect(first.rules[0]?.name).toBe('Aaa cursor rule');
-        expect(first.search_after).toBeDefined();
-
-        const second = await reviewPrebuiltRulesToInstall(supertest, {
-          per_page: 1,
-          sort_field: 'name',
-          sort_order: 'asc',
-          search_after: first.search_after,
-        });
-
-        expect(second.rules).toHaveLength(1);
-        expect(second.rules[0]?.name).toBe('Mmm cursor rule');
       });
     });
 

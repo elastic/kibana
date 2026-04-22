@@ -44,7 +44,7 @@ paths:
                   $ref: '#/components/schemas/PrebuiltRuleAssetsAggregations'
                 sort:
                   description: |
-                    Ordered sort criteria (only `name`, `risk_score`, and `severity` as `sort_field` values).
+                    Ordered sort criteria (only `name`, `risk_score`, and `severity` as `field` values).
                   $ref: '#/components/schemas/PrebuiltRuleAssetsSort'
                 fields:
                   type: array
@@ -154,15 +154,15 @@ components:
       type: object
       additionalProperties: false
       description: |
-        One sort criterion. Only `name`, `risk_score`, and `severity` are valid for `sort_field`.
+        One sort criterion. Only `name`, `risk_score`, and `severity` are valid for `field`.
       required:
-        - sort_field
-        - sort_order
+        - field
+        - order
       properties:
-        sort_field:
+        field:
           description: Field to sort by.
           $ref: '#/components/schemas/PrebuiltRuleAssetsSortField'
-        sort_order:
+        order:
           description: Sort order.
           $ref: '../../model/sorting.schema.yaml#/components/schemas/SortOrder'
 
@@ -170,7 +170,7 @@ components:
       type: array
       description: |
         Ordered multi-field sort for prebuilt rule assets. Only `name`, `risk_score`, and `severity`
-        may appear as `sort_field` values (see `PrebuiltRuleAssetsSortField`).
+        may appear as `field` values (see `PrebuiltRuleAssetsSortField`).
       minItems: 1
       items:
         $ref: '#/components/schemas/PrebuiltRuleAssetsSortItem'

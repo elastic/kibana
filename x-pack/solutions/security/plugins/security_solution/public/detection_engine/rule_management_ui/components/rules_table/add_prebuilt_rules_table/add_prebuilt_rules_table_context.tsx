@@ -26,7 +26,7 @@ import * as i18n from './translations';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { RULES_TABLE_INITIAL_PAGE_SIZE } from '../constants';
 import type { PaginationOptions } from '../../../../rule_management/logic';
-import type { PrebuiltRuleAssetsSort } from '../../../../../../common/api/detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route.gen';
+import type { PrebuiltRuleAssetsSortItem } from '../../../../../../common/api/detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route.gen';
 
 export interface AddPrebuiltRulesTableState {
   /**
@@ -87,9 +87,9 @@ export interface AddPrebuiltRulesTableState {
    */
   pagination: PaginationOptions;
   /**
-   * API `sort` payload (installation review ordered sort criteria).
+   * Currently selected table sorting
    */
-  sort?: PrebuiltRuleAssetsSort;
+  sortingOptions: PrebuiltRuleAssetsSortItem | undefined;
 
   /**
    * Currently selected table filter
@@ -110,7 +110,7 @@ export interface AddPrebuiltRulesTableActions {
   setFilterOptions: Dispatch<SetStateAction<AddPrebuiltRulesTableFilterOptions>>;
   selectRules: (rules: RuleResponse[]) => void;
   setPagination: Dispatch<SetStateAction<{ page: number; perPage: number }>>;
-  setSort: Dispatch<SetStateAction<PrebuiltRuleAssetsSort | undefined>>;
+  setSortingOptions: Dispatch<SetStateAction<PrebuiltRuleAssetsSortItem | undefined>>;
   openRulePreview: (ruleId: RuleSignatureId) => void;
 }
 
@@ -156,7 +156,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
     }));
   }, []);
 
-  const [sort, setSort] = useState<PrebuiltRuleAssetsSort | undefined>();
+  const [sortingOptions, setSortingOptions] = useState<PrebuiltRuleAssetsSortItem | undefined>();
 
   const { data: prebuiltRulesStatus } = useFetchPrebuiltRulesStatusQuery();
 
@@ -184,9 +184,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
       page: pagination.page,
       perPage: pagination.perPage,
       filterOptions,
-      sort,
-      fields: ['name', 'tags'],
-      aggregations: { counts: ['tags'] },
+      sortingOptions,
     },
     {
       refetchInterval: 60000, // Refetch available rules for installation every minute
@@ -313,7 +311,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
   const actions = useMemo(
     () => ({
       setPagination,
-      setSort,
+      setSortingOptions,
       setFilterOptions,
       installAllRules,
       installOneRule,
@@ -324,7 +322,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
     }),
     [
       setPagination,
-      setSort,
+      setSortingOptions,
       installAllRules,
       installOneRule,
       installSelectedRules,
@@ -355,7 +353,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
           ...pagination,
           total: rulesMatchingFilterCount,
         },
-        sort,
+        sortingOptions,
       },
       actions,
     };
@@ -376,7 +374,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
     selectedRules,
     dataUpdatedAt,
     pagination,
-    sort,
+    sortingOptions,
     actions,
   ]);
 

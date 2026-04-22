@@ -8,9 +8,24 @@
 import type { ESFilter } from '@kbn/es-types';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import type { Sort } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingRuntimeFields, Sort } from '@elastic/elasticsearch/lib/api/types';
 import type { PrebuiltRuleAssetsSort } from '../../../../../../../common/api/detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route.gen';
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../prebuilt_rule_assets_type';
+
+/**
+ * Runtime mapping that converts `severity` keyword values into a numeric rank,
+ * so Elasticsearch can sort by severity in a meaningful order rather than
+ * alphabetically. Must be included in any search that sorts on `severity_rank`.
+ */
+export const PREBUILT_RULE_ASSETS_RUNTIME_MAPPINGS: MappingRuntimeFields = {
+  [`${PREBUILT_RULE_ASSETS_SO_TYPE}.severity_rank`]: {
+    type: 'long',
+    script: {
+      source: `emit(params.rank.getOrDefault(doc['${PREBUILT_RULE_ASSETS_SO_TYPE}.severity'].value, 0))`,
+      params: { rank: { low: 20, medium: 40, high: 60, critical: 80 } },
+    },
+  },
+};
 
 export function prepareQueryDslFilter(ruleIds?: string[], filter?: string): ESFilter[] {
   const queryFilter: ESFilter[] = [];
@@ -55,7 +70,7 @@ export function prepareQueryDslSort(sort?: PrebuiltRuleAssetsSort): Sort | undef
   };
 
   return sort?.map((s) => {
-    return { [soSortFields[s.sort_field]]: s.sort_order };
+    return { [soSortFields[s.field]]: s.order };
   });
 }
 /**

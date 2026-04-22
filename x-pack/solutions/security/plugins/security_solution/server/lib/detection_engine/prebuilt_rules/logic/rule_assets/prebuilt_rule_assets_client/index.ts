@@ -27,8 +27,8 @@ export interface IPrebuiltRuleAssetsClient {
 
   fetchLatestVersions: (args?: {
     ruleIds?: string[];
-    sort?: PrebuiltRuleAssetsSort;
     filter?: string;
+    sort?: PrebuiltRuleAssetsSort;
   }) => Promise<BasicRuleInfo[]>;
 
   fetchAssetsByVersion(
@@ -51,9 +51,9 @@ export const createPrebuiltRuleAssetsClient = (
       });
     },
 
-    fetchLatestVersions: ({ ruleIds, sort, filter } = {}): Promise<BasicRuleInfo[]> => {
+    fetchLatestVersions: ({ ruleIds, filter, sort } = {}): Promise<BasicRuleInfo[]> => {
       return withSecuritySpan('IPrebuiltRuleAssetsClient.fetchLatestVersions', async () => {
-        return fetchLatestVersions(savedObjectsClient, { ruleIds, sort, filter });
+        return fetchLatestVersions(savedObjectsClient, { ruleIds, filter, sort });
       });
     },
 

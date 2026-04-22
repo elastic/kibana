@@ -15,7 +15,7 @@ import { prepareKQLStringParam } from '../../../../../common/utils/kql';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import * as i18n from '../translations';
 import { useFetchPrebuiltRulesInstallReviewQuery } from '../../api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_install_review_query';
-import type { PrebuiltRuleAssetsSort } from '../../../../../common/api/detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route.gen';
+import type { PrebuiltRuleAssetsSortItem } from '../../../../../common/api/detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route.gen';
 import type { AddPrebuiltRulesTableFilterOptions } from '../../../rule_management_ui/components/rules_table/add_prebuilt_rules_table/add_prebuilt_rules_table_context';
 
 interface UsePrebuiltRulesInstallReviewParams {
@@ -23,7 +23,7 @@ interface UsePrebuiltRulesInstallReviewParams {
   perPage: number;
   filterOptions?: AddPrebuiltRulesTableFilterOptions;
 
-  sort?: PrebuiltRuleAssetsSort;
+  sortingOptions?: PrebuiltRuleAssetsSortItem;
   aggregations?: Record<string, string[]>;
   fields?: ReviewRuleInstallationField[];
 }
@@ -53,7 +53,7 @@ export const usePrebuiltRulesInstallReview = (
       per_page: requestParameters.perPage,
       filter: buildInstallReviewKqlFilter(requestParameters.filterOptions),
       search,
-      sort: requestParameters.sort,
+      sort: requestParameters.sortingOptions ? [requestParameters.sortingOptions] : undefined,
       aggregations: requestParameters.aggregations,
       fields: requestParameters.fields,
     },

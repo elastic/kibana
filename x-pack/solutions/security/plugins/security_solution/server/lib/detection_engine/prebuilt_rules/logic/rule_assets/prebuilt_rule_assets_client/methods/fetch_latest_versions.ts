@@ -17,6 +17,7 @@ import type { BasicRuleInfo } from '../../../basic_rule_info';
 import type { RuleVersionSpecifier } from '../../../rule_versions/rule_version_specifier';
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../prebuilt_rule_assets_type';
 import {
+  PREBUILT_RULE_ASSETS_RUNTIME_MAPPINGS,
   prepareQueryDslFilter,
   prepareQueryDslSort,
   getPrebuiltRuleAssetSoId,
@@ -150,15 +151,7 @@ async function fetchVersionsBySoIds(
     type: PREBUILT_RULE_ASSETS_SO_TYPE,
     namespaces: getPrebuiltRuleAssetsSearchNamespace(savedObjectsClient),
     size: MAX_PREBUILT_RULES_COUNT,
-    runtime_mappings: {
-      [`${PREBUILT_RULE_ASSETS_SO_TYPE}.severity_rank`]: {
-        type: 'long',
-        script: {
-          source: `emit(params.rank.getOrDefault(doc['${PREBUILT_RULE_ASSETS_SO_TYPE}.severity'].value, 0))`,
-          params: { rank: { low: 20, medium: 40, high: 60, critical: 80 } },
-        },
-      },
-    },
+    runtime_mappings: PREBUILT_RULE_ASSETS_RUNTIME_MAPPINGS,
     query: {
       terms: {
         _id: soIds,

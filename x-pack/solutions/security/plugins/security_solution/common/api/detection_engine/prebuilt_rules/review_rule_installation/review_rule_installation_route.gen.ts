@@ -117,7 +117,7 @@ export type PrebuiltRuleAssetsSortFieldEnum = typeof PrebuiltRuleAssetsSortField
 export const PrebuiltRuleAssetsSortFieldEnum = PrebuiltRuleAssetsSortField.enum;
 
 /**
-  * One sort criterion. Only `name`, `risk_score`, and `severity` are valid for `sort_field`.
+  * One sort criterion. Only `name`, `risk_score`, and `severity` are valid for `field`.
 
   */
 export type PrebuiltRuleAssetsSortItem = z.infer<typeof PrebuiltRuleAssetsSortItem>;
@@ -126,17 +126,17 @@ export const PrebuiltRuleAssetsSortItem = z
     /**
      * Field to sort by.
      */
-    sort_field: PrebuiltRuleAssetsSortField,
+    field: PrebuiltRuleAssetsSortField,
     /**
      * Sort order.
      */
-    sort_order: SortOrder,
+    order: SortOrder,
   })
   .strict();
 
 /**
   * Ordered multi-field sort for prebuilt rule assets. Only `name`, `risk_score`, and `severity`
-may appear as `sort_field` values (see `PrebuiltRuleAssetsSortField`).
+may appear as `field` values (see `PrebuiltRuleAssetsSortField`).
 
   */
 export type PrebuiltRuleAssetsSort = z.infer<typeof PrebuiltRuleAssetsSort>;
@@ -238,7 +238,7 @@ installable rules.
       */
     aggregations: PrebuiltRuleAssetsAggregations.optional(),
     /**
-      * Ordered sort criteria (only `name`, `risk_score`, and `severity` as `sort_field` values).
+      * Ordered sort criteria (only `name`, `risk_score`, and `severity` as `field` values).
 
       */
     sort: PrebuiltRuleAssetsSort.optional(),
