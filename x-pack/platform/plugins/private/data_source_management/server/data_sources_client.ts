@@ -7,6 +7,8 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 
+import type { DataSource } from '../common/types';
+
 /**
  * Server-side Elasticsearch client for data source management.
  * Pass a scoped cluster client (`asCurrentUser`, `asInternalUser`, etc.) appropriate
@@ -38,6 +40,35 @@ export class DataSourcesClient {
     const encoded = encodeURIComponent(id);
     return await this.esClient.transport.request({
       method: 'GET',
+      path: `/_query/datasource/${encoded}`,
+    });
+  }
+
+  /**
+   * Calls Elasticsearch `PUT /_query/datasource/{id}` (create data source).
+   *
+   * **Not implemented yet:** this route does not exist on Elasticsearch; the
+   * request will fail until the API is added.
+   */
+  public async put(id: string, body: DataSource): Promise<unknown> {
+    const encoded = encodeURIComponent(id);
+    return await this.esClient.transport.request({
+      method: 'PUT',
+      path: `/_query/datasource/${encoded}`,
+      body,
+    });
+  }
+
+  /**
+   * Calls Elasticsearch `DELETE /_query/datasource/{id}`.
+   *
+   * **Not implemented yet:** this route does not exist on Elasticsearch; the
+   * request will fail until the API is added.
+   */
+  public async delete(id: string): Promise<unknown> {
+    const encoded = encodeURIComponent(id);
+    return await this.esClient.transport.request({
+      method: 'DELETE',
       path: `/_query/datasource/${encoded}`,
     });
   }
