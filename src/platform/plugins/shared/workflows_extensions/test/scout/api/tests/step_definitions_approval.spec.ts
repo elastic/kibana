@@ -13,8 +13,7 @@ import { expect } from '@kbn/scout/api';
 import { APPROVED_STEP_DEFINITIONS } from '../fixtures/approved_step_definitions';
 import { COMMON_HEADERS } from '../fixtures/constants';
 
-// Failing: See https://github.com/elastic/kibana/issues/265012
-apiTest.describe.skip(
+apiTest.describe(
   'Workflows Extensions - Custom Step Definitions Approval',
   {
     tag: [
