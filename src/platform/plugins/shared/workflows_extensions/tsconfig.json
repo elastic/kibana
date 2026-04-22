@@ -27,7 +27,9 @@
     "@kbn/eval-kql",
     "@kbn/es-query",
     "@kbn/std",
-    "@kbn/core-http-common"
+    "@kbn/core-http-common",
+    "@kbn/logging-mocks",
+    "@kbn/logging"
   ],
   "exclude": ["target/**/*"]
 }
