@@ -116,7 +116,13 @@ function buildQueryFromKuery(kuery: string): Query | undefined {
 export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
   const factory: EmbeddableFactory<ServiceMapEmbeddableState, ServiceMapEmbeddableApi> = {
     type: APM_SERVICE_MAP_EMBEDDABLE,
-    buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
+    buildEmbeddable: async ({
+      initialState,
+      finalizeApi,
+      uuid,
+      parentApi,
+      initializeDrilldownsManager,
+    }) => {
       const { coreStart } = deps;
       const state = initialState;
 
@@ -135,6 +141,8 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
         defaultCustomState
       );
 
+      const drilldownsManager = await initializeDrilldownsManager(uuid, state);
+
       const query$ = new BehaviorSubject<Query | undefined>(buildQueryFromKuery(state.kuery ?? ''));
       const filters$ = new BehaviorSubject<Filter[] | undefined>(
         buildFiltersFromState(state.serviceName, state.environment)
@@ -146,6 +154,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
           ...titleManager.getLatestState(),
           ...timeRangeManager.getLatestState(),
           ...customStateManager.getLatestState(),
+          ...drilldownsManager.getLatestState(),
         };
       }
 
@@ -156,12 +165,14 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           timeRangeManager.anyStateChange$,
-          customStateManager.anyStateChange$
+          customStateManager.anyStateChange$,
+          drilldownsManager.anyStateChange$
         ).pipe(map(() => undefined)),
         getComparators: () => ({
           ...titleComparators,
           ...timeRangeComparators,
           ...customStateComparators,
+          ...drilldownsManager.comparators,
         }),
         onReset: (lastSaved) => {
           titleManager.reinitializeState(lastSaved);
@@ -171,6 +182,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
               : { time_range: DEFAULT_TIME_RANGE }
           );
           customStateManager.reinitializeState(lastSaved);
+          drilldownsManager.reinitializeState(lastSaved ?? {});
         },
       });
 
@@ -178,6 +190,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
         ...titleManager.api,
         ...timeRangeManager.api,
         ...unsavedChangesApi,
+        ...drilldownsManager.api,
         serializeState,
         blockingError$,
         filters$,
@@ -238,6 +251,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
             return () => {
               filtersSubscription.unsubscribe();
               querySubscription.unsubscribe();
+              drilldownsManager.cleanup();
             };
           }, []);
 
