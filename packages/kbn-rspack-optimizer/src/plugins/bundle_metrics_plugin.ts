@@ -131,10 +131,14 @@ export interface PluginMetricsInfo {
  *
  * 9. AGGREGATE SHARED CHUNK AND TOTAL OUTPUT METRICS
  *
- *    `shared chunks total size` and `shared chunk count` track only the
- *    `kibana` entry chunk (named, non-plugin, non-shared). Named shared
- *    chunks (e.g. `shared-core`, `vendors`) are tracked individually via
- *    `page load bundle size` with their own limits.
+ *    `shared chunks total size` and `shared chunk count` track all named
+ *    chunks that are NOT plugin entries and NOT splitChunks shared chunks.
+ *    This includes the `kibana` entry chunk (runtime + orchestration) and
+ *    all developer-named async chunks created via `webpackChunkName` magic
+ *    comments (e.g. connector icons, security_solution lazy sub-plugins,
+ *    APM dashboard chunks). In a typical dist build this is ~69 chunks /
+ *    ~6.6MB. Named shared chunks (e.g. `shared-core`, `vendors`) are
+ *    tracked individually via `page load bundle size` with their own limits.
  *
  *    `shared async chunks total size` and `shared async chunk count` track
  *    unnamed async chunks that are reachable from 2+ plugins (multi-consumer)
