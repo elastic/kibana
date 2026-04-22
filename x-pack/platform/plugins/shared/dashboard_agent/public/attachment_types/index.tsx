@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { ChromeStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { UpdateOriginResponse } from '@kbn/agent-builder-common';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import { attachmentDataToDashboardState } from '@kbn/dashboard-agent-common';
@@ -51,6 +52,17 @@ export const registerDashboardAttachmentUiDefinition = ({
     return result.status === 'success';
   };
 
+  // TODO: this should be replaced by making sure `agentBuilder.updateAttachmentOrigin`
+  // keeps the conversation in sync by invalidating conversation - it doesn't do it atm.
+  // Captured from `getActionButtons` so that non-UI integrations (e.g. origin sync on
+  // dashboard save) can reuse the framework-provided `updateOrigin`, which both persists
+  // the origin and invalidates the conversation. Unlike `agentBuilder.updateAttachmentOrigin`
+  // (plugin start contract), this keeps the rendered attachment in sync without a full refetch.
+  const updateOriginByAttachmentId = new Map<
+    string,
+    (origin: string) => Promise<UpdateOriginResponse | undefined>
+  >();
+
   const dashboardAppApiSubscription = combineLatest([
     dashboardPlugin.dashboardAppClientApi$,
     chrome.sidebar.getCurrentAppId$(),
@@ -66,6 +78,7 @@ export const registerDashboardAttachmentUiDefinition = ({
               agentBuilder,
               api,
               checkSavedDashboardExist,
+              getUpdateOrigin: (attachmentId) => updateOriginByAttachmentId.get(attachmentId),
             })
           : EMPTY;
       })
@@ -92,7 +105,10 @@ export const registerDashboardAttachmentUiDefinition = ({
         canWriteDashboards={canWriteDashboards}
       />
     ),
-    getActionButtons: ({ attachment, openCanvas, isCanvas, isSidebar }) => {
+    getActionButtons: ({ attachment, openCanvas, isCanvas, isSidebar, updateOrigin }) => {
+      // Capture the framework-provided updater keyed by attachment id so that
+      // dashboard-save origin sync (outside the React tree) can reuse it.
+      updateOriginByAttachmentId.set(attachment.id, updateOrigin);
       if (isCanvas) {
         return [];
       }
@@ -141,5 +157,6 @@ export const registerDashboardAttachmentUiDefinition = ({
   return () => {
     dashboardAppApiSubscription.unsubscribe();
     dashboardApi = undefined;
+    updateOriginByAttachmentId.clear();
   };
 };

@@ -38,9 +38,6 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
   // Track current props, starting with initial props
   const [currentProps, setCurrentProps] = useState<EmbeddableConversationProps>(contextProps);
 
-  // Refs to allow callbacks to access latest values
-  const invalidateConversationRef = useRef<(() => void) | null>(null);
-
   // Register callbacks to allow parent to update props and clear browserApiTools
   const onRegisterCallbacks = contextProps.onRegisterCallbacks;
   useEffect(() => {
@@ -54,7 +51,6 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
             ...prevProps,
             attachments: upsertAttachmentsIntoList(prevProps.attachments, [attachment]),
           })),
-        invalidateConversation: () => invalidateConversationRef.current?.(),
       });
     }
   }, [onRegisterCallbacks]);
@@ -155,10 +151,6 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     onDeleteConversation,
   });
 
-  useEffect(() => {
-    invalidateConversationRef.current = conversationActions.invalidateConversation;
-  }, [conversationActions.invalidateConversation]);
-
   // Resets the {initialMessage} and {autoSendInitialMessage} flags after an initial message has been sent or set in the {ConversationInput} component
   const resetInitialMessage = useCallback(() => {
     setCurrentProps((prevProps) => ({
@@ -238,13 +230,8 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
           <AgentBuilderServicesContext.Provider value={services}>
             <AppLeaveContext.Provider value={noopOnAppLeave}>
               <ConversationContext.Provider value={conversationContextValue}>
-                <SendMessageProvider>
-                  <ConversationChangeNotifier
-                    onConversationChange={contextProps.onConversationChange}
-                  >
-                    {children}
-                  </ConversationChangeNotifier>
-                </SendMessageProvider>
+                <ConversationChangeNotifier />
+                <SendMessageProvider>{children}</SendMessageProvider>
               </ConversationContext.Provider>
             </AppLeaveContext.Provider>
           </AgentBuilderServicesContext.Provider>

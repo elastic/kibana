@@ -77,7 +77,7 @@ const createMockConversation = (
 ): Conversation => ({
   id,
   agent_id: 'test-agent',
-  user: { id: 'user-1', name: 'user-1' },
+  user: { id: 'user-1', username: 'user-1' },
   title: 'Test conversation',
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString(),
@@ -261,11 +261,21 @@ describe('registerDashboardAttachmentUiDefinition', () => {
     api: DashboardApi;
     conversationId?: string;
   }) => {
+    const attachment = getAttachment();
+    uiDefinition.getActionButtons?.({
+      attachment,
+      isSidebar: false,
+      isCanvas: false,
+      openCanvas: jest.fn(),
+      updateOrigin: (origin: string) =>
+        deps.updateAttachmentOrigin(conversationId, attachment.id, origin),
+    });
+
     deps.dashboardAppClientApi$.next(api);
     deps.emitConversationChange({
       id: conversationId,
       conversation: createMockConversation(conversationId, [
-        toVersionedDashboardAttachment(getAttachment()),
+        toVersionedDashboardAttachment(attachment),
       ]),
     });
 
@@ -448,6 +458,14 @@ describe('registerDashboardAttachmentUiDefinition', () => {
   });
 
   describe('dashboard app integration - activation lifecycle', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
     it('does not attach the dashboard when navigating to a dashboard with an existing conversation already open', () => {
       const mockApi = createMockDashboardApi();
 
@@ -456,6 +474,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
         conversation: createMockConversation('conversation-1', []),
       });
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
+      jest.runOnlyPendingTimers();
 
       expect(deps.addAttachment).not.toHaveBeenCalled();
     });
@@ -465,6 +484,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
 
       deps.emitConversationChange({ id: undefined });
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
+      jest.runOnlyPendingTimers();
 
       expect(deps.addAttachment).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -482,6 +502,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
         id: 'conversation-1',
         conversation: createMockConversation('conversation-1', []),
       });
+      jest.runOnlyPendingTimers();
 
       expect(deps.addAttachment).not.toHaveBeenCalled();
     });
@@ -491,6 +512,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
 
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
       deps.emitConversationChange({ id: undefined });
+      jest.runOnlyPendingTimers();
 
       expect(deps.addAttachment).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -510,6 +532,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       expect(deps.addAttachment).not.toHaveBeenCalled();
 
       deps.currentAppId$.next('agentBuilder');
+      jest.runOnlyPendingTimers();
 
       expect(deps.addAttachment).toHaveBeenCalledWith(
         expect.objectContaining({

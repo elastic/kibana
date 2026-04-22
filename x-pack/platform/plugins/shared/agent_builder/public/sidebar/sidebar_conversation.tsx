@@ -39,12 +39,7 @@ export function SidebarConversation({ onClose }: SidebarComponentProps): React.R
     return null;
   }
 
-  const {
-    options,
-    onConversationChange,
-    onRegisterCallbacks,
-    onClose: contextOnClose,
-  } = runtimeContext;
+  const { options, onRegisterCallbacks, onClose: contextOnClose } = runtimeContext;
   const { onClose: externalOnClose, ...restOptions } = options;
 
   const handleOnClose = () => {
@@ -56,11 +51,10 @@ export function SidebarConversation({ onClose }: SidebarComponentProps): React.R
   return (
     <div css={sidebarBodyStyles}>
       <ConversationComponent
-        {...restOptions}
         onClose={handleOnClose}
         ariaLabelledBy="agent-builder-sidebar"
-        onConversationChange={onConversationChange}
         onRegisterCallbacks={onRegisterCallbacks}
+        {...restOptions}
       />
     </div>
   );

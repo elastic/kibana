@@ -5,48 +5,43 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
-import type { ConversationChangeHandler } from '../../../embeddable/types';
+import { useEffect } from 'react';
+import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 import { useConversation } from '../../hooks/use_conversation';
 import { useConversationId } from './use_conversation_id';
 
-interface ConversationChangeNotifierProps {
-  onConversationChange?: ConversationChangeHandler;
-  children: React.ReactNode;
-}
-
 /**
- * Notifies `onConversationChange` whenever the active conversation id changes,
- *
- * Must be rendered below `ConversationContext.Provider`, `QueryClientProvider`
- * and `SendMessageProvider` (required by `useConversation`).
+ * Publishes the active conversation to the shared `EventsService` whenever the
+ * conversation id or fetch state changes, and resets it to `null` when the
+ * subtree unmounts (e.g. the user navigates away from the full-page chat or
+ * closes the sidebar).
  */
-export const ConversationChangeNotifier: React.FC<ConversationChangeNotifierProps> = ({
-  onConversationChange,
-  children,
-}) => {
+export const ConversationChangeNotifier = (): null => {
+  const { eventsService } = useAgentBuilderServices();
   const conversationId = useConversationId();
   const { conversation, isError, isFetched } = useConversation();
 
   useEffect(() => {
-    if (!onConversationChange) {
-      return;
-    }
-
     if (!conversationId) {
-      onConversationChange({ id: undefined });
+      eventsService.setActiveConversation({ id: undefined });
       return;
     }
 
     if (isError) {
-      onConversationChange({ id: conversationId });
+      eventsService.setActiveConversation({ id: conversationId });
       return;
     }
 
     if (isFetched && conversation) {
-      onConversationChange({ id: conversationId, conversation });
+      eventsService.setActiveConversation({ id: conversationId, conversation });
     }
-  }, [conversationId, conversation, isError, isFetched, onConversationChange]);
+  }, [conversationId, conversation, isError, isFetched, eventsService]);
 
-  return <>{children}</>;
+  useEffect(() => {
+    return () => {
+      eventsService.clearActiveConversation();
+    };
+  }, [eventsService]);
+
+  return null;
 };

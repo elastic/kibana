@@ -52,7 +52,6 @@ export const useConversation = () => {
       }
       return failureCount < 3;
     },
-    refetchOnMount: false,
   });
 
   return { conversation, isLoading, isFetching, isFetched, isError, error };

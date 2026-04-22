@@ -684,6 +684,22 @@ getActionButtons: ({ attachment, updateOrigin, isCanvas }) => {
 
 On the wire and in `Attachment`, **`origin` is always a string** (for example a saved object ID). The same string is passed to your type’s **`resolve`** hook when the attachment is added or resynced. `updateOrigin` and `updateAttachmentOrigin` also take that string — not an object.
 
+#### Updating origin from outside attachment context
+
+If you need to update an attachment's origin from outside the `getActionButtons` context (e.g., from a different plugin or component that has the conversation and attachment IDs), you can use the `updateAttachmentOrigin` API from the `agentBuilder` plugin's start contract:
+
+```ts
+// In your plugin
+class MyPlugin {
+  start(core: CoreStart, { agentBuilder }: { agentBuilder: AgentBuilderPluginStart }) {
+    // Update an attachment's origin directly
+    await agentBuilder.updateAttachmentOrigin(conversationId, attachmentId, savedObjectId);
+  }
+}
+```
+
+This is useful when the save operation happens outside the attachment's UI, such as when a separate "Save to library" workflow completes asynchronously. It is your responsibility to pass the `conversationId` and `attachmentId` to your plugin when navigating away from the chat - how you do this is up to you (e.g., URL parameters, local storage, or other mechanisms).
+
 #### By-reference attachments with `resolve`
 
 The optional `resolve` hook in `AttachmentTypeDefinition` enables **by-reference attachment creation**: instead of providing inline `data`, the caller provides an `origin` string (e.g. a saved object ID), and the framework calls `resolve` once at add time to fetch and store the content.
@@ -822,16 +838,6 @@ agentBuilder.addAttachment({
 ```
 
 Pending attachments added through `agentBuilder.addAttachment(...)` can include an `origin` string, just like other attachment inputs sent to the Agent Builder APIs. Use this when your pending attachment already corresponds to a persistent resource (for example, a saved object-backed dashboard or visualization), and your attachment type expects `origin` to be present.
-
-### `updateAttachmentOrigin(...)`
-
-Use `updateAttachmentOrigin(...)` when you need to update an attachment's `origin` from outside the attachment UI itself.
-
-```ts
-await agentBuilder.updateAttachmentOrigin(conversationId, attachmentId, savedObjectId);
-```
-
-This is useful when the save workflow completes somewhere else in your plugin, but you still know which conversation attachment should be linked to the newly created persistent resource.
 
 ## Events
 

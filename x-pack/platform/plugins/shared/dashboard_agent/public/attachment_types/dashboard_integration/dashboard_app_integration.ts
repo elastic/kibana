@@ -7,6 +7,7 @@
 
 import { Observable } from 'rxjs';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
+import type { UpdateOriginResponse } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
@@ -27,6 +28,16 @@ export interface DashboardAppIntegrationParams {
   agentBuilder: AgentBuilderPluginStart;
   api: DashboardApi;
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
+  /**
+   * Lookup for the framework-provided `updateOrigin` callback bound to a specific
+   * attachment id. Returns `undefined` when the attachment has not been rendered yet
+   * (and thus hasn't registered an updater). Using this callback instead of
+   * `agentBuilder.updateAttachmentOrigin` keeps the rendered conversation in sync
+   * because it invalidates the conversation query after persisting the new origin.
+   */
+  getUpdateOrigin: (
+    attachmentId: string
+  ) => ((origin: string) => Promise<UpdateOriginResponse | undefined>) | undefined;
 }
 
 interface State {
@@ -41,6 +52,7 @@ export const registerDashboardAppIntegration = ({
   agentBuilder,
   api,
   checkSavedDashboardExist,
+  getUpdateOrigin,
 }: DashboardAppIntegrationParams): (() => void) => {
   const state: State = {
     attachments: undefined,
@@ -121,10 +133,7 @@ export const registerDashboardAppIntegration = ({
     api,
     checkSavedDashboardExist,
     getAttachments: () => state.attachments,
-    updateOrigin: (id: string, origin: string) =>
-      state.conversationId
-        ? agentBuilder.updateAttachmentOrigin(state.conversationId, id, origin)
-        : undefined,
+    updateOrigin: (id: string, origin: string) => getUpdateOrigin(id)?.(origin),
   });
 
   const manualChangesSubscription = createManualChangesSubscription({

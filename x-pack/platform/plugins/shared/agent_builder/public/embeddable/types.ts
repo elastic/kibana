@@ -18,8 +18,6 @@ export interface EmbeddableConversationDependencies {
   coreStart: CoreStart;
 }
 
-export type ConversationChangeHandler = (conversation: ActiveConversation) => void;
-
 export interface EmbeddableConversationProps {
   /**
    * Force starting a new conversation, ignoring any stored conversation IDs.
@@ -100,12 +98,6 @@ export interface EmbeddableConversationSidebarProps {
   onClose: () => void;
   ariaLabelledBy: string;
   /**
-   * Optional internal listener fired whenever the conversation changes.
-   * Used to publish conversation changes through the agent builder start contract.
-   * @internal
-   */
-  onConversationChange?: ConversationChangeHandler;
-  /**
    * Callback to register sidebar control methods.
    * Used internally to update sidebar props and clear browser API tools.
    * @internal
@@ -114,7 +106,6 @@ export interface EmbeddableConversationSidebarProps {
     updateProps: (props: EmbeddableConversationProps) => void;
     resetBrowserApiTools: () => void;
     addAttachment: (attachment: AttachmentInput) => void;
-    invalidateConversation: () => void;
   }) => void;
 }
 

@@ -24,7 +24,10 @@ export const createOriginSyncSubscription = ({
   api: DashboardApi;
   getAttachments: () => undefined | DashboardAttachment[];
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
-  updateOrigin: (attachmentId: string, origin: string) => Promise<UpdateOriginResponse> | undefined;
+  updateOrigin: (
+    attachmentId: string,
+    origin: string
+  ) => Promise<UpdateOriginResponse | undefined> | undefined;
 }): Subscription => {
   return api.onSave$.subscribe(async ({ previousDashboardId, dashboardId }: DashboardSaveEvent) => {
     if (!dashboardId) {

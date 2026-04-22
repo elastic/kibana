@@ -91,7 +91,7 @@ export interface AgentBuilderPluginStart {
    */
   tools: ToolServiceStartContract;
   /**
-   * Events service contract, can be used to listen to chat events and to chat UI-shell state (`events.ui.*`).
+   * Events service contract, can be used to listen to chat events.
    */
   events: EventsServiceStartContract;
   /**

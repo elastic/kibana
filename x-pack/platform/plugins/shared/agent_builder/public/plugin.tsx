@@ -57,7 +57,7 @@ import type {
   AgentBuilderStartDependencies,
   ConversationSidebarRef,
 } from './types';
-import type { ActiveConversation, EmbeddableConversationProps } from './embeddable/types';
+import type { EmbeddableConversationProps } from './embeddable/types';
 import type { OpenConversationSidebarOptions } from './sidebar/types';
 import {
   setSidebarServices,
@@ -87,9 +87,7 @@ export class AgentBuilderPlugin
     updateProps: (props: EmbeddableConversationProps) => void;
     resetBrowserApiTools: () => void;
     addAttachment: (attachment: AttachmentInput) => void;
-    invalidateConversation: () => void;
   } | null = null;
-  private activeConversationState$ = new BehaviorSubject<ActiveConversation | null>(null);
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private experimentalDeepLinksSubscription?: Subscription;
 
@@ -168,9 +166,6 @@ export class AgentBuilderPlugin
 
     const hasAgentBuilder = core.application.capabilities.agentBuilder?.show === true;
     const sidebar = core.chrome.sidebar.getApp('agentBuilder');
-    const notifyConversationChange = (conversation: ActiveConversation) => {
-      this.activeConversationState$.next(conversation);
-    };
 
     const openSidebarInternal = (options?: OpenConversationSidebarOptions) => {
       const config = options ?? this.conversationActiveConfig;
@@ -184,14 +179,12 @@ export class AgentBuilderPlugin
       // Set runtime context before opening
       setSidebarRuntimeContext({
         options: config,
-        onConversationChange: notifyConversationChange,
         onRegisterCallbacks: (callbacks) => {
           this.sidebarCallbacks = callbacks;
         },
         onClose: () => {
           this.activeSidebarRef = null;
           this.sidebarCallbacks = null;
-          this.activeConversationState$.next(null);
           clearSidebarRuntimeContext();
         },
       });
@@ -203,7 +196,6 @@ export class AgentBuilderPlugin
           sidebar.close();
           this.activeSidebarRef = null;
           this.sidebarCallbacks = null;
-          this.activeConversationState$.next(null);
           clearSidebarRuntimeContext();
         },
       };
@@ -230,7 +222,6 @@ export class AgentBuilderPlugin
       openSidebarConversation: (options?: OpenConversationSidebarOptions) => {
         return openSidebarInternal(options);
       },
-      notifyConversationChange,
     };
 
     this.internalServices = internalServices;
@@ -250,10 +241,7 @@ export class AgentBuilderPlugin
       agents: createPublicAgentsContract({ agentService }),
       attachments: createPublicAttachmentContract({ attachmentsService }),
       tools: createPublicToolContract({ toolsService }),
-      events: createPublicEventsContract({
-        eventsService,
-        activeConversation$: this.activeConversationState$.asObservable(),
-      }),
+      events: createPublicEventsContract({ eventsService }),
       addAttachment: (attachment: AttachmentInput) => {
         if (this.sidebarCallbacks) {
           this.sidebarCallbacks.addAttachment(attachment);
@@ -271,6 +259,7 @@ export class AgentBuilderPlugin
       clearChatConfig: () => {
         this.conversationActiveConfig = {};
         if (this.activeSidebarRef && this.sidebarCallbacks) {
+          // Removes stale browserApiTools from the sidebar
           this.sidebarCallbacks.resetBrowserApiTools();
         }
       },
@@ -284,32 +273,14 @@ export class AgentBuilderPlugin
           // synchronously invoke our onClose callback.
           this.activeSidebarRef = null;
           this.sidebarCallbacks = null;
-          this.activeConversationState$.next(null);
           sidebarRef.close();
           return;
         }
 
         openSidebarInternal(options);
       },
-      updateAttachmentOrigin: async (
-        conversationId: string,
-        attachmentId: string,
-        origin: string
-      ) => {
-        const response = await attachmentsService.updateOrigin(
-          conversationId,
-          attachmentId,
-          origin
-        );
-
-        if (
-          this.activeConversationState$.getValue()?.id === conversationId &&
-          this.sidebarCallbacks
-        ) {
-          this.sidebarCallbacks.invalidateConversation();
-        }
-
-        return response;
+      updateAttachmentOrigin: (conversationId: string, attachmentId: string, origin: string) => {
+        return attachmentsService.updateOrigin(conversationId, attachmentId, origin);
       },
     };
 

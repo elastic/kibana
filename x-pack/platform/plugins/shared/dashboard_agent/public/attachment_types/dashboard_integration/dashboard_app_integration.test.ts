@@ -6,12 +6,18 @@
  */
 
 import { BehaviorSubject, Subject } from 'rxjs';
-import type { ChatEvent, ConversationRound, RoundCompleteEvent } from '@kbn/agent-builder-common';
+import type {
+  ChatEvent,
+  Conversation,
+  ConversationRound,
+  RoundCompleteEvent,
+} from '@kbn/agent-builder-common';
 import { ChatEventType } from '@kbn/agent-builder-common';
 import {
   ATTACHMENT_REF_OPERATION,
   type VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
+import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
@@ -157,11 +163,34 @@ const createDashboardAttachment = (
   ...overrides,
 });
 
+const createActiveConversation = ({
+  id,
+  attachments,
+}: {
+  id?: string;
+  attachments?: VersionedAttachment[];
+}): ActiveConversation => ({
+  id,
+  conversation: id
+    ? ({
+        id,
+        agent_id: 'test-agent',
+        user: { id: 'user-1', username: 'user-1' },
+        title: 'Test conversation',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        rounds: [],
+        attachments,
+      } as Conversation)
+    : undefined,
+});
+
 describe('registerDashboardAppIntegration', () => {
   let mockApi: MockDashboardApi;
   let chat$: Subject<ChatEvent>;
   let addAttachment: jest.Mock;
   let updateAttachmentOrigin: jest.Mock;
+  let getUpdateOrigin: jest.Mock;
   let checkSavedDashboardExist: jest.Mock;
   let emitConversationChange: (change: {
     id?: string;
@@ -175,6 +204,10 @@ describe('registerDashboardAppIntegration', () => {
     chat$ = new Subject<ChatEvent>();
     addAttachment = jest.fn();
     updateAttachmentOrigin = jest.fn().mockResolvedValue(undefined);
+    getUpdateOrigin = jest.fn(
+      (attachmentId: string) => async (origin: string) =>
+        updateAttachmentOrigin('conversation-1', attachmentId, origin)
+    );
     checkSavedDashboardExist = jest.fn().mockResolvedValue(true);
   });
 
@@ -184,10 +217,7 @@ describe('registerDashboardAppIntegration', () => {
   });
 
   const register = () => {
-    const activeConversation$ = new BehaviorSubject<{
-      id?: string;
-      attachments?: VersionedAttachment[];
-    } | null>(null);
+    const activeConversation$ = new BehaviorSubject<ActiveConversation | null>(null);
     const agentBuilder = {
       addAttachment,
       updateAttachmentOrigin,
@@ -198,13 +228,14 @@ describe('registerDashboardAppIntegration', () => {
     } as unknown as AgentBuilderPluginStart;
 
     emitConversationChange = (change) => {
-      activeConversation$.next(change);
+      activeConversation$.next(createActiveConversation(change));
     };
 
     cleanup = registerDashboardAppIntegration({
       agentBuilder,
       api: mockApi as unknown as DashboardApi,
       checkSavedDashboardExist,
+      getUpdateOrigin,
     });
   };
 
@@ -330,6 +361,7 @@ describe('registerDashboardAppIntegration', () => {
       attachments: [createVersionedAttachment(attachment)],
     });
 
+    jest.runOnlyPendingTimers();
     addAttachment.mockClear();
     mockApi.title$.next('Updated Title');
     jest.advanceTimersByTime(200);
@@ -338,6 +370,7 @@ describe('registerDashboardAppIntegration', () => {
 
     addAttachment.mockClear();
     emitConversationChange({ id: undefined, attachments: undefined });
+    jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -402,6 +435,7 @@ describe('registerDashboardAppIntegration', () => {
     register();
 
     emitConversationChange({ id: undefined, attachments: undefined });
+    jest.runOnlyPendingTimers();
 
     const firstDraftAttachment = addAttachment.mock.calls[0]?.[0];
     expect(firstDraftAttachment).toEqual(
@@ -420,6 +454,7 @@ describe('registerDashboardAppIntegration', () => {
     );
 
     emitConversationChange({ id: undefined, attachments: undefined });
+    jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledWith(
       expect.objectContaining({

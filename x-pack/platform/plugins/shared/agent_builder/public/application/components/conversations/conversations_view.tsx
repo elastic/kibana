@@ -12,9 +12,11 @@ import { useLocation } from 'react-router-dom';
 import { Conversation } from './conversation';
 import { ConversationHeader } from './conversation_header/conversation_header';
 import { RoutedConversationsProvider } from '../../context/conversation/routed_conversations_provider';
-import { useSendMessage } from '../../context/send_message/send_message_context';
+import {
+  SendMessageProvider,
+  useSendMessage,
+} from '../../context/send_message/send_message_context';
 import { conversationBackgroundStyles, headerHeight } from './conversation.styles';
-import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 
 // Clears error state on every navigation. Rendered inside SendMessageProvider (for context access)
 // and inside the Router (for useLocation access), so it's intentionally placed in the routed view
@@ -30,7 +32,6 @@ const LocationErrorClearer: React.FC<{}> = () => {
 
 export const AgentBuilderConversationsView: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
-  const { notifyConversationChange } = useAgentBuilderServices();
 
   const containerStyles = css`
     display: flex;
@@ -58,16 +59,18 @@ export const AgentBuilderConversationsView: React.FC<{}> = () => {
   `;
 
   return (
-    <RoutedConversationsProvider onConversationChange={notifyConversationChange}>
-      <LocationErrorClearer />
-      <div css={containerStyles} data-test-subj="agentBuilderPageConversations">
-        <div css={headerStyles}>
-          <ConversationHeader />
+    <RoutedConversationsProvider>
+      <SendMessageProvider>
+        <LocationErrorClearer />
+        <div css={containerStyles} data-test-subj="agentBuilderPageConversations">
+          <div css={headerStyles}>
+            <ConversationHeader />
+          </div>
+          <div css={contentStyles}>
+            <Conversation />
+          </div>
         </div>
-        <div css={contentStyles}>
-          <Conversation />
-        </div>
-      </div>
+      </SendMessageProvider>
     </RoutedConversationsProvider>
   );
 };
