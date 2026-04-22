@@ -19,10 +19,10 @@ import {
   ensureStreamsEnabled,
   getEnabledStreams,
   parseCommonSnapshotFlags,
-  promoteQueries,
-  resetQueriesPromotion,
+  toSnapshotName,
 } from '../lib/snapshot_utils';
-import { withTempSuperuser } from '../lib/kibana';
+import { promoteQueries, resetQueriesPromotion } from '../lib/significant_events_workflow';
+import { withTempSuperuser } from '../lib/user_utils';
 
 const SIGEVENTS_INDEX_TEMPLATE = 'sigevents-logs-template';
 
@@ -57,7 +57,7 @@ async function repromoteQueries({
   log: ToolingLog;
   config: ConnectionConfig;
 }): Promise<void> {
-  await resetQueriesPromotion({ esClient, log });
+  await resetQueriesPromotion({ esClient });
   await promoteQueries(config);
 }
 
@@ -162,10 +162,13 @@ export const restoreEnvSnapshot = async ({
 
     // System indices are captured as snapshot-* (e.g. .kibana_streams_features → snapshot-kibana_streams_features)
     // so we must match the snapshot-* names and rename them back on restore.
-    const snapshotSystemIndices = systemIndices.map((p) => `snapshot-${p.slice(1)}`);
+    const snapshotSystemIndices = systemIndices.map(toSnapshotName);
 
     log.info('');
     log.info('Step 1/6 — Restoring system indices (with rename snapshot-* → .*)...');
+    // restoreSnapshot and replaySnapshot use the caller's esClient intentionally:
+    // the snapshot/replay APIs work with the caller's privileges, and keeping them
+    // outside sysClient avoids creating the temp superuser a second time.
     const restoreResult = await restoreSnapshot({
       esClient,
       log,
@@ -210,7 +213,7 @@ export const restoreEnvSnapshot = async ({
       log.info('Step 4/6 — Replaying data indices (with timestamp transformation)...');
 
       replayResult = await replaySnapshot({
-        esClient,
+        esClient, // caller's client — see comment at Step 1/6
         log,
         repository,
         snapshotName,

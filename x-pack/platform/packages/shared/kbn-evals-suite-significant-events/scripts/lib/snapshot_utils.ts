@@ -14,10 +14,13 @@ import { kibanaRequest } from './kibana';
 import {
   DEFAULT_ENV_SNAPSHOT_LOGS_INDEX,
   INDEX_ALIAS_CONFIG,
-  QUERIES_INDEX,
   VALID_ALERT_INDICES,
   VALID_SYSTEM_INDICES,
 } from './constants';
+
+export function toSnapshotName(index: string): string {
+  return `snapshot-${index.slice(1)}`;
+}
 
 export const parseRepeatableFlag = (value: unknown): string[] => {
   if (!value) return [];
@@ -366,35 +369,4 @@ export async function ensureStreamsEnabled(
   } else {
     throw new Error(`Failed to enable streams: ${status} ${JSON.stringify(data)}`);
   }
-}
-
-export async function promoteQueries(config: ConnectionConfig): Promise<void> {
-  const { status, data } = await kibanaRequest(
-    config,
-    'POST',
-    '/internal/streams/queries/_promote'
-  );
-  if (status !== 200) {
-    throw new Error(`Failed to promote queries: ${status} ${JSON.stringify(data)}`);
-  }
-}
-
-export async function resetQueriesPromotion({
-  esClient,
-  log,
-}: {
-  esClient: Client;
-  log: ToolingLog;
-}) {
-  return esClient.updateByQuery({
-    index: QUERIES_INDEX,
-    conflicts: 'proceed',
-    refresh: true,
-    query: { match_all: {} },
-    script: {
-      lang: 'painless',
-      source: `ctx._source['rule_backed'] = params.rb`,
-      params: { rb: false },
-    },
-  });
 }

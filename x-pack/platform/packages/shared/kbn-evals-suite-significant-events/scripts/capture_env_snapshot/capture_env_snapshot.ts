@@ -13,12 +13,8 @@ import type { ConnectionConfig } from '../lib/get_connection_config';
 import { getConnectionConfig } from '../lib/get_connection_config';
 import { createSnapshot, generateGcsBasePath, registerGcsRepository } from '../lib/gcs';
 import { GCS_BUCKET } from '../lib/constants';
-import { resolvePatterns, parseCommonSnapshotFlags } from '../lib/snapshot_utils';
-import { withTempSuperuser } from '../lib/kibana';
-
-function toSnapshotName(index: string): string {
-  return `snapshot-${index.slice(1)}`;
-}
+import { resolvePatterns, parseCommonSnapshotFlags, toSnapshotName } from '../lib/snapshot_utils';
+import { withTempSuperuser } from '../lib/user_utils';
 
 async function fetchMapping(
   esClient: Client,

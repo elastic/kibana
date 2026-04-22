@@ -22,6 +22,7 @@ run(({ log, flags }) => captureEnvSnapshot({ log, flags }), {
 
     Prerequisites:
       - Local Elasticsearch with GCS credentials in keystore
+      - The configured user must have the manage_security cluster privilege (required to create and delete the temporary superuser account)
 
     Examples:
       node scripts/capture_sigevents_env_snapshot.js --snapshot-name my-snapshot
