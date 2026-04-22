@@ -49,8 +49,8 @@ describe('useDefaultModelValidation', () => {
     expect(result.current.errors).toEqual([]);
   });
 
-  it('is valid when AI is enabled with no default model but other models are allowed', () => {
-    const { result } = renderHook(() =>
+  it('is invalid when AI is enabled but no default model is selected, regardless of hide-selection', () => {
+    const { result: withAllowOthers } = renderHook(() =>
       useDefaultModelValidation({
         enableAi: true,
         defaultModelId: NO_DEFAULT_MODEL,
@@ -58,12 +58,11 @@ describe('useDefaultModelValidation', () => {
       })
     );
 
-    expect(result.current.isValid).toBe(true);
-    expect(result.current.missingDefaultModel).toBe(true);
-  });
+    expect(withAllowOthers.current.isValid).toBe(false);
+    expect(withAllowOthers.current.missingDefaultModel).toBe(true);
+    expect(withAllowOthers.current.errors[0]).toMatch(/Select a default model/);
 
-  it('reports an error when hide-model-selection is on but no default model is selected', () => {
-    const { result } = renderHook(() =>
+    const { result: withHide } = renderHook(() =>
       useDefaultModelValidation({
         enableAi: true,
         defaultModelId: NO_DEFAULT_MODEL,
@@ -71,11 +70,9 @@ describe('useDefaultModelValidation', () => {
       })
     );
 
-    expect(result.current.isValid).toBe(false);
-    expect(result.current.missingDefaultModel).toBe(true);
-    expect(result.current.errors[0]).toMatch(
-      /Select a default model before hiding model selection/
-    );
+    expect(withHide.current.isValid).toBe(false);
+    expect(withHide.current.missingDefaultModel).toBe(true);
+    expect(withHide.current.errors[0]).toMatch(/Select a default model/);
   });
 
   it('reports connector-not-exist when the selected model is missing', () => {

@@ -88,20 +88,30 @@ test.describe(
       });
     });
 
-    test('combobox exposes "No default model" so AI can stay on with no default set', async ({
+    test('selecting "No default model" while AI is on keeps the save button disabled', async ({
       pageObjects,
     }) => {
       const { featureSettings } = pageObjects;
-
-      await test.step('default model combobox is visible', async () => {
-        await expect(featureSettings.defaultModelComboBox).toBeVisible();
-      });
 
       await test.step('opening the combobox reveals the "No default model" option', async () => {
         await featureSettings.defaultModelComboBox.click();
         await expect(
           featureSettings.content.getByRole('option', { name: 'No default model' })
         ).toBeVisible();
+      });
+
+      await test.step('picking a real model first so we can compare dirty states', async () => {
+        await featureSettings.content.getByRole('option', { name: 'Mock Connector' }).click();
+        await expect(featureSettings.saveButton).toBeEnabled();
+      });
+
+      await test.step('switching back to "No default model" invalidates the form', async () => {
+        await featureSettings.defaultModelComboBox.click();
+        await featureSettings.content.getByRole('option', { name: 'No default model' }).click();
+      });
+
+      await test.step('save button is disabled while AI is on with no default model', async () => {
+        await expect(featureSettings.saveButton).toBeDisabled();
       });
     });
 

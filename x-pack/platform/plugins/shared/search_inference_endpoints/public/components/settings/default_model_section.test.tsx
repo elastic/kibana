@@ -122,7 +122,7 @@ describe('DefaultModelSection', () => {
 
   it('renders validation errors passed from the parent', () => {
     const settings = createMockSettings({
-      state: { enableAi: true, defaultModelId: NO_DEFAULT_MODEL, disallowOtherModels: true },
+      state: { enableAi: true, defaultModelId: NO_DEFAULT_MODEL, disallowOtherModels: false },
     });
 
     render(
@@ -130,7 +130,7 @@ describe('DefaultModelSection', () => {
         <DefaultModelSection
           defaultModelSettings={settings}
           validation={{
-            errors: ['Select a default model before hiding model selection within features.'],
+            errors: ['Select a default model to save changes.'],
             isValid: false,
             missingDefaultModel: true,
           }}
@@ -138,12 +138,10 @@ describe('DefaultModelSection', () => {
       </Wrapper>
     );
 
-    expect(
-      screen.getByText('Select a default model before hiding model selection within features.')
-    ).toBeInTheDocument();
+    expect(screen.getByText('Select a default model to save changes.')).toBeInTheDocument();
   });
 
-  it('combobox exposes an explicit "No default model" option so AI on / no default stays reachable', () => {
+  it('combobox exposes an explicit "No default model" option so users can clear their selection', () => {
     render(
       <Wrapper>
         <DefaultModelSection

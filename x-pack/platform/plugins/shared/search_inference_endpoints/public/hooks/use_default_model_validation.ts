@@ -24,9 +24,9 @@ export interface DefaultModelValidationResult {
  * considered valid -- nothing needs to be configured.
  *
  * When AI features are enabled:
+ *  - A real default model MUST be selected. "No default model" is not a savable
+ *    state while AI features are on; Save stays disabled until a model is picked.
  *  - If the underlying connector for the selected default no longer exists, flag it.
- *  - If "Hide model selection within features" is on, a real default model must be
- *    selected -- otherwise no model is available to any AI feature.
  */
 export const useDefaultModelValidation = (
   state: DefaultModelSettingsState
@@ -43,7 +43,16 @@ export const useDefaultModelValidation = (
     const errors: string[] = [];
     const missingDefaultModel = state.defaultModelId === NO_DEFAULT_MODEL;
 
-    if (state.defaultModelId !== NO_DEFAULT_MODEL && !connectorExists && !connectorExistsLoading) {
+    if (missingDefaultModel) {
+      errors.push(
+        i18n.translate(
+          'xpack.searchInferenceEndpoints.settings.defaultModel.error.selectDefaultModel',
+          {
+            defaultMessage: 'Select a default model to save changes.',
+          }
+        )
+      );
+    } else if (!connectorExists && !connectorExistsLoading) {
       errors.push(
         i18n.translate(
           'xpack.searchInferenceEndpoints.settings.defaultModel.error.connectorNotExist',
@@ -55,27 +64,10 @@ export const useDefaultModelValidation = (
       );
     }
 
-    if (state.disallowOtherModels && missingDefaultModel) {
-      errors.push(
-        i18n.translate(
-          'xpack.searchInferenceEndpoints.settings.defaultModel.error.selectDefaultModel',
-          {
-            defaultMessage: 'Select a default model before hiding model selection within features.',
-          }
-        )
-      );
-    }
-
     return {
       errors,
       isValid: errors.length === 0,
       missingDefaultModel,
     };
-  }, [
-    state.enableAi,
-    state.defaultModelId,
-    state.disallowOtherModels,
-    connectorExists,
-    connectorExistsLoading,
-  ]);
+  }, [state.enableAi, state.defaultModelId, connectorExists, connectorExistsLoading]);
 };

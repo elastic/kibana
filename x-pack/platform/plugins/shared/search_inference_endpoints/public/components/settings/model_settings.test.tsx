@@ -305,7 +305,7 @@ describe('ModelSettings', () => {
       isDirty: true,
     });
     mockUseDefaultModelValidation.mockReturnValue({
-      errors: ['Select a default model before hiding model selection within features.'],
+      errors: ['Select a default model to save changes.'],
       isValid: false,
       missingDefaultModel: true,
     });
@@ -334,7 +334,7 @@ describe('ModelSettings', () => {
       save: saveDefaultModel,
     });
     mockUseDefaultModelValidation.mockReturnValue({
-      errors: ['Select a default model before hiding model selection within features.'],
+      errors: ['Select a default model to save changes.'],
       isValid: false,
       missingDefaultModel: true,
     });
