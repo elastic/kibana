@@ -28,13 +28,19 @@ export const AvailableAnnotationIcons = {
 export const EVENT_ANNOTATION_GROUP_TYPE = 'event-annotation-group';
 
 export {
+  AUTO_ANNOTATION_COLOR,
   defaultAnnotationColor,
   defaultAnnotationRangeColor,
+  getDefaultAnnotationColor,
+  getDefaultAnnotationRangeColor,
+  getPersistedAnnotationColor,
+  getResolvedAnnotationColor,
   defaultAnnotationLabel,
   defaultRangeAnnotationLabel,
   getDefaultManualAnnotation,
   getDefaultQueryAnnotation,
   createCopiedAnnotation,
+  isAutoAnnotationColor,
   isRangeAnnotationConfig,
   isManualPointAnnotationConfig,
   isQueryAnnotationConfig,

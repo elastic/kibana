@@ -6399,7 +6399,7 @@
           },
           " | undefined; skills?: ",
           "SkillDefinition",
-          "<string, \"skills/search\" | \"skills/security\" | \"skills/security/ml\" | \"skills/security/rules\" | \"skills/security/alerts\" | \"skills/security/alerts/rules\" | \"skills/security/endpoint\" | \"skills/security/entities\" | \"skills/observability\" | \"skills/platform\" | \"skills/platform/streams\" | \"skills/platform/workflows\" | \"skills/platform/dashboard\" | \"skills/platform/visualization\">[] | undefined; }"
+          "<string, \"skills/search\" | \"skills/security\" | \"skills/security/ml\" | \"skills/security/rules\" | \"skills/security/alerts\" | \"skills/security/alerts/rules\" | \"skills/security/endpoint\" | \"skills/security/entities\" | \"skills/observability\" | \"skills/platform\" | \"skills/platform/streams\" | \"skills/platform/workflows\" | \"skills/platform/discover\" | \"skills/platform/dashboard\" | \"skills/platform/visualization\">[] | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugins/builtin_definition.ts",
         "lineNumber": 11,
