@@ -90,8 +90,8 @@ export class ManageIntegrationsTablePage {
     return this.page.getByRole('dialog', { name: 'Review and approve data streams dialog' });
   }
 
-  getReviewApproveDeployButton() {
-    return this.page.testSubj.locator('manageIntegrationReviewApproveDeployButton');
+  getReviewApproveInstallButton() {
+    return this.page.testSubj.locator('manageIntegrationReviewApproveInstallButton');
   }
 
   getReviewModalCancelButton() {

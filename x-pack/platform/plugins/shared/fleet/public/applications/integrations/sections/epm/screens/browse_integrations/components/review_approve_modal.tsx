@@ -142,12 +142,16 @@ export const ReviewApproveModal: React.FC<{
   onClose: () => void;
   onEdit: (integrationId: string) => void;
   onFetchReviewDetails: (integrationId: string) => Promise<ReviewIntegrationDetails>;
-  onApproveAndDeploy: (
+  onApproveAndInstall: (
     integrationId: string,
     version: string,
-    categories: string[]
+    categories: string[],
+    autoInstallAfterApproval: boolean
   ) => Promise<void>;
-  onInstallToCluster?: (integrationId: string) => Promise<void>;
+  onInstallToCluster?: (
+    integrationId: string,
+    options?: { skipSuccessToast?: boolean }
+  ) => Promise<void>;
   DataStreamResultsFlyoutComponent?: DataStreamResultsFlyoutComponent;
 }> = ({
   isOpen,
@@ -155,7 +159,7 @@ export const ReviewApproveModal: React.FC<{
   onClose,
   onEdit,
   onFetchReviewDetails,
-  onApproveAndDeploy,
+  onApproveAndInstall,
   onInstallToCluster,
   DataStreamResultsFlyoutComponent,
 }) => {
@@ -266,7 +270,7 @@ export const ReviewApproveModal: React.FC<{
         defaultMessage: 'Enter a valid semantic version (for example, 1.0.0).',
       });
 
-  const handleApproveAndDeploy = useCallback(async () => {
+  const handleApproveAndInstall = useCallback(async () => {
     const version = reviewVersion.trim();
     if (!semverValid(version) || version.startsWith(INVALID_VERSION)) {
       setIsVersionTouched(true);
@@ -282,7 +286,7 @@ export const ReviewApproveModal: React.FC<{
           : i18n.translate(
               'xpack.fleet.epmList.manageIntegrations.actions.reviewVersionValidationError',
               {
-                defaultMessage: 'Provide a valid version before approving and deploying.',
+                defaultMessage: 'Provide a valid version before approving and installing.',
               }
             )
       );
@@ -313,9 +317,10 @@ export const ReviewApproveModal: React.FC<{
     setIsApproving(true);
     setReviewError(null);
     try {
-      await onApproveAndDeploy(integrationId, version, categoryIds);
+      const willAutoInstall = autoInstallAfterApproval && Boolean(onInstallToCluster);
+      await onApproveAndInstall(integrationId, version, categoryIds, willAutoInstall);
       if (autoInstallAfterApproval && onInstallToCluster) {
-        await onInstallToCluster(integrationId);
+        await onInstallToCluster(integrationId, { skipSuccessToast: true });
       }
       onClose();
     } catch (error) {
@@ -323,7 +328,7 @@ export const ReviewApproveModal: React.FC<{
         error instanceof Error
           ? error.message
           : i18n.translate('xpack.fleet.epmList.manageIntegrations.actions.reviewApproveError', {
-              defaultMessage: 'Failed to approve and deploy integration.',
+              defaultMessage: 'Failed to approve and install integration.',
             })
       );
     } finally {
@@ -333,7 +338,7 @@ export const ReviewApproveModal: React.FC<{
     automaticImport,
     autoInstallAfterApproval,
     integrationId,
-    onApproveAndDeploy,
+    onApproveAndInstall,
     onClose,
     onInstallToCluster,
     reviewDetails,
@@ -543,11 +548,11 @@ export const ReviewApproveModal: React.FC<{
           />
         </EuiButtonEmpty>
         <EuiButton
-          onClick={handleApproveAndDeploy}
+          onClick={handleApproveAndInstall}
           fill
           isLoading={isApproving}
           isDisabled={isLoadingReviewDetails || !isVersionValid || !hasAtLeastOneCategory}
-          data-test-subj="manageIntegrationReviewApproveDeployButton"
+          data-test-subj="manageIntegrationReviewApproveInstallButton"
         >
           <FormattedMessage
             id="xpack.fleet.epmList.manageIntegrations.actions.reviewModalApprove"

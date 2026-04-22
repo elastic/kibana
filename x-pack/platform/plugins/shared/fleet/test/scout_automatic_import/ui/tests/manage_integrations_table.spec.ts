@@ -231,10 +231,14 @@ test.describe('Manage Integrations Table', { tag: tags.stateful.classic }, () =>
     await pageObjects.manageIntegrationsTable.getReviewApproveMenuItem().click();
     await expect(pageObjects.manageIntegrationsTable.getReviewApproveModal()).toBeVisible();
 
-    await expect(pageObjects.manageIntegrationsTable.getReviewApproveDeployButton()).toBeDisabled();
+    await expect(
+      pageObjects.manageIntegrationsTable.getReviewApproveInstallButton()
+    ).toBeDisabled();
 
     await pageObjects.manageIntegrationsTable.getReviewModalVersionInput().fill('1.0.0');
-    await expect(pageObjects.manageIntegrationsTable.getReviewApproveDeployButton()).toBeDisabled();
+    await expect(
+      pageObjects.manageIntegrationsTable.getReviewApproveInstallButton()
+    ).toBeDisabled();
 
     const categoryInput = pageObjects.manageIntegrationsTable
       .getReviewModalCategoriesComboBox()
@@ -242,7 +246,7 @@ test.describe('Manage Integrations Table', { tag: tags.stateful.classic }, () =>
     await categoryInput.click();
     await categoryInput.press('ArrowDown');
     await categoryInput.press('Enter');
-    await expect(pageObjects.manageIntegrationsTable.getReviewApproveDeployButton()).toBeEnabled();
+    await expect(pageObjects.manageIntegrationsTable.getReviewApproveInstallButton()).toBeEnabled();
   });
 
   test('Approve flow calls the approve API and closes the modal', async ({ page, pageObjects }) => {
@@ -278,7 +282,7 @@ test.describe('Manage Integrations Table', { tag: tags.stateful.classic }, () =>
         req.url().includes(`/integrations/${MOCK_COMPLETED.integrationId}/approve`) &&
         req.method() === 'POST'
     );
-    await pageObjects.manageIntegrationsTable.getReviewApproveDeployButton().click();
+    await pageObjects.manageIntegrationsTable.getReviewApproveInstallButton().click();
     await approveRequest;
     await expect(pageObjects.manageIntegrationsTable.getReviewApproveModal()).toBeHidden();
   });
@@ -648,7 +652,9 @@ test.describe('Manage Integrations Table', { tag: tags.stateful.classic }, () =>
     await expect(pageObjects.manageIntegrationsTable.getReviewApproveModal()).toBeVisible();
 
     await pageObjects.manageIntegrationsTable.getReviewModalVersionInput().fill('1.0.0');
-    await expect(pageObjects.manageIntegrationsTable.getReviewApproveDeployButton()).toBeDisabled();
+    await expect(
+      pageObjects.manageIntegrationsTable.getReviewApproveInstallButton()
+    ).toBeDisabled();
     await expect(page.getByText('Select at least one category.')).toBeVisible();
   });
 
@@ -783,7 +789,7 @@ test.describe('Manage Integrations Table', { tag: tags.stateful.classic }, () =>
     await categoryInput.press('ArrowDown');
     await categoryInput.press('Enter');
 
-    await pageObjects.manageIntegrationsTable.getReviewApproveDeployButton().click();
+    await pageObjects.manageIntegrationsTable.getReviewApproveInstallButton().click();
 
     const modal = pageObjects.manageIntegrationsTable.getReviewApproveModal();
     await expect(modal).toBeVisible();
