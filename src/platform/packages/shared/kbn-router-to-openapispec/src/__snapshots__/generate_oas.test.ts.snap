@@ -285,7 +285,10 @@ Object {
               "schema": Object {
                 "additionalProperties": false,
                 "properties": Object {
-                  "any": Object {},
+                  "any": Object {
+                    "description": "any type",
+                    "nullable": true,
+                  },
                   "array": Object {
                     "items": Object {
                       "additionalProperties": false,
@@ -453,7 +456,10 @@ Object {
               "schema": Object {
                 "additionalProperties": false,
                 "properties": Object {
-                  "any": Object {},
+                  "any": Object {
+                    "description": "any type",
+                    "nullable": true,
+                  },
                   "array": Object {
                     "items": Object {
                       "additionalProperties": false,
