@@ -150,6 +150,39 @@ const SlackResolveChannelIdInputSchema = z.object({
 });
 type SlackResolveChannelIdInput = z.infer<typeof SlackResolveChannelIdInputSchema>;
 
+const SlackListChannelsInputSchema = z.object({
+  types: z
+    .array(z.enum(SLACK_CONVERSATION_TYPES))
+    .optional()
+    .describe(
+      'Conversation types to list. Defaults to public_channel only. Valid: public_channel, private_channel, im, mpim.'
+    ),
+  excludeArchived: z.boolean().default(true).describe('Exclude archived channels (default true)'),
+  cursor: z
+    .string()
+    .optional()
+    .describe(
+      'Pagination cursor from a previous listChannels response (nextCursor). Omit for the first page.'
+    ),
+  limit: z
+    .number()
+    .int()
+    .min(1)
+    .max(SLACK_MAX_CONVERSATIONS_LIST_LIMIT)
+    .optional()
+    .describe(
+      `Channels per page to request (1-${SLACK_MAX_CONVERSATIONS_LIST_LIMIT}). Defaults to ${SLACK_DEFAULT_CONVERSATIONS_LIST_LIMIT}.`
+    ),
+  raw: z
+    .boolean()
+    .optional()
+    .describe(
+      'Return the full raw Slack API response instead of a compact, LLM-friendly result. Defaults to false.'
+    ),
+});
+
+export type SlackListChannelsInput = z.infer<typeof SlackListChannelsInputSchema>;
+
 const SlackCreateConversationInputSchema = z.object({
   name: z
     .string()
@@ -336,7 +369,8 @@ export const Slack: ConnectorSpec = {
     id: '.slack2',
     displayName: 'Slack (v2)',
     description: i18n.translate('core.kibanaConnectorSpecs.slack.metadata.description', {
-      defaultMessage: 'Search messages, list public channels, and send messages in Slack',
+      defaultMessage:
+        'Search messages, list channels (with pagination), resolve channel names to IDs, and send messages in Slack',
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
@@ -468,6 +502,84 @@ export const Slack: ConnectorSpec = {
           );
           throw error;
         }
+      },
+    },
+
+    listChannels: {
+      isTool: true,
+      description:
+        'List Slack channels/conversations the token can see (one page per call). Use this to answer which channels exist or to browse IDs before sendMessage. Pass nextCursor from the previous response to fetch the next page. Prefer this over many resolveChannelId calls for discovery.',
+      input: SlackListChannelsInputSchema,
+      handler: async (ctx, input) => {
+        const typedInput: SlackListChannelsInput = SlackListChannelsInputSchema.parse(input);
+
+        const types =
+          typedInput.types && typedInput.types.length > 0
+            ? typedInput.types
+            : (['public_channel'] as Array<(typeof SLACK_CONVERSATION_TYPES)[number]>);
+        const excludeArchived = typedInput.excludeArchived ?? true;
+        const limit = typedInput.limit ?? SLACK_DEFAULT_CONVERSATIONS_LIST_LIMIT;
+        const cursor = typedInput.cursor;
+
+        const params: Record<string, string | number | boolean> = {
+          types: types.join(','),
+          exclude_archived: excludeArchived,
+          limit,
+          ...(cursor ? { cursor } : {}),
+        };
+
+        ctx.log.debug('Slack listChannels request');
+        const response = await slackRequestWithRateLimitRetry<{
+          ok: boolean;
+          error?: string;
+          needed?: string;
+          provided?: string;
+          channels?: Array<{
+            id?: string;
+            name?: string;
+            is_private?: boolean;
+            is_archived?: boolean;
+            is_member?: boolean;
+          }>;
+          response_metadata?: { next_cursor?: string };
+        }>({
+          ctx,
+          action: 'listChannels',
+          maxRetries: SLACK_MAX_RETRIES,
+          request: () => ctx.client.get(`${SLACK_API_BASE}/conversations.list`, { params }),
+        });
+
+        if (!response.data.ok) {
+          throw new Error(
+            formatSlackApiErrorMessage({
+              action: 'listChannels',
+              responseData: response.data,
+              responseHeaders: response.headers,
+            })
+          );
+        }
+
+        if (typedInput.raw) {
+          return response.data;
+        }
+
+        const channels = response.data.channels ?? [];
+        const nextCursor = response.data.response_metadata?.next_cursor;
+        const hasMore = Boolean(nextCursor && nextCursor.length > 0);
+
+        return {
+          ok: true as const,
+          source: 'conversations.list' as const,
+          channels: channels.map((c) => ({
+            id: c.id,
+            name: c.name,
+            is_private: c.is_private,
+            is_archived: c.is_archived,
+            is_member: c.is_member,
+          })),
+          nextCursor: hasMore ? nextCursor : undefined,
+          hasMore,
+        };
       },
     },
 
