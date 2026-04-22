@@ -26,7 +26,7 @@ interface PolicyProps {
 }
 
 export const getTestSyntheticsPolicy = (props: PolicyProps): PackagePolicy => {
-  const { namespace, spaceId, kibanaUrl } = props;
+  const { namespace, spaceId } = props;
   return {
     id: '2bfd7da0-22ed-11ed-8c6b-09a2d21dfbc3-27337270-22ed-11ed-8c6b-09a2d21dfbc3-default',
     version: 'WzE2MjYsMV0=',
@@ -139,6 +139,7 @@ export const getHttpInput = ({
   isBrowser,
   spaceId,
   namespace,
+  kibanaUrl,
   name = 'check if title is present-Test private location 0',
 }: PolicyProps) => {
   const enabled = !isBrowser;

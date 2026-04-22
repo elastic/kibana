@@ -68,7 +68,7 @@ export async function enrollAgent(
   const dockerKibanaHost =
     formattedKibanaURL.hostname === 'host.docker.internal' ? formattedKibanaURL.origin : kibanaUrl;
   const version = `${await kibanaApiClient.getKibanaVersion()}-SNAPSHOT`;
-
+  // const version = '9.4.0-SNAPSHOT';
   // Start Fleet Server container (runs in background)
   const fleetProcess = spawn(
     'docker',
