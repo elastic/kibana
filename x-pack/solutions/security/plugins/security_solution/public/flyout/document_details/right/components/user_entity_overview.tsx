@@ -305,6 +305,9 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
     ];
   }, [userRiskData]);
 
+  const displayName = entityRecord?.entity?.name ?? userName;
+  console.log('Entity record:', entityRecord);
+  console.log('user identity fields:', userIdentityFields);
   return (
     <EuiFlexGroup
       direction="column"
@@ -331,7 +334,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
                   font-weight: ${euiTheme.font.weight.bold};
                 `}
               >
-                {userName}
+                {displayName}
               </EuiText>
             </PreviewLink>
           </EuiFlexItem>
@@ -371,7 +374,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
         )}
       </EuiFlexItem>
       <AlertCountInsight
-        identityFields={userIdentityFields}
+        identityFields={userName ? { 'user.name': userName } : userIdentityFields}
         entityType={EntityType.user}
         queryId={`${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-${USER_ENTITY_OVERVIEW_ID}`}
         openDetailsPanel={openDetailsPanel}

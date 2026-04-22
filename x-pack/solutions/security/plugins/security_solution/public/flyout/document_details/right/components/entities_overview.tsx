@@ -86,6 +86,12 @@ export const EntitiesOverview: React.FC = () => {
     [navigateToLeftPanel]
   );
 
+  console.log('Host entity identifiers:', hostEntityIdentifiers);
+  console.log('User entity identifiers:', userEntityIdentifiers);
+  console.log('hasAnyEntity:', hasAnyEntity);
+  console.log('userEntityFromStore:', userEntityFromStore);
+  console.log('hostEntityFromStore:', hostEntityFromStore);
+
   return (
     <>
       <ExpandablePanel

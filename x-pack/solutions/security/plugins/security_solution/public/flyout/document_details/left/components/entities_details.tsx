@@ -127,7 +127,7 @@ export const EntitiesDetails: React.FC = () => {
               </EuiTitle>
               <EuiSpacer size="s" />
               <UserDetails
-                userName={resolvedUserName}
+                userName={userEntityFromStore.entityRecord?.entity?.name ?? resolvedUserName}
                 entityId={userEntityFromStore?.entityRecord?.entity?.id}
                 timestamp={timestamp}
                 scopeId={scopeId}
