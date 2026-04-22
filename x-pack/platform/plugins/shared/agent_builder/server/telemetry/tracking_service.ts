@@ -237,12 +237,13 @@ export class TrackingService {
 
   /**
    * Track a plugin import
-   * @param sourceType - How the plugin was imported (url or upload)
+   * @param sourceType - The original source type from the install request
    */
-  trackPluginImport(sourceType: 'url' | 'upload'): void {
+  trackPluginImport(sourceType: string): void {
     try {
-      trackPluginImportCounter(this.usageCounter, sourceType);
-      this.logger.debug(`Tracked plugin import: sourceType=${sourceType}`);
+      const importType = sourceType === 'url' ? 'url' : 'upload';
+      trackPluginImportCounter(this.usageCounter, importType);
+      this.logger.debug(`Tracked plugin import: sourceType=${importType}`);
     } catch (error) {
       this.logger.error(`Failed to track plugin import: ${error.message}`);
     }

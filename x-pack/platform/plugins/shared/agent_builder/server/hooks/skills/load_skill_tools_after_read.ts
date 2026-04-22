@@ -109,14 +109,10 @@ const loadSkillTools = async ({
     }
   );
 
-  if (!analyticsService) {
-    return;
-  }
-
   try {
     const agentContext = getAgentFromRunContext(runContext);
     const { origin, solution_area: solutionArea } = classifySkill(skill);
-    analyticsService.reportSkillInvoked({
+    analyticsService?.reportSkillInvoked({
       skillId: skill.id,
       origin,
       solutionArea,

@@ -198,7 +198,7 @@ class PluginsServiceImpl implements PluginsService {
       sourceType: source.type,
       skillCount: createRequests.length,
     });
-    trackingService?.trackPluginImport(source.type === 'url' ? 'url' : 'upload');
+    trackingService?.trackPluginImport(source.type);
 
     return created;
   }
