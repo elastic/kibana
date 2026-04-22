@@ -29,6 +29,20 @@ apiTest.describe('Fleet Outputs Management', { tag: [...tags.stateful.classic] }
     expect(response.data.items).toBeDefined();
   });
 
+  apiTest('should get a specific output by ID', async ({ apiServices }) => {
+    // First get all outputs to find an existing one
+    const allOutputsResponse = await apiServices.fleet.outputs.getOutputs();
+    const existingOutput = allOutputsResponse.data.items[0];
+
+    // Only proceed if we have an existing output
+    expect(existingOutput).toBeDefined();
+
+    const response = await apiServices.fleet.outputs.getOutput(existingOutput.id);
+
+    expect(response).toHaveStatusCode(200);
+    expect(response.data.item.id).toBe(existingOutput.id);
+  });
+
   apiTest('should create an output with additional parameters', async ({ apiServices }) => {
     const outputName = `test-output-params-${Date.now()}`;
     const outputHosts = ['https://localhost:9200'];

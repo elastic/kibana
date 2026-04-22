@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apiTest } from '../../../../../src/playwright';
+import { apiTest, tags } from '../../../../../src/playwright';
 import { expect } from '../../../../../api';
 
 apiTest.describe(
   'Fleet Server Hosts Management',
-  { tag: ['@local-stateful-classic', '@local-serverless-security_complete'] },
+  { tag: [...tags.serverless.security.complete, ...tags.stateful.classic] },
   () => {
     let hostId: string;
 
@@ -28,8 +28,7 @@ apiTest.describe(
     apiTest('should get fleet server hosts', async ({ apiServices }) => {
       // Note: The get method doesn't return a value in current implementation
       // This test verifies it doesn't throw an error
-      const resp = await apiServices.fleet.server_hosts.get();
-      expect(resp).toHaveStatusCode(200);
+      await apiServices.fleet.server_hosts.get();
     });
 
     apiTest('should create a fleet server host with parameters', async ({ apiServices }) => {
