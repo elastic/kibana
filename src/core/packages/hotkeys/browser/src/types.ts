@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Hotkey } from '@tanstack/hotkeys';
+import type { Hotkey, RegisterableHotkey } from '@tanstack/hotkeys';
 
 /**
  * The tier a hotkey belongs to. Drives grouping in the cheat sheet.
@@ -28,8 +28,14 @@ export type HotkeyScope = 'global' | 'app' | 'context';
 export interface HotkeyDefinition {
   /** Stable, namespaced id (e.g. `discover:toggleSidebar`). Used for unregister and discovery grouping. */
   id: string;
-  /** The keyboard chord. Prefer the platform-adaptive `Mod` modifier for cross-platform shortcuts. */
-  keys: Hotkey;
+  /**
+   * The keyboard chord. Prefer the platform-adaptive `Mod` modifier for
+   * cross-platform shortcuts. Accepts either a type-safe {@link Hotkey} string,
+   * a {@link RegisterableHotkey} raw object for cases that don't fit the
+   * strict union (e.g. `Shift+?`), or an arbitrary string for fully dynamic
+   * registrations.
+   */
+  keys: Hotkey | RegisterableHotkey | (string & {});
   /** Human-readable label, shown in the cheat sheet. Must be i18n-translated by the caller. */
   label: string;
   /** Optional longer description, shown alongside the label. Must be i18n-translated by the caller. */

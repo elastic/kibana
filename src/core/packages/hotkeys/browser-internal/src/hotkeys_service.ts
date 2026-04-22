@@ -8,7 +8,7 @@
  */
 
 import { Subscription } from 'rxjs';
-import { HotkeyManager, type HotkeyCallback } from '@tanstack/hotkeys';
+import { HotkeyManager, type HotkeyCallback, type RegisterableHotkey } from '@tanstack/hotkeys';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type {
@@ -107,7 +107,7 @@ export class HotkeysService {
     }
     const stored: HotkeyDefinition = { ...def, scope: def.scope ?? 'context' };
     const callback: HotkeyCallback = (event) => handler(event);
-    const managerHandle = this.manager.register(stored.keys, callback, {
+    const managerHandle = this.manager.register(stored.keys as RegisterableHotkey, callback, {
       enabled: stored.enabled !== false,
       target: stored.target ?? undefined,
       meta: buildMeta(stored),
