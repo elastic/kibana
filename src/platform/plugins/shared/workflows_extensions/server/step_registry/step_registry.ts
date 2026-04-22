@@ -63,7 +63,7 @@ export class ServerStepRegistry {
   >(definition: ServerStepDefinition<Input, Output, Config>): void {
     if (this.registry.has(definition.id)) {
       throw new Error(
-        `Step definition for type "${definition.id}" is already registered. Each step type must have unique definition.`
+        `Step definition for type "${definition.id}" is already registered. Each step type must have a unique definition.`
       );
     }
     this.registry.set(definition.id, definition as ServerStepDefinition);

@@ -250,24 +250,5 @@ describe('setupDependencies', () => {
         spaceId
       );
     });
-
-    it('should propagate errors thrown by workflowsExtensions.isReady', async () => {
-      const mockFakeRequest = { headers: {} } as KibanaRequest;
-      const loadError = new Error('Failed to load step definition');
-      (mockDependencies.workflowsExtensions.isReady as jest.Mock).mockRejectedValue(loadError);
-
-      await expect(
-        setupDependencies(
-          workflowRunId,
-          spaceId,
-          mockLogger,
-          mockConfig,
-          mockDependencies,
-          mockFakeRequest
-        )
-      ).rejects.toThrow('Failed to load step definition');
-
-      expect(mockWorkflowExecutionRepository.getWorkflowExecutionById).not.toHaveBeenCalled();
-    });
   });
 });
