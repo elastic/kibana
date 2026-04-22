@@ -29,7 +29,7 @@ const querySchema = z
     size: z.coerce
       .number()
       .int()
-      .positive()
+      .min(1)
       .optional()
       .describe('Number of entities to return in search-after mode.'),
     searchAfter: z
