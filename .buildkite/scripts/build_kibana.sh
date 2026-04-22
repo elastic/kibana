@@ -26,5 +26,11 @@ is_pr_with_label "ci:build-cdn-assets" || BUILD_ARGS+=("--skip-cdn-assets")
 echo "> node scripts/build" "${BUILD_ARGS[@]}"
 node scripts/build "${BUILD_ARGS[@]}"
 
-# Ensure docker cleanup finished before build artifacts are uploaded
+# Ensure docker cleanup finished before archiving
 wait $cleanup_pid || true
+
+echo "--- Archive Kibana Distribution"
+version="$(jq -r '.version' package.json)"
+linuxBuild="$KIBANA_DIR/target/kibana-$version-SNAPSHOT-linux-x86_64.tar.gz"
+mkdir -p "$KIBANA_BUILD_LOCATION"
+tar -xzf "$linuxBuild" -C "$KIBANA_BUILD_LOCATION" --strip=1
