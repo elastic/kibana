@@ -72,12 +72,9 @@ export const getErrorMessage = (
   if (isDotPresent) {
     // Query streams don't have a meaningful child-stream link to point at.
     if (!checkRootChildExists) {
-      return i18n.translate(
-        'xpack.streams.streamDetailRouting.nameContainsDotErrorMessageSimple',
-        {
-          defaultMessage: `Stream name cannot contain the "." character.`,
-        }
-      );
+      return i18n.translate('xpack.streams.streamDetailRouting.nameContainsDotErrorMessageSimple', {
+        defaultMessage: `Stream name cannot contain the "." character.`,
+      });
     }
     if (!rootChildExists) {
       return i18n.translate('xpack.streams.streamDetailRouting.rootChildDoesNotExistError', {
@@ -224,8 +221,8 @@ export const useChildStreamInput = ({
 };
 
 export function StreamNameFormRow({
-  onChange = (value: string) => { },
-  setLocalStreamName = () => { },
+  onChange = (value: string) => {},
+  setLocalStreamName = () => {},
   readOnly = false,
   autoFocus = false,
   error,

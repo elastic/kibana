@@ -45,8 +45,7 @@ jest.mock('../esql_query_editor', () => ({
   ),
 }));
 
-const renderWithProviders = (ui: React.ReactElement) =>
-  render(<I18nProvider>{ui}</I18nProvider>);
+const renderWithProviders = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
 describe('InlineQueryStreamForm', () => {
   beforeEach(() => {
@@ -69,9 +68,7 @@ describe('InlineQueryStreamForm', () => {
   });
 
   it('does NOT disable the save button in edit mode even if the stream is present in routing', () => {
-    mockRoutingContext.routing = [
-      { destination: 'logs.my-query', isNew: false },
-    ];
+    mockRoutingContext.routing = [{ destination: 'logs.my-query', isNew: false }];
 
     renderWithProviders(
       <InlineQueryStreamForm
@@ -88,9 +85,7 @@ describe('InlineQueryStreamForm', () => {
   });
 
   it('disables the save button when the ES|QL query is empty in edit mode', () => {
-    mockRoutingContext.routing = [
-      { destination: 'logs.my-query', isNew: false },
-    ];
+    mockRoutingContext.routing = [{ destination: 'logs.my-query', isNew: false }];
 
     renderWithProviders(
       <InlineQueryStreamForm
@@ -107,9 +102,7 @@ describe('InlineQueryStreamForm', () => {
   });
 
   it('disables the save button when the name matches an existing sibling (create mode, duplicate)', () => {
-    mockRoutingContext.routing = [
-      { destination: 'logs.existing', isNew: false },
-    ];
+    mockRoutingContext.routing = [{ destination: 'logs.existing', isNew: false }];
 
     renderWithProviders(
       <InlineQueryStreamForm
@@ -142,9 +135,7 @@ describe('InlineQueryStreamForm', () => {
   });
 
   it('does not paint the input invalid in edit mode even when the stream is in routing', () => {
-    mockRoutingContext.routing = [
-      { destination: 'logs.my-query', isNew: false },
-    ];
+    mockRoutingContext.routing = [{ destination: 'logs.my-query', isNew: false }];
 
     renderWithProviders(
       <InlineQueryStreamForm
