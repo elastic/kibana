@@ -29,7 +29,6 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ACTION_CREATE_TIME_SLIDER, pinnedPanelsContainTimeSlider } from '@kbn/controls-constants';
 import type { DashboardApi } from '../../../../dashboard_api/types';
 import type { MenuItem, MenuItemGroup } from '../types';
 import { getMenuItemGroups } from '../get_menu_item_groups';
@@ -42,33 +41,6 @@ type FlyoutTab = 'new' | 'library';
 const TAB_NEW_ID = 'new' as const;
 const TAB_LIBRARY_ID = 'library' as const;
 
-const timeSliderAddPanelDisabledTooltip = i18nFn.translate(
-  'dashboard.addPanelFlyout.timeSliderOnlyOneTooltip',
-  {
-    defaultMessage: 'Only one time slider control can be added per dashboard.',
-  }
-);
-
-function applyTimeSliderDisabledFromPinnedPanels(
-  menuGroups: MenuItemGroup[],
-  pinnedPanels: Record<string, { type: string }>
-): MenuItemGroup[] {
-  const sliderDisabled = pinnedPanelsContainTimeSlider(pinnedPanels);
-  return menuGroups.map((group) => ({
-    ...group,
-    items: group.items.map((item) => {
-      if (item.id !== ACTION_CREATE_TIME_SLIDER) {
-        return item;
-      }
-      return {
-        ...item,
-        isDisabled: sliderDisabled,
-        description: sliderDisabled ? timeSliderAddPanelDisabledTooltip : undefined,
-      };
-    }),
-  }));
-}
-
 function NewPanelContent({ dashboardApi }: { dashboardApi: DashboardApi }) {
   const { euiTheme } = useEuiTheme();
 
@@ -80,57 +52,19 @@ function NewPanelContent({ dashboardApi }: { dashboardApi: DashboardApi }) {
     return await getMenuItemGroups(dashboardApi);
   }, [dashboardApi]);
 
-  const [reactiveGroups, setReactiveGroups] = useState<MenuItemGroup[] | undefined>();
-
-  const syncReactiveGroupsFromLayout = useCallback(
-    (menuGroups: MenuItemGroup[] | undefined) => {
-      if (!menuGroups) {
-        setReactiveGroups(undefined);
-        return;
-      }
-      const layout$ = (
-        dashboardApi as {
-          layout$?: { getValue?: () => { pinnedPanels: Record<string, { type: string }> } };
-        }
-      ).layout$;
-      const pinnedPanels = layout$?.getValue?.()?.pinnedPanels ?? {};
-      setReactiveGroups(applyTimeSliderDisabledFromPinnedPanels(menuGroups, pinnedPanels));
-    },
-    [dashboardApi]
-  );
-
   const groupsRef = useRef(groups);
   groupsRef.current = groups;
-
-  useEffect(() => {
-    syncReactiveGroupsFromLayout(groups);
-  }, [groups, syncReactiveGroupsFromLayout]);
-
-  useEffect(() => {
-    const layout$ = (
-      dashboardApi as {
-        layout$?: { subscribe?: (fn: () => void) => { unsubscribe: () => void } };
-      }
-    ).layout$;
-    if (!layout$ || typeof layout$.subscribe !== 'function') {
-      return;
-    }
-    const subscription = layout$.subscribe(() => {
-      syncReactiveGroupsFromLayout(groupsRef.current);
-    });
-    return () => subscription.unsubscribe();
-  }, [dashboardApi, syncReactiveGroupsFromLayout]);
 
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [filteredGroups, setFilteredGroups] = useState<MenuItemGroup[]>([]);
   useEffect(() => {
     if (!searchTerm) {
-      return setFilteredGroups(reactiveGroups ?? []);
+      return setFilteredGroups(groups ?? []);
     }
 
     const q = searchTerm.toLowerCase();
 
-    const currentGroups = reactiveGroups ?? ([] as MenuItemGroup[]);
+    const currentGroups = groups ?? ([] as MenuItemGroup[]);
     setFilteredGroups(
       currentGroups
         .map((group) => {
@@ -159,7 +93,7 @@ function NewPanelContent({ dashboardApi }: { dashboardApi: DashboardApi }) {
         })
         .filter((group) => !group.isDisabled)
     );
-  }, [reactiveGroups, searchTerm]);
+  }, [groups, searchTerm]);
 
   const { lens, esql } = useMemo(
     () => selectFeaturedVisualizationActions(filteredGroups),

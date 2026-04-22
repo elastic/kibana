@@ -7,29 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ACTION_CREATE_TIME_SLIDER, pinnedPanelsContainTimeSlider } from '@kbn/controls-constants';
-import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { ADD_PANEL_OTHER_GROUP } from '@kbn/embeddable-plugin/public';
-import { type TracksOverlays } from '@kbn/presentation-util';
 import type { PresentableGroup } from '@kbn/ui-actions-browser/src/types';
-import type { HasAppContext } from '@kbn/presentation-publishing';
+import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { triggers } from '@kbn/ui-actions-plugin/public';
+
+import { getTimeSliderActionItem } from '../../../dashboard_actions/execute_create_time_slider_control_panel_action';
 import { uiActionsService } from '../../../services/kibana_services';
 import type { MenuItem, MenuItemGroup } from './types';
+import type { DashboardApi } from '../../../dashboard_api/types';
 
-function isTimeSliderAddPanelDisabledForApi(api: unknown): boolean {
-  const layout$ = (
-    api as { layout$?: { getValue?: () => { pinnedPanels: Record<string, { type: string }> } } }
-  )?.layout$;
-  if (!layout$ || typeof layout$.getValue !== 'function') {
-    return false;
-  }
-  return pinnedPanelsContainTimeSlider(layout$.getValue().pinnedPanels);
-}
-
-export async function getMenuItemGroups(
-  api: HasAppContext & TracksOverlays
-): Promise<MenuItemGroup[]> {
+export async function getMenuItemGroups(api: DashboardApi): Promise<MenuItemGroup[]> {
   const groups: Record<string, MenuItemGroup> = {};
   const addPanelContext = {
     embeddable: api,
@@ -54,17 +42,11 @@ export async function getMenuItemGroups(
     const actionGroups = Array.isArray(action.grouping) ? action.grouping : [ADD_PANEL_OTHER_GROUP];
     actionGroups.forEach((group) => {
       const actionName = action.getDisplayName(addPanelContext);
-      const isDisabled =
-        action.id === ACTION_CREATE_TIME_SLIDER && isTimeSliderAddPanelDisabledForApi(api);
       pushItem(group, {
         id: action.id,
         name: actionName,
         icon: action.getIconType?.(addPanelContext) ?? 'empty',
         onClick: (event: React.MouseEvent) => {
-          if (action.id === ACTION_CREATE_TIME_SLIDER && isTimeSliderAddPanelDisabledForApi(api)) {
-            event.preventDefault();
-            return;
-          }
           api.clearOverlays();
           if (event.currentTarget instanceof HTMLAnchorElement) {
             if (
@@ -80,12 +62,15 @@ export async function getMenuItemGroups(
         },
         'data-test-subj': `create-action-${actionName}`,
         description: action?.getDisplayNameTooltip?.(addPanelContext),
-        isDisabled,
         order: action.order ?? 0,
         MenuItem: action.MenuItem ? action.MenuItem({ context: addPanelContext }) : undefined,
       });
     });
   });
+
+  /** Handle special time slider case */
+  const timeSliderAction = await getTimeSliderActionItem(api);
+  if (timeSliderAction) pushItem(groups.controls, timeSliderAction);
 
   return Object.values(groups)
     .map((group) => {
