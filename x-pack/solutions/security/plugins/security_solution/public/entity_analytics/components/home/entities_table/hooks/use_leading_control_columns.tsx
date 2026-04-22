@@ -11,9 +11,6 @@ import type { RowControlColumn } from '@kbn/discover-utils';
 import type { EntityType } from '../../../../../../common/entity_analytics/types';
 import { EntityTypeToIdentifierField } from '../../../../../../common/entity_analytics/types';
 import { createDataProviders } from '../../../../../app/actions/add_to_timeline/data_provider';
-import { SecurityAgentBuilderAttachments } from '../../../../../../common/constants';
-import { useAgentBuilderAvailability } from '../../../../../agent_builder/hooks/use_agent_builder_availability';
-import { useKibana } from '../../../../../common/lib/kibana/use_kibana';
 import { getEntityFields } from '../utils';
 import { ENTITY_ANALYTICS_TABLE_ID } from '../constants';
 
@@ -41,9 +38,6 @@ export const useLeadingControlColumns = ({
   canUseTimeline,
   investigateInTimeline,
 }: UseLeadingControlColumnsArgs): RowControlColumn[] => {
-  const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
-  const { agentBuilder } = useKibana().services;
-
   return useMemo(() => {
     const columns: RowControlColumn[] = [];
 
@@ -77,55 +71,6 @@ export const useLeadingControlColumns = ({
       });
     }
 
-    if (isAgentBuilderEnabled && agentBuilder?.openChat) {
-      columns.push({
-        id: 'entity-analytics-ai-action',
-        render: (Control, { record }) => {
-          const { entityType, entityName } = getEntityFields(record);
-          if (!entityName || !entityType) {
-            return <Control iconType="sparkles" label="" disabled onClick={undefined} />;
-          }
-
-          return (
-            <Control
-              iconType="sparkles"
-              label={i18n.translate(
-                'xpack.securitySolution.entityAnalytics.entitiesTable.addToChat',
-                { defaultMessage: 'Add to chat' }
-              )}
-              color="text"
-              onClick={() => {
-                agentBuilder.openChat({
-                  autoSendInitialMessage: false,
-                  newConversation: true,
-                  initialMessage: i18n.translate(
-                    'xpack.securitySolution.entityAnalytics.entitiesTable.aiInvestigationPrompt',
-                    {
-                      defaultMessage:
-                        'Investigate this entity and provide relevant context about its risk and activity.',
-                    }
-                  ),
-                  attachments: [
-                    {
-                      id: `${SecurityAgentBuilderAttachments.entity}-${Date.now()}`,
-                      type: SecurityAgentBuilderAttachments.entity,
-                      data: {
-                        identifierType: entityType,
-                        identifier: entityName,
-                        attachmentLabel: `${entityType}: ${entityName}`,
-                      },
-                    },
-                  ],
-                  sessionTag: 'security',
-                });
-              }}
-              data-test-subj="entity-analytics-home-ai-action-icon"
-            />
-          );
-        },
-      });
-    }
-
     return columns;
-  }, [canUseTimeline, investigateInTimeline, isAgentBuilderEnabled, agentBuilder]);
+  }, [canUseTimeline, investigateInTimeline]);
 };

@@ -119,7 +119,7 @@
                     "section": "def-common.DeepPartialObject",
                     "text": "DeepPartialObject"
                   },
-                  "<Record<string, any>> | undefined; readonly info?: ",
+                  "<Record<string, string | string[] | undefined>> | undefined; readonly info?: ",
                   {
                     "pluginId": "@kbn/utility-types",
                     "scope": "common",
@@ -157,7 +157,7 @@
                     "section": "def-common.DeepPartialObject",
                     "text": "DeepPartialObject"
                   },
-                  "<Record<string, any>> | undefined; readonly paramsArray?: string | ",
+                  "<Record<string, string>> | undefined; readonly paramsArray?: string | ",
                   {
                     "pluginId": "@kbn/utility-types",
                     "scope": "common",
@@ -229,7 +229,7 @@
                     "section": "def-common.DeepPartialObject",
                     "text": "DeepPartialObject"
                   },
-                  "<Record<string, any>> | undefined; readonly query?: ",
+                  "<Record<string, unknown>> | undefined; readonly query?: ",
                   {
                     "pluginId": "@kbn/utility-types",
                     "scope": "common",
@@ -285,7 +285,7 @@
                     "section": "def-common.DeepPartialObject",
                     "text": "DeepPartialObject"
                   },
-                  "<Record<string, any>> | undefined; readonly url?: ",
+                  "<Record<string, unknown>> | undefined; readonly url?: ",
                   {
                     "pluginId": "@kbn/utility-types",
                     "scope": "common",

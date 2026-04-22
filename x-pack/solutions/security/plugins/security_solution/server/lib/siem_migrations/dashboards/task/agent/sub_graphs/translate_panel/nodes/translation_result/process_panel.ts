@@ -242,16 +242,22 @@ function configureStackedProperties(
   columns: string[]
 ): void {
   if ((vizType.includes('stacked') || vizType.includes('line')) && columns.length > 2) {
-    if (panelJSON.embeddableConfig?.attributes?.state?.visualization?.layers?.[0]) {
-      panelJSON.embeddableConfig.attributes.state.visualization.layers[0].splitAccessors[0] =
-        columns[columns.length - 2];
+    const layer = panelJSON.embeddableConfig?.attributes?.state?.visualization?.layers?.[0];
+    if (layer) {
+      if (!layer.splitAccessors) {
+        layer.splitAccessors = [];
+      }
+      layer.splitAccessors[0] = columns[columns.length - 2];
     }
   }
 
   if (vizType.includes('stacked') && columns.length === 2) {
-    if (panelJSON.embeddableConfig?.attributes?.state?.visualization?.layers?.[0]) {
-      panelJSON.embeddableConfig.attributes.state.visualization.layers[0].splitAccessors[0] =
-        columns[columns.length - 1];
+    const layer = panelJSON.embeddableConfig?.attributes?.state?.visualization?.layers?.[0];
+    if (layer) {
+      if (!layer.splitAccessors) {
+        layer.splitAccessors = [];
+      }
+      layer.splitAccessors[0] = columns[columns.length - 1];
     }
   }
 }
