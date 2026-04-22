@@ -26,15 +26,15 @@ export const ResponseNote = z.object({
 export type PersistNoteRouteRequestBody = z.infer<typeof PersistNoteRouteRequestBody>;
 export const PersistNoteRouteRequestBody = z.object({
   /**
-   * The note to add or update.
+   * Note payload (timeline, text, optional event linkage, metadata).
    */
   note: BareNote,
   /**
-   * The `savedObjectId` of the note
+   * The `savedObjectId` of the note to update. Omit when creating a new note.
    */
   noteId: z.string().nullable().optional(),
   /**
-   * The version of the note
+   * Saved object version string from a previous read; optional on update.
    */
   version: z.string().nullable().optional(),
 });

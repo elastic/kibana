@@ -14,6 +14,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { isAllowedBuiltinPlugin } from '@kbn/agent-builder-server/allow_lists';
 import type { BuiltInPluginDefinition } from '@kbn/agent-builder-server/plugins';
 import type { AgentBuilderConfig } from '../../config';
+import type { AnalyticsService } from '../../telemetry';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { PluginClient, PersistedPluginDefinition } from './client';
 import { createClient, parsedArchiveToCreateRequest } from './client';
@@ -59,6 +60,7 @@ export interface PluginsServiceStartDeps {
   elasticsearch: ElasticsearchServiceStart;
   spaces?: SpacesPluginStart;
   config: AgentBuilderConfig;
+  analyticsService?: AnalyticsService;
 }
 
 export const createPluginsService = (): PluginsService => {
@@ -169,6 +171,7 @@ class PluginsServiceImpl implements PluginsService {
     const createRequests = parsedArchive.skills.map((skill) =>
       toSkillCreateRequest({ skill, pluginName, pluginId })
     );
+
     await skillClient.bulkCreate(createRequests);
 
     const skillIds = createRequests.map((req) => req.id);
@@ -181,7 +184,16 @@ class PluginsServiceImpl implements PluginsService {
       id: pluginId,
     });
 
-    return pluginClient.create(createRequest);
+    const created = await pluginClient.create(createRequest);
+
+    const { analyticsService } = this.getStartDeps();
+    analyticsService?.reportPluginImported({
+      pluginId: created.id,
+      sourceType: source.type,
+      skillCount: createRequests.length,
+    });
+
+    return created;
   }
 
   private async deletePlugin({
@@ -230,7 +242,7 @@ const toSkillCreateRequest = ({
       relativePath: file.relativePath,
       content: file.content,
     })),
-    tool_ids: [],
+    tool_ids: skill.meta.allowedTools ?? [],
     plugin_id: pluginId,
   };
 };
