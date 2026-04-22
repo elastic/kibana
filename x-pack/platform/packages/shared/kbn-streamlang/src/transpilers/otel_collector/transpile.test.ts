@@ -157,7 +157,7 @@ describe('transpileOtelCollector', () => {
       expect(result.warnings[0]).toContain('2 patterns');
     });
 
-    it('inlines pattern_definitions into the emitted pattern', async () => {
+    it('forwards pattern_definitions as the 4th ExtractGrokPatterns argument', async () => {
       const dsl: StreamlangDSL = {
         steps: [
           {
@@ -172,9 +172,71 @@ describe('transpileOtelCollector', () => {
       };
       const result = await transpile(dsl);
       expect(asTransform(result.processors['transform/streamlang']).log_statements).toEqual([
-        'merge_maps(log.attributes, ExtractGrokPatterns(log.attributes["message"], "(?<greeting>hello|hi|hey) world", true), "upsert") where (log.attributes["message"] != nil)',
+        'merge_maps(log.attributes, ExtractGrokPatterns(log.attributes["message"], "%{GREETING:greeting} world", true, ["GREETING=hello|hi|hey"]), "upsert") where (log.attributes["message"] != nil)',
       ]);
       expect(result.warnings).toEqual([]);
+    });
+
+    it('passes @timestamp field name in pattern_definitions without RE2 named-capture inlining, and emits a warning', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            action: 'grok',
+            from: 'message',
+            patterns: ['%{MY_TS:@timestamp} %{WORD:level}'],
+            pattern_definitions: {
+              MY_TS: '\\d{4}-\\d{2}-\\d{2}',
+            },
+          },
+        ],
+      };
+      const result = await transpile(dsl);
+      expect(asTransform(result.processors['transform/streamlang']).log_statements).toEqual([
+        'merge_maps(log.attributes, ExtractGrokPatterns(log.attributes["message"], "%{MY_TS:@timestamp} %{WORD:level}", true, ["MY_TS=\\\\d{4}-\\\\d{2}-\\\\d{2}"]), "upsert") where (log.attributes["message"] != nil)',
+      ]);
+      expect(result.warnings).toHaveLength(1);
+      expect(result.warnings[0]).toMatch(/@timestamp/);
+      expect(result.warnings[0]).toMatch(/not be extracted/);
+    });
+
+    it('passes dotted field name in pattern_definitions without RE2 named-capture inlining', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            action: 'grok',
+            from: 'message',
+            patterns: ['%{MY_IP:client.ip}'],
+            pattern_definitions: {
+              MY_IP: '\\d+\\.\\d+\\.\\d+\\.\\d+',
+            },
+          },
+        ],
+      };
+      const result = await transpile(dsl);
+      expect(asTransform(result.processors['transform/streamlang']).log_statements).toEqual([
+        'merge_maps(log.attributes, ExtractGrokPatterns(log.attributes["message"], "%{MY_IP:client.ip}", true, ["MY_IP=\\\\d+\\\\.\\\\d+\\\\.\\\\d+\\\\.\\\\d+"]), "upsert") where (log.attributes["message"] != nil)',
+      ]);
+      expect(result.warnings).toEqual([]);
+    });
+
+    it('emits a warning when pattern_definitions are cyclic', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            action: 'grok',
+            from: 'message',
+            patterns: ['%{A:result}'],
+            pattern_definitions: {
+              A: '%{B}',
+              B: '%{A}',
+            },
+          },
+        ],
+      };
+      const result = await transpile(dsl);
+      expect(result.warnings).toHaveLength(1);
+      expect(result.warnings[0]).toMatch(/cyclic/);
+      expect(result.warnings[0]).toMatch(/A|B/);
     });
   });
 
