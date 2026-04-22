@@ -51,6 +51,23 @@ paths:
                     required:
                       - entity_types
                       - filter
+            examples:
+              ConfigureRiskEngineSavedObjectRequest:
+                summary: Configure the risk engine saved object
+                value:
+                  exclude_alert_statuses:
+                    - closed
+                  range:
+                    start: now-30d
+                    end: now
+                  exclude_alert_tags:
+                    - low-priority
+                  enable_reset_to_zero: false
+                  filters:
+                    - entity_types:
+                        - host
+                        - user
+                      filter: 'host.name: *'
       responses:
         "200":
           description: Successful response
@@ -61,6 +78,11 @@ paths:
                 properties:
                   risk_engine_saved_object_configured:
                     type: boolean
+              examples:
+                ConfigureRiskEngineSavedObjectResponse:
+                  summary: Successful configuration response
+                  value:
+                    risk_engine_saved_object_configured: true
         "400":
           description: Task manager is unavailable
           content:
