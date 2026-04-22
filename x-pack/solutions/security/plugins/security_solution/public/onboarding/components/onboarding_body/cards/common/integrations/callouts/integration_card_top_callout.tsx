@@ -8,9 +8,8 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
-import { matchPath, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
-import { SIEM_MIGRATIONS_MANAGE_PATH } from '../../../../../../../../common/constants';
 import { useOnboardingService } from '../../../../../hooks/use_onboarding_service';
 import { AgentlessAvailableCallout } from './agentless_available_callout';
 import { ActiveIntegrationsCallout } from './active_integrations_callout';
@@ -35,16 +34,6 @@ export const IntegrationCardTopCallout = React.memo<{
     isAgentlessAvailable &&
     activeIntegrationsCount === 0 &&
     selectedTabId !== IntegrationTabId.endpoint;
-
-  const showMigrationsCallout = useMemo(
-    () =>
-      !matchPath(pathname, {
-        path: SIEM_MIGRATIONS_MANAGE_PATH,
-        exact: false,
-        strict: false,
-      }),
-    [pathname]
-  );
 
   const showEndpointCallout =
     activeIntegrationsCount === 0 && selectedTabId === IntegrationTabId.endpoint;
