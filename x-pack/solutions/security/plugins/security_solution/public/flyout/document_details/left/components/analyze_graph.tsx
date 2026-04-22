@@ -211,6 +211,7 @@ export const AnalyzeGraph: FC = () => {
         shouldUpdate={shouldUpdate}
         filters={filters}
         renderCellActions={cellActionRenderer}
+        useLegacyExpandableFlyout={true}
       />
     </div>
   );
