@@ -110,8 +110,7 @@ export const createQueryDocumentsTool = ({
       const { streamsClient, scopedClusterClient } = await getScopedClients({ request });
       const esClient = scopedClusterClient.asCurrentUser;
 
-      const targetIndex =
-        source === 'failures' ? `${name}${FAILURE_STORE_SELECTOR}` : name;
+      const targetIndex = source === 'failures' ? `${name}${FAILURE_STORE_SELECTOR}` : name;
 
       const definition = await streamsClient.getStream(name);
       const definitionFieldTypes = getDefinitionFieldTypes(definition);
