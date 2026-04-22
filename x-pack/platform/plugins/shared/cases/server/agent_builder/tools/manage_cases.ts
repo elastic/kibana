@@ -112,18 +112,10 @@ export const manageCasesTool = (
         }
 
         case 'create_from_template':
-          return invokeStepHandler(
-            createFromTemplateStepDef,
-            { ...rest },
-            toolContext
-          );
+          return invokeStepHandler(createFromTemplateStepDef, { ...rest }, toolContext);
 
         case 'update':
-          return invokeStepHandler(
-            updateCaseStepDef,
-            { case_id, ...rest },
-            toolContext
-          );
+          return invokeStepHandler(updateCaseStepDef, { case_id, ...rest }, toolContext);
 
         case 'update_bulk':
           return invokeStepHandler(updateCasesStepDef, { ...rest }, toolContext);
@@ -132,18 +124,10 @@ export const manageCasesTool = (
           return invokeStepHandler(deleteCasesStepDef, { ...rest }, toolContext);
 
         case 'assign':
-          return invokeStepHandler(
-            assignStepDef,
-            { case_id, assignees, ...rest },
-            toolContext
-          );
+          return invokeStepHandler(assignStepDef, { case_id, assignees, ...rest }, toolContext);
 
         case 'unassign':
-          return invokeStepHandler(
-            unassignStepDef,
-            { case_id, assignees, ...rest },
-            toolContext
-          );
+          return invokeStepHandler(unassignStepDef, { case_id, assignees, ...rest }, toolContext);
 
         case 'add_tags':
           return invokeStepHandler(
@@ -153,11 +137,7 @@ export const manageCasesTool = (
           );
 
         case 'set_custom_field':
-          return invokeStepHandler(
-            setCustomFieldStepDef,
-            { case_id, ...rest },
-            toolContext
-          );
+          return invokeStepHandler(setCustomFieldStepDef, { case_id, ...rest }, toolContext);
 
         default: {
           const _exhaustive: never = mode;
