@@ -32,6 +32,11 @@ export class DashboardsTab extends ServiceDetailsTab {
       .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 
+  public async waitForDashboardsToLoad(): Promise<void> {
+    await expect(this.page.getByRole('progressbar')).toBeHidden({ timeout: EXTENDED_TIMEOUT });
+    await this.addServiceDashboardButton.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+  }
+
   public async linkDashboardByTitle(dashboardTitle: string) {
     await this.addServiceDashboardButton.waitFor({ timeout: EXTENDED_TIMEOUT });
     await this.addServiceDashboardButton.click();
