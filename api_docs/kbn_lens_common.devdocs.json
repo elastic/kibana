@@ -5241,10 +5241,10 @@
               "NotificationsStart",
               "; http: ",
               "HttpSetup",
-              "; docLinks: ",
-              "DocLinksStart",
               "; application: ",
               "ApplicationStart",
+              "; docLinks: ",
+              "DocLinksStart",
               "; overlays: ",
               "OverlayStart",
               "; uiSettings: ",
@@ -27792,6 +27792,10 @@
               },
               {
                 "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/xy_config_panel/dimension_editor.tsx"
+              },
+              {
+                "plugin": "lens",
                 "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/visualization.tsx"
               },
               {
@@ -27821,6 +27825,30 @@
               {
                 "plugin": "lens",
                 "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/axes_configuration.test.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/color_assignment.test.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/color_assignment.test.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/color_assignment.test.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/color_assignment.test.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/color_assignment.test.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/color_assignment.test.ts"
               },
               {
                 "plugin": "lens",
@@ -29273,7 +29301,7 @@
           },
           "<T, { isDimensionComplete?: boolean | undefined; forceRender?: boolean | undefined; }>; core: Pick<",
           "CoreStart",
-          ", \"notifications\" | \"http\" | \"docLinks\" | \"i18n\" | \"analytics\" | \"overlays\" | \"uiSettings\" | \"theme\" | \"userProfile\">; dateRange: ",
+          ", \"notifications\" | \"http\" | \"i18n\" | \"analytics\" | \"docLinks\" | \"overlays\" | \"uiSettings\" | \"theme\" | \"userProfile\">; dateRange: ",
           {
             "pluginId": "@kbn/lens-common",
             "scope": "common",

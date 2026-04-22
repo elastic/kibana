@@ -100,14 +100,10 @@ describe('Download script API route', () => {
         .getRegisteredVersionedRoute('get', SCRIPTS_LIBRARY_ITEM_DOWNLOAD_ROUTE, '2023-10-31')
         .routeHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
 
-      expect(httpResponseMock.ok).toHaveBeenCalledWith({
+      expect(httpResponseMock.file).toHaveBeenCalledWith({
         body: expect.any(Readable),
-        headers: {
-          'cache-control': 'max-age=31536000, immutable',
-          'content-disposition': 'attachment; filename="do_something.sh"',
-          'content-type': 'application/octet-stream',
-          'x-content-type-options': 'nosniff',
-        },
+        fileContentType: 'application/something',
+        filename: 'do_something.sh',
       });
     });
   });
