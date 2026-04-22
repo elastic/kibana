@@ -6,6 +6,7 @@ Captures the current Streams/SigEvents environment into a GCS snapshot. `.kibana
 
 - The environment must already contain all the data you want to capture (logs, alerts, Streams features/assets, etc.). This script only snapshots existing indices — it does not generate or ingest any data. Run the appropriate data generation scripts (e.g. OTel demo, Significant Events scenarios) before capturing.
 - Local Elasticsearch with GCS credentials in the keystore.
+- Credentials with `manage_security` privilege (see [Required privileges](#required-privileges)).
 
 ## Why
 
