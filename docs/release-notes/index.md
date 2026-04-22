@@ -51,7 +51,30 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 **Connectivity**:
 * Adds support for the `region` parameter to the Bedrock Connector [#252956]({{kib-pull}}252956).
-* Adds a SharePoint Server connector, enabling you to connect to on-prem SharePoint instances and search, browse, and retrieve documents and site content [#258014]({{kib-pull}}258014).
+* Adds a Jina Reader data source connector [#247527]({{kib-pull}}247527).
+* Adds a Jira Cloud data source connector [#251345]({{kib-pull}}251345).
+* Adds a SharePoint Online data source connector [#251544]({{kib-pull}}251544).
+* Adds a ServiceNow data source connector [#252430]({{kib-pull}}252430).
+* Adds a Microsoft Teams data source connector [#252465]({{kib-pull}}252465).
+* Adds a Tavily data source connector [#252717]({{kib-pull}}252717).
+* Adds a Google Calendar data source connector [#252740]({{kib-pull}}252740).
+* Adds a Slack data source connector [#252972]({{kib-pull}}252972).
+* Adds an Amazon S3 data source connector [#253753]({{kib-pull}}253753).
+* Adds a Salesforce data source connector [#254303]({{kib-pull}}254303).
+* Adds a Zendesk data source connector [#254739]({{kib-pull}}254739).
+* Adds a Firecrawl data source connector [#255004]({{kib-pull}}255004).
+* Adds a 1Password data source connector [#255076]({{kib-pull}}255076).
+* Adds a PagerDuty data source connector [#255154]({{kib-pull}}255154).
+* Adds a Zoom data source connector [#255174]({{kib-pull}}255174).
+* Adds a Figma data source connector [#255322]({{kib-pull}}255322).
+* Adds a Gmail data source connector [#255565]({{kib-pull}}255565).
+* Adds an AWS Lambda data source connector [#256150]({{kib-pull}}256150).
+* Adds a Confluence Cloud data source connector [#256508]({{kib-pull}}256508).
+* Adds a Google Cloud Storage data source connector [#257374]({{kib-pull}}257374).
+* Adds a SharePoint Server data source connector [#258014]({{kib-pull}}258014).
+* Adds a GitHub data source connector [#258169]({{kib-pull}}258169).
+* Adds an Azure Blob Storage data source connector [#259439]({{kib-pull}}259439).
+* Adds a GCP Cloud Functions data source connector [#261277]({{kib-pull}}261277).
 
 **Dashboards and Visualizations**:
 % main features
@@ -239,33 +262,14 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Updates the Search homepage design [#246777]({{kib-pull}}246777).
 
 **Workflows**:
-* Enables OAuth on the Jira connector [#262189]({{kib-pull}}262189).
-* Enables OAuth on the Zoom connector [#260775]({{kib-pull}}260775).
-* Adds the `linux.advanced.ransomware.diagnostic` advanced flag in preparation for the Linux ransomware release [#260538]({{kib-pull}}260538).
-* Enables OAuth on Notion, Figma, Sharepoint, and ServiceNow connectors [#260395]({{kib-pull}}260395).
-* Enables OAuth on the Salesforce connector [#259826]({{kib-pull}}259826).
-* Enables OAuth on Google connectors [#259528]({{kib-pull}}259528).
 * Creates an initialization endpoint and migrates the list index creation flow [#258891]({{kib-pull}}258891).
 * Adds import and export features for workflows [#257976]({{kib-pull}}257976).
 * Adds the `workflows.executionFailed` trigger so you can run workflows when another workflow fails. Use it to send notifications (e.g., Slack), run cleanup, or trigger retries [#257633]({{kib-pull}}257633).
 * Adds leads cards, flyouts, and Agent Builder integration [#257610]({{kib-pull}}257610).
-* Adds Confluence Cloud as a data source for Workplace AI. Users can connect to Confluence Cloud (REST API v2) with Basic auth and use agent tools to list and retrieve spaces and pages [#256508]({{kib-pull}}256508).
-* Adds a Figma data source [#255322]({{kib-pull}}255322).
-* Adds a Zoom connector and data source [#255174]({{kib-pull}}255174).
-* Adds a PagerDuty MCP implementation [#255154]({{kib-pull}}255154).
-* Adds a Firecrawl data source [#255004]({{kib-pull}}255004).
-* Adds a Zendesk data source [#254739]({{kib-pull}}254739).
 * Adds a server-side workflow validation endpoint [#254502]({{kib-pull}}254502).
-* Adds a connector for Amazon S3 list and get file from bucket [#253753]({{kib-pull}}253753).
 * Makes the manual run API public [#253010]({{kib-pull}}253010).
-* Adds a Slack data source for Workplace AI [#252972]({{kib-pull}}252972).
-* Adds a Google Calendar connector [#252740]({{kib-pull}}252740).
-* Adds a Tavily data source [#252717]({{kib-pull}}252717).
 * Adds agent pre-execution workflows [#252452]({{kib-pull}}252452).
-* Adds ServiceNow: Search connector for searching across records and knowledge bases [#252430]({{kib-pull}}252430).
 * Whitelists Streams APIs as Kibana workflow steps [#252068]({{kib-pull}}252068).
-* Adds SharePoint Online data source and workflows [#251544]({{kib-pull}}251544).
-* Adds a Jira Cloud datasource [#251345]({{kib-pull}}251345).
 * Adds a gap scheduler error callout [#250393]({{kib-pull}}250393).
 * Adds metrics grid {{esql}} WHERE propagation [#249103]({{kib-pull}}249103).
 * Adds a SharePoint Online connector to the available list of connectors [#248737]({{kib-pull}}248737).
@@ -305,6 +309,10 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Encodes the search term in the cases page [#247992]({{kib-pull}}247992).
 * Adds max character validation to the email connector params and config [#246453]({{kib-pull}}246453).
 * Fixes the wrong time zone being applied when a CSV report has a local date comparison [#244405]({{kib-pull}}244405).
+
+**Connectivity**:
+* Fixes `defaultModel` not being injected for the **Other** OpenAI provider on run and test sub-actions [#260747]({{kib-pull}}260747).
+* Fixes MCP connectors ignoring the proxy and SSL configuration from the actions plugin [#255813]({{kib-pull}}255813).
 
 **Dashboards and Visualizations**:
 * Fixes an issue that could prevent a dashboard from showing its latest saved state [#262695]({{kib-pull}}262695).
@@ -510,7 +518,6 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Fixes connector step icons falling back to plugs in workflow list [#263880]({{kib-pull}}263880).
 * Fixes the preview time picker not updating on chart brush [#262112]({{kib-pull}}262112).
 * Fixes **Failed to check if maintenance windows are active** error [#261048]({{kib-pull}}261048).
-* Fixes `defaultModel` not injected for **Other** OpenAI provider on run/test subActions in OpenAI connector [#260747]({{kib-pull}}260747).
 * Adds input text sanitization [#259262]({{kib-pull}}259262).
 * Adds attachment origin to Converse API. Converse accepts optional `origin` on attachments for by-reference flows and rejects attachments with neither `data` nor `origin` [#259043]({{kib-pull}}259043).
 * Supports Logs AI Insight in {{esql}} mode in Discover [#258595]({{kib-pull}}258595).
@@ -524,7 +531,6 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Fixes deanonymization offset drift and adds regression coverage [#256112]({{kib-pull}}256112).
 * Adds a generate API key server-side implementation [#256083]({{kib-pull}}256083).
 * Fixes a bug in the `platform.core.search` tool and `index_search` tool type where nested fields were ignored when searching for matching documents [#255914]({{kib-pull}}255914).
-* Fixes MCP connectors ignoring the proxy/SSL configuration from the actions plugin (`xpack.actions` configuration property) [#255813]({{kib-pull}}255813).
 * Returns an error when submitting a scan job but malware protection is not enabled [#255597]({{kib-pull}}255597).
 * Fixes liquidjs validation for variables used before assignment [#255337]({{kib-pull}}255337).
 * Fixes glitchy **Attributes** rendering [#255173]({{kib-pull}}255173).
