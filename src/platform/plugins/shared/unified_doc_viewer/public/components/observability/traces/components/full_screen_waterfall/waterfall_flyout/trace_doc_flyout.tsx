@@ -13,7 +13,7 @@ import { DataSourcesProvider } from '../../../../../../hooks/use_data_sources';
 import { DocViewerExtensionActionsProvider } from '../../../../../../hooks/use_doc_viewer_extension_actions';
 import { DocumentDetailFlyout, type DocumentDetailFlyoutProps } from './document_detail_flyout';
 
-export type { DocumentType } from './document_detail_flyout';
+export type { TraceDocFlyoutType } from '../../../common/constants';
 
 export interface TraceDocFlyoutProps extends DocumentDetailFlyoutProps {
   indexes: ObservabilityIndexes;

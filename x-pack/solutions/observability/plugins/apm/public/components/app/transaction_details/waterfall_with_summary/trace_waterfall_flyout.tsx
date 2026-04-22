@@ -8,12 +8,8 @@
 import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { FullTraceWaterfallOnErrorClick } from '@kbn/apm-types';
-import {
-  UnifiedDocViewerObservabilityTraceDocFlyout,
-  unifiedDocViewerObservabilityTracesSpanFlyoutId,
-  unifiedDocViewerObservabilityTracesLogsFlyoutId,
-  type UnifiedDocViewerObservabilityTracesDocumentType,
-} from '@kbn/unified-doc-viewer-plugin/public';
+import { UnifiedDocViewerObservabilityTraceDocFlyout } from '@kbn/unified-doc-viewer-plugin/public';
+import type { UnifiedDocViewerObservabilityTracesDocumentType } from '@kbn/unified-doc-viewer-plugin/public';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useAdHocApmDataView } from '../../../../hooks/use_adhoc_apm_data_view';
@@ -46,9 +42,7 @@ export function TraceWaterfallFlyout({
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
   const [selectedDocIndex, setSelectedDocIndex] = useState<string | undefined>(undefined);
   const [activeFlyoutType, setActiveFlyoutType] =
-    useState<UnifiedDocViewerObservabilityTracesDocumentType>(
-      unifiedDocViewerObservabilityTracesSpanFlyoutId
-    );
+    useState<UnifiedDocViewerObservabilityTracesDocumentType>('span');
   const [activeSection, setActiveSection] = useState<'errors-table' | undefined>(undefined);
   const { logsIndexPattern } = useLogsIndexPattern();
 
@@ -64,7 +58,7 @@ export function TraceWaterfallFlyout({
   );
 
   const onNodeClick = useCallback((nodeSpanId: string) => {
-    setActiveFlyoutType(unifiedDocViewerObservabilityTracesSpanFlyoutId);
+    setActiveFlyoutType('span');
     setActiveSection(undefined);
     setSelectedDocIndex(undefined);
     setSelectedDocId(nodeSpanId);
@@ -73,12 +67,12 @@ export function TraceWaterfallFlyout({
   const onErrorClick = useCallback<FullTraceWaterfallOnErrorClick>(
     ({ docId, errorCount, errorDocId, docIndex }) => {
       if (errorCount > 1) {
-        setActiveFlyoutType(unifiedDocViewerObservabilityTracesSpanFlyoutId);
+        setActiveFlyoutType('span');
         setActiveSection('errors-table');
         setSelectedDocIndex(undefined);
         setSelectedDocId(docId);
       } else if (errorDocId) {
-        setActiveFlyoutType(unifiedDocViewerObservabilityTracesLogsFlyoutId);
+        setActiveFlyoutType('log');
         setActiveSection(undefined);
         setSelectedDocIndex(docIndex);
         setSelectedDocId(errorDocId);

@@ -22,9 +22,7 @@ import { FullScreenWaterfall, type FullScreenWaterfallProps } from '../full_scre
 import { TraceWaterfallTourStep } from './full_screen_waterfall_tour_step';
 import { useDiscoverLinkAndEsqlQuery } from '../../../../../hooks/use_discover_link_and_esql_query';
 import { useOpenInDiscoverSectionAction } from '../../../../../hooks/use_open_in_discover_section_action';
-import { spanFlyoutId } from '../full_screen_waterfall/waterfall_flyout/span_flyout';
-import { logsFlyoutId } from '../full_screen_waterfall/waterfall_flyout/logs_flyout';
-import type { DocumentType } from '../full_screen_waterfall/waterfall_flyout/document_detail_flyout';
+import type { TraceDocFlyoutType } from '../../common/types';
 
 interface Props {
   traceId: string;
@@ -36,7 +34,7 @@ interface Props {
 export interface TraceWaterfallRestorableState {
   restoredTraceId: string | null;
   showFullScreenWaterfall: boolean;
-  activeFlyoutType: DocumentType | null;
+  activeFlyoutType: TraceDocFlyoutType | null;
   activeSection: 'errors-table' | undefined;
   activeDocId: string | null;
   activeDocIndex: string | undefined;
@@ -142,7 +140,7 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
       setActiveSection(undefined);
       setActiveDocId(nodeSpanId);
       setActiveDocIndex(undefined);
-      setActiveFlyoutType(spanFlyoutId);
+      setActiveFlyoutType('span');
     },
     [setActiveSection, setActiveDocId, setActiveDocIndex, setActiveFlyoutType]
   );
@@ -150,12 +148,12 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
   const onErrorClick = useCallback<FullScreenWaterfallProps['onErrorClick']>(
     (params) => {
       if (params.errorCount > 1) {
-        setActiveFlyoutType(spanFlyoutId);
+        setActiveFlyoutType('span');
         setActiveSection('errors-table');
         setActiveDocId(params.docId);
         setActiveDocIndex(undefined);
       } else if (params.errorDocId) {
-        setActiveFlyoutType(logsFlyoutId);
+        setActiveFlyoutType('log');
         setActiveSection(undefined);
         setActiveDocId(params.errorDocId);
         setActiveDocIndex(params.docIndex);
