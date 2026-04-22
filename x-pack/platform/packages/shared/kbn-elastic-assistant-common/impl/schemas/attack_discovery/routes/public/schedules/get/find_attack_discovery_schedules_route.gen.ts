@@ -28,7 +28,7 @@ export const FindAttackDiscoverySchedulesRequestQuery = z.object({
    */
   page: z.coerce.number().optional(),
   /**
-   * Number of Attack discovery schedules to return per page (used for pagination). Defaults to 10.
+   * Number of Attack Discovery schedules to return per page (used for pagination). Defaults to 10.
    */
   per_page: z.coerce.number().optional(),
   /**
@@ -57,11 +57,11 @@ export const FindAttackDiscoverySchedulesResponse = z.object({
    */
   per_page: z.number(),
   /**
-   * Total number of Attack discovery schedules matching the query (across all pages).
+   * Total number of Attack Discovery schedules matching the query (across all pages).
    */
   total: z.number(),
   /**
-   * Array of matched Attack discovery schedule objects.
+   * Array of matched Attack Discovery schedule objects.
    */
   data: z.array(AttackDiscoveryApiSchedule),
 });
