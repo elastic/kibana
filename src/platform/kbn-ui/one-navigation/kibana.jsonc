@@ -1,6 +1,6 @@
 {
   "type": "shared-browser",
-  "id": "@kbn/core-chrome-navigation",
+  "id": "@kbn/ui-one-navigation",
   "owner": "@elastic/appex-sharedux",
   "group": "platform",
   "visibility": "private"

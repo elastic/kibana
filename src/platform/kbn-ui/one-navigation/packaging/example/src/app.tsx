@@ -14,9 +14,9 @@ import { css } from '@emotion/css';
 import { EuiProvider, EuiSpacer, EuiText, EuiCode, useEuiTheme } from '@elastic/eui';
 
 // @ts-expect-error — package must be built first.
-import { OneNavigation } from '@kbn/one-navigation';
+import { OneNavigation } from '@kbn/ui-one-navigation';
 // @ts-expect-error — package must be built first.
-import type { MenuItem, SecondaryMenuItem, SideNavLogo } from '@kbn/one-navigation';
+import type { MenuItem, SecondaryMenuItem, SideNavLogo } from '@kbn/ui-one-navigation';
 
 /** Returns a `className` that adds a divider after the Dashboard nav item. */
 const useNavDividerClass = () => {

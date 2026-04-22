@@ -1,6 +1,6 @@
 # OneNavigation Example
 
-Minimal test application for the `@kbn/one-navigation` package.
+Minimal test application for the `@kbn/ui-one-navigation` package.
 
 ## Setup
 
@@ -9,14 +9,14 @@ Minimal test application for the `@kbn/one-navigation` package.
 yarn kbn bootstrap
 
 # Build the package
-cd src/core/packages/chrome/navigation/packaging
+cd src/platform/kbn-ui/one-navigation/packaging
 ./scripts/build.sh
 ```
 
 ## Run
 
 ```bash
-cd src/core/packages/chrome/navigation/packaging/example
+cd src/platform/kbn-ui/one-navigation/packaging/example
 yarn start
 ```
 

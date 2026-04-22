@@ -17,6 +17,8 @@
  * @see {@link ./type_validation.ts} for the compatibility check.
  */
 
+import type * as React from 'react';
+
 type ReactNode = string | number | boolean | null | undefined | React.ReactElement;
 
 /**

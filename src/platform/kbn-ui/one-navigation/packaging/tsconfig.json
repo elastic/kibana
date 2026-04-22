@@ -18,6 +18,9 @@
       ],
       "@kbn/core-chrome-layout-constants": [
         "./react/services/layout_constants.ts"
+      ],
+      "@kbn/core-chrome-layout-utils": [
+        "./react/services/layout_utils.ts"
       ]
     }
   },

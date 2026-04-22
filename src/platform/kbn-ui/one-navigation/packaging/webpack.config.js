@@ -68,6 +68,7 @@ module.exports = {
         __dirname,
         'react/services/layout_constants.ts'
       ),
+      '@kbn/core-chrome-layout-utils': path.resolve(__dirname, 'react/services/layout_utils.ts'),
     },
   },
 

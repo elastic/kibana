@@ -9,7 +9,9 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../../../',
-  roots: ['<rootDir>/src/core/packages/chrome/navigation'],
-  setupFilesAfterEnv: ['<rootDir>/src/core/packages/chrome/navigation/src/__tests__/test_setup.ts'],
+  rootDir: '../../../../',
+  roots: ['<rootDir>/src/platform/kbn-ui/one-navigation'],
+  setupFilesAfterEnv: [
+    '<rootDir>/src/platform/kbn-ui/one-navigation/src/__tests__/test_setup.ts',
+  ],
 };
