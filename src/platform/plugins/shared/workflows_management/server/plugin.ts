@@ -17,7 +17,7 @@ import { registerWorkflowAgentBuilderIntegration } from './agent_builder';
 import { defineRoutes } from './api/routes';
 import { type SmlIndexAttachmentFn, WorkflowsManagementApi } from './api/workflows_management_api';
 import { WorkflowsService } from './api/workflows_management_service';
-import { createWorkflowsClientProvider } from './client/workflows_route_handler_context_provider';
+import { createWorkflowsClientProvider } from './client/workflows_client';
 import type { WorkflowsManagementConfig } from './config';
 import {
   getWorkflowsConnectorAdapter,

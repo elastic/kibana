@@ -31,6 +31,7 @@ export const createWorkflowsClientProvider = (
       emitEvent: async (triggerId, payload) => {
         if (!isWorkflowsAvailable) {
           logger.debug('Workflows is not available in this environment. Trigger event ignored.');
+          return;
         }
         try {
           await executionEngine.triggerEvents.emitEvent({ triggerId, payload, request });
