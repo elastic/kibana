@@ -337,7 +337,7 @@ describe('LogsExtractionClient', () => {
       jest.useRealTimers();
     });
 
-    it('should use logsPageCursorStartTimestamp as from when no lastExecutionTimestamp (not lookback)', async () => {
+    it('on first log slice in a new extractLogs, boundary probe does not use persisted log-slice start (time window from lookback)', async () => {
       const fixedNow = new Date('2025-01-15T12:00:00.000Z');
       jest.useFakeTimers({ now: fixedNow.getTime() });
 
@@ -364,21 +364,14 @@ describe('LogsExtractionClient', () => {
       await client.extractLogs('user');
 
       const lookbackFrom = moment.utc(fixedNow).subtract(3, 'hours').toISOString();
-      expect(lookbackFrom).not.toBe(logPageCursorStart);
-
-      expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
-        esClient: mockEsClient,
-        query: expect.stringContaining(logPageCursorStart),
-      });
-      expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
-        esClient: mockEsClient,
-        query: expect.not.stringContaining(lookbackFrom),
-      });
+      const firstEsql = mockExecuteEsqlQuery.mock.calls[0][0].query;
+      expect(firstEsql).toContain(lookbackFrom);
+      expect(firstEsql).not.toContain(logPageCursorStart);
 
       jest.useRealTimers();
     });
 
-    it('should prefer logsPageCursorStartTimestamp over delayed lastExecutionTimestamp when both are set', async () => {
+    it('uses delayed lastExecution for extraction window from when set (first boundary probe, no persisted log-slice start)', async () => {
       const fixedNow = new Date('2025-01-15T12:00:00.000Z');
       jest.useFakeTimers({ now: fixedNow.getTime() });
 
@@ -411,14 +404,9 @@ describe('LogsExtractionClient', () => {
 
       await client.extractLogs('user');
 
-      expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
-        esClient: mockEsClient,
-        query: expect.stringContaining(logPageCursorStart),
-      });
-      expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
-        esClient: mockEsClient,
-        query: expect.not.stringContaining(delayedLastExecution),
-      });
+      const firstEsql = mockExecuteEsqlQuery.mock.calls[0][0].query;
+      expect(firstEsql).toContain(delayedLastExecution);
+      expect(firstEsql).not.toContain(logPageCursorStart);
 
       jest.useRealTimers();
     });
@@ -492,6 +480,51 @@ describe('LogsExtractionClient', () => {
       const boundedQuery = mockExecuteEsqlQuery.mock.calls[1][0].query;
       expect(probeQuery).toContain(`@timestamp >= TO_DATETIME("${fromDateISO}")`);
       expect(boundedQuery).toContain(`@timestamp >= TO_DATETIME("${fromDateISO}")`);
+    });
+
+    it('on recovery, first boundary probe uses time window at paginationTimestamp (ignores persisted log-slice for first slice)', async () => {
+      const fixedNow = new Date('2025-01-15T12:00:00.000Z');
+      jest.useFakeTimers({ now: fixedNow.getTime() });
+      const paginationTimestamp = '2025-01-15T10:00:00.000Z';
+      const sliceStartTs = '2025-01-15T10:20:00.000Z';
+      const sliceStartId = 'log-slice-lower';
+      const sliceEndTs = '2025-01-15T10:45:00.000Z';
+      const sliceEndId = 'log-slice-upper';
+      const mockDataView = {
+        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+      };
+      const mainExtractionResponse: ESQLSearchResponse = {
+        columns: [
+          { name: '@timestamp', type: 'date' },
+          { name: HASHED_ID_FIELD, type: 'keyword' },
+        ],
+        values: [],
+      };
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+        createMockEngineDescriptor('user', {
+          lookbackPeriod: '3h',
+          delay: '1m',
+          paginationTimestamp,
+          paginationId: 'entity-cursor',
+          lastExecutionTimestamp: '2025-01-15T10:00:00.000Z',
+          logsPageCursorStartTimestamp: sliceStartTs,
+          logsPageCursorStartId: sliceStartId,
+          logsPageCursorEndTimestamp: sliceEndTs,
+          logsPageCursorEndId: sliceEndId,
+        }) as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>
+      );
+      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
+      mockExtractSuccessSequence(mainExtractionResponse);
+      mockIngestEntities.mockResolvedValue(undefined);
+
+      const result = await client.extractLogs('user');
+
+      expect(result.success).toBe(true);
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(3);
+      const firstProbeQuery = mockExecuteEsqlQuery.mock.calls[0][0].query;
+      expect(firstProbeQuery).toContain(paginationTimestamp);
+      expect(firstProbeQuery).not.toContain(sliceStartTs);
+      jest.useRealTimers();
     });
 
     it('should return error when specificWindow has from date after to date', async () => {
@@ -1169,6 +1202,44 @@ describe('LogsExtractionClient', () => {
         esClient: mockEsClient,
         query: expect.stringMatching(/@timestamp\s*>=\s*TO_DATETIME/),
       });
+    });
+
+    it('should pass persisted log-slice start into remaining-count ESQL when present on engine', async () => {
+      const fixedNow = new Date('2025-01-15T12:00:00.000Z');
+      jest.useFakeTimers({ now: fixedNow.getTime() });
+      const mockEsqlResponse: ESQLSearchResponse = {
+        columns: [{ name: 'document_count', type: 'long' }],
+        values: [[3]],
+      };
+      const mockDataView = {
+        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+      };
+      const paginationTimestamp = '2025-01-15T10:00:00.000Z';
+      const sliceStartId = 'slice-start';
+      const sliceStartTs = '2025-01-15T10:20:00.000Z';
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+        createMockEngineDescriptor('user', {
+          lookbackPeriod: '3h',
+          delay: '1m',
+          paginationTimestamp,
+          logsPageCursorStartTimestamp: sliceStartTs,
+          logsPageCursorStartId: sliceStartId,
+        }) as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>
+      );
+      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
+      mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
+
+      const result = await client.getRemainingLogsCount('user');
+      expect(result).toBe(3);
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
+        esClient: mockEsClient,
+        query: expect.stringContaining(paginationTimestamp),
+      });
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
+        esClient: mockEsClient,
+        query: expect.stringContaining(sliceStartId),
+      });
+      jest.useRealTimers();
     });
 
     it('should convert document_count to number via Number()', async () => {
