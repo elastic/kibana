@@ -2391,10 +2391,9 @@
     tree-dump "1.1.0"
     tslib "2.8.1"
 
-"@elastic/eui-theme-borealis@7.0.0":
+"@elastic/eui-theme-borealis@file:./eui_theme_borealis_7.0.0_selection_lists_01.tgz":
   version "7.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-7.0.0.tgz#31ce6eabacb51a29f0dd159ad2b34f7dfbb9acd7"
-  integrity sha512-UiwpCmMxx7fWosNUi2JMnR+bAQBppHHOI0lIfLBrP7uYqDg+3JFV5Mhg8Wc3kdfaxoVaW1/IUMmLxJ5eTulSnA==
+  resolved "file:./eui_theme_borealis_7.0.0_selection_lists_01.tgz#a5a6ba8786779295ce3b5936feaa016ed1dbdbee"
   dependencies:
     "@elastic/eui-theme-common" "9.0.0"
     chroma-js "^2.4.2"
@@ -2408,12 +2407,18 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@114.2.0":
-  version "114.2.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-114.2.0.tgz#04551190586b09ed5d0de86dae3cfe2468b1178a"
-  integrity sha512-jFHflSzBdD8bEV9JaeFlB7mkV8+sh21MwMD4EsV5KVuRGYKgNUjGj1uxitMlYICFIG0qwcCa/YWvY8pUnskBoA==
+"@elastic/eui-theme-common@file:./eui_theme_common_9.0.0_selection_lists_01.tgz":
+  version "9.0.0"
+  resolved "file:./eui_theme_common_9.0.0_selection_lists_01.tgz#d9c3d666e27fc6b3995c98520e97b34b3775c518"
   dependencies:
-    "@elastic/eui-theme-common" "9.0.0"
+    "@types/lodash" "^4.14.202"
+    chroma-js "^2.4.2"
+    lodash "^4.17.21"
+
+"@elastic/eui@file:./eui_114.2.0_selection_lists_01.tgz":
+  version "114.2.0"
+  resolved "file:./eui_114.2.0_selection_lists_01.tgz#b8a2e86f3bd8e4e78572dd4c478105c22d69449d"
+  dependencies:
     "@elastic/prismjs-esql" "^1.1.2"
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
