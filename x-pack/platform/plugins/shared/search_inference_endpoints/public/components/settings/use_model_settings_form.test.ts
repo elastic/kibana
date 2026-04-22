@@ -266,4 +266,47 @@ describe('useModelSettingsForm', () => {
 
     expect(result.current.isLoading).toBe(true);
   });
+
+  it('hasSavedObject reflects which features have saved settings', () => {
+    mockUseInferenceSettings.mockReturnValue({
+      data: {
+        data: {
+          features: [{ feature_id: 'child_1', endpoints: [{ id: 'saved-1' }] }],
+        },
+      },
+      isLoading: false,
+    });
+
+    const { result } = renderHook(() => useModelSettingsForm());
+
+    expect(result.current.hasSavedObject).toEqual({ child_1: true, child_2: false });
+  });
+
+  it('hasSavedObject treats empty saved endpoints as no saved object', () => {
+    mockUseInferenceSettings.mockReturnValue({
+      data: {
+        data: {
+          features: [{ feature_id: 'child_1', endpoints: [] }],
+        },
+      },
+      isLoading: false,
+    });
+
+    const { result } = renderHook(() => useModelSettingsForm());
+
+    expect(result.current.hasSavedObject).toEqual({ child_1: false, child_2: false });
+  });
+
+  it('dirtyFeatureIds contains only features whose assignments differ from defaults', () => {
+    const { result } = renderHook(() => useModelSettingsForm());
+
+    expect(result.current.dirtyFeatureIds.size).toBe(0);
+
+    act(() => {
+      result.current.updateEndpoints('child_1', ['endpoint-x']);
+    });
+
+    expect(result.current.dirtyFeatureIds.has('child_1')).toBe(true);
+    expect(result.current.dirtyFeatureIds.has('child_2')).toBe(false);
+  });
 });
