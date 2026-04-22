@@ -320,8 +320,10 @@ describe('When using runscript action from response console', () => {
       consoleMockUtils.openHelpPanel();
 
       expect(
-        renderResult.getByTestId<HTMLButtonElement>(
-          'test-commandList-Responseactions-runscript-addToInput'
+        (
+          renderResult.getByTestId(
+            'test-commandList-Responseactions-runscript-addToInput'
+          ) as HTMLButtonElement
         ).disabled
       ).toBe(true);
     });
