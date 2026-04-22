@@ -56,7 +56,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 **Dashboards and Visualizations**:
 % main features
 * A new Dashboard skill is now available in Agent Builder. This skill allows you to create and update dashboards through natural language [chat](docs-content://explore-analyze/ai-features/agent-builder/chat.md), using the chat UI in {{product.kibana}}, the [Chat API](docs-content://explore-analyze/ai-features/agent-builder/kibana-api.md), or the [MCP server](docs-content://explore-analyze/ai-features/agent-builder/mcp-server.md). Describe what you want to visualize and the agent builds a dashboard with [{{esql}}](docs-content://explore-analyze/query-filter/languages/esql-kibana.md)-powered visualizations. [#261530]({{kib-pull}}261530).
-* New API endpoints are now available in technical preview to manage your dashboards and visulization library. The Dashboards API gives you full read and write access to dashboards, including their panels, controls, sections, and display options. The Visualizations API lets you create and manage visualizations as standalone saved objects in the {{product.kibana}} Visualizations library. [#256302]({{kib-pull}}256302).
+* New API endpoints are now available in technical preview to manage your dashboards and visualization library. The Dashboards API gives you full read and write access to dashboards, including their panels, controls, sections, and display options. The Visualizations API lets you create and manage visualizations as standalone saved objects in the {{product.kibana}} Visualizations library. [#256302]({{kib-pull}}256302).
 * Adds the ability to show and export Dashboard API JSON in a flyout [#255382]({{kib-pull}}255382).
 
 % controls
@@ -90,7 +90,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % chart options and improvements
 * Adds a **Discover session** panel option to dashboards [#256293]({{kib-pull}}256293).
 * Editing an unlinked Discover session panel in a dashboard now saves changes back to that panel without affecting the original saved session [#250438]({{kib-pull}}250438).
-* Defaults the visualization type a to line chart when the x-axis contains a timestamp, instead of a bar chart [#253930]({{kib-pull}}253930).
+* Defaults the visualization type to line chart when the x-axis contains a timestamp, instead of a bar chart [#253930]({{kib-pull}}253930).
 * Adds a new optimized color palette for line charts [#253437]({{kib-pull}}253437).
 * Adds a **Badge** color option for table values in Lens, allowing cell values to be displayed as colored badges instead of text or background coloring [#257408]({{kib-pull}}257408).
 * Adds a new list legend layout for horizontal legends (top and bottom), offering a more space-efficient alternative to the grid layout. This is now the default for XY charts [#257092]({{kib-pull}}257092).
@@ -150,7 +150,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * The doc viewer flyout now stays open when switching between Discover tabs and remembers which tab (such as **Table** or **JSON**) was active in each [#246612]({{kib-pull}}246612).
 * The chart interval is now saved with Discover sessions and restored when reopening them [#246426]({{kib-pull}}246426).
 
-**{{esql}} editor:
+**{{esql}} editor**:
 * Adds PromQL support in {{kib}} through {{esql}} [#249854]({{kib-pull}}249854).
 * Redesigns the {{esql}} editor interface [#251223]({{kib-pull}}251223).
 * Adds a data source browser to the {{esql}} editor [#251897]({{kib-pull}}251897).
@@ -218,7 +218,6 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Deprecates search indices in favor of index management [#260210]({{kib-pull}}260210).
 * Adds a **Models** page for inference management [#259374]({{kib-pull}}259374).
 * Adds a **Model Settings** UI for inference endpoint assignments [#258871]({{kib-pull}}258871).
-
 * Ensures Jina is the default in semantic text if available [#257464]({{kib-pull}}257464).
 * Adds an AI assistant-led onboarding option to the Elasticsearch getting started page [#255192]({{kib-pull}}255192).
 * Adds the ability to dynamically create AI Connectors for Elastic Inference Service preconfigured inference endpoints [#254826]({{kib-pull}}254826).
@@ -276,8 +275,6 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Updates OAS docs for Alerting create rule route [#260497]({{kib-pull}}260497).
 * Adds **Default model** and **Disallow all other models** settings to the **Model Settings** page [#259932]({{kib-pull}}259932).
 * Adds the `entries` Liquid filter for iterating over object keys [#259249]({{kib-pull}}259249).
-* Agent Builder's default agent is no longer read-only and can now be customized per Kibana space [#256333]({{kib-pull}}256333).
-* Adds agent and tools RBAC sub features [#254464]({{kib-pull}}254464).
 * Respects `observability:enableInspectEsQueries` in Hosts UI [#253618]({{kib-pull}}253618).
 * Adds audit logging for agent and tool actions [#252143]({{kib-pull}}252143).
 * Reduces output tokens in the `get_anomaly_detection_jobs` tool [#251415]({{kib-pull}}251415).
@@ -382,7 +379,7 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Allows completing all quickly opened tabs [#246941]({{kib-pull}}246941).
 * Fixes the default app state handling when detecting unsaved changes [#246664]({{kib-pull}}246664).
 
-**{{esql}} editor:
+**{{esql}} editor**:
 * Fixes {{esql}} multi-value filtering with `STATS` [#260998]({{kib-pull}}260998).
 * Fixes `STATS` generated columns with inline `WHERE` [#260196]({{kib-pull}}260196).
 * When no local indices are available, the {{esql}} query suggestion now correctly considers remote indices [#257340]({{kib-pull}}257340).
