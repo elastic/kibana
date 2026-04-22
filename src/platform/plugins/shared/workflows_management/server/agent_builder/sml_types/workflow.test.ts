@@ -9,9 +9,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import type { SmlDocument } from './types';
 import { createWorkflowSmlType } from './workflow';
-import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '../../../common/agent_builder/constants';
 import type { WorkflowsManagementApi } from '../../api/workflows_management_api';
 import { workflowIndexName } from '../../storage/workflow_storage';
 
@@ -35,19 +33,6 @@ const createMockApi = (overrides: Partial<WorkflowsManagementApi> = {}) =>
     getWorkflow: jest.fn().mockResolvedValue(null),
     ...overrides,
   } as unknown as WorkflowsManagementApi);
-
-const createSmlDocument = (overrides: Partial<SmlDocument> = {}): SmlDocument => ({
-  id: 'chunk-1',
-  type: 'workflow',
-  title: 'My Workflow',
-  origin_id: 'workflow-abc',
-  content: 'My Workflow\nA test workflow',
-  created_at: '2025-01-01T00:00:00.000Z',
-  updated_at: '2025-01-01T00:00:00.000Z',
-  spaces: ['default'],
-  permissions: [],
-  ...overrides,
-});
 
 describe('workflowSmlType', () => {
   describe('id and fetchFrequency', () => {
@@ -435,62 +420,12 @@ describe('workflowSmlType', () => {
     });
   });
 
-  describe('toAttachment', () => {
-    it('converts workflow to workflow.yaml attachment', async () => {
-      const api = createMockApi({
-        getWorkflow: jest.fn().mockResolvedValue({
-          id: 'workflow-abc',
-          name: 'Alert Triage',
-          yaml: 'version: "1"\nname: Alert Triage\nsteps: []',
-        }),
-      });
-
-      const smlType = createWorkflowSmlType(api);
-
-      const result = await smlType.toAttachment(createSmlDocument(), {
-        savedObjectsClient: {} as never,
-        request: {} as never,
-        spaceId: 'default',
-      });
-
-      expect(result).toEqual({
-        type: WORKFLOW_YAML_ATTACHMENT_TYPE,
-        data: {
-          yaml: 'version: "1"\nname: Alert Triage\nsteps: []',
-          workflowId: 'workflow-abc',
-          name: 'Alert Triage',
-        },
-      });
-    });
-
-    it('calls api.getWorkflow with correct origin_id and spaceId', async () => {
+  describe('originType', () => {
+    it('declares workflow as the origin type', () => {
       const api = createMockApi();
-
       const smlType = createWorkflowSmlType(api);
-
-      await smlType.toAttachment(createSmlDocument({ origin_id: 'workflow-xyz' }), {
-        savedObjectsClient: {} as never,
-        request: {} as never,
-        spaceId: 'my-space',
-      });
-
-      expect(api.getWorkflow).toHaveBeenCalledWith('workflow-xyz', 'my-space');
-    });
-
-    it('returns undefined when workflow is not found', async () => {
-      const api = createMockApi({
-        getWorkflow: jest.fn().mockResolvedValue(null),
-      });
-
-      const smlType = createWorkflowSmlType(api);
-
-      const result = await smlType.toAttachment(createSmlDocument(), {
-        savedObjectsClient: {} as never,
-        request: {} as never,
-        spaceId: 'default',
-      });
-
-      expect(result).toBeUndefined();
+      expect(smlType.originType).toBe('workflow');
     });
   });
+
 });

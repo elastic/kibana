@@ -64,7 +64,7 @@ const createMockSmlTypeDefinition = (
   id: 'test-type',
   list: jest.fn(),
   getSmlData: jest.fn(),
-  toAttachment: jest.fn(),
+  originType: 'test',
   ...overrides,
 });
 

@@ -6,6 +6,7 @@
  */
 
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import type { Logger } from '@kbn/logging';
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import { createTextAttachmentType } from './text';
 import { createEsqlAttachmentType } from './esql';
@@ -22,9 +23,11 @@ import type {
 export const registerAttachmentTypes = ({
   coreSetup,
   setupDeps,
+  logger,
 }: {
   coreSetup: CoreSetup<PluginStartDependencies, AgentBuilderPlatformPluginStart>;
   setupDeps: PluginSetupDependencies;
+  logger: Logger;
 }) => {
   const { agentBuilder } = setupDeps;
 
@@ -34,7 +37,13 @@ export const registerAttachmentTypes = ({
     createEsqlAttachmentType(),
     createVisualizationAttachmentType(),
     createGraphAttachmentType(),
-    createConnectorAttachmentType(),
+    createConnectorAttachmentType({
+      getActionSavedObjectsClient: async (request) => {
+        const [coreStart] = await coreSetup.getStartServices();
+        return coreStart.savedObjects.getScopedClient(request, { includedHiddenTypes: ['action'] });
+      },
+      logger: logger.get('connector-attachment'),
+    }),
   ];
 
   attachmentTypes.forEach((attachmentType) => {

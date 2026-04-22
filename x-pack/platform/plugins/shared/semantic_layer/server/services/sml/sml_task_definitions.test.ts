@@ -53,7 +53,7 @@ const createMockDefinition = (overrides: Partial<SmlTypeDefinition> = {}): SmlTy
   id: 'visualization',
   list: jest.fn(),
   getSmlData: jest.fn(),
-  toAttachment: jest.fn(),
+  originType: 'test',
   ...overrides,
 });
 

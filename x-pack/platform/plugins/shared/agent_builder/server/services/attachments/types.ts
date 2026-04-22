@@ -20,5 +20,6 @@ export interface AttachmentServiceStart {
     request: KibanaRequest
   ): Promise<ValidateAttachmentResult<Type, Data>>;
   getTypeDefinition(type: string): AttachmentTypeDefinition | undefined;
+  getTypeDefinitionByOriginType(originType: string): AttachmentTypeDefinition | undefined;
   getRegisteredTypeIds(): string[];
 }

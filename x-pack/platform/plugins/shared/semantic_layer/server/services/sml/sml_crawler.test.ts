@@ -66,7 +66,7 @@ const createMockDefinition = (overrides: Partial<SmlTypeDefinition> = {}): SmlTy
   id: 'test-type',
   list: jest.fn().mockReturnValue(yieldPages()),
   getSmlData: jest.fn().mockResolvedValue({ chunks: [] }),
-  toAttachment: jest.fn().mockResolvedValue(undefined),
+  originType: 'test',
   ...overrides,
 });
 

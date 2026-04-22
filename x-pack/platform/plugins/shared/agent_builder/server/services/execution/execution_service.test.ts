@@ -73,6 +73,7 @@ describe('AgentExecutionService', () => {
   const attachmentsService: AttachmentServiceStart = {
     validate: jest.fn().mockImplementation(async (attachment) => ({ valid: true, attachment })),
     getTypeDefinition: jest.fn(),
+    getTypeDefinitionByOriginType: jest.fn(),
     getRegisteredTypeIds: jest.fn().mockReturnValue([]),
   };
 

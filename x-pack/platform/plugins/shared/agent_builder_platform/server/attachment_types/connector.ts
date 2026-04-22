@@ -10,9 +10,20 @@ import {
   AttachmentType,
   connectorAttachmentDataSchema,
 } from '@kbn/agent-builder-common/attachments';
-import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { Logger } from '@kbn/logging';
+import type {
+  AttachmentResolveContext,
+  AttachmentTypeDefinition,
+} from '@kbn/agent-builder-server/attachments';
 import { formatSchemaForLlm } from '@kbn/agent-builder-server';
 import { getConnectorSpec } from '@kbn/connector-specs';
+
+interface ConnectorAttachmentTypeDeps {
+  getActionSavedObjectsClient: (request: KibanaRequest) => Promise<SavedObjectsClientContract>;
+  logger: Logger;
+}
 
 /**
  * Creates the definition for the `connector` attachment type.
@@ -22,12 +33,17 @@ import { getConnectorSpec } from '@kbn/connector-specs';
  * sub-actions (with `isTool: true`) are listed directly from the spec so the
  * agent knows how to call them via `execute_connector_sub_action`.
  */
-export const createConnectorAttachmentType = (): AttachmentTypeDefinition<
+export const createConnectorAttachmentType = ({
+  getActionSavedObjectsClient,
+  logger,
+}: ConnectorAttachmentTypeDeps): AttachmentTypeDefinition<
   AttachmentType.connector,
   ConnectorAttachmentData
 > => {
   return {
     id: AttachmentType.connector,
+
+    originType: 'connector',
 
     isReadonly: true,
 
@@ -88,6 +104,29 @@ export const createConnectorAttachmentType = (): AttachmentTypeDefinition<
 
         getBoundedTools: () => [],
       };
+    },
+
+    resolve: async (
+      origin: string,
+      context: AttachmentResolveContext
+    ): Promise<ConnectorAttachmentData | undefined> => {
+      try {
+        const soClient = await getActionSavedObjectsClient(context.request);
+        const so = await soClient.get('action', origin);
+        const attrs = so.attributes as { name?: string; actionTypeId?: string };
+        return {
+          connector_id: origin,
+          connector_name: attrs.name ?? origin,
+          connector_type: attrs.actionTypeId ?? '',
+        };
+      } catch (error) {
+        logger.debug(
+          `Failed to resolve connector attachment for origin '${origin}': ${
+            (error as Error).message
+          }`
+        );
+        return undefined;
+      }
     },
 
     getTools: () => [],

@@ -112,6 +112,7 @@ export const createAttachmentsServiceStartMock = (): AttachmentsServiceStartMock
   return {
     validate: jest.fn(),
     getTypeDefinition: jest.fn(),
+    getTypeDefinitionByOriginType: jest.fn(),
     getRegisteredTypeIds: jest.fn(),
   };
 };

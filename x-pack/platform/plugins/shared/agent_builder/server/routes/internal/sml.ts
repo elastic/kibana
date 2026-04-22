@@ -11,8 +11,7 @@ import {
   ATTACHMENT_REF_ACTOR,
   type VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
-import { resolveSmlAttachItems } from '@kbn/semantic-layer-plugin/server';
+import { SEMANTIC_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
 import { internalApiPath } from '../../../common/constants';
@@ -67,6 +66,12 @@ export function registerInternalSmlRoutes({
     wrapHandler(
       async (ctx, request, response) => {
         const [coreStart, startDeps] = await coreSetup.getStartServices();
+        if (!startDeps.semanticLayer) {
+          return response.customError({
+            statusCode: 503,
+            body: { message: 'Semantic layer plugin is not available' },
+          });
+        }
         const sml = startDeps.semanticLayer.getSmlService();
         const { conversations: conversationsService, attachments: attachmentsService } =
           getInternalServices();
@@ -85,14 +90,20 @@ export function registerInternalSmlRoutes({
           });
         }
 
-        const resolvedItems = await resolveSmlAttachItems({
-          chunkIds,
-          sml,
+        const uniqueChunkIds = [...new Set(chunkIds)];
+
+        const accessMap = await sml.checkItemsAccess({
+          ids: uniqueChunkIds,
+          spaceId,
           esClient,
           request,
+        });
+
+        const authorizedIds = uniqueChunkIds.filter((id) => accessMap.get(id) === true);
+        const smlDocs = await sml.getDocuments({
+          ids: authorizedIds,
           spaceId,
-          savedObjectsClient,
-          logger,
+          esClient,
         });
 
         const stateManager = createAttachmentStateManager(
@@ -103,35 +114,74 @@ export function registerInternalSmlRoutes({
         );
 
         const resultItems = await Promise.all(
-          resolvedItems.map(async (r): Promise<SmlAttachHttpResultItem> => {
-            if (!r.success) {
+          uniqueChunkIds.map(async (chunkId): Promise<SmlAttachHttpResultItem> => {
+            if (!accessMap.get(chunkId)) {
               return {
                 success: false,
-                chunk_id: r.chunk_id,
-                attachment_type: r.attachment_type,
-                message: r.message,
+                chunk_id: chunkId,
+                message: `Access denied: you do not have the required permissions to access SML item '${chunkId}'`,
+              };
+            }
+
+            const smlDoc = smlDocs.get(chunkId);
+            if (!smlDoc) {
+              return {
+                success: false,
+                chunk_id: chunkId,
+                message: `SML document '${chunkId}' not found in the index`,
+              };
+            }
+
+            const smlTypeDef = sml.getTypeDefinition(smlDoc.type);
+            if (!smlTypeDef?.originType) {
+              return {
+                success: false,
+                chunk_id: chunkId,
+                attachment_type: smlDoc.type,
+                message: `SML type '${smlDoc.type}' does not support attachment`,
+              };
+            }
+
+            const attachmentTypeDef = attachmentsService.getTypeDefinitionByOriginType(
+              smlTypeDef.originType
+            );
+
+            if (!attachmentTypeDef?.resolve) {
+              return {
+                success: false,
+                chunk_id: chunkId,
+                attachment_type: smlDoc.type,
+                message: `No attachment type found for origin type '${smlTypeDef.originType}'`,
               };
             }
 
             try {
-              const added = await stateManager.add(r.attachment, ATTACHMENT_REF_ACTOR.system, {
-                request,
-                spaceId,
-                savedObjectsClient,
-              });
+              const added = await stateManager.add(
+                {
+                  type: attachmentTypeDef.id,
+                  origin: smlDoc.origin_id,
+                  description: `${smlDoc.type}/${smlDoc.title}`,
+                },
+                ATTACHMENT_REF_ACTOR.system,
+                {
+                  request,
+                  spaceId,
+                  savedObjectsClient,
+                }
+              );
 
               return {
                 success: true,
-                chunk_id: r.chunk_id,
+                chunk_id: chunkId,
                 conversation_attachment_id: added.id,
-                attachment_type: r.attachment.type,
-                message: `Attachment '${added.id}' of type '${r.attachment.type}' created from SML item '${r.chunk_id}'`,
+                attachment_type: attachmentTypeDef.id,
+                message: `Attachment '${added.id}' of type '${attachmentTypeDef.id}' created from SML item '${chunkId}'`,
               };
             } catch (e) {
               return {
                 success: false,
-                chunk_id: r.chunk_id,
-                attachment_type: r.attachment.type,
+                chunk_id: chunkId,
+                attachment_type: attachmentTypeDef.id,
                 message: e instanceof Error ? e.message : String(e),
               };
             }
@@ -164,7 +214,7 @@ export function registerInternalSmlRoutes({
         return response.ok({ body });
       },
       {
-        featureFlag: AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
+        featureFlag: SEMANTIC_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID,
       }
     )
   );

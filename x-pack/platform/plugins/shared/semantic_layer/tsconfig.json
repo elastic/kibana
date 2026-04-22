@@ -20,7 +20,6 @@
     "@kbn/features-plugin",
     "@kbn/security-plugin-types-server",
     "@kbn/spaces-plugin",
-    "@kbn/agent-builder-common",
     "@kbn/management-settings-ids",
     "@kbn/i18n"
   ]

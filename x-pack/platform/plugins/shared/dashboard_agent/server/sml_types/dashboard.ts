@@ -6,10 +6,6 @@
  */
 
 import type { SmlTypeDefinition } from '@kbn/semantic-layer-plugin/server';
-import {
-  DASHBOARD_ATTACHMENT_TYPE,
-  dashboardStateToAttachmentData,
-} from '@kbn/dashboard-agent-common';
 import type {
   DashboardPanel,
   DashboardPluginStart,
@@ -67,6 +63,7 @@ export const createDashboardSmlType = ({
   getDashboardClient,
 }: CreateDashboardSmlTypeOptions): SmlTypeDefinition => ({
   id: DASHBOARD_SML_TYPE,
+  originType: 'dashboard',
   fetchFrequency: () => '30m',
 
   async *list(context) {
@@ -112,25 +109,6 @@ export const createDashboardSmlType = ({
         `SML dashboard: failed to get data for '${originId}': ${(error as Error).message}`
       );
       return undefined;
-    }
-  },
-
-  toAttachment: async (item, context) => {
-    try {
-      // todo: this should be passed from agent builder
-      const requestHandlerContext = createRequestHandlerContext(context.savedObjectsClient);
-      const dashboardClient = await getDashboardClient();
-      const dashboard = await dashboardClient.read(requestHandlerContext, item.origin_id);
-
-      return {
-        type: DASHBOARD_ATTACHMENT_TYPE,
-        data: dashboardStateToAttachmentData(dashboard.data),
-        origin: dashboard.id,
-      };
-    } catch (error) {
-      throw new Error(
-        `SML dashboard: failed to get data for '${item.origin_id}': ${(error as Error).message}`
-      );
     }
   },
 });

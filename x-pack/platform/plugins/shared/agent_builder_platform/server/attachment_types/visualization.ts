@@ -38,6 +38,8 @@ export const createVisualizationAttachmentType = (): AttachmentTypeDefinition<
   return {
     id: AttachmentType.visualization,
 
+    originType: 'lens',
+
     validate: (input) => {
       const parseResult = visualizationAttachmentDataSchema.safeParse(input);
       if (parseResult.success) {

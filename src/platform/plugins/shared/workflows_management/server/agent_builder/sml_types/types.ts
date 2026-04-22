@@ -7,14 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Mirrors SML types from @kbn/agent-builder-plugin/server/services/sml/types.
-// Declared inline to avoid a circular TS project reference: agent_builder already
-// references workflows_management (via agent-builder-genai-utils), so a reverse
-// import would create a build cycle.
+// Mirrors SML types from @kbn/semantic-layer-plugin/server/services/sml/types.
+// Declared inline to avoid a circular TS project reference.
 
-import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 
@@ -33,13 +29,6 @@ export interface SmlContext {
   esClient: ElasticsearchClient;
   savedObjectsClient: SavedObjectsClientContract;
   logger: Logger;
-  request?: KibanaRequest;
-}
-
-export interface SmlToAttachmentContext {
-  request: KibanaRequest;
-  savedObjectsClient: SavedObjectsClientContract;
-  spaceId: string;
 }
 
 export interface SmlListItem {
@@ -48,25 +37,10 @@ export interface SmlListItem {
   spaces: string[];
 }
 
-export interface SmlDocument {
-  id: string;
-  type: string;
-  title: string;
-  origin_id: string;
-  content: string;
-  created_at: string;
-  updated_at: string;
-  spaces: string[];
-  permissions: string[];
-}
-
 export interface SmlTypeDefinition {
   id: string;
   list: (context: SmlContext) => AsyncIterable<SmlListItem[]>;
   getSmlData: (originId: string, context: SmlContext) => Promise<SmlData | undefined>;
-  toAttachment: (
-    item: SmlDocument,
-    context: SmlToAttachmentContext
-  ) => Promise<AttachmentInput<string, unknown> | undefined>;
+  originType?: string;
   fetchFrequency?: () => string;
 }

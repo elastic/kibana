@@ -9,10 +9,7 @@
 
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { SmlTypeDefinition } from './types';
-import {
-  WORKFLOW_SML_TYPE,
-  WORKFLOW_YAML_ATTACHMENT_TYPE,
-} from '../../../common/agent_builder/constants';
+import { WORKFLOW_SML_TYPE } from '../../../common/agent_builder/constants';
 import type { WorkflowsManagementApi } from '../../api/workflows_management_api';
 import { workflowIndexName, type WorkflowProperties } from '../../storage/workflow_storage';
 
@@ -29,8 +26,9 @@ const buildSearchContent = (source: WorkflowProperties): string => {
   return parts.filter(Boolean).join('\n');
 };
 
-export const createWorkflowSmlType = (api: WorkflowsManagementApi): SmlTypeDefinition => ({
+export const createWorkflowSmlType = (_api: WorkflowsManagementApi): SmlTypeDefinition => ({
   id: WORKFLOW_SML_TYPE,
+  originType: 'workflow',
   fetchFrequency: () => '30m',
 
   async *list(context) {
@@ -117,19 +115,5 @@ export const createWorkflowSmlType = (api: WorkflowsManagementApi): SmlTypeDefin
       );
       return undefined;
     }
-  },
-
-  toAttachment: async (item, context) => {
-    const workflow = await api.getWorkflow(item.origin_id, context.spaceId);
-    if (!workflow) return undefined;
-
-    return {
-      type: WORKFLOW_YAML_ATTACHMENT_TYPE,
-      data: {
-        yaml: workflow.yaml,
-        workflowId: workflow.id,
-        name: workflow.name,
-      },
-    };
   },
 });

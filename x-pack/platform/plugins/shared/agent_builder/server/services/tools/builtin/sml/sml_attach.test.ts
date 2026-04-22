@@ -30,6 +30,15 @@ const getSmlService = jest.fn(() => ({
   getCrawler: jest.fn(),
 }));
 
+const mockResolve = jest.fn();
+const getAttachmentTypeByOriginType = jest.fn().mockReturnValue({
+  id: 'visualization',
+  originType: 'lens',
+  resolve: mockResolve,
+  validate: jest.fn(),
+  format: jest.fn(),
+});
+
 const mockLogger = { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() };
 
 const mockContext = {
@@ -41,7 +50,6 @@ const mockContext = {
   logger: mockLogger,
 };
 
-/** Example chunk id suffix (indexed documents use type:origin:uuid style). */
 const CHUNK_UUID_A = '550e8400-e29b-41d4-a716-446655440000';
 const CHUNK_UUID_B = '6ba7b810-9dad-41d1-80b4-00c04fd430c8';
 
@@ -69,58 +77,44 @@ const createSmlDoc = (
 describe('createSmlAttachTool', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetTypeDefinition.mockReturnValue({
+      id: 'visualization',
+      originType: 'lens',
+    });
+    getAttachmentTypeByOriginType.mockReturnValue({
+      id: 'visualization',
+      originType: 'lens',
+      resolve: mockResolve,
+      validate: jest.fn(),
+      format: jest.fn(),
+    });
   });
 
   it('has correct id and tags', () => {
-    const tool = createSmlAttachTool({ getSmlService });
+    const tool = createSmlAttachTool({ getSmlService, getAttachmentTypeByOriginType });
     expect(tool.id).toBe(platformCoreTools.smlAttach);
     expect(tool.type).toBe(ToolType.builtin);
     expect(tool.tags).toEqual(['sml', 'attachment']);
   });
 
-  it('returns error when chunk_id is unknown or access denied (no index document)', async () => {
-    mockCheckItemsAccess.mockResolvedValue(new Map([['chunk-1', false]]));
-    const tool = createSmlAttachTool({ getSmlService });
-    const result = (await tool.handler(
-      { chunk_ids: ['chunk-1'] },
-      mockContext as unknown as ToolHandlerContext
-    )) as { results: unknown[] };
-    expect(mockCheckItemsAccess).toHaveBeenCalledWith({
-      ids: ['chunk-1'],
-      spaceId: 'default',
-      esClient: mockContext.esClient.asCurrentUser,
-      request: mockContext.request,
-    });
-    expect(result.results).toHaveLength(1);
-    expect((result.results[0] as { type: string }).type).toBe(ToolResultType.error);
-    expect((result.results[0] as ErrorResult).data.message).toContain('Access denied');
-  });
-
   it('returns error when access denied', async () => {
     const chunkId = makeChunkId('visualization', 'ref-1');
     mockCheckItemsAccess.mockResolvedValue(new Map([[chunkId, false]]));
-    const tool = createSmlAttachTool({ getSmlService });
+    const tool = createSmlAttachTool({ getSmlService, getAttachmentTypeByOriginType });
     const result = (await tool.handler(
       { chunk_ids: [chunkId] },
       mockContext as unknown as ToolHandlerContext
     )) as { results: unknown[] };
-    expect(mockCheckItemsAccess).toHaveBeenCalledWith({
-      ids: [chunkId],
-      spaceId: 'default',
-      esClient: mockContext.esClient.asCurrentUser,
-      request: mockContext.request,
-    });
     expect(result.results).toHaveLength(1);
     expect((result.results[0] as { type: string }).type).toBe(ToolResultType.error);
     expect((result.results[0] as ErrorResult).data.message).toContain('Access denied');
-    expect((result.results[0] as ErrorResult).data.message).toContain(chunkId);
   });
 
   it('returns error when document not found', async () => {
     const chunkId = makeChunkId('visualization', 'ref-1');
     mockCheckItemsAccess.mockResolvedValue(new Map([[chunkId, true]]));
     mockGetDocuments.mockResolvedValue(new Map());
-    const tool = createSmlAttachTool({ getSmlService });
+    const tool = createSmlAttachTool({ getSmlService, getAttachmentTypeByOriginType });
     const result = (await tool.handler(
       { chunk_ids: [chunkId] },
       mockContext as unknown as ToolHandlerContext
@@ -128,16 +122,15 @@ describe('createSmlAttachTool', () => {
     expect(result.results).toHaveLength(1);
     expect((result.results[0] as { type: string }).type).toBe(ToolResultType.error);
     expect((result.results[0] as ErrorResult).data.message).toContain('not found in the index');
-    expect((result.results[0] as ErrorResult).data.message).toContain(chunkId);
   });
 
-  it('returns error when type definition is unknown', async () => {
+  it('returns error when SML type has no originType', async () => {
     const chunkId = makeChunkId('unknown-type', 'ref-1');
     const smlDoc = createSmlDoc('unknown-type', 'ref-1', CHUNK_UUID_A);
     mockCheckItemsAccess.mockResolvedValue(new Map([[chunkId, true]]));
     mockGetDocuments.mockResolvedValue(new Map([[chunkId, smlDoc]]));
-    mockGetTypeDefinition.mockReturnValue(undefined);
-    const tool = createSmlAttachTool({ getSmlService });
+    mockGetTypeDefinition.mockReturnValue({ id: 'unknown-type' });
+    const tool = createSmlAttachTool({ getSmlService, getAttachmentTypeByOriginType });
     const result = (await tool.handler(
       { chunk_ids: [chunkId] },
       mockContext as unknown as ToolHandlerContext
@@ -145,23 +138,17 @@ describe('createSmlAttachTool', () => {
     expect(result.results).toHaveLength(1);
     expect((result.results[0] as { type: string }).type).toBe(ToolResultType.error);
     expect((result.results[0] as ErrorResult).data.message).toContain(
-      'does not support conversion to attachment'
+      'does not support attachment'
     );
-    expect((result.results[0] as ErrorResult).data.message).toContain('unknown-type');
   });
 
-  it('returns error when toAttachment returns undefined', async () => {
+  it('returns error when no matching attachment type found', async () => {
     const chunkId = makeChunkId('visualization', 'ref-1');
     const smlDoc = createSmlDoc('visualization', 'ref-1', CHUNK_UUID_A);
     mockCheckItemsAccess.mockResolvedValue(new Map([[chunkId, true]]));
     mockGetDocuments.mockResolvedValue(new Map([[chunkId, smlDoc]]));
-    mockGetTypeDefinition.mockReturnValue({
-      id: 'visualization',
-      list: jest.fn(),
-      getSmlData: jest.fn(),
-      toAttachment: jest.fn().mockResolvedValue(undefined),
-    });
-    const tool = createSmlAttachTool({ getSmlService });
+    getAttachmentTypeByOriginType.mockReturnValue(undefined);
+    const tool = createSmlAttachTool({ getSmlService, getAttachmentTypeByOriginType });
     const result = (await tool.handler(
       { chunk_ids: [chunkId] },
       mockContext as unknown as ToolHandlerContext
@@ -169,25 +156,17 @@ describe('createSmlAttachTool', () => {
     expect(result.results).toHaveLength(1);
     expect((result.results[0] as { type: string }).type).toBe(ToolResultType.error);
     expect((result.results[0] as ErrorResult).data.message).toContain(
-      'toAttachment returned undefined'
+      'No attachment type with resolve found'
     );
   });
 
-  it('returns success when toAttachment returns data and attachments.add succeeds', async () => {
+  it('adds attachment with origin (by-reference) when everything succeeds', async () => {
     const chunkId = makeChunkId('visualization', 'ref-1');
     const smlDoc = createSmlDoc('visualization', 'ref-1', CHUNK_UUID_A);
-    const convertedAttachment = { type: 'visualization', data: { layers: [] } };
-    const typeDef = {
-      id: 'visualization',
-      list: jest.fn(),
-      getSmlData: jest.fn(),
-      toAttachment: jest.fn().mockResolvedValue(convertedAttachment),
-    };
     mockCheckItemsAccess.mockResolvedValue(new Map([[chunkId, true]]));
     mockGetDocuments.mockResolvedValue(new Map([[chunkId, smlDoc]]));
-    mockGetTypeDefinition.mockReturnValue(typeDef);
     mockAttachmentsAdd.mockResolvedValue({ id: 'att-123' });
-    const tool = createSmlAttachTool({ getSmlService });
+    const tool = createSmlAttachTool({ getSmlService, getAttachmentTypeByOriginType });
     const result = (await tool.handler(
       { chunk_ids: [chunkId] },
       mockContext as unknown as ToolHandlerContext
@@ -207,7 +186,6 @@ describe('createSmlAttachTool', () => {
     expect(mockAttachmentsAdd).toHaveBeenCalledWith(
       {
         type: 'visualization',
-        data: { layers: [] },
         origin: 'ref-1',
         description: 'visualization/Test Viz',
       },
@@ -215,38 +193,26 @@ describe('createSmlAttachTool', () => {
     );
   });
 
-  it('returns error when toAttachment throws', async () => {
+  it('returns error when attachments.add throws', async () => {
     const chunkId = makeChunkId('visualization', 'ref-1');
     const smlDoc = createSmlDoc('visualization', 'ref-1', CHUNK_UUID_A);
-    const typeDef = {
-      id: 'visualization',
-      list: jest.fn(),
-      getSmlData: jest.fn(),
-      toAttachment: jest.fn().mockRejectedValue(new Error('Conversion failed')),
-    };
     mockCheckItemsAccess.mockResolvedValue(new Map([[chunkId, true]]));
     mockGetDocuments.mockResolvedValue(new Map([[chunkId, smlDoc]]));
-    mockGetTypeDefinition.mockReturnValue(typeDef);
-    const tool = createSmlAttachTool({ getSmlService });
+    mockAttachmentsAdd.mockRejectedValue(new Error('Add failed'));
+    const tool = createSmlAttachTool({ getSmlService, getAttachmentTypeByOriginType });
     const result = (await tool.handler(
       { chunk_ids: [chunkId] },
       mockContext as unknown as ToolHandlerContext
     )) as { results: unknown[] };
     expect(result.results).toHaveLength(1);
     expect((result.results[0] as { type: string }).type).toBe(ToolResultType.error);
-    expect((result.results[0] as ErrorResult).data.message).toContain('Failed to convert SML item');
+    expect((result.results[0] as ErrorResult).data.message).toContain('Failed to attach SML item');
   });
 
   it('handles multiple items with mix of authorized and unauthorized', async () => {
     const chunkDenied = makeChunkId('visualization', 'ref-1', CHUNK_UUID_A);
     const chunkOk = makeChunkId('visualization', 'ref-2', CHUNK_UUID_B);
     const smlDoc = createSmlDoc('visualization', 'ref-2', CHUNK_UUID_B);
-    const typeDef = {
-      id: 'visualization',
-      list: jest.fn(),
-      getSmlData: jest.fn(),
-      toAttachment: jest.fn().mockResolvedValue({ type: 'visualization', data: {} }),
-    };
     mockCheckItemsAccess.mockResolvedValue(
       new Map([
         [chunkDenied, false],
@@ -254,9 +220,8 @@ describe('createSmlAttachTool', () => {
       ])
     );
     mockGetDocuments.mockResolvedValue(new Map([[chunkOk, smlDoc]]));
-    mockGetTypeDefinition.mockReturnValue(typeDef);
     mockAttachmentsAdd.mockResolvedValue({ id: 'att-456' });
-    const tool = createSmlAttachTool({ getSmlService });
+    const tool = createSmlAttachTool({ getSmlService, getAttachmentTypeByOriginType });
     const result = (await tool.handler(
       { chunk_ids: [chunkDenied, chunkOk] },
       mockContext as unknown as ToolHandlerContext
@@ -277,14 +242,8 @@ describe('createSmlAttachTool', () => {
     const smlDoc = createSmlDoc('visualization', 'ref-1', CHUNK_UUID_A);
     mockCheckItemsAccess.mockResolvedValue(new Map([[chunkId, true]]));
     mockGetDocuments.mockResolvedValue(new Map([[chunkId, smlDoc]]));
-    mockGetTypeDefinition.mockReturnValue({
-      id: 'visualization',
-      list: jest.fn(),
-      getSmlData: jest.fn(),
-      toAttachment: jest.fn().mockResolvedValue({ type: 'visualization', data: {} }),
-    });
     mockAttachmentsAdd.mockResolvedValue({ id: 'att-dup' });
-    const tool = createSmlAttachTool({ getSmlService });
+    const tool = createSmlAttachTool({ getSmlService, getAttachmentTypeByOriginType });
     const result = (await tool.handler(
       { chunk_ids: [chunkId, chunkId] },
       mockContext as unknown as ToolHandlerContext
@@ -297,32 +256,5 @@ describe('createSmlAttachTool', () => {
       request: mockContext.request,
     });
     expect(mockAttachmentsAdd).toHaveBeenCalledTimes(1);
-  });
-
-  it('uses real SmlDocument from getDocuments when calling toAttachment', async () => {
-    const chunkId = makeChunkId('dashboard', 'ref-real');
-    const smlDoc = createSmlDoc('dashboard', 'ref-real', CHUNK_UUID_A, {
-      title: 'Real Document Title',
-      type: 'dashboard',
-      origin_id: 'ref-real',
-    });
-    const toAttachment = jest.fn().mockResolvedValue({ type: 'dashboard', data: {} });
-    mockCheckItemsAccess.mockResolvedValue(new Map([[chunkId, true]]));
-    mockGetDocuments.mockResolvedValue(new Map([[chunkId, smlDoc]]));
-    mockGetTypeDefinition.mockReturnValue({
-      id: 'dashboard',
-      list: jest.fn(),
-      getSmlData: jest.fn(),
-      toAttachment,
-    });
-    mockAttachmentsAdd.mockResolvedValue({ id: 'att-789' });
-    const tool = createSmlAttachTool({ getSmlService });
-    await tool.handler({ chunk_ids: [chunkId] }, mockContext as unknown as ToolHandlerContext);
-    expect(toAttachment).toHaveBeenCalledWith(smlDoc, {
-      request: mockContext.request,
-      savedObjectsClient: mockContext.savedObjectsClient,
-      spaceId: 'default',
-    });
-    expect(toAttachment).toHaveBeenCalledTimes(1);
   });
 });

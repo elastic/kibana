@@ -55,6 +55,7 @@ export type SmlIndexAttachmentFn = (params: {
   originId: string;
   attachmentType: string;
   action: SmlIndexAction;
+  spaceId?: string;
 }) => Promise<void>;
 
 export interface GetWorkflowsParams {

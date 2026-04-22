@@ -47,18 +47,11 @@ export class AgentBuilderPlatformPlugin
     registerAttachmentTypes({
       coreSetup,
       setupDeps,
+      logger: this.logger,
     });
     registerSkills(setupDeps.agentBuilder);
     setupDeps.semanticLayer.registerType(visualizationSmlType);
-
-    const connectorSmlType = createConnectorSmlType({
-      getActionSavedObjectsClient: async (request) => {
-        const [coreStart] = await coreSetup.getStartServices();
-        return coreStart.savedObjects.getScopedClient(request, { includedHiddenTypes: ['action'] });
-      },
-      logger: this.logger.get('sml-connector'),
-    });
-    setupDeps.semanticLayer.registerType(connectorSmlType);
+    setupDeps.semanticLayer.registerType(createConnectorSmlType());
 
     const connectorLifecycleHandler = createConnectorLifecycleHandler({
       logger: this.logger.get('connector-lifecycle'),

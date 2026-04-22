@@ -11,7 +11,6 @@ export type {
   SmlChunk,
   SmlData,
   SmlContext,
-  SmlToAttachmentContext,
   SmlListItem,
   SmlSearchResult,
   SmlDocument,

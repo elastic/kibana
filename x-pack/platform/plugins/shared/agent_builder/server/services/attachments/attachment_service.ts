@@ -56,8 +56,13 @@ export class AttachmentServiceImpl implements AttachmentService {
           resolveContext,
         });
       },
-      getTypeDefinition: (attachment) => {
-        return this.attachmentTypeRegistry.get(attachment);
+      getTypeDefinition: (type) => {
+        return this.attachmentTypeRegistry.get(type);
+      },
+      getTypeDefinitionByOriginType: (originType) => {
+        return this.attachmentTypeRegistry
+          .list()
+          .find((def) => def.originType === originType);
       },
       getRegisteredTypeIds: () => {
         return this.attachmentTypeRegistry.list().map((def) => def.id);

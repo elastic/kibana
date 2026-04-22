@@ -33,8 +33,7 @@
       "triggersActionsUi",
       "esUiShared",
       "workflowsExtensions",
-      "searchInferenceEndpoints",
-      "semanticLayer"
+      "searchInferenceEndpoints"
     ],
     "requiredBundles": [
       "kibanaReact",
@@ -49,6 +48,7 @@
       "usageCollection",
       "usageApi",
       "home",
+      "semanticLayer"
     ],
     "extraPublicDirs": []
   }

@@ -9,7 +9,6 @@ import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger, CoreSetup } from '@kbn/core/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
 import { SEMANTIC_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { internalApiPath } from '../../common/constants';
 import {
   SML_HTTP_SEARCH_QUERY_MAX_LENGTH,
@@ -53,17 +52,16 @@ export const registerSearchRoute = ({
       const { uiSettings } = await ctx.core;
       const enabled = await uiSettings.client.get(SEMANTIC_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID);
       if (!enabled) {
-        return response.notFound();
+        return response.forbidden({
+          body: { message: 'Semantic layer experimental features are not enabled' },
+        });
       }
 
       const sml = getSmlService();
       const { query, size, skip_content: skipContent } = request.body;
       const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
       const [, startDeps] = await coreSetup.getStartServices();
-      const spaceId =
-        (startDeps as unknown as { spaces?: SpacesPluginStart }).spaces?.spacesService?.getSpaceId(
-          request
-        ) ?? 'default';
+      const spaceId = startDeps.spaces?.spacesService?.getSpaceId(request) ?? 'default';
 
       const { results, total } = await sml.search({
         query,

@@ -10,7 +10,7 @@ import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { SEMANTIC_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { SmlToolsOptions } from './types';
 
 const smlSearchSchema = z.object({
@@ -36,6 +36,7 @@ const smlSearchSchema = z.object({
  */
 export const createSmlSearchTool = ({
   getSmlService,
+  getAttachmentTypeByOriginType,
 }: SmlToolsOptions): BuiltinToolDefinition<typeof smlSearchSchema> => ({
   id: platformCoreTools.smlSearch,
   type: ToolType.builtin,
@@ -43,14 +44,14 @@ export const createSmlSearchTool = ({
     'Search the Semantic Metadata Layer (SML) for Kibana assets such as saved visualizations, dashboards, workflows, and more. ' +
     'Provide a natural-language query string; titles and types are matched using Elasticsearch text analysis (bool_prefix on search_as_you_type fields). ' +
     'Pass "*" to return all available assets. ' +
-    'Each result includes a title, content snippet, attachment_id, attachment_type, and chunk_id. ' +
-    'To bring a result into the conversation as an attachment, pass its chunk_id to sml_attach.',
+    'Each result includes a title, content snippet, attachment_id, attachment_type, chunk_id, and attachable flag. ' +
+    'To bring an attachable result into the conversation as an attachment, pass its chunk_id to sml_attach.',
   schema: smlSearchSchema,
   tags: ['sml', 'search'],
   availability: {
     cacheMode: 'global',
     handler: async ({ uiSettings }) => {
-      const enabled = await uiSettings.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
+      const enabled = await uiSettings.get<boolean>(SEMANTIC_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID);
       return enabled
         ? { status: 'available' }
         : {
@@ -107,15 +108,24 @@ export const createSmlSearchTool = ({
           type: ToolResultType.other,
           data: {
             total: searchResult.total,
-            items: searchResult.results.map((hit) => ({
-              chunk_id: hit.id,
-              attachment_id: hit.origin_id,
-              attachment_type: hit.type,
-              type: hit.type,
-              title: hit.title,
-              content: hit.content,
-              score: hit.score,
-            })),
+            items: searchResult.results.map((hit) => {
+              const smlTypeDef = smlService.getTypeDefinition(hit.type);
+              const originType = smlTypeDef?.originType;
+              const attachmentTypeDef =
+                originType ? getAttachmentTypeByOriginType(originType) : undefined;
+              const attachable = Boolean(attachmentTypeDef?.resolve);
+
+              return {
+                chunk_id: hit.id,
+                attachment_id: hit.origin_id,
+                attachment_type: hit.type,
+                type: hit.type,
+                title: hit.title,
+                content: hit.content,
+                score: hit.score,
+                attachable,
+              };
+            }),
           },
         },
       ],

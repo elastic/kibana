@@ -75,7 +75,7 @@ describe('createConnectorLifecycleHandler', () => {
       } as any);
 
       expect(getStartServices).not.toHaveBeenCalled();
-      expect(logger.error).toHaveBeenCalledWith(
+      expect(logger.debug).toHaveBeenCalledWith(
         expect.stringContaining('wasSuccessful=false')
       );
     });
@@ -168,6 +168,21 @@ describe('createConnectorLifecycleHandler', () => {
       );
     });
 
+    it('skips when experimental features flag is disabled', async () => {
+      const { getStartServices, indexAttachment } = createMockStartServices({
+        experimentalEnabled: false,
+      });
+      const handler = createConnectorLifecycleHandler({ logger, getStartServices });
+
+      await handler.onPostDelete({
+        connectorId: 'c1',
+        connectorType: '.test',
+        request: createMockRequest(),
+      } as any);
+
+      expect(indexAttachment).not.toHaveBeenCalled();
+    });
+
     it('logs a warning and does not throw when indexAttachment fails', async () => {
       const indexAttachment = jest.fn().mockRejectedValue(new Error('delete failed'));
       const { getStartServices } = createMockStartServices({ indexAttachment });
@@ -183,26 +198,6 @@ describe('createConnectorLifecycleHandler', () => {
 
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('delete failed')
-      );
-    });
-
-    it('defaults to space "default" when spaces plugin is absent', async () => {
-      const indexAttachment = jest.fn().mockResolvedValue(undefined);
-      const getStartServices = jest.fn().mockResolvedValue([
-        {}, // coreStart (unused by onPostDelete)
-        { semanticLayer: { indexAttachment }, spaces: undefined },
-        {},
-      ]);
-      const handler = createConnectorLifecycleHandler({ logger, getStartServices });
-
-      await handler.onPostDelete({
-        connectorId: 'c1',
-        connectorType: '.test',
-        request: createMockRequest(),
-      } as any);
-
-      expect(indexAttachment).toHaveBeenCalledWith(
-        expect.objectContaining({ spaceId: 'default' })
       );
     });
   });

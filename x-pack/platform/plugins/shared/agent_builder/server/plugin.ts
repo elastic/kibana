@@ -14,6 +14,7 @@ import {
   AGENT_BUILDER_PARENT_INFERENCE_FEATURE_ID,
   AGENT_BUILDER_RECOMMENDED_ENDPOINTS,
 } from '@kbn/agent-builder-common/constants';
+import type { SemanticLayerPluginStart } from '@kbn/semantic-layer-plugin/server';
 import type { AgentBuilderConfig } from './config';
 import { ServiceManager } from './services';
 import type {
@@ -57,7 +58,7 @@ export class AgentBuilderPlugin
   private trackingService?: TrackingService;
   private analyticsService?: AnalyticsService;
   private home: HomeServerPluginSetup | null = null;
-  private getSemanticLayerStart?: () => AgentBuilderStartDependencies['semanticLayer'];
+  private getSemanticLayerStart?: () => SemanticLayerPluginStart;
   constructor(context: PluginInitializerContext<AgentBuilderConfig>) {
     this.logger = context.logger.get();
     this.config = context.config.get();
@@ -184,6 +185,11 @@ export class AgentBuilderPlugin
         }
         return this.getSemanticLayerStart().getSmlService();
       },
+      getAttachmentTypeByOriginType: (originType: string) => {
+        const services = this.serviceManager.internalStart;
+        if (!services) return undefined;
+        return services.attachments.getTypeDefinitionByOriginType(originType);
+      },
     });
     smlTools.forEach((tool) => {
       serviceSetups.tools.register(tool);
@@ -235,7 +241,10 @@ export class AgentBuilderPlugin
   ): AgentBuilderPluginStart {
     const { security, uiSettings, savedObjects, dataStreams, featureFlags } = coreStart;
 
-    this.getSemanticLayerStart = () => semanticLayer;
+    if (semanticLayer) {
+      const sl = semanticLayer;
+      this.getSemanticLayerStart = () => sl;
+    }
 
     const startServices = this.serviceManager.startServices({
       logger: this.logger.get('services'),

@@ -41,6 +41,7 @@ const workflowYamlOriginSchema = z.string().describe('The workflow ID to resolve
 
 const createWorkflowYamlAttachmentType = (api: WorkflowsManagementApi) => ({
   id: WORKFLOW_YAML_ATTACHMENT_TYPE,
+  originType: 'workflow',
   isReadonly: true,
   validate: (input: unknown) => {
     const parseResult = workflowYamlDataSchema.safeParse(input);

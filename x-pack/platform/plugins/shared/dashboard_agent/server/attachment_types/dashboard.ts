@@ -59,6 +59,7 @@ export const createDashboardAttachmentType = ({
 
   return {
     id: DASHBOARD_ATTACHMENT_TYPE,
+    originType: 'dashboard',
     validate: (input) => {
       const parseResult = dashboardAttachmentDataSchema.safeParse(input);
       if (parseResult.success) {

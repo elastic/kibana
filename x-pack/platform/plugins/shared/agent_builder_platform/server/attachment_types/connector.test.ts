@@ -49,7 +49,12 @@ const formatContext = {
 };
 
 describe('connector attachment type', () => {
-  const connectorType = createConnectorAttachmentType();
+  const connectorType = createConnectorAttachmentType({
+    getActionSavedObjectsClient: jest.fn().mockResolvedValue({
+      get: jest.fn(),
+    }),
+    logger: { debug: jest.fn(), warn: jest.fn(), error: jest.fn(), info: jest.fn() } as any,
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();

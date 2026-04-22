@@ -6,9 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { SmlListItem } from '@kbn/agent-builder-plugin/server';
-import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { createConnectorSmlType } from './connector';
 
 jest.mock('@kbn/connector-specs', () => ({
@@ -21,17 +19,9 @@ const mockSavedObjectsClient = {
   get: jest.fn(),
 };
 
-const mockGetActionSavedObjectsClient = jest.fn().mockResolvedValue(mockSavedObjectsClient);
-const mockLogger = loggingSystemMock.createLogger();
-
 const createContext = () => ({
   logger: loggingSystemMock.createLogger(),
   savedObjectsClient: mockSavedObjectsClient as any,
-});
-
-const createAttachmentContext = () => ({
-  request: httpServerMock.createKibanaRequest(),
-  spaceId: 'default',
 });
 
 async function collectPages(iterable: AsyncIterable<SmlListItem[]>): Promise<SmlListItem[]> {
@@ -43,10 +33,7 @@ async function collectPages(iterable: AsyncIterable<SmlListItem[]>): Promise<Sml
 }
 
 describe('connectorSmlType', () => {
-  const connectorSmlType = createConnectorSmlType({
-    getActionSavedObjectsClient: mockGetActionSavedObjectsClient,
-    logger: mockLogger,
-  });
+  const connectorSmlType = createConnectorSmlType();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -194,65 +181,9 @@ describe('connectorSmlType', () => {
     });
   });
 
-  describe('toAttachment', () => {
-    it('returns connector attachment data', async () => {
-      mockSavedObjectsClient.get.mockResolvedValue({
-        id: 'conn-1',
-        type: 'action',
-        attributes: { name: 'My MCP Connector', actionTypeId: '.mcp' },
-        references: [],
-      });
-
-      const result = await connectorSmlType.toAttachment!(
-        { origin_id: 'conn-1' } as never,
-        createAttachmentContext() as never
-      );
-
-      expect(result).toEqual({
-        type: AttachmentType.connector,
-        data: {
-          connector_id: 'conn-1',
-          connector_name: 'My MCP Connector',
-          connector_type: '.mcp',
-        },
-      });
-    });
-
-    it('returns undefined and logs warning when connector is not found', async () => {
-      mockSavedObjectsClient.get.mockRejectedValue(new Error('Not found'));
-
-      const result = await connectorSmlType.toAttachment!(
-        { origin_id: 'missing-conn' } as never,
-        createAttachmentContext() as never
-      );
-
-      expect(result).toBeUndefined();
-      expect(mockLogger.warn).toHaveBeenCalledWith(
-        expect.stringContaining("failed to convert 'missing-conn' to attachment")
-      );
-    });
-
-    it('defaults connector_name to origin_id when name attribute is missing', async () => {
-      mockSavedObjectsClient.get.mockResolvedValue({
-        id: 'conn-1',
-        type: 'action',
-        attributes: { actionTypeId: '.mcp' },
-        references: [],
-      });
-
-      const result = await connectorSmlType.toAttachment!(
-        { origin_id: 'conn-1' } as never,
-        createAttachmentContext() as never
-      );
-
-      expect(result).toEqual({
-        type: AttachmentType.connector,
-        data: {
-          connector_id: 'conn-1',
-          connector_name: 'conn-1',
-          connector_type: '.mcp',
-        },
-      });
+  describe('originType', () => {
+    it('declares connector as the origin type', () => {
+      expect(connectorSmlType.originType).toBe('connector');
     });
   });
 });

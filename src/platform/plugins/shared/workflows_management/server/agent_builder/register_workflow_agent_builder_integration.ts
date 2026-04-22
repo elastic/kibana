@@ -8,7 +8,6 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { SemanticLayerPluginSetup } from '@kbn/semantic-layer-plugin/server';
 import { registerWorkflowYamlAttachment } from './attachments/workflow_yaml_attachment';
 import { registerWorkflowYamlDiffAttachment } from './attachments/workflow_yaml_diff_attachment';
 import { workflowAuthoringSkill } from './skills/workflow_authoring_skill';
@@ -25,7 +24,7 @@ import type { AgentBuilderPluginSetupContract } from '../types';
 
 interface RegisterWorkflowAgentBuilderIntegrationParams {
   agentBuilder: AgentBuilderPluginSetupContract;
-  semanticLayer?: SemanticLayerPluginSetup;
+  semanticLayer?: { registerType: (definition: unknown) => void };
   logger: Logger;
   api: WorkflowsManagementApi;
   aiTelemetryClient: WorkflowsAiTelemetryClient;

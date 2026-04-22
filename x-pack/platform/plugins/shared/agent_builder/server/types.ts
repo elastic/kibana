@@ -62,7 +62,7 @@ export interface AgentBuilderSetupDependencies {
   actions: ActionsPluginSetup;
   home: HomeServerPluginSetup;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginSetup;
-  semanticLayer: SemanticLayerPluginSetup;
+  semanticLayer?: SemanticLayerPluginSetup;
 }
 
 export interface AgentBuilderStartDependencies {
@@ -75,7 +75,7 @@ export interface AgentBuilderStartDependencies {
   taskManager: TaskManagerStartContract;
   security?: SecurityPluginStart;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
-  semanticLayer: SemanticLayerPluginStart;
+  semanticLayer?: SemanticLayerPluginStart;
 }
 
 export interface AttachmentsSetup {

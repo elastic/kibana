@@ -27,7 +27,7 @@ export function createConnectorLifecycleHandler({ logger, getStartServices }: Co
   return {
     async onPostCreate(params: ConnectorLifecyclePostCreateParams): Promise<void> {
       if (!params.wasSuccessful) {
-        logger.error(
+        logger.debug(
           `Connector lifecycle: onPostCreate called with wasSuccessful=false for connector ${params.connectorId}`
         );
         return;
@@ -67,9 +67,15 @@ export function createConnectorLifecycleHandler({ logger, getStartServices }: Co
       const { connectorId, connectorType } = params;
 
       try {
-        const [, startDeps] = await getStartServices();
+        const [coreStart, startDeps] = await getStartServices();
 
         const request = params.request;
+        const soClient = coreStart.savedObjects.getScopedClient(request);
+        const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
+        const isExperimentalFeaturesEnabled = await uiSettingsClient.get<boolean>(
+          SEMANTIC_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID
+        );
+        if (!isExperimentalFeaturesEnabled) return;
         const spaceId = startDeps.spaces?.spacesService?.getSpaceId(request) ?? 'default';
         await startDeps.semanticLayer.indexAttachment({
           request,

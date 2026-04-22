@@ -12,7 +12,6 @@ import type {
 } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 
 /**
  * A single SML chunk to be indexed.
@@ -45,15 +44,6 @@ export interface SmlContext {
 }
 
 /**
- * Context passed to the toAttachment hook.
- */
-export interface SmlToAttachmentContext {
-  request: KibanaRequest;
-  savedObjectsClient: SavedObjectsClientContract;
-  spaceId: string;
-}
-
-/**
  * An item returned by the `list` hook of an SML type.
  */
 export interface SmlListItem {
@@ -68,7 +58,7 @@ export interface SmlListItem {
 /**
  * Server-side type definition for SML (Semantic Metadata Layer).
  *
- * Registered via `agentBuilder.sml.registerType()` during plugin setup.
+ * Registered via `semanticLayer.registerType()` during plugin setup.
  *
  * Solutions register these to make their content discoverable via the SML.
  */
@@ -90,12 +80,13 @@ export interface SmlTypeDefinition {
   getSmlData: (originId: string, context: SmlContext) => Promise<SmlData | undefined>;
 
   /**
-   * Convert an SML document into a conversation attachment.
+   * Origin type identifier for by-reference attachment resolution.
+   * When set, SML items of this type can be attached to conversations by matching
+   * this key against an attachment type's `originType` and using its `resolve` method.
+   * When absent, items are search-only (not attachable).
+   * Examples: `'lens'`, `'dashboard'`, `'connector'`, `'workflow'`.
    */
-  toAttachment: (
-    item: SmlDocument,
-    context: SmlToAttachmentContext
-  ) => Promise<AttachmentInput<string, unknown> | undefined>;
+  originType?: string;
 
   /**
    * Optional: custom crawl interval for the crawler.

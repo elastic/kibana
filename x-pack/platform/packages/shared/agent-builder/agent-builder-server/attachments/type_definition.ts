@@ -23,6 +23,13 @@ export interface AttachmentTypeDefinition<TType extends string = string, TConten
    */
   id: TType;
   /**
+   * Origin type identifier for by-reference resolution from external systems (e.g. SML).
+   * When set, external systems can match their items to this attachment type using this
+   * shared key, then use {@link resolve} to load the content by origin ID.
+   * Examples: `'lens'`, `'dashboard'`, `'connector'`, `'workflow'`.
+   */
+  originType?: string;
+  /**
    * validation function, which will be called when the attachment is added to the conversation.
    */
   validate: (input: unknown) => MaybePromise<AttachmentValidationResult<TContent>>;

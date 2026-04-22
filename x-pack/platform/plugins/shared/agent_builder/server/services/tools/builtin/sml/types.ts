@@ -6,13 +6,16 @@
  */
 
 import type { SmlService } from '@kbn/semantic-layer-plugin/server';
+import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 
 /**
  * Options for creating SML tools.
- * Uses a getter for lazy resolution — the SML service start contract
- * is not available until after plugin start.
+ * Uses getters for lazy resolution — plugin start contracts
+ * are not available until after plugin start.
  */
 export interface SmlToolsOptions {
   /** Lazy getter for the SML service (resolved at handler invocation time). */
   getSmlService: () => SmlService;
+  /** Find an attachment type definition by its originType key. */
+  getAttachmentTypeByOriginType: (originType: string) => AttachmentTypeDefinition | undefined;
 }

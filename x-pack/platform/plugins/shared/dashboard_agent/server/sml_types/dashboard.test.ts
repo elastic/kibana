@@ -8,10 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import type { DashboardPluginStart, DashboardState } from '@kbn/dashboard-plugin/server';
 import type { DashboardAttachmentData } from '@kbn/dashboard-agent-common';
-import {
-  DASHBOARD_ATTACHMENT_TYPE,
-  attachmentDataToDashboardState,
-} from '@kbn/dashboard-agent-common';
+import { attachmentDataToDashboardState } from '@kbn/dashboard-agent-common';
 import { createDashboardSmlType } from './dashboard';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
@@ -56,24 +53,6 @@ const dashboardAttachmentData: DashboardAttachmentData = {
     },
   ],
 };
-
-const dashboardStateWithLensApi = {
-  title: 'API Lens Dashboard',
-  description: 'Dashboard with API-format lens panel',
-  panels: [
-    {
-      type: LENS_EMBEDDABLE_TYPE,
-      id: 'panel-3',
-      grid: { x: 0, y: 0, w: 24, h: 12 },
-      config: {
-        attributes: {
-          type: 'lnsXY',
-          title: 'Request Rate',
-        },
-      },
-    },
-  ],
-} as unknown as DashboardState;
 
 const createDashboardClient = ({
   id = 'dashboard-1',
@@ -192,117 +171,11 @@ describe('dashboardSmlType', () => {
     });
   });
 
-  it('converts saved dashboards into dashboard attachments with origin', async () => {
-    const dashboardClient = createDashboardClient();
-    const savedObjectsClient = createSavedObjectsClient();
+  it('declares dashboard as the origin type', () => {
     const dashboardSmlType = createDashboardSmlType({
-      getDashboardClient: async () => dashboardClient,
+      getDashboardClient: async () => createDashboardClient(),
     });
-
-    const result = await dashboardSmlType.toAttachment(
-      {
-        id: 'chunk-1',
-        type: 'dashboard',
-        title: 'System Overview',
-        origin_id: 'dashboard-1',
-        content: '...',
-        created_at: '2025-01-01T00:00:00.000Z',
-        updated_at: '2025-01-01T00:00:00.000Z',
-        spaces: ['default'],
-        permissions: ['saved_object:dashboard/get'],
-      },
-      {
-        request: {} as never,
-        spaceId: 'default',
-        savedObjectsClient,
-      } as never
-    );
-
-    expect(result).toEqual(
-      expect.objectContaining({
-        type: DASHBOARD_ATTACHMENT_TYPE,
-        origin: 'dashboard-1',
-        data: expect.objectContaining({
-          title: 'System Overview',
-          description: 'Main dashboard for key metrics',
-        }),
-      })
-    );
-    const attachmentData = result?.data as DashboardAttachmentData | undefined;
-
-    expect(attachmentData?.panels).toHaveLength(2);
-    expect(attachmentData?.panels).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          id: 'panel-1',
-          type: LENS_EMBEDDABLE_TYPE,
-        }),
-        expect.objectContaining({
-          id: 'section-1',
-          title: 'Operations',
-          panels: [expect.objectContaining({ id: 'panel-2', type: 'markdown' })],
-        }),
-      ])
-    );
-    const requestHandlerContext = dashboardClient.read.mock.calls[0][0];
-    await expect(requestHandlerContext.resolve(['core'])).resolves.toEqual({
-      core: {
-        savedObjects: {
-          client: savedObjectsClient,
-        },
-      },
-    });
-  });
-
-  it('falls back to generic panel storage when a lens panel is already in API format', async () => {
-    const savedObjectsClient = createSavedObjectsClient();
-    const dashboardSmlType = createDashboardSmlType({
-      getDashboardClient: async () =>
-        createDashboardClient({
-          id: 'dashboard-2',
-          data: dashboardStateWithLensApi,
-        }),
-    });
-
-    const result = await dashboardSmlType.toAttachment(
-      {
-        id: 'chunk-2',
-        type: 'dashboard',
-        title: 'API Lens Dashboard',
-        origin_id: 'dashboard-2',
-        content: '...',
-        created_at: '2025-01-01T00:00:00.000Z',
-        updated_at: '2025-01-01T00:00:00.000Z',
-        spaces: ['default'],
-        permissions: ['saved_object:dashboard/get'],
-      },
-      {
-        request: {} as never,
-        spaceId: 'default',
-        savedObjectsClient,
-      } as never
-    );
-
-    expect(result).toEqual(
-      expect.objectContaining({
-        type: DASHBOARD_ATTACHMENT_TYPE,
-        origin: 'dashboard-2',
-      })
-    );
-    const attachmentData = result?.data as DashboardAttachmentData | undefined;
-
-    expect(attachmentData?.panels).toEqual([
-      expect.objectContaining({
-        id: 'panel-3',
-        type: LENS_EMBEDDABLE_TYPE,
-        config: expect.objectContaining({
-          attributes: expect.objectContaining({
-            type: 'lnsXY',
-            title: 'Request Rate',
-          }),
-        }),
-      }),
-    ]);
+    expect(dashboardSmlType.originType).toBe('dashboard');
   });
 
   it('creates requestHandlerContext from savedObjectsClient for SML reads', async () => {

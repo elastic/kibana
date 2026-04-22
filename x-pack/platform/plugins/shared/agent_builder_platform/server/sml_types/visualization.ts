@@ -6,11 +6,7 @@
  */
 
 import type { SmlTypeDefinition } from '@kbn/semantic-layer-plugin/server';
-import {
-  LensConfigBuilder,
-  type LensApiConfig,
-  type LensAttributes,
-} from '@kbn/lens-embeddable-utils';
+import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 
 const VISUALIZATION_SML_TYPE = 'visualization';
 
@@ -35,19 +31,9 @@ const getChartType = (attributes: LensAttributes): string => {
   return attributes.visualizationType ?? '';
 };
 
-const toLensAttributes = (
-  attributes: LensAttributes,
-  references: LensAttributes['references'] | undefined
-): LensAttributes => ({
-  ...attributes,
-  references: references ?? attributes.references ?? [],
-});
-
-const toLensApiConfig = (attributes: LensAttributes): LensApiConfig =>
-  new LensConfigBuilder().toAPIFormat(attributes);
-
 export const visualizationSmlType: SmlTypeDefinition = {
   id: VISUALIZATION_SML_TYPE,
+  originType: 'lens',
   fetchFrequency: () => '1h',
 
   async *list(context) {
@@ -98,29 +84,5 @@ export const visualizationSmlType: SmlTypeDefinition = {
       );
       return undefined;
     }
-  },
-
-  toAttachment: async (item, context) => {
-    const resolveResult = await context.savedObjectsClient.resolve('lens', item.origin_id);
-    const savedObject = resolveResult.saved_object as { error?: { message?: string } };
-    if (savedObject?.error) {
-      return undefined;
-    }
-
-    const lensAttributes = toLensAttributes(
-      resolveResult.saved_object.attributes as LensAttributes,
-      resolveResult.saved_object.references
-    );
-    const lensApiConfig = toLensApiConfig(lensAttributes);
-
-    return {
-      type: VISUALIZATION_SML_TYPE,
-      data: {
-        query: lensAttributes.title ?? item.origin_id,
-        visualization: lensApiConfig as unknown as Record<string, unknown>,
-        chart_type: lensApiConfig.type,
-        esql: extractEsql(lensAttributes),
-      },
-    };
   },
 };
