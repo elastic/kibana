@@ -86,8 +86,6 @@
       "@kbn/alerting-v2-constants/*": ["x-pack/platform/packages/shared/response-ops/alerting-v2-constants/*"],
       "@kbn/alerting-v2-episodes-ui": ["x-pack/platform/packages/shared/response-ops/alerting-v2-episodes-ui"],
       "@kbn/alerting-v2-episodes-ui/*": ["x-pack/platform/packages/shared/response-ops/alerting-v2-episodes-ui/*"],
-      "@kbn/alerting-v2-fixture": ["x-pack/platform/test/api_integration_deployment_agnostic/plugins/alerting_v2_fixture"],
-      "@kbn/alerting-v2-fixture/*": ["x-pack/platform/test/api_integration_deployment_agnostic/plugins/alerting_v2_fixture/*"],
       "@kbn/alerting-v2-plugin": ["x-pack/platform/plugins/shared/alerting_v2"],
       "@kbn/alerting-v2-plugin/*": ["x-pack/platform/plugins/shared/alerting_v2/*"],
       "@kbn/alerting-v2-rule-form": ["x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form"],
