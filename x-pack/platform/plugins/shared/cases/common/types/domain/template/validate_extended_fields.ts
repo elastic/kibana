@@ -9,6 +9,7 @@ import type { z } from '@kbn/zod/v4';
 import type { FieldSchema } from './fields';
 import { FieldType } from './fields';
 import { evaluateCondition } from './evaluate_conditions';
+import { getFieldSnakeKey } from '../../../utils';
 
 type FieldSchemaType = z.infer<typeof FieldSchema>;
 
@@ -124,7 +125,7 @@ export const validateExtendedFields = (
   const errors: string[] = [];
 
   // 1. Build valid key set
-  const validKeys = new Set(fields.map((f) => `${f.name}_as_${f.type}`));
+  const validKeys = new Set(fields.map((f) => getFieldSnakeKey(f.name, f.type)));
 
   // 2. Unknown keys
   for (const key of Object.keys(extendedFields)) {
@@ -137,7 +138,7 @@ export const validateExtendedFields = (
   const fieldValues: Record<string, string | undefined> = {};
   const fieldTypeMap: Record<string, string> = {};
   for (const field of fields) {
-    fieldValues[field.name] = extendedFields[`${field.name}_as_${field.type}`];
+    fieldValues[field.name] = extendedFields[getFieldSnakeKey(field.name, field.type)];
     fieldTypeMap[field.name] = field.type;
   }
 
