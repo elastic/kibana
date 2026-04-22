@@ -129,7 +129,7 @@ export function AlertEpisodeActions({
             anchorPosition="downLeft"
             panelPaddingSize="s"
           >
-            <EuiListGroup bordered={false} flush={true} size="l">
+            <EuiListGroup bordered={false}>
               <AlertEpisodeResolveActionButton
                 lastDeactivateAction={groupAction?.lastDeactivateAction}
                 groupHash={groupHash}
