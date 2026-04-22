@@ -379,16 +379,313 @@ describe('transpileOtelCollector', () => {
   });
 
   describe('unsupported actions', () => {
-    it('does not throw and records a warning for unsupported actions', async () => {
+    it('throws a descriptive error for unsupported actions', async () => {
       const dsl: StreamlangDSL = {
         steps: [
           { action: 'set', to: 'a', value: 1 },
           { action: 'math', expression: 'a + 1', to: 'b' },
         ],
       };
+      await expect(transpile(dsl)).rejects.toThrow(/math/);
+      await expect(transpile(dsl)).rejects.toThrow(/cannot be transpiled/);
+    });
+
+    it('includes the reason in the error message', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [{ action: 'enrich', policy_name: 'my-policy', to: 'enriched' }],
+      };
+      await expect(transpile(dsl)).rejects.toThrow(/enrich/);
+      await expect(transpile(dsl)).rejects.toThrow(/lookup/);
+    });
+  });
+
+  describe('lowercase processor', () => {
+    it('transforms in place when no target is given', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [{ action: 'lowercase', from: 'level' }],
+      };
       const result = await transpile(dsl);
-      expect(result.warnings).toHaveLength(1);
-      expect(result.warnings[0]).toContain('math');
+      expect(asTransform(result.processors['transform/streamlang']).log_statements).toEqual([
+        'set(log.attributes["level"], ToLowerCase(log.attributes["level"])) where (log.attributes["level"] != nil) and (IsString(log.attributes["level"]))',
+      ]);
+    });
+
+    it('writes to a different target when `to` is given', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [{ action: 'lowercase', from: 'level', to: 'level_lower' }],
+      };
+      const result = await transpile(dsl);
+      expect(asTransform(result.processors['transform/streamlang']).log_statements).toEqual([
+        'set(log.attributes["level_lower"], ToLowerCase(log.attributes["level"])) where (log.attributes["level"] != nil) and (IsString(log.attributes["level"]))',
+      ]);
+    });
+
+    it('drops the nil guard when ignore_missing is true', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [{ action: 'lowercase', from: 'level', ignore_missing: true }],
+      };
+      const result = await transpile(dsl);
+      expect(asTransform(result.processors['transform/streamlang']).log_statements).toEqual([
+        'set(log.attributes["level"], ToLowerCase(log.attributes["level"])) where (IsString(log.attributes["level"]))',
+      ]);
+    });
+  });
+
+  describe('trim processor', () => {
+    it('trims whitespace in place', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [{ action: 'trim', from: 'message' }],
+      };
+      const result = await transpile(dsl);
+      expect(asTransform(result.processors['transform/streamlang']).log_statements).toEqual([
+        'set(log.attributes["message"], TrimSpace(log.attributes["message"])) where (log.attributes["message"] != nil) and (IsString(log.attributes["message"]))',
+      ]);
+    });
+
+    it('writes trimmed value to a target field', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [{ action: 'trim', from: 'message', to: 'message_trimmed' }],
+      };
+      const result = await transpile(dsl);
+      expect(asTransform(result.processors['transform/streamlang']).log_statements).toEqual([
+        'set(log.attributes["message_trimmed"], TrimSpace(log.attributes["message"])) where (log.attributes["message"] != nil) and (IsString(log.attributes["message"]))',
+      ]);
+    });
+  });
+
+  describe('replace processor', () => {
+    it('emits replace_pattern in place when no to is given', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [{ action: 'replace', from: 'message', pattern: 'foo', replacement: 'bar' }],
+      };
+      const result = await transpile(dsl);
+      expect(asTransform(result.processors['transform/streamlang']).log_statements).toEqual([
+        'replace_pattern(log.attributes["message"], "foo", "bar") where (log.attributes["message"] != nil)',
+      ]);
+    });
+
+    it('emits copy+replace when a different target is specified', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          { action: 'replace', from: 'message', pattern: 'foo', replacement: 'bar', to: 'cleaned' },
+        ],
+      };
+      const result = await transpile(dsl);
+      expect(asTransform(result.processors['transform/streamlang']).log_statements).toEqual([
+        'set(log.attributes["cleaned"], log.attributes["message"]) where (log.attributes["message"] != nil)',
+        'replace_pattern(log.attributes["cleaned"], "foo", "bar") where (log.attributes["message"] != nil)',
+      ]);
+    });
+
+    it('drops the nil guard when ignore_missing is true', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          { action: 'replace', from: 'message', pattern: 'foo', replacement: 'bar', ignore_missing: true },
+        ],
+      };
+      const result = await transpile(dsl);
+      expect(asTransform(result.processors['transform/streamlang']).log_statements).toEqual([
+        'replace_pattern(log.attributes["message"], "foo", "bar")',
+      ]);
+    });
+  });
+
+  describe('split processor', () => {
+    it('splits a field in place', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [{ action: 'split', from: 'tags', separator: ',' }],
+      };
+      const result = await transpile(dsl);
+      expect(asTransform(result.processors['transform/streamlang']).log_statements).toEqual([
+        'set(log.attributes["tags"], Split(log.attributes["tags"], ",")) where (log.attributes["tags"] != nil)',
+      ]);
+    });
+
+    it('splits into a target field', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [{ action: 'split', from: 'tags', separator: ',', to: 'tag_list' }],
+      };
+      const result = await transpile(dsl);
+      expect(asTransform(result.processors['transform/streamlang']).log_statements).toEqual([
+        'set(log.attributes["tag_list"], Split(log.attributes["tags"], ",")) where (log.attributes["tags"] != nil)',
+      ]);
+    });
+  });
+
+  describe('convert processor', () => {
+    it('converts to integer via Int()', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [{ action: 'convert', from: 'count', type: 'integer' }],
+      };
+      const result = await transpile(dsl);
+      expect(asTransform(result.processors['transform/streamlang']).log_statements).toEqual([
+        'set(log.attributes["count"], Int(log.attributes["count"])) where (log.attributes["count"] != nil)',
+      ]);
+    });
+
+    it('maps long to Int() (OTTL has no ToLong)', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [{ action: 'convert', from: 'count', type: 'long' }],
+      };
+      const result = await transpile(dsl);
+      expect(asTransform(result.processors['transform/streamlang']).log_statements).toEqual([
+        'set(log.attributes["count"], Int(log.attributes["count"])) where (log.attributes["count"] != nil)',
+      ]);
+    });
+
+    it('converts to double via Double()', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [{ action: 'convert', from: 'score', type: 'double' }],
+      };
+      const result = await transpile(dsl);
+      expect(asTransform(result.processors['transform/streamlang']).log_statements).toEqual([
+        'set(log.attributes["score"], Double(log.attributes["score"])) where (log.attributes["score"] != nil)',
+      ]);
+    });
+
+    it('converts to string via String()', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [{ action: 'convert', from: 'code', type: 'string' }],
+      };
+      const result = await transpile(dsl);
+      expect(asTransform(result.processors['transform/streamlang']).log_statements).toEqual([
+        'set(log.attributes["code"], String(log.attributes["code"])) where (log.attributes["code"] != nil)',
+      ]);
+    });
+
+    it('converts to boolean via Bool()', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [{ action: 'convert', from: 'active', type: 'boolean' }],
+      };
+      const result = await transpile(dsl);
+      expect(asTransform(result.processors['transform/streamlang']).log_statements).toEqual([
+        'set(log.attributes["active"], Bool(log.attributes["active"])) where (log.attributes["active"] != nil)',
+      ]);
+    });
+
+    it('writes to a target field when to is specified', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [{ action: 'convert', from: 'count', type: 'integer', to: 'count_int' }],
+      };
+      const result = await transpile(dsl);
+      expect(asTransform(result.processors['transform/streamlang']).log_statements).toEqual([
+        'set(log.attributes["count_int"], Int(log.attributes["count"])) where (log.attributes["count"] != nil)',
+      ]);
+    });
+  });
+
+  describe('redact processor', () => {
+    it('emits replace_pattern for each compiled grok pattern', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [{ action: 'redact', from: 'message', patterns: ['%{IP:client}'] }],
+      };
+      const result = await transpile(dsl);
+      const statements = asTransform(result.processors['transform/streamlang']).log_statements;
+      expect(statements).toHaveLength(1);
+      expect(statements[0]).toMatch(/^replace_pattern\(log\.attributes\["message"\]/);
+      expect(statements[0]).toMatch(/"<client>"/);
+    });
+
+    it('uses custom prefix and suffix', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          { action: 'redact', from: 'message', patterns: ['%{IP:client}'], prefix: '[', suffix: ']' },
+        ],
+      };
+      const result = await transpile(dsl);
+      const statements = asTransform(result.processors['transform/streamlang']).log_statements;
+      expect(statements[0]).toMatch(/"\[client\]"/);
+    });
+
+    it('emits one statement per pattern', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            action: 'redact',
+            from: 'message',
+            patterns: ['%{IP:client}', '%{EMAILADDRESS:email}'],
+          },
+        ],
+      };
+      const result = await transpile(dsl);
+      const statements = asTransform(result.processors['transform/streamlang']).log_statements;
+      expect(statements).toHaveLength(2);
+    });
+
+    it('adds a nil guard when ignore_missing is false', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [{ action: 'redact', from: 'message', patterns: ['%{IP:client}'], ignore_missing: false }],
+      };
+      const result = await transpile(dsl);
+      const statements = asTransform(result.processors['transform/streamlang']).log_statements;
+      expect(statements[0]).toContain('where (log.attributes["message"] != nil)');
+    });
+  });
+
+  describe('concat processor', () => {
+    it('concatenates fields and literals into a target', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            action: 'concat',
+            from: [
+              { type: 'field', value: 'first_name' },
+              { type: 'literal', value: ' ' },
+              { type: 'field', value: 'last_name' },
+            ],
+            to: 'full_name',
+          },
+        ],
+      };
+      const result = await transpile(dsl);
+      expect(asTransform(result.processors['transform/streamlang']).log_statements).toEqual([
+        'set(log.attributes["full_name"], Concat([log.attributes["first_name"], " ", log.attributes["last_name"]], "")) where (log.attributes["first_name"] != nil) and (log.attributes["last_name"] != nil)',
+      ]);
+    });
+
+    it('drops nil guards when ignore_missing is true', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            action: 'concat',
+            from: [{ type: 'field', value: 'a' }, { type: 'field', value: 'b' }],
+            to: 'ab',
+            ignore_missing: true,
+          },
+        ],
+      };
+      const result = await transpile(dsl);
+      expect(asTransform(result.processors['transform/streamlang']).log_statements).toEqual([
+        'set(log.attributes["ab"], Concat([log.attributes["a"], log.attributes["b"]], ""))',
+      ]);
+    });
+  });
+
+  describe('error_mode option', () => {
+    it('passes propagate to all emitted processors', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          { action: 'set', to: 'status', value: 'ok' },
+          { action: 'drop_document', where: { field: 'level', eq: 'debug' } },
+        ],
+      };
+      const result = await transpile(dsl, { errorMode: 'propagate' });
+      expect(
+        asTransform(result.processors['transform/streamlang']).error_mode
+      ).toBe('propagate');
+      expect(
+        asFilter(result.processors['filter/streamlang']).error_mode
+      ).toBe('propagate');
+    });
+
+    it('defaults to ignore when no option is given', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [{ action: 'set', to: 'status', value: 'ok' }],
+      };
+      const result = await transpile(dsl);
+      expect(
+        asTransform(result.processors['transform/streamlang']).error_mode
+      ).toBe('ignore');
     });
   });
 });

@@ -6,20 +6,34 @@
  */
 
 import type {
+  ConcatProcessor,
+  ConvertProcessor,
   DropDocumentProcessor,
   GrokProcessor,
+  LowercaseProcessor,
+  RedactProcessor,
   RemoveProcessor,
   RenameProcessor,
+  ReplaceProcessor,
   SetProcessor,
+  SplitProcessor,
   StreamlangProcessorDefinition,
+  TrimProcessor,
   UppercaseProcessor,
 } from '../../../types/processors';
 import type { Emission } from './emission';
+import { convertConcatProcessorToOtel } from './processors/concat';
+import { convertConvertProcessorToOtel } from './processors/convert';
 import { convertDropDocumentProcessorToOtel } from './processors/drop_document';
 import { convertGrokProcessorToOtel } from './processors/grok';
+import { convertLowercaseProcessorToOtel } from './processors/lowercase';
+import { convertRedactProcessorToOtel } from './processors/redact';
 import { convertRemoveProcessorToOtel } from './processors/remove';
 import { convertRenameProcessorToOtel } from './processors/rename';
+import { convertReplaceProcessorToOtel } from './processors/replace';
 import { convertSetProcessorToOtel } from './processors/set';
+import { convertSplitProcessorToOtel } from './processors/split';
+import { convertTrimProcessorToOtel } from './processors/trim';
 import { convertUppercaseProcessorToOtel } from './processors/uppercase';
 import type { OtelCollectorTranspilationResult, OtelProcessorConfig } from './types';
 
@@ -28,11 +42,32 @@ export interface DispatchResult {
   warnings: string[];
 }
 
+const UNSUPPORTED_REASONS: Partial<Record<string, string>> = {
+  enrich: 'requires an external lookup policy; no OTTL equivalent exists',
+  math: 'requires a full expression evaluator; OTTL supports only basic arithmetic',
+  network_direction: 'requires IP network range tables; no OTTL equivalent exists',
+  sort: 'OTTL has no array-sort function',
+  remove_by_prefix: 'OTTL does not support iterating over attribute keys by prefix',
+  manual_ingest_pipeline: 'this processor is specific to the Elasticsearch ingest pipeline',
+  append: 'array append is not yet implemented for the OTel Collector transpiler',
+  json_extract: 'json_extract is not yet implemented for the OTel Collector transpiler',
+  dissect: 'dissect is not yet implemented for the OTel Collector transpiler',
+  date: 'date parsing is not yet implemented for the OTel Collector transpiler',
+};
+
+/**
+ * Warn when a processor explicitly sets `ignore_missing: false`. OTTL has no
+ * "error on nil" primitive — the `field != nil` guard silently no-ops instead.
+ */
+const ignoreMissingWarning = (action: string, field: string): string =>
+  `${action} on field "${field}" has ignore_missing: false, but OTTL silently skips missing ` +
+  `fields rather than raising. Pipelines relying on this as a validation gate will not ` +
+  `behave the same as ingest pipeline or ES|QL.`;
+
 /**
  * Dispatch one flattened Streamlang processor to its OTel emission. Actions
- * outside the Phase 1 surface return an `unsupported` emission so the caller
- * can thread a warning through — the pipeline stays valid, just with a comment
- * marking the gap.
+ * with no OTTL equivalent throw — the transpiler does not produce a partial
+ * config that silently drops processors from the pipeline.
  */
 export const convertProcessorToOtel = (
   processor: StreamlangProcessorDefinition
@@ -40,21 +75,64 @@ export const convertProcessorToOtel = (
   switch (processor.action) {
     case 'set':
       return { emission: convertSetProcessorToOtel(processor as SetProcessor), warnings: [] };
-    case 'rename':
-      return {
-        emission: convertRenameProcessorToOtel(processor as RenameProcessor),
-        warnings: [],
-      };
-    case 'remove':
-      return {
-        emission: convertRemoveProcessorToOtel(processor as RemoveProcessor),
-        warnings: [],
-      };
-    case 'uppercase':
-      return {
-        emission: convertUppercaseProcessorToOtel(processor as UppercaseProcessor),
-        warnings: [],
-      };
+    case 'rename': {
+      const p = processor as RenameProcessor;
+      const warnings =
+        p.ignore_missing === false ? [ignoreMissingWarning('rename', p.from)] : [];
+      return { emission: convertRenameProcessorToOtel(p), warnings };
+    }
+    case 'remove': {
+      const p = processor as RemoveProcessor;
+      const warnings =
+        p.ignore_missing === false ? [ignoreMissingWarning('remove', p.from)] : [];
+      return { emission: convertRemoveProcessorToOtel(p), warnings };
+    }
+    case 'uppercase': {
+      const p = processor as UppercaseProcessor;
+      const warnings =
+        p.ignore_missing === false ? [ignoreMissingWarning('uppercase', p.from)] : [];
+      return { emission: convertUppercaseProcessorToOtel(p), warnings };
+    }
+    case 'lowercase': {
+      const p = processor as LowercaseProcessor;
+      const warnings =
+        p.ignore_missing === false ? [ignoreMissingWarning('lowercase', p.from)] : [];
+      return { emission: convertLowercaseProcessorToOtel(p), warnings };
+    }
+    case 'trim': {
+      const p = processor as TrimProcessor;
+      const warnings = p.ignore_missing === false ? [ignoreMissingWarning('trim', p.from)] : [];
+      return { emission: convertTrimProcessorToOtel(p), warnings };
+    }
+    case 'replace': {
+      const p = processor as ReplaceProcessor;
+      const warnings =
+        p.ignore_missing === false ? [ignoreMissingWarning('replace', p.from)] : [];
+      return { emission: convertReplaceProcessorToOtel(p), warnings };
+    }
+    case 'split': {
+      const p = processor as SplitProcessor;
+      const warnings =
+        p.ignore_missing === false ? [ignoreMissingWarning('split', p.from)] : [];
+      return { emission: convertSplitProcessorToOtel(p), warnings };
+    }
+    case 'convert': {
+      const p = processor as ConvertProcessor;
+      const warnings =
+        p.ignore_missing === false ? [ignoreMissingWarning('convert', p.from)] : [];
+      return { emission: convertConvertProcessorToOtel(p), warnings };
+    }
+    case 'redact': {
+      const p = processor as RedactProcessor;
+      const { emission, warnings: patternWarnings } = convertRedactProcessorToOtel(p);
+      const ignoreMissingWarnings =
+        p.ignore_missing === false ? [ignoreMissingWarning('redact', p.from)] : [];
+      return { emission, warnings: [...patternWarnings, ...ignoreMissingWarnings] };
+    }
+    case 'concat': {
+      const p = processor as ConcatProcessor;
+      return convertConcatProcessorToOtel(p);
+    }
     case 'grok':
       return convertGrokProcessorToOtel(processor as GrokProcessor);
     case 'drop_document':
@@ -62,19 +140,18 @@ export const convertProcessorToOtel = (
         emission: convertDropDocumentProcessorToOtel(processor as DropDocumentProcessor),
         warnings: [],
       };
-    default:
-      return {
-        emission: {
-          kind: 'unsupported',
-          action: processor.action,
-          reason: `Action "${processor.action}" is not yet supported by the OTel collector transpiler (Phase 1 scope).`,
-        },
-        warnings: [
-          `Action "${processor.action}" was skipped — not yet supported by the OTel collector transpiler.`,
-        ],
-      };
+    default: {
+      const reason =
+        UNSUPPORTED_REASONS[processor.action] ??
+        `no OTTL equivalent is known for this action`;
+      throw new Error(
+        `OTel Collector transpiler: action "${processor.action}" cannot be transpiled — ${reason}.`
+      );
+    }
   }
 };
+
+export type OtelErrorMode = 'ignore' | 'silent' | 'propagate';
 
 /**
  * Walk the flattened processors, collect emissions, and group contiguous
@@ -83,7 +160,8 @@ export const convertProcessorToOtel = (
  * processor instances in that order.
  */
 export const assembleOtelConfig = (
-  processors: StreamlangProcessorDefinition[]
+  processors: StreamlangProcessorDefinition[],
+  errorMode: OtelErrorMode = 'ignore'
 ): OtelCollectorTranspilationResult & { emissions: Emission[] } => {
   const emissions: Emission[] = [];
   const warnings: string[] = [];
@@ -110,7 +188,7 @@ export const assembleOtelConfig = (
       filter: filterCounter,
       unsupported: unsupportedCounter,
     });
-    out[name] = buildProcessorConfig(current.kind, current.items);
+    out[name] = buildProcessorConfig(current.kind, current.items, errorMode);
     pipelineProcessors.push(name);
     current = null;
   };
@@ -156,14 +234,18 @@ const assignName = (
   return `__streamlang_unsupported_${counters.unsupported.n}`;
 };
 
-const buildProcessorConfig = (kind: Emission['kind'], items: Emission[]): OtelProcessorConfig => {
+const buildProcessorConfig = (
+  kind: Emission['kind'],
+  items: Emission[],
+  errorMode: OtelErrorMode
+): OtelProcessorConfig => {
   if (kind === 'transform') {
     const statements = items.flatMap((e) => (e.kind === 'transform' ? e.statements : []));
-    return { error_mode: 'ignore', log_statements: statements };
+    return { error_mode: errorMode, log_statements: statements };
   }
   if (kind === 'filter') {
     const conditions = items.flatMap((e) => (e.kind === 'filter' ? e.conditions : []));
-    return { error_mode: 'ignore', log_conditions: conditions };
+    return { error_mode: errorMode, log_conditions: conditions };
   }
   // unsupported — we flatten into a single placeholder with the combined message.
   const first = items.find(

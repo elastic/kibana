@@ -13,6 +13,7 @@ import type { OtelCollectorTranspilationResult } from './types';
 import { renderOtelConfigYaml } from './yaml';
 
 export { conditionToOttl } from './condition_to_ottl';
+export type { OtelErrorMode } from './conversions';
 export type {
   OtelCollectorTranspilationResult,
   OtelFilterProcessorConfig,
@@ -21,29 +22,44 @@ export type {
   OtelUnsupportedPlaceholder,
 } from './types';
 
+export interface OtelTranspileOptions {
+  /**
+   * Controls how the OTel Collector processor handles OTTL evaluation errors.
+   * - `'ignore'` (default): errors are silently swallowed; the log record passes through unchanged.
+   * - `'silent'`: same as ignore but without logging.
+   * - `'propagate'`: errors propagate to the pipeline's error handler (useful for debugging).
+   *
+   * For production deployments `'propagate'` is strongly recommended so that evaluation
+   * failures surface rather than being silently swallowed.
+   */
+  errorMode?: 'ignore' | 'silent' | 'propagate';
+}
+
 /**
  * Transpile a Streamlang DSL document into an OpenTelemetry Collector
  * configuration fragment (logs pipeline).
  *
- * Phase 1 scope: `set`, `rename`, `remove`, `grok`, `uppercase`, `drop_document`
- * and the full condition operator surface. Unsupported actions are preserved
- * in the output as warning placeholders; see `warnings` on the result.
+ * Supported actions: `set`, `rename`, `remove`, `grok`, `uppercase`, `lowercase`,
+ * `trim`, `replace`, `split`, `convert`, `redact`, `concat`, `drop_document`,
+ * and the full condition operator surface.
+ *
+ * Actions with no OTTL equivalent (`enrich`, `math`, `network_direction`, `sort`,
+ * `remove_by_prefix`, `manual_ingest_pipeline`) throw a descriptive error — the
+ * transpiler does not produce a partial config that silently drops processors.
  *
  * Cross-target semantic gap — `ignore_missing: false`:
- * Streamlang's `ignore_missing: false` instructs the ingest and ES|QL transpilers
- * to raise an error when the source field is missing. OTTL has no "error if nil"
- * primitive and no per-statement `error_mode` override, so the OTel transpiler
- * approximates this by adding a `<field> != nil` guard — a silent no-op instead
- * of a loud failure. Affects `uppercase`, `grok`, `rename`, and `remove`.
- * Pipelines relying on `ignore_missing: false` as a validation assertion will
- * not behave the same across targets.
+ * OTTL has no "error if nil" primitive. The OTel transpiler approximates this
+ * with a `<field> != nil` guard — a silent skip rather than a loud failure.
+ * A transpile-time warning is emitted when `ignore_missing: false` is explicit.
  */
 export const transpile = async (
-  streamlang: StreamlangDSL
+  streamlang: StreamlangDSL,
+  options: OtelTranspileOptions = {}
 ): Promise<OtelCollectorTranspilationResult> => {
+  const { errorMode = 'ignore' } = options;
   const validated = streamlangDSLSchema.parse(streamlang);
   const flattened = flattenSteps(validated.steps);
-  const assembled = assembleOtelConfig(flattened);
+  const assembled = assembleOtelConfig(flattened, errorMode);
 
   const yaml = renderOtelConfigYaml(assembled.processors, assembled.pipelineProcessors);
 
