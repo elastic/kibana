@@ -105,6 +105,13 @@ const createCombinedRenderPayload = () => ({
     'C={{ steps.fetchCaseC.output.case.title }}',
 });
 
+const createLightweightRenderPayload = () => ({
+  summary:
+    'A={{ steps.fetchCaseA.output.case.title }}, ' +
+    'B={{ steps.fetchCaseB.output.case.title }}, ' +
+    'C={{ steps.fetchCaseC.output.case.title }}',
+});
+
 const createTestContainer = (largeOutput: ReturnType<typeof createLargeCaseOutput>) => {
   const workflow: WorkflowYaml = {
     name: 'Large Context Workflow',
@@ -349,5 +356,51 @@ describe('event loop blocking minimal local reproduction', () => {
     expect(rendered.summary).toContain('A=Synthetic large case');
     expect(renderElapsed).toBeGreaterThan(20);
     expect(timerDriftMs).toBeGreaterThan(10);
+  });
+
+  it('keeps timer drift low for repeated lightweight renders over large predecessor context after the fix', async () => {
+    const { contextManager } = createBroaderSurfaceContainer();
+
+    await setImmediateAsync();
+
+    const warmupIterations = 10;
+    const iterations = 250;
+    let timerDriftMs = 0;
+    let totalElapsedMs = 0;
+    let lastSummary = '';
+
+    for (let index = 0; index < warmupIterations; index++) {
+      const rendered = contextManager.renderValueAccordingToContext(
+        createLightweightRenderPayload()
+      );
+      lastSummary = String(rendered.summary);
+    }
+
+    const timerStartedAt = performance.now();
+    const blockedTimer = new Promise<void>((resolve) => {
+      setTimeout(() => {
+        timerDriftMs = performance.now() - timerStartedAt;
+        resolve();
+      }, 0);
+    });
+
+    const workStartedAt = performance.now();
+
+    for (let index = 0; index < iterations; index++) {
+      const rendered = contextManager.renderValueAccordingToContext(
+        createLightweightRenderPayload()
+      );
+      lastSummary = String(rendered.summary);
+    }
+
+    totalElapsedMs = performance.now() - workStartedAt;
+
+    await blockedTimer;
+
+    expect(lastSummary).toBe(
+      'A=Synthetic large case, B=Synthetic large case, C=Synthetic large case'
+    );
+    expect(timerDriftMs).toBeLessThan(50);
+    expect(totalElapsedMs).toBeLessThan(50);
   });
 });

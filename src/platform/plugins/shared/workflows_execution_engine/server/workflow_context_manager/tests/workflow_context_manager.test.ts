@@ -206,6 +206,60 @@ describe('WorkflowContextManager', () => {
     };
   }
 
+  function createBroaderSurfaceContainerWithRealTemplating() {
+    const broaderWorkflow: WorkflowYaml = {
+      name: 'Broader Surface Repro Workflow',
+      version: '1',
+      description: 'Exercises predecessor accumulation and template rendering',
+      enabled: true,
+      consts: {},
+      triggers: [],
+      steps: [
+        {
+          name: 'fetchCaseA',
+          type: 'console',
+          with: { message: 'fetch-a' },
+        } as ConnectorStep,
+        {
+          name: 'fetchCaseB',
+          type: 'console',
+          with: { message: 'fetch-b' },
+        } as ConnectorStep,
+        {
+          name: 'fetchCaseC',
+          type: 'console',
+          with: { message: 'fetch-c' },
+        } as ConnectorStep,
+        {
+          name: 'renderCombinedPayload',
+          type: 'console',
+          with: { message: '{{ steps.fetchCaseA.output.case.title }}' },
+        } as ConnectorStep,
+      ],
+    };
+
+    const renderNode: AtomicGraphNode = {
+      id: 'renderCombinedPayload',
+      type: 'atomic',
+      stepId: 'renderCombinedPayload',
+      stepType: 'console',
+      configuration: {},
+    };
+
+    return createTestContainerWithRealTemplating(broaderWorkflow, renderNode, (stepId) => {
+      if (stepId === 'fetchCaseA' || stepId === 'fetchCaseB' || stepId === 'fetchCaseC') {
+        return {
+          state: { fetched: true, stepId },
+          input: undefined,
+          output: createLargeStepOutput(stepId),
+          error: null,
+        };
+      }
+
+      return undefined;
+    });
+  }
+
   describe('consts', () => {
     const workflow: WorkflowYaml = {
       name: 'Test Workflow',
@@ -1542,61 +1596,7 @@ describe('WorkflowContextManager', () => {
     });
 
     it('shows blocking with real templating and inflated predecessor context in an existing test path', async () => {
-      const broaderWorkflow: WorkflowYaml = {
-        name: 'Broader Surface Repro Workflow',
-        version: '1',
-        description: 'Exercises predecessor accumulation and template rendering',
-        enabled: true,
-        consts: {},
-        triggers: [],
-        steps: [
-          {
-            name: 'fetchCaseA',
-            type: 'console',
-            with: { message: 'fetch-a' },
-          } as ConnectorStep,
-          {
-            name: 'fetchCaseB',
-            type: 'console',
-            with: { message: 'fetch-b' },
-          } as ConnectorStep,
-          {
-            name: 'fetchCaseC',
-            type: 'console',
-            with: { message: 'fetch-c' },
-          } as ConnectorStep,
-          {
-            name: 'renderCombinedPayload',
-            type: 'console',
-            with: { message: '{{ steps.fetchCaseA.output.case.title }}' },
-          } as ConnectorStep,
-        ],
-      };
-
-      const renderNode: AtomicGraphNode = {
-        id: 'renderCombinedPayload',
-        type: 'atomic',
-        stepId: 'renderCombinedPayload',
-        stepType: 'console',
-        configuration: {},
-      };
-
-      const broaderContainer = createTestContainerWithRealTemplating(
-        broaderWorkflow,
-        renderNode,
-        (stepId) => {
-          if (stepId === 'fetchCaseA' || stepId === 'fetchCaseB' || stepId === 'fetchCaseC') {
-            return {
-              state: { fetched: true, stepId },
-              input: undefined,
-              output: createLargeStepOutput(stepId),
-              error: null,
-            };
-          }
-
-          return undefined;
-        }
-      );
+      const broaderContainer = createBroaderSurfaceContainerWithRealTemplating();
 
       await setImmediateAsync();
 
@@ -1630,61 +1630,7 @@ describe('WorkflowContextManager', () => {
     });
 
     it('can compound repeated large getContext calls into about 10s of event loop drift in an existing test path', async () => {
-      const broaderWorkflow: WorkflowYaml = {
-        name: 'Broader Surface Repro Workflow',
-        version: '1',
-        description: 'Exercises predecessor accumulation and template rendering',
-        enabled: true,
-        consts: {},
-        triggers: [],
-        steps: [
-          {
-            name: 'fetchCaseA',
-            type: 'console',
-            with: { message: 'fetch-a' },
-          } as ConnectorStep,
-          {
-            name: 'fetchCaseB',
-            type: 'console',
-            with: { message: 'fetch-b' },
-          } as ConnectorStep,
-          {
-            name: 'fetchCaseC',
-            type: 'console',
-            with: { message: 'fetch-c' },
-          } as ConnectorStep,
-          {
-            name: 'renderCombinedPayload',
-            type: 'console',
-            with: { message: '{{ steps.fetchCaseA.output.case.title }}' },
-          } as ConnectorStep,
-        ],
-      };
-
-      const renderNode: AtomicGraphNode = {
-        id: 'renderCombinedPayload',
-        type: 'atomic',
-        stepId: 'renderCombinedPayload',
-        stepType: 'console',
-        configuration: {},
-      };
-
-      const broaderContainer = createTestContainerWithRealTemplating(
-        broaderWorkflow,
-        renderNode,
-        (stepId) => {
-          if (stepId === 'fetchCaseA' || stepId === 'fetchCaseB' || stepId === 'fetchCaseC') {
-            return {
-              state: { fetched: true, stepId },
-              input: undefined,
-              output: createLargeStepOutput(stepId),
-              error: null,
-            };
-          }
-
-          return undefined;
-        }
-      );
+      const broaderContainer = createBroaderSurfaceContainerWithRealTemplating();
 
       await setImmediateAsync();
 
