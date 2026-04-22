@@ -57,9 +57,9 @@ export class DashboardAddPanelService extends FtrService {
     });
   }
 
-  async clickAddCustomVisualization() {
+  async clickAddVega() {
     await this.openAddPanelFlyout();
-    await this.clickAddNewPanelFromUIActionLink('Custom visualization');
+    await this.clickAddNewPanelFromUIActionLink('Vega');
   }
   async clickAddMarkdownPanel() {
     this.log.debug('DashboardAddPanel.clickAddMarkdownPanel');
