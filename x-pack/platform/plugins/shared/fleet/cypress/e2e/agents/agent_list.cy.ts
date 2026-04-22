@@ -380,7 +380,8 @@ describe('View agents list', () => {
       cy.getBySel(FLEET_AGENT_LIST_PAGE.BULK_ACTIONS_BUTTON).click();
       cy.get('button').contains('Assign to new policy').click();
       cy.get('.euiModalBody input').clear().type('Agent policy 4');
-      cy.get('[role="option"]').contains('Agent policy 4').click({ force: true });
+      cy.get('[role="option"]').contains('Agent policy 4').should('exist');
+      cy.get('.euiModalBody input').type('{downArrow}{enter}');
       cy.get('.euiModalFooter button:enabled').contains('Assign policy').click();
       cy.wait('@bulkReassign');
       waitForLoading();
@@ -397,7 +398,8 @@ describe('View agents list', () => {
       cy.getBySel(FLEET_AGENT_LIST_PAGE.BULK_ACTIONS_BUTTON).click();
       cy.get('button').contains('Assign to new policy').click();
       cy.get('.euiModalBody input').clear().type('Agent policy 3');
-      cy.get('[role="option"]').contains('Agent policy 3').click({ force: true });
+      cy.get('[role="option"]').contains('Agent policy 3').should('exist');
+      cy.get('.euiModalBody input').type('{downArrow}{enter}');
       cy.get('.euiModalFooter button:enabled').contains('Assign policy').click();
       cy.wait('@bulkReassign');
       waitForLoading();
