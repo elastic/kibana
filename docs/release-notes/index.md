@@ -48,6 +48,8 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Adds user-created skills to Agent Builder [#252221]({{kib-pull}}252221).
 * Allows Agent Builder to detect outdated attachments and lets users refresh them into the next message [#257658]({{kib-pull}}257658).
 * Allows {{esql}} generation to search index patterns [#253492]({{kib-pull}}253492).
+* Allows agents to run one or more workflows before each execution, enabling prompt modifications or conditional abort [#252452]({{kib-pull}}252452).
+* Adds audit logging for agent and tool create, update, and delete actions [#252143]({{kib-pull}}252143).
 
 **Connectivity**:
 * Adds support for the `region` parameter to the Bedrock Connector [#252956]({{kib-pull}}252956).
@@ -273,7 +275,6 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Adds the `workflows.executionFailed` trigger so you can run workflows when another workflow fails. Use it to send notifications (e.g., Slack), run cleanup, or trigger retries [#257633]({{kib-pull}}257633).
 * Adds a server-side workflow validation endpoint [#254502]({{kib-pull}}254502).
 * Makes the manual run API public [#253010]({{kib-pull}}253010).
-* Adds agent pre-execution workflows [#252452]({{kib-pull}}252452).
 * Whitelists Streams APIs as Kibana workflow steps [#252068]({{kib-pull}}252068).
 * Adds a gap scheduler error callout [#250393]({{kib-pull}}250393).
 * Adds metrics grid {{esql}} WHERE propagation [#249103]({{kib-pull}}249103).
@@ -283,7 +284,6 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Adds **Default model** and **Disallow all other models** settings to the **Model Settings** page [#259932]({{kib-pull}}259932).
 * Adds the `entries` Liquid filter for iterating over object keys [#259249]({{kib-pull}}259249).
 * Respects `observability:enableInspectEsQueries` in Hosts UI [#253618]({{kib-pull}}253618).
-* Adds audit logging for agent and tool actions [#252143]({{kib-pull}}252143).
 ### Fixes [kibana-9.4.0-fixes]
 
 **Alerting**:
