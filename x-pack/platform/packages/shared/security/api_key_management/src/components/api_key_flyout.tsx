@@ -105,6 +105,8 @@ interface CommonApiKeyFlyoutProps {
   defaultMetadata?: string;
   defaultRoleDescriptors?: string;
   defaultExpiration?: string;
+  /** When true, uses the next larger flyout size at each breakpoint (~2× width vs default). */
+  widenFlyout?: boolean;
 }
 
 interface CreateApiKeyFlyoutProps extends CommonApiKeyFlyoutProps {
@@ -184,10 +186,11 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
   readOnly = false,
   currentUser,
   isLoadingCurrentUser,
+  widenFlyout = false,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const isFullWidth = useIsWithinBreakpoints(['xs', 's', 'm']);
-  const flyoutSize = isFullWidth ? 'full' : 'm';
+  const isSmallScreen = useIsWithinBreakpoints(['xs', 's', 'm']);
+  const flyoutSize = widenFlyout ? (isSmallScreen ? 'l' : 'm') : isSmallScreen ? 'm' : 's';
   const {
     services: { http, docLinks },
   } = useKibana();
@@ -427,7 +430,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                       <EuiFlexItem grow={false}>
                         <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="xs">
                           <EuiFlexItem grow={false}>
-                            <EuiIcon type="user" aria-hidden={true} />
+                            <EuiIcon type="user" />
                           </EuiFlexItem>
                           <EuiFlexItem grow={false}>{apiKey.username}</EuiFlexItem>
                         </EuiFlexGroup>
@@ -486,7 +489,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                   <>
                     <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
                       <EuiFlexItem grow={false}>
-                        <EuiIcon type="gear" aria-hidden={true} />
+                        <EuiIcon type="gear" />
                       </EuiFlexItem>
                       <EuiFlexItem>
                         <EuiTitle size="xs">
@@ -683,7 +686,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                   <div style={{ paddingRight: euiTheme.size.s }}>
                     <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
                       <EuiFlexItem grow={false}>
-                        <EuiIcon type="lock" aria-hidden={true} />
+                        <EuiIcon type="lock" />
                       </EuiFlexItem>
                       <EuiFlexItem>
                         <EuiTitle size="xs">

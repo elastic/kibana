@@ -41,8 +41,8 @@ export const PageTemplate: React.FC<React.PropsWithChildren<TemplateProps>> = ({
         paddingSize="none"
         restrictWidth
         css={css`
-          padding-block-start: 32px;
-          padding-block-end: 32px;
+          padding-block-start: 40px;
+          padding-block-end: 40px;
         `}
       >
         {children}

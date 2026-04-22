@@ -665,8 +665,12 @@ const isFloatingTargetGeometryPlausible = (
   const ih = Math.max(0, ib - it);
   const inter = iw * ih;
   const overlapRatio = inter / fbArea;
+  const overlapByTarget = inter / tArea;
   // Reject matches that don’t overlap where the user anchored (stops “nearest” full-width rows).
-  if (overlapRatio < 0.08) return false;
+  // `overlapRatio` divides by saved fbArea; after responsive reflow the live node is often much
+  // smaller than the stale rect, so the ratio can dip below 0.08 even for the correct element.
+  // `overlapByTarget` asks how much of the *live* target still lies under the saved anchor box.
+  if (overlapRatio < 0.08 && overlapByTarget < 0.22) return false;
   // Flyout `EuiCodeBlock` rows are often full flyout width (>58% vw); only reject “wide + weak overlap”.
   if (targetRect.width > vw * 0.58 && overlapRatio < 0.12) return false;
   const ratio = tArea / fbArea;
@@ -694,6 +698,10 @@ const resolveElementRect = (selector: string, fallback: PageRect): PageRect => {
   if (isFloatingScopedSelector(selector)) {
     return { x: r.left, y: r.top, width: r.width, height: r.height };
   }
+  const liveRect = { x: r.left, y: r.top, width: r.width, height: r.height };
+  if (matches.length === 1) {
+    return liveRect;
+  }
   if (
     !isFloatingTargetGeometryPlausible(
       { left: r.left, top: r.top, width: r.width, height: r.height },
@@ -702,7 +710,7 @@ const resolveElementRect = (selector: string, fallback: PageRect): PageRect => {
   ) {
     return fallback;
   }
-  return { x: r.left, y: r.top, width: r.width, height: r.height };
+  return liveRect;
 };
 
 /**
@@ -1524,10 +1532,12 @@ export const CommentOverlay: React.FC = () => {
             width: ${hoveredRect.width}px;
             height: ${hoveredRect.height}px;
             border: 2px solid ${euiTheme.colors.backgroundFilledPrimary};
-            background: rgba(0, 102, 255, 0.03);
+            background: transparent;
             border-radius: 4px;
             pointer-events: none;
-            z-index: ${annotationModeChromeZ + 2};
+            /* Same z as seek overlay + earlier in DOM → outline sits under the overlay; the discuss
+               pill (inside the overlay) stays above. The OS cursor always paints on top of the page. */
+            z-index: ${annotationModeChromeZ};
             box-sizing: border-box;
           `}
         >

@@ -11,7 +11,8 @@ export type IngestHubVersion =
   | 'agentUx'
   | 'aiSourceMap'
   | 'version1'
-  | 'version2';
+  | 'version2'
+  | 'version3';
 
 type Listener = () => void;
 
@@ -32,15 +33,25 @@ const getOrCreateStore = (): VersionStore => {
   const STORAGE_KEY = 'ingestHub:activeVersion';
   const stored = sessionStorage.getItem(STORAGE_KEY) as IngestHubVersion | null;
   const validVersions: IngestHubVersion[] = [
+    'blockUx',
     'streamsUx',
     'agentUx',
     'aiSourceMap',
     'version1',
     'version2',
+    'version3',
   ];
-  let version: IngestHubVersion = validVersions.includes(stored as IngestHubVersion)
+  const resolved: IngestHubVersion = validVersions.includes(stored as IngestHubVersion)
     ? (stored as IngestHubVersion)
-    : 'version1';
+    : 'version2';
+  let version = resolved;
+  if (stored !== resolved) {
+    try {
+      sessionStorage.setItem(STORAGE_KEY, resolved);
+    } catch {
+      // ignore private mode / blocked storage
+    }
+  }
   const store: VersionStore = {
     _listeners: listeners,
     _version: version,

@@ -60,7 +60,9 @@ import {
   INGEST_HUB_ADD_DATA_NAV_ID,
   isIngestHubVersion2AddDataPage,
 } from './ingest_hub_experience_targets';
+import type { ObservabilityOnboardingAppServices } from '../../..';
 import { Version2ApiEndpointsSplit } from '../../version_2_api_endpoints_split';
+import { Version3ApiEndpointsSplit } from '../../version_3_api_endpoints_split';
 import {
   SECTIONS,
   SAAS_TILES,
@@ -268,7 +270,7 @@ const SECTION_TO_NAV_ID: Record<string, string> = {
 };
 
 export const IngestHubPage: React.FC = () => {
-  const { services } = useKibana();
+  const { services } = useKibana<ObservabilityOnboardingAppServices>();
   const [activeVersion] = useActiveVersion();
   const { euiTheme } = useEuiTheme();
   const history = useHistory();
@@ -332,9 +334,21 @@ export const IngestHubPage: React.FC = () => {
   const [version2ApiEndpointId, setVersion2ApiEndpointId] = useState<string>(
     API_ENDPOINTS[0]?.id ?? 'endpoint-elasticsearch'
   );
+  const [version2ApiEndpointSecrets, setVersion2ApiEndpointSecrets] = useState<
+    Record<string, string>
+  >({});
+  const [version3ApiEndpointId, setVersion3ApiEndpointId] = useState<string>(
+    API_ENDPOINTS[0]?.id ?? 'endpoint-elasticsearch'
+  );
+  const [version3ApiEndpointSecrets, setVersion3ApiEndpointSecrets] = useState<
+    Record<string, string>
+  >({});
 
   useEffect(() => {
-    if (activeVersion !== 'version2' || selectedCategory !== 'all-api-ingestion') {
+    if (
+      (activeVersion !== 'version2' && activeVersion !== 'version3') ||
+      selectedCategory !== 'all-api-ingestion'
+    ) {
       return;
     }
     const q = integrationsSearch.trim().toLowerCase();
@@ -343,16 +357,27 @@ export const IngestHubPage: React.FC = () => {
       : API_ENDPOINTS.filter(
           (e) =>
             e.name.toLowerCase().includes(q) ||
+            e.detailTitle.toLowerCase().includes(q) ||
             e.description.toLowerCase().includes(q) ||
             e.details.toLowerCase().includes(q)
         );
     if (filtered.length === 0) {
       return;
     }
-    if (!filtered.some((e) => e.id === version2ApiEndpointId)) {
+    if (activeVersion === 'version3') {
+      if (!filtered.some((e) => e.id === version3ApiEndpointId)) {
+        setVersion3ApiEndpointId(filtered[0].id);
+      }
+    } else if (!filtered.some((e) => e.id === version2ApiEndpointId)) {
       setVersion2ApiEndpointId(filtered[0].id);
     }
-  }, [activeVersion, selectedCategory, integrationsSearch, version2ApiEndpointId]);
+  }, [
+    activeVersion,
+    selectedCategory,
+    integrationsSearch,
+    version2ApiEndpointId,
+    version3ApiEndpointId,
+  ]);
 
   const [isStatusPopoverOpen, setIsStatusPopoverOpen] = useState(false);
   const [isSignalsPopoverOpen, setIsSignalsPopoverOpen] = useState(false);
@@ -1361,7 +1386,8 @@ export const IngestHubPage: React.FC = () => {
     activeVersion === 'agentUx' ||
     activeVersion === 'aiSourceMap' ||
     activeVersion === 'version1' ||
-    activeVersion === 'version2';
+    activeVersion === 'version2' ||
+    activeVersion === 'version3';
   const isStopVersion = isSkipLikeVersion;
   const hasAddedData = sessionStorage.getItem('ingestHub:dataAdded') === 'true';
   const isStopFillVersion = activeVersion === 'blockUx' && !hasAddedData;
@@ -1955,27 +1981,102 @@ export const IngestHubPage: React.FC = () => {
           <EuiFlexItem grow={1} style={{ minWidth: 0 }}>
             {selectedCategory === 'all' && !rawQ ? (
               renderAddDataRecommendedContent()
-            ) : activeVersion === 'version2' && selectedCategory === 'all-api-ingestion' ? (
-              <>
-                <EuiTitle size="xs">
-                  <h2>API endpoints</h2>
-                </EuiTitle>
-                <EuiSpacer size="xs" />
-                <EuiText size="s" color="subdued">
-                  <p>
-                    Direct access to your deployment&apos;s endpoints. Create an API key to
-                    authenticate.
-                  </p>
-                </EuiText>
-                <EuiSpacer size="l" />
-                <Version2ApiEndpointsSplit
-                  searchQuery={rawQ}
-                  selectedEndpointId={version2ApiEndpointId}
-                  onSelectEndpoint={setVersion2ApiEndpointId}
-                  prependBasePath={(path) => services.http?.basePath.prepend(path) ?? path}
-                  dataTestSubjPrefix="obsOnboardingIngestHubV2ApiEndpoint"
-                />
-              </>
+            ) : (activeVersion === 'version2' || activeVersion === 'version3') &&
+              selectedCategory === 'all-api-ingestion' ? (
+              <EuiFlexGroup
+                direction="column"
+                gutterSize="none"
+                alignItems="stretch"
+                /* EuiFlexGroup replaces `css`; default flex-grow:1 stretched this column inside grow={1} */
+                style={{ gap: 24, flexGrow: 0, alignSelf: 'flex-start', width: '100%', minWidth: 0 }}
+              >
+                <EuiFlexGroup
+                  alignItems="flexStart"
+                  responsive={true}
+                  gutterSize="m"
+                  style={{ flexGrow: 0, width: '100%', minWidth: 0 }}
+                >
+                  <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
+                    <EuiTitle size="xs">
+                      <h2>API endpoints</h2>
+                    </EuiTitle>
+                    <EuiSpacer size="xs" />
+                    <EuiText size="s" color="subdued">
+                      <p>
+                        Direct access to your deployment&apos;s endpoints. Create an API key to
+                        authenticate.{' '}
+                        <EuiLink
+                          data-test-subj={
+                            activeVersion === 'version3'
+                              ? 'obsOnboardingIngestHubV3ApiEndpointsDocumentation'
+                              : 'obsOnboardingIngestHubV2ApiEndpointsDocumentation'
+                          }
+                          href="https://www.elastic.co/docs/deploy-manage/api-keys/elasticsearch-api-keys"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          external
+                        >
+                          {i18n.translate(
+                            'xpack.observabilityOnboarding.version2ApiEndpoints.elasticsearchApiKeysLearnMore',
+                            { defaultMessage: 'Learn more' }
+                          )}
+                        </EuiLink>
+                      </p>
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                {activeVersion === 'version3' ? (
+                  <Version3ApiEndpointsSplit
+                    searchQuery={rawQ}
+                    selectedEndpointId={version3ApiEndpointId}
+                    onSelectEndpoint={setVersion3ApiEndpointId}
+                    dataTestSubjPrefix="obsOnboardingIngestHubV3ApiEndpoint"
+                    secretsByEndpointId={version3ApiEndpointSecrets}
+                    apiKeyManageHref={
+                      services.http?.basePath.prepend('/app/management/security/api_keys') ??
+                      '/app/management/security/api_keys'
+                    }
+                    createApiKeyDataTestSubj="obsOnboardingIngestHubV3CreateApiKey"
+                    onApiKeyCreated={(result) => {
+                      const endpoint = API_ENDPOINTS.find((e) => e.id === version3ApiEndpointId);
+                      if (
+                        endpoint &&
+                        (endpoint.keyType === 'api_key' || endpoint.keyType === 'kibana_note')
+                      ) {
+                        setVersion3ApiEndpointSecrets((prev) => ({
+                          ...prev,
+                          [version3ApiEndpointId]: result.encoded,
+                        }));
+                      }
+                    }}
+                  />
+                ) : (
+                  <Version2ApiEndpointsSplit
+                    searchQuery={rawQ}
+                    selectedEndpointId={version2ApiEndpointId}
+                    onSelectEndpoint={setVersion2ApiEndpointId}
+                    dataTestSubjPrefix="obsOnboardingIngestHubV2ApiEndpoint"
+                    secretsByEndpointId={version2ApiEndpointSecrets}
+                    apiKeyManageHref={
+                      services.http?.basePath.prepend('/app/management/security/api_keys') ??
+                      '/app/management/security/api_keys'
+                    }
+                    createApiKeyDataTestSubj="obsOnboardingIngestHubV2CreateApiKey"
+                    onApiKeyCreated={(result) => {
+                      const endpoint = API_ENDPOINTS.find((e) => e.id === version2ApiEndpointId);
+                      if (
+                        endpoint &&
+                        (endpoint.keyType === 'api_key' || endpoint.keyType === 'kibana_note')
+                      ) {
+                        setVersion2ApiEndpointSecrets((prev) => ({
+                          ...prev,
+                          [version2ApiEndpointId]: result.encoded,
+                        }));
+                      }
+                    }}
+                  />
+                )}
+              </EuiFlexGroup>
             ) : (
               <>
                 <EuiTitle size="xs">

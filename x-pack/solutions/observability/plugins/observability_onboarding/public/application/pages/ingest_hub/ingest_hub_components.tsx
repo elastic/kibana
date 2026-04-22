@@ -22,12 +22,33 @@ const CARD_PADDING_PX = 16;
 
 export type CardLogoIconSize = 'default' | 'compact' | 'list';
 
-export const CardLogoIcon: React.FC<{
+/** Built-in EUI logos supported inside {@link CardLogoIcon} tiles (see EUI Icons → Elastic logos / Apps). */
+export type CardLogoIconEuiType = 'logoCloud';
+
+export interface CardLogoIconProps {
   src: string;
   alt: string;
   /** `default`: integration cards. `list`: same treatment at 16×16. `compact`: dense legacy row. */
   size?: CardLogoIconSize;
-}> = ({ src, alt, size = 'default' }) => {
+  /** `plain`: white (empty shade) tile behind the logo; default matches subdued list rows. */
+  iconBackground?: 'subdued' | 'plain';
+  /** Overrides tile background from `iconBackground` (e.g. selected tab highlight). */
+  tileBackgroundColor?: string;
+  /** Overrides default `borderBaseSubdued` tile border color. */
+  tileBorderColor?: string;
+  /** When set, renders this EUI built-in logo instead of loading `src`. */
+  logoEuiIcon?: CardLogoIconEuiType;
+}
+
+export const CardLogoIcon = ({
+  src,
+  alt,
+  size = 'default',
+  iconBackground = 'subdued',
+  tileBackgroundColor,
+  tileBorderColor,
+  logoEuiIcon,
+}: CardLogoIconProps) => {
   const { euiTheme } = useEuiTheme();
   const [errored, setErrored] = useState(false);
   const imgRef = useRef<HTMLImageElement | null>(null);
@@ -51,18 +72,37 @@ export const CardLogoIcon: React.FC<{
     width: logoPx + padPx * 2,
     height: logoPx + padPx * 2,
     borderRadius: cornerRadius,
-    backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-    border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
+    backgroundColor:
+      tileBackgroundColor ??
+      (iconBackground === 'plain'
+        ? euiTheme.colors.emptyShade
+        : euiTheme.colors.backgroundBaseSubdued),
+    border: `1px solid ${tileBorderColor ?? euiTheme.colors.borderBaseSubdued}`,
   };
 
   useEffect(() => {
-    if (errored) return;
+    if (logoEuiIcon || errored) return;
     const img = imgRef.current;
     if (!img) return;
     const onErr = () => setErrored(true);
     img.addEventListener('error', onErr);
     return () => img.removeEventListener('error', onErr);
-  }, [src, errored, logoPx]);
+  }, [logoEuiIcon, src, errored, logoPx]);
+
+  const euiLogoSize = isList || isCompact ? 'm' : 'l';
+
+  if (logoEuiIcon) {
+    return (
+      <div style={wrapperStyle}>
+        <EuiIcon
+          type={logoEuiIcon}
+          size={euiLogoSize}
+          title={alt || undefined}
+          aria-hidden={alt ? undefined : true}
+        />
+      </div>
+    );
+  }
 
   if (errored) {
     return (
