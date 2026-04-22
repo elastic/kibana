@@ -63,7 +63,7 @@ export function MetricsInDiscoverCallout({ timeRange }: MetricsInDiscoverCallout
         announceOnMount
         color="warning"
         title={calloutTitle}
-        iconType="popper"
+        iconType="warning"
       >
         <EuiText size="s">
           <FormattedMessage
