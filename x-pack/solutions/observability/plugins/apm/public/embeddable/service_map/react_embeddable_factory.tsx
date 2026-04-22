@@ -25,7 +25,6 @@ import {
 } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { BehaviorSubject, combineLatest, map, merge } from 'rxjs';
 import { SERVICE_ENVIRONMENT, SERVICE_NAME } from '@kbn/apm-types';
@@ -114,15 +113,6 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
       );
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
-      const filtersSubscription = combineLatest([serviceName$, environment$]).subscribe(
-        ([sn, env]) => {
-          filters$.next(buildFiltersFromState(sn, env));
-        }
-      );
-      const querySubscription = kuery$.subscribe((k) => {
-        query$.next(buildQueryFromKuery(k));
-      });
-
       function serializeState(): ServiceMapEmbeddableState {
         return {
           ...titleManager.getLatestState(),
@@ -177,10 +167,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
         filters$,
         query$,
         canEditUnifiedSearch: () => true,
-        getTypeDisplayName: () =>
-          i18n.translate('xpack.apm.embeddable.serviceMap.typeDisplayName', {
-            defaultMessage: 'configuration',
-          }),
+        getTypeDisplayName: () => 'configuration',
         isEditingEnabled: () => true,
         onEdit: async () => {
           openLazyFlyout({
@@ -223,6 +210,14 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
         api,
         Component: () => {
           useEffect(() => {
+            const filtersSubscription = combineLatest([serviceName$, environment$]).subscribe(
+              ([sn, env]) => {
+                filters$.next(buildFiltersFromState(sn, env));
+              }
+            );
+            const querySubscription = kuery$.subscribe((k) => {
+              query$.next(buildQueryFromKuery(k));
+            });
             return () => {
               filtersSubscription.unsubscribe();
               querySubscription.unsubscribe();
