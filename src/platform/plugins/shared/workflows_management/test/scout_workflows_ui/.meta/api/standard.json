@@ -1,5 +1,5 @@
 {
-  "sha1": "4fa6a89dc177494782fe1fe04f22fd9d590e7a5b",
+  "sha1": "3a5093b7332613c7f0d78b7cdac3589d2fc57e10",
   "tests": [
     {
       "id": "b2eaaaa0cf33c26-d5cddc6b883a994",
@@ -219,6 +219,32 @@
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/concurrency_control.spec.ts",
         "line": 142,
         "column": 14
+      }
+    },
+    {
+      "id": "88880ed74902ffd-ddaea7aa387b906",
+      "title": "Hard delete TOCTOU race condition hard delete during a concurrent run should not orphan the execution",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/hard_delete_race_condition.spec.ts",
+        "line": 95,
+        "column": 12
       }
     },
     {

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { getLatestEntitiesIndexName } from '@kbn/entity-store/common';
 import type { ExtraOptions, LensAttributes } from '../../types';
 
 import {
   ENTITY_STORE_V2_HOSTS_KPI_LENS_AD_HOC_ID,
   getEntityStoreV2HostOnlyFilter,
-  getEntityStoreV2LatestHostsIndexTitle,
 } from './entity_store_v2_hosts_kpi_lens_shared';
 
 const layerId = '416b6fad-1923-4f6a-a2df-b223bb287e30';
@@ -67,7 +67,7 @@ const getLegacyKpiHostMetricLensAttributes = (): LensAttributes => {
 };
 
 const getEntityStoreV2KpiHostMetricLensAttributes = (spaceId?: string): LensAttributes => {
-  const indexTitle = getEntityStoreV2LatestHostsIndexTitle(spaceId);
+  const indexTitle = getLatestEntitiesIndexName(spaceId ?? 'default');
 
   return {
     description: '',

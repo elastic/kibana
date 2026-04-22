@@ -12,6 +12,8 @@ import {
   trackLLMUsage,
   trackConversationRound,
   trackQueryToResultTime,
+  trackSkillInvocation,
+  trackPluginImport,
   AGENTBUILDER_USAGE_DOMAIN,
 } from './usage_counters';
 
@@ -307,6 +309,84 @@ describe('usage_counters', () => {
           incrementBy: 1,
         });
       }
+    });
+  });
+
+  describe('trackSkillInvocation', () => {
+    let mockUsageCounter: jest.Mocked<UsageCounter>;
+
+    beforeEach(() => {
+      mockUsageCounter = {
+        incrementCounter: jest.fn(),
+      } as unknown as jest.Mocked<UsageCounter>;
+    });
+
+    it('does nothing when usageCounter is undefined', () => {
+      expect(() => trackSkillInvocation(undefined, 'builtin')).not.toThrow();
+    });
+
+    it('tracks skill invocation from builtin', () => {
+      trackSkillInvocation(mockUsageCounter, 'builtin');
+
+      expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'agent_builder_skill_invocation_builtin',
+        counterType: 'count',
+        incrementBy: 1,
+      });
+    });
+
+    it('tracks skill invocation from custom', () => {
+      trackSkillInvocation(mockUsageCounter, 'custom');
+
+      expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'agent_builder_skill_invocation_custom',
+        counterType: 'count',
+        incrementBy: 1,
+      });
+    });
+
+    it('tracks skill invocation from plugin', () => {
+      trackSkillInvocation(mockUsageCounter, 'plugin');
+
+      expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'agent_builder_skill_invocation_plugin',
+        counterType: 'count',
+        incrementBy: 1,
+      });
+    });
+  });
+
+  describe('trackPluginImport', () => {
+    let mockUsageCounter: jest.Mocked<UsageCounter>;
+
+    beforeEach(() => {
+      mockUsageCounter = {
+        incrementCounter: jest.fn(),
+      } as unknown as jest.Mocked<UsageCounter>;
+    });
+
+    it('does nothing when usageCounter is undefined', () => {
+      expect(() => trackPluginImport(undefined, 'url')).not.toThrow();
+    });
+
+    it('tracks plugin import from url', () => {
+      trackPluginImport(mockUsageCounter, 'url');
+
+      expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'agent_builder_plugin_import_url',
+        counterType: 'count',
+        incrementBy: 1,
+      });
+    });
+
+    it('tracks plugin import from upload', () => {
+      trackPluginImport(mockUsageCounter, 'upload');
+
+      expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'agent_builder_plugin_import_upload',
+        counterType: 'count',
+        incrementBy: 1,
+      });
     });
   });
 });
