@@ -64,7 +64,7 @@ const getDefaultQuery = ({ query, filters }: EntitiesBaseURLQuery): URLQuery => 
 });
 
 export const EntityAnalyticsHomePage = () => {
-  const { telemetry } = useKibana().services;
+  const { telemetry, agentBuilder } = useKibana().services;
   const {
     indicesExist: oldIndicesExist,
     loading: oldIsSourcererLoading,
@@ -159,11 +159,8 @@ export const EntityAnalyticsHomePage = () => {
   );
 
   const handleHuntInChat = useCallback(() => {
-    const firstLead = leads[0];
-    if (firstLead) {
-      openAgentBuilderWithLead(firstLead);
-    }
-  }, [leads, openAgentBuilderWithLead]);
+    agentBuilder?.openChat({ newConversation: true, sessionTag: 'security' });
+  }, [agentBuilder]);
 
   if (newDataViewPickerEnabled && entityDataViewLoading) {
     return <PageLoader />;
