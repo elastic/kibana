@@ -11,6 +11,7 @@ import { apiPrivileges } from '@kbn/agent-builder-plugin/common/features';
 import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
 import { getRequestAbortedSignal } from '@kbn/inference-plugin/server/routes/get_request_aborted_signal';
 import { isIndexNotFoundError } from '@kbn/agent-builder-plugin/server/utils/is_index_not_found_error';
+import { isNoMatchingProjectError } from '@kbn/agent-builder-plugin/server/utils/is_no_matching_project_error';
 import { generateErrorAiInsight } from './apm_error/generate_error_ai_insight';
 import { createObservabilityAgentBuilderServerRoute } from '../create_observability_agent_builder_server_route';
 import { getLogAiInsights } from './get_log_ai_insights';
@@ -200,11 +201,14 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
         });
       } catch (error) {
         logger.error(error);
-        if (isIndexNotFoundError(error)) {
+        if (isIndexNotFoundError(error) || isNoMatchingProjectError(error)) {
           return response.notFound({
-            body: { message: error.message },
+            body: {
+              message: error instanceof Error ? error.message : String(error),
+            },
           });
         }
+        throw error;
       }
     },
   });
