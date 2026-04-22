@@ -20,6 +20,9 @@ import { EntityType } from '../common.gen';
 
 export type DeleteSingleEntityRequestParams = z.infer<typeof DeleteSingleEntityRequestParams>;
 export const DeleteSingleEntityRequestParams = z.object({
+  /**
+   * The entity type of the entity to delete.
+   */
   entityType: EntityType,
 });
 export type DeleteSingleEntityRequestParamsInput = z.input<typeof DeleteSingleEntityRequestParams>;

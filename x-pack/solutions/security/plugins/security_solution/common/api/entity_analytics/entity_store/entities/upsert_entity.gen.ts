@@ -31,6 +31,9 @@ export type UpsertEntityRequestQueryInput = z.input<typeof UpsertEntityRequestQu
 
 export type UpsertEntityRequestParams = z.infer<typeof UpsertEntityRequestParams>;
 export const UpsertEntityRequestParams = z.object({
+  /**
+   * The entity type of the entity to create or update.
+   */
   entityType: EntityType,
 });
 export type UpsertEntityRequestParamsInput = z.input<typeof UpsertEntityRequestParams>;
