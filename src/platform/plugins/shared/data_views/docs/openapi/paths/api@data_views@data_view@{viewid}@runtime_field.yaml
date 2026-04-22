@@ -6,6 +6,7 @@ post:
     Runtime fields are computed at query time using a
     [Painless script](https://www.elastic.co/docs/explore-analyze/scripting/modules-scripting-painless)
     and do not require reindexing.
+    If no `script` is provided, the runtime field returns the corresponding value from the document `_source`.
   tags:
     - data views
   x-codeSamples:

@@ -164,7 +164,8 @@ export const UPDATE_DATA_VIEW_FIELDS_DESCRIPTION =
 
 export const CREATE_RUNTIME_FIELD_DESCRIPTION =
   'Create a runtime field for a data view. Runtime fields are computed at query time ' +
-  `using a [Painless script](${PAINLESS_DOCS_URL}) and do not require reindexing.`;
+  `using a [Painless script](${PAINLESS_DOCS_URL}) and do not require reindexing. ` +
+  'If no `script` is provided, the runtime field returns the corresponding value from the document `_source`.';
 
 export const CREATE_UPDATE_RUNTIME_FIELD_DESCRIPTION =
   'Create or update a runtime field for a data view. If the runtime field already exists, ' +
@@ -181,7 +182,10 @@ export const DELETE_RUNTIME_FIELD_DESCRIPTION = 'Delete a runtime field from a d
 export const SWAP_REFERENCES_DESCRIPTION =
   'Swap saved object references from one data view to another. ' +
   'Use this endpoint to update dashboards, visualizations, and other saved objects ' +
-  'that reference a data view.';
+  'that reference a data view. ' +
+  'WARNING: Misuse can break large numbers of saved objects! ' +
+  'Use the [`_preview`](https://www.elastic.co/docs/api/doc/kibana/operation/operation-previewswapdataviewsdefault) endpoint ' +
+  'to see which saved objects would be affected before making changes.';
 
 export const PREVIEW_SWAP_REFERENCES_DESCRIPTION =
   'Preview the effect of swapping saved object references from one data view to another. ' +
