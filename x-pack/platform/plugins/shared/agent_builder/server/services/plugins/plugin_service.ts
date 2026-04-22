@@ -13,7 +13,9 @@ import type { PersistedSkillCreateRequest } from '@kbn/agent-builder-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { isAllowedBuiltinPlugin } from '@kbn/agent-builder-server/allow_lists';
 import type { BuiltInPluginDefinition } from '@kbn/agent-builder-server/plugins';
+import type { ToolRegistry } from '@kbn/agent-builder-server/tools';
 import type { AgentBuilderConfig } from '../../config';
+import type { AnalyticsService } from '../../telemetry';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { PluginClient, PersistedPluginDefinition } from './client';
 import { createClient, parsedArchiveToCreateRequest } from './client';
@@ -21,6 +23,7 @@ import { parsePluginFromUrl, parsePluginFromFile } from './utils';
 import { createClient as createSkillClient } from '../skills/persisted/client';
 import type { SkillClient } from '../skills/persisted/client';
 import type { SkillServiceSetup } from '../skills';
+import { validateToolIds } from '../skills/skill_registry';
 import {
   createBuiltinPluginRegistry,
   createBuiltinPluginProvider,
@@ -59,6 +62,8 @@ export interface PluginsServiceStartDeps {
   elasticsearch: ElasticsearchServiceStart;
   spaces?: SpacesPluginStart;
   config: AgentBuilderConfig;
+  getToolRegistry: (opts: { request: KibanaRequest }) => Promise<ToolRegistry>;
+  analyticsService?: AnalyticsService;
 }
 
 export const createPluginsService = (): PluginsService => {
@@ -169,6 +174,9 @@ class PluginsServiceImpl implements PluginsService {
     const createRequests = parsedArchive.skills.map((skill) =>
       toSkillCreateRequest({ skill, pluginName, pluginId })
     );
+
+    await this.validateSkillToolIds({ request, createRequests });
+
     await skillClient.bulkCreate(createRequests);
 
     const skillIds = createRequests.map((req) => req.id);
@@ -181,7 +189,31 @@ class PluginsServiceImpl implements PluginsService {
       id: pluginId,
     });
 
-    return pluginClient.create(createRequest);
+    const created = await pluginClient.create(createRequest);
+
+    const { analyticsService } = this.getStartDeps();
+    analyticsService?.reportPluginImported({
+      pluginId: created.id,
+      sourceType: source.type,
+      skillCount: createRequests.length,
+    });
+
+    return created;
+  }
+
+  private async validateSkillToolIds({
+    request,
+    createRequests,
+  }: {
+    request: KibanaRequest;
+    createRequests: PersistedSkillCreateRequest[];
+  }): Promise<void> {
+    const { getToolRegistry } = this.getStartDeps();
+    const toolRegistry = await getToolRegistry({ request });
+
+    for (const req of createRequests) {
+      await validateToolIds(req.tool_ids, toolRegistry);
+    }
   }
 
   private async deletePlugin({
@@ -230,7 +262,7 @@ const toSkillCreateRequest = ({
       relativePath: file.relativePath,
       content: file.content,
     })),
-    tool_ids: [],
+    tool_ids: skill.meta.allowedTools ?? [],
     plugin_id: pluginId,
   };
 };

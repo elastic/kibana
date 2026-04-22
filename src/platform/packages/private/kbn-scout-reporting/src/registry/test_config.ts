@@ -69,7 +69,15 @@ const resolveModuleMetadata = (
   }
 
   const g = match.groups;
-  const module: ScoutTestableModule = g.examplesRoot
+  const module: ScoutTestableModule = g.coreRoot
+    ? {
+        name: 'core',
+        group: 'platform',
+        type: 'package' as ScoutTestableModule['type'],
+        visibility: 'shared' as ScoutTestableModule['visibility'],
+        root: moduleRoot,
+      }
+    : g.examplesRoot
     ? (() => {
         const manifest = readKibanaModuleManifest(path.join(REPO_ROOT, moduleRoot, 'kibana.jsonc'));
         return {

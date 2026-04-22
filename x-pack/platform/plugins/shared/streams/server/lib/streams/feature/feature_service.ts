@@ -15,6 +15,10 @@ import { getFeatureStorageSettings } from './storage_settings';
 import { FEATURE_ID, FEATURE_PROPERTIES, FEATURE_SUBTYPE, FEATURE_UUID } from './fields';
 import { storedFeatureSchema } from './stored_feature';
 import type { InferenceResolver } from '../assets/query/helpers/inference_availability';
+import {
+  DEFAULT_SIG_EVENTS_TUNING_CONFIG,
+  type SigEventsTuningConfig,
+} from '../../../../common/sig_events_tuning_config';
 
 export class FeatureService {
   constructor(
@@ -23,7 +27,12 @@ export class FeatureService {
     private readonly logger: Logger
   ) {}
 
-  async getClient(): Promise<FeatureClient> {
+  async getClient(
+    config: Pick<
+      SigEventsTuningConfig,
+      'feature_ttl_days' | 'semantic_min_score' | 'rrf_rank_constant'
+    > = DEFAULT_SIG_EVENTS_TUNING_CONFIG
+  ): Promise<FeatureClient> {
     const [coreStart] = await this.coreSetup.getStartServices();
 
     const esClient = coreStart.elasticsearch.client.asInternalUser;
@@ -61,7 +70,8 @@ export class FeatureService {
         storageClient: adapter.getClient(),
         logger: this.logger,
       },
-      inferenceAvailable
+      inferenceAvailable,
+      config
     );
   }
 }

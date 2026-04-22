@@ -13,7 +13,7 @@ import os from 'os';
 import * as globby from 'globby';
 import minimatch from 'minimatch';
 
-import { load as loadYaml } from 'js-yaml';
+import { parse as loadYaml } from 'yaml';
 
 import type { BuildkiteStep } from '../buildkite';
 import { BuildkiteClient } from '../buildkite';

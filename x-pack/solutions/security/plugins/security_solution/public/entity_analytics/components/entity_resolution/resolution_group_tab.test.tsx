@@ -64,7 +64,7 @@ describe('ResolutionGroupTab', () => {
 
     const { getByTestId, getAllByText, getByText } = render(
       <TestProviders>
-        <ResolutionGroupTab entityId="alice-id" entityType="user" />
+        <ResolutionGroupTab entityId="alice-id" entityType="user" scopeId="test-scope" />
       </TestProviders>
     );
 
@@ -81,7 +81,7 @@ describe('ResolutionGroupTab', () => {
 
     const { getAllByLabelText } = render(
       <TestProviders>
-        <ResolutionGroupTab entityId="alice-id" entityType="user" />
+        <ResolutionGroupTab entityId="alice-id" entityType="user" scopeId="test-scope" />
       </TestProviders>
     );
 
@@ -109,7 +109,7 @@ describe('ResolutionGroupTab', () => {
 
     const { getAllByLabelText, findByTestId } = render(
       <TestProviders>
-        <ResolutionGroupTab entityId="alice-id" entityType="user" />
+        <ResolutionGroupTab entityId="alice-id" entityType="user" scopeId="test-scope" />
       </TestProviders>
     );
 
@@ -131,7 +131,7 @@ describe('ResolutionGroupTab', () => {
 
     const { getAllByLabelText } = render(
       <TestProviders>
-        <ResolutionGroupTab entityId="alice-id" entityType="user" />
+        <ResolutionGroupTab entityId="alice-id" entityType="user" scopeId="test-scope" />
       </TestProviders>
     );
 
@@ -149,7 +149,7 @@ describe('ResolutionGroupTab', () => {
 
     const { getAllByLabelText } = render(
       <TestProviders>
-        <ResolutionGroupTab entityId="alice-id" entityType="user" />
+        <ResolutionGroupTab entityId="alice-id" entityType="user" scopeId="test-scope" />
       </TestProviders>
     );
 
@@ -175,7 +175,7 @@ describe('ResolutionGroupTab', () => {
 
     const { getAllByLabelText, findByRole } = render(
       <TestProviders>
-        <ResolutionGroupTab entityId="alice-id" entityType="user" />
+        <ResolutionGroupTab entityId="alice-id" entityType="user" scopeId="test-scope" />
       </TestProviders>
     );
 

@@ -85,6 +85,14 @@ import type {
 } from '@kbn/discover-shared-plugin/public';
 import type { KqlPluginSetup, KqlPluginStart } from '@kbn/kql/public';
 import type { SLOPublicStart } from '@kbn/slo-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
+import type { ICPSManager } from '@kbn/cps-utils';
+import { ProjectRoutingAccess } from '@kbn/cps-utils';
+import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
+import {
+  OBSERVABILITY_APM_CPS_ENABLED_DEFAULT,
+  OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
+} from '../common/cps_feature_flag';
 import type { ConfigSchema } from '.';
 import {
   getApmEnrollmentFlyoutData,
@@ -99,6 +107,7 @@ import type { ITelemetryClient } from './services/telemetry';
 import { TelemetryService } from './services/telemetry';
 import { createLazyFocusedTraceWaterfallRenderer } from './components/shared/focused_trace_waterfall/lazy_create_focused_trace_waterfall_renderer';
 import { createLazyFullTraceWaterfallRenderer } from './components/shared/trace_waterfall/lazy_create_full_trace_waterfall_renderer';
+import type { ApmCoreSetup } from './components/alerting/utils/create_lazy_component_with_context';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 export type ApmPluginStart = ReturnType<ApmPlugin['start']>;
@@ -130,6 +139,13 @@ export interface ApmServices {
   securityService: SecurityServiceStart;
   telemetry: ITelemetryClient;
 }
+
+export interface ApmInternalServices {
+  cpsManager?: ICPSManager;
+}
+
+export const [getApmInternalServices, setApmInternalServices] =
+  createGetterSetter<ApmInternalServices>('ApmInternalServices', false);
 
 export interface ApmPluginStartDeps {
   alerting?: AlertingPluginPublicStart;
@@ -175,6 +191,7 @@ export interface ApmPluginStartDeps {
   agentBuilder?: AgentBuilderPluginStart;
   observabilityAgentBuilder?: ObservabilityAgentBuilderPluginPublicStart;
   slo?: SLOPublicStart;
+  cps?: CPSPluginStart;
 }
 
 const applicationsTitle = i18n.translate('xpack.apm.navigation.rootTitle', {
@@ -495,7 +512,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
 
     import('./components/alerting/rule_types/register_apm_rule_types').then(
       ({ registerApmRuleTypes }) => {
-        registerApmRuleTypes(observabilityRuleTypeRegistry);
+        registerApmRuleTypes(observabilityRuleTypeRegistry, core as ApmCoreSetup);
       }
     );
     import('./embeddable/register_embeddables').then(({ registerEmbeddables }) => {
@@ -518,6 +535,24 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
     const { fleet, discoverShared } = plugins;
 
+    if (
+      core.featureFlags.getBooleanValue(
+        OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
+        OBSERVABILITY_APM_CPS_ENABLED_DEFAULT
+      )
+    ) {
+      plugins.cps?.cpsManager?.registerAppAccess('apm', () => ProjectRoutingAccess.EDITABLE);
+      setApmInternalServices({
+        cpsManager: plugins.cps?.cpsManager,
+      });
+    } else {
+      setApmInternalServices({});
+    }
+    if (plugins.agentBuilder) {
+      import('./agent_builder/attachment_types').then(({ registerServiceMapAttachment }) => {
+        registerServiceMapAttachment(plugins.agentBuilder!.attachments);
+      });
+    }
     plugins.observabilityAIAssistant?.service.register(async ({ registerRenderFunction }) => {
       const mod = await import('./assistant_functions');
 

@@ -44,6 +44,7 @@ import {
   USER_PROMPT,
 } from '../../screens/ai_assistant';
 import { visit, visitGetStartedPage } from '../../tasks/navigation';
+import { setPreferredChatExperienceToClassic } from '../../tasks/api_calls/kibana_advanced_settings';
 
 const mockConvo1 = {
   id: 'spooky',
@@ -61,6 +62,7 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
     deleteConversations();
     deleteAlertsAndRules();
     login(Cypress.env(IS_SERVERLESS) ? 'admin' : undefined);
+    setPreferredChatExperienceToClassic();
     waitForConversation(mockConvo1);
     waitForConversation(mockConvo2);
   });
