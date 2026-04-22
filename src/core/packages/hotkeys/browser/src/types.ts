@@ -34,8 +34,21 @@ export interface HotkeyDefinition {
    * a {@link RegisterableHotkey} raw object for cases that don't fit the
    * strict union (e.g. `Shift+?`), or an arbitrary string for fully dynamic
    * registrations.
+   *
+   * On projected registrations from {@link HotkeysStart.getRegistrations$}
+   * this is the chord that is currently bound (after any user override);
+   * the originally declared value is preserved on {@link defaultKeys}.
    */
   keys: Hotkey | RegisterableHotkey | (string & {});
+  /**
+   * The originally declared chord. Stamped by the service at first register
+   * and preserved across updates/overrides so discovery UIs can show both
+   * the active binding and the shipped default.
+   *
+   * Plugins should not set this manually: it is auto-populated from `keys`
+   * and any value passed at registration is ignored.
+   */
+  defaultKeys?: Hotkey | RegisterableHotkey | (string & {});
   /** Human-readable label, shown in the cheat sheet. Must be i18n-translated by the caller. */
   label: string;
   /** Optional longer description, shown alongside the label. Must be i18n-translated by the caller. */
@@ -108,6 +121,13 @@ declare module '@tanstack/hotkeys' {
       scope: HotkeyScope;
       appId?: string;
       group?: string;
+      /**
+       * The chord that was declared when the hotkey was first registered,
+       * preserved here so discovery UIs can surface the shipped default
+       * independently of any user override that may be active on
+       * {@link HotkeyRegistration.hotkey}.
+       */
+      defaultKeys: Hotkey | RegisterableHotkey | (string & {});
     };
   }
 }

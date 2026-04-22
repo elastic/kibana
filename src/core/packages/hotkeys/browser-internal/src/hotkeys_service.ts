@@ -7,8 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Subscription } from 'rxjs';
-import { HotkeyManager, type HotkeyCallback, type RegisterableHotkey } from '@tanstack/hotkeys';
+import { EMPTY, Subscription } from 'rxjs';
+import {
+  HotkeyManager,
+  type HotkeyCallback,
+  type HotkeyRegistrationHandle,
+  type RegisterableHotkey,
+} from '@tanstack/hotkeys';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type {
@@ -18,8 +23,8 @@ import type {
   HotkeysSetup,
   HotkeysStart,
 } from '@kbn/core-hotkeys-browser';
-import { RegistrationsStore } from './registrations_store';
 import { createAppScopedHotkeys } from './app_scoped_hotkeys';
+import { createDerivedRegistrations, type DerivedRegistrations } from './derive_registrations';
 
 /** @internal */
 export type SetupDeps = Record<string, never>;
@@ -27,6 +32,18 @@ export type SetupDeps = Record<string, never>;
 /** @internal */
 export interface StartDeps {
   application: Pick<ApplicationStart, 'currentAppId$'>;
+}
+
+/**
+ * Internal bookkeeping for a single registered hotkey. Holds the
+ * definition the caller provided (plus normalized defaults) and the
+ * TanStack handle that backs it, so `update()` and future re-bind paths
+ * can act on both without having to re-query the manager.
+ */
+interface InternalEntry {
+  def: HotkeyDefinition;
+  callback: HotkeyCallback;
+  managerHandle: HotkeyRegistrationHandle;
 }
 
 const buildMeta = (def: HotkeyDefinition) => ({
@@ -37,20 +54,25 @@ const buildMeta = (def: HotkeyDefinition) => ({
     scope: def.scope ?? 'context',
     appId: def.appId,
     group: def.group,
+    defaultKeys: def.defaultKeys ?? def.keys,
   },
 });
 
 /**
  * Core browser-side hotkeys service. Wraps a shared `HotkeyManager` instance
- * from `@tanstack/hotkeys` with a Kibana-flavored registry that exposes a
- * discoverable stream of definitions and an app-scoped registrar.
+ * from `@tanstack/hotkeys` and projects its live `registrations` store back
+ * into the Kibana {@link HotkeyDefinition} shape consumed by discovery UIs
+ * (cheat sheet, keyboard settings, etc.). The manager is the single source
+ * of truth; this service only keeps a small lookup map so it can honor
+ * `update()`/`unregister()` without duplicating the registry.
  *
  * @internal
  */
 export class HotkeysService {
   private readonly manager: HotkeyManager = HotkeyManager.getInstance();
-  private readonly registrations = new RegistrationsStore();
+  private readonly internal = new Map<string, InternalEntry>();
   private readonly subscriptions = new Subscription();
+  private derived: DerivedRegistrations | undefined;
   private latestAppId: string | undefined;
   private started = false;
 
@@ -60,6 +82,7 @@ export class HotkeysService {
 
   public start({ application }: StartDeps): HotkeysStart {
     this.started = true;
+    this.derived = createDerivedRegistrations(this.manager);
     this.subscriptions.add(
       application.currentAppId$.subscribe((id) => {
         this.latestAppId = id;
@@ -86,7 +109,7 @@ export class HotkeysService {
       });
 
     const getRegistrations$: HotkeysStart['getRegistrations$'] = () =>
-      this.registrations.asObservable();
+      this.derived?.registrations$ ?? EMPTY;
 
     return { register, registerMany, forApp, getRegistrations$ };
   }
@@ -97,32 +120,39 @@ export class HotkeysService {
     }
     this.started = false;
     this.subscriptions.unsubscribe();
-    this.registrations.dispose();
+    this.derived?.dispose();
+    this.derived = undefined;
+    this.internal.clear();
     this.manager.destroy();
   }
 
   private doRegister(def: HotkeyDefinition, handler: (event: KeyboardEvent) => void): HotkeyHandle {
-    if (this.registrations.has(def.id)) {
+    if (this.internal.has(def.id)) {
       throw new Error(`HotkeysService: a hotkey with id "${def.id}" is already registered`);
     }
-    const stored: HotkeyDefinition = { ...def, scope: def.scope ?? 'context' };
+    const stored: HotkeyDefinition = {
+      ...def,
+      scope: def.scope ?? 'context',
+      defaultKeys: def.keys,
+    };
     const callback: HotkeyCallback = (event) => handler(event);
     const managerHandle = this.manager.register(stored.keys as RegisterableHotkey, callback, {
       enabled: stored.enabled !== false,
       target: stored.target ?? undefined,
       meta: buildMeta(stored),
     });
-    this.registrations.set(stored);
+    const entry: InternalEntry = { def: stored, callback, managerHandle };
+    this.internal.set(stored.id, entry);
 
     return {
       id: stored.id,
       update: (partial) => {
-        const current = this.registrations.get(stored.id);
+        const current = this.internal.get(stored.id);
         if (!current) {
           return;
         }
-        const next: HotkeyDefinition = { ...current, ...partial };
-        this.registrations.set(next);
+        const next: HotkeyDefinition = { ...current.def, ...partial };
+        current.def = next;
         const options: Parameters<typeof managerHandle.setOptions>[0] = {
           meta: buildMeta(next),
         };
@@ -132,11 +162,11 @@ export class HotkeysService {
         managerHandle.setOptions(options);
       },
       unregister: () => {
-        if (!this.registrations.has(stored.id)) {
+        if (!this.internal.has(stored.id)) {
           return;
         }
         managerHandle.unregister();
-        this.registrations.remove(stored.id);
+        this.internal.delete(stored.id);
       },
     };
   }
