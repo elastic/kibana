@@ -99,8 +99,7 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
   });
 
   const rowHoverAndFocusStyles = css`
-    &:hover .${ACTIONS_CLASS},
-    &:focus-within .${ACTIONS_CLASS} {
+    &:hover .${ACTIONS_CLASS}, &:focus-within .${ACTIONS_CLASS} {
       opacity: 1;
     }
     &:hover,
