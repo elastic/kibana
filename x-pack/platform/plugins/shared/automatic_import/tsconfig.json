@@ -62,6 +62,7 @@
     "@kbn/scout",
     "@kbn/core-analytics-browser",
     "@kbn/inference-common",
+    "@kbn/shared-ux-ai-components",
     "@kbn/core-http-browser",
   ]
 }

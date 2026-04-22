@@ -131,12 +131,17 @@
     "@kbn/scout",
     "@kbn/scout-synthtrace",
     "@kbn/synthtrace-client",
+    "@kbn/agent-builder-plugin",
+    "@kbn/agent-builder-server",
+    "@kbn/agent-builder-common",
+    "@kbn/agent-builder-browser",
     "@kbn/alerting-v2-plugin",
     "@kbn/cps-utils",
     "@kbn/aiops-log-rate-analysis",
     "@kbn/presentation-util-plugin",
     "@kbn/core-saved-objects-common",
     "@kbn/as-code-filters-constants",
+    "@kbn/core-http-server-mocks",
   ],
   "exclude": ["target/**/*"]
 }
