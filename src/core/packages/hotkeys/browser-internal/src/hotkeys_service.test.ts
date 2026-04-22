@@ -11,10 +11,23 @@ import { BehaviorSubject, firstValueFrom, take, toArray } from 'rxjs';
 import { HotkeyManager } from '@tanstack/hotkeys';
 import type { HotkeysStart } from '@kbn/core-hotkeys-browser';
 import { HotkeysService } from './hotkeys_service';
+import type { HotkeyOverride, HotkeyOverridesSource } from './overrides_source';
 
 const createApplication = (initialAppId?: string) => {
   const currentAppId$ = new BehaviorSubject<string | undefined>(initialAppId);
   return { currentAppId$ };
+};
+
+const createOverridesSource = (
+  initial: ReadonlyMap<string, HotkeyOverride> = new Map()
+): HotkeyOverridesSource & {
+  next: (overrides: ReadonlyMap<string, HotkeyOverride>) => void;
+} => {
+  const subject = new BehaviorSubject<ReadonlyMap<string, HotkeyOverride>>(initial);
+  return {
+    overrides$: subject.asObservable(),
+    next: (overrides) => subject.next(overrides),
+  };
 };
 
 const takeRegistrations = async (start: HotkeysStart) =>
@@ -245,6 +258,110 @@ describe('HotkeysService', () => {
       expect(() =>
         scope.register({ id: 'after:a', keys: 'Mod+1', label: 'nope' }, jest.fn())
       ).toThrow(/after the app scope has been disposed/);
+    });
+  });
+
+  describe('overrides', () => {
+    it('honors an override that is present at registration time', () => {
+      const overrides = createOverridesSource(new Map([['ov:a', { keys: 'Mod+Shift+S' }]]));
+      const start = service.start({ application: createApplication(), overrides });
+      const handler = jest.fn();
+      start.register({ id: 'ov:a', keys: 'Mod+S', label: 'Save', scope: 'global' }, handler);
+
+      document.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'S', ctrlKey: true, bubbles: true })
+      );
+      expect(handler).not.toHaveBeenCalled();
+
+      document.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'S', ctrlKey: true, shiftKey: true, bubbles: true })
+      );
+      expect(handler).toHaveBeenCalledTimes(1);
+    });
+
+    it('exposes the overridden chord on the projected registration but preserves defaultKeys', async () => {
+      const overrides = createOverridesSource(new Map([['ov:b', { keys: 'Mod+Shift+S' }]]));
+      const start = service.start({ application: createApplication(), overrides });
+      start.register({ id: 'ov:b', keys: 'Mod+S', label: 'Save', scope: 'global' }, jest.fn());
+      const regs = await takeRegistrations(start);
+      expect(regs[0]).toMatchObject({
+        id: 'ov:b',
+        keys: 'Mod+Shift+S',
+        defaultKeys: 'Mod+S',
+      });
+    });
+
+    it('re-binds the chord when the overrides source emits a new mapping', () => {
+      const overrides = createOverridesSource();
+      const start = service.start({ application: createApplication(), overrides });
+      const handler = jest.fn();
+      start.register({ id: 'ov:c', keys: 'Mod+S', label: 'Save', scope: 'global' }, handler);
+
+      document.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'S', ctrlKey: true, bubbles: true })
+      );
+      expect(handler).toHaveBeenCalledTimes(1);
+
+      overrides.next(new Map([['ov:c', { keys: 'Mod+Alt+S' }]]));
+
+      document.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'S', ctrlKey: true, bubbles: true })
+      );
+      expect(handler).toHaveBeenCalledTimes(1);
+
+      document.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'S', ctrlKey: true, altKey: true, bubbles: true })
+      );
+      expect(handler).toHaveBeenCalledTimes(2);
+    });
+
+    it('restores the declared chord when an override is cleared', () => {
+      const overrides = createOverridesSource(new Map([['ov:d', { keys: 'Mod+Alt+S' }]]));
+      const start = service.start({ application: createApplication(), overrides });
+      const handler = jest.fn();
+      start.register({ id: 'ov:d', keys: 'Mod+S', label: 'Save', scope: 'global' }, handler);
+
+      document.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'S', ctrlKey: true, bubbles: true })
+      );
+      expect(handler).not.toHaveBeenCalled();
+
+      overrides.next(new Map());
+
+      document.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'S', ctrlKey: true, bubbles: true })
+      );
+      expect(handler).toHaveBeenCalledTimes(1);
+    });
+
+    it('applies an override of `enabled` without re-registering the chord', async () => {
+      const overrides = createOverridesSource();
+      const start = service.start({ application: createApplication(), overrides });
+      const handler = jest.fn();
+      start.register({ id: 'ov:e', keys: 'Mod+S', label: 'Save', scope: 'global' }, handler);
+
+      overrides.next(new Map([['ov:e', { enabled: false }]]));
+
+      document.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'S', ctrlKey: true, bubbles: true })
+      );
+      expect(handler).not.toHaveBeenCalled();
+
+      const regs = await takeRegistrations(start);
+      expect(regs[0]).toMatchObject({ id: 'ov:e', keys: 'Mod+S', enabled: false });
+    });
+
+    it('leaves untouched entries alone when only one override changes', async () => {
+      const overrides = createOverridesSource();
+      const start = service.start({ application: createApplication(), overrides });
+      start.register({ id: 'ov:f', keys: 'Mod+S', label: 'Save', scope: 'global' }, jest.fn());
+      start.register({ id: 'ov:g', keys: 'Mod+K', label: 'Palette', scope: 'global' }, jest.fn());
+
+      overrides.next(new Map([['ov:f', { keys: 'Mod+Alt+S' }]]));
+
+      const regs = await takeRegistrations(start);
+      expect(regs.find((r) => r.id === 'ov:f')).toMatchObject({ keys: 'Mod+Alt+S' });
+      expect(regs.find((r) => r.id === 'ov:g')).toMatchObject({ keys: 'Mod+K' });
     });
   });
 
