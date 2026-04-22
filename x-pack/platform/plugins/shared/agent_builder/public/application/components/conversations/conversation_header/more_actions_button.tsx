@@ -163,7 +163,6 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
         <EuiContextMenuItem
           key="addConversationToDataset"
           icon="beaker"
-          size="s"
           data-test-subj="agentBuilderAddConversationToDataset"
           onClick={onAddConversationToDataset}
         >
