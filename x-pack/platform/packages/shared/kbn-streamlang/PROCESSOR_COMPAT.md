@@ -6,29 +6,29 @@ Audited against opentelemetry-collector-contrib (transform processor v0.120.0+, 
 
 ## Blocking Issues (fix before production use)
 
-| # | Processor | Issue | Location |
-|---|-----------|-------|----------|
-| 1 | `uppercase` | `ToUpperCase` errors at runtime if attribute is not a string type — the `where != nil` guard does not check type | `processors/uppercase.ts` |
-| 2 | `grok` | Pattern definitions (`pattern_definitions`) in the Streamlang DSL are silently dropped instead of being forwarded to `ExtractGrokPatterns` as the optional 4th array argument | `processors/grok.ts` |
-| 3 | `conditions` | `HasPrefix` and `HasSuffix` require a `string` first argument — they do not auto-convert like `IsMatch` does. Fields that aren't strings will produce a runtime error | `condition_to_ottl.ts:95,98` |
+| # | Processor | OTelCol Behavior | Expected Streamlang Behavior | Location |
+|---|-----------|------------------|------------------------------|----------|
+| 1 | `uppercase` | `ToUpperCase` raises a `TypeError` and the statement is skipped (with `error_mode: ignore`) if the attribute is not a string | Field is uppercased for any non-nil value, or an error is surfaced | `processors/uppercase.ts` |
+| 2 | `grok` | `pattern_definitions` in the DSL are silently ignored; `ExtractGrokPatterns` runs without custom pattern definitions, potentially failing to match | Custom pattern definitions are forwarded and used during extraction | `processors/grok.ts` |
+| 3 | `conditions` | `HasPrefix`/`HasSuffix` raise a runtime error if the field value is not a string — they do not auto-convert unlike `IsMatch` | `startsWith`/`endsWith` conditions work on any field that can be coerced to string | `condition_to_ottl.ts:95,98` |
 
 ---
 
 ## Semantic Issues (correct behavior, but worth documenting or hardening)
 
-| # | Processor | Issue | Location |
-|---|-----------|-------|----------|
-| 4 | `grok` | `set(log.attributes, merge_maps(...))` — `merge_maps` modifies the map in-place and returns `nil`; `set()` then skips nil and does nothing. The net result is correct (the merge already happened), but the pattern is inverted. Use `merge_maps()` directly as a statement. | `processors/grok.ts` |
-| 5 | `grok` | `namedCapturesOnly` is hardcoded to `true` regardless of DSL input | `processors/grok.ts` |
-| 6 | `rename` | Two-step `set()` + `delete_key()` uses `error_mode: ignore`. If `delete_key` errors after `set` succeeds, both source and target will exist. The shared `where` guard makes this rare, but it is not atomic. No dedicated OTTL `move_keys` editor exists, so this is the documented OTel pattern. | `processors/rename.ts` |
+| # | Processor | OTelCol Behavior | Expected Streamlang Behavior | Location |
+|---|-----------|------------------|------------------------------|----------|
+| 4 | `grok` | `merge_maps` modifies `log.attributes` in-place then returns `nil`; the enclosing `set()` call sees nil and skips — the merge already happened as a side effect | Extracted fields are merged into attributes; accidental reliance on side-effect ordering is fragile | `processors/grok.ts` |
+| 5 | `grok` | `namedCapturesOnly` is always `true` regardless of DSL input — numeric capture groups are always excluded | Respects the DSL `named_captures_only` field when provided | `processors/grok.ts` |
+| 6 | `rename` | Non-atomic: if `delete_key` fails after `set` succeeds (with `error_mode: ignore`), both source and target fields will exist | Rename is all-or-nothing; source disappears only if target was written | `processors/rename.ts` |
 
 ---
 
 ## Style Issues (deprecated but functional)
 
-| # | Processor | Issue | Location |
-|---|-----------|-------|----------|
-| 7 | `drop_document` | YAML output uses the deprecated v0.145.x `logs.log_record` nested format instead of the modern `log_conditions` top-level key | `yaml.ts` `renderFilter()` |
+| # | Processor | OTelCol Behavior | Expected Streamlang Behavior | Location |
+|---|-----------|------------------|------------------------------|----------|
+| 7 | `drop_document` | Accepts the deprecated `logs.log_record` nested format (v0.145.x) but the recommended format since v0.146.0 is the top-level `log_conditions` key | Emitted YAML should use the current documented format | `yaml.ts` `renderFilter()` |
 
 ---
 
