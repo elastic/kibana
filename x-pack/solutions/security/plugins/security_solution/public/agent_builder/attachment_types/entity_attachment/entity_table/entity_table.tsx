@@ -94,7 +94,7 @@ const SOURCES_OVERFLOW_TOOLTIP_TITLE = i18n.translate(
   { defaultMessage: 'Additional data sources' }
 );
 
-const LAST_SEEN_TOOLTIP_FIELD_NAME = 'entity.lifecycle.last_activity';
+const LAST_SEEN_TOOLTIP_FIELD_NAME = '@timestamp';
 
 const OPEN_ENTITY_ANALYTICS_LABEL = i18n.translate(
   'xpack.securitySolution.agentBuilder.entityAttachment.table.openEntityAnalytics',
@@ -333,12 +333,12 @@ export const EntityTable: React.FC<EntityTableProps> = ({ entities }) => {
         width: '150px',
       },
       {
-        field: 'data.lastSeen',
+        field: 'data.timestamp',
         name: COLUMN_LABELS.lastSeen,
         render: (_value: unknown, row: EntityRow) =>
-          row.data?.lastSeen ? (
+          row.data?.timestamp ? (
             <FormattedRelativePreferenceDate
-              value={row.data.lastSeen}
+              value={row.data.timestamp}
               relativeThresholdInHrs={Number.MAX_SAFE_INTEGER}
               tooltipFieldName={LAST_SEEN_TOOLTIP_FIELD_NAME}
             />
