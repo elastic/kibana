@@ -12,6 +12,7 @@ plugins:
     - custom_branding
     - dashboard
     - dashboard_markdown
+    - data
     - data_views
     - discover
     - discover_enhanced
