@@ -1743,7 +1743,7 @@
       "matchBaseBranches": ["main"],
       "addLabels": ["Team: SecuritySolution"],
       "minimumReleaseAge": "14 days",
-      "enabled": true
+      "enabled": false
     },
     {
       "groupName": "@hello-pangea/dnd",
