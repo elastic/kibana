@@ -930,7 +930,7 @@ describe('When on the package policy create page', () => {
         });
       });
 
-      test('should show Recommended badge instead of beta badge when agentless is the default deployment', async () => {
+      test('should show Recommended badge alongside beta badge when agentless is the default deployment and semver is pre-release', async () => {
         (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue(
           getMockPackageInfo({ version: '0.1.0', agentless: { enabled: true, isDefault: true } })
         );
@@ -941,8 +941,8 @@ describe('When on the package policy create page', () => {
         await waitFor(() => {
           expect(renderResult.getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ)).toBeInTheDocument();
           expect(
-            renderResult.queryByTestId(SETUP_TECHNOLOGY_SELECTOR_BETA_BADGE_TEST_SUBJ)
-          ).not.toBeInTheDocument();
+            renderResult.getByTestId(SETUP_TECHNOLOGY_SELECTOR_BETA_BADGE_TEST_SUBJ)
+          ).toBeInTheDocument();
           expect(renderResult.getByText('Recommended')).toBeInTheDocument();
         });
       });
