@@ -16,7 +16,7 @@ import { APM_SERVICE_MAP_EMBEDDABLE } from './constants';
 import {
   getServiceMapEmbeddableFactory,
   type ServiceMapEmbeddableApi,
-} from './react_embeddable_factory';
+} from './service_map_embeddable_factory';
 import type { EmbeddableDeps } from '../types';
 
 const mockInitializeTitleManager = jest.fn();

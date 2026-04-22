@@ -57,7 +57,7 @@ export async function registerEmbeddables(
 
   registerReactEmbeddableFactory(APM_SERVICE_MAP_EMBEDDABLE, async () => {
     const { getServiceMapEmbeddableFactory } = await import(
-      './service_map/react_embeddable_factory'
+      './service_map/service_map_embeddable_factory'
     );
 
     return getServiceMapEmbeddableFactory({ ...deps, coreStart, pluginsStart });
