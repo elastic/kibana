@@ -1412,6 +1412,7 @@ If you're upgrading to version 9.1.0, you first need to upgrade to version [8.19
 * Allows users to delete a snooze schedule from a rule using schedule ID [#213247]({{kib-pull}}213247).
 * Allows users to create a snooze schedule for rules using the schedule API [#210584]({{kib-pull}}210584).
 * Implements functionality to add observables, procedures, and custom fields to alerts for {{hive}} [#207255]({{kib-pull}}207255).
+* Updates the `context.link` variable to use the new Discover URL formatting in all {{es}} query rule types [#216376]({{kib-pull}}216376).
 
 **Dashboards and Visualizations**:
 * Adds the **Create alert rule** action to ES|QL dashboard panels, usable from the panel context menu or by right-clicking a data point on the visualization. This rule allows you to generate an alert when the data on the chart crosses a certain threshold [#217719]({{kib-pull}}217719).

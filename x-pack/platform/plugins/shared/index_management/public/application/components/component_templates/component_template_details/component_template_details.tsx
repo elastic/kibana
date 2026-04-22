@@ -237,7 +237,7 @@ export const ComponentTemplateDetailsFlyoutContent: React.FunctionComponent<Prop
             </EuiFlexItem>
 
             {/* "Manage" context menu */}
-            {componentTemplateDetails && (
+            {componentTemplateDetails && actions.length > 0 && (
               <EuiFlexItem grow={false}>
                 <ManageButton
                   actions={actions}

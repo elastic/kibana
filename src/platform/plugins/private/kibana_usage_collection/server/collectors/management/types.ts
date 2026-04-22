@@ -79,6 +79,7 @@ export interface UsageStats {
   'securitySolution:defaultValueReportMinutes': string;
   'securitySolution:defaultValueReportRate': string;
   'securitySolution:defaultValueReportTitle': string;
+  'securitySolution:enableAlertsAndAttacksAlignment': boolean;
   'search:includeFrozen': boolean;
   'courier:maxConcurrentShardRequests': number;
   'courier:setRequestPreference': string;
@@ -199,4 +200,5 @@ export interface UsageStats {
   'securitySolution:entityStoreEnableV2': boolean;
   'elasticRamen:enabled': boolean;
   'query_activity:minRunningTime': number;
+  'genAiSettings:tokenUsageTracking': boolean;
 }

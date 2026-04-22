@@ -10,6 +10,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { ServiceNode } from './service_node';
 import { ServiceMapSloFlyoutProvider } from './service_map_slo_flyout_context';
+import { useServiceMapAlertsTabNavigate } from './use_service_map_alerts_tab_href';
 import { ServiceHealthStatus } from '../../../../common/service_health_status';
 import type { ServiceNodeData } from '../../../../common/service_map';
 import { MOCK_EUI_THEME, MOCK_DEFAULT_COLOR, MOCK_EUI_THEME_FOR_USE_THEME } from './constants';
@@ -40,6 +41,11 @@ jest.mock('../../../context/apm_plugin/use_apm_plugin_context', () => ({
       },
     },
   }),
+}));
+
+jest.mock('./use_service_map_alerts_tab_href', () => ({
+  useServiceMapAlertsTabHref: jest.fn(() => '/app/apm/services/Test%20Service/alerts'),
+  useServiceMapAlertsTabNavigate: jest.fn(() => jest.fn()),
 }));
 
 // Mock getServiceHealthStatusColor
@@ -202,6 +208,17 @@ describe('ServiceNode', () => {
       );
       fireEvent.click(screen.getByTestId('apmSloBadge'));
       expect(onSloBadgeClick).toHaveBeenCalledWith('Test Service', 'java');
+    });
+  });
+
+  describe('Alerts badge', () => {
+    it('calls the alerts navigation handler when the alerts badge is clicked', () => {
+      const navigateCb = jest.fn();
+      jest.mocked(useServiceMapAlertsTabNavigate).mockReturnValue(navigateCb);
+
+      renderServiceNode(createServiceNodeData({ alertsCount: 2 }));
+      fireEvent.click(screen.getByTestId('serviceMapNodeAlertsBadge'));
+      expect(navigateCb).toHaveBeenCalled();
     });
   });
 });
