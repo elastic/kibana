@@ -52,6 +52,12 @@ export class DispatcherService implements DispatcherServiceContract {
     previousStartedAt = new Date(),
   }: DispatcherExecutionParams): Promise<DispatcherExecutionResult> {
     const startedAt = new Date();
+    // `startedAt`/`finishedAt` are wall-clock `Date` values used to emit
+    // ISO-8601 timestamps. Elapsed time is measured with
+    // `process.hrtime.bigint()` so that tick and per-stage durations are
+    // on the same monotonic clock — avoids NTP jumps and matches the
+    // resolution contract of `DispatcherStageTiming.duration_ms`.
+    const startedAtNs = process.hrtime.bigint();
 
     let pipelineResult: DispatcherPipelineResult;
     try {
@@ -66,6 +72,7 @@ export class DispatcherService implements DispatcherServiceContract {
       this.emitTickSummary(
         buildTickSummary({
           startedAt,
+          startedAtNs,
           previousStartedAt,
           completed: false,
           haltReason: 'step_error',
@@ -78,6 +85,7 @@ export class DispatcherService implements DispatcherServiceContract {
 
     const tick = buildTickSummary({
       startedAt,
+      startedAtNs,
       previousStartedAt,
       completed: pipelineResult.completed,
       haltReason: pipelineResult.haltReason ?? null,
@@ -105,22 +113,25 @@ export class DispatcherService implements DispatcherServiceContract {
 
 function buildTickSummary({
   startedAt,
+  startedAtNs,
   previousStartedAt,
   completed,
   haltReason,
   stages,
 }: {
   startedAt: Date;
+  startedAtNs: bigint;
   previousStartedAt: Date;
   completed: boolean;
   haltReason: DispatcherTickSummary['halt_reason'];
   stages: DispatcherTickSummary['stages'];
 }): DispatcherTickSummary {
   const finishedAt = new Date();
+  const durationMs = Number(process.hrtime.bigint() - startedAtNs) / 1_000_000;
   return {
     started_at: startedAt.toISOString(),
     finished_at: finishedAt.toISOString(),
-    duration_ms: finishedAt.getTime() - startedAt.getTime(),
+    duration_ms: Math.round(durationMs * 1000) / 1000,
     previous_started_at: previousStartedAt.toISOString(),
     completed,
     halt_reason: haltReason,

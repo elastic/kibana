@@ -188,18 +188,24 @@ export interface DispatcherPipelineState {
 }
 
 /**
+ * Controlled halt reasons a step may return from its own output when
+ * there is nothing further to do. Expected, non-error outcomes.
+ */
+export type DispatcherStepHaltReason = 'no_episodes' | 'no_actions';
+
+/**
  * Reasons a dispatcher tick stopped before completing all stages.
  *
- * - `no_episodes` / `no_actions`: controlled halts, returned by a step's
- *   own output when there is nothing further to do. Expected, non-error.
- * - `step_error`: a step threw an unhandled exception. Never returned by
- *   a step directly; produced by the pipeline when it catches a throw.
+ * Superset of `DispatcherStepHaltReason` plus `step_error`, which is
+ * produced by the pipeline itself when it catches a thrown step.
+ * `step_error` is intentionally NOT part of `DispatcherStepHaltReason`
+ * so the type system prevents a step from accidentally returning it.
  */
-export type DispatcherHaltReason = 'no_episodes' | 'no_actions' | 'step_error';
+export type DispatcherHaltReason = DispatcherStepHaltReason | 'step_error';
 
 export type DispatcherStepOutput =
   | { type: 'continue'; data?: Partial<Omit<DispatcherPipelineState, 'input'>> }
-  | { type: 'halt'; reason: DispatcherHaltReason };
+  | { type: 'halt'; reason: DispatcherStepHaltReason };
 
 export interface DispatcherStep {
   readonly name: string;

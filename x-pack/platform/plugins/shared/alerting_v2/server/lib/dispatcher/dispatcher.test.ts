@@ -736,6 +736,45 @@ describe('DispatcherService', () => {
       expect(result.tick).toEqual(tick);
     });
 
+    it('reports tick.duration_ms on the same monotonic clock as the stages (sum ≲ total within rounding)', async () => {
+      // Tick and stage durations must share a clock so operators can reason
+      // about them together (e.g. "what % of the tick was spent in dispatch?").
+      // Sum of stages is always ≤ tick total (pipeline orchestration adds a
+      // small delta), and both are in fractional ms from hrtime.
+      const alertEpisodes: AlertEpisode[] = [
+        {
+          last_event_timestamp: '2026-01-22T07:10:00.000Z',
+          rule_id: 'rule-1',
+          group_hash: 'hash-1',
+          episode_id: 'episode-1',
+          episode_status: 'active',
+        },
+      ];
+
+      queryEsClient.esql.query
+        .mockResolvedValueOnce(createDispatchableAlertEventsResponse(alertEpisodes))
+        .mockResolvedValueOnce(createAlertEpisodeSuppressionsResponse([]))
+        .mockResolvedValueOnce(createLastNotifiedTimestampsResponse());
+
+      storageEsClient.bulk.mockResolvedValue({
+        items: [{ create: { _id: '1', status: 201 } }],
+        errors: false,
+      } as BulkResponse);
+
+      const result = await dispatcherService.run({
+        previousStartedAt: new Date('2026-01-22T07:30:00.000Z'),
+      });
+
+      const tick = result.tick;
+      const stagesSum = tick.stages.reduce((acc, s) => acc + s.duration_ms, 0);
+
+      expect(tick.duration_ms).toBeGreaterThanOrEqual(stagesSum - 0.001);
+      // Overhead between the outer hrtime bracket and the sum of per-stage
+      // timings should be small — a generous 500ms bound catches clock
+      // regressions without flaking on loaded CI.
+      expect(tick.duration_ms - stagesSum).toBeLessThan(500);
+    });
+
     it('emits a tick summary with halt_reason set when the pipeline halts early', async () => {
       queryEsClient.esql.query.mockResolvedValueOnce(createDispatchableAlertEventsResponse([]));
 
