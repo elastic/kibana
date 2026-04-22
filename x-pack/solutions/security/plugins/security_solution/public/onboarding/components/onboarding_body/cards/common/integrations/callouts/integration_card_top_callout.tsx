@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import React from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import { matchPath, useLocation } from 'react-router-dom';
 
@@ -49,21 +49,32 @@ export const IntegrationCardTopCallout = React.memo<{
   const showEndpointCallout =
     activeIntegrationsCount === 0 && selectedTabId === IntegrationTabId.endpoint;
 
-  const showAnyLegacyCallout = showAgentlessCallout || showEndpointCallout || showActiveCallout;
-
   return (
-    <>
-      {showMigrationsCallout && <MigrationsCallout />}
-      {showMigrationsCallout && showAnyLegacyCallout && <EuiSpacer size="s" />}
-      {showEndpointCallout && <EndpointCallout />}
-      {showAgentlessCallout && <AgentlessAvailableCallout />}
-      {showActiveCallout && (
-        <ActiveIntegrationsCallout
-          isAgentRequired={isAgentRequired}
-          activeIntegrationsCount={activeIntegrationsCount}
-        />
+    <EuiFlexGroup direction="column" gutterSize="s">
+      {showMigrationCallout && (
+        <EuiFlexItem>
+          <MigrationsCallout />
+        </EuiFlexItem>
       )}
-    </>
+      {showEndpointCallout && (
+        <EuiFlexItem>
+          <EndpointCallout />
+        </EuiFlexItem>
+      )}
+      {showAgentlessCallout && (
+        <EuiFlexItem>
+          <AgentlessAvailableCallout />
+        </EuiFlexItem>
+      )}
+      {showActiveCallout && (
+        <EuiFlexItem>
+          <ActiveIntegrationsCallout
+            isAgentRequired={isAgentRequired}
+            activeIntegrationsCount={activeIntegrationsCount}
+          />
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
   );
 });
 IntegrationCardTopCallout.displayName = 'IntegrationCardTopCallout';
