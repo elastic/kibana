@@ -7,7 +7,7 @@ info:
     **Alerts** page and can be assigned and triaged, using the alert status to
     mark them as open, closed, or acknowledged.
   title: Security Detections API (Elastic Cloud Serverless)
-  version: 2023-10-31
+  version: '2023-10-31'
 servers:
   - url: http://{kibana_host}:{port}
     variables:
@@ -165,14 +165,14 @@ paths:
                 example1:
                   summary: Example response for a retrieved rule
                   value:
-                    created_at: 2020-02-03T11:19:04.259Z
+                    created_at: '2020-02-03T11:19:04.259Z'
                     created_by: elastic
                     description: >-
                       Process started by MS Office program in user folder
                     enabled: false
                     execution_summary:
                       last_execution:
-                        date: 2022-03-23T16:06:12.787Z
+                        date: '2022-03-23T16:06:12.787Z'
                         message: >-
                           This rule attempted to query data from Elasticsearch
                           indices listed in the "Index pattern" section of the
@@ -237,7 +237,7 @@ paths:
                               https://attack.mitre.org/techniques/T1193
                     to: now-300s
                     type: query
-                    updated_at: 2020-02-03T11:19:04.462Z
+                    updated_at: '2020-02-03T11:19:04.462Z'
                     updated_by: elastic
                     version: 1
               schema:
@@ -323,10 +323,9 @@ paths:
                 summary: Patch indicator match rule
                 value:
                   id: 462f1986-10fe-40a3-a22c-2b1c9c4c48fd
-                  threat_query: >-
-                    @timestamp >= "now-30d/d" and event.module:(threatintel or
-                    ti_*) and threat.indicator.ip:* and not
-                    labels.is_ioc_transform_source:"false"
+                  threat_query: '@timestamp >= "now-30d/d" and event.module:(threatintel or ti_*)
+                    and threat.indicator.ip:* and not
+                    labels.is_ioc_transform_source:"false"'
               example7:
                 summary: Patch machine learning rule
                 value:
@@ -349,7 +348,7 @@ paths:
                   summary: Example response for an updated rule
                   value:
                     actions: []
-                    created_at: 2020-04-07T14:51:09.755Z
+                    created_at: '2020-04-07T14:51:09.755Z'
                     created_by: elastic
                     description: Updated description for the rule.
                     enabled: false
@@ -385,7 +384,7 @@ paths:
                     threat: []
                     to: now
                     type: query
-                    updated_at: 2020-04-07T14:51:09.970Z
+                    updated_at: '2020-04-07T14:51:09.970Z'
                     updated_by: elastic
                     version: 2
               schema:
@@ -760,7 +759,7 @@ paths:
                   summary: Query rule response
                   value:
                     actions: []
-                    created_at: 2020-04-07T14:51:09.755Z
+                    created_at: '2020-04-07T14:51:09.755Z'
                     created_by: elastic
                     description: >-
                       Process started by MS Office program - possible payload
@@ -808,7 +807,7 @@ paths:
                     threat: []
                     to: now
                     type: query
-                    updated_at: 2020-04-07T14:51:09.970Z
+                    updated_at: '2020-04-07T14:51:09.970Z'
                     updated_by: elastic
                     version: 1
                 example2:
@@ -827,7 +826,7 @@ paths:
                         params:
                           message: 'Urgent: {{context.rule.description}}'
                     anomaly_threshold: 70
-                    created_at: 2020-04-07T14:45:15.679Z
+                    created_at: '2020-04-07T14:45:15.679Z'
                     created_by: elastic
                     description: >-
                       Generates alerts when the job discovers anomalies over 70
@@ -849,14 +848,14 @@ paths:
                     setup: ''
                     severity: high
                     status: going to run
-                    status_date: 2020-04-07T14:45:21.685Z
+                    status_date: '2020-04-07T14:45:21.685Z'
                     tags:
                       - machine learning
                       - Linux
                     threat: []
                     to: now
                     type: machine_learning
-                    updated_at: 2020-04-07T14:45:15.892Z
+                    updated_at: '2020-04-07T14:45:15.892Z'
                     updated_by: elastic
                     version: 1
                 example3:
@@ -865,7 +864,7 @@ paths:
                   value:
                     actions: []
                     author: []
-                    created_at: 2020-07-22T10:27:23.486Z
+                    created_at: '2020-07-22T10:27:23.486Z'
                     created_by: elastic
                     description: >-
                       Detects when there are 20 or more failed login attempts
@@ -926,7 +925,7 @@ paths:
                       value: 20
                     to: now
                     type: threshold
-                    updated_at: 2020-07-22T10:27:23.673Z
+                    updated_at: '2020-07-22T10:27:23.673Z'
                     updated_by: elastic
                     version: 1
                 example4:
@@ -934,7 +933,7 @@ paths:
                   summary: EQL rule response
                   value:
                     author: []
-                    created_at: 2020-10-05T09:06:16.392Z
+                    created_at: '2020-10-05T09:06:16.392Z'
                     created_by: elastic
                     description: Unusual rundll32.exe network connection
                     enabled: true
@@ -994,7 +993,7 @@ paths:
                     throttle: no_actions
                     to: now
                     type: eql
-                    updated_at: 2020-10-05T09:06:16.403Z
+                    updated_at: '2020-10-05T09:06:16.403Z'
                     updated_by: elastic
                     version: 1
                 example5:
@@ -1002,7 +1001,7 @@ paths:
                   summary: Indicator match rule response
                   value:
                     author: []
-                    created_at: 2020-10-06T07:07:58.227Z
+                    created_at: '2020-10-06T07:07:58.227Z'
                     created_by: elastic
                     description: >-
                       Checks for bad IP addresses listed in the ip-threat-list
@@ -1059,7 +1058,7 @@ paths:
                     threat_query: '*:*'
                     to: now
                     type: threat_match
-                    updated_at: 2020-10-06T07:07:58.237Z
+                    updated_at: '2020-10-06T07:07:58.237Z'
                     updated_by: elastic
                     version: 1
                 example6:
@@ -1067,7 +1066,7 @@ paths:
                   summary: New terms rule response
                   value:
                     author: []
-                    created_at: 2020-10-06T07:07:58.227Z
+                    created_at: '2020-10-06T07:07:58.227Z'
                     created_by: elastic
                     description: >-
                       Detects a user associated with a new IP address
@@ -1109,7 +1108,7 @@ paths:
                     threat: []
                     to: now
                     type: new_terms
-                    updated_at: 2020-10-06T07:07:58.237Z
+                    updated_at: '2020-10-06T07:07:58.237Z'
                     updated_by: elastic
                     version: 1
                 example7:
@@ -1118,7 +1117,7 @@ paths:
                   value:
                     actions: []
                     author: []
-                    created_at: 2023-10-18T10:55:14.269Z
+                    created_at: '2023-10-18T10:55:14.269Z'
                     created_by: elastic
                     description: Find Excel events
                     enabled: false
@@ -1154,7 +1153,7 @@ paths:
                     threat: []
                     to: now
                     type: esql
-                    updated_at: 2023-10-18T10:55:14.269Z
+                    updated_at: '2023-10-18T10:55:14.269Z'
                     updated_by: elastic
                     version: 1
               schema:
@@ -1269,10 +1268,9 @@ paths:
                         - field: destination.ip
                           type: mapping
                           value: threat.indicator.ip
-                  threat_query: >-
-                    @timestamp >= "now-30d/d" and event.module:(threatintel or
-                    ti_*) and threat.indicator.ip:* and not
-                    labels.is_ioc_transform_source:"true"
+                  threat_query: '@timestamp >= "now-30d/d" and event.module:(threatintel or ti_*)
+                    and threat.indicator.ip:* and not
+                    labels.is_ioc_transform_source:"true"'
                   type: threat_match
               example7:
                 summary: Update machine learning rule
@@ -1301,7 +1299,7 @@ paths:
                   summary: Example response for an updated rule
                   value:
                     actions: []
-                    created_at: 2020-04-07T14:51:09.755Z
+                    created_at: '2020-04-07T14:51:09.755Z'
                     created_by: elastic
                     description: Updated description for the rule.
                     enabled: false
@@ -1337,7 +1335,7 @@ paths:
                     threat: []
                     to: now
                     type: query
-                    updated_at: 2020-04-07T14:51:09.970Z
+                    updated_at: '2020-04-07T14:51:09.970Z'
                     updated_by: elastic
                     version: 2
               schema:
@@ -1431,8 +1429,8 @@ paths:
                   ids:
                     - 748694f0-6977-4ea5-8384-cd2e39730779
                   run:
-                    end_date: 2025-03-10T23:59:59.999Z
-                    start_date: 2025-03-01T00:00:00.000Z
+                    end_date: '2025-03-10T23:59:59.999Z'
+                    start_date: '2025-03-01T00:00:00.000Z'
               example07:
                 description: >-
                   The following request exports the rules with the specified IDs.
@@ -1768,7 +1766,7 @@ paths:
                               eventAction: trigger
                               severity: critical
                               summary: The message body
-                              timestamp: 2023-10-31T00:00:00Z
+                              timestamp: '2023-10-31T00:00:00Z'
                   ids:
                     - 9e946bfc-3118-4c77-bb25-67d781191921
               example27:
@@ -1835,8 +1833,8 @@ paths:
                     - 748694f0-6977-4ea5-8384-cd2e39730779
                     - 164d0918-f720-4c9f-9f5c-c5122587cf19
                   run:
-                    end_date: 2025-03-10T23:59:59.999Z
-                    start_date: 2025-03-01T00:00:00.000Z
+                    end_date: '2025-03-10T23:59:59.999Z'
+                    start_date: '2025-03-01T00:00:00.000Z'
             schema:
               oneOf:
                 - $ref: '#/components/schemas/BulkDeleteRules'
@@ -1871,7 +1869,7 @@ paths:
                           - anomaly_threshold: 50
                             author:
                               - Elastic
-                            created_at: 2022-02-21T14:14:13.801Z
+                            created_at: '2022-02-21T14:14:13.801Z'
                             created_by: elastic
                             description: >-
                               A machine learning job detected unusually large
@@ -1886,7 +1884,7 @@ paths:
                             exceptions_list: []
                             execution_summary:
                               last_execution:
-                                date: 2022-03-23T16:06:12.787Z
+                                date: '2022-03-23T16:06:12.787Z'
                                 message: >-
                                   This rule attempted to query data from
                                   Elasticsearch indices listed in the "Index
@@ -1932,7 +1930,7 @@ paths:
                             threat: []
                             to: now
                             type: machine_learning
-                            updated_at: 2022-02-21T17:05:50.883Z
+                            updated_at: '2022-02-21T17:05:50.883Z'
                             updated_by: elastic
                             version: 6
                       summary:
@@ -1969,7 +1967,7 @@ paths:
                             - actions: []
                               author:
                                 - Elastic
-                              created_at: 2022-02-21T14:14:17.883Z
+                              created_at: '2022-02-21T14:14:17.883Z'
                               created_by: elastic
                               description: >-
                                 Generates a detection alert for each external
@@ -1980,7 +1978,7 @@ paths:
                               exceptions_list: []
                               execution_summary:
                                 last_execution:
-                                  date: 2022-03-23T16:06:12.787Z
+                                  date: '2022-03-23T16:06:12.787Z'
                                   message: >-
                                     This rule attempted to query data from
                                     Elasticsearch indices listed in the "Index
@@ -2055,7 +2053,7 @@ paths:
                               timestamp_override: event.ingested
                               to: now
                               type: query
-                              updated_at: 2022-02-21T16:56:22.818Z
+                              updated_at: '2022-02-21T16:56:22.818Z'
                               updated_by: elastic
                               version: 5
                         summary:
@@ -2125,7 +2123,7 @@ paths:
                         updated:
                           - actions: []
                             author: []
-                            created_at: 2025-03-25T11:46:41.899Z
+                            created_at: '2025-03-25T11:46:41.899Z'
                             created_by: elastic
                             description: test
                             enabled: false
@@ -2173,7 +2171,7 @@ paths:
                             threat: []
                             to: now
                             type: query
-                            updated_at: 2025-03-25T11:47:11.350Z
+                            updated_at: '2025-03-25T11:47:11.350Z'
                             updated_by: elastic
                             version: 2
                           - actions:
@@ -2190,7 +2188,7 @@ paths:
                                 uuid: >-
                                   580e2e16-5e91-411c-999b-7b75a11ed441
                             author: []
-                            created_at: 2025-03-25T09:49:08.343Z
+                            created_at: '2025-03-25T09:49:08.343Z'
                             created_by: elastic
                             description: test
                             enabled: false
@@ -2247,7 +2245,7 @@ paths:
                               Alerts Involving a Single User Timeline
                             to: now
                             type: query
-                            updated_at: 2025-03-25T11:47:11.357Z
+                            updated_at: '2025-03-25T11:47:11.357Z'
                             updated_by: elastic
                             version: 24
                       summary:
@@ -2315,7 +2313,7 @@ paths:
                                 uuid: >-
                                   580e2e16-5e91-411c-999b-7b75a11ed441
                             author: []
-                            created_at: 2025-03-25T09:49:08.343Z
+                            created_at: '2025-03-25T09:49:08.343Z'
                             created_by: elastic
                             description: test
                             enabled: false
@@ -2373,7 +2371,7 @@ paths:
                               Alerts Involving a Single User Timeline
                             to: now
                             type: query
-                            updated_at: 2025-03-25T11:55:12.752Z
+                            updated_at: '2025-03-25T11:55:12.752Z'
                             updated_by: elastic
                             version: 25
                       summary:
@@ -2411,7 +2409,7 @@ paths:
                                 uuid: >-
                                   e48428e5-efac-4856-b8ad-b271c14eaa91
                             author: []
-                            created_at: 2025-03-25T09:49:08.343Z
+                            created_at: '2025-03-25T09:49:08.343Z'
                             created_by: elastic
                             description: test
                             enabled: false
@@ -2469,7 +2467,7 @@ paths:
                               Alerts Involving a Single User Timeline
                             to: now
                             type: query
-                            updated_at: 2025-03-25T12:17:40.528Z
+                            updated_at: '2025-03-25T12:17:40.528Z'
                             updated_by: elastic
                             version: 30
                       summary:
@@ -2519,7 +2517,7 @@ paths:
                                 uuid: >-
                                   49ddaa94-d63d-410e-90dc-8c1bad9552bd
                             author: []
-                            created_at: 2025-04-02T12:42:03.400Z
+                            created_at: '2025-04-02T12:42:03.400Z'
                             created_by: elastic
                             description: test
                             enabled: false
@@ -2565,7 +2563,7 @@ paths:
                             threat: []
                             to: now
                             type: query
-                            updated_at: 2025-04-02T12:51:40.215Z
+                            updated_at: '2025-04-02T12:51:40.215Z'
                             updated_by: elastic
                             version: 2
                       summary:
@@ -2578,8 +2576,7 @@ paths:
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/BulkEditActionResponse'
-                  - $ref: >-
-                      #/components/schemas/BulkExportActionResponse
+                  - $ref: '#/components/schemas/BulkExportActionResponse'
           description: OK
       summary: Apply a bulk action to detection rules
       tags:
@@ -2764,7 +2761,7 @@ paths:
                 example1:
                   value:
                     data:
-                      - created_at: 2020-02-02T10:05:19.613Z
+                      - created_at: '2020-02-02T10:05:19.613Z'
                         created_by: elastic
                         description: >-
                           Identifies a PowerShell process launched by either
@@ -2774,7 +2771,7 @@ paths:
                         enabled: false
                         execution_summary:
                           last_execution:
-                            date: 2022-03-23T16:06:12.787Z
+                            date: '2022-03-23T16:06:12.787Z'
                             message: >-
                               This rule attempted to query data from
                               Elasticsearch indices listed in the "Index
@@ -2835,7 +2832,7 @@ paths:
                                   https://attack.mitre.org/techniques/T1193/
                         to: now
                         type: query
-                        updated_at: 2020-02-02T10:05:19.830Z
+                        updated_at: '2020-02-02T10:05:19.830Z'
                         updated_by: elastic
                     page: 1
                     perPage: 5
@@ -3045,24 +3042,19 @@ paths:
                     - $ref: '#/components/schemas/QueryRuleCreateProps'
                     - $ref: '#/components/schemas/RulePreviewParams'
                 - allOf:
-                    - $ref: >-
-                        #/components/schemas/SavedQueryRuleCreateProps
+                    - $ref: '#/components/schemas/SavedQueryRuleCreateProps'
                     - $ref: '#/components/schemas/RulePreviewParams'
                 - allOf:
-                    - $ref: >-
-                        #/components/schemas/ThresholdRuleCreateProps
+                    - $ref: '#/components/schemas/ThresholdRuleCreateProps'
                     - $ref: '#/components/schemas/RulePreviewParams'
                 - allOf:
-                    - $ref: >-
-                        #/components/schemas/ThreatMatchRuleCreateProps
+                    - $ref: '#/components/schemas/ThreatMatchRuleCreateProps'
                     - $ref: '#/components/schemas/RulePreviewParams'
                 - allOf:
-                    - $ref: >-
-                        #/components/schemas/MachineLearningRuleCreateProps
+                    - $ref: '#/components/schemas/MachineLearningRuleCreateProps'
                     - $ref: '#/components/schemas/RulePreviewParams'
                 - allOf:
-                    - $ref: >-
-                        #/components/schemas/NewTermsRuleCreateProps
+                    - $ref: '#/components/schemas/NewTermsRuleCreateProps'
                     - $ref: '#/components/schemas/RulePreviewParams'
                 - allOf:
                     - $ref: '#/components/schemas/EsqlRuleCreateProps'
@@ -3129,8 +3121,7 @@ paths:
               add:
                 $ref: '#/components/examples/SetAlertAssigneesBodyAdd'
               remove:
-                $ref: >-
-                  #/components/examples/SetAlertAssigneesBodyRemove
+                $ref: '#/components/examples/SetAlertAssigneesBodyRemove'
             schema:
               $ref: '#/components/schemas/SetAlertAssigneesBody'
         required: true
@@ -3196,8 +3187,8 @@ paths:
                             should: []
                         - range:
                             '@timestamp':
-                              gte: 2025-01-17T08:00:00.000Z
-                              lte: 2025-01-18T07:59:59.999Z
+                              gte: '2025-01-17T08:00:00.000Z'
+                              lte: '2025-01-18T07:59:59.999Z'
                   runtime_mappings: {}
                   size: 0
             schema:
@@ -3285,8 +3276,8 @@ paths:
                       filter:
                         - '@timestamp':
                             format: strict_date_optional_time
-                            gte: 2024-10-23T07:00:00.000Z
-                            lte: 2025-01-21T20:12:11.704Z
+                            gte: '2024-10-23T07:00:00.000Z'
+                            lte: '2025-01-21T20:12:11.704Z'
                           range: null
                         - bool:
                             filter:
@@ -3296,8 +3287,8 @@ paths:
                                       kibana.alert.workflow_status: open
                                   - '@timestamp':
                                       format: strict_date_optional_time
-                                      gte: 2024-10-23T07:00:00.000Z
-                                      lte: 2025-01-21T20:12:11.704Z
+                                      gte: '2024-10-23T07:00:00.000Z'
+                                      lte: '2025-01-21T20:12:11.704Z'
                                     range: null
                                 must: []
                                 must_not:
@@ -3590,8 +3581,7 @@ components:
         group_by:
           $ref: '#/components/schemas/AlertSuppressionGroupBy'
         missing_fields_strategy:
-          $ref: >-
-            #/components/schemas/AlertSuppressionMissingFieldsStrategy
+          $ref: '#/components/schemas/AlertSuppressionMissingFieldsStrategy'
       required:
         - group_by
     AlertSuppressionDuration:
@@ -3656,23 +3646,17 @@ components:
     BulkActionEditPayload:
       anyOf:
         - $ref: '#/components/schemas/BulkActionEditPayloadTags'
-        - $ref: >-
-            #/components/schemas/BulkActionEditPayloadIndexPatterns
-        - $ref: >-
-            #/components/schemas/BulkActionEditPayloadInvestigationFields
+        - $ref: '#/components/schemas/BulkActionEditPayloadIndexPatterns'
+        - $ref: '#/components/schemas/BulkActionEditPayloadInvestigationFields'
         - $ref: '#/components/schemas/BulkActionEditPayloadTimeline'
         - $ref: '#/components/schemas/BulkActionEditPayloadRuleActions'
         - $ref: '#/components/schemas/BulkActionEditPayloadSchedule'
-        - $ref: >-
-            #/components/schemas/BulkActionEditPayloadAlertSuppression
+        - $ref: '#/components/schemas/BulkActionEditPayloadAlertSuppression'
     BulkActionEditPayloadAlertSuppression:
       anyOf:
-        - $ref: >-
-            #/components/schemas/BulkActionEditPayloadSetAlertSuppression
-        - $ref: >-
-            #/components/schemas/BulkActionEditPayloadSetAlertSuppressionForThreshold
-        - $ref: >-
-            #/components/schemas/BulkActionEditPayloadDeleteAlertSuppression
+        - $ref: '#/components/schemas/BulkActionEditPayloadSetAlertSuppression'
+        - $ref: '#/components/schemas/BulkActionEditPayloadSetAlertSuppressionForThreshold'
+        - $ref: '#/components/schemas/BulkActionEditPayloadDeleteAlertSuppression'
     BulkActionEditPayloadDeleteAlertSuppression:
       type: object
       properties:
@@ -4466,11 +4450,9 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasPurpose
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
             alias_target_id:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasTargetId
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -4548,8 +4530,7 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: >-
-                #/components/schemas/TimestampOverrideFallbackDisabled
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -4595,11 +4576,9 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasPurpose
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
             alias_target_id:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasTargetId
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -4679,8 +4658,7 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: >-
-                #/components/schemas/TimestampOverrideFallbackDisabled
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -4718,11 +4696,9 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasPurpose
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
             alias_target_id:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasTargetId
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -4804,8 +4780,7 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: >-
-                #/components/schemas/TimestampOverrideFallbackDisabled
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -4827,11 +4802,9 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasPurpose
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
             alias_target_id:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasTargetId
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -4913,8 +4886,7 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: >-
-                #/components/schemas/TimestampOverrideFallbackDisabled
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -4968,11 +4940,9 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasPurpose
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
             alias_target_id:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasTargetId
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -5050,8 +5020,7 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: >-
-                #/components/schemas/TimestampOverrideFallbackDisabled
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -5097,11 +5066,9 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasPurpose
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
             alias_target_id:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasTargetId
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -5181,8 +5148,7 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: >-
-                #/components/schemas/TimestampOverrideFallbackDisabled
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -5210,11 +5176,9 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasPurpose
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
             alias_target_id:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasTargetId
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -5300,8 +5264,7 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: >-
-                #/components/schemas/TimestampOverrideFallbackDisabled
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             type:
@@ -5344,11 +5307,9 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasPurpose
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
             alias_target_id:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasTargetId
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -5430,8 +5391,7 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: >-
-                #/components/schemas/TimestampOverrideFallbackDisabled
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -5614,11 +5574,9 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasPurpose
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
             alias_target_id:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasTargetId
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -5696,8 +5654,7 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: >-
-                #/components/schemas/TimestampOverrideFallbackDisabled
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -5743,11 +5700,9 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasPurpose
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
             alias_target_id:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasTargetId
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -5827,8 +5782,7 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: >-
-                #/components/schemas/TimestampOverrideFallbackDisabled
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -5870,11 +5824,9 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasPurpose
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
             alias_target_id:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasTargetId
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -5956,8 +5908,7 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: >-
-                #/components/schemas/TimestampOverrideFallbackDisabled
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -5995,11 +5946,9 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasPurpose
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
             alias_target_id:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasTargetId
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -6081,8 +6030,7 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: >-
-                #/components/schemas/TimestampOverrideFallbackDisabled
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -6120,11 +6068,9 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasPurpose
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
             alias_target_id:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasTargetId
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -6202,8 +6148,7 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: >-
-                #/components/schemas/TimestampOverrideFallbackDisabled
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -6250,11 +6195,9 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasPurpose
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
             alias_target_id:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasTargetId
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -6334,8 +6277,7 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: >-
-                #/components/schemas/TimestampOverrideFallbackDisabled
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -6391,11 +6333,9 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasPurpose
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
             alias_target_id:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasTargetId
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -6477,8 +6417,7 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: >-
-                #/components/schemas/TimestampOverrideFallbackDisabled
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -6525,11 +6464,9 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasPurpose
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
             alias_target_id:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasTargetId
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -6611,8 +6548,7 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: >-
-                #/components/schemas/TimestampOverrideFallbackDisabled
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -6816,11 +6752,9 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasPurpose
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
             alias_target_id:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasTargetId
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -6898,8 +6832,7 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: >-
-                #/components/schemas/TimestampOverrideFallbackDisabled
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -6946,11 +6879,9 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasPurpose
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
             alias_target_id:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasTargetId
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -7030,8 +6961,7 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: >-
-                #/components/schemas/TimestampOverrideFallbackDisabled
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -7085,11 +7015,9 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasPurpose
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
             alias_target_id:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasTargetId
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -7171,8 +7099,7 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: >-
-                #/components/schemas/TimestampOverrideFallbackDisabled
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -7213,11 +7140,9 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasPurpose
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
             alias_target_id:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasTargetId
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -7299,8 +7224,7 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: >-
-                #/components/schemas/TimestampOverrideFallbackDisabled
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -8116,11 +8040,9 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasPurpose
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
             alias_target_id:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasTargetId
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -8198,8 +8120,7 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: >-
-                #/components/schemas/TimestampOverrideFallbackDisabled
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -8246,11 +8167,9 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasPurpose
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
             alias_target_id:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasTargetId
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -8330,8 +8249,7 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: >-
-                #/components/schemas/TimestampOverrideFallbackDisabled
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -8385,11 +8303,9 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasPurpose
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
             alias_target_id:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasTargetId
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -8471,8 +8387,7 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: >-
-                #/components/schemas/TimestampOverrideFallbackDisabled
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -8513,11 +8428,9 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasPurpose
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
             alias_target_id:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasTargetId
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -8599,8 +8512,7 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: >-
-                #/components/schemas/TimestampOverrideFallbackDisabled
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -8842,11 +8754,9 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasPurpose
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
             alias_target_id:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasTargetId
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -8924,8 +8834,7 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: >-
-                #/components/schemas/TimestampOverrideFallbackDisabled
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -8972,11 +8881,9 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasPurpose
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
             alias_target_id:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasTargetId
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -9056,8 +8963,7 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: >-
-                #/components/schemas/TimestampOverrideFallbackDisabled
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -9127,11 +9033,9 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasPurpose
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
             alias_target_id:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasTargetId
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -9213,8 +9117,7 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: >-
-                #/components/schemas/TimestampOverrideFallbackDisabled
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -9264,11 +9167,9 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasPurpose
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
             alias_target_id:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasTargetId
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -9350,8 +9251,7 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: >-
-                #/components/schemas/TimestampOverrideFallbackDisabled
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -9486,11 +9386,9 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasPurpose
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
             alias_target_id:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasTargetId
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -9568,8 +9466,7 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: >-
-                #/components/schemas/TimestampOverrideFallbackDisabled
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -9616,11 +9513,9 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasPurpose
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
             alias_target_id:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasTargetId
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -9700,8 +9595,7 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: >-
-                #/components/schemas/TimestampOverrideFallbackDisabled
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -9757,11 +9651,9 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasPurpose
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
             alias_target_id:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasTargetId
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -9843,8 +9735,7 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: >-
-                #/components/schemas/TimestampOverrideFallbackDisabled
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:
@@ -9888,11 +9779,9 @@ components:
                 $ref: '#/components/schemas/RuleAction'
               type: array
             alias_purpose:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasPurpose
+              $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
             alias_target_id:
-              $ref: >-
-                #/components/schemas/SavedObjectResolveAliasTargetId
+              $ref: '#/components/schemas/SavedObjectResolveAliasTargetId'
             author:
               $ref: '#/components/schemas/RuleAuthorArray'
             building_block_type:
@@ -9974,8 +9863,7 @@ components:
             timestamp_override:
               $ref: '#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: >-
-                #/components/schemas/TimestampOverrideFallbackDisabled
+              $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
             to:
               $ref: '#/components/schemas/RuleIntervalTo'
             version:

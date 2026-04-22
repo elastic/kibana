@@ -3,7 +3,7 @@ info:
   description: Endpoint Exceptions API allow you to manage Endpoint lists.
   title: >-
     Security Endpoint Exceptions API (Elastic Cloud and self-hosted)
-  version: 2023-10-31
+  version: '2023-10-31'
 servers:
   - url: http://{kibana_host}:{port}
     variables:
@@ -32,7 +32,7 @@ paths:
                 newList:
                   summary: Endpoint exception list created
                   value:
-                    created_at: 2025-01-01T00:00:00.000Z
+                    created_at: '2025-01-01T00:00:00.000Z'
                     created_by: elastic
                     description: Endpoint Security Exception List
                     id: 2e23a8c4-ef7e-4c10-adfa-3eae4e4b4b8b
@@ -44,7 +44,7 @@ paths:
                     tags: []
                     tie_breaker_id: e3c5a8e0-5b6a-4b4b-8b3a-2e23a8c4ef7e
                     type: endpoint
-                    updated_at: 2025-01-01T00:00:00.000Z
+                    updated_at: '2025-01-01T00:00:00.000Z'
                     updated_by: elastic
                     version: 1
               schema:
@@ -107,7 +107,7 @@ paths:
                   summary: Deleted endpoint exception list item
                   value:
                     comments: []
-                    created_at: 2025-01-01T12:00:00.000Z
+                    created_at: '2025-01-01T12:00:00.000Z'
                     created_by: elastic
                     description: Blocks a known malicious file by its hash
                     entries:
@@ -126,7 +126,7 @@ paths:
                     tags: []
                     tie_breaker_id: f1e2d3c4-b5a6-7890-abcd-ef1234567890
                     type: simple
-                    updated_at: 2025-01-01T12:00:00.000Z
+                    updated_at: '2025-01-01T12:00:00.000Z'
                     updated_by: elastic
               schema:
                 $ref: '#/components/schemas/EndpointListItem'
@@ -193,7 +193,7 @@ paths:
                   summary: Endpoint exception list item
                   value:
                     comments: []
-                    created_at: 2025-01-01T12:00:00.000Z
+                    created_at: '2025-01-01T12:00:00.000Z'
                     created_by: elastic
                     description: Blocks a known malicious file by its hash
                     entries:
@@ -213,7 +213,7 @@ paths:
                       - policy:all
                     tie_breaker_id: f1e2d3c4-b5a6-7890-abcd-ef1234567890
                     type: simple
-                    updated_at: 2025-01-01T12:00:00.000Z
+                    updated_at: '2025-01-01T12:00:00.000Z'
                     updated_by: elastic
               schema:
                 $ref: '#/components/schemas/EndpointListItem'
@@ -298,15 +298,12 @@ paths:
               type: object
               properties:
                 comments:
-                  $ref: >-
-                    #/components/schemas/ExceptionListItemCommentArray
+                  $ref: '#/components/schemas/ExceptionListItemCommentArray'
                   default: []
                 description:
-                  $ref: >-
-                    #/components/schemas/ExceptionListItemDescription
+                  $ref: '#/components/schemas/ExceptionListItemDescription'
                 entries:
-                  $ref: >-
-                    #/components/schemas/ExceptionListItemEntryArray
+                  $ref: '#/components/schemas/ExceptionListItemEntryArray'
                 item_id:
                   $ref: '#/components/schemas/ExceptionListItemHumanId'
                 meta:
@@ -314,8 +311,7 @@ paths:
                 name:
                   $ref: '#/components/schemas/ExceptionListItemName'
                 os_types:
-                  $ref: >-
-                    #/components/schemas/ExceptionListItemOsTypeArray
+                  $ref: '#/components/schemas/ExceptionListItemOsTypeArray'
                   default: []
                 tags:
                   $ref: '#/components/schemas/ExceptionListItemTags'
@@ -338,7 +334,7 @@ paths:
                   summary: Endpoint exception list item created
                   value:
                     comments: []
-                    created_at: 2025-01-01T12:00:00.000Z
+                    created_at: '2025-01-01T12:00:00.000Z'
                     created_by: elastic
                     description: Blocks a known malicious file by its hash
                     entries:
@@ -358,7 +354,7 @@ paths:
                       - policy:all
                     tie_breaker_id: f1e2d3c4-b5a6-7890-abcd-ef1234567890
                     type: simple
-                    updated_at: 2025-01-01T12:00:00.000Z
+                    updated_at: '2025-01-01T12:00:00.000Z'
                     updated_by: elastic
               schema:
                 $ref: '#/components/schemas/EndpointListItem'
@@ -433,15 +429,12 @@ paths:
                     latest version.
                   type: string
                 comments:
-                  $ref: >-
-                    #/components/schemas/ExceptionListItemCommentArray
+                  $ref: '#/components/schemas/ExceptionListItemCommentArray'
                   default: []
                 description:
-                  $ref: >-
-                    #/components/schemas/ExceptionListItemDescription
+                  $ref: '#/components/schemas/ExceptionListItemDescription'
                 entries:
-                  $ref: >-
-                    #/components/schemas/ExceptionListItemEntryArray
+                  $ref: '#/components/schemas/ExceptionListItemEntryArray'
                 id:
                   $ref: '#/components/schemas/ExceptionListItemId'
                   description: Either `id` or `item_id` must be specified
@@ -453,8 +446,7 @@ paths:
                 name:
                   $ref: '#/components/schemas/ExceptionListItemName'
                 os_types:
-                  $ref: >-
-                    #/components/schemas/ExceptionListItemOsTypeArray
+                  $ref: '#/components/schemas/ExceptionListItemOsTypeArray'
                   default: []
                 tags:
                   $ref: '#/components/schemas/ExceptionListItemTags'
@@ -476,7 +468,7 @@ paths:
                   summary: Endpoint exception list item updated
                   value:
                     comments: []
-                    created_at: 2025-01-01T12:00:00.000Z
+                    created_at: '2025-01-01T12:00:00.000Z'
                     created_by: elastic
                     description: Updated description for the exception
                     entries:
@@ -497,7 +489,7 @@ paths:
                       - policy:all
                     tie_breaker_id: f1e2d3c4-b5a6-7890-abcd-ef1234567890
                     type: simple
-                    updated_at: 2025-01-15T09:30:00.000Z
+                    updated_at: '2025-01-15T09:30:00.000Z'
                     updated_by: elastic
               schema:
                 $ref: '#/components/schemas/EndpointListItem'
@@ -590,7 +582,7 @@ paths:
                   value:
                     data:
                       - comments: []
-                        created_at: 2025-01-01T12:00:00.000Z
+                        created_at: '2025-01-01T12:00:00.000Z'
                         created_by: elastic
                         description: >-
                           Blocks a known malicious file by its hash
@@ -611,7 +603,7 @@ paths:
                           - policy:all
                         tie_breaker_id: f1e2d3c4-b5a6-7890-abcd-ef1234567890
                         type: simple
-                        updated_at: 2025-01-01T12:00:00.000Z
+                        updated_at: '2025-01-01T12:00:00.000Z'
                         updated_by: elastic
                     page: 1
                     per_page: 20
@@ -891,8 +883,7 @@ components:
         - $ref: '#/components/schemas/ExceptionListItemEntryList'
         - $ref: '#/components/schemas/ExceptionListItemEntryExists'
         - $ref: '#/components/schemas/ExceptionListItemEntryNested'
-        - $ref: >-
-            #/components/schemas/ExceptionListItemEntryMatchWildcard
+        - $ref: '#/components/schemas/ExceptionListItemEntryMatchWildcard'
       discriminator:
         propertyName: type
     ExceptionListItemEntryArray:
@@ -1002,8 +993,7 @@ components:
       properties:
         entries:
           items:
-            $ref: >-
-              #/components/schemas/ExceptionListItemEntryNestedEntryItem
+            $ref: '#/components/schemas/ExceptionListItemEntryNestedEntryItem'
           minItems: 1
           type: array
         field:

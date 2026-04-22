@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   description: Manage and interact with Security Assistant resources.
   title: Security AI Assistant API (Elastic Cloud & self-hosted)
-  version: 2023-10-31
+  version: '2023-10-31'
 servers:
   - url: http://{kibana_host}:{port}
     variables:
@@ -47,8 +47,7 @@ paths:
                 create:
                   description: Array of anonymization fields to create.
                   items:
-                    $ref: >-
-                      #/components/schemas/AnonymizationFieldCreateProps
+                    $ref: '#/components/schemas/AnonymizationFieldCreateProps'
                   type: array
                 delete:
                   description: >-
@@ -72,8 +71,7 @@ paths:
                 update:
                   description: Array of anonymization fields to update.
                   items:
-                    $ref: >-
-                      #/components/schemas/AnonymizationFieldUpdateProps
+                    $ref: '#/components/schemas/AnonymizationFieldUpdateProps'
                   type: array
       responses:
         '200':
@@ -86,13 +84,13 @@ paths:
                     created:
                       - allowed: false
                         anonymized: true
-                        createdAt: 2023-10-31T12:00:00Z
+                        createdAt: '2023-10-31T12:00:00Z'
                         createdBy: user1
                         field: host.name
                         id: field2
                         namespace: default
-                        timestamp: 2023-10-31T12:00:00Z
-                        updatedAt: 2023-10-31T12:00:00Z
+                        timestamp: '2023-10-31T12:00:00Z'
+                        updatedAt: '2023-10-31T12:00:00Z'
                         updatedBy: user1
                     deleted:
                       - field3
@@ -103,13 +101,13 @@ paths:
                     updated:
                       - allowed: true
                         anonymized: false
-                        createdAt: 2023-10-31T12:00:00Z
+                        createdAt: '2023-10-31T12:00:00Z'
                         createdBy: user1
                         field: url.domain
                         id: field8
                         namespace: default
-                        timestamp: 2023-10-31T12:00:00Z
-                        updatedAt: 2023-10-31T12:00:00Z
+                        timestamp: '2023-10-31T12:00:00Z'
+                        updatedAt: '2023-10-31T12:00:00Z'
                         updatedBy: user1
                   summary:
                     failed: 1
@@ -120,8 +118,7 @@ paths:
                 status_code: 200
                 success: true
               schema:
-                $ref: >-
-                  #/components/schemas/AnonymizationFieldsBulkCrudActionResponse
+                $ref: '#/components/schemas/AnonymizationFieldsBulkCrudActionResponse'
           description: Indicates a successful call.
         '400':
           content:
@@ -178,8 +175,7 @@ paths:
           name: sort_field
           required: false
           schema:
-            $ref: >-
-              #/components/schemas/FindAnonymizationFieldsSortField
+            $ref: '#/components/schemas/FindAnonymizationFieldsSortField'
         - description: Sort order
           example: asc
           in: query
@@ -230,24 +226,24 @@ paths:
                 all:
                   - allowed: true
                     anonymized: true
-                    createdAt: 2023-10-31T12:00:00Z
+                    createdAt: '2023-10-31T12:00:00Z'
                     createdBy: user1
                     field: user.name
                     id: '1'
                     namespace: default
-                    timestamp: 2023-10-31T12:00:00Z
-                    updatedAt: 2023-10-31T12:00:00Z
+                    timestamp: '2023-10-31T12:00:00Z'
+                    updatedAt: '2023-10-31T12:00:00Z'
                     updatedBy: user1
                 data:
                   - allowed: true
                     anonymized: true
-                    createdAt: 2023-10-31T12:00:00Z
+                    createdAt: '2023-10-31T12:00:00Z'
                     createdBy: user1
                     field: user.name
                     id: '1'
                     namespace: default
-                    timestamp: 2023-10-31T12:00:00Z
-                    updatedAt: 2023-10-31T12:00:00Z
+                    timestamp: '2023-10-31T12:00:00Z'
+                    updatedAt: '2023-10-31T12:00:00Z'
                     updatedBy: user1
                 page: 1
                 perPage: 20
@@ -284,13 +280,11 @@ paths:
                                     type: integer
                   all:
                     items:
-                      $ref: >-
-                        #/components/schemas/AnonymizationFieldResponse
+                      $ref: '#/components/schemas/AnonymizationFieldResponse'
                     type: array
                   data:
                     items:
-                      $ref: >-
-                        #/components/schemas/AnonymizationFieldResponse
+                      $ref: '#/components/schemas/AnonymizationFieldResponse'
                     type: array
                   page:
                     type: integer
@@ -475,7 +469,7 @@ paths:
               messages:
                 - content: Hello, how can I assist you today?
                   role: system
-                  timestamp: 2023-10-31T12:00:00Z
+                  timestamp: '2023-10-31T12:00:00Z'
               replacements: {}
               title: Security Discussion
             schema:
@@ -490,16 +484,16 @@ paths:
                   actionTypeId: '67890'
                   connectorId: '12345'
                 category: assistant
-                createdAt: 2023-10-31T12:01:00Z
+                createdAt: '2023-10-31T12:01:00Z'
                 excludeFromLastConversationStorage: false
                 id: abc123
                 messages:
                   - content: Hello, how can I assist you today?
                     role: system
-                    timestamp: 2023-10-31T12:00:00Z
+                    timestamp: '2023-10-31T12:00:00Z'
                 replacements: {}
                 title: Security Discussion
-                updatedAt: 2023-10-31T12:01:00Z
+                updatedAt: '2023-10-31T12:01:00Z'
                 users:
                   - id: user1
                     name: John Doe
@@ -688,16 +682,16 @@ paths:
                   actionTypeId: '67890'
                   connectorId: '12345'
                 category: assistant
-                createdAt: 2023-10-31T12:01:00Z
+                createdAt: '2023-10-31T12:01:00Z'
                 excludeFromLastConversationStorage: false
                 id: abc123
                 messages:
                   - content: The conversation has been deleted.
                     role: system
-                    timestamp: 2023-10-31T12:35:00Z
+                    timestamp: '2023-10-31T12:35:00Z'
                 replacements: {}
                 title: Deleted Security Discussion
-                updatedAt: 2023-10-31T12:01:00Z
+                updatedAt: '2023-10-31T12:01:00Z'
                 users:
                   - id: user1
                     name: John Doe
@@ -752,16 +746,16 @@ paths:
                   actionTypeId: '67890'
                   connectorId: '12345'
                 category: assistant
-                createdAt: 2023-10-31T12:01:00Z
+                createdAt: '2023-10-31T12:01:00Z'
                 excludeFromLastConversationStorage: false
                 id: abc123
                 messages:
                   - content: Hello, how can I assist you today?
                     role: system
-                    timestamp: 2023-10-31T12:00:00Z
+                    timestamp: '2023-10-31T12:00:00Z'
                 replacements: {}
                 title: Security Discussion
-                updatedAt: 2023-10-31T12:01:00Z
+                updatedAt: '2023-10-31T12:01:00Z'
                 users:
                   - id: user1
                     name: John Doe
@@ -815,7 +809,7 @@ paths:
               messages:
                 - content: The issue was resolved.
                   role: assistant
-                  timestamp: 2023-10-31T12:30:00Z
+                  timestamp: '2023-10-31T12:30:00Z'
               replacements: {}
               title: Updated Security Discussion
             schema:
@@ -830,16 +824,16 @@ paths:
                   actionTypeId: '09876'
                   connectorId: '54321'
                 category: insights
-                createdAt: 2023-10-31T12:01:00Z
+                createdAt: '2023-10-31T12:01:00Z'
                 excludeFromLastConversationStorage: true
                 id: abc123
                 messages:
                   - content: The issue was resolved.
                     role: assistant
-                    timestamp: 2023-10-31T12:30:00Z
+                    timestamp: '2023-10-31T12:30:00Z'
                 replacements: {}
                 title: Updated Security Discussion
-                updatedAt: 2023-10-31T12:31:00Z
+                updatedAt: '2023-10-31T12:31:00Z'
                 users:
                   - id: user1
                     name: John Doe
@@ -891,8 +885,7 @@ paths:
                     security_labs_exists: false
                     user_data_exists: true
               schema:
-                $ref: >-
-                  #/components/schemas/KnowledgeBaseReadResponse200
+                $ref: '#/components/schemas/KnowledgeBaseReadResponse200'
           description: Indicates a successful call.
         '400':
           content:
@@ -989,8 +982,7 @@ paths:
                     security_labs_exists: false
                     user_data_exists: true
               schema:
-                $ref: >-
-                  #/components/schemas/KnowledgeBaseReadResponse200
+                $ref: '#/components/schemas/KnowledgeBaseReadResponse200'
           description: Indicates a successful call.
         '400':
           content:
@@ -1083,8 +1075,7 @@ paths:
                 - help
               title: How to reset a password
             schema:
-              $ref: >-
-                #/components/schemas/KnowledgeBaseEntryCreateProps
+              $ref: '#/components/schemas/KnowledgeBaseEntryCreateProps'
         required: true
       responses:
         '200':
@@ -1136,8 +1127,7 @@ paths:
                     - content: This is the content of the new entry.
                       title: New Entry
                   items:
-                    $ref: >-
-                      #/components/schemas/KnowledgeBaseEntryCreateProps
+                    $ref: '#/components/schemas/KnowledgeBaseEntryCreateProps'
                   type: array
                 delete:
                   type: object
@@ -1163,23 +1153,20 @@ paths:
                       id: '123'
                       title: Updated Entry
                   items:
-                    $ref: >-
-                      #/components/schemas/KnowledgeBaseEntryUpdateProps
+                    $ref: '#/components/schemas/KnowledgeBaseEntryUpdateProps'
                   type: array
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: >-
-                  #/components/schemas/KnowledgeBaseEntryBulkCrudActionResponse
+                $ref: '#/components/schemas/KnowledgeBaseEntryBulkCrudActionResponse'
           description: Successful bulk operation request
         '400':
           content:
             application/json:
               schema:
-                $ref: >-
-                  #/components/schemas/KnowledgeBaseEntryErrorSchema
+                $ref: '#/components/schemas/KnowledgeBaseEntryErrorSchema'
           description: Generic Error
       summary: Applies a bulk action to multiple Knowledge Base Entries
       tags:
@@ -1216,8 +1203,7 @@ paths:
           name: sort_field
           required: false
           schema:
-            $ref: >-
-              #/components/schemas/FindKnowledgeBaseEntriesSortField
+            $ref: '#/components/schemas/FindKnowledgeBaseEntriesSortField'
             example: created_at
         - description: Sort order for the results, either asc or desc.
           in: query
@@ -1256,8 +1242,7 @@ paths:
                     description: >-
                       The list of Knowledge Base Entries for the current page.
                     items:
-                      $ref: >-
-                        #/components/schemas/KnowledgeBaseEntryResponse
+                      $ref: '#/components/schemas/KnowledgeBaseEntryResponse'
                     type: array
                   page:
                     description: The current page number.
@@ -1418,8 +1403,7 @@ paths:
                 - update
               title: How to reset a password (updated)
             schema:
-              $ref: >-
-                #/components/schemas/KnowledgeBaseEntryUpdateRouteProps
+              $ref: '#/components/schemas/KnowledgeBaseEntryUpdateRouteProps'
         required: true
       responses:
         '200':
@@ -1651,8 +1635,8 @@ paths:
                       name: Error Troubleshooting Prompt
                       namespace: default
                       promptType: standard
-                      timestamp: 2025-04-30T22:30:00Z
-                      updatedAt: 2025-04-30T22:45:00Z
+                      timestamp: '2025-04-30T22:30:00Z'
+                      updatedAt: '2025-04-30T22:45:00Z'
                       updatedBy: jdoe
                       users:
                         - full_name: John Doe
@@ -1784,7 +1768,7 @@ components:
             Timestamp when the anonymization field was initially created.
         updatedAt:
           description: Timestamp of the last update.
-          example: 2023-10-31T12:00:00Z
+          example: '2023-10-31T12:00:00Z'
           type: string
         updatedBy:
           description: Username of the person who last updated the field.
@@ -1812,8 +1796,7 @@ components:
           example: user.name
           type: string
         skip_reason:
-          $ref: >-
-            #/components/schemas/AnonymizationFieldsBulkActionSkipReason
+          $ref: '#/components/schemas/AnonymizationFieldsBulkActionSkipReason'
           description: Reason why the anonymization field was not modified.
       required:
         - id
@@ -1832,12 +1815,10 @@ components:
               description: >-
                 List of errors that occurred during the bulk operation.
               items:
-                $ref: >-
-                  #/components/schemas/NormalizedAnonymizationFieldError
+                $ref: '#/components/schemas/NormalizedAnonymizationFieldError'
               type: array
             results:
-              $ref: >-
-                #/components/schemas/AnonymizationFieldsBulkCrudActionResults
+              $ref: '#/components/schemas/AnonymizationFieldsBulkCrudActionResults'
             summary:
               $ref: '#/components/schemas/BulkCrudActionSummary'
           required:
@@ -1877,8 +1858,7 @@ components:
           description: >-
             List of anonymization fields that were skipped during the operation.
           items:
-            $ref: >-
-              #/components/schemas/AnonymizationFieldsBulkActionSkipResult
+            $ref: '#/components/schemas/AnonymizationFieldsBulkActionSkipResult'
           type: array
         updated:
           description: List of anonymization fields successfully updated.
@@ -2106,13 +2086,10 @@ components:
     ContentReferences:
       additionalProperties:
         oneOf:
-          - $ref: >-
-              #/components/schemas/KnowledgeBaseEntryContentReference
+          - $ref: '#/components/schemas/KnowledgeBaseEntryContentReference'
           - $ref: '#/components/schemas/SecurityAlertContentReference'
-          - $ref: >-
-              #/components/schemas/SecurityAlertsPageContentReference
-          - $ref: >-
-              #/components/schemas/ProductDocumentationContentReference
+          - $ref: '#/components/schemas/SecurityAlertsPageContentReference'
+          - $ref: '#/components/schemas/ProductDocumentationContentReference'
           - $ref: '#/components/schemas/EsqlContentReference'
           - $ref: '#/components/schemas/HrefContentReference'
             additionalProperties: false
@@ -2167,7 +2144,7 @@ components:
           example: assistant
         createdAt:
           description: The time conversation was created.
-          example: 2025-04-30T14:00:00Z
+          example: '2025-04-30T14:00:00Z'
           type: string
         createdBy:
           $ref: '#/components/schemas/User'
@@ -2196,7 +2173,7 @@ components:
           type: string
         updatedAt:
           description: The last time conversation was updated.
-          example: 2025-04-30T16:30:00Z
+          example: '2025-04-30T16:30:00Z'
           type: string
         users:
           items:
@@ -2393,10 +2370,10 @@ components:
               type: object
               properties:
                 from:
-                  example: 2025-04-01T00:00:00Z
+                  example: '2025-04-01T00:00:00Z'
                   type: string
                 to:
-                  example: 2025-04-30T23:59:59Z
+                  example: '2025-04-30T23:59:59Z'
                   type: string
               required:
                 - from
@@ -2713,8 +2690,7 @@ components:
           example: Skipped Entry
           type: string
         skip_reason:
-          $ref: >-
-            #/components/schemas/KnowledgeBaseEntryBulkActionSkipReason
+          $ref: '#/components/schemas/KnowledgeBaseEntryBulkActionSkipReason'
       required:
         - id
         - skip_reason
@@ -2735,15 +2711,12 @@ components:
                   message: Failed to update entry.
                   statusCode: 400
               items:
-                $ref: >-
-                  #/components/schemas/NormalizedKnowledgeBaseEntryError
+                $ref: '#/components/schemas/NormalizedKnowledgeBaseEntryError'
               type: array
             results:
-              $ref: >-
-                #/components/schemas/KnowledgeBaseEntryBulkCrudActionResults
+              $ref: '#/components/schemas/KnowledgeBaseEntryBulkCrudActionResults'
             summary:
-              $ref: >-
-                #/components/schemas/KnowledgeBaseEntryBulkCrudActionSummary
+              $ref: '#/components/schemas/KnowledgeBaseEntryBulkCrudActionSummary'
           required:
             - results
             - summary
@@ -2795,8 +2768,7 @@ components:
               name: Skipped Entry
               skip_reason: KNOWLEDGE_BASE_ENTRY_NOT_MODIFIED
           items:
-            $ref: >-
-              #/components/schemas/KnowledgeBaseEntryBulkActionSkipResult
+            $ref: '#/components/schemas/KnowledgeBaseEntryBulkActionSkipResult'
           type: array
         updated:
           description: >-
@@ -3040,7 +3012,7 @@ components:
         timestamp:
           $ref: '#/components/schemas/NonEmptyTimestamp'
           description: The timestamp message was sent or received.
-          example: 2025-04-30T15:30:00Z
+          example: '2025-04-30T15:30:00Z'
         traceData:
           $ref: '#/components/schemas/TraceData'
           description: Trace data
@@ -3096,7 +3068,7 @@ components:
       description: >-
         A string that represents a timestamp in ISO 8601 format and does not
         contain only whitespace characters.
-      example: 2023-10-31T12:00:00Z
+      example: '2023-10-31T12:00:00Z'
       format: nonempty
       minLength: 1
       type: string
@@ -3106,8 +3078,7 @@ components:
         anonymization_fields:
           description: Array of anonymization fields that caused the error.
           items:
-            $ref: >-
-              #/components/schemas/AnonymizationFieldDetailsInError
+            $ref: '#/components/schemas/AnonymizationFieldDetailsInError'
           type: array
         err_code:
           description: Error code indicating the type of failure.
@@ -3136,8 +3107,7 @@ components:
           description: >-
             List of Knowledge Base Entries that encountered the error.
           items:
-            $ref: >-
-              #/components/schemas/KnowledgeBaseEntryDetailsInError
+            $ref: '#/components/schemas/KnowledgeBaseEntryDetailsInError'
           type: array
         message:
           description: Error message describing the issue.
@@ -3458,7 +3428,7 @@ components:
       properties:
         createdAt:
           description: Time the Knowledge Base Entry was created.
-          example: 2023-01-01T12:00:00Z
+          example: '2023-01-01T12:00:00Z'
           type: string
         createdBy:
           description: User who created the Knowledge Base Entry.
@@ -3468,7 +3438,7 @@ components:
           $ref: '#/components/schemas/NonEmptyString'
         updatedAt:
           description: Time the Knowledge Base Entry was last updated.
-          example: 2023-01-02T12:00:00Z
+          example: '2023-01-02T12:00:00Z'
           type: string
         updatedBy:
           description: User who last updated the Knowledge Base Entry.

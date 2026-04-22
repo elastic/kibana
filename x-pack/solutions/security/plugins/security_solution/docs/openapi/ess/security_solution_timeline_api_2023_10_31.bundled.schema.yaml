@@ -4,7 +4,7 @@ info:
     You can create Timelines and Timeline templates via the API, as well as
     import new Timelines from an ndjson file.
   title: Security Timeline API (Elastic Cloud and self-hosted)
-  version: 2023-10-31
+  version: '2023-10-31'
 servers:
   - url: http://{kibana_host}:{port}
     variables:
@@ -827,8 +827,7 @@ paths:
               properties:
                 prepackagedTimelines:
                   items:
-                    $ref: >-
-                      #/components/schemas/TimelineSavedToReturnObject
+                    $ref: '#/components/schemas/TimelineSavedToReturnObject'
                     nullable: true
                   type: array
                 timelinesToInstall:
@@ -1068,8 +1067,7 @@ components:
             - timelineId
     BarePinnedEvent:
       allOf:
-        - $ref: >-
-            #/components/schemas/PinnedEventCreatedAndUpdatedMetadata
+        - $ref: '#/components/schemas/PinnedEventCreatedAndUpdatedMetadata'
         - type: object
           properties:
             eventId:

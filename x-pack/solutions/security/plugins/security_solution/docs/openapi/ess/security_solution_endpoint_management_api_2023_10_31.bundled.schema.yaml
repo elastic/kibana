@@ -4,7 +4,7 @@ info:
     Interact with and manage endpoints running the Elastic Defend integration.
   title: >-
     Security Endpoint Management API (Elastic Cloud and self-hosted)
-  version: 2023-10-31
+  version: '2023-10-31'
 servers:
   - url: http://{kibana_host}:{port}
     variables:
@@ -73,8 +73,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: >-
-                  #/components/schemas/GetEndpointActionListResponse
+                $ref: '#/components/schemas/GetEndpointActionListResponse'
           description: Indicates a successful call.
       summary: Get response actions
       tags:
@@ -96,8 +95,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: >-
-                  #/components/schemas/ActionStatusSuccessResponse
+                $ref: '#/components/schemas/ActionStatusSuccessResponse'
           description: Indicates a successful call.
       summary: Get response actions status
       tags:
@@ -281,12 +279,11 @@ paths:
                       outputs: {}
                       parameters:
                         id: 7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d
-                      startedAt: 2022-07-29T19:08:49.126Z
+                      startedAt: '2022-07-29T19:08:49.126Z'
                       status: pending
                       wasSuccessful: false
               schema:
-                $ref: >-
-                  #/components/schemas/ResponseActionCreateSuccessResponse
+                $ref: '#/components/schemas/ResponseActionCreateSuccessResponse'
           description: Indicates a successful call.
       summary: Cancel a response action
       tags:
@@ -339,12 +336,11 @@ paths:
                       parameters:
                         command: ls -al
                         timeout: 600
-                      startedAt: 2023-07-28T18:43:27.362Z
+                      startedAt: '2023-07-28T18:43:27.362Z'
                       status: pending
                       wasSuccessful: false
               schema:
-                $ref: >-
-                  #/components/schemas/ResponseActionCreateSuccessResponse
+                $ref: '#/components/schemas/ResponseActionCreateSuccessResponse'
           description: Indicates a successful call.
       summary: Run a command
       tags:
@@ -395,12 +391,11 @@ paths:
                       outputs: {}
                       parameters:
                         path: /usr/my-file.txt
-                      startedAt: 2023-07-28T19:00:03.911Z
+                      startedAt: '2023-07-28T19:00:03.911Z'
                       status: pending
                       wasSuccessful: false
               schema:
-                $ref: >-
-                  #/components/schemas/ResponseActionCreateSuccessResponse
+                $ref: '#/components/schemas/ResponseActionCreateSuccessResponse'
           description: Indicates a successful call.
       summary: Get a file
       tags:
@@ -507,7 +502,7 @@ paths:
                       isCompleted: false
                       isExpired: false
                       outputs: {}
-                      startedAt: 2022-07-29T19:08:49.126Z
+                      startedAt: '2022-07-29T19:08:49.126Z'
                       status: pending
                       wasSuccessful: false
               schema:
@@ -569,12 +564,11 @@ paths:
                       outputs: {}
                       parameters:
                         entity_id: abc123
-                      startedAt: 2022-07-29T19:08:49.126Z
+                      startedAt: '2022-07-29T19:08:49.126Z'
                       status: pending
                       wasSuccessful: false
               schema:
-                $ref: >-
-                  #/components/schemas/ResponseActionCreateSuccessResponse
+                $ref: '#/components/schemas/ResponseActionCreateSuccessResponse'
           description: Indicates a successful call.
       summary: Terminate a process
       tags:
@@ -628,12 +622,11 @@ paths:
                       parameters:
                         entity_id: abc123
                         type: process
-                      startedAt: 2022-07-29T19:08:49.126Z
+                      startedAt: '2022-07-29T19:08:49.126Z'
                       status: pending
                       wasSuccessful: false
               schema:
-                $ref: >-
-                  #/components/schemas/ResponseActionCreateSuccessResponse
+                $ref: '#/components/schemas/ResponseActionCreateSuccessResponse'
           description: Indicates a successful call.
       summary: Generate a memory dump from the host machine
       tags:
@@ -679,12 +672,11 @@ paths:
                       isCompleted: false
                       isExpired: false
                       outputs: {}
-                      startedAt: 2022-07-29T19:08:49.126Z
+                      startedAt: '2022-07-29T19:08:49.126Z'
                       status: pending
                       wasSuccessful: false
               schema:
-                $ref: >-
-                  #/components/schemas/ResponseActionCreateSuccessResponse
+                $ref: '#/components/schemas/ResponseActionCreateSuccessResponse'
           description: Indicates a successful call.
       summary: Get running processes
       tags:
@@ -751,12 +743,11 @@ paths:
                       outputs: {}
                       parameters:
                         scriptId: 1111-2222-3333-4444-5555-6666-7777-8888
-                      startedAt: 2022-07-29T19:08:49.126Z
+                      startedAt: '2022-07-29T19:08:49.126Z'
                       status: pending
                       wasSuccessful: false
               schema:
-                $ref: >-
-                  #/components/schemas/ResponseActionCreateSuccessResponse
+                $ref: '#/components/schemas/ResponseActionCreateSuccessResponse'
           description: Indicates a successful call.
       summary: Run a script
       tags:
@@ -808,12 +799,11 @@ paths:
                       outputs: {}
                       parameters:
                         path: /usr/my-file.txt
-                      startedAt: 2023-07-28T19:00:03.911Z
+                      startedAt: '2023-07-28T19:00:03.911Z'
                       status: pending
                       wasSuccessful: false
               schema:
-                $ref: >-
-                  #/components/schemas/ResponseActionCreateSuccessResponse
+                $ref: '#/components/schemas/ResponseActionCreateSuccessResponse'
           description: Indicates a successful call.
       summary: Scan a file or directory
       tags:
@@ -858,8 +848,7 @@ paths:
                   parameters:
                     pid: 1234
             schema:
-              $ref: >-
-                #/components/schemas/SuspendProcessRouteRequestBody
+              $ref: '#/components/schemas/SuspendProcessRouteRequestBody'
         required: true
       responses:
         '200':
@@ -888,12 +877,11 @@ paths:
                       outputs: {}
                       parameters:
                         entity_id: abc123
-                      startedAt: 2022-07-29T19:08:49.126Z
+                      startedAt: '2022-07-29T19:08:49.126Z'
                       status: pending
                       wasSuccessful: false
               schema:
-                $ref: >-
-                  #/components/schemas/ResponseActionCreateSuccessResponse
+                $ref: '#/components/schemas/ResponseActionCreateSuccessResponse'
           description: Indicates a successful call.
       summary: Suspend a process
       tags:
@@ -999,7 +987,7 @@ paths:
                       isCompleted: false
                       isExpired: false
                       outputs: {}
-                      startedAt: 2022-07-29T19:08:49.126Z
+                      startedAt: '2022-07-29T19:08:49.126Z'
                       status: pending
                       wasSuccessful: false
               schema:
@@ -1049,12 +1037,11 @@ paths:
                         file_sha256: >-
                           a0bed94220193ba4895c0aa5b4e7e293381d15765cb164ddf7be5cdd010ae42a
                         file_size: 69
-                      startedAt: 2023-07-03T15:07:22.837Z
+                      startedAt: '2023-07-03T15:07:22.837Z'
                       status: pending
                       wasSuccessful: false
               schema:
-                $ref: >-
-                  #/components/schemas/ResponseActionCreateSuccessResponse
+                $ref: '#/components/schemas/ResponseActionCreateSuccessResponse'
           description: Indicates a successful call.
       summary: Upload a file
       tags:
@@ -1164,8 +1151,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: >-
-                  #/components/schemas/ProtectionUpdatesNoteResponse
+                $ref: '#/components/schemas/ProtectionUpdatesNoteResponse'
           description: Indicates a successful call.
       summary: Get a protection updates note
       tags:
@@ -1198,8 +1184,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: >-
-                  #/components/schemas/ProtectionUpdatesNoteResponse
+                $ref: '#/components/schemas/ProtectionUpdatesNoteResponse'
           description: Indicates a successful call.
       summary: Create or update a protection updates note
       tags:
@@ -1436,7 +1421,7 @@ components:
           type: string
     EndDate:
       description: An end date in ISO format or Date Math format.
-      example: 2023-10-31T23:59:59.999Z
+      example: '2023-10-31T23:59:59.999Z'
       type: string
     EndpointIds:
       description: >-
@@ -1453,9 +1438,9 @@ components:
     EndpointMetadataResponse:
       example:
         host_status: healthy
-        last_checkin: 2023-07-04T15:48:57.360Z
+        last_checkin: '2023-07-04T15:48:57.360Z'
         metadata:
-          '@timestamp': 2023-07-04T15:48:57.3609346Z
+          '@timestamp': '2023-07-04T15:48:57.3609346Z'
           agent:
             build:
               original: >-
@@ -1493,10 +1478,10 @@ components:
             agent_id_status: verified
             category:
               - host
-            created: 2023-07-04T15:48:57.3609346Z
+            created: '2023-07-04T15:48:57.3609346Z'
             dataset: endpoint.metadata
             id: MNtRc++KoKHXXwlj+++++OhZ
-            ingested: 2023-07-04T15:48:58Z
+            ingested: '2023-07-04T15:48:58Z'
             kind: metric
             module: endpoint
             sequence: 43757
@@ -1648,47 +1633,47 @@ components:
               - afdc366c-e2e0-4cdb-ae1d-94575bd2d8e0
             agentType: endpoint
             command: running-processes
-            completedAt: 2022-08-08T09:50:47.672Z
+            completedAt: '2022-08-08T09:50:47.672Z'
             createdBy: elastic
             id: b3d6de74-36b0-4fa8-be46-c375bf1771bf
             isCompleted: true
             isExpired: false
-            startedAt: 2022-08-08T15:24:57.402Z
+            startedAt: '2022-08-08T15:24:57.402Z'
             wasSuccessful: true
           - agents:
               - afdc366c-e2e0-4cdb-ae1d-94575bd2d8e0
             agentType: endpoint
             command: isolate
-            completedAt: 2022-08-08T10:41:57.352Z
+            completedAt: '2022-08-08T10:41:57.352Z'
             createdBy: elastic
             id: 43b4098b-8752-4fbb-a7a7-6df7c74d0ee3
             isCompleted: true
             isExpired: false
-            startedAt: 2022-08-08T15:23:37.359Z
+            startedAt: '2022-08-08T15:23:37.359Z'
             wasSuccessful: true
           - agents:
               - afdc366c-e2e0-4cdb-ae1d-94575bd2d8e0
             agentType: endpoint
             command: kill-process
             comment: bad process - taking up too much cpu
-            completedAt: 2022-08-08T09:44:50.952Z
+            completedAt: '2022-08-08T09:44:50.952Z'
             createdBy: elastic
             id: 5bc92c86-b8e6-42dd-837f-12ad29e09caa
             isCompleted: true
             isExpired: false
-            startedAt: 2022-08-08T14:38:44.125Z
+            startedAt: '2022-08-08T14:38:44.125Z'
             wasSuccessful: true
           - agents:
               - afdc366c-e2e0-4cdb-ae1d-94575bd2d8e0
             agentType: endpoint
             command: unisolate
             comment: Not a threat to the network
-            completedAt: 2022-08-08T09:40:47.398Z
+            completedAt: '2022-08-08T09:40:47.398Z'
             createdBy: elastic
             id: 790d54e0-3aa3-4e5b-8255-3ce9d851246a
             isCompleted: true
             isExpired: false
-            startedAt: 2022-08-08T14:38:15.391Z
+            startedAt: '2022-08-08T14:38:15.391Z'
             wasSuccessful: true
         elasticAgentIds:
           - afdc366c-e2e0-4cdb-ae1d-94575bd2d8e0
@@ -2241,9 +2226,9 @@ components:
       example:
         data:
           - host_status: healthy
-            last_checkin: 2023-07-04T15:47:57.432Z
+            last_checkin: '2023-07-04T15:47:57.432Z'
             metadata:
-              '@timestamp': 2023-07-04T15:47:57.432173535Z
+              '@timestamp': '2023-07-04T15:47:57.432173535Z'
               agent:
                 build:
                   original: >-
@@ -2281,10 +2266,10 @@ components:
                 agent_id_status: verified
                 category:
                   - host
-                created: 2023-07-04T15:47:57.432173535Z
+                created: '2023-07-04T15:47:57.432173535Z'
                 dataset: endpoint.metadata
                 id: MNtSXK/SkhEBnmgt++++++7S
-                ingested: 2023-07-04T15:47:58Z
+                ingested: '2023-07-04T15:47:58Z'
                 kind: metric
                 module: endpoint
                 sequence: 400
@@ -2327,9 +2312,9 @@ components:
                 id: d5371dcd-93b7-4627-af88-4084f7d6aa3e
                 revision: 2
           - host_status: healthy
-            last_checkin: 2023-07-04T15:44:31.491Z
+            last_checkin: '2023-07-04T15:44:31.491Z'
             metadata:
-              '@timestamp': 2023-07-04T15:44:31.4917849Z
+              '@timestamp': '2023-07-04T15:44:31.4917849Z'
               agent:
                 build:
                   original: >-
@@ -2367,10 +2352,10 @@ components:
                 agent_id_status: verified
                 category:
                   - host
-                created: 2023-07-04T15:44:31.4917849Z
+                created: '2023-07-04T15:44:31.4917849Z'
                 dataset: endpoint.metadata
                 id: MNtRc++KoKHXXwlj+++++/N9
-                ingested: 2023-07-04T15:44:33Z
+                ingested: '2023-07-04T15:44:33Z'
                 kind: metric
                 module: endpoint
                 sequence: 5159
@@ -2516,7 +2501,7 @@ components:
           isExpired: false
           outputs: {}
           parameters: {}
-          startedAt: 2022-07-29T19:08:49.126Z
+          startedAt: '2022-07-29T19:08:49.126Z'
           status: pending
           wasSuccessful: false
       type: object
@@ -2642,10 +2627,8 @@ components:
                 properties:
                   content:
                     oneOf:
-                      - $ref: >-
-                          #/components/schemas/RunningProcessesOutputEndpoint
-                      - $ref: >-
-                          #/components/schemas/RunningProcessesOutputSentinelOne
+                      - $ref: '#/components/schemas/RunningProcessesOutputEndpoint'
+                      - $ref: '#/components/schemas/RunningProcessesOutputSentinelOne'
               type: object
     RunningProcessesOutputEndpoint:
       description: Processes output for `agentType` of `endpoint`
@@ -2777,8 +2760,7 @@ components:
                 - $ref: '#/components/schemas/RawScriptParameters'
                 - $ref: '#/components/schemas/HostPathScriptParameters'
                 - $ref: '#/components/schemas/CloudFileScriptParameters'
-                - $ref: >-
-                    #/components/schemas/SentinelOneRunScriptParameters
+                - $ref: '#/components/schemas/SentinelOneRunScriptParameters'
                 - $ref: '#/components/schemas/MDERunScriptParameters'
           required:
             - parameters
@@ -2906,7 +2888,7 @@ components:
       type: string
     StartDate:
       description: A start date in ISO 8601 format or Date Math format.
-      example: 2023-10-31T00:00:00.000Z
+      example: '2023-10-31T00:00:00.000Z'
       type: string
     SuccessResponse:
       description: A generic successful response.

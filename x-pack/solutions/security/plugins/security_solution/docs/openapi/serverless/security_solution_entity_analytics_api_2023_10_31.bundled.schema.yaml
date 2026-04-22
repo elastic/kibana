@@ -3,7 +3,7 @@ info:
   description: >-
     Manage entity risk scores, asset criticality, and the Entity Store.
   title: Security Entity Analytics API (Elastic Cloud Serverless)
-  version: 2023-10-31
+  version: '2023-10-31'
 servers:
   - url: http://{kibana_host}:{port}
     variables:
@@ -107,8 +107,7 @@ paths:
           application/json:
             schema:
               allOf:
-                - $ref: >-
-                    #/components/schemas/CreateAssetCriticalityRecord
+                - $ref: '#/components/schemas/CreateAssetCriticalityRecord'
                 - type: object
                   properties:
                     refresh:
@@ -159,13 +158,11 @@ paths:
                 records:
                   items:
                     allOf:
-                      - $ref: >-
-                          #/components/schemas/AssetCriticalityRecordIdParts
+                      - $ref: '#/components/schemas/AssetCriticalityRecordIdParts'
                       - type: object
                         properties:
                           criticality_level:
-                            $ref: >-
-                              #/components/schemas/AssetCriticalityLevelsForBulkUpload
+                            $ref: '#/components/schemas/AssetCriticalityLevelsForBulkUpload'
                         required:
                           - criticality_level
                   maxItems: 1000
@@ -190,12 +187,10 @@ paths:
                 properties:
                   errors:
                     items:
-                      $ref: >-
-                        #/components/schemas/AssetCriticalityBulkUploadErrorItem
+                      $ref: '#/components/schemas/AssetCriticalityBulkUploadErrorItem'
                     type: array
                   stats:
-                    $ref: >-
-                      #/components/schemas/AssetCriticalityBulkUploadStats
+                    $ref: '#/components/schemas/AssetCriticalityBulkUploadStats'
                 required:
                   - errors
                   - stats
@@ -261,7 +256,7 @@ paths:
                   page: 1
                   per_page: 10
                   records:
-                    - '@timestamp': 2024-08-02T14:40:35.705Z
+                    - '@timestamp': '2024-08-02T14:40:35.705Z'
                       asset:
                         criticality: medium_impact
                       criticality_level: medium_impact
@@ -271,7 +266,7 @@ paths:
                         name: my_other_host
                       id_field: host.name
                       id_value: my_other_host
-                    - '@timestamp': 2024-08-02T11:15:34.290Z
+                    - '@timestamp': '2024-08-02T11:15:34.290Z'
                       asset:
                         criticality: high_impact
                       criticality_level: high_impact
@@ -293,8 +288,7 @@ paths:
                     type: integer
                   records:
                     items:
-                      $ref: >-
-                        #/components/schemas/AssetCriticalityRecord
+                      $ref: '#/components/schemas/AssetCriticalityRecord'
                     type: array
                   total:
                     minimum: 0
@@ -455,8 +449,7 @@ paths:
                     required:
                       - status
                   status:
-                    $ref: >-
-                      #/components/schemas/PrivilegeMonitoringEngineStatus
+                    $ref: '#/components/schemas/PrivilegeMonitoringEngineStatus'
                   users:
                     description: User statistics for privilege monitoring
                     type: object
@@ -533,14 +526,14 @@ paths:
                 CreatePrivMonUserResponse:
                   summary: Created monitored user
                   value:
-                    '@timestamp': 2026-01-28T12:00:00.000Z
+                    '@timestamp': '2026-01-28T12:00:00.000Z'
                     entity_analytics_monitoring:
                       labels:
                         - field: department
                           source: api
                           value: IT
                     event:
-                      ingested: 2026-01-28T12:00:00.000Z
+                      ingested: '2026-01-28T12:00:00.000Z'
                     id: user-abc-123
                     user:
                       is_privileged: true
@@ -588,12 +581,10 @@ paths:
                 properties:
                   errors:
                     items:
-                      $ref: >-
-                        #/components/schemas/PrivmonUserCsvUploadErrorItem
+                      $ref: '#/components/schemas/PrivmonUserCsvUploadErrorItem'
                     type: array
                   stats:
-                    $ref: >-
-                      #/components/schemas/PrivmonUserCsvUploadStats
+                    $ref: '#/components/schemas/PrivmonUserCsvUploadStats'
                 required:
                   - errors
                   - stats
@@ -678,14 +669,14 @@ paths:
                 UpdatePrivMonUserResponse:
                   summary: Updated monitored user
                   value:
-                    '@timestamp': 2026-01-28T12:00:00.000Z
+                    '@timestamp': '2026-01-28T12:00:00.000Z'
                     entity_analytics_monitoring:
                       labels:
                         - field: department
                           source: api
                           value: Security
                     event:
-                      ingested: 2026-01-28T12:00:00.000Z
+                      ingested: '2026-01-28T12:00:00.000Z'
                     id: user-abc-123
                     user:
                       is_privileged: true
@@ -717,26 +708,26 @@ paths:
                 ListPrivMonUsersResponse:
                   summary: List of monitored users
                   value:
-                    - '@timestamp': 2026-01-28T12:00:00.000Z
+                    - '@timestamp': '2026-01-28T12:00:00.000Z'
                       entity_analytics_monitoring:
                         labels:
                           - field: department
                             source: api
                             value: IT
                       event:
-                        ingested: 2026-01-28T12:00:00.000Z
+                        ingested: '2026-01-28T12:00:00.000Z'
                       id: user-abc-123
                       user:
                         is_privileged: true
                         name: john.doe
-                    - '@timestamp': 2026-01-15T09:00:00.000Z
+                    - '@timestamp': '2026-01-15T09:00:00.000Z'
                       entity_analytics_monitoring:
                         labels:
                           - field: department
                             source: csv
                             value: Security
                       event:
-                        ingested: 2026-01-15T09:00:00.000Z
+                        ingested: '2026-01-15T09:00:00.000Z'
                       id: user-def-456
                       user:
                         is_privileged: true
@@ -949,13 +940,13 @@ paths:
                 CreateWatchlistResponse:
                   summary: Created watchlist
                   value:
-                    createdAt: 2026-01-28T12:00:00.000Z
+                    createdAt: '2026-01-28T12:00:00.000Z'
                     description: High risk vendor watchlist
                     id: watchlist-123
                     managed: false
                     name: High Risk Vendors
                     riskModifier: 1.5
-                    updatedAt: 2026-01-28T12:00:00.000Z
+                    updatedAt: '2026-01-28T12:00:00.000Z'
               schema:
                 allOf:
                   - $ref: '#/components/schemas/WatchlistObject'
@@ -963,8 +954,7 @@ paths:
                     properties:
                       entitySources:
                         items:
-                          $ref: >-
-                            #/components/schemas/MonitoringEntitySource
+                          $ref: '#/components/schemas/MonitoringEntitySource'
                         type: array
           description: Watchlist created successfully
       summary: Create a new watchlist
@@ -992,13 +982,13 @@ paths:
                 GetWatchlistResponse:
                   summary: Watchlist details
                   value:
-                    createdAt: 2026-01-28T12:00:00.000Z
+                    createdAt: '2026-01-28T12:00:00.000Z'
                     description: High risk vendor watchlist
                     id: watchlist-123
                     managed: false
                     name: High Risk Vendors
                     riskModifier: 1.5
-                    updatedAt: 2026-02-18T12:00:00.000Z
+                    updatedAt: '2026-02-18T12:00:00.000Z'
               schema:
                 $ref: '#/components/schemas/WatchlistObject'
           description: Watchlist details
@@ -1060,13 +1050,13 @@ paths:
                 UpdateWatchlistResponse:
                   summary: Updated watchlist
                   value:
-                    createdAt: 2026-01-28T12:00:00.000Z
+                    createdAt: '2026-01-28T12:00:00.000Z'
                     description: High risk vendor watchlist
                     id: watchlist-123
                     managed: false
                     name: High Risk Vendors
                     riskModifier: 1.5
-                    updatedAt: 2026-02-18T12:00:00.000Z
+                    updatedAt: '2026-02-18T12:00:00.000Z'
               schema:
                 $ref: '#/components/schemas/WatchlistObject'
           description: Watchlist updated successfully
@@ -1144,8 +1134,7 @@ paths:
                     type: integer
                   items:
                     items:
-                      $ref: >-
-                        #/components/schemas/WatchlistCsvUploadResponseItem
+                      $ref: '#/components/schemas/WatchlistCsvUploadResponseItem'
                     type: array
                   successful:
                     description: >-
@@ -1240,8 +1229,7 @@ paths:
                     type: integer
                   items:
                     items:
-                      $ref: >-
-                        #/components/schemas/WatchlistEntityAssignResponseItem
+                      $ref: '#/components/schemas/WatchlistEntityAssignResponseItem'
                     type: array
                   not_found:
                     description: >-
@@ -1333,8 +1321,7 @@ paths:
                     type: integer
                   items:
                     items:
-                      $ref: >-
-                        #/components/schemas/WatchlistEntityUnassignResponseItem
+                      $ref: '#/components/schemas/WatchlistEntityUnassignResponseItem'
                     type: array
                   not_found:
                     description: >-
@@ -1373,20 +1360,20 @@ paths:
                 ListWatchlistsResponse:
                   summary: List of watchlists
                   value:
-                    - createdAt: 2026-01-28T12:00:00.000Z
+                    - createdAt: '2026-01-28T12:00:00.000Z'
                       description: High risk vendor watchlist
                       id: watchlist-123
                       managed: false
                       name: High Risk Vendors
                       riskModifier: 1.5
-                      updatedAt: 2026-02-18T12:00:00.000Z
-                    - createdAt: 2026-01-10T09:30:00.000Z
+                      updatedAt: '2026-02-18T12:00:00.000Z'
+                    - createdAt: '2026-01-10T09:30:00.000Z'
                       description: Privileged user monitoring watchlist
                       id: watchlist-456
                       managed: true
                       name: Privileged Accounts
                       riskModifier: 2
-                      updatedAt: 2026-02-01T15:45:00.000Z
+                      updatedAt: '2026-02-01T15:45:00.000Z'
               schema:
                 items:
                   $ref: '#/components/schemas/WatchlistObject'
@@ -1919,8 +1906,7 @@ paths:
                   result:
                     description: Per-engine update results.
                     items:
-                      $ref: >-
-                        #/components/schemas/EngineDataviewUpdateResult
+                      $ref: '#/components/schemas/EngineDataviewUpdateResult'
                     type: array
                   success:
                     description: Whether all engines updated successfully.
@@ -1959,8 +1945,7 @@ paths:
                     description: >-
                       Per-engine update results for engines that succeeded.
                     items:
-                      $ref: >-
-                        #/components/schemas/EngineDataviewUpdateResult
+                      $ref: '#/components/schemas/EngineDataviewUpdateResult'
                     type: array
                   success:
                     description: Always `false` for a partial success.
@@ -2284,8 +2269,7 @@ paths:
                                 Detailed component-level status. Only included
                                 when include_components is true.
                               items:
-                                $ref: >-
-                                  #/components/schemas/EngineComponentStatus
+                                $ref: '#/components/schemas/EngineComponentStatus'
                               type: array
                     type: array
                   status:
@@ -2323,15 +2307,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: >-
-                  #/components/schemas/TaskManagerUnavailableResponse
+                $ref: '#/components/schemas/TaskManagerUnavailableResponse'
           description: Task manager is unavailable
         default:
           content:
             application/json:
               schema:
-                $ref: >-
-                  #/components/schemas/CleanUpRiskEngineErrorResponse
+                $ref: '#/components/schemas/CleanUpRiskEngineErrorResponse'
           description: Unexpected error
       summary: Cleanup the Risk Engine
       tags:
@@ -2419,15 +2401,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: >-
-                  #/components/schemas/TaskManagerUnavailableResponse
+                $ref: '#/components/schemas/TaskManagerUnavailableResponse'
           description: Task manager is unavailable
         default:
           content:
             application/json:
               schema:
-                $ref: >-
-                  #/components/schemas/ConfigureRiskEngineSavedObjectErrorResponse
+                $ref: '#/components/schemas/ConfigureRiskEngineSavedObjectErrorResponse'
           description: Unexpected error
       summary: Configure the Risk Engine Saved Object
       tags:
@@ -2452,22 +2432,19 @@ paths:
                   value:
                     success: true
               schema:
-                $ref: >-
-                  #/components/schemas/RiskEngineScheduleNowResponse
+                $ref: '#/components/schemas/RiskEngineScheduleNowResponse'
           description: Successful response
         '400':
           content:
             application/json:
               schema:
-                $ref: >-
-                  #/components/schemas/TaskManagerUnavailableResponse
+                $ref: '#/components/schemas/TaskManagerUnavailableResponse'
           description: Task manager is unavailable
         default:
           content:
             application/json:
               schema:
-                $ref: >-
-                  #/components/schemas/RiskEngineScheduleNowErrorResponse
+                $ref: '#/components/schemas/RiskEngineScheduleNowErrorResponse'
           description: Unexpected error
       summary: Run the risk scoring engine
       tags:
@@ -2559,13 +2536,13 @@ components:
           properties:
             '@timestamp':
               description: The time the record was created or updated.
-              example: 2017-07-21T17:32:28Z
+              example: '2017-07-21T17:32:28Z'
               format: date-time
               type: string
           required:
             - '@timestamp'
       example:
-        '@timestamp': 2024-08-02T11:15:34.290Z
+        '@timestamp': '2024-08-02T11:15:34.290Z'
         asset:
           criticality: high_impact
         criticality_level: high_impact
@@ -3143,7 +3120,7 @@ components:
       properties:
         '@timestamp':
           description: The time at which the risk score was calculated.
-          example: 2017-07-21T17:32:28Z
+          example: '2017-07-21T17:32:28Z'
           format: date-time
           type: string
         calculated_level:
@@ -3590,8 +3567,7 @@ components:
             - managed
     MonitoringEntitySourceProperties:
       allOf:
-        - $ref: >-
-            #/components/schemas/UpdateableMonitoringEntitySourceProperties
+        - $ref: '#/components/schemas/UpdateableMonitoringEntitySourceProperties'
         - type: object
           properties:
             managed:
@@ -3704,7 +3680,7 @@ components:
           type: number
         timestamp:
           description: The @timestamp of the risk input document.
-          example: 2017-07-21T17:32:28Z
+          example: '2017-07-21T17:32:28Z'
           type: string
       required:
         - id
@@ -4059,13 +4035,13 @@ components:
         - status
     WatchlistObject:
       example:
-        createdAt: 2026-01-28T12:00:00.000Z
+        createdAt: '2026-01-28T12:00:00.000Z'
         description: High risk vendor watchlist
         id: watchlist-123
         managed: false
         name: High Risk Vendors
         riskModifier: 1.5
-        updatedAt: 2026-02-18T12:00:00.000Z
+        updatedAt: '2026-02-18T12:00:00.000Z'
       type: object
       properties:
         createdAt:

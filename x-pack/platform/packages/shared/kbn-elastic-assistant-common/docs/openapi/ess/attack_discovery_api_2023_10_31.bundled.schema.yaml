@@ -8,7 +8,7 @@ info:
     you which users and hosts are involved, how alerts correspond to the MITRE
     ATT&CK matrix, and which threat actor might be responsible.
   title: Security Attack discovery API (Elastic Cloud & self-hosted)
-  version: 2023-10-31
+  version: '2023-10-31'
 servers:
   - url: http://{kibana_host}:{port}
     variables:
@@ -122,8 +122,7 @@ paths:
                       includes the applied modifications from the bulk update
                       request.
                     items:
-                      $ref: >-
-                        #/components/schemas/AttackDiscoveryApiAlert
+                      $ref: '#/components/schemas/AttackDiscoveryApiAlert'
                     type: array
                 required:
                   - data
@@ -386,8 +385,7 @@ paths:
                       Array of matched Attack discovery objects. Each item
                       follows the `AttackDiscoveryApiAlert` schema.
                     items:
-                      $ref: >-
-                        #/components/schemas/AttackDiscoveryApiAlert
+                      $ref: '#/components/schemas/AttackDiscoveryApiAlert'
                     type: array
                   page:
                     description: >-
@@ -490,8 +488,7 @@ paths:
               start: now-24h
               subAction: invokeAI
             schema:
-              $ref: >-
-                #/components/schemas/AttackDiscoveryGenerationConfig
+              $ref: '#/components/schemas/AttackDiscoveryGenerationConfig'
         required: true
       responses:
         '200':
@@ -1529,12 +1526,12 @@ paths:
                   - alerts_context_count: 75
                     connector_id: chatGpt5_0ChatAzure
                     discoveries: 3
-                    end: 2025-09-29T06:42:44.810Z
+                    end: '2025-09-29T06:42:44.810Z'
                     execution_uuid: 46b218d5-535d-4329-be56-d0f6af6986b7
                     loading_message: >-
                       AI is analyzing up to 100 alerts in the last 24 hours to
                       generate discoveries.
-                    start: 2025-09-29T06:42:08.962Z
+                    start: '2025-09-29T06:42:08.962Z'
                     status: succeeded
               schema:
                 type: object
@@ -1542,8 +1539,7 @@ paths:
                   generations:
                     description: List of Attack Discovery generations
                     items:
-                      $ref: >-
-                        #/components/schemas/AttackDiscoveryGeneration
+                      $ref: '#/components/schemas/AttackDiscoveryGeneration'
                     type: array
                 required:
                   - generations
@@ -1638,9 +1634,9 @@ paths:
                 generation:
                   alerts_context_count: 50
                   discoveries: 1
-                  end: 2025-09-29T06:42:44.810Z
+                  end: '2025-09-29T06:42:44.810Z'
                   execution_uuid: 2e13f386-46cf-4d65-9e2b-68609e132ba5
-                  start: 2025-09-29T06:42:08.962Z
+                  start: '2025-09-29T06:42:08.962Z'
                   status: succeeded
               schema:
                 type: object
@@ -1650,12 +1646,10 @@ paths:
                       Array of Attack discoveries generated during this
                       execution.
                     items:
-                      $ref: >-
-                        #/components/schemas/AttackDiscoveryApiAlert
+                      $ref: '#/components/schemas/AttackDiscoveryApiAlert'
                     type: array
                   generation:
-                    $ref: >-
-                      #/components/schemas/AttackDiscoveryGeneration
+                    $ref: '#/components/schemas/AttackDiscoveryGeneration'
                     description: >-
                       Optional metadata about the attack discovery generation
                       process, metadata including execution status and
@@ -1733,12 +1727,12 @@ paths:
                 alerts_context_count: 75
                 connector_id: chatGpt5_0ChatAzure
                 discoveries: 3
-                end: 2025-09-29T06:42:44.810Z
+                end: '2025-09-29T06:42:44.810Z'
                 execution_uuid: 46b218d5-535d-4329-be56-d0f6af6986b7
                 loading_message: >-
                   AI is analyzing up to 100 alerts in the last 24 hours to
                   generate discoveries.
-                start: 2025-09-29T06:42:08.962Z
+                start: '2025-09-29T06:42:08.962Z'
                 status: dismissed
               schema:
                 type: object
@@ -1785,7 +1779,7 @@ paths:
                       The timestamp when the generation process completed, in
                       ISO 8601 format. This field may be absent for generations
                       that haven't finished.
-                    example: 2025-09-29T06:42:44.810Z
+                    example: '2025-09-29T06:42:44.810Z'
                     type: string
                   execution_uuid:
                     description: >-
@@ -1814,7 +1808,7 @@ paths:
                     description: >-
                       The timestamp when the generation process began, in ISO
                       8601 format. This marks the beginning of the AI analysis.
-                    example: 2025-09-29T06:42:08.962Z
+                    example: '2025-09-29T06:42:08.962Z'
                     type: string
                   status:
                     description: >-
@@ -1904,8 +1898,7 @@ paths:
               schedule:
                 interval: 24h
             schema:
-              $ref: >-
-                #/components/schemas/AttackDiscoveryApiScheduleCreateProps
+              $ref: '#/components/schemas/AttackDiscoveryApiScheduleCreateProps'
         description: >-
           Attack Discovery schedule configuration including name, parameters,
           schedule interval, and actions
@@ -1916,7 +1909,7 @@ paths:
             application/json:
               example:
                 actions: []
-                created_at: 2023-10-31T10:00:00.000Z
+                created_at: '2023-10-31T10:00:00.000Z'
                 created_by: elastic
                 enabled: true
                 id: 12345678-1234-1234-1234-123456789012
@@ -1932,7 +1925,7 @@ paths:
                   start: now-24h
                 schedule:
                   interval: 24h
-                updated_at: 2023-10-31T10:00:00.000Z
+                updated_at: '2023-10-31T10:00:00.000Z'
                 updated_by: elastic
               schema:
                 $ref: '#/components/schemas/AttackDiscoveryApiSchedule'
@@ -1946,8 +1939,7 @@ paths:
                 message: Invalid request parameters.
                 status_code: 400
               schema:
-                $ref: >-
-                  #/components/schemas/AttackDiscoveryGenericError
+                $ref: '#/components/schemas/AttackDiscoveryGenericError'
           description: Bad Request response.
       summary: Create Attack Discovery schedule
       tags:
@@ -2046,7 +2038,7 @@ paths:
               example:
                 data:
                   - actions: []
-                    created_at: 2023-10-31T10:00:00.000Z
+                    created_at: '2023-10-31T10:00:00.000Z'
                     created_by: elastic
                     enabled: true
                     id: 12345678-1234-1234-1234-123456789012
@@ -2062,7 +2054,7 @@ paths:
                       start: now-24h
                     schedule:
                       interval: 24h
-                    updated_at: 2023-10-31T10:00:00.000Z
+                    updated_at: '2023-10-31T10:00:00.000Z'
                     updated_by: elastic
                 page: 1
                 per_page: 10
@@ -2074,8 +2066,7 @@ paths:
                     description: >-
                       Array of matched Attack Discovery schedule objects.
                     items:
-                      $ref: >-
-                        #/components/schemas/AttackDiscoveryApiSchedule
+                      $ref: '#/components/schemas/AttackDiscoveryApiSchedule'
                     type: array
                   page:
                     description: >-
@@ -2174,8 +2165,7 @@ paths:
                 message: Invalid request parameters.
                 status_code: 400
               schema:
-                $ref: >-
-                  #/components/schemas/AttackDiscoveryGenericError
+                $ref: '#/components/schemas/AttackDiscoveryGenericError'
           description: Bad Request response.
       summary: Delete Attack Discovery schedule
       tags:
@@ -2211,12 +2201,12 @@ paths:
             application/json:
               example:
                 actions: []
-                created_at: 2023-10-31T10:00:00.000Z
+                created_at: '2023-10-31T10:00:00.000Z'
                 created_by: elastic
                 enabled: true
                 id: 12345678-1234-1234-1234-123456789012
                 last_execution:
-                  date: 2023-10-31T10:00:00.000Z
+                  date: '2023-10-31T10:00:00.000Z'
                   last_duration: 45.2
                   status: ok
                 name: Daily Security Analysis
@@ -2231,7 +2221,7 @@ paths:
                   start: now-24h
                 schedule:
                   interval: 24h
-                updated_at: 2023-10-31T10:00:00.000Z
+                updated_at: '2023-10-31T10:00:00.000Z'
                 updated_by: elastic
               schema:
                 $ref: '#/components/schemas/AttackDiscoveryApiSchedule'
@@ -2246,8 +2236,7 @@ paths:
                 message: Invalid request parameters.
                 status_code: 400
               schema:
-                $ref: >-
-                  #/components/schemas/AttackDiscoveryGenericError
+                $ref: '#/components/schemas/AttackDiscoveryGenericError'
           description: Bad Request response.
       summary: Get Attack Discovery schedule by ID
       tags:
@@ -2296,8 +2285,7 @@ paths:
               schedule:
                 interval: 12h
             schema:
-              $ref: >-
-                #/components/schemas/AttackDiscoveryApiScheduleUpdateProps
+              $ref: '#/components/schemas/AttackDiscoveryApiScheduleUpdateProps'
         description: >-
           Updated Attack Discovery schedule configuration. All fields are
           required as this replaces the entire schedule configuration.
@@ -2308,7 +2296,7 @@ paths:
             application/json:
               example:
                 actions: []
-                created_at: 2023-10-31T10:00:00.000Z
+                created_at: '2023-10-31T10:00:00.000Z'
                 created_by: elastic
                 enabled: true
                 id: 12345678-1234-1234-1234-123456789012
@@ -2324,7 +2312,7 @@ paths:
                   start: now-48h
                 schedule:
                   interval: 12h
-                updated_at: 2023-10-31T12:00:00.000Z
+                updated_at: '2023-10-31T12:00:00.000Z'
                 updated_by: elastic
               schema:
                 $ref: '#/components/schemas/AttackDiscoveryApiSchedule'
@@ -2339,8 +2327,7 @@ paths:
                 message: Invalid request parameters.
                 status_code: 400
               schema:
-                $ref: >-
-                  #/components/schemas/AttackDiscoveryGenericError
+                $ref: '#/components/schemas/AttackDiscoveryGenericError'
           description: Bad Request response.
       summary: Update Attack Discovery schedule
       tags:
@@ -2417,8 +2404,7 @@ paths:
                 message: Invalid request parameters.
                 status_code: 400
               schema:
-                $ref: >-
-                  #/components/schemas/AttackDiscoveryGenericError
+                $ref: '#/components/schemas/AttackDiscoveryGenericError'
           description: Bad Request response.
       summary: Disable Attack Discovery schedule
       tags:
@@ -2477,8 +2463,7 @@ paths:
                 message: Invalid request parameters.
                 status_code: 400
               schema:
-                $ref: >-
-                  #/components/schemas/AttackDiscoveryGenericError
+                $ref: '#/components/schemas/AttackDiscoveryGenericError'
           description: Bad Request response.
       summary: Enable Attack Discovery schedule
       tags:
@@ -2533,7 +2518,7 @@ components:
             Timestamp when the anonymization field was initially created.
         updatedAt:
           description: Timestamp of the last update.
-          example: 2023-10-31T12:00:00Z
+          example: '2023-10-31T12:00:00Z'
           type: string
         updatedBy:
           description: Username of the person who last updated the field.
@@ -2712,8 +2697,7 @@ components:
         actions:
           description: The Attack Discovery schedule actions
           items:
-            $ref: >-
-              #/components/schemas/AttackDiscoveryApiScheduleAction
+            $ref: '#/components/schemas/AttackDiscoveryApiScheduleAction'
           type: array
         created_at:
           description: The date the schedule was created
@@ -2729,8 +2713,7 @@ components:
           description: UUID of Attack Discovery schedule
           type: string
         last_execution:
-          $ref: >-
-            #/components/schemas/AttackDiscoveryApiScheduleExecution
+          $ref: '#/components/schemas/AttackDiscoveryApiScheduleExecution'
           description: The Attack Discovery schedule last execution summary
         name:
           description: The name of the schedule
@@ -2762,10 +2745,8 @@ components:
         - actions
     AttackDiscoveryApiScheduleAction:
       oneOf:
-        - $ref: >-
-            #/components/schemas/AttackDiscoveryApiScheduleGeneralAction
-        - $ref: >-
-            #/components/schemas/AttackDiscoveryApiScheduleSystemAction
+        - $ref: '#/components/schemas/AttackDiscoveryApiScheduleGeneralAction'
+        - $ref: '#/components/schemas/AttackDiscoveryApiScheduleSystemAction'
     AttackDiscoveryApiScheduleActionAlertsFilter:
       additionalProperties: true
       type: object
@@ -2776,16 +2757,14 @@ components:
       type: object
       properties:
         notify_when:
-          $ref: >-
-            #/components/schemas/AttackDiscoveryApiScheduleActionNotifyWhen
+          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionNotifyWhen'
         summary:
           description: >-
             Action summary indicates whether we will send a summary notification
             about all the generate alerts or notification per individual alert
           type: boolean
         throttle:
-          $ref: >-
-            #/components/schemas/AttackDiscoveryApiScheduleActionThrottle
+          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionThrottle'
           nullable: true
       required:
         - summary
@@ -2827,8 +2806,7 @@ components:
         actions:
           description: The Attack Discovery schedule actions
           items:
-            $ref: >-
-              #/components/schemas/AttackDiscoveryApiScheduleAction
+            $ref: '#/components/schemas/AttackDiscoveryApiScheduleAction'
           type: array
         enabled:
           description: Indicates whether the schedule is enabled
@@ -2861,8 +2839,7 @@ components:
         message:
           type: string
         status:
-          $ref: >-
-            #/components/schemas/AttackDiscoveryApiScheduleExecutionStatus
+          $ref: '#/components/schemas/AttackDiscoveryApiScheduleExecutionStatus'
           description: Status of the execution
       required:
         - date
@@ -2884,20 +2861,15 @@ components:
           description: The action type used for sending notifications.
           type: string
         alerts_filter:
-          $ref: >-
-            #/components/schemas/AttackDiscoveryApiScheduleActionAlertsFilter
+          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionAlertsFilter'
         frequency:
-          $ref: >-
-            #/components/schemas/AttackDiscoveryApiScheduleActionFrequency
+          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionFrequency'
         group:
-          $ref: >-
-            #/components/schemas/AttackDiscoveryApiScheduleActionGroup
+          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionGroup'
         id:
-          $ref: >-
-            #/components/schemas/AttackDiscoveryApiScheduleActionId
+          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionId'
         params:
-          $ref: >-
-            #/components/schemas/AttackDiscoveryApiScheduleActionParams
+          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionParams'
         uuid:
           $ref: '#/components/schemas/NonEmptyString'
       required:
@@ -2947,11 +2919,9 @@ components:
           description: The action type used for sending notifications.
           type: string
         id:
-          $ref: >-
-            #/components/schemas/AttackDiscoveryApiScheduleActionId
+          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionId'
         params:
-          $ref: >-
-            #/components/schemas/AttackDiscoveryApiScheduleActionParams
+          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionParams'
         uuid:
           $ref: '#/components/schemas/NonEmptyString'
       required:
@@ -2965,8 +2935,7 @@ components:
         actions:
           description: The Attack Discovery schedule actions
           items:
-            $ref: >-
-              #/components/schemas/AttackDiscoveryApiScheduleAction
+            $ref: '#/components/schemas/AttackDiscoveryApiScheduleAction'
           type: array
         name:
           description: The name of the schedule
@@ -3172,7 +3141,7 @@ components:
       description: >-
         A string that represents a timestamp in ISO 8601 format and does not
         contain only whitespace characters.
-      example: 2023-10-31T12:00:00Z
+      example: '2023-10-31T12:00:00Z'
       format: nonempty
       minLength: 1
       type: string
