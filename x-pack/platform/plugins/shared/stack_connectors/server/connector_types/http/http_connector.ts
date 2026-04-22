@@ -38,7 +38,7 @@ import type {
 import type { Result } from '../lib/result_type';
 
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
-import { processBufferResponse } from '../lib/process_buffer_response';
+import { processBufferResponse, type ResponseBuffer } from '../lib/process_buffer_response';
 import { isOk, promiseResult } from '../lib/result_type';
 import { getAxiosConfig } from './get_axios_config';
 import { ensureUriAllowed, validateConnectorTypeConfig } from './validations';
@@ -283,7 +283,7 @@ export async function executor(
     keepAlive = fetcher.keep_alive;
   }
 
-  const result: Result<AxiosResponse, AxiosError<unknown>> = await promiseResult(
+  const result: Result<AxiosResponse<ResponseBuffer>, AxiosError<unknown>> = await promiseResult(
     request({
       axios: axiosInstance,
       method,
@@ -301,7 +301,7 @@ export async function executor(
         maxContentLength: fetcher.max_content_length,
         maxBodyLength: fetcher.max_content_length,
       }),
-      responseType: 'arraybuffer',
+      responseType: 'arraybuffer', // Guaranteed to return a buffer data type
       signal,
     })
   );
