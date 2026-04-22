@@ -197,11 +197,8 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Uses a restorable state in doc viewer's **JSON** tab [#252054]({{kib-pull}}252054).
 
 **{{esql}} editor**:
-% GA commands
-* Makes the `FORK` command generally available [#261904]({{kib-pull}}261904).
-* Makes the `RERANK` command generally available [#252242]({{kib-pull}}252242).
-
 % new commands and language features
+* Adds PromQL support in {{kib}} through {{esql}} [#249854]({{kib-pull}}249854).
 * Adds support for the `USER_AGENT` command [#261314]({{kib-pull}}261314).
 * Adds support for the `MMR` command [#257208]({{kib-pull}}257208).
 * Adds autocomplete and validation support for the `approximate` setting in the {{esql}} editor [#248946]({{kib-pull}}248946).
@@ -209,7 +206,10 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Adds autocomplete to the KQL function [#249510]({{kib-pull}}249510).
 * Adds support for unmapped fields [#248606]({{kib-pull}}248606).
 * Adds support for timezone handling [#247917]({{kib-pull}}247917).
-* Adds PromQL support in {{kib}} through {{esql}} [#249854]({{kib-pull}}249854).
+
+% GA commands
+* Makes the `FORK` command generally available [#261904]({{kib-pull}}261904).
+* Makes the `RERANK` command generally available [#252242]({{kib-pull}}252242).
 
 % editor UI and experience
 * Redesigns the {{esql}} editor interface [#251223]({{kib-pull}}251223).
