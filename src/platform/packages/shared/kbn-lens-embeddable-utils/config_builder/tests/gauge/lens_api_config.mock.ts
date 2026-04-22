@@ -7,17 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { GaugeState } from '../../schema/charts/gauge';
+import {
+  AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+  AS_CODE_DATA_VIEW_SPEC_TYPE,
+} from '@kbn/as-code-data-views-schema';
+import type { GaugeConfig } from '../../schema/charts/gauge';
 
 /**
  * Basic gauge chart with ad hoc dataView
  */
-export const basicGaugeWithAdHocDataView: GaugeState = {
+export const basicGaugeWithAdHocDataView: GaugeConfig = {
   type: 'gauge',
   title: 'Test Gauge',
-  dataset: {
-    type: 'index',
-    index: 'test-index',
+  data_source: {
+    type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+    index_pattern: 'test-index',
     time_field: '@timestamp',
   },
   metric: {
@@ -32,13 +36,13 @@ export const basicGaugeWithAdHocDataView: GaugeState = {
 /**
  * Basic gauge chart with existing dataView
  */
-export const basicGaugeWithDataView: GaugeState = {
+export const basicGaugeWithDataView: GaugeConfig = {
   type: 'gauge',
   title: 'Test Gauge',
   description: 'A test gauge chart',
-  dataset: {
-    type: 'dataView',
-    id: 'test-id',
+  data_source: {
+    type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+    ref_id: 'test-id',
   },
   metric: {
     operation: 'count',
@@ -52,11 +56,11 @@ export const basicGaugeWithDataView: GaugeState = {
 /**
  * ESQL-based gauge chart
  */
-export const esqlGauge: GaugeState = {
+export const esqlGauge: GaugeConfig = {
   type: 'gauge',
   title: 'Test ESQL Gauge',
   description: 'A test gauge chart using ESQL',
-  dataset: {
+  data_source: {
     type: 'esql',
     query: 'FROM test-index | STATS count = COUNT(*)',
   },
@@ -70,13 +74,13 @@ export const esqlGauge: GaugeState = {
 /**
  * Comprehensive gauge chart with ad hoc dataView
  */
-export const comprehensiveGaugeWithAdHocDataView: GaugeState = {
+export const comprehensiveGaugeWithAdHocDataView: GaugeConfig = {
   type: 'gauge',
   title: 'Comprehensive Test Gauge',
   description: 'A comprehensive metric chart with all features',
-  dataset: {
-    type: 'index',
-    index: 'comprehensive-index',
+  data_source: {
+    type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+    index_pattern: 'comprehensive-index',
     time_field: '@timestamp',
   },
   metric: {
@@ -108,13 +112,13 @@ export const comprehensiveGaugeWithAdHocDataView: GaugeState = {
 /**
  * Comprehensive gauge chart with existing dataView
  */
-export const comprehensiveGaugeWithDataView: GaugeState = {
+export const comprehensiveGaugeWithDataView: GaugeConfig = {
   type: 'gauge',
   title: 'Comprehensive Test Gauge',
   description: 'A comprehensive metric chart with all features',
-  dataset: {
-    type: 'dataView',
-    id: 'my-custom-data-view-id',
+  data_source: {
+    type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+    ref_id: 'my-custom-data-view-id',
   },
   metric: {
     operation: 'average',
@@ -144,11 +148,11 @@ export const comprehensiveGaugeWithDataView: GaugeState = {
 /**
  * Comprehensive ESQL-based gauge chart
  */
-export const comprehensiveEsqlGauge: GaugeState = {
+export const comprehensiveEsqlGauge: GaugeConfig = {
   type: 'gauge',
   title: 'Comprehensive Test Gauge',
   description: 'A comprehensive metric chart with all features',
-  dataset: {
+  data_source: {
     type: 'esql',
     query: 'FROM test-index | STATS countA = COUNT(*) WHERE a > 1, countB = COUNT(*) WHERE b > 1',
   },

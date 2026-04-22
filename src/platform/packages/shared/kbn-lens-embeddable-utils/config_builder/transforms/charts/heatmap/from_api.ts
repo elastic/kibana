@@ -23,8 +23,8 @@ import type {
 import { DEFAULT_LAYER_ID } from '../../../constants';
 import { legendSizeCompat } from '../legend_sizes';
 import { getSharedChartAPIToLensState, stripUndefined } from '../utils';
-import type { HeatmapState } from '../../../schema';
-import { fromColorByValueAPIToLensState } from '../../coloring';
+import type { HeatmapConfig } from '../../../schema';
+import { fromColorByValueAPIToLensState, isAutoColor } from '../../coloring';
 import {
   addLayerColumn,
   buildDatasourceStates,
@@ -32,7 +32,7 @@ import {
   generateLayer,
   getAdhocDataviews,
 } from '../../utils';
-import type { HeatmapStateESQL, HeatmapStateNoESQL } from '../../../schema/charts/heatmap';
+import type { HeatmapConfigESQL, HeatmapConfigNoESQL } from '../../../schema/charts/heatmap';
 import { fromMetricAPItoLensState } from '../../columns/metric';
 import { fromBucketLensApiToLensState } from '../../columns/buckets';
 import type { LensApiBucketOperations } from '../../../schema/bucket_ops';
@@ -45,11 +45,14 @@ function getAccessorName(type: 'x' | 'y' | 'value') {
   return `${ACCESSOR}_${type}`;
 }
 
-function buildVisualizationState(config: HeatmapState): HeatmapVisualizationState {
+function buildVisualizationState(config: HeatmapConfig): HeatmapVisualizationState {
   const layer = config;
   const valueAccessor = getAccessorName('value');
-  const basePalette = layer.metric.color && fromColorByValueAPIToLensState(layer.metric.color);
-  const xAxisLabelRotation = axisLabelOrientationCompat.toState(layer.axes?.x?.labels?.orientation);
+  const basePalette =
+    layer.metric.color && !isAutoColor(layer.metric.color)
+      ? fromColorByValueAPIToLensState(layer.metric.color)
+      : undefined;
+  const xAxisLabelRotation = axisLabelOrientationCompat.toState(layer.axis?.x?.labels?.orientation);
 
   return {
     layerId: DEFAULT_LAYER_ID,
@@ -60,17 +63,17 @@ function buildVisualizationState(config: HeatmapState): HeatmapVisualizationStat
     ...(layer.y ? { yAccessor: getAccessorName('y') } : {}),
     gridConfig: {
       type: HEATMAP_GRID_NAME,
-      isCellLabelVisible: layer.cells?.labels?.visible ?? false,
-      isXAxisLabelVisible: layer.axes?.x?.labels?.visible ?? true,
-      isXAxisTitleVisible: layer.axes?.x?.title?.visible ?? false,
-      isYAxisLabelVisible: layer.axes?.y?.labels?.visible ?? true,
-      isYAxisTitleVisible: layer.axes?.y?.title?.visible ?? false,
+      isCellLabelVisible: layer.styling?.cells?.labels?.visible ?? false,
+      isXAxisLabelVisible: layer.axis?.x?.labels?.visible ?? true,
+      isXAxisTitleVisible: layer.axis?.x?.title?.visible ?? false,
+      isYAxisLabelVisible: layer.axis?.y?.labels?.visible ?? true,
+      isYAxisTitleVisible: layer.axis?.y?.title?.visible ?? false,
       ...stripUndefined<HeatmapGridConfigResult>({
-        xTitle: layer.axes?.x?.title?.text,
-        yTitle: layer.axes?.y?.title?.text,
+        xTitle: layer.axis?.x?.title?.text,
+        yTitle: layer.axis?.y?.title?.text,
         xAxisLabelRotation,
-        xSortPredicate: layer.axes?.x?.sort,
-        ySortPredicate: layer.axes?.y?.sort,
+        xSortPredicate: layer.axis?.x?.sort,
+        ySortPredicate: layer.axis?.y?.sort,
       }),
     },
     legend: {
@@ -92,7 +95,7 @@ function buildVisualizationState(config: HeatmapState): HeatmapVisualizationStat
   };
 }
 
-function buildFormBasedLayer(layer: HeatmapStateNoESQL): FormBasedPersistedState['layers'] {
+function buildFormBasedLayer(layer: HeatmapConfigNoESQL): FormBasedPersistedState['layers'] {
   const metricColumns = fromMetricAPItoLensState(layer.metric);
 
   const layers: Record<string, PersistedIndexPatternLayer> = generateLayer(DEFAULT_LAYER_ID, layer);
@@ -122,7 +125,7 @@ function buildFormBasedLayer(layer: HeatmapStateNoESQL): FormBasedPersistedState
   return layers;
 }
 
-function getValueColumns(layer: HeatmapStateESQL) {
+function getValueColumns(layer: HeatmapConfigESQL) {
   return [
     getValueColumn(getAccessorName('value'), layer.metric, 'number'),
     ...(layer.x ? [getValueColumn(getAccessorName('x'), layer.x)] : []),
@@ -139,8 +142,8 @@ type HeatmapAttributesWithoutFiltersAndQuery = Omit<HeatmapAttributes, 'state'> 
   state: Omit<HeatmapAttributes['state'], 'filters' | 'query'>;
 };
 
-export function fromAPItoLensState(config: HeatmapState): HeatmapAttributesWithoutFiltersAndQuery {
-  const _buildDataLayer = (cfg: unknown) => buildFormBasedLayer(cfg as HeatmapStateNoESQL);
+export function fromAPItoLensState(config: HeatmapConfig): HeatmapAttributesWithoutFiltersAndQuery {
+  const _buildDataLayer = (cfg: unknown) => buildFormBasedLayer(cfg as HeatmapConfigNoESQL);
 
   const { layers, usedDataviews } = buildDatasourceStates(config, _buildDataLayer, getValueColumns);
 

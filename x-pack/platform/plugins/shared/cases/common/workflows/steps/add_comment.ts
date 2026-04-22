@@ -34,7 +34,7 @@ export const addCommentStepCommonDefinition: CommonStepDefinition<
   AddCommentStepOutputSchema
 > = {
   id: AddCommentStepTypeId,
-  category: StepCategory.Kibana,
+  category: StepCategory.KibanaCases,
   label: i18n.ADD_COMMENT_STEP_LABEL,
   description: i18n.ADD_COMMENT_STEP_DESCRIPTION,
   documentation: {

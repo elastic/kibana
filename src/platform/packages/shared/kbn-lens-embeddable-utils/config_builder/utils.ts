@@ -37,8 +37,8 @@ import type {
   LensDataviewDataset,
   LensESQLDataset,
 } from './types';
-import type { LensApiState } from './schema';
-import type { DatasetType } from './schema/dataset';
+import type { LensApiConfig, LensApiConfigESQL, LensApiConfigNoESQL } from './schema';
+import type { DataSourceType } from './schema/data_source';
 
 type DataSourceStateLayer =
   | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)
@@ -350,7 +350,7 @@ export function isDataViewDataset(dataset: LensDataset): dataset is LensDataview
   return 'index' in dataset;
 }
 
-export function isLensAPIFormat(config: unknown): config is LensApiState {
+export function isLensAPIFormat(config: unknown): config is LensApiConfig {
   return typeof config === 'object' && config !== null && 'type' in config;
 }
 
@@ -364,10 +364,10 @@ export function isLensLegacyAttributes(config: unknown): config is LensAttribute
   );
 }
 
-export function isEsqlTableTypeDataset(
-  dataset: DatasetType
-): dataset is Extract<DatasetType, { type: 'esql' | 'table' }> {
-  return dataset.type === 'esql' || dataset.type === 'table';
+export function isEsqlTableTypeDataSource(
+  dataSource: DataSourceType
+): dataSource is Extract<DataSourceType, { type: 'esql' }> {
+  return dataSource.type === 'esql';
 }
 
 export function groupIsNotCollapsed(def: {
@@ -376,8 +376,14 @@ export function groupIsNotCollapsed(def: {
   return def.collapse_by == null;
 }
 
-export function isLensESQLConfig(config: LensApiState): boolean {
+export function isLensESQLConfig(config: LensApiConfig): config is LensApiConfigESQL {
   if (config.type === 'xy')
-    return config.layers.some((layer) => 'dataset' in layer && layer.dataset?.type === 'esql');
-  return config.dataset?.type === 'esql';
+    return config.layers.some(
+      (layer) => 'data_source' in layer && layer.data_source?.type === 'esql'
+    );
+  return config.data_source?.type === 'esql';
+}
+
+export function isLensDSLConfig(config: LensApiConfig): config is LensApiConfigNoESQL {
+  return !isLensESQLConfig(config);
 }

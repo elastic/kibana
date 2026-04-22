@@ -672,6 +672,172 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.getGraphActorEuidSourceFields",
+        "type": "Function",
+        "tags": [],
+        "label": "getGraphActorEuidSourceFields",
+        "description": [
+          "\nRaw source fields used to compute actor EUIDs in entity store v2.\nThese mirror the identity fields from Entity Store definitions.\nServer-side code derives these dynamically via euid.getEuidSourceFields()."
+        ],
+        "signature": [
+          "(euid: { getEuidFromObject: (entityType: any, doc: any) => string | undefined; getEntityIdentifiersFromDocument: (entityType: any, doc: unknown) => Record<string, string> | undefined; getEuidFromTimelineNonEcsData: (entityType: any, rows: readonly ",
+          {
+            "pluginId": "entityStore",
+            "scope": "common",
+            "docId": "kibEntityStorePluginApi",
+            "section": "def-common.NonEcsTimelineDataRow",
+            "text": "NonEcsTimelineDataRow"
+          },
+          "[] | undefined) => string | undefined; getEuidSourceFields: (entityType: any) => ",
+          {
+            "pluginId": "entityStore",
+            "scope": "common",
+            "docId": "kibEntityStorePluginApi",
+            "section": "def-common.IdentitySourceFields",
+            "text": "IdentitySourceFields"
+          },
+          "; painless: { getEuidEvaluation: (entityType: any) => string; getEuidRuntimeMapping: (entityType: any) => { type: \"keyword\"; script: { source: string; }; }; }; esql: { getEuidDocumentsContainsIdFilter: (entityType: any) => string; getEuidEvaluation: (entityType: any, { withTypeId }?: { withTypeId?: boolean | undefined; }) => string; getEuidFilterBasedOnDocument: (entityType: any, doc: any) => string | undefined; getFieldEvaluations: (entityType: any) => string | undefined; }; dsl: { getEuidFilterBasedOnDocument: (entityType: any, doc: any) => ",
+          "QueryDslQueryContainer",
+          "; getEuidDocumentsContainsIdFilter: (entityType: any) => ",
+          "QueryDslQueryContainer",
+          "; }; }) => { user: string[]; host: string[]; service: string[]; generic: string[]; all: string[]; }"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
+        "lineNumber": 170,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.getGraphActorEuidSourceFields.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "euid",
+            "description": [],
+            "signature": [
+              "{ getEuidFromObject: typeof ",
+              "getEuidFromObject",
+              "; getEntityIdentifiersFromDocument: typeof ",
+              "getEntityIdentifiersFromDocument",
+              "; getEuidFromTimelineNonEcsData: typeof ",
+              "getEuidFromTimelineNonEcsData",
+              "; getEuidSourceFields: typeof ",
+              "getEuidSourceFields",
+              "; painless: { getEuidEvaluation: typeof ",
+              "getEuidPainlessEvaluation",
+              "; getEuidRuntimeMapping: typeof ",
+              "getEuidPainlessRuntimeMapping",
+              "; }; esql: { getEuidDocumentsContainsIdFilter: typeof ",
+              "getEuidEsqlDocumentsContainsIdFilter",
+              "; getEuidEvaluation: typeof ",
+              "getEuidEsqlEvaluation",
+              "; getEuidFilterBasedOnDocument: typeof ",
+              "getEuidEsqlFilterBasedOnDocument",
+              "; getFieldEvaluations: typeof ",
+              "getFieldEvaluationsEsql",
+              "; }; dsl: { getEuidFilterBasedOnDocument: typeof ",
+              "getEuidDslFilterBasedOnDocument",
+              "; getEuidDocumentsContainsIdFilter: typeof ",
+              "getEuidDslDocumentsContainsIdFilter",
+              "; }; }"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
+            "lineNumber": 170,
+            "columnNumber": 47,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.getGraphTargetEuidSourceFields",
+        "type": "Function",
+        "tags": [],
+        "label": "getGraphTargetEuidSourceFields",
+        "description": [
+          "\nRaw source fields used to compute target EUIDs in entity store v2.\nTarget-namespace equivalents of GRAPH_ACTOR_EUID_SOURCE_FIELDS."
+        ],
+        "signature": [
+          "(euid: { getEuidFromObject: (entityType: any, doc: any) => string | undefined; getEntityIdentifiersFromDocument: (entityType: any, doc: unknown) => Record<string, string> | undefined; getEuidFromTimelineNonEcsData: (entityType: any, rows: readonly ",
+          {
+            "pluginId": "entityStore",
+            "scope": "common",
+            "docId": "kibEntityStorePluginApi",
+            "section": "def-common.NonEcsTimelineDataRow",
+            "text": "NonEcsTimelineDataRow"
+          },
+          "[] | undefined) => string | undefined; getEuidSourceFields: (entityType: any) => ",
+          {
+            "pluginId": "entityStore",
+            "scope": "common",
+            "docId": "kibEntityStorePluginApi",
+            "section": "def-common.IdentitySourceFields",
+            "text": "IdentitySourceFields"
+          },
+          "; painless: { getEuidEvaluation: (entityType: any) => string; getEuidRuntimeMapping: (entityType: any) => { type: \"keyword\"; script: { source: string; }; }; }; esql: { getEuidDocumentsContainsIdFilter: (entityType: any) => string; getEuidEvaluation: (entityType: any, { withTypeId }?: { withTypeId?: boolean | undefined; }) => string; getEuidFilterBasedOnDocument: (entityType: any, doc: any) => string | undefined; getFieldEvaluations: (entityType: any) => string | undefined; }; dsl: { getEuidFilterBasedOnDocument: (entityType: any, doc: any) => ",
+          "QueryDslQueryContainer",
+          "; getEuidDocumentsContainsIdFilter: (entityType: any) => ",
+          "QueryDslQueryContainer",
+          "; }; }) => { user: string[]; host: string[]; service: string[]; generic: string[]; all: string[]; }"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
+        "lineNumber": 188,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.getGraphTargetEuidSourceFields.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "euid",
+            "description": [],
+            "signature": [
+              "{ getEuidFromObject: typeof ",
+              "getEuidFromObject",
+              "; getEntityIdentifiersFromDocument: typeof ",
+              "getEntityIdentifiersFromDocument",
+              "; getEuidFromTimelineNonEcsData: typeof ",
+              "getEuidFromTimelineNonEcsData",
+              "; getEuidSourceFields: typeof ",
+              "getEuidSourceFields",
+              "; painless: { getEuidEvaluation: typeof ",
+              "getEuidPainlessEvaluation",
+              "; getEuidRuntimeMapping: typeof ",
+              "getEuidPainlessRuntimeMapping",
+              "; }; esql: { getEuidDocumentsContainsIdFilter: typeof ",
+              "getEuidEsqlDocumentsContainsIdFilter",
+              "; getEuidEvaluation: typeof ",
+              "getEuidEsqlEvaluation",
+              "; getEuidFilterBasedOnDocument: typeof ",
+              "getEuidEsqlFilterBasedOnDocument",
+              "; getFieldEvaluations: typeof ",
+              "getFieldEvaluationsEsql",
+              "; }; dsl: { getEuidFilterBasedOnDocument: typeof ",
+              "getEuidDslFilterBasedOnDocument",
+              "; getEuidDocumentsContainsIdFilter: typeof ",
+              "getEuidDslDocumentsContainsIdFilter",
+              "; }; }"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
+            "lineNumber": 188,
+            "columnNumber": 48,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -2189,7 +2355,7 @@
           "\"90d\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 77,
+        "lineNumber": 78,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2206,7 +2372,7 @@
           "\"security_solution-cloud_security_posture.misconfiguration_latest\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 12,
+        "lineNumber": 13,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2223,7 +2389,7 @@
           "\"logs-cloud_security_posture.vulnerabilities_latest-default\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 52,
+        "lineNumber": 53,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2240,7 +2406,7 @@
           "\"security_solution-*.misconfiguration_latest\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 18,
+        "lineNumber": 19,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2257,7 +2423,7 @@
           "\"security_solution-*.vulnerability_latest\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 54,
+        "lineNumber": 55,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2274,7 +2440,7 @@
           "\"security_solution_cdr_latest_misconfigurations_v2\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 47,
+        "lineNumber": 48,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2291,7 +2457,7 @@
           "string[]"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 36,
+        "lineNumber": 37,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2308,7 +2474,7 @@
           "string[]"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 42,
+        "lineNumber": 43,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2325,7 +2491,7 @@
           "\"Latest Cloud Security Misconfigurations\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 23,
+        "lineNumber": 24,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2342,7 +2508,7 @@
           "\"security_solution-*.misconfiguration_latest\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 20,
+        "lineNumber": 21,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2359,7 +2525,7 @@
           "\"security_solution_cdr_latest_vulnerabilities_v2\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 73,
+        "lineNumber": 74,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2376,7 +2542,7 @@
           "string[]"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 62,
+        "lineNumber": 63,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2393,7 +2559,7 @@
           "string[]"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 68,
+        "lineNumber": 69,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2410,7 +2576,7 @@
           "\"Latest Cloud Security Vulnerabilities\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 59,
+        "lineNumber": 60,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2424,7 +2590,7 @@
         "label": "CDR_VULNERABILITIES_INDEX_PATTERN",
         "description": [],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 56,
+        "lineNumber": 57,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2441,7 +2607,7 @@
           "\"1.9.0\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 108,
+        "lineNumber": 109,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2460,7 +2626,7 @@
           "\"/cloud_security_posture\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 33,
+        "lineNumber": 34,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2494,7 +2660,7 @@
           "\"1\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 28,
+        "lineNumber": 29,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2511,7 +2677,7 @@
           "\"/internal/cloud_security_posture/rules/_get_states\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 26,
+        "lineNumber": 27,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2528,7 +2694,7 @@
           "\"cloud_security_posture.findings\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 79,
+        "lineNumber": 80,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2545,7 +2711,7 @@
           "\"MMMM D, YYYY @ HH:mm:ss.SSS\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 95,
+        "lineNumber": 96,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2579,7 +2745,7 @@
           "\"cspm\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 11,
+        "lineNumber": 12,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2636,7 +2802,7 @@
           "\"logs-cloud_security_posture.findings_latest-default\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 15,
+        "lineNumber": 16,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2653,7 +2819,7 @@
           "\"2023-10-31\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 104,
+        "lineNumber": 105,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2661,19 +2827,17 @@
       },
       {
         "parentPluginId": "@kbn/cloud-security-posture-common",
-        "id": "def-common.ENTITIES_LATEST_INDEX",
-        "type": "string",
+        "id": "def-common.EuidSourceFields",
+        "type": "Type",
         "tags": [],
-        "label": "ENTITIES_LATEST_INDEX",
-        "description": [
-          "\nEntity store latest index pattern for LOOKUP JOIN queries.\nThe <space> placeholder should be replaced with the actual space ID."
-        ],
+        "label": "EuidSourceFields",
+        "description": [],
         "signature": [
-          "\".entities.v2.latest.security_<space>\""
+          "{ user: string[]; host: string[]; service: string[]; generic: string[]; all: string[]; }"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 114,
-        "columnNumber": 14,
+        "lineNumber": 198,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2689,7 +2853,7 @@
           "\"logs-cloud_security_posture.findings-default*\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 106,
+        "lineNumber": 107,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2774,7 +2938,7 @@
           "\"kspm\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 10,
+        "lineNumber": 11,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2791,7 +2955,7 @@
           "\"26h\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 24,
+        "lineNumber": 25,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2808,7 +2972,7 @@
           "\"3d\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 57,
+        "lineNumber": 58,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2825,7 +2989,7 @@
           "500"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 25,
+        "lineNumber": 26,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2876,7 +3040,7 @@
           "\"security-solution-default\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 50,
+        "lineNumber": 51,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2893,7 +3057,7 @@
           "\"1\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 30,
+        "lineNumber": 31,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2910,7 +3074,7 @@
           "\"/internal/cloud_security_posture/status\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 29,
+        "lineNumber": 30,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3285,7 +3449,7 @@
           "readonly [\"accesses_frequently\", \"accesses_infrequently\", \"communicates_with\", \"depends_on\", \"owns\", \"owns_inferred\", \"resolution.resolved_to\", \"supervises\"]"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 124,
+        "lineNumber": 119,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3299,7 +3463,7 @@
         "label": "ENTITY_RELATIONSHIP_LABELS",
         "description": [],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 135,
+        "lineNumber": 130,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3312,7 +3476,7 @@
             "label": "accesses_frequently",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-            "lineNumber": 139,
+            "lineNumber": 134,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3325,7 +3489,7 @@
             "label": "accesses_infrequently",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-            "lineNumber": 140,
+            "lineNumber": 135,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3338,7 +3502,7 @@
             "label": "communicates_with",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-            "lineNumber": 141,
+            "lineNumber": 136,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3351,7 +3515,7 @@
             "label": "depends_on",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-            "lineNumber": 142,
+            "lineNumber": 137,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3364,7 +3528,7 @@
             "label": "owns",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-            "lineNumber": 143,
+            "lineNumber": 138,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3377,7 +3541,7 @@
             "label": "owns_inferred",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-            "lineNumber": 144,
+            "lineNumber": 139,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3390,7 +3554,7 @@
             "label": "'resolution.resolved_to'",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-            "lineNumber": 145,
+            "lineNumber": 140,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3403,7 +3567,7 @@
             "label": "supervises",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-            "lineNumber": 146,
+            "lineNumber": 141,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3573,26 +3737,7 @@
           "readonly [\"user.entity.id\", \"host.entity.id\", \"service.entity.id\", \"entity.id\"]"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 153,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/cloud-security-posture-common",
-        "id": "def-common.GRAPH_ACTOR_EUID_SOURCE_FIELDS",
-        "type": "Object",
-        "tags": [],
-        "label": "GRAPH_ACTOR_EUID_SOURCE_FIELDS",
-        "description": [
-          "\nRaw source fields used to compute actor EUIDs in entity store v2.\nThese mirror the identity fields from Entity Store definitions.\nServer-side code derives these dynamically via euid.getEuidSourceFields()."
-        ],
-        "signature": [
-          "readonly [\"user.email\", \"user.id\", \"user.name\", \"host.id\", \"host.name\", \"host.hostname\", \"service.name\", \"entity.id\"]"
-        ],
-        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 176,
+        "lineNumber": 148,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3611,26 +3756,7 @@
           "readonly [\"user.target.entity.id\", \"host.target.entity.id\", \"service.target.entity.id\", \"entity.target.id\"]"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 164,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/cloud-security-posture-common",
-        "id": "def-common.GRAPH_TARGET_EUID_SOURCE_FIELDS",
-        "type": "Object",
-        "tags": [],
-        "label": "GRAPH_TARGET_EUID_SOURCE_FIELDS",
-        "description": [
-          "\nRaw source fields used to compute target EUIDs in entity store v2.\nTarget-namespace equivalents of GRAPH_ACTOR_EUID_SOURCE_FIELDS."
-        ],
-        "signature": [
-          "readonly [\"user.target.email\", \"user.target.id\", \"user.target.name\", \"host.target.id\", \"host.target.name\", \"host.target.hostname\", \"service.target.name\", \"entity.target.id\"]"
-        ],
-        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 195,
+        "lineNumber": 159,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3647,7 +3773,7 @@
           "{ readonly showManageRulesMock: false; readonly showFindingFlyoutEvidence: true; }"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 99,
+        "lineNumber": 100,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3661,7 +3787,7 @@
         "label": "MISCONFIGURATION_STATUS",
         "description": [],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 89,
+        "lineNumber": 90,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3677,7 +3803,7 @@
               "\"passed\""
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-            "lineNumber": 90,
+            "lineNumber": 91,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3693,7 +3819,7 @@
               "\"failed\""
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-            "lineNumber": 91,
+            "lineNumber": 92,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3709,7 +3835,7 @@
               "\"unknown\""
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-            "lineNumber": 92,
+            "lineNumber": 93,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3725,7 +3851,7 @@
         "label": "VULNERABILITIES_SEVERITY",
         "description": [],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 81,
+        "lineNumber": 82,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3741,7 +3867,7 @@
               "\"LOW\""
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-            "lineNumber": 82,
+            "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3757,7 +3883,7 @@
               "\"MEDIUM\""
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-            "lineNumber": 83,
+            "lineNumber": 84,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3773,7 +3899,7 @@
               "\"HIGH\""
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-            "lineNumber": 84,
+            "lineNumber": 85,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3789,7 +3915,7 @@
               "\"CRITICAL\""
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-            "lineNumber": 85,
+            "lineNumber": 86,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3805,7 +3931,7 @@
               "\"UNKNOWN\""
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-            "lineNumber": 86,
+            "lineNumber": 87,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

@@ -31,6 +31,20 @@ export const STATUS_LABELS: Record<
       defaultMessage: 'The monitor references a private location that no longer exists.',
     }
   ),
+  [PrivateLocationHealthStatusValue.MissingAgents]: i18n.translate(
+    'xpack.synthetics.monitorHealth.status.missingAgents',
+    {
+      defaultMessage:
+        'No Fleet agents are enrolled in the agent policy for this private location. Enroll an agent in Fleet to resolve this.',
+    }
+  ),
+  [PrivateLocationHealthStatusValue.UnhealthyAgent]: i18n.translate(
+    'xpack.synthetics.monitorHealth.status.unhealthyAgent',
+    {
+      defaultMessage:
+        'All Fleet agents for this private location are unhealthy or offline. Check the agent status in Fleet.',
+    }
+  ),
 };
 
 export const getStatusLabel = (status: PrivateLocationHealthStatusValue): string | undefined => {

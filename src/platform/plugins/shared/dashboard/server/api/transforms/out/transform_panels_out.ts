@@ -10,6 +10,7 @@
 import type { SavedObjectReference } from '@kbn/core/server';
 import { transformTimeRangeOut, transformTitlesOut } from '@kbn/presentation-publishing';
 import { flow } from 'lodash';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import type { SavedDashboardPanel, SavedDashboardSection } from '../../../dashboard_saved_object';
 import type { DashboardState, DashboardPanel, DashboardSection } from '../../types';
 import { embeddableService } from '../../../kibana_services';
@@ -34,7 +35,7 @@ export function transformPanelsOut(
       collapsed: restOfSection.collapsed ?? false,
       grid: restOfGrid,
       panels: [],
-      uid: sectionId,
+      id: sectionId,
     };
   });
 
@@ -101,7 +102,8 @@ function transformPanel(
 
   // Temporary escape hatch for lens as code
   // TODO remove when lens as code transforms are ready for production
-  const transformType = type === 'lens' && isDashboardAppRequest ? 'lens-dashboard-app' : type;
+  const transformType =
+    type === LENS_EMBEDDABLE_TYPE && isDashboardAppRequest ? 'lens-dashboard-app' : type;
   const transforms = embeddableService?.getTransforms(transformType);
 
   const transformedPanelConfig =
@@ -111,7 +113,7 @@ function transformPanel(
   return {
     grid: restOfGrid,
     config: transformedPanelConfig,
-    uid: panelIndex,
+    id: panelIndex,
     type,
   };
 }

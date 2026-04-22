@@ -22,19 +22,19 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import type { ReactExpressionRendererProps } from '@kbn/expressions-plugin/public';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import type {
-  Datasource,
-  DatasourceMap,
-  Visualization,
-  VisualizationMap,
-  ExpressionWrapperProps,
-  LensInternalApi,
-  LensRendererProps,
-  LensRuntimeState,
-  LensSerializedState,
+import {
+  type Datasource,
+  type DatasourceMap,
+  type Visualization,
+  type VisualizationMap,
+  type ExpressionWrapperProps,
+  type LensInternalApi,
+  type LensRendererProps,
+  type LensRuntimeState,
+  type LensSerializedState,
+  LENS_EMBEDDABLE_TYPE,
 } from '@kbn/lens-common';
 import type { LensApi } from '@kbn/lens-common-2';
-import { DOC_TYPE } from '../../../common/constants';
 import { createEmptyLensState } from '../helper';
 import { createMockDatasource, createMockVisualization, makeDefaultServices } from '../../mocks';
 import { initializeInternalApi } from '../initializers/initialize_internal_api';
@@ -43,7 +43,7 @@ import type { LensEmbeddableStartServices } from '../types';
 function getDefaultLensApiMock() {
   const LensApiMock: LensApi = {
     // Static props
-    type: DOC_TYPE,
+    type: LENS_EMBEDDABLE_TYPE,
     uuid: faker.string.uuid(),
     // Shared Embeddable Observables
     title$: new BehaviorSubject<string | undefined>(faker.lorem.words()),

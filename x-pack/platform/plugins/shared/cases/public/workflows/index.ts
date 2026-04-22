@@ -35,10 +35,9 @@ export function registerCasesSteps(
     import('./simple_steps').then((m) => m.updateCasesStepDefinition)
   );
 
-  // TODO: enable once https://github.com/elastic/security-team/issues/15982 has been resolved
-  // workflowsExtensions.registerStepDefinition(() =>
-  //   import('./set_custom_field').then((m) => m.setCustomFieldStepDefinition)
-  // );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./set_custom_field').then((m) => m.setCustomFieldStepDefinition)
+  );
 
   workflowsExtensions.registerStepDefinition(() =>
     import('./simple_steps').then((m) => m.findCasesStepDefinition)
@@ -97,9 +96,30 @@ export function registerCasesSteps(
   );
 
   workflowsExtensions.registerStepDefinition(() =>
-    import('./simple_steps').then((m) => m.setCategoryStepDefinition)
+    import('./set_category').then((m) => m.setCategoryStepDefinition)
   );
 
-  // Leaving this in for now. We need to get support for reflective value lookup first.
-  // workflowsExtensions.registerStepDefinition(createCreateCaseFromTemplateStepDefinition());
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.getCasesByAlertIdStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.getAllAttachmentsStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.updateObservableStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.deleteObservableStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.getCasesStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./create_case_from_template').then((m) => m.createCreateCaseFromTemplateStepDefinition)
+  );
 }

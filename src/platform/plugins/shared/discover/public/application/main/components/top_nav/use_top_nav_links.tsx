@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -38,6 +38,7 @@ import {
 import { useProfileAccessor } from '../../../../context_awareness';
 import {
   internalStateActions,
+  selectTabSavedSearchByValueAttributes,
   useCurrentDataView,
   useCurrentTabAction,
   useCurrentTabSelector,
@@ -48,7 +49,6 @@ import {
   useRuntimeStateManager,
 } from '../../state_management/redux';
 import type { DiscoverAppState } from '../../state_management/redux';
-import { onSaveDiscoverSession } from './save_discover_session';
 import { useDataState } from '../../hooks/use_data_state';
 import { TransferAction } from '../../../../plugin_imports/embeddable_editor_service';
 
@@ -64,6 +64,8 @@ export const useTopNavLinks = ({
   adHocDataViews,
   hasShareIntegration,
   persistedDiscoverSession,
+  onOpenSaveModal,
+  onOpenSaveAsModal,
 }: {
   dataView: DataView | undefined;
   services: DiscoverServices;
@@ -73,6 +75,8 @@ export const useTopNavLinks = ({
   adHocDataViews: DataView[];
   hasShareIntegration: boolean;
   persistedDiscoverSession: DiscoverSession | undefined;
+  onOpenSaveModal: () => void;
+  onOpenSaveAsModal: () => void;
 }): AppMenuConfig => {
   const intl = useI18n();
   const dispatch = useInternalStateDispatch();
@@ -97,6 +101,19 @@ export const useTopNavLinks = ({
         Object.values(ruleType.authorizedConsumers).some((consumer) => consumer.all)
       )
       .map((ruleType) => ruleType.id);
+
+  const transferBackToEditor = useCallback(async () => {
+    const byValueState = await selectTabSavedSearchByValueAttributes({
+      tabId: currentTab.id,
+      getState,
+      runtimeStateManager,
+      services,
+    });
+
+    services.embeddableEditor.transferBackToEditor(TransferAction.SaveByValue, {
+      state: byValueState,
+    });
+  }, [getState, currentTab.id, runtimeStateManager, services]);
 
   const discoverParams: AppMenuDiscoverParams = useMemo(
     () => ({
@@ -236,13 +253,13 @@ export const useTopNavLinks = ({
     // Only show the ES|QL button in classic mode (not in ES|QL mode)
     // The "Switch to Classic" option is now in the tab menu when in ES|QL mode
     if (services.uiSettings.get(ENABLE_ESQL) && !isEsqlMode) {
-      newAppMenuRegistry.setSecondaryActionItem({
+      newAppMenuRegistry.registerItem({
         id: 'esql',
+        order: 2,
         label: i18n.translate('discover.localMenu.tryESQLTitle', {
           defaultMessage: 'ES|QL',
         }),
         iconType: 'code',
-        color: 'success',
         tooltipContent: i18n.translate('discover.localMenu.esqlTooltipLabel', {
           defaultMessage: `ES|QL is Elastic's powerful new piped query language.`,
         }),
@@ -261,13 +278,7 @@ export const useTopNavLinks = ({
 
       const savedAsButton = {
         run: async () => {
-          await onSaveDiscoverSession({
-            initialCopyOnSave: true,
-            services,
-            dispatch,
-            getState,
-            runtimeStateManager,
-          });
+          onOpenSaveAsModal();
         },
         id: 'saveAs',
         order: 1,
@@ -290,21 +301,11 @@ export const useTopNavLinks = ({
         testId: 'discoverSaveButton',
         iconType: isEmbeddedEditor ? 'checkCircleFill' : 'save',
         run: async () => {
-          await onSaveDiscoverSession({
-            services,
-            dispatch,
-            getState,
-            runtimeStateManager,
-            onSaveCb: isEmbeddedEditor
-              ? (saveState) => {
-                  const action = saveState
-                    ? TransferAction.SaveSession
-                    : TransferAction.SaveByValue;
-
-                  services.embeddableEditor.transferBackToEditor(action, { state: saveState });
-                }
-              : undefined,
-          });
+          if (isEmbeddedEditor && services.embeddableEditor.isByValueEditor()) {
+            await transferBackToEditor();
+          } else {
+            onOpenSaveModal();
+          }
         },
         popoverWidth: 150,
         popoverTestId: 'discoverSaveButtonPopover',
@@ -385,10 +386,12 @@ export const useTopNavLinks = ({
     dataView,
     dispatch,
     getState,
-    runtimeStateManager,
     hasUnsavedChanges,
     transitionFromDataViewToESQL,
+    transferBackToEditor,
     persistedDiscoverSession,
+    onOpenSaveModal,
+    onOpenSaveAsModal,
   ]);
 
   return useMemo((): AppMenuConfig => {
@@ -404,12 +407,6 @@ export const useTopNavLinks = ({
       primaryActionItem: config.primaryActionItem
         ? enhanceAppMenuItemWithRunAction({
             appMenuItem: config.primaryActionItem,
-            services,
-          })
-        : undefined,
-      secondaryActionItem: config.secondaryActionItem
-        ? enhanceAppMenuItemWithRunAction({
-            appMenuItem: config.secondaryActionItem,
             services,
           })
         : undefined,

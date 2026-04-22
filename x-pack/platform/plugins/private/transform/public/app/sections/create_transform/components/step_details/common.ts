@@ -21,6 +21,7 @@ export interface StepDetailsExposedState {
   continuousModeDateField: string;
   continuousModeDelay: string;
   createDataView: boolean;
+  deferValidation: boolean;
   destinationIndex: EsIndexName;
   destinationIngestPipeline: EsIngestPipelineName;
   isContinuousModeEnabled: boolean;
@@ -44,6 +45,7 @@ export function getDefaultStepDetailsState(): StepDetailsExposedState {
     continuousModeDateField: '',
     continuousModeDelay: DEFAULT_CONTINUOUS_MODE_DELAY,
     createDataView: true,
+    deferValidation: false,
     isContinuousModeEnabled: false,
     isRetentionPolicyEnabled: false,
     retentionPolicyDateField: '',

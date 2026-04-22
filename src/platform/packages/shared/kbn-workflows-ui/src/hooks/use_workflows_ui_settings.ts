@@ -16,5 +16,5 @@ export const useWorkflowsUIEnabledSetting = (): boolean => {
     services: { uiSettings },
   } = useKibana<{ uiSettings: IUiSettingsClient }>();
 
-  return uiSettings?.get<boolean>(WORKFLOWS_UI_SETTING_ID, false) ?? false;
+  return uiSettings?.get<boolean>(WORKFLOWS_UI_SETTING_ID, true);
 };

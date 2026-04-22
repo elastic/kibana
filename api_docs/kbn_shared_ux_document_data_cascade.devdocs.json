@@ -598,7 +598,7 @@
           "UseCascadeVirtualizer"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/index.tsx",
-        "lineNumber": 371,
+        "lineNumber": 415,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -617,106 +617,12 @@
               "<G>, \"isRoot\"> & { isRoot: true; }"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/index.tsx",
-            "lineNumber": 185,
+            "lineNumber": 195,
             "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false
           }
         ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/shared-ux-document-data-cascade",
-        "id": "def-common.useChildVirtualizerActivation",
-        "type": "Function",
-        "tags": [],
-        "label": "useChildVirtualizerActivation",
-        "description": [
-          "\nOpt-in hook that pre-registers a row cell with the child virtualizer\ncontroller and returns whether the cell's heavy content should mount.\n\nUse this in consumer components that render expensive children (e.g.\na full data grid) to defer their mount until the controller's staggered\nactivation loop reaches this row.  Components that don't need stagger\ngating should skip this hook entirely — their content will mount\nimmediately."
-        ],
-        "signature": [
-          "({ controller, cellId, rowIndex, }: { controller: ",
-          {
-            "pluginId": "@kbn/shared-ux-document-data-cascade",
-            "scope": "common",
-            "docId": "kibKbnSharedUxDocumentDataCascadePluginApi",
-            "section": "def-common.ChildVirtualizerController",
-            "text": "ChildVirtualizerController"
-          },
-          " | null; cellId: string; rowIndex: number; }) => boolean"
-        ],
-        "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/use_child_virtualizer_activation.ts",
-        "lineNumber": 26,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
-            "id": "def-common.useChildVirtualizerActivation.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  controller,\n  cellId,\n  rowIndex,\n}",
-            "description": [],
-            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/use_child_virtualizer_activation.ts",
-            "lineNumber": 30,
-            "columnNumber": 4,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/shared-ux-document-data-cascade",
-                "id": "def-common.useChildVirtualizerActivation.$1.controller",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "controller",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/shared-ux-document-data-cascade",
-                    "scope": "common",
-                    "docId": "kibKbnSharedUxDocumentDataCascadePluginApi",
-                    "section": "def-common.ChildVirtualizerController",
-                    "text": "ChildVirtualizerController"
-                  },
-                  " | null"
-                ],
-                "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/use_child_virtualizer_activation.ts",
-                "lineNumber": 31,
-                "columnNumber": 3,
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/shared-ux-document-data-cascade",
-                "id": "def-common.useChildVirtualizerActivation.$1.cellId",
-                "type": "string",
-                "tags": [],
-                "label": "cellId",
-                "description": [],
-                "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/use_child_virtualizer_activation.ts",
-                "lineNumber": 32,
-                "columnNumber": 3,
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/shared-ux-document-data-cascade",
-                "id": "def-common.useChildVirtualizerActivation.$1.rowIndex",
-                "type": "number",
-                "tags": [],
-                "label": "rowIndex",
-                "description": [],
-                "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/use_child_virtualizer_activation.ts",
-                "lineNumber": 33,
-                "columnNumber": 3,
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -753,7 +659,7 @@
           }
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/use_connected_child_virtualizer.ts",
-        "lineNumber": 44,
+        "lineNumber": 45,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -776,7 +682,7 @@
               "<G>"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/use_connected_child_virtualizer.ts",
-            "lineNumber": 44,
+            "lineNumber": 45,
             "columnNumber": 67,
             "deprecated": false,
             "trackAdoption": false,
@@ -808,7 +714,7 @@
           "<Element, Element>, \"range\" | \"measureElement\" | \"getTotalSize\" | \"getVirtualItems\" | \"isScrolling\" | \"scrollOffset\" | \"scrollElement\" | \"measurementsCache\" | \"calculateRange\">"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/index.tsx",
-        "lineNumber": 146,
+        "lineNumber": 155,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -824,7 +730,7 @@
               "Map<number, number>"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/index.tsx",
-            "lineNumber": 159,
+            "lineNumber": 168,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -840,7 +746,7 @@
               "Map<string, number>"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/index.tsx",
-            "lineNumber": 160,
+            "lineNumber": 169,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -856,7 +762,7 @@
               "(offset: number, options: { adjustments?: number | undefined; behavior?: ScrollBehavior | undefined; }) => void"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/index.tsx",
-            "lineNumber": 161,
+            "lineNumber": 170,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -872,7 +778,7 @@
                   "number"
                 ],
                 "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/index.tsx",
-                "lineNumber": 162,
+                "lineNumber": 171,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -886,7 +792,7 @@
                 "label": "options",
                 "description": [],
                 "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/index.tsx",
-                "lineNumber": 163,
+                "lineNumber": 172,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -902,7 +808,7 @@
                       "number | undefined"
                     ],
                     "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/index.tsx",
-                    "lineNumber": 164,
+                    "lineNumber": 173,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -918,7 +824,7 @@
                       "ScrollBehavior | undefined"
                     ],
                     "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/index.tsx",
-                    "lineNumber": 165,
+                    "lineNumber": 174,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -939,7 +845,7 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/index.tsx",
-            "lineNumber": 168,
+            "lineNumber": 177,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -964,7 +870,20 @@
               " | null"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/index.tsx",
-            "lineNumber": 169,
+            "lineNumber": 178,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.CascadeVirtualizerReturnValue.isStable",
+            "type": "boolean",
+            "tags": [],
+            "label": "isStable",
+            "description": [],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/index.tsx",
+            "lineNumber": 179,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -980,7 +899,7 @@
         "label": "ChildConnectionHandle",
         "description": [],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
-        "lineNumber": 30,
+        "lineNumber": 31,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1004,7 +923,7 @@
               ">) => void"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
-            "lineNumber": 31,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1028,7 +947,7 @@
                   ">"
                 ],
                 "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
-                "lineNumber": 31,
+                "lineNumber": 32,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1048,7 +967,7 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
-            "lineNumber": 32,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1066,7 +985,7 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
-            "lineNumber": 33,
+            "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1084,7 +1003,7 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
-            "lineNumber": 34,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1178,7 +1097,7 @@
         "label": "ChildVirtualizerController",
         "description": [],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
-        "lineNumber": 37,
+        "lineNumber": 38,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1196,7 +1115,7 @@
               "(cellId: string, rowIndex: number) => () => void"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
-            "lineNumber": 38,
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1212,7 +1131,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
-                "lineNumber": 42,
+                "lineNumber": 43,
                 "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1229,7 +1148,7 @@
                   "number"
                 ],
                 "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
-                "lineNumber": 42,
+                "lineNumber": 43,
                 "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1251,7 +1170,7 @@
               "(cellId: string) => boolean"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
-            "lineNumber": 43,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1267,7 +1186,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
-                "lineNumber": 48,
+                "lineNumber": 49,
                 "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1294,7 +1213,7 @@
               }
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
-            "lineNumber": 49,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1310,7 +1229,7 @@
                   "number"
                 ],
                 "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
-                "lineNumber": 49,
+                "lineNumber": 50,
                 "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1332,7 +1251,7 @@
               "(rowIndex: number) => number"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
-            "lineNumber": 50,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1348,7 +1267,7 @@
                   "number"
                 ],
                 "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
-                "lineNumber": 56,
+                "lineNumber": 57,
                 "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1375,7 +1294,7 @@
               }
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
-            "lineNumber": 57,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1391,7 +1310,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
-                "lineNumber": 57,
+                "lineNumber": 58,
                 "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1408,7 +1327,7 @@
                   "number"
                 ],
                 "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
-                "lineNumber": 57,
+                "lineNumber": 58,
                 "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1436,7 +1355,7 @@
               ">"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
-            "lineNumber": 58,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1454,7 +1373,7 @@
               "(rowIndex: number) => boolean"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
-            "lineNumber": 59,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1470,7 +1389,7 @@
                   "number"
                 ],
                 "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
-                "lineNumber": 59,
+                "lineNumber": 60,
                 "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1487,7 +1406,7 @@
             "label": "isRootStable",
             "description": [],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
-            "lineNumber": 60,
+            "lineNumber": 61,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1503,7 +1422,7 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
-            "lineNumber": 61,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1521,7 +1440,7 @@
               "(listener: () => void) => () => void"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
-            "lineNumber": 62,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1537,7 +1456,7 @@
                   "() => void"
                 ],
                 "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
-                "lineNumber": 62,
+                "lineNumber": 63,
                 "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1557,7 +1476,7 @@
               "(cellId: string) => number | null"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
-            "lineNumber": 63,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1573,7 +1492,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
-                "lineNumber": 63,
+                "lineNumber": 64,
                 "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1595,7 +1514,7 @@
               "(cellId: string) => void"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
-            "lineNumber": 64,
+            "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1611,7 +1530,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
-                "lineNumber": 68,
+                "lineNumber": 69,
                 "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1633,7 +1552,27 @@
               "() => boolean"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
-            "lineNumber": 69,
+            "lineNumber": 70,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.ChildVirtualizerController.haveAllRestoringChildrenStabilized",
+            "type": "Function",
+            "tags": [],
+            "label": "haveAllRestoringChildrenStabilized",
+            "description": [
+              "\nReturns true when every child that had an initial persisted anchor has\nreported `hasStabilized: true`. Trivially true when no persisted anchors\nexisted at creation time."
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+            "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1651,7 +1590,7 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
-            "lineNumber": 75,
+            "lineNumber": 82,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1780,6 +1719,19 @@
             "description": [],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
             "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.ConnectedChildState.hasStabilized",
+            "type": "boolean",
+            "tags": [],
+            "label": "hasStabilized",
+            "description": [],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+            "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2135,7 +2087,7 @@
           "<G>"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/use_connected_child_virtualizer.ts",
-        "lineNumber": 19,
+        "lineNumber": 20,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2157,7 +2109,7 @@
               }
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/use_connected_child_virtualizer.ts",
-            "lineNumber": 20,
+            "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2170,7 +2122,7 @@
             "label": "cellId",
             "description": [],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/use_connected_child_virtualizer.ts",
-            "lineNumber": 21,
+            "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2183,7 +2135,7 @@
             "label": "rowIndex",
             "description": [],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/use_connected_child_virtualizer.ts",
-            "lineNumber": 22,
+            "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2200,7 +2152,7 @@
               "<G>[]"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/use_connected_child_virtualizer.ts",
-            "lineNumber": 23,
+            "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2216,7 +2168,7 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/use_connected_child_virtualizer.ts",
-            "lineNumber": 24,
+            "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2232,7 +2184,7 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/use_connected_child_virtualizer.ts",
-            "lineNumber": 25,
+            "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2250,7 +2202,7 @@
               "React.RefObject<Element | null> | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/use_connected_child_virtualizer.ts",
-            "lineNumber": 26,
+            "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2266,7 +2218,7 @@
         "label": "UseConnectedChildVirtualizerResult",
         "description": [],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/use_connected_child_virtualizer.ts",
-        "lineNumber": 33,
+        "lineNumber": 34,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2288,7 +2240,7 @@
               }
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/use_connected_child_virtualizer.ts",
-            "lineNumber": 34,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2310,7 +2262,7 @@
               }
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/use_connected_child_virtualizer.ts",
-            "lineNumber": 35,
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2323,7 +2275,7 @@
             "label": "isActive",
             "description": [],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/use_connected_child_virtualizer.ts",
-            "lineNumber": 36,
+            "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2336,7 +2288,7 @@
             "label": "isDetached",
             "description": [],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/use_connected_child_virtualizer.ts",
-            "lineNumber": 37,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2376,7 +2328,7 @@
           "; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/index.tsx",
-        "lineNumber": 172,
+        "lineNumber": 182,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

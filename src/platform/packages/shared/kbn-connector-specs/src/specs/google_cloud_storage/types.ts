@@ -15,8 +15,11 @@ export const ListProjectsInputSchema = z.object({
   pageSize: z
     .number()
     .optional()
-    .describe(`Maximum number of projects to return (default: ${DEFAULT_PAGE_SIZE})`),
-  pageToken: z.string().optional().describe('Token for pagination'),
+    .describe(`Maximum number of projects to return (default: ${DEFAULT_PAGE_SIZE}, max 1000)`),
+  pageToken: z
+    .string()
+    .optional()
+    .describe('Pagination token from a previous response to get the next page of results'),
   filter: z
     .string()
     .optional()
@@ -27,18 +30,26 @@ export const ListProjectsInputSchema = z.object({
 export type ListProjectsInput = z.infer<typeof ListProjectsInputSchema>;
 
 export const ListBucketsInputSchema = z.object({
-  project: z.string().min(1).describe('Google Cloud project ID (e.g. "my-project-123")'),
+  project: z
+    .string()
+    .min(1)
+    .describe(
+      'Google Cloud project ID (e.g. "my-project-123"). Use listProjects to discover available project IDs.'
+    ),
   maxResults: z
     .number()
     .optional()
-    .describe(`Maximum number of buckets to return (default: ${DEFAULT_PAGE_SIZE})`),
-  pageToken: z.string().optional().describe('Token for pagination'),
+    .describe(`Maximum number of buckets to return (default: ${DEFAULT_PAGE_SIZE}, max 1000)`),
+  pageToken: z
+    .string()
+    .optional()
+    .describe('Pagination token from a previous response to get the next page of results'),
   prefix: z.string().optional().describe('Filter buckets whose names begin with this prefix'),
 });
 export type ListBucketsInput = z.infer<typeof ListBucketsInputSchema>;
 
 export const ListObjectsInputSchema = z.object({
-  bucket: z.string().min(1).describe('Name of the bucket to list objects from'),
+  bucket: z.string().min(1).describe('Name of the GCS bucket to list objects from'),
   prefix: z
     .string()
     .optional()
@@ -54,13 +65,16 @@ export const ListObjectsInputSchema = z.object({
   maxResults: z
     .number()
     .optional()
-    .describe(`Maximum number of objects to return (default: ${DEFAULT_PAGE_SIZE})`),
-  pageToken: z.string().optional().describe('Token for pagination'),
+    .describe(`Maximum number of objects to return (default: ${DEFAULT_PAGE_SIZE}, max 1000)`),
+  pageToken: z
+    .string()
+    .optional()
+    .describe('Pagination token from a previous response to get the next page of results'),
 });
 export type ListObjectsInput = z.infer<typeof ListObjectsInputSchema>;
 
 export const GetObjectMetadataInputSchema = z.object({
-  bucket: z.string().min(1).describe('Name of the bucket'),
+  bucket: z.string().min(1).describe('Name of the GCS bucket containing the object'),
   object: z
     .string()
     .min(1)
@@ -71,11 +85,11 @@ export type GetObjectMetadataInput = z.infer<typeof GetObjectMetadataInputSchema
 const DEFAULT_MAX_DOWNLOAD_SIZE_BYTES = 768000; // ~750 KB (safe ceiling before base64 hits the 1 MB platform response limit)
 
 export const DownloadObjectInputSchema = z.object({
-  bucket: z.string().min(1).describe('Name of the bucket'),
+  bucket: z.string().min(1).describe('Name of the GCS bucket containing the object'),
   object: z
     .string()
     .min(1)
-    .describe('Full name/path of the object to download (e.g. "reports/2024/january.pdf")'),
+    .describe('Full name/path of the object to download (e.g. "reports/jan.pdf", "data/q1.csv")'),
   maximumDownloadSizeBytes: z
     .number()
     .optional()

@@ -91,6 +91,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const queries = [
         {
           id: v4(),
+          type: 'match' as const,
           title: 'OutOfMemoryError',
           description: '',
           esql: {
@@ -99,6 +100,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
         {
           id: v4(),
+          type: 'match' as const,
           title: 'cluster_block_exception',
           description: '',
           esql: {
@@ -132,6 +134,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('inserts a query when inexistant', async () => {
         const query = {
           id: v4(),
+          type: 'match' as const,
           title: 'initial title',
           description: '',
           esql: {
@@ -199,6 +202,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('updates the query and create a new rule when updating an existing query esql', async () => {
         const query = {
           id: 'first',
+          type: 'match' as const,
           title: 'initial title',
           description: '',
           esql: {
@@ -231,6 +235,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(getQueriesResponse.queries).to.eql([
           {
             id: query.id,
+            type: 'match',
             title: query.title,
             description: '',
             esql: { query: updatedEsql },
@@ -246,6 +251,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('updates the query and the rule when updating an existing query title', async () => {
         const query = {
           id: 'first',
+          type: 'match' as const,
           title: 'initial title',
           description: '',
           esql: {
@@ -277,6 +283,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(getQueriesResponse.queries).to.eql([
           {
             id: query.id,
+            type: 'match',
             title: 'updated title',
             description: '',
             esql: { query: query.esql.query },
@@ -298,6 +305,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         queries: [
           {
             id: queryId,
+            type: 'match' as const,
             title: 'Significant Query',
             description: '',
             esql: {
@@ -334,6 +342,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     it('bulks insert and remove queries', async () => {
       const firstQuery = {
         id: 'first',
+        type: 'match' as const,
         title: 'first query',
         description: '',
         esql: {
@@ -342,6 +351,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       };
       const secondQuery = {
         id: 'second',
+        type: 'match' as const,
         title: 'second query',
         description: '',
         esql: {
@@ -350,6 +360,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       };
       const thirdQuery = {
         id: 'third',
+        type: 'match' as const,
         title: 'third query',
         description: '',
         esql: {
@@ -411,7 +422,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(bulkResponse).to.have.property('acknowledged', true);
 
       const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
-      expect(getQueriesResponse.queries).to.eql([firstQuery, updateThirdQuery, newQuery]);
+      expect(getQueriesResponse.queries).to.eql([
+        firstQuery,
+        { ...updateThirdQuery, type: 'match' },
+        { ...newQuery, type: 'match' },
+      ]);
 
       const updatedRules = await alertingApi.searchRules(roleAuthc, '');
       expect(updatedRules.body.data).to.have.length(3);
@@ -431,6 +446,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     it('returns 400 and does not apply changes when bulk includes an invalid ES|QL query', async () => {
       const firstQuery = {
         id: 'first',
+        type: 'match' as const,
         title: 'first query',
         description: '',
         esql: {

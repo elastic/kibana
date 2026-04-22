@@ -128,6 +128,7 @@ export const ActionResponseOutputs = memo<ActionResponseOutputsProps>(
                 hostOutput = (
                   <RunscriptActionResult
                     action={action}
+                    agentId={agentId}
                     data-test-subj={getTestId('actionsLogTray')}
                     textSize="xs"
                   />
@@ -145,8 +146,8 @@ export const ActionResponseOutputs = memo<ActionResponseOutputsProps>(
                 );
               }
 
-              // CrowdStrike Isolate/Release actions
-              if (action.agentType === 'crowdstrike') {
+              // CrowdStrike Isolate/Release actions (runscript has its own output via RunscriptActionResult)
+              if (action.agentType === 'crowdstrike' && !isRunScriptAction(action)) {
                 hostOutput = <>{OUTPUT_MESSAGES.submittedSuccessfully(consoleCommandName)}</>;
               }
             }

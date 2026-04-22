@@ -33,7 +33,14 @@ describe('ToolsService', () => {
     it('allows registering allowed built-in tools', () => {
       isAllowedBuiltinToolMock.mockReturnValue(true);
 
-      const serviceSetup = service.setup({ logger });
+      const serviceSetup = service.setup({
+        logger,
+        config: {
+          enabled: true,
+          githubBaseUrl: 'https://github.com',
+          topSnippets: { numSnippets: 2, numWords: 750 },
+        },
+      });
 
       expect(() => serviceSetup.register(createMockedBuiltinTool())).not.toThrow();
     });
@@ -41,7 +48,14 @@ describe('ToolsService', () => {
     it('throws an error trying to register non-allowed built-in tools', () => {
       isAllowedBuiltinToolMock.mockReturnValue(false);
 
-      const serviceSetup = service.setup({ logger });
+      const serviceSetup = service.setup({
+        logger,
+        config: {
+          enabled: true,
+          githubBaseUrl: 'https://github.com',
+          topSnippets: { numSnippets: 2, numWords: 750 },
+        },
+      });
 
       expect(() => serviceSetup.register(createMockedBuiltinTool()))
         .toThrowErrorMatchingInlineSnapshot(`

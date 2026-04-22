@@ -186,6 +186,7 @@ export const RulesListPage = () => {
             page={page}
             perPage={perPage}
             search={debouncedSearch}
+            filter={filter}
             hasActiveFilters={hasActiveFilters}
             sortField={SORT_FIELD_TO_TABLE_FIELD[sortField]}
             sortDirection={sortDirection}

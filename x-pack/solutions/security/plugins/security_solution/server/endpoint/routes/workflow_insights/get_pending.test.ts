@@ -101,9 +101,29 @@ describe('Get Pending Insights Route Handler', () => {
     });
   });
 
-  describe('insightType filter', () => {
-    it('includes insightType in metadata filter when query param is provided', async () => {
-      await callRoute({ insightType: 'incompatible_antivirus' });
+  describe('status filter', () => {
+    it('filters for running, scheduled, failed, and aborted statuses', async () => {
+      await callRoute();
+
+      expect(mockAgentBuilder.execution.findExecutions).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          filter: expect.objectContaining({
+            status: [
+              ExecutionStatus.running,
+              ExecutionStatus.scheduled,
+              ExecutionStatus.failed,
+              ExecutionStatus.aborted,
+            ],
+          }),
+        })
+      );
+    });
+  });
+
+  describe('insightTypes filter', () => {
+    it('includes insightType in metadata filter when a single insightTypes query param is provided', async () => {
+      await callRoute({ insightTypes: ['incompatible_antivirus'] });
 
       expect(mockAgentBuilder.execution.findExecutions).toHaveBeenCalledWith(
         expect.anything(),
@@ -111,6 +131,36 @@ describe('Get Pending Insights Route Handler', () => {
           filter: expect.objectContaining({
             metadata: expect.objectContaining({
               insightType: 'incompatible_antivirus',
+            }),
+          }),
+        })
+      );
+    });
+
+    it('issues one findExecutions call per insightType when multiple insightTypes are provided', async () => {
+      mockAgentBuilder.execution.findExecutions.mockResolvedValueOnce([]).mockResolvedValueOnce([]);
+
+      await callRoute({
+        insightTypes: ['incompatible_antivirus', 'policy_response_failure'],
+      });
+
+      expect(mockAgentBuilder.execution.findExecutions).toHaveBeenCalledTimes(2);
+      expect(mockAgentBuilder.execution.findExecutions).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          filter: expect.objectContaining({
+            metadata: expect.objectContaining({
+              insightType: 'incompatible_antivirus',
+            }),
+          }),
+        })
+      );
+      expect(mockAgentBuilder.execution.findExecutions).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          filter: expect.objectContaining({
+            metadata: expect.objectContaining({
+              insightType: 'policy_response_failure',
             }),
           }),
         })
@@ -126,8 +176,98 @@ describe('Get Pending Insights Route Handler', () => {
     });
   });
 
+  describe('endpointIds filter', () => {
+    it('issues one findExecutions call per endpointId when endpointIds is provided', async () => {
+      mockAgentBuilder.execution.findExecutions
+        .mockResolvedValueOnce([
+          {
+            executionId: 'exec-1',
+            status: ExecutionStatus.running,
+            metadata: {
+              insightType: 'incompatible_antivirus',
+              source: AUTOMATIC_TROUBLESHOOTING_TAG,
+              endpointId: 'endpoint-1',
+            },
+            '@timestamp': '2024-01-01T00:00:00Z',
+            agentId: 'agent-1',
+            spaceId: 'default',
+            agentParams: { conversationId: 'conv-1' },
+            eventCount: 0,
+            events: [],
+          },
+        ])
+        .mockResolvedValueOnce([
+          {
+            executionId: 'exec-2',
+            status: ExecutionStatus.scheduled,
+            metadata: {
+              insightType: 'policy_response_failure',
+              source: AUTOMATIC_TROUBLESHOOTING_TAG,
+              endpointId: 'endpoint-2',
+            },
+            '@timestamp': '2024-01-01T00:00:01Z',
+            agentId: 'agent-2',
+            spaceId: 'default',
+            agentParams: { conversationId: 'conv-2' },
+            eventCount: 0,
+            events: [],
+          },
+        ]);
+
+      await callRoute({ endpointIds: ['endpoint-1', 'endpoint-2'] });
+
+      expect(mockAgentBuilder.execution.findExecutions).toHaveBeenCalledTimes(2);
+      expect(mockAgentBuilder.execution.findExecutions).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          filter: expect.objectContaining({
+            metadata: expect.objectContaining({ endpointId: 'endpoint-1' }),
+          }),
+        })
+      );
+      expect(mockAgentBuilder.execution.findExecutions).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          filter: expect.objectContaining({
+            metadata: expect.objectContaining({ endpointId: 'endpoint-2' }),
+          }),
+        })
+      );
+
+      const callBody = (mockResponse.ok as jest.Mock).mock.calls[0][0].body;
+      expect(callBody.pending).toHaveLength(2);
+    });
+
+    it('deduplicates results when the same executionId is returned for multiple endpointId calls', async () => {
+      const sharedExecution = {
+        executionId: 'exec-shared',
+        status: ExecutionStatus.running,
+        metadata: {
+          insightType: 'incompatible_antivirus',
+          source: AUTOMATIC_TROUBLESHOOTING_TAG,
+          endpointId: 'endpoint-1',
+        },
+        '@timestamp': '2024-01-01T00:00:00Z',
+        agentId: 'agent-1',
+        spaceId: 'default',
+        agentParams: { conversationId: 'conv-1' },
+        eventCount: 0,
+        events: [],
+      };
+
+      mockAgentBuilder.execution.findExecutions
+        .mockResolvedValueOnce([sharedExecution])
+        .mockResolvedValueOnce([sharedExecution]);
+
+      await callRoute({ endpointIds: ['endpoint-1', 'endpoint-2'] });
+
+      const callBody = (mockResponse.ok as jest.Mock).mock.calls[0][0].body;
+      expect(callBody.pending).toHaveLength(1);
+    });
+  });
+
   describe('happy path', () => {
-    it('returns mapped pending executions with correct shape', async () => {
+    it('returns mapped pending executions with correct shape including endpointId', async () => {
       mockAgentBuilder.execution.findExecutions.mockResolvedValue([
         {
           executionId: 'exec-1',
@@ -135,6 +275,7 @@ describe('Get Pending Insights Route Handler', () => {
           metadata: {
             insightType: 'incompatible_antivirus',
             source: AUTOMATIC_TROUBLESHOOTING_TAG,
+            endpointId: 'endpoint-1',
           },
           '@timestamp': '2024-01-01T00:00:00Z',
           agentId: 'agent-1',
@@ -155,6 +296,7 @@ describe('Get Pending Insights Route Handler', () => {
               status: ExecutionStatus.running,
               conversationId: 'conv-1',
               insightType: 'incompatible_antivirus',
+              endpointId: 'endpoint-1',
               '@timestamp': '2024-01-01T00:00:00Z',
             },
           ],
@@ -162,17 +304,29 @@ describe('Get Pending Insights Route Handler', () => {
       });
     });
 
-    it('filters for running and scheduled statuses', async () => {
+    it('includes failed and aborted executions in response', async () => {
+      mockAgentBuilder.execution.findExecutions.mockResolvedValue([
+        {
+          executionId: 'exec-failed',
+          status: ExecutionStatus.failed,
+          metadata: {
+            insightType: 'policy_response_failure',
+            source: AUTOMATIC_TROUBLESHOOTING_TAG,
+            endpointId: 'endpoint-1',
+          },
+          '@timestamp': '2024-01-01T00:00:00Z',
+          agentId: 'agent-1',
+          spaceId: 'default',
+          agentParams: {},
+          eventCount: 0,
+          events: [],
+        },
+      ]);
+
       await callRoute();
 
-      expect(mockAgentBuilder.execution.findExecutions).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.objectContaining({
-          filter: expect.objectContaining({
-            status: [ExecutionStatus.running, ExecutionStatus.scheduled],
-          }),
-        })
-      );
+      const callBody = (mockResponse.ok as jest.Mock).mock.calls[0][0].body;
+      expect(callBody.pending[0].status).toBe(ExecutionStatus.failed);
     });
 
     it('always includes source in metadata filter', async () => {

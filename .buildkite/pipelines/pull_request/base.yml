@@ -9,6 +9,21 @@ steps:
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
     timeout_in_minutes: 60
+    plugins:
+      - custom-checkout#v1.8.0:
+          skip_checkout: true
+          repos:
+            - url: git@github.com:elastic/kibana.git
+              mirror_url: /opt/git-mirrors/git-github-com-elastic-kibana-git
+              ref: "${BUILDKITE_COMMIT}"
+              fetch: true
+              clone_flags:
+                - '--depth=1'
+                - '--no-tags'
+                - '--single-branch'
+              fetch_flags:
+                - '--depth=1'
+                - '--no-tags'
     retry:
       automatic:
         - exit_status: '-1'
@@ -133,7 +148,7 @@ steps:
     agents:
       machineType: n2-standard-2
       diskSizeGb: 115
-    timeout_in_minutes: 10
+    timeout_in_minutes: 15
     env:
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
       JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
@@ -150,11 +165,9 @@ steps:
       machineType: n2d-standard-8
     key: build_scout_tests
     timeout_in_minutes: 20
-    depends_on:
-      - build
     env:
       SCOUT_TEST_DISTRIBUTION_STRATEGY: 'configs'
-      SCOUT_CONFIGS_DEPS: 'build_scout_tests'
+      SCOUT_CONFIGS_DEPS: 'build_scout_tests,build'
       SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout/configs.sh'
       SELECTIVE_TESTING_ENABLED: 'true'
     retry:
@@ -179,9 +192,10 @@ steps:
   - command: .buildkite/scripts/steps/api_docs/build_api_docs.sh
     label: 'Build API Docs'
     agents:
-      machineType: n2-highmem-4
+      machineType: c4d-highmem-4
+      diskType: hyperdisk-balanced
       preemptible: true
-      spotZones: us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-a,us-central1-b,us-central1-c
       diskSizeGb: 105
     key: build_api_docs
     timeout_in_minutes: 60

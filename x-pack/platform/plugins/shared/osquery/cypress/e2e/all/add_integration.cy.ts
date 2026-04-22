@@ -90,7 +90,7 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     it('should add the old integration and be able to upgrade it', { tags: '@ess' }, () => {
-      cy.visit(createOldOsqueryPath(oldVersion));
+      navigateTo(createOldOsqueryPath(oldVersion));
       addCustomIntegration(integrationName, policyName);
       policyContainsIntegration(integrationName, policyName);
       checkDataStreamsInPolicyDetails();
@@ -147,13 +147,12 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
         policyContainsIntegration(integrationName, policyName);
         checkDataStreamsInPolicyDetails();
         cy.visit(OSQUERY);
-        cy.contains('Live queries history');
+        cy.contains('History');
       }
     );
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/255381
-  describe.skip('Upgrade policy with existing packs', () => {
+  describe('Upgrade policy with existing packs', () => {
     const oldVersion = '1.2.0';
     const [policyName, integrationName, packName] = generateRandomStringName(3);
     let policyId: string;
@@ -178,6 +177,7 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
       addCustomIntegration(integrationName, policyName);
       cy.getBySel('integrationPolicyUpgradeBtn');
       cy.get(`[title="${policyName}"]`).click();
+      closeFleetTourIfVisible();
       cy.get(`[title="${integrationName}"]`)
         .parents('tr')
         .within(() => {
@@ -210,12 +210,12 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
       cy.get(`[title="${policyName}"]`).click();
       closeFleetTourIfVisible();
       cy.getBySel('integrationPolicyUpgradeBtn').click();
-      cy.contains(/^Advanced$/).click();
-      cy.get('.kibanaCodeEditor').should('contain', `"${packName}":`);
+      cy.contains(/^Osquery config$/).click();
+      cy.get('.kibanaCodeEditor', { timeout: 30000 }).should('contain', `"default--${packName}":`);
       cy.getBySel('saveIntegration').click();
       cy.get(`a[title="${integrationName}"]`).click();
-      cy.contains(/^Advanced$/).click();
-      cy.get('.kibanaCodeEditor').should('contain', `"${packName}":`);
+      cy.contains(/^Osquery config$/).click();
+      cy.get('.kibanaCodeEditor', { timeout: 30000 }).should('contain', `"default--${packName}":`);
       cy.contains('Cancel').click();
       closeModalIfVisible();
       cy.get(`[title="${integrationName}"]`)

@@ -46,14 +46,8 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
     }),
 
     getSmlData: async (originId, context) => {
-      if (!context.request) {
-        throw new Error(
-          `SML connector: no request available for '${originId}' — cannot create scoped client`
-        );
-      }
       try {
-        const soClient = await getActionSavedObjectsClient(context.request);
-        const so = await soClient.get('action', originId);
+        const so = await context.savedObjectsClient.get('action', originId);
         const attrs = so.attributes as { name?: string; actionTypeId?: string };
         const name = attrs.name ?? originId;
         const actionTypeId = attrs.actionTypeId ?? '';

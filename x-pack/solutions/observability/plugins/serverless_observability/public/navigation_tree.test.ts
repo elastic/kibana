@@ -67,8 +67,8 @@ describe('Navigation Tree', () => {
     expect(agentsNode).toBeDefined();
   });
 
-  it('uses a single Alerts link when alerting v2 is disabled', () => {
-    const { body } = createNavigationTree({ showAlertingV2: false });
+  it('uses a single Alerts link to classic Observability alerts', () => {
+    const { body } = createNavigationTree({ showAlertingV2: true });
     const alertsPanel = body.find(
       (item) => 'id' in item && item.id === 'alerting' && item.renderAs === 'panelOpener'
     );
@@ -79,23 +79,6 @@ describe('Navigation Tree', () => {
       expect.objectContaining({
         link: 'observability-overview:alerts',
         icon: 'warning',
-      })
-    );
-  });
-
-  it('opens an Alerts panel with legacy and v2 when alerting v2 is enabled', () => {
-    const { body } = createNavigationTree({ showAlertingV2: true });
-    const alertsPanel = body.find((item) => 'id' in item && item.id === 'alerting');
-
-    expect(alertsPanel).toEqual(
-      expect.objectContaining({
-        id: 'alerting',
-        renderAs: 'panelOpener',
-        icon: 'warning',
-        children: [
-          { link: 'observability-overview:alerts' },
-          { link: 'observability-overview:alerts_v2' },
-        ],
       })
     );
   });
