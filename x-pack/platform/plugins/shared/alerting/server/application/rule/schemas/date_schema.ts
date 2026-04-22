@@ -6,6 +6,7 @@
  */
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
+import { ISO_DATE_REGEX } from '../../../../common/routes/schedule/constants';
 
 const validateDate = (string: Date) => {
   if (moment(string).isValid()) {
@@ -14,4 +15,11 @@ const validateDate = (string: Date) => {
   return `string is not a valid date: ${string}`;
 };
 
+const validateIsoDate = (value: string) => {
+  if (!ISO_DATE_REGEX.test(value) || isNaN(Date.parse(value))) {
+    return `string is not a valid ISO date: ${value}. Use ISO 8601 YYYY-MM-DDTHH:mm:ss.sssZ`;
+  }
+};
+
 export const dateSchema = schema.any({ validate: validateDate });
+export const isoDateSchema = schema.string({ validate: validateIsoDate });

@@ -31,6 +31,7 @@ import { TaskPartitioner } from './lib/task_partitioner';
 import type { KibanaDiscoveryService } from './kibana_discovery_service';
 import { TaskEventType } from './task_events';
 import { reconcileTasksOnStartup } from './lib/task_reconciliation';
+import { EsApiKeyStrategy } from './api_key_strategy';
 
 const executionContext = executionContextServiceMock.createSetupContract();
 let mockTaskClaiming = taskClaimingMock.create({});
@@ -134,6 +135,7 @@ describe('TaskPollingLifecycle', () => {
         scale_down_cooldown_ms: 30000,
         scale_down_max_step_fraction: 0.5,
       },
+      grant_uiam_api_keys: false,
     },
     basePathService: httpServiceMock.createBasePath(),
     taskStore: mockTaskStore,
@@ -148,6 +150,7 @@ describe('TaskPollingLifecycle', () => {
       kibanaDiscoveryService: {} as KibanaDiscoveryService,
       kibanasPerPartition: DEFAULT_KIBANAS_PER_PARTITION,
     }),
+    apiKeyStrategy: new EsApiKeyStrategy(),
     eventLogger: eventLoggerMock,
   };
 

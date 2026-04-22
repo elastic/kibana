@@ -1,0 +1,81 @@
+---
+# This file is used to generate "Banner settings in Kibana" page in the product docs
+# For the schema and an example refer to the automated settings reference: 
+# https://github.com/elastic/docs-builder/blob/main/docs/syntax/automated_settings.md
+
+product: Kibana
+collection: Banner settings in Kibana
+id: banners-settings-kb
+page_description: |
+  Banners are disabled by default. You need to manually configure them in order to use the feature.
+
+  You can configure the `xpack.banners` settings in your `kibana.yml` file.
+
+note: Banners are a [subscription feature](https://www.elastic.co/subscriptions).
+
+groups:
+  - group: All settings
+    id: general-banner-settings
+    settings:
+
+      - setting: xpack.banners.placement
+        description: |
+          Set to `top` to display a banner above the Elastic header.
+        datatype: enum
+        default: disabled
+        options:
+          - option: disabled
+          - option: top
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: xpack.banners.textContent
+        description: |
+          The text to display inside the banner, either plain text or Markdown.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: xpack.banners.textColor
+        description: |
+          The color for the banner text.
+        datatype: string
+        default: '#8A6A0A'
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: xpack.banners.linkColor
+        description: |
+          The color for the banner link text.
+        datatype: string
+        default: '#0B64DD'
+        applies_to:
+          stack: ga 9.1
+          ech: ga
+          self: ga
+
+      - setting: xpack.banners.backgroundColor
+        description: |
+          The color of the banner background.
+        datatype: string
+        default: '#FFF9E8'
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: xpack.banners.disableSpaceBanners
+        description: |
+          If true, per-space banner overrides will be disabled.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga

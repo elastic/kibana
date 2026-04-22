@@ -47,6 +47,7 @@ import { TaskPool } from './task_pool';
 import type { TaskRunner } from './task_running';
 import { TaskManagerRunner } from './task_running';
 import type { TaskStore } from './task_store';
+import type { ApiKeyStrategy } from './api_key_strategy';
 import { identifyEsError, isEsCannotExecuteScriptError } from './lib/identify_es_error';
 import { BufferedTaskStore } from './buffered_task_store';
 import type { TaskTypeDictionary } from './task_type_dictionary';
@@ -82,6 +83,7 @@ export interface TaskPollingLifecycleOpts {
   usageCounter?: UsageCounter;
   taskPartitioner: TaskPartitioner;
   startingCapacity: number;
+  apiKeyStrategy: ApiKeyStrategy;
   eventLogger: TaskEventLogger;
   opsMetrics$?: Observable<OpsMetrics>;
 }
@@ -124,6 +126,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   private usageCounter?: UsageCounter;
   private config: TaskManagerConfig;
   private currentPollInterval: number;
+  private apiKeyStrategy: ApiKeyStrategy;
   private currentTmUtilization$ = new BehaviorSubject<number>(0);
   private currentTmObservedUtilization$ = new BehaviorSubject<number>(0);
   private isElasticsearchAndSOAvailable = false;
@@ -150,6 +153,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     usageCounter,
     taskPartitioner,
     startingCapacity,
+    apiKeyStrategy,
     eventLogger,
     opsMetrics$,
   }: TaskPollingLifecycleOpts) {
@@ -161,6 +165,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     this.executionContext = executionContext;
     this.usageCounter = usageCounter;
     this.config = config;
+    this.apiKeyStrategy = apiKeyStrategy;
     const { poll_interval: pollInterval, claim_strategy: claimStrategy } = config;
     this.currentPollInterval = pollInterval;
     this.eventLogger = eventLogger;
@@ -289,6 +294,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       allowReadingInvalidState: this.config.allow_reading_invalid_state,
       strategy: this.config.claim_strategy,
       getPollInterval: () => this.currentPollInterval,
+      apiKeyStrategy: this.apiKeyStrategy,
       eventLogger: this.eventLogger,
     });
   };

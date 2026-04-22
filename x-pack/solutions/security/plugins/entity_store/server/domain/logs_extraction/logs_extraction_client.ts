@@ -9,7 +9,7 @@ import type { Logger } from '@kbn/logging';
 import moment from 'moment';
 import { SavedObjectsErrorHelpers, type ElasticsearchClient } from '@kbn/core/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
-import { isCCSRemoteIndexName } from '@kbn/es-query';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import type {
   EntityType,
   ManagedEntityDefinition,
@@ -756,7 +756,7 @@ export class LogsExtractionClient {
     const remoteIndexPatterns: string[] = [];
 
     withoutAlerts.forEach((index) => {
-      if (isCCSRemoteIndexName(index)) {
+      if (isNonLocalIndexName(index)) {
         remoteIndexPatterns.push(index);
       } else {
         localIndexPatterns.push(index);

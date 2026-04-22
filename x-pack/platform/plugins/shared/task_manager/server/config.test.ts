@@ -38,6 +38,7 @@ describe('config validation', () => {
           "monitor": true,
           "warn_threshold": 5000,
         },
+        "grant_uiam_api_keys": false,
         "invalidate_api_key_task": Object {
           "interval": "5m",
           "removalDelay": "1h",
@@ -115,6 +116,7 @@ describe('config validation', () => {
           "monitor": true,
           "warn_threshold": 5000,
         },
+        "grant_uiam_api_keys": false,
         "invalidate_api_key_task": Object {
           "interval": "5m",
           "removalDelay": "1h",
@@ -190,6 +192,7 @@ describe('config validation', () => {
           "monitor": true,
           "warn_threshold": 5000,
         },
+        "grant_uiam_api_keys": false,
         "invalidate_api_key_task": Object {
           "interval": "5m",
           "removalDelay": "1h",
