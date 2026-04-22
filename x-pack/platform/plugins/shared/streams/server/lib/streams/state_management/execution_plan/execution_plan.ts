@@ -295,6 +295,7 @@ export class ExecutionPlan {
       actions.flatMap((action) => [
         this.dependencies.attachmentClient.syncAttachmentList(action.request.name, [], 'dashboard'),
         this.dependencies.attachmentClient.syncAttachmentList(action.request.name, [], 'rule'),
+        this.dependencies.attachmentClient.syncAttachmentList(action.request.name, [], 'slo'),
       ])
     );
   }

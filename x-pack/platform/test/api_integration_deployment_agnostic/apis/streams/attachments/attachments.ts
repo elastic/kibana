@@ -1117,6 +1117,113 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
+    describe('SLO cascade-unlink on stream deletion', () => {
+      const SLO_TEST_STREAM = 'logs.otel.slo_test';
+
+      const wiredChildStreamBody = {
+        dashboards: [],
+        rules: [],
+        queries: [],
+        stream: {
+          type: 'wired' as const,
+          description: '',
+          ingest: {
+            lifecycle: { inherit: {} },
+            processing: { steps: [] },
+            settings: {},
+            wired: {
+              routing: [],
+              fields: {},
+            },
+            failure_store: { inherit: {} },
+          },
+        },
+      };
+
+      it('removes SLO attachment links when the stream is deleted', async () => {
+        let sloId = '';
+        const supertest = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
+          useCookieHeader: true,
+          withInternalHeaders: true,
+        });
+
+        try {
+          await putStream(apiClient, SLO_TEST_STREAM, wiredChildStreamBody);
+
+          const createSloResponse = await supertest
+            .post('/api/observability/slos')
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'streams-attachments-slo-unlink-regression',
+              description: 'Regression fixture for SLO cascade-unlink on stream delete',
+              indicator: {
+                type: 'sli.kql.custom',
+                params: {
+                  index: 'logs.otel',
+                  filter: '*',
+                  good: 'message: *',
+                  total: 'message: *',
+                  timestampField: '@timestamp',
+                },
+              },
+              budgetingMethod: 'occurrences',
+              timeWindow: {
+                duration: '7d',
+                type: 'rolling',
+              },
+              objective: {
+                target: 0.99,
+              },
+              tags: ['streams-test'],
+            })
+            .expect(200);
+
+          sloId = createSloResponse.body.id as string;
+
+          await linkAttachment({
+            apiClient,
+            stream: SLO_TEST_STREAM,
+            type: 'slo',
+            id: sloId,
+          });
+
+          const linked = await getAttachments({
+            apiClient,
+            stream: SLO_TEST_STREAM,
+            filters: { types: ['slo'] },
+          });
+          expect(linked.attachments.length).to.eql(1);
+          expect(linked.attachments[0].id).to.eql(sloId);
+
+          await deleteStream(apiClient, SLO_TEST_STREAM);
+
+          // Listing attachments requires the stream to exist (ensureStream). Recreate the same
+          // child stream and assert no SLO links remain. If cascade unlink did not run, the
+          // recreated stream would still show the orphaned SLO attachment.
+          await putStream(apiClient, SLO_TEST_STREAM, wiredChildStreamBody);
+
+          const afterDelete = await getAttachments({
+            apiClient,
+            stream: SLO_TEST_STREAM,
+            filters: { types: ['slo'] },
+          });
+          expect(afterDelete.attachments.length).to.eql(0);
+        } finally {
+          try {
+            await deleteStream(apiClient, SLO_TEST_STREAM);
+          } catch {
+            // Stream may already be absent if a prior step failed.
+          }
+          if (sloId) {
+            await supertest
+              .delete(`/api/observability/slos/${encodeURIComponent(sloId)}`)
+              .set('kbn-xsrf', 'foo')
+              .expect(204);
+          }
+        }
+      });
+    });
+
     describe('requires attachments setting', () => {
       before(async () => {
         await loadDashboards(kibanaServer, DASHBOARD_ARCHIVES, SPACE_ID);
