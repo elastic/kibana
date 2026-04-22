@@ -6,7 +6,6 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import { i18n } from '@kbn/i18n';
 
 import { DATA_SOURCES_LIST_ROUTE_PATH } from '../../../common';
 import { DataSourcesClient } from '../../data_sources_client';
@@ -24,9 +23,6 @@ export function registerListDataSourcesRoute(router: IRouter): void {
       },
       options: {
         access: 'internal',
-        summary: i18n.translate('dataSourceManagement.routes.listDataSources.summary', {
-          defaultMessage: 'List data sources',
-        }),
       },
       validate: false,
     },
