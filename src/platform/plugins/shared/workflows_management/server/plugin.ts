@@ -91,7 +91,7 @@ export class WorkflowsPlugin
 
     // Register public workflows client provider to allow any external plugin use it via the workflowsExtensions plugin
     plugins.workflowsExtensions.registerWorkflowsClientProvider(
-      createWorkflowsClientProvider(api, workflowsService, this.logger)
+      createWorkflowsClientProvider(workflowsService, this.config, this.logger)
     );
 
     const router = core.http.createRouter<WorkflowsRequestHandlerContext>();
@@ -99,7 +99,9 @@ export class WorkflowsPlugin
 
     this.setupAiIntegration(core, api, this.aiTelemetryClient);
 
-    return {};
+    return {
+      management: api,
+    };
   }
 
   public start(core: CoreStart, plugins: WorkflowsServerPluginStartDeps) {
