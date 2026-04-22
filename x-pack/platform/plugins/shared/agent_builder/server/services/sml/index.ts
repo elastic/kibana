@@ -8,6 +8,7 @@
 export type {
   SmlService,
   SmlTypeDefinition,
+  SmlCheckPermissionsFn,
   SmlChunk,
   SmlData,
   SmlContext,

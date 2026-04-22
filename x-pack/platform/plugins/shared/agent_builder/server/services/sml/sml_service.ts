@@ -88,6 +88,8 @@ class SmlServiceImpl implements SmlServiceInstance {
           searchResult: rawResults,
           request,
           securityAuthz: this.securityAuthz,
+          esClient,
+          registry: this.registry,
           logger,
         });
       },
@@ -98,6 +100,7 @@ class SmlServiceImpl implements SmlServiceInstance {
           esClient,
           request,
           securityAuthz: this.securityAuthz,
+          registry: this.registry,
           logger,
         });
       },
@@ -158,55 +161,128 @@ const getAuthorizedPermissions = async ({
   }
 };
 
+interface SmlPermissionItem {
+  id: string;
+  permissions: string[];
+  type: string;
+  origin_id: string;
+}
+
 /**
- * Filter search results by the current user's permissions.
- *
- * 1. Collect all unique permission strings from the results.
- * 2. Batch-check them with the security plugin.
- * 3. Remove results whose required permissions are not fully authorized.
+ * Unified permission check for SML items. Runs Kibana privilege checks first,
+ * then ES-level permission checks (via type-specific `checkPermissions` hooks).
+ * Returns a map of item id -> authorized (true/false).
+ */
+const checkItemPermissions = async ({
+  items,
+  request,
+  securityAuthz,
+  esClient,
+  registry,
+  logger,
+}: {
+  items: SmlPermissionItem[];
+  request: KibanaRequest;
+  securityAuthz?: AuthorizationServiceSetup;
+  esClient: ElasticsearchClient;
+  registry: SmlTypeRegistry;
+  logger: Logger;
+}): Promise<Map<string, boolean>> => {
+  const accessMap = new Map<string, boolean>();
+
+  if (!securityAuthz) {
+    for (const item of items) {
+      accessMap.set(item.id, true);
+    }
+    return accessMap;
+  }
+
+  const allPermissions = [...new Set(items.flatMap((item) => item.permissions))];
+  const authorizedPerms =
+    allPermissions.length > 0
+      ? await getAuthorizedPermissions({
+          permissions: allPermissions,
+          request,
+          securityAuthz,
+          logger,
+        })
+      : new Set<string>();
+
+  for (const item of items) {
+    if (item.permissions.length === 0) {
+      accessMap.set(item.id, true);
+    } else {
+      accessMap.set(
+        item.id,
+        item.permissions.every((p) => authorizedPerms.has(p))
+      );
+    }
+  }
+
+  await Promise.all(
+    items
+      .filter((item) => accessMap.get(item.id) === true)
+      .map(async (item) => {
+        const typeDef = registry.get(item.type);
+        if (!typeDef?.checkPermissions) return;
+        try {
+          const allowed = await typeDef.checkPermissions(item.origin_id, esClient);
+          if (!allowed) {
+            accessMap.set(item.id, false);
+          }
+        } catch (error) {
+          logger.warn(
+            `SML permission check failed for '${item.origin_id}' (type: ${item.type}): ${
+              (error as Error).message
+            }`
+          );
+          accessMap.set(item.id, false);
+        }
+      })
+  );
+
+  return accessMap;
+};
+
+/**
+ * Filter search results by the current user's permissions (Kibana + ES-level).
  */
 const filterResultsByPermissions = async ({
   searchResult,
   request,
   securityAuthz,
+  esClient,
+  registry,
   logger,
 }: {
   searchResult: { results: SmlSearchResult[]; total: number };
   request: KibanaRequest;
   securityAuthz?: AuthorizationServiceSetup;
+  esClient: ElasticsearchClient;
+  registry: SmlTypeRegistry;
   logger: Logger;
 }): Promise<{ results: SmlSearchResult[]; total: number }> => {
-  // When the security plugin is absent (e.g. development/testing with security
-  // disabled), all results are returned unfiltered. This follows the standard
-  // Kibana convention: no security plugin → open access.
-  if (!securityAuthz || searchResult.results.length === 0) {
+  if (searchResult.results.length === 0) {
     return searchResult;
   }
 
-  const allPermissions = [...new Set(searchResult.results.flatMap((hit) => hit.permissions))];
-
-  if (allPermissions.length === 0) {
-    return searchResult;
-  }
-
-  const authorizedPerms = await getAuthorizedPermissions({
-    permissions: allPermissions,
+  const accessMap = await checkItemPermissions({
+    items: searchResult.results,
     request,
     securityAuthz,
+    esClient,
+    registry,
     logger,
   });
 
-  const filteredResults = searchResult.results.filter((hit) => {
-    if (hit.permissions.length === 0) return true;
-    return hit.permissions.every((p) => authorizedPerms.has(p));
-  });
-
+  const filteredResults = searchResult.results.filter((hit) => accessMap.get(hit.id) === true);
   return { results: filteredResults, total: filteredResults.length };
 };
 
 /**
  * Check whether the current user has access to specific SML items.
- * Looks up each item's permissions from the index and batch-checks them.
+ * Fetches item metadata from the index, then delegates to the shared
+ * permission check. IDs not found in the index are denied.
  */
 const checkItemsAccess = async ({
   ids,
@@ -214,6 +290,7 @@ const checkItemsAccess = async ({
   esClient,
   request,
   securityAuthz,
+  registry,
   logger,
 }: {
   ids: string[];
@@ -221,21 +298,18 @@ const checkItemsAccess = async ({
   esClient: ElasticsearchClient;
   request: KibanaRequest;
   securityAuthz?: AuthorizationServiceSetup;
+  registry: SmlTypeRegistry;
   logger: Logger;
 }): Promise<Map<string, boolean>> => {
-  const accessMap = new Map<string, boolean>();
-
-  // When the security plugin is absent, grant access to all items.
   if (!securityAuthz) {
-    for (const id of ids) {
-      accessMap.set(id, true);
-    }
-    return accessMap;
+    return new Map(ids.map((id) => [id, true]));
   }
 
-  let docPermissions: Map<string, string[]>;
+  let items: SmlPermissionItem[];
   try {
-    const response = await esClient.search<Pick<SmlDocument, 'id' | 'permissions'>>({
+    const response = await esClient.search<
+      Pick<SmlDocument, 'id' | 'permissions' | 'origin_id' | 'type'>
+    >({
       index: smlIndexName,
       size: ids.length,
       allow_no_indices: true,
@@ -253,54 +327,41 @@ const checkItemsAccess = async ({
           ],
         },
       },
-      _source: ['id', 'permissions'],
+      _source: ['id', 'permissions', 'origin_id', 'type'],
     });
 
-    docPermissions = new Map(
-      response.hits.hits
-        .filter((hit) => hit._source != null)
-        .map((hit) => {
-          const source = hit._source!;
-          return [source.id ?? '', source.permissions ?? []] as [string, string[]];
-        })
-    );
+    items = response.hits.hits
+      .filter((hit) => hit._source != null)
+      .map((hit) => {
+        const source = hit._source!;
+        return {
+          id: source.id ?? '',
+          permissions: source.permissions ?? [],
+          origin_id: source.origin_id ?? '',
+          type: source.type ?? '',
+        };
+      });
   } catch (error) {
     if (isNotFoundError(error)) {
-      for (const id of ids) {
-        accessMap.set(id, false);
-      }
-      return accessMap;
+      return new Map(ids.map((id) => [id, false]));
     }
     logger.warn(`SML items access check failed: ${(error as Error).message}`);
-    for (const id of ids) {
-      accessMap.set(id, false);
-    }
-    return accessMap;
+    return new Map(ids.map((id) => [id, false]));
   }
 
-  const allPermissions = [...new Set([...docPermissions.values()].flat())];
-
-  const authorizedPerms = await getAuthorizedPermissions({
-    permissions: allPermissions,
+  const accessMap = await checkItemPermissions({
+    items,
     request,
     securityAuthz,
+    esClient,
+    registry,
     logger,
   });
 
   for (const id of ids) {
-    const perms = docPermissions.get(id);
-    if (!perms) {
+    if (!accessMap.has(id)) {
       accessMap.set(id, false);
-      continue;
     }
-    if (perms.length === 0) {
-      accessMap.set(id, true);
-      continue;
-    }
-    accessMap.set(
-      id,
-      perms.every((p) => authorizedPerms.has(p))
-    );
   }
 
   return accessMap;
