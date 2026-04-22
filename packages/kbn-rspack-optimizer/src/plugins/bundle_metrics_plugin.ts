@@ -8,7 +8,7 @@
  */
 
 import Path from 'path';
-import { rspack, type Compiler } from '@rspack/core';
+import { rspack, type Compiler, type Chunk } from '@rspack/core';
 import type { CiStatsMetric } from '@kbn/ci-stats-reporter';
 
 /**
@@ -52,9 +52,10 @@ export interface PluginMetricsInfo {
  *    the `kibana` entry chunk (name: `'kibana'`) is NOT captured -- it stays
  *    in the aggregate.
  *
- *    Unnamed numeric chunks and the `kibana` entry chunk are lumped into
- *    aggregate `shared chunks total size` / `shared chunk count` metrics
- *    (informational, no limits).
+ *    The `kibana` entry chunk is counted in `shared chunks total size`.
+ *    Unnamed async chunks are attributed via exclusive-ownership (see
+ *    section 3) to per-plugin `async chunks size` or the `shared async
+ *    chunks total size` aggregate.
  *
  * 2. CORE vs PLUGIN CHUNK NAMING
  *
@@ -63,20 +64,34 @@ export interface PluginMetricsInfo {
  *    user-facing `id` (e.g. "core", "discover") differs from the internal
  *    `chunkName` to match legacy metrics format and limits.yml keys.
  *
- * 3. ASYNC CHUNK TRAVERSAL (exclusive-ownership filtering)
+ * 3. ASYNC CHUNK TRAVERSAL (exclusive-ownership attribution)
  *
  *    All bundles (core + plugins) call `chunk.getAllAsyncChunks()` which
  *    walks child chunk groups recursively. In the unified compilation this
- *    returns named shared chunks (`shared-plugins`, `vendors`, etc.) and
- *    other plugin entry chunks that are reachable through the graph. To
- *    avoid massive double-counting we filter the result with an exclusion
- *    set built from `sharedChunkNames` (already tracked individually in
- *    `page load bundle size`) and `chunkNameToInfo` keys (each plugin's
- *    own entry chunk, tracked in its own per-plugin metrics). Only unnamed
- *    chunks (genuine per-plugin async splits from dynamic imports) pass
- *    through. Some unnamed chunks may be shared by a few plugins via
- *    `splitChunks`; counting them per consumer is semantically equivalent
- *    to legacy's code duplication and represents genuine download cost.
+ *    returns named shared chunks (`shared-plugins`, `vendors`, etc.),
+ *    other plugin entry chunks, and unnamed async splits.
+ *
+ *    Only unnamed chunks (those with `chunk.name` falsy) pass through the
+ *    async filter. ALL named chunks are excluded because they are already
+ *    tracked elsewhere: plugin entries in per-plugin `page load bundle
+ *    size`, named shared chunks individually, and any other named chunks
+ *    (e.g. the `kibana` entry) in `shared chunks total size`.
+ *
+ *    A two-pass exclusive-ownership attribution determines where each
+ *    unnamed chunk is counted:
+ *
+ *      Phase 1 — Collect each plugin's reachable unnamed async chunks.
+ *      Phase 2 — Build a claim-count map: for each unnamed chunk, how
+ *                many plugins can reach it?
+ *      Phase 3 — Attribute:
+ *        - claim === 1 (exclusive):  counted in that plugin's `asyncSize`.
+ *        - claim === 0 (orphan):     counted in `shared async chunks total size`.
+ *        - claim >= 2 (shared):      counted in `shared async chunks total size`.
+ *
+ *    This ensures every unnamed async byte is counted exactly once. The
+ *    Map keys are chunk object references (identity), which rspack
+ *    guarantees are the same objects in `compilation.chunks` and in the
+ *    results of `getAllAsyncChunks()`.
  *    Core (`plugin-core`) receives the same treatment as any plugin.
  *
  * 4. ENTRY CHUNK (kibana.bundle.js)
@@ -117,11 +132,18 @@ export interface PluginMetricsInfo {
  * 9. AGGREGATE SHARED CHUNK AND TOTAL OUTPUT METRICS
  *
  *    `shared chunks total size` and `shared chunk count` track only the
- *    entry chunk (`kibana`) and unnamed numeric chunks -- truly unattributed
- *    code. Named shared chunks (e.g. `shared-core`, `vendors`) are tracked
- *    individually via `page load bundle size` with their own limits.
+ *    `kibana` entry chunk (named, non-plugin, non-shared). Named shared
+ *    chunks (e.g. `shared-core`, `vendors`) are tracked individually via
+ *    `page load bundle size` with their own limits.
+ *
+ *    `shared async chunks total size` and `shared async chunk count` track
+ *    unnamed async chunks that are reachable from 2+ plugins (multi-consumer)
+ *    or from no plugin at all (orphan). Exclusive unnamed chunks (reachable
+ *    from exactly one plugin) are counted in that plugin's `async chunks
+ *    size` instead.
+ *
  *    `total optimizer output size` sums all emitted JS and catches overall
- *    build growth. These aggregate metrics are purely informational (no
+ *    build growth. All aggregate metrics are purely informational (no
  *    limits). They do NOT include UI shared deps (`@kbn/ui-shared-deps-npm`,
  *    `@kbn/ui-shared-deps-src`) which are built by separate tooling.
  *
@@ -174,6 +196,7 @@ export function buildMetrics(
     miscSize: number;
   }>,
   sharedStats: { totalSize: number; count: number },
+  sharedAsyncStats: { totalSize: number; count: number },
   totalOutputSize: number
 ): CiStatsMetric[] {
   const metrics: CiStatsMetric[] = [];
@@ -217,6 +240,16 @@ export function buildMetrics(
     group: 'shared chunk count',
     id: 'all',
     value: sharedStats.count,
+  });
+  metrics.push({
+    group: 'shared async chunks total size',
+    id: 'all',
+    value: sharedAsyncStats.totalSize,
+  });
+  metrics.push({
+    group: 'shared async chunk count',
+    id: 'all',
+    value: sharedAsyncStats.count,
   });
   metrics.push({
     group: 'total optimizer output size',
@@ -271,14 +304,18 @@ export class BundleMetricsPlugin {
           let sharedChunkCount = 0;
           const namedSharedData: typeof entryData = [];
 
-          // Chunks whose async size is already tracked elsewhere:
-          //  - named shared chunks (tracked individually in `page load bundle size`)
-          //  - other plugin entry chunks (tracked in their own per-plugin metrics)
-          // Unnamed chunks (genuine per-plugin async splits) pass through.
-          const excludedChunkNames = new Set([
-            ...this.sharedChunkNames,
-            ...this.chunkNameToInfo.keys(),
-          ]);
+          // ── Phase 1: collect per-plugin data + defer unnamed chunks ──
+          const pluginCollected = new Map<
+            string,
+            {
+              info: PluginMetricsInfo;
+              pageLoadSize: number;
+              moduleCount: number;
+              miscSize: number;
+              asyncChunks: Chunk[];
+            }
+          >();
+          const deferredChunks: Chunk[] = [];
 
           for (const chunk of compilation.chunks) {
             const info = chunk.name ? this.chunkNameToInfo.get(chunk.name) : undefined;
@@ -296,9 +333,11 @@ export class BundleMetricsPlugin {
                   asyncCount: 0,
                   miscSize: 0,
                 });
-              } else {
+              } else if (chunk.name) {
                 totalSharedSize += jsSize;
                 sharedChunkCount++;
+              } else {
+                deferredChunks.push(chunk);
               }
               continue;
             }
@@ -310,22 +349,9 @@ export class BundleMetricsPlugin {
             const pageLoadSize = sumJsFileSize(chunk.files, compilation);
             const moduleCount = compilation.chunkGraph.getChunkModules(chunk).length;
 
-            let asyncSize: number;
-            let asyncCount: number;
+            const allAsync = new Set(chunk.getAllAsyncChunks());
+            const asyncChunks = [...allAsync].filter((c) => !c.name);
 
-            {
-              const allAsync = new Set(chunk.getAllAsyncChunks());
-              const pluginAsync = [...allAsync].filter(
-                (c) => !c.name || !excludedChunkNames.has(c.name)
-              );
-              asyncSize = sumJsFileSize(
-                pluginAsync.flatMap((c) => [...c.files]),
-                compilation
-              );
-              asyncCount = pluginAsync.length;
-            }
-
-            // Miscellaneous assets (non-JS auxiliary files)
             let miscSize = 0;
             for (const auxFile of chunk.auxiliaryFiles) {
               const ext = Path.extname(auxFile);
@@ -334,16 +360,48 @@ export class BundleMetricsPlugin {
               miscSize += asset ? asset.source.size() : 0;
             }
 
-            entryData.push({
-              id: info.id,
-              chunkName: info.chunkName,
-              limit: info.limit,
+            pluginCollected.set(info.chunkName, {
+              info,
               pageLoadSize,
               moduleCount,
-              asyncSize,
-              asyncCount,
               miscSize,
+              asyncChunks,
             });
+          }
+
+          // ── Phase 2: build claim-count map ──
+          const chunkClaimCount = new Map<Chunk, number>();
+          for (const [, data] of pluginCollected) {
+            for (const ac of data.asyncChunks) {
+              chunkClaimCount.set(ac, (chunkClaimCount.get(ac) ?? 0) + 1);
+            }
+          }
+
+          // ── Phase 3: attribute exclusive async + categorise deferred ──
+          for (const [, data] of pluginCollected) {
+            const exclusive = data.asyncChunks.filter((c) => chunkClaimCount.get(c) === 1);
+            entryData.push({
+              id: data.info.id,
+              chunkName: data.info.chunkName,
+              limit: data.info.limit,
+              pageLoadSize: data.pageLoadSize,
+              moduleCount: data.moduleCount,
+              asyncSize: sumJsFileSize(
+                exclusive.flatMap((c) => [...c.files]),
+                compilation
+              ),
+              asyncCount: exclusive.length,
+              miscSize: data.miscSize,
+            });
+          }
+
+          let sharedAsyncSize = 0;
+          let sharedAsyncCount = 0;
+          for (const chunk of deferredChunks) {
+            const claim = chunkClaimCount.get(chunk) ?? 0;
+            if (claim === 1) continue;
+            sharedAsyncSize += sumJsFileSize(chunk.files, compilation);
+            sharedAsyncCount++;
           }
 
           // Produce 0-value metrics for registered plugins whose entry chunks
@@ -386,6 +444,7 @@ export class BundleMetricsPlugin {
           const metrics = buildMetrics(
             entryData,
             { totalSize: totalSharedSize, count: sharedChunkCount },
+            { totalSize: sharedAsyncSize, count: sharedAsyncCount },
             totalOutputSize
           );
 

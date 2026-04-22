@@ -1,31 +1,31 @@
 pageLoadAssetSize:
-  actions: 2961
+  actions: 3110
   advancedSettings: 1981
   agentBuilder: 254
-  agentBuilderPlatform: 3968
+  agentBuilderPlatform: 4152
   aiAssistantManagementSelection: 392
   aiops: 317
-  alerting: 8782
+  alerting: 8789
   alertingVTwo: 7442
-  apm: 15969
-  apmSourcesAccess: 766
+  apm: 16978
+  apmSourcesAccess: 779
   automaticImport: 13257
-  banners: 1144
+  banners: 1157
   canvas: 6000
   cases: 1938
   charts: 1188
-  cloud: 8389
-  cloudConnect: 4940
+  cloud: 8477
+  cloudConnect: 4998
   cloudDataMigration: 1755
   cloudDefend: 3152
   cloudExperiments: 75153
   cloudFullStory: 1373
-  cloudLinks: 13772
-  cloudSecurityPosture: 12181
-  console: 24515
+  cloudLinks: 13792
+  cloudSecurityPosture: 12224
+  console: 24516
   contentConnectors: 2789
-  contentManagement: 6725
-  controls: 4379
+  contentManagement: 6738
+  controls: 4489
   core: 320
   cps: 5080
   crossClusterReplication: 7691
@@ -36,33 +36,33 @@ pageLoadAssetSize:
   data: 11799
   dataQuality: 5836
   datasetQuality: 41092
-  dataUsage: 4111
+  dataUsage: 4123
   dataViewEditor: 3312
   dataViewFieldEditor: 16263
   dataViewManagement: 1302
   dataViews: 1697
-  dataVisualizer: 7421
+  dataVisualizer: 7461
   developerToolbar: 1175
-  devTools: 4280
-  discover: 15239
+  devTools: 4281
+  discover: 16306
   discoverEnhanced: 1091
   discoverShared: 1070
-  elasticAssistant: 141895
-  elasticAssistantSharedState: 3353
-  elasticConsole: 830
+  elasticAssistant: 141896
+  elasticAssistantSharedState: 3369
+  elasticConsole: 850
   embeddable: 760
   embeddableAlertsTable: 1263
-  enterpriseSearch: 28122
+  enterpriseSearch: 28809
   entityStore: 1216
   esql: 308
   esqlDataGrid: 215
   esUiShared: 2284
   evals: 1915
   eventAnnotation: 17299
-  eventAnnotationListing: 2388
+  eventAnnotationListing: 2401
   exploratoryView: 707
   expressionGauge: 5424
-  expressionHeatmap: 11990
+  expressionHeatmap: 12370
   expressionLegacyMetricVis: 6800
   expressionMetricVis: 13684
   expressionPartitionVis: 21956
@@ -70,67 +70,67 @@ pageLoadAssetSize:
   expressionTagcloud: 6629
   expressionXY: 566
   features: 1218
-  feedback: 3110
+  feedback: 3124
   fieldFormats: 4195
-  fieldsMetadata: 1527
+  fieldsMetadata: 1568
   files: 3957
-  filesManagement: 911
+  filesManagement: 952
   fileUpload: 217
   fleet: 4772
-  genAiSettings: 1277
-  globalSearch: 5170
-  globalSearchBar: 18678
-  globalSearchProviders: 2572
+  genAiSettings: 1278
+  globalSearch: 5183
+  globalSearchBar: 18715
+  globalSearchProviders: 2586
   graph: 3659
-  grokdebugger: 1276
-  home: 9066
-  imageEmbeddable: 1700
+  grokdebugger: 1333
+  home: 9251
+  imageEmbeddable: 1732
   indexLifecycleManagement: 29230
   indexManagement: 316
   inference: 5751
-  infra: 45387
+  infra: 45673
   ingestHub: 1923
   ingestPipelines: 270
-  inputControlVis: 3185
+  inputControlVis: 3216
   inspectComponent: 1152
   inspector: 590
-  interactiveSetup: 32426
+  interactiveSetup: 32844
   intercepts: 14394
-  kibanaOverview: 1840
+  kibanaOverview: 1863
   kibanaReact: 1225
-  kibanaUsageCollection: 515
+  kibanaUsageCollection: 529
   kibanaUtils: 2884
   kql: 337
   kubernetesSecurity: 247
   lens: 316
   licenseManagement: 3292
-  licensing: 8317
+  licensing: 8329
   links: 3900
   lists: 371
   logsDataAccess: 308
   logsShared: 1774
-  logstash: 11698
-  maintenanceWindows: 3741
-  management: 9543
+  logstash: 11772
+  maintenanceWindows: 3754
+  management: 10296
   maps: 932
-  mapsEms: 3229
+  mapsEms: 3256
   metricsDataAccess: 1557
   ml: 700
-  mockIdpPlugin: 3976
+  mockIdpPlugin: 4203
   monitoring: 22416
   navigation: 8671
-  newsfeed: 9687
+  newsfeed: 9707
   noDataPage: 630
   observability: 3674
   observabilityAgentBuilder: 715
   observabilityAIAssistant: 2094
-  observabilityAIAssistantApp: 6279
+  observabilityAIAssistantApp: 6377
   observabilityAiAssistantManagement: 2011
   observabilityLogsExplorer: 1083
-  observabilityOnboarding: 7629
+  observabilityOnboarding: 7767
   observabilityShared: 7496
-  osquery: 13044
-  painlessLab: 2211
+  osquery: 13047
+  painlessLab: 2282
   presentationPanel: 442
   presentationUtil: 771
   productDocBase: 3614
@@ -146,68 +146,68 @@ pageLoadAssetSize:
   savedObjects: 365
   savedObjectsFinder: 256
   savedObjectsManagement: 18255
-  savedObjectsTagging: 18366
+  savedObjectsTagging: 18398
   savedObjectsTaggingOss: 808
   savedSearch: 696
   screenshotMode: 979
   screenshotting: 1493
   searchAssistant: 1545
-  searchGettingStarted: 2250
-  searchHomepage: 3900
-  searchInferenceEndpoints: 4669
-  searchNavigation: 5350
+  searchGettingStarted: 2340
+  searchHomepage: 3972
+  searchInferenceEndpoints: 4714
+  searchNavigation: 5579
   searchNotebooks: 3490
-  searchPlayground: 5542
+  searchPlayground: 5566
   searchprofiler: 2260
-  searchQueryRules: 2130
-  searchSynonyms: 1897
+  searchQueryRules: 2167
+  searchSynonyms: 1919
   security: 215
   securitySolution: 119099
-  securitySolutionEss: 19484
-  securitySolutionServerless: 31839
-  serverless: 1259
-  serverlessObservability: 14027
-  serverlessSearch: 17287
+  securitySolutionEss: 19938
+  securitySolutionServerless: 33422
+  serverless: 1272
+  serverlessObservability: 14446
+  serverlessSearch: 18261
   serverlessWorkplaceAI: 3338
   sessionView: 379
   share: 379
-  shared-core: 352771
+  shared-core: 354973
   shared-misc: 39659
   shared-packages: 3141411
-  shared-plugins: 10771382
-  shared-solution-packages: 281806
-  slo: 19118
-  snapshotRestore: 16852
-  spaces: 22531
+  shared-plugins: 10954901
+  shared-solution-packages: 282464
+  slo: 19696
+  snapshotRestore: 16909
+  spaces: 22966
   stackAlerts: 1717
-  stackConnectors: 67414
+  stackConnectors: 67743
   streams: 6521
-  streamsApp: 56249
-  synthetics: 18251
+  streamsApp: 56887
+  synthetics: 18443
   telemetry: 20586
   telemetryManagementSection: 1738
   timelines: 1140
-  transform: 8644
-  triggersActionsUi: 2948
+  transform: 8828
+  triggersActionsUi: 3033
   uiActions: 454
   unifiedDocViewer: 568
   unifiedSearch: 511
-  upgradeAssistant: 1821
+  upgradeAssistant: 1822
   uptime: 37818
   urlDrilldown: 1267
   urlForwarding: 1412
   usageCollection: 223
   ux: 2418
-  vendors: 4580341
-  vendors-heavy: 1387221
+  vendors: 4594254
+  vendors-heavy: 1388239
   visDefaultEditor: 738
   visTypeGauge: 7639
   visTypeHeatmap: 6961
   visTypeMarkdown: 4929
-  visTypeMetric: 6930
-  visTypePie: 22899
+  visTypeMetric: 6932
+  visTypePie: 22902
   visTypeTable: 13200
-  visTypeTagcloud: 3117
+  visTypeTagcloud: 3119
   visTypeTimelion: 6661
   visTypeTimeseries: 12718
   visTypeVega: 14703
@@ -215,7 +215,7 @@ pageLoadAssetSize:
   visTypeXy: 24402
   visualizationListing: 1091
   visualizations: 1147
-  watcher: 5484
+  watcher: 5497
   workflowsExtensions: 38186
   workflowsManagement: 28359
-  workplaceAIApp: 8674
+  workplaceAIApp: 8756

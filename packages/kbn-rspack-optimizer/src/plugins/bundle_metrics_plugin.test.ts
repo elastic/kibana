@@ -10,23 +10,27 @@
 import { buildMetrics, BundleMetricsPlugin } from './bundle_metrics_plugin';
 
 /**
- * Create a mock chunk with the given name, JS files, and optional async children.
+ * Create a mock chunk with the given name and JS files.
+ * Async children are set via the `asyncChunks` array property (shared object
+ * references) so that the claim-count Map (keyed by identity) works correctly.
  */
-function createMockChunk(
-  name: string | undefined,
-  files: string[],
-  asyncChunks: Array<{ name?: string; files: string[] }> = []
-) {
-  return {
+function createMockChunk(name: string | undefined, files: string[]) {
+  const chunk: {
+    name: string | undefined;
+    files: Set<string>;
+    auxiliaryFiles: Set<string>;
+    asyncChunks: any[];
+    getAllAsyncChunks: () => any[];
+  } = {
     name,
     files: new Set(files),
     auxiliaryFiles: new Set<string>(),
-    getAllAsyncChunks: () =>
-      asyncChunks.map((ac) => ({
-        name: ac.name,
-        files: new Set(ac.files),
-      })),
+    asyncChunks: [],
+    getAllAsyncChunks() {
+      return this.asyncChunks;
+    },
   };
+  return chunk;
 }
 
 /**
@@ -109,6 +113,7 @@ describe('buildMetrics', () => {
         },
       ],
       { totalSize: 0, count: 0 },
+      { totalSize: 0, count: 0 },
       450000
     );
 
@@ -138,6 +143,7 @@ describe('buildMetrics', () => {
         },
       ],
       { totalSize: 0, count: 0 },
+      { totalSize: 0, count: 0 },
       450000
     );
 
@@ -165,6 +171,7 @@ describe('buildMetrics', () => {
           miscSize: 0,
         },
       ],
+      { totalSize: 0, count: 0 },
       { totalSize: 0, count: 0 },
       145000
     );
@@ -199,6 +206,7 @@ describe('buildMetrics', () => {
         },
       ],
       { totalSize: 0, count: 0 },
+      { totalSize: 0, count: 0 },
       450000
     );
 
@@ -224,6 +232,7 @@ describe('buildMetrics', () => {
         },
       ],
       { totalSize: 2500000, count: 8 },
+      { totalSize: 0, count: 0 },
       3000000
     );
 
@@ -257,6 +266,7 @@ describe('buildMetrics', () => {
         },
       ],
       { totalSize: 0, count: 0 },
+      { totalSize: 0, count: 0 },
       45000000
     );
 
@@ -282,6 +292,7 @@ describe('buildMetrics', () => {
           miscSize: 0,
         },
       ],
+      { totalSize: 0, count: 0 },
       { totalSize: 0, count: 0 },
       450000
     );
@@ -315,15 +326,18 @@ describe('buildMetrics', () => {
         },
       ],
       { totalSize: 2500000, count: 8 },
+      { totalSize: 1200000, count: 42 },
       3000000
     );
 
     // Per-plugin metrics come first (5 per plugin, 2 plugins = 10)
-    // Aggregate metrics are the last 3
-    expect(metrics).toHaveLength(13);
+    // Aggregate metrics are the last 5
+    expect(metrics).toHaveLength(15);
     expect(metrics[10].group).toBe('shared chunks total size');
     expect(metrics[11].group).toBe('shared chunk count');
-    expect(metrics[12].group).toBe('total optimizer output size');
+    expect(metrics[12].group).toBe('shared async chunks total size');
+    expect(metrics[13].group).toBe('shared async chunk count');
+    expect(metrics[14].group).toBe('total optimizer output size');
   });
 
   it('handles multiple plugins with correct async/misc values', () => {
@@ -351,6 +365,7 @@ describe('buildMetrics', () => {
         },
       ],
       { totalSize: 2500000, count: 8 },
+      { totalSize: 0, count: 0 },
       45000000
     );
 
@@ -405,6 +420,7 @@ describe('buildMetrics', () => {
         },
       ],
       { totalSize: 15000, count: 1 },
+      { totalSize: 0, count: 0 },
       6300300
     );
 
@@ -438,6 +454,7 @@ describe('buildMetrics', () => {
           miscSize: 0,
         },
       ],
+      { totalSize: 0, count: 0 },
       { totalSize: 0, count: 0 },
       2500000
     );
@@ -493,6 +510,7 @@ describe('buildMetrics', () => {
         },
       ],
       { totalSize: 0, count: 0 },
+      { totalSize: 0, count: 0 },
       2000000
     );
 
@@ -517,19 +535,13 @@ describe('BundleMetricsPlugin.apply() — async chunk filtering', () => {
     mock.setAssetSize('vendors.js', 4000000);
     mock.setAssetSize('123.js', 8000);
 
-    mock.setChunks([
-      createMockChunk(
-        'plugin-discover',
-        ['plugin-discover.js'],
-        [
-          { name: 'shared-plugins', files: ['shared-plugins.js'] },
-          { name: 'vendors', files: ['vendors.js'] },
-          { name: undefined, files: ['123.js'] },
-        ]
-      ),
-      createMockChunk('shared-plugins', ['shared-plugins.js']),
-      createMockChunk('vendors', ['vendors.js']),
-    ]);
+    const sharedPluginsChunk = createMockChunk('shared-plugins', ['shared-plugins.js']);
+    const vendorsChunk = createMockChunk('vendors', ['vendors.js']);
+    const unnamed123 = createMockChunk(undefined, ['123.js']);
+    const discoverChunk = createMockChunk('plugin-discover', ['plugin-discover.js']);
+    discoverChunk.asyncChunks = [sharedPluginsChunk, vendorsChunk, unnamed123];
+
+    mock.setChunks([discoverChunk, sharedPluginsChunk, vendorsChunk, unnamed123]);
 
     plugin.apply(mock.compiler as any);
     mock.runProcessAssets();
@@ -563,19 +575,13 @@ describe('BundleMetricsPlugin.apply() — async chunk filtering', () => {
     mock.setAssetSize('shared-plugins.js', 5000000);
     mock.setAssetSize('456.js', 12000);
 
-    mock.setChunks([
-      createMockChunk(
-        'plugin-discover',
-        ['plugin-discover.js'],
-        [
-          { name: 'shared-plugins', files: ['shared-plugins.js'] },
-          { name: 'plugin-dashboard', files: ['plugin-dashboard.js'] },
-          { name: undefined, files: ['456.js'] },
-        ]
-      ),
-      createMockChunk('plugin-dashboard', ['plugin-dashboard.js'], []),
-      createMockChunk('shared-plugins', ['shared-plugins.js']),
-    ]);
+    const sharedPluginsChunk = createMockChunk('shared-plugins', ['shared-plugins.js']);
+    const dashboardChunk = createMockChunk('plugin-dashboard', ['plugin-dashboard.js']);
+    const unnamed456 = createMockChunk(undefined, ['456.js']);
+    const discoverChunk = createMockChunk('plugin-discover', ['plugin-discover.js']);
+    discoverChunk.asyncChunks = [sharedPluginsChunk, dashboardChunk, unnamed456];
+
+    mock.setChunks([discoverChunk, dashboardChunk, sharedPluginsChunk, unnamed456]);
 
     plugin.apply(mock.compiler as any);
     mock.runProcessAssets();
@@ -588,7 +594,7 @@ describe('BundleMetricsPlugin.apply() — async chunk filtering', () => {
     expect(discoverAsync.value).toBe(12000);
   });
 
-  it('passes through unnamed async chunks (genuine per-plugin splits)', () => {
+  it('passes through unnamed async chunks exclusive to one plugin', () => {
     const sharedChunkNames = new Set(['shared-plugins']);
     const plugin = new BundleMetricsPlugin(
       [{ id: 'maps', chunkName: 'plugin-maps', limit: 300000, ignoreMetrics: false }],
@@ -602,18 +608,13 @@ describe('BundleMetricsPlugin.apply() — async chunk filtering', () => {
     mock.setAssetSize('100.js', 20000);
     mock.setAssetSize('101.js', 15000);
 
-    mock.setChunks([
-      createMockChunk(
-        'plugin-maps',
-        ['plugin-maps.js'],
-        [
-          { name: 'shared-plugins', files: ['shared-plugins.js'] },
-          { name: undefined, files: ['100.js'] },
-          { name: undefined, files: ['101.js'] },
-        ]
-      ),
-      createMockChunk('shared-plugins', ['shared-plugins.js']),
-    ]);
+    const sharedPluginsChunk = createMockChunk('shared-plugins', ['shared-plugins.js']);
+    const unnamed100 = createMockChunk(undefined, ['100.js']);
+    const unnamed101 = createMockChunk(undefined, ['101.js']);
+    const mapsChunk = createMockChunk('plugin-maps', ['plugin-maps.js']);
+    mapsChunk.asyncChunks = [sharedPluginsChunk, unnamed100, unnamed101];
+
+    mock.setChunks([mapsChunk, sharedPluginsChunk, unnamed100, unnamed101]);
 
     plugin.apply(mock.compiler as any);
     mock.runProcessAssets();
@@ -646,18 +647,12 @@ describe('BundleMetricsPlugin.apply() — async chunk filtering', () => {
     mock.setAssetSize('shared-plugins.js', 9500000);
     mock.setAssetSize('vendors.js', 4000000);
 
-    mock.setChunks([
-      createMockChunk(
-        'plugin-painlessLab',
-        ['plugin-painlessLab.js'],
-        [
-          { name: 'shared-plugins', files: ['shared-plugins.js'] },
-          { name: 'vendors', files: ['vendors.js'] },
-        ]
-      ),
-      createMockChunk('shared-plugins', ['shared-plugins.js']),
-      createMockChunk('vendors', ['vendors.js']),
-    ]);
+    const sharedPluginsChunk = createMockChunk('shared-plugins', ['shared-plugins.js']);
+    const vendorsChunk = createMockChunk('vendors', ['vendors.js']);
+    const painlessChunk = createMockChunk('plugin-painlessLab', ['plugin-painlessLab.js']);
+    painlessChunk.asyncChunks = [sharedPluginsChunk, vendorsChunk];
+
+    mock.setChunks([painlessChunk, sharedPluginsChunk, vendorsChunk]);
 
     plugin.apply(mock.compiler as any);
     mock.runProcessAssets();
@@ -672,5 +667,210 @@ describe('BundleMetricsPlugin.apply() — async chunk filtering', () => {
 
     expect(asyncSize.value).toBe(0);
     expect(asyncCount.value).toBe(0);
+  });
+});
+
+describe('BundleMetricsPlugin.apply() — exclusive-ownership attribution', () => {
+  it('attributes unnamed chunk exclusively to one plugin when only that plugin reaches it', () => {
+    const sharedChunkNames = new Set(['shared-plugins']);
+    const plugin = new BundleMetricsPlugin(
+      [
+        { id: 'discover', chunkName: 'plugin-discover', limit: 160000, ignoreMetrics: false },
+        { id: 'dashboard', chunkName: 'plugin-dashboard', limit: 200000, ignoreMetrics: false },
+      ],
+      sharedChunkNames
+    );
+
+    const mock = createMockCompiler();
+    mock.setAssetSize('plugin-discover.js', 50000);
+    mock.setAssetSize('plugin-dashboard.js', 80000);
+    mock.setAssetSize('shared-plugins.js', 5000000);
+    mock.setAssetSize('123.js', 8000);
+    mock.setAssetSize('456.js', 12000);
+
+    const sharedPluginsChunk = createMockChunk('shared-plugins', ['shared-plugins.js']);
+    const exclusive123 = createMockChunk(undefined, ['123.js']);
+    const exclusive456 = createMockChunk(undefined, ['456.js']);
+    const discoverChunk = createMockChunk('plugin-discover', ['plugin-discover.js']);
+    const dashboardChunk = createMockChunk('plugin-dashboard', ['plugin-dashboard.js']);
+    discoverChunk.asyncChunks = [sharedPluginsChunk, exclusive123];
+    dashboardChunk.asyncChunks = [sharedPluginsChunk, exclusive456];
+
+    mock.setChunks([discoverChunk, dashboardChunk, sharedPluginsChunk, exclusive123, exclusive456]);
+
+    plugin.apply(mock.compiler as any);
+    mock.runProcessAssets();
+
+    const metrics = mock.getEmittedMetrics();
+    const discoverAsync = metrics.find(
+      (m: any) => m.group === 'async chunks size' && m.id === 'discover'
+    );
+    const dashboardAsync = metrics.find(
+      (m: any) => m.group === 'async chunks size' && m.id === 'dashboard'
+    );
+    const sharedAsyncTotal = metrics.find((m: any) => m.group === 'shared async chunks total size');
+
+    expect(discoverAsync.value).toBe(8000);
+    expect(dashboardAsync.value).toBe(12000);
+    expect(sharedAsyncTotal.value).toBe(0);
+  });
+
+  it('puts unnamed chunk shared by two plugins into shared async aggregate', () => {
+    const sharedChunkNames = new Set(['shared-plugins']);
+    const plugin = new BundleMetricsPlugin(
+      [
+        { id: 'discover', chunkName: 'plugin-discover', limit: 160000, ignoreMetrics: false },
+        { id: 'dashboard', chunkName: 'plugin-dashboard', limit: 200000, ignoreMetrics: false },
+      ],
+      sharedChunkNames
+    );
+
+    const mock = createMockCompiler();
+    mock.setAssetSize('plugin-discover.js', 50000);
+    mock.setAssetSize('plugin-dashboard.js', 80000);
+    mock.setAssetSize('shared-plugins.js', 5000000);
+    mock.setAssetSize('shared-unnamed.js', 25000);
+
+    const sharedPluginsChunk = createMockChunk('shared-plugins', ['shared-plugins.js']);
+    const sharedUnnamed = createMockChunk(undefined, ['shared-unnamed.js']);
+    const discoverChunk = createMockChunk('plugin-discover', ['plugin-discover.js']);
+    const dashboardChunk = createMockChunk('plugin-dashboard', ['plugin-dashboard.js']);
+    discoverChunk.asyncChunks = [sharedPluginsChunk, sharedUnnamed];
+    dashboardChunk.asyncChunks = [sharedPluginsChunk, sharedUnnamed];
+
+    mock.setChunks([discoverChunk, dashboardChunk, sharedPluginsChunk, sharedUnnamed]);
+
+    plugin.apply(mock.compiler as any);
+    mock.runProcessAssets();
+
+    const metrics = mock.getEmittedMetrics();
+    const discoverAsync = metrics.find(
+      (m: any) => m.group === 'async chunks size' && m.id === 'discover'
+    );
+    const dashboardAsync = metrics.find(
+      (m: any) => m.group === 'async chunks size' && m.id === 'dashboard'
+    );
+    const sharedAsyncTotal = metrics.find((m: any) => m.group === 'shared async chunks total size');
+    const sharedAsyncCount = metrics.find((m: any) => m.group === 'shared async chunk count');
+
+    expect(discoverAsync.value).toBe(0);
+    expect(dashboardAsync.value).toBe(0);
+    expect(sharedAsyncTotal.value).toBe(25000);
+    expect(sharedAsyncCount.value).toBe(1);
+  });
+
+  it('puts orphan unnamed chunk (not reachable from any plugin) into shared async', () => {
+    const sharedChunkNames = new Set(['shared-plugins']);
+    const plugin = new BundleMetricsPlugin(
+      [{ id: 'discover', chunkName: 'plugin-discover', limit: 160000, ignoreMetrics: false }],
+      sharedChunkNames
+    );
+
+    const mock = createMockCompiler();
+    mock.setAssetSize('plugin-discover.js', 50000);
+    mock.setAssetSize('shared-plugins.js', 5000000);
+    mock.setAssetSize('789.js', 7000);
+
+    const sharedPluginsChunk = createMockChunk('shared-plugins', ['shared-plugins.js']);
+    const orphan789 = createMockChunk(undefined, ['789.js']);
+    const discoverChunk = createMockChunk('plugin-discover', ['plugin-discover.js']);
+    discoverChunk.asyncChunks = [sharedPluginsChunk];
+
+    mock.setChunks([discoverChunk, sharedPluginsChunk, orphan789]);
+
+    plugin.apply(mock.compiler as any);
+    mock.runProcessAssets();
+
+    const metrics = mock.getEmittedMetrics();
+    const sharedAsyncTotal = metrics.find((m: any) => m.group === 'shared async chunks total size');
+    const sharedAsyncCount = metrics.find((m: any) => m.group === 'shared async chunk count');
+
+    expect(sharedAsyncTotal.value).toBe(7000);
+    expect(sharedAsyncCount.value).toBe(1);
+  });
+
+  it('keeps kibana entry chunk in shared chunks total size (not shared async)', () => {
+    const sharedChunkNames = new Set(['shared-plugins']);
+    const plugin = new BundleMetricsPlugin(
+      [{ id: 'discover', chunkName: 'plugin-discover', limit: 160000, ignoreMetrics: false }],
+      sharedChunkNames
+    );
+
+    const mock = createMockCompiler();
+    mock.setAssetSize('plugin-discover.js', 50000);
+    mock.setAssetSize('shared-plugins.js', 5000000);
+    mock.setAssetSize('kibana.bundle.js', 3000);
+
+    const sharedPluginsChunk = createMockChunk('shared-plugins', ['shared-plugins.js']);
+    const kibanaChunk = createMockChunk('kibana', ['kibana.bundle.js']);
+    const discoverChunk = createMockChunk('plugin-discover', ['plugin-discover.js']);
+    discoverChunk.asyncChunks = [sharedPluginsChunk];
+
+    mock.setChunks([kibanaChunk, discoverChunk, sharedPluginsChunk]);
+
+    plugin.apply(mock.compiler as any);
+    mock.runProcessAssets();
+
+    const metrics = mock.getEmittedMetrics();
+    const sharedChunksTotal = metrics.find((m: any) => m.group === 'shared chunks total size');
+    const sharedAsyncTotal = metrics.find((m: any) => m.group === 'shared async chunks total size');
+
+    expect(sharedChunksTotal.value).toBe(3000);
+    expect(sharedAsyncTotal.value).toBe(0);
+  });
+
+  it('mix: exclusive + shared unnamed chunks attributed correctly', () => {
+    const sharedChunkNames = new Set(['shared-plugins']);
+    const plugin = new BundleMetricsPlugin(
+      [
+        { id: 'discover', chunkName: 'plugin-discover', limit: 160000, ignoreMetrics: false },
+        { id: 'dashboard', chunkName: 'plugin-dashboard', limit: 200000, ignoreMetrics: false },
+      ],
+      sharedChunkNames
+    );
+
+    const mock = createMockCompiler();
+    mock.setAssetSize('plugin-discover.js', 50000);
+    mock.setAssetSize('plugin-dashboard.js', 80000);
+    mock.setAssetSize('shared-plugins.js', 5000000);
+    mock.setAssetSize('exclusive-to-discover.js', 10000);
+    mock.setAssetSize('shared-by-both.js', 30000);
+    mock.setAssetSize('kibana.bundle.js', 2000);
+
+    const sharedPluginsChunk = createMockChunk('shared-plugins', ['shared-plugins.js']);
+    const exclusiveDiscover = createMockChunk(undefined, ['exclusive-to-discover.js']);
+    const sharedByBoth = createMockChunk(undefined, ['shared-by-both.js']);
+    const kibanaChunk = createMockChunk('kibana', ['kibana.bundle.js']);
+    const discoverChunk = createMockChunk('plugin-discover', ['plugin-discover.js']);
+    const dashboardChunk = createMockChunk('plugin-dashboard', ['plugin-dashboard.js']);
+    discoverChunk.asyncChunks = [sharedPluginsChunk, exclusiveDiscover, sharedByBoth];
+    dashboardChunk.asyncChunks = [sharedPluginsChunk, sharedByBoth];
+
+    mock.setChunks([
+      kibanaChunk,
+      discoverChunk,
+      dashboardChunk,
+      sharedPluginsChunk,
+      exclusiveDiscover,
+      sharedByBoth,
+    ]);
+
+    plugin.apply(mock.compiler as any);
+    mock.runProcessAssets();
+
+    const metrics = mock.getEmittedMetrics();
+    const discoverAsync = metrics.find(
+      (m: any) => m.group === 'async chunks size' && m.id === 'discover'
+    );
+    const dashboardAsync = metrics.find(
+      (m: any) => m.group === 'async chunks size' && m.id === 'dashboard'
+    );
+    const sharedChunksTotal = metrics.find((m: any) => m.group === 'shared chunks total size');
+    const sharedAsyncTotal = metrics.find((m: any) => m.group === 'shared async chunks total size');
+
+    expect(discoverAsync.value).toBe(10000);
+    expect(dashboardAsync.value).toBe(0);
+    expect(sharedChunksTotal.value).toBe(2000);
+    expect(sharedAsyncTotal.value).toBe(30000);
   });
 });
