@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-import { AlertingV2Fixture } from './plugin';
-
-export const plugin = async () => new AlertingV2Fixture();
+/** Props for variant body + footer (modal chrome lives in the parent). */
+export interface AnnouncementModalVariantProps {
+  onContinue: () => void;
+  onRevert: () => void;
+}
