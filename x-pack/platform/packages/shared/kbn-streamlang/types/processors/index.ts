@@ -766,10 +766,14 @@ export interface UserAgentProcessor extends ProcessorBaseWithWhere {
 export const userAgentProcessorSchema = processorBaseWithWhereSchema.extend({
   action: z.literal('user_agent'),
   from: StreamlangSourceField.describe('The field containing the user agent string'),
-  to: z.optional(StreamlangTargetField).describe('The field that will be filled with the user agent details'),
+  to: z
+    .optional(StreamlangTargetField)
+    .describe('The field that will be filled with the user agent details'),
   regex_file: z
     .optional(NonEmptyString)
-    .describe('Custom regex file name containing the regular expressions for parsing the user agent string'),
+    .describe(
+      'Custom regex file name containing the regular expressions for parsing the user agent string'
+    ),
   properties: z
     .optional(z.array(z.enum(userAgentProperties)))
     .describe('Specific properties to extract (defaults to all)'),
