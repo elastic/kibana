@@ -27,7 +27,7 @@ jest.mock('../../network_details', () => ({
   ),
 }));
 
-jest.mock('../../../one_discover/alert_flyout_overview_tab_component', () => ({
+jest.mock('../../../one_discover/alert_flyout_overview_tab_component/data_view_manager_bootstrap', () => ({
   DataViewManagerBootstrap: () => null,
 }));
 

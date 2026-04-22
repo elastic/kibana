@@ -9,7 +9,7 @@ import React from 'react';
 import { getEcsField } from '../../../flyout/document_details/right/components/table_field_name_cell';
 import { IP_FIELD_TYPE } from '../../../timelines/components/timeline/body/renderers/constants';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
-import { DataViewManagerBootstrap } from '../../../one_discover/alert_flyout_overview_tab_component';
+import { DataViewManagerBootstrap } from '../../../one_discover/alert_flyout_overview_tab_component/data_view_manager_bootstrap';
 import { Network } from '../../network_details';
 
 /**
