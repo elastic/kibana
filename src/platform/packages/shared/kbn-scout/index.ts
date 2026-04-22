@@ -53,6 +53,7 @@ export type {
   BrowserAuthFixture,
   RequestAuthFixture,
   SamlAuth,
+  ScoutSpaceFixture,
   SpaceSolutionView,
 } from './src/playwright';
 

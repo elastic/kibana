@@ -49,6 +49,7 @@ export type {
   LinkedProjectFixture,
   SamlAuth,
   RequestAuthFixture,
+  ScoutSpaceFixture,
   SpaceSolutionView,
 } from './fixtures/scope/worker';
 
