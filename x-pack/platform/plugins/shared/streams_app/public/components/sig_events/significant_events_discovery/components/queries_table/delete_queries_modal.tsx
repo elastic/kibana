@@ -23,15 +23,10 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import { QUERY_TYPE_MATCH, QUERY_TYPE_STATS } from '@kbn/streams-schema';
+import { QUERY_TYPE_MATCH } from '@kbn/streams-schema';
 import type { SignificantEventQueryRow } from '../../../../../hooks/sig_events/use_fetch_discovery_queries';
 import { SeverityBadge } from '../severity_badge/severity_badge';
 import { QueryTypeBadge } from '../query_type_badge/query_type_badge';
-import {
-  PROMOTED_BADGE_LABEL,
-  NOT_PROMOTED_BADGE_LABEL,
-  STATS_DRAFT_BADGE_LABEL,
-} from './translations';
 
 interface DeleteQueriesModalProps {
   title: string;
@@ -79,20 +74,6 @@ export function DeleteQueriesModal({
           <EuiBadge color="hollow">{item.stream_name}</EuiBadge>
         ),
       },
-      {
-        field: 'rule_backed',
-        name: STATUS_COLUMN_LABEL,
-        width: '120px',
-        render: (_: unknown, item: SignificantEventQueryRow) => {
-          if (item.rule_backed) {
-            return <EuiBadge color="hollow">{PROMOTED_BADGE_LABEL}</EuiBadge>;
-          }
-          if (item.query.type === QUERY_TYPE_STATS) {
-            return <EuiBadge color="default">{STATS_DRAFT_BADGE_LABEL}</EuiBadge>;
-          }
-          return <EuiBadge color="warning">{NOT_PROMOTED_BADGE_LABEL}</EuiBadge>;
-        },
-      },
     ],
     []
   );
@@ -116,6 +97,7 @@ export function DeleteQueriesModal({
             items={items}
             columns={columns}
             itemId={(item) => item.query.id}
+            tableCaption={TABLE_CONTENT_ARIA_LABEL}
             compressed
           />
         </div>
@@ -139,12 +121,15 @@ const MODAL_ARIA_LABEL = i18n.translate(
 
 const CONSEQUENCE_MESSAGE = i18n.translate(
   'xpack.streams.significantEventsDiscovery.deleteQueriesModal.consequenceMessage',
-  { defaultMessage: 'This will permanently delete the selected queries and their backing rules.' }
+  {
+    defaultMessage:
+      'This will stop scanning for the selected rules. The underlying queries will be preserved on the Knowledge Indicators tab.',
+  }
 );
 
 const WARNING_MESSAGE = i18n.translate(
   'xpack.streams.significantEventsDiscovery.deleteQueriesModal.warningMessage',
-  { defaultMessage: 'This action cannot be undone.' }
+  { defaultMessage: 'You can re-promote these queries later to resume scanning.' }
 );
 
 const TABLE_CONTENT_ARIA_LABEL = i18n.translate(
@@ -180,11 +165,6 @@ const STREAM_COLUMN_LABEL = i18n.translate(
 const TYPE_COLUMN_LABEL = i18n.translate(
   'xpack.streams.significantEventsDiscovery.deleteQueriesModal.typeColumn',
   { defaultMessage: 'Type' }
-);
-
-const STATUS_COLUMN_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.deleteQueriesModal.statusColumn',
-  { defaultMessage: 'Status' }
 );
 
 const TABLE_CONTAINER_CSS = css`
