@@ -16,8 +16,8 @@ export const TS_PROJECTS = TsProject.loadAll({
     // The packaging build tsconfig for one-navigation is used only for standalone
     // build-time type validation and intentionally imports from parent directories,
     // which conflicts with the main package tsconfig.
-    // See: `src/core/packages/chrome/navigation/packaging/react/type_validation.ts`.
-    'src/core/packages/chrome/navigation/packaging/tsconfig.json',
+    // See: `src/platform/kbn-ui/one-navigation/packaging/react/type_validation.ts`.
+    'src/platform/kbn-ui/one-navigation/packaging/tsconfig.json',
   ],
 
   /** Array of repo-relative paths to projects which should have their type-check disabled */
