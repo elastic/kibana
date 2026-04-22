@@ -507,6 +507,7 @@ src/platform/packages/shared/kbn-cleanup-before-exit @elastic/observability-ui
 src/platform/packages/shared/kbn-coloring @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-config @elastic/kibana-core
 src/platform/packages/shared/kbn-config-schema @elastic/kibana-core
+src/platform/packages/shared/kbn-connector-cli @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-schemas @elastic/response-ops
 src/platform/packages/shared/kbn-connector-specs @elastic/response-ops
 src/platform/packages/shared/kbn-content-management-utils @elastic/kibana-data-discovery
@@ -972,7 +973,6 @@ x-pack/platform/packages/shared/agent-builder/agent-builder-common @elastic/work
 x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils @elastic/workchat-eng
 x-pack/platform/packages/shared/agent-builder/agent-builder-server @elastic/workchat-eng
 x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder @elastic/workchat-eng
-x-pack/platform/packages/shared/ai-assistant/ai-agent-confirmation-modal @elastic/appex-ai-infra
 x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action @elastic/appex-sharedux
 x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta @elastic/appex-sharedux
 x-pack/platform/packages/shared/ai-assistant/common @elastic/search-kibana
@@ -2277,11 +2277,11 @@ x-pack/platform/test/plugin_api_integration/test_suites/platform/ @elastic/kiban
 #CC# /x-pack/plugins/global_search_providers/ @elastic/kibana-core
 
 # Exclude OAS error baseline file from @elastic/kibana-core ownership
-!/src/platform/packages/private/kbn-validate-oas/oas_error_baseline.json
+/src/platform/packages/private/kbn-validate-oas/oas_error_baseline.json
 # Exclude usage collection schemas from @elastic/kibana-core ownership
-!/src/platform/plugins/private/kibana_usage_collection/server/collectors/application_usage/schema.ts
-!/src/platform/plugins/private/kibana_usage_collection/server/collectors/management/schema.ts
-!/src/platform/plugins/private/kibana_usage_collection/server/collectors/management/types.ts
+/src/platform/plugins/private/kibana_usage_collection/server/collectors/application_usage/schema.ts
+/src/platform/plugins/private/kibana_usage_collection/server/collectors/management/schema.ts
+/src/platform/plugins/private/kibana_usage_collection/server/collectors/management/types.ts
 
 # Kibana Telemetry
 /.telemetryrc.json @elastic/kibana-core
