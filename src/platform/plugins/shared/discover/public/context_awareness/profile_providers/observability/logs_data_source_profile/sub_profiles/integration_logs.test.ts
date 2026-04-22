@@ -135,8 +135,9 @@ describe('createIntegrationLogsDataSourceProfileProviders', () => {
       const getDefaultAppState = provider.profile.getDefaultAppState?.(() => ({}), {
         context: RESOLUTION_MATCH.context,
       });
-      expect(getDefaultAppState?.({ dataView: dataViewWithTimefieldMock })).toMatchObject({
+      expect(getDefaultAppState?.({ dataView: dataViewWithTimefieldMock })).toEqual({
         hideTable: false,
+        breakdownField: 'log.level',
         columns: expectedColumnsMap[provider.profileId],
       });
     });

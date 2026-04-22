@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LOG_LEVEL_FIELD } from '@kbn/discover-utils';
+import { fieldConstants } from '@kbn/discover-utils';
 import type { DataSourceProfileProvider } from '../../../../profiles';
 import type { DefaultAppStateColumn } from '../../../../types';
 
@@ -22,7 +22,7 @@ export const createGetDefaultAppState = ({
     const appState = { ...prev(params) };
 
     appState.hideTable = false;
-    appState.breakdownField = LOG_LEVEL_FIELD;
+    appState.breakdownField = fieldConstants.LOG_LEVEL_FIELD;
 
     if (defaultColumns) {
       appState.columns = [];
