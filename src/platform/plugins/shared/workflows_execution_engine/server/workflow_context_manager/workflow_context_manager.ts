@@ -47,6 +47,9 @@ interface ScopeEntry {
   stepExecution: EsWorkflowStepExecution | undefined;
 }
 
+type ContextPathSegment = string | number;
+type ContextPath = ContextPathSegment[];
+
 export class WorkflowContextManager {
   private workflowExecutionGraph: WorkflowGraph;
   private workflowExecutionState: WorkflowExecutionState;
@@ -145,7 +148,7 @@ export class WorkflowContextManager {
    * ```
    */
   public renderValueAccordingToContext<T>(obj: T, additionalContext?: Record<string, unknown>): T {
-    return this.renderValueWithContext(obj, this.getContext(), additionalContext);
+    return this.renderValueWithContext(obj, this.getRenderingContext(obj), additionalContext);
   }
 
   public renderValueWithContext<T>(
@@ -277,6 +280,142 @@ export class WorkflowContextManager {
   private buildWorkflowContext(): WorkflowContext {
     const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
     return buildWorkflowContext(workflowExecution, this.coreStart, this.dependencies);
+  }
+
+  private getRenderingContext(value: unknown): StepContext {
+    if (this.stackFrames.length > 0) {
+      return this.getContext();
+    }
+
+    const referencedVariableSegments = this.templateEngine.extractGlobalVariableSegments(value);
+    if (referencedVariableSegments === null) {
+      return this.getContext();
+    }
+
+    return this.getContextForVariableSegments(referencedVariableSegments);
+  }
+
+  private getContextForVariableSegments(referencedVariableSegments: ContextPath[]): StepContext {
+    const hasUnsupportedStepPath = referencedVariableSegments.some(
+      (path) => path[0] === 'steps' && typeof path[1] !== 'string'
+    );
+    if (hasUnsupportedStepPath) {
+      return this.getContext();
+    }
+
+    const referencedRoots = new Set(
+      referencedVariableSegments.flatMap((path) => (typeof path[0] === 'string' ? [path[0]] : []))
+    );
+
+    const stepContext: StepContext = {
+      ...this.buildWorkflowContext(),
+      steps: {},
+      variables: referencedRoots.has('variables') ? this.getVariables() : {},
+    };
+
+    if (referencedRoots.has('steps')) {
+      this.populateReferencedStepPaths(stepContext, referencedVariableSegments);
+    }
+
+    this.enrichStepContextAccordingToStepScope(stepContext);
+    this.enrichStepContextWithMockedData(stepContext);
+    return stepContext;
+  }
+
+  private populateReferencedStepPaths(
+    stepContext: StepContext,
+    referencedVariableSegments: ContextPath[]
+  ): void {
+    const pathsByStepId = new Map<string, ContextPath[]>();
+
+    for (const path of referencedVariableSegments) {
+      if (path[0] === 'steps') {
+        const [, stepId, ...stepPath] = path;
+        if (typeof stepId !== 'string') {
+          return;
+        }
+
+        const existing = pathsByStepId.get(stepId);
+        if (existing) {
+          existing.push(stepPath);
+        } else {
+          pathsByStepId.set(stepId, [stepPath]);
+        }
+      }
+    }
+
+    for (const [stepId, requestedPaths] of pathsByStepId) {
+      const stepData = this.getStepData(stepId);
+      if (stepData) {
+        const mergedStepData = {
+          ...stepData.runStepResult,
+          ...(stepData.stepState ?? {}),
+        };
+        stepContext.steps[stepId] ??= {};
+        const partialStepData = stepContext.steps[stepId];
+        for (const requestedPath of requestedPaths) {
+          if (requestedPath.length === 0) {
+            Object.assign(partialStepData, mergedStepData);
+          } else {
+            const { pathExists, value } = this.readValueAtPath(mergedStepData, requestedPath);
+            if (pathExists) {
+              this.writeValueAtPath(partialStepData, requestedPath, value);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  private readValueAtPath(
+    value: unknown,
+    propertyPath: ContextPath
+  ): { pathExists: boolean; value: unknown } {
+    let result = value;
+
+    for (const segment of propertyPath) {
+      if (result === null || result === undefined || typeof result !== 'object') {
+        return { pathExists: false, value: undefined };
+      }
+
+      const resultAsRecord = result as Record<string | number, unknown>;
+      if (!(segment in resultAsRecord)) {
+        return { pathExists: false, value: undefined };
+      }
+
+      result = resultAsRecord[segment];
+    }
+
+    return { pathExists: true, value: result };
+  }
+
+  private writeValueAtPath(
+    target: Record<string, unknown>,
+    propertyPath: ContextPath,
+    value: unknown
+  ): void {
+    let currentTarget: Record<string, unknown> = target;
+
+    for (const [index, segment] of propertyPath.entries()) {
+      const targetKey = String(segment);
+      const isLeaf = index === propertyPath.length - 1;
+
+      if (isLeaf) {
+        currentTarget[targetKey] = value;
+        return;
+      }
+
+      const existingValue = currentTarget[targetKey];
+      if (
+        existingValue === null ||
+        typeof existingValue !== 'object' ||
+        Array.isArray(existingValue)
+      ) {
+        currentTarget[targetKey] = {};
+      }
+
+      currentTarget = currentTarget[targetKey] as Record<string, unknown>;
+    }
   }
 
   private enrichStepContextWithMockedData(stepContext: StepContext): void {
