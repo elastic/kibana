@@ -7,6 +7,8 @@
 
 import { charset as mimeCharset } from 'mime-types';
 
+export type ResponseBuffer = Buffer | ArrayBuffer | ArrayBufferView | null | undefined;
+
 const isTextContentType = (contentType: string | null | undefined): boolean => {
   if (!contentType) return false;
   const mimeType = contentType.split(';')[0].trim().toLowerCase();
@@ -15,7 +17,7 @@ const isTextContentType = (contentType: string | null | undefined): boolean => {
   return !!mimeCharset(mimeType);
 };
 
-function toResponseBuffer(data: unknown): Buffer {
+function toResponseBuffer(data: ResponseBuffer): Buffer {
   if (Buffer.isBuffer(data)) {
     return data;
   }
@@ -51,7 +53,10 @@ function getContentTypeHeader(headers: Record<string, string>): string | null {
  *   UTF-8 decoding that would otherwise corrupt non-UTF-8 byte sequences, while
  *   keeping the result JSON-serializable for downstream consumers.
  */
-export const processBufferResponse = (data: unknown, headers: Record<string, string>): unknown => {
+export const processBufferResponse = (
+  data: ResponseBuffer,
+  headers: Record<string, string>
+): unknown => {
   const buffer = toResponseBuffer(data);
   const contentType = getContentTypeHeader(headers);
 
