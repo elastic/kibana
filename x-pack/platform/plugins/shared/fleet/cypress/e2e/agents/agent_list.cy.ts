@@ -134,6 +134,7 @@ describe('View agents list', () => {
       uninstalled: 0,
     });
     cy.intercept('GET', /\/api\/fleet\/agents/).as('getAgents');
+    cy.intercept('POST', /\/api\/fleet\/agents\/bulk_reassign/).as('bulkReassign');
   });
 
   describe('Agent filter suggestions', () => {
@@ -381,6 +382,7 @@ describe('View agents list', () => {
       cy.get('.euiModalBody input').clear().type('Agent policy 4');
       cy.get('[role="option"]').contains('Agent policy 4').click({ force: true });
       cy.get('.euiModalFooter button:enabled').contains('Assign policy').click();
+      cy.wait('@bulkReassign');
       waitForLoading();
       assertTableIsEmpty();
       // Select new policy is filters
@@ -397,6 +399,7 @@ describe('View agents list', () => {
       cy.get('.euiModalBody input').clear().type('Agent policy 3');
       cy.get('[role="option"]').contains('Agent policy 3').click({ force: true });
       cy.get('.euiModalFooter button:enabled').contains('Assign policy').click();
+      cy.wait('@bulkReassign');
       waitForLoading();
     });
 
