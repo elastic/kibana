@@ -88,10 +88,11 @@ export interface ParsedMetricItem {
 }
 
 /**
- * Output shape of the parser, before `classifyMetricSources` resolves
- * `sourceKind` against the `_resolve/index` API. Consumers must not render
- * an unclassified item directly; the type guarantees that the classification
- * step has run before a `ParsedMetricItem` exists.
+ * Pre-classification shape of a metric item: same as `ParsedMetricItem`
+ * but without `sourceKind`. The type-level distinction guarantees that any
+ * `ParsedMetricItem` reaching the rendering layer has already been classified.
+ *
+ * @see ParsedMetricItem
  */
 export type UnclassifiedMetricItem = Omit<ParsedMetricItem, 'sourceKind'>;
 
