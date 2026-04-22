@@ -6,12 +6,19 @@
  */
 
 import React from 'react';
-import { Navigate } from 'react-router-dom-v5-compat';
+import { Navigate, useLocation } from 'react-router-dom-v5-compat';
 
 import { useLastAgentId } from '../../hooks/use_last_agent_id';
 import { appPaths } from '../../utils/app_paths';
 
 export const RootRedirect: React.FC = () => {
   const lastAgentId = useLastAgentId();
-  return <Navigate to={appPaths.agent.root({ agentId: lastAgentId })} replace />;
+  const location = useLocation();
+  return (
+    <Navigate
+      to={appPaths.agent.root({ agentId: lastAgentId })}
+      replace
+      state={location.state}
+    />
+  );
 };

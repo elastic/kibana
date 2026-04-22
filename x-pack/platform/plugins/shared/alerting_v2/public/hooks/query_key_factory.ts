@@ -34,6 +34,21 @@ export const matcherSuggestionKeys = {
   dataFields: () => [...matcherSuggestionKeys.all, 'dataFields'] as const,
 };
 
+export const ruleDoctorFindingKeys = {
+  all: ['ruleDoctorFinding'] as const,
+  lists: () => [...ruleDoctorFindingKeys.all, 'list'] as const,
+  list: (status: string) => [...ruleDoctorFindingKeys.lists(), status] as const,
+};
+
+export const ruleDoctorExecutionKeys = {
+  all: ['ruleDoctorExecution'] as const,
+  lists: () => [...ruleDoctorExecutionKeys.all, 'list'] as const,
+};
+
+export const ruleDoctorSettingsKeys = {
+  all: ['ruleDoctorSettings'] as const,
+};
+
 export const notificationPolicyKeys = {
   all: ['notificationPolicy'] as const,
   detail: (id: string) => [...notificationPolicyKeys.all, 'detail', id] as const,

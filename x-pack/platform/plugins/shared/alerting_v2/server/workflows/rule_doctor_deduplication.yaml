@@ -1,0 +1,336 @@
+version: "1"
+name: ".alerting-v2-rule-doctor-deduplication"
+description: "Rule Doctor deduplication workflow — detects overlapping and duplicate alerting rules. Do not modify."
+enabled: true
+
+triggers:
+  - type: manual
+
+settings:
+  timeout: "5m"
+  concurrency:
+    key: alerting-v2-rule-doctor-deduplication
+    strategy: cancel-in-progress
+    max: 1
+
+steps:
+  - name: find_duplicates
+    type: ai.prompt
+    with:
+      prompt: |
+        You are Rule Doctor, an expert system for analyzing Kibana alerting rules.
+
+        ## Task
+        Analyze the following alerting rules for **duplicates and overlaps**. Two rules overlap when they
+        monitor the same or very similar metrics/conditions on the same infrastructure, even if their
+        ES|QL queries are worded differently.
+
+        ## Rules to analyze
+        {{ inputs.rules | json }}
+
+        ## Analysis criteria
+        Compare each pair of rules on:
+        - `evaluation.query.base` — do the ES|QL queries target the same index patterns, metrics, or fields?
+        - `grouping.fields` — are they grouping by the same dimensions?
+        - `schedule.every` — similar execution intervals?
+        - `metadata.tags` — shared domain tags?
+        - `kind` — same rule kind?
+
+        Two rules are duplicates if they would fire on largely the same conditions for the same infrastructure,
+        even if one uses a static threshold and the other uses a more sophisticated query.
+
+        For each duplicate group:
+        - Populate `ruleIds` with all affected rule IDs (the retained rule and the overlapping ones).
+        - Inside `details`, set `retainRuleId` to the best rule to keep and `mergeRuleIds` to the
+          remaining overlapping rule IDs.
+        - The `proposed` object should represent the merged rule that will replace the retained rule.
+
+        If no duplicates are found, return an empty array.
+
+        ## Output style
+        All text fields (summary, explanation) must be plain text only — no markdown, no bold, no
+        tables, no special formatting. Keep `explanation` to 2-3 sentences.
+      schema:
+        type: object
+        properties:
+          findings:
+            type: array
+            items:
+              type: object
+              properties:
+                id:
+                  type: string
+                  description: Unique recommendation identifier
+                type:
+                  type: string
+                  enum: [deduplication]
+                  description: Category of the recommendation
+                action:
+                  type: string
+                  enum: [merge]
+                  description: Recommended action
+                risk:
+                  type: string
+                  enum: [low, medium, high]
+                confidence:
+                  type: string
+                  enum: [low, medium, high]
+                summary:
+                  type: string
+                  description: One-sentence description of the recommendation
+                ruleIds:
+                  type: array
+                  items:
+                    type: string
+                  description: All affected rule IDs
+                details:
+                  type: object
+                  description: Action-specific data. For merge actions, includes retainRuleId (string) and mergeRuleIds (array of strings).
+                current:
+                  type: object
+                  description: Current rule object or null
+                proposed:
+                  type: object
+                  description: Proposed rule object or null if disabling
+                diffs:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      field:
+                        type: string
+                      previous: {}
+                      proposed: {}
+                    required: [field]
+                explanation:
+                  type: string
+                  description: Why this change is recommended
+              required: [id, type, action, risk, confidence, summary, ruleIds, explanation]
+        required: [findings]
+    timeout: 300s
+
+  - name: init_current_findings
+    type: data.set
+    with:
+      current_findings: '${{ steps.find_duplicates.output.content.findings }}'
+      correction_attempt: 0
+
+  - name: map_to_rules
+    type: data.map
+    items: '${{ variables.current_findings }}'
+    with:
+      fields:
+        id: '${{ item.id }}'
+        rule: '${{ item.proposed }}'
+        meta: '${{ item }}'
+
+  - name: validate_rules
+    type: alerting.validateRules
+    with:
+      rules: '${{ steps.map_to_rules.output }}'
+
+  - name: store_validation
+    type: data.set
+    with:
+      has_invalid: '${{ steps.validate_rules.output.hasInvalid }}'
+      invalid_rules: '${{ steps.validate_rules.output.invalidRules }}'
+      valid_rules: '${{ steps.validate_rules.output.validRules }}'
+      field_schemas: '${{ steps.validate_rules.output.fieldSchemas }}'
+      validation_report: '${{ steps.validate_rules.output.validationReport }}'
+      loop_valid_rules: []
+
+  - name: correction_loop
+    type: while
+    condition: "variables.has_invalid:true AND variables.correction_attempt < 3"
+    steps:
+      - name: increment_attempt
+        type: data.set
+        with:
+          correction_attempt: '{{ variables.correction_attempt | plus: 1 }}'
+
+      - name: correct_queries
+        type: ai.prompt
+        with:
+          prompt: |
+            You are Rule Doctor's rule correction agent.
+
+            ## Task
+            Some proposed alerting rules failed validation against Elasticsearch.
+            Fix each invalid rule using the validation errors and real field schemas below.
+
+            ## Invalid rules with errors
+            {{ variables.invalid_rules | json }}
+
+            Each invalid rule has `_validationErrors` (array of strings) describing what went wrong.
+            The rule object is in the `rule` field of each entry.
+
+            ## Validation report
+            {{ variables.validation_report | json }}
+
+            ## Real field schemas for the target indices
+            {{ variables.field_schemas | json }}
+
+            Use ONLY fields that appear in these schemas. Match field names and types exactly.
+
+            ## Original rules for context
+            {{ inputs.rules | json }}
+
+            ## Instructions
+            - Fix the ES|QL query in each invalid rule's `evaluation.query.base`.
+            - If a rule has `recovery_policy.query.base`, fix that too if invalid.
+            - If grouping fields are invalid, update them to match available columns.
+            - Keep everything else about the finding unchanged.
+            - Remove the `_validationErrors` from each corrected rule.
+            - If a rule cannot be fixed (e.g., the required fields do not exist), omit that finding entirely.
+
+            Return the corrected findings array (the `meta` field from each entry contains the original finding).
+          schema:
+            type: object
+            properties:
+              findings:
+                type: array
+                items:
+                  type: object
+            required: [findings]
+        timeout: 120s
+
+      - name: merge_corrected
+        type: data.set
+        with:
+          current_findings: '${{ steps.correct_queries.output.content.findings }}'
+
+      - name: remap_to_rules
+        type: data.map
+        items: '${{ variables.current_findings }}'
+        with:
+          fields:
+            id: '${{ item.id }}'
+            rule: '${{ item.proposed }}'
+            meta: '${{ item }}'
+
+      - name: revalidate_rules
+        type: alerting.validateRules
+        with:
+          rules: '${{ steps.remap_to_rules.output }}'
+
+      - name: update_validation
+        type: data.set
+        with:
+          has_invalid: '${{ steps.revalidate_rules.output.hasInvalid }}'
+          invalid_rules: '${{ steps.revalidate_rules.output.invalidRules }}'
+          loop_valid_rules: '${{ steps.revalidate_rules.output.validRules }}'
+          field_schemas: '${{ steps.revalidate_rules.output.fieldSchemas }}'
+          validation_report: '${{ steps.revalidate_rules.output.validationReport }}'
+
+  - name: merge_all_valid
+    type: data.set
+    with:
+      valid_rules: '${{ variables.valid_rules | concat: variables.loop_valid_rules }}'
+
+  - name: fetch_open_findings
+    type: elasticsearch.request
+    with:
+      method: POST
+      path: /.rule-doctor-findings/_search
+      body:
+        size: 100
+        query:
+          bool:
+            filter:
+              - term:
+                  status: open
+              - term:
+                  type: deduplication
+              - term:
+                  space_id: '{{ inputs.space_id }}'
+        _source:
+          includes:
+            - finding_id
+            - status
+            - type
+            - action
+            - summary
+            - explanation
+            - rule_ids
+
+  - name: evaluate_existing
+    type: ai.prompt
+    with:
+      prompt: |
+        You are evaluating existing Rule Doctor findings against new analysis results.
+
+        ## New findings
+        {{ variables.valid_rules | json }}
+
+        ## Currently open existing findings
+        {{ steps.fetch_open_findings.output.hits.hits | json }}
+
+        For each existing finding, determine if it should be dismissed because:
+        1. A new finding covers the same issue (overlapping or duplicate recommendation)
+        2. The finding references rules that now appear in a new, updated recommendation
+        3. The finding is no longer relevant based on the latest analysis
+
+        Only dismiss findings you are confident are stale or superseded. If unsure, keep them open.
+        If there are no existing findings, or none should be dismissed, return an empty array.
+      schema:
+        type: object
+        properties:
+          dismissals:
+            type: array
+            items:
+              type: object
+              properties:
+                findingId:
+                  type: string
+                  description: The finding_id of the existing finding to dismiss
+                reason:
+                  type: string
+                  description: Brief reason why this finding is being dismissed
+              required: [findingId, reason]
+        required: [dismissals]
+    timeout: 60s
+
+  - name: dismiss_stale_findings
+    type: foreach
+    foreach: '{{ steps.evaluate_existing.output.content.dismissals }}'
+    steps:
+      - name: dismiss_finding
+        type: elasticsearch.request
+        with:
+          method: POST
+          path: '/.rule-doctor-findings/_update/{{ foreach.item.findingId }}'
+          body:
+            doc:
+              status: dismissed
+
+  - name: persist_findings
+    type: foreach
+    foreach: '{{ variables.valid_rules }}'
+    steps:
+      - name: index_finding
+        type: elasticsearch.index
+        with:
+          index: '.rule-doctor-findings'
+          id: '{{ foreach.item.id }}'
+          document:
+            finding_id: '{{ foreach.item.id }}'
+            execution_id: '{{ execution.id }}'
+            space_id: '{{ inputs.space_id }}'
+            status: 'open'
+            type: '${{ foreach.item.meta.type }}'
+            action: '${{ foreach.item.meta.action }}'
+            risk: '${{ foreach.item.meta.risk }}'
+            confidence: '${{ foreach.item.meta.confidence }}'
+            summary: '${{ foreach.item.meta.summary }}'
+            explanation: '${{ foreach.item.meta.explanation }}'
+            rule_ids: '${{ foreach.item.meta.ruleIds }}'
+            details: '${{ foreach.item.meta.details }}'
+            current: '${{ foreach.item.meta.current }}'
+            proposed: '${{ foreach.item.meta.proposed }}'
+            diffs: '${{ foreach.item.meta.diffs }}'
+
+  - name: output_findings
+    type: workflow.output
+    with:
+      findings: "{{ variables.valid_rules | json }}"
+      dismissals: "{{ steps.evaluate_existing.output.content.dismissals | json }}"

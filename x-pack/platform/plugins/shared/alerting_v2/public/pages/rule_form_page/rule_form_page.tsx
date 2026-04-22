@@ -63,6 +63,10 @@ interface FetchedRuleFormPageProps {
 
 const FetchedRuleFormPage = ({ ruleId, mode }: FetchedRuleFormPageProps) => {
   const isClone = mode === 'clone';
+  const { state: locationState } = useLocation<{
+    initialValues?: Partial<FormValues>;
+    initialQuery?: string;
+  }>();
   const {
     data: rule,
     isLoading,
@@ -101,8 +105,11 @@ const FetchedRuleFormPage = ({ ruleId, mode }: FetchedRuleFormPageProps) => {
     );
   }
 
-  const initialQuery = rule.evaluation?.query?.base ?? DEFAULT_QUERY;
-  const initialValues = mapRuleResponseToFormValues(rule);
+  const initialQuery = locationState?.initialQuery ?? rule.evaluation?.query?.base ?? DEFAULT_QUERY;
+  const initialValues = {
+    ...mapRuleResponseToFormValues(rule),
+    ...locationState?.initialValues,
+  };
 
   if (isClone && initialValues.metadata) {
     initialValues.metadata = {

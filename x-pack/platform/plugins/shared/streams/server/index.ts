@@ -10,8 +10,19 @@ import type { StreamsConfig } from '../common/config';
 import type { StreamsPluginSetup, StreamsPluginStart } from './plugin';
 import { config } from './plugin';
 import type { StreamsRouteRepository } from './routes';
+import type { KnowledgeIndicatorsClient } from './lib/knowledge_indicators/knowledge_indicators_service';
 
-export type { StreamsConfig, StreamsPluginSetup, StreamsPluginStart, StreamsRouteRepository };
+export type {
+  StreamsConfig,
+  StreamsPluginSetup,
+  StreamsPluginStart,
+  StreamsRouteRepository,
+  KnowledgeIndicatorsClient,
+};
+export type {
+  SearchKnowledgeIndicatorsInput,
+  SearchKnowledgeIndicatorsOutput,
+} from '@kbn/streams-ai';
 export { config };
 
 export const plugin = async (context: PluginInitializerContext<StreamsConfig>) => {

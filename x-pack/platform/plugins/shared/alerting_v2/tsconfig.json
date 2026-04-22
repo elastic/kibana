@@ -94,7 +94,12 @@
     "@kbn/utility-types",
     "@kbn/usage-collection-plugin",
     "@kbn/share-plugin",
-    "@kbn/deeplinks-analytics"
+    "@kbn/deeplinks-analytics",
+    "@kbn/sse-utils",
+    "@kbn/sse-utils-server",
+    "@kbn/sse-utils-client",
+    "@kbn/workflows-extensions",
+    "@kbn/agent-builder-plugin"
   ],
   "exclude": ["target/**/*"]
 }

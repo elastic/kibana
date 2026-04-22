@@ -1,0 +1,348 @@
+version: "1"
+name: ".alerting-v2-rule-doctor-threshold-tuning"
+description: "Rule Doctor threshold tuning workflow — identifies rules with noisy or late-detection thresholds. Do not modify."
+enabled: true
+
+triggers:
+  - type: manual
+
+settings:
+  timeout: "5m"
+  concurrency:
+    key: alerting-v2-rule-doctor-threshold-tuning
+    strategy: cancel-in-progress
+    max: 1
+
+steps:
+  - name: analyze_thresholds
+    type: ai.prompt
+    with:
+      prompt: |
+        You are Rule Doctor, an expert system for analyzing Kibana alerting rules.
+
+        ## Task
+        Analyze the following alerting rules for **threshold tuning** issues. There are two categories:
+
+        1. **Noisy thresholds** — rules that fire too often due to overly sensitive thresholds. Signals include:
+           - Very low numeric thresholds (e.g., error count > 5 on a 1-minute schedule)
+           - Low or missing `pending_count` / debounce settings, causing every brief spike to trigger
+           - Broad queries with no grouping that aggregate all sources into a single alert stream
+           - Thresholds that are clearly below normal baseline values for the monitored metric
+
+        2. **Late-detection thresholds** — rules with thresholds set so high that they only fire after severe degradation. Signals include:
+           - Latency thresholds far above reasonable P95 baselines (e.g., 10s when typical P95 is 600ms)
+           - Error rate thresholds that only trigger during catastrophic failure
+           - The rule would miss moderate-severity incidents entirely
+
+        ## Rules to analyze
+        {{ inputs.rules | json }}
+
+        ## Analysis criteria
+        For each rule, examine:
+        - `evaluation.query.base` — what metric is being measured and what threshold is applied?
+        - `schedule.every` — how frequently does it run? High frequency + low threshold = noisy.
+        - `state_transition.pending_count` — is there any debounce? Low or missing = noisy.
+        - `grouping.fields` — are results aggregated broadly or per-entity?
+        - `metadata.tags` — domain context for what reasonable baselines look like.
+
+        For each issue found:
+        - Set `type` to `threshold_tuning`.
+        - Set `action` to `tune`.
+        - Populate `ruleIds` with the affected rule ID.
+        - In `proposed`, include the rule with your recommended threshold and pending_count changes.
+        - In `diffs`, show what specific fields you are proposing to change.
+
+        If no threshold issues are found, return an empty findings array.
+
+        ## Output format
+        Return a JSON object with a single key `findings` containing an array.
+        Do NOT wrap the output in any additional object like `response`.
+        Every finding must include the `diffs` array showing the specific fields being changed.
+
+        ## Output style
+        All text fields (summary, explanation) must be plain text only — no markdown, no bold, no
+        tables, no special formatting. Keep `explanation` to 2-3 sentences.
+      schema:
+        type: object
+        properties:
+          findings:
+            type: array
+            items:
+              type: object
+              properties:
+                id:
+                  type: string
+                  description: Unique recommendation identifier
+                type:
+                  type: string
+                  enum: [threshold_tuning]
+                  description: Category of the recommendation
+                action:
+                  type: string
+                  enum: [tune]
+                  description: Recommended action
+                risk:
+                  type: string
+                  enum: [low, medium, high]
+                confidence:
+                  type: string
+                  enum: [low, medium, high]
+                summary:
+                  type: string
+                  description: One-sentence description of the recommendation
+                ruleIds:
+                  type: array
+                  items:
+                    type: string
+                  description: All affected rule IDs
+                details:
+                  type: object
+                  description: Action-specific data including the tuning rationale and category (noisy or late_detection).
+                current:
+                  type: object
+                  description: Current rule object
+                proposed:
+                  type: object
+                  description: Proposed rule object with tuned thresholds
+                diffs:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      field:
+                        type: string
+                      previous: {}
+                      proposed: {}
+                    required: [field]
+                explanation:
+                  type: string
+                  description: Why this change is recommended
+              required: [id, type, action, risk, confidence, summary, ruleIds, explanation]
+        required: [findings]
+    timeout: 300s
+
+  - name: init_current_findings
+    type: data.set
+    with:
+      current_findings: '${{ steps.analyze_thresholds.output.content.findings }}'
+      correction_attempt: 0
+
+  - name: map_to_rules
+    type: data.map
+    items: '${{ variables.current_findings }}'
+    with:
+      fields:
+        id: '${{ item.id }}'
+        rule: '${{ item.proposed }}'
+        meta: '${{ item }}'
+
+  - name: validate_rules
+    type: alerting.validateRules
+    with:
+      rules: '${{ steps.map_to_rules.output }}'
+
+  - name: store_validation
+    type: data.set
+    with:
+      has_invalid: '${{ steps.validate_rules.output.hasInvalid }}'
+      invalid_rules: '${{ steps.validate_rules.output.invalidRules }}'
+      valid_rules: '${{ steps.validate_rules.output.validRules }}'
+      field_schemas: '${{ steps.validate_rules.output.fieldSchemas }}'
+      validation_report: '${{ steps.validate_rules.output.validationReport }}'
+      loop_valid_rules: []
+
+  - name: correction_loop
+    type: while
+    condition: "variables.has_invalid:true AND variables.correction_attempt < 3"
+    steps:
+      - name: increment_attempt
+        type: data.set
+        with:
+          correction_attempt: '{{ variables.correction_attempt | plus: 1 }}'
+
+      - name: correct_queries
+        type: ai.prompt
+        with:
+          prompt: |
+            You are Rule Doctor's rule correction agent.
+
+            ## Task
+            Some proposed alerting rules failed validation against Elasticsearch.
+            Fix each invalid rule using the validation errors and real field schemas below.
+
+            ## Invalid rules with errors
+            {{ variables.invalid_rules | json }}
+
+            Each invalid rule has `_validationErrors` (array of strings) describing what went wrong.
+            The rule object is in the `rule` field of each entry.
+
+            ## Validation report
+            {{ variables.validation_report | json }}
+
+            ## Real field schemas for the target indices
+            {{ variables.field_schemas | json }}
+
+            Use ONLY fields that appear in these schemas. Match field names and types exactly.
+
+            ## Original rules for context
+            {{ inputs.rules | json }}
+
+            ## Instructions
+            - Fix the ES|QL query in each invalid rule's `evaluation.query.base`.
+            - If a rule has `recovery_policy.query.base`, fix that too if invalid.
+            - If grouping fields are invalid, update them to match available columns.
+            - Keep everything else about the finding unchanged.
+            - Remove the `_validationErrors` from each corrected rule.
+            - If a rule cannot be fixed (e.g., the required fields do not exist), omit that finding entirely.
+
+            Return the corrected findings array (the `meta` field from each entry contains the original finding).
+          schema:
+            type: object
+            properties:
+              findings:
+                type: array
+                items:
+                  type: object
+            required: [findings]
+        timeout: 120s
+
+      - name: merge_corrected
+        type: data.set
+        with:
+          current_findings: '${{ steps.correct_queries.output.content.findings }}'
+
+      - name: remap_to_rules
+        type: data.map
+        items: '${{ variables.current_findings }}'
+        with:
+          fields:
+            id: '${{ item.id }}'
+            rule: '${{ item.proposed }}'
+            meta: '${{ item }}'
+
+      - name: revalidate_rules
+        type: alerting.validateRules
+        with:
+          rules: '${{ steps.remap_to_rules.output }}'
+
+      - name: update_validation
+        type: data.set
+        with:
+          has_invalid: '${{ steps.revalidate_rules.output.hasInvalid }}'
+          invalid_rules: '${{ steps.revalidate_rules.output.invalidRules }}'
+          loop_valid_rules: '${{ steps.revalidate_rules.output.validRules }}'
+          field_schemas: '${{ steps.revalidate_rules.output.fieldSchemas }}'
+          validation_report: '${{ steps.revalidate_rules.output.validationReport }}'
+
+  - name: merge_all_valid
+    type: data.set
+    with:
+      valid_rules: '${{ variables.valid_rules | concat: variables.loop_valid_rules }}'
+
+  - name: fetch_open_findings
+    type: elasticsearch.request
+    with:
+      method: POST
+      path: /.rule-doctor-findings/_search
+      body:
+        size: 100
+        query:
+          bool:
+            filter:
+              - term:
+                  status: open
+              - term:
+                  type: threshold_tuning
+              - term:
+                  space_id: '{{ inputs.space_id }}'
+        _source:
+          includes:
+            - finding_id
+            - status
+            - type
+            - action
+            - summary
+            - explanation
+            - rule_ids
+
+  - name: evaluate_existing
+    type: ai.prompt
+    with:
+      prompt: |
+        You are evaluating existing Rule Doctor threshold tuning findings against new analysis results.
+
+        ## New findings
+        {{ variables.valid_rules | json }}
+
+        ## Currently open existing findings
+        {{ steps.fetch_open_findings.output.hits.hits | json }}
+
+        For each existing finding, determine if it should be dismissed because:
+        1. A new finding covers the same issue (overlapping or duplicate recommendation)
+        2. The finding references rules that now appear in a new, updated recommendation
+        3. The finding is no longer relevant based on the latest analysis
+
+        Only dismiss findings you are confident are stale or superseded. If unsure, keep them open.
+        If there are no existing findings, or none should be dismissed, return an empty array.
+      schema:
+        type: object
+        properties:
+          dismissals:
+            type: array
+            items:
+              type: object
+              properties:
+                findingId:
+                  type: string
+                  description: The finding_id of the existing finding to dismiss
+                reason:
+                  type: string
+                  description: Brief reason why this finding is being dismissed
+              required: [findingId, reason]
+        required: [dismissals]
+    timeout: 60s
+
+  - name: dismiss_stale_findings
+    type: foreach
+    foreach: '{{ steps.evaluate_existing.output.content.dismissals }}'
+    steps:
+      - name: dismiss_finding
+        type: elasticsearch.request
+        with:
+          method: POST
+          path: '/.rule-doctor-findings/_update/{{ foreach.item.findingId }}'
+          body:
+            doc:
+              status: dismissed
+
+  - name: persist_findings
+    type: foreach
+    foreach: '{{ variables.valid_rules }}'
+    steps:
+      - name: index_finding
+        type: elasticsearch.index
+        with:
+          index: '.rule-doctor-findings'
+          id: '{{ foreach.item.id }}'
+          document:
+            finding_id: '{{ foreach.item.id }}'
+            execution_id: '{{ execution.id }}'
+            space_id: '{{ inputs.space_id }}'
+            status: 'open'
+            type: '${{ foreach.item.meta.type }}'
+            action: '${{ foreach.item.meta.action }}'
+            risk: '${{ foreach.item.meta.risk }}'
+            confidence: '${{ foreach.item.meta.confidence }}'
+            summary: '${{ foreach.item.meta.summary }}'
+            explanation: '${{ foreach.item.meta.explanation }}'
+            rule_ids: '${{ foreach.item.meta.ruleIds }}'
+            details: '${{ foreach.item.meta.details }}'
+            current: '${{ foreach.item.meta.current }}'
+            proposed: '${{ foreach.item.meta.proposed }}'
+            diffs: '${{ foreach.item.meta.diffs }}'
+
+  - name: output_findings
+    type: workflow.output
+    with:
+      findings: "{{ variables.valid_rules | json }}"
+      dismissals: "{{ steps.evaluate_existing.output.content.dismissals | json }}"

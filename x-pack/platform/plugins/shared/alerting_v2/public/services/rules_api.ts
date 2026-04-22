@@ -74,6 +74,12 @@ export class RulesApi {
     return this.http.delete<RuleResponse>(`${ALERTING_V2_RULE_API_PATH}/${id}`);
   }
 
+  public async getRulesByIds(ids: string[]) {
+    return this.http.get<FindRulesResponse>(`${ALERTING_V2_RULE_API_PATH}/_bulk`, {
+      query: { ids },
+    });
+  }
+
   public async bulkDeleteRules(params: BulkOperationParams) {
     return this.http.post<BulkOperationResponse>(`${ALERTING_V2_RULE_API_PATH}/_bulk_delete`, {
       body: JSON.stringify(params),

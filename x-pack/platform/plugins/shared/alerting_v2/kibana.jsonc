@@ -21,6 +21,7 @@
       "security",
       "encryptedSavedObjects",
       "workflowsManagement",
+      "workflowsExtensions",
       "expressions",
       "uiActions",
       "fieldFormats",
@@ -29,8 +30,8 @@
       "kibanaUtils",
       "share"
     ],
-    "optionalPlugins": ["usageCollection"],
-    "requiredBundles": ["alerting", "kibanaReact"],
+    "optionalPlugins": ["usageCollection", "agentBuilder", "inference"],
+    "requiredBundles": ["alerting", "kibanaReact", "esUiShared"],
     "extraPublicDirs": []
   }
 }

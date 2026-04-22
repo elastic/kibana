@@ -6,7 +6,7 @@
  */
 
 import { Logger, OnSetup, PluginSetup, PluginStart } from '@kbn/core-di';
-import { CoreSetup } from '@kbn/core-di-server';
+import { CoreSetup, CoreStart } from '@kbn/core-di-server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
 import { registerTelemetryTask } from '../lib/usage/task_definition';
@@ -16,6 +16,10 @@ import { TaskDefinition } from '../lib/services/task_run_scope_service/create_ta
 import { registerSavedObjects } from '../saved_objects';
 import { dispatcherUiSettings } from '../lib/dispatcher/ui_settings';
 import { EsServiceInternalToken } from '../lib/services/es_service/tokens';
+import { registerProposedChangeAttachmentType } from '../agent_builder/proposed_change_attachment';
+import { registerAlertingV2Tools } from '../agent_builder/register_tools';
+import { validateRulesStepDefinition } from '../step_types/validate_rules';
+import { createDiscoverFeaturesStepDefinition } from '../step_types/discover_features';
 
 export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
   bind(OnSetup).toConstantValue((container) => {
@@ -48,6 +52,46 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
 
     // Trigger task registration via onActivation callbacks
     container.getAll(TaskDefinition);
+
+    const agentBuilderToken =
+      PluginSetup<NonNullable<AlertingServerSetupDependencies['agentBuilder']>>('agentBuilder');
+    if (container.isBound(agentBuilderToken)) {
+      const agentBuilder = container.get(agentBuilderToken);
+      registerProposedChangeAttachmentType(agentBuilder);
+      registerAlertingV2Tools(agentBuilder, container, logger);
+    }
+
+    const workflowsExtensions = container.get(
+      PluginSetup<AlertingServerSetupDependencies['workflowsExtensions']>('workflowsExtensions')
+    );
+    workflowsExtensions.registerStepDefinition(validateRulesStepDefinition);
+
+    const discoverFeaturesStep = createDiscoverFeaturesStepDefinition({
+      getScopedSoClient: (fakeRequest) => {
+        const savedObjects = container.get(CoreStart('savedObjects'));
+        return savedObjects.getScopedClient(fakeRequest);
+      },
+      getInferenceClient: (fakeRequest) => {
+        const inferenceToken =
+          PluginStart<NonNullable<AlertingServerStartDependencies['inference']>>('inference');
+        if (!container.isBound(inferenceToken)) return undefined;
+        const inference = container.get(inferenceToken);
+        return inference.getClient({ request: fakeRequest });
+      },
+      getDefaultConnectorId: async (fakeRequest) => {
+        const inferenceToken =
+          PluginStart<NonNullable<AlertingServerStartDependencies['inference']>>('inference');
+        if (!container.isBound(inferenceToken)) return undefined;
+        try {
+          const inference = container.get(inferenceToken);
+          const connector = await inference.getDefaultConnector(fakeRequest);
+          return connector.connectorId;
+        } catch {
+          return undefined;
+        }
+      },
+    });
+    workflowsExtensions.registerStepDefinition(discoverFeaturesStep);
 
     if (container.isBound(usageCollectionToken)) {
       // Both getters are called task run (after start), so the

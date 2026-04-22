@@ -20,6 +20,9 @@ import type {
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 
 export type AlertingServerSetup = void;
 export type AlertingServerStart = void;
@@ -30,7 +33,9 @@ export interface AlertingServerSetupDependencies {
   spaces: SpacesPluginSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   workflowsManagement: WorkflowsServerPluginSetup;
+  workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   usageCollection?: UsageCollectionSetup;
+  agentBuilder?: AgentBuilderPluginSetup;
 }
 
 export interface AlertingServerStartDependencies {
@@ -40,4 +45,5 @@ export interface AlertingServerStartDependencies {
   data: DataPluginStart;
   security: SecurityPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  inference?: InferenceServerStart;
 }

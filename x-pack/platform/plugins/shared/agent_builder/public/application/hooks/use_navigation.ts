@@ -8,12 +8,14 @@
 import { useCallback, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { combineLatest, map } from 'rxjs';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { AGENTBUILDER_APP_ID } from '../../../common/features';
 import { useKibana } from './use_kibana';
 
 export interface LocationState {
   shouldStickToBottom?: boolean;
   initialMessage?: string;
+  attachments?: AttachmentInput[];
 }
 
 export const INFERENCE_MANAGEMENT_APP_ID = 'management';

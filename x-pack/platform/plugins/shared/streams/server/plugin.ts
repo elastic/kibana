@@ -76,11 +76,14 @@ import {
   type ContinuousKiExtractionWorkflowService,
 } from './lib/workflows/continuous_extraction_workflow';
 import { createInferenceResolver } from './lib/streams/assets/query/helpers/inference_availability';
+import { KnowledgeIndicatorsService } from './lib/knowledge_indicators/knowledge_indicators_service';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface StreamsPluginStart {}
+
+export interface StreamsPluginStart {
+  getKnowledgeIndicatorsClientFactory(): KnowledgeIndicatorsService;
+}
 
 export const config: PluginConfigDescriptor<StreamsConfig> = {
   schema: configSchema,
@@ -104,6 +107,7 @@ export class StreamsPlugin
   private statsTelemetryService = new StatsTelemetryService();
   private processorSuggestionsService: ProcessorSuggestionsService;
   private patternExtractionService?: PatternExtractionService;
+  private knowledgeIndicatorsService?: KnowledgeIndicatorsService;
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
     this.isDev = context.env.mode.dev;
@@ -158,6 +162,19 @@ export class StreamsPlugin
     const contentService = new ContentService(core, this.logger);
     const queryService = new QueryService(core, inferenceResolver, this.logger);
     const taskService = new TaskService(plugins.taskManager);
+
+    this.knowledgeIndicatorsService = new KnowledgeIndicatorsService(
+      core,
+      {
+        streamsService,
+        attachmentService,
+        featureService,
+        queryService,
+      },
+      () => this.server,
+      this.logger.get('knowledge-indicators')
+    );
+
     const getScopedClients = async ({
       request,
     }: {
@@ -553,7 +570,15 @@ export class StreamsPlugin
 
     this.processorSuggestionsService.setConsoleStart(plugins.console);
 
-    return {};
+    const knowledgeIndicatorsService = this.knowledgeIndicatorsService;
+    return {
+      getKnowledgeIndicatorsClientFactory() {
+        if (!knowledgeIndicatorsService) {
+          throw new Error('KnowledgeIndicatorsService is not initialized');
+        }
+        return knowledgeIndicatorsService;
+      },
+    };
   }
 
   public async stop() {

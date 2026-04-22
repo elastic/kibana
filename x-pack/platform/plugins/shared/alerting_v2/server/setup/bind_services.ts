@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginSetup, PluginStart } from '@kbn/core-di';
+import { Logger, PluginSetup, PluginStart } from '@kbn/core-di';
 import { CoreStart, Request, SavedObjectsClientFactory } from '@kbn/core-di-server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { AlertActionsClient } from '../lib/alert_actions_client';
@@ -60,6 +60,7 @@ import { ApiKeyServiceSavedObjectsClientToken } from '../lib/services/api_key_se
 import {
   API_KEY_PENDING_INVALIDATION_TYPE,
   NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+  RULE_DOCTOR_SETTINGS_SAVED_OBJECT_TYPE,
   RULE_SAVED_OBJECT_TYPE,
 } from '../saved_objects';
 import {
@@ -68,6 +69,9 @@ import {
 } from '../lib/dispatcher/steps/dispatch_step_tokens';
 import { MatcherSuggestionsService } from '../lib/services/matcher_suggestions_service/matcher_suggestions_service';
 import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
+import { createRuleDoctorWorkflowService } from '../workflows/rule_doctor_workflow';
+import { RuleDoctorWorkflowServiceToken } from '../workflows/tokens';
+import { RuleDoctorSettingsSavedObjectsClientToken } from '../lib/rule_doctor_settings';
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(AlertActionsClient).toSelf().inRequestScope();
@@ -222,6 +226,26 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
         PluginSetup<AlertingServerSetupDependencies['workflowsManagement']>('workflowsManagement')
       );
       return wfm.management;
+    })
+    .inSingletonScope();
+
+  bind(RuleDoctorSettingsSavedObjectsClientToken)
+    .toResolvedValue(
+      (savedObjectsClientFactory) =>
+        savedObjectsClientFactory({
+          includedHiddenTypes: [RULE_DOCTOR_SETTINGS_SAVED_OBJECT_TYPE],
+        }),
+      [SavedObjectsClientFactory]
+    )
+    .inRequestScope();
+
+  bind(RuleDoctorWorkflowServiceToken)
+    .toDynamicValue(({ get }) => {
+      const logger = get(Logger);
+      const wfm = get(
+        PluginSetup<AlertingServerSetupDependencies['workflowsManagement']>('workflowsManagement')
+      );
+      return createRuleDoctorWorkflowService(logger, wfm.management);
     })
     .inSingletonScope();
 

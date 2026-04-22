@@ -12,16 +12,19 @@ import {
   apiKeyPendingInvalidationModelVersions,
   notificationPolicyModelVersions,
   ruleModelVersions,
+  ruleDoctorSettingsModelVersions,
 } from './model_versions';
 import { apiKeyPendingInvalidationMappings } from './api_key_pending_invalidation_mappings';
 import { notificationPolicyMappings } from './notification_policy_mappings';
 import { ruleMappings } from './rule_mappings';
+import { ruleDoctorSettingsMappings } from './rule_doctor_settings_mappings';
 import type { NotificationPolicySavedObjectAttributes } from './schemas/notification_policy_saved_object_attributes';
 import type { RuleSavedObjectAttributes } from './schemas/rule_saved_object_attributes';
 
 export const RULE_SAVED_OBJECT_TYPE = 'alerting_rule';
 export const NOTIFICATION_POLICY_SAVED_OBJECT_TYPE = 'alerting_notification_policy';
 export const API_KEY_PENDING_INVALIDATION_TYPE = 'alerting_api_key_pending_invalidation';
+export const RULE_DOCTOR_SETTINGS_SAVED_OBJECT_TYPE = 'alerting_rule_doctor_settings';
 
 export const NotificationPolicyAttributesToEncrypt = ['auth.apiKey'];
 
@@ -73,6 +76,15 @@ export function registerSavedObjects({
     namespaceType: 'agnostic',
     mappings: apiKeyPendingInvalidationMappings,
     modelVersions: apiKeyPendingInvalidationModelVersions,
+  });
+
+  savedObjects.registerType({
+    name: RULE_DOCTOR_SETTINGS_SAVED_OBJECT_TYPE,
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    hidden: true,
+    namespaceType: 'multiple-isolated',
+    mappings: ruleDoctorSettingsMappings,
+    modelVersions: ruleDoctorSettingsModelVersions,
   });
 
   encryptedSavedObjects.registerType({

@@ -45,6 +45,9 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.get_entity`,
   `${internalNamespaces.security}.search_entities`,
 
+  // Alerting V2
+  `${internalNamespaces.alerting}.update_rule`,
+
   // Streams – read
   `${internalNamespaces.streams}.list_streams`,
   `${internalNamespaces.streams}.get_stream`,

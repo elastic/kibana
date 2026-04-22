@@ -15,14 +15,17 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import {
   ALERTING_V2_SECTION_ID,
   ALERTING_V2_RULES_APP_ID,
   ALERTING_V2_NOTIFICATION_POLICIES_APP_ID,
   ALERTING_V2_EPISODES_APP_ID,
+  ALERTING_V2_RULE_DOCTOR_APP_ID,
 } from './constants';
 import { NotificationPoliciesApi } from './services/notification_policies_api';
 import { RulesApi } from './services/rules_api';
+import { RuleDoctorApi } from './services/rule_doctor_api';
 import { WorkflowsApi } from './services/workflows_api';
 import { setKibanaServices } from './kibana_services';
 import { DynamicRuleFormFlyout } from './create_rule_form_flyout';
@@ -35,6 +38,7 @@ export const module = new ContainerModule(({ bind }) => {
   bind(RulesApi).toSelf().inSingletonScope();
   bind(NotificationPoliciesApi).toSelf().inSingletonScope();
   bind(WorkflowsApi).toSelf().inSingletonScope();
+  bind(RuleDoctorApi).toSelf().inSingletonScope();
   bind(Start).toConstantValue({
     DynamicRuleFormFlyout,
   } satisfies AlertingV2PublicStart);
@@ -53,6 +57,21 @@ export const module = new ContainerModule(({ bind }) => {
         expressions: diContainer.get(PluginStart('expressions')) as ExpressionsStart,
         uiActions: diContainer.get(PluginStart('uiActions')) as UiActionsStart,
       });
+
+      const agentBuilderToken = PluginStart('agentBuilder');
+      if (diContainer.isBound(agentBuilderToken)) {
+        const agentBuilder = diContainer.get(agentBuilderToken) as AgentBuilderPluginStart;
+        if (agentBuilder.attachments) {
+          import('./agent_builder/proposed_change_attachment').then(
+            ({ registerProposedChangeAttachment }) => {
+              registerProposedChangeAttachment({
+                attachments: agentBuilder.attachments,
+                container: diContainer,
+              });
+            }
+          );
+        }
+      }
     });
 
     const management = container.get(PluginSetup('management')) as ManagementSetup;
@@ -107,6 +126,20 @@ export const module = new ContainerModule(({ bind }) => {
           container: coreStart.injection.getContainer(),
           coreStart,
         });
+      },
+    });
+
+    alertingV2Section.registerApp({
+      id: ALERTING_V2_RULE_DOCTOR_APP_ID,
+      title: 'Rule Doctor',
+      order: 4,
+      async mount() {
+        const [coreStart] = await getStartServices();
+        const { paths: appPaths } = await import('./constants');
+        coreStart.application.navigateToUrl(
+          coreStart.http.basePath.prepend(appPaths.ruleDoctor)
+        );
+        return () => {};
       },
     });
   });

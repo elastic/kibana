@@ -10,6 +10,7 @@ import type { Logger } from '@kbn/logging';
 import type { ResourceManagerContract } from '../lib/services/resource_service/resource_manager';
 import { registerDatastreams } from './datastreams/register';
 import { registerEsqlViews } from './esql_views/register';
+import { registerIndices } from './indices/register';
 
 export interface InitializeResourcesOptions {
   resourceManager: ResourceManagerContract;
@@ -24,6 +25,7 @@ export function initializeResources({
 }: InitializeResourcesOptions): void {
   registerDatastreams({ resourceManager, esClient, logger });
   registerEsqlViews({ resourceManager, esClient, logger });
+  registerIndices({ resourceManager, esClient, logger });
 
   resourceManager.startInitialization();
 }

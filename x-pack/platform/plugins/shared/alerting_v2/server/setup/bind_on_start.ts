@@ -18,6 +18,8 @@ import type { AlertingServerStartDependencies } from '../types';
 import { scheduleDispatcherTask } from '../lib/dispatcher/schedule_task';
 import { scheduleTelemetryTask } from '../lib/usage/schedule_task';
 
+const LEGACY_RULE_DOCTOR_TASK_ID = 'alerting_v2:rule_doctor:1.0.0';
+
 export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
   bind(OnStart).toConstantValue(async (container) => {
     const resourceManager = container.get(ResourceManager);
@@ -34,6 +36,10 @@ export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
       resourceManager,
       esClient,
       logger,
+    });
+
+    taskManager.removeIfExists(LEGACY_RULE_DOCTOR_TASK_ID).catch((error: Error) => {
+      logger.debug(`Could not remove legacy Rule Doctor task: ${error.message}`);
     });
 
     scheduleDispatcherTask({ taskManager, resourceManager }).catch((error) => {

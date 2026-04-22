@@ -169,3 +169,4 @@ export const mountNotificationPoliciesApp = async ({
 
   return () => ReactDOM.unmountComponentAtNode(element);
 };
+

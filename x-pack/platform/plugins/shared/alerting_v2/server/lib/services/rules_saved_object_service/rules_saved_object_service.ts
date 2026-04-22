@@ -62,6 +62,7 @@ export interface RulesSavedObjectServiceContract {
     filter?: string;
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
+    namespaces?: string[];
   }): Promise<{
     saved_objects: Array<{ id: string; attributes: RuleSavedObjectAttributes }>;
     total: number;
@@ -225,12 +226,14 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
     filter,
     sortField = 'updatedAt',
     sortOrder = 'desc',
+    namespaces,
   }: {
     page: number;
     perPage: number;
     filter?: string;
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
+    namespaces?: string[];
   }) {
     return this.client.find<RuleSavedObjectAttributes>({
       type: RULE_SAVED_OBJECT_TYPE,
@@ -239,6 +242,7 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
       sortField,
       sortOrder,
       ...(filter ? { filter } : {}),
+      ...(namespaces ? { namespaces } : {}),
     });
   }
 
