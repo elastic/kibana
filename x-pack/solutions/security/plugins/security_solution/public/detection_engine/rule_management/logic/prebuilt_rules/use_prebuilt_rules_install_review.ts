@@ -6,25 +6,29 @@
  */
 
 import type { UseQueryOptions } from '@kbn/react-query';
-import type { ReviewRuleInstallationResponseBody } from '../../../../../common/api/detection_engine/prebuilt_rules';
+import type {
+  ReviewRuleInstallationResponseBody,
+  ReviewRuleInstallationField,
+} from '../../../../../common/api/detection_engine/prebuilt_rules';
 import { fullyEscapeKQLStringParam, prepareKQLStringParam } from '../../../../../common/utils/kql';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import * as i18n from '../translations';
 import { useFetchPrebuiltRulesInstallReviewQuery } from '../../api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_install_review_query';
-import type { PrebuiltRuleAssetsSortField } from '../../../../../common/api/detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route.gen';
-import type { SortOrder } from '../../../../../common/api/detection_engine/model';
+import type { PrebuiltRuleAssetsSort } from '../../../../../common/api/detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route.gen';
 import type { AddPrebuiltRulesTableFilterOptions } from '../../../rule_management_ui/components/rules_table/add_prebuilt_rules_table/add_prebuilt_rules_table_context';
 
 interface UsePrebuiltRulesInstallReviewParams {
   page: number;
   perPage: number;
   filterOptions?: AddPrebuiltRulesTableFilterOptions;
-  field?: PrebuiltRuleAssetsSortField;
-  order?: SortOrder;
+
+  sort?: PrebuiltRuleAssetsSort;
+  aggregations?: Record<string, string[]>;
+  fields?: ReviewRuleInstallationField[];
 }
 
-const ASSET_NAME_FIELD = 'security-rule.attributes.name';
-const ASSET_TAGS_FIELD = 'security-rule.attributes.tags';
+const ASSET_NAME_FIELD = 'security-rule.name';
+const ASSET_TAGS_FIELD = 'security-rule.tags';
 
 /**
  * A wrapper around useQuery provides default values to the underlying query,
@@ -43,8 +47,9 @@ export const usePrebuiltRulesInstallReview = (
       page: requestParameters.page,
       per_page: requestParameters.perPage,
       filter: buildInstallReviewKqlFilter(requestParameters.filterOptions),
-      sort_field: requestParameters.field,
-      sort_order: requestParameters.order,
+      sort: requestParameters.sort,
+      aggregations: requestParameters.aggregations,
+      fields: requestParameters.fields,
     },
     {
       onError: (error) => addError(error, { title: i18n.RULE_AND_TIMELINE_FETCH_FAILURE }),
@@ -75,9 +80,9 @@ const buildTagsClause = (tags: string[]): string => {
 };
 
 /**
- * Converts the UI filter options into a KQL string targeting the asset SO
- * attribute namespace (`security-rule.attributes.*`). Preserves the prior UI
- * semantics:
+ * Converts the UI filter options into a KQL string using the field paths that
+ * exist on the prebuilt-rule asset saved-object documents (`security-rule.*`).
+ * Preserves the UI semantics:
  *   - `name`: substring match for single terms, exact phrase match for
  *     multi-term values
  *   - `tags`: AND across all provided tags

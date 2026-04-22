@@ -112,6 +112,32 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
+    describe('Field selection', () => {
+      it('returns a reduced rule payload when `fields` is set', async () => {
+        const ruleAssets = [
+          createRuleAssetSavedObject({
+            rule_id: 'rule-fields-1',
+            version: 1,
+            name: 'Filtered fields rule',
+            tags: ['keep-me'],
+          }),
+        ];
+
+        await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
+
+        const response = await reviewPrebuiltRulesToInstall(supertest, {
+          fields: ['name'],
+        });
+
+        expect(response.rules).toHaveLength(1);
+
+        const rule = response.rules[0] as Record<string, unknown>;
+
+        expect(rule.name).toBe('Filtered fields rule');
+        expect(rule).toHaveProperty('query');
+      });
+    });
+
     describe('Pagination', () => {
       it('returns page and per_page passed in the request', async () => {
         const response = await reviewPrebuiltRulesToInstall(supertest, {
@@ -312,7 +338,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
         const response = await reviewPrebuiltRulesToInstall(supertest, {
-          filter: 'security-rule.attributes.tags: "tag-a"',
+          filter: 'security-rule.tags: "tag-a"',
         });
 
         expect(response.stats.tags).toEqual(['tag-a', 'tag-b', 'tag-c']);
@@ -552,7 +578,7 @@ export default ({ getService }: FtrProviderContext): void => {
             await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
             const response = await reviewPrebuiltRulesToInstall(supertest, {
-              filter: 'security-rule.attributes.name: "My rule 1"',
+              filter: 'security-rule.name: "My rule 1"',
             });
 
             expect(response.rules).toEqual([
@@ -569,7 +595,7 @@ export default ({ getService }: FtrProviderContext): void => {
             await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
             const response = await reviewPrebuiltRulesToInstall(supertest, {
-              filter: 'security-rule.attributes.name.keyword: *rule*',
+              filter: 'security-rule.name.keyword: *rule*',
             });
 
             expect(response.rules).toHaveLength(3);
@@ -591,7 +617,7 @@ export default ({ getService }: FtrProviderContext): void => {
             await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
             const response = await reviewPrebuiltRulesToInstall(supertest, {
-              filter: 'security-rule.attributes.name: "mY rulE 1"',
+              filter: 'security-rule.name: "mY rulE 1"',
             });
 
             expect(response.rules).toEqual([
@@ -621,7 +647,7 @@ export default ({ getService }: FtrProviderContext): void => {
             await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
             const singleTagResponse = await reviewPrebuiltRulesToInstall(supertest, {
-              filter: 'security-rule.attributes.tags: "tag-b"',
+              filter: 'security-rule.tags: "tag-b"',
             });
 
             expect(singleTagResponse.rules).toHaveLength(2);
@@ -657,7 +683,7 @@ export default ({ getService }: FtrProviderContext): void => {
             await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
             const singleTagResponse = await reviewPrebuiltRulesToInstall(supertest, {
-              filter: 'security-rule.attributes.tags: "tag-d"',
+              filter: 'security-rule.tags: "tag-d"',
             });
 
             expect(singleTagResponse.rules).toEqual([]);
@@ -683,8 +709,7 @@ export default ({ getService }: FtrProviderContext): void => {
             await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
             const multipleTagsResponse = await reviewPrebuiltRulesToInstall(supertest, {
-              filter:
-                '(security-rule.attributes.tags: "tag-a") AND (security-rule.attributes.tags: "tag-b")',
+              filter: '(security-rule.tags: "tag-a") AND (security-rule.tags: "tag-b")',
             });
 
             expect(multipleTagsResponse.rules).toEqual([
@@ -713,8 +738,7 @@ export default ({ getService }: FtrProviderContext): void => {
             await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
             const multipleTagsResponse = await reviewPrebuiltRulesToInstall(supertest, {
-              filter:
-                '(security-rule.attributes.tags: "tag-a") AND (security-rule.attributes.tags: "tag-c")',
+              filter: '(security-rule.tags: "tag-a") AND (security-rule.tags: "tag-c")',
             });
 
             expect(multipleTagsResponse.rules).toEqual([]);
@@ -757,7 +781,7 @@ export default ({ getService }: FtrProviderContext): void => {
               await createPrebuiltRuleAssetSavedObjects(es, [ruleAsset]);
 
               const response = await reviewPrebuiltRulesToInstall(supertest, {
-                filter: `security-rule.attributes.tags: "${tag.replace(/"/g, '\\"')}"`,
+                filter: `security-rule.tags: "${tag.replace(/"/g, '\\"')}"`,
               });
               expect(response.rules).toEqual([
                 expect.objectContaining({
@@ -780,7 +804,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
           const response = await reviewPrebuiltRulesToInstall(supertest, {
-            filter: 'security-rule.attributes.name.keyword: *Rule*',
+            filter: 'security-rule.name.keyword: *Rule*',
           });
 
           expect(response).toMatchObject({
@@ -818,7 +842,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
           const response = await reviewPrebuiltRulesToInstall(supertest, {
-            filter: 'security-rule.attributes.tags: "tag-a"',
+            filter: 'security-rule.tags: "tag-a"',
           });
 
           expect(response).toMatchObject({
@@ -856,7 +880,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const response = await reviewPrebuiltRulesToInstall(supertest, {
           sort_field: 'name',
           sort_order: 'desc',
-          filter: 'security-rule.attributes.tags: "tag-b"',
+          filter: 'security-rule.tags: "tag-b"',
         });
 
         expect(response.rules).toEqual([
@@ -906,7 +930,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
         const response = await reviewPrebuiltRulesToInstall(supertest, {
-          filter: 'security-rule.attributes.tags: "tag-a"',
+          filter: 'security-rule.tags: "tag-a"',
           search: { term: 'phishing', mode: 'legacy' },
         });
 
@@ -942,7 +966,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const response = (await reviewPrebuiltRulesToInstall(
           supertest,
           {
-            filter: 'security-rule.attributes.name: (',
+            filter: 'security-rule.name: (',
           },
           400
         )) as unknown as { status_code: number; message: string[] };
@@ -1065,7 +1089,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
         const response = await reviewPrebuiltRulesToInstall(supertest, {
-          filter: 'security-rule.attributes.tags: "tag-a"',
+          filter: 'security-rule.tags: "tag-a"',
           aggregations: { counts: ['tags'] },
         });
 
@@ -1074,6 +1098,35 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(tagsCounts).toBeDefined();
         expect(tagsCounts?.['tag-a']).toBe(2);
         expect(tagsCounts?.['tag-b']).toBeUndefined();
+      });
+
+      it('facet tag counts exclude rules that are already installed', async () => {
+        const ruleAssets = [
+          createRuleAssetSavedObject({
+            rule_id: 'rule-1',
+            tags: ['tag-only-on-installed-rule'],
+          }),
+          createRuleAssetSavedObject({
+            rule_id: 'rule-2',
+            tags: ['tag-on-installable-rule'],
+          }),
+        ];
+        await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
+
+        await installPrebuiltRules(es, supertest, [{ rule_id: 'rule-1', version: 1 }]);
+
+        const response = await reviewPrebuiltRulesToInstall(supertest, {
+          aggregations: { counts: ['tags'] },
+        });
+
+        expect(response.total).toBe(1);
+        expect(response.rules).toEqual([expect.objectContaining({ rule_id: 'rule-2' })]);
+        expect(response.stats.num_rules_to_install).toBe(1);
+
+        const tagsCounts = response.counts?.tags as Record<string, number> | undefined;
+        expect(tagsCounts).toBeDefined();
+        expect(tagsCounts?.['tag-only-on-installed-rule']).toBeUndefined();
+        expect(tagsCounts?.['tag-on-installable-rule']).toBe(1);
       });
 
       it('returns 400 when aggregations.counts contains duplicates', async () => {

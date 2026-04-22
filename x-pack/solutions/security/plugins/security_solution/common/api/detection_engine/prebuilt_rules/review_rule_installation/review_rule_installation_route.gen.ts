@@ -21,10 +21,92 @@ import {
   FacetCounts,
 } from '../../rule_management/granular_rules_contract.gen';
 import { SortOrder } from '../../model/sorting.gen';
-import { SearchRulesSearchAfterItem } from '../../rule_management/search_rules/search_rules_route.gen';
 import { RuleTagArray } from '../../model/rule_schema/common_attributes.gen';
 import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
 import { WarningSchema } from '../../model/warning_schema.gen';
+
+/**
+  * Top-level key from detection rule API responses (`RuleResponse`). Covers common and type-specific
+rule fields that may appear when reviewing installable prebuilt rules.
+
+  */
+export type ReviewRuleInstallationField = z.infer<typeof ReviewRuleInstallationField>;
+export const ReviewRuleInstallationField = z.enum([
+  'actions',
+  'alias_purpose',
+  'alias_target_id',
+  'alert_suppression',
+  'anomaly_threshold',
+  'author',
+  'building_block_type',
+  'concurrent_searches',
+  'created_at',
+  'created_by',
+  'data_view_id',
+  'description',
+  'enabled',
+  'event_category_override',
+  'exceptions_list',
+  'execution_summary',
+  'false_positives',
+  'filters',
+  'from',
+  'history_window_start',
+  'id',
+  'immutable',
+  'index',
+  'investigation_fields',
+  'items_per_search',
+  'interval',
+  'language',
+  'license',
+  'machine_learning_job_id',
+  'max_signals',
+  'meta',
+  'name',
+  'namespace',
+  'new_terms_fields',
+  'note',
+  'outcome',
+  'output_index',
+  'query',
+  'references',
+  'related_integrations',
+  'required_fields',
+  'response_actions',
+  'revision',
+  'risk_score',
+  'risk_score_mapping',
+  'rule_id',
+  'rule_name_override',
+  'rule_source',
+  'saved_id',
+  'severity',
+  'severity_mapping',
+  'setup',
+  'tags',
+  'threat',
+  'threat_filters',
+  'threat_index',
+  'threat_indicator_path',
+  'threat_language',
+  'threat_mapping',
+  'threat_query',
+  'throttle',
+  'tiebreaker_field',
+  'timeline_id',
+  'timeline_title',
+  'timestamp_field',
+  'timestamp_override',
+  'timestamp_override_fallback_disabled',
+  'to',
+  'type',
+  'updated_at',
+  'updated_by',
+  'version',
+]);
+export type ReviewRuleInstallationFieldEnum = typeof ReviewRuleInstallationField.enum;
+export const ReviewRuleInstallationFieldEnum = ReviewRuleInstallationField.enum;
 
 /**
  * Field to sort prebuilt rule assets by.
@@ -35,8 +117,33 @@ export type PrebuiltRuleAssetsSortFieldEnum = typeof PrebuiltRuleAssetsSortField
 export const PrebuiltRuleAssetsSortFieldEnum = PrebuiltRuleAssetsSortField.enum;
 
 /**
-  * Facet categories available for prebuilt rule asset aggregations. Only
-attributes that exist on the asset saved object are supported.
+  * One sort criterion. Only `name`, `risk_score`, and `severity` are valid for `sort_field`.
+
+  */
+export type PrebuiltRuleAssetsSortItem = z.infer<typeof PrebuiltRuleAssetsSortItem>;
+export const PrebuiltRuleAssetsSortItem = z
+  .object({
+    /**
+     * Field to sort by.
+     */
+    sort_field: PrebuiltRuleAssetsSortField,
+    /**
+     * Sort order.
+     */
+    sort_order: SortOrder,
+  })
+  .strict();
+
+/**
+  * Ordered multi-field sort for prebuilt rule assets. Only `name`, `risk_score`, and `severity`
+may appear as `sort_field` values (see `PrebuiltRuleAssetsSortField`).
+
+  */
+export type PrebuiltRuleAssetsSort = z.infer<typeof PrebuiltRuleAssetsSort>;
+export const PrebuiltRuleAssetsSort = z.array(PrebuiltRuleAssetsSortItem).min(1);
+
+/**
+  * Facet categories available for prebuilt rule asset aggregations.
 
   */
 export type PrebuiltRuleAssetsFacetCategory = z.infer<typeof PrebuiltRuleAssetsFacetCategory>;
@@ -54,50 +161,6 @@ export const PrebuiltRuleAssetsAggregations = z
      * Facet categories for which to compute counts over the filtered + searched set.
      */
     counts: z.array(PrebuiltRuleAssetsFacetCategory).optional(),
-  })
-  .strict();
-
-export type ReviewRuleInstallationRequestBody = z.infer<typeof ReviewRuleInstallationRequestBody>;
-export const ReviewRuleInstallationRequestBody = z
-  .object({
-    /**
-     * Page number starting from 1. Ignored when `search_after` is provided.
-     */
-    page: z.number().int().min(1).optional().default(1),
-    /**
-     * Rules per page.
-     */
-    per_page: z.number().int().min(1).max(10000).optional().default(20),
-    /**
-      * KQL filter string applied to prebuilt rule assets. Must use the
-native `security-rule.attributes.*` field namespace.
-
-      */
-    filter: z.string().optional(),
-    /**
-     * Free-text search combined with the KQL `filter`.
-     */
-    search: GranularRulesSearch.optional(),
-    /**
-      * Aggregation options (facet counts) computed over the filtered set of
-installable rules.
-
-      */
-    aggregations: PrebuiltRuleAssetsAggregations.optional(),
-    /**
-     * Field to sort by.
-     */
-    sort_field: PrebuiltRuleAssetsSortField.optional(),
-    /**
-     * Sort order. Required when `sort_field` is set.
-     */
-    sort_order: SortOrder.optional(),
-    /**
-      * Elasticsearch-style `search_after` tiebreaker values. Requires
-`sort_field` and `sort_order`. When set, `page` is ignored.
-
-      */
-    search_after: z.array(SearchRulesSearchAfterItem).min(1).optional(),
   })
   .strict();
 
@@ -143,13 +206,6 @@ export const ReviewRuleInstallationResponseBody = z
      */
     counts: FacetCounts.optional(),
     /**
-      * Sort values of the last hit on this page, for use as `search_after`
-on the next request. Only included when the request used
-`search_after` or when deep pagination applies.
-
-      */
-    search_after: z.array(SearchRulesSearchAfterItem).optional(),
-    /**
      * Warnings produced while serving the request.
      */
     warnings: z.array(WarningSchema).optional(),
@@ -157,7 +213,44 @@ on the next request. Only included when the request used
   .strict();
 
 export type ReviewRuleInstallationRequestBody = z.infer<typeof ReviewRuleInstallationRequestBody>;
-export const ReviewRuleInstallationRequestBody = ReviewRuleInstallationRequestBody;
+export const ReviewRuleInstallationRequestBody = z
+  .object({
+    /**
+     * Page number starting from 1.
+     */
+    page: z.number().int().min(1).optional().default(1),
+    /**
+     * Rules per page.
+     */
+    per_page: z.number().int().min(1).max(10000).optional().default(20),
+    /**
+     * KQL filter string applied to prebuilt rule assets.
+     */
+    filter: z.string().optional(),
+    /**
+     * Free-text search.
+     */
+    search: GranularRulesSearch.optional(),
+    /**
+      * Aggregation options computed over the filtered set of
+installable rules.
+
+      */
+    aggregations: PrebuiltRuleAssetsAggregations.optional(),
+    /**
+      * Ordered sort criteria (only `name`, `risk_score`, and `severity` as `sort_field` values).
+
+      */
+    sort: PrebuiltRuleAssetsSort.optional(),
+    /**
+      * Subset of top-level `RuleResponse` keys used to narrow Elasticsearch `_source` for each
+prebuilt-rule saved object (snake_case, as in the REST payload). The server merges a small
+baseline attribute set so rule payloads remain convertible. Omit to fetch full assets.
+
+      */
+    fields: z.array(ReviewRuleInstallationField).optional(),
+  })
+  .strict();
 export type ReviewRuleInstallationRequestBodyInput = z.input<
   typeof ReviewRuleInstallationRequestBody
 >;

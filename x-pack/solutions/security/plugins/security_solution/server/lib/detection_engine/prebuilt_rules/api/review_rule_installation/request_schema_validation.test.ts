@@ -11,10 +11,6 @@ import {
   MAX_SEARCH_RULES_SEARCH_TERM_LENGTH,
 } from '../../../rule_management/api/rules/search_rules/request_schema_validation';
 
-/** Mirrors {@link FIND_RULES_SORT_FIELD_ORDER_COEXIST_MESSAGE} in find-rules query validation. */
-const SORT_FIELD_ORDER_COEXIST_MESSAGE =
-  'when "sort_order" and "sort_field" must exist together or not at all';
-
 describe('validateReviewRuleInstallationRequestBody', () => {
   const defaultInput = {
     page: 1,
@@ -25,7 +21,16 @@ describe('validateReviewRuleInstallationRequestBody', () => {
     expect(validateReviewRuleInstallationRequestBody(defaultInput)).toEqual([]);
   });
 
-  it('accepts a valid KQL filter using security-rule.attributes.*', () => {
+  it('accepts a valid KQL filter using flattened security-rule.* paths', () => {
+    expect(
+      validateReviewRuleInstallationRequestBody({
+        ...defaultInput,
+        filter: 'security-rule.tags: "tag-a"',
+      })
+    ).toEqual([]);
+  });
+
+  it('accepts legacy security-rule.attributes.* filter strings (syntax only)', () => {
     expect(
       validateReviewRuleInstallationRequestBody({
         ...defaultInput,
@@ -37,7 +42,7 @@ describe('validateReviewRuleInstallationRequestBody', () => {
   it('rejects a syntactically invalid KQL filter', () => {
     const errors = validateReviewRuleInstallationRequestBody({
       ...defaultInput,
-      filter: 'security-rule.attributes.name: (',
+      filter: 'security-rule.name: (',
     });
     expect(errors.some((e) => e.startsWith('invalid KQL filter'))).toBe(true);
   });
@@ -52,50 +57,20 @@ describe('validateReviewRuleInstallationRequestBody', () => {
     ).toEqual([`filter exceeds maximum length of ${MAX_SEARCH_RULES_FILTER_KQL_LENGTH}`]);
   });
 
-  it('rejects sort_field without sort_order', () => {
+  it('accepts sort as a non-empty array of criteria', () => {
     expect(
       validateReviewRuleInstallationRequestBody({
         ...defaultInput,
-        sort_field: 'name',
-      })
-    ).toContain(SORT_FIELD_ORDER_COEXIST_MESSAGE);
-  });
-
-  it('rejects sort_order without sort_field', () => {
-    expect(
-      validateReviewRuleInstallationRequestBody({
-        ...defaultInput,
-        sort_order: 'asc',
-      })
-    ).toContain(SORT_FIELD_ORDER_COEXIST_MESSAGE);
-  });
-
-  it('accepts sort_field and sort_order together', () => {
-    expect(
-      validateReviewRuleInstallationRequestBody({
-        ...defaultInput,
-        sort_field: 'name',
-        sort_order: 'asc',
+        sort: [{ sort_field: 'name', sort_order: 'asc' }],
       })
     ).toEqual([]);
   });
 
-  it('rejects search_after without sort_field and sort_order', () => {
+  it('accepts fields parameter', () => {
     expect(
       validateReviewRuleInstallationRequestBody({
         ...defaultInput,
-        search_after: ['cursor'],
-      })
-    ).toContain('when search_after is provided, sort_field and sort_order must be set');
-  });
-
-  it('accepts search_after when sort_field and sort_order are set', () => {
-    expect(
-      validateReviewRuleInstallationRequestBody({
-        ...defaultInput,
-        sort_field: 'name',
-        sort_order: 'asc',
-        search_after: ['cursor'],
+        fields: ['name', 'tags'],
       })
     ).toEqual([]);
   });
@@ -121,7 +96,6 @@ describe('validateReviewRuleInstallationRequestBody', () => {
   it('rejects unsupported search.mode', () => {
     const errors = validateReviewRuleInstallationRequestBody({
       ...defaultInput,
-      // Runtime object is intentionally not limited to the wire `search.mode` union.
       search: JSON.parse('{"term":"x","mode":"vector"}'),
     });
     expect(errors).toContain('unsupported search.mode "vector"');

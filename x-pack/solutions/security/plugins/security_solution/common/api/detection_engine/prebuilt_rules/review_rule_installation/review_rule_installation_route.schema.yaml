@@ -17,7 +17,43 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ReviewRuleInstallationRequestBody'
+              type: object
+              additionalProperties: false
+              properties:
+                page:
+                  type: integer
+                  minimum: 1
+                  default: 1
+                  description: Page number starting from 1.
+                per_page:
+                  type: integer
+                  minimum: 1
+                  maximum: 10000
+                  default: 20
+                  description: Rules per page.
+                filter:
+                  type: string
+                  description: KQL filter string applied to prebuilt rule assets.
+                search:
+                  description: Free-text search.
+                  $ref: '../../rule_management/granular_rules_contract.schema.yaml#/components/schemas/GranularRulesSearch'
+                aggregations:
+                  description: |
+                    Aggregation options computed over the filtered set of
+                    installable rules.
+                  $ref: '#/components/schemas/PrebuiltRuleAssetsAggregations'
+                sort:
+                  description: |
+                    Ordered sort criteria (only `name`, `risk_score`, and `severity` as `sort_field` values).
+                  $ref: '#/components/schemas/PrebuiltRuleAssetsSort'
+                fields:
+                  type: array
+                  description: |
+                    Subset of top-level `RuleResponse` keys used to narrow Elasticsearch `_source` for each
+                    prebuilt-rule saved object (snake_case, as in the REST payload). The server merges a small
+                    baseline attribute set so rule payloads remain convertible. Omit to fetch full assets.
+                  items:
+                    $ref: '#/components/schemas/ReviewRuleInstallationField'
       responses:
         '200':
           description: Indicates a successful call
@@ -27,6 +63,85 @@ paths:
                 $ref: '#/components/schemas/ReviewRuleInstallationResponseBody'
 components:
   schemas:
+    ReviewRuleInstallationField:
+      type: string
+      description: |
+        Top-level key from detection rule API responses (`RuleResponse`). Covers common and type-specific
+        rule fields that may appear when reviewing installable prebuilt rules.
+      enum:
+        - actions
+        - alias_purpose
+        - alias_target_id
+        - alert_suppression
+        - anomaly_threshold
+        - author
+        - building_block_type
+        - concurrent_searches
+        - created_at
+        - created_by
+        - data_view_id
+        - description
+        - enabled
+        - event_category_override
+        - exceptions_list
+        - execution_summary
+        - false_positives
+        - filters
+        - from
+        - history_window_start
+        - id
+        - immutable
+        - index
+        - investigation_fields
+        - items_per_search
+        - interval
+        - language
+        - license
+        - machine_learning_job_id
+        - max_signals
+        - meta
+        - name
+        - namespace
+        - new_terms_fields
+        - note
+        - outcome
+        - output_index
+        - query
+        - references
+        - related_integrations
+        - required_fields
+        - response_actions
+        - revision
+        - risk_score
+        - risk_score_mapping
+        - rule_id
+        - rule_name_override
+        - rule_source
+        - saved_id
+        - severity
+        - severity_mapping
+        - setup
+        - tags
+        - threat
+        - threat_filters
+        - threat_index
+        - threat_indicator_path
+        - threat_language
+        - threat_mapping
+        - threat_query
+        - throttle
+        - tiebreaker_field
+        - timeline_id
+        - timeline_title
+        - timestamp_field
+        - timestamp_override
+        - timestamp_override_fallback_disabled
+        - to
+        - type
+        - updated_at
+        - updated_by
+        - version
+
     PrebuiltRuleAssetsSortField:
       type: string
       description: Field to sort prebuilt rule assets by.
@@ -34,6 +149,31 @@ components:
         - name
         - risk_score
         - severity
+
+    PrebuiltRuleAssetsSortItem:
+      type: object
+      additionalProperties: false
+      description: |
+        One sort criterion. Only `name`, `risk_score`, and `severity` are valid for `sort_field`.
+      required:
+        - sort_field
+        - sort_order
+      properties:
+        sort_field:
+          description: Field to sort by.
+          $ref: '#/components/schemas/PrebuiltRuleAssetsSortField'
+        sort_order:
+          description: Sort order.
+          $ref: '../../model/sorting.schema.yaml#/components/schemas/SortOrder'
+
+    PrebuiltRuleAssetsSort:
+      type: array
+      description: |
+        Ordered multi-field sort for prebuilt rule assets. Only `name`, `risk_score`, and `severity`
+        may appear as `sort_field` values (see `PrebuiltRuleAssetsSortField`).
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/PrebuiltRuleAssetsSortItem'
 
     PrebuiltRuleAssetsFacetCategory:
       type: string
@@ -53,47 +193,6 @@ components:
           description: Facet categories for which to compute counts over the filtered + searched set.
           items:
             $ref: '#/components/schemas/PrebuiltRuleAssetsFacetCategory'
-
-    ReviewRuleInstallationRequestBody:
-      type: object
-      additionalProperties: false
-      properties:
-        page:
-          type: integer
-          minimum: 1
-          default: 1
-          description: Page number starting from 1. Ignored when `search_after` is provided.
-        per_page:
-          type: integer
-          minimum: 1
-          maximum: 10000
-          default: 20
-          description: Rules per page.
-        filter:
-          type: string
-          description: KQL filter string applied to prebuilt rule assets.
-        search:
-          description: Free-text search.
-          $ref: '../../rule_management/granular_rules_contract.schema.yaml#/components/schemas/GranularRulesSearch'
-        aggregations:
-          description: |
-            Aggregation options computed over the filtered set of
-            installable rules.
-          $ref: '#/components/schemas/PrebuiltRuleAssetsAggregations'
-        sort_field:
-          description: Field to sort by.
-          $ref: '#/components/schemas/PrebuiltRuleAssetsSortField'
-        sort_order:
-          description: Sort order. Required when `sort_field` is set.
-          $ref: '../../model/sorting.schema.yaml#/components/schemas/SortOrder'
-        search_after:
-          type: array
-          minItems: 1
-          description: |
-            Elasticsearch `search_after` tiebreaker values. Requires
-            `sort_field` and `sort_order`. When set, `page` is ignored.
-          items:
-            $ref: '../../rule_management/search_rules/search_rules_route.schema.yaml#/components/schemas/SearchRulesSearchAfterItem'
 
     RuleInstallationStatsForReview:
       type: object
@@ -134,14 +233,6 @@ components:
         counts:
           description: Facet counts per category requested in `aggregations.counts`.
           $ref: '../../rule_management/granular_rules_contract.schema.yaml#/components/schemas/FacetCounts'
-        search_after:
-          type: array
-          description: |
-            Sort values of the last hit on this page, for use as `search_after`
-            on the next request. Only included when the request used
-            `search_after` or when deep pagination applies.
-          items:
-            $ref: '../../rule_management/search_rules/search_rules_route.schema.yaml#/components/schemas/SearchRulesSearchAfterItem'
         warnings:
           type: array
           description: Warnings produced while serving the request.

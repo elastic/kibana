@@ -12,7 +12,6 @@ import type { Logger } from '@kbn/core/server';
 import {
   REVIEW_RULE_INSTALLATION_URL,
   ReviewRuleInstallationRequestBody as ReviewRuleInstallationRequestBodySchema,
-  validateReviewRuleInstallationRequestBody,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { routeLimitedConcurrencyTag } from '../../../../../utils/route_limited_concurrency_tag';
@@ -22,6 +21,7 @@ import {
 } from '../../constants';
 import { buildSiemResponse } from '../../../routes/utils';
 import { reviewRuleInstallationHandler } from './review_rule_installation_handler';
+import { validateReviewRuleInstallationRequestBody } from './request_schema_validation';
 
 export const reviewRuleInstallationRoute = (
   router: SecuritySolutionPluginRouter,

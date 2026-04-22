@@ -6,13 +6,34 @@
  */
 
 import type { SavedObjectsClientContract, SavedObjectsRawDocSource } from '@kbn/core/server';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import type {
+  AggregationsAggregationContainer,
+  QueryDslQueryContainer,
+  Sort,
+} from '@elastic/elasticsearch/lib/api/types';
 import { invariant } from '../../../../../../../../common/utils/invariant';
-import { MAX_PREBUILT_RULES_COUNT } from '../../../../../rule_management/logic/search/get_existing_prepackaged_rules';
 import type { PrebuiltRuleAsset } from '../../../../model/rule_assets/prebuilt_rule_asset';
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../prebuilt_rule_assets_type';
 import { validatePrebuiltRuleAssets } from '../../prebuilt_rule_assets_validation';
 import type { RuleVersionSpecifier } from '../../../rule_versions/rule_version_specifier';
 import { getPrebuiltRuleAssetSoId, getPrebuiltRuleAssetsSearchNamespace } from '../utils';
+
+export interface FetchAssetsByVersionSearchParams {
+  filter?: string;
+  aggs?: Record<string, AggregationsAggregationContainer>;
+  sort?: Sort;
+  trackTotalHits?: boolean;
+  page?: number;
+  perPage?: number;
+  fields?: string[];
+}
+
+export interface FetchAssetsByVersionResult {
+  assets: PrebuiltRuleAsset[];
+  total?: number;
+  aggregations?: Record<string, AggregationsAggregationContainer>;
+}
 
 /**
  * Fetches prebuilt rule assets for specified rule versions.
@@ -22,15 +43,20 @@ import { getPrebuiltRuleAssetSoId, getPrebuiltRuleAssetsSearchNamespace } from '
  *
  * @param savedObjectsClient - The saved objects client used to query the saved objects store
  * @param versions - An array of rule version specifiers, each containing a rule_id and version.
+ * @param params - Optional search options (e.g. `aggs`, `sort`, `_source`) merged into the underlying SO search.
  * @returns A promise that resolves to an array of prebuilt rule assets.
  */
 export async function fetchAssetsByVersion(
   savedObjectsClient: SavedObjectsClientContract,
-  versions: RuleVersionSpecifier[]
-): Promise<PrebuiltRuleAsset[]> {
+  versions: RuleVersionSpecifier[],
+  params?: FetchAssetsByVersionSearchParams
+): Promise<FetchAssetsByVersionResult> {
   if (versions.length === 0) {
     // NOTE: without early return it would build incorrect filter and fetch all existing saved objects
-    return [];
+    return {
+      assets: [],
+      total: 0,
+    };
   }
 
   const soIds = versions.map((version) =>
@@ -44,19 +70,13 @@ export async function fetchAssetsByVersion(
   >({
     type: PREBUILT_RULE_ASSETS_SO_TYPE,
     namespaces: getPrebuiltRuleAssetsSearchNamespace(savedObjectsClient),
-    size: MAX_PREBUILT_RULES_COUNT,
-    query: {
-      bool: {
-        must: {
-          terms: {
-            _id: soIds,
-          },
-        },
-        must_not: {
-          term: { [`${PREBUILT_RULE_ASSETS_SO_TYPE}.deprecated`]: true },
-        },
-      },
-    },
+    query: buildQuery(soIds, params?.filter),
+    fields: ['enabled'],
+    track_total_hits: params?.trackTotalHits,
+    size: params?.perPage,
+    from: params?.page && params.perPage ? (params.page - 1) * params.perPage : undefined,
+    sort: params?.sort,
+    aggs: params?.aggs,
   });
 
   const ruleAssets = searchResult.hits.hits.map((hit) => {
@@ -67,16 +87,41 @@ export async function fetchAssetsByVersion(
     return savedObject;
   });
 
-  // Ensure the order of the returned assets matches the order of the "versions" argument.
-  const ruleAssetsMap = new Map<string, PrebuiltRuleAsset>();
-  for (const asset of ruleAssets) {
-    const key = getPrebuiltRuleAssetSoId(asset.rule_id, asset.version);
-    ruleAssetsMap.set(key, asset);
+  return {
+    assets: validatePrebuiltRuleAssets(ruleAssets),
+    total:
+      typeof searchResult.hits.total === 'number'
+        ? searchResult.hits.total
+        : searchResult.hits.total?.value,
+    aggregations: searchResult.aggregations as Record<string, AggregationsAggregationContainer>,
+  };
+}
+
+const buildQuery = (soIds: string[], filter: string | undefined): QueryDslQueryContainer => {
+  const must: QueryDslQueryContainer[] = [
+    {
+      terms: {
+        _id: soIds,
+      },
+    },
+  ];
+
+  if (filter && filter.trim() !== '') {
+    try {
+      const kqlDsl = toElasticsearchQuery(fromKueryExpression(filter));
+      must.push(kqlDsl);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      throw new Error(`Invalid KQL filter: ${message}`);
+    }
   }
 
-  const orderedRuleAssets = soIds
-    .map((soId) => ruleAssetsMap.get(soId))
-    .filter((asset) => asset !== undefined);
-
-  return validatePrebuiltRuleAssets(orderedRuleAssets);
-}
+  return {
+    bool: {
+      must,
+      must_not: {
+        term: { [`${PREBUILT_RULE_ASSETS_SO_TYPE}.deprecated`]: true },
+      },
+    },
+  };
+};

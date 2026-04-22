@@ -2941,12 +2941,8 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * Returns the set of prebuilt detection rule assets that can be installed,
-paginated, optionally filtered with a KQL filter, free-text `search`
-term, facet `aggregations`, and ordered by `sort_field`/`sort_order` or
-paged with `search_after`.
-
-    */
+   * Lists prebuilt detection rules that can be installed
+   */
   async reviewRuleInstallation(props: ReviewRuleInstallationProps) {
     this.log.info(`${new Date().toISOString()} Calling API ReviewRuleInstallation`);
     return this.kbnClient

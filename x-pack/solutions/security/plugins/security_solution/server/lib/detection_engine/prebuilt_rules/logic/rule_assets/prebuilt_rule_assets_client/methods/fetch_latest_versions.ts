@@ -10,13 +10,15 @@ import type {
   SearchHitsMetadata,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract, SavedObjectsRawDocSource } from '@kbn/core/server';
+import type { PrebuiltRuleAssetsSort } from '../../../../../../../../common/api/detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route.gen';
 import { invariant } from '../../../../../../../../common/utils/invariant';
 import { MAX_PREBUILT_RULES_COUNT } from '../../../../../rule_management/logic/search/get_existing_prepackaged_rules';
 import type { BasicRuleInfo } from '../../../basic_rule_info';
 import type { RuleVersionSpecifier } from '../../../rule_versions/rule_version_specifier';
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../prebuilt_rule_assets_type';
 import {
-  prepareLatestVersionsFilter,
+  prepareQueryDslFilter,
+  prepareQueryDslSort,
   getPrebuiltRuleAssetSoId,
   getPrebuiltRuleAssetsSearchNamespace,
 } from '../utils';
@@ -35,9 +37,11 @@ export async function fetchLatestVersions(
   savedObjectsClient: SavedObjectsClientContract,
   queryParameters?: {
     ruleIds?: string[];
+    sort?: PrebuiltRuleAssetsSort;
+    filter?: string;
   }
 ): Promise<BasicRuleInfo[]> {
-  const { ruleIds } = queryParameters || {};
+  const { ruleIds, sort, filter } = queryParameters || {};
 
   if (ruleIds && ruleIds.length === 0) {
     return [];
@@ -46,21 +50,23 @@ export async function fetchLatestVersions(
   // First, fetch the latest version numbers for each rule_id.
   const latestVersionSpecifiers: RuleVersionSpecifier[] = await fetchLatestVersionSpecifiers(
     savedObjectsClient,
-    ruleIds
+    ruleIds,
+    filter
   );
 
-  // Then, fetch the rule type for each latest version.
+  // Then, fetch the rule type for each latest version and sort the result.
   const soIds = latestVersionSpecifiers.map((rule) =>
     getPrebuiltRuleAssetSoId(rule.rule_id, rule.version)
   );
-  const latestVersions = await fetchVersionsBySoIds(savedObjectsClient, soIds);
+  const latestVersions = await fetchVersionsBySoIds(savedObjectsClient, soIds, sort);
 
   return latestVersions;
 }
 
 async function fetchLatestVersionSpecifiers(
   savedObjectsClient: SavedObjectsClientContract,
-  ruleIds?: string[]
+  ruleIds?: string[],
+  filter?: string
 ) {
   const latestVersionSpecifiersResult = await savedObjectsClient.search<
     SavedObjectsRawDocSource,
@@ -80,7 +86,7 @@ async function fetchLatestVersionSpecifiers(
     size: 0,
     query: {
       bool: {
-        filter: prepareLatestVersionsFilter(ruleIds),
+        filter: prepareQueryDslFilter(ruleIds, filter),
       },
     },
     aggs: {
@@ -133,7 +139,8 @@ async function fetchLatestVersionSpecifiers(
 
 async function fetchVersionsBySoIds(
   savedObjectsClient: SavedObjectsClientContract,
-  soIds: string[]
+  soIds: string[],
+  sort?: PrebuiltRuleAssetsSort
 ) {
   const searchResult = await savedObjectsClient.search<
     SavedObjectsRawDocSource & {
@@ -143,11 +150,21 @@ async function fetchVersionsBySoIds(
     type: PREBUILT_RULE_ASSETS_SO_TYPE,
     namespaces: getPrebuiltRuleAssetsSearchNamespace(savedObjectsClient),
     size: MAX_PREBUILT_RULES_COUNT,
+    runtime_mappings: {
+      [`${PREBUILT_RULE_ASSETS_SO_TYPE}.severity_rank`]: {
+        type: 'long',
+        script: {
+          source: `emit(params.rank.getOrDefault(doc['${PREBUILT_RULE_ASSETS_SO_TYPE}.severity'].value, 0))`,
+          params: { rank: { low: 20, medium: 40, high: 60, critical: 80 } },
+        },
+      },
+    },
     query: {
       terms: {
         _id: soIds,
       },
     },
+    sort: prepareQueryDslSort(sort),
     _source: [
       `${PREBUILT_RULE_ASSETS_SO_TYPE}.rule_id`,
       `${PREBUILT_RULE_ASSETS_SO_TYPE}.version`,
