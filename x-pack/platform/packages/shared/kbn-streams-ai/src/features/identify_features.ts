@@ -29,6 +29,17 @@ export interface PreviouslyIdentifiedFeature {
   description?: string;
   properties: Record<string, unknown>;
 }
+
+export const toPreviouslyIdentifiedFeature = (
+  feature: BaseFeature
+): PreviouslyIdentifiedFeature => ({
+  id: feature.id,
+  type: feature.type,
+  subtype: feature.subtype,
+  title: feature.title,
+  description: feature.description,
+  properties: feature.properties,
+});
 export type { IgnoredFeature } from '@kbn/streams-schema';
 
 export interface ExcludedFeatureSummary {
