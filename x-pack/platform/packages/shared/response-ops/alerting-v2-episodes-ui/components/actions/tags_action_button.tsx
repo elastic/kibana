@@ -18,7 +18,6 @@ export function AlertEpisodeTagsMenuItem({ isDisabled, onOpen }: AlertEpisodeTag
   return (
     <EuiListGroupItem
       label={i18n.TAGS_ACTION_EDIT_TAGS}
-      size="s"
       iconType="tag"
       onClick={onOpen}
       isDisabled={isDisabled}

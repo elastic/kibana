@@ -129,7 +129,7 @@ export function AlertEpisodeActions({
             anchorPosition="downLeft"
             panelPaddingSize="s"
           >
-            <EuiListGroup gutterSize="none" bordered={false} flush={true} size="l">
+            <EuiListGroup bordered={false} flush={true} size="l">
               <AlertEpisodeResolveActionButton
                 lastDeactivateAction={groupAction?.lastDeactivateAction}
                 groupHash={groupHash}
@@ -145,7 +145,6 @@ export function AlertEpisodeActions({
               {openInDiscoverHref && (
                 <EuiListGroupItem
                   label={i18n.ACTIONS_OPEN_IN_DISCOVER_LABEL}
-                  size="s"
                   iconType="discoverApp"
                   href={openInDiscoverHref}
                   onClick={() => setIsMoreOpen(false)}
