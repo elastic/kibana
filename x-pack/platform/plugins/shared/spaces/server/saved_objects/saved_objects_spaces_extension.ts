@@ -34,6 +34,10 @@ export class SavedObjectsSpacesExtension implements ISavedObjectsSpacesExtension
     return spaceIdToNamespace(this.activeSpaceId);
   }
 
+  async validateActiveSpace() {
+    await this.spacesClient.get(this.activeSpaceId);
+  }
+
   async getSearchableNamespaces(namespaces: string[] | undefined): Promise<string[]> {
     if (!namespaces) {
       // If no namespaces option was specified, fall back to the active space.

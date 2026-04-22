@@ -30,4 +30,9 @@ export interface ISavedObjectsSpacesExtension {
    * @param namespace Space to which the extension should be scoped to.
    */
   asScopedToNamespace(namespace: string): ISavedObjectsSpacesExtension;
+  /**
+   * Ensures the active space exists before mutating saved objects.
+   * When implemented, the saved objects client/repository calls this at the start of write operations.
+   */
+  validateActiveSpace?: () => Promise<void>;
 }

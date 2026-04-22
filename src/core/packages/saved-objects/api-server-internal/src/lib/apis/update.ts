@@ -42,8 +42,10 @@ export const performUpdate = async <T>(
   apiContext: ApiExecutionContext
 ): Promise<SavedObjectsUpdateResponse<T>> => {
   const { type, id, options } = updateParams;
-  const { allowedTypes, helpers } = apiContext;
+  const { allowedTypes, helpers, extensions } = apiContext;
   const namespace = helpers.common.getCurrentNamespace(options.namespace);
+
+  await extensions.spacesExtension?.validateActiveSpace?.();
 
   // check request is valid
   const { validRequest, error } = isValidRequest({ allowedTypes, type, id });

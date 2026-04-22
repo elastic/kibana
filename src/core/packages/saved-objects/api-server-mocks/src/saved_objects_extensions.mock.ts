@@ -57,6 +57,7 @@ const createSpacesExtension = (): jest.Mocked<ISavedObjectsSpacesExtension> =>
     getCurrentNamespace: jest.fn(),
     getSearchableNamespaces: jest.fn(),
     asScopedToNamespace: jest.fn().mockImplementation(createSpacesExtension),
+    validateActiveSpace: jest.fn().mockResolvedValue(undefined),
   });
 
 const create = (): jest.Mocked<SavedObjectsExtensions> =>

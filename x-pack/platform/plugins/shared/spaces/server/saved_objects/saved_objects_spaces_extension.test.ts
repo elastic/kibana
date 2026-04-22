@@ -151,3 +151,18 @@ describe('#asScopedToNamespace', () => {
     expect(rescopedExtension.getCurrentNamespace(undefined)).toStrictEqual('namespace-for-space-a');
   });
 });
+
+describe('#validateActiveSpace', () => {
+  test('loads the active space via the spaces client', async () => {
+    const { spacesClient, spacesExtension } = setup();
+    spacesClient.get.mockResolvedValue({ id: ACTIVE_SPACE_ID, name: '', disabledFeatures: [] });
+    await spacesExtension.validateActiveSpace!();
+    expect(spacesClient.get).toHaveBeenCalledWith(ACTIVE_SPACE_ID);
+  });
+
+  test('propagates errors from the spaces client', async () => {
+    const { spacesClient, spacesExtension } = setup();
+    spacesClient.get.mockRejectedValue(Boom.notFound());
+    await expect(spacesExtension.validateActiveSpace!()).rejects.toThrow('Not Found');
+  });
+});
