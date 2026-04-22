@@ -253,22 +253,22 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Deprecates search indices in favor of index management [#260210]({{kib-pull}}260210).
 * Adds a **Models** page for inference management [#259374]({{kib-pull}}259374).
 * Adds a **Model Settings** UI for inference endpoint assignments [#258871]({{kib-pull}}258871).
-* Ensures Jina is the default in semantic text if available [#257464]({{kib-pull}}257464).
+* Sets Jina v5 as the default inference endpoint for `semantic_text` fields when it's available [#257464]({{kib-pull}}257464).
 * Adds an AI assistant-led onboarding option to the Elasticsearch getting started page [#255192]({{kib-pull}}255192).
-* Adds the ability to dynamically create AI Connectors for Elastic Inference Service preconfigured inference endpoints [#254826]({{kib-pull}}254826).
+* Automatically creates AI connectors for Elastic Inference Service chat completion endpoints when they are added [#254826]({{kib-pull}}254826).
 * Adds sorting capabilities to the Inference Endpoints table, allowing users to sort by Endpoint, Service, Type, or Model using a dropdown or by clicking column headers [#252189]({{kib-pull}}252189).
 * Adds a summary stats bar to the Inference Endpoints page displaying counts for Services, Models, Types, and Endpoints [#251558]({{kib-pull}}251558).
 * Adds a copy-to-clipboard button for inference endpoint names in the Inference Endpoints management page [#251494]({{kib-pull}}251494).
 * Improves the External Inference page by hiding the Elasticsearch service provider from the **Add Inference Endpoint** flyout, since Elasticsearch endpoints are managed internally [#261851]({{kib-pull}}261851).
 * Adds a model detail flyout with endpoint management [#260307]({{kib-pull}}260307).
-* Improves fetching {{es}} data performance for setups using HTTP/2 [#256564]({{kib-pull}}256564).
+* Reduces search latency by switching to long-polling when HTTP/2 multiplexing is available, eliminating unnecessary wait times [#256564]({{kib-pull}}256564).
 * Improves the Inference Endpoints management page by adding a view to group by service [#254296]({{kib-pull}}254296).
 * Improves the Inference Endpoints management page by adding a view to group by models, making this the default view [#252984]({{kib-pull}}252984).
 * Consolidates Type, Preconfigured, and Tech Preview badges under the endpoint name and removes the dedicated Type column in the inference endpoints table [#252621]({{kib-pull}}252621).
 * Improves AI connector setup by auto-populating the model field with recommended defaults [#250506]({{kib-pull}}250506).
 * Improves the inference endpoints page by adding a Model column and enabling search by model name [#249779]({{kib-pull}}249779).
 * Adds descriptions to the `semantic_text` field inference endpoint select [#249265]({{kib-pull}}249265).
-* Improves the inference endpoint selector layout to keep long endpoint names readable and stable while clarifying ML-node startup behavior [#247417]({{kib-pull}}247417).
+* Fixes layout instability in the inference endpoint selector when endpoint names are long [#247417]({{kib-pull}}247417).
 * Displays the API key tab if the user has permission, and hides it for users without API key management permissions [#246979]({{kib-pull}}246979).
 * Updates the Search homepage design [#246777]({{kib-pull}}246777).
 
@@ -487,11 +487,9 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Fixes the query ruleset save deleting filtered-out rules [#259503]({{kib-pull}}259503).
 * Fixes the **Convert to lookup index** action being permanently disabled on the index list view in stateful deployments [#259449]({{kib-pull}}259449).
 * Removes the `exact_fuzzy` option from the Query Rules UI [#258278]({{kib-pull}}258278).
-* Adds searchable property to field metadata, enabling fields to be marked as searchable or non-searchable in search operations [#257993]({{kib-pull}}257993).
 * Prevents **Add field** from overwriting existing mappings [#256728]({{kib-pull}}256728).
 * Fixes {{esql}} tool crash with optional null parameters [#256588]({{kib-pull}}256588).
 * Fixes incompatible inference endpoints being selectable in the semantic text field [#256586]({{kib-pull}}256586).
-* Changes **Run in Console** button type [#256455]({{kib-pull}}256455).
 * Fixes Search Playground routes to limit the maximum size of arrays [#255881]({{kib-pull}}255881).
 * Fixes the focus behavior when there are errors in the connector flyout form [#255770]({{kib-pull}}255770).
 * Fixes the homepage throwing errors when the license level is below Enterprise [#251484]({{kib-pull}}251484).
@@ -516,6 +514,7 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Fixes a bug with resetting of agent id [#263044]({{kib-pull}}263044).
 * Upgrades hono and @hono/node-server dependency [#263794]({{kib-pull}}263794).
 * Renders an inline attachment loading skeleton during streaming [#264408]({{kib-pull}}264408).
+* Fixes an issue where index search tools would skip non-searchable fields, causing incomplete search results [#257993]({{kib-pull}}257993).
 * Adds attachment origin to Converse API — accepts optional `origin` on attachments for by-reference flows, and rejects attachments with neither `data` nor `origin` [#259043]({{kib-pull}}259043).
 * Fixes a bug in the `platform.core.search` tool and `index_search` tool type where nested fields were ignored when searching for matching documents [#255914]({{kib-pull}}255914).
 * Fixes {{esql}} test tool failing when the numerical value is zero [#251901]({{kib-pull}}251901).
