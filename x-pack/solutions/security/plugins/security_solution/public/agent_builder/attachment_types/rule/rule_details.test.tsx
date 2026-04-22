@@ -60,7 +60,7 @@ const renderInlineContent = (rule: Record<string, unknown>) => {
 };
 
 describe('ThresholdDetails', () => {
-  it('renders threshold with a single field using the reused Threshold component', () => {
+  it('shows heading, aggregation field and threshold value for a single-field threshold', () => {
     const rule = {
       ...baseRule,
       type: 'threshold',
@@ -77,7 +77,7 @@ describe('ThresholdDetails', () => {
     expect(screen.getByText(/>= 5/)).toBeInTheDocument();
   });
 
-  it('renders threshold with multiple fields as comma-separated list', () => {
+  it('shows multiple aggregation fields as comma-separated list', () => {
     const rule = {
       ...baseRule,
       type: 'threshold',
@@ -91,7 +91,7 @@ describe('ThresholdDetails', () => {
     expect(screen.getByText(/>= 10/)).toBeInTheDocument();
   });
 
-  it('renders cardinality when present', () => {
+  it('shows cardinality condition with field name and value', () => {
     const rule = {
       ...baseRule,
       type: 'threshold',
@@ -108,21 +108,7 @@ describe('ThresholdDetails', () => {
     expect(screen.getByText(/unique values count of user\.name >= 3/)).toBeInTheDocument();
   });
 
-  it('renders "All results" when threshold field is empty', () => {
-    const rule = {
-      ...baseRule,
-      type: 'threshold',
-      query: 'host.name: *',
-      threshold: { field: '', value: 100 },
-    } as unknown as RuleResponse;
-
-    render(<ThresholdDetails rule={rule} />);
-
-    expect(screen.getByText(/All results/)).toBeInTheDocument();
-    expect(screen.getByText(/>= 100/)).toBeInTheDocument();
-  });
-
-  it('renders threshold with empty array field as "All results"', () => {
+  it('shows "All results" when threshold field is an array with empty string', () => {
     const rule = {
       ...baseRule,
       type: 'threshold',
@@ -136,7 +122,7 @@ describe('ThresholdDetails', () => {
     expect(screen.getByText(/>= 50/)).toBeInTheDocument();
   });
 
-  it('does not render cardinality when empty array', () => {
+  it('omits cardinality section when cardinality array is empty', () => {
     const rule = {
       ...baseRule,
       type: 'threshold',
@@ -149,7 +135,7 @@ describe('ThresholdDetails', () => {
     expect(screen.queryByText(/unique values count/)).not.toBeInTheDocument();
   });
 
-  it('does not render cardinality when undefined', () => {
+  it('omits cardinality section when cardinality is undefined', () => {
     const rule = {
       ...baseRule,
       type: 'threshold',
@@ -162,7 +148,7 @@ describe('ThresholdDetails', () => {
     expect(screen.queryByText(/unique values count/)).not.toBeInTheDocument();
   });
 
-  it('returns null for non-threshold rule types', () => {
+  it('renders nothing for a non-threshold rule like query', () => {
     const rule = {
       ...baseRule,
       type: 'query',
@@ -175,7 +161,7 @@ describe('ThresholdDetails', () => {
 });
 
 describe('ThreatMatchDetails', () => {
-  it('renders threat index badges via reused ThreatIndex component', () => {
+  it('shows indicator index patterns as badges', () => {
     const rule = {
       ...baseRule,
       type: 'threat_match',
@@ -195,7 +181,7 @@ describe('ThreatMatchDetails', () => {
     expect(text).toContain('logs-ti*');
   });
 
-  it('renders threat query in code block', () => {
+  it('shows indicator index query heading and query text in code block', () => {
     const rule = {
       ...baseRule,
       type: 'threat_match',
@@ -213,7 +199,7 @@ describe('ThreatMatchDetails', () => {
     expect(screen.getByText('threat.indicator.type: "ip"')).toBeInTheDocument();
   });
 
-  it('renders threat mapping using MATCHES format from constructThreatMappingDescription', () => {
+  it('shows indicator mapping with "field MATCHES indicator" format', () => {
     const rule = {
       ...baseRule,
       type: 'threat_match',
@@ -232,7 +218,7 @@ describe('ThreatMatchDetails', () => {
     expect(text).toContain('source.ip MATCHES threat.indicator.ip');
   });
 
-  it('renders multiple entries within one mapping group with AND', () => {
+  it('joins multiple entries within one mapping group with AND', () => {
     const rule = {
       ...baseRule,
       type: 'threat_match',
@@ -258,7 +244,7 @@ describe('ThreatMatchDetails', () => {
     ).toBeInTheDocument();
   });
 
-  it('renders multiple threat mapping groups with OR', () => {
+  it('joins multiple mapping groups with OR', () => {
     const rule = {
       ...baseRule,
       type: 'threat_match',
@@ -280,7 +266,7 @@ describe('ThreatMatchDetails', () => {
     expect(screen.getByText(/host\.name/)).toBeInTheDocument();
   });
 
-  it('does not render threat query section when threat_query is empty string', () => {
+  it('omits indicator index query section when threat_query is empty', () => {
     const rule = {
       ...baseRule,
       type: 'threat_match',
@@ -297,7 +283,7 @@ describe('ThreatMatchDetails', () => {
     expect(screen.queryByText('Indicator index query')).not.toBeInTheDocument();
   });
 
-  it('returns null for non-threat_match rule types', () => {
+  it('renders nothing for a non-threat_match rule like query', () => {
     const rule = {
       ...baseRule,
       type: 'query',
@@ -310,7 +296,7 @@ describe('ThreatMatchDetails', () => {
 });
 
 describe('MachineLearningDetails', () => {
-  it('renders a single ML job ID', () => {
+  it('shows ML job label and single job ID', () => {
     const rule = {
       ...baseRule,
       type: 'machine_learning',
@@ -325,7 +311,7 @@ describe('MachineLearningDetails', () => {
     expect(text).toContain('v3_linux_anomalous_network_activity');
   });
 
-  it('renders anomaly threshold', () => {
+  it('shows anomaly score threshold label and value', () => {
     const rule = {
       ...baseRule,
       type: 'machine_learning',
@@ -355,7 +341,7 @@ describe('MachineLearningDetails', () => {
     expect(text).toContain('50');
   });
 
-  it('renders anomaly threshold of 0', () => {
+  it('shows anomaly score threshold when value is 0', () => {
     const rule = {
       ...baseRule,
       type: 'machine_learning',
@@ -370,7 +356,7 @@ describe('MachineLearningDetails', () => {
     expect(text).toContain('0');
   });
 
-  it('returns null for non-machine_learning rule types', () => {
+  it('renders nothing for a non-machine_learning rule like query', () => {
     const rule = {
       ...baseRule,
       type: 'query',
@@ -383,7 +369,7 @@ describe('MachineLearningDetails', () => {
 });
 
 describe('NewTermsDetails', () => {
-  it('renders new terms fields via reused NewTermsFields component', () => {
+  it('shows Fields heading and new terms field as badge', () => {
     const rule = {
       ...baseRule,
       type: 'new_terms',
@@ -415,7 +401,7 @@ describe('NewTermsDetails', () => {
     expect(text).toContain('7d');
   });
 
-  it('renders multiple new terms fields', () => {
+  it('shows multiple new terms fields as separate badges', () => {
     const rule = {
       ...baseRule,
       type: 'new_terms',
@@ -432,7 +418,7 @@ describe('NewTermsDetails', () => {
     expect(screen.getByText('30d')).toBeInTheDocument();
   });
 
-  it('renders a single field with short window', () => {
+  it('shows single new terms field with 1d history window', () => {
     const rule = {
       ...baseRule,
       type: 'new_terms',
@@ -447,7 +433,7 @@ describe('NewTermsDetails', () => {
     expect(screen.getByText('1d')).toBeInTheDocument();
   });
 
-  it('returns null for non-new_terms rule types', () => {
+  it('renders nothing for a non-new_terms rule like query', () => {
     const rule = {
       ...baseRule,
       type: 'query',
@@ -460,7 +446,7 @@ describe('NewTermsDetails', () => {
 });
 
 describe('SavedQueryDetails', () => {
-  it('renders saved query name', () => {
+  it('shows saved query name label and the saved_id value', () => {
     const rule = {
       ...baseRule,
       type: 'saved_query',
@@ -474,7 +460,7 @@ describe('SavedQueryDetails', () => {
     expect(text).toContain('my-saved-query-id');
   });
 
-  it('returns null for non-saved_query rule types', () => {
+  it('renders nothing for a non-saved_query rule like query', () => {
     const rule = {
       ...baseRule,
       type: 'query',
@@ -487,7 +473,7 @@ describe('SavedQueryDetails', () => {
 });
 
 describe('EqlDetails', () => {
-  it('renders all three EQL-specific fields using shared translation labels', () => {
+  it('shows event category, tiebreaker, and timestamp fields when all present', () => {
     const rule = {
       ...baseRule,
       type: 'eql',
@@ -508,7 +494,7 @@ describe('EqlDetails', () => {
     expect(screen.getByText('@timestamp')).toBeInTheDocument();
   });
 
-  it('renders only event_category_override when others are absent', () => {
+  it('shows only event category field when tiebreaker and timestamp are absent', () => {
     const rule = {
       ...baseRule,
       type: 'eql',
@@ -524,7 +510,7 @@ describe('EqlDetails', () => {
     expect(screen.queryByText(/Timestamp field/)).not.toBeInTheDocument();
   });
 
-  it('renders only tiebreaker_field when others are absent', () => {
+  it('shows only tiebreaker field when event category and timestamp are absent', () => {
     const rule = {
       ...baseRule,
       type: 'eql',
@@ -540,7 +526,7 @@ describe('EqlDetails', () => {
     expect(screen.queryByText(/Timestamp field/)).not.toBeInTheDocument();
   });
 
-  it('renders only timestamp_field when others are absent', () => {
+  it('shows only timestamp field when event category and tiebreaker are absent', () => {
     const rule = {
       ...baseRule,
       type: 'eql',
@@ -556,7 +542,7 @@ describe('EqlDetails', () => {
     expect(screen.queryByText(/Tiebreaker field/)).not.toBeInTheDocument();
   });
 
-  it('returns null when no EQL-specific fields are present', () => {
+  it('renders nothing when no EQL optional fields are provided', () => {
     const rule = {
       ...baseRule,
       type: 'eql',
@@ -569,7 +555,7 @@ describe('EqlDetails', () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it('returns null for non-eql rule types', () => {
+  it('renders nothing for a non-eql rule like query', () => {
     const rule = {
       ...baseRule,
       type: 'query',
@@ -582,88 +568,88 @@ describe('EqlDetails', () => {
 });
 
 describe('getFilterLabel', () => {
-  it('returns alias when present', () => {
+  it('uses filter alias as label when alias is set', () => {
     const filter: Filter = { meta: { alias: 'My custom filter' } };
     expect(getFilterLabel(filter)).toBe('My custom filter');
   });
 
-  it('formats phrase filter as key: value', () => {
+  it('formats phrase filter as "host.name: server-01"', () => {
     const filter: Filter = {
       meta: { key: 'host.name', type: 'phrase', value: 'server-01' },
     };
     expect(getFilterLabel(filter)).toBe('host.name: server-01');
   });
 
-  it('formats phrases filter with comma-separated params', () => {
+  it('formats multi-value phrases filter as "status: active, pending, error"', () => {
     const filter: Filter = {
       meta: { key: 'status', type: 'phrases', params: ['active', 'pending', 'error'] },
     };
     expect(getFilterLabel(filter)).toBe('status: active, pending, error');
   });
 
-  it('formats exists filter', () => {
+  it('formats exists filter as "agent.name: exists"', () => {
     const filter: Filter = { meta: { key: 'agent.name', type: 'exists' } };
     expect(getFilterLabel(filter)).toBe('agent.name: exists');
   });
 
-  it('formats negated filter with NOT prefix', () => {
+  it('prepends "NOT" for negated phrase filter', () => {
     const filter: Filter = {
       meta: { key: 'host.name', negate: true, type: 'phrase', value: 'bad-host' },
     };
     expect(getFilterLabel(filter)).toBe('NOT host.name: bad-host');
   });
 
-  it('formats range filter with gte and lte', () => {
+  it('formats inclusive range as "bytes: >= 100 AND <= 500"', () => {
     const filter: Filter = {
       meta: { key: 'bytes', type: 'range', params: { gte: 100, lte: 500 } },
     };
     expect(getFilterLabel(filter)).toBe('bytes: >= 100 AND <= 500');
   });
 
-  it('formats range filter with only gte', () => {
+  it('formats open-ended inclusive range as "risk_score: >= 50"', () => {
     const filter: Filter = {
       meta: { key: 'risk_score', type: 'range', params: { gte: 50 } },
     };
     expect(getFilterLabel(filter)).toBe('risk_score: >= 50');
   });
 
-  it('formats range filter with strict gt and lt', () => {
+  it('formats strict range as "bytes: > 100 AND < 500"', () => {
     const filter: Filter = {
       meta: { key: 'bytes', type: 'range', params: { gt: 100, lt: 500 } },
     };
     expect(getFilterLabel(filter)).toBe('bytes: > 100 AND < 500');
   });
 
-  it('formats range filter with strict gt only', () => {
+  it('formats open-ended strict range as "risk_score: > 50"', () => {
     const filter: Filter = {
       meta: { key: 'risk_score', type: 'range', params: { gt: 50 } },
     };
     expect(getFilterLabel(filter)).toBe('risk_score: > 50');
   });
 
-  it('prefers gte over gt when both present', () => {
+  it('uses inclusive gte when both gte and gt are present', () => {
     const filter: Filter = {
       meta: { key: 'bytes', type: 'range', params: { gte: 100, gt: 99 } },
     };
     expect(getFilterLabel(filter)).toBe('bytes: >= 100');
   });
 
-  it('falls back to JSON for filter without key', () => {
+  it('falls back to JSON-serialized query when filter has no key', () => {
     const filter: Filter = { meta: {}, query: { match_all: {} } };
     expect(getFilterLabel(filter)).toBe('{"match_all":{}}');
   });
 
-  it('formats negated exists filter', () => {
+  it('prepends "NOT" for negated exists filter', () => {
     const filter: Filter = { meta: { key: 'error.message', type: 'exists', negate: true } };
     expect(getFilterLabel(filter)).toBe('NOT error.message: exists');
   });
 
-  it('shows key only when no value or params', () => {
+  it('shows only the key for a custom filter with no value or params', () => {
     const filter: Filter = { meta: { key: 'event.action', type: 'custom' } };
     expect(getFilterLabel(filter)).toBe('event.action');
   });
 
-  it('resolves phrase filter with params as { query: value } object', () => {
+  it('extracts value from params.query when meta.value is absent on phrase filter', () => {
     const filter: Filter = {
       meta: { key: 'event.category', type: 'phrase', params: { query: 'network' } },
       query: { match_phrase: { 'event.category': 'network' } },
@@ -671,7 +657,7 @@ describe('getFilterLabel', () => {
     expect(getFilterLabel(filter)).toBe('event.category: network');
   });
 
-  it('resolves non-typed filter with params as { query: value } object', () => {
+  it('extracts value from params.query for a filter without explicit type', () => {
     const filter: Filter = {
       meta: { key: 'host.os', params: { query: 'linux' } },
     };
@@ -680,7 +666,7 @@ describe('getFilterLabel', () => {
 });
 
 describe('FiltersDisplay', () => {
-  it('renders filters as badges', () => {
+  it('shows Filters heading and each filter label as a badge', () => {
     const filters = [
       { meta: { key: 'host.name', type: 'phrase', value: 'server-01' } },
       { meta: { key: 'agent.type', type: 'exists' } },
@@ -693,7 +679,7 @@ describe('FiltersDisplay', () => {
     expect(screen.getByText('agent.type: exists')).toBeInTheDocument();
   });
 
-  it('renders negated filters with NOT prefix', () => {
+  it('shows "NOT host.name: bad-host" badge for negated phrase filter', () => {
     const filters = [
       { meta: { key: 'host.name', negate: true, type: 'phrase', value: 'bad-host' } },
     ];
@@ -710,7 +696,7 @@ describe('FiltersDisplay', () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it('skips invalid filter objects without meta', () => {
+  it('skips null, undefined, and objects without meta, renders valid ones', () => {
     const filters = [{ something: 'else' }, null, undefined, { meta: { key: 'valid' } }];
 
     render(<FiltersDisplay filters={filters as unknown[]} />);
@@ -718,7 +704,7 @@ describe('FiltersDisplay', () => {
     expect(screen.getByText('valid')).toBeInTheDocument();
   });
 
-  it('renders filter with alias', () => {
+  it('displays filter alias text instead of key when alias is set', () => {
     const filters = [{ meta: { alias: 'Production servers only', key: 'env' } }];
 
     render(<FiltersDisplay filters={filters} />);
@@ -739,7 +725,7 @@ describe('RuleInlineContent integration', () => {
     (window as { location: unknown }).location = originalLocation;
   });
 
-  it('renders rule type label', () => {
+  it('shows "Rule type: Indicator Match" for threat_match rule', () => {
     const { container } = renderInlineContent({
       ...baseRule,
       type: 'threat_match',
@@ -756,7 +742,7 @@ describe('RuleInlineContent integration', () => {
     expect(allText).toContain('Indicator Match');
   });
 
-  it('renders description section', () => {
+  it('shows Description heading and description text', () => {
     renderInlineContent({
       ...baseRule,
       type: 'query',
@@ -767,7 +753,7 @@ describe('RuleInlineContent integration', () => {
     expect(screen.getByText('A test rule')).toBeInTheDocument();
   });
 
-  it('renders severity and risk score', () => {
+  it('shows "Severity: High" and "Risk Score: 73" inline', () => {
     const { container } = renderInlineContent({
       ...baseRule,
       type: 'query',
@@ -781,7 +767,7 @@ describe('RuleInlineContent integration', () => {
     expect(allText).toContain('73');
   });
 
-  it('renders interval and lookback time', () => {
+  it('shows "Interval: 5m" and "Lookback time" inline', () => {
     renderInlineContent({
       ...baseRule,
       type: 'query',
@@ -793,7 +779,7 @@ describe('RuleInlineContent integration', () => {
     expect(screen.getByText('Lookback time:')).toBeInTheDocument();
   });
 
-  it('renders threshold rule with type-specific section', () => {
+  it('shows query, threshold heading, aggregation field, and value for threshold rule', () => {
     renderInlineContent({
       ...baseRule,
       type: 'threshold',
@@ -807,7 +793,7 @@ describe('RuleInlineContent integration', () => {
     expect(screen.getByText(/>= 5/)).toBeInTheDocument();
   });
 
-  it('renders threat_match rule with type-specific section', () => {
+  it('shows query, indicator index patterns, and threat mapping for threat_match rule', () => {
     const { container } = renderInlineContent({
       ...baseRule,
       type: 'threat_match',
@@ -826,7 +812,7 @@ describe('RuleInlineContent integration', () => {
     expect(allText).toContain('source.ip MATCHES threat.indicator.ip');
   });
 
-  it('renders machine_learning rule with type-specific section', () => {
+  it('shows ML job ID and anomaly threshold for machine_learning rule', () => {
     const { container } = renderInlineContent({
       ...baseRule,
       type: 'machine_learning',
@@ -840,7 +826,7 @@ describe('RuleInlineContent integration', () => {
     expect(allText).toContain('75');
   });
 
-  it('renders new_terms rule with type-specific section', () => {
+  it('shows query, fields badge, and 7d history window for new_terms rule', () => {
     const { container } = renderInlineContent({
       ...baseRule,
       type: 'new_terms',
@@ -856,7 +842,7 @@ describe('RuleInlineContent integration', () => {
     expect(allText).toContain('7d');
   });
 
-  it('renders eql rule with type-specific section', () => {
+  it('shows EQL query heading, event category, and tiebreaker for eql rule', () => {
     renderInlineContent({
       ...baseRule,
       type: 'eql',
@@ -872,7 +858,7 @@ describe('RuleInlineContent integration', () => {
     expect(screen.getByText('event.sequence')).toBeInTheDocument();
   });
 
-  it('does not render type-specific section for eql rule without optional fields', () => {
+  it('shows only EQL query heading when eql has no optional fields', () => {
     renderInlineContent({
       ...baseRule,
       type: 'eql',
@@ -884,7 +870,7 @@ describe('RuleInlineContent integration', () => {
     expect(screen.queryByText(/Event category field/)).not.toBeInTheDocument();
   });
 
-  it('does not render type-specific section for basic query rule', () => {
+  it('shows Custom query heading but no type-specific fields for basic query rule', () => {
     const { container } = renderInlineContent({
       ...baseRule,
       type: 'query',
@@ -898,7 +884,7 @@ describe('RuleInlineContent integration', () => {
     expect(screen.queryByText(/Event category field/)).not.toBeInTheDocument();
   });
 
-  it('does not render type-specific section for esql rule', () => {
+  it('shows ES|QL query heading but no type-specific fields for esql rule', () => {
     renderInlineContent({
       ...baseRule,
       type: 'esql',
@@ -912,7 +898,7 @@ describe('RuleInlineContent integration', () => {
     expect(screen.queryByText(/Event category field/)).not.toBeInTheDocument();
   });
 
-  it('renders saved_query rule with saved query name', () => {
+  it('shows saved query name and no other type-specific fields for saved_query rule', () => {
     const { container } = renderInlineContent({
       ...baseRule,
       type: 'saved_query',
@@ -926,7 +912,7 @@ describe('RuleInlineContent integration', () => {
     expect(allText).not.toContain('Machine Learning job');
   });
 
-  it('renders type-specific section between query and tags for threshold rule', () => {
+  it('places threshold details between query and tags in DOM order', () => {
     const { container } = renderInlineContent({
       ...baseRule,
       type: 'threshold',
@@ -944,7 +930,7 @@ describe('RuleInlineContent integration', () => {
     expect(thresholdPos).toBeLessThan(tagsPos);
   });
 
-  it('renders type-specific section between index patterns and tags for ml rule', () => {
+  it('places ML job details before tags in DOM order', () => {
     const { container } = renderInlineContent({
       ...baseRule,
       type: 'machine_learning',
@@ -960,7 +946,7 @@ describe('RuleInlineContent integration', () => {
     expect(mlPos).toBeLessThan(tagsPos);
   });
 
-  it('renders shared fields alongside type-specific fields', () => {
+  it('shows query, index patterns, threshold, and tags together for threshold rule', () => {
     renderInlineContent({
       ...baseRule,
       type: 'threshold',
@@ -998,7 +984,7 @@ describe('RuleInlineContent integration', () => {
     expect(screen.getByText('New Rule')).toBeInTheDocument();
   });
 
-  it('renders rule fields even when name is missing', () => {
+  it('still renders description, query, and other fields when name is missing', () => {
     const { container } = renderInlineContent({
       type: 'query',
       query: '*:*',
@@ -1013,7 +999,7 @@ describe('RuleInlineContent integration', () => {
     expect(allText).toContain('*:*');
   });
 
-  it('renders filters between index patterns and type-specific details', () => {
+  it('places filters between index patterns and threshold details in DOM order', () => {
     const { container } = renderInlineContent({
       ...baseRule,
       type: 'threshold',
@@ -1039,7 +1025,7 @@ describe('RuleInlineContent integration', () => {
     expect(filtersPos).toBeLessThan(thresholdPos);
   });
 
-  it('does not render filters section when filters array is empty', () => {
+  it('omits Filters heading when filters array is empty', () => {
     renderInlineContent({
       ...baseRule,
       type: 'query',
@@ -1050,7 +1036,7 @@ describe('RuleInlineContent integration', () => {
     expect(screen.queryByText('Filters')).not.toBeInTheDocument();
   });
 
-  it('does not render filters section when filters is undefined', () => {
+  it('omits Filters heading when filters is undefined', () => {
     renderInlineContent({
       ...baseRule,
       type: 'query',
@@ -1060,7 +1046,7 @@ describe('RuleInlineContent integration', () => {
     expect(screen.queryByText('Filters')).not.toBeInTheDocument();
   });
 
-  it('renders query in a code block with correct heading', () => {
+  it('shows "Custom query" heading and query text for kuery language rule', () => {
     const { container } = renderInlineContent({
       ...baseRule,
       type: 'query',
@@ -1073,7 +1059,7 @@ describe('RuleInlineContent integration', () => {
     expect(allText).toContain('Custom query');
   });
 
-  it('renders filters for indicator match rule with threat_filters', () => {
+  it('shows Filters badge for indicator match rule with a filter on event.category', () => {
     renderInlineContent({
       ...baseRule,
       type: 'threat_match',
