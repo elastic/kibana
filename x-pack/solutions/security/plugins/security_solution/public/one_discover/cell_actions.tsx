@@ -150,11 +150,11 @@ const DiscoverCellActions = ({
       data-test-subj="securitySolutionOneDiscoverCellActions"
     >
       <EuiPopover
-        button={children}
+        button={<>{children}</>}
         isOpen={isPopoverOpen}
         anchorPosition="downCenter"
         closePopover={closePopoverPlaceholder}
-        panelPaddingSize="s"
+        panelPaddingSize="xs"
         panelStyle={{ minWidth: '24px' }}
         display="inline-block"
         aria-label={fieldValueActionsLabel}
@@ -165,6 +165,7 @@ const DiscoverCellActions = ({
               <EuiButtonIcon
                 data-test-subj={`securitySolutionOneDiscoverCellAction-${action.id}`}
                 size="xs"
+                iconSize="s"
                 iconType={action.iconType}
                 aria-label={action.label}
                 onClick={() => {

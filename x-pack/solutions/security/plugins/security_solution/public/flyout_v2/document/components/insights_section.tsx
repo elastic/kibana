@@ -14,7 +14,7 @@ import { useStore } from 'react-redux';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { alertFlyoutHistoryKey } from '../constants/flyout_history';
 import { DocumentFlyoutWrapper } from '../document_flyout_wrapper';
-import { cellActionRenderer, type CellActionRenderer } from '../../shared/components/cell_actions';
+import { type CellActionRenderer } from '../../shared/components/cell_actions';
 import { EventKind } from '../constants/event_kinds';
 import { getColumns } from '../../prevalence/utils/get_columns';
 import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
@@ -55,7 +55,7 @@ export interface InsightsSectionProps {
   /**
    * Renderer for cell actions on field values. Falls back to the Security default when not provided.
    */
-  renderCellActions?: CellActionRenderer;
+  renderCellActions: CellActionRenderer;
   /**
    * Callback invoked after alert mutations to refresh parent flyout content.
    */
@@ -67,8 +67,7 @@ export interface InsightsSectionProps {
  * Content to be added soon.
  */
 export const InsightsSection = memo(
-  ({ hit, renderCellActions: renderCellActionsProp, onAlertUpdated }: InsightsSectionProps) => {
-    const renderCellActions = renderCellActionsProp ?? cellActionRenderer;
+  ({ hit, renderCellActions, onAlertUpdated }: InsightsSectionProps) => {
     const { services } = useKibana();
     const { overlays } = services;
     const store = useStore();

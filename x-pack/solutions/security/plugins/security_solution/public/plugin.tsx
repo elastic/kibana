@@ -400,7 +400,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     const alertFlyoutOverviewTabFeature: SecuritySolutionAlertFlyoutOverviewTabFeature = {
       id: 'security-solution-alert-flyout-overview-tab',
-      render: ({ hit, onAlertUpdated, ...docViewProps }) => {
+      render: ({ hit, onAlertUpdated, columns, filter, onAddColumn, onRemoveColumn }) => {
         const servicesPromise = this.getDiscoverFlyoutServices(core);
         const storePromise = this.getDiscoverFlyoutStore(core);
 
@@ -411,7 +411,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               servicesPromise={servicesPromise}
               storePromise={storePromise}
               onAlertUpdated={onAlertUpdated}
-              {...docViewProps}
+              columns={columns}
+              filter={filter}
+              onAddColumn={onAddColumn}
+              onRemoveColumn={onRemoveColumn}
             />
           </React.Suspense>
         );
@@ -425,7 +428,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     });
     const headerTitleFeature: SecuritySolutionAlertFlyoutHeaderTitleFeature = {
       id: 'security-solution-alert-flyout-header-title',
-      renderHeader: ({ hit, onAlertUpdated, ...docViewProps }) => {
+      renderHeader: ({ hit, onAlertUpdated, columns, filter, onAddColumn, onRemoveColumn }) => {
         const servicesPromise = this.getDiscoverFlyoutServices(core);
         const storePromise = this.getDiscoverFlyoutStore(core);
 
@@ -436,7 +439,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               servicesPromise={servicesPromise}
               storePromise={storePromise}
               onAlertUpdated={onAlertUpdated}
-              {...docViewProps}
+              columns={columns}
+              filter={filter}
+              onAddColumn={onAddColumn}
+              onRemoveColumn={onRemoveColumn}
             />
           </React.Suspense>
         );
