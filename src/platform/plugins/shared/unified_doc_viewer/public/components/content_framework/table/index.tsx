@@ -114,7 +114,7 @@ export function ContentFrameworkTable({
             type: fieldsMetadata[fieldName]?.type,
             valueCellContent: ({ truncate }: { truncate?: boolean } = { truncate: true }) => {
               return fieldConfiguration?.formatter ? (
-                <>{fieldConfiguration.formatter(value as FieldConfigValue, formattedValue)}</>
+                <>{fieldConfiguration.formatter(value, formattedValue)}</>
               ) : (
                 <FormattedValue value={formattedValue} truncate={truncate} />
               );

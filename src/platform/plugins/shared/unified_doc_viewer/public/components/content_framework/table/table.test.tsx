@@ -71,7 +71,13 @@ const defaultProps: ContentFrameworkTableProps = {
     fieldA: {
       title: 'Field A Title',
       description: 'Custom description A',
-      formatter: (value, formattedValue) => <span>{`Custom: ${value} (${formattedValue})`}</span>,
+      formatter: (value, formattedValue) => (
+        <span>
+          {`Custom: ${value} (`}
+          {formattedValue}
+          {`)`}
+        </span>
+      ),
     },
     fieldB: {
       title: 'Field B Title',
