@@ -5646,7 +5646,7 @@
           "CustomFieldTypes",
           ".TOGGLE; value: boolean | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".NUMBER; value: number | null; })[]; }; } | { type: \"observables\"; payload: { observables: { count: number; actionType: \"update\" | \"delete\" | \"add\"; }; }; } | { type: \"extended_fields\"; payload: { extended_fields: { [x: string]: string; }; }; } | { type: \"comment\"; payload: { comment: { type: ",
+          ".NUMBER; value: number | null; })[]; }; } | { type: \"observables\"; payload: { observables: { count: number; actionType: \"update\" | \"delete\" | \"add\"; }; }; } | { type: \"extended_fields\"; payload: { extended_fields: { [x: string]: string; }; }; } | { type: \"template\"; payload: { template: { id: string; version: number; } | null; }; } | { type: \"comment\"; payload: { comment: { type: ",
           {
             "pluginId": "cases",
             "scope": "common",

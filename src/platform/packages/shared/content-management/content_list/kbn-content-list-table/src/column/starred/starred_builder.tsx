@@ -14,6 +14,7 @@ import type { ContentListItem } from '@kbn/content-list-provider';
 import { useContentListFilters, getIncludeExcludeFlag } from '@kbn/content-list-provider';
 import type { ColumnBuilderContext } from '../types';
 import { column } from '../part';
+import { getColumnLayoutProps, type ColumnLayoutProps } from '../layout';
 import { StarredCell } from './starred_cell';
 
 const DEFAULT_WIDTH = '40px';
@@ -35,7 +36,8 @@ const StarredColumnHeader = () => {
 /**
  * Props for the `Column.Starred` preset component.
  */
-export interface StarredColumnProps {
+export interface StarredColumnProps
+  extends Pick<ColumnLayoutProps, 'width' | 'minWidth' | 'maxWidth'> {
   /** Column width (CSS value). Defaults to `'40px'`. */
   width?: string;
 }
@@ -55,14 +57,14 @@ export const buildStarredColumn = (
     return undefined;
   }
 
-  const { width = DEFAULT_WIDTH } = attributes;
+  const { width = DEFAULT_WIDTH, minWidth, maxWidth } = attributes;
 
   return {
     field: 'id',
     name: <StarredColumnHeader />,
     align: 'center' as const,
     sortable: false,
-    width,
+    ...getColumnLayoutProps({ width, minWidth, maxWidth }),
     'data-test-subj': 'content-list-table-column-starred',
     render: (_value: string, item: ContentListItem) => {
       return <StarredCell id={item.id} />;

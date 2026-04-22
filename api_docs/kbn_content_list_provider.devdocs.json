@@ -1877,7 +1877,7 @@
           "\nPer-item configuration for link behavior and actions."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/item/types.ts",
-        "lineNumber": 92,
+        "lineNumber": 100,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1903,7 +1903,7 @@
               "<Record<string, unknown>>) => string) | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/item/types.ts",
-            "lineNumber": 96,
+            "lineNumber": 104,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1926,7 +1926,7 @@
                   "<Record<string, unknown>>"
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/item/types.ts",
-                "lineNumber": 100,
+                "lineNumber": 108,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1956,7 +1956,7 @@
               "<Record<string, unknown>>) => string) | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/item/types.ts",
-            "lineNumber": 102,
+            "lineNumber": 110,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1979,7 +1979,7 @@
                   "<Record<string, unknown>>"
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/item/types.ts",
-                "lineNumber": 111,
+                "lineNumber": 119,
                 "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2009,7 +2009,7 @@
               "<Record<string, unknown>>) => void) | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/item/types.ts",
-            "lineNumber": 113,
+            "lineNumber": 121,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2032,7 +2032,7 @@
                   "<Record<string, unknown>>"
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/item/types.ts",
-                "lineNumber": 122,
+                "lineNumber": 130,
                 "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2062,7 +2062,7 @@
               "<Record<string, unknown>>[]) => Promise<void>) | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/item/types.ts",
-            "lineNumber": 124,
+            "lineNumber": 132,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2085,8 +2085,61 @@
                   "<Record<string, unknown>>[]"
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/item/types.ts",
-                "lineNumber": 129,
+                "lineNumber": 137,
                 "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.ContentListItemConfig.onInspect",
+            "type": "Function",
+            "tags": [],
+            "label": "onInspect",
+            "description": [
+              "\nCallback invoked to inspect an item (view/edit its metadata).\nWhen provided, enables the \"View details\" row action.\n\nThis is a simple, UI-agnostic callback — the implementation decides what\nhappens when the action fires (e.g., opening a flyout, navigating to a\ndetail page). The Kibana content editor integration is handled by\n`ContentListClientProvider` in `@kbn/content-list-provider-client`."
+            ],
+            "signature": [
+              "((item: ",
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.ContentListItem",
+                "text": "ContentListItem"
+              },
+              "<Record<string, unknown>>) => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/item/types.ts",
+            "lineNumber": 139,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-provider",
+                "id": "def-public.ContentListItemConfig.onInspect.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "item",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/content-list-provider",
+                    "scope": "public",
+                    "docId": "kibKbnContentListProviderPluginApi",
+                    "section": "def-public.ContentListItem",
+                    "text": "ContentListItem"
+                  },
+                  "<Record<string, unknown>>"
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/item/types.ts",
+                "lineNumber": 148,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5142,7 +5195,7 @@
           "\nStandardized item structure for rendering components (tables, grids, etc.).\n\nThis is the common interface that all rendering components work with,\nregardless of the underlying datasource type. The `findItems` function\nin `DataSourceConfig` must return items in this format.\n"
         ],
         "signature": [
-          "T & { id: string; title: string; description?: string | undefined; type?: string | undefined; updatedAt?: Date | undefined; tags?: string[] | undefined; }"
+          "T & { id: string; title: string; description?: string | undefined; type?: string | undefined; updatedAt?: Date | undefined; tags?: string[] | undefined; createdAt?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; managed?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/item/types.ts",
         "lineNumber": 68,
@@ -5700,6 +5753,31 @@
             "returnComment": []
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.contentListQueryClient",
+        "type": "Object",
+        "tags": [],
+        "label": "contentListQueryClient",
+        "description": [
+          "\nShared React Query client for content list queries.\n\nUses conservative defaults:\n- No automatic retries (errors surface immediately).\n- Standard stale time and cache time."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/react-query",
+            "scope": "common",
+            "docId": "kibKbnReactQueryPluginApi",
+            "section": "def-common.QueryClient",
+            "text": "QueryClient"
+          }
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/query/query_client.tsx",
+        "lineNumber": 19,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
