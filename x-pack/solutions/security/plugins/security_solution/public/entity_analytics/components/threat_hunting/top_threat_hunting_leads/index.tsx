@@ -92,6 +92,8 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
   const toggleOpen = useCallback(() => setIsOpen((prev) => !prev), []);
 
   const showHeaderGenerate = !isOpen && leads.length === 0 && !hasGenerated;
+  const renderCount = Math.min(leads.length, visibleCardCount);
+  const hasFewLeads = leads.length < visibleCardCount;
 
   return (
     <EuiPanel hasBorder data-test-subj="topThreatHuntingLeads" color="subdued">
@@ -329,31 +331,25 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
             </EuiPanel>
           ) : (
             <div ref={setCardsContainer} style={{ overflow: 'hidden' }}>
-              {(() => {
-                const renderCount = Math.min(leads.length, visibleCardCount);
-                const hasFewLeads = leads.length < visibleCardCount;
-                return (
-                  <EuiFlexGroup
-                    gutterSize="m"
-                    responsive={false}
-                    wrap={false}
-                    justifyContent={hasFewLeads ? 'flexStart' : undefined}
+              <EuiFlexGroup
+                gutterSize="m"
+                responsive={false}
+                wrap={false}
+                justifyContent={hasFewLeads ? 'flexStart' : undefined}
+              >
+                {leads.slice(0, renderCount).map((lead) => (
+                  <EuiFlexItem
+                    key={lead.id}
+                    grow={!hasFewLeads}
+                    style={{
+                      minWidth: 0,
+                      maxWidth: hasFewLeads ? MAX_CARD_WIDTH : undefined,
+                    }}
                   >
-                    {leads.slice(0, renderCount).map((lead) => (
-                      <EuiFlexItem
-                        key={lead.id}
-                        grow={!hasFewLeads}
-                        style={{
-                          minWidth: 0,
-                          maxWidth: hasFewLeads ? MAX_CARD_WIDTH : undefined,
-                        }}
-                      >
-                        <LeadCard lead={lead} onClick={onLeadClick} />
-                      </EuiFlexItem>
-                    ))}
-                  </EuiFlexGroup>
-                );
-              })()}
+                    <LeadCard lead={lead} onClick={onLeadClick} />
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
             </div>
           )}
         </>
