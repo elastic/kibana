@@ -550,6 +550,8 @@
               },
               ") => void; registerApiKeyInvalidateFn: (fn?: ",
               "ApiKeyInvalidationFn",
+              " | undefined) => void; registerUiamApiKeyInvalidateFn: (fn?: ",
+              "UiamApiKeyInvalidationFn",
               " | undefined) => void; }"
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
