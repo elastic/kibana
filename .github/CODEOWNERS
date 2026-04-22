@@ -1184,7 +1184,6 @@ x-pack/platform/test/alerting_api_integration/common/plugins/alerts @elastic/res
 x-pack/platform/test/alerting_api_integration/common/plugins/alerts_restricted @elastic/response-ops
 x-pack/platform/test/alerting_api_integration/common/plugins/task_manager_fixture @elastic/response-ops
 x-pack/platform/test/alerting_api_integration/packages/helpers @elastic/response-ops
-x-pack/platform/test/api_integration_deployment_agnostic/plugins/alerting_v2_fixture @elastic/response-ops
 x-pack/platform/test/api_integration/apis/entity_manager/fixture_plugin @elastic/core-analysis
 x-pack/platform/test/cases_api_integration/common/plugins/cases @elastic/kibana-cases
 x-pack/platform/test/cases_api_integration/common/plugins/observability @elastic/kibana-cases
@@ -1344,6 +1343,8 @@ x-pack/solutions/workplaceai/test @elastic/workchat-eng
 # used for the 'team' designator within Kibana Stats
 
 packages/kbn-generate/src/commands/user_activity_actions_docs_command.ts @elastic/kibana-core
+
+src/platform/plugins/private/ftr_apis/server/routes/task_manager @elastic/response-ops
 
 /x-pack/solutions/observability/test/api_integration/apis/metrics_ui @elastic/obs-presentation-team
 x-pack/platform/test/serverless/api_integration/test_suites/platform_security @elastic/kibana-security
