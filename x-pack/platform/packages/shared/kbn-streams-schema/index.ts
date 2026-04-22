@@ -8,7 +8,13 @@
 export { Streams, streamDefinitionSchema } from './src/models/streams';
 export { IngestBase, type IngestStreamIndexMode } from './src/models/ingest/base';
 export { Ingest, IngestStream, IngestUpsertRequest } from './src/models/ingest';
-export { WiredIngest, WiredStream, WiredIngestUpsertRequest } from './src/models/ingest/wired';
+export {
+  WiredIngest,
+  WiredStream,
+  WiredIngestUpsertRequest,
+  isDraftStream,
+  type DraftStreamDefinition,
+} from './src/models/ingest/wired';
 export {
   ClassicIngest,
   ClassicStream,
@@ -254,6 +260,7 @@ export { TaskStatus, type TaskResult } from './src/tasks/types';
 
 export type { GenerateDescriptionResult } from './src/api/description_generation';
 export type { IdentifyFeaturesResult, IterationResult } from './src/api/features';
+export { tokenCountSchema, iterationResultSchema } from './src/api/features';
 
 export {
   type GenerateInsightsResult,

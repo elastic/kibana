@@ -215,7 +215,7 @@ export const CreateAttackDiscoveryAlertsParams = z.object({
    */
   connectorName: z.string(),
   /**
-   * Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack discovery views within Kibana. Defaults to `false`.
+   * Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack Discovery views within Kibana. Defaults to `false`.
    */
   enableFieldRendering: z.boolean(),
   /**
@@ -243,7 +243,7 @@ export const FindAttackDiscoveryAlertsParams = z.object({
    */
   connectorNames: z.array(z.string()).optional(),
   /**
-   * Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack discovery views within Kibana. Defaults to `false`.
+   * Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack Discovery views within Kibana. Defaults to `false`.
    */
   enableFieldRendering: z.boolean(),
   /**

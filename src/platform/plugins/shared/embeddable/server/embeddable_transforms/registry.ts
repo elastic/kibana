@@ -23,11 +23,14 @@ export function getTransformsRegistry(drilldownRegistry: ReturnType<typeof getDr
       transformsRegistry[type] = transforms;
     },
     getAllEmbeddableSchemas: () => {
-      const schemas: { [key: string]: ObjectType } = {};
+      const schemas: { [key: string]: { schema: ObjectType; title: string } } = {};
       Object.entries(transformsRegistry).forEach(([type, transformsSetup]) => {
         const schema = transformsSetup?.getSchema?.(drilldownRegistry.getSchema);
         if (schema) {
-          schemas[type] = schema as ObjectType;
+          schemas[type] = {
+            schema: schema as ObjectType,
+            title: transformsSetup.title,
+          };
         }
       });
       return schemas;
