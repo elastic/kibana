@@ -33,7 +33,7 @@ const ErrorRateChartContent = ({
   color,
   title,
 }: ErrorRateChartContentProps) => {
-  const { services, fetchParams, discoverFetch$, onBrushEnd, onFilter, actions } =
+  const { services, fetchParams, discoverFetch$, onBrushEnd, onFilter, actions, profileId } =
     useTraceMetricsContext();
 
   const chartLayers = useMemo<LensSeriesLayer[]>(
@@ -61,6 +61,7 @@ const ErrorRateChartContent = ({
 
   return (
     <Chart
+      id="errorRate"
       esqlQuery={query}
       size="s"
       discoverFetch$={discoverFetch$}
@@ -75,6 +76,7 @@ const ErrorRateChartContent = ({
       syncTooltips
       yBounds={ERROR_RATE_Y_BOUNDS}
       extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
+      profileId={profileId}
     />
   );
 };
