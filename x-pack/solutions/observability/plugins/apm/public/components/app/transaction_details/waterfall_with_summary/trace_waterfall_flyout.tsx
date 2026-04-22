@@ -7,16 +7,15 @@
 
 import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import {
+  UnifiedDocViewerObservabilityTraceDocFlyout,
+  unifiedDocViewerObservabilityTracesSpanFlyoutId,
+} from '@kbn/unified-doc-viewer-plugin/public';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useAdHocApmDataView } from '../../../../hooks/use_adhoc_apm_data_view';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { FullTraceWaterfallRenderer } from '../../../shared/trace_waterfall/full_trace_waterfall_renderer';
-
-export interface TraceWaterfallDetailFlyoutProps {
-  docId: string;
-  traceId: string;
-  onClose: () => void;
-}
 
 const TRACE_WATERFALL_FLYOUT_HISTORY_KEY = Symbol.for('apmTraceWaterfallFlyout');
 
@@ -27,7 +26,6 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   contextSpanIds?: string[];
-  renderDetailFlyout: (props: TraceWaterfallDetailFlyoutProps) => React.ReactNode;
 }
 
 export function TraceWaterfallFlyout({
@@ -37,11 +35,23 @@ export function TraceWaterfallFlyout({
   isOpen,
   onClose,
   contextSpanIds,
-  renderDetailFlyout,
 }: Props) {
   const { core } = useApmPluginContext();
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+  const { dataView, apmIndices } = useAdHocApmDataView();
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
+
+  const indexes = useMemo(
+    () => ({
+      apm: {
+        traces: apmIndices?.transaction,
+        errors: apmIndices?.error,
+      },
+    }),
+    [apmIndices?.transaction, apmIndices?.error]
+  );
+
+  const closeDetailFlyout = useCallback(() => setSelectedDocId(null), []);
 
   if (!isOpen) return null;
 
@@ -74,12 +84,16 @@ export function TraceWaterfallFlyout({
           onNodeClick={setSelectedDocId}
         />
       </EuiFlyoutBody>
-      {selectedDocId &&
-        renderDetailFlyout({
-          docId: selectedDocId,
-          traceId,
-          onClose: () => setSelectedDocId(null),
-        })}
+      {selectedDocId && dataView && (
+        <UnifiedDocViewerObservabilityTraceDocFlyout
+          type={unifiedDocViewerObservabilityTracesSpanFlyoutId}
+          docId={selectedDocId}
+          traceId={traceId}
+          dataView={dataView}
+          indexes={indexes}
+          onCloseFlyout={closeDetailFlyout}
+        />
+      )}
     </EuiFlyout>
   );
 }
