@@ -10,13 +10,15 @@ import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { SEMANTIC_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { createConnectorLifecycleHandler } from './connector_lifecycle_handler';
 
-const createMockRequest = () => ({}) as any;
+const createMockRequest = () => ({} as any);
 
-const createMockStartServices = (overrides: {
-  experimentalEnabled?: boolean;
-  spaceId?: string;
-  indexAttachment?: jest.Mock;
-} = {}) => {
+const createMockStartServices = (
+  overrides: {
+    experimentalEnabled?: boolean;
+    spaceId?: string;
+    indexAttachment?: jest.Mock;
+  } = {}
+) => {
   const {
     experimentalEnabled = true,
     spaceId = 'default',
@@ -75,9 +77,7 @@ describe('createConnectorLifecycleHandler', () => {
       } as any);
 
       expect(getStartServices).not.toHaveBeenCalled();
-      expect(logger.error).toHaveBeenCalledWith(
-        expect.stringContaining('wasSuccessful=false')
-      );
+      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('wasSuccessful=false'));
     });
 
     it('skips when experimental features flag is disabled', async () => {
@@ -117,9 +117,7 @@ describe('createConnectorLifecycleHandler', () => {
         action: 'create',
         spaceId: 'my-space',
       });
-      expect(logger.info).toHaveBeenCalledWith(
-        expect.stringContaining('indexed connector c1')
-      );
+      expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('indexed connector c1'));
     });
 
     it('logs a warning and does not throw when indexAttachment fails', async () => {
@@ -136,9 +134,7 @@ describe('createConnectorLifecycleHandler', () => {
         } as any)
       ).resolves.toBeUndefined();
 
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('index failed')
-      );
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('index failed'));
     });
   });
 
@@ -163,9 +159,7 @@ describe('createConnectorLifecycleHandler', () => {
         action: 'delete',
         spaceId: 'my-space',
       });
-      expect(logger.info).toHaveBeenCalledWith(
-        expect.stringContaining('removed connector c1')
-      );
+      expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('removed connector c1'));
     });
 
     it('logs a warning and does not throw when indexAttachment fails', async () => {
@@ -181,9 +175,7 @@ describe('createConnectorLifecycleHandler', () => {
         } as any)
       ).resolves.toBeUndefined();
 
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('delete failed')
-      );
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('delete failed'));
     });
 
     it('defaults to space "default" when spaces plugin is absent', async () => {
@@ -201,9 +193,7 @@ describe('createConnectorLifecycleHandler', () => {
         request: createMockRequest(),
       } as any);
 
-      expect(indexAttachment).toHaveBeenCalledWith(
-        expect.objectContaining({ spaceId: 'default' })
-      );
+      expect(indexAttachment).toHaveBeenCalledWith(expect.objectContaining({ spaceId: 'default' }));
     });
   });
 });

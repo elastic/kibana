@@ -36,4 +36,7 @@ export type {
 
 export { smlElasticsearchIndexMappings, smlIndexName } from './services/sml/sml_storage';
 
-export { resolveSmlAttachItems, type SmlResolvedItemResult } from './services/sml/execute_sml_attach_items';
+export {
+  resolveSmlAttachItems,
+  type SmlResolvedItemResult,
+} from './services/sml/execute_sml_attach_items';

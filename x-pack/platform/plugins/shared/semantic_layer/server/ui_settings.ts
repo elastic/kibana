@@ -13,9 +13,12 @@ import { SEMANTIC_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management
 export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServiceSetup }) => {
   uiSettings.register({
     [SEMANTIC_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID]: {
-      description: i18n.translate('xpack.semanticLayer.uiSettings.experimentalFeatures.description', {
-        defaultMessage: 'Enables experimental features for the Semantic Layer.',
-      }),
+      description: i18n.translate(
+        'xpack.semanticLayer.uiSettings.experimentalFeatures.description',
+        {
+          defaultMessage: 'Enables experimental features for the Semantic Layer.',
+        }
+      ),
       name: i18n.translate('xpack.semanticLayer.uiSettings.experimentalFeatures.name', {
         defaultMessage: 'Semantic Layer: Experimental Features',
       }),

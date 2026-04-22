@@ -66,8 +66,7 @@ export const AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID = 'agentBuilder:expe
 export const AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS = 'agentBuilder:prePromptWorkflowIds';
 
 // Semantic layer settings
-export const SEMANTIC_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID =
-  'semanticLayer:experimentalFeatures';
+export const SEMANTIC_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID = 'semanticLayer:experimentalFeatures';
 
 // Autocomplete settings
 export const AUTOCOMPLETE_USE_TIME_RANGE_ID = 'autocomplete:useTimeRange';

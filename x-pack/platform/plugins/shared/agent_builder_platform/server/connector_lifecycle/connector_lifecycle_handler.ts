@@ -23,7 +23,10 @@ interface ConnectorLifecycleHandlerDeps {
   >;
 }
 
-export function createConnectorLifecycleHandler({ logger, getStartServices }: ConnectorLifecycleHandlerDeps) {
+export function createConnectorLifecycleHandler({
+  logger,
+  getStartServices,
+}: ConnectorLifecycleHandlerDeps) {
   return {
     async onPostCreate(params: ConnectorLifecyclePostCreateParams): Promise<void> {
       if (!params.wasSuccessful) {

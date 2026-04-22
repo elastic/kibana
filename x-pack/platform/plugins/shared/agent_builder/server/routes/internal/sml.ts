@@ -95,12 +95,9 @@ export function registerInternalSmlRoutes({
           logger,
         });
 
-        const stateManager = createAttachmentStateManager(
-          conversationForAttach.attachments ?? [],
-          {
-            getTypeDefinition: attachmentsService.getTypeDefinition,
-          }
-        );
+        const stateManager = createAttachmentStateManager(conversationForAttach.attachments ?? [], {
+          getTypeDefinition: attachmentsService.getTypeDefinition,
+        });
 
         const resultItems = await Promise.all(
           resolvedItems.map(async (r): Promise<SmlAttachHttpResultItem> => {

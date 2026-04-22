@@ -88,10 +88,7 @@ export class SemanticLayerPlugin
     };
   }
 
-  start(
-    coreStart: CoreStart,
-    startDeps: SemanticLayerStartDependencies
-  ): SemanticLayerPluginStart {
+  start(coreStart: CoreStart, startDeps: SemanticLayerStartDependencies): SemanticLayerPluginStart {
     const { elasticsearch, savedObjects } = coreStart;
 
     const smlService = this.smlServiceInstance.start({
