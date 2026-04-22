@@ -2,9 +2,9 @@ openapi: 3.0.0
 
 info:
   title: Get Entity Store Status
-  version: '2023-10-31'
+  version: '1'
 paths:
-  /api/entity_store/status:
+  /internal/entity_store/status:
     get:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
