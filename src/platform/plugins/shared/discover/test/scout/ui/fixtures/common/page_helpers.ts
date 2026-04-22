@@ -80,11 +80,6 @@ export const expandGridCell = async (
  * Inside an open document-viewer flyout, toggle the grid column for `fieldName`
  * from the field-table tab. Calling this twice on the same field toggles it off.
  *
- * EUI's DataGrid renders `cellAction` buttons in several places at once: inline
- * when the cell is focused AND inside the cell's expansion popover. Multiple
- * copies share the same data-test-subj, so we scope to the one inside the
- * focused row's `euiDataGridRowCell__actionsWrapper` to ensure the click hits
- * the wired-up handler.
  */
 export const toggleColumnInDocViewer = async (page: ScoutPage, fieldName: string) => {
   const nameElement = page.testSubj.locator(`tableDocViewRow-${fieldName}-name`);
