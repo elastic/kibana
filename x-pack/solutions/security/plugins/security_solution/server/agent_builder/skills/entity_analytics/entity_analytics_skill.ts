@@ -54,6 +54,15 @@ Two rich attachment types are available for entity analytics answers:
   You never call \`attachments.add\` for this type — just render the tag returned by the tool result.
 - \`security.entity_analytics_dashboard\` — an explicit **Entity Analytics home/overview** Canvas snapshot (risk level donut + highlights + entities together). You call \`attachments.add\` with this type **only** when the user explicitly asks to **show / open / view / display** the **Entity Analytics dashboard / home / overview / landing** product page.
 
+**Never duplicate the attachment in prose.** The \`security.entity\` attachment IS the user-facing presentation of the entity (the card for a single entity; the entities table for 2+ entities). Your prose reply is for narrative and recommendations only — it must NOT restate what the attachment already shows:
+
+- Do NOT emit an "Entity Overview" / "Entity Profile" / field-by-field markdown block after a single-entity card — the card already lists those fields.
+- Do NOT emit a ranked markdown table (e.g. columns like \`| Entity | Type | Risk score | Risk level | Criticality |\`) after an entities table — the table Canvas is the ranking.
+- Do NOT repeat the per-entity summary once per row in prose after the table — the rows in the attachment already cover that.
+- DO write a short prose narrative alongside the attachment: 1–3 sentences for a single-entity card (why this entity is / is not risky, what drove the score, what to investigate next), or 2–4 bullets for a list (top-level takeaways, biggest outliers, recommended follow-ups).
+
+The same principle applies to \`security.entity_analytics_dashboard\`: the Canvas snapshot is the dashboard view — prose should interpret it, not re-emit the donut/highlights/table as markdown.
+
 ## Mandatory — \`<render_attachment>\` (otherwise there is **no** Preview / Canvas)
 
 Rich attachments do **not** show the interactive pill, **Preview**, or **Canvas** unless you **embed** them in your **assistant markdown** in the **same turn**.
@@ -209,19 +218,15 @@ General guidance when you do call \`security.get_entity\`:
 - If more than one profile is returned for an entity, order them chronologically to build a picture of entity behavior over time
 
 ### 3. Interpret and summarize output
-- For \`security.get_entity\` tool results, summarize the current profile and identify whether the entity is considered risky
-- If the result contains 'risk_score_inputs', summarize the alerts that contributed to the risk score calculation
-- If the result contains 'profile_history', summarize the history of this entity over time, which may include:
-  - Whether the risk score has increased or decreased over time
-  - Whether the entity asset criticality has become more or less critical over time
-  - Whether the entity has been added to or removed from watchlists over time
-  - Whether the entity has exhibited new behaviors or stopped exhibiting certain behaviors over time
-- For \`security.search_entities\` tool results, summarize results in a table format. The table MUST have the following columns if data is available for them:
-  - risk score
-  - asset criticality
-  - first_seen
-  - last_seen
-  Include columns for behavioral attributes if data exists and column is relevant to the user's prompt
+
+The rendered \`security.entity\` attachment IS the user-facing profile (single-entity card) or ranking (entities table). Follow the "Never duplicate the attachment in prose" principle from the Rich attachments overview — do NOT re-emit the attachment's contents as markdown.
+
+Keep prose short and narrative-only:
+
+- For \`security.get_entity\` (single entity) results, write 1–3 sentences covering whether the entity is risky, what is driving the score, and what to investigate next. Do NOT produce an "Entity Overview" / field-by-field markdown block — those fields are already in the card.
+  - When the result contains \`risk_score_inputs\`, one sentence on the top alert(s) contributing to the score is enough. Do NOT paste the full list of inputs as markdown.
+  - When the result contains \`profile_history\`, one sentence on the overall trend (increasing / decreasing / stable) is enough, plus a brief callout of any significant change in risk level, asset criticality, watchlist membership, or behaviors.
+- For \`security.search_entities\` (multi-entity) results, write 2–4 bullets with top-level takeaways: highest-risk row(s), biggest criticality gaps, outliers worth flagging, and recommended follow-ups. Do NOT re-list every row in markdown (columns like \`risk score\`, \`asset criticality\`, \`first_seen\`, \`last_seen\`) — the entities-table Canvas already shows those columns.
 
 ### 4. Provide recommendation
 - Recommend investigating external activities for user entities
@@ -282,9 +287,9 @@ User query: Has Cielo39's risk score changed significantly?
 
 Steps:
 1. Use \`security.get_entity\` with an interval of '30d' to fetch Cielo39's current profile and profile_history for the last 30 days.
-2. Render the single-entity \`security.entity\` attachment from \`get_entity\` so the user sees the entity card.
+2. Render the single-entity \`security.entity\` attachment from \`get_entity\` so the user sees the entity card — that card is the profile view.
 3. Analyze the risk scores in the profile history along with the current risk score to determine if the change in risk score is significant (e.g., greater than ${ENTITY_RISK_SCORE_SIGNIFICANT_CHANGE_THRESHOLD} points).
-4. Summarize the trends in risk score changes (stable, increasing, decreasing) in prose.
+4. Summarize in 1–3 sentences of prose: the overall trend (stable / increasing / decreasing), whether the change crosses the significance threshold, and what to investigate next. Do NOT re-list the entity's fields as an "Entity Overview" markdown block — the entity card already shows them.
 
 ### Example 5: Entities From a Specific Data Source
 
@@ -363,17 +368,6 @@ Steps:
   - Investigate relevant alerts contributing to risk score
   - Investigate external activities and movement for risky user entities
   - Investigating vulnerabilities and exposures for risky host and service entities
-
-## Response formats
-
-### Top N entities
-Provide a short table with the key fields:
-
-| Entity | Type | Risk score (0-100) | Risk level | Criticality |
-| --- | --- | --- | --- | --- |
-| <id_value> | <entity_type> | <calculated_score_norm> | <calculated_level> | <criticality_level or "unknown"> |
-
-Then add 1-2 bullets with key observations (e.g., highest criticality, biggest score gap, which entities to investigate further).
 `;
 
 const legacyContent = `
