@@ -79,9 +79,7 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
     await expect(heading).toHaveText('Editing ' + dashboardName);
   });
 
-  test('should edit existing dashboard and add map and custom visualization panels', async ({
-    pageObjects,
-  }) => {
+  test('should edit existing dashboard and add map and Vega panels', async ({ pageObjects }) => {
     const logsDashboardTitle = '[Logs] Web Traffic';
 
     await pageObjects.dashboard.clickDashboardTitleLink(logsDashboardTitle);
