@@ -24,14 +24,34 @@ import {
   mockTagsService,
   mockContentListUserProfilesServices,
   StateDiagnosticPanel,
+  useInspectFlyout,
 } from './stories_helpers';
 
 // =============================================================================
 // Storybook Meta
 // =============================================================================
 
-const meta: Meta = {
+interface ExtendedStoryArgs {
+  scrollableInline: boolean;
+  responsiveBreakpoint: boolean;
+}
+
+const meta: Meta<ExtendedStoryArgs> = {
   title: 'Content List/Core Features + Extended',
+  argTypes: {
+    scrollableInline: {
+      control: 'boolean',
+      description: 'Enable horizontal scrolling when columns exceed container width.',
+    },
+    responsiveBreakpoint: {
+      control: 'boolean',
+      description: 'Collapse the table into responsive cards on narrow viewports.',
+    },
+  },
+  args: {
+    scrollableInline: true,
+    responsiveBreakpoint: false,
+  },
   decorators: [
     (Story) => (
       <div style={{ padding: '20px', maxWidth: '1200px' }}>
@@ -65,8 +85,14 @@ const { Filters } = ContentListToolbar;
  * - [x] Starred column — star icon toggle per row
  * - [x] Starred filter — toggle to show only starred items
  * - [x] Created By filter — include/exclude by user (PR 10)
+ * - [x] Content editor — "View details" row action via `item.onInspect` (PR 12)
  */
-const CoreTagsStarredFeaturesWrapper = () => {
+const CoreTagsStarredFeaturesWrapper = ({
+  scrollableInline = true,
+  responsiveBreakpoint = false,
+}: ExtendedStoryArgs) => {
+  const { onInspect, flyout } = useInspectFlyout();
+
   const labels = useMemo(
     () => ({
       entity: 'dashboard',
@@ -111,8 +137,9 @@ const CoreTagsStarredFeaturesWrapper = () => {
       onDelete: async (_items: ContentListItem[]) => {
         await new Promise((resolve) => setTimeout(resolve, 300));
       },
+      onInspect,
     }),
-    []
+    [onInspect]
   );
 
   const tableChildren = useMemo(
@@ -123,6 +150,7 @@ const CoreTagsStarredFeaturesWrapper = () => {
         <Column.CreatedBy />
         <Column.UpdatedAt />
         <Column.Actions>
+          <Action.Inspect />
           <Action.Delete />
         </Column.Actions>
       </>
@@ -152,11 +180,22 @@ const CoreTagsStarredFeaturesWrapper = () => {
             <Filters.Sort />
           </Filters>
         </ContentListToolbar>
-        <ContentListTable title="dashboards table">{tableChildren}</ContentListTable>
+        <ContentListTable title="dashboards table" {...{ scrollableInline, responsiveBreakpoint }}>
+          {tableChildren}
+        </ContentListTable>
         <ContentListFooter />
       </ContentListProvider>
     ),
-    [labels, dataSource, features, itemConfig, favoritesClient, tableChildren]
+    [
+      labels,
+      dataSource,
+      features,
+      itemConfig,
+      favoritesClient,
+      tableChildren,
+      scrollableInline,
+      responsiveBreakpoint,
+    ]
   );
 
   return (
@@ -196,7 +235,12 @@ const CoreTagsStarredFeaturesWrapper = () => {
           </ContentListToolbar>
         </EuiFlexItem>
         <EuiFlexItem>
-          <ContentListTable title="dashboards table">{tableChildren}</ContentListTable>
+          <ContentListTable
+            title="dashboards table"
+            {...{ scrollableInline, responsiveBreakpoint }}
+          >
+            {tableChildren}
+          </ContentListTable>
         </EuiFlexItem>
         <EuiFlexItem>
           <ContentListFooter />
@@ -205,6 +249,7 @@ const CoreTagsStarredFeaturesWrapper = () => {
           <StateDiagnosticPanel defaultOpen element={displayElement} />
         </EuiFlexItem>
       </EuiFlexGroup>
+      {flyout}
     </ContentListProvider>
   );
 };
@@ -225,7 +270,9 @@ const CoreTagsStarredFeaturesWrapper = () => {
  * "Starred" filter to narrow the list. Use the "Created by" filter to filter by
  * user, or type `createdBy:email` in the search bar. Hold Cmd/Ctrl to exclude.
  */
-export const CoreTagsStarredFeatures: StoryObj = {
+type Story = StoryObj<ExtendedStoryArgs>;
+
+export const CoreTagsStarredFeatures: Story = {
   name: 'Core Features + Extended',
-  render: () => <CoreTagsStarredFeaturesWrapper />,
+  render: (args) => <CoreTagsStarredFeaturesWrapper {...args} />,
 };

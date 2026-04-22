@@ -294,9 +294,13 @@ function TraceTree() {
   const [scrollComplete, setScrollComplete] = useState(false);
 
   const scrollToIndex = useMemo(() => {
-    if (!scrollToContextOnMount || scrollStrategy !== 'parent') return undefined;
+    if (!scrollToContextOnMount || scrollStrategy !== 'parent') {
+      return undefined;
+    }
     const scrollTarget = contextSpanIds?.[0];
-    if (scrollComplete || !scrollTarget || visibleList.length === 0) return undefined;
+    if (scrollComplete || !scrollTarget || visibleList.length === 0) {
+      return undefined;
+    }
     const index = visibleList.findIndex((item) => item.id === scrollTarget);
     return index >= 0 ? index : undefined;
   }, [scrollToContextOnMount, scrollStrategy, scrollComplete, contextSpanIds, visibleList]);

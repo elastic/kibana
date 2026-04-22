@@ -225,6 +225,8 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
     [clearActiveFlyout]
   );
 
+  const contextSpanIds = useMemo(() => (docId ? [docId] : undefined), [docId]);
+
   const actions = useMemo(
     () => [
       {
@@ -251,7 +253,7 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
           rangeTo={rangeTo}
           dataView={dataView}
           serviceName={serviceName}
-          contextSpanIds={docId ? [docId] : undefined}
+          contextSpanIds={contextSpanIds}
           scrollToContextOnMount={docId != null}
           docId={activeDocId}
           docIndex={activeDocIndex}
