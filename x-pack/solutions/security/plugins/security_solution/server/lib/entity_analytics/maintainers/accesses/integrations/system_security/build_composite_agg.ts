@@ -7,10 +7,9 @@
 
 import type { CompositeAfterKey } from '../../types';
 import { buildCompositeAggQueryBase } from '../shared_query_utils';
+import { EXCLUDED_USERNAMES } from './constants';
 
 export { buildBucketUserFilter } from '../shared_query_utils';
-
-const EXCLUDED_USERNAMES = ['SYSTEM', 'LOCAL SERVICE', 'NETWORK SERVICE', 'ANONYMOUS LOGON'];
 
 export const buildCompositeAggQuery = (afterKey?: CompositeAfterKey) =>
   buildCompositeAggQueryBase(

@@ -11,14 +11,16 @@ import {
   buildBucketUserFilter as azureBuildBucketFilter,
 } from './integrations/azure_auditlogs/build_composite_agg';
 import { buildEsqlQuery as azureBuildEsqlQuery } from './integrations/azure_auditlogs/build_esql_query';
-import { OKTA_USER_ADMIN_EVENT_ACTIONS } from './integrations/okta/constants';
-import { HUMAN_IAM_IDENTITY_TYPES } from './integrations/aws_cloudtrail/constants';
+import { getIndexPattern as oktaIndexPattern, OKTA_USER_ADMIN_EVENT_ACTIONS } from './integrations/okta/constants';
+import { getIndexPattern as jamfProIndexPattern } from './integrations/jamf_pro/constants';
+import { getIndexPattern as awsCloudtrailCommunicatesWithIndexPattern, HUMAN_IAM_IDENTITY_TYPES } from './integrations/aws_cloudtrail/constants';
+import { getIndexPattern as azureAuditlogsIndexPattern } from './integrations/azure_auditlogs/constants';
 
 export const COMMUNICATES_WITH_ENGINE_CONFIGS: RelationshipIntegrationConfig[] = [
   {
     id: 'okta',
     name: 'Okta',
-    indexPattern: (ns) => `logs-okta.system-${ns}`,
+    indexPattern: oktaIndexPattern,
     relationshipType: 'communicates_with',
     targetEntityType: 'user',
     compositeAggFilters: [
@@ -35,7 +37,7 @@ export const COMMUNICATES_WITH_ENGINE_CONFIGS: RelationshipIntegrationConfig[] =
   {
     id: 'jamf_pro',
     name: 'Jamf Pro',
-    indexPattern: (ns) => `logs-jamf_pro.events-${ns}`,
+    indexPattern: jamfProIndexPattern,
     relationshipType: 'communicates_with',
     targetEntityType: 'host',
     compositeAggFilters: [
@@ -52,7 +54,7 @@ export const COMMUNICATES_WITH_ENGINE_CONFIGS: RelationshipIntegrationConfig[] =
   {
     id: 'aws_cloudtrail',
     name: 'AWS CloudTrail',
-    indexPattern: (ns) => `logs-aws.cloudtrail-${ns}`,
+    indexPattern: awsCloudtrailCommunicatesWithIndexPattern,
     relationshipType: 'communicates_with',
     targetEntityType: 'host',
     compositeAggFilters: [
@@ -68,7 +70,7 @@ export const COMMUNICATES_WITH_ENGINE_CONFIGS: RelationshipIntegrationConfig[] =
   {
     id: 'azure_auditlogs',
     name: 'Azure Audit Logs',
-    indexPattern: (ns) => `logs-azure.auditlogs-${ns}`,
+    indexPattern: azureAuditlogsIndexPattern,
     relationshipType: 'communicates_with',
     targetEntityType: 'user',
     // azure_auditlogs uses a non-ECS actor field and complex multi-type targets;

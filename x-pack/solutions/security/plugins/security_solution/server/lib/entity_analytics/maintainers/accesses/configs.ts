@@ -6,12 +6,16 @@
  */
 
 import type { RelationshipIntegrationConfig } from '../engine/types';
+import { getIndexPattern as elasticDefendIndexPattern } from './integrations/elastic_defend/constants';
+import { getIndexPattern as awsCloudtrailAccessesIndexPattern } from './integrations/aws_cloudtrail/constants';
+import { getIndexPattern as systemAuthIndexPattern } from './integrations/system_auth/constants';
+import { getIndexPattern as systemSecurityIndexPattern, EXCLUDED_USERNAMES } from './integrations/system_security/constants';
 
 export const ACCESSES_ENGINE_CONFIGS: RelationshipIntegrationConfig[] = [
   {
     id: 'elastic_defend',
     name: 'Elastic Defend',
-    indexPattern: (ns) => `logs-endpoint.events.security-${ns}`,
+    indexPattern: elasticDefendIndexPattern,
     relationshipType: 'accesses',
     targetEntityType: 'host',
     compositeAggFilters: [
@@ -28,7 +32,7 @@ export const ACCESSES_ENGINE_CONFIGS: RelationshipIntegrationConfig[] = [
   {
     id: 'aws_cloudtrail',
     name: 'AWS CloudTrail',
-    indexPattern: (ns) => `logs-aws.cloudtrail-${ns}`,
+    indexPattern: awsCloudtrailAccessesIndexPattern,
     relationshipType: 'accesses',
     targetEntityType: 'host',
     compositeAggFilters: [
@@ -41,7 +45,7 @@ export const ACCESSES_ENGINE_CONFIGS: RelationshipIntegrationConfig[] = [
   {
     id: 'system_auth',
     name: 'System Auth',
-    indexPattern: (ns) => `logs-system.auth-${ns}`,
+    indexPattern: systemAuthIndexPattern,
     relationshipType: 'accesses',
     targetEntityType: 'host',
     compositeAggFilters: [
@@ -62,7 +66,7 @@ export const ACCESSES_ENGINE_CONFIGS: RelationshipIntegrationConfig[] = [
   {
     id: 'system_security',
     name: 'System Security',
-    indexPattern: (ns) => `logs-system.security-${ns}`,
+    indexPattern: systemSecurityIndexPattern,
     relationshipType: 'accesses',
     targetEntityType: 'host',
     compositeAggFilters: [
@@ -74,7 +78,7 @@ export const ACCESSES_ENGINE_CONFIGS: RelationshipIntegrationConfig[] = [
           must_not: [
             {
               terms: {
-                'user.name': ['SYSTEM', 'LOCAL SERVICE', 'NETWORK SERVICE', 'ANONYMOUS LOGON'],
+                'user.name': EXCLUDED_USERNAMES,
               },
             },
           ],
@@ -84,6 +88,6 @@ export const ACCESSES_ENGINE_CONFIGS: RelationshipIntegrationConfig[] = [
     esqlWhereClause: `event.action IN ("logged-in", "logged-in-explicit")
     AND event.code IN ("4624", "4648")
     AND winlog.logon.type IN ("Interactive", "RemoteInteractive", "CachedInteractive")
-    AND NOT user.name IN ("SYSTEM", "LOCAL SERVICE", "NETWORK SERVICE", "ANONYMOUS LOGON")`,
+    AND NOT user.name IN (${EXCLUDED_USERNAMES.map((u) => `"${u}"`).join(', ')})`,
   },
 ];
