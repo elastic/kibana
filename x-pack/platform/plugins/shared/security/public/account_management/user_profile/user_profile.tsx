@@ -277,7 +277,7 @@ const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
   );
 };
 
-const UserLocaleEditor: FunctionComponent<UserLocaleEditorProps> = ({ formik }) => {
+export const UserLocaleEditor: FunctionComponent<UserLocaleEditorProps> = ({ formik }) => {
   const { services } = useKibana<CoreStart>();
   if (!formik.values.data) {
     return null;
