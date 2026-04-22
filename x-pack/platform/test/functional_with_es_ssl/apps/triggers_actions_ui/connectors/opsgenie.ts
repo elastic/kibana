@@ -147,6 +147,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
 
+        await testSubjects.existOrFail('nameInput');
+
         await retry.try(async () => {
           await testSubjects.click('testConnectorTab');
           await testSubjects.existOrFail('executeActionButton');
