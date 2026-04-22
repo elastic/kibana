@@ -39,8 +39,7 @@ import {
 } from '../../tasks/integrations';
 import { ServerlessRoleName } from '../../support/roles';
 
-// Failing: See https://github.com/elastic/kibana/issues/255381
-describe.skip('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
+describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
   let savedQueryId: string;
 
   before(() => {
@@ -211,11 +210,11 @@ describe.skip('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => 
       cy.get(`[title="${policyName}"]`).click();
       closeFleetTourIfVisible();
       cy.getBySel('integrationPolicyUpgradeBtn').click();
-      cy.contains(/^Advanced$/).click();
+      cy.contains(/^Osquery config$/).click();
       cy.get('.kibanaCodeEditor', { timeout: 30000 }).should('contain', `"default--${packName}":`);
       cy.getBySel('saveIntegration').click();
       cy.get(`a[title="${integrationName}"]`).click();
-      cy.contains(/^Advanced$/).click();
+      cy.contains(/^Osquery config$/).click();
       cy.get('.kibanaCodeEditor', { timeout: 30000 }).should('contain', `"default--${packName}":`);
       cy.contains('Cancel').click();
       closeModalIfVisible();
