@@ -14,9 +14,9 @@ import { css } from '@emotion/css';
 import { EuiProvider, EuiSpacer, EuiText, EuiCode, useEuiTheme } from '@elastic/eui';
 
 // @ts-expect-error — package must be built first.
-import { OneNavigation } from '@kbn/ui-one-navigation';
+import { SideNavigation } from '@kbn/ui-side-navigation';
 // @ts-expect-error — package must be built first.
-import type { MenuItem, SecondaryMenuItem, SideNavLogo } from '@kbn/ui-one-navigation';
+import type { MenuItem, SecondaryMenuItem, SideNavLogo } from '@kbn/ui-side-navigation';
 
 /** Returns a `className` that adds a divider after the Dashboard nav item. */
 const useNavDividerClass = () => {
@@ -123,7 +123,7 @@ const App = () => {
   return (
     <EuiProvider colorMode="light">
       <div className={navDividerClass} style={{ display: 'flex', minHeight: '100vh' }}>
-        <OneNavigation
+        <SideNavigation
           {...{ activeItemId, logo }}
           items={navigationItems}
           isCollapsed={isCollapsed}
@@ -143,7 +143,7 @@ const App = () => {
         >
           <EuiText>
             <h1>
-              <EuiCode>OneNavigation</EuiCode> Example
+              <EuiCode>SideNavigation</EuiCode> Example
             </h1>
             <p>
               Active item: <EuiCode>{activeItemId}</EuiCode>

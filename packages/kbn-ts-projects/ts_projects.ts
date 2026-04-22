@@ -16,7 +16,7 @@ export const TS_PROJECTS = TsProject.loadAll({
     // Every @kbn/ui-* package has a packaging build tsconfig used only for
     // standalone build-time type validation; it intentionally imports from
     // parent directories and conflicts with the package's main tsconfig.
-    // See e.g. `src/platform/kbn-ui/one-navigation/packaging/react/type_validation.ts`.
+    // See e.g. `src/platform/kbn-ui/side-navigation/packaging/react/type_validation.ts`.
     'src/platform/kbn-ui/*/packaging/tsconfig.json',
   ],
 

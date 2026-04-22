@@ -1,5 +1,5 @@
 {
-  "name": "@kbn/ui-one-navigation",
+  "name": "@kbn/ui-side-navigation",
   "version": "0.1.0",
   "private": true,
   "description": "Standalone Elastic navigation component for non-Kibana applications",

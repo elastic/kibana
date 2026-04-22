@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Build script for @kbn/ui-one-navigation standalone package.
+# Build script for @kbn/ui-side-navigation standalone package.
 #
 # Steps:
 #   1. Validate types (packaging types match source types).
@@ -29,7 +29,7 @@ echo "    Bundle OK"
 
 echo "==> Step 3: TypeScript declarations"
 # Emit as a regular module (not --outFile ambient wrapper) so consumers can
-# `import { NavigationProps } from '@kbn/ui-one-navigation'`.
+# `import { NavigationProps } from '@kbn/ui-side-navigation'`.
 npx tsc "$PACKAGING_DIR/react/types.ts" \
   --declaration --emitDeclarationOnly \
   --outDir "$TARGET_DIR" \

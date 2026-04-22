@@ -34,7 +34,7 @@ dependsOn:
   - '@kbn/react-kibana-context-env'
   - '@kbn/core-chrome-layout-constants'
   - '@kbn/core-chrome-sidebar-components'
-  - '@kbn/ui-one-navigation'
+  - '@kbn/ui-side-navigation'
   - '@kbn/core-custom-branding-browser'
   - '@kbn/core-custom-branding-common'
   - '@kbn/core-doc-links-browser'

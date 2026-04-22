@@ -35,15 +35,15 @@ export type {
 };
 
 /** Alias for the external package. */
-export type OneNavigationProps = NavigationProps;
+export type SideNavigationProps = NavigationProps;
 
 /**
- * `OneNavigation` — standalone navigation component for non-Kibana applications.
+ * `SideNavigation` — standalone navigation component for non-Kibana applications.
  *
  * Wraps the internal `Navigation` component. Kibana-specific dependencies
  * (`@kbn/i18n`, `@kbn/core-chrome-layout-constants`) are replaced at build
  * time via webpack aliases.
  */
-export const OneNavigation = (props: OneNavigationProps) => {
+export const SideNavigation = (props: SideNavigationProps) => {
   return <Navigation {...props} />;
 };

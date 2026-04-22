@@ -8,7 +8,7 @@
  */
 
 /**
- * Standalone type definitions for the `OneNavigation` external package.
+ * Standalone type definitions for the `SideNavigation` external package.
  *
  * Types are defined inline (not re-exported) so that declaration generation
  * does not pull in the full Kibana dependency graph. Build-time validation
@@ -103,7 +103,7 @@ export interface SideNavLogo {
 }
 
 /**
- * Props accepted by the `OneNavigation` component.
+ * Props accepted by the `SideNavigation` component.
  */
 export interface NavigationProps {
   /** The active item ID, used for highlighting the current item. */
@@ -127,7 +127,7 @@ export interface NavigationProps {
 }
 
 /** Alias for the external package. */
-export type OneNavigationProps = NavigationProps;
+export type SideNavigationProps = NavigationProps;
 
 /** Component declaration (compiled to function declaration in `.d.ts`). */
-export declare function OneNavigation(props: OneNavigationProps): React.ReactNode;
+export declare function SideNavigation(props: SideNavigationProps): React.ReactNode;

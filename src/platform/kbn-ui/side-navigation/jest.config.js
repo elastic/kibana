@@ -10,8 +10,8 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../',
-  roots: ['<rootDir>/src/platform/kbn-ui/one-navigation'],
+  roots: ['<rootDir>/src/platform/kbn-ui/side-navigation'],
   setupFilesAfterEnv: [
-    '<rootDir>/src/platform/kbn-ui/one-navigation/src/__tests__/test_setup.ts',
+    '<rootDir>/src/platform/kbn-ui/side-navigation/src/__tests__/test_setup.ts',
   ],
 };

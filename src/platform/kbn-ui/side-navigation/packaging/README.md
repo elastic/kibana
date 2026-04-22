@@ -1,11 +1,11 @@
-# @kbn/ui-one-navigation
+# @kbn/ui-side-navigation
 
 Standalone build of the Kibana side navigation component for use in non-Kibana
 Elastic applications (e.g. Cloud console).
 
 ## How it works
 
-The source component lives in `src/platform/kbn-ui/one-navigation/`. This
+The source component lives in `src/platform/kbn-ui/side-navigation/`. This
 packaging layer bundles it into a single JS file with webpack, replacing
 Kibana-only dependencies (`@kbn/i18n`, `@kbn/core-chrome-layout-constants`)
 with lightweight stubs via aliases.
@@ -14,17 +14,17 @@ with lightweight stubs via aliases.
 
 ```bash
 yarn kbn bootstrap
-src/platform/kbn-ui/one-navigation/packaging/scripts/build.sh
+src/platform/kbn-ui/side-navigation/packaging/scripts/build.sh
 ```
 
-Artifacts are written to `src/platform/kbn-ui/one-navigation/target/`.
+Artifacts are written to `src/platform/kbn-ui/side-navigation/target/`.
 
 ## Usage
 
 ```tsx
-import { OneNavigation } from '@kbn/ui-one-navigation';
+import { SideNavigation } from '@kbn/ui-side-navigation';
 
-<OneNavigation
+<SideNavigation
   items={navigationItems}
   logo={logoConfig}
   isCollapsed={false}

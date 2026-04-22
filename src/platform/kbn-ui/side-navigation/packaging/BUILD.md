@@ -1,4 +1,4 @@
-# Building @kbn/ui-one-navigation
+# Building @kbn/ui-side-navigation
 
 ## Prerequisites
 
@@ -12,12 +12,12 @@ The publish pipeline invokes `packaging/scripts/build.sh` directly. To build
 locally:
 
 ```bash
-src/platform/kbn-ui/one-navigation/packaging/scripts/build.sh
+src/platform/kbn-ui/side-navigation/packaging/scripts/build.sh
 ```
 
 ## Output
 
-Artifacts in `src/platform/kbn-ui/one-navigation/target/`:
+Artifacts in `src/platform/kbn-ui/side-navigation/target/`:
 
 | File | Description |
 |------|-------------|
@@ -25,7 +25,7 @@ Artifacts in `src/platform/kbn-ui/one-navigation/target/`:
 | `index.d.ts` | TypeScript declarations |
 | `package.json` | Package manifest |
 | `metadata.json` | Build metadata (name, version, gitSha, buildTimestamp, peerDependencies) |
-| `kbn-ui-one-navigation-<version>.tgz` | Installable npm tarball |
+| `kbn-ui-side-navigation-<version>.tgz` | Installable npm tarball |
 
 ## Build steps
 
@@ -36,11 +36,11 @@ Artifacts in `src/platform/kbn-ui/one-navigation/target/`:
    `@kbn/core-chrome-layout-utils` with local stubs via resolver aliases.
 3. **Declaration generation** — emits `index.d.ts` as a regular ES module
    (not an ambient `declare module` wrapper) so consumers can import types
-   directly from `@kbn/ui-one-navigation`.
+   directly from `@kbn/ui-side-navigation`.
 4. **Manifest copy** — copies `package.json` into the output directory.
 5. **Metadata** — writes `metadata.json` with name, version, git SHA, build
    timestamp, and peer dependencies. Override the SHA with `BUILD_GIT_SHA`.
-6. **Tarball** — `npm pack --force` produces `kbn-ui-one-navigation-<version>.tgz`.
+6. **Tarball** — `npm pack --force` produces `kbn-ui-side-navigation-<version>.tgz`.
    The `--force` flag is required because the manifest is marked `private`
    (the artifact is distributed out-of-band, not via the public registry).
 
@@ -49,7 +49,7 @@ Artifacts in `src/platform/kbn-ui/one-navigation/target/`:
 ```bash
 cd /tmp && mkdir one-nav-check && cd one-nav-check
 npm init -y
-npm i <path-to>/kbn-ui-one-navigation-<version>.tgz \
+npm i <path-to>/kbn-ui-side-navigation-<version>.tgz \
       @elastic/eui react react-dom @emotion/react @emotion/css
-node -e "console.log(require('@kbn/ui-one-navigation'))"
+node -e "console.log(require('@kbn/ui-side-navigation'))"
 ```

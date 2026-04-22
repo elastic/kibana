@@ -35,7 +35,7 @@ dependsOn:
   - '@kbn/deeplinks-workflows'
   - '@kbn/deeplinks-agent-builder'
   - '@kbn/core-chrome-sidebar'
-  - '@kbn/ui-one-navigation'
+  - '@kbn/ui-side-navigation'
 tags:
   - shared-browser
   - package
