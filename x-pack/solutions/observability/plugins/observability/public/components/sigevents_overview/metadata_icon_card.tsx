@@ -27,14 +27,14 @@ export interface MetadataIconCardProps {
   iconType?: NonNullable<EuiAvatarProps['iconType']>;
 }
 
-export const MetadataIconCard: React.FC<MetadataIconCardProps> = ({
+export function MetadataIconCard({
   title,
   iconType,
   value,
   color,
   iconColor,
   hideIcon = false,
-}) => {
+}: MetadataIconCardProps) {
   const { euiTheme } = useEuiTheme();
 
   if (hideIcon) {
@@ -85,4 +85,4 @@ export const MetadataIconCard: React.FC<MetadataIconCardProps> = ({
       </EuiFlexGroup>
     </EuiPanel>
   );
-};
+}

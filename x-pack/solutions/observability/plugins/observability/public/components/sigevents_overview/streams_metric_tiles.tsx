@@ -38,10 +38,10 @@ const DEFAULT_METRICS: StreamMetricConfig[] = [
   },
 ];
 
-export const StreamsMetricTiles: React.FC<StreamsMetricTilesProps> = ({
+export function StreamsMetricTiles({
   metrics = DEFAULT_METRICS,
   height = 160,
-}) => {
+}: StreamsMetricTilesProps) {
   const { euiTheme } = useEuiTheme();
 
   const data = useMemo(
@@ -91,4 +91,4 @@ export const StreamsMetricTiles: React.FC<StreamsMetricTilesProps> = ({
       </Chart>
     </div>
   );
-};
+}

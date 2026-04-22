@@ -15,7 +15,7 @@ export interface InfoPanelProps {
   children: React.ReactNode;
 }
 
-export const InfoPanel: React.FC<InfoPanelProps> = ({ title, headerRightContent, children }) => {
+export function InfoPanel({ title, headerRightContent, children }: InfoPanelProps) {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -51,4 +51,4 @@ export const InfoPanel: React.FC<InfoPanelProps> = ({ title, headerRightContent,
       </div>
     </EuiPanel>
   );
-};
+}
