@@ -40,9 +40,7 @@
     "@kbn/inference-connectors",
     "@kbn/ai-assistant-connector-selector-action",
     "@kbn/core-application-browser",
-    "@kbn/workflows-extensions",
     "@kbn/zod",
-    "@kbn/workflows",
   ],
   "exclude": [
     "target/**/*"
