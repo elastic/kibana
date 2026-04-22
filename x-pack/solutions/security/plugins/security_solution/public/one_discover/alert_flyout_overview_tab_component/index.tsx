@@ -15,8 +15,6 @@ import type { StartServices } from '../../types';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 import { DataViewManagerBootstrap } from './data_view_manager_bootstrap';
 
-export { DataViewManagerBootstrap };
-
 export interface AlertFlyoutOverviewTabProps {
   /**
    * The document record that will be used to render the content of the overview tab in the alert details flyout.
