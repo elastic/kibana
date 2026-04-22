@@ -39,7 +39,6 @@ import {
   tableDefaults,
   TableId,
 } from '@kbn/securitysolution-data-table';
-import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { RuleCustomizationsContextProvider } from '../../../rule_management/components/rule_details/rule_customizations_diff/rule_customizations_context';
 import { useGroupTakeActionsItems } from '../../../../detections/hooks/alerts_table/use_group_take_action_items';
@@ -236,13 +235,11 @@ export const RuleDetailsPage = connector(
     clearEventsLoading,
     clearSelected,
   }: DetectionEngineComponentProps) {
-    const { application, cps, timelines: timelinesUi, spaces: spacesApi } = useKibana().services;
+    const { application, timelines: timelinesUi, spaces: spacesApi } = useKibana().services;
     const {
       navigateToApp,
       capabilities: { actions },
     } = application;
-
-    useRouteBasedCpsPickerAccess(ProjectRoutingAccess.READONLY, { application, cps });
 
     const dispatch = useDispatch();
     const containerElement = useRef<HTMLDivElement | null>(null);
