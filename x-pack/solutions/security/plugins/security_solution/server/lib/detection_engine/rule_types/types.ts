@@ -32,6 +32,7 @@ import type { Filter } from '@kbn/es-query';
 
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { DocLinksServiceSetup } from '@kbn/core/server';
+import type { EntityStoreStartContract, EntityStoreCRUDClient } from '@kbn/entity-store/server';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import type { RulePreviewLoggedRequest } from '../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import type { RuleResponseAction } from '../../../../common/api/detection_engine/model/rule_response_actions';
@@ -102,6 +103,7 @@ export interface SecuritySharedParams<TParams extends RuleParams = RuleParams> {
   experimentalFeatures: ExperimentalFeatures;
   intendedTimestamp: Date | undefined;
   spaceId: string;
+  entityStoreCrudClient?: EntityStoreCRUDClient;
   ignoreFields: Record<string, boolean>;
   ignoreFieldsRegexes: string[];
   eventsTelemetry: ITelemetryEventsSender | undefined;
@@ -164,6 +166,7 @@ export interface CreateSecurityRuleTypeWrapperProps {
   scheduleNotificationResponseActionsService: ScheduleNotificationResponseActionsService;
   endpointAppContextService: EndpointAppContextService;
   emitAlertsCreatedEvent?: EmitAlertsCreatedEvent;
+  getEntityStore: () => Promise<EntityStoreStartContract>;
 }
 
 export type CreateSecurityRuleTypeWrapper = (

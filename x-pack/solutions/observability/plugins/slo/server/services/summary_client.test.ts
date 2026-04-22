@@ -49,6 +49,154 @@ describe('SummaryClient', () => {
     ]);
   });
 
+  describe('computeSummaries', () => {
+    it('uses named filter aggregations when all members share the same index and date range', async () => {
+      const slo1 = createSLO({ timeWindow: sevenDaysRolling() });
+      const slo2 = createSLO({ timeWindow: sevenDaysRolling() });
+      const sharedTimeWindow = sevenDaysRolling();
+
+      esClientMock.search.mockResolvedValueOnce({
+        took: 10,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: { hits: [] },
+        aggregations: {
+          member_0: { doc_count: 100, good: { value: 90 }, total: { value: 100 } },
+          member_1: { doc_count: 200, good: { value: 180 }, total: { value: 200 } },
+        },
+      } as any);
+
+      burnRatesClientMock.calculateBatch.mockResolvedValueOnce([
+        [
+          { name: '5m', burnRate: 0.5, sli: 0.9 },
+          { name: '1h', burnRate: 0.6, sli: 0.9 },
+          { name: '1d', burnRate: 0.7, sli: 0.9 },
+        ],
+        [
+          { name: '5m', burnRate: 0.3, sli: 0.9 },
+          { name: '1h', burnRate: 0.4, sli: 0.9 },
+          { name: '1d', burnRate: 0.5, sli: 0.9 },
+        ],
+      ]);
+
+      const summaryClient = new DefaultSummaryClient(esClientMock, burnRatesClientMock);
+      const results = await summaryClient.computeSummaries([
+        { slo: slo1, timeWindowOverride: sharedTimeWindow },
+        { slo: slo2, timeWindowOverride: sharedTimeWindow },
+      ]);
+
+      expect(results).toHaveLength(2);
+      expect(results[0].summary.sliValue).toEqual(0.9);
+      expect(results[1].summary.sliValue).toEqual(0.9);
+
+      expect(esClientMock.search).toHaveBeenCalledTimes(1);
+      expect(esClientMock.msearch).not.toHaveBeenCalled();
+
+      const searchCall = esClientMock.search.mock.calls[0][0] as any;
+      expect(searchCall.query.bool.filter).toEqual(
+        expect.arrayContaining([
+          { terms: { 'slo.id': expect.arrayContaining([slo1.id, slo2.id]) } },
+        ])
+      );
+      expect(searchCall.aggs.member_0.filter.bool.filter).toEqual(
+        expect.arrayContaining([
+          { term: { 'slo.id': slo1.id } },
+          { term: { 'slo.revision': slo1.revision } },
+        ])
+      );
+      expect(searchCall.aggs.member_1.filter.bool.filter).toEqual(
+        expect.arrayContaining([
+          { term: { 'slo.id': slo2.id } },
+          { term: { 'slo.revision': slo2.revision } },
+        ])
+      );
+    });
+
+    it('falls back to msearch when members use different indices', async () => {
+      const slo1 = createSLO({ timeWindow: sevenDaysRolling() });
+      const slo2 = createSLO({ timeWindow: sevenDaysRolling() });
+      const sharedTimeWindow = sevenDaysRolling();
+
+      esClientMock.msearch.mockResolvedValueOnce({
+        took: 10,
+        responses: [
+          {
+            took: 5,
+            timed_out: false,
+            _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+            hits: { hits: [] },
+            aggregations: { good: { value: 90 }, total: { value: 100 } },
+            status: 200,
+          },
+          {
+            took: 5,
+            timed_out: false,
+            _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+            hits: { hits: [] },
+            aggregations: { good: { value: 80 }, total: { value: 100 } },
+            status: 200,
+          },
+        ],
+      } as any);
+
+      burnRatesClientMock.calculateBatch.mockResolvedValueOnce([
+        [
+          { name: '5m', burnRate: 0.5, sli: 0.9 },
+          { name: '1h', burnRate: 0.6, sli: 0.9 },
+          { name: '1d', burnRate: 0.7, sli: 0.9 },
+        ],
+        [
+          { name: '5m', burnRate: 0.3, sli: 0.8 },
+          { name: '1h', burnRate: 0.4, sli: 0.8 },
+          { name: '1d', burnRate: 0.5, sli: 0.8 },
+        ],
+      ]);
+
+      const summaryClient = new DefaultSummaryClient(esClientMock, burnRatesClientMock);
+      const results = await summaryClient.computeSummaries([
+        { slo: slo1, timeWindowOverride: sharedTimeWindow },
+        { slo: slo2, timeWindowOverride: sharedTimeWindow, remoteName: 'remote_cluster' },
+      ]);
+
+      expect(results).toHaveLength(2);
+      expect(esClientMock.msearch).toHaveBeenCalledTimes(1);
+      expect(esClientMock.search).not.toHaveBeenCalled();
+    });
+
+    it('falls back to msearch for a single member', async () => {
+      const slo1 = createSLO({ timeWindow: sevenDaysRolling() });
+
+      esClientMock.msearch.mockResolvedValueOnce({
+        took: 10,
+        responses: [
+          {
+            took: 5,
+            timed_out: false,
+            _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+            hits: { hits: [] },
+            aggregations: { good: { value: 90 }, total: { value: 100 } },
+            status: 200,
+          },
+        ],
+      } as any);
+
+      burnRatesClientMock.calculateBatch.mockResolvedValueOnce([
+        [
+          { name: '5m', burnRate: 0.5, sli: 0.9 },
+          { name: '1h', burnRate: 0.6, sli: 0.9 },
+          { name: '1d', burnRate: 0.7, sli: 0.9 },
+        ],
+      ]);
+
+      const summaryClient = new DefaultSummaryClient(esClientMock, burnRatesClientMock);
+      const results = await summaryClient.computeSummaries([{ slo: slo1 }]);
+
+      expect(results).toHaveLength(1);
+      expect(esClientMock.msearch).toHaveBeenCalledTimes(1);
+      expect(esClientMock.search).not.toHaveBeenCalled();
+    });
+  });
+
   describe('fetchSummary', () => {
     describe('with rolling and occurrences SLO', () => {
       it('returns the summary', async () => {

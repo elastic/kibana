@@ -16,6 +16,8 @@ import type { NameColumnProps } from './name/name_builder';
 import type { UpdatedAtColumnProps } from './updated_at/updated_at_builder';
 import type { ActionsColumnProps } from './actions/actions_builder';
 import type { StarredColumnProps } from './starred/starred_builder';
+import type { CreatedByColumnProps } from './created_by/created_by_builder';
+import { getColumnLayoutProps, type ColumnLayoutProps } from './layout';
 
 /**
  * Props for the `Column` component (custom columns).
@@ -24,13 +26,11 @@ import type { StarredColumnProps } from './starred/starred_builder';
  * `render` function. Pre-built columns (like `Column.Name`) have
  * dedicated preset components with their own props interfaces.
  */
-export interface ColumnProps {
+export interface ColumnProps extends ColumnLayoutProps {
   /** Unique identifier for the column. */
   id: string;
   /** Display name for the column header. */
   name: ReactNode;
-  /** Column width (CSS value like `'200px'` or `'40%'`). */
-  width?: string;
   /** Whether the column is sortable. */
   sortable?: boolean;
   /**
@@ -62,6 +62,12 @@ export interface ColumnNamespace {
    * @param props - {@link StarredColumnProps}
    */
   Starred: (props: StarredColumnProps) => ReactNode;
+  /**
+   * Pre-built "Created by" avatar column.
+   *
+   * @param props - {@link CreatedByColumnProps}
+   */
+  CreatedBy: (props: CreatedByColumnProps) => ReactNode;
 }
 
 /** Preset-to-props mapping for table columns. */
@@ -70,6 +76,7 @@ export interface ColumnPresets {
   updatedAt: UpdatedAtColumnProps;
   actions: ActionsColumnProps;
   starred: StarredColumnProps;
+  createdBy: CreatedByColumnProps;
 }
 
 /** Part factory for table columns. */
@@ -86,7 +93,18 @@ export const column = table.definePart<
  * Custom columns are identified by `props.id` rather than a preset name.
  */
 const resolveCustomColumn = (
-  { id, name, width, sortable, field, render, 'data-test-subj': dataTestSubj }: ColumnProps,
+  {
+    id,
+    name,
+    width,
+    minWidth,
+    maxWidth,
+    truncateText,
+    sortable,
+    field,
+    render,
+    'data-test-subj': dataTestSubj,
+  }: ColumnProps,
   { supports }: ColumnBuilderContext
 ): EuiBasicTableColumn<ContentListItem> => {
   const fieldId = field ?? id;
@@ -96,7 +114,7 @@ const resolveCustomColumn = (
     name,
     field: fieldId,
     sortable: supportsSorting ? sortable : false,
-    ...(width && { width }),
+    ...getColumnLayoutProps({ width, minWidth, maxWidth, truncateText }),
     render: (_value: unknown, record: ContentListItem) => render(record),
     'data-test-subj': dataTestSubj ?? `content-list-table-column-${id}`,
   };

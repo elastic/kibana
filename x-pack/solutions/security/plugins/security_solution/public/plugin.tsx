@@ -134,6 +134,22 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       share.url.locators.create(new AIValueReportLocatorDefinition());
     }
 
+    // Register workflow steps
+    if (workflowsExtensions) {
+      import('./workflows/step_types')
+        .then(async ({ registerWorkflowSteps }) => {
+          const [coreStart] = await core.getStartServices();
+          return registerWorkflowSteps(workflowsExtensions, coreStart);
+        })
+        .catch((error) => {
+          this.logger.error(
+            `Error registering security workflow steps: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+        });
+    }
+
     // Lazily instantiate subPlugins and initialize services
     const mountDependencies = async (params?: AppMountParameters) => {
       const { renderApp } = await this.lazyApplicationDependencies();

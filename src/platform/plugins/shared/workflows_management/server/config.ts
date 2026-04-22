@@ -16,6 +16,12 @@ const configSchema = schema.object({
   logging: schema.object({
     console: schema.boolean({ defaultValue: false }),
   }),
+  /**
+   * Whether the plugin is available in the current offering pricing model.
+   * This is used to turn off workflows management server features via config in specific serverless tiers,
+   * without completely disabling the plugin.
+   */
+  available: schema.boolean({ defaultValue: true }),
 });
 
 export type WorkflowsManagementConfig = TypeOf<typeof configSchema>;

@@ -4339,7 +4339,7 @@
         "tags": [],
         "label": "AttackDiscoveryApiSchedule",
         "description": [
-          "\nAn attack discovery schedule"
+          "\nAn Attack Discovery schedule"
         ],
         "signature": [
           "{ id: string; name: string; created_by: string; updated_by: string; created_at: string; updated_at: string; enabled: boolean; params: { alerts_index_pattern: string; api_config: Record<any, any>; size: number; end?: string | undefined; query?: { query: any; language: string; } | undefined; filters?: unknown[] | undefined; combined_filter?: { [x: string]: unknown; } | undefined; start?: string | undefined; }; schedule: { interval: string; }; actions: any[]; last_execution?: { date: string; status: any; duration?: number | undefined; message?: string | undefined; } | undefined; }"
@@ -4392,7 +4392,7 @@
         "tags": [],
         "label": "AttackDiscoveryApiScheduleCreateProps",
         "description": [
-          "\nAn attack discovery schedule create properties"
+          "\nAn Attack Discovery schedule create properties"
         ],
         "signature": [
           "{ name: string; params: { alerts_index_pattern: string; api_config: Record<any, any>; size: number; end?: string | undefined; query?: { query: any; language: string; } | undefined; filters?: unknown[] | undefined; combined_filter?: { [x: string]: unknown; } | undefined; start?: string | undefined; }; schedule: { interval: string; }; enabled?: boolean | undefined; actions?: any[] | undefined; }"
@@ -4411,7 +4411,7 @@
         "tags": [],
         "label": "AttackDiscoveryApiScheduleExecution",
         "description": [
-          "\nAn attack discovery schedule execution information"
+          "\nAn Attack Discovery schedule execution information"
         ],
         "signature": [
           "{ date: string; status: any; duration?: number | undefined; message?: string | undefined; }"
@@ -4430,7 +4430,7 @@
         "tags": [],
         "label": "AttackDiscoveryApiScheduleExecutionStatus",
         "description": [
-          "\nAn attack discovery schedule execution status"
+          "\nAn Attack Discovery schedule execution status"
         ],
         "signature": [
           "any"
@@ -4483,7 +4483,7 @@
         "tags": [],
         "label": "AttackDiscoveryApiScheduleParams",
         "description": [
-          "\nAn attack discovery schedule params"
+          "\nAn Attack Discovery schedule params"
         ],
         "signature": [
           "{ alerts_index_pattern: string; api_config: Record<any, any>; size: number; end?: string | undefined; query?: { query: any; language: string; } | undefined; filters?: unknown[] | undefined; combined_filter?: { [x: string]: unknown; } | undefined; start?: string | undefined; }"
@@ -4519,7 +4519,7 @@
         "tags": [],
         "label": "AttackDiscoveryApiScheduleUpdateProps",
         "description": [
-          "\nAn attack discovery schedule update properties"
+          "\nAn Attack Discovery schedule update properties"
         ],
         "signature": [
           "{ name: string; params: { alerts_index_pattern: string; api_config: Record<any, any>; size: number; end?: string | undefined; query?: { query: any; language: string; } | undefined; filters?: unknown[] | undefined; combined_filter?: { [x: string]: unknown; } | undefined; start?: string | undefined; }; schedule: { interval: string; }; actions: any[]; }"
@@ -4640,7 +4640,7 @@
         "tags": [],
         "label": "AttackDiscoverySchedule",
         "description": [
-          "\nAn attack discovery schedule"
+          "\nAn Attack Discovery schedule"
         ],
         "signature": [
           "{ id: string; name: string; createdBy: string; updatedBy: string; createdAt: string; updatedAt: string; enabled: boolean; params: { alertsIndexPattern: string; apiConfig: Record<any, any>; size: number; end?: string | undefined; query?: { query: any; language: string; } | undefined; filters?: unknown[] | undefined; combinedFilter?: { [x: string]: unknown; } | undefined; start?: string | undefined; }; schedule: { interval: string; }; actions: any[]; lastExecution?: { date: string; status: any; duration?: number | undefined; message?: string | undefined; } | undefined; }"
@@ -4693,7 +4693,7 @@
         "tags": [],
         "label": "AttackDiscoveryScheduleCreateProps",
         "description": [
-          "\nAn attack discovery schedule create properties"
+          "\nAn Attack Discovery schedule create properties"
         ],
         "signature": [
           "{ name: string; params: { alertsIndexPattern: string; apiConfig: Record<any, any>; size: number; end?: string | undefined; query?: { query: any; language: string; } | undefined; filters?: unknown[] | undefined; combinedFilter?: { [x: string]: unknown; } | undefined; start?: string | undefined; }; schedule: { interval: string; }; enabled?: boolean | undefined; actions?: any[] | undefined; }"
@@ -4712,7 +4712,7 @@
         "tags": [],
         "label": "AttackDiscoveryScheduleExecution",
         "description": [
-          "\nAn attack discovery schedule execution information"
+          "\nAn Attack Discovery schedule execution information"
         ],
         "signature": [
           "{ date: string; status: any; duration?: number | undefined; message?: string | undefined; }"
@@ -4731,7 +4731,7 @@
         "tags": [],
         "label": "AttackDiscoveryScheduleExecutionStatus",
         "description": [
-          "\nAn attack discovery schedule execution status"
+          "\nAn Attack Discovery schedule execution status"
         ],
         "signature": [
           "any"
@@ -4784,7 +4784,7 @@
         "tags": [],
         "label": "AttackDiscoveryScheduleParams",
         "description": [
-          "\nAn attack discovery schedule params"
+          "\nAn Attack Discovery schedule params"
         ],
         "signature": [
           "{ alertsIndexPattern: string; apiConfig: Record<any, any>; size: number; end?: string | undefined; query?: { query: any; language: string; } | undefined; filters?: unknown[] | undefined; combinedFilter?: { [x: string]: unknown; } | undefined; start?: string | undefined; }"
@@ -4820,7 +4820,7 @@
         "tags": [],
         "label": "AttackDiscoveryScheduleUpdateProps",
         "description": [
-          "\nAn attack discovery schedule update properties"
+          "\nAn Attack Discovery schedule update properties"
         ],
         "signature": [
           "{ name: string; params: { alertsIndexPattern: string; apiConfig: Record<any, any>; size: number; end?: string | undefined; query?: { query: any; language: string; } | undefined; filters?: unknown[] | undefined; combinedFilter?: { [x: string]: unknown; } | undefined; start?: string | undefined; }; schedule: { interval: string; }; actions: any[]; }"

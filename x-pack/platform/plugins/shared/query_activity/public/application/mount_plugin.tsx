@@ -26,6 +26,7 @@ export const renderApp = (
     coreStart.rendering.addContext(
       <QueryActivityAppContextProvider
         chrome={coreStart.chrome}
+        dataViews={pluginsStart.data.dataViews}
         http={coreStart.http}
         notifications={coreStart.notifications}
         apiService={apiService}

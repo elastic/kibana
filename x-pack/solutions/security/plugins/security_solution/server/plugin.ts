@@ -171,6 +171,7 @@ import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_repo
 import type { TrialCompanionRoutesDeps } from './lib/trial_companion/types';
 import { setupAlertsCapabilitiesSwitcher } from './lib/capabilities/alerts_capabilities_switcher';
 import { securityAlertsProfileInitializer } from './lib/anonymization';
+import { registerWorkflowSteps } from './workflows/step_types';
 import { registerWatchlistMaintainer } from './lib/entity_analytics/watchlists/maintainer/register_watchlist_maintainer';
 import { registerEndpointExceptionsRoutes } from './endpoint/routes/endpoint_exceptions_per_policy_opt_in';
 import {
@@ -278,9 +279,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
     registerAttachments(agentBuilder).catch((error) => {
       this.logger.error(`Error registering security attachments: ${error}`);
-    });
-    registerAgents(agentBuilder, core, logger).catch((error) => {
-      this.logger.error(`Error registering security agent: ${error}`);
     });
     registerSkills({
       agentBuilder,
@@ -482,6 +480,17 @@ export class Plugin implements ISecuritySolutionPlugin {
         taskType: 'chat_completion',
         recommendedEndpoints: [],
       });
+
+      if (experimentalFeatures.leadGenerationEnabled) {
+        plugins.searchInferenceEndpoints.features.register({
+          parentFeatureId: 'security_search_inference_parent',
+          featureId: 'lead_generation',
+          featureName: 'Threat Hunting Lead Generation',
+          featureDescription: 'Lead generation inference endpoint configuration',
+          taskType: 'chat_completion',
+          recommendedEndpoints: [],
+        });
+      }
     }
 
     const requestContextFactory = new RequestContextFactory({
@@ -605,6 +614,10 @@ export class Plugin implements ISecuritySolutionPlugin {
       }),
       endpointAppContextService: this.endpointAppContextService,
       emitAlertsCreatedEvent,
+      getEntityStore: async () => {
+        const [, startPlugins] = await core.getStartServices();
+        return startPlugins.entityStore;
+      },
     };
 
     const securityRuleTypeWrapper = createSecurityRuleTypeWrapper(securityRuleTypeOptions);
@@ -840,6 +853,22 @@ export class Plugin implements ISecuritySolutionPlugin {
     } else {
       this.logger.debug('Workflows Management plugin not available, skipping prebuilt workflow installation');
     }
+
+    const workflowsExtensions = plugins.workflowsExtensions;
+    core
+      .getStartServices()
+      .then(async ([coreStart]) => {
+        await registerWorkflowSteps(workflowsExtensions, coreStart);
+      })
+      .catch((error) => {
+        this.logger.error(
+          `[RegisterAlertValidationSteps] Error registering alert validation steps: ${error.message}`,
+          {
+            error: error.stack,
+          }
+        );
+      });
+    
 
     setupAlertsCapabilitiesSwitcher({
       core,

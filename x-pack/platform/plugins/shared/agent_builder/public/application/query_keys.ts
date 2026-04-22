@@ -45,7 +45,8 @@ export const queryKeys = {
     },
   },
   skills: {
-    all: ['skills', 'list'] as const,
+    all: ['skills'] as const,
+    list: ['skills', 'list'] as const,
     byId: (skillId?: string) => ['skills', skillId],
     byAgent: (agentId?: string) => ['skills', 'byAgent', agentId],
   },

@@ -37,7 +37,7 @@ import { registerBeforeAgentWorkflowsHook } from './hooks/agent_workflows/regist
 import { registerSkillToolsLoaderHook } from './hooks/skills/register_skill_tools_loader_hook';
 import { createConnectorLifecycleHandler } from './services/connector_lifecycle/connector_lifecycle_handler';
 import { registerTaskDefinitions } from './services/execution';
-import { createModelProviderFactory } from './services/runner/model_provider';
+import { createModelProviderFactory } from './services/execution/runner/model_provider';
 import { registerSmlCrawlerTaskDefinition, scheduleSmlCrawlerTasks } from './services/sml';
 import { createSmlTools } from './services/tools/builtin/sml';
 import { createConnectorTools } from './services/tools/builtin/connectors';
@@ -195,7 +195,7 @@ export class AgentBuilderPlugin
       getInternalServices,
     });
 
-    registerSkillToolsLoaderHook(serviceSetups);
+    registerSkillToolsLoaderHook(serviceSetups, { analyticsService: this.analyticsService });
 
     const smlTools = createSmlTools({
       getSmlService: () => {
@@ -263,7 +263,13 @@ export class AgentBuilderPlugin
 
   start(
     coreStart: CoreStart,
-    { inference, spaces, actions, taskManager }: AgentBuilderStartDependencies
+    {
+      inference,
+      spaces,
+      actions,
+      taskManager,
+      searchInferenceEndpoints,
+    }: AgentBuilderStartDependencies
   ): AgentBuilderPluginStart {
     const { elasticsearch, security, uiSettings, savedObjects, dataStreams, featureFlags } =
       coreStart;
@@ -281,6 +287,7 @@ export class AgentBuilderPlugin
       taskManager,
       trackingService: this.trackingService,
       analyticsService: this.analyticsService,
+      searchInferenceEndpoints,
     });
 
     const { tools, agents, skills, runnerFactory, execution, plugins, conversations } =
@@ -296,6 +303,7 @@ export class AgentBuilderPlugin
       uiSettings,
       savedObjects,
       trackingService: this.trackingService,
+      searchInferenceEndpoints,
     });
 
     // Schedule SML crawler tasks for all registered types

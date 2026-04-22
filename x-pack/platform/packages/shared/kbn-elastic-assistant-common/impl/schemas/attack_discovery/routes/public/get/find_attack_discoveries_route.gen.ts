@@ -21,7 +21,7 @@ import { SortOrder } from '../../../../common_attributes.gen';
 import { AttackDiscoveryApiAlert } from '../../../attack_discovery_api_alert.gen';
 
 /**
- * Allowed field names to sort Attack discovery results by. Clients should only pass one of the listed values.
+ * Allowed field names to sort Attack Discovery results by. Clients should only pass one of the listed values.
  */
 export type AttackDiscoveryFindSortField = z.infer<typeof AttackDiscoveryFindSortField>;
 export const AttackDiscoveryFindSortField = z.literal('@timestamp');
@@ -37,7 +37,7 @@ export const AttackDiscoveryFindRequestQuery = z.object({
    */
   connector_names: ArrayFromString(z.string()).optional(),
   /**
-   * Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack discovery views within Kibana. Defaults to `false`.
+   * Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack Discovery views within Kibana. Defaults to `false`.
    */
   enable_field_rendering: BooleanFromString.optional().default(false),
   /**
