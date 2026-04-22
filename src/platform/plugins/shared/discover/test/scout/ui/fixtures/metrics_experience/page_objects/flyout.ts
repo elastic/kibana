@@ -44,8 +44,8 @@ export function createFlyout(page: ScoutPage): MetricsFlyout {
       tabButton: page.testSubj.locator('metricsExperienceFlyoutOverviewTab'),
       descriptionList: page.testSubj.locator('metricsExperienceFlyoutOverviewTabDescriptionList'),
       dataStream: {
-        link: page.testSubj.locator('metricsDataStreamLink'),
-        text: page.testSubj.locator('metricsDataStreamText'),
+        link: page.testSubj.locator('dataStreamLink'),
+        text: page.testSubj.locator('dataStreamText'),
       },
       dimensionsPagination: createDimensionsPagination(container),
       dimensionsListItems: page.testSubj

@@ -378,7 +378,7 @@ describe('Metric Flyout Overview Tab', () => {
         <OverviewTab metricItem={metricItem} externalServices={mockExternalServicesWithStreams} />
       );
 
-      const link = screen.getByTestId('metricsDataStreamLink');
+      const link = screen.getByTestId('dataStreamLink');
       expect(link).toBeInTheDocument();
       expect(link).toHaveAttribute('href', '/app/streams/metrics-system.cpu-default');
     });
@@ -387,17 +387,15 @@ describe('Metric Flyout Overview Tab', () => {
       const metricItem = createMockMetric({ dataStream: 'metrics-system.cpu-default' });
       render(<OverviewTab metricItem={metricItem} externalServices={mockExternalServices} />);
 
-      expect(screen.queryByTestId('metricsDataStreamLink')).not.toBeInTheDocument();
-      expect(screen.getByTestId('metricsDataStreamText')).toHaveTextContent(
-        'metrics-system.cpu-default'
-      );
+      expect(screen.queryByTestId('dataStreamLink')).not.toBeInTheDocument();
+      expect(screen.getByTestId('dataStreamText')).toHaveTextContent('metrics-system.cpu-default');
     });
 
     it('renders "-" when data stream is empty', () => {
       const metricItem = createMockMetric({ dataStream: '' });
       render(<OverviewTab metricItem={metricItem} externalServices={mockExternalServices} />);
 
-      expect(screen.getByTestId('metricsDataStreamEmpty')).toHaveTextContent('-');
+      expect(screen.getByTestId('dataStreamEmpty')).toHaveTextContent('-');
     });
 
     it('renders "Index" label and plain text when sourceKind is "index"', () => {
@@ -410,10 +408,8 @@ describe('Metric Flyout Overview Tab', () => {
       );
 
       expect(screen.getByText('Index')).toBeInTheDocument();
-      expect(screen.getByTestId('metricsDataStreamText')).toHaveTextContent(
-        'test-plain-tsdb-index'
-      );
-      expect(screen.queryByTestId('metricsDataStreamLink')).not.toBeInTheDocument();
+      expect(screen.getByTestId('dataStreamText')).toHaveTextContent('test-plain-tsdb-index');
+      expect(screen.queryByTestId('dataStreamLink')).not.toBeInTheDocument();
     });
 
     it('renders "Data stream" label when sourceKind is "data_stream"', () => {
@@ -426,7 +422,7 @@ describe('Metric Flyout Overview Tab', () => {
       );
 
       expect(screen.getByText('Data stream')).toBeInTheDocument();
-      expect(screen.getByTestId('metricsDataStreamLink')).toBeInTheDocument();
+      expect(screen.getByTestId('dataStreamLink')).toBeInTheDocument();
     });
   });
 });

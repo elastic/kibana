@@ -10,27 +10,28 @@
 import type { DataViewsPublicPluginStart, MatchedItem } from '@kbn/data-views-plugin/public';
 import type { MetricSourceKind, ParsedMetricItem, UnclassifiedMetricItem } from '../../../../types';
 
+// The 'data_stream' tag key is set by the data_views plugin when transforming
+// the Elasticsearch _resolve/index response into MatchedItem[]. See:
+// https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/data_views/public/services/get_indices.ts#L160-L166
+//
+// TODO: Replace this string literal with a constant
+// exported from @kbn/data-views-plugin so both producer and consumer share
+// the same source of truth and a rename can't silently break this check.
+const DATA_STREAM_TAG_KEY = 'data_stream';
+
 const extractDataStreamNames = (items: MatchedItem[]): Set<string> =>
   items.reduce<Set<string>>((acc, item) => {
-    if (item.tags.some((tag) => tag.key === 'data_stream')) {
+    if (item.tags.some((tag) => tag.key === DATA_STREAM_TAG_KEY)) {
       acc.add(item.name);
     }
     return acc;
   }, new Set());
 
 /**
- * Classifies metric sources as either `'data_stream'` or `'index'` using the
- * resolve_index API via dataViews.getIndices, producing fully-typed
- * `ParsedMetricItem`s from `UnclassifiedMetricItem`s.
- *
- * Owns the `sourceKind` invariant on every path:
- * - empty uniqueSources: stamps `options.fallbackKind` on every item
- * - success: stamps `'data_stream'` or `'index'` per item based on resolved
- *   data_stream tags
- * - failure (network / permission): stamps `options.fallbackKind`
- *
- * Callers express their failure preference at the call site via
- * `options.fallbackKind`.
+ * Classifies metric sources as `'data_stream'` or `'index'` via the
+ * `_resolve/index` API. Best-effort: never throws — items fall back to
+ * `options.fallbackKind` when `uniqueSources` is empty, or when resolution
+ * can't run or fails.
  */
 export const classifyMetricSources = async (
   dataViews: DataViewsPublicPluginStart,
