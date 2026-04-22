@@ -104,7 +104,7 @@ export const getDefaultManualAnnotation = (
     timestamp,
   },
   icon: 'triangle',
-  color: 'auto',
+  color: AUTO_ANNOTATION_COLOR,
   id,
 });
 
@@ -125,5 +125,5 @@ export const getDefaultQueryAnnotation = (
   },
   id,
   label: `${fieldName}: *`,
-  color: 'auto',
+  color: AUTO_ANNOTATION_COLOR,
 });
