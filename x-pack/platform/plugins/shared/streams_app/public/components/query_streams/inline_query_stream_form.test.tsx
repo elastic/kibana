@@ -57,7 +57,7 @@ describe('InlineQueryStreamForm', () => {
   it('disables the save button when the name has invalid characters (create mode)', () => {
     renderWithProviders(
       <InlineQueryStreamForm
-initialName="MyQuery"
+        initialName="My-Query"
         initialEsqlQuery="FROM $.logs"
         onSave={jest.fn()}
         onCancel={jest.fn()}
@@ -75,7 +75,7 @@ initialName="MyQuery"
 
     renderWithProviders(
       <InlineQueryStreamForm
-initialName="my-query"
+        initialName="my-query"
         initialEsqlQuery="FROM $.logs"
         nameReadOnly
         onSave={jest.fn()}
@@ -94,7 +94,7 @@ initialName="my-query"
 
     renderWithProviders(
       <InlineQueryStreamForm
-initialName="my-query"
+        initialName="my-query"
         initialEsqlQuery=""
         nameReadOnly
         onSave={jest.fn()}
@@ -113,7 +113,7 @@ initialName="my-query"
 
     renderWithProviders(
       <InlineQueryStreamForm
-initialName="existing"
+        initialName="existing"
         initialEsqlQuery="FROM $.logs"
         onSave={jest.fn()}
         onCancel={jest.fn()}
@@ -129,7 +129,7 @@ initialName="existing"
 
     renderWithProviders(
       <InlineQueryStreamForm
-initialName="existing-query"
+        initialName="existing-query"
         initialEsqlQuery="FROM $.logs"
         existingSiblingNames={['logs.existing-query']}
         onSave={jest.fn()}
@@ -148,7 +148,7 @@ initialName="existing-query"
 
     renderWithProviders(
       <InlineQueryStreamForm
-initialName="my-query"
+        initialName="my-query"
         initialEsqlQuery="FROM $.logs"
         nameReadOnly
         onSave={jest.fn()}
@@ -165,7 +165,7 @@ initialName="my-query"
 
     renderWithProviders(
       <InlineQueryStreamForm
-initialName="new-query"
+        initialName="new-query"
         initialEsqlQuery="FROM $.logs"
         onSave={jest.fn()}
         onCancel={jest.fn()}
