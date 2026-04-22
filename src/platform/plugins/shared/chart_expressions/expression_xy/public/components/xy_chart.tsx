@@ -454,7 +454,8 @@ export function XYChart({
     annotations?.layers.flatMap((l) => l.annotations),
     annotations?.datatable.columns,
     formatFactory,
-    timeFormat
+    timeFormat,
+    darkMode
   );
 
   const visualConfigs = [
