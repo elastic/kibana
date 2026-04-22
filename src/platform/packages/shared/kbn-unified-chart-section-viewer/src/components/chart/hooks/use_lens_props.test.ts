@@ -20,6 +20,13 @@ import type { UnifiedHistogramFetch$ } from '@kbn/unified-histogram/types';
 
 jest.mock('./use_chart_layers');
 jest.mock('@kbn/lens-embeddable-utils');
+jest.mock('../../observability/metrics/utils/report_metrics_grid_error', () => ({
+  reportMetricsGridError: jest.fn(),
+}));
+
+const { reportMetricsGridError: mockReportMetricsGridError } = jest.requireMock(
+  '../../observability/metrics/utils/report_metrics_grid_error'
+) as { reportMetricsGridError: jest.Mock };
 
 const LensConfigBuilderMock = LensConfigBuilder as jest.MockedClass<typeof LensConfigBuilder>;
 const useChartLayersMock = useChartLayers as jest.MockedFunction<typeof useChartLayers>;
@@ -314,6 +321,104 @@ describe('useLensProps', () => {
       expect(result.current).toBeDefined();
       expect(result.current?.attributes.state).toEqual({});
       expect(result.current?.attributes.state.datasourceStates).toBeUndefined();
+    });
+  });
+
+  describe('LensConfigBuilder error surfacing', () => {
+    it('reports the caught builder error and rebuilds with no datasource', async () => {
+      const chartRef = createMockChartRef();
+      const builderError = new Error('builder failed');
+      const analyticsMock = { reportEvent: jest.fn() };
+
+      // First build rejects (the silent-failure path). Subsequent builds
+      // fall back to the beforeEach `mockImplementation` that resolves —
+      // after setBuildError triggers a re-render, buildAttributesFn runs
+      // again and goes down the `effectiveError` branch (build with no
+      // datasource) so the chart surfaces an error instead of spinning
+      // forever.
+      // First build rejects (the silent-failure path). Subsequent builds
+      // fall back to the beforeEach `mockImplementation` that resolves —
+      // after setBuildError triggers a re-render, buildAttributesFn runs
+      // again and goes down the `effectiveError` branch (build with no
+      // datasource) so the chart surfaces an error instead of spinning
+      // forever.
+      LensConfigBuilderMock.prototype.build.mockImplementationOnce(() =>
+        Promise.reject(builderError)
+      );
+
+      const { result } = renderHook(() =>
+        useLensProps({
+          chartId: 'testChartId',
+          title: 'Test Chart',
+          query: 'FROM metrics-*',
+          services: {
+            ...(servicesMock as UnifiedHistogramServices),
+            analytics: analyticsMock as any,
+          },
+          fetchParams,
+          discoverFetch$,
+          chartRef,
+          chartLayers: mockChartLayers,
+          profileId: 'testProfileId',
+        })
+      );
+
+      await waitFor(() => {
+        expect(mockReportMetricsGridError).toHaveBeenCalledTimes(1);
+      });
+
+      expect(mockReportMetricsGridError).toHaveBeenCalledWith({
+        error: builderError,
+        source: 'useLensProps',
+        analytics: analyticsMock,
+      });
+
+      // After the setBuildError rerender, the hook should eventually yield
+      // defined lens props — the chart is no longer stuck loading.
+      await waitFor(() => {
+        expect(result.current).toBeDefined();
+      });
+
+      // build() is called more than once — once for the failing call and
+      // at least once for the recovery re-build triggered by setBuildError.
+      expect((LensConfigBuilder.prototype.build as jest.Mock).mock.calls.length).toBeGreaterThan(1);
+    });
+
+    it('does not terminate the subscription — subsequent fetches continue to build', async () => {
+      const chartRef = createMockChartRef();
+      const builderError = new Error('first build fails');
+
+      LensConfigBuilderMock.prototype.build.mockImplementationOnce(() =>
+        Promise.reject(builderError)
+      );
+
+      const { result } = renderHook(() =>
+        useLensProps({
+          chartId: 'testChartId',
+          title: 'Test Chart',
+          query: 'FROM metrics-*',
+          services: servicesMock as UnifiedHistogramServices,
+          fetchParams,
+          discoverFetch$,
+          chartRef,
+          chartLayers: mockChartLayers,
+          profileId: 'testProfileId',
+        })
+      );
+
+      await waitFor(() => {
+        expect(mockReportMetricsGridError).toHaveBeenCalled();
+      });
+
+      // Next external trigger should produce defined lensProps — the
+      // subscription did not terminate on the earlier throw.
+      await act(async () => {
+        discoverFetch$.next({ fetchParams, lensVisServiceState: undefined });
+      });
+
+      await waitFor(() => {
+        expect(result.current).toBeDefined();
+      });
     });
   });
 });

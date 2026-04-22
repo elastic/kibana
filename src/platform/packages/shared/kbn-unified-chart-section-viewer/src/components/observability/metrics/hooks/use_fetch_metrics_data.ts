@@ -8,7 +8,7 @@
  */
 
 import useAsyncFn from 'react-use/lib/useAsyncFn';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { buildMetricsInfoQuery, hasTransformationalCommand } from '@kbn/esql-utils';
 import { getFieldIconType } from '@kbn/field-utils';
@@ -18,6 +18,7 @@ import { useChartSectionInspector } from '../../../../context/chart_section_insp
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { parseMetricsWithTelemetry } from '../utils/parse_metrics_response_with_telemetry';
 import { getEsqlQuery } from '../utils/get_esql_query';
+import { reportMetricsGridError } from '../utils/report_metrics_grid_error';
 
 /**
  * Fetches METRICS_INFO when in Metrics Experience (non-transformational ES|QL, chart visible).
@@ -139,6 +140,22 @@ export function useFetchMetricsData({
     fetchParams.esqlVariables,
     executeFetch,
   ]);
+
+  // Report any landed fetch error to APM + EBT. De-duped via a ref so repeat
+  // renders with the same error instance don't spam the sink.
+  // The util internally no-ops on AbortError so cancellations stay silent.
+  const lastReportedErrorRef = useRef<unknown>(null);
+  useEffect(() => {
+    if (!error || error === lastReportedErrorRef.current) {
+      return;
+    }
+    lastReportedErrorRef.current = error;
+    reportMetricsGridError({
+      error,
+      source: 'useFetchMetricsData',
+      analytics: services.analytics,
+    });
+  }, [error, services.analytics]);
 
   return {
     loading,

@@ -45,17 +45,24 @@ jest.mock('../../../../context/chart_section_inspector', () => ({
     trackRequest: mockTrackRequest,
   }),
 }));
+jest.mock('../utils/report_metrics_grid_error', () => ({
+  reportMetricsGridError: jest.fn(),
+}));
 
 import { renderHook, waitFor, act } from '@testing-library/react';
 import type { Dimension, ParsedMetricsWithTelemetry } from '../../../../types';
 import { useFetchMetricsData } from './use_fetch_metrics_data';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { parseMetricsWithTelemetry } from '../utils/parse_metrics_response_with_telemetry';
+import { reportMetricsGridError } from '../utils/report_metrics_grid_error';
 import { getFetchParamsMock } from '@kbn/unified-histogram/__mocks__/fetch_params';
 
 const mockExecuteEsqlQuery = executeEsqlQuery as jest.MockedFunction<typeof executeEsqlQuery>;
 const mockParseMetricsWithTelemetry = parseMetricsWithTelemetry as jest.MockedFunction<
   typeof parseMetricsWithTelemetry
+>;
+const mockReportMetricsGridError = reportMetricsGridError as jest.MockedFunction<
+  typeof reportMetricsGridError
 >;
 
 const createDimension = (name: string): Dimension => ({ name });
@@ -101,6 +108,7 @@ const createDefaultParams = (overrides?: Record<string, unknown>) => ({
   services: {
     data: { search: { search: jest.fn() } },
     uiSettings: {},
+    analytics: { reportEvent: jest.fn() },
   } as any,
   isComponentVisible: true,
   selectedDimensionNames: undefined as Dimension[] | undefined,
@@ -451,6 +459,71 @@ describe('useFetchMetricsData', () => {
       expect(result.current.metricItems).toEqual([]);
       expect(result.current.allDimensions).toEqual([]);
       expect(result.current.activeDimensions).toEqual([]);
+    });
+
+    it('reports landed fetch errors via reportMetricsGridError', async () => {
+      const fetchError = new Error('boom');
+      mockExecuteEsqlQuery.mockRejectedValue(fetchError);
+
+      const params = createDefaultParams();
+      const { result } = renderHook(() => useFetchMetricsData(params));
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+        expect(result.current.error).toBeTruthy();
+      });
+
+      expect(mockReportMetricsGridError).toHaveBeenCalledTimes(1);
+      expect(mockReportMetricsGridError).toHaveBeenCalledWith({
+        error: fetchError,
+        source: 'useFetchMetricsData',
+        analytics: params.services.analytics,
+      });
+    });
+
+    it('hands AbortError to the reporter (which internally suppresses it)', async () => {
+      const abortError = new Error('aborted');
+      abortError.name = 'AbortError';
+      mockExecuteEsqlQuery.mockRejectedValue(abortError);
+
+      const params = createDefaultParams();
+      const { result } = renderHook(() => useFetchMetricsData(params));
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+        expect(result.current.error).toBeTruthy();
+      });
+
+      // The wiring always forwards to the reporter; AbortError suppression
+      // lives inside reportMetricsGridError (covered by its own unit test).
+      expect(mockReportMetricsGridError).toHaveBeenCalledTimes(1);
+      expect(mockReportMetricsGridError).toHaveBeenCalledWith({
+        error: abortError,
+        source: 'useFetchMetricsData',
+        analytics: params.services.analytics,
+      });
+    });
+
+    it('does not re-report the same error on re-render', async () => {
+      const fetchError = new Error('re-render test');
+      mockExecuteEsqlQuery.mockRejectedValue(fetchError);
+
+      const params = createDefaultParams();
+      const { result, rerender } = renderHook(
+        (props: ReturnType<typeof createDefaultParams>) => useFetchMetricsData(props),
+        { initialProps: params }
+      );
+
+      await waitFor(() => {
+        expect(result.current.error).toBeTruthy();
+      });
+
+      expect(mockReportMetricsGridError).toHaveBeenCalledTimes(1);
+
+      rerender(params);
+      rerender(params);
+
+      expect(mockReportMetricsGridError).toHaveBeenCalledTimes(1);
     });
   });
 

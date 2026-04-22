@@ -31,10 +31,13 @@ import {
   switchMap,
   combineLatest,
   map,
+  catchError,
+  of,
 } from 'rxjs';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import { useEuiTheme } from '@elastic/eui';
 import type { UnifiedMetricsGridProps } from '../../../types';
+import { reportMetricsGridError } from '../../observability/metrics/utils/report_metrics_grid_error';
 
 export type LensProps = Pick<
   EmbeddableComponentProps,
@@ -78,15 +81,22 @@ export const useLensProps = ({
   const { euiTheme } = useEuiTheme();
   const chartConfigUpdates$ = useRef<BehaviorSubject<void>>(new BehaviorSubject<void>(undefined));
 
+  // Captures errors thrown during LensConfigBuilder.build() so the chart
+  // doesn't stay in forever-loading state. Folded into `effectiveError`
+  // below so the same "build with no datasource" fallback that fetch
+  // errors use applies to builder errors too.
+  const [buildError, setBuildError] = useState<Error | undefined>();
+  const effectiveError = error ?? buildError;
+
   useEffect(() => {
     chartConfigUpdates$.current.next(void 0);
-  }, [query, title, chartLayers, yBounds, error, userMessages, profileId]);
+  }, [query, title, chartLayers, yBounds, effectiveError, userMessages, profileId]);
 
   // creates a stable function that builds the Lens attributes
   const buildAttributesFn = useLatest(async () => {
     // keep Lens from building if there are no chart layers and no error
     // force Lens to build with no datasource on error to show the error message
-    if (!chartLayers.length && !error) return null;
+    if (!chartLayers.length && !effectiveError) return null;
 
     const lensParams = buildLensParams({ query, title, chartLayers, yBounds });
     const builder = new LensConfigBuilder(services.dataViews);
@@ -157,8 +167,26 @@ export const useLensProps = ({
       // discover state update
       discoverFetch$
     ).pipe(
-      // any new emission cancels previous load to avoid race conditions
-      switchMap(() => from(buildAttributesFn.current())),
+      // any new emission cancels previous load to avoid race conditions.
+      // catchError is INSIDE the switchMap's inner observable so a thrown
+      // build error doesn't terminate the outer subscription — it emits
+      // null for this round, reports the error, and the next trigger
+      // restarts cleanly.
+      switchMap(() =>
+        from(buildAttributesFn.current()).pipe(
+          catchError((buildErr: unknown) => {
+            reportMetricsGridError({
+              error: buildErr,
+              source: 'useLensProps',
+              analytics: services.analytics,
+            });
+            if (buildErr instanceof Error) {
+              setBuildError(buildErr);
+            }
+            return of(null);
+          })
+        )
+      ),
       filter((attributes): attributes is LensAttributes => attributes !== null)
     );
 
@@ -176,7 +204,14 @@ export const useLensProps = ({
     return () => {
       subscription.unsubscribe();
     };
-  }, [discoverFetch$, buildAttributesFn, updateLensPropsContext, chartRef, euiTheme.size.base]);
+  }, [
+    discoverFetch$,
+    buildAttributesFn,
+    updateLensPropsContext,
+    chartRef,
+    euiTheme.size.base,
+    services.analytics,
+  ]);
 
   return lensPropsContext;
 };
