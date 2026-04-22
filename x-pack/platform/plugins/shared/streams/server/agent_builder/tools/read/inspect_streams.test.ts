@@ -5,34 +5,96 @@
  * 2.0.
  */
 
+import type { ToolHandlerReturn } from '@kbn/agent-builder-server/tools/handler';
+import type { Streams, FieldDefinition, ClassicFieldDefinition } from '@kbn/streams-schema';
+import type { StreamlangStep } from '@kbn/streamlang/types/streamlang';
 import { createInspectStreamsTool } from './inspect_streams';
-import { createMockGetScopedClients, createMockToolContext } from '../../utils/test_helpers';
+import {
+  createMockGetScopedClients,
+  createMockToolContext,
+  mockEsMethodResolvedValue,
+} from '../../utils/test_helpers';
+
+const searchResponseDefaults = {
+  took: 0,
+  timed_out: false,
+  _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+} as const;
 
 const wiredStreamDef = (
   name: string,
-  steps: object[] = [],
-  fields: Record<string, { type: string }> = { 'log.level': { type: 'keyword' } }
-) => ({
+  steps: StreamlangStep[] = [],
+  fields: FieldDefinition = { 'log.level': { type: 'keyword' } }
+): Streams.WiredStream.Definition => ({
+  type: 'wired',
   name,
   description: `${name} stream`,
+  updated_at: '2026-04-10T00:00:00.000Z',
   ingest: {
     wired: { fields, routing: [] },
-    processing: { steps },
+    processing: { steps, updated_at: '2026-04-10T00:00:00.000Z' },
     lifecycle: { inherit: {} },
     failure_store: { inherit: {} },
+    settings: {},
   },
 });
 
-const classicStreamDef = (name: string, steps: object[] = []) => ({
+const classicStreamDef = (
+  name: string,
+  steps: StreamlangStep[] = []
+): Streams.ClassicStream.Definition => ({
+  type: 'classic',
   name,
   description: `${name} stream`,
+  updated_at: '2026-04-10T00:00:00.000Z',
   ingest: {
     classic: { field_overrides: { message: { type: 'text' } } },
-    processing: { steps },
+    processing: { steps, updated_at: '2026-04-10T00:00:00.000Z' },
     lifecycle: { inherit: {} },
     failure_store: { inherit: {} },
+    settings: {},
   },
 });
+
+const queryStreamDef = (name: string): Streams.QueryStream.Definition => ({
+  type: 'query',
+  name,
+  description: 'test',
+  updated_at: '2026-04-10T00:00:00.000Z',
+  query: { esql: 'FROM logs', view: '' },
+});
+
+const mockFieldCapsResponse = (
+  fields: Record<string, Record<string, { type: string; metadata_field?: boolean }>>
+) => ({
+  indices: ['.ds-test-index'],
+  fields: Object.fromEntries(
+    Object.entries(fields).map(([fieldName, variants]) => [
+      fieldName,
+      Object.fromEntries(
+        Object.entries(variants).map(([variantName, props]) => [
+          variantName,
+          { aggregatable: true, searchable: true, ...props },
+        ])
+      ),
+    ])
+  ),
+});
+
+const emptySearchResponse = {
+  ...searchResponseDefaults,
+  hits: { hits: [] },
+};
+
+interface InspectResultData {
+  summary: string;
+  streams: Record<string, Record<string, Record<string, unknown>>>;
+}
+
+const getData = (result: ToolHandlerReturn): InspectResultData => {
+  if (!('results' in result)) throw new Error('Expected results');
+  return result.results[0].data as InspectResultData;
+};
 
 describe('createInspectStreamsTool handler', () => {
   const setup = () => {
@@ -45,7 +107,7 @@ describe('createInspectStreamsTool handler', () => {
 
   it('returns overview for a single stream', async () => {
     const { tool, context, streamsClient } = setup();
-    streamsClient.getStream.mockResolvedValue(wiredStreamDef('logs.ecs.nginx') as any);
+    streamsClient.getStream.mockResolvedValue(wiredStreamDef('logs.ecs.nginx'));
     streamsClient.getAncestors.mockResolvedValue([]);
 
     const result = await tool.handler(
@@ -53,12 +115,10 @@ describe('createInspectStreamsTool handler', () => {
       context
     );
 
-    if ('results' in result) {
-      const data = result.results[0].data as Record<string, any>;
-      expect(data.streams['logs.ecs.nginx']).toBeDefined();
-      expect(data.streams['logs.ecs.nginx'].type).toBe('wired');
-      expect(data.streams['logs.ecs.nginx'].overview.name).toBe('logs.ecs.nginx');
-    }
+    const data = getData(result);
+    expect(data.streams['logs.ecs.nginx']).toBeDefined();
+    expect(data.streams['logs.ecs.nginx'].type).toBe('wired');
+    expect(data.streams['logs.ecs.nginx'].overview.name).toBe('logs.ecs.nginx');
   });
 
   it('resolves ["*"] to all existing streams', async () => {
@@ -68,30 +128,28 @@ describe('createInspectStreamsTool handler', () => {
       { exists: true, stream: wiredStreamDef('logs.ecs.a') },
       { exists: true, stream: classicStreamDef('logs-nginx.data-default') },
       { exists: false, stream: wiredStreamDef('logs.ecs.missing') },
-    ] as any);
+    ]);
 
     streamsClient.getStream
-      .mockResolvedValueOnce(wiredStreamDef('logs.ecs.a') as any)
-      .mockResolvedValueOnce(classicStreamDef('logs-nginx.data-default') as any);
+      .mockResolvedValueOnce(wiredStreamDef('logs.ecs.a'))
+      .mockResolvedValueOnce(classicStreamDef('logs-nginx.data-default'));
 
     const result = await tool.handler({ names: ['*'], aspects: ['overview'] }, context);
 
-    if ('results' in result) {
-      const data = result.results[0].data as Record<string, any>;
-      expect(Object.keys(data.streams)).toHaveLength(2);
-      expect(data.streams['logs.ecs.a'].type).toBe('wired');
-      expect(data.streams['logs-nginx.data-default'].type).toBe('classic');
-    }
+    const data = getData(result);
+    expect(Object.keys(data.streams)).toHaveLength(2);
+    expect(data.streams['logs.ecs.a'].type).toBe('wired');
+    expect(data.streams['logs-nginx.data-default'].type).toBe('classic');
   });
 
   it('returns processing_chain with source attribution for wired streams', async () => {
     const { tool, context, streamsClient } = setup();
 
-    const steps = [
+    const steps: StreamlangStep[] = [
       { action: 'grok', from: 'message', patterns: ['%{COMBINEDAPACHELOG}'] },
       { action: 'remove', from: 'message' },
     ];
-    streamsClient.getStream.mockResolvedValue(wiredStreamDef('logs.ecs.nginx', steps) as any);
+    streamsClient.getStream.mockResolvedValue(wiredStreamDef('logs.ecs.nginx', steps));
     streamsClient.getAncestors.mockResolvedValue([]);
 
     const result = await tool.handler(
@@ -99,95 +157,83 @@ describe('createInspectStreamsTool handler', () => {
       context
     );
 
-    if ('results' in result) {
-      const data = result.results[0].data as Record<string, any>;
-      const proc = data.streams['logs.ecs.nginx'].processing;
-      expect(proc.own_step_count).toBe(2);
-      expect(proc.processing_chain).toEqual([{ source: 'logs.ecs.nginx', steps }]);
-    }
+    const data = getData(result);
+    const proc = data.streams['logs.ecs.nginx'].processing;
+    expect(proc.own_step_count).toBe(2);
+    expect(proc.processing_chain).toEqual([{ source: 'logs.ecs.nginx', steps }]);
   });
 
   it('includes ancestor steps in processing_chain for wired streams', async () => {
     const { tool, context, streamsClient } = setup();
 
-    const parentSteps = [{ action: 'date', from: 'timestamp', formats: ['ISO8601'] }];
-    const ownSteps = [{ action: 'grok', from: 'message' }];
+    const parentSteps: StreamlangStep[] = [
+      { action: 'date', from: 'timestamp', formats: ['ISO8601'] },
+    ];
+    const ownSteps: StreamlangStep[] = [
+      { action: 'grok', from: 'message', patterns: ['%{GREEDYDATA}'] },
+    ];
 
-    streamsClient.getStream.mockResolvedValue(wiredStreamDef('logs.ecs.nginx', ownSteps) as any);
-    streamsClient.getAncestors.mockResolvedValue([wiredStreamDef('logs.ecs', parentSteps)] as any);
+    streamsClient.getStream.mockResolvedValue(wiredStreamDef('logs.ecs.nginx', ownSteps));
+    streamsClient.getAncestors.mockResolvedValue([wiredStreamDef('logs.ecs', parentSteps)]);
 
     const result = await tool.handler(
       { names: ['logs.ecs.nginx'], aspects: ['processing'] },
       context
     );
 
-    if ('results' in result) {
-      const data = result.results[0].data as Record<string, any>;
-      const proc = data.streams['logs.ecs.nginx'].processing;
-      expect(proc.processing_chain).toEqual([
-        { source: 'logs.ecs', steps: parentSteps },
-        { source: 'logs.ecs.nginx', steps: ownSteps },
-      ]);
-      expect(proc.own_step_count).toBe(1);
-    }
+    const data = getData(result);
+    const proc = data.streams['logs.ecs.nginx'].processing;
+    expect(proc.processing_chain).toEqual([
+      { source: 'logs.ecs', steps: parentSteps },
+      { source: 'logs.ecs.nginx', steps: ownSteps },
+    ]);
+    expect(proc.own_step_count).toBe(1);
   });
 
   it('returns single-entry processing_chain for classic streams', async () => {
     const { tool, context, streamsClient } = setup();
 
-    const steps = [{ action: 'grok', from: 'message' }];
-    streamsClient.getStream.mockResolvedValue(classicStreamDef('logs-nginx', steps) as any);
+    const steps: StreamlangStep[] = [
+      { action: 'grok', from: 'message', patterns: ['%{GREEDYDATA}'] },
+    ];
+    streamsClient.getStream.mockResolvedValue(classicStreamDef('logs-nginx', steps));
 
     const result = await tool.handler({ names: ['logs-nginx'], aspects: ['processing'] }, context);
 
-    if ('results' in result) {
-      const data = result.results[0].data as Record<string, any>;
-      const proc = data.streams['logs-nginx'].processing;
-      expect(proc.processing_chain).toEqual([{ source: 'logs-nginx', steps }]);
-      expect(proc.own_step_count).toBe(1);
-    }
+    const data = getData(result);
+    const proc = data.streams['logs-nginx'].processing;
+    expect(proc.processing_chain).toEqual([{ source: 'logs-nginx', steps }]);
+    expect(proc.own_step_count).toBe(1);
   });
 
   it('omits processing for query streams', async () => {
     const { tool, context, streamsClient } = setup();
 
-    streamsClient.getStream.mockResolvedValue({
-      name: 'query.test',
-      description: 'test',
-      query: { esql: 'FROM logs' },
-    } as any);
+    streamsClient.getStream.mockResolvedValue(queryStreamDef('query.test'));
 
     const result = await tool.handler({ names: ['query.test'], aspects: ['processing'] }, context);
 
-    if ('results' in result) {
-      const data = result.results[0].data as Record<string, any>;
-      expect(data.streams['query.test'].processing).toBeUndefined();
-    }
+    const data = getData(result);
+    expect(data.streams['query.test'].processing).toBeUndefined();
   });
 
   it('includes type_context per stream type', async () => {
     const { tool, context, streamsClient } = setup();
 
-    streamsClient.getStream.mockResolvedValue({
-      name: 'query.test',
-      description: 'test',
-      query: { esql: 'FROM logs' },
-    } as any);
+    streamsClient.getStream.mockResolvedValue(queryStreamDef('query.test'));
 
     const result = await tool.handler({ names: ['query.test'], aspects: ['overview'] }, context);
 
-    if ('results' in result) {
-      const data = result.results[0].data as Record<string, any>;
-      expect(data.streams['query.test'].type).toBe('query');
-      expect(data.streams['query.test'].type_context).toContain('Read-only');
-    }
+    const data = getData(result);
+    expect(data.streams['query.test'].type).toBe('query');
+    expect(data.streams['query.test'].type_context).toContain('Read-only');
   });
 
   it('handles errors for individual streams gracefully', async () => {
     const { tool, context, streamsClient } = setup();
 
     streamsClient.getStream
-      .mockResolvedValueOnce(wiredStreamDef('logs.ecs.good') as any)
+      .mockResolvedValueOnce(wiredStreamDef('logs.ecs.good'))
       .mockRejectedValueOnce(new Error('Cannot find stream logs.ecs.bad'));
 
     const result = await tool.handler(
@@ -195,11 +241,9 @@ describe('createInspectStreamsTool handler', () => {
       context
     );
 
-    if ('results' in result) {
-      const data = result.results[0].data as Record<string, any>;
-      expect(data.streams['logs.ecs.good'].type).toBe('wired');
-      expect(data.streams['logs.ecs.bad'].error).toContain('Cannot find stream');
-    }
+    const data = getData(result);
+    expect(data.streams['logs.ecs.good'].type).toBe('wired');
+    expect(data.streams['logs.ecs.bad'].error).toContain('Cannot find stream');
   });
 
   it('returns empty result when no streams exist', async () => {
@@ -208,25 +252,26 @@ describe('createInspectStreamsTool handler', () => {
 
     const result = await tool.handler({ names: ['*'], aspects: ['overview'] }, context);
 
-    if ('results' in result) {
-      const data = result.results[0].data as Record<string, any>;
-      expect(data.summary).toBe('No streams found.');
-      expect(Object.keys(data.streams)).toHaveLength(0);
-    }
+    const data = getData(result);
+    expect(data.summary).toBe('No streams found.');
+    expect(Object.keys(data.streams)).toHaveLength(0);
   });
 
   describe('classic stream schema aspect with fieldCaps', () => {
     const classicWithOverrides = (
       name: string,
-      overrides: Record<string, { type: string }> = {}
-    ) => ({
+      overrides: ClassicFieldDefinition = {}
+    ): Streams.ClassicStream.Definition => ({
+      type: 'classic',
       name,
       description: `${name} stream`,
+      updated_at: '2026-04-10T00:00:00.000Z',
       ingest: {
         classic: { field_overrides: overrides },
-        processing: { steps: [] },
+        processing: { steps: [], updated_at: '2026-04-10T00:00:00.000Z' },
         lifecycle: { inherit: {} },
         failure_store: { inherit: {} },
+        settings: {},
       },
     });
 
@@ -244,29 +289,24 @@ describe('createInspectStreamsTool handler', () => {
       total_unmapped: number;
     }
 
-    const mockFieldCaps = (
-      fields: Record<string, Record<string, { type: string; metadata_field?: boolean }>>
-    ) => ({
-      indices: ['.ds-test-index'],
-      fields,
-    });
-
-    const getSchema = (result: Record<string, unknown>, streamName: string): SchemaResult => {
+    const getSchema = (result: ToolHandlerReturn, streamName: string): SchemaResult => {
       if (!('results' in result)) throw new Error('Expected results');
-      const data = (result as { results: Array<{ data: Record<string, unknown> }> }).results[0]
-        .data as { streams: Record<string, { schema: SchemaResult }> };
+      const data = result.results[0].data as {
+        streams: Record<string, { schema: SchemaResult }>;
+      };
       return data.streams[streamName].schema;
     };
 
     it('shows ES-mapped fields with source "index_template" for classic streams', async () => {
       const { tool, context, streamsClient, esClient } = setup();
-      streamsClient.getStream.mockResolvedValue(classicWithOverrides('logs-otel') as never);
-      esClient.search.mockResolvedValue({ hits: { hits: [] } } as never);
-      esClient.fieldCaps.mockResolvedValue(
-        mockFieldCaps({
+      streamsClient.getStream.mockResolvedValue(classicWithOverrides('logs-otel'));
+      mockEsMethodResolvedValue(esClient.search, emptySearchResponse);
+      mockEsMethodResolvedValue(
+        esClient.fieldCaps,
+        mockFieldCapsResponse({
           trace_id: { trace_id: { type: 'keyword' } },
           '@timestamp': { '@timestamp': { type: 'date' } },
-        }) as never
+        })
       );
 
       const result = await tool.handler({ names: ['logs-otel'], aspects: ['schema'] }, context);
@@ -293,14 +333,15 @@ describe('createInspectStreamsTool handler', () => {
 
     it('marks non-Streams types as overridable: false', async () => {
       const { tool, context, streamsClient, esClient } = setup();
-      streamsClient.getStream.mockResolvedValue(classicWithOverrides('logs-otel') as never);
-      esClient.search.mockResolvedValue({ hits: { hits: [] } } as never);
-      esClient.fieldCaps.mockResolvedValue(
-        mockFieldCaps({
+      streamsClient.getStream.mockResolvedValue(classicWithOverrides('logs-otel'));
+      mockEsMethodResolvedValue(esClient.search, emptySearchResponse);
+      mockEsMethodResolvedValue(
+        esClient.fieldCaps,
+        mockFieldCapsResponse({
           'data_stream.type': { 'data_stream.type': { type: 'constant_keyword' } },
           trace_id: { trace_id: { type: 'keyword' } },
           'scope.version': { 'scope.version': { type: 'version' } },
-        }) as never
+        })
       );
 
       const result = await tool.handler({ names: ['logs-otel'], aspects: ['schema'] }, context);
@@ -321,14 +362,15 @@ describe('createInspectStreamsTool handler', () => {
     it('shows field_overrides as Streams-managed with stream name as source', async () => {
       const { tool, context, streamsClient, esClient } = setup();
       streamsClient.getStream.mockResolvedValue(
-        classicWithOverrides('logs-otel', { my_field: { type: 'keyword' } }) as never
+        classicWithOverrides('logs-otel', { my_field: { type: 'keyword' } })
       );
-      esClient.search.mockResolvedValue({ hits: { hits: [] } } as never);
-      esClient.fieldCaps.mockResolvedValue(
-        mockFieldCaps({
+      mockEsMethodResolvedValue(esClient.search, emptySearchResponse);
+      mockEsMethodResolvedValue(
+        esClient.fieldCaps,
+        mockFieldCapsResponse({
           my_field: { my_field: { type: 'keyword' } },
           trace_id: { trace_id: { type: 'keyword' } },
-        }) as never
+        })
       );
 
       const result = await tool.handler({ names: ['logs-otel'], aspects: ['schema'] }, context);
@@ -347,14 +389,20 @@ describe('createInspectStreamsTool handler', () => {
 
     it('reports truly unmapped fields from _source samples', async () => {
       const { tool, context, streamsClient, esClient } = setup();
-      streamsClient.getStream.mockResolvedValue(classicWithOverrides('logs-otel') as never);
-      esClient.search.mockResolvedValue({
-        hits: { hits: [{ _source: { trace_id: 'abc', dynamic_field: 'hello' } }] },
-      } as never);
-      esClient.fieldCaps.mockResolvedValue(
-        mockFieldCaps({
+      streamsClient.getStream.mockResolvedValue(classicWithOverrides('logs-otel'));
+      mockEsMethodResolvedValue(esClient.search, {
+        ...searchResponseDefaults,
+        hits: {
+          hits: [
+            { _index: 'logs-otel', _id: '1', _source: { trace_id: 'abc', dynamic_field: 'hello' } },
+          ],
+        },
+      });
+      mockEsMethodResolvedValue(
+        esClient.fieldCaps,
+        mockFieldCapsResponse({
           trace_id: { trace_id: { type: 'keyword' } },
-        }) as never
+        })
       );
 
       const result = await tool.handler({ names: ['logs-otel'], aspects: ['schema'] }, context);
@@ -366,15 +414,16 @@ describe('createInspectStreamsTool handler', () => {
 
     it('filters out metadata and multi-field sub-paths from fieldCaps', async () => {
       const { tool, context, streamsClient, esClient } = setup();
-      streamsClient.getStream.mockResolvedValue(classicWithOverrides('logs-otel') as never);
-      esClient.search.mockResolvedValue({ hits: { hits: [] } } as never);
-      esClient.fieldCaps.mockResolvedValue(
-        mockFieldCaps({
+      streamsClient.getStream.mockResolvedValue(classicWithOverrides('logs-otel'));
+      mockEsMethodResolvedValue(esClient.search, emptySearchResponse);
+      mockEsMethodResolvedValue(
+        esClient.fieldCaps,
+        mockFieldCapsResponse({
           _id: { _id: { type: 'keyword', metadata_field: true } },
           trace_id: { trace_id: { type: 'keyword' } },
           'trace_id.keyword': { 'trace_id.keyword': { type: 'keyword' } },
           'message.text': { 'message.text': { type: 'match_only_text' } },
-        }) as never
+        })
       );
 
       const result = await tool.handler({ names: ['logs-otel'], aspects: ['schema'] }, context);
@@ -389,9 +438,9 @@ describe('createInspectStreamsTool handler', () => {
 
     it('does not use fieldCaps for wired streams', async () => {
       const { tool, context, streamsClient, esClient } = setup();
-      streamsClient.getStream.mockResolvedValue(wiredStreamDef('logs.ecs.nginx') as never);
+      streamsClient.getStream.mockResolvedValue(wiredStreamDef('logs.ecs.nginx'));
       streamsClient.getAncestors.mockResolvedValue([]);
-      esClient.search.mockResolvedValue({ hits: { hits: [] } } as never);
+      mockEsMethodResolvedValue(esClient.search, emptySearchResponse);
 
       const result = await tool.handler(
         { names: ['logs.ecs.nginx'], aspects: ['schema'] },

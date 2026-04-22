@@ -28,6 +28,20 @@ type ToolScopedClients = Pick<
   'streamsClient' | 'scopedClusterClient' | 'getQueryClient' | 'attachmentClient'
 >;
 
+/**
+ * Sets a mock resolved value using only the fields the handler actually reads.
+ * Use for deeply nested ES response types (IndicesGetDataStreamResponse,
+ * IndicesStatsResponse, etc.) where providing every required field is impractical.
+ * This is the sole containment point for the partial-mock pattern in these tests;
+ * call sites provide correctly-shaped partial data without needing casts.
+ */
+export function mockEsMethodResolvedValue(
+  mock: { mockResolvedValue: Function },
+  value: unknown
+): void {
+  mock.mockResolvedValue(value);
+}
+
 export const createMockGetScopedClients = () => {
   const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
   const esClient = scopedClusterClient.asCurrentUser;

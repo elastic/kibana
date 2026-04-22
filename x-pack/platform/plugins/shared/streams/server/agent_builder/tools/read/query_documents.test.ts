@@ -59,7 +59,10 @@ describe('createQueryDocumentsTool handler', () => {
       content: '{ "query": { "match_all": {} }, "size": 10 }',
     });
 
-    const result = await tool.handler({ name: 'logs', query: 'show me docs' }, context);
+    const result = await tool.handler(
+      { name: 'logs', query: 'show me docs', source: 'data' },
+      context
+    );
 
     expect('results' in result).toBe(true);
     if ('results' in result) {
@@ -84,7 +87,10 @@ describe('createQueryDocumentsTool handler', () => {
       content: '{ "query": { "match_all": {} }, "size": 100 }',
     });
 
-    const result = await tool.handler({ name: 'logs', query: 'show 100 docs' }, context);
+    const result = await tool.handler(
+      { name: 'logs', query: 'show 100 docs', source: 'data' },
+      context
+    );
 
     if ('results' in result) {
       const data = result.results[0].data as Record<string, unknown>;
@@ -112,7 +118,10 @@ describe('createQueryDocumentsTool handler', () => {
       }),
     });
 
-    const result = await tool.handler({ name: 'logs', query: 'something' }, context);
+    const result = await tool.handler(
+      { name: 'logs', query: 'something', source: 'data' },
+      context
+    );
 
     if ('results' in result) {
       const data = result.results[0].data as Record<string, unknown>;
@@ -139,7 +148,10 @@ describe('createQueryDocumentsTool handler', () => {
       }),
     });
 
-    const result = await tool.handler({ name: 'logs', query: 'count by level' }, context);
+    const result = await tool.handler(
+      { name: 'logs', query: 'count by level', source: 'data' },
+      context
+    );
 
     if ('results' in result) {
       const data = result.results[0].data as Record<string, unknown>;
@@ -228,7 +240,7 @@ describe('createQueryDocumentsTool handler', () => {
       content: '{ "query": { "match_all": {} }, "size": 10 }',
     });
 
-    await tool.handler({ name: 'logs', query: 'show me docs' }, context);
+    await tool.handler({ name: 'logs', query: 'show me docs', source: 'data' }, context);
 
     const fieldCapsCall = esClient.fieldCaps.mock.calls[0][0] as Record<string, unknown>;
     expect(fieldCapsCall.index).toBe('logs');
@@ -264,7 +276,7 @@ describe('createQueryDocumentsTool handler', () => {
       Object.assign(new Error('Cannot find stream'), { statusCode: 404 })
     );
 
-    const result = await tool.handler({ name: 'no.exist', query: 'docs' }, context);
+    const result = await tool.handler({ name: 'no.exist', query: 'docs', source: 'data' }, context);
 
     if ('results' in result) {
       const data = result.results[0].data as Record<string, unknown>;

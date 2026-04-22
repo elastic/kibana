@@ -5,33 +5,93 @@
  * 2.0.
  */
 
+import type { SearchRequest, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { StreamlangStep } from '@kbn/streamlang/types/streamlang';
+import type { Streams, FieldDefinition } from '@kbn/streams-schema';
 import { createDiagnoseStreamTool } from './diagnose_stream';
-import { createMockGetScopedClients, createMockToolContext } from '../../utils/test_helpers';
+import {
+  createMockGetScopedClients,
+  createMockToolContext,
+  mockEsMethodResolvedValue,
+} from '../../utils/test_helpers';
 
-const wiredStreamDef = (
-  name: string,
-  steps: object[] = [],
-  fields: Record<string, { type: string }> = {}
+const searchResponseDefaults = {
+  took: 0,
+  timed_out: false,
+  _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+} as const;
+
+const mockSearchResponse = (overrides: Partial<SearchResponse> = {}): SearchResponse => ({
+  ...searchResponseDefaults,
+  hits: { total: { value: 0, relation: 'eq' }, hits: [] },
+  ...overrides,
+});
+
+const mockDataStreamResponse = (
+  streamName: string,
+  backingIndex: string,
+  failureIndex?: string
 ) => ({
-  name,
-  description: `${name} stream`,
-  ingest: {
-    wired: { fields, routing: [] },
-    processing: { steps },
-    lifecycle: { inherit: {} },
-    failure_store: { inherit: {} },
+  data_streams: [
+    {
+      name: streamName,
+      indices: [{ index_name: backingIndex }],
+      failure_store: {
+        indices: failureIndex ? [{ index_name: failureIndex }] : [],
+      },
+    },
+  ],
+});
+
+const mockIndicesStatsResponse = (backingIndex: string, docCount: number) => ({
+  _shards: { total: 1, successful: 1, failed: 0 },
+  _all: {},
+  indices: {
+    [backingIndex]: { primaries: { docs: { count: docCount } } },
   },
 });
 
-const classicStreamDef = (name: string, steps: object[] = []) => ({
+const wiredStreamDef = (
+  name: string,
+  steps: StreamlangStep[] = [],
+  fields: FieldDefinition = {}
+): Streams.WiredStream.Definition => ({
+  type: 'wired',
   name,
   description: `${name} stream`,
+  updated_at: '2026-04-10T00:00:00.000Z',
   ingest: {
-    classic: { field_overrides: { message: { type: 'text' } } },
-    processing: { steps },
+    wired: { fields, routing: [] },
+    processing: { steps, updated_at: '2026-04-10T00:00:00.000Z' },
     lifecycle: { inherit: {} },
     failure_store: { inherit: {} },
+    settings: {},
   },
+});
+
+const classicStreamDef = (
+  name: string,
+  steps: StreamlangStep[] = []
+): Streams.ClassicStream.Definition => ({
+  type: 'classic',
+  name,
+  description: `${name} stream`,
+  updated_at: '2026-04-10T00:00:00.000Z',
+  ingest: {
+    classic: { field_overrides: { message: { type: 'match_only_text' } } },
+    processing: { steps, updated_at: '2026-04-10T00:00:00.000Z' },
+    lifecycle: { inherit: {} },
+    failure_store: { inherit: {} },
+    settings: {},
+  },
+});
+
+const queryStreamDef = (name: string): Streams.QueryStream.Definition => ({
+  type: 'query',
+  name,
+  description: 'test',
+  updated_at: '2026-04-10T00:00:00.000Z',
+  query: { esql: 'FROM logs', view: '' },
 });
 
 describe('createDiagnoseStreamTool handler', () => {
@@ -52,35 +112,24 @@ describe('createDiagnoseStreamTool handler', () => {
     const backingIndex = `.ds-${streamName}-000001`;
     const failureIndex = `.ds-${streamName}-failures-000001`;
 
-    const dataStreamResponse = {
-      data_streams: [
-        {
-          name: streamName,
-          indices: [{ index_name: backingIndex }],
-          failure_store: {
-            indices: failedDocs > 0 ? [{ index_name: failureIndex }] : [],
-          },
-        },
-      ],
-    };
-
-    esClient.indices.getDataStream.mockResolvedValue(dataStreamResponse as any);
-    scopedClusterClient.asSecondaryAuthUser.indices.getDataStream.mockResolvedValue(
-      dataStreamResponse as any
+    const dataStreamResponse = mockDataStreamResponse(
+      streamName,
+      backingIndex,
+      failedDocs > 0 ? failureIndex : undefined
     );
 
-    esClient.indices.stats.mockResolvedValue({
-      indices: {
-        [backingIndex]: { primaries: { docs: { count: totalDocs } } },
-      },
-    } as any);
-    scopedClusterClient.asSecondaryAuthUser.indices.stats.mockResolvedValue({
-      indices: {
-        [backingIndex]: { primaries: { docs: { count: totalDocs } } },
-      },
-    } as any);
+    mockEsMethodResolvedValue(esClient.indices.getDataStream, dataStreamResponse);
+    mockEsMethodResolvedValue(
+      scopedClusterClient.asSecondaryAuthUser.indices.getDataStream,
+      dataStreamResponse
+    );
 
-    esClient.esql.query.mockResolvedValue(
+    const statsResponse = mockIndicesStatsResponse(backingIndex, totalDocs);
+    mockEsMethodResolvedValue(esClient.indices.stats, statsResponse);
+    mockEsMethodResolvedValue(scopedClusterClient.asSecondaryAuthUser.indices.stats, statsResponse);
+
+    mockEsMethodResolvedValue(
+      esClient.esql.query,
       failedDocs > 0
         ? {
             columns: [
@@ -92,19 +141,23 @@ describe('createDiagnoseStreamTool handler', () => {
         : { columns: [], values: [] }
     );
 
-    esClient.search.mockImplementation(async (params: any) => {
+    esClient.search.mockImplementation(async (params?: SearchRequest) => {
       const index = params?.index as string;
       if (index?.includes('::failures')) {
-        return { hits: { total: { value: failedDocs }, hits: [] } };
+        return mockSearchResponse({
+          hits: { total: { value: failedDocs, relation: 'eq' }, hits: [] },
+        });
       }
-      return { hits: { total: { value: 0 } } };
+      return mockSearchResponse();
     });
   };
 
   it('returns healthy status with metrics and time_window', async () => {
     const { tool, context, streamsClient, esClient, scopedClusterClient } = setup();
-    const steps = [{ action: 'grok', from: 'message' }];
-    streamsClient.getStream.mockResolvedValue(wiredStreamDef('logs.ecs.nginx', steps) as any);
+    const steps: StreamlangStep[] = [
+      { action: 'grok', from: 'message', patterns: ['%{GREEDYDATA}'] },
+    ];
+    streamsClient.getStream.mockResolvedValue(wiredStreamDef('logs.ecs.nginx', steps));
     mockEsClientForDocCounts(esClient, scopedClusterClient, 'logs.ecs.nginx', {
       totalDocs: 1000,
     });
@@ -112,13 +165,14 @@ describe('createDiagnoseStreamTool handler', () => {
     const result = await tool.handler({ name: 'logs.ecs.nginx' }, context);
 
     if ('results' in result) {
-      const data = result.results[0].data as Record<string, any>;
+      const data = result.results[0].data as Record<string, unknown>;
       expect(data.stream).toBe('logs.ecs.nginx');
       expect(data.stream_type).toBe('wired');
       expect(data.health).toBe('healthy');
-      expect(data.time_window).toEqual(expect.objectContaining({ range: '24h' }));
-      expect(data.time_window.from).toBeDefined();
-      expect(data.time_window.to).toBeDefined();
+      const timeWindow = data.time_window as Record<string, string>;
+      expect(timeWindow).toEqual(expect.objectContaining({ range: '24h' }));
+      expect(timeWindow.from).toBeDefined();
+      expect(timeWindow.to).toBeDefined();
       expect(data.metrics).toEqual(
         expect.objectContaining({
           total_docs: 1000,
@@ -137,7 +191,7 @@ describe('createDiagnoseStreamTool handler', () => {
     streamsClient.getStream.mockResolvedValue(
       wiredStreamDef('logs.ecs.broken', [
         { action: 'grok', from: 'message', patterns: ['%{INVALID}'] },
-      ]) as any
+      ])
     );
     mockEsClientForDocCounts(esClient, scopedClusterClient, 'logs.ecs.broken', {
       totalDocs: 1000,
@@ -151,7 +205,9 @@ describe('createDiagnoseStreamTool handler', () => {
       '2026-04-16T10:02:00Z',
       '2026-04-16T10:01:00Z',
     ];
-    const failureStoreHits = timestamps.map((ts) => ({
+    const failureStoreHits = timestamps.map((ts, i) => ({
+      _index: 'failures',
+      _id: String(i),
       _source: {
         '@timestamp': ts,
         error: {
@@ -161,21 +217,24 @@ describe('createDiagnoseStreamTool handler', () => {
         },
       },
     }));
-    esClient.search.mockImplementation(async (params: any) => {
+    esClient.search.mockImplementation(async (params?: SearchRequest) => {
       const index = params?.index as string;
       if (index?.includes('::failures')) {
-        return { hits: { total: { value: 50 }, hits: failureStoreHits } };
+        return mockSearchResponse({
+          hits: { total: { value: 50, relation: 'eq' }, hits: failureStoreHits },
+        });
       }
-      return { hits: { total: { value: 0 } } };
+      return mockSearchResponse();
     });
 
     const result = await tool.handler({ name: 'logs.ecs.broken' }, context);
 
     if ('results' in result) {
-      const data = result.results[0].data as Record<string, any>;
+      const data = result.results[0].data as Record<string, unknown>;
+      const errors = data.errors as Array<Record<string, unknown>>;
       expect(data.health).toBe('failing');
-      expect(data.errors).toHaveLength(1);
-      expect(data.errors[0]).toEqual(
+      expect(errors).toHaveLength(1);
+      expect(errors[0]).toEqual(
         expect.objectContaining({
           error_type: 'grok_exception',
           error_message: expect.stringContaining('grok pattern invalid'),
@@ -190,16 +249,12 @@ describe('createDiagnoseStreamTool handler', () => {
 
   it('handles query streams — returns not_applicable health', async () => {
     const { tool, context, streamsClient } = setup();
-    streamsClient.getStream.mockResolvedValue({
-      name: 'query.test',
-      description: 'test',
-      query: { esql: 'FROM logs' },
-    } as any);
+    streamsClient.getStream.mockResolvedValue(queryStreamDef('query.test'));
 
     const result = await tool.handler({ name: 'query.test' }, context);
 
     if ('results' in result) {
-      const data = result.results[0].data as Record<string, any>;
+      const data = result.results[0].data as Record<string, unknown>;
       expect(data.stream_type).toBe('query');
       expect(data.health).toBe('not_applicable');
     }
@@ -207,24 +262,24 @@ describe('createDiagnoseStreamTool handler', () => {
 
   it('surfaces error retrieval failure', async () => {
     const { tool, context, streamsClient, esClient, scopedClusterClient } = setup();
-    streamsClient.getStream.mockResolvedValue(wiredStreamDef('logs.ecs.fail') as any);
+    streamsClient.getStream.mockResolvedValue(wiredStreamDef('logs.ecs.fail'));
     mockEsClientForDocCounts(esClient, scopedClusterClient, 'logs.ecs.fail', {
       totalDocs: 1000,
       failedDocs: 50,
     });
 
-    esClient.search.mockImplementation(async (params: any) => {
+    esClient.search.mockImplementation(async (params?: SearchRequest) => {
       const index = params?.index as string;
       if (index?.includes('::failures')) {
         throw new Error('index_not_found_exception');
       }
-      return { hits: { total: { value: 0 } } };
+      return mockSearchResponse();
     });
 
     const result = await tool.handler({ name: 'logs.ecs.fail' }, context);
 
     if ('results' in result) {
-      const data = result.results[0].data as Record<string, any>;
+      const data = result.results[0].data as Record<string, unknown>;
       expect(data.health).toBe('failing');
       expect(data.errors).toEqual([]);
       expect(data.errors_retrieval_error).toContain('index_not_found_exception');
@@ -238,7 +293,7 @@ describe('createDiagnoseStreamTool handler', () => {
     const result = await tool.handler({ name: 'logs.ecs.missing' }, context);
 
     if ('results' in result) {
-      const data = result.results[0].data as Record<string, any>;
+      const data = result.results[0].data as Record<string, unknown>;
       expect(data.message).toContain('Failed to diagnose stream');
       expect(data.likely_cause).toContain('Stream not found');
     }
@@ -264,35 +319,28 @@ describe('createDiagnoseStreamTool handler', () => {
       }
     ) => {
       const backingIndex = `.ds-${streamName}-000001`;
-      const dataStreamResponse = {
-        data_streams: [
-          {
-            name: streamName,
-            indices: [{ index_name: backingIndex }],
-            failure_store: { indices: [] },
-          },
-        ],
-      };
+      const dataStreamResponse = mockDataStreamResponse(streamName, backingIndex);
 
-      esClient.indices.getDataStream.mockResolvedValue(dataStreamResponse as never);
-      scopedClusterClient.asSecondaryAuthUser.indices.getDataStream.mockResolvedValue(
-        dataStreamResponse as never
+      mockEsMethodResolvedValue(esClient.indices.getDataStream, dataStreamResponse);
+      mockEsMethodResolvedValue(
+        scopedClusterClient.asSecondaryAuthUser.indices.getDataStream,
+        dataStreamResponse
       );
-      esClient.indices.stats.mockResolvedValue({
-        indices: { [backingIndex]: { primaries: { docs: { count: totalDocs } } } },
-      } as never);
-      scopedClusterClient.asSecondaryAuthUser.indices.stats.mockResolvedValue({
-        indices: { [backingIndex]: { primaries: { docs: { count: totalDocs } } } },
-      } as never);
-      esClient.esql.query.mockResolvedValue({ columns: [], values: [] } as never);
+      const statsResponse = mockIndicesStatsResponse(backingIndex, totalDocs);
+      mockEsMethodResolvedValue(esClient.indices.stats, statsResponse);
+      mockEsMethodResolvedValue(
+        scopedClusterClient.asSecondaryAuthUser.indices.stats,
+        statsResponse
+      );
+      mockEsMethodResolvedValue(esClient.esql.query, { columns: [], values: [] });
 
-      esClient.search.mockImplementation(async (params: Record<string, unknown>) => {
+      esClient.search.mockImplementation(async (params?: SearchRequest) => {
         const index = params?.index as string;
         if (index?.includes('::failures')) {
-          return { hits: { total: { value: 0 }, hits: [] } };
+          return mockSearchResponse();
         }
         if (params?.aggs && typeof params.aggs === 'object' && 'per_index' in params.aggs) {
-          return {
+          return mockSearchResponse({
             aggregations: {
               per_index: {
                 buckets: {
@@ -300,22 +348,22 @@ describe('createDiagnoseStreamTool handler', () => {
                 },
               },
             },
-          };
+          });
         }
         if (params?.aggs && typeof params.aggs === 'object' && 'degraded_fields' in params.aggs) {
-          return {
+          return mockSearchResponse({
             aggregations: {
               degraded_fields: { buckets: degradedFieldBuckets },
             },
-          };
+          });
         }
-        return { hits: { total: { value: 0 } } };
+        return mockSearchResponse();
       });
     };
 
     it('returns degraded_fields when degradedCount > 0', async () => {
       const { tool, context, streamsClient, esClient, scopedClusterClient } = setup();
-      streamsClient.getStream.mockResolvedValue(classicStreamDef('logs-otel') as never);
+      streamsClient.getStream.mockResolvedValue(classicStreamDef('logs-otel'));
 
       mockDegradedStream(esClient, scopedClusterClient, 'logs-otel', {
         totalDocs: 3422,
@@ -360,7 +408,7 @@ describe('createDiagnoseStreamTool handler', () => {
 
     it('omits degraded_fields when degradedCount is 0', async () => {
       const { tool, context, streamsClient, esClient, scopedClusterClient } = setup();
-      streamsClient.getStream.mockResolvedValue(classicStreamDef('logs-healthy') as never);
+      streamsClient.getStream.mockResolvedValue(classicStreamDef('logs-healthy'));
 
       mockDegradedStream(esClient, scopedClusterClient, 'logs-healthy', {
         totalDocs: 1000,
@@ -387,48 +435,41 @@ describe('createDiagnoseStreamTool handler', () => {
 
     it('gracefully handles degraded fields query failure', async () => {
       const { tool, context, streamsClient, esClient, scopedClusterClient } = setup();
-      streamsClient.getStream.mockResolvedValue(classicStreamDef('logs-broken') as never);
+      streamsClient.getStream.mockResolvedValue(classicStreamDef('logs-broken'));
 
       const backingIndex = '.ds-logs-broken-000001';
-      const dataStreamResponse = {
-        data_streams: [
-          {
-            name: 'logs-broken',
-            indices: [{ index_name: backingIndex }],
-            failure_store: { indices: [] },
-          },
-        ],
-      };
-      esClient.indices.getDataStream.mockResolvedValue(dataStreamResponse as never);
-      scopedClusterClient.asSecondaryAuthUser.indices.getDataStream.mockResolvedValue(
-        dataStreamResponse as never
+      const dataStreamResponse = mockDataStreamResponse('logs-broken', backingIndex);
+      mockEsMethodResolvedValue(esClient.indices.getDataStream, dataStreamResponse);
+      mockEsMethodResolvedValue(
+        scopedClusterClient.asSecondaryAuthUser.indices.getDataStream,
+        dataStreamResponse
       );
-      esClient.indices.stats.mockResolvedValue({
-        indices: { [backingIndex]: { primaries: { docs: { count: 500 } } } },
-      } as never);
-      scopedClusterClient.asSecondaryAuthUser.indices.stats.mockResolvedValue({
-        indices: { [backingIndex]: { primaries: { docs: { count: 500 } } } },
-      } as never);
-      esClient.esql.query.mockResolvedValue({ columns: [], values: [] } as never);
+      const statsResponse = mockIndicesStatsResponse(backingIndex, 500);
+      mockEsMethodResolvedValue(esClient.indices.stats, statsResponse);
+      mockEsMethodResolvedValue(
+        scopedClusterClient.asSecondaryAuthUser.indices.stats,
+        statsResponse
+      );
+      mockEsMethodResolvedValue(esClient.esql.query, { columns: [], values: [] });
 
       let callCount = 0;
-      esClient.search.mockImplementation(async (params: Record<string, unknown>) => {
+      esClient.search.mockImplementation(async (params?: SearchRequest) => {
         const index = params?.index as string;
         if (index?.includes('::failures')) {
-          return { hits: { total: { value: 0 }, hits: [] } };
+          return mockSearchResponse();
         }
         if (params?.aggs && typeof params.aggs === 'object' && 'per_index' in params.aggs) {
-          return {
+          return mockSearchResponse({
             aggregations: {
               per_index: { buckets: { [backingIndex]: { doc_count: 100 } } },
             },
-          };
+          });
         }
         if (params?.aggs && typeof params.aggs === 'object' && 'degraded_fields' in params.aggs) {
           callCount++;
           throw new Error('search_phase_execution_exception');
         }
-        return { hits: { total: { value: 0 } } };
+        return mockSearchResponse();
       });
 
       const result = await tool.handler({ name: 'logs-broken' }, context);
@@ -445,20 +486,22 @@ describe('createDiagnoseStreamTool handler', () => {
   describe('sample_document in error groups', () => {
     it('includes flattened sample_document from document.source', async () => {
       const { tool, context, streamsClient, esClient, scopedClusterClient } = setup();
-      streamsClient.getStream.mockResolvedValue(wiredStreamDef('logs.ecs.broken') as never);
+      streamsClient.getStream.mockResolvedValue(wiredStreamDef('logs.ecs.broken'));
       mockEsClientForDocCounts(esClient, scopedClusterClient, 'logs.ecs.broken', {
         totalDocs: 1000,
         failedDocs: 10,
       });
 
-      esClient.search.mockImplementation(async (params: any) => {
+      esClient.search.mockImplementation(async (params?: SearchRequest) => {
         const index = params?.index as string;
         if (index?.includes('::failures')) {
-          return {
+          return mockSearchResponse({
             hits: {
-              total: { value: 10 },
+              total: { value: 10, relation: 'eq' },
               hits: [
                 {
+                  _index: 'failures',
+                  _id: '1',
                   _source: {
                     '@timestamp': '2026-04-18T12:00:00Z',
                     error: {
@@ -476,9 +519,9 @@ describe('createDiagnoseStreamTool handler', () => {
                 },
               ],
             },
-          };
+          });
         }
-        return { hits: { total: { value: 0 } } };
+        return mockSearchResponse();
       });
 
       const result = await tool.handler({ name: 'logs.ecs.broken' }, context);
@@ -497,7 +540,7 @@ describe('createDiagnoseStreamTool handler', () => {
 
     it('truncates long strings and caps field count in sample_document', async () => {
       const { tool, context, streamsClient, esClient, scopedClusterClient } = setup();
-      streamsClient.getStream.mockResolvedValue(wiredStreamDef('logs.ecs.big') as never);
+      streamsClient.getStream.mockResolvedValue(wiredStreamDef('logs.ecs.big'));
       mockEsClientForDocCounts(esClient, scopedClusterClient, 'logs.ecs.big', {
         totalDocs: 500,
         failedDocs: 5,
@@ -508,14 +551,16 @@ describe('createDiagnoseStreamTool handler', () => {
         manyFields[`field_${i}`] = i === 0 ? 'x'.repeat(300) : `val_${i}`;
       }
 
-      esClient.search.mockImplementation(async (params: any) => {
+      esClient.search.mockImplementation(async (params?: SearchRequest) => {
         const index = params?.index as string;
         if (index?.includes('::failures')) {
-          return {
+          return mockSearchResponse({
             hits: {
-              total: { value: 5 },
+              total: { value: 5, relation: 'eq' },
               hits: [
                 {
+                  _index: 'failures',
+                  _id: '1',
                   _source: {
                     '@timestamp': '2026-04-18T12:00:00Z',
                     error: { type: 'some_error', message: 'failed' },
@@ -524,9 +569,9 @@ describe('createDiagnoseStreamTool handler', () => {
                 },
               ],
             },
-          };
+          });
         }
-        return { hits: { total: { value: 0 } } };
+        return mockSearchResponse();
       });
 
       const result = await tool.handler({ name: 'logs.ecs.big' }, context);
@@ -546,20 +591,22 @@ describe('createDiagnoseStreamTool handler', () => {
 
     it('omits sample_document when document.source is absent', async () => {
       const { tool, context, streamsClient, esClient, scopedClusterClient } = setup();
-      streamsClient.getStream.mockResolvedValue(wiredStreamDef('logs.ecs.nosource') as never);
+      streamsClient.getStream.mockResolvedValue(wiredStreamDef('logs.ecs.nosource'));
       mockEsClientForDocCounts(esClient, scopedClusterClient, 'logs.ecs.nosource', {
         totalDocs: 500,
         failedDocs: 5,
       });
 
-      esClient.search.mockImplementation(async (params: any) => {
+      esClient.search.mockImplementation(async (params?: SearchRequest) => {
         const index = params?.index as string;
         if (index?.includes('::failures')) {
-          return {
+          return mockSearchResponse({
             hits: {
-              total: { value: 5 },
+              total: { value: 5, relation: 'eq' },
               hits: [
                 {
+                  _index: 'failures',
+                  _id: '1',
                   _source: {
                     '@timestamp': '2026-04-18T12:00:00Z',
                     error: { type: 'some_error', message: 'failed' },
@@ -567,9 +614,9 @@ describe('createDiagnoseStreamTool handler', () => {
                 },
               ],
             },
-          };
+          });
         }
-        return { hits: { total: { value: 0 } } };
+        return mockSearchResponse();
       });
 
       const result = await tool.handler({ name: 'logs.ecs.nosource' }, context);
@@ -585,7 +632,7 @@ describe('createDiagnoseStreamTool handler', () => {
 
   it('uses custom time_range for failed counts and error samples', async () => {
     const { tool, context, streamsClient, esClient, scopedClusterClient } = setup();
-    streamsClient.getStream.mockResolvedValue(wiredStreamDef('logs.ecs.test') as any);
+    streamsClient.getStream.mockResolvedValue(wiredStreamDef('logs.ecs.test'));
     mockEsClientForDocCounts(esClient, scopedClusterClient, 'logs.ecs.test', {
       totalDocs: 500,
     });
@@ -593,11 +640,12 @@ describe('createDiagnoseStreamTool handler', () => {
     const result = await tool.handler({ name: 'logs.ecs.test', time_range: '1h' }, context);
 
     if ('results' in result) {
-      const data = result.results[0].data as Record<string, any>;
-      expect(data.time_window.range).toBe('1h');
+      const data = result.results[0].data as Record<string, unknown>;
+      const timeWindow = data.time_window as Record<string, string>;
+      expect(timeWindow.range).toBe('1h');
 
-      const from = new Date(data.time_window.from).getTime();
-      const to = new Date(data.time_window.to).getTime();
+      const from = new Date(timeWindow.from).getTime();
+      const to = new Date(timeWindow.to).getTime();
       const diffMs = to - from;
       expect(diffMs).toBeGreaterThan(55 * 60 * 1000);
       expect(diffMs).toBeLessThan(65 * 60 * 1000);
@@ -606,20 +654,22 @@ describe('createDiagnoseStreamTool handler', () => {
 
   it('passes time range filter to failure store search query', async () => {
     const { tool, context, streamsClient, esClient, scopedClusterClient } = setup();
-    streamsClient.getStream.mockResolvedValue(wiredStreamDef('logs.ecs.test') as any);
+    streamsClient.getStream.mockResolvedValue(wiredStreamDef('logs.ecs.test'));
     mockEsClientForDocCounts(esClient, scopedClusterClient, 'logs.ecs.test', {
       totalDocs: 500,
     });
 
     await tool.handler({ name: 'logs.ecs.test', time_range: '6h' }, context);
 
-    const failureStoreCall = esClient.search.mock.calls.find((call: any[]) =>
-      call[0]?.index?.includes('::failures')
-    );
+    const failureStoreCall = esClient.search.mock.calls.find((call) => {
+      const params = call[0] as SearchRequest | undefined;
+      return (params?.index as string)?.includes('::failures');
+    });
     expect(failureStoreCall).toBeDefined();
-    const searchParams = failureStoreCall![0] as any;
+    const searchParams = failureStoreCall![0] as SearchRequest;
     expect(searchParams.query).toBeDefined();
-    expect(searchParams.query.range['@timestamp']).toEqual(
+    const rangeQuery = searchParams.query as { range: Record<string, Record<string, unknown>> };
+    expect(rangeQuery.range['@timestamp']).toEqual(
       expect.objectContaining({ gte: expect.any(Number), lte: expect.any(Number) })
     );
     expect(searchParams._source).toContain('@timestamp');
