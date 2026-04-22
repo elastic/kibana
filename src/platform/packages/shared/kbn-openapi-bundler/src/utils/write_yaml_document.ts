@@ -54,7 +54,7 @@ const preserveDateTimestamps = (doc: Document): void => {
  */
 function requiresQuoting(str: string): boolean {
   if (str.length === 0) return false;
-  return "#*&!|>'\":?@`".includes(str[0]);
+  return '#*&!|>\'":?@`'.includes(str[0]);
 }
 
 /**
