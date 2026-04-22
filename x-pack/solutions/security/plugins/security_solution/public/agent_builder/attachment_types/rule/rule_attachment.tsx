@@ -75,7 +75,7 @@ export const isOnRuleFormPage = (pathname: string): boolean =>
 const parseRuleFromAttachment = (attachment: RuleAttachment): RuleResponse | null => {
   try {
     const parsed = JSON.parse(attachment.data.text);
-    if (!parsed || typeof parsed !== 'object') {
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
       return null;
     }
     return parsed as RuleResponse;

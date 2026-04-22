@@ -999,6 +999,27 @@ describe('RuleInlineContent integration', () => {
     expect(allText).toContain('*:*');
   });
 
+  it('shows "New Rule" callout when attachment data is a JSON array', () => {
+    const aiRuleCreation = new AiRuleCreationService();
+    const application = makeApplication();
+    const definition = createRuleAttachmentDefinition({ application, aiRuleCreation });
+    const Renderer = definition.renderInlineContent!;
+    render(
+      <Renderer
+        attachment={{
+          id: 'test',
+          type: 'security.rule',
+          data: { text: '[1,2,3]' },
+        }}
+        isSidebar={false}
+        isCanvas={false}
+        updateOrigin={jest.fn()}
+      />
+    );
+
+    expect(screen.getByText('New Rule')).toBeInTheDocument();
+  });
+
   it('places filters between index patterns and threshold details in DOM order', () => {
     const { container } = renderInlineContent({
       ...baseRule,
