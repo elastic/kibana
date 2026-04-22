@@ -21,7 +21,6 @@ import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
-import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import { APP_ID, CASE_SAVED_OBJECT } from '../common/constants';
 
 import type { CasesClient } from './client';
@@ -219,16 +218,9 @@ export class CasePlugin
 
     registerCaseWorkflowSteps(plugins.workflowsExtensions, getCasesClient);
 
-    void core.plugins
-      .onSetup<{ agentBuilder: AgentBuilderPluginSetup }>('agentBuilder')
-      .then(({ agentBuilder }) => {
-        if (agentBuilder.found) {
-          registerCasesAgentBuilderTools(agentBuilder.contract, getCasesClient, core);
-        }
-      })
-      .catch((error: Error) => {
-        this.logger.error(`Failed to register Cases agent builder tools: ${error.message}`);
-      });
+    if (plugins.agentBuilder) {
+      registerCasesAgentBuilderTools(plugins.agentBuilder, getCasesClient, core);
+    }
 
     return {
       attachmentFramework: {
