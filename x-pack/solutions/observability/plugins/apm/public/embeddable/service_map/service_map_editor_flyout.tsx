@@ -33,7 +33,7 @@ import {
   getEnvironmentLabel,
 } from '../../../common/environment_filter_values';
 import type { Environment } from '../../../common/environment_rt';
-import type { ServiceMapEmbeddableState } from './types';
+import type { ServiceMapEmbeddableState } from '../../../server/lib/embeddables/service_map_embeddable_schema';
 import type { EmbeddableDeps } from '../types';
 import { useSuggestions } from './use_suggestions';
 import { useAdHocApmDataView } from '../../hooks/use_adhoc_apm_data_view';

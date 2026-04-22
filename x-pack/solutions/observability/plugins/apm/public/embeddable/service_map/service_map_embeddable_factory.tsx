@@ -32,9 +32,9 @@ import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
 } from '../../../common/environment_filter_values';
+import type { ServiceMapEmbeddableState } from '../../../server/lib/embeddables/service_map_embeddable_schema';
 
 import type { EmbeddableDeps } from '../types';
-import type { ServiceMapEmbeddableState } from './types';
 import { ApmEmbeddableContext } from '../embeddable_context';
 import { ServiceMapEmbeddable } from './service_map_embeddable';
 import { ServiceMapEditorFlyout } from './service_map_editor_flyout';
