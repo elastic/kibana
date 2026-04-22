@@ -130,8 +130,10 @@ test.describe(
       });
 
       await test.step('Verify error is visible in errors table', async () => {
-        const errorsTable = serviceDetailsPage.overviewTab.serviceOverviewErrorsTable;
-        await errorsTable.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+        await serviceDetailsPage.overviewTab.serviceOverviewErrorsTable.waitFor({
+          state: 'visible',
+          timeout: EXTENDED_TIMEOUT,
+        });
         const errorLink = errorsTable.getByRole('link', {
           name: testData.EDOT_ERROR_MESSAGE,
         });
