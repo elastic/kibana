@@ -735,7 +735,6 @@ const createLoadDataStreamStatsActor = ({
   fromPromise(async ({ input }: { input: DatasetQualityControllerContext }) =>
     dataStreamStatsClient.getDataStreamsStats({
       types: getValidDatasetTypes(input, isDatasetQualityAllSignalsAvailable),
-      datasetQuery: input.filters.query,
     })
   );
 
@@ -771,7 +770,6 @@ const createLoadDegradedDocsActor = ({
 
     return dataStreamStatsClient.getDataStreamsDegradedStats({
       types: getValidDatasetTypes(input, isDatasetQualityAllSignalsAvailable),
-      datasetQuery: input.filters.query,
       start,
       end,
     });
@@ -786,7 +784,6 @@ const createLoadFailedDocsActor = ({
 
     return dataStreamStatsClient.getDataStreamsFailedStats({
       types: getValidDatasetTypes(input, isDatasetQualityAllSignalsAvailable),
-      datasetQuery: input.filters.query,
       start,
       end,
     });
