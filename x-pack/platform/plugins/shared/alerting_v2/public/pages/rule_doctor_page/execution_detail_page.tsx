@@ -25,6 +25,7 @@ import { useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { RuleDoctorApi } from '../../services/rule_doctor_api';
 import { FindingCard } from './finding_card';
+import { isValidFinding } from './types';
 import type {
   RuleDoctorExecutionDetail,
   RuleDoctorFinding,
@@ -115,7 +116,7 @@ export const ExecutionDetailPage = () => {
         if (TERMINAL_STATUSES.has(detail.status)) {
           stopPolling();
           if (detail.status === 'completed') {
-            setFindings(detail.findings);
+            setFindings(detail.findings.filter(isValidFinding));
             setState('complete');
           } else {
             setErrorMessage(detail.error ?? `Execution finished with status: ${detail.status}`);

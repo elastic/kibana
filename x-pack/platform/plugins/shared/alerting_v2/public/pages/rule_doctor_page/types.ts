@@ -20,6 +20,16 @@ export interface RuleDoctorFinding {
   explanation: string;
 }
 
+export const isValidFinding = (finding: RuleDoctorFinding): boolean =>
+  typeof finding.id === 'string' &&
+  finding.id.length > 0 &&
+  typeof finding.type === 'string' &&
+  finding.type.length > 0 &&
+  typeof finding.summary === 'string' &&
+  finding.summary.length > 0 &&
+  typeof finding.action === 'string' &&
+  Array.isArray(finding.ruleIds);
+
 export interface RuleDoctorStepProgress {
   stepId: string;
   status: string;

@@ -45,18 +45,18 @@ const formatTypeName = (type: string): string =>
 
 const ACTION_LABELS: Record<string, Record<string, { icon: string; label: string }>> = {
   deduplication: {
-    merge: { icon: 'merge', label: 'Merge rules' },
+    merge: { icon: 'merge', label: 'Review merge' },
   },
   threshold_tuning: {
-    tune: { icon: 'controlsHorizontal', label: 'Apply tuning' },
+    tune: { icon: 'controlsHorizontal', label: 'Review tuning' },
   },
   stale_rule: {
-    delete: { icon: 'trash', label: 'Delete rule' },
-    disable: { icon: 'eyeClosed', label: 'Disable rule' },
-    re_enable_and_tune: { icon: 'refresh', label: 'Re-enable & tune' },
+    delete: { icon: 'trash', label: 'Review deletion' },
+    disable: { icon: 'eyeClosed', label: 'Review disable' },
+    re_enable_and_tune: { icon: 'refresh', label: 'Review re-enable' },
   },
   coverage_gap: {
-    create: { icon: 'plusInCircle', label: 'Create rule' },
+    create: { icon: 'plusInCircle', label: 'Review rule' },
   },
 };
 
@@ -64,7 +64,7 @@ const getActionMeta = (
   type: string,
   action: string
 ): { icon: string; label: string } =>
-  ACTION_LABELS[type]?.[action] ?? { icon: 'wrench', label: 'Fix with Rule Doctor' };
+  ACTION_LABELS[type]?.[action] ?? { icon: 'inspect', label: 'Review finding' };
 
 interface FindingCardProps {
   finding: RuleDoctorFinding;

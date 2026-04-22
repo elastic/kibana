@@ -96,9 +96,11 @@ const WORKFLOW_DEFINITIONS: WorkflowDefinition[] = [
     yaml: COVERAGE_GAP_WORKFLOW_YAML,
     insightType: 'coverage_gap',
     label: 'Coverage Gap',
-    analyzeStepId: 'analyze_coverage',
+    analyzeStepId: 'identify_gaps',
     stepOrder: [
-      { stepId: 'analyze_coverage', label: 'Analyzing coverage gaps' },
+      { stepId: 'discover_features', label: 'Discovering environment features' },
+      { stepId: 'identify_gaps', label: 'Identifying coverage gaps' },
+      { stepId: 'generate_rules', label: 'Generating proposed rules' },
       { stepId: 'validate_rules', label: 'Validating proposed rules' },
       { stepId: 'correction_loop', label: 'Correcting invalid rules' },
       { stepId: 'fetch_open_findings', label: 'Fetching existing findings' },
@@ -119,6 +121,28 @@ function getWorkflowDefinition(workflowId: string): WorkflowDefinition | undefin
 function extractStepDetail(stepId: string, step: WorkflowStepExecutionDto): string | null {
   if (step.status !== 'completed' || !step.output) return null;
   const output = step.output as Record<string, unknown>;
+
+  if (stepId === 'discover_features') {
+    const features = output.features;
+    const dataViews = output.data_views_processed;
+    const featureCount = Array.isArray(features) ? features.length : 0;
+    const dvCount = Array.isArray(dataViews) ? dataViews.length : 0;
+    return `Discovered ${featureCount} ${featureCount === 1 ? 'feature' : 'features'} from ${dvCount} data ${dvCount === 1 ? 'view' : 'views'}`;
+  }
+
+  if (stepId === 'identify_gaps') {
+    const content = output.content as Record<string, unknown> | undefined;
+    const gaps = content?.gaps;
+    if (Array.isArray(gaps)) {
+      return gaps.length > 0
+        ? `Identified ${gaps.length} coverage ${gaps.length === 1 ? 'gap' : 'gaps'}`
+        : 'No coverage gaps found';
+    }
+  }
+
+  if (stepId === 'generate_rules') {
+    return 'Rule generation completed';
+  }
 
   const analyzeStepIds = WORKFLOW_DEFINITIONS.map((def) => def.analyzeStepId);
   if (analyzeStepIds.includes(stepId)) {

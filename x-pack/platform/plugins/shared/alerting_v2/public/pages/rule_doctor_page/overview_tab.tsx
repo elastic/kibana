@@ -13,13 +13,16 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
+  EuiPagination,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { FindingCard } from './finding_card';
+import { isValidFinding } from './types';
 import type { RuleDoctorFinding } from './types';
 import { useFetchFindings } from '../../hooks/use_fetch_findings';
 import type { FindingDoc, FindingStatus } from '../../services/rule_doctor_api';
@@ -58,15 +61,29 @@ interface OverviewTabProps {
   onSwitchToExecutions: () => void;
 }
 
+const PAGE_SIZE = 10;
+
 export const OverviewTab: React.FC<OverviewTabProps> = ({ onSwitchToExecutions }) => {
   const [status, setStatus] = useState<FindingStatus>('open');
+  const [page, setPage] = useState(0);
   const { data, isLoading, isError, error } = useFetchFindings(status);
 
   const findings = useMemo(
-    () => (data?.findings ?? []).map(toFinding),
+    () =>
+      (data?.findings ?? [])
+        .map(toFinding)
+        .filter(isValidFinding)
+        .filter((f) => f.confidence !== 'low'),
     [data]
   );
   const analyzedAt = data?.findings?.[0]?.['@timestamp'] ?? null;
+  const pageCount = Math.ceil(findings.length / PAGE_SIZE);
+  const paginatedFindings = findings.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+
+  const handleStatusChange = (id: string) => {
+    setStatus(id as FindingStatus);
+    setPage(0);
+  };
 
   const renderEmptyState = () => {
     if (status === 'dismissed') {
@@ -130,19 +147,21 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ onSwitchToExecutions }
     );
   };
 
-  const renderContent = () => {
+  const renderBody = () => {
     if (isLoading) {
       return (
-        <EuiEmptyPrompt
-          icon={<EuiLoadingSpinner size="xl" />}
-          title={
-            <h2>
+        <EuiFlexGroup alignItems="center" gutterSize="s" direction="column">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="l" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="s" color="subdued">
               {i18n.translate('xpack.alertingV2.ruleDoctor.overview.loadingTitle', {
                 defaultMessage: 'Loading recommendations...',
               })}
-            </h2>
-          }
-        />
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       );
     }
 
@@ -164,32 +183,35 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ onSwitchToExecutions }
       return renderEmptyState();
     }
 
+    const rangeStart = page * PAGE_SIZE + 1;
+    const rangeEnd = Math.min((page + 1) * PAGE_SIZE, findings.length);
+
     return (
       <>
-        <EuiTitle size="s">
-          <h2>
-            {status === 'open'
-              ? i18n.translate('xpack.alertingV2.ruleDoctor.overview.recommendationsTitle', {
-                  defaultMessage: 'AI Recommendations',
-                })
-              : i18n.translate(
-                  'xpack.alertingV2.ruleDoctor.overview.dismissedRecommendationsTitle',
-                  { defaultMessage: 'Dismissed Recommendations' }
-                )}
-          </h2>
-        </EuiTitle>
-        <EuiSpacer size="xs" />
-        <EuiText size="s" color="subdued">
-          <p>
-            {i18n.translate('xpack.alertingV2.ruleDoctor.overview.recommendationsSubtitle', {
-              defaultMessage:
-                'Agent Builder has analyzed your rules and found {count} {count, plural, one {recommendation} other {recommendations}}.',
-              values: { count: findings.length },
-            })}
-          </p>
+        <EuiText size="xs">
+          <FormattedMessage
+            id="xpack.alertingV2.ruleDoctor.overview.showingLabel"
+            defaultMessage="Showing {rangeBold} of {totalBold}"
+            values={{
+              rangeBold: (
+                <strong>
+                  {rangeStart}-{rangeEnd}
+                </strong>
+              ),
+              totalBold: (
+                <strong>
+                  <FormattedMessage
+                    id="xpack.alertingV2.ruleDoctor.overview.showingLabelTotal"
+                    defaultMessage="{total} {total, plural, one {Recommendation} other {Recommendations}}"
+                    values={{ total: findings.length }}
+                  />
+                </strong>
+              ),
+            }}
+          />
         </EuiText>
         <EuiSpacer size="m" />
-        {findings.map((finding) => (
+        {paginatedFindings.map((finding) => (
           <React.Fragment key={finding.id}>
             <FindingCard
               finding={finding}
@@ -199,23 +221,54 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ onSwitchToExecutions }
             <EuiSpacer size="m" />
           </React.Fragment>
         ))}
+        {pageCount > 1 && (
+          <EuiFlexGroup justifyContent="center">
+            <EuiFlexItem grow={false}>
+              <EuiPagination
+                pageCount={pageCount}
+                activePage={page}
+                onPageClick={setPage}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
       </>
     );
   };
 
   return (
     <>
-      <EuiButtonGroup
-        legend={i18n.translate('xpack.alertingV2.ruleDoctor.overview.statusFilterLegend', {
-          defaultMessage: 'Filter by status',
-        })}
-        options={STATUS_OPTIONS}
-        idSelected={status}
-        onChange={(id) => setStatus(id as FindingStatus)}
-        buttonSize="compressed"
-      />
-      <EuiSpacer size="m" />
-      {renderContent()}
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="s">
+            <h2>
+              {status === 'open'
+                ? i18n.translate('xpack.alertingV2.ruleDoctor.overview.recommendationsTitle', {
+                    defaultMessage: 'AI Recommendations',
+                  })
+                : i18n.translate(
+                    'xpack.alertingV2.ruleDoctor.overview.dismissedRecommendationsTitle',
+                    { defaultMessage: 'Dismissed Recommendations' }
+                  )}
+            </h2>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonGroup
+            legend={i18n.translate(
+              'xpack.alertingV2.ruleDoctor.overview.statusFilterLegend',
+              { defaultMessage: 'Filter by status' }
+            )}
+            options={STATUS_OPTIONS}
+            idSelected={status}
+            onChange={handleStatusChange}
+            buttonSize="compressed"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="xs" />
+      {renderBody()}
     </>
   );
+
 };

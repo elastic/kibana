@@ -7,7 +7,7 @@ triggers:
   - type: manual
 
 settings:
-  timeout: "5m"
+  timeout: "10m"
   concurrency:
     key: alerting-v2-rule-doctor-coverage-gap
     strategy: cancel-in-progress
@@ -20,7 +20,7 @@ steps:
       rules: '${{ inputs.rules }}'
       max_data_views: 5
 
-  - name: analyze_coverage
+  - name: identify_gaps
     type: ai.prompt
     with:
       prompt: |
@@ -65,21 +65,10 @@ steps:
         - `metadata.tags` — what domains are covered?
         - The overall set — what domains, metrics, and dimensions are represented vs. missing?
 
-        For each coverage gap found:
-        - Set `type` to `coverage_gap`.
-        - Set `action` to `create`.
-        - Populate `ruleIds` with IDs of the existing related rules that highlight the gap.
-        - In `proposed`, include a complete rule definition for the suggested new rule, with a
-          realistic ES|QL query targeting the same index patterns used by related existing rules.
-        - In `details`, include `missingDimension` describing what is not covered and
-          `relatedRules` listing the rules that cover adjacent dimensions.
+        For each coverage gap found, return a lightweight description — do NOT generate full rule
+        definitions yet. Just identify the gap and suggest what index pattern and metric to use.
 
-        If no coverage gaps are found, return an empty findings array.
-
-        ## Output format
-        Return a JSON object with a single key `findings` containing an array.
-        Do NOT wrap the output in any additional object like `response`.
-        Every finding must include the `diffs` array (use an empty array for new rule proposals).
+        If no coverage gaps are found, return an empty gaps array.
 
         ## Output style
         All text fields (summary, explanation) must be plain text only — no markdown, no bold, no
@@ -87,66 +76,160 @@ steps:
       schema:
         type: object
         properties:
-          findings:
+          gaps:
             type: array
             items:
               type: object
               properties:
                 id:
                   type: string
-                  description: Unique recommendation identifier
-                type:
+                  description: Unique gap identifier (e.g. coverage-gap-memory-k8s)
+                summary:
                   type: string
-                  enum: [coverage_gap]
-                  description: Category of the recommendation
-                action:
+                  description: One-sentence description of what is missing
+                missingDimension:
                   type: string
-                  enum: [create]
-                  description: Recommended action
+                  description: The monitoring dimension that is absent (e.g. memory utilization)
+                suggestedIndexPattern:
+                  type: string
+                  description: The index pattern to target for the new rule
+                suggestedMetric:
+                  type: string
+                  description: The primary metric or field to monitor
+                relatedRuleIds:
+                  type: array
+                  items:
+                    type: string
+                  description: IDs of existing rules that highlight this gap
                 risk:
                   type: string
                   enum: [low, medium, high]
                 confidence:
                   type: string
                   enum: [low, medium, high]
-                summary:
-                  type: string
-                  description: One-sentence description of the recommendation
-                ruleIds:
-                  type: array
-                  items:
-                    type: string
-                  description: IDs of existing related rules that highlight the gap
-                details:
-                  type: object
-                  description: Action-specific data including missingDimension and relatedRules.
-                current:
-                  type: object
-                  description: Null for coverage gaps (no existing rule)
-                proposed:
-                  type: object
-                  description: Proposed new rule definition
-                diffs:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      field:
-                        type: string
-                      previous: {}
-                      proposed: {}
-                    required: [field]
                 explanation:
                   type: string
-                  description: Why this new rule is recommended
-              required: [id, type, action, risk, confidence, summary, ruleIds, explanation]
-        required: [findings]
-    timeout: 300s
+                  description: Why this gap matters
+              required: [id, summary, missingDimension, suggestedIndexPattern, suggestedMetric, relatedRuleIds, risk, confidence, explanation]
+        required: [gaps]
+    timeout: 180s
+
+  - name: store_gaps
+    type: data.set
+    with:
+      gaps: '${{ steps.identify_gaps.output.content.gaps }}'
+      generated_findings: []
+
+  - name: generate_rules
+    type: foreach
+    foreach: '{{ variables.gaps }}'
+    on-failure:
+      strategy: continue
+    steps:
+      - name: generate_single_rule
+        type: ai.prompt
+        with:
+          prompt: |
+            You are Rule Doctor's rule generation agent. Generate a single Kibana alerting v2 rule
+            definition for the coverage gap described below.
+
+            ## Coverage gap
+            - ID: {{ foreach.item.id }}
+            - Summary: {{ foreach.item.summary }}
+            - Missing dimension: {{ foreach.item.missingDimension }}
+            - Suggested index pattern: {{ foreach.item.suggestedIndexPattern }}
+            - Suggested metric: {{ foreach.item.suggestedMetric }}
+            - Explanation: {{ foreach.item.explanation }}
+
+            ## Existing related rules (for reference on structure and style)
+            {{ inputs.rules | json }}
+
+            ## System context (discovered features)
+            {{ steps.discover_features.output.features | json }}
+
+            ## Instructions
+            Generate a complete rule definition as a JSON object with:
+            - `kind`: set to "esql_v1"
+            - `metadata`: with `name`, `description`, and `tags`
+            - `schedule`: with `every` (e.g. "1m", "5m")
+            - `time_field`: typically "@timestamp"
+            - `evaluation.query.base`: a valid ES|QL query using FROM <suggestedIndexPattern>
+              that monitors the identified gap metric. Use realistic WHERE clauses and
+              STATS aggregations. Model the query style on the existing related rules.
+            - `evaluation.condition`: threshold condition (e.g. { gte: { value: N } })
+            - `grouping.fields`: appropriate grouping dimensions
+            - `state_transition.pending_count`: a reasonable debounce value
+            - `recovery_policy`: with a recovery query if appropriate
+
+            Use ONLY real field names that would exist in the suggested index pattern.
+            The query must be syntactically valid ES|QL.
+
+            Also include finding metadata:
+            - `type`: "coverage_gap"
+            - `action`: "create"
+            - `risk`: "{{ foreach.item.risk }}"
+            - `confidence`: "{{ foreach.item.confidence }}"
+            - `summary`: "{{ foreach.item.summary }}"
+            - `explanation`: "{{ foreach.item.explanation }}"
+            - `ruleIds`: the related rule IDs
+            - `diffs`: empty array (this is a new rule, not a modification)
+            - `details`: object with `missingDimension` and `relatedRules`
+
+            ## Output format
+            Return a JSON object with a single key `findings` containing an array with exactly
+            one finding object. Always return an array, even though it has one item.
+          schema:
+            type: object
+            properties:
+              findings:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    type:
+                      type: string
+                      enum: [coverage_gap]
+                    action:
+                      type: string
+                      enum: [create]
+                    risk:
+                      type: string
+                      enum: [low, medium, high]
+                    confidence:
+                      type: string
+                      enum: [low, medium, high]
+                    summary:
+                      type: string
+                    ruleIds:
+                      type: array
+                      items:
+                        type: string
+                    details:
+                      type: object
+                    proposed:
+                      type: object
+                      description: Complete rule definition for the new rule
+                    diffs:
+                      type: array
+                      items:
+                        type: object
+                    explanation:
+                      type: string
+                  required: [id, type, action, risk, confidence, summary, ruleIds, details, proposed, diffs, explanation]
+            required: [findings]
+        timeout: 120s
+
+      - name: append_finding
+        type: data.set
+        with:
+          generated_findings: '${{ variables.generated_findings | concat: steps.generate_single_rule.output.content.findings }}'
 
   - name: init_current_findings
     type: data.set
     with:
-      current_findings: '${{ steps.analyze_coverage.output.content.findings }}'
+      current_findings: '${{ variables.generated_findings }}'
       correction_attempt: 0
 
   - name: map_to_rules
