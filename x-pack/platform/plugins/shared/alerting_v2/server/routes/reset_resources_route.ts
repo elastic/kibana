@@ -7,9 +7,9 @@
 
 /**
  * Temporary endpoint used to reset the alerting_v2 resources (data streams,
- * their backing index templates, and all plugin-owned saved objects) when
- * breaking changes require a clean slate. Added as part of
- * https://github.com/elastic/rna-program/issues/204.
+ * their backing index templates, all plugin-owned saved objects, and the
+ * per-rule task_manager tasks) when breaking changes require a clean slate.
+ * Added as part of https://github.com/elastic/rna-program/issues/204.
  *
  * Meant to be removed before GA: delete this file and its `bind(Route)` entry
  * in `server/setup/bind_routes.ts`. Nothing else references it. Removal is
@@ -18,21 +18,18 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
-import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import {
+  ALERTING_CASES_SAVED_OBJECT_INDEX,
+  TASK_MANAGER_SAVED_OBJECT_INDEX,
+} from '@kbn/core-saved-objects-server';
 import { isResponseError } from '@kbn/es-errors';
 import { inject, injectable } from 'inversify';
 
+import { ALERTING_RULE_EXECUTOR_TASK_TYPE } from '../lib/rule_executor/task_definition';
 import { ALERTING_V2_API_PRIVILEGES } from '../lib/security/privileges';
 import { EsServiceScopedToken } from '../lib/services/es_service/tokens';
 import { DatastreamInitializer } from '../lib/services/resource_service/datastream_initializer';
-import {
-  ALERT_ACTIONS_DATA_STREAM,
-  getAlertActionsResourceDefinition,
-} from '../resources/datastreams/alert_actions';
-import {
-  ALERT_EVENTS_DATA_STREAM,
-  getAlertEventsResourceDefinition,
-} from '../resources/datastreams/alert_events';
+import { getDataStreamResourceDefinitions } from '../resources/datastreams/register';
 import type { ResourceDefinition } from '../resources/datastreams/types';
 import {
   API_KEY_PENDING_INVALIDATION_TYPE,
@@ -80,16 +77,15 @@ export class ResetResourcesRoute extends BaseAlertingRoute {
   }
 
   protected async execute() {
-    const definitions: ResourceDefinition[] = [
-      getAlertEventsResourceDefinition(),
-      getAlertActionsResourceDefinition(),
-    ];
+    const definitions = getDataStreamResourceDefinitions();
 
+    const dataStreamNames = definitions.map((definition) => definition.dataStreamName).join(', ');
     const savedObjectTypes = ALERTING_V2_SAVED_OBJECT_TYPES.join(', ');
     this.ctx.logger.debug(
-      `Resetting alerting v2 resources [${ALERT_EVENTS_DATA_STREAM}, ${ALERT_ACTIONS_DATA_STREAM}, saved objects: ${savedObjectTypes}]`
+      `Resetting alerting v2 resources [data streams: ${dataStreamNames}, saved objects: ${savedObjectTypes}, task type: ${ALERTING_RULE_EXECUTOR_TASK_TYPE}]`
     );
 
+    await this.deleteAllRuleTasks();
     await this.deleteAllSavedObjects();
 
     for (const definition of definitions) {
@@ -113,6 +109,32 @@ export class ResetResourcesRoute extends BaseAlertingRoute {
       index: ALERTING_CASES_SAVED_OBJECT_INDEX,
       query: {
         terms: { type: ALERTING_V2_SAVED_OBJECT_TYPES },
+      },
+      conflicts: 'proceed',
+      refresh: true,
+      wait_for_completion: true,
+    });
+  }
+
+  /**
+   * Delete every task_manager task associated with an alerting_v2 rule.
+   *
+   * Task manager tasks are stored as `type: 'task'` saved objects in
+   * `.kibana_task_manager` with the task type under `task.taskType`. We
+   * narrow to `ALERTING_RULE_EXECUTOR_TASK_TYPE` so recurring infra tasks
+   * owned by this plugin (API key invalidation, dispatcher, usage) are left
+   * alone — only the per-rule tasks are removed.
+   */
+  private async deleteAllRuleTasks(): Promise<void> {
+    await this.esClient.deleteByQuery({
+      index: TASK_MANAGER_SAVED_OBJECT_INDEX,
+      query: {
+        bool: {
+          must: [
+            { term: { type: 'task' } },
+            { term: { 'task.taskType': ALERTING_RULE_EXECUTOR_TASK_TYPE } },
+          ],
+        },
       },
       conflicts: 'proceed',
       refresh: true,
