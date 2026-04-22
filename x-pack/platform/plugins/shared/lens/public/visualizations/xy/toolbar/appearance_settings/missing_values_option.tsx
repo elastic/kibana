@@ -113,7 +113,6 @@ export const MissingValuesOptions: React.FC<MissingValuesOptionProps> = ({
                   valueOfSelected={endValue || FittingFunctions.NONE}
                   onChange={(value) => onEndValueChange(value)}
                   itemLayoutAlign="top"
-                  hasDividers
                 />
               </EuiFormRow>
               <EuiFormRow
