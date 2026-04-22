@@ -13,6 +13,7 @@ import { searchCasesTool } from './tools/search_cases';
 import { manageCasesTool } from './tools/manage_cases';
 import { attachmentsTool } from './tools/attachment_tools';
 import { observablesTool } from './tools/observable_tools';
+import { casesSkill } from './skills/cases_skill';
 
 /**
  * Registers all Cases agent builder tools:
@@ -31,4 +32,5 @@ export function registerCasesAgentBuilderTools(
   agentBuilder.tools.register(manageCasesTool(getCasesClient));
   agentBuilder.tools.register(attachmentsTool(getCasesClient));
   agentBuilder.tools.register(observablesTool(getCasesClient));
+  agentBuilder.skills.register(casesSkill);
 }
