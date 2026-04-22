@@ -123,7 +123,7 @@ export async function generateSignificantEventsQueries(
     if (isInferenceProviderError(error)) {
       const connector = await inferenceClient.getConnectorById(connectorId).catch(() => undefined);
       if (connector) {
-        throw new Error(formatInferenceProviderError(error, connector));
+        throw new Error(formatInferenceProviderError(error, connector), { cause: error });
       }
     }
     throw error;

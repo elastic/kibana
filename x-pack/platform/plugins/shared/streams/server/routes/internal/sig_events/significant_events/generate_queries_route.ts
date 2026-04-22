@@ -14,7 +14,7 @@ import { assertSignificantEventsAccess } from '../../../utils/assert_significant
 import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
 
 const generateQueriesRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{streamName}/significant_events/_generate_queries',
+  endpoint: 'POST /internal/streams/{streamName}/queries/_generate',
   params: z.object({
     path: z.object({
       streamName: z.string().describe('The name of the stream'),
@@ -30,9 +30,7 @@ const generateQueriesRoute = createServerRoute({
         maxExistingQueriesForContext: z
           .number()
           .optional()
-          .describe(
-            'Max number of existing queries to include as context for the LLM. Defaults to 50.'
-          ),
+          .describe('Max number of existing queries to include as context for the LLM.'),
       })
       .nullish(),
   }),
