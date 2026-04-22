@@ -29,6 +29,7 @@ run(({ log, flags }) => restoreEnvSnapshot({ log, flags }), {
     Prerequisites:
       - Local Elasticsearch running
       - Access to the GCS bucket containing the snapshot
+      - The configured user must have the manage_security cluster privilege (required to create and delete the temporary superuser account)
 
     Examples:
       node scripts/restore_sigevents_env_snapshot.js \\
