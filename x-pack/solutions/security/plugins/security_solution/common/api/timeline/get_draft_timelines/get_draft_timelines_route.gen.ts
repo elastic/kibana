@@ -20,6 +20,9 @@ import { TimelineType, PersistTimelineResponse } from '../model/components.gen';
 
 export type GetDraftTimelinesRequestQuery = z.infer<typeof GetDraftTimelinesRequestQuery>;
 export const GetDraftTimelinesRequestQuery = z.object({
+  /**
+   * Which draft to load (`default` investigation timeline or `template` timeline template).
+   */
   timelineType: TimelineType,
 });
 export type GetDraftTimelinesRequestQueryInput = z.input<typeof GetDraftTimelinesRequestQuery>;
