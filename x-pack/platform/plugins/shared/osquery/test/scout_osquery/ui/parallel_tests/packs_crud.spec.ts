@@ -95,7 +95,7 @@ test.describe('Pack CRUD from UI', { tag: localTags }, () => {
     await pageObjects.osqueryPackForm.setPagination50Rows();
     await pageObjects.osqueryPackForm.openPackFromList(packName);
 
-    await test.step('captures the Lens locator URL for pack results', async () => {
+    await test.step('captures the Lens locator params for pack results', async () => {
       const viewInLensButton = page.getByLabel('View in Lens');
       await viewInLensButton.waitFor({ state: 'visible', timeout: 30_000 });
       const [popup] = await Promise.all([page.waitForEvent('popup'), viewInLensButton.click()]);
