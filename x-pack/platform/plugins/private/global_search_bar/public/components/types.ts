@@ -6,6 +6,7 @@
  */
 
 import type { ApplicationStart } from '@kbn/core/public';
+import type { HotkeysStart } from '@kbn/core-hotkeys-browser';
 import type { GlobalSearchPluginStart } from '@kbn/global-search-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { EventReporter } from '../telemetry';
@@ -20,6 +21,7 @@ export interface SearchProps {
   globalSearch: GlobalSearchPluginStart & { searchCharLimit: number };
   navigateToUrl: ApplicationStart['navigateToUrl'];
   reportEvent: EventReporter;
+  hotkeys: HotkeysStart;
   taggingApi?: SavedObjectTaggingPluginStart;
   basePathUrl: string;
 }
