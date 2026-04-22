@@ -22,7 +22,7 @@ interface DataStreamLinkProps {
 export const DataStreamLink = ({ dataStream, streamUrl }: DataStreamLinkProps) => {
   if (!dataStream) {
     return (
-      <EuiText size="s" color="subdued" data-test-subj="metricsDataStreamEmpty">
+      <EuiText size="s" color="subdued" data-test-subj="dataStreamEmpty">
         -
       </EuiText>
     );
@@ -30,14 +30,14 @@ export const DataStreamLink = ({ dataStream, streamUrl }: DataStreamLinkProps) =
 
   if (!streamUrl) {
     return (
-      <EuiText size="s" data-test-subj="metricsDataStreamText">
+      <EuiText size="s" data-test-subj="dataStreamText">
         {dataStream}
       </EuiText>
     );
   }
 
   return (
-    <EuiLink href={streamUrl} data-test-subj="metricsDataStreamLink">
+    <EuiLink href={streamUrl} data-test-subj="dataStreamLink">
       <EuiText size="s">{dataStream}</EuiText>
     </EuiLink>
   );

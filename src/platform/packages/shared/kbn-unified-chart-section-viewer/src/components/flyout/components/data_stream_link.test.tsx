@@ -16,13 +16,13 @@ describe('DataStreamLink', () => {
     it('renders "-" when dataStream is undefined', () => {
       render(<DataStreamLink />);
 
-      expect(screen.getByTestId('metricsDataStreamEmpty')).toHaveTextContent('-');
+      expect(screen.getByTestId('dataStreamEmpty')).toHaveTextContent('-');
     });
 
     it('renders "-" when dataStream is an empty string', () => {
       render(<DataStreamLink dataStream="" />);
 
-      expect(screen.getByTestId('metricsDataStreamEmpty')).toHaveTextContent('-');
+      expect(screen.getByTestId('dataStreamEmpty')).toHaveTextContent('-');
     });
   });
 
@@ -35,7 +35,7 @@ describe('DataStreamLink', () => {
         />
       );
 
-      const link = screen.getByTestId('metricsDataStreamLink');
+      const link = screen.getByTestId('dataStreamLink');
       expect(link).toHaveAttribute('href', '/app/streams/metrics-system.cpu-default');
       expect(screen.getByText('metrics-system.cpu-default')).toBeInTheDocument();
     });
@@ -43,10 +43,8 @@ describe('DataStreamLink', () => {
     it('renders plain text when streamUrl is not provided', () => {
       render(<DataStreamLink dataStream="metrics-system.cpu-default" />);
 
-      expect(screen.queryByTestId('metricsDataStreamLink')).not.toBeInTheDocument();
-      expect(screen.getByTestId('metricsDataStreamText')).toHaveTextContent(
-        'metrics-system.cpu-default'
-      );
+      expect(screen.queryByTestId('dataStreamLink')).not.toBeInTheDocument();
+      expect(screen.getByTestId('dataStreamText')).toHaveTextContent('metrics-system.cpu-default');
     });
   });
 });
