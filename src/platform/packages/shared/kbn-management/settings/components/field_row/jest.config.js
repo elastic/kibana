@@ -10,7 +10,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../../../..',
-  roots: [
-    '<rootDir>/src/platform/packages/shared/kbn-management/settings/components/field_row',
-  ],
+  roots: ['<rootDir>/src/platform/packages/shared/kbn-management/settings/components/field_row'],
 };

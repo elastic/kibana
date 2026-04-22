@@ -10,7 +10,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../../../..',
-  roots: [
-    '<rootDir>/src/platform/packages/shared/kbn-management/settings/components/field_input',
-  ],
+  roots: ['<rootDir>/src/platform/packages/shared/kbn-management/settings/components/field_input'],
 };

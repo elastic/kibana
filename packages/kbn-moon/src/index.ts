@@ -8,7 +8,6 @@
  */
 
 import { regenerateMoonProjects } from './cli/regenerate_moon_projects';
-import { verifyJestConfigCoverage } from './cli/verify_jest_config_coverage';
 import {
   getAffectedMoonProjectsFromChangedFiles,
   getMoonExecutablePath,
@@ -21,7 +20,6 @@ import { getMoonChangedFiles } from './query_changed_files';
 
 export {
   regenerateMoonProjects,
-  verifyJestConfigCoverage,
   getAffectedMoonProjectsFromChangedFiles,
   getMoonChangedFiles,
   getMoonExecutablePath,
