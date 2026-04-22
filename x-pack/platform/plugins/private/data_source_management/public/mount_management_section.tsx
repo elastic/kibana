@@ -9,12 +9,17 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import type { CoreStart } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { PLUGIN_NAME } from '../common';
+import { DataSourcesPage } from './data_sources_page';
 
 export const mountManagementSection = (
   coreStart: CoreStart,
   { element }: ManagementAppMountParams
 ) => {
-  ReactDOM.render(coreStart.rendering.addContext(<p>hello world</p>), element);
+  ReactDOM.render(
+    coreStart.rendering.addContext(<DataSourcesPage pageTitle={PLUGIN_NAME} />),
+    element
+  );
 
   return () => {
     ReactDOM.unmountComponentAtNode(element);
