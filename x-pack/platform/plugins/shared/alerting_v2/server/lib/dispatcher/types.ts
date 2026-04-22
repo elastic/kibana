@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { DispatcherTickSummary } from './telemetry/types';
+
 export type RuleId = string;
 export type NotificationPolicyId = string;
 export type NotificationGroupId = string;
@@ -37,56 +39,6 @@ export interface AlertEpisodeSuppression {
 export interface DispatcherExecutionParams {
   previousStartedAt?: Date;
   abortController?: AbortController;
-}
-
-/**
- * Counts of entities present in the pipeline state after a given stage
- * completes. Keys are a stable subset of `DispatcherPipelineState` field names
- * and are always present (defaulting to 0) so downstream consumers (APM, logs,
- * ES|QL) can aggregate without special-casing per step or tolerating missing
- * fields.
- */
-export type DispatcherStageCounts = Readonly<Record<DispatcherCountKey, number>>;
-
-export type DispatcherCountKey =
-  | 'episodes'
-  | 'suppressions'
-  | 'dispatchable'
-  | 'suppressed'
-  | 'rules'
-  | 'policies'
-  | 'matched'
-  | 'groups'
-  | 'dispatch'
-  | 'throttled';
-
-/**
- * Minimal, log-safe representation of an error thrown by a pipeline step.
- * We intentionally only keep the class name and message here — stack traces
- * are emitted separately at `error` level so the per-tick summary stays
- * compact and queryable.
- */
-export interface DispatcherStageError {
-  readonly type: string;
-  readonly message: string;
-}
-
-export interface DispatcherStageTiming {
-  readonly name: string;
-  readonly duration_ms: number;
-  readonly halted: boolean;
-  readonly counts: DispatcherStageCounts;
-  readonly error?: DispatcherStageError;
-}
-
-export interface DispatcherTickSummary {
-  readonly started_at: string;
-  readonly finished_at: string;
-  readonly duration_ms: number;
-  readonly previous_started_at: string;
-  readonly completed: boolean;
-  readonly halt_reason: DispatcherHaltReason | null;
-  readonly stages: readonly DispatcherStageTiming[];
 }
 
 export interface DispatcherExecutionResult {

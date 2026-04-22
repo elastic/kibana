@@ -14,14 +14,20 @@ import type {
   DispatcherHaltReason,
   DispatcherPipelineInput,
   DispatcherPipelineState,
-  DispatcherStageCounts,
-  DispatcherStageError,
-  DispatcherStageTiming,
   DispatcherStep,
   DispatcherStepOutput,
 } from './types';
 import { DispatcherExecutionStepsToken } from './steps/tokens';
 import { withDispatcherSpan } from './with_dispatcher_span';
+import {
+  computeStateCounts,
+  elapsedMs,
+  roundMs,
+  startHrtime,
+  toSpanLabels,
+  toStageError,
+  type DispatcherStageTiming,
+} from './telemetry';
 
 export interface DispatcherPipelineResult {
   readonly completed: boolean;
@@ -95,7 +101,7 @@ export class DispatcherPipeline implements DispatcherPipelineContract {
     step: DispatcherStep,
     state: DispatcherPipelineState
   ): Promise<StageExecutionResult> {
-    const startedAt = process.hrtime.bigint();
+    const startedAt = startHrtime();
 
     try {
       const output = await withDispatcherSpan(
@@ -104,13 +110,12 @@ export class DispatcherPipeline implements DispatcherPipelineContract {
         (stepOutput) => toSpanLabels(computeStateCounts(applyStepOutput(state, stepOutput)))
       );
 
-      const durationMs = Number(process.hrtime.bigint() - startedAt) / 1_000_000;
       const nextState = applyStepOutput(state, output);
 
       return {
         timing: {
           name: step.name,
-          duration_ms: roundMs(durationMs),
+          duration_ms: roundMs(elapsedMs(startedAt)),
           halted: output.type === 'halt',
           counts: computeStateCounts(nextState),
         },
@@ -118,7 +123,6 @@ export class DispatcherPipeline implements DispatcherPipelineContract {
         nextState,
       };
     } catch (err) {
-      const durationMs = Number(process.hrtime.bigint() - startedAt) / 1_000_000;
       const error = err instanceof Error ? err : new Error(String(err));
 
       this.logger.error({ error, type: `dispatcher:${step.name}` });
@@ -126,7 +130,7 @@ export class DispatcherPipeline implements DispatcherPipelineContract {
       return {
         timing: {
           name: step.name,
-          duration_ms: roundMs(durationMs),
+          duration_ms: roundMs(elapsedMs(startedAt)),
           halted: true,
           counts: computeStateCounts(state),
           error: toStageError(error),
@@ -146,36 +150,4 @@ function applyStepOutput(
     return { ...state, ...output.data };
   }
   return state;
-}
-
-function computeStateCounts(state: DispatcherPipelineState): DispatcherStageCounts {
-  return {
-    episodes: state.episodes?.length ?? 0,
-    suppressions: state.suppressions?.length ?? 0,
-    dispatchable: state.dispatchable?.length ?? 0,
-    suppressed: state.suppressed?.length ?? 0,
-    rules: state.rules?.size ?? 0,
-    policies: state.policies?.size ?? 0,
-    matched: state.matched?.length ?? 0,
-    groups: state.groups?.length ?? 0,
-    dispatch: state.dispatch?.length ?? 0,
-    throttled: state.throttled?.length ?? 0,
-  };
-}
-
-function toSpanLabels(counts: DispatcherStageCounts): Record<string, number> {
-  return Object.fromEntries(
-    Object.entries(counts).map(([key, value]) => [`count_${key}`, value as number])
-  );
-}
-
-function toStageError(error: Error): DispatcherStageError {
-  return {
-    type: error.name || 'Error',
-    message: error.message,
-  };
-}
-
-function roundMs(value: number): number {
-  return Math.round(value * 1000) / 1000;
 }

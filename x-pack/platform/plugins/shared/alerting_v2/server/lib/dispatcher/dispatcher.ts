@@ -6,7 +6,6 @@
  */
 
 import { inject, injectable } from 'inversify';
-import type { LogMeta } from '@kbn/logging';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
@@ -16,29 +15,11 @@ import {
   type DispatcherPipelineContract,
   type DispatcherPipelineResult,
 } from './execution_pipeline';
-import type {
-  DispatcherExecutionParams,
-  DispatcherExecutionResult,
-  DispatcherTickSummary,
-} from './types';
+import { buildTickSummary, emitTickSummary, startHrtime } from './telemetry';
+import type { DispatcherExecutionParams, DispatcherExecutionResult } from './types';
 
 export interface DispatcherServiceContract {
   run(params: DispatcherExecutionParams): Promise<DispatcherExecutionResult>;
-}
-
-/**
- * Structured log meta shape for a single dispatcher tick. Lives under the
- * `kibana.alerting_v2.dispatcher.tick` namespace so consumers (ES|QL, Logs
- * app) can target a stable, unambiguous key without colliding with ECS.
- */
-export interface DispatcherTickLogMeta extends LogMeta {
-  kibana: {
-    alerting_v2: {
-      dispatcher: {
-        tick: DispatcherTickSummary;
-      };
-    };
-  };
 }
 
 @injectable()
@@ -52,12 +33,10 @@ export class DispatcherService implements DispatcherServiceContract {
     previousStartedAt = new Date(),
   }: DispatcherExecutionParams): Promise<DispatcherExecutionResult> {
     const startedAt = new Date();
-    // `startedAt`/`finishedAt` are wall-clock `Date` values used to emit
-    // ISO-8601 timestamps. Elapsed time is measured with
-    // `process.hrtime.bigint()` so that tick and per-stage durations are
-    // on the same monotonic clock — avoids NTP jumps and matches the
-    // resolution contract of `DispatcherStageTiming.duration_ms`.
-    const startedAtNs = process.hrtime.bigint();
+    // Wall-clock `startedAt`/`finishedAt` drive ISO-8601 timestamps; elapsed
+    // time is measured with a monotonic clock so tick and per-stage
+    // durations share the same resolution and are immune to NTP jumps.
+    const startedAtNs = startHrtime();
 
     let pipelineResult: DispatcherPipelineResult;
     try {
@@ -69,7 +48,8 @@ export class DispatcherService implements DispatcherServiceContract {
       // We still emit a tick summary so the outage is visible in logs,
       // then re-throw so Task Manager records the task as failed.
       const error = err instanceof Error ? err : new Error(String(err));
-      this.emitTickSummary(
+      emitTickSummary(
+        this.logger,
         buildTickSummary({
           startedAt,
           startedAtNs,
@@ -92,49 +72,8 @@ export class DispatcherService implements DispatcherServiceContract {
       stages: pipelineResult.stageTimings,
     });
 
-    this.emitTickSummary(tick);
+    emitTickSummary(this.logger, tick);
 
     return { startedAt, tick };
   }
-
-  private emitTickSummary(tick: DispatcherTickSummary): void {
-    this.logger.info<DispatcherTickLogMeta>({
-      message: 'dispatcher tick complete',
-      meta: {
-        kibana: {
-          alerting_v2: {
-            dispatcher: { tick },
-          },
-        },
-      },
-    });
-  }
-}
-
-function buildTickSummary({
-  startedAt,
-  startedAtNs,
-  previousStartedAt,
-  completed,
-  haltReason,
-  stages,
-}: {
-  startedAt: Date;
-  startedAtNs: bigint;
-  previousStartedAt: Date;
-  completed: boolean;
-  haltReason: DispatcherTickSummary['halt_reason'];
-  stages: DispatcherTickSummary['stages'];
-}): DispatcherTickSummary {
-  const finishedAt = new Date();
-  const durationMs = Number(process.hrtime.bigint() - startedAtNs) / 1_000_000;
-  return {
-    started_at: startedAt.toISOString(),
-    finished_at: finishedAt.toISOString(),
-    duration_ms: Math.round(durationMs * 1000) / 1000,
-    previous_started_at: previousStartedAt.toISOString(),
-    completed,
-    halt_reason: haltReason,
-    stages,
-  };
 }
