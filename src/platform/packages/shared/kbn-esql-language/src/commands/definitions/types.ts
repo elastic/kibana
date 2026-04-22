@@ -500,8 +500,6 @@ export interface ESQLMessage {
   code: string;
   errorType?: 'semantic';
   requiresCallback?: 'getColumnsFor' | 'getSources' | 'getPolicies' | 'getJoinIndices' | string;
-
-  // By default warnings are not underlined, use this flag to indicate it should be
   underlinedWarning?: boolean;
 }
 

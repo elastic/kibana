@@ -15,12 +15,7 @@ import { UnmappedFieldsStrategy } from '../../commands/registry/types';
 import { hasWiredStreamsInQuery } from '../../commands/definitions/utils/sources';
 
 /**
- * Registry of quick fixes keyed by validation message code.
- *
- * Keeping fixes in a dedicated map (rather than inlined alongside message
- * text) separates "what went wrong" from "how the user can fix it", lets the
- * validation layer stay focused on producing error metadata, and makes it
- * trivial to add, remove, or review the full set of available fixes.
+ * Registry of quick fixes by validation message code.
  */
 export const fixesByMessageCode: Record<string, QuickFix> = {
   unknownColumn: {
