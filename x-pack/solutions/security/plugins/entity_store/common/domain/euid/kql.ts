@@ -6,6 +6,16 @@
  */
 
 import { escapeQuotes } from '@kbn/es-query';
+import type { FilterCondition, RangeCondition, Condition } from '@kbn/streamlang';
+import {
+  getFilterOperator,
+  getFilterValue,
+  isFilterCondition,
+  isAndCondition,
+  isOrCondition,
+  isNotCondition,
+  isAlwaysCondition,
+} from '@kbn/streamlang';
 import type { EntityType, FieldEvaluation } from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
@@ -19,7 +29,8 @@ import {
   getFieldsToBeFilteredOut,
   getSourceFieldNames,
 } from './commons';
-import { applyFieldEvaluations } from './field_evaluations';
+import type { SourceMatchSpec } from './field_evaluations';
+import { applyFieldEvaluations, getSourceMatchSpec } from './field_evaluations';
 
 /**
  * Constructs a KQL filter string matching source documents that would resolve to the same entity
@@ -113,11 +124,14 @@ export function getEuidKqlFilterBasedOnDocument(
 
   if (fieldEvaluations.length > 0) {
     for (const evaluation of fieldEvaluations) {
-      const destinationValue = doc[evaluation.destination];
-      if (destinationValue == null) {
+      const { exactMatchFields, prefixMatchFields } = getSourceFieldNames(evaluation.sources);
+      const sourceFields = [...exactMatchFields, ...prefixMatchFields];
+      const hasEvaluatedSource = sourceFields.some((f) => evaluatedDestinations.has(f));
+      if (hasEvaluatedSource) {
         continue;
       }
-      const kqlClause = buildSourceClauseKql(evaluation, destinationValue);
+      const spec = getSourceMatchSpec(doc, evaluation);
+      const kqlClause = buildSourceClauseKql(evaluation, spec);
       if (kqlClause !== undefined) {
         conditions.push(kqlClause);
       }
@@ -145,21 +159,26 @@ function fieldMissingOrEmptyKql(field: string): string {
  */
 function buildSourceClauseKql(
   evaluation: FieldEvaluation,
-  destinationValue: string
+  spec: SourceMatchSpec
 ): string | undefined {
-  const matchingClause = evaluation.whenClauses.find(
-    (clause): clause is { sourceMatchesAny: string[]; then: string } =>
-      'sourceMatchesAny' in clause && clause.then === destinationValue
-  );
-
-  if (matchingClause === undefined) {
-    return undefined;
+  if (spec.type === 'condition') {
+    return conditionToKql(spec.condition);
   }
 
   const { exactMatchFields, prefixMatchFields } = getSourceFieldNames(evaluation.sources);
+  const allSourceFields = [...exactMatchFields, ...prefixMatchFields];
+
+  if (spec.type === 'unknown') {
+    const fieldGroups: string[] = [];
+    for (const field of allSourceFields) {
+      fieldGroups.push(`(NOT ${field}: * OR ${field}: "")`);
+    }
+    return fieldGroups.length === 0 ? undefined : `(${fieldGroups.join(' AND ')})`;
+  }
+
   const parts: string[] = [];
 
-  for (const v of matchingClause.sourceMatchesAny) {
+  for (const v of spec.values) {
     for (const field of exactMatchFields) {
       parts.push(`${field}: "${escapeQuotes(v)}"`);
     }
@@ -175,4 +194,76 @@ function buildSourceClauseKql(
     return undefined;
   }
   return parts.length === 1 ? parts[0] : `(${parts.join(' OR ')})`;
+}
+
+function escapeKqlValue(value: string): string {
+  return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+}
+
+function filterConditionToKql(condition: FilterCondition): string {
+  const operator = getFilterOperator(condition);
+  const value = getFilterValue(condition);
+  const { field } = condition;
+
+  switch (operator) {
+    case 'eq':
+      return `${field}: "${escapeKqlValue(String(value))}"`;
+    case 'neq':
+      return `NOT ${field}: "${escapeKqlValue(String(value))}"`;
+    case 'exists':
+      return value === true ? `${field}: *` : `NOT ${field}: *`;
+    case 'gt':
+      return `${field} > ${value}`;
+    case 'gte':
+      return `${field} >= ${value}`;
+    case 'lt':
+      return `${field} < ${value}`;
+    case 'lte':
+      return `${field} <= ${value}`;
+    case 'contains':
+      return `${field}: *${escapeKqlValue(String(value))}*`;
+    case 'startsWith':
+      return `${field}: ${escapeKqlValue(String(value))}*`;
+    case 'endsWith':
+      return `${field}: *${escapeKqlValue(String(value))}`;
+    case 'includes':
+      return `${field}: "${escapeKqlValue(String(value))}"`;
+    case 'range': {
+      const r = value as RangeCondition;
+      const parts: string[] = [];
+      if (r.gte !== undefined) parts.push(`${field} >= ${r.gte}`);
+      if (r.gt !== undefined) parts.push(`${field} > ${r.gt}`);
+      if (r.lte !== undefined) parts.push(`${field} <= ${r.lte}`);
+      if (r.lt !== undefined) parts.push(`${field} < ${r.lt}`);
+      return parts.length === 1 ? parts[0] : `(${parts.join(' AND ')})`;
+    }
+    default:
+      return 'NOT *';
+  }
+}
+
+export function conditionToKql(condition: Condition): string {
+  if (isFilterCondition(condition)) {
+    return filterConditionToKql(condition);
+  }
+
+  if (isAndCondition(condition)) {
+    const parts = condition.and.map((c) => conditionToKql(c));
+    return parts.length === 1 ? parts[0] : `(${parts.join(' AND ')})`;
+  }
+
+  if (isOrCondition(condition)) {
+    const parts = condition.or.map((c) => conditionToKql(c));
+    return parts.length === 1 ? parts[0] : `(${parts.join(' OR ')})`;
+  }
+
+  if (isNotCondition(condition)) {
+    return `NOT ${conditionToKql(condition.not)}`;
+  }
+
+  if (isAlwaysCondition(condition)) {
+    return '*';
+  }
+
+  return 'NOT *';
 }
