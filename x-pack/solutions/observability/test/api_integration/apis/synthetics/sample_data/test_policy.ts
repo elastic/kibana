@@ -25,10 +25,11 @@ interface PolicyProps {
   spaceIds?: string[];
   mws?: MaintenanceWindow[];
   packageVersion?: string;
+  kibanaUrl?: string;
 }
 
 export const getTestSyntheticsPolicy = (props: PolicyProps): PackagePolicy => {
-  const { namespace, packageVersion, spaceIds } = props;
+  const { namespace, packageVersion, spaceIds, kibanaUrl } = props;
   return {
     id: '2bfd7da0-22ed-11ed-8c6b-09a2d21dfbc3-27337270-22ed-11ed-8c6b-09a2d21dfbc3-default',
     version: 'WzE2MjYsMV0=',
@@ -217,6 +218,7 @@ export const getHttpInput = ({
                 : {}),
               'monitor.interval': 300,
               meta: { space_id: spaceIds ? spaceIds[0] : 'default' },
+              ...(kibanaUrl ? { kibanaUrl } : {}),
             },
             target: '',
           },
@@ -324,6 +326,7 @@ export const getHttpInput = ({
             meta: {
               space_id: spaceIds ? spaceIds[0] : 'default',
             },
+            ...(kibanaUrl ? { kibanaUrl } : {}),
           },
           target: '',
         },

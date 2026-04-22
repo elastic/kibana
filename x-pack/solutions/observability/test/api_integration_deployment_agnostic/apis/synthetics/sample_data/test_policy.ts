@@ -22,10 +22,11 @@ interface PolicyProps {
   params?: Record<string, any>;
   isBrowser?: boolean;
   spaceId?: string;
+  kibanaUrl?: string;
 }
 
 export const getTestSyntheticsPolicy = (props: PolicyProps): PackagePolicy => {
-  const { namespace, spaceId } = props;
+  const { namespace, spaceId, kibanaUrl } = props;
   return {
     id: '2bfd7da0-22ed-11ed-8c6b-09a2d21dfbc3-27337270-22ed-11ed-8c6b-09a2d21dfbc3-default',
     version: 'WzE2MjYsMV0=',
@@ -210,6 +211,7 @@ export const getHttpInput = ({
                 : {}),
               'monitor.interval': 300,
               meta: { space_id: spaceId ?? 'default' },
+              ...(kibanaUrl ? { kibanaUrl } : {}),
             },
             target: '',
           },
@@ -316,6 +318,7 @@ export const getHttpInput = ({
             meta: {
               space_id: spaceId ?? 'default',
             },
+            ...(kibanaUrl ? { kibanaUrl } : {}),
           },
           target: '',
         },
