@@ -8,30 +8,30 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { MosaicState, MosaicStateESQL, MosaicStateNoESQL } from './mosaic';
-import { mosaicStateSchema } from './mosaic';
-import type { PieState, PieStateESQL, PieStateNoESQL } from './pie';
-import { pieStateSchema } from './pie';
-import type { TreemapState, TreemapStateESQL, TreemapStateNoESQL } from './treemap';
-import { treemapStateSchema } from './treemap';
-import type { WaffleState, WaffleStateESQL, WaffleStateNoESQL } from './waffle';
-import { waffleStateSchema } from './waffle';
+import type { MosaicConfig, MosaicConfigESQL, MosaicConfigNoESQL } from './mosaic';
+import { mosaicConfigSchema } from './mosaic';
+import type { PieConfig, PieConfigESQL, PieConfigNoESQL } from './pie';
+import { pieConfigSchema } from './pie';
+import type { TreemapConfig, TreemapConfigESQL, TreemapConfigNoESQL } from './treemap';
+import { treemapConfigSchema } from './treemap';
+import type { WaffleConfig, WaffleConfigESQL, WaffleConfigNoESQL } from './waffle';
+import { waffleConfigSchema } from './waffle';
 
-export const partitionStateSchema = schema.oneOf([
-  mosaicStateSchema,
-  pieStateSchema,
-  treemapStateSchema,
-  waffleStateSchema,
+export const partitionConfigSchema = schema.oneOf([
+  mosaicConfigSchema,
+  pieConfigSchema,
+  treemapConfigSchema,
+  waffleConfigSchema,
 ]);
 
-export type PartitionState = PieState | MosaicState | TreemapState | WaffleState;
-export type PartitionStateNoESQL =
-  | PieStateNoESQL
-  | MosaicStateNoESQL
-  | TreemapStateNoESQL
-  | WaffleStateNoESQL;
-export type PartitionStateESQL =
-  | PieStateESQL
-  | MosaicStateESQL
-  | TreemapStateESQL
-  | WaffleStateESQL;
+export type PartitionConfig = PieConfig | MosaicConfig | TreemapConfig | WaffleConfig;
+export type PartitionConfigNoESQL =
+  | PieConfigNoESQL
+  | MosaicConfigNoESQL
+  | TreemapConfigNoESQL
+  | WaffleConfigNoESQL;
+export type PartitionConfigESQL =
+  | PieConfigESQL
+  | MosaicConfigESQL
+  | TreemapConfigESQL
+  | WaffleConfigESQL;
