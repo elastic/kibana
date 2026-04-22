@@ -35,6 +35,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Exposes the `maximumCasesToOpen` parameter in the case action connection [#247990]({{kib-pull}}247990).
 * Adds additional workflow steps [#256922]({{kib-pull}}256922).
 * Alert deletion is now generally available [#247465]({{kib-pull}}247465).
+* Adds a gap scheduler error callout [#250393]({{kib-pull}}250393).
 
 **Elastic Agent Builder**:
 * Updates Test tool flyout to support datetime picker [#249549]({{kib-pull}}249549).
@@ -278,9 +279,7 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Adds a server-side workflow validation endpoint [#254502]({{kib-pull}}254502).
 * Makes the manual run API public [#253010]({{kib-pull}}253010).
 * Whitelists Streams APIs as Kibana workflow steps [#252068]({{kib-pull}}252068).
-* Adds a gap scheduler error callout [#250393]({{kib-pull}}250393).
 * Adds the `createConversation` and `inviteToConversation` actions [#260806]({{kib-pull}}260806).
-* Updates OAS docs for Alerting create rule route [#260497]({{kib-pull}}260497).
 * Adds **Default model** and **Disallow all other models** settings to the **Model Settings** page [#259932]({{kib-pull}}259932).
 * Adds the `entries` Liquid filter for iterating over object keys [#259249]({{kib-pull}}259249).
 * Respects `observability:enableInspectEsQueries` in Hosts UI [#253618]({{kib-pull}}253618).
