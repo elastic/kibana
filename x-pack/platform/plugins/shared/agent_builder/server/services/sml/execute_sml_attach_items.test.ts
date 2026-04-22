@@ -5,12 +5,18 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchClient, IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { SmlDocument, SmlService } from './types';
 import { resolveSmlAttachItems } from './execute_sml_attach_items';
+
+const createMockScopedClient = (): IScopedClusterClient =>
+  ({
+    asInternalUser: { search: jest.fn() } as unknown as ElasticsearchClient,
+    asCurrentUser: { search: jest.fn() } as unknown as ElasticsearchClient,
+  } as unknown as IScopedClusterClient);
 
 const mockCheckItemsAccess = jest.fn();
 const mockGetDocuments = jest.fn();
@@ -40,7 +46,7 @@ const mockLogger = loggerMock.create();
 
 const baseParams = {
   sml: createSmlService(),
-  esClient: {} as ElasticsearchClient,
+  esClient: createMockScopedClient(),
   request: {} as KibanaRequest,
   spaceId: 'default',
   savedObjectsClient: {} as SavedObjectsClientContract,

@@ -71,9 +71,12 @@ const SiemReadinessDashboard = () => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiBetaBadge
-                label={i18n.translate('xpack.securitySolution.siemReadiness.previewBadgeLabel', {
-                  defaultMessage: 'Preview',
-                })}
+                label={i18n.translate(
+                  'xpack.securitySolution.siemReadiness.technicalPreviewBadgeLabel',
+                  {
+                    defaultMessage: 'Technical Preview',
+                  }
+                )}
                 data-test-subj="siemReadinessPreviewBadge"
               />
             </EuiFlexItem>
