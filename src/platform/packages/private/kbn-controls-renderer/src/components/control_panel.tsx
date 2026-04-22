@@ -28,7 +28,6 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { EmbeddableRenderer, type DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useBatchedPublishingSubjects, type PublishingSubject } from '@kbn/presentation-publishing';
-import { useIndicateRelatedPanelsSelector } from '@kbn/presentation-util';
 import {
   apiPublishesTooltipLabel,
   type PublishesTooltipLabel,
@@ -39,6 +38,7 @@ import { controlWidthStyles } from './control_panel.styles';
 import { DragHandle } from './drag_handle';
 import { FloatingActions } from './floating_actions';
 import { ControlLabelTooltip } from './control_label_tooltip';
+import { useIndicateRelatedPanelsSelector } from '../hooks';
 
 export const ControlPanel = ({
   parentApi,

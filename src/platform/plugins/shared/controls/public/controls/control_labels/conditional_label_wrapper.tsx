@@ -21,8 +21,7 @@ import {
 } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { css } from '@emotion/react';
-import { useIndicateRelatedPanelsSelector } from '@kbn/presentation-util';
-import { ControlLabelTooltip } from '@kbn/controls-renderer';
+import { ControlLabelTooltip, useIndicateRelatedPanelsSelector } from '@kbn/controls-renderer';
 import { i18n } from '@kbn/i18n';
 
 export const ConditionalLabelWrapper = ({

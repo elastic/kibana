@@ -15,6 +15,5 @@
     "@kbn/i18n",
     "@kbn/react-kibana-mount",
     "@kbn/core-mount-utils-browser",
-    "@kbn/presentation-publishing",
   ]
 }
