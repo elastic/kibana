@@ -13,9 +13,8 @@ with lightweight stubs via aliases.
 ## Quick start
 
 ```bash
-# From the Kibana root
 yarn kbn bootstrap
-./scripts/build_one_navigation.sh
+src/platform/kbn-ui/one-navigation/packaging/scripts/build.sh
 ```
 
 Artifacts are written to `src/platform/kbn-ui/one-navigation/target/`.

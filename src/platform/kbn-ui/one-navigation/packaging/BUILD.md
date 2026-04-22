@@ -8,13 +8,11 @@
 
 ## Build
 
-```bash
-# From Kibana root
-./scripts/build_one_navigation.sh
+The publish pipeline invokes `packaging/scripts/build.sh` directly. To build
+locally:
 
-# Or from the packaging directory
-cd src/platform/kbn-ui/one-navigation/packaging
-./scripts/build.sh
+```bash
+src/platform/kbn-ui/one-navigation/packaging/scripts/build.sh
 ```
 
 ## Output
