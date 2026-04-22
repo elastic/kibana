@@ -488,11 +488,13 @@ describe('getEntityTool', () => {
 
     it('returns error result when no entity is found', async () => {
       (executeEsql as jest.Mock)
-        // 1. Exact match — nothing found
+        // 1. Exact id match — nothing found
         .mockResolvedValueOnce({ columns: [{ name: 'entity.id', type: 'keyword' }], values: [] })
-        // 2. entity.id RLIKE fallback — also nothing found
+        // 2. Exact name match — nothing found
+        .mockResolvedValueOnce({ columns: [{ name: 'entity.name', type: 'keyword' }], values: [] })
+        // 3. entity.id RLIKE fallback — also nothing found
         .mockResolvedValueOnce({ columns: [{ name: 'entity.id', type: 'keyword' }], values: [] })
-        // 3. entity.name RLIKE fallback — also nothing found
+        // 4. entity.name RLIKE fallback — also nothing found
         .mockResolvedValueOnce({ columns: [{ name: 'entity.name', type: 'keyword' }], values: [] });
 
       const result = (await tool.handler(
@@ -500,7 +502,7 @@ describe('getEntityTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       )) as ToolHandlerStandardReturn;
 
-      expect(executeEsql).toHaveBeenCalledTimes(3);
+      expect(executeEsql).toHaveBeenCalledTimes(4);
       expect(result.results).toHaveLength(1);
       const errorResult = result.results[0] as ErrorResult;
       expect(errorResult.type).toBe(ToolResultType.error);
@@ -509,9 +511,11 @@ describe('getEntityTool', () => {
 
     it('returns LIKE fallback results when exact match finds no entity', async () => {
       (executeEsql as jest.Mock)
-        // 1. Exact match — empty
+        // 1. Exact id match — empty
         .mockResolvedValueOnce({ columns: [{ name: 'entity.id', type: 'keyword' }], values: [] })
-        // 2. LIKE fallback
+        // 2. Exact name match — empty
+        .mockResolvedValueOnce({ columns: [{ name: 'entity.name', type: 'keyword' }], values: [] })
+        // 3. LIKE fallback
         .mockResolvedValueOnce({
           columns: [
             { name: 'entity.id', type: 'keyword' },
@@ -525,8 +529,8 @@ describe('getEntityTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       )) as ToolHandlerStandardReturn;
 
-      expect(executeEsql).toHaveBeenCalledTimes(2);
-      const rlikeQuery = (executeEsql as jest.Mock).mock.calls[1][0].query;
+      expect(executeEsql).toHaveBeenCalledTimes(3);
+      const rlikeQuery = (executeEsql as jest.Mock).mock.calls[2][0].query;
       expect(rlikeQuery).toContain('RLIKE ".*server1.*"');
       expect(rlikeQuery).toContain('LIMIT 5');
       expect(result.results).toHaveLength(1);
@@ -537,11 +541,13 @@ describe('getEntityTool', () => {
 
     it('uses raw entityId (not normalized) as the RLIKE pattern', async () => {
       (executeEsql as jest.Mock)
-        // 1. Exact match — empty
+        // 1. Exact id match — empty
         .mockResolvedValueOnce({ columns: [], values: [] })
-        // 2. entity.id RLIKE fallback — empty (just checking query shape)
+        // 2. Exact name match — empty
         .mockResolvedValueOnce({ columns: [], values: [] })
-        // 3. entity.name RLIKE fallback — empty
+        // 3. entity.id RLIKE fallback — empty (just checking query shape)
+        .mockResolvedValueOnce({ columns: [], values: [] })
+        // 4. entity.name RLIKE fallback — empty
         .mockResolvedValueOnce({ columns: [], values: [] });
 
       await tool.handler(
@@ -549,18 +555,20 @@ describe('getEntityTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const rlikeQuery = (executeEsql as jest.Mock).mock.calls[1][0].query;
+      const rlikeQuery = (executeEsql as jest.Mock).mock.calls[2][0].query;
       expect(rlikeQuery).toContain('RLIKE ".*server1.*"');
       expect(rlikeQuery).not.toContain('RLIKE ".*host:server1.*"');
     });
 
     it('returns entity.name RLIKE fallback results when entity.id searches find nothing', async () => {
       (executeEsql as jest.Mock)
-        // 1. Exact match — empty
+        // 1. Exact id match — empty
         .mockResolvedValueOnce({ columns: [{ name: 'entity.id', type: 'keyword' }], values: [] })
-        // 2. entity.id RLIKE fallback — empty
+        // 2. Exact name match — empty
+        .mockResolvedValueOnce({ columns: [{ name: 'entity.name', type: 'keyword' }], values: [] })
+        // 3. entity.id RLIKE fallback — empty
         .mockResolvedValueOnce({ columns: [{ name: 'entity.id', type: 'keyword' }], values: [] })
-        // 3. entity.name RLIKE fallback — returns a match
+        // 4. entity.name RLIKE fallback — returns a match
         .mockResolvedValueOnce({
           columns: [
             { name: 'entity.id', type: 'keyword' },
@@ -574,8 +582,8 @@ describe('getEntityTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       )) as ToolHandlerStandardReturn;
 
-      expect(executeEsql).toHaveBeenCalledTimes(3);
-      const nameQuery = (executeEsql as jest.Mock).mock.calls[2][0].query;
+      expect(executeEsql).toHaveBeenCalledTimes(4);
+      const nameQuery = (executeEsql as jest.Mock).mock.calls[3][0].query;
       expect(nameQuery).toContain('entity.name RLIKE ".*server1.*"');
       expect(nameQuery).toContain('user.full_name RLIKE ".*server1.*"');
       expect(nameQuery).toContain('LIMIT 5');
@@ -587,11 +595,14 @@ describe('getEntityTool', () => {
 
     it('returns user.full_name RLIKE match when user is found by full name', async () => {
       (executeEsql as jest.Mock)
-        // 1. Exact match — empty
+        // 1. Exact id match — empty
         .mockResolvedValueOnce({ columns: [{ name: 'entity.id', type: 'keyword' }], values: [] })
-        // 2. entity.id RLIKE fallback — empty
+        // 2. Exact name match — empty (this test specifically exercises the RLIKE
+        // fallback, so the exact-name rung is mocked as a miss to force fall-through)
+        .mockResolvedValueOnce({ columns: [{ name: 'entity.name', type: 'keyword' }], values: [] })
+        // 3. entity.id RLIKE fallback — empty
         .mockResolvedValueOnce({ columns: [{ name: 'entity.id', type: 'keyword' }], values: [] })
-        // 3. entity.name / user.full_name RLIKE fallback — returns a user entity matched by full name
+        // 4. entity.name / user.full_name RLIKE fallback — returns a user entity matched by full name
         .mockResolvedValueOnce({
           columns: [
             { name: 'entity.id', type: 'keyword' },
@@ -606,8 +617,8 @@ describe('getEntityTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       )) as ToolHandlerStandardReturn;
 
-      expect(executeEsql).toHaveBeenCalledTimes(3);
-      const nameQuery = (executeEsql as jest.Mock).mock.calls[2][0].query;
+      expect(executeEsql).toHaveBeenCalledTimes(4);
+      const nameQuery = (executeEsql as jest.Mock).mock.calls[3][0].query;
       expect(nameQuery).toContain('user.full_name RLIKE ".*John Doe.*"');
       expect(result.results).toHaveLength(1);
       const esqlResult = result.results[0] as EsqlResults;
@@ -618,11 +629,13 @@ describe('getEntityTool', () => {
 
     it('uses raw entityId (not normalized) as the entity.name RLIKE pattern', async () => {
       (executeEsql as jest.Mock)
-        // 1. Exact match — empty
+        // 1. Exact id match — empty
         .mockResolvedValueOnce({ columns: [], values: [] })
-        // 2. entity.id RLIKE fallback — empty
+        // 2. Exact name match — empty
         .mockResolvedValueOnce({ columns: [], values: [] })
-        // 3. entity.name RLIKE fallback — empty (just checking query shape)
+        // 3. entity.id RLIKE fallback — empty
+        .mockResolvedValueOnce({ columns: [], values: [] })
+        // 4. entity.name RLIKE fallback — empty (just checking query shape)
         .mockResolvedValueOnce({ columns: [], values: [] });
 
       await tool.handler(
@@ -630,7 +643,7 @@ describe('getEntityTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const nameQuery = (executeEsql as jest.Mock).mock.calls[2][0].query;
+      const nameQuery = (executeEsql as jest.Mock).mock.calls[3][0].query;
       expect(nameQuery).toContain('entity.name RLIKE ".*server1.*"');
       expect(nameQuery).toContain('user.full_name RLIKE ".*server1.*"');
       expect(nameQuery).not.toContain('entity.name RLIKE ".*host:server1.*"');
@@ -639,11 +652,13 @@ describe('getEntityTool', () => {
 
     it('escapes regex metacharacters in the entity.name RLIKE pattern', async () => {
       (executeEsql as jest.Mock)
-        // 1. Exact match — empty
+        // 1. Exact id match — empty
         .mockResolvedValueOnce({ columns: [], values: [] })
-        // 2. entity.id RLIKE fallback — empty
+        // 2. Exact name match — empty
         .mockResolvedValueOnce({ columns: [], values: [] })
-        // 3. entity.name RLIKE fallback — empty
+        // 3. entity.id RLIKE fallback — empty
+        .mockResolvedValueOnce({ columns: [], values: [] })
+        // 4. entity.name RLIKE fallback — empty
         .mockResolvedValueOnce({ columns: [], values: [] });
 
       await tool.handler(
@@ -651,18 +666,20 @@ describe('getEntityTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const nameQuery = (executeEsql as jest.Mock).mock.calls[2][0].query;
+      const nameQuery = (executeEsql as jest.Mock).mock.calls[3][0].query;
       expect(nameQuery).toContain('entity.name RLIKE ".*server\\\\.1\\\\*test.*"');
       expect(nameQuery).toContain('user.full_name RLIKE ".*server\\\\.1\\\\*test.*"');
     });
 
     it('escapes regex metacharacters in the entity.id RLIKE pattern', async () => {
       (executeEsql as jest.Mock)
-        // 1. Exact match — empty
+        // 1. Exact id match — empty
         .mockResolvedValueOnce({ columns: [], values: [] })
-        // 2. entity.id RLIKE fallback — empty
+        // 2. Exact name match — empty
         .mockResolvedValueOnce({ columns: [], values: [] })
-        // 3. entity.name RLIKE fallback — empty
+        // 3. entity.id RLIKE fallback — empty
+        .mockResolvedValueOnce({ columns: [], values: [] })
+        // 4. entity.name RLIKE fallback — empty
         .mockResolvedValueOnce({ columns: [], values: [] });
 
       await tool.handler(
@@ -670,15 +687,17 @@ describe('getEntityTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const rlikeQuery = (executeEsql as jest.Mock).mock.calls[1][0].query;
+      const rlikeQuery = (executeEsql as jest.Mock).mock.calls[2][0].query;
       expect(rlikeQuery).toContain('RLIKE ".*server\\\\.1\\\\*test.*"');
     });
 
     it('uses resolved entity.id from RLIKE result for subsequent snapshot queries', async () => {
       (executeEsql as jest.Mock)
-        // 1. Exact match — empty
+        // 1. Exact id match — empty
         .mockResolvedValueOnce({ columns: [], values: [] })
-        // 2. RLIKE fallback — returns entity with a prefixed ID
+        // 2. Exact name match — empty
+        .mockResolvedValueOnce({ columns: [], values: [] })
+        // 3. RLIKE fallback — returns entity with a prefixed ID
         .mockResolvedValueOnce({
           columns: [
             { name: 'entity.id', type: 'keyword' },
@@ -686,7 +705,7 @@ describe('getEntityTool', () => {
           ],
           values: [['host:server1', 'server1']],
         })
-        // 3. Interval snapshot
+        // 4. Interval snapshot
         .mockResolvedValueOnce({ columns: [{ name: '@timestamp', type: 'date' }], values: [] });
 
       await tool.handler(
@@ -694,16 +713,18 @@ describe('getEntityTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      expect(executeEsql).toHaveBeenCalledTimes(3);
-      const snapshotQuery = (executeEsql as jest.Mock).mock.calls[2][0].query;
+      expect(executeEsql).toHaveBeenCalledTimes(4);
+      const snapshotQuery = (executeEsql as jest.Mock).mock.calls[3][0].query;
       expect(snapshotQuery).toContain('WHERE entity.id == "host:server1"');
     });
 
     it('returns one result per RLIKE entity with profile_history when interval is provided', async () => {
       (executeEsql as jest.Mock)
-        // 1. Exact match — empty
+        // 1. Exact id match — empty
         .mockResolvedValueOnce({ columns: [], values: [] })
-        // 2. RLIKE fallback — 2 entities (no risk score, so no extra enrichment calls)
+        // 2. Exact name match — empty
+        .mockResolvedValueOnce({ columns: [], values: [] })
+        // 3. RLIKE fallback — 2 entities (no risk score, so no extra enrichment calls)
         .mockResolvedValueOnce({
           columns: [
             { name: 'entity.id', type: 'keyword' },
@@ -714,12 +735,12 @@ describe('getEntityTool', () => {
             ['host:server10', 'server10'],
           ],
         })
-        // 3. Interval snapshot for host:server1
+        // 4. Interval snapshot for host:server1
         .mockResolvedValueOnce({
           columns: [{ name: '@timestamp', type: 'date' }],
           values: [['2024-01-01T00:00:00Z']],
         })
-        // 4. Interval snapshot for host:server10
+        // 5. Interval snapshot for host:server10
         .mockResolvedValueOnce({
           columns: [{ name: '@timestamp', type: 'date' }],
           values: [['2024-01-02T00:00:00Z']],
@@ -730,7 +751,7 @@ describe('getEntityTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       )) as ToolHandlerStandardReturn;
 
-      expect(executeEsql).toHaveBeenCalledTimes(4);
+      expect(executeEsql).toHaveBeenCalledTimes(5);
       expect(result.results).toHaveLength(2);
 
       const [r1, r2] = result.results as EsqlResults[];
@@ -744,16 +765,18 @@ describe('getEntityTool', () => {
       expect(r2.data.columns.map((c) => c.name)).toContain('profile_history');
 
       // Each snapshot query uses the entity.id from the respective RLIKE result row
-      const snapshotCalls = (executeEsql as jest.Mock).mock.calls.slice(2);
+      const snapshotCalls = (executeEsql as jest.Mock).mock.calls.slice(3);
       expect(snapshotCalls[0][0].query).toContain('WHERE entity.id == "host:server1"');
       expect(snapshotCalls[1][0].query).toContain('WHERE entity.id == "host:server10"');
     });
 
     it('returns one result per RLIKE entity when date is provided with early exit', async () => {
       (executeEsql as jest.Mock)
-        // 1. Exact match — empty
+        // 1. Exact id match — empty
         .mockResolvedValueOnce({ columns: [], values: [] })
-        // 2. RLIKE fallback — 2 entities (with risk score; date path exits before risk score fetch)
+        // 2. Exact name match — empty
+        .mockResolvedValueOnce({ columns: [], values: [] })
+        // 3. RLIKE fallback — 2 entities (with risk score; date path exits before risk score fetch)
         .mockResolvedValueOnce({
           columns: [
             { name: 'entity.id', type: 'keyword' },
@@ -765,12 +788,12 @@ describe('getEntityTool', () => {
             ['host:server10', 'server10', 60.0],
           ],
         })
-        // 3. Date snapshot for host:server1
+        // 4. Date snapshot for host:server1
         .mockResolvedValueOnce({
           columns: [{ name: '@timestamp', type: 'date' }],
           values: [['2024-01-15T10:00:00Z']],
         })
-        // 4. Date snapshot for host:server10
+        // 5. Date snapshot for host:server10
         .mockResolvedValueOnce({
           columns: [{ name: '@timestamp', type: 'date' }],
           values: [['2024-01-15T11:00:00Z']],
@@ -781,7 +804,7 @@ describe('getEntityTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       )) as ToolHandlerStandardReturn;
 
-      expect(executeEsql).toHaveBeenCalledTimes(4);
+      expect(executeEsql).toHaveBeenCalledTimes(5);
       expect(result.results).toHaveLength(2);
 
       const [r1, r2] = result.results as EsqlResults[];
@@ -869,6 +892,7 @@ describe('getEntityTool', () => {
 
       it('reports success=true and entitiesReturned=0 when no entity is found', async () => {
         (executeEsql as jest.Mock)
+          .mockResolvedValueOnce({ columns: [], values: [] })
           .mockResolvedValueOnce({ columns: [], values: [] })
           .mockResolvedValueOnce({ columns: [], values: [] })
           .mockResolvedValueOnce({ columns: [], values: [] });
@@ -1026,11 +1050,199 @@ describe('getEntityTool', () => {
       expect(otherResult.data).toEqual({ attachmentId: expectedAttachmentId, version: 2 });
     });
 
-    it('does not create an attachment when the match came from the entity.id RLIKE fallback', async () => {
+    it('creates an attachment when the entity.id RLIKE fallback returns a single row whose stripped id equals the input', async () => {
       (executeEsql as jest.Mock)
-        // 1. Exact match — empty
+        // 1. Exact id match — empty (input "server1" vs stored "host:server1")
         .mockResolvedValueOnce({ columns: [{ name: 'entity.id', type: 'keyword' }], values: [] })
-        // 2. entity.id RLIKE fallback — single match
+        // 2. Exact name match — empty
+        .mockResolvedValueOnce({ columns: [{ name: 'entity.name', type: 'keyword' }], values: [] })
+        // 3. entity.id RLIKE fallback — single match where stripped id equals the user input
+        .mockResolvedValueOnce({
+          columns: [
+            { name: 'entity.id', type: 'keyword' },
+            { name: 'entity.name', type: 'keyword' },
+            { name: 'entity.EngineMetadata.Type', type: 'keyword' },
+          ],
+          values: [['host:server1', 'server1', 'host']],
+        });
+
+      const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+      (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce(undefined);
+      (context.attachments.add as jest.Mock).mockResolvedValueOnce({
+        id: expectedAttachmentId,
+        current_version: 1,
+      });
+
+      const result = (await richTool.handler(
+        { entityId: 'server1' },
+        context
+      )) as ToolHandlerStandardReturn;
+
+      expect(context.attachments.add).toHaveBeenCalledTimes(1);
+      expect(context.attachments.add).toHaveBeenCalledWith({
+        id: expectedAttachmentId,
+        type: SecurityAgentBuilderAttachments.entity,
+        data: {
+          identifierType: 'host',
+          identifier: 'server1',
+          attachmentLabel: 'host: server1',
+        },
+        description: 'host: server1',
+      });
+
+      expect(result.results).toHaveLength(2);
+      expect(result.results[0].type).toBe(ToolResultType.esqlResults);
+      const otherResult = result.results[1] as OtherResult<{
+        attachmentId: string;
+        version: number;
+      }>;
+      expect(otherResult.type).toBe(ToolResultType.other);
+      expect(otherResult.data).toEqual({ attachmentId: expectedAttachmentId, version: 1 });
+    });
+
+    it('creates an attachment when resolved via exact entity.name match', async () => {
+      const expectedHostAttachmentId = `${SecurityAgentBuilderAttachments.entity}:host:LAPTOP-SALES04`;
+
+      (executeEsql as jest.Mock)
+        // 1. Exact id match — empty (the input is the canonical name, not the id)
+        .mockResolvedValueOnce({ columns: [{ name: 'entity.id', type: 'keyword' }], values: [] })
+        // 2. Exact name match — single hit
+        .mockResolvedValueOnce({
+          columns: [
+            { name: 'entity.id', type: 'keyword' },
+            { name: 'entity.name', type: 'keyword' },
+            { name: 'entity.EngineMetadata.Type', type: 'keyword' },
+          ],
+          values: [['host:LAPTOP-SALES04', 'LAPTOP-SALES04', 'host']],
+        });
+
+      const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+      (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce(undefined);
+      (context.attachments.add as jest.Mock).mockResolvedValueOnce({
+        id: expectedHostAttachmentId,
+        current_version: 1,
+      });
+
+      const result = (await richTool.handler(
+        { entityId: 'LAPTOP-SALES04' },
+        context
+      )) as ToolHandlerStandardReturn;
+
+      const nameExactQuery = (executeEsql as jest.Mock).mock.calls[1][0].query;
+      expect(nameExactQuery).toContain('entity.name == "LAPTOP-SALES04"');
+      expect(nameExactQuery).toContain('user.full_name == "LAPTOP-SALES04"');
+      expect(nameExactQuery).toContain('LIMIT 2');
+
+      expect(context.attachments.add).toHaveBeenCalledTimes(1);
+      expect(context.attachments.add).toHaveBeenCalledWith({
+        id: expectedHostAttachmentId,
+        type: SecurityAgentBuilderAttachments.entity,
+        data: {
+          identifierType: 'host',
+          identifier: 'LAPTOP-SALES04',
+          attachmentLabel: 'host: LAPTOP-SALES04',
+        },
+        description: 'host: LAPTOP-SALES04',
+      });
+
+      expect(result.results).toHaveLength(2);
+      expect(result.results[0].type).toBe(ToolResultType.esqlResults);
+      const otherResult = result.results[1] as OtherResult<{
+        attachmentId: string;
+        version: number;
+      }>;
+      expect(otherResult.type).toBe(ToolResultType.other);
+      expect(otherResult.data).toEqual({ attachmentId: expectedHostAttachmentId, version: 1 });
+    });
+
+    it('creates an attachment when resolved via exact user.full_name match', async () => {
+      const expectedUserAttachmentId = `${SecurityAgentBuilderAttachments.entity}:user:jdoe`;
+
+      (executeEsql as jest.Mock)
+        // 1. Exact id match — empty
+        .mockResolvedValueOnce({ columns: [{ name: 'entity.id', type: 'keyword' }], values: [] })
+        // 2. Exact name match — single hit via user.full_name
+        .mockResolvedValueOnce({
+          columns: [
+            { name: 'entity.id', type: 'keyword' },
+            { name: 'entity.name', type: 'keyword' },
+            { name: 'entity.EngineMetadata.Type', type: 'keyword' },
+            { name: 'user.full_name', type: 'keyword' },
+          ],
+          values: [['user:jdoe', 'jdoe', 'user', 'John Doe']],
+        });
+
+      const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+      (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce(undefined);
+      (context.attachments.add as jest.Mock).mockResolvedValueOnce({
+        id: expectedUserAttachmentId,
+        current_version: 1,
+      });
+
+      const result = (await richTool.handler(
+        { entityId: 'John Doe' },
+        context
+      )) as ToolHandlerStandardReturn;
+
+      const nameExactQuery = (executeEsql as jest.Mock).mock.calls[1][0].query;
+      expect(nameExactQuery).toContain('user.full_name == "John Doe"');
+
+      expect(context.attachments.add).toHaveBeenCalledTimes(1);
+      expect(context.attachments.add).toHaveBeenCalledWith({
+        id: expectedUserAttachmentId,
+        type: SecurityAgentBuilderAttachments.entity,
+        data: {
+          identifierType: 'user',
+          identifier: 'jdoe',
+          attachmentLabel: 'user: jdoe',
+        },
+        description: 'user: jdoe',
+      });
+
+      expect(result.results).toHaveLength(2);
+      expect(result.results[1].type).toBe(ToolResultType.other);
+    });
+
+    it('does not create an attachment when exact name match returns two rows (ambiguous)', async () => {
+      (executeEsql as jest.Mock)
+        // 1. Exact id match — empty
+        .mockResolvedValueOnce({ columns: [{ name: 'entity.id', type: 'keyword' }], values: [] })
+        // 2. Exact name match — two rows (a host and a user share the same name)
+        .mockResolvedValueOnce({
+          columns: [
+            { name: 'entity.id', type: 'keyword' },
+            { name: 'entity.name', type: 'keyword' },
+            { name: 'entity.EngineMetadata.Type', type: 'keyword' },
+          ],
+          values: [
+            ['host:bob', 'bob', 'host'],
+            ['user:bob', 'bob', 'user'],
+          ],
+        });
+
+      const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+
+      const result = (await richTool.handler(
+        { entityId: 'bob' },
+        context
+      )) as ToolHandlerStandardReturn;
+
+      expect(context.attachments.add).not.toHaveBeenCalled();
+      expect(context.attachments.update).not.toHaveBeenCalled();
+      expect(result.results).toHaveLength(2);
+      expect(result.results[0].type).toBe(ToolResultType.esqlResults);
+      expect(result.results[1].type).toBe(ToolResultType.esqlResults);
+    });
+
+    it('does not create an attachment when entity.id RLIKE single hit has a non-matching stripped id', async () => {
+      (executeEsql as jest.Mock)
+        // 1. Exact id match — empty
+        .mockResolvedValueOnce({ columns: [{ name: 'entity.id', type: 'keyword' }], values: [] })
+        // 2. Exact name match — empty
+        .mockResolvedValueOnce({ columns: [{ name: 'entity.name', type: 'keyword' }], values: [] })
+        // 3. entity.id RLIKE single hit, but the stripped id ("server1") does NOT
+        // equal the user input ("server"), so this is a true substring match and
+        // should not authoritatively render a card.
         .mockResolvedValueOnce({
           columns: [
             { name: 'entity.id', type: 'keyword' },
@@ -1043,7 +1255,7 @@ describe('getEntityTool', () => {
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
 
       const result = (await richTool.handler(
-        { entityType: 'host', entityId: 'server1' },
+        { entityId: 'server' },
         context
       )) as ToolHandlerStandardReturn;
 
@@ -1055,11 +1267,13 @@ describe('getEntityTool', () => {
 
     it('does not create an attachment when the match came from the entity.name RLIKE fallback', async () => {
       (executeEsql as jest.Mock)
-        // 1. Exact match — empty
+        // 1. Exact id match — empty
         .mockResolvedValueOnce({ columns: [{ name: 'entity.id', type: 'keyword' }], values: [] })
-        // 2. entity.id RLIKE fallback — empty
+        // 2. Exact name match — empty
+        .mockResolvedValueOnce({ columns: [{ name: 'entity.name', type: 'keyword' }], values: [] })
+        // 3. entity.id RLIKE fallback — empty
         .mockResolvedValueOnce({ columns: [{ name: 'entity.id', type: 'keyword' }], values: [] })
-        // 3. entity.name RLIKE fallback — single match
+        // 4. entity.name RLIKE fallback — single match
         .mockResolvedValueOnce({
           columns: [
             { name: 'entity.id', type: 'keyword' },
@@ -1084,6 +1298,7 @@ describe('getEntityTool', () => {
 
     it('does not create an attachment when zero hits are returned', async () => {
       (executeEsql as jest.Mock)
+        .mockResolvedValueOnce({ columns: [], values: [] })
         .mockResolvedValueOnce({ columns: [], values: [] })
         .mockResolvedValueOnce({ columns: [], values: [] })
         .mockResolvedValueOnce({ columns: [], values: [] });

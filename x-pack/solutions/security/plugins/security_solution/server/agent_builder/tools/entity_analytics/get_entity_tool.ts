@@ -30,6 +30,8 @@ import {
   describeAttachmentForRow,
   ensureEntityAttachment,
   getRowValue,
+  isAttachmentIdentifierType,
+  stripEntityIdPrefix,
   ENTITY_STORE_ENTITY_TYPE_FIELD,
   ENTITY_STORE_ENTITY_ID_FIELD,
 } from './entity_attachment_utils';
@@ -44,7 +46,9 @@ const schema = z.object({
     .string()
     .min(1)
     .describe(
-      'The entity id (EUID) to fetch. Supports both prefixed and non-prefixed forms (for example "host:server1" and "server1").'
+      'The entity id (EUID), canonical entity.name, or user.full_name to fetch. ' +
+        'Examples: "host:server1" (prefixed EUID), "server1" (non-prefixed), ' +
+        '"LAPTOP-SALES04" (entity.name), "John Doe" (user.full_name).'
     ),
   interval: z
     .string()
@@ -172,38 +176,68 @@ interface FindEntityByIdParams {
   esClient: ElasticsearchClient;
 }
 
+type MatchSource = 'exact_id' | 'exact_name' | 'rlike_id' | 'rlike_name';
+
+interface FindEntityByIdResult {
+  source: MatchSource;
+  query: string;
+  columns: Array<{ name: string; type: string }>;
+  values: unknown[][];
+}
+
 const findEntityById = async ({
   entityIndex,
   entityId,
   entityType,
   esClient,
-}: FindEntityByIdParams) => {
+}: FindEntityByIdParams): Promise<FindEntityByIdResult> => {
   const normalizedEntityId = normalizeEntityId(entityId, entityType);
-  const escapedEntityId = escapeEsqlString(normalizedEntityId);
-  const query = `FROM ${entityIndex} | WHERE entity.id == "${escapedEntityId}" | LIMIT 1`;
-  const { columns, values } = await executeEsql({ query, esClient });
+  const escapedNormalized = escapeEsqlString(normalizedEntityId);
 
-  if (values.length === 0) {
-    const rlikePattern = escapeEsqlRlikePattern(entityId);
-    const likeQuery = `FROM ${entityIndex} | WHERE entity.id RLIKE ".*${rlikePattern}.*" | LIMIT 5`;
-    const { columns: likeColumns, values: likeValues } = await executeEsql({
-      query: likeQuery,
-      esClient,
-    });
-
-    if (likeValues.length === 0) {
-      const nameQuery = `FROM ${entityIndex} | WHERE entity.name RLIKE ".*${rlikePattern}.*" OR user.full_name RLIKE ".*${rlikePattern}.*" | LIMIT 5`;
-      const { columns: nameColumns, values: nameValues } = await executeEsql({
-        query: nameQuery,
-        esClient,
-      });
-      return { query: nameQuery, columns: nameColumns, values: nameValues };
-    }
-
-    return { query: likeQuery, columns: likeColumns, values: likeValues };
+  // 1. Exact id match (canonical key, uses prefix if entityType provided)
+  const idQuery = `FROM ${entityIndex} | WHERE entity.id == "${escapedNormalized}" | LIMIT 1`;
+  const idHit = await executeEsql({ query: idQuery, esClient });
+  if (idHit.values.length > 0) {
+    return { source: 'exact_id', query: idQuery, columns: idHit.columns, values: idHit.values };
   }
 
-  return { query, columns, values };
+  // 2. Exact name match against entity.name or user.full_name. LIMIT 2 detects
+  // collisions (two entities sharing the same display name) so we can suppress
+  // the rich entity card and let the LLM disambiguate.
+  const escapedRaw = escapeEsqlString(entityId);
+  const nameExactQuery = `FROM ${entityIndex} | WHERE entity.name == "${escapedRaw}" OR user.full_name == "${escapedRaw}" | LIMIT 2`;
+  const nameExactHit = await executeEsql({ query: nameExactQuery, esClient });
+  if (nameExactHit.values.length > 0) {
+    return {
+      source: 'exact_name',
+      query: nameExactQuery,
+      columns: nameExactHit.columns,
+      values: nameExactHit.values,
+    };
+  }
+
+  // 3. entity.id RLIKE fallback (substring match)
+  const rlikePattern = escapeEsqlRlikePattern(entityId);
+  const likeQuery = `FROM ${entityIndex} | WHERE entity.id RLIKE ".*${rlikePattern}.*" | LIMIT 5`;
+  const likeHit = await executeEsql({ query: likeQuery, esClient });
+  if (likeHit.values.length > 0) {
+    return {
+      source: 'rlike_id',
+      query: likeQuery,
+      columns: likeHit.columns,
+      values: likeHit.values,
+    };
+  }
+
+  // 4. entity.name / user.full_name RLIKE fallback (substring match)
+  const nameQuery = `FROM ${entityIndex} | WHERE entity.name RLIKE ".*${rlikePattern}.*" OR user.full_name RLIKE ".*${rlikePattern}.*" | LIMIT 5`;
+  const nameHit = await executeEsql({ query: nameQuery, esClient });
+  return {
+    source: 'rlike_name',
+    query: nameQuery,
+    columns: nameHit.columns,
+    values: nameHit.values,
+  };
 };
 
 interface EnrichEntityResultParams {
@@ -372,7 +406,7 @@ When exactly one entity is resolved, this tool also stores a \`security.entity\`
         const normalizedEntityId = normalizeEntityId(entityId, entityType);
         const entityIndex = getEntitiesAlias(ENTITY_LATEST, spaceId);
 
-        const { query, columns, values } = await findEntityById({
+        const { source, query, columns, values } = await findEntityById({
           entityIndex,
           entityId,
           entityType,
@@ -392,12 +426,29 @@ When exactly one entity is resolved, this tool also stores a \`security.entity\`
           };
         }
 
-        // Only persist a rich entity attachment when the exact-match query
-        // returned a single entity. RLIKE fallbacks are skipped because weakly
-        // matched rows should not produce a card for an unintended entity.
-        const isExactSingleHit = values.length === 1 && !query.includes(' RLIKE ');
+        // Persist a rich entity attachment only for high-confidence single-row
+        // matches. Exact id/name matches are always trusted; the entity.id RLIKE
+        // fallback is also trusted when the single resolved row's stripped id
+        // equals the user input (i.e. the LLM forgot the "{type}:" prefix).
+        // The entity.name RLIKE fallback stays excluded — display-name substring
+        // matches are too ambiguous to authoritatively render a card for.
+        const isRlikeIdPrefixMatch = (): boolean => {
+          if (source !== 'rlike_id' || values.length !== 1) {
+            return false;
+          }
+          const row = values[0];
+          const rawType = getRowValue(columns, row, ENTITY_STORE_ENTITY_TYPE_FIELD);
+          const rawId = getRowValue(columns, row, ENTITY_STORE_ENTITY_ID_FIELD);
+          if (!isAttachmentIdentifierType(rawType) || typeof rawId !== 'string') {
+            return false;
+          }
+          return stripEntityIdPrefix(rawId, rawType) === entityId;
+        };
+
         const shouldCreateAttachment =
-          experimentalFeatures.entityAttachmentRichRenderer && isExactSingleHit;
+          experimentalFeatures.entityAttachmentRichRenderer &&
+          values.length === 1 &&
+          (source === 'exact_id' || source === 'exact_name' || isRlikeIdPrefixMatch());
 
         const attachmentResult = shouldCreateAttachment
           ? await (async () => {
