@@ -85,12 +85,12 @@ export async function generateKIQueries(
 
   logger.debug(`Using connector ${connectorId} for query generation`);
 
-  const [definition, { significantEventsPromptOverride }] = await Promise.all([
+  const [definition, { significantEventsPromptOverride }, useMemory] = await Promise.all([
     streamsClient.getStream(streamName),
     new PromptsConfigService({ soClient, logger }).getPrompt(),
+    uiSettingsClient.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_MEMORY),
   ]);
 
-  const useMemory = await uiSettingsClient.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_MEMORY);
   const memoryTools = useMemory
     ? createMemoryDiscoveryTools({
         memoryService: new MemoryServiceImpl({
@@ -100,26 +100,23 @@ export async function generateKIQueries(
       })
     : undefined;
 
-  let result: Awaited<ReturnType<typeof generateSignificantEventDefinitions>>;
-  try {
-    result = await generateSignificantEventDefinitions(
-      {
-        definition,
-        connectorId,
-        systemPrompt: significantEventsPromptOverride,
-        maxExistingQueriesForContext,
-      },
-      {
-        inferenceClient,
-        esClient,
-        featureClient,
-        queryClient,
-        logger: logger.get('significant_events_generation'),
-        signal,
-        memoryTools,
-      }
-    );
-  } catch (error) {
+  const result = await generateSignificantEventDefinitions(
+    {
+      definition,
+      connectorId,
+      systemPrompt: significantEventsPromptOverride,
+      maxExistingQueriesForContext,
+    },
+    {
+      inferenceClient,
+      esClient,
+      featureClient,
+      queryClient,
+      logger: logger.get('significant_events_generation'),
+      signal,
+      memoryTools,
+    }
+  ).catch(async (error) => {
     if (isInferenceProviderError(error)) {
       const connector = await inferenceClient.getConnectorById(connectorId).catch(() => undefined);
       if (connector) {
@@ -127,7 +124,7 @@ export async function generateKIQueries(
       }
     }
     throw error;
-  }
+  });
 
   telemetry.trackSignificantEventsQueriesGenerated({
     count: result.queries.length,
