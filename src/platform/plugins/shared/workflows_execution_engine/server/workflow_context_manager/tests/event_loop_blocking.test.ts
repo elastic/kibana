@@ -96,106 +96,12 @@ const createLargeStepOutput = (stepId: string) => ({
   },
 });
 
-const createCombinedRenderPayload = () => ({
-  combinedCases:
-    '{{ steps.fetchCaseA.output.case | json }}{{ steps.fetchCaseB.output.case | json }}{{ steps.fetchCaseC.output.case | json }}',
-  summary:
-    'A={{ steps.fetchCaseA.output.case.title }}, ' +
-    'B={{ steps.fetchCaseB.output.case.title }}, ' +
-    'C={{ steps.fetchCaseC.output.case.title }}',
-});
-
 const createLightweightRenderPayload = () => ({
   summary:
     'A={{ steps.fetchCaseA.output.case.title }}, ' +
     'B={{ steps.fetchCaseB.output.case.title }}, ' +
     'C={{ steps.fetchCaseC.output.case.title }}',
 });
-
-const createTestContainer = (largeOutput: ReturnType<typeof createLargeCaseOutput>) => {
-  const workflow: WorkflowYaml = {
-    name: 'Large Context Workflow',
-    version: '1',
-    description: 'Minimal repro workflow',
-    enabled: true,
-    consts: {},
-    triggers: [],
-    steps: [
-      {
-        name: 'fetchLargeCase',
-        type: 'console',
-        with: {
-          message: 'fetch',
-        },
-      } as ConnectorStep,
-      {
-        name: 'renderLargeCase',
-        type: 'console',
-        with: {
-          message: '{{ steps.fetchLargeCase.output.title }}',
-        },
-      } as ConnectorStep,
-    ],
-  };
-
-  const node: AtomicGraphNode = {
-    id: 'renderLargeCase',
-    type: 'atomic',
-    stepId: 'renderLargeCase',
-    stepType: 'console',
-    configuration: {},
-  };
-
-  const workflowExecutionGraph = WorkflowGraph.fromWorkflowDefinition(workflow);
-  const workflowExecutionState: WorkflowExecutionState = {} as WorkflowExecutionState;
-  workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
-    scopeStack: [] as StackFrame[],
-    workflowDefinition: workflow,
-  } as EsWorkflowExecution);
-  workflowExecutionState.getLatestStepExecution = jest
-    .fn()
-    .mockImplementation((stepId: string): Partial<EsWorkflowStepExecution> | undefined => {
-      if (stepId === 'fetchLargeCase') {
-        return {
-          state: { fetched: true },
-          input: undefined,
-          output: largeOutput,
-          error: null,
-        };
-      }
-
-      return undefined;
-    });
-  workflowExecutionState.getStepExecution = jest.fn().mockReturnValue(undefined);
-  workflowExecutionState.getAllStepExecutions = jest.fn().mockReturnValue([]);
-
-  const esClient = {
-    search: jest.fn(),
-    index: jest.fn(),
-    get: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-  } as unknown as ElasticsearchClient;
-
-  const templatingEngine = new WorkflowTemplatingEngine();
-
-  const contextManager = new WorkflowContextManager({
-    templateEngine: templatingEngine,
-    node,
-    stackFrames: [],
-    workflowExecutionGraph,
-    workflowExecutionState,
-    esClient,
-    dependencies,
-    fakeRequest: {} as KibanaRequest,
-    coreStart: {} as CoreStart,
-  });
-
-  return {
-    contextManager,
-    templatingEngine,
-  };
-};
 
 const createBroaderSurfaceContainer = () => {
   const largeStepOutputs = {
@@ -301,70 +207,8 @@ const createBroaderSurfaceContainer = () => {
   };
 };
 
-describe('event loop blocking minimal local reproduction', () => {
-  it('shows measurable synchronous blocking from large context serialization', async () => {
-    const largeOutput = createLargeCaseOutput();
-    const { contextManager, templatingEngine } = createTestContainer(largeOutput);
-
-    await setImmediateAsync();
-
-    const context = contextManager.getContext();
-    let timerDriftMs = 0;
-    const timerStartedAt = performance.now();
-    const blockedTimer = new Promise<void>((resolve) => {
-      setTimeout(() => {
-        timerDriftMs = performance.now() - timerStartedAt;
-        resolve();
-      }, 0);
-    });
-
-    const serializeStart = performance.now();
-    const serializedContext = JSON.stringify(context);
-    const serializeElapsed = performance.now() - serializeStart;
-
-    const renderStart = performance.now();
-    const rendered = templatingEngine.render('{{ steps.fetchLargeCase.output | json }}', context);
-    const renderElapsed = performance.now() - renderStart;
-
-    await blockedTimer;
-
-    expect(serializedContext.length).toBeGreaterThan(5_000_000);
-    expect(rendered.length).toBeGreaterThan(5_000_000);
-
-    // Keep thresholds conservative so the test remains stable across machines.
-    expect(serializeElapsed).toBeGreaterThan(10);
-    expect(renderElapsed).toBeGreaterThan(10);
-    expect(timerDriftMs).toBeGreaterThan(10);
-  });
-
-  it('shows measurable blocking through renderValueAccordingToContext with accumulated predecessor state', async () => {
-    const { contextManager } = createBroaderSurfaceContainer();
-
-    await setImmediateAsync();
-
-    let timerDriftMs = 0;
-    const timerStartedAt = performance.now();
-    const blockedTimer = new Promise<void>((resolve) => {
-      setTimeout(() => {
-        timerDriftMs = performance.now() - timerStartedAt;
-        resolve();
-      }, 0);
-    });
-
-    const renderStart = performance.now();
-    const rendered = contextManager.renderValueAccordingToContext(createCombinedRenderPayload());
-    const renderElapsed = performance.now() - renderStart;
-
-    await blockedTimer;
-
-    expect(typeof rendered.combinedCases).toBe('string');
-    expect((rendered.combinedCases as string).length).toBeGreaterThan(15_000_000);
-    expect(rendered.summary).toContain('A=Synthetic large case');
-    expect(renderElapsed).toBeGreaterThan(20);
-    expect(timerDriftMs).toBeGreaterThan(10);
-  });
-
-  it('keeps timer drift low for repeated lightweight renders over large predecessor context after the fix', async () => {
+describe('WorkflowContextManager post-fix regressions', () => {
+  it('keeps timer drift low for repeated lightweight renders over large predecessor context', async () => {
     const { contextManager } = createBroaderSurfaceContainer();
 
     await setImmediateAsync();
