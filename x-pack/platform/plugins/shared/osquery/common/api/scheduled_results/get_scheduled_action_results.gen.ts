@@ -49,6 +49,11 @@ export const ScheduledExecutionMetadata = z.object({
    * The timestamp of the most recent response for this execution.
    */
   timestamp: z.string().optional(),
+  /**
+      * Interval in seconds from the pack saved object query definition. Present only when the resultCountsEnabled experimental feature is enabled and the pack query defines an interval.
+
+      */
+  queryInterval: z.number().int().optional(),
 });
 
 export type ScheduledActionResultsAggregations = z.infer<typeof ScheduledActionResultsAggregations>;

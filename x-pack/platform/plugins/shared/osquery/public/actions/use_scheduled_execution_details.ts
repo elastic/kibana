@@ -19,6 +19,7 @@ export interface ScheduledExecutionDetailsItem {
   queryName: string;
   queryText: string;
   timestamp: string;
+  queryInterval?: number;
   agentCount: number;
   successCount: number;
   errorCount: number;
@@ -51,6 +52,7 @@ interface ScheduledActionResultsResponse {
     queryName: string;
     queryText: string;
     timestamp: string;
+    queryInterval?: number;
   };
   aggregations: {
     totalRowCount: number;

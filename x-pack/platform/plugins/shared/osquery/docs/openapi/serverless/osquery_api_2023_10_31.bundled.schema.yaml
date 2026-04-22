@@ -640,7 +640,8 @@ paths:
       description: >
         Get paginated per-agent action results for a specific scheduled query
         execution, with success/failure aggregation and execution metadata (pack
-        name, query name/text, timestamp).
+        name, query name/text, timestamp, and optionally queryInterval when the
+        resultCountsEnabled experimental feature is enabled).
       operationId: OsqueryGetScheduledActionResults
       parameters:
         - description: The schedule ID of the scheduled query.
@@ -714,6 +715,7 @@ paths:
                       executionCount: 3
                       packId: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
                       packName: My Pack
+                      queryInterval: 3600
                       queryName: uptime
                       queryText: select * from uptime;
                       scheduleId: pack_my_pack_uptime
@@ -1497,6 +1499,11 @@ components:
               saved_query_id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
               status: completed
               successful: 0
+          result_counts:
+            error_agents: 0
+            responded_agents: 1
+            successful_agents: 1
+            total_rows: 42
           status: completed
           user_id: elastic
       type: object
@@ -1563,6 +1570,31 @@ components:
                     description: Number of successful agents.
                     type: integer
               type: array
+            result_counts:
+              description: >
+                Aggregated result count statistics for the query. May be omitted
+                when aggregation data is unavailable. Single-query actions
+                include responded_agents; pack actions include
+                queries_with_results and queries_total instead.
+              type: object
+              properties:
+                error_agents:
+                  type: integer
+                queries_total:
+                  description: Total number of sub-queries in the pack (pack actions only).
+                  type: integer
+                queries_with_results:
+                  description: >-
+                    Number of sub-queries that returned at least one row (pack
+                    actions only).
+                  type: integer
+                responded_agents:
+                  description: Number of agents that responded (single-query actions only).
+                  type: integer
+                successful_agents:
+                  type: integer
+                total_rows:
+                  type: integer
             status:
               description: Global status of the live query (completed, running).
               enum:
@@ -1651,14 +1683,29 @@ components:
                               type: string
                         type: array
                       result_counts:
-                        description: >-
+                        description: >
                           Result count statistics (present when withResultCounts
-                          is true).
+                          is true). Single-query actions include
+                          responded_agents; pack actions include
+                          queries_with_results and queries_total instead.
                         type: object
                         properties:
                           error_agents:
                             type: integer
+                          queries_total:
+                            description: >-
+                              Total number of sub-queries in the pack (pack
+                              actions only).
+                            type: integer
+                          queries_with_results:
+                            description: >-
+                              Number of sub-queries that returned at least one
+                              row (pack actions only).
+                            type: integer
                           responded_agents:
+                            description: >-
+                              Number of agents that responded (single-query
+                              actions only).
                             type: integer
                           successful_agents:
                             type: integer
@@ -2079,6 +2126,7 @@ components:
           executionCount: 3
           packId: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
           packName: My Pack
+          queryInterval: 3600
           queryName: uptime
           queryText: select * from uptime;
           scheduleId: pack_my_pack_uptime
@@ -2407,6 +2455,12 @@ components:
         packName:
           description: The name of the pack containing the query.
           type: string
+        queryInterval:
+          description: >
+            Interval in seconds from the pack saved object query definition.
+            Present only when the resultCountsEnabled experimental feature is
+            enabled and the pack query defines an interval.
+          type: integer
         queryName:
           description: The name of the query within the pack.
           type: string

@@ -7,7 +7,7 @@
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useLayoutEffect, useMemo, useState } from 'react';
+import React, { useCallback, useLayoutEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { useRouterNavigate } from '../../../common/lib/kibana';
@@ -24,6 +24,9 @@ import { PackQueriesStatusTable } from '../../../live_queries/form/pack_queries_
 import { useIsExperimentalFeatureEnabled } from '../../../common/experimental_features_context';
 import { SavedQueryFlyout } from '../../../saved_queries';
 import { useSaveQueryFromDetails } from './use_save_query_from_details';
+import { AboutTab } from './about_tab';
+import type { QueryItemAgents } from './about_tab';
+import { AddTagsFlyout } from '../../../actions/components/add_tags_flyout';
 
 const tableWrapperCss = {
   paddingLeft: 0,
@@ -48,6 +51,27 @@ const LiveQueryDetailsPageComponent = () => {
     handleCloseSaveQueryFlyout,
     savedQueryDefaultValue,
   } = useSaveQueryFromDetails({ data });
+
+  const isResultCountsEnabled = useIsExperimentalFeatureEnabled('resultCountsEnabled');
+
+  const [isTagsFlyoutOpen, setIsTagsFlyoutOpen] = useState(false);
+  const handleOpenTagsFlyout = useCallback(() => setIsTagsFlyoutOpen(true), []);
+  const handleCloseTagsFlyout = useCallback(() => setIsTagsFlyoutOpen(false), []);
+
+  const currentTags = useMemo(() => data?.tags ?? [], [data?.tags]);
+
+  const renderAboutTab = useMemo(() => {
+    if (!isResultCountsEnabled || !data) {
+      return undefined;
+    }
+
+    const AboutTabRenderer = (queryItem: QueryItemAgents) => (
+      <AboutTab data={data} queryItemAgents={queryItem} onEditTags={handleOpenTagsFlyout} />
+    );
+    AboutTabRenderer.displayName = 'AboutTabRenderer';
+
+    return AboutTabRenderer;
+  }, [isResultCountsEnabled, data, handleOpenTagsFlyout]);
 
   const LeftColumn = useMemo(
     () => (
@@ -106,6 +130,7 @@ const LiveQueryDetailsPageComponent = () => {
         showResultsHeader
         tags={data?.tags}
         onSaveQuery={onSaveQuery}
+        renderAboutTab={renderAboutTab}
       />
     </div>
   );
@@ -113,6 +138,15 @@ const LiveQueryDetailsPageComponent = () => {
   const savedQueryFlyout = showSavedQueryFlyout ? (
     <SavedQueryFlyout onClose={handleCloseSaveQueryFlyout} defaultValue={savedQueryDefaultValue} />
   ) : null;
+
+  const tagsFlyout =
+    isTagsFlyoutOpen && actionId ? (
+      <AddTagsFlyout
+        actionId={actionId}
+        currentTags={currentTags}
+        onClose={handleCloseTagsFlyout}
+      />
+    ) : null;
 
   if (isHistoryEnabled) {
     return (
@@ -125,6 +159,7 @@ const LiveQueryDetailsPageComponent = () => {
           </div>
         </WithoutHeaderLayout>
         {savedQueryFlyout}
+        {tagsFlyout}
       </>
     );
   }
@@ -141,9 +176,11 @@ const LiveQueryDetailsPageComponent = () => {
             agentIds={data?.agents}
             showResultsHeader
             tags={data?.tags}
+            renderAboutTab={renderAboutTab}
           />
         </EuiFlexItem>
       </WithHeaderLayout>
+      {tagsFlyout}
     </>
   );
 };

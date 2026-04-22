@@ -142,6 +142,9 @@ export const getScheduledActionResultsRoute = (
           let packName = '';
           let queryName = '';
           let queryText = '';
+          let queryInterval: number | undefined;
+
+          const resultCountsEnabled = osqueryContext.experimentalFeatures?.resultCountsEnabled;
 
           if (packId) {
             try {
@@ -156,6 +159,12 @@ export const getScheduledActionResultsRoute = (
               if (matchingQuery) {
                 queryName = matchingQuery.name || matchingQuery.id || '';
                 queryText = matchingQuery.query || '';
+                if (resultCountsEnabled && matchingQuery.interval != null) {
+                  const n = Number(matchingQuery.interval);
+                  if (!Number.isNaN(n)) {
+                    queryInterval = n;
+                  }
+                }
               }
             } catch {
               // Pack deleted — gracefully degrade to empty name fields
@@ -172,6 +181,7 @@ export const getScheduledActionResultsRoute = (
                 queryName,
                 queryText,
                 timestamp,
+                ...(resultCountsEnabled && queryInterval !== undefined ? { queryInterval } : {}),
               },
               edges: res.edges,
               total,

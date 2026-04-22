@@ -144,6 +144,16 @@ export const getLiveQueryDetailsResponseSchema = schema.object({
         tags: schema.maybe(schema.arrayOf(schema.string())),
         status: schema.maybe(schema.string()),
         queries: schema.maybe(schema.arrayOf(liveQueryDetailsQueryItemSchema)),
+        result_counts: schema.maybe(
+          schema.object({
+            total_rows: schema.maybe(schema.number()),
+            responded_agents: schema.maybe(schema.number()),
+            queries_with_results: schema.maybe(schema.number()),
+            queries_total: schema.maybe(schema.number()),
+            successful_agents: schema.maybe(schema.number()),
+            error_agents: schema.maybe(schema.number()),
+          })
+        ),
       },
       { unknowns: 'allow' }
     )

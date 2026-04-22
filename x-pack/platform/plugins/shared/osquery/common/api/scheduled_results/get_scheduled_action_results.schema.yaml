@@ -30,6 +30,12 @@ components:
         timestamp:
           description: 'The timestamp of the most recent response for this execution.'
           type: string
+        queryInterval:
+          description: >
+            Interval in seconds from the pack saved object query definition.
+            Present only when the resultCountsEnabled experimental feature is enabled
+            and the pack query defines an interval.
+          type: integer
 
     ScheduledActionResultsAggregations:
       type: object
@@ -86,6 +92,7 @@ components:
           queryName: 'uptime'
           queryText: 'select * from uptime;'
           timestamp: '2024-07-26T09:00:00.000Z'
+          queryInterval: 3600
         edges:
           - _id: 'result-001'
             fields:
