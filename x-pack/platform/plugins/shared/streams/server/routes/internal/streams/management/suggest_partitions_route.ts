@@ -29,7 +29,6 @@ export interface SuggestPartitionsParams {
     end: number;
     user_prompt?: string;
     existing_partitions?: Array<{ name: string; condition: z.infer<typeof conditionSchema> }>;
-    is_refinement?: boolean;
   };
 }
 
@@ -43,7 +42,6 @@ export const suggestPartitionsSchema = z.object({
     existing_partitions: z
       .array(z.object({ name: z.string(), condition: conditionSchema }))
       .optional(),
-    is_refinement: z.boolean().optional(),
   }),
 }) satisfies z.Schema<SuggestPartitionsParams>;
 
@@ -97,7 +95,6 @@ export const suggestPartitionsRoute = createServerRoute({
       signal: getRequestAbortSignal(request),
       userPrompt: params.body.user_prompt,
       existingPartitions: params.body.existing_partitions,
-      isRefinement: params.body.is_refinement,
       getFeatures: async (filters) => {
         const featureClient = await getFeatureClient();
         const { hits } = await featureClient.getFeatures(params.path.name, filters);

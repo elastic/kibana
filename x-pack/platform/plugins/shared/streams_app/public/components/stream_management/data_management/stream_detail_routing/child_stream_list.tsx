@@ -223,7 +223,6 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
     isLoadingSuggestions,
     suggestions,
     suggestionReason,
-    hasRefined,
     resetForm,
     previewSuggestion,
     acceptSuggestion,
@@ -306,17 +305,9 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
         end: timeState.end,
         userPrompt,
         existingPartitions: suggestions ?? undefined,
-        isRefinement: !!userPrompt && hasRefined,
       });
     },
-    [
-      fetchSuggestions,
-      definition.stream.name,
-      timeState.start,
-      timeState.end,
-      suggestions,
-      hasRefined,
-    ]
+    [fetchSuggestions, definition.stream.name, timeState.start, timeState.end, suggestions]
   );
 
   const renderCreateButton = () => {

@@ -9,16 +9,16 @@ User guidance:
 {{{user_prompt}}}
 {{/user_prompt}}
 {{#existing_partitions}}
-{{#is_refinement}}
+{{#user_prompt}}
 
-Current partitions (the user's accepted baseline — preserve unless they explicitly ask to start over):
+Existing partitions (previously suggested — keep, modify, or replace based on the user's guidance above):
 {{{existing_partitions}}}
-{{/is_refinement}}
-{{^is_refinement}}
+{{/user_prompt}}
+{{^user_prompt}}
 
-Previously suggested partitions (REJECTED — discard these entirely, pick ONE different field, create one partition per value with a simple eq condition, and name each partition after the matched value):
+Previously suggested partitions (REJECTED — the user wants a different approach; pick a different field entirely):
 {{{existing_partitions}}}
-{{/is_refinement}}
+{{/user_prompt}}
 {{/existing_partitions}}
 
 Initial clustering:

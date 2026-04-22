@@ -46,7 +46,6 @@ export async function partitionStream({
   getFeatures,
   userPrompt,
   existingPartitions = [],
-  isRefinement = false,
 }: {
   definition: Streams.WiredStream.Definition;
   inferenceClient: BoundInferenceClient;
@@ -63,7 +62,6 @@ export async function partitionStream({
   }): Promise<Feature[]>;
   userPrompt?: string;
   existingPartitions?: Array<{ name: string; condition: Condition }>;
-  isRefinement?: boolean;
 }): Promise<PartitionStreamResponse> {
   const enabledChildConditions = definition.ingest.wired.routing
     .filter((route) => route.status !== 'disabled')
@@ -132,7 +130,6 @@ export async function partitionStream({
       ...(existingPartitions.length > 0
         ? { existing_partitions: JSON.stringify(existingPartitions) }
         : {}),
-      ...(isRefinement ? { is_refinement: 'true' } : {}),
     },
     maxSteps,
     toolCallbacks: {

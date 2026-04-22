@@ -26,7 +26,6 @@ export interface FetchSuggestedPartitionsParams {
   end: number;
   userPrompt?: string;
   existingPartitions?: PartitionSuggestion[];
-  isRefinement?: boolean;
 }
 
 export interface PartitionSuggestion {
@@ -58,7 +57,6 @@ export function useReviewSuggestionsForm() {
   );
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [selectedSuggestionNames, setSelectedSuggestionNames] = useState<Set<string>>(new Set());
-  const [hasRefined, setHasRefined] = useState(false);
 
   const abortController = useAbortController();
 
@@ -78,15 +76,11 @@ export function useReviewSuggestionsForm() {
               ...(params.existingPartitions?.length
                 ? { existing_partitions: params.existingPartitions }
                 : {}),
-              ...(params.isRefinement ? { is_refinement: true } : {}),
             },
           },
         })
       );
 
-      if (params.userPrompt) {
-        setHasRefined(true);
-      }
       setSuggestions(response.partitions);
       setSuggestionReason(response.reason);
     } catch (error) {
@@ -176,7 +170,6 @@ export function useReviewSuggestionsForm() {
     setSuggestions(undefined);
     setSelectedSuggestionNames(new Set());
     setSuggestionReason(undefined);
-    setHasRefined(false);
     resetPreview();
   };
 
@@ -188,7 +181,6 @@ export function useReviewSuggestionsForm() {
   return {
     suggestions,
     suggestionReason,
-    hasRefined,
     removeSuggestion,
     isLoadingSuggestions,
     fetchSuggestions,
