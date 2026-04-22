@@ -16,6 +16,16 @@
 
 import { z } from '@kbn/zod/v4';
 
+import {
+  PackName,
+  PackDescriptionOrUndefined,
+  ECSMappingArrayOrUndefined,
+  EnabledOrUndefined,
+  PolicyIdsOrUndefined,
+  ObjectQueries,
+  Shards,
+} from '../model/schema/common_attributes.gen';
+
 /**
  * A paginated list of query packs.
  */
@@ -24,19 +34,62 @@ export const FindPacksResponse = z.object({
   /**
    * The current page number.
    */
-  page: z.number().int().optional(),
+  page: z.number().int(),
   /**
    * The number of results per page.
    */
-  per_page: z.number().int().optional(),
+  per_page: z.number().int(),
   /**
    * The total number of packs.
    */
-  total: z.number().int().optional(),
+  total: z.number().int(),
   /**
-   * The list of packs.
+   * An array of pack objects.
    */
-  data: z.array(z.object({})).optional(),
+  data: z.array(
+    z.object({
+      /**
+       * The saved object ID of the pack.
+       */
+      saved_object_id: z.string(),
+      name: PackName,
+      description: PackDescriptionOrUndefined.optional(),
+      /**
+       * Pack queries in saved-object storage format (array). Note: the read endpoint returns object format.
+       */
+      queries: z
+        .array(
+          z.object({
+            id: z.string().optional(),
+            query: z.string().optional(),
+            interval: z.number().int().optional(),
+            platform: z.string().optional(),
+            version: z.string().optional(),
+            snapshot: z.boolean().optional(),
+            removed: z.boolean().optional(),
+            timeout: z.number().int().optional(),
+            ecs_mapping: ECSMappingArrayOrUndefined.optional(),
+          })
+        )
+        .optional(),
+      /**
+       * The pack version number.
+       */
+      version: z.number().int().optional(),
+      enabled: EnabledOrUndefined.optional(),
+      created_at: z.string().datetime().optional(),
+      created_by: z.string().nullable().optional(),
+      created_by_profile_uid: z.string().optional(),
+      updated_at: z.string().datetime().optional(),
+      updated_by: z.string().nullable().optional(),
+      updated_by_profile_uid: z.string().optional(),
+      policy_ids: PolicyIdsOrUndefined.optional(),
+      /**
+       * Whether the pack is read-only (true for prebuilt packs).
+       */
+      read_only: z.boolean().optional(),
+    })
+  ),
 });
 
 /**
@@ -47,60 +100,38 @@ export const FindPackResponse = z.object({
   /**
    * The pack details.
    */
-  data: z
-    .object({
-      /**
-       * The saved object ID of the pack.
-       */
-      saved_object_id: z.string().optional(),
-      /**
-       * The pack name.
-       */
-      name: z.string().optional(),
-      /**
-       * The pack description.
-       */
-      description: z.string().optional(),
-      /**
-       * The queries in the pack, keyed by query name.
-       */
-      queries: z.object({}).optional(),
-      /**
-       * The pack version.
-       */
-      version: z.number().int().optional(),
-      /**
-       * Whether the pack is enabled.
-       */
-      enabled: z.boolean().optional(),
-      /**
-       * The creation timestamp.
-       */
-      created_at: z.string().optional(),
-      /**
-       * The user who created the pack.
-       */
-      created_by: z.string().optional(),
-      /**
-       * The last update timestamp.
-       */
-      updated_at: z.string().optional(),
-      /**
-       * The user who last updated the pack.
-       */
-      updated_by: z.string().optional(),
-      /**
-       * A list of agent policy IDs associated with the pack.
-       */
-      policy_ids: z.array(z.string()).optional(),
-      /**
-       * Shard configuration for policies, as a map of policy ID to percentage.
-       */
-      shards: z.object({}).optional(),
-      /**
-       * Whether the pack is read-only (true for prebuilt packs).
-       */
-      read_only: z.boolean().optional(),
-    })
-    .optional(),
+  data: z.object({
+    /**
+     * The saved object ID of the pack.
+     */
+    saved_object_id: z.string(),
+    name: PackName,
+    description: PackDescriptionOrUndefined.optional(),
+    queries: ObjectQueries.optional(),
+    /**
+     * The pack version number.
+     */
+    version: z.number().int().optional(),
+    enabled: EnabledOrUndefined.optional(),
+    created_at: z.string().datetime().optional(),
+    created_by: z.string().nullable().optional(),
+    created_by_profile_uid: z.string().optional(),
+    updated_at: z.string().datetime().optional(),
+    updated_by: z.string().nullable().optional(),
+    updated_by_profile_uid: z.string().optional(),
+    policy_ids: PolicyIdsOrUndefined.optional(),
+    shards: Shards.optional(),
+    /**
+     * Whether the pack is read-only (true for prebuilt packs).
+     */
+    read_only: z.boolean().optional(),
+    /**
+     * The saved object type.
+     */
+    type: z.string().optional(),
+    /**
+     * The namespaces the pack belongs to.
+     */
+    namespaces: z.array(z.string()).optional(),
+  }),
 });

@@ -29,6 +29,7 @@ import {
 } from '@kbn/connector-schemas/http';
 import { z } from '@kbn/zod/v4';
 import { SecretsSchema } from '@kbn/connector-schemas/http/schemas/v1';
+import { safeJsonStringify } from '@kbn/std';
 import type {
   HttpConnectorType,
   HttpConnectorTypeExecutorOptions,
@@ -47,6 +48,7 @@ import {
   errorResultUnexpectedError,
   retryResult,
   retryResultSeconds,
+  getErrorResponseMessage,
 } from './errors';
 
 const userErrorCodes = [400, 404, 405, 406, 410, 411, 414, 428, 431];
@@ -133,7 +135,7 @@ function renderParameterTemplates(
 ): ActionParamsType {
   const renderedParams: ActionParamsType = { ...params };
 
-  if (params.body) {
+  if (typeof params.body === 'string') {
     renderedParams.body = renderMustacheString(logger, params.body, variables, 'json');
   }
 
@@ -179,6 +181,15 @@ function buildQueryString(query?: Record<string, string>): string {
     params.append(key, value);
   }
   return `?${params.toString()}`;
+}
+
+function serializeHttpRequestBody(body: unknown): string {
+  if (typeof body === 'string') {
+    return body;
+  }
+  return safeJsonStringify(body, (error) => {
+    throw new Error(`Error serializing request body: ${error.message}`);
+  }) as string; // will return a string or throw an error if it fails
 }
 
 // action executor
@@ -269,7 +280,7 @@ export async function executor(
       url,
       logger,
       headers: finalHeaders,
-      data: body,
+      data: serializeHttpRequestBody(body),
       configurationUtilities,
       sslOverrides,
       proxyOverrides,
@@ -308,8 +319,9 @@ export async function executor(
   } else {
     const { error } = result;
     if (error.response) {
-      const { status, statusText, headers: responseHeaders, data: responseData } = error.response;
-      const responseMessage = responseData?.message;
+      const { status, statusText, headers: responseHeaders } = error.response;
+
+      const responseMessage = getErrorResponseMessage(error);
       const responseMessageAsSuffix = responseMessage ? `: ${responseMessage}` : '';
       const message = `[${status}] ${statusText}${responseMessageAsSuffix}`;
       logger.error(`error on ${actionId} http event: ${message}`);

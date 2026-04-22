@@ -26,6 +26,7 @@ import {
   IntervalOrUndefined,
   SnapshotOrUndefined,
   RemovedOrUndefined,
+  Query,
 } from '../model/schema/common_attributes.gen';
 
 export type UpdateSavedQueryRequestBody = z.infer<typeof UpdateSavedQueryRequestBody>;
@@ -46,63 +47,27 @@ export const UpdateSavedQueryRequestBody = z.object({
  */
 export type UpdateSavedQueryResponse = z.infer<typeof UpdateSavedQueryResponse>;
 export const UpdateSavedQueryResponse = z.object({
-  /**
-   * The updated saved query.
-   */
-  data: z
-    .object({
-      /**
-       * The saved object ID of the saved query.
-       */
-      saved_object_id: z.string().optional(),
-      /**
-       * The saved query ID.
-       */
-      id: z.string().optional(),
-      /**
-       * The saved query description.
-       */
-      description: z.string().optional(),
-      /**
-       * The SQL query.
-       */
-      query: z.string().optional(),
-      /**
-       * The query interval in seconds.
-       */
-      interval: z.string().optional(),
-      /**
-       * The query timeout in seconds.
-       */
-      timeout: z.number().int().optional(),
-      /**
-       * Whether the query is a snapshot query.
-       */
-      snapshot: z.boolean().optional(),
-      /**
-       * Whether to include results for removed processes.
-       */
-      removed: z.boolean().optional(),
-      /**
-       * The target platform(s).
-       */
-      platform: z.string().optional(),
-      /**
-       * The minimum osquery version.
-       */
-      version: z.string().optional(),
-      /**
-       * The ECS mapping configuration.
-       */
-      ecs_mapping: z.object({}).optional(),
-      /**
-       * The last update timestamp.
-       */
-      updated_at: z.string().optional(),
-      /**
-       * The user who last updated the saved query.
-       */
-      updated_by: z.string().optional(),
-    })
-    .optional(),
+  data: z.object({
+    saved_object_id: z.string(),
+    id: SavedQueryId,
+    description: SavedQueryDescriptionOrUndefined.optional(),
+    query: Query.optional(),
+    interval: z.union([z.number().int(), z.string()]).optional(),
+    timeout: z.number().int().optional(),
+    snapshot: SnapshotOrUndefined.optional(),
+    removed: RemovedOrUndefined.optional(),
+    platform: PlatformOrUndefined.optional(),
+    ecs_mapping: ECSMappingOrUndefined.optional(),
+    created_at: z.string().datetime().optional(),
+    created_by: z.string().nullable().optional(),
+    created_by_profile_uid: z.string().optional(),
+    updated_at: z.string().datetime().optional(),
+    updated_by: z.string().nullable().optional(),
+    updated_by_profile_uid: z.string().optional(),
+    prebuilt: z.boolean().optional(),
+    /**
+     * The saved query version.
+     */
+    version: z.string().optional(),
+  }),
 });

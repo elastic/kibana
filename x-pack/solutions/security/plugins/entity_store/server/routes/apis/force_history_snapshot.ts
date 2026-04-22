@@ -16,6 +16,8 @@ export function registerForceHistorySnapshot(router: EntityStorePluginRouter) {
     .post({
       path: ENTITY_STORE_ROUTES.internal.FORCE_HISTORY_SNAPSHOT,
       access: 'internal',
+      summary: 'Force history snapshot',
+      description: 'Trigger an immediate history snapshot of all entity engines.',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },

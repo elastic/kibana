@@ -12,13 +12,10 @@ import type {
   GetCompositeSLOResponse,
   SLOStatus,
 } from '@kbn/slo-schema';
-import {
-  ALL_VALUE,
-  batchGetCompositeSLOResponseSchema,
-  getCompositeSLOResponseSchema,
-} from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { toHighPrecision } from '../utils/number';
 import type { CompositeSLODefinition } from '../domain/models';
+import { toRichRollingTimeWindow } from '../domain/models';
 import {
   computeWeightedSli,
   computeNormalisedWeights,
@@ -50,13 +47,11 @@ export class GetCompositeSLO {
   ) {}
 
   public async executeBatch(ids: string[]): Promise<BatchGetCompositeSLOResponse> {
-    const results = await Promise.all(ids.map((id) => this.executeOne(id)));
-    return batchGetCompositeSLOResponseSchema.encode(results);
+    return await Promise.all(ids.map((id) => this.executeOne(id)));
   }
 
   public async execute(id: string): Promise<GetCompositeSLOResponse> {
-    const result = await this.executeOne(id);
-    return getCompositeSLOResponseSchema.encode(result);
+    return await this.executeOne(id);
   }
 
   private async executeOne(id: string) {
@@ -70,10 +65,12 @@ export class GetCompositeSLO {
       memberDefinitionMap.has(member.sloId)
     );
 
+    const richTimeWindow = toRichRollingTimeWindow(compositeSlo.timeWindow);
+
     const summaryParams = activeMembers.map((member) => ({
       slo: memberDefinitionMap.get(member.sloId)!,
       instanceId: member.instanceId ?? ALL_VALUE,
-      timeWindowOverride: compositeSlo.timeWindow,
+      timeWindowOverride: richTimeWindow,
     }));
 
     const summaryResults = await this.summaryClient.computeSummaries(summaryParams);
