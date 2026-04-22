@@ -6,14 +6,16 @@
  */
 
 import type { RelationshipIntegrationConfig } from '../engine/types';
-
-const EXCLUDED_USERNAMES = ['SYSTEM', 'LOCAL SERVICE', 'NETWORK SERVICE', 'ANONYMOUS LOGON'];
+import { getIndexPattern as elasticDefendIndexPattern } from './integrations/elastic_defend/constants';
+import { getIndexPattern as awsCloudtrailAccessesIndexPattern } from './integrations/aws_cloudtrail/constants';
+import { getIndexPattern as systemAuthIndexPattern } from './integrations/system_auth/constants';
+import { getIndexPattern as systemSecurityIndexPattern, EXCLUDED_USERNAMES } from './integrations/system_security/constants';
 
 export const ACCESSES_ENGINE_CONFIGS: RelationshipIntegrationConfig[] = [
   {
     id: 'elastic_defend',
     name: 'Elastic Defend',
-    indexPattern: (ns) => `logs-endpoint.events.security-${ns}`,
+    indexPattern: elasticDefendIndexPattern,
     relationshipType: 'accesses',
     targetEntityType: 'host',
     esqlWhereClause: `event.action == "log_on"
@@ -23,7 +25,7 @@ export const ACCESSES_ENGINE_CONFIGS: RelationshipIntegrationConfig[] = [
   {
     id: 'aws_cloudtrail',
     name: 'AWS CloudTrail',
-    indexPattern: (ns) => `logs-aws.cloudtrail-${ns}`,
+    indexPattern: awsCloudtrailAccessesIndexPattern,
     relationshipType: 'accesses',
     targetEntityType: 'host',
     esqlWhereClause: `event.module == "aws"
@@ -35,7 +37,7 @@ export const ACCESSES_ENGINE_CONFIGS: RelationshipIntegrationConfig[] = [
   {
     id: 'system_auth',
     name: 'System Auth',
-    indexPattern: (ns) => `logs-system.auth-${ns}`,
+    indexPattern: systemAuthIndexPattern,
     relationshipType: 'accesses',
     targetEntityType: 'host',
     esqlWhereClause: `event.category IN ("authentication", "session")
@@ -45,7 +47,7 @@ export const ACCESSES_ENGINE_CONFIGS: RelationshipIntegrationConfig[] = [
   {
     id: 'system_security',
     name: 'System Security',
-    indexPattern: (ns) => `logs-system.security-${ns}`,
+    indexPattern: systemSecurityIndexPattern,
     relationshipType: 'accesses',
     targetEntityType: 'host',
     esqlWhereClause: `event.action IN ("logged-in", "logged-in-explicit")
