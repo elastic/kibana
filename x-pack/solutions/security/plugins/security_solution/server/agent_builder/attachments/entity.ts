@@ -20,6 +20,14 @@ export const MAX_ENTITIES_PER_ATTACHMENT = 50;
 const entityIdentifierSchema = z.object({
   identifierType: z.enum(['host', 'user', 'service', 'generic']),
   identifier: z.string().min(1),
+  /**
+   * Canonical `entity.id` value from the entity store (for example
+   * `user:name@host@namespace`). When set, the rich-card lookup targets this
+   * field directly instead of the per-type identity field, which is required
+   * for local users where `entity.name` is a composite that does not match
+   * `user.name`. Optional for backward compatibility with older payloads.
+   */
+  entityStoreId: z.string().min(1).optional(),
 });
 
 /**
@@ -64,11 +72,11 @@ const riskStatsPayloadSchema = z
 /**
  * Entity attachment payload. Two backward-compatible shapes are supported:
  *
- * 1. Single-entity (legacy): `{ identifierType, identifier, attachmentLabel?,
- *    riskStats?, resolutionRiskStats? }`. Rendered as a single card. The
- *    optional `riskStats`/`resolutionRiskStats` fields carry the risk
- *    breakdown fetched server-side from the risk time-series index.
- * 2. Multi-entity: `{ entities: [{ identifierType, identifier }, ...], attachmentLabel? }`.
+ * 1. Single-entity (legacy): `{ identifierType, identifier, entityStoreId?,
+ *    attachmentLabel?, riskStats?, resolutionRiskStats? }`. Rendered as a
+ *    single card. The optional `riskStats`/`resolutionRiskStats` fields carry
+ *    the risk breakdown fetched server-side from the risk time-series index.
+ * 2. Multi-entity: `{ entities: [{ identifierType, identifier, entityStoreId? }, ...], attachmentLabel? }`.
  *    Rendered as a table. Capped at {@link MAX_ENTITIES_PER_ATTACHMENT}.
  *    Deliberately does not carry risk stats — the multi-entity renderer
  *    fetches its own summary per row from the entity store.
@@ -77,6 +85,7 @@ const riskEntityAttachmentDataSchema = z.union([
   securityAttachmentDataSchema.extend({
     identifierType: z.enum(['host', 'user', 'service', 'generic']),
     identifier: z.string().min(1),
+    entityStoreId: z.string().min(1).optional(),
     riskStats: riskStatsPayloadSchema.optional(),
     resolutionRiskStats: riskStatsPayloadSchema.optional(),
   }),

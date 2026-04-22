@@ -16,6 +16,15 @@ import type { EntityType } from '../../../../common/entity_analytics/types';
 export interface EntityAttachmentIdentifier {
   identifierType: EntityType | 'host' | 'user' | 'service' | 'generic';
   identifier: string;
+  /**
+   * Canonical `entity.id` from the entity store (e.g. `user:name@host@namespace`).
+   * Optional — attachments created before this field was added won't have it,
+   * and the client hook falls back to per-type identity-field filtering.
+   * Prefer this for the entity store lookup: for local users the composite
+   * `entity.name` / `entity.id` diverges from `user.name`, so only matching
+   * on `entity.id` returns the stored record.
+   */
+  entityStoreId?: string;
 }
 
 /**

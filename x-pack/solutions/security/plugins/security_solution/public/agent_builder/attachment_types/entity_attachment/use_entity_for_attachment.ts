@@ -88,13 +88,22 @@ const toEntityType = (identifierType: EntityAttachmentIdentifier['identifierType
 
 /**
  * Builds an Elasticsearch bool filter that targets a single entity store
- * record by identifier. For host/user/service we match on the well-known
- * identity field (`host.name`, `user.name`, `service.name`). For generic
- * entities we match on the canonical `entity.id`.
+ * record by identifier. Prefers the canonical `entity.id` when the attachment
+ * payload carries `entityStoreId` — this is the only way to resolve local
+ * users, whose `entity.name` is a `user.name@host.name` composite that does
+ * not match the stored `user.name`. When `entityStoreId` is absent (legacy
+ * payloads) we fall back to the per-type identity field: `host.name`,
+ * `user.name`, `service.name`, or `entity.id` for generic entities.
  */
 const buildFilterQuery = (identifier: EntityAttachmentIdentifier): string | undefined => {
   const value = identifier.identifier;
   if (!value) return undefined;
+
+  if (identifier.entityStoreId) {
+    return JSON.stringify({
+      bool: { filter: [{ term: { 'entity.id': identifier.entityStoreId } }] },
+    });
+  }
 
   let field: string;
   switch (identifier.identifierType) {
@@ -215,6 +224,7 @@ export const useEntityForAttachment = (
       ENTITY_ATTACHMENT_QUERY_KEY,
       identifier?.identifierType ?? '',
       identifier?.identifier ?? '',
+      identifier?.entityStoreId ?? '',
     ],
     [identifier]
   );

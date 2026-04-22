@@ -731,6 +731,9 @@ When exactly one entity is resolved, this tool also stores a \`security.entity\`
                   identifierType: descriptor.identifierType,
                   identifier: descriptor.identifier,
                   attachmentLabel: descriptor.attachmentLabel,
+                  ...(descriptor.entityStoreId
+                    ? { entityStoreId: descriptor.entityStoreId }
+                    : {}),
                   ...(descriptor.riskStats ? { riskStats: descriptor.riskStats } : {}),
                   ...(descriptor.resolutionRiskStats
                     ? { resolutionRiskStats: descriptor.resolutionRiskStats }

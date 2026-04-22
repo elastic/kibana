@@ -1016,6 +1016,7 @@ describe('getEntityTool', () => {
           identifierType: 'host',
           identifier: 'server1',
           attachmentLabel: 'host: server1',
+          entityStoreId: 'host:server1',
         },
         description: 'host: server1',
       });
@@ -1055,6 +1056,7 @@ describe('getEntityTool', () => {
           identifierType: 'host',
           identifier: 'server1',
           attachmentLabel: 'host: server1',
+          entityStoreId: 'host:server1',
         },
         description: 'host: server1',
       });
@@ -1104,6 +1106,7 @@ describe('getEntityTool', () => {
           identifierType: 'host',
           identifier: 'server1',
           attachmentLabel: 'host: server1',
+          entityStoreId: 'host:server1',
         },
         description: 'host: server1',
       });
@@ -1159,6 +1162,7 @@ describe('getEntityTool', () => {
           identifierType: 'host',
           identifier: 'LAPTOP-SALES04',
           attachmentLabel: 'host: LAPTOP-SALES04',
+          entityStoreId: 'host:LAPTOP-SALES04',
         },
         description: 'host: LAPTOP-SALES04',
       });
@@ -1213,12 +1217,54 @@ describe('getEntityTool', () => {
           identifierType: 'user',
           identifier: 'jdoe',
           attachmentLabel: 'user: jdoe',
+          entityStoreId: 'user:jdoe',
         },
         description: 'user: jdoe',
       });
 
       expect(result.results).toHaveLength(2);
       expect(result.results[1].type).toBe(ToolResultType.other);
+    });
+
+    it('carries the composite entity.id on the attachment for a local user so the client can rehydrate by entity.id', async () => {
+      const compositeEntityId = "user:Lena Medhurst@Lena's MacBook Pro@local";
+      const compositeEntityName = "Lena Medhurst@Lena's MacBook Pro";
+      const expectedLocalUserAttachmentId = buildSingleEntityAttachmentId('user', compositeEntityName);
+
+      (executeEsql as jest.Mock)
+        // 1. Exact id match — empty (the input is the bare name, not the id)
+        .mockResolvedValueOnce({ columns: [{ name: 'entity.id', type: 'keyword' }], values: [] })
+        // 2. Exact name match — the composite entity.name hit
+        .mockResolvedValueOnce({
+          columns: [
+            { name: 'entity.id', type: 'keyword' },
+            { name: 'entity.name', type: 'keyword' },
+            { name: 'entity.EngineMetadata.Type', type: 'keyword' },
+          ],
+          values: [[compositeEntityId, compositeEntityName, 'user']],
+        });
+
+      const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+      (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce(undefined);
+      (context.attachments.add as jest.Mock).mockResolvedValueOnce({
+        id: expectedLocalUserAttachmentId,
+        current_version: 1,
+      });
+
+      await richTool.handler({ entityId: compositeEntityName }, context);
+
+      expect(context.attachments.add).toHaveBeenCalledTimes(1);
+      expect(context.attachments.add).toHaveBeenCalledWith({
+        id: expectedLocalUserAttachmentId,
+        type: SecurityAgentBuilderAttachments.entity,
+        data: {
+          identifierType: 'user',
+          identifier: compositeEntityName,
+          attachmentLabel: `user: ${compositeEntityName}`,
+          entityStoreId: compositeEntityId,
+        },
+        description: `user: ${compositeEntityName}`,
+      });
     });
 
     it('does not create an attachment when exact name match returns two rows (ambiguous)', async () => {

@@ -98,6 +98,36 @@ describe('EntityAttachmentInlineContent', () => {
     expect(card.getAttribute('data-privmon-modifier-enabled')).toBe('true');
   });
 
+  it('forwards entityStoreId from a single-entity payload to the EntityCard identifier', () => {
+    renderDispatcher({
+      identifierType: 'user',
+      identifier: "Lena Medhurst@Lena's MacBook Pro",
+      entityStoreId: "user:Lena Medhurst@Lena's MacBook Pro@local",
+    });
+    const card = screen.getByTestId('entityCardMock');
+    const serialized = JSON.parse(card.textContent ?? '{}');
+    expect(serialized).toEqual({
+      identifierType: 'user',
+      identifier: "Lena Medhurst@Lena's MacBook Pro",
+      entityStoreId: "user:Lena Medhurst@Lena's MacBook Pro@local",
+    });
+  });
+
+  it('forwards entityStoreId from a single-element entities list to the EntityCard identifier', () => {
+    renderDispatcher({
+      entities: [
+        {
+          identifierType: 'user',
+          identifier: 'bob',
+          entityStoreId: 'user:bob@workstation@local',
+        },
+      ],
+    });
+    const card = screen.getByTestId('entityCardMock');
+    const serialized = JSON.parse(card.textContent ?? '{}');
+    expect(serialized.entityStoreId).toBe('user:bob@workstation@local');
+  });
+
   describe('outer-panel spacing workaround', () => {
     it('wraps valid payloads in a div with the ENTITY_ATTACHMENT_ROOT_CLASS marker', () => {
       const { container } = renderDispatcher({ identifierType: 'host', identifier: 'alpha' });

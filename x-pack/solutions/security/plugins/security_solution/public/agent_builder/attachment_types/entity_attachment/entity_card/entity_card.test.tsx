@@ -197,6 +197,22 @@ describe('EntityCard', () => {
     expect(screen.queryByTestId('resolutionMiniMock')).not.toBeInTheDocument();
   });
 
+  it('forwards the attachment identifier (including entityStoreId) to useEntityForAttachment', () => {
+    mockedUseEntityForAttachment.mockReturnValue({
+      isLoading: false,
+      data: baseEntity(),
+    });
+
+    const identifier = {
+      identifierType: 'user' as const,
+      identifier: "Lena Medhurst@Lena's MacBook Pro",
+      entityStoreId: "user:Lena Medhurst@Lena's MacBook Pro@local",
+    };
+    renderCard({ identifier });
+
+    expect(mockedUseEntityForAttachment).toHaveBeenCalledWith(identifier);
+  });
+
   describe('attachment-supplied risk stats', () => {
     const attachmentRiskStats: React.ComponentProps<typeof EntityCard>['riskStats'] = {
       '@timestamp': '2024-02-02T00:00:00Z',

@@ -752,9 +752,21 @@ describe('searchEntitiesTool', () => {
     };
 
     const expectedListEntities = [
-      { identifierType: 'host' as const, identifier: 'server1' },
-      { identifierType: 'host' as const, identifier: 'server2' },
-      { identifierType: 'user' as const, identifier: 'alice' },
+      {
+        identifierType: 'host' as const,
+        identifier: 'server1',
+        entityStoreId: 'host:server1',
+      },
+      {
+        identifierType: 'host' as const,
+        identifier: 'server2',
+        entityStoreId: 'host:server2',
+      },
+      {
+        identifierType: 'user' as const,
+        identifier: 'alice',
+        entityStoreId: 'user:alice',
+      },
     ];
     const expectedListAttachmentId = buildListEntityAttachmentId(expectedListEntities);
 
@@ -836,6 +848,7 @@ describe('searchEntitiesTool', () => {
           identifierType: 'host',
           identifier: 'server1',
           attachmentLabel: 'host: server1',
+          entityStoreId: 'host:server1',
         },
         description: 'host: server1',
       });
@@ -878,6 +891,7 @@ describe('searchEntitiesTool', () => {
           identifierType: 'host',
           identifier: 'server1',
           attachmentLabel: 'host: server1',
+          entityStoreId: 'host:server1',
         },
         description: 'host: server1',
       });
@@ -909,8 +923,16 @@ describe('searchEntitiesTool', () => {
       });
 
       const filteredEntities = [
-        { identifierType: 'host' as const, identifier: 'server1' },
-        { identifierType: 'user' as const, identifier: 'alice' },
+        {
+          identifierType: 'host' as const,
+          identifier: 'server1',
+          entityStoreId: 'host:server1',
+        },
+        {
+          identifierType: 'user' as const,
+          identifier: 'alice',
+          entityStoreId: 'user:alice',
+        },
       ];
       const filteredAttachmentId = buildListEntityAttachmentId(filteredEntities);
 
@@ -979,6 +1001,37 @@ describe('searchEntitiesTool', () => {
       result.results.forEach((r) => {
         expect(r.type).toBe(ToolResultType.esqlResults);
       });
+    });
+
+    it('omits entityStoreId from the attachment payload when the row has no entity.id', async () => {
+      // Rows without an entity.id still produce a usable attachment via
+      // entity.name, but the payload should not carry a synthetic entity
+      // store id — the client falls back to per-type identity filtering.
+      (executeEsql as jest.Mock).mockResolvedValueOnce({
+        columns: [
+          { name: 'entity.name', type: 'keyword' },
+          { name: 'entity.EngineMetadata.Type', type: 'keyword' },
+        ],
+        values: [['server1', 'host']],
+      });
+
+      const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+      (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce(undefined);
+      (context.attachments.add as jest.Mock).mockResolvedValueOnce({
+        id: expectedSingleAttachmentId,
+        current_version: 1,
+      });
+
+      await richTool.handler({}, context);
+
+      expect(context.attachments.add).toHaveBeenCalledTimes(1);
+      const addCall = (context.attachments.add as jest.Mock).mock.calls[0][0];
+      expect(addCall.data).toEqual({
+        identifierType: 'host',
+        identifier: 'server1',
+        attachmentLabel: 'host: server1',
+      });
+      expect(addCall.data).not.toHaveProperty('entityStoreId');
     });
 
     it('does not create an attachment when the rich renderer experimental flag is off', async () => {

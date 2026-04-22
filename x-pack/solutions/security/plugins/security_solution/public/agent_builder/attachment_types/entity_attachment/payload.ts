@@ -25,6 +25,12 @@ const isValidIdentifier = (candidate: unknown): candidate is EntityAttachmentIde
   );
 };
 
+const pickEntityStoreId = (candidate: unknown): string | undefined => {
+  if (!candidate || typeof candidate !== 'object') return undefined;
+  const raw = (candidate as Record<string, unknown>).entityStoreId;
+  return typeof raw === 'string' && raw.length > 0 ? raw : undefined;
+};
+
 /**
  * Light structural check for the handful of fields `RiskSummaryMini`
  * actually reads. We keep this deliberately permissive (optional fields can
@@ -66,7 +72,17 @@ export const normaliseEntityAttachment = (
   const attachmentLabel = (data as { attachmentLabel?: string }).attachmentLabel;
 
   if ('entities' in data && Array.isArray((data as { entities: unknown[] }).entities)) {
-    const entities = (data as { entities: unknown[] }).entities.filter(isValidIdentifier);
+    const rawEntities = (data as { entities: unknown[] }).entities;
+    const entities: EntityAttachmentIdentifier[] = rawEntities
+      .filter(isValidIdentifier)
+      .map((candidate) => {
+        const entityStoreId = pickEntityStoreId(candidate);
+        return {
+          identifierType: candidate.identifierType,
+          identifier: candidate.identifier,
+          ...(entityStoreId ? { entityStoreId } : {}),
+        };
+      });
     if (entities.length === 0) {
       return null;
     }
@@ -81,6 +97,7 @@ export const normaliseEntityAttachment = (
     const rawRiskStats = (data as { riskStats?: unknown }).riskStats;
     const rawResolutionRiskStats = (data as { resolutionRiskStats?: unknown })
       .resolutionRiskStats;
+    const entityStoreId = pickEntityStoreId(data);
     return {
       isSingle: true,
       attachmentLabel,
@@ -88,6 +105,7 @@ export const normaliseEntityAttachment = (
         {
           identifierType: data.identifierType,
           identifier: data.identifier,
+          ...(entityStoreId ? { entityStoreId } : {}),
         },
       ],
       ...(isValidRiskStats(rawRiskStats) ? { riskStats: rawRiskStats } : {}),

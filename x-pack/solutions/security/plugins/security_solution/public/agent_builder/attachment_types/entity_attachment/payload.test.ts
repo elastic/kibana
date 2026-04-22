@@ -54,6 +54,41 @@ describe('normaliseEntityAttachment', () => {
     expect(result?.attachmentLabel).toBe('Bob user');
   });
 
+  it('preserves entityStoreId on a single-entity payload', () => {
+    const result = normaliseEntityAttachment(
+      buildAttachment({
+        identifierType: 'user',
+        identifier: "Lena Medhurst@Lena's MacBook Pro",
+        entityStoreId: "user:Lena Medhurst@Lena's MacBook Pro@local",
+      })
+    );
+    expect(result?.entities[0].entityStoreId).toBe(
+      "user:Lena Medhurst@Lena's MacBook Pro@local"
+    );
+  });
+
+  it('drops malformed entityStoreId on a single-entity payload', () => {
+    const result = normaliseEntityAttachment(
+      buildAttachment({
+        identifierType: 'user',
+        identifier: 'bob',
+        entityStoreId: 42,
+      })
+    );
+    expect(result?.entities[0]).not.toHaveProperty('entityStoreId');
+  });
+
+  it('drops empty-string entityStoreId on a single-entity payload', () => {
+    const result = normaliseEntityAttachment(
+      buildAttachment({
+        identifierType: 'user',
+        identifier: 'bob',
+        entityStoreId: '',
+      })
+    );
+    expect(result?.entities[0]).not.toHaveProperty('entityStoreId');
+  });
+
   it('accepts multi-entity payload with entities array', () => {
     const result = normaliseEntityAttachment(
       buildAttachment({
@@ -65,6 +100,40 @@ describe('normaliseEntityAttachment', () => {
     );
     expect(result?.isSingle).toBe(false);
     expect(result?.entities).toHaveLength(2);
+  });
+
+  it('preserves entityStoreId on each entry of a multi-entity payload', () => {
+    const result = normaliseEntityAttachment(
+      buildAttachment({
+        entities: [
+          {
+            identifierType: 'host',
+            identifier: 'alpha',
+            entityStoreId: 'host:alpha',
+          },
+          {
+            identifierType: 'user',
+            identifier: 'bob',
+            entityStoreId: 'user:bob@host@local',
+          },
+        ],
+      })
+    );
+    expect(result?.entities[0].entityStoreId).toBe('host:alpha');
+    expect(result?.entities[1].entityStoreId).toBe('user:bob@host@local');
+  });
+
+  it('drops malformed entityStoreId values inside a multi-entity payload', () => {
+    const result = normaliseEntityAttachment(
+      buildAttachment({
+        entities: [
+          { identifierType: 'host', identifier: 'alpha', entityStoreId: null },
+          { identifierType: 'user', identifier: 'bob', entityStoreId: '' },
+        ],
+      })
+    );
+    expect(result?.entities[0]).not.toHaveProperty('entityStoreId');
+    expect(result?.entities[1]).not.toHaveProperty('entityStoreId');
   });
 
   it('marks single-element entities list as isSingle=true', () => {

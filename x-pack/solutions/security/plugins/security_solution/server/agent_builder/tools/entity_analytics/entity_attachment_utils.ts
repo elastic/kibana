@@ -81,6 +81,15 @@ export interface EntityAttachmentDescriptor {
   identifier: string;
   attachmentLabel: string;
   /**
+   * Canonical `entity.id` from the entity store row (e.g.
+   * `user:name@host@namespace`), carried verbatim onto the attachment so the
+   * rich renderer can filter the store by `entity.id` directly. Required to
+   * resolve local users where `entity.name` is a composite and does not match
+   * `user.name`. Absent only when the underlying row did not project
+   * `entity.id` (older snapshots / custom queries).
+   */
+  entityStoreId?: string;
+  /**
    * Full risk breakdown (category scores/counts, modifiers, criticality)
    * embedded on the attachment so the chat card's risk summary table can
    * render without spinning up a Redux-backed search-strategy call on the
@@ -166,7 +175,8 @@ export const describeAttachmentForRow = ({
   const rawId = getRowValue(columns, row, ENTITY_STORE_ENTITY_ID_FIELD);
   const rawName = getRowValue(columns, row, ENTITY_STORE_ENTITY_NAME_FIELD);
 
-  const bareFromId = typeof rawId === 'string' ? stripEntityIdPrefix(rawId, rawType) : undefined;
+  const entityStoreId = typeof rawId === 'string' && rawId.length > 0 ? rawId : undefined;
+  const bareFromId = entityStoreId ? stripEntityIdPrefix(entityStoreId, rawType) : undefined;
   const bareName = typeof rawName === 'string' && rawName.length > 0 ? rawName : undefined;
 
   const identifier = bareName ?? bareFromId;
@@ -178,6 +188,7 @@ export const describeAttachmentForRow = ({
     identifierType: rawType,
     identifier,
     attachmentLabel: `${rawType}: ${identifier}`,
+    ...(entityStoreId ? { entityStoreId } : {}),
     ...(enrichment?.riskStats ? { riskStats: enrichment.riskStats } : {}),
     ...(enrichment?.resolutionRiskStats
       ? { resolutionRiskStats: enrichment.resolutionRiskStats }

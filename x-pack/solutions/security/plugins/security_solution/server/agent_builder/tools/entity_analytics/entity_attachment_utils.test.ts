@@ -9,6 +9,10 @@ import {
   ATTACHMENT_IDENTIFIER_TYPES,
   buildListEntityAttachmentId,
   buildSingleEntityAttachmentId,
+  describeAttachmentForRow,
+  ENTITY_STORE_ENTITY_ID_FIELD,
+  ENTITY_STORE_ENTITY_NAME_FIELD,
+  ENTITY_STORE_ENTITY_TYPE_FIELD,
   type AttachmentIdentifierType,
 } from './entity_attachment_utils';
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
@@ -71,5 +75,62 @@ describe('buildListEntityAttachmentId', () => {
       { identifierType: 'user', identifier: 'alice' },
     ]);
     expect(a).toBe(b);
+  });
+});
+
+describe('describeAttachmentForRow', () => {
+  const columns = [
+    { name: ENTITY_STORE_ENTITY_TYPE_FIELD },
+    { name: ENTITY_STORE_ENTITY_ID_FIELD },
+    { name: ENTITY_STORE_ENTITY_NAME_FIELD },
+  ];
+
+  it('includes the raw entity.id as entityStoreId when present', () => {
+    const row = ['user', "user:Lena Medhurst@Lena's MacBook Pro@local", "Lena Medhurst@Lena's MacBook Pro"];
+    const descriptor = describeAttachmentForRow({ columns, row });
+    expect(descriptor).toEqual({
+      identifierType: 'user',
+      identifier: "Lena Medhurst@Lena's MacBook Pro",
+      attachmentLabel: "user: Lena Medhurst@Lena's MacBook Pro",
+      entityStoreId: "user:Lena Medhurst@Lena's MacBook Pro@local",
+    });
+  });
+
+  it('omits entityStoreId when entity.id is missing from the row', () => {
+    const row = ['host', null, 'LAPTOP-SALES04'];
+    const descriptor = describeAttachmentForRow({ columns, row });
+    expect(descriptor).toEqual({
+      identifierType: 'host',
+      identifier: 'LAPTOP-SALES04',
+      attachmentLabel: 'host: LAPTOP-SALES04',
+    });
+    expect(descriptor).not.toHaveProperty('entityStoreId');
+  });
+
+  it('omits entityStoreId when entity.id is an empty string', () => {
+    const row = ['host', '', 'LAPTOP-SALES04'];
+    const descriptor = describeAttachmentForRow({ columns, row });
+    expect(descriptor).not.toHaveProperty('entityStoreId');
+  });
+
+  it('falls back to the stripped entity.id for the identifier when entity.name is missing', () => {
+    const row = ['host', 'host:LAPTOP-SALES04', null];
+    const descriptor = describeAttachmentForRow({ columns, row });
+    expect(descriptor).toEqual({
+      identifierType: 'host',
+      identifier: 'LAPTOP-SALES04',
+      attachmentLabel: 'host: LAPTOP-SALES04',
+      entityStoreId: 'host:LAPTOP-SALES04',
+    });
+  });
+
+  it('returns null when the entity type cell is not a known identifier type', () => {
+    const row = ['unknown', 'whatever:x', 'whatever'];
+    expect(describeAttachmentForRow({ columns, row })).toBeNull();
+  });
+
+  it('returns null when neither entity.name nor entity.id yield an identifier', () => {
+    const row = ['user', null, null];
+    expect(describeAttachmentForRow({ columns, row })).toBeNull();
   });
 });

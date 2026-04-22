@@ -446,12 +446,14 @@ const buildAttachmentSideEffectResults = async ({
       identifierType: descriptor.identifierType,
       identifier: descriptor.identifier,
       attachmentLabel: descriptor.attachmentLabel,
+      ...(descriptor.entityStoreId ? { entityStoreId: descriptor.entityStoreId } : {}),
     };
     description = descriptor.attachmentLabel;
   } else {
-    const entities = descriptors.map(({ identifierType, identifier }) => ({
+    const entities = descriptors.map(({ identifierType, identifier, entityStoreId }) => ({
       identifierType,
       identifier,
+      ...(entityStoreId ? { entityStoreId } : {}),
     }));
     id = buildListEntityAttachmentId(entities);
     data = {
