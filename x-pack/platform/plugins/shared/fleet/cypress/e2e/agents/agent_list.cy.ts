@@ -112,6 +112,7 @@ describe('View agents list', () => {
     cleanupAgentPolicies();
   });
   beforeEach(() => {
+    cy.clearAllSessionStorage();
     login();
 
     cy.intercept('/api/fleet/agents/setup', {
@@ -213,7 +214,6 @@ describe('View agents list', () => {
 
   describe('Agent status filter', () => {
     const clearFilters = () => {
-      cy.clearAllSessionStorage();
       cy.visit('/app/fleet/agents');
       waitForLoading();
       // Default state has all 5 statuses selected — deselect them all so each
