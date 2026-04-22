@@ -10,21 +10,20 @@
 import type { Logger } from '@kbn/core/server';
 import type { WorkflowsClientProvider } from '@kbn/workflows/server/types';
 import { REQUIRED_LICENSE_TYPE } from '../api/constants';
-import type { WorkflowsManagementApi } from '../api/workflows_management_api';
 import type { WorkflowsService } from '../api/workflows_management_service';
+import type { WorkflowsManagementConfig } from '../config';
 
 export const createWorkflowsClientProvider = (
-  api: WorkflowsManagementApi,
   workflowsService: WorkflowsService,
+  config: WorkflowsManagementConfig,
   logger: Logger
 ): WorkflowsClientProvider => {
   return async (request) => {
-    const { licensing } = await workflowsService.getPluginsStart();
+    const { licensing, workflowsExecutionEngine } = await workflowsService.getPluginsStart();
     const license = await licensing.getLicense();
-    const isWorkflowsAvailable =
-      license.hasAtLeast(REQUIRED_LICENSE_TYPE) && api.isWorkflowsAvailable;
 
-    const executionEngine = await workflowsService.getWorkflowsExecutionEngine();
+    // License check for stateful and availability check for serverless
+    const isWorkflowsAvailable = license.hasAtLeast(REQUIRED_LICENSE_TYPE) && config.available;
 
     return {
       isWorkflowsAvailable,
@@ -33,12 +32,7 @@ export const createWorkflowsClientProvider = (
           logger.debug('Workflows is not available in this environment. Trigger event ignored.');
           return;
         }
-        try {
-          await executionEngine.triggerEvents.emitEvent({ triggerId, payload, request });
-        } catch (error) {
-          logger.error('Failed to emit event', error);
-          throw error;
-        }
+        return workflowsExecutionEngine.triggerEvents.emitEvent({ triggerId, payload, request });
       },
     };
   };
