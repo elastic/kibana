@@ -6,7 +6,7 @@
  */
 
 import { normaliseEntityAttachment } from './payload';
-import type { EntityAttachment } from './types';
+import type { EntityAttachment, EntityAttachmentRiskStats } from './types';
 
 const buildAttachment = (data: unknown): EntityAttachment =>
   ({
@@ -14,6 +14,22 @@ const buildAttachment = (data: unknown): EntityAttachment =>
     type: 'security.entity',
     data: data as EntityAttachment['data'],
   } as EntityAttachment);
+
+const riskStatsFixture = (
+  override: Partial<EntityAttachmentRiskStats> = {}
+): EntityAttachmentRiskStats => ({
+  '@timestamp': '2024-01-01T00:00:00Z',
+  id_field: 'host.name',
+  id_value: 'alpha',
+  calculated_level: 'High',
+  calculated_score: 50,
+  calculated_score_norm: 75,
+  category_1_score: 40,
+  category_1_count: 3,
+  category_2_score: 10,
+  notes: [],
+  ...override,
+});
 
 describe('normaliseEntityAttachment', () => {
   it('accepts legacy single-identifier payload and returns isSingle=true', () => {
@@ -93,5 +109,75 @@ describe('normaliseEntityAttachment', () => {
     expect(
       normaliseEntityAttachment(buildAttachment({ entities: [{ bad: true }] }))
     ).toBeNull();
+  });
+
+  describe('riskStats / resolutionRiskStats forwarding', () => {
+    it('forwards riskStats when the payload carries a well-formed risk doc', () => {
+      const riskStats = riskStatsFixture();
+      const result = normaliseEntityAttachment(
+        buildAttachment({
+          identifierType: 'host',
+          identifier: 'alpha',
+          riskStats,
+        })
+      );
+      expect(result?.riskStats).toEqual(riskStats);
+      expect(result?.resolutionRiskStats).toBeUndefined();
+    });
+
+    it('forwards both primary and resolution risk stats when both are present', () => {
+      const riskStats = riskStatsFixture();
+      const resolutionRiskStats = riskStatsFixture({
+        calculated_level: 'Critical',
+        calculated_score: 90,
+        calculated_score_norm: 95,
+        category_1_score: 80,
+        category_1_count: 10,
+      });
+      const result = normaliseEntityAttachment(
+        buildAttachment({
+          identifierType: 'host',
+          identifier: 'alpha',
+          riskStats,
+          resolutionRiskStats,
+        })
+      );
+      expect(result?.riskStats).toEqual(riskStats);
+      expect(result?.resolutionRiskStats).toEqual(resolutionRiskStats);
+    });
+
+    it('omits riskStats when the payload does not include one', () => {
+      const result = normaliseEntityAttachment(
+        buildAttachment({ identifierType: 'host', identifier: 'alpha' })
+      );
+      expect(result?.riskStats).toBeUndefined();
+      expect(result?.resolutionRiskStats).toBeUndefined();
+    });
+
+    it('ignores invalid riskStats shapes without rejecting the whole payload', () => {
+      const result = normaliseEntityAttachment(
+        buildAttachment({
+          identifierType: 'host',
+          identifier: 'alpha',
+          riskStats: { calculated_level: 'High' },
+          resolutionRiskStats: 'not-an-object',
+        })
+      );
+      expect(result?.isSingle).toBe(true);
+      expect(result?.riskStats).toBeUndefined();
+      expect(result?.resolutionRiskStats).toBeUndefined();
+    });
+
+    it('never forwards riskStats on the multi-entity payload shape', () => {
+      const result = normaliseEntityAttachment(
+        buildAttachment({
+          entities: [{ identifierType: 'host', identifier: 'alpha' }],
+          // Even if the server (hypothetically) tacked these on, the
+          // multi-entity path doesn't surface a risk breakdown today.
+          riskStats: riskStatsFixture(),
+        })
+      );
+      expect(result?.riskStats).toBeUndefined();
+    });
   });
 });

@@ -8,6 +8,7 @@
 import type {
   EntityAttachment,
   EntityAttachmentIdentifier,
+  EntityAttachmentRiskStats,
   NormalisedEntityAttachment,
 } from './types';
 
@@ -25,10 +26,34 @@ const isValidIdentifier = (candidate: unknown): candidate is EntityAttachmentIde
 };
 
 /**
+ * Light structural check for the handful of fields `RiskSummaryMini`
+ * actually reads. We keep this deliberately permissive (optional fields can
+ * be missing, unknown extras are tolerated) because old attachments won't
+ * carry this shape at all — we just want to reject garbage payloads that
+ * would make the card throw when rendering the contributions table.
+ */
+const isValidRiskStats = (candidate: unknown): candidate is EntityAttachmentRiskStats => {
+  if (!candidate || typeof candidate !== 'object') return false;
+  const record = candidate as Record<string, unknown>;
+  return (
+    typeof record.calculated_level === 'string' &&
+    typeof record.calculated_score === 'number' &&
+    typeof record.calculated_score_norm === 'number' &&
+    typeof record.category_1_score === 'number' &&
+    typeof record.category_1_count === 'number'
+  );
+};
+
+/**
  * Accept either a single-entity payload (legacy `{ identifierType, identifier }`)
  * or a multi-entity payload (`{ entities: [...] }`) and normalise to a common
  * shape. Returns `null` if the payload is unusable so callers can render an
  * empty/error state instead of crashing the chat round.
+ *
+ * Optional `riskStats` and `resolutionRiskStats` from single-entity payloads
+ * are forwarded to the normalised shape when they pass `isValidRiskStats`.
+ * Missing or malformed stats are silently dropped so older attachments and
+ * forward-compatible variations continue to render.
  */
 export const normaliseEntityAttachment = (
   attachment: EntityAttachment
@@ -53,6 +78,9 @@ export const normaliseEntityAttachment = (
   }
 
   if (isValidIdentifier(data)) {
+    const rawRiskStats = (data as { riskStats?: unknown }).riskStats;
+    const rawResolutionRiskStats = (data as { resolutionRiskStats?: unknown })
+      .resolutionRiskStats;
     return {
       isSingle: true,
       attachmentLabel,
@@ -62,6 +90,10 @@ export const normaliseEntityAttachment = (
           identifier: data.identifier,
         },
       ],
+      ...(isValidRiskStats(rawRiskStats) ? { riskStats: rawRiskStats } : {}),
+      ...(isValidRiskStats(rawResolutionRiskStats)
+        ? { resolutionRiskStats: rawResolutionRiskStats }
+        : {}),
     };
   }
 

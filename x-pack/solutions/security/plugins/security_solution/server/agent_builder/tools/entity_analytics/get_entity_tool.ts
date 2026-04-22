@@ -18,8 +18,10 @@ import {
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ExperimentalFeatures } from '../../../../common';
+import type { EntityRiskScoreRecord } from '../../../../common/api/entity_analytics/common';
 import { IdentifierType } from '../../../../common/api/entity_analytics/common/common.gen';
 import { DEFAULT_ALERTS_INDEX, ESSENTIAL_ALERT_FIELDS } from '../../../../common/constants';
+import { EntityType } from '../../../../common/entity_analytics/types';
 import { getRiskScoreTimeSeriesIndex } from '../../../../common/entity_analytics/risk_engine/indices';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
@@ -34,6 +36,8 @@ import {
   stripEntityIdPrefix,
   ENTITY_STORE_ENTITY_TYPE_FIELD,
   ENTITY_STORE_ENTITY_ID_FIELD,
+  stripRiskRecordForAttachment,
+  type EntityAttachmentRiskStats,
 } from './entity_attachment_utils';
 
 const ENTITY_STORE_RISK_SCORE_NORMALIZED_FIELD = 'entity.risk.calculated_score_norm';
@@ -167,6 +171,237 @@ const getAlertIdsFromRiskScoreIndex = async ({
 
   const ids = Array.isArray(alertIds) ? alertIds : [alertIds];
   return ids.filter((id): id is string => typeof id === 'string');
+};
+
+/**
+ * Maps the entity-store identifier type to the risk-index `EntityType` enum.
+ * Returns `null` when the type is unsupported (e.g. unknown types or types
+ * without a dedicated risk index mapping) so the caller can skip the
+ * enrichment instead of issuing a doomed query.
+ */
+const identifierTypeToRiskEntityType = (
+  identifierType: z.infer<typeof IdentifierType>
+): EntityType | null => {
+  switch (identifierType) {
+    case 'host':
+      return EntityType.host;
+    case 'user':
+      return EntityType.user;
+    case 'service':
+      return EntityType.service;
+    case 'generic':
+      return EntityType.generic;
+    default:
+      return null;
+  }
+};
+
+interface RiskStatsPair {
+  riskStats?: EntityAttachmentRiskStats;
+  resolutionRiskStats?: EntityAttachmentRiskStats;
+}
+
+interface FetchRiskStatsForAttachmentParams {
+  identifierType: z.infer<typeof IdentifierType>;
+  identifier: string;
+  entityStoreEntityId: string;
+  esClient: ElasticsearchClient;
+  spaceId: string;
+  logger: Logger;
+  createResolutionClient?: (
+    esClient: ElasticsearchClient,
+    namespace: string
+  ) => {
+    getResolutionGroup: (
+      entityId: string
+    ) => Promise<{ group_size: number; target: Record<string, unknown> }>;
+  };
+}
+
+const dedupeNonEmptyStrings = (values: Array<string | undefined>): string[] => {
+  const out = new Set<string>();
+  for (const value of values) {
+    if (typeof value === 'string' && value.length > 0) {
+      out.add(value);
+    }
+  }
+  return [...out];
+};
+
+/**
+ * Direct search against the risk score time-series index for the latest
+ * matching risk document.
+ *
+ * We filter on `<type>.risk.id_value` — the same field the entity-details
+ * flyout uses with Entity Store V2 — and pass multiple `id_value` candidates
+ * through a `terms` clause so we tolerate both V2 (prefixed EUID, e.g.
+ * `user:982675@github`) and V1 (bare name, e.g. `haylee-anderson`) data
+ * shapes without a second round-trip.
+ */
+const searchRiskDocForCandidates = async ({
+  esClient,
+  spaceId,
+  logger,
+  entityType,
+  idCandidates,
+  scoreType,
+  debugLabel,
+}: {
+  esClient: ElasticsearchClient;
+  spaceId: string;
+  logger: Logger;
+  entityType: EntityType;
+  idCandidates: string[];
+  scoreType: 'base' | 'resolution';
+  debugLabel: string;
+}): Promise<EntityRiskScoreRecord | undefined> => {
+  if (idCandidates.length === 0) {
+    return undefined;
+  }
+
+  const idValueField = `${entityType}.risk.id_value`;
+  const scoreTypeField = `${entityType}.risk.score_type`;
+
+  try {
+    const response = await esClient.search<Record<EntityType, { risk: EntityRiskScoreRecord }>>({
+      index: getRiskScoreTimeSeriesIndex(spaceId),
+      size: 1,
+      sort: [{ '@timestamp': { order: 'desc' } }],
+      query: {
+        bool: {
+          filter: [
+            { terms: { [idValueField]: idCandidates } },
+            ...(scoreType === 'resolution'
+              ? [{ term: { [scoreTypeField]: 'resolution' } }]
+              : []),
+          ],
+          ...(scoreType === 'base'
+            ? { must_not: [{ term: { [scoreTypeField]: 'resolution' } }] }
+            : {}),
+        },
+      },
+    });
+
+    return response.hits.hits[0]?._source?.[entityType]?.risk;
+  } catch (error) {
+    logger.debug(
+      `Failed to fetch ${scoreType} risk score for attachment ${debugLabel}: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+    return undefined;
+  }
+};
+
+/**
+ * Fetches the full risk breakdown for an entity (and, when part of a
+ * resolution group, the group's resolution risk doc) and returns the
+ * stripped shapes that can be embedded in the `security.entity` attachment.
+ *
+ * The client-side chat card uses these to drive `RiskSummaryMini` without
+ * spinning up a search-strategy call through Redux. Failures are logged and
+ * swallowed — the attachment is still useful without the detailed breakdown.
+ */
+const fetchRiskStatsForAttachment = async ({
+  identifierType,
+  identifier,
+  entityStoreEntityId,
+  esClient,
+  spaceId,
+  logger,
+  createResolutionClient,
+}: FetchRiskStatsForAttachmentParams): Promise<RiskStatsPair> => {
+  const entityType = identifierTypeToRiskEntityType(identifierType);
+  if (!entityType) {
+    return {};
+  }
+
+  const debugLabel = `${identifierType}:${identifier}`;
+  const primaryCandidates = dedupeNonEmptyStrings([entityStoreEntityId, identifier]);
+
+  const primary = await searchRiskDocForCandidates({
+    esClient,
+    spaceId,
+    logger,
+    entityType,
+    idCandidates: primaryCandidates,
+    scoreType: 'base',
+    debugLabel,
+  });
+
+  let resolution: EntityRiskScoreRecord | undefined;
+  if (createResolutionClient) {
+    try {
+      const resolutionClient = createResolutionClient(esClient, spaceId);
+      const group = await resolutionClient.getResolutionGroup(entityStoreEntityId);
+
+      // Only look up a resolution doc when the entity actually participates
+      // in a multi-entity group. For standalone entities `group_size === 1`
+      // and there is no meaningful resolution score to display.
+      if (group.group_size > 1) {
+        const targetCandidates = getResolutionTargetRiskIdCandidates(group.target);
+        resolution = await searchRiskDocForCandidates({
+          esClient,
+          spaceId,
+          logger,
+          entityType,
+          idCandidates: targetCandidates,
+          scoreType: 'resolution',
+          debugLabel: `${debugLabel} (resolution)`,
+        });
+      }
+    } catch (error) {
+      logger.debug(
+        `Failed to look up resolution group for attachment ${debugLabel}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  }
+
+  return {
+    riskStats: stripRiskRecordForAttachment(primary),
+    resolutionRiskStats: stripRiskRecordForAttachment(resolution),
+  };
+};
+
+/**
+ * Collects the identifier values we should feed into the risk index lookup
+ * for a resolution-group target. The target document is the raw `_source`
+ * from the latest-entities index, so we walk the shape to gather every
+ * candidate the risk doc could be keyed on:
+ *
+ * - `entity.id` — V2's prefixed EUID (matches `<type>.risk.id_value`).
+ * - `entity.name` — the display name (matches legacy V1 risk docs keyed
+ *   off `<type>.name`).
+ * - `host.name`/`user.name`/`service.name` as last-ditch fallbacks for
+ *   targets that don't carry the `entity` block.
+ */
+const getResolutionTargetRiskIdCandidates = (target: Record<string, unknown>): string[] => {
+  const entity = target.entity as
+    | { EngineMetadata?: { Type?: unknown }; id?: unknown; name?: unknown }
+    | undefined;
+
+  const candidates: Array<string | undefined> = [];
+
+  if (typeof entity?.id === 'string') {
+    candidates.push(entity.id);
+  }
+  if (typeof entity?.name === 'string') {
+    candidates.push(entity.name);
+  }
+
+  const nameFields = ['host.name', 'user.name', 'service.name'];
+  for (const field of nameFields) {
+    const [first, second] = field.split('.');
+    const namespace = target[first] as Record<string, unknown> | undefined;
+    const value = namespace?.[second];
+    if (typeof value === 'string') {
+      candidates.push(value);
+    }
+  }
+
+  return dedupeNonEmptyStrings(candidates);
 };
 
 interface FindEntityByIdParams {
@@ -452,10 +687,43 @@ When exactly one entity is resolved, this tool also stores a \`security.entity\`
 
         const attachmentResult = shouldCreateAttachment
           ? await (async () => {
-              const descriptor = describeAttachmentForRow({ columns, row: values[0] });
+              const baseDescriptor = describeAttachmentForRow({ columns, row: values[0] });
+              if (!baseDescriptor) {
+                return null;
+              }
+
+              // Fetch the real risk breakdown so the chat card's
+              // contributions table mirrors the flyout instead of showing
+              // zeros (the entity store only stores high-level scores).
+              // We prefer the entity-store `entity.id` for the resolution
+              // lookup because the resolution group is keyed on that field.
+              const rowEntityStoreId = getRowValue(
+                columns,
+                values[0],
+                ENTITY_STORE_ENTITY_ID_FIELD
+              );
+              const [, startPlugins] = await core.getStartServices();
+              const entityStoreStart = startPlugins.entityStore;
+              const enrichment = await fetchRiskStatsForAttachment({
+                identifierType: baseDescriptor.identifierType,
+                identifier: baseDescriptor.identifier,
+                entityStoreEntityId:
+                  typeof rowEntityStoreId === 'string' ? rowEntityStoreId : '',
+                esClient: client,
+                spaceId,
+                logger,
+                createResolutionClient: entityStoreStart?.createResolutionClient,
+              });
+
+              const descriptor = describeAttachmentForRow({
+                columns,
+                row: values[0],
+                enrichment,
+              });
               if (!descriptor) {
                 return null;
               }
+
               return ensureEntityAttachment({
                 attachments,
                 id: buildSingleEntityAttachmentId(descriptor.identifierType, descriptor.identifier),
@@ -463,6 +731,10 @@ When exactly one entity is resolved, this tool also stores a \`security.entity\`
                   identifierType: descriptor.identifierType,
                   identifier: descriptor.identifier,
                   attachmentLabel: descriptor.attachmentLabel,
+                  ...(descriptor.riskStats ? { riskStats: descriptor.riskStats } : {}),
+                  ...(descriptor.resolutionRiskStats
+                    ? { resolutionRiskStats: descriptor.resolutionRiskStats }
+                    : {}),
                 },
                 description: descriptor.attachmentLabel,
                 logger,

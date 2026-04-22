@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiCallOut, EuiPanel, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { RiskSeverity, RiskStats } from '../../../../../common/search_strategy';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import { useEntityForAttachment } from '../use_entity_for_attachment';
-import type { EntityAttachmentIdentifier } from '../types';
+import type { EntityAttachmentIdentifier, EntityAttachmentRiskStats } from '../types';
 import { IdentityHeader } from './identity_header';
 import { EntitySummaryGridMini } from './entity_summary_grid';
 import { RiskSummaryMini } from './risk_summary_mini';
@@ -19,9 +20,38 @@ import { EntityCardActions } from './entity_card_actions';
 
 interface EntityCardProps {
   identifier: EntityAttachmentIdentifier;
+  /**
+   * Risk breakdown embedded on the attachment payload by
+   * `security.get_entity`. When present, the card prefers these over the
+   * (far more limited) stats available on the entity store record so the
+   * contributions table mirrors the full flyout.
+   */
+  riskStats?: EntityAttachmentRiskStats;
+  /**
+   * Resolution-group risk breakdown embedded on the attachment payload
+   * when the entity is part of a multi-member resolution group. Drives the
+   * "Resolution group risk score" block in `RiskSummaryMini`.
+   */
+  resolutionRiskStats?: EntityAttachmentRiskStats;
   watchlistsEnabled: boolean;
   privmonModifierEnabled: boolean;
 }
+
+/**
+ * Projects the embedded `EntityAttachmentRiskStats` (a subset of
+ * `EntityRiskScoreRecord`) into the full `RiskStats` shape `RiskSummaryMini`
+ * expects. `rule_risks`/`multipliers` aren't surfaced on the attachment
+ * today — defaulting them to empty arrays matches what the entity-store
+ * shaping hook does and keeps the contributions table render-safe.
+ */
+const toRiskStats = (stats: EntityAttachmentRiskStats | undefined): RiskStats | undefined => {
+  if (!stats) return undefined;
+  return {
+    ...stats,
+    rule_risks: [],
+    multipliers: [],
+  } as unknown as RiskStats;
+};
 
 const identifierTypeToEntityType = (
   type: EntityAttachmentIdentifier['identifierType']
@@ -49,10 +79,25 @@ const identifierTypeToEntityType = (
  */
 export const EntityCard: React.FC<EntityCardProps> = ({
   identifier,
+  riskStats: attachmentRiskStats,
+  resolutionRiskStats: attachmentResolutionRiskStats,
   watchlistsEnabled,
   privmonModifierEnabled,
 }) => {
   const { isLoading, error, data } = useEntityForAttachment(identifier);
+
+  // Prefer attachment-supplied risk stats (full breakdown from the risk
+  // index) over the entity-store-derived stats (score/level only). Falls
+  // back to the entity store for older attachments persisted before the
+  // payload was widened, so they keep rendering as before.
+  const effectiveRiskStats = useMemo(
+    () => toRiskStats(attachmentRiskStats) ?? data?.riskStats,
+    [attachmentRiskStats, data?.riskStats]
+  );
+  const effectiveResolutionRiskStats = useMemo(
+    () => toRiskStats(attachmentResolutionRiskStats),
+    [attachmentResolutionRiskStats]
+  );
 
   if (isLoading && !data) {
     return (
@@ -86,6 +131,7 @@ export const EntityCard: React.FC<EntityCardProps> = ({
         data-test-subj="entityAttachmentCard"
       >
         <EuiCallOut
+          announceOnMount
           size="s"
           color="warning"
           iconType="warning"
@@ -118,6 +164,21 @@ export const EntityCard: React.FC<EntityCardProps> = ({
   const resolved = data ?? fallback;
   const source = resolved.sources[0];
 
+  // Derive the resolution-group score/level from the embedded risk doc so
+  // `RiskSummaryMini` renders the resolution block (`showResolution`
+  // flips on whenever any of these three fields is set).
+  const resolutionRiskScore = attachmentResolutionRiskStats?.calculated_score_norm;
+  const resolutionRiskLevel = attachmentResolutionRiskStats?.calculated_level as
+    | RiskSeverity
+    | undefined;
+
+  const hasRiskSummary =
+    effectiveRiskStats != null ||
+    resolved.riskScore != null ||
+    effectiveResolutionRiskStats != null ||
+    resolutionRiskScore != null ||
+    resolutionRiskLevel != null;
+
   return (
     <EuiPanel
       hasShadow={false}
@@ -143,7 +204,7 @@ export const EntityCard: React.FC<EntityCardProps> = ({
             watchlistIds={resolved.watchlistIds}
             watchlistsEnabled={watchlistsEnabled}
           />
-          {(resolved.riskStats || resolved.riskScore != null) && (
+          {hasRiskSummary && (
             <>
               <EuiSpacer size="m" />
               <RiskSummaryMini
@@ -151,7 +212,10 @@ export const EntityCard: React.FC<EntityCardProps> = ({
                 displayName={resolved.displayName}
                 riskScore={resolved.riskScore}
                 riskLevel={resolved.riskLevel}
-                riskStats={resolved.riskStats}
+                riskStats={effectiveRiskStats}
+                resolutionRiskScore={resolutionRiskScore}
+                resolutionRiskLevel={resolutionRiskLevel}
+                resolutionRiskStats={effectiveResolutionRiskStats}
                 privmonModifierEnabled={privmonModifierEnabled}
                 watchlistEnabled={watchlistsEnabled}
               />

@@ -22,6 +22,7 @@ import {
   setupMockCoreStartServices,
 } from '../../__mocks__/test_helpers';
 import type { ExperimentalFeatures } from '../../../../common';
+import type { EntityRiskScoreRecord } from '../../../../common/api/entity_analytics/common';
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../lib/telemetry/event_based/events';
 import { buildSingleEntityAttachmentId } from './entity_attachment_utils';
@@ -41,6 +42,16 @@ const mockExperimentalFeatures = {
   entityAnalyticsEntityStoreV2: true,
 } as ExperimentalFeatures;
 
+const buildEmptyRiskSearchResponse = () => ({
+  took: 1,
+  timed_out: false,
+  _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+  hits: {
+    hits: [] as Array<{ _id: string; _index: string; _source: unknown }>,
+    total: { value: 0, relation: 'eq' as const },
+  },
+});
+
 describe('getEntityTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
   const tool = getEntityTool(mockCore, mockLogger, mockExperimentalFeatures);
@@ -52,6 +63,12 @@ describe('getEntityTool', () => {
     mockGetAgentBuilderResourceAvailability.mockResolvedValue({
       status: 'available',
     });
+    // Default to an empty risk index so existing tests that don't care
+    // about the attachment payload's risk enrichment still pass. The
+    // risk enrichment path issues `esClient.asCurrentUser.search` against
+    // the time-series risk index; mocking a zero-hit response is the
+    // cheapest safe default.
+    mockEsClient.asCurrentUser.search.mockResolvedValue(buildEmptyRiskSearchResponse());
   });
 
   describe('schema', () => {
@@ -1389,6 +1406,338 @@ describe('getEntityTool', () => {
       expect(result.results).toHaveLength(2);
       expect(result.results[0].type).toBe(ToolResultType.esqlResults);
       expect(result.results[1].type).toBe(ToolResultType.other);
+    });
+
+    describe('attachment risk stats enrichment', () => {
+      const buildRiskRecord = (
+        override: Partial<EntityRiskScoreRecord> = {}
+      ): EntityRiskScoreRecord =>
+        ({
+          '@timestamp': '2024-05-01T00:00:00Z',
+          id_field: 'host.name',
+          id_value: 'host:server1',
+          calculated_level: 'High',
+          calculated_score: 50,
+          calculated_score_norm: 75,
+          category_1_score: 45,
+          category_1_count: 6,
+          category_2_score: 5,
+          category_2_count: 1,
+          notes: [],
+          inputs: [
+            {
+              id: 'alert-1',
+              index: '.alerts-security.alerts-default',
+              category: '',
+              description: '',
+              risk_score: 0,
+              timestamp: '',
+            },
+          ],
+          score_type: 'base',
+          ...override,
+        } as unknown as EntityRiskScoreRecord);
+
+      const buildRiskSearchResponse = (records: EntityRiskScoreRecord[]) => ({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: {
+          hits: records.map((risk, index) => ({
+            _id: `risk-doc-${index}`,
+            _index: 'risk-score.risk-score-default',
+            _source: { host: { risk } },
+          })),
+          total: { value: records.length, relation: 'eq' as const },
+        },
+      });
+
+      const primaryHitResponse = {
+        columns: [
+          { name: 'entity.id', type: 'keyword' },
+          { name: 'entity.name', type: 'keyword' },
+          { name: 'entity.EngineMetadata.Type', type: 'keyword' },
+        ],
+        values: [['host:server1', 'server1', 'host']],
+      };
+
+      const createEntityStoreStartMock = (group: {
+        group_size: number;
+        target: Record<string, unknown>;
+      }) => ({
+        createResolutionClient: jest.fn().mockReturnValue({
+          getResolutionGroup: jest.fn().mockResolvedValue(group),
+        }),
+      });
+
+      it('embeds the primary risk stats on the attachment data (and strips inputs)', async () => {
+        (executeEsql as jest.Mock).mockResolvedValueOnce(primaryHitResponse);
+
+        mockEsClient.asCurrentUser.search.mockResolvedValueOnce(
+          buildRiskSearchResponse([buildRiskRecord()])
+        );
+
+        const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+        (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce(undefined);
+        (context.attachments.add as jest.Mock).mockResolvedValueOnce({
+          id: expectedAttachmentId,
+          current_version: 1,
+        });
+
+        await richTool.handler({ entityType: 'host', entityId: 'server1' }, context);
+
+        expect(context.attachments.add).toHaveBeenCalledTimes(1);
+        const addCall = (context.attachments.add as jest.Mock).mock.calls[0][0];
+        expect(addCall.data.riskStats).toBeDefined();
+        expect(addCall.data.riskStats).toEqual(
+          expect.objectContaining({
+            calculated_level: 'High',
+            calculated_score: 50,
+            calculated_score_norm: 75,
+            category_1_score: 45,
+            category_1_count: 6,
+            category_2_score: 5,
+            category_2_count: 1,
+          })
+        );
+        // `inputs` (and any other heavy fields) must never reach the
+        // attachment payload — keeps the persisted state small.
+        expect(addCall.data.riskStats).not.toHaveProperty('inputs');
+        expect(addCall.data.resolutionRiskStats).toBeUndefined();
+      });
+
+      it('queries the risk time-series index with both V2 (prefixed EUID) and V1 (bare name) candidates and excludes resolution docs', async () => {
+        (executeEsql as jest.Mock).mockResolvedValueOnce(primaryHitResponse);
+
+        mockEsClient.asCurrentUser.search.mockResolvedValueOnce(
+          buildRiskSearchResponse([buildRiskRecord()])
+        );
+
+        const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+        (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce(undefined);
+        (context.attachments.add as jest.Mock).mockResolvedValueOnce({
+          id: expectedAttachmentId,
+          current_version: 1,
+        });
+
+        await richTool.handler({ entityType: 'host', entityId: 'server1' }, context);
+
+        expect(mockEsClient.asCurrentUser.search).toHaveBeenCalledTimes(1);
+        const searchCall = mockEsClient.asCurrentUser.search.mock.calls[0][0] as {
+          index: string;
+          size: number;
+          query: {
+            bool: { filter: unknown[]; must_not?: unknown[] };
+          };
+        };
+        expect(searchCall.index).toBe('risk-score.risk-score-default');
+        expect(searchCall.size).toBe(1);
+        // Filter matches both the prefixed EUID (V2 `user.risk.id_value`
+        // convention — mirrored for hosts) and the bare identifier (V1
+        // convention), which is how the flyout stays robust across
+        // deployments. We mirror that here.
+        expect(searchCall.query.bool.filter).toContainEqual({
+          terms: { 'host.risk.id_value': ['host:server1', 'server1'] },
+        });
+        // The primary fetch explicitly excludes resolution-group docs so
+        // the card reflects the entity's own score rather than the
+        // resolution override.
+        expect(searchCall.query.bool.must_not).toContainEqual({
+          term: { 'host.risk.score_type': 'resolution' },
+        });
+      });
+
+      it('embeds both primary and resolution risk stats when the entity is part of a resolution group', async () => {
+        (executeEsql as jest.Mock).mockResolvedValueOnce(primaryHitResponse);
+
+        const primaryRecord = buildRiskRecord({
+          score_type: 'base',
+          calculated_level: 'High',
+          calculated_score_norm: 75,
+          category_1_score: 45,
+          category_1_count: 6,
+        });
+        const resolutionRecord = buildRiskRecord({
+          score_type: 'resolution',
+          calculated_level: 'Critical',
+          calculated_score_norm: 95,
+          category_1_score: 80,
+          category_1_count: 12,
+          id_value: 'host:server-canonical',
+        });
+        mockEsClient.asCurrentUser.search
+          .mockResolvedValueOnce(buildRiskSearchResponse([primaryRecord]))
+          .mockResolvedValueOnce(buildRiskSearchResponse([resolutionRecord]));
+
+        const entityStoreStart = createEntityStoreStartMock({
+          group_size: 2,
+          target: {
+            entity: {
+              EngineMetadata: { Type: 'host' },
+              id: 'host:server-canonical',
+              name: 'server-canonical',
+            },
+          },
+        });
+        mockCore.getStartServices.mockResolvedValueOnce([
+          mockCoreStart,
+          { entityStore: entityStoreStart },
+          {},
+        ]);
+
+        const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+        (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce(undefined);
+        (context.attachments.add as jest.Mock).mockResolvedValueOnce({
+          id: expectedAttachmentId,
+          current_version: 1,
+        });
+
+        await richTool.handler({ entityType: 'host', entityId: 'server1' }, context);
+
+        expect(entityStoreStart.createResolutionClient).toHaveBeenCalledTimes(1);
+        // Resolution group is keyed on the entity-store `entity.id`, not
+        // the stripped identifier.
+        const resolutionClient = entityStoreStart.createResolutionClient.mock.results[0].value;
+        expect(resolutionClient.getResolutionGroup).toHaveBeenCalledWith('host:server1');
+
+        // Two risk-index queries: one for the primary (no-resolution) doc,
+        // one for the resolution doc keyed on the group target's id(s).
+        expect(mockEsClient.asCurrentUser.search).toHaveBeenCalledTimes(2);
+        const resolutionSearchCall = mockEsClient.asCurrentUser.search.mock.calls[1][0] as {
+          query: { bool: { filter: Array<Record<string, unknown>> } };
+        };
+        expect(resolutionSearchCall.query.bool.filter).toContainEqual({
+          terms: { 'host.risk.id_value': ['host:server-canonical', 'server-canonical'] },
+        });
+        expect(resolutionSearchCall.query.bool.filter).toContainEqual({
+          term: { 'host.risk.score_type': 'resolution' },
+        });
+
+        const addCall = (context.attachments.add as jest.Mock).mock.calls[0][0];
+        expect(addCall.data.riskStats).toEqual(
+          expect.objectContaining({
+            calculated_level: 'High',
+            calculated_score_norm: 75,
+          })
+        );
+        expect(addCall.data.resolutionRiskStats).toEqual(
+          expect.objectContaining({
+            calculated_level: 'Critical',
+            calculated_score_norm: 95,
+            category_1_score: 80,
+            category_1_count: 12,
+          })
+        );
+        expect(addCall.data.resolutionRiskStats).not.toHaveProperty('inputs');
+      });
+
+      it('does not fetch a resolution risk doc when the group only has one member', async () => {
+        (executeEsql as jest.Mock).mockResolvedValueOnce(primaryHitResponse);
+
+        mockEsClient.asCurrentUser.search.mockResolvedValueOnce(
+          buildRiskSearchResponse([buildRiskRecord()])
+        );
+
+        const entityStoreStart = createEntityStoreStartMock({
+          group_size: 1,
+          target: {
+            entity: { EngineMetadata: { Type: 'host' }, id: 'host:server1', name: 'server1' },
+          },
+        });
+        mockCore.getStartServices.mockResolvedValueOnce([
+          mockCoreStart,
+          { entityStore: entityStoreStart },
+          {},
+        ]);
+
+        const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+        (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce(undefined);
+        (context.attachments.add as jest.Mock).mockResolvedValueOnce({
+          id: expectedAttachmentId,
+          current_version: 1,
+        });
+
+        await richTool.handler({ entityType: 'host', entityId: 'server1' }, context);
+
+        // Only the primary risk-index query should run for a solo group.
+        expect(mockEsClient.asCurrentUser.search).toHaveBeenCalledTimes(1);
+        const addCall = (context.attachments.add as jest.Mock).mock.calls[0][0];
+        expect(addCall.data.resolutionRiskStats).toBeUndefined();
+      });
+
+      it('omits riskStats when the risk index has no document for the entity', async () => {
+        (executeEsql as jest.Mock).mockResolvedValueOnce(primaryHitResponse);
+
+        mockEsClient.asCurrentUser.search.mockResolvedValueOnce(buildRiskSearchResponse([]));
+
+        const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+        (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce(undefined);
+        (context.attachments.add as jest.Mock).mockResolvedValueOnce({
+          id: expectedAttachmentId,
+          current_version: 1,
+        });
+
+        await richTool.handler({ entityType: 'host', entityId: 'server1' }, context);
+
+        const addCall = (context.attachments.add as jest.Mock).mock.calls[0][0];
+        expect(addCall.data.riskStats).toBeUndefined();
+        expect(addCall.data.resolutionRiskStats).toBeUndefined();
+      });
+
+      it('still creates the attachment (without risk stats) when the risk index query throws', async () => {
+        (executeEsql as jest.Mock).mockResolvedValueOnce(primaryHitResponse);
+
+        mockEsClient.asCurrentUser.search.mockRejectedValueOnce(
+          new Error('risk index unavailable')
+        );
+
+        const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+        (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce(undefined);
+        (context.attachments.add as jest.Mock).mockResolvedValueOnce({
+          id: expectedAttachmentId,
+          current_version: 1,
+        });
+
+        await richTool.handler({ entityType: 'host', entityId: 'server1' }, context);
+
+        expect(context.attachments.add).toHaveBeenCalledTimes(1);
+        const addCall = (context.attachments.add as jest.Mock).mock.calls[0][0];
+        expect(addCall.data.riskStats).toBeUndefined();
+      });
+
+      it('embeds primary risk stats when the resolution fetch fails but the primary succeeds', async () => {
+        (executeEsql as jest.Mock).mockResolvedValueOnce(primaryHitResponse);
+
+        mockEsClient.asCurrentUser.search.mockResolvedValueOnce(
+          buildRiskSearchResponse([buildRiskRecord()])
+        );
+
+        const entityStoreStart = {
+          createResolutionClient: jest.fn().mockReturnValue({
+            getResolutionGroup: jest
+              .fn()
+              .mockRejectedValueOnce(new Error('resolution index unavailable')),
+          }),
+        };
+        mockCore.getStartServices.mockResolvedValueOnce([
+          mockCoreStart,
+          { entityStore: entityStoreStart },
+          {},
+        ]);
+
+        const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+        (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce(undefined);
+        (context.attachments.add as jest.Mock).mockResolvedValueOnce({
+          id: expectedAttachmentId,
+          current_version: 1,
+        });
+
+        await richTool.handler({ entityType: 'host', entityId: 'server1' }, context);
+
+        const addCall = (context.attachments.add as jest.Mock).mock.calls[0][0];
+        expect(addCall.data.riskStats).toBeDefined();
+        expect(addCall.data.resolutionRiskStats).toBeUndefined();
+      });
     });
   });
 });

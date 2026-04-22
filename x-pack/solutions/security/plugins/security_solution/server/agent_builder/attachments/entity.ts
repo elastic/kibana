@@ -23,17 +23,62 @@ const entityIdentifierSchema = z.object({
 });
 
 /**
+ * Subset of `EntityRiskScoreRecord` that `security.get_entity` embeds on the
+ * attachment payload so the chat card's `RiskSummaryMini` can render the
+ * contributions table without a client-side round-trip to the risk index.
+ *
+ * The required fields mirror the client guard in
+ * `public/agent_builder/attachment_types/entity_attachment/payload.ts`
+ * (`isValidRiskStats`) so anything that passes this schema will also pass
+ * the client validation. `.passthrough()` is used so we can evolve the
+ * server-side stripper (see `stripRiskRecordForAttachment` in
+ * `entity_attachment_utils.ts`) without also bumping this schema every
+ * time a new optional field is introduced.
+ *
+ * IMPORTANT: Zod strips unknown keys by default. If the server-side tool
+ * embeds new fields on the attachment, they must either be declared here
+ * or the schema must keep `.passthrough()` — otherwise the
+ * `AttachmentStateManager` validator silently drops them before the
+ * payload is persisted and the client never sees them.
+ */
+const riskStatsPayloadSchema = z
+  .object({
+    '@timestamp': z.string().optional(),
+    id_field: z.string().optional(),
+    id_value: z.string().optional(),
+    calculated_level: z.string(),
+    calculated_score: z.number(),
+    calculated_score_norm: z.number(),
+    category_1_score: z.number(),
+    category_1_count: z.number(),
+    category_2_score: z.number().optional(),
+    category_2_count: z.number().optional(),
+    notes: z.array(z.unknown()).optional(),
+    criticality_modifier: z.number().optional(),
+    criticality_level: z.string().optional(),
+    modifiers: z.array(z.unknown()).optional(),
+    score_type: z.string().optional(),
+  })
+  .passthrough();
+
+/**
  * Entity attachment payload. Two backward-compatible shapes are supported:
  *
- * 1. Single-entity (legacy): `{ identifierType, identifier, attachmentLabel? }`.
- *    Rendered as a single card.
+ * 1. Single-entity (legacy): `{ identifierType, identifier, attachmentLabel?,
+ *    riskStats?, resolutionRiskStats? }`. Rendered as a single card. The
+ *    optional `riskStats`/`resolutionRiskStats` fields carry the risk
+ *    breakdown fetched server-side from the risk time-series index.
  * 2. Multi-entity: `{ entities: [{ identifierType, identifier }, ...], attachmentLabel? }`.
  *    Rendered as a table. Capped at {@link MAX_ENTITIES_PER_ATTACHMENT}.
+ *    Deliberately does not carry risk stats — the multi-entity renderer
+ *    fetches its own summary per row from the entity store.
  */
 const riskEntityAttachmentDataSchema = z.union([
   securityAttachmentDataSchema.extend({
     identifierType: z.enum(['host', 'user', 'service', 'generic']),
     identifier: z.string().min(1),
+    riskStats: riskStatsPayloadSchema.optional(),
+    resolutionRiskStats: riskStatsPayloadSchema.optional(),
   }),
   securityAttachmentDataSchema.extend({
     entities: z.array(entityIdentifierSchema).min(1).max(MAX_ENTITIES_PER_ATTACHMENT),

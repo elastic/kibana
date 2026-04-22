@@ -8,6 +8,7 @@
 import { createHash } from 'crypto';
 import type { Logger } from '@kbn/logging';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
+import type { EntityRiskScoreRecord } from '../../../../common/api/entity_analytics/common';
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 
 export const ENTITY_STORE_ENTITY_TYPE_FIELD = 'entity.EngineMetadata.Type';
@@ -38,11 +39,96 @@ export const stripEntityIdPrefix = (
   return entityId.startsWith(prefix) ? entityId.slice(prefix.length) : entityId;
 };
 
+/**
+ * Fields we keep from `EntityRiskScoreRecord` when embedding a risk doc on
+ * an entity attachment. We drop the heavy `inputs`, `related_entities`, and
+ * `calculation_run_id` fields because the chat card's `RiskSummaryMini` only
+ * needs the score/category/modifier/criticality breakdown to render, and
+ * those extra fields can be megabytes in size.
+ */
+export type EntityAttachmentRiskStats = Pick<
+  EntityRiskScoreRecord,
+  | '@timestamp'
+  | 'id_field'
+  | 'id_value'
+  | 'calculated_level'
+  | 'calculated_score'
+  | 'calculated_score_norm'
+  | 'category_1_score'
+  | 'category_1_count'
+  | 'category_2_score'
+  | 'category_2_count'
+  | 'notes'
+  | 'criticality_modifier'
+  | 'criticality_level'
+  | 'modifiers'
+  | 'score_type'
+>;
+
+/**
+ * Optional enrichment bits the tool can layer onto an attachment descriptor
+ * after running side queries (risk index, resolution group). Split out from
+ * `EntityAttachmentDescriptor` so the pure row-to-identifier extractor stays
+ * free of side-effectful fetches.
+ */
+export interface EntityAttachmentEnrichment {
+  riskStats?: EntityAttachmentRiskStats;
+  resolutionRiskStats?: EntityAttachmentRiskStats;
+}
+
 export interface EntityAttachmentDescriptor {
   identifierType: AttachmentIdentifierType;
   identifier: string;
   attachmentLabel: string;
+  /**
+   * Full risk breakdown (category scores/counts, modifiers, criticality)
+   * embedded on the attachment so the chat card's risk summary table can
+   * render without spinning up a Redux-backed search-strategy call on the
+   * client. See `stripRiskRecordForAttachment` for the exact projection.
+   */
+  riskStats?: EntityAttachmentRiskStats;
+  /**
+   * Resolution-group risk breakdown (only populated when the entity is part
+   * of a resolution group with more than one member). Feeds the "Resolution
+   * group risk score" block in the chat card.
+   */
+  resolutionRiskStats?: EntityAttachmentRiskStats;
 }
+
+/**
+ * Returns a minimal risk-doc projection suitable for embedding in an entity
+ * attachment payload. Returns `undefined` when the record is missing so
+ * callers can drop the field entirely instead of embedding `null`s.
+ */
+export const stripRiskRecordForAttachment = (
+  record: EntityRiskScoreRecord | undefined
+): EntityAttachmentRiskStats | undefined => {
+  if (!record) {
+    return undefined;
+  }
+
+  return {
+    '@timestamp': record['@timestamp'],
+    id_field: record.id_field,
+    id_value: record.id_value,
+    calculated_level: record.calculated_level,
+    calculated_score: record.calculated_score,
+    calculated_score_norm: record.calculated_score_norm,
+    category_1_score: record.category_1_score,
+    category_1_count: record.category_1_count,
+    ...(record.category_2_score !== undefined ? { category_2_score: record.category_2_score } : {}),
+    ...(record.category_2_count !== undefined ? { category_2_count: record.category_2_count } : {}),
+    notes: record.notes,
+    ...(record.criticality_modifier !== undefined
+      ? { criticality_modifier: record.criticality_modifier }
+      : {}),
+    ...(record.criticality_level !== undefined
+      ? { criticality_level: record.criticality_level }
+      : {}),
+    ...(record.modifiers !== undefined ? { modifiers: record.modifiers } : {}),
+    ...(record.score_type !== undefined ? { score_type: record.score_type } : {}),
+  };
+};
 
 export const getRowValue = (
   columns: Array<{ name: string }>,
@@ -57,13 +143,20 @@ export const getRowValue = (
  * Derives the attachment payload from a resolved entity row. Returns `null`
  * when we cannot extract a trustworthy identifier (e.g. missing type) so the
  * caller can skip the attachment side-effect instead of emitting garbage.
+ *
+ * The optional `enrichment` argument lets callers fold in async-fetched
+ * extras (risk stats, resolution stats) without re-walking `columns`.
+ * Kept optional so existing call sites — and the row-only unit tests —
+ * don't need to supply enrichment when they only care about identity.
  */
 export const describeAttachmentForRow = ({
   columns,
   row,
+  enrichment,
 }: {
   columns: Array<{ name: string }>;
   row: unknown[];
+  enrichment?: EntityAttachmentEnrichment;
 }): EntityAttachmentDescriptor | null => {
   const rawType = getRowValue(columns, row, ENTITY_STORE_ENTITY_TYPE_FIELD);
   if (!isAttachmentIdentifierType(rawType)) {
@@ -85,6 +178,10 @@ export const describeAttachmentForRow = ({
     identifierType: rawType,
     identifier,
     attachmentLabel: `${rawType}: ${identifier}`,
+    ...(enrichment?.riskStats ? { riskStats: enrichment.riskStats } : {}),
+    ...(enrichment?.resolutionRiskStats
+      ? { resolutionRiskStats: enrichment.resolutionRiskStats }
+      : {}),
   };
 };
 

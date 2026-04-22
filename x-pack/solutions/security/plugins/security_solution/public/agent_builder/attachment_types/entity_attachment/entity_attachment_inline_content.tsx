@@ -109,6 +109,8 @@ export const EntityAttachmentInlineContent: React.FC<EntityAttachmentInlineConte
           {parsed.isSingle ? (
             <EntityCard
               identifier={parsed.entities[0]}
+              riskStats={parsed.riskStats}
+              resolutionRiskStats={parsed.resolutionRiskStats}
               watchlistsEnabled={watchlistsEnabled}
               privmonModifierEnabled={privmonModifierEnabled}
             />

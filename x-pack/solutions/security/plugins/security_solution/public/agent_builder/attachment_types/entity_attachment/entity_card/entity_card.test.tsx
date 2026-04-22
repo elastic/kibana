@@ -43,12 +43,24 @@ jest.mock('./entity_summary_grid', () => ({
 }));
 
 jest.mock('./risk_summary_mini', () => ({
-  RiskSummaryMini: (props: Record<string, unknown>) => (
-    <div
-      data-test-subj="riskSummaryMiniMock"
-      data-has-stats={String(Boolean(props.riskStats))}
-    />
-  ),
+  RiskSummaryMini: (props: Record<string, unknown>) => {
+    const riskStats = props.riskStats as Record<string, unknown> | undefined;
+    const resolutionRiskStats = props.resolutionRiskStats as
+      | Record<string, unknown>
+      | undefined;
+    return (
+      <div
+        data-test-subj="riskSummaryMiniMock"
+        data-has-stats={String(Boolean(riskStats))}
+        data-primary-cat1-score={String(riskStats?.category_1_score ?? '')}
+        data-primary-cat1-count={String(riskStats?.category_1_count ?? '')}
+        data-has-resolution-stats={String(Boolean(resolutionRiskStats))}
+        data-resolution-score={String(props.resolutionRiskScore ?? '')}
+        data-resolution-level={String(props.resolutionRiskLevel ?? '')}
+        data-resolution-cat1-score={String(resolutionRiskStats?.category_1_score ?? '')}
+      />
+    );
+  },
 }));
 
 const mockedUseEntityForAttachment =
@@ -183,5 +195,107 @@ describe('EntityCard', () => {
     });
     renderCard();
     expect(screen.queryByTestId('resolutionMiniMock')).not.toBeInTheDocument();
+  });
+
+  describe('attachment-supplied risk stats', () => {
+    const attachmentRiskStats: React.ComponentProps<typeof EntityCard>['riskStats'] = {
+      '@timestamp': '2024-02-02T00:00:00Z',
+      id_field: 'user.name',
+      id_value: 'bob',
+      calculated_level: 'High',
+      calculated_score: 70,
+      calculated_score_norm: 88,
+      category_1_score: 55.5,
+      category_1_count: 7,
+      category_2_score: 12,
+      notes: [],
+    };
+
+    const attachmentResolutionRiskStats: React.ComponentProps<
+      typeof EntityCard
+    >['resolutionRiskStats'] = {
+      '@timestamp': '2024-02-02T01:00:00Z',
+      id_field: 'user.name',
+      id_value: 'bob',
+      calculated_level: 'Critical',
+      calculated_score: 90,
+      calculated_score_norm: 95,
+      category_1_score: 80,
+      category_1_count: 11,
+      notes: [],
+    };
+
+    it('prefers attachment-supplied stats over entity-store stats', () => {
+      mockedUseEntityForAttachment.mockReturnValue({
+        isLoading: false,
+        data: baseEntity(),
+      });
+      renderCard({ riskStats: attachmentRiskStats });
+
+      const mini = screen.getByTestId('riskSummaryMiniMock');
+      expect(mini.getAttribute('data-primary-cat1-score')).toBe('55.5');
+      expect(mini.getAttribute('data-primary-cat1-count')).toBe('7');
+    });
+
+    it('falls back to entity-store stats when no attachment stats are supplied', () => {
+      mockedUseEntityForAttachment.mockReturnValue({
+        isLoading: false,
+        data: baseEntity(),
+      });
+      renderCard();
+
+      const mini = screen.getByTestId('riskSummaryMiniMock');
+      // baseEntity's category_1_score/count from the fixture
+      expect(mini.getAttribute('data-primary-cat1-score')).toBe('40');
+      expect(mini.getAttribute('data-primary-cat1-count')).toBe('3');
+    });
+
+    it('passes resolution stats through to RiskSummaryMini so the resolution block renders', () => {
+      mockedUseEntityForAttachment.mockReturnValue({
+        isLoading: false,
+        data: baseEntity(),
+      });
+      renderCard({
+        riskStats: attachmentRiskStats,
+        resolutionRiskStats: attachmentResolutionRiskStats,
+      });
+
+      const mini = screen.getByTestId('riskSummaryMiniMock');
+      expect(mini.getAttribute('data-has-resolution-stats')).toBe('true');
+      expect(mini.getAttribute('data-resolution-score')).toBe('95');
+      expect(mini.getAttribute('data-resolution-level')).toBe('Critical');
+      expect(mini.getAttribute('data-resolution-cat1-score')).toBe('80');
+    });
+
+    it('renders the risk summary when only attachment stats are present and the store has no score', () => {
+      mockedUseEntityForAttachment.mockReturnValue({
+        isLoading: false,
+        data: baseEntity({
+          riskStats: undefined,
+          riskScore: undefined,
+          riskLevel: undefined,
+        }),
+      });
+      renderCard({ riskStats: attachmentRiskStats });
+
+      expect(screen.getByTestId('riskSummaryMiniMock')).toBeInTheDocument();
+    });
+
+    it('renders the risk summary when only resolution stats are present', () => {
+      mockedUseEntityForAttachment.mockReturnValue({
+        isLoading: false,
+        data: baseEntity({
+          riskStats: undefined,
+          riskScore: undefined,
+          riskLevel: undefined,
+        }),
+      });
+      renderCard({ resolutionRiskStats: attachmentResolutionRiskStats });
+
+      const mini = screen.getByTestId('riskSummaryMiniMock');
+      expect(mini).toBeInTheDocument();
+      expect(mini.getAttribute('data-has-resolution-stats')).toBe('true');
+      expect(mini.getAttribute('data-resolution-score')).toBe('95');
+    });
   });
 });

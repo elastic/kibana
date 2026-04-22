@@ -6,6 +6,7 @@
  */
 
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import type { EntityRiskScoreRecord } from '../../../../common/api/entity_analytics/common';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 
 /**
@@ -18,10 +19,50 @@ export interface EntityAttachmentIdentifier {
 }
 
 /**
+ * Risk-doc projection the server embeds on a single-entity attachment so
+ * the chat card's risk summary table can render without running a Redux-
+ * backed search-strategy call client-side. Mirrors the server-side
+ * `EntityAttachmentRiskStats` (see `server/.../entity_attachment_utils.ts`).
+ * We intentionally only Pick the fields the card actually needs to keep the
+ * attachment payload compact — `inputs`, `related_entities`, and
+ * `calculation_run_id` are stripped on the server.
+ */
+export type EntityAttachmentRiskStats = Pick<
+  EntityRiskScoreRecord,
+  | '@timestamp'
+  | 'id_field'
+  | 'id_value'
+  | 'calculated_level'
+  | 'calculated_score'
+  | 'calculated_score_norm'
+  | 'category_1_score'
+  | 'category_1_count'
+  | 'category_2_score'
+  | 'category_2_count'
+  | 'notes'
+  | 'criticality_modifier'
+  | 'criticality_level'
+  | 'modifiers'
+  | 'score_type'
+>;
+
+/**
  * Legacy single-entity payload shape.
  */
 export interface EntityAttachmentSingleData extends EntityAttachmentIdentifier {
   attachmentLabel?: string;
+  /**
+   * Full risk breakdown for the entity, embedded by
+   * `security.get_entity` so the chat card can match the flyout's
+   * contributions table. Absent for old attachments — consumers must fall
+   * back to the entity-store-derived `RiskStats` when missing.
+   */
+  riskStats?: EntityAttachmentRiskStats;
+  /**
+   * Full risk breakdown for the entity's resolution group. Only populated
+   * when the entity participates in a multi-member resolution group.
+   */
+  resolutionRiskStats?: EntityAttachmentRiskStats;
 }
 
 /**
@@ -45,9 +86,15 @@ export type EntityAttachment = Attachment<string, EntityAttachmentData>;
 /**
  * Normalised shape used throughout the renderer - always a non-empty list of
  * identifiers plus an `isSingle` flag so the dispatcher can pick a card vs table.
+ *
+ * `riskStats` / `resolutionRiskStats` are only ever populated on the
+ * single-entity path; the list-attachment path doesn't surface a risk
+ * breakdown today.
  */
 export interface NormalisedEntityAttachment {
   isSingle: boolean;
   attachmentLabel?: string;
   entities: EntityAttachmentIdentifier[];
+  riskStats?: EntityAttachmentRiskStats;
+  resolutionRiskStats?: EntityAttachmentRiskStats;
 }
