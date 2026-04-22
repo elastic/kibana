@@ -61,6 +61,13 @@ export function listChangedFiles({
     maxBuffer: 10 * 1024 * 1024,
   };
 
+  // Ensure the merge base commit is available (shallow clones may not have it)
+  try {
+    execSync(`git cat-file -e ${mergeBase}^{commit}`, { ...execOptions, stdio: 'pipe' });
+  } catch {
+    execSync(`git fetch --depth=1 origin ${mergeBase}`, execOptions);
+  }
+
   // To avoid symmetric diffs, and only care for changes from local towards the merge base
   const actualBase = execSync(`git merge-base ${mergeBase} HEAD`, execOptions).trim();
 
