@@ -41,7 +41,6 @@ export const AddInferenceFlyoutWrapper: React.FC<AddInferenceFlyoutWrapperProps>
       enforceAdaptiveAllocations={!!serverless}
       toasts={toasts}
       onSubmitSuccess={onSubmitSuccess}
-      enableEisPromoTour={true}
       excludeProviders={EXCLUDED_PROVIDERS}
     />
   );
