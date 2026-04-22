@@ -71,26 +71,26 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Enables {{esql}} multi-terms charts in Lens [#244743]({{kib-pull}}244743).
 
 **Data ingestion and Fleet**:
-* Allows remote ES outputs and service tokens in serverless [#262101]({{kib-pull}}262101).
+* Allows remote {{es}} outputs and service tokens in Serverless [#262101]({{kib-pull}}262101).
 * Renames Cloud Connector to Federated Identity in the UX [#261353]({{kib-pull}}261353).
-* Enables OpenTelemetry (OTel) collector support in Fleet. You can now add OTel collector agents via a new **Add collector** button in the Fleet UI [#260654]({{kib-pull}}260654).
-* Enables the version-specific policies feature flag [#258796]({{kib-pull}}258796).
-* Warns users about integrations with upcoming deprecations [#257937]({{kib-pull}}257937).
+* Adds support for monitoring OpenTelemetry (OTel) collectors in {{fleet}} in technical preview. You can now add OTel collector agents using the **Add** > **Collector (OpAMP)** button in the Fleet UI [#260654]({{kib-pull}}260654).
+* Introduces support for version-specific policies in {{fleet}} when integrations specify agent version requirements, ensuring agents receive only configurations compatible with their version [#258796]({{kib-pull}}258796).
+* Shows UI warnings for integrations with upcoming deprecations [#257937]({{kib-pull}}257937).
 * Resolves and merges templates listed in `template_paths` [#257730]({{kib-pull}}257730).
 * Adds permission verifier background tasks [#257516]({{kib-pull}}257516).
 * Installs package dependencies automatically [#256700]({{kib-pull}}256700).
-* Requests user review for auto-upgrade packages with deprecations [#255273]({{kib-pull}}255273).
+* Requests user review when auto-upgrading packages with deprecations [#255273]({{kib-pull}}255273).
 * Adds an out-of-the-box alerting rule template to freshly installed integrations for monitoring idle data streams [#254730]({{kib-pull}}254730).
 * Displays warnings for deprecated integration features [#253923]({{kib-pull}}253923).
 * Shows warnings in the UI when an integration is deprecated [#251860]({{kib-pull}}251860).
-* Integration-managed SLO templates can now be installed by Fleet and used to create new SLOs [#250369]({{kib-pull}}250369).
-* Migrates inputs when the `migrate_from` field is found [#242934]({{kib-pull}}242934).
-* Updates the max spec version to 3.6 [#261362]({{kib-pull}}261362).
+* Allows {{fleet}} to install integration-managed SLO templates for creating new SLOs [#250369]({{kib-pull}}250369).
+* Migrates input configurations when the `migrate_from` field is specified in the package manifest [#242934]({{kib-pull}}242934).
+* Updates the maximum supported package specification version to 3.6 [#261362]({{kib-pull}}261362).
 * Adds a new **Alerting** tab to the integrations UI for viewing and managing alerting-related assets [#253948]({{kib-pull}}253948).
-* Allows integration rollback if not all package policies are upgraded [#253646]({{kib-pull}}253646).
-* Ensures time series index mode is not enabled on non-metrics time series for input packages [#251205]({{kib-pull}}251205).
-* Adds authentication fields to Elastic Agent binary download sources for connecting to self-hosted artifact registries [#250557]({{kib-pull}}250557).
-* Improves memory usage during Fleet setup by deferring package reinstalls to async tasks [#248235]({{kib-pull}}248235).
+* Allows integration rollback when only some integration policies are upgraded [#253646]({{kib-pull}}253646).
+* Ensures the time series index mode is not enabled for input packages with non-metrics data streams [#251205]({{kib-pull}}251205).
+* Adds authentication fields to {{agent}} binary download sources managed by {{fleet}} for connecting to self-hosted artifact registries [#250557]({{kib-pull}}250557).
+* Improves memory usage during {{fleet}} setup by deferring package reinstalls to async tasks [#248235]({{kib-pull}}248235).
 
 **Discover**:
 * Adds `hideTable` to the app state and connects it with a layout toggle [#259083]({{kib-pull}}259083).
