@@ -260,6 +260,7 @@ export { TaskStatus, type TaskResult } from './src/tasks/types';
 
 export type { GenerateDescriptionResult } from './src/api/description_generation';
 export type { IdentifyFeaturesResult, IterationResult } from './src/api/features';
+export { tokenCountSchema, iterationResultSchema } from './src/api/features';
 
 export {
   type GenerateInsightsResult,
