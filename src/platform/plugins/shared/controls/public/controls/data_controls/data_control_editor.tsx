@@ -145,7 +145,7 @@ const CompatibleControlTypesComponent = ({
               onClick={() => setSelectedControlType(factory.type)}
               label={factory.getDisplayName()}
             >
-              <EuiIcon type={factory.getIconType()} size="l" />
+              <EuiIcon type={factory.getIconType()} size="l" aria-hidden={true} />
             </EuiKeyPadMenuItem>
           );
 

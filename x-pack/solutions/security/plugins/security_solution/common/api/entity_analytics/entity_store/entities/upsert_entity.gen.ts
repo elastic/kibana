@@ -22,12 +22,18 @@ import { Entity } from './common.gen';
 
 export type UpsertEntityRequestQuery = z.infer<typeof UpsertEntityRequestQuery>;
 export const UpsertEntityRequestQuery = z.object({
+  /**
+   * When true, allows updating protected fields.
+   */
   force: BooleanFromString.optional().default(false),
 });
 export type UpsertEntityRequestQueryInput = z.input<typeof UpsertEntityRequestQuery>;
 
 export type UpsertEntityRequestParams = z.infer<typeof UpsertEntityRequestParams>;
 export const UpsertEntityRequestParams = z.object({
+  /**
+   * The entity type of the entity to create or update.
+   */
   entityType: EntityType,
 });
 export type UpsertEntityRequestParamsInput = z.input<typeof UpsertEntityRequestParams>;

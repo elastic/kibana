@@ -80,6 +80,9 @@ const createBaseXYCharts = async (
   await pageObjects.lens.saveAndReturn();
   await pageObjects.dashboard.waitForPanelsToLoad(1);
 
+  // Ensure the dashboard UI is fully stable before opening the next panel
+  await pageObjects.dashboard.waitForRenderComplete();
+
   await pageObjects.dashboard.openNewLensPanel();
   await pageObjects.lens.configureXYDimensions({
     y: { operation: 'count' },

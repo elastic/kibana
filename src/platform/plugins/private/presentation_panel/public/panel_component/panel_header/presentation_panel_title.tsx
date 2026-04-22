@@ -152,6 +152,9 @@ export const PresentationPanelTitle = ({
             color="subdued"
             data-test-subj="embeddablePanelTitleDescriptionIcon"
             tabIndex={0}
+            aria-label={i18n.translate('presentationPanel.header.descriptionIconAriaLabel', {
+              defaultMessage: 'Description',
+            })}
           />
         </div>
       </EuiToolTip>

@@ -30,7 +30,7 @@ test.describe(
       cdp = await context.newCDPSession(page);
       await cdp.send('Network.enable');
       await page.gotoApp('home');
-      await page.waitForLoadingIndicatorHidden();
+      await page.testSubj.waitForSelector('homeApp', { timeout: 20000 });
       await perfTracker.waitForJsLoad(cdp); // Ensure JS bundles are fully loaded
     });
 
@@ -100,7 +100,7 @@ test.describe(
 
       // Navigate to Discover app
       await pageObjects.collapsibleNav.clickItem('Discover');
-      await page.waitForLoadingIndicatorHidden();
+      await page.testSubj.waitForSelector('discoverLayoutResizableContainer', { timeout: 20000 });
       const currentUrl = page.url();
       expect(currentUrl).toContain('app/discover#/');
 

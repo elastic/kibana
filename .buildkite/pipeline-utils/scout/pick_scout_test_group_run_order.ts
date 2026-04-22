@@ -55,7 +55,7 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
       ? process.env.SCOUT_CONFIGS_DEPS.split(',')
           .map((t) => t.trim())
           .filter(Boolean)
-      : ['build_scout_tests'];
+      : ['build_scout_tests', 'build'];
 
   const scoutCiRunGroups = modulesWithTests.map((module) => {
     // Check if any config in this module uses parallel workers

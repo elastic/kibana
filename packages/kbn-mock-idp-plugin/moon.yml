@@ -33,6 +33,7 @@ dependsOn:
   - '@kbn/cloud-plugin'
   - '@kbn/es'
   - '@kbn/core-user-profile-browser'
+  - '@kbn/i18n'
 tags:
   - plugin
   - dev

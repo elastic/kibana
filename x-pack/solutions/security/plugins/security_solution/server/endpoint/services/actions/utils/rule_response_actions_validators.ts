@@ -32,6 +32,11 @@ import { CustomHttpRequestError } from '../../../../utils/custom_http_request_er
 
 type RuleResponseActions = Pick<RuleResponse, 'response_actions'>;
 
+export type CheckOsqueryResponseActionAuthz = (actionParams: {
+  saved_query_id?: string;
+  pack_id?: string;
+}) => Promise<void>;
+
 export interface ValidateRuleResponseActionsOptions<
   T extends RuleResponseActions = RuleResponseActions
 > {
@@ -47,6 +52,12 @@ export interface ValidateRuleResponseActionsOptions<
    * are only applied to the response actions that have changed
    */
   existingRule?: RuleAlertType | null;
+  /**
+   * Optional callback to validate osquery response action authorization.
+   * Should be bound to the current request before passing in.
+   * When provided, osquery response actions will be validated for privileges.
+   */
+  checkOsqueryResponseActionAuthz?: CheckOsqueryResponseActionAuthz;
 }
 
 /**
@@ -61,6 +72,7 @@ export const validateRuleResponseActions = async <
   spaceId,
   rulePayload: { response_actions: ruleResponseActions },
   existingRule,
+  checkOsqueryResponseActionAuthz,
 }: ValidateRuleResponseActionsOptions<T>): Promise<void> => {
   const logger = endpointService.createLogger('validateRuleResponseActions');
   const existingRuleResponseActions = existingRule?.params?.responseActions;
@@ -112,12 +124,31 @@ export const validateRuleResponseActions = async <
           validateEndpointKillSuspendProcessResponseAction(actionData.params);
           break;
       }
+    } else if (isOsqueryResponseAction(actionData)) {
+      if (checkOsqueryResponseActionAuthz) {
+        const params = actionData.params;
+        // Params may be snake_case (from API payload: OsqueryResponseAction) or
+        // camelCase (from existing rule in ES: RuleResponseOsqueryAction)
+        await checkOsqueryResponseActionAuthz({
+          saved_query_id:
+            ('saved_query_id' in params ? params.saved_query_id : undefined) ??
+            ('savedQueryId' in params ? params.savedQueryId : undefined),
+          pack_id:
+            ('pack_id' in params ? params.pack_id : undefined) ??
+            ('packId' in params ? params.packId : undefined),
+        });
+      } else {
+        logger.debug(
+          () =>
+            `Skipping osquery response action validation - no osquery authz checker provided: ${stringify(
+              actionData
+            )}`
+        );
+      }
     } else {
       logger.debug(
         () =>
-          `Skipping validation of response action - action type id not '.endpoint': ${stringify(
-            actionData
-          )}`
+          `Skipping validation of response action - unknown action type: ${stringify(actionData)}`
       );
     }
   }
@@ -129,7 +160,10 @@ type ImportRuleResponseActions = Pick<RuleToImport, 'response_actions' | 'id' | 
 
 export type ValidateRuleImportResponseActionsOptions<
   T extends ImportRuleResponseActions = ImportRuleResponseActions
-> = Pick<ValidateRuleResponseActionsOptions, 'endpointAuthz' | 'endpointService' | 'spaceId'> & {
+> = Pick<
+  ValidateRuleResponseActionsOptions,
+  'endpointAuthz' | 'endpointService' | 'spaceId' | 'checkOsqueryResponseActionAuthz'
+> & {
   rulesToImport: T[];
 };
 
@@ -155,6 +189,7 @@ export const validateRuleImportResponseActions = async <
   endpointAuthz,
   spaceId,
   rulesToImport,
+  checkOsqueryResponseActionAuthz,
 }: ValidateRuleImportResponseActionsOptions<T>): Promise<
   ValidateRuleImportResponseActionsResult<T>
 > => {
@@ -172,6 +207,7 @@ export const validateRuleImportResponseActions = async <
           endpointService,
           spaceId,
           rulePayload: rule,
+          checkOsqueryResponseActionAuthz,
         });
 
         response.valid.push(rule);
@@ -228,6 +264,20 @@ const isEndpointResponseAction = (
   return (
     ('action_type_id' in ruleResponseAction && ruleResponseAction.action_type_id === '.endpoint') ||
     ('actionTypeId' in ruleResponseAction && ruleResponseAction.actionTypeId === '.endpoint')
+  );
+};
+
+/** @private */
+const isOsqueryResponseAction = (
+  ruleResponseAction:
+    | RuleResponseOsqueryAction
+    | RuleResponseEndpointAction
+    | OsqueryResponseAction
+    | EndpointResponseAction
+): ruleResponseAction is OsqueryResponseAction | RuleResponseOsqueryAction => {
+  return (
+    ('action_type_id' in ruleResponseAction && ruleResponseAction.action_type_id === '.osquery') ||
+    ('actionTypeId' in ruleResponseAction && ruleResponseAction.actionTypeId === '.osquery')
   );
 };
 
