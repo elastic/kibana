@@ -53,7 +53,7 @@ export class WorkflowsExtensionsServerPlugin
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
-    this.stepRegistry = new ServerStepRegistry();
+    this.stepRegistry = new ServerStepRegistry(this.logger);
     this.triggerRegistry = new TriggerRegistry();
   }
 

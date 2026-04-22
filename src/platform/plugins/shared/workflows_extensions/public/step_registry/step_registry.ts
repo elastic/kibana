@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Logger } from '@kbn/logging';
 import type { z } from '@kbn/zod/v4';
 import type { PublicStepDefinition } from './types';
 import type { PublicStepDefinitionOrLoader } from '../types';
@@ -19,6 +20,8 @@ import type { PublicStepDefinitionOrLoader } from '../types';
 export class PublicStepRegistry {
   private readonly registry = new Map<string, PublicStepDefinition>();
   private readonly pending = new Set<Promise<void>>(); // Stores promises that are either in progress or have been rejected
+
+  constructor(private readonly logger: Logger) {}
 
   /**
    * Register step definition.
@@ -36,10 +39,12 @@ export class PublicStepRegistry {
           if (definition) {
             this.addToRegistry(definition);
           }
-          this.pending.delete(promise);
         })
         .catch((error) => {
-          throw new Error('Failed to load step definition', { cause: error });
+          this.logger.error('Failed to register step definition', { error });
+        })
+        .finally(() => {
+          this.pending.delete(promise);
         });
       this.pending.add(promise);
     } else {
@@ -71,12 +76,7 @@ export class PublicStepRegistry {
    */
   public async whenReady(): Promise<void> {
     if (this.pending.size > 0) {
-      const results = await Promise.allSettled(this.pending);
-      for (const result of results) {
-        if (result.status === 'rejected') {
-          throw result.reason;
-        }
-      }
+      await Promise.allSettled(this.pending);
     }
   }
 
