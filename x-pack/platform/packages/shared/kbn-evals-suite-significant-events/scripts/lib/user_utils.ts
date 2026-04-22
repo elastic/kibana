@@ -12,20 +12,10 @@ import type { ConnectionConfig } from './get_connection_config';
 const TEMP_USER = 'restore_sigevents_env_snapshot_tmp';
 const TEMP_PASSWORD = 'restore_sigevents_env_snapshot_tmp_pass!';
 
-async function deleteUser(esClient: Client, username: string): Promise<void> {
-  await esClient.security.deleteUser({ username });
-}
-
-export async function withTempSuperuser<T>(
-  esClient: Client,
-  log: ToolingLog,
-  config: ConnectionConfig,
-  fn: (sysClient: Client) => Promise<T>
-): Promise<T> {
-  // Pre-flight: remove any stale user left by a previous crashed run.
+async function deleteUser(esClient: Client, log: ToolingLog, username: string): Promise<void> {
   try {
-    await deleteUser(esClient, TEMP_USER);
-    log.debug(`withTempSuperuser: removed stale temp user "${TEMP_USER}" from previous run`);
+    await esClient.security.deleteUser({ username });
+    log.info(`withTempSuperuser: deleted temp user "${TEMP_USER}"`);
   } catch (err) {
     const statusCode = err instanceof errors.ResponseError ? err.statusCode : undefined;
     const msg = err instanceof Error ? err.message : String(err);
@@ -42,7 +32,16 @@ export async function withTempSuperuser<T>(
       );
     }
   }
+}
 
+export async function withTempSuperuser<T>(
+  esClient: Client,
+  log: ToolingLog,
+  config: ConnectionConfig,
+  fn: (sysClient: Client) => Promise<T>
+): Promise<T> {
+  // Pre-flight: remove any stale user left by a previous crashed run.
+  await deleteUser(esClient, log, TEMP_USER);
   try {
     await esClient.security.putUser({
       username: TEMP_USER,
@@ -58,15 +57,6 @@ export async function withTempSuperuser<T>(
     });
     return await fn(sysClient);
   } finally {
-    try {
-      await deleteUser(esClient, TEMP_USER);
-      log.info(`withTempSuperuser: deleted temp user "${TEMP_USER}"`);
-    } catch (err) {
-      log.warning(
-        `withTempSuperuser: failed to delete temp user "${TEMP_USER}": ${
-          err instanceof Error ? err.message : String(err)
-        }`
-      );
-    }
+    await deleteUser(esClient, log, TEMP_USER);
   }
 }
