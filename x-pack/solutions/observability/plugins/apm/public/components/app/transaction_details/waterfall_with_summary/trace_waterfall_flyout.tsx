@@ -18,6 +18,8 @@ export interface TraceWaterfallDetailFlyoutProps {
   onClose: () => void;
 }
 
+const TRACE_WATERFALL_FLYOUT_HISTORY_KEY = Symbol.for('apmTraceWaterfallFlyout');
+
 interface Props {
   traceId: string;
   rangeFrom: string;
@@ -44,7 +46,15 @@ export function TraceWaterfallFlyout({
   if (!isOpen) return null;
 
   return (
-    <EuiFlyout onClose={onClose} size="l">
+    <EuiFlyout
+      session="start"
+      historyKey={TRACE_WATERFALL_FLYOUT_HISTORY_KEY}
+      onClose={onClose}
+      size="m"
+      aria-label={i18n.translate('xpack.apm.traceWaterfallFlyout.ariaLabel', {
+        defaultMessage: 'Full trace waterfall flyout',
+      })}
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2>
