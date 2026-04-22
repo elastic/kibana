@@ -21,6 +21,7 @@ export const createGetDefaultAppState = ({
   return (prev) => (params) => {
     const appState = { ...prev(params) };
 
+    appState.hideTable = false;
     appState.breakdownField = LOG_LEVEL_FIELD;
 
     if (defaultColumns) {

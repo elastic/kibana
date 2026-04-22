@@ -22,6 +22,7 @@ export const getDefaultAppState: DataSourceProfileProvider['profile']['getDefaul
   (prev) => (params) => ({
     ...prev(params),
 
+    hideTable: false,
     columns: [
       { name: TIMESTAMP_FIELD, width: 212 },
       { name: SERVICE_NAME_FIELD },
