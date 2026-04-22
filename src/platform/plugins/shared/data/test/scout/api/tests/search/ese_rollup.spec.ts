@@ -33,12 +33,10 @@ apiTest.describe('ese search - rollup (stateful only)', { tag: [...tags.stateful
     });
 
     expect(response).toHaveStatusCode(400);
-    verifyErrorResponse(
-      response.body,
-      400,
-      '"params.index" is required when performing a rollup search',
-      false
-    );
+    // 8.19 has no Kibana-side `params.index` validation (it was added with the
+    // ES 9.0 client upgrade in 9.1, PR #208776). The error bubbles up from ES
+    // as `illegal_argument_exception: Must specify at least one concrete index`.
+    verifyErrorResponse(response.body, 400, 'illegal_argument_exception', true);
   });
 
   apiTest(
