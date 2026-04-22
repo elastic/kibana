@@ -21,6 +21,7 @@ import type { EmbeddableDeps } from '../types';
 
 const mockInitializeTitleManager = jest.fn();
 const mockInitializeTimeRangeManager = jest.fn();
+const mockInitializeStateManager = jest.fn();
 const mockInitializeUnsavedChanges = jest.fn();
 const mockUseBatchedPublishingSubjects = jest.fn();
 const mockUseFetchContext = jest.fn();
@@ -30,6 +31,7 @@ const mockApmEmbeddableContext = jest.fn();
 jest.mock('@kbn/presentation-publishing', () => ({
   initializeTitleManager: (...args: unknown[]) => mockInitializeTitleManager(...args),
   initializeTimeRangeManager: (...args: unknown[]) => mockInitializeTimeRangeManager(...args),
+  initializeStateManager: (...args: unknown[]) => mockInitializeStateManager(...args),
   initializeUnsavedChanges: (...args: unknown[]) => mockInitializeUnsavedChanges(...args),
   titleComparators: { title: 'referenceEquality' },
   timeRangeComparators: { time_range: 'deepEquality' },
@@ -54,11 +56,13 @@ jest.mock('./service_map_embeddable', () => ({
 describe('getServiceMapEmbeddableFactory', () => {
   let titleAnyStateChange$: Subject<void>;
   let timeRangeAnyStateChange$: Subject<void>;
+  let customStateAnyStateChange$: Subject<void>;
 
   beforeEach(() => {
     jest.clearAllMocks();
     titleAnyStateChange$ = new Subject<void>();
     timeRangeAnyStateChange$ = new Subject<void>();
+    customStateAnyStateChange$ = new Subject<void>();
     mockInitializeTitleManager.mockReturnValue({
       api: { titleApi: true },
       getLatestState: jest.fn(() => ({ title: 'Saved title' })),
@@ -72,6 +76,26 @@ describe('getServiceMapEmbeddableFactory', () => {
       },
       getLatestState: jest.fn(() => ({ time_range: { from: 'now-15m', to: 'now' } })),
       anyStateChange$: timeRangeAnyStateChange$,
+      reinitializeState: jest.fn(),
+    });
+    mockInitializeStateManager.mockReturnValue({
+      api: {
+        environment$: new BehaviorSubject(ENVIRONMENT_ALL.value),
+        setEnvironment: jest.fn(),
+        kuery$: new BehaviorSubject(''),
+        setKuery: jest.fn(),
+        serviceName$: new BehaviorSubject(undefined),
+        setServiceName: jest.fn(),
+        serviceGroupId$: new BehaviorSubject(undefined),
+        setServiceGroupId: jest.fn(),
+      },
+      getLatestState: jest.fn(() => ({
+        environment: ENVIRONMENT_ALL.value,
+        kuery: '',
+        serviceName: undefined,
+        serviceGroupId: undefined,
+      })),
+      anyStateChange$: customStateAnyStateChange$,
       reinitializeState: jest.fn(),
     });
     mockInitializeUnsavedChanges.mockImplementation(() => ({ unsavedApi: true }));
@@ -202,6 +226,7 @@ describe('getServiceMapEmbeddableFactory', () => {
 
   it('supports reset behavior', async () => {
     const timeRangeReinitialize = jest.fn();
+    const customStateReinitialize = jest.fn();
     mockInitializeTimeRangeManager.mockReturnValue({
       api: {
         timeRange$: new BehaviorSubject({ from: 'now-15m', to: 'now' }),
@@ -210,6 +235,26 @@ describe('getServiceMapEmbeddableFactory', () => {
       getLatestState: jest.fn(() => ({ time_range: { from: 'now-15m', to: 'now' } })),
       anyStateChange$: timeRangeAnyStateChange$,
       reinitializeState: timeRangeReinitialize,
+    });
+    mockInitializeStateManager.mockReturnValue({
+      api: {
+        environment$: new BehaviorSubject(ENVIRONMENT_ALL.value),
+        setEnvironment: jest.fn(),
+        kuery$: new BehaviorSubject(''),
+        setKuery: jest.fn(),
+        serviceName$: new BehaviorSubject(undefined),
+        setServiceName: jest.fn(),
+        serviceGroupId$: new BehaviorSubject(undefined),
+        setServiceGroupId: jest.fn(),
+      },
+      getLatestState: jest.fn(() => ({
+        environment: ENVIRONMENT_ALL.value,
+        kuery: '',
+        serviceName: undefined,
+        serviceGroupId: undefined,
+      })),
+      anyStateChange$: customStateAnyStateChange$,
+      reinitializeState: customStateReinitialize,
     });
     mockUseBatchedPublishingSubjects.mockReturnValue([
       ENVIRONMENT_ALL.value,
@@ -262,12 +307,21 @@ describe('getServiceMapEmbeddableFactory', () => {
     expect(timeRangeReinitialize).toHaveBeenCalledWith({
       time_range: { from: 'now-30m', to: 'now' },
     });
+    expect(customStateReinitialize).toHaveBeenCalledWith(
+      expect.objectContaining({
+        environment: 'qa',
+        kuery: 'trace.id: 1',
+        serviceName: 'service-b',
+        serviceGroupId: 'group-b',
+      })
+    );
 
     // Reset to undefined (new panel state) - should default to custom time range
     unsavedConfig.onReset(undefined);
     expect(timeRangeReinitialize).toHaveBeenCalledWith({
       time_range: { from: 'now-15m', to: 'now' },
     });
+    expect(customStateReinitialize).toHaveBeenCalledWith(undefined);
 
     render(<embeddable.Component />);
     expect(mockServiceMapEmbeddable).toHaveBeenCalledWith(

@@ -16,12 +16,14 @@ import type {
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 import {
+  initializeStateManager,
   initializeTimeRangeManager,
   initializeTitleManager,
   timeRangeComparators,
   titleComparators,
   useBatchedPublishingSubjects,
   useFetchContext,
+  type StateComparators,
 } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
@@ -41,6 +43,27 @@ import { ServiceMapEditorFlyout } from './service_map_editor_flyout';
 import { APM_SERVICE_MAP_EMBEDDABLE } from './constants';
 
 const DEFAULT_TIME_RANGE: TimeRange = { from: 'now-15m', to: 'now' };
+
+interface ServiceMapCustomState {
+  environment: string;
+  kuery: string;
+  serviceName: string | undefined;
+  serviceGroupId: string | undefined;
+}
+
+const defaultCustomState: ServiceMapCustomState = {
+  environment: ENVIRONMENT_ALL.value,
+  kuery: '',
+  serviceName: undefined,
+  serviceGroupId: undefined,
+};
+
+const customStateComparators: StateComparators<ServiceMapCustomState> = {
+  environment: 'referenceEquality',
+  kuery: 'referenceEquality',
+  serviceName: 'referenceEquality',
+  serviceGroupId: 'referenceEquality',
+};
 
 export type ServiceMapEmbeddableApi = DefaultEmbeddableApi<ServiceMapEmbeddableState> &
   HasEditCapabilities &
@@ -102,10 +125,15 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
         time_range: state.time_range ?? DEFAULT_TIME_RANGE,
       });
 
-      const environment$ = new BehaviorSubject(state.environment ?? ENVIRONMENT_ALL.value);
-      const kuery$ = new BehaviorSubject(state.kuery ?? '');
-      const serviceName$ = new BehaviorSubject(state.serviceName);
-      const serviceGroupId$ = new BehaviorSubject(state.serviceGroupId);
+      const customStateManager = initializeStateManager<ServiceMapCustomState>(
+        {
+          environment: state.environment,
+          kuery: state.kuery,
+          serviceName: state.serviceName,
+          serviceGroupId: state.serviceGroupId,
+        },
+        defaultCustomState
+      );
 
       const query$ = new BehaviorSubject<Query | undefined>(buildQueryFromKuery(state.kuery ?? ''));
       const filters$ = new BehaviorSubject<Filter[] | undefined>(
@@ -117,10 +145,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
         return {
           ...titleManager.getLatestState(),
           ...timeRangeManager.getLatestState(),
-          environment: environment$.getValue(),
-          kuery: kuery$.getValue(),
-          serviceName: serviceName$.getValue(),
-          serviceGroupId: serviceGroupId$.getValue(),
+          ...customStateManager.getLatestState(),
         };
       }
 
@@ -131,18 +156,12 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           timeRangeManager.anyStateChange$,
-          environment$,
-          kuery$,
-          serviceName$,
-          serviceGroupId$
+          customStateManager.anyStateChange$
         ).pipe(map(() => undefined)),
         getComparators: () => ({
           ...titleComparators,
           ...timeRangeComparators,
-          environment: 'referenceEquality',
-          kuery: 'referenceEquality',
-          serviceName: 'referenceEquality',
-          serviceGroupId: 'referenceEquality',
+          ...customStateComparators,
         }),
         onReset: (lastSaved) => {
           titleManager.reinitializeState(lastSaved);
@@ -151,10 +170,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
               ? { time_range: lastSaved.time_range }
               : { time_range: DEFAULT_TIME_RANGE }
           );
-          environment$.next(lastSaved?.environment ?? ENVIRONMENT_ALL.value);
-          kuery$.next(lastSaved?.kuery ?? '');
-          serviceName$.next(lastSaved?.serviceName);
-          serviceGroupId$.next(lastSaved?.serviceGroupId);
+          customStateManager.reinitializeState(lastSaved);
         },
       });
 
@@ -190,12 +206,12 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
                     onCancel={closeFlyout}
                     onSave={(newState: ServiceMapEmbeddableState) => {
                       if (newState.environment !== undefined) {
-                        environment$.next(newState.environment);
+                        customStateManager.api.setEnvironment(newState.environment);
                       }
                       if (newState.kuery !== undefined) {
-                        kuery$.next(newState.kuery);
+                        customStateManager.api.setKuery(newState.kuery);
                       }
-                      serviceName$.next(newState.serviceName);
+                      customStateManager.api.setServiceName(newState.serviceName);
                       closeFlyout();
                     }}
                   />
@@ -210,12 +226,13 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
         api,
         Component: () => {
           useEffect(() => {
-            const filtersSubscription = combineLatest([serviceName$, environment$]).subscribe(
-              ([sn, env]) => {
-                filters$.next(buildFiltersFromState(sn, env));
-              }
-            );
-            const querySubscription = kuery$.subscribe((k) => {
+            const filtersSubscription = combineLatest([
+              customStateManager.api.serviceName$,
+              customStateManager.api.environment$,
+            ]).subscribe(([sn, env]) => {
+              filters$.next(buildFiltersFromState(sn, env));
+            });
+            const querySubscription = customStateManager.api.kuery$.subscribe((k) => {
               query$.next(buildQueryFromKuery(k));
             });
             return () => {
@@ -225,10 +242,10 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
           }, []);
 
           const [environment, kuery, serviceName, serviceGroupId] = useBatchedPublishingSubjects(
-            environment$,
-            kuery$,
-            serviceName$,
-            serviceGroupId$
+            customStateManager.api.environment$,
+            customStateManager.api.kuery$,
+            customStateManager.api.serviceName$,
+            customStateManager.api.serviceGroupId$
           );
 
           const { timeRange } = useFetchContext(api);
