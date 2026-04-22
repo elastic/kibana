@@ -693,7 +693,7 @@ describe('FiltersDisplay', () => {
     expect(screen.getByText('agent.type: exists')).toBeInTheDocument();
   });
 
-  it('renders negated filters with danger color', () => {
+  it('renders negated filters with NOT prefix', () => {
     const filters = [
       { meta: { key: 'host.name', negate: true, type: 'phrase', value: 'bad-host' } },
     ];

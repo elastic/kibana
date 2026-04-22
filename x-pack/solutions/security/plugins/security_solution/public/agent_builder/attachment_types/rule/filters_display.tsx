@@ -91,9 +91,7 @@ export const FiltersDisplay: React.FC<{ filters: unknown[] }> = ({ filters }) =>
       <EuiFlexGroup responsive={false} gutterSize="xs" wrap>
         {validFilters.map((filter, idx) => (
           <EuiFlexItem grow={false} key={idx}>
-            <EuiBadge color={filter.meta?.negate ? 'danger' : 'hollow'}>
-              {getFilterLabel(filter)}
-            </EuiBadge>
+            <EuiBadge color="hollow">{getFilterLabel(filter)}</EuiBadge>
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>
