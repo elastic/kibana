@@ -67,6 +67,10 @@ import {
   WorkflowsManagementApiToken,
 } from '../lib/dispatcher/steps/dispatch_step_tokens';
 import { MatcherSuggestionsService } from '../lib/services/matcher_suggestions_service/matcher_suggestions_service';
+import {
+  RuleExecutionStatusWriter,
+  RuleExecutionStatusWriterToken,
+} from '../lib/services/rule_execution_status_writer';
 import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
@@ -249,4 +253,9 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   // Order matters: specialized strategies first, fallback (BasicTransitionStrategy) last.
   bind(TransitionStrategyToken).to(CountTimeframeStrategy).inSingletonScope();
   bind(TransitionStrategyToken).to(BasicTransitionStrategy).inSingletonScope();
+
+  // Rule execution status writer — persists `last_execution` on the rule SO
+  // so the rules list can show/sort/filter by the latest run outcome.
+  bind(RuleExecutionStatusWriter).toSelf().inSingletonScope();
+  bind(RuleExecutionStatusWriterToken).toService(RuleExecutionStatusWriter);
 }

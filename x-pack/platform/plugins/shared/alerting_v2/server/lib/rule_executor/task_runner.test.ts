@@ -9,11 +9,13 @@ import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task'
 
 import { RuleExecutorTaskRunner } from './task_runner';
 import type { RuleExecutionPipelineContract } from './execution_pipeline';
+import type { RuleExecutionStatusWriterContract } from '../services/rule_execution_status_writer';
 import { createRulePipelineState } from './test_utils';
 
 describe('RuleExecutorTaskRunner', () => {
   let runner: RuleExecutorTaskRunner;
   let pipeline: jest.Mocked<RuleExecutionPipelineContract>;
+  let ruleExecutionStatusWriter: jest.Mocked<RuleExecutionStatusWriterContract>;
   let abortController: AbortController;
 
   // @ts-expect-error: not all fields are required
@@ -27,7 +29,8 @@ describe('RuleExecutorTaskRunner', () => {
 
   beforeEach(() => {
     pipeline = { execute: jest.fn() };
-    runner = new RuleExecutorTaskRunner(pipeline);
+    ruleExecutionStatusWriter = { writeExecutionStatus: jest.fn().mockResolvedValue(undefined) };
+    runner = new RuleExecutorTaskRunner(pipeline, ruleExecutionStatusWriter);
     abortController = new AbortController();
   });
 
@@ -126,6 +129,55 @@ describe('RuleExecutorTaskRunner', () => {
       await expect(runner.run({ taskInstance, abortController })).rejects.toThrow(
         'Pipeline failed'
       );
+    });
+  });
+
+  describe('last execution persistence', () => {
+    it('writes last execution status on success', async () => {
+      pipeline.execute.mockResolvedValue({
+        completed: true,
+        finalState: createRulePipelineState(),
+      });
+
+      await runner.run({ taskInstance, abortController });
+
+      expect(ruleExecutionStatusWriter.writeExecutionStatus).toHaveBeenCalledTimes(1);
+      expect(ruleExecutionStatusWriter.writeExecutionStatus).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ruleId: 'rule-1',
+          outcome: 'success',
+          errorMessage: null,
+        })
+      );
+    });
+
+    it('writes last execution status on pipeline failure', async () => {
+      pipeline.execute.mockRejectedValue(new Error('Pipeline failed'));
+
+      await expect(runner.run({ taskInstance, abortController })).rejects.toThrow(
+        'Pipeline failed'
+      );
+
+      expect(ruleExecutionStatusWriter.writeExecutionStatus).toHaveBeenCalledTimes(1);
+      expect(ruleExecutionStatusWriter.writeExecutionStatus).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ruleId: 'rule-1',
+          outcome: 'failure',
+          errorMessage: 'Pipeline failed',
+        })
+      );
+    });
+
+    it('does not surface writer errors to the task runner', async () => {
+      pipeline.execute.mockResolvedValue({
+        completed: true,
+        finalState: createRulePipelineState(),
+      });
+      ruleExecutionStatusWriter.writeExecutionStatus.mockRejectedValueOnce(
+        new Error('SO write crashed')
+      );
+
+      await expect(runner.run({ taskInstance, abortController })).resolves.toEqual({ state: {} });
     });
   });
 });

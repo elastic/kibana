@@ -13,6 +13,8 @@ import { SavedObjectsUtils } from '@kbn/core/server';
 import type { SavedObjectError } from '@kbn/core/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { RuleSavedObjectAttributes } from '../../../saved_objects';
+
+type LastExecutionAttribute = NonNullable<RuleSavedObjectAttributes['last_execution']>;
 import type { AlertingServerStartDependencies } from '../../../types';
 import { spaceIdToNamespace } from '../../space_id_to_namespace';
 import { RuleSavedObjectsClientToken } from './tokens';
@@ -51,6 +53,10 @@ export interface RulesSavedObjectServiceContract {
   bulkGetByIds(ids: string[], spaceId?: string): Promise<RulesSavedObjectsBulkGetResultItem[]>;
   findByIds(ruleIds: string[], spaceId?: string): Promise<RulesFindAllResultItem[]>;
   update(params: { id: string; attrs: RuleSavedObjectAttributes; version?: string }): Promise<void>;
+  partialUpdateLastExecution(params: {
+    id: string;
+    patch: LastExecutionAttribute | null;
+  }): Promise<void>;
   bulkUpdate(
     items: Array<{ id: string; attrs: RuleSavedObjectAttributes; version?: string }>
   ): Promise<BulkUpdateResultItem[]>;
@@ -168,6 +174,28 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
       ...(version ? { version } : {}),
       mergeAttributes: false,
     });
+  }
+
+  /**
+   * Merge-update just the `last_execution` attribute for a single rule.
+   *
+   * Intended for the task-runner hot path: avoids a read-modify-write race with
+   * concurrent user updates (no `version` precondition, `mergeAttributes: true`
+   * preserves sibling fields) and skips the refresh to keep writes cheap.
+   */
+  public async partialUpdateLastExecution({
+    id,
+    patch,
+  }: {
+    id: string;
+    patch: LastExecutionAttribute | null;
+  }): Promise<void> {
+    await this.client.update<Partial<RuleSavedObjectAttributes>>(
+      RULE_SAVED_OBJECT_TYPE,
+      id,
+      { last_execution: patch },
+      { refresh: false, mergeAttributes: true }
+    );
   }
 
   public async bulkUpdate(

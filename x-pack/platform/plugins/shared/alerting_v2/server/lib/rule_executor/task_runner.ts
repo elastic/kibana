@@ -15,21 +15,77 @@ import type {
   RuleExecutionPipelineResult,
 } from './execution_pipeline';
 import { RuleExecutionPipeline } from './execution_pipeline';
+import {
+  RuleExecutionStatusWriterToken,
+  type RuleExecutionStatusWriterContract,
+} from '../services/rule_execution_status_writer';
 
 type TaskRunParams = Pick<RunContext, 'taskInstance' | 'abortController'>;
 
 @injectable()
 export class RuleExecutorTaskRunner {
   constructor(
-    @inject(RuleExecutionPipeline) private readonly pipeline: RuleExecutionPipelineContract
+    @inject(RuleExecutionPipeline) private readonly pipeline: RuleExecutionPipelineContract,
+    @inject(RuleExecutionStatusWriterToken)
+    private readonly ruleExecutionStatusWriter: RuleExecutionStatusWriterContract
   ) {}
 
   public async run({ taskInstance, abortController }: TaskRunParams): Promise<RunResult> {
     const input = this.createRuleExecutionInput(taskInstance, abortController);
 
-    const result = await this.pipeline.execute(input);
+    const startMs = Date.now();
+    let result: RuleExecutionPipelineResult | undefined;
+    let executionError: Error | undefined;
 
-    return this.buildRunResult(result, taskInstance);
+    try {
+      result = await this.pipeline.execute(input);
+    } catch (err) {
+      executionError = err instanceof Error ? err : new Error(String(err));
+    }
+
+    const endMs = Date.now();
+    await this.recordExecution(input, result, endMs, endMs - startMs, executionError);
+
+    if (executionError) {
+      throw executionError;
+    }
+
+    return this.buildRunResult(result!, taskInstance);
+  }
+
+  /**
+   * Persists `last_execution` on the rule SO so the rules list can show/sort/
+   * filter by the latest run outcome.
+   *
+   * Best-effort: the writer swallows and logs its own errors, but we also
+   * double-guard here so any unexpected throw cannot turn a successful rule
+   * run into a failed task.
+   */
+  private async recordExecution(
+    input: RuleExecutionPipelineInput,
+    result: RuleExecutionPipelineResult | undefined,
+    endMs: number,
+    durationMs: number,
+    error?: Error
+  ): Promise<void> {
+    const outcome: 'success' | 'failure' = !error && result?.completed ? 'success' : 'failure';
+    const message = error
+      ? `rule execution failed: ${error.message}`
+      : `rule executed: ${input.ruleId}`;
+
+    try {
+      await this.ruleExecutionStatusWriter.writeExecutionStatus({
+        ruleId: input.ruleId,
+        outcome,
+        timestamp: new Date(endMs).toISOString(),
+        durationMs,
+        message,
+        errorMessage: error?.message ?? null,
+      });
+    } catch {
+      // Writer already swallows + logs; belt-and-braces guard so execution
+      // completion never depends on SO write success.
+    }
   }
 
   /**

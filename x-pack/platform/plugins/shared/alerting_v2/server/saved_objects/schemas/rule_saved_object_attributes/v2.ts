@@ -11,11 +11,10 @@ import { ruleSavedObjectAttributesSchema as ruleSavedObjectAttributesSchemaV1 } 
 /**
  * Schema for the last execution outcome persisted directly on the rule SO.
  *
- * Two-state outcome (`success` / `failure`) mirrors `ExecutionEventLogger`'s
- * `ExecutionOutcome`. If we introduce a `warning` state later we can extend
- * this without another mapping migration since the mapped subset (outcome,
- * timestamp, duration_ms) is forward-compatible as long as outcome stays a
- * keyword.
+ * Two-state outcome (`success` / `failure`) — if we introduce a `warning`
+ * state later we can extend this without another mapping migration since the
+ * mapped subset (outcome, timestamp, duration_ms) is forward-compatible as
+ * long as outcome stays a keyword.
  *
  * `message` and `error_message` are intentionally unmapped (`dynamic: false`
  * at the root) so we avoid per-run churn on the mappings for unbounded text.
