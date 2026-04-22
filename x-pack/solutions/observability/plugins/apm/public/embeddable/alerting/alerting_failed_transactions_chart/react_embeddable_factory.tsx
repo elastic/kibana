@@ -14,11 +14,11 @@ import {
 } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import { BehaviorSubject, map, merge } from 'rxjs';
+import { APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE } from '@kbn/apm-embeddable-common';
 import type { EmbeddableApmAlertingVizProps } from '../types';
 import type { EmbeddableDeps } from '../../types';
 import { ApmEmbeddableContext } from '../../embeddable_context';
 import { APMAlertingFailedTransactionsChart } from './chart';
-import { APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE } from '../constants';
 
 export const getApmAlertingFailedTransactionsChartEmbeddableFactory = (deps: EmbeddableDeps) => {
   const factory: EmbeddableFactory<
