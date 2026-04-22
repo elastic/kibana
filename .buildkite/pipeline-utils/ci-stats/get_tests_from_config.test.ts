@@ -36,7 +36,6 @@ describe('filterEmptyJestConfigs glob coverage', () => {
     for (const configPath of allConfigs) {
       let config: Record<string, unknown>;
       try {
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
         config = require(configPath);
       } catch {
         continue;
@@ -57,7 +56,10 @@ describe('filterEmptyJestConfigs glob coverage', () => {
                 const specFilename = `example.spec.${ext}`;
                 if (!COVERED_EXTENSIONS.test(specFilename)) {
                   uncovered.push(
-                    `${path.relative(REPO_ROOT, configPath)}: testMatch extension ".${ext}" not covered`
+                    `${path.relative(
+                      REPO_ROOT,
+                      configPath
+                    )}: testMatch extension ".${ext}" not covered`
                   );
                 }
               }
@@ -82,7 +84,10 @@ describe('filterEmptyJestConfigs glob coverage', () => {
           const anyMatch = sampleFiles.some((f) => re.test(f));
           if (!anyMatch) {
             uncovered.push(
-              `${path.relative(REPO_ROOT, configPath)}: testRegex "${regex}" doesn't match standard test file names`
+              `${path.relative(
+                REPO_ROOT,
+                configPath
+              )}: testRegex "${regex}" doesn't match standard test file names`
             );
           }
         }
