@@ -26,7 +26,7 @@ const extendedExpect = baseExpect.extend({ toHaveStatusCode, toHaveStatusText, t
  */
 function expectFn(actual: unknown, options?: ExpectOptionsOrMessage): Matchers {
   const message = typeof options === 'string' ? options : options?.message;
-  // eslint-disable-next-line playwright/valid-expect
+
   const expectInstance = extendedExpect(actual, message ? { message } : undefined);
   return restrictMatchers(expectInstance);
 }
@@ -42,7 +42,6 @@ function expectFn(actual: unknown, options?: ExpectOptionsOrMessage): Matchers {
  * ).toBe(200);
  */
 function poll<T>(actual: () => T | Promise<T>, options?: PollOptions): PollMatchers {
-  // eslint-disable-next-line playwright/valid-expect
   const pollResult = extendedExpect.poll(actual, options);
   return restrictMatchers(pollResult) as unknown as PollMatchers;
 }
