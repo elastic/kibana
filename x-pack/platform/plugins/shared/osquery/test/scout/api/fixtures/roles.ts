@@ -43,7 +43,8 @@ const COMMON_READ_INDICES = [
 const COMMON_KIBANA_FEATURES = {
   ml: ['read'],
   siemV5: ['read', 'endpoint_list_read'],
-  securitySolutionRulesV2: ['read'],
+  securitySolutionRulesV4: ['read'],
+  securitySolutionAlertsV1: ['all'],
   securitySolutionAssistant: ['all'],
   securitySolutionAttackDiscovery: ['all'],
   securitySolutionTimeline: ['read'],

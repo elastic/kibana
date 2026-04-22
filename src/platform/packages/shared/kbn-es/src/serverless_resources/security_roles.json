@@ -47,8 +47,11 @@
           "siemV5": [
             "read"
           ],
-          "securitySolutionRulesV2": [
+          "securitySolutionRulesV4": [
             "read"
+          ],
+          "securitySolutionAlertsV1": [
+            "all"
           ],
           "securitySolutionAssistant": [
             "all"
@@ -129,8 +132,11 @@
           "siemV5": [
             "read"
           ],
-          "securitySolutionRulesV2": [
+          "securitySolutionRulesV4": [
             "read"
+          ],
+          "securitySolutionAlertsV1": [
+            "all"
           ],
           "securitySolutionAssistant": [
             "all"
@@ -246,7 +252,15 @@
             "actions_log_management_all",
             "file_operations_all"
           ],
-          "securitySolutionRulesV2": [
+          "securitySolutionRulesV4": [
+            "minimal_all",
+            "security_solution_exceptions_all",
+            "security_solution_investigation_guide_edit",
+            "security_solution_custom_highlighted_fields_edit",
+            "security_solution_enable_disable_rules",
+            "security_solution_manual_run_rules"
+          ],
+          "securitySolutionAlertsV1": [
             "all"
           ],
           "securitySolutionCasesV2": [
@@ -360,7 +374,15 @@
             "all",
             "endpoint_exceptions_all"
           ],
-          "securitySolutionRulesV2": [
+          "securitySolutionRulesV4": [
+            "minimal_all",
+            "security_solution_exceptions_all",
+            "security_solution_investigation_guide_edit",
+            "security_solution_custom_highlighted_fields_edit",
+            "security_solution_enable_disable_rules",
+            "security_solution_manual_run_rules"
+          ],
+          "securitySolutionAlertsV1": [
             "all"
           ],
           "securitySolutionAssistant": [
@@ -455,7 +477,11 @@
             "all",
             "endpoint_exceptions_all"
           ],
-          "securitySolutionRulesV2": [
+          "securitySolutionRulesV4": [
+            "read",
+            "security_solution_exceptions_all"
+          ],
+          "securitySolutionAlertsV1": [
             "all"
           ],
           "securitySolutionAssistant": [
@@ -544,7 +570,10 @@
             "all",
             "endpoint_exceptions_all"
           ],
-          "securitySolutionRulesV2": [
+          "securitySolutionRulesV4": [
+            "all"
+          ],
+          "securitySolutionAlertsV1": [
             "all"
           ],
           "securitySolutionAssistant": [
@@ -648,7 +677,10 @@
             "all",
             "endpoint_exceptions_all"
           ],
-          "securitySolutionRulesV2": [
+          "securitySolutionRulesV4": [
+            "all"
+          ],
+          "securitySolutionAlertsV1": [
             "all"
           ],
           "securitySolutionAssistant": [
