@@ -16,8 +16,12 @@ export {
   getPipelineDefinitionJsonSchema,
   pipelineDefinitionSchema,
   postParsePipelineDefinitionSchema,
+  formatZodPipelineErrors,
+  buildSimulationFeedback,
+  detectTemporaryFields,
   type SuggestProcessingPipelineResult,
   type SuggestPipelineAgentSchema,
+  type SimulationFeedback,
 } from './workflows/suggest_processing_pipeline';
 export {
   generateSignificantEvents,
