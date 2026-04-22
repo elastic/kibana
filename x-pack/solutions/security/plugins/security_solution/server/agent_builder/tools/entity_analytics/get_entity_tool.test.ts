@@ -24,6 +24,7 @@ import {
 import type { ExperimentalFeatures } from '../../../../common';
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../lib/telemetry/event_based/events';
+import { buildSingleEntityAttachmentId } from './entity_attachment_utils';
 import { getEntityTool, SECURITY_GET_ENTITY_TOOL_ID } from './get_entity_tool';
 
 jest.mock('../../utils/get_agent_builder_resource_availability', () => ({
@@ -964,7 +965,7 @@ describe('getEntityTool', () => {
       entityAttachmentRichRenderer: true,
     } as ExperimentalFeatures);
 
-    const expectedAttachmentId = `${SecurityAgentBuilderAttachments.entity}:host:server1`;
+    const expectedAttachmentId = buildSingleEntityAttachmentId('host', 'server1');
 
     const exactHitResponse = {
       columns: [
@@ -1101,7 +1102,7 @@ describe('getEntityTool', () => {
     });
 
     it('creates an attachment when resolved via exact entity.name match', async () => {
-      const expectedHostAttachmentId = `${SecurityAgentBuilderAttachments.entity}:host:LAPTOP-SALES04`;
+      const expectedHostAttachmentId = buildSingleEntityAttachmentId('host', 'LAPTOP-SALES04');
 
       (executeEsql as jest.Mock)
         // 1. Exact id match — empty (the input is the canonical name, not the id)
@@ -1156,7 +1157,7 @@ describe('getEntityTool', () => {
     });
 
     it('creates an attachment when resolved via exact user.full_name match', async () => {
-      const expectedUserAttachmentId = `${SecurityAgentBuilderAttachments.entity}:user:jdoe`;
+      const expectedUserAttachmentId = buildSingleEntityAttachmentId('user', 'jdoe');
 
       (executeEsql as jest.Mock)
         // 1. Exact id match — empty

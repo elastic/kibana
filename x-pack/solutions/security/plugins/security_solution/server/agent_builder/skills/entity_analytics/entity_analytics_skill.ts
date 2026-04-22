@@ -28,6 +28,18 @@ export interface EntityAnalyticsSkillsContext {
   logger: Logger;
 }
 
+// The "Inline rendering" sections below instruct the LLM to emit the
+// <render_attachment/> tag followed by a BLANK LINE before any prose. This is a
+// workaround for an upstream bug in agent_builder's createTagParser
+// (x-pack/platform/plugins/shared/agent_builder/public/application/components/
+// conversations/conversation_rounds/round_response/markdown_plugins/utils.ts):
+// when <render_attachment .../> shares a text node with trailing prose, the
+// parser mutates the node, deletes node.value, and drops the prose.
+// remark-parse-no-trim does not recognise `<render_attachment>` as an HTML tag
+// because its openTag regex rejects underscores, so the only way to keep the
+// prose is to force the parser to treat it as its own block — which it does
+// when separated by a blank line. Remove these template notes once the
+// upstream parser handles this case.
 const entityStoreV2Content = `
 This skill provides a guide to investigating specific security entities (hosts, users, services, generic) by entity ID (EUID)
 or by surfacing risky entities based on their risk scores, asset criticality levels and other behavioral and lifecycle attributes.
@@ -72,13 +84,17 @@ Use this skill when:
 #### Inline rendering (REQUIRED when a single entity is resolved)
 When \`security.get_entity\` resolves exactly one entity, it also stores a \`security.entity\` attachment
 and returns an \`other\` result containing \`attachmentId\` and \`version\`. You MUST render that
-attachment inline using the custom XML element:
+attachment inline using the custom XML element, on its own line, followed by a BLANK LINE, and then
+your prose summary:
 
     <render_attachment id="ATTACHMENT_ID" version="VERSION" />
+
+    <your prose summary here>
 
 Rules:
 - Copy \`id\` and \`version\` verbatim from the tool result. Do not invent or alter them.
 - Emit the \`<render_attachment>\` tag BEFORE your prose summary so the user sees the rich entity card first.
+- ALWAYS insert a BLANK LINE between the \`<render_attachment>\` tag and any following prose. Without this blank line, the prose will be dropped by the markdown parser.
 - Render each \`security.entity\` attachment at most once per turn.
 - When multiple results are returned (fallback match), no attachment is stored — skip the render tag and summarise in prose.
 
@@ -99,13 +115,17 @@ Rules:
 #### Inline rendering (REQUIRED when 2+ entities are returned)
 When \`security.search_entities\` returns 2 or more entities, it also stores an aggregate
 \`security.entity\` attachment and returns an \`other\` result containing \`attachmentId\` and
-\`version\`. You MUST render that attachment inline using the custom XML element:
+\`version\`. You MUST render that attachment inline using the custom XML element, on its own
+line, followed by a BLANK LINE, and then your prose summary:
 
     <render_attachment id="ATTACHMENT_ID" version="VERSION" />
+
+    <your prose summary here>
 
 Rules:
 - Copy \`id\` and \`version\` verbatim from the \`other\` tool result. Do not invent or alter them.
 - Emit the \`<render_attachment>\` tag BEFORE your prose summary so the user sees the table first.
+- ALWAYS insert a BLANK LINE between the \`<render_attachment>\` tag and any following prose. Without this blank line, the prose will be dropped by the markdown parser.
 - Render each \`security.entity\` attachment at most once per turn.
 - The rendered table REPLACES the prose markdown table for the list — do not also print the
   markdown columns described in Step 3 when the inline table is shown. A short narrative

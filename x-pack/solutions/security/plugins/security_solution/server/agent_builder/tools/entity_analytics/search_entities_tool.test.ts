@@ -24,7 +24,10 @@ import {
 import type { ExperimentalFeatures } from '../../../../common';
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../lib/telemetry/event_based/events';
-import { buildListEntityAttachmentId } from './entity_attachment_utils';
+import {
+  buildListEntityAttachmentId,
+  buildSingleEntityAttachmentId,
+} from './entity_attachment_utils';
 import { searchEntitiesTool, SECURITY_SEARCH_ENTITIES_TOOL_ID } from './search_entities_tool';
 
 jest.mock('../../utils/get_agent_builder_resource_availability', () => ({
@@ -764,7 +767,7 @@ describe('searchEntitiesTool', () => {
       values: [['host:server1', 'server1', 'host']],
     };
 
-    const expectedSingleAttachmentId = `${SecurityAgentBuilderAttachments.entity}:host:server1`;
+    const expectedSingleAttachmentId = buildSingleEntityAttachmentId('host', 'server1');
 
     it('creates a list attachment when 3 rows are returned and appends an other result', async () => {
       (executeEsql as jest.Mock).mockResolvedValueOnce(multiRowResponse);

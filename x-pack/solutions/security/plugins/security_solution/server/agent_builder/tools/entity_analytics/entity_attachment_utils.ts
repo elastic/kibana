@@ -93,11 +93,26 @@ export const describeAttachmentForRow = ({
  * `security.entity` attachment. Matches the scheme used by
  * `security.get_entity` so a later call for the same entity bumps the shared
  * attachment version rather than creating a new record.
+ *
+ * We hash the identifier because agent_builder's markdown pipeline
+ * (remark-parse-no-trim + createTagParser in
+ * x-pack/platform/plugins/shared/agent_builder/public/application/components/
+ * conversations/conversation_rounds/round_response/markdown_plugins/utils.ts)
+ * cannot recognise `<render_attachment id="..." />` when the id contains
+ * characters that trigger inline autolinking (e.g. `@` in user ids auto-links
+ * to `mailto:`). When that happens the tag is shattered across multiple AST
+ * nodes and is rendered as literal text instead of as the rich attachment.
+ * Hashing produces a pure hex id that is safe for inline placement. Remove
+ * once the upstream parser recognises `<render_attachment>` as an HTML tag
+ * and no longer depends on autolink-safe ids.
  */
 export const buildSingleEntityAttachmentId = (
   identifierType: AttachmentIdentifierType,
   identifier: string
-): string => `${SecurityAgentBuilderAttachments.entity}:${identifierType}:${identifier}`;
+): string => {
+  const hash = createHash('sha256').update(`${identifierType}:${identifier}`).digest('hex');
+  return `${SecurityAgentBuilderAttachments.entity}:${identifierType}:${hash}`;
+};
 
 /**
  * Builds a deterministic attachment id for a multi-entity search result. The
@@ -112,7 +127,7 @@ export const buildListEntityAttachmentId = (
     .map((e) => `${e.identifierType}:${e.identifier}`)
     .sort()
     .join('\n');
-  const hash = createHash('sha1').update(serialized).digest('hex');
+  const hash = createHash('sha256').update(serialized).digest('hex');
   return `${SecurityAgentBuilderAttachments.entity}:list:${hash}`;
 };
 

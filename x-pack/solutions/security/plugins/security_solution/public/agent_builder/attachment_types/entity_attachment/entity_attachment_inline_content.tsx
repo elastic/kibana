@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiCallOut, EuiPanel } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { Global, css } from '@emotion/react';
+import { EuiCallOut, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { QueryClientProvider } from '@kbn/react-query';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
@@ -23,6 +24,13 @@ export interface EntityAttachmentInlineContentProps
 }
 
 /**
+ * Stable marker class on the inline-content root. Used by the global style
+ * below (via `:has()`) to target the ancestor `EuiSplitPanel.Outer` that the
+ * agent_builder renderer mounts around us.
+ */
+export const ENTITY_ATTACHMENT_ROOT_CLASS = 'securitySolutionEntityAttachment__root';
+
+/**
  * The rich renderer mounts inside Agent Builder's provider tree, which does
  * not carry Security Solution's QueryClientProvider. Wrapping the subtree in
  * a module-scoped client here lets `useEntityFromStore` and siblings run
@@ -33,34 +41,60 @@ export const EntityAttachmentInlineContent: React.FC<EntityAttachmentInlineConte
   experimentalFeatures,
 }) => {
   const parsed = normaliseEntityAttachment(attachment);
+  const { euiTheme } = useEuiTheme();
+
+  // Workaround for a missing trailing spacer in agent_builder's
+  // createRenderAttachmentRenderer
+  // (x-pack/platform/plugins/shared/agent_builder/public/application/components/
+  // conversations/conversation_rounds/round_response/markdown_plugins/
+  // render_attachment_plugin.tsx): other markdown block renderers (codeBlock,
+  // table) append an <EuiSpacer />, but render_attachment does not, so the
+  // attachment's EuiSplitPanel.Outer ends flush against the following
+  // paragraph. We cannot add a spacer from inside the renderer because we
+  // render in EuiSplitPanel.Inner; the visible panel is the outer split-panel.
+  // Scope the rule tightly via `:has()` so it only targets panels that wrap
+  // our attachment. Remove once the upstream renderer adds a trailing spacer.
+  const outerPanelMarginStyles = useMemo(
+    () => css`
+      .euiSplitPanel:has(> .euiSplitPanel__inner > .${ENTITY_ATTACHMENT_ROOT_CLASS}) {
+        margin-block-end: ${euiTheme.size.m};
+      }
+    `,
+    [euiTheme.size.m]
+  );
 
   if (!parsed) {
     return (
-      <EuiPanel
-        hasShadow={false}
-        hasBorder={false}
-        paddingSize="m"
-        data-test-subj="entityAttachmentEmpty"
-      >
-        <EuiCallOut
-          announceOnMount
-          size="s"
-          color="warning"
-          iconType="warning"
-          title={i18n.translate(
-            'xpack.securitySolution.agentBuilder.entityAttachment.empty.title',
-            { defaultMessage: 'No entity information available' }
-          )}
-        >
-          {i18n.translate(
-            'xpack.securitySolution.agentBuilder.entityAttachment.empty.description',
-            {
-              defaultMessage:
-                'The entity attachment does not contain a valid identifier. The agent may still respond to the original question.',
-            }
-          )}
-        </EuiCallOut>
-      </EuiPanel>
+      <>
+        <Global styles={outerPanelMarginStyles} />
+        <div className={ENTITY_ATTACHMENT_ROOT_CLASS}>
+          <EuiPanel
+            hasShadow={false}
+            hasBorder={false}
+            paddingSize="m"
+            data-test-subj="entityAttachmentEmpty"
+          >
+            <EuiCallOut
+              announceOnMount
+              size="s"
+              color="warning"
+              iconType="warning"
+              title={i18n.translate(
+                'xpack.securitySolution.agentBuilder.entityAttachment.empty.title',
+                { defaultMessage: 'No entity information available' }
+              )}
+            >
+              {i18n.translate(
+                'xpack.securitySolution.agentBuilder.entityAttachment.empty.description',
+                {
+                  defaultMessage:
+                    'The entity attachment does not contain a valid identifier. The agent may still respond to the original question.',
+                }
+              )}
+            </EuiCallOut>
+          </EuiPanel>
+        </div>
+      </>
     );
   }
 
@@ -68,16 +102,21 @@ export const EntityAttachmentInlineContent: React.FC<EntityAttachmentInlineConte
   const privmonModifierEnabled = experimentalFeatures.enableRiskScorePrivmonModifier;
 
   return (
-    <QueryClientProvider client={entityAttachmentQueryClient}>
-      {parsed.isSingle ? (
-        <EntityCard
-          identifier={parsed.entities[0]}
-          watchlistsEnabled={watchlistsEnabled}
-          privmonModifierEnabled={privmonModifierEnabled}
-        />
-      ) : (
-        <EntityTable entities={parsed.entities} />
-      )}
-    </QueryClientProvider>
+    <>
+      <Global styles={outerPanelMarginStyles} />
+      <div className={ENTITY_ATTACHMENT_ROOT_CLASS}>
+        <QueryClientProvider client={entityAttachmentQueryClient}>
+          {parsed.isSingle ? (
+            <EntityCard
+              identifier={parsed.entities[0]}
+              watchlistsEnabled={watchlistsEnabled}
+              privmonModifierEnabled={privmonModifierEnabled}
+            />
+          ) : (
+            <EntityTable entities={parsed.entities} />
+          )}
+        </QueryClientProvider>
+      </div>
+    </>
   );
 };

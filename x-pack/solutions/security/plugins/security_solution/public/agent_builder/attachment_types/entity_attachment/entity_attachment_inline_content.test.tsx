@@ -10,7 +10,10 @@ import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import type { EntityAttachment } from './types';
-import { EntityAttachmentInlineContent } from './entity_attachment_inline_content';
+import {
+  ENTITY_ATTACHMENT_ROOT_CLASS,
+  EntityAttachmentInlineContent,
+} from './entity_attachment_inline_content';
 
 jest.mock('./entity_card/entity_card', () => ({
   EntityCard: (props: Record<string, unknown>) => (
@@ -93,5 +96,41 @@ describe('EntityAttachmentInlineContent', () => {
     const card = screen.getByTestId('entityCardMock');
     expect(card.getAttribute('data-watchlists-enabled')).toBe('true');
     expect(card.getAttribute('data-privmon-modifier-enabled')).toBe('true');
+  });
+
+  describe('outer-panel spacing workaround', () => {
+    it('wraps valid payloads in a div with the ENTITY_ATTACHMENT_ROOT_CLASS marker', () => {
+      const { container } = renderDispatcher({ identifierType: 'host', identifier: 'alpha' });
+      const marker = container.querySelector(`.${ENTITY_ATTACHMENT_ROOT_CLASS}`);
+      expect(marker).not.toBeNull();
+      expect(marker).toContainElement(screen.getByTestId('entityCardMock'));
+    });
+
+    it('wraps the empty callout in a div with the ENTITY_ATTACHMENT_ROOT_CLASS marker', () => {
+      const { container } = renderDispatcher({ foo: 'bar' });
+      const marker = container.querySelector(`.${ENTITY_ATTACHMENT_ROOT_CLASS}`);
+      expect(marker).not.toBeNull();
+      expect(marker).toContainElement(screen.getByTestId('entityAttachmentEmpty'));
+    });
+
+    it('mounts a global style that scopes the margin to .euiSplitPanel ancestors of the marker', () => {
+      renderDispatcher({ identifierType: 'host', identifier: 'alpha' });
+      // Emotion's <Global> injects rules into `document.styleSheets` via
+      // `CSSStyleSheet.insertRule` in jsdom, so the <style> tag's textContent
+      // is empty. Read the serialized rules from every stylesheet instead.
+      const cssText = Array.from(document.styleSheets)
+        .flatMap((sheet) => {
+          try {
+            return Array.from(sheet.cssRules);
+          } catch {
+            return [];
+          }
+        })
+        .map((rule) => rule.cssText)
+        .join('\n');
+      expect(cssText).toContain(ENTITY_ATTACHMENT_ROOT_CLASS);
+      expect(cssText).toMatch(/\.euiSplitPanel:has\(/);
+      expect(cssText).toContain('margin-block-end');
+    });
   });
 });
