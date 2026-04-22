@@ -48,6 +48,7 @@ export const forkStreamsRoute = createServerRoute({
       stream: z.object({ name: z.string() }),
       where: conditionSchema,
       status: routingStatus.optional(),
+      draft: z.boolean().optional(),
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<{ acknowledged: true }> => {
@@ -66,6 +67,7 @@ export const forkStreamsRoute = createServerRoute({
       where: params.body.where,
       name: params.body.stream.name,
       status: conditionStatus,
+      draft: params.body.draft,
     });
   },
 });
