@@ -13,7 +13,7 @@ import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { getOrEmptyTagFromValue } from '../../common/components/empty_value';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../../flyout_v2/shared/hooks/use_default_flyout_properties';
-import { RuleDetails } from '../../flyout_v2/rule_details';
+import { buildFlyoutContent } from '../../flyout_v2/shared/utils/build_flyout_content';
 import type { StartServices } from '../../types';
 import type { SecurityAppStore } from '../../common/store/types';
 
@@ -46,27 +46,32 @@ export const RuleNameCellRenderer = React.memo<RuleNameCellRendererProps>(
       return raw != null ? String(raw) : null;
     }, [props.row.flattened]);
 
+    const flyoutContent = useMemo(
+      () => (ruleId ? buildFlyoutContent(props.columnId, ruleId) : null),
+      [props.columnId, ruleId]
+    );
+
     const handleClick = useCallback(() => {
-      if (!ruleId) return;
+      if (!flyoutContent) return;
       overlays.openSystemFlyout(
         flyoutProviders({
           services,
           store,
           history,
-          children: <RuleDetails ruleId={ruleId} />,
+          children: flyoutContent,
         }),
         {
           ...defaultDocumentFlyoutProperties,
-          session: 'inherit',
+          session: 'start',
         }
       );
-    }, [defaultDocumentFlyoutProperties, overlays, services, store, history, ruleId]);
+    }, [defaultDocumentFlyoutProperties, overlays, services, store, history, flyoutContent]);
 
     if (!ruleName) {
       return getOrEmptyTagFromValue(null);
     }
 
-    if (!ruleId) {
+    if (!flyoutContent) {
       return <span data-test-subj="one-discover-rule-name">{ruleName}</span>;
     }
 
