@@ -691,6 +691,11 @@ export const CaseResponseProperties = lazySchema(() =>
     external_service: ExternalService,
     id: z.string(),
     /**
+      * A monotonically increasing number assigned to each case, unique per space. This value is generated asynchronously after the case is created and may not be present immediately in the response.
+
+      */
+    incremental_id: z.number().int().nullable().optional(),
+    /**
      * Observables attached to the case.
      */
     observables: z.array(CaseObservable),
@@ -1184,6 +1189,11 @@ export const CaseResponseGetCase = lazySchema(() =>
     duration: z.number().int().nullable(),
     external_service: ExternalService,
     id: z.string(),
+    /**
+      * A monotonically increasing number assigned to each case, unique per space. This value is generated asynchronously after the case is created and may not be present immediately in the response.
+
+      */
+    incremental_id: z.number().int().nullable().optional(),
     /**
      * Observables attached to the case.
      */
@@ -1720,16 +1730,21 @@ export const UserActionsFindResponseProperties = lazySchema(() =>
      */
     type: z.enum([
       'assignees',
-      'create_case',
+      'category',
       'comment',
       'connector',
+      'create_case',
+      'customFields',
+      'delete_case',
       'description',
+      'extended_fields',
+      'observables',
       'pushed',
-      'tags',
-      'title',
-      'status',
       'settings',
       'severity',
+      'status',
+      'tags',
+      'title',
     ]),
   })
 );
