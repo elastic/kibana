@@ -14,9 +14,13 @@ import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { ScopedModel, ToolEventEmitter, ToolHandlerResult } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import { EsResourceType } from '@kbn/agent-builder-common';
-import { indexExplorer, listSearchSources } from '@kbn/agent-builder-esql-utils';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { createToolCallMessage, extractTextContent, generateFakeToolCallId } from '../../langchain';
+import {
+  createToolCallMessage,
+  extractTextContent,
+  generateFakeToolCallId,
+} from '@kbn/agent-builder-esql-utils/langchain/messages';
+import { indexExplorer, listSearchSources } from '@kbn/agent-builder-esql-utils';
 import {
   createNaturalLanguageSearchTool,
   createRelevanceSearchTool,

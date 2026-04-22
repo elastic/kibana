@@ -9,17 +9,19 @@ import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result'
 import type { ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import { generateEsql } from '..';
+import { generateEsql } from '@kbn/agent-builder-esql-utils';
 import { createVisualizationGraph } from './graph_lens';
 import type { VisualizationConfig } from './types';
 
-jest.mock('..', () => ({
-  generateEsql: jest.fn(),
-}));
-
-jest.mock('../../langchain', () => ({
-  extractTextContent: (response: unknown) => String(response),
-}));
+jest.mock('@kbn/agent-builder-esql-utils', () => {
+  const actual = jest.requireActual<typeof import('@kbn/agent-builder-esql-utils')>(
+    '@kbn/agent-builder-esql-utils'
+  );
+  return {
+    ...actual,
+    generateEsql: jest.fn(),
+  };
+});
 
 jest.mock('./chart_type_registry', () => ({
   chartTypeRegistry: new Proxy(
