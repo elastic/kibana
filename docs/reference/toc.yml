@@ -5,13 +5,13 @@ toc:
   - file: configuration-reference.md
     children:
       - file: cloud/elastic-cloud-kibana-settings.md
-      - file: configuration-reference/general-settings.md
       - file: configuration-reference/alerting-settings.md
       - file: configuration-reference/apm-settings.md
       - file: configuration-reference/search-sessions-settings.md
       - file: configuration-reference/banner-settings.md
       - file: configuration-reference/cases-settings.md
       - file: configuration-reference/fleet-settings.md
+      - file: configuration-reference/general-settings.md
       - file: configuration-reference/internationalization-settings.md
       - file: configuration-reference/ai-assistant-settings.md
       - file: configuration-reference/logging-settings.md
