@@ -27,6 +27,7 @@ import {
   DUPLICATE_WITHOUT_EXCEPTIONS_OPTION,
   CONFIRM_DUPLICATE_RULE,
 } from '../../../../../screens/alerts_detection_rules';
+import { assertSuccessToast } from '../../../../../screens/common/toast';
 import { RULES_MANAGEMENT_URL } from '../../../../../urls/rules_management';
 import {
   DEPRECATED_RULE_DETAILS_CALLOUT,
@@ -175,6 +176,7 @@ describe(
         cy.get(DEPRECATED_RULE_DELETE_BUTTON).click();
         cy.get(CONFIRM_DELETE_RULE_BTN).click();
 
+        assertSuccessToast('Rules deleted', 'Successfully deleted 1 rule');
         cy.url().should('include', RULES_MANAGEMENT_URL);
       });
     });
@@ -198,6 +200,8 @@ describe(
 
           cy.get(DUPLICATE_WITHOUT_EXCEPTIONS_OPTION).click();
           cy.get(CONFIRM_DUPLICATE_RULE).click();
+
+          assertSuccessToast('Rules duplicated', 'Successfully duplicated 1 rule');
 
           cy.location('pathname').should('not.eq', originalPath);
           cy.location('pathname').should('match', /\/rules\/id\//);

@@ -189,6 +189,20 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(response.rules).toEqual([]);
       });
+
+      it('returns 400 when the filtered id does not exist', async () => {
+        const response = await reviewRuleDeprecation(
+          es,
+          supertest,
+          { ids: ['non-existent-so-id'] },
+          400
+        );
+
+        expect(response).toMatchObject({
+          message: 'No rules found for bulk get',
+          status_code: 400,
+        });
+      });
     });
 
     describe('Authorization', () => {

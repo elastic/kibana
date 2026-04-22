@@ -20,6 +20,7 @@ import {
   getPrebuiltRulesStatus,
   installPrebuiltRules,
   getInstalledRules,
+  reviewPrebuiltRulesToInstall,
 } from '../../../../utils';
 
 export default ({ getService }: FtrProviderContext): void => {
@@ -323,6 +324,18 @@ export default ({ getService }: FtrProviderContext): void => {
 
           expect(body.summary.succeeded).toBe(0);
           expect(body.results.created).toHaveLength(0);
+        });
+
+        it('does not include deprecated rule assets in the install review after the bootstrap endpoint is called', async () => {
+          await createDeprecatedPrebuiltRuleAssetSavedObjects(es, [
+            { rule_id: 'deprecated-rule-1', version: 1 },
+          ]);
+
+          await detectionsApi.bootstrapPrebuiltRules().expect(200);
+
+          const response = await reviewPrebuiltRulesToInstall(supertest);
+          const ruleIds = response.rules.map((r: { rule_id: string }) => r.rule_id);
+          expect(ruleIds).not.toContain('deprecated-rule-1');
         });
       });
 
