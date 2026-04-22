@@ -25,9 +25,14 @@ interface EventTypeProps {
 }
 export function EventType({ eventTypeValue }: EventTypeProps) {
   const { euiTheme } = useEuiTheme();
+
+  if (!eventTypeValue) {
+    return null;
+  }
+
   return (
     <EuiBadge color={euiPaletteRed9[9]} data-test-subj={dataTestSubj} css={badgeCss(euiTheme)}>
-      <EuiText size="xs">{eventTypeValue ?? ''}</EuiText>
+      <EuiText size="xs">{eventTypeValue}</EuiText>
     </EuiBadge>
   );
 }
