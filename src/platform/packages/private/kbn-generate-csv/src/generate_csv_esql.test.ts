@@ -162,6 +162,36 @@ describe('CsvESQLGenerator', () => {
     expect(csvResult.csv_contains_formulas).toBe(false);
   });
 
+  it('excludes _source from the CSV output in ES|QL mode', async () => {
+    mockSearchResponse({
+      columns: [
+        { name: 'date', type: 'date' },
+        { name: '_source', type: '_source' },
+        { name: 'message', type: 'string' },
+      ],
+      values: [['2020-12-31T00:14:28.000Z', { foo: 'bar' }, 'hello']],
+    });
+
+    const generateCsv = new CsvESQLGenerator(
+      createMockJob({ query: { esql: '' } }),
+      mockConfig,
+      mockTaskInstanceFields,
+      {
+        es: mockEsClient,
+        data: mockDataClient,
+        uiSettings: uiSettingsClient,
+      },
+      new CancellationToken(),
+      mockLogger,
+      stream,
+      jobId
+    );
+    await generateCsv.generateData();
+
+    expect(content).not.toContain('_source');
+    expect(content).not.toContain('[object Object]');
+  });
+
   it('calculates the bytes of the content', async () => {
     mockSearchResponse({
       columns: [{ name: 'message', type: 'string' }],

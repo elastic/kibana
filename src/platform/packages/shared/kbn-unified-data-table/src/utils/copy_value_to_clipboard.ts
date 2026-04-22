@@ -279,11 +279,21 @@ export const copyRowsAsTextToClipboard = async ({
 export const copyRowsAsJsonToClipboard = async ({
   selectedRows,
   toastNotifications,
+  isPlainRecord,
 }: {
   selectedRows: DataTableRecord[];
   toastNotifications: ToastsStart;
+  isPlainRecord: boolean | undefined;
 }): Promise<string | null> => {
-  const textToCopy = selectedRows ? JSON.stringify(selectedRows.map((row) => row.raw)) : '';
+  const expandSource = ({ _source, ...rest }: DataTableRecord['flattened']) => {
+    const merged: Record<string, unknown> = {
+      ...(typeof _source === 'object' && _source !== null ? _source : {}),
+      ...rest,
+    };
+    return Object.fromEntries(Object.entries(merged).sort(([a], [b]) => a.localeCompare(b)));
+  };
+  const toJson = (row: DataTableRecord) => (isPlainRecord ? expandSource(row.flattened) : row.raw);
+  const textToCopy = selectedRows ? JSON.stringify(selectedRows.map(toJson)) : '';
 
   let copied;
   try {

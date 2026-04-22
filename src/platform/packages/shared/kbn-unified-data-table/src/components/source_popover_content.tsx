@@ -28,7 +28,7 @@ export const SourcePopoverContent = ({
   columnId: string;
   row: DataTableRecord;
   useTopLevelObjectColumns: boolean;
-  isPlainRecord?: boolean;
+  isPlainRecord: boolean | undefined;
   dataTestSubj?: string;
 }) => {
   return (

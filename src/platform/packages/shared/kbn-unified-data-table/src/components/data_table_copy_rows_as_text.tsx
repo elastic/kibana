@@ -15,6 +15,7 @@ import type { ToastsStart } from '@kbn/core/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { calcFieldCounts } from '@kbn/discover-utils';
 import { copyRowsAsTextToClipboard, CopyAsTextFormat } from '../utils/copy_value_to_clipboard';
+import { SOURCE_COLUMN } from '../utils/columns';
 import { UnifiedDataTableContext } from '../table_context';
 
 interface DataTableCopyRowsAsTextProps {
@@ -49,27 +50,25 @@ export const DataTableCopyRowsAsText: React.FC<DataTableCopyRowsAsTextProps> = (
       onClick={async () => {
         setIsProcessing(true);
 
-        const outputColumns = columns.reduce((acc, column) => {
-          if (column === '_source') {
-            // split Document column into individual columns
-            const fieldCounts = calcFieldCounts(rows);
-            acc.push(...Object.keys(fieldCounts).sort());
-            return acc;
-          }
-          acc.push(column);
-          return acc;
-        }, [] as string[]);
+        const sourceInnerKeys = rows.flatMap(({ flattened }) => {
+          const source = flattened?.[SOURCE_COLUMN];
+          return source && typeof source === 'object' ? Object.keys(source) : [];
+        });
+        const documentFields = uniq([...Object.keys(calcFieldCounts(rows)), ...sourceInnerKeys])
+          .filter((key) => key !== SOURCE_COLUMN)
+          .sort();
+        const outputColumns = uniq(
+          columns.flatMap((column) => (column === SOURCE_COLUMN ? documentFields : [column]))
+        ).sort();
+
+        const selectedRowIndices = rows
+          .map((row, index) => (isDocSelected(row.id) ? index : -1))
+          .filter((index) => index !== -1);
 
         await copyRowsAsTextToClipboard({
           format,
-          columns: uniq(outputColumns),
-          // preserving the original order of rows rather than the order of selecting rows
-          selectedRowIndices: rows.reduce((acc, row, index) => {
-            if (isDocSelected(row.id)) {
-              acc.push(index);
-            }
-            return acc;
-          }, [] as number[]),
+          columns: outputColumns,
+          selectedRowIndices,
           valueToStringConverter,
           toastNotifications,
           dataView,

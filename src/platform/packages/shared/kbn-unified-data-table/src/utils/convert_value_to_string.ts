@@ -50,7 +50,10 @@ export const convertValueToString = ({
     };
   }
   const rowFlattened = rows[rowIndex].flattened;
-  const value = rowFlattened?.[columnId];
+  // Fallback to the nested `_source` object when the column is not present at the top level
+  // (e.g. ES|QL queries with `KEEP _source` keep fields nested under `_source`).
+  const nestedSource = rowFlattened?._source as Record<string, unknown> | undefined;
+  const value = rowFlattened?.[columnId] ?? nestedSource?.[columnId];
   const disableMultiline = options?.compatibleWithCSV ?? false;
   const field = getDataViewFieldOrCreateFromColumnMeta({
     fieldName: columnId,

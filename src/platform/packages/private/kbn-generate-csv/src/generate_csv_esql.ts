@@ -155,12 +155,27 @@ export class CsvESQLGenerator {
       }
 
       const responseColumns = rawResponse.columns?.map(({ name }) => name) ?? [];
-      const visibleColumns =
+      const rows = rawResponse.values.map((row) => zipObject(responseColumns, row));
+
+      // Expand `_source` into its inner fields so they are serialized as proper columns instead
+      // of being collapsed into a single `[object Object]` blob.
+      const sourceInnerKeys = Array.from(
+        new Set(
+          rows.flatMap((row) => {
+            const source = row._source;
+            return source && typeof source === 'object' ? Object.keys(source) : [];
+          })
+        )
+      );
+      const requestedColumns =
         this.job.columns && this.job.columns.length > 0
           ? this.job.columns.filter((column) => responseColumns.includes(column))
           : responseColumns;
-
-      const rows = rawResponse.values.map((row) => zipObject(responseColumns, row));
+      const visibleColumns = Array.from(
+        new Set(
+          requestedColumns.flatMap((column) => (column === '_source' ? sourceInnerKeys : [column]))
+        )
+      ).sort();
 
       const header =
         Array.from(visibleColumns).map(this.escapeValues(settings)).join(settings.separator) + '\n';
@@ -234,8 +249,13 @@ export class CsvESQLGenerator {
       const rowDefinition: string[] = [];
       const escape = this.escapeValues(settings);
 
+      const nestedSource =
+        dataTableRow._source && typeof dataTableRow._source === 'object'
+          ? (dataTableRow._source as Record<string, unknown>)
+          : undefined;
       for (const column of columns) {
-        let formattedValue: string = escape(`${dataTableRow[column]}`);
+        const rawValue = dataTableRow[column] ?? nestedSource?.[column];
+        let formattedValue: string = escape(`${rawValue}`);
         if (formattedValue === 'null') formattedValue = '';
         if (formattedValue === 'undefined') formattedValue = '';
         rowDefinition.push(formattedValue);

@@ -41,6 +41,7 @@ export const DataTableCopyRowsAsJson: React.FC<DataTableCopyRowsAsJsonProps> = (
           // preserving the original order of rows rather than the order of selecting rows
           selectedRows: getSelectedDocsOrderedByRows(rows),
           toastNotifications,
+          isPlainRecord,
         });
         setIsProcessing(false);
         onCompleted();
