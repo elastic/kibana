@@ -200,7 +200,7 @@ function NewPanelContent({ dashboardApi }: { dashboardApi: DashboardApi }) {
                     <EuiText size="xs" color="subdued">
                       {i18nFn.translate(
                         'dashboard.addPanelFlyout.featured.esqlVisualizationDescription',
-                        { defaultMessage: 'Build charts with ES|QL' }
+                        { defaultMessage: 'Build charts, metrics, and tables with ES|QL' }
                       )}
                     </EuiText>
                   </EuiFlexItem>
