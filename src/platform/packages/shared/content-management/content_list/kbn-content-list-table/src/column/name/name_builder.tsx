@@ -14,6 +14,7 @@ import { i18n } from '@kbn/i18n';
 import type { ContentListItem } from '@kbn/content-list-provider';
 import type { ColumnBuilderContext } from '../types';
 import { column } from '../part';
+import { getColumnLayoutProps, type ColumnLayoutProps } from '../layout';
 import { NameCell, type NameCellProps } from './name_cell';
 
 /** Default i18n-translated column title for the name column. */
@@ -28,9 +29,7 @@ const DEFAULT_NAME_COLUMN_TITLE = i18n.translate(
  * These are the declarative attributes consumers pass in JSX. The name builder
  * reads them directly from the parsed attributes.
  */
-export interface NameColumnProps {
-  /** Column width (CSS value like `'200px'` or `'40%'`). */
-  width?: string;
+export interface NameColumnProps extends ColumnLayoutProps {
   /** Custom column title. Defaults to `'Name'`. */
   columnTitle?: string;
   /**
@@ -65,6 +64,17 @@ export interface NameColumnProps {
    */
   showStarred?: boolean;
   /**
+   * Optional click handler for the title.
+   * When provided, the provider-level `item.getHref` is ignored unless
+   * `shouldUseHref` is explicitly `true`.
+   */
+  onClick?: (item: ContentListItem) => void;
+  /**
+   * Whether to use the provider-level `item.getHref` for the title link.
+   * Defaults to `true` unless `onClick` is provided.
+   */
+  shouldUseHref?: boolean;
+  /**
    * Optional click handler for tag badges.
    * Called with the tag and a boolean indicating whether a modifier key
    * (Cmd on Mac, Ctrl on Windows/Linux) was held during the click.
@@ -89,10 +99,15 @@ export const buildNameColumn = (
   const {
     columnTitle,
     width,
+    minWidth,
+    maxWidth,
+    truncateText,
     sortable: sortableProp,
     showDescription = true,
     showTags = context.supports?.tags ?? false,
     showStarred = false,
+    onClick,
+    shouldUseHref,
     onTagClick,
     render: customRender,
   } = attributes;
@@ -106,14 +121,18 @@ export const buildNameColumn = (
     field: 'title',
     name: columnTitle ?? DEFAULT_NAME_COLUMN_TITLE,
     sortable,
-    ...(width && { width }),
+    ...getColumnLayoutProps({ width, minWidth, maxWidth, truncateText }),
     'data-test-subj': 'content-list-table-column-name',
     render: (title: string, item: ContentListItem) => {
       if (customRender) {
         return customRender(item);
       }
 
-      return <NameCell {...{ item, showDescription, showTags, showStarred, onTagClick }} />;
+      return (
+        <NameCell
+          {...{ item, showDescription, showTags, showStarred, onClick, shouldUseHref, onTagClick }}
+        />
+      );
     },
   };
 };
