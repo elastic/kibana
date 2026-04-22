@@ -8,6 +8,7 @@
  */
 
 import type { ScoutPage } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 
 /**
  * Wait for Discover to finish loading: give the `discoverDataGridUpdating`
@@ -71,4 +72,45 @@ export const setChartInterval = async (page: ScoutPage, intervalTitle: string) =
   await page.testSubj.waitForSelector('unifiedHistogramTimeIntervalSelectorSelectable', {
     state: 'hidden',
   });
+};
+
+/**
+ * Close the Discover document-viewer flyout and wait for it to disappear.
+ */
+export const closeDocViewerFlyout = async (page: ScoutPage) => {
+  await page.testSubj.click('euiFlyoutCloseButton');
+  await expect(page.testSubj.locator('kbnDocViewer')).toBeHidden();
+};
+
+/**
+ * Hover the given data-grid cell and click its "expand" action, opening the
+ * cell-value popover (which embeds a Monaco editor with the row JSON).
+ *
+ * @param rowIndex - 0-based visible row index.
+ * @param columnId - EUI data-grid column id (e.g. `_source`, `@timestamp`).
+ */
+export const expandGridCell = async (
+  page: ScoutPage,
+  { rowIndex, columnId }: { rowIndex: number; columnId: string }
+) => {
+  const cell = page.locator(
+    `[data-grid-visible-row-index="${rowIndex}"] [data-gridcell-column-id="${columnId}"]`
+  );
+  await cell.hover();
+  await cell.locator('[data-test-subj="euiDataGridCellExpandButton"]').click();
+  await expect(page.testSubj.locator('euiDataGridExpansionPopover')).toBeVisible();
+};
+
+/**
+ * Inside an open document-viewer flyout, hover the row for `fieldName` and
+ * click its "toggle column" action. Used to add/remove grid columns from the
+ * flyout. Calling this twice on the same field toggles it off.
+ */
+export const toggleColumnInDocViewer = async (page: ScoutPage, fieldName: string) => {
+  const nameCell = page.testSubj.locator(`tableDocViewRow-${fieldName}-name`);
+  await nameCell.hover();
+  await nameCell.click();
+  const toggle = page.testSubj.locator(`toggleColumnButton-${fieldName}`);
+  await toggle.waitFor({ state: 'visible' });
+  await toggle.click();
 };

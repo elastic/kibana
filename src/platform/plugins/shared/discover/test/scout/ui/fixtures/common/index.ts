@@ -10,4 +10,11 @@
 import * as testData from './constants';
 
 export { testData };
-export { chooseBreakdownField, setChartInterval, waitForDiscoverToSettle } from './page_helpers';
+export {
+  chooseBreakdownField,
+  closeDocViewerFlyout,
+  expandGridCell,
+  setChartInterval,
+  toggleColumnInDocViewer,
+  waitForDiscoverToSettle,
+} from './page_helpers';
