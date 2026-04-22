@@ -129,8 +129,8 @@ const formatThreatMapping = (
   return threatMapping
     .map((map) =>
       (map.entries ?? [])
-        .map((entry) =>
-          `${entry.field} ${entry.negate ? 'DOES NOT MATCH' : 'MATCHES'} ${entry.value}`
+        .map(
+          (entry) => `${entry.field} ${entry.negate ? 'DOES NOT MATCH' : 'MATCHES'} ${entry.value}`
         )
         .join(' AND ')
     )
