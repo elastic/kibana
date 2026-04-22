@@ -11,7 +11,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
-import { defaultToolsFlyoutProperties } from '../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import { useDefaultToolsFlyoutProperties } from '../../flyout_v2/shared/hooks/use_default_flyout_properties';
 import { RemoteDocumentCallout } from '../../flyout_v2/document/components/remote_document_callout';
 import type { SecurityAppStore } from '../../common/store/types';
 import type { StartServices } from '../../types';
@@ -56,6 +56,7 @@ export const AlertFlyoutHeader = ({
   onAlertUpdated,
 }: AlertFlyoutHeaderProps) => {
   const history = useHistory();
+  const defaultToolsFlyoutProperties = useDefaultToolsFlyoutProperties();
   const [services, setServices] = useState<StartServices | null>(null);
   const [store, setStore] = useState<SecurityAppStore | null>(null);
   const isSecurityApp = useIsInSecurityApp();
@@ -78,7 +79,7 @@ export const AlertFlyoutHeader = ({
         historyKey,
       }
     );
-  }, [history, historyKey, hit, services, store]);
+  }, [defaultToolsFlyoutProperties, history, historyKey, hit, services, store]);
 
   useEffect(() => {
     let isCanceled = false;

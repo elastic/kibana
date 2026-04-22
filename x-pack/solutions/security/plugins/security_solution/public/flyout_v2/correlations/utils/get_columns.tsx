@@ -6,7 +6,13 @@
  */
 
 import React from 'react';
-import { type EuiBasicTableColumn, EuiButtonIcon, EuiToolTip, formatDate } from '@elastic/eui';
+import {
+  type EuiBasicTableColumn,
+  EuiButtonIcon,
+  EuiLink,
+  EuiToolTip,
+  formatDate,
+} from '@elastic/eui';
 import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { isRight } from 'fp-ts/Either';
 import { ALERT_REASON, ALERT_RULE_NAME } from '@kbn/rule-data-utils';
@@ -25,11 +31,13 @@ export const getColumns = ({
   dataTestSubj,
   onShowAlert,
   hidePreviewLink,
+  onShowRuleSummary,
 }: {
   scopeId: string;
   dataTestSubj?: string;
   onShowAlert: (id: string, indexName: string) => void;
   hidePreviewLink: boolean;
+  onShowRuleSummary?: (ruleId: string) => void;
 }): Array<EuiBasicTableColumn<Record<string, unknown>>> => [
   {
     render: (row: Record<string, unknown>) => (
@@ -81,7 +89,16 @@ export const getColumns = ({
       return (
         <EuiToolTip content={ruleName}>
           {hidePreviewLink ? (
-            <span>{ruleName}</span>
+            onShowRuleSummary && ruleId ? (
+              <EuiLink
+                onClick={() => onShowRuleSummary(ruleId)}
+                data-test-subj={`${dataTestSubj}RuleLink`}
+              >
+                <span>{ruleName}</span>
+              </EuiLink>
+            ) : (
+              <span>{ruleName}</span>
+            )
           ) : (
             <PreviewLink
               field={ALERT_RULE_NAME}

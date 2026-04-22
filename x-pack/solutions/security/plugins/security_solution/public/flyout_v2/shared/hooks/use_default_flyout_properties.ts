@@ -27,10 +27,17 @@ export const useDefaultDocumentFlyoutProperties = (): OverlaySystemFlyoutOpenOpt
 
 /**
  * Hook that returns the main properties used when opening a tools flyout, to ensure consistency.
+ * Tools flyouts replace the document flyout in-place (e.g. correlations, prevalence, analyzer).
  */
-export const defaultToolsFlyoutProperties: OverlaySystemFlyoutOpenOptions = {
-  ownFocus: false,
-  paddingSize: 'm',
-  resizable: true,
-  size: 'm',
+export const useDefaultToolsFlyoutProperties = (): OverlaySystemFlyoutOpenOptions => {
+  const { euiTheme } = useEuiTheme();
+
+  return {
+    maxWidth: euiTheme.breakpoint.xl,
+    minWidth: euiTheme.base * 24,
+    ownFocus: false,
+    paddingSize: 'm',
+    resizable: true,
+    size: 'm',
+  };
 };

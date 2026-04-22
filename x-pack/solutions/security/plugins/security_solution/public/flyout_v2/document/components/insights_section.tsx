@@ -30,9 +30,10 @@ import { PrevalenceDetails } from '../../prevalence';
 import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { CorrelationsDetails } from '../../correlations';
+import { RuleDetails } from '../../rule_details';
 import { ThreatIntelligenceDetails } from '../../threat_intelligence';
 import {
-  defaultToolsFlyoutProperties,
+  useDefaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
 } from '../../shared/hooks/use_default_flyout_properties';
 import { ChildLink } from '../../shared/components/child_link';
@@ -68,7 +69,8 @@ export const InsightsSection = memo(({ hit, onAlertUpdated }: InsightsSectionPro
   const { overlays } = services;
   const store = useStore();
   const history = useHistory();
-  const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
+  const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
+  const defaultToolsFlyoutProperties = useDefaultToolsFlyoutProperties();
   const isInSecurityApp = useIsInSecurityApp();
   const historyKey = isInSecurityApp ? alertFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
 
@@ -109,7 +111,7 @@ export const InsightsSection = memo(({ hit, onAlertUpdated }: InsightsSectionPro
         session: 'start',
       }
     );
-  }, [history, historyKey, hit, overlays, services, store]);
+  }, [defaultToolsFlyoutProperties, history, historyKey, hit, overlays, services, store]);
 
   const onShowAlert = useCallback(
     (id: string, indexName: string) =>
@@ -128,11 +130,29 @@ export const InsightsSection = memo(({ hit, onAlertUpdated }: InsightsSectionPro
           ),
         }),
         {
-          ...defaultFlyoutProperties,
+          ...defaultDocumentFlyoutProperties,
           session: 'inherit',
         }
       ),
-    [defaultFlyoutProperties, history, onAlertUpdated, overlays, services, store]
+    [defaultDocumentFlyoutProperties, history, onAlertUpdated, overlays, services, store]
+  );
+
+  const onShowRuleSummary = useCallback(
+    (targetRuleId: string) => {
+      overlays.openSystemFlyout(
+        flyoutProviders({
+          services,
+          store,
+          history,
+          children: <RuleDetails ruleId={targetRuleId} />,
+        }),
+        {
+          ...defaultDocumentFlyoutProperties,
+          session: 'inherit',
+        }
+      );
+    },
+    [defaultDocumentFlyoutProperties, history, overlays, services, store]
   );
 
   const onShowCorrelationsDetails = useCallback(() => {
@@ -147,6 +167,7 @@ export const InsightsSection = memo(({ hit, onAlertUpdated }: InsightsSectionPro
             scopeId=""
             isRulePreview={false}
             onShowAlert={onShowAlert}
+            onShowRuleSummary={onShowRuleSummary}
           />
         ),
       }),
@@ -156,7 +177,17 @@ export const InsightsSection = memo(({ hit, onAlertUpdated }: InsightsSectionPro
         session: 'start',
       }
     );
-  }, [history, historyKey, hit, onShowAlert, overlays, services, store]);
+  }, [
+    defaultToolsFlyoutProperties,
+    history,
+    historyKey,
+    hit,
+    onShowAlert,
+    onShowRuleSummary,
+    overlays,
+    services,
+    store,
+  ]);
 
   const onShowPrevalenceDetails = useCallback(() => {
     overlays.openSystemFlyout(
@@ -179,7 +210,17 @@ export const InsightsSection = memo(({ hit, onAlertUpdated }: InsightsSectionPro
         session: 'start',
       }
     );
-  }, [history, historyKey, hit, investigationFields, isInSecurityApp, overlays, services, store]);
+  }, [
+    defaultToolsFlyoutProperties,
+    history,
+    historyKey,
+    hit,
+    investigationFields,
+    isInSecurityApp,
+    overlays,
+    services,
+    store,
+  ]);
 
   return (
     <ExpandableSection

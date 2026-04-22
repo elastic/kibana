@@ -33,6 +33,10 @@ export interface RelatedAlertsBySessionProps {
    * Whether to hide the rule preview link
    */
   hidePreviewLink: boolean;
+  /**
+   * Callback to open the rule summary flyout for a given rule ID.
+   */
+  onShowRuleSummary?: (ruleId: string) => void;
 }
 
 /**
@@ -44,6 +48,7 @@ export const RelatedAlertsBySession: React.FC<RelatedAlertsBySessionProps> = ({
   eventId,
   onShowAlert,
   hidePreviewLink,
+  onShowRuleSummary,
 }) => {
   const { loading, error, data, dataCount } = useFetchRelatedAlertsBySession({
     entityId,
@@ -57,8 +62,9 @@ export const RelatedAlertsBySession: React.FC<RelatedAlertsBySessionProps> = ({
         dataTestSubj: CORRELATIONS_DETAILS_BY_SESSION_SECTION_TEST_ID,
         onShowAlert,
         hidePreviewLink,
+        onShowRuleSummary,
       }),
-    [scopeId, onShowAlert, hidePreviewLink]
+    [scopeId, onShowAlert, hidePreviewLink, onShowRuleSummary]
   );
 
   if (error) {

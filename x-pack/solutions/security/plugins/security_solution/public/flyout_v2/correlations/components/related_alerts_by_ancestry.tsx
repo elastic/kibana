@@ -33,6 +33,10 @@ export interface RelatedAlertsByAncestryProps {
    * Whether to hide the rule preview link
    */
   hidePreviewLink: boolean;
+  /**
+   * Callback to open the rule summary flyout for a given rule ID.
+   */
+  onShowRuleSummary?: (ruleId: string) => void;
 }
 
 /**
@@ -43,6 +47,7 @@ export const RelatedAlertsByAncestry: React.FC<RelatedAlertsByAncestryProps> = (
   scopeId,
   onShowAlert,
   hidePreviewLink,
+  onShowRuleSummary,
 }) => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const oldSecurityDefaultPatterns =
@@ -64,8 +69,9 @@ export const RelatedAlertsByAncestry: React.FC<RelatedAlertsByAncestryProps> = (
         dataTestSubj: CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID,
         onShowAlert,
         hidePreviewLink,
+        onShowRuleSummary,
       }),
-    [scopeId, onShowAlert, hidePreviewLink]
+    [scopeId, onShowAlert, hidePreviewLink, onShowRuleSummary]
   );
 
   if (error) {

@@ -51,6 +51,10 @@ export interface CorrelationsDetailsViewProps {
    * Defaults to true (hidden) for the new tools flyout which has no expandable flyout context.
    */
   hidePreviewLink?: boolean;
+  /**
+   * Callback to open the rule summary flyout for a given rule ID.
+   */
+  onShowRuleSummary?: (ruleId: string) => void;
 }
 
 /**
@@ -65,6 +69,7 @@ export const CorrelationsDetailsView = memo(
     onShowAlert,
     onShowAttack,
     hidePreviewLink = true,
+    onShowRuleSummary,
   }: CorrelationsDetailsViewProps) => {
     const eventId = hit.raw._id ?? '';
     const ecsData = useMemo<Ecs>(
@@ -124,6 +129,7 @@ export const CorrelationsDetailsView = memo(
                   eventId={eventId}
                   onShowAlert={onShowAlert}
                   hidePreviewLink={hidePreviewLink}
+                  onShowRuleSummary={onShowRuleSummary}
                 />
               </EuiFlexItem>
             )}
@@ -135,6 +141,7 @@ export const CorrelationsDetailsView = memo(
                   eventId={eventId}
                   onShowAlert={onShowAlert}
                   hidePreviewLink={hidePreviewLink}
+                  onShowRuleSummary={onShowRuleSummary}
                 />
               </EuiFlexItem>
             )}
@@ -145,6 +152,7 @@ export const CorrelationsDetailsView = memo(
                   documentId={ancestryDocumentId}
                   onShowAlert={onShowAlert}
                   hidePreviewLink={hidePreviewLink}
+                  onShowRuleSummary={onShowRuleSummary}
                 />
               </EuiFlexItem>
             )}

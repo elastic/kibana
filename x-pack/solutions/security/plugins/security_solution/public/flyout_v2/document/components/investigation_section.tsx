@@ -15,7 +15,7 @@ import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { alertFlyoutHistoryKey } from '../constants/flyout_history';
-import { defaultToolsFlyoutProperties } from '../../shared/hooks/use_default_flyout_properties';
+import { useDefaultToolsFlyoutProperties } from '../../shared/hooks/use_default_flyout_properties';
 import { EventKind } from '../constants/event_kinds';
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 import { useKibana } from '../../../common/lib/kibana';
@@ -65,6 +65,7 @@ export const InvestigationSection = memo(
     const store = useStore();
     const history = useHistory();
     const isInSecurityApp = useIsInSecurityApp();
+    const defaultToolsFlyoutProperties = useDefaultToolsFlyoutProperties();
     const historyKey = isInSecurityApp ? alertFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
 
     const isAlert = useMemo(
@@ -112,7 +113,7 @@ export const InvestigationSection = memo(
           session: 'start',
         }
       );
-    }, [history, historyKey, hit, overlays, services, store]);
+    }, [defaultToolsFlyoutProperties, history, historyKey, hit, overlays, services, store]);
 
     return (
       <ExpandableSection

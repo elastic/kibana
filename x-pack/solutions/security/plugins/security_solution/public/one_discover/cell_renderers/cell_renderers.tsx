@@ -12,11 +12,15 @@ import type { SecuritySolutionCellRendererFeature } from '@kbn/discover-shared-p
 import type { ColumnHeaderType } from '../../../common/types';
 import type { Maybe } from '../../../common/search_strategy';
 import { DefaultCellRenderer } from '../../timelines/components/timeline/cell_rendering/default_cell_renderer';
-import { IP_FIELD_TYPE } from '../../timelines/components/timeline/body/renderers/constants';
+import {
+  IP_FIELD_TYPE,
+  SIGNAL_RULE_NAME_FIELD_NAME,
+} from '../../timelines/components/timeline/body/renderers/constants';
 import { getEcsField } from '../../flyout/document_details/right/components/table_field_name_cell';
 import type { StartServices } from '../../types';
 import type { SecurityAppStore } from '../../common/store/types';
 import { IpCellRenderer } from './ip_cell_renderer';
+import { RuleNameCellRenderer } from './rule_name_cell_renderer';
 import { ONE_DISCOVER_SCOPE_ID } from '../constants';
 
 export type SecuritySolutionRowCellRendererGetter = Awaited<
@@ -88,6 +92,12 @@ export const getCellRendererForGivenRecord = (
     if (ecsField?.type === IP_FIELD_TYPE) {
       return function IpFieldRenderer(props: DataGridCellValueElementProps) {
         return <IpCellRenderer {...props} services={services} store={store} />;
+      };
+    }
+
+    if (fieldName === SIGNAL_RULE_NAME_FIELD_NAME) {
+      return function RuleNameFieldRenderer(props: DataGridCellValueElementProps) {
+        return <RuleNameCellRenderer {...props} services={services} store={store} />;
       };
     }
 

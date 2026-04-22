@@ -41,7 +41,7 @@ export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
           if (!params.dataView.getIndexPattern().includes(ALERTS_INDEX_PATTERN)) {
             return entries;
           }
-          ['kibana.alert.workflow_status'].forEach((fieldName) => {
+          ['kibana.alert.workflow_status', 'kibana.alert.rule.name'].forEach((fieldName) => {
             entries[fieldName] =
               context.getSecuritySolutionCellRenderer?.(fieldName) ?? entries[fieldName];
           });

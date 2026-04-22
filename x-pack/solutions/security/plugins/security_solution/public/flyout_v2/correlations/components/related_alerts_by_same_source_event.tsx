@@ -33,6 +33,10 @@ export interface RelatedAlertsBySameSourceEventProps {
    * Whether to hide the rule preview link
    */
   hidePreviewLink: boolean;
+  /**
+   * Callback to open the rule summary flyout for a given rule ID.
+   */
+  onShowRuleSummary?: (ruleId: string) => void;
 }
 
 /**
@@ -44,6 +48,7 @@ export const RelatedAlertsBySameSourceEvent: React.FC<RelatedAlertsBySameSourceE
   eventId,
   onShowAlert,
   hidePreviewLink,
+  onShowRuleSummary,
 }) => {
   const { loading, data, dataCount } = useFetchRelatedAlertsBySameSourceEvent({
     originalEventId,
@@ -57,8 +62,9 @@ export const RelatedAlertsBySameSourceEvent: React.FC<RelatedAlertsBySameSourceE
         dataTestSubj: CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TEST_ID,
         onShowAlert,
         hidePreviewLink,
+        onShowRuleSummary,
       }),
-    [scopeId, onShowAlert, hidePreviewLink]
+    [scopeId, onShowAlert, hidePreviewLink, onShowRuleSummary]
   );
 
   return (
