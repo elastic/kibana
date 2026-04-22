@@ -37,6 +37,11 @@ export const useDeprecatedRuleDetailsCallout = ({
 }: UseDeprecatedRuleDetailsCalloutProps) => {
   const {
     application: { navigateToApp },
+    docLinks: {
+      links: {
+        securitySolution: { manageDetectionRules },
+      },
+    },
   } = useKibana().services;
   const {
     rules: { edit: canEditRules },
@@ -135,10 +140,7 @@ export const useDeprecatedRuleDetailsCallout = ({
             defaultMessage="This rule won't receive new updates or fixes. If you still need it, duplicate it as a custom rule. Otherwise, you can delete it now. {docsLink}"
             values={{
               docsLink: (
-                <EuiLink
-                  href="https://www.elastic.co/docs/solutions/security/detect-and-alert/manage-detection-rules#deprecated-prebuilt-rules"
-                  target="_blank"
-                >
+                <EuiLink href={`${manageDetectionRules}#deprecated-prebuilt-rules`} target="_blank">
                   <FormattedMessage
                     id="xpack.securitySolution.detectionEngine.deprecation.detailsCalloutDocsLink"
                     defaultMessage="Read the docs to learn more."

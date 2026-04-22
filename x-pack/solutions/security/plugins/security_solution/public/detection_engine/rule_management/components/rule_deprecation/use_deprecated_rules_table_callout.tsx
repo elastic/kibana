@@ -8,6 +8,7 @@
 import React, { useCallback } from 'react';
 import { EuiButton, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '../../../../common/lib/kibana';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
@@ -28,6 +29,13 @@ export const useDeprecatedRulesTableCallout = () => {
   const [isConfirmVisible, showConfirm, hideConfirm] = useBoolState();
   const [isDismissed, dismiss] = useTimedDismissal(DISMISSAL_STORAGE_KEY);
   const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
+  const {
+    docLinks: {
+      links: {
+        securitySolution: { manageDetectionRules },
+      },
+    },
+  } = useKibana().services;
   const { data, isLoading } = usePrebuiltRulesDeprecationReview(null, {
     enabled: isFeatureEnabled,
   });
@@ -58,10 +66,7 @@ export const useDeprecatedRulesTableCallout = () => {
             defaultMessage="These rules have been deprecated and won't receive new updates or fixes. Duplicate them as custom rules, delete them now, or dismiss this to be reminded in 7 days. {docsLink}"
             values={{
               docsLink: (
-                <EuiLink
-                  href="https://www.elastic.co/docs/solutions/security/detect-and-alert/manage-detection-rules#deprecated-prebuilt-rules"
-                  target="_blank"
-                >
+                <EuiLink href={`${manageDetectionRules}#deprecated-prebuilt-rules`} target="_blank">
                   <FormattedMessage
                     id="xpack.securitySolution.detectionEngine.deprecation.tableCalloutDocsLink"
                     defaultMessage="Read the docs to learn more."
