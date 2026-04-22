@@ -20,12 +20,12 @@ export interface BlastRadiusDonutProps {
 const DEFAULT_SIZE = 100;
 const DEFAULT_STROKE = 18;
 
-export const BlastRadiusDonut: React.FC<BlastRadiusDonutProps> = ({
+export function BlastRadiusDonut({
   score,
   isCritical,
   size = DEFAULT_SIZE,
   strokeWidth = DEFAULT_STROKE,
-}) => {
+}: BlastRadiusDonutProps) {
   const { euiTheme } = useEuiTheme();
 
   const { radius, circumference, dashOffset, trackColor, arcColor, labelColor } = useMemo(() => {
@@ -115,4 +115,4 @@ export const BlastRadiusDonut: React.FC<BlastRadiusDonutProps> = ({
       </div>
     </div>
   );
-};
+}

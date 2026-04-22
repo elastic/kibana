@@ -42,7 +42,7 @@ export interface SignificantEventDetailBodyProps {
   onOpenConversation?: () => void;
 }
 
-export const SignificantEventDetailBody: React.FC<SignificantEventDetailBodyProps> = ({
+export function SignificantEventDetailBody({
   event,
   relevanceScore = 75,
   suggestionsCount = 2,
@@ -51,7 +51,7 @@ export const SignificantEventDetailBody: React.FC<SignificantEventDetailBodyProp
   onRemediate,
   onRunInBackground,
   onOpenConversation,
-}) => {
+}: SignificantEventDetailBodyProps) {
   const summaryPanelTitle = i18n.translate(
     'xpack.observability.sigeventsOverview.sigEvents.childSummaryTitle',
     { defaultMessage: 'Summary' }
@@ -219,4 +219,4 @@ export const SignificantEventDetailBody: React.FC<SignificantEventDetailBodyProp
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-};
+}

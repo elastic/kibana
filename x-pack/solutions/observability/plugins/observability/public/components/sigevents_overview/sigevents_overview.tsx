@@ -40,7 +40,7 @@ export interface SigeventsOverviewProps {
   onOpenConversation?: () => void;
 }
 
-export const SigeventsOverview: React.FC<SigeventsOverviewProps> = ({
+export function SigeventsOverview({
   state = 'critical',
   blastRadiusScore,
   criticalCount,
@@ -55,7 +55,7 @@ export const SigeventsOverview: React.FC<SigeventsOverviewProps> = ({
   onAttachEntity,
   onAttachEvent,
   onOpenConversation,
-}) => {
+}: SigeventsOverviewProps) {
   const { euiTheme } = useEuiTheme();
 
   if (state !== 'critical') {
@@ -143,4 +143,4 @@ export const SigeventsOverview: React.FC<SigeventsOverviewProps> = ({
       />
     </div>
   );
-};
+}
