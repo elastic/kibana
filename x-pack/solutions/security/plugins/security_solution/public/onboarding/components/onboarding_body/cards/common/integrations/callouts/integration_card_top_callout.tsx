@@ -16,7 +16,7 @@ import { AgentlessAvailableCallout } from './agentless_available_callout';
 import { ActiveIntegrationsCallout } from './active_integrations_callout';
 import { EndpointCallout } from './endpoint_callout';
 import { IntegrationTabId } from '../../../../../../../common/lib/integrations/types';
-import { MigrationsCallout } from './migrations_callout';
+import { MigrationsCallout, useShowMigrationCallout } from './migrations_callout';
 
 export const IntegrationCardTopCallout = React.memo<{
   activeIntegrationsCount: number;
@@ -26,6 +26,8 @@ export const IntegrationCardTopCallout = React.memo<{
   const { pathname } = useLocation();
   const { isAgentlessAvailable$ } = useOnboardingService();
   const isAgentlessAvailable = useObservable(isAgentlessAvailable$, undefined);
+
+  const showMigrationCallout = useShowMigrationCallout();
 
   const showActiveCallout = activeIntegrationsCount > 0 || isAgentRequired;
 

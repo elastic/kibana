@@ -8,8 +8,10 @@ import React, { memo, useMemo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPanel, EuiButton, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { SecurityPageName, useNavigateTo } from '@kbn/security-solution-navigation';
+import { useLocation } from 'react-router-dom';
 import { IconAgent } from '../../../../../../../common/icons/agent';
 import { useGetSecuritySolutionUrl } from '../../../../../../../common/components/link_to';
+import { SIEM_MIGRATIONS_PATH } from '../../../../../../../../common/constants';
 
 export const MigrationsCallout = memo(() => {
   const { navigateTo } = useNavigateTo();
@@ -18,6 +20,7 @@ export const MigrationsCallout = memo(() => {
     () => getSecuritySolutionUrl({ deepLinkId: SecurityPageName.siemMigrationsManage }),
     [getSecuritySolutionUrl]
   );
+
   const onClick = useCallback(
     (e: React.SyntheticEvent) => {
       e.preventDefault();
@@ -54,5 +57,11 @@ export const MigrationsCallout = memo(() => {
     </EuiPanel>
   );
 });
+
+export const useShowMigrationCallout = () => {
+  const { pathname } = useLocation();
+
+  return !pathname.includes(SIEM_MIGRATIONS_PATH);
+};
 
 MigrationsCallout.displayName = 'MigrationsCallout';
