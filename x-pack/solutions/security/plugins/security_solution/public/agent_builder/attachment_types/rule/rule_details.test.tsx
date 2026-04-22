@@ -55,8 +55,6 @@ const renderInlineContent = async (rule: Record<string, unknown>) => {
           data: { text: JSON.stringify(rule) },
         }}
         isSidebar={false}
-        isCanvas={false}
-        updateOrigin={jest.fn()}
       />
     );
   });
@@ -981,8 +979,6 @@ describe('RuleInlineContent integration', () => {
             data: { text: 'not-valid-json' },
           }}
           isSidebar={false}
-          isCanvas={false}
-          updateOrigin={jest.fn()}
         />
       );
     });
@@ -1019,8 +1015,6 @@ describe('RuleInlineContent integration', () => {
             data: { text: '[1,2,3]' },
           }}
           isSidebar={false}
-          isCanvas={false}
-          updateOrigin={jest.fn()}
         />
       );
     });
