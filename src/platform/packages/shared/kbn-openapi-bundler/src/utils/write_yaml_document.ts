@@ -8,7 +8,7 @@
  */
 
 import fs from 'fs/promises';
-import { Document, isScalar, visit } from 'yaml';
+import { Document, isMap, isScalar, isSeq, visit } from 'yaml';
 import type { Pair } from 'yaml';
 import { dirname } from 'path';
 
@@ -60,24 +60,28 @@ function requiresQuoting(str: string): boolean {
 /**
  * Walk the document tree and set explicit scalar types to match js-yaml's
  * block-scalar heuristics:
- *   - Strings with internal '\n' → BLOCK_LITERAL (|)
- *   - Strings whose length exceeds the effective line budget, or strings with
- *     only a trailing '\n' (from a folded block scalar source) → BLOCK_FOLDED (>)
+ *   - Multi-line strings whose first line exceeds the effective line budget →
+ *     BLOCK_FOLDED (>), matching js-yaml's hasFoldableLine check.
+ *   - Multi-line strings whose first line fits within the budget (e.g.
+ *     structured code samples like curl commands) → BLOCK_LITERAL (|), to
+ *     preserve embedded newlines as-is.
+ *   - Single-line strings whose length exceeds the effective line budget for
+ *     the current nesting depth → BLOCK_FOLDED (>-)
+ *   - All other strings → no override (PLAIN)
  *
  * Map keys are skipped (they must stay inline). Strings that cannot be YAML
  * plain scalars (e.g. those starting with '#') are also skipped — the yaml
- * serialiser will quote them naturally (e.g. as '#/components/schemas/Foo').
+ * serialiser will quote them naturally.
  *
  * A trailing '\n' is stripped before the internal-newline check because the
- * yaml package appends one to folded (>) block scalars via clip-chomping.
- * Without stripping it, those long single-line values would be mis-classified
- * as BLOCK_LITERAL and re-serialised with '|' instead of '>'.
+ * yaml package appends one to folded (>) block scalars via clip-chomping;
+ * without stripping it those values would be mis-classified.
  *
- * The effective line budget mirrors js-yaml's lineWidth-aware selection: it
- * subtracts an estimated overhead (path depth + a fixed key+': ' allowance)
- * from the target line width of 80 chars. Without this, short-ish strings that
- * still exceed 80 chars when combined with their key/indentation prefix would
- * remain as plain scalars instead of being folded.
+ * The effective line budget replicates js-yaml's lineWidth formula:
+ *   effectiveWidth = Math.max(80 - 2 * (depth + 1), 40)
+ * where depth is the number of Map/Seq ancestor nodes in the AST path.
+ * The threshold is applied to the VALUE string length alone (not the full
+ * line width including indentation and key prefix).
  */
 const applyBlockScalarTypes = (doc: Document): void => {
   visit(doc, {
@@ -86,21 +90,23 @@ const applyBlockScalarTypes = (doc: Document): void => {
         const str = node.value;
         const hasTrailingNewline = str.endsWith('\n');
         const body = hasTrailingNewline ? str.slice(0, -1) : str;
-        if (body.includes('\n')) {
-          node.type = 'BLOCK_LITERAL';
+        const depth = path.filter((n) => isMap(n) || isSeq(n)).length;
+        const effectiveWidth = Math.max(80 - 2 * (depth + 1), 40);
+        if (body.includes('\n') || hasTrailingNewline) {
+          // js-yaml uses hasFoldableLine to decide FOLDED vs LITERAL: if the
+          // first line is long enough to be folded it picks BLOCK_FOLDED (>),
+          // otherwise BLOCK_LITERAL (|) to preserve structured content (e.g.
+          // curl examples) verbatim. The check is strict (>) matching
+          // js-yaml's `lineTotal > lineWidth` condition.
+          const firstLine = body.split('\n')[0];
+          node.type = firstLine.length > effectiveWidth ? 'BLOCK_FOLDED' : 'BLOCK_LITERAL';
         } else {
           // Strings that cannot be plain YAML scalars (e.g. '#/...' $ref
           // values) must be quoted — don't force BLOCK_FOLDED on them.
           if (requiresQuoting(body)) return;
-          // Estimate the line budget remaining for the scalar value after
-          // accounting for indentation and key overhead. Each entry in `path`
-          // contributes roughly one character of YAML indentation (the default
-          // indent is 2 spaces per level, but path includes both Map/Seq nodes
-          // and Pair nodes, roughly halving the effective multiplier). A fixed
-          // 14-char allowance covers the key name and ': ' separator.
-          const estimatedLineOverhead = path.length + 14;
-          const effectiveThreshold = Math.max(20, 80 - estimatedLineOverhead);
-          if (body.length > effectiveThreshold || hasTrailingNewline) {
+          // Replicate js-yaml's lineWidth-based folding decision.
+          // The check is strict (>) matching js-yaml's `lineTotal > lineWidth`.
+          if (body.length > effectiveWidth) {
             node.type = 'BLOCK_FOLDED';
           }
         }
