@@ -104,6 +104,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Legend actions in Lens XY and Partition charts now only appear on hover [#255616]({{kib-pull}}255616).
 * Removes the font-weight configuration option from Lens Metric chart titles, defaulting to medium weight [#254941]({{kib-pull}}254941).
 * Updates axis title and label colors in Lens and dashboard charts to be less visually prominent [#254587]({{kib-pull}}254587).
+* Displays row numbers by default in Lens data tables [#247834]({{kib-pull}}247834).
 
 **Data ingestion and Fleet**:
 * Allows remote {{es}} outputs and service tokens in Serverless [#262101]({{kib-pull}}262101).
@@ -268,7 +269,6 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Adds a gap scheduler error callout [#250393]({{kib-pull}}250393).
 * Adds metrics grid {{esql}} WHERE propagation [#249103]({{kib-pull}}249103).
 * Adds a SharePoint Online connector to the available list of connectors [#248737]({{kib-pull}}248737).
-* Displays row numbers for the data table by default [#247834]({{kib-pull}}247834).
 * Adds a serverless Trial Companion [#244178]({{kib-pull}}244178).
 * Adds the `createConversation` and `inviteToConversation` actions [#260806]({{kib-pull}}260806).
 * Shows streams field description in {{esql}} editor and field side bar [#260582]({{kib-pull}}260582).
@@ -336,6 +336,9 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Fixes compound filters showing unsaved changes on dashboard load [#247309]({{kib-pull}}247309).
 * Increases default top values from 3 or 5 to 9 categories in Lens [#247015]({{kib-pull}}247015).
 * Fixes the handling of a quote as a dead key [#246773]({{kib-pull}}246773).
+* Fixes an issue where embeddables cannot load when no references are provided [#257779]({{kib-pull}}257779).
+* Fixes `runtime_mappings` being ignored or overridden in Vega visualization data requests [#253560]({{kib-pull}}253560).
+* Changes the Gauge chart default color palette to the status palette [#246734]({{kib-pull}}246734).
 
 **Data ingestion and Fleet**:
 * Fixes package policy count filters: uses `NOT latest_revision:false` instead of `latest_revision:true` [#263717]({{kib-pull}}263717).
@@ -514,7 +517,6 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Cancels in-flight metrics requests on breakdown change [#258473]({{kib-pull}}258473).
 * Validates HTTP connector URL against `allowedHosts` at execution time [#258080]({{kib-pull}}258080).
 * Uses correct URL in `viewInAppUrl` and fixes `??` bug in redirect [#257910]({{kib-pull}}257910).
-* Fixes an issue where embeddables cannot load when no references are provided [#257779]({{kib-pull}}257779).
 * Fixes false validation errors for item/index in `data.map` steps [#257703]({{kib-pull}}257703).
 * Fixes an accessibility issue in the table with zoom [#257097]({{kib-pull}}257097).
 * Adds support for native YAML arrays for foreach step [#256298]({{kib-pull}}256298).
@@ -529,7 +531,6 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Propagates inference errors [#254815]({{kib-pull}}254815).
 * Adds server-side validation for workflow inputs before execution [#254546]({{kib-pull}}254546).
 * Fixes execution tree clipping when the foreach step has many iterations [#253576]({{kib-pull}}253576).
-* Fixes `data[].url.body.runtime_mappings` param being ignored or overridden in Vega specs [#253560]({{kib-pull}}253560).
 * Fixes the scrollbars color in Safari when the macOS appearance setting is the opposite of the selected Kibana Color Mode [#253484]({{kib-pull}}253484).
 * Fixes false validation errors for template-local variables in Liquid templates [#253405]({{kib-pull}}253405).
 * Fixes Beats tutorial authentication instructions in serverless environments to show correct API key-based configuration [#253164]({{kib-pull}}253164).
@@ -547,7 +548,6 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Fixes a bug where Agent Builder Index Search tools would fail on aliases that contained `semantic_text` fields [#247877]({{kib-pull}}247877).
 * Fixes `ToolbarSelector` when clicking on tabs [#247836]({{kib-pull}}247836).
 * Improves anonymization error messages when the NER model is not available [#247696]({{kib-pull}}247696).
-* Changes the Gauge chart default color palette to the status palette [#246734]({{kib-pull}}246734).
 * Adds a table caption for empty top categories in the logs category table [#246041]({{kib-pull}}246041).
 * Adds a refusal field to assistant conversations [#243423]({{kib-pull}}243423).
 
