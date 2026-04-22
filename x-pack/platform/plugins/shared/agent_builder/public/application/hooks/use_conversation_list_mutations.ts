@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useQueryClient } from '@kbn/react-query';
 import produce from 'immer';
 import type { Conversation } from '@kbn/agent-builder-common';
@@ -62,5 +62,8 @@ export const useConversationListMutations = ({
     [conversationsService, queryClient]
   );
 
-  return { deleteConversation, renameConversation };
+  return useMemo(
+    () => ({ deleteConversation, renameConversation }),
+    [deleteConversation, renameConversation]
+  );
 };

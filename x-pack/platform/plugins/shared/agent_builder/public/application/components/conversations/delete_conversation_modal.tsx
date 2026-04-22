@@ -6,7 +6,7 @@
  */
 
 import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useConversationContext } from '../../context/conversation/conversation_context';
 import { useConversationId } from '../../context/conversation/use_conversation_id';
@@ -29,12 +29,6 @@ export const BaseDeleteConversationModal: React.FC<BaseDeleteConversationModalPr
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const confirmModalTitleId = useGeneratedHtmlId({ prefix: 'deleteConversationModal' });
-
-  useEffect(() => {
-    if (isOpen) {
-      setIsLoading(false);
-    }
-  }, [isOpen]);
 
   const handleDelete = useCallback(async () => {
     if (!conversationId) {

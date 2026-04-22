@@ -80,53 +80,56 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
   const baseLinkStyles = createConversationListItemStyles(euiTheme);
   const activeLinkStyles = createActiveConversationListItemStyles(euiTheme);
 
-  const linkStyles = useMemo(
-    () => css`
-      ${isActive ? activeLinkStyles : baseLinkStyles}
+  const linkStyles = css([
+    isActive ? activeLinkStyles : baseLinkStyles,
+    css`
       flex: 1 1 0;
       min-width: 0;
       width: auto;
       display: block;
     `,
-    [isActive, activeLinkStyles, baseLinkStyles]
-  );
+  ]);
 
-  const rowStyles = useMemo(
-    () => css`
-      display: flex;
-      align-items: center;
-      gap: ${euiTheme.size.xxs};
-      border-radius: ${euiTheme.border.radius.small};
-      padding-inline-end: ${euiTheme.size.xxs};
+  const rowLayoutStyles = css({
+    display: 'flex',
+    alignItems: 'center',
+    gap: euiTheme.size.xxs,
+    borderRadius: euiTheme.border.radius.small,
+    paddingInlineEnd: euiTheme.size.xxs,
+  });
 
-      ${isActive
-        ? css`
-            background-color: ${euiTheme.colors.backgroundLightPrimary};
-          `
-        : undefined}
+  const rowHoverAndFocusStyles = css`
+    &:hover .${ACTIONS_CLASS},
+    &:focus-within .${ACTIONS_CLASS} {
+      opacity: 1;
+    }
+    &:hover,
+    &:focus-within {
+      background-color: ${euiTheme.colors.backgroundLightPrimary};
+    }
+  `;
 
-      &:hover .${ACTIONS_CLASS},
-      &:focus-within .${ACTIONS_CLASS},
-      &[data-conversation-list-menu-open='true'] .${ACTIONS_CLASS} {
-        opacity: 1;
-      }
+  const activeOrPopoverRowBg = css`
+    background-color: ${euiTheme.colors.backgroundLightPrimary};
+  `;
 
-      &:hover,
-      &:focus-within,
-      &[data-conversation-list-menu-open='true'] {
-        background-color: ${euiTheme.colors.backgroundLightPrimary};
-      }
-    `,
-    [euiTheme, isActive]
-  );
+  const popoverOpenActionsVisible = css`
+    .${ACTIONS_CLASS} {
+      opacity: 1;
+    }
+  `;
 
-  const actionsStyles = useMemo(
-    () => css`
-      flex-shrink: 0;
-      opacity: 0;
-    `,
-    []
-  );
+  const rowStyles = css([
+    rowLayoutStyles,
+    rowHoverAndFocusStyles,
+    (isActive || isPopoverOpen) && activeOrPopoverRowBg,
+    isPopoverOpen && popoverOpenActionsVisible,
+  ]);
+
+  const actionsStyles = css`
+    flex-shrink: 0;
+    opacity: 0;
+  `;
 
   const menuItems = useMemo(
     () => [
@@ -185,7 +188,6 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
         responsive={false}
         alignItems="center"
         css={rowStyles}
-        data-conversation-list-menu-open={isPopoverOpen ? 'true' : 'false'}
         data-test-subj={`agentBuilderSidebarConversationRow-${conversationId}`}
       >
         <EuiFlexItem grow css={css({ minWidth: 0 })}>
@@ -216,21 +218,25 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <BaseRenameConversationModal
-        isOpen={isRenameModalOpen}
-        onClose={() => setIsRenameModalOpen(false)}
-        conversationId={conversationId}
-        initialTitle={title}
-        onRename={renameConversation}
-      />
+      {isRenameModalOpen ? (
+        <BaseRenameConversationModal
+          isOpen
+          onClose={() => setIsRenameModalOpen(false)}
+          conversationId={conversationId}
+          initialTitle={title}
+          onRename={renameConversation}
+        />
+      ) : null}
 
-      <BaseDeleteConversationModal
-        isOpen={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
-        conversationId={conversationId}
-        title={title}
-        onDelete={deleteConversation}
-      />
+      {isDeleteModalOpen ? (
+        <BaseDeleteConversationModal
+          isOpen
+          onClose={() => setIsDeleteModalOpen(false)}
+          conversationId={conversationId}
+          title={title}
+          onDelete={deleteConversation}
+        />
+      ) : null}
     </>
   );
 };

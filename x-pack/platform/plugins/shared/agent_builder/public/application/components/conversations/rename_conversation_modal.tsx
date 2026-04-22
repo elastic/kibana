@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -50,15 +50,8 @@ export const BaseRenameConversationModal: React.FC<BaseRenameConversationModalPr
   onRename,
 }) => {
   const { addErrorToast } = useToasts();
-  const [newTitle, setNewTitle] = useState('');
+  const [newTitle, setNewTitle] = useState(initialTitle || '');
   const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    if (isOpen) {
-      setNewTitle(initialTitle || '');
-      setIsLoading(false);
-    }
-  }, [isOpen, initialTitle]);
 
   const isDirty = newTitle.trim() !== (initialTitle || '').trim();
 
