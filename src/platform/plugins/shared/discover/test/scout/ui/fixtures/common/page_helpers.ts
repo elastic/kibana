@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { expect } from '@kbn/scout/ui';
 import type { ScoutPage } from '@kbn/scout';
 
 /**
@@ -82,11 +83,19 @@ export const expandGridCell = async (
  *
  */
 export const toggleColumnInDocViewer = async (page: ScoutPage, fieldName: string) => {
-  const nameElement = page.testSubj.locator(`tableDocViewRow-${fieldName}-name`);
-  await nameElement.scrollIntoViewIfNeeded();
-  await nameElement.hover();
-
-  const toggle = page.locator(`[data-test-subj="toggleColumnButton-${fieldName}"]:visible`);
-  await toggle.waitFor({ state: 'visible' });
-  await toggle.click();
+  const flyout = page.testSubj.locator('docViewerFlyout');
+  // The field table is an EuiDataGrid with a sticky "Field" header. Scrolling the row
+  // to the vertical center of the grid viewport keeps the toggle from sitting under
+  // that header (avoids "element intercepts pointer events" / unstable clicks).
+  await expect(async () => {
+    const nameElement = flyout.locator(`[data-test-subj="tableDocViewRow-${fieldName}-name"]`);
+    await nameElement.evaluate((el) => {
+      el.scrollIntoView({ block: 'center', inline: 'nearest' });
+    });
+    await nameElement.hover();
+    const toggle = flyout.locator(`[data-test-subj="toggleColumnButton-${fieldName}"]`);
+    await toggle.waitFor({ state: 'visible' });
+    await toggle.scrollIntoViewIfNeeded();
+    await toggle.click();
+  }).toPass({ timeout: 15_000 });
 };
