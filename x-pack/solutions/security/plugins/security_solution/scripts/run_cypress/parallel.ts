@@ -533,6 +533,25 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
                   process.env.CYPRESS_RETRY_RUN = 'true';
                 }
 
+                // [test-injection, revert before merge] Force a synthetic
+                // CypressFailedRunResult for a chosen spec so we can exercise
+                // the runner-failure handling path in real CI. Tied to the
+                // KBN_CYPRESS_INJECT_RUNNER_FAILURE env var (substring match
+                // against the spec path). Guarded on !retryAttempt so it can
+                // never leak into the in-place retry path.
+                const forcedFailureMatch = process.env.KBN_CYPRESS_INJECT_RUNNER_FAILURE;
+                if (forcedFailureMatch && !retryAttempt && filePath.includes(forcedFailureMatch)) {
+                  log.warning(
+                    `[test-injection] Returning synthetic CypressFailedRunResult for ${filePath} (KBN_CYPRESS_INJECT_RUNNER_FAILURE=${forcedFailureMatch})`
+                  );
+                  return {
+                    status: 'failed',
+                    failures: 1,
+                    message:
+                      'Synthetic CypressFailedRunResult injected via KBN_CYPRESS_INJECT_RUNNER_FAILURE for PR #264796 validation.',
+                  } as unknown as CypressCommandLine.CypressFailedRunResult;
+                }
+
                 return cypress.run({
                   browser: USE_CHROME_BETA ? 'chrome:beta' : 'chrome',
                   spec: filePath,
