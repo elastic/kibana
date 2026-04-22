@@ -8,7 +8,7 @@
  */
 
 import type React from 'react';
-import type { PublishingSubject } from '@kbn/presentation-publishing';
+import type { BehaviorSubject } from 'rxjs';
 
 import type { TypeOf } from '@kbn/config-schema';
 import type { controlTitleSchema, dataControlSchema } from './control_schema';
@@ -60,7 +60,7 @@ export interface HasCustomPrepend {
   CustomPrependComponent: React.FC<{}>;
 }
 export interface PublishesTooltipLabel {
-  tooltipLabel$: PublishingSubject<string>;
+  tooltipLabel$: BehaviorSubject<string>;
 }
 
 export const apiPublishesTooltipLabel = (api: unknown): api is PublishesTooltipLabel =>
