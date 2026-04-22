@@ -53,20 +53,25 @@ test.describe('Saved queries CRUD from UI', { tag: mkiTags }, () => {
       'select name, version from os_version;'
     );
 
-    await pageObjects.osqueryLiveQueryForm.clickAdvanced();
-    // One ECS-pairing row to prove mapping is persisted end-to-end.
+    // NOTE: the dedicated create page (`/app/osquery/saved_queries/new`) does
+    // NOT render the "Advanced" accordion the live-query form uses — timeout,
+    // ECS mapping, and pack-config sections are always expanded. Do not call
+    // `clickAdvanced()` here.
     await pageObjects.osqueryEcsMappingEditor.typeEcsField('host.name{downArrow}{enter}');
     await pageObjects.osqueryEcsMappingEditor.typeColumnValue('name{downArrow}{enter}');
 
-    await page.testSubj.locator('savedQueryFlyoutSaveButton').click();
+    // The create page renders the save button in an `EuiBottomBar` with only a
+    // visible "Save query" label; there is no `data-test-subj` on it. Target
+    // via role + name, scoped into the form's bottom bar.
+    // (source: `public/routes/saved_queries/new/form.tsx:72-85`)
+    await page.getByRole('button', { name: 'Save query' }).click();
     await expect(page.getByText(/Successfully saved/)).toBeVisible({ timeout: 30_000 });
 
-    // Confirm via API that the saved query landed with the ECS mapping attached —
-    // asserting only on the toast would miss server-side regressions in ECS persistence.
-    await pageObjects.osqueryNavigation.gotoSavedQueries();
-    await expect(page.getByText(savedQueryId)).toBeVisible({ timeout: 30_000 });
-
     createdSavedQueryLabels.push(savedQueryId);
+
+    // Confirm the saved query landed in the list view.
+    await pageObjects.osquerySavedQuery.navigateToList();
+    await expect(page.getByText(savedQueryId)).toBeVisible({ timeout: 30_000 });
   });
 
   test('edits an existing saved query description from the UI', async ({
@@ -115,24 +120,33 @@ test.describe('Saved queries CRUD from UI', { tag: mkiTags }, () => {
     await browserAuth.loginAsAdmin();
     await pageObjects.osquerySavedQuery.navigateToList();
 
-    // Page through to find a prebuilt row — the prebuilt seed `users_elastic`
-    // ships with osquery_manager. Page size is 20 by default so prebuilt entries
-    // live on page 2+; the first pagination button navigates to page 2.
+    // osquery_manager ships ~80 prebuilt saved queries. With page size 50, the
+    // alphabetically-late `users_elastic` lives on page 2. The Cypress version
+    // navigated directly via the pagination button — same approach here. The
+    // search box is unreliable as a filter (typing into it doesn't always
+    // narrow the EUI table on the first run), so we page-through instead.
     await page.testSubj.locator('tablePaginationPopoverButton').click();
     await page.testSubj.locator('tablePagination-50-rows').click();
+    await page.testSubj.locator('pagination-button-1').click();
+    await expect(page.getByRole('button', { name: 'Run users_elastic' })).toBeVisible({
+      timeout: 30_000,
+    });
 
     await pageObjects.osquerySavedQuery.openRowActionsMenu('users_elastic');
     await pageObjects.osquerySavedQuery.chooseEditQuery();
     // Prebuilt queries hide "Delete query" — the fact that the button is absent
-    // is the contract we're asserting.
+    // is the contract we're asserting. The edit view is a dedicated route
+    // (`/app/osquery/saved_queries/{id}/edit`), not a flyout with Cancel — so
+    // we navigate directly to the custom query's edit page instead of hunting
+    // for a Cancel button. This matches the Cypress reference which does
+    // `navigateTo('/app/osquery/saved_queries/{savedObjectId}')` at the same
+    // point in the flow.
     await expect(page.getByRole('button', { name: 'Delete query' })).toBeHidden();
-    await page.getByRole('button', { name: 'Cancel' }).click();
 
-    // Custom saved query lets the user delete.
-    await pageObjects.osquerySavedQuery.openRowActionsMenu(inner.id);
-    await pageObjects.osquerySavedQuery.chooseEditQuery();
+    await page.gotoApp(`osquery/saved_queries/${inner.saved_object_id}`);
     await page.getByRole('button', { name: 'Delete query' }).click();
     await pageObjects.osquerySavedQuery.confirmDeleteModal();
+    await pageObjects.osquerySavedQuery.navigateToList();
     await expect(page.getByText(inner.id)).toBeHidden({ timeout: 30_000 });
   });
 

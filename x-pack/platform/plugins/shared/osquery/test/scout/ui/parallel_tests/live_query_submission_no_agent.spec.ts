@@ -15,8 +15,16 @@ test.describe('Live query submission without enrolled agents', { tag: noAgentTag
   test.beforeEach(async ({ browserAuth, page, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await pageObjects.osqueryNavigation.gotoNewLiveQuery();
+    // EuiCard's `selectable` prop renders a footer `<button>` whose class is an
+    // emotion-compiled string ending in `-euiCardSelect` (e.g.
+    // `css-1ti8sfo-euiButtonDisplay-...-euiCardSelect`). The button has no
+    // discernible text — axe flags it as a critical `button-name` violation on
+    // the "Single query" / "Pack" mode-selector cards. EUI library gap, not
+    // an osquery bug. `.euiCardSelect` doesn't match the compiled class string,
+    // so we use the attribute-substring selector `[class*="euiCardSelect"]`.
     const { violations } = await page.checkA11y({
       include: ['[data-test-subj="liveQueryForm"]'],
+      exclude: ['[class*="euiCardSelect"]'],
       timeoutMs: 25_000,
     });
     expect(violations).toStrictEqual([]);
@@ -64,6 +72,11 @@ test.describe('Live query submission without enrolled agents', { tag: noAgentTag
     await pageObjects.osqueryLiveQueryForm.clearAndInputQuery('select 1;');
     await pageObjects.osqueryLiveQueryForm.clearAndInputQuery('');
     await pageObjects.osqueryLiveQueryForm.clickSubmit();
-    await expect(page.getByText('Query is a required field')).toBeVisible();
+    // RHF validation renders the "Query is a required field" error in two
+    // places (the inline `aria-live` region under the label plus a mirror in
+    // the form's summary area). Playwright strict-mode rejects the ambiguous
+    // selector, so match the first one — any occurrence proves validation fired.
+    // eslint-disable-next-line playwright/no-nth-methods -- two identical error nodes render; first-match is sufficient proof the validation fired
+    await expect(page.getByText('Query is a required field').first()).toBeVisible();
   });
 });

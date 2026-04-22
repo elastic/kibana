@@ -6,6 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { waitForKibanaChromeLoadingFinished } from '../../common/wait_for_kibana_loading_finished';
 
 const OSQUERY_RESPONSE_ACTION_ADD_BUTTON = 'Osquery-response-action-type-selection-option';
@@ -96,6 +97,15 @@ export class RuleEditorPage {
     await search.fill(packName);
     await this.page.keyboard.press('ArrowDown');
     await this.page.keyboard.press('Enter');
+
+    // EuiComboBox commits the selection asynchronously. Without waiting for the
+    // input value to actually carry the new pack name, callers can race a
+    // subsequent save click before the form's `pack` field updates — the
+    // request body then carries the previous pack's queries (observed in
+    // `alert_response_action_form` second-save assertion).
+    // Combobox single-select with `singleSelection={asPlainText}` writes the
+    // chosen option label into the input's `value` attribute.
+    await expect(search).toHaveValue(packName, { timeout: 30_000 });
   }
 
   async typePackNameInComboBox(itemIndex: number, packName: string): Promise<void> {

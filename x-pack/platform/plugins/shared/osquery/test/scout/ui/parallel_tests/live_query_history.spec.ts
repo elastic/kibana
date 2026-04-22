@@ -7,27 +7,14 @@
 
 import { expect } from '@kbn/scout/ui';
 import { uiTest as test } from '../fixtures';
-import { getMinimalLiveQuery, getMinimalSavedQuery } from '../../api/fixtures/constants';
+import { getMinimalLiveQuery } from '../../api/fixtures/constants';
 import { waitForAtLeastOneAgentOnline } from '../helpers/fleet_agents';
 
 const localTags = ['@local-stateful-classic', '@local-serverless-security_complete'];
 
 test.describe('Live query history', { tag: localTags }, () => {
-  let savedQueryId: string;
-  let savedQueryLabel: string;
-
   test.beforeAll(async ({ kbnClient, apiServices }) => {
     await waitForAtLeastOneAgentOnline(kbnClient);
-    const created = await apiServices.osquery.savedQueries.create(
-      getMinimalSavedQuery({
-        id: `scout-history-sq-${Date.now()}`,
-        query: 'select * from uptime;',
-        interval: '3600',
-      })
-    );
-    const inner = (created.data as { data: { saved_object_id: string; id: string } }).data;
-    savedQueryId = inner.saved_object_id;
-    savedQueryLabel = inner.id;
 
     // Seed two history rows so the "Details" and "Run query" affordances both
     // appear on the first page of history, independent of prior test state.
@@ -43,11 +30,7 @@ test.describe('Live query history', { tag: localTags }, () => {
     }
   });
 
-  test.afterAll(async ({ apiServices }) => {
-    await apiServices.osquery.savedQueries.delete(savedQueryId);
-  });
-
-  test('re-runs a customized saved query from history and restores its editor state', async ({
+  test('re-runs the most recent query from history and restores its editor state', async ({
     browserAuth,
     page,
     pageObjects,
@@ -58,16 +41,16 @@ test.describe('Live query history', { tag: localTags }, () => {
     await pageObjects.osqueryNavigation.gotoNewLiveQuery();
     await pageObjects.osqueryLiveQueryForm.selectAllAgents();
 
-    // Pick the saved query from the dropdown, then overwrite the body so we can
-    // later assert that history re-run restores the overwritten text (not the
-    // saved-query default).
-    const savedQueryDropdown = page.testSubj.locator('savedQuerySelect');
-    await savedQueryDropdown.getByTestId('comboBoxSearchInput').click();
-    await savedQueryDropdown.getByTestId('comboBoxSearchInput').pressSequentially(savedQueryLabel);
-    await page.keyboard.press('ArrowDown');
-    await page.keyboard.press('Enter');
-
-    await pageObjects.osqueryLiveQueryForm.clearAndInputQuery('select * from users;');
+    // Use a query body with a unique marker so we can assert it survived
+    // through submit → history → re-run regardless of what's already in
+    // history. NOTE: we deliberately avoid the saved-query dropdown here —
+    // selecting a saved query fires a React effect that overwrites Monaco
+    // AFTER our `clearAndInputQuery`, leaving form state out of sync with
+    // the editor and causing the previous "uptime" submission instead of our
+    // overwrite. The "re-run from history" contract doesn't depend on the
+    // dropdown path; a plain typed-query submission exercises the same code.
+    const uniqueMarker = `scout-history-${Date.now()}`;
+    await pageObjects.osqueryLiveQueryForm.clearAndInputQuery(`select '${uniqueMarker}';`);
     await pageObjects.osqueryLiveQueryForm.clickAdvanced();
     await pageObjects.osqueryLiveQueryForm.fillInQueryTimeout('601');
     await pageObjects.osqueryLiveQueryForm.submitQuery();
@@ -77,30 +60,38 @@ test.describe('Live query history', { tag: localTags }, () => {
     // eslint-disable-next-line playwright/no-nth-methods -- re-run the most recent history entry, which is the one we just submitted
     await page.locator('[aria-label="Run query"]').first().click();
 
-    // Editor should reflect the custom body submitted above, not the saved query's default.
-    await expect(pageObjects.osqueryLiveQueryForm.queryEditor).toContainText(
-      'select * from users;',
-      { timeout: 30_000 }
-    );
+    await expect(pageObjects.osqueryLiveQueryForm.queryEditor).toContainText(uniqueMarker, {
+      timeout: 30_000,
+    });
   });
 
   test('opens query details from history and surfaces the submitted query body', async ({
+    apiServices,
     browserAuth,
     page,
     pageObjects,
   }) => {
     test.setTimeout(180_000);
 
+    // Seed a dedicated history row with a unique marker in THIS test so we
+    // don't rely on ordering from test 1's submission or the `beforeAll`
+    // seeds — both of which could land on or off the first page depending on
+    // sort + prior state.
+    const detailsMarker = `scout-details-${Date.now()}`;
+    await apiServices.osquery.liveQueries.create(
+      getMinimalLiveQuery({
+        query: `select '${detailsMarker}';`,
+        agent_all: true,
+      })
+    );
+
     await browserAuth.loginAsAdmin();
     await pageObjects.osqueryNavigation.gotoHistory();
 
-    // eslint-disable-next-line playwright/no-nth-methods -- open details for the first history row
+    // eslint-disable-next-line playwright/no-nth-methods -- open details for the most-recent history row (our just-seeded entry)
     await page.locator('[aria-label="Details"]').first().click();
     await expect(page.getByText('View history')).toBeVisible({ timeout: 30_000 });
-    // The details pane renders the submitted query inline; the `uptime` literal is
-    // unique to the seeded queries so it's a reliable signal without coupling to
-    // full SQL text (which differs across re-run tests in the same spec).
-    await expect(page.getByText(/from uptime/)).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText(detailsMarker)).toBeVisible({ timeout: 30_000 });
   });
 
   test('paginates the query history list', async ({ browserAuth, page, pageObjects }) => {

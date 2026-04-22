@@ -30,7 +30,10 @@ test.describe('Live query ECS mapping', { tag: localTags }, () => {
   }) => {
     test.setTimeout(360_000);
 
-    await pageObjects.osqueryLiveQueryForm.clearAndInputQuery('select * from processes;');
+    // `select * from uptime;` is the canonical osquery sample because every
+    // platform supports it AND it exposes the `days` column we use for the
+    // dynamic pairing below. The static pairing is column-agnostic.
+    await pageObjects.osqueryLiveQueryForm.clearAndInputQuery('select * from uptime;');
     await pageObjects.osqueryLiveQueryForm.clickAdvanced();
 
     await test.step('add dynamic ECS pairing (message ← days)', async () => {

@@ -99,6 +99,7 @@ export class AlertFlyoutPage {
       (expected: string) => {
         const w = window as unknown as WindowWithMonaco;
         const models = w.MonacoEnvironment?.monaco?.editor.getModels() ?? [];
+
         return models.some((m) => m.getValue().includes(expected));
       },
       query,
@@ -114,16 +115,23 @@ export class AlertFlyoutPage {
   // then for the osquery-scoped editor wrapper.
   async waitForFlyoutEditorReady(): Promise<void> {
     const flyoutBody = this.page.testSubj.locator(FLYOUT_OSQUERY_EDITOR);
-    await flyoutBody
-      .getByText(/\d+ agents? selected/)
-      .waitFor({ state: 'visible', timeout: 60_000 });
+    // The "Take action" path auto-selects the alert's host agent and renders
+    // the "N agents selected" confirmation text. The "Investigation guide"
+    // path doesn't auto-select — the user picks an agent manually — so the
+    // text never appears via that flow. Race the editor's appearance against
+    // the agents-selected text so we proceed as soon as either signal is
+    // visible (editor presence alone is sufficient to know the form mounted).
+    await Promise.race([
+      this.page.getByText(/\d+ agents? selected/).waitFor({ state: 'visible', timeout: 60_000 }),
+      flyoutBody.getByTestId('osqueryEditor').waitFor({ state: 'visible', timeout: 60_000 }),
+    ]);
     await flyoutBody.getByTestId('osqueryEditor').waitFor({ state: 'visible', timeout: 60_000 });
   }
 
   // The mode selector is an `EuiCard` with the `selectable` prop. The card's onClick
   // lives on the selectable footer button, not on the description text — clicking
   // the description via `getByText` frequently fails to toggle the mode. Target the
-  // card's role+name, then assert the pack selector renders before continuing.
+  // card's role+name, then assert the pack selector's INPUT renders before continuing.
   async switchFlyoutToPackMode(): Promise<void> {
     const flyoutBody = this.page.testSubj.locator(FLYOUT_OSQUERY_EDITOR);
     const packCard = flyoutBody.locator('.euiCard', {
@@ -131,23 +139,37 @@ export class AlertFlyoutPage {
     });
     await packCard.waitFor({ state: 'visible', timeout: 15_000 });
     await packCard.click();
+    // Wait for the search INPUT (not the wrapper div) to be visible. The
+    // EuiComboBox wrapper re-renders a few times as React settles after the
+    // mode toggle; the inner `comboBoxSearchInput` is a stable leaf so its
+    // readiness is the cleanest signal that the selector is actually interactable.
     await flyoutBody
-      .locator('[data-test-subj="select-live-pack"]')
+      .locator('[data-test-subj="select-live-pack"] [data-test-subj="comboBoxSearchInput"]')
       .waitFor({ state: 'visible', timeout: 15_000 });
   }
 
   async selectFlyoutPack(packName: string): Promise<void> {
-    const selector = this.page.testSubj.locator('select-live-pack');
-    await selector.click();
-    await selector.getByTestId('comboBoxSearchInput').fill(packName);
+    // Target the input directly rather than the outer combobox wrapper. The
+    // wrapper (`select-live-pack`) detaches/remounts when the surrounding form
+    // re-renders after the mode switch, causing strict-click retries to fail
+    // even though Playwright eventually resolves to an element. The inner
+    // `comboBoxSearchInput` is a stable leaf node that Playwright's auto-retry
+    // resolves freshly on every action. Scope to the flyout body + the pack-
+    // selector so we don't cross-match a different combobox elsewhere on the page.
+    const flyoutBody = this.page.testSubj.locator(FLYOUT_OSQUERY_EDITOR);
+    const searchInput = flyoutBody.locator(
+      '[data-test-subj="select-live-pack"] [data-test-subj="comboBoxSearchInput"]'
+    );
+    await searchInput.click();
+    await searchInput.fill(packName);
     await this.page.keyboard.press('ArrowDown');
     await this.page.keyboard.press('Enter');
-    // Confirm the pack is actually chosen before returning. Use the search input's
-    // `value` attribute: EuiComboBox writes the selected single-option label into it.
-    // NOTE: do NOT press Escape to dismiss the dropdown — the key event bubbles and
-    // the surrounding alert flyout also listens for Escape, which silently closes it.
-    // EuiComboBox collapses its option list on Enter-select; no manual dismiss needed.
-    await expect(selector.getByTestId('comboBoxSearchInput')).toHaveValue(
+    // Confirm the pack is actually chosen before returning. EuiComboBox with
+    // `singleSelection={asPlainText}` writes the selected option's label into
+    // the input's `value` attribute.
+    // NOTE: do NOT press Escape here — the key bubbles up and the surrounding
+    // alert flyout also listens for Escape, which silently closes it.
+    await expect(searchInput).toHaveValue(
       new RegExp(packName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
     );
   }
@@ -163,11 +185,16 @@ export class AlertFlyoutPage {
   async clearAgentsAndSelectAllAgents(): Promise<void> {
     const agentSelection = this.page.testSubj.locator('agentSelection');
     await agentSelection.getByTestId('comboBoxClearButton').click();
-    const input = agentSelection.getByTestId('comboBoxInput');
+    // `comboBoxInput` is the wrapper `<div tabindex="-1">` around the combobox;
+    // Playwright's `.fill()` refuses to type into non-editable elements. The
+    // actual typing target is `comboBoxSearchInput` — the inner `<input>`.
+    const input = agentSelection.getByTestId('comboBoxSearchInput');
+    await input.click();
     await input.fill('All');
     await this.page.keyboard.press('ArrowDown');
     await this.page.keyboard.press('Enter');
-    await this.page.keyboard.press('Escape').catch(() => {});
+    // Do NOT press Escape here — the key bubbles up and closes the surrounding
+    // alert flyout (same rationale as `selectFlyoutPack`).
     await this.page
       .getByText('All agents')
       .waitFor({ state: 'visible', timeout: 15_000 })

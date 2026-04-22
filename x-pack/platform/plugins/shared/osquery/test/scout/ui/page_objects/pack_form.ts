@@ -76,6 +76,30 @@ export class PackFormPage {
     await editor.waitFor({ state: 'visible', timeout: 30_000 });
     await editor.click();
     await editor.pressSequentially(query, { delay: 5 });
+
+    // Monaco's React wrapper syncs typed text into RHF via a 500ms debounce on
+    // the onChange callback. If the next action (e.g. Save) lands before the
+    // debounce fires, RHF still sees an empty `query` field and rejects the
+    // save silently — the flyout never closes. Blur the hidden textarea AND
+    // wait for the Monaco model to carry the text before returning, mirroring
+    // the same guard used by `alert_flyout.ts::inputFlyoutQuery`.
+    await editor.evaluate((el: HTMLElement) => {
+      el.querySelector<HTMLTextAreaElement>('textarea')?.blur();
+    });
+    await this.page.waitForFunction(
+      (expected: string) => {
+        const w = window as unknown as {
+          MonacoEnvironment?: {
+            monaco?: { editor: { getModels: () => Array<{ getValue: () => string }> } };
+          };
+        };
+        const models = w.MonacoEnvironment?.monaco?.editor.getModels() ?? [];
+
+        return models.some((m) => m.getValue().includes(expected));
+      },
+      query,
+      { timeout: 10_000 }
+    );
   }
 
   async setQueryIntervalSeconds(seconds: string): Promise<void> {
@@ -93,6 +117,14 @@ export class PackFormPage {
 
   async saveQueryFlyout(): Promise<void> {
     await this.queryFlyoutSaveButton.click();
+    // Wait for the flyout's title heading to disappear — a more reliable signal
+    // than the save button (which can stay visible if validation fails). The
+    // flyout uses `aria-labelledby="flyoutTitle"` with either "Edit query" or
+    // "Attach next query" as the title (source: `public/packs/queries/query_flyout.tsx:103-122`).
+    // Detached flyout means the portal's pointer-event capture is gone, so the
+    // outer pack form's Update button is clickable again.
+    const flyoutTitle = this.page.locator('h2#flyoutTitle');
+    await flyoutTitle.waitFor({ state: 'hidden', timeout: 15_000 });
   }
 
   async attachSavedQuery(savedQueryLabel: string): Promise<void> {

@@ -27,16 +27,25 @@ export class SavedQueryPage {
     await this.page.getByRole('button', { name: `Actions for ${queryId}` }).click();
   }
 
+  // The row-actions menu renders inside an EuiPopover with `role="dialog"` (not
+  // a `menu` role), and each action is a plain `<button>` — NOT an EUI context
+  // menu's `menuitem`. Source: `public/routes/saved_queries/list/saved_query_row_actions.tsx`.
+  // Scope to the popover dialog so we match the right button when multiple rows
+  // render the same label elsewhere on the page.
+  private rowActionsDialog() {
+    return this.page.getByRole('dialog');
+  }
+
   async chooseEditQuery(): Promise<void> {
-    await this.page.getByRole('menuitem', { name: 'Edit query' }).click();
+    await this.rowActionsDialog().getByRole('button', { name: 'Edit query' }).click();
   }
 
   async chooseDuplicateQuery(): Promise<void> {
-    await this.page.getByRole('menuitem', { name: 'Duplicate query' }).click();
+    await this.rowActionsDialog().getByRole('button', { name: 'Duplicate query' }).click();
   }
 
   async chooseDeleteQuery(): Promise<void> {
-    await this.page.getByRole('menuitem', { name: 'Delete query' }).click();
+    await this.rowActionsDialog().getByRole('button', { name: 'Delete query' }).click();
   }
 
   async clickRunSavedQuery(queryId: string): Promise<void> {

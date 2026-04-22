@@ -30,23 +30,14 @@ test.describe('Osquery parameter substitution from alerts', { tag: localTags }, 
     await deleteDetectionRule(kbnClient, ruleId);
   });
 
-  test('substitutes parameters in investigation guide queries opened from the alert flyout', async ({
-    browserAuth,
-    page,
-    pageObjects,
-  }) => {
-    test.setTimeout(300_000);
-    await browserAuth.loginAsAdmin();
-
-    await pageObjects.osqueryRuleEditor.openRuleAlertsView(ruleName);
-    await pageObjects.osqueryAlertFlyout.expandFirstAlert();
-    await pageObjects.osqueryAlertFlyout.openInvestigationGuide();
-    await pageObjects.osqueryAlertFlyout.doubleClickInvestigationGuideQuery('Get processes');
-    await pageObjects.osqueryAlertFlyout.clickFlyoutMonacoEditor();
-    const flyout = page.testSubj.locator('flyout-body-osquery');
-    await expect(flyout).toContainText(/SELECT \* FROM os_version where name=/);
-    await expect(flyout.locator('input[value="host.os.platform"]')).toBeVisible();
-  });
+  // NOTE: the originally-planned "double-click IG query → osquery editor
+  // opens with substituted params" flow isn't a real UI path — the current
+  // security_solution build only exposes IG queries as read-only text
+  // (`[data-test-subj="osquery-investigation-guide-text"]`, per the Cypress
+  // reference at `alert_response_actions.cy.ts:71`). The substitution contract
+  // is exercised end-to-end by the two tests below which go through the
+  // "Take action" menu and use `{{host.os.name}}` in the submitted query — the
+  // same flow `cypress/tasks/live_query.ts::takeOsqueryActionWithParams` tests.
 
   test('runs a take-action query against all enrolled agents with substituted parameters', async ({
     browserAuth,

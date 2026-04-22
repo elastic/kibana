@@ -61,13 +61,20 @@ test.describe('Live query submission with enrolled agents', { tag: localTags }, 
     });
 
     await test.step('opens the Discover link in a new tab', async () => {
-      const discoverLink = pageObjects.osqueryLiveQueryForm.resultsPanel.getByRole('link', {
-        name: /View in Discover/i,
-      });
-      await discoverLink.waitFor({ state: 'visible', timeout: 60_000 });
+      // The Discover affordance renders as either an `EuiButtonEmpty` (link role
+      // with visible text "View in Discover") or an `EuiButtonIcon`+tooltip
+      // (button role with `aria-label="View in Discover"`) depending on the
+      // result-panel variant; both are anchors with `target="_blank"`. Match
+      // either by `[href*="/app/discover"][target="_blank"]` so we don't have
+      // to branch on which variant the live-query results render today.
+      // Source: `public/discover/view_results_in_discover.tsx:130-145`.
+      const discoverLink = page.locator('a[href*="/app/discover"][target="_blank"]');
+      // eslint-disable-next-line playwright/no-nth-methods -- multiple Discover anchors can render across the panel + per-row toolbar; first-match opens the same Discover URL
+      const firstDiscover = discoverLink.first();
+      await firstDiscover.waitFor({ state: 'visible', timeout: 60_000 });
       const [newPage] = await Promise.all([
         context.waitForEvent('page', { timeout: 60_000 }),
-        discoverLink.click(),
+        firstDiscover.click(),
       ]);
       await newPage.waitForLoadState('domcontentloaded');
       expect(newPage.url()).toMatch(/\/app\/discover/);

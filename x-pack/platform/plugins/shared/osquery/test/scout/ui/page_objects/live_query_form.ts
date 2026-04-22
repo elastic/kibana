@@ -82,7 +82,11 @@ export class LiveQueryFormPage {
 
     await this.page.keyboard.press('Escape');
 
-    await this.agentSelection.getByText(/\d+ agents? selected\./).waitFor({
+    // The "N agents selected" confirmation text is rendered as a `<span>` that's a
+    // SIBLING of the EuiComboBox (see `public/agents/agents_table.tsx:358`), not a
+    // descendant — so `this.agentSelection.getByText(...)` misses it even though
+    // the text is on-page. Scope to the page instead.
+    await this.page.getByText(/\d+ agents? selected\./).waitFor({
       state: 'visible',
       timeout: 60_000,
     });
