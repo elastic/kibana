@@ -30,7 +30,6 @@ import type { FC } from 'react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { apm } from '@elastic/apm-rum';
 import useDebounce from 'react-use/lib/useDebounce';
-import useEvent from 'react-use/lib/useEvent';
 import useMountedState from 'react-use/lib/useMountedState';
 import useObservable from 'react-use/lib/useObservable';
 import type { Subscription } from 'rxjs';
@@ -85,7 +84,8 @@ const EmptyMessage = () => (
 );
 
 export const SearchBar: FC<SearchBarProps> = (opts) => {
-  const { globalSearch, taggingApi, navigateToUrl, reportEvent, chromeStyle$, ...props } = opts;
+  const { globalSearch, taggingApi, navigateToUrl, reportEvent, hotkeys, chromeStyle$, ...props } =
+    opts;
 
   const isMounted = useMountedState();
   const { euiTheme } = useEuiTheme();
@@ -241,18 +241,16 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
     [searchValue, loadSuggestions, searchableTypes, initialLoad]
   );
 
-  const onKeyDown = useCallback(
+  const onShortcut = useCallback(
     (event: KeyboardEvent) => {
-      if (event.key === '/' && (isMac ? event.metaKey : event.ctrlKey)) {
-        event.preventDefault();
-        reportEvent.shortcutUsed();
-        if (chromeStyle === 'project' && !isVisible) {
-          visibilityButtonRef.current?.click();
-        } else if (searchRef) {
-          searchRef.focus();
-        } else if (buttonRef) {
-          (buttonRef.children[0] as HTMLButtonElement).click();
-        }
+      event.preventDefault();
+      reportEvent.shortcutUsed();
+      if (chromeStyle === 'project' && !isVisible) {
+        visibilityButtonRef.current?.click();
+      } else if (searchRef) {
+        searchRef.focus();
+      } else if (buttonRef) {
+        (buttonRef.children[0] as HTMLButtonElement).click();
       }
     },
     [chromeStyle, isVisible, buttonRef, searchRef, reportEvent]
@@ -337,7 +335,19 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
     isMac ? i18nStrings.keyboardShortcutTooltip.onMac : i18nStrings.keyboardShortcutTooltip.onNotMac
   }`;
 
-  useEvent('keydown', onKeyDown);
+  useEffect(() => {
+    const handle = hotkeys.register(
+      {
+        id: 'platform:globalSearch.open',
+        keys: 'Mod+/',
+        scope: 'global',
+        group: 'Navigation',
+        label: i18nStrings.keyboardShortcutTooltip.prefix,
+      },
+      onShortcut
+    );
+    return handle.unregister;
+  }, [hotkeys, onShortcut]);
 
   if (chromeStyle === 'project' && !isVisible) {
     return (

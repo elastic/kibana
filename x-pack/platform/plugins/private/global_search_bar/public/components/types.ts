@@ -7,6 +7,7 @@
 
 import type { ChromeStyle } from '@kbn/core-chrome-browser';
 import type { ApplicationStart } from '@kbn/core/public';
+import type { HotkeysStart } from '@kbn/core-hotkeys-browser';
 import type { GlobalSearchPluginStart } from '@kbn/global-search-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { Observable } from 'rxjs';
@@ -17,6 +18,7 @@ export interface SearchBarProps {
   globalSearch: GlobalSearchPluginStart & { searchCharLimit: number };
   navigateToUrl: ApplicationStart['navigateToUrl'];
   reportEvent: EventReporter;
+  hotkeys: HotkeysStart;
   taggingApi?: SavedObjectTaggingPluginStart;
   basePathUrl: string;
   chromeStyle$: Observable<ChromeStyle>;

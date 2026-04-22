@@ -37,7 +37,7 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}, {}, GlobalSearchBar
 
   public start(core: CoreStart, startDeps: GlobalSearchBarPluginStartDeps) {
     const { globalSearch, savedObjectsTagging, usageCollection } = startDeps;
-    const { application, http } = core;
+    const { application, http, hotkeys } = core;
     const reportEvent = new EventReporter({ analytics: core.analytics, usageCollection });
 
     core.chrome.navControls.registerCenter({
@@ -50,6 +50,7 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}, {}, GlobalSearchBar
           basePathUrl={http.basePath.prepend('/plugins/globalSearchBar/assets/')}
           chromeStyle$={core.chrome.getChromeStyle$()}
           reportEvent={reportEvent}
+          hotkeys={hotkeys}
         />
       ),
     });
