@@ -63,15 +63,17 @@ async function getDiscoverLocationParams({
     throw new Error('Underlying data is not ready');
   }
   const dataView = await dataViews.get(args.dataViewSpec.id!);
-  // we don't want to pass the DSL filters when navigating from an ES|SQL embeddable
+  // `filtersToApply` is what we pass to Discover as `filters` in the locator params: merged drilldown
+  // + Lens underlying-data filters (`args.filters`) when the panel is not text-based. For text-based
+  // (ES|QL) panels it stays `[]` so we do not attach the same constraints as Kibana DSL filter pills.
   let filtersToApply = embeddable.isTextBasedLanguage()
     ? []
     : [...(filters || []), ...args.filters];
   let timeRangeToApply = args.timeRange;
   // if the target data view is time based, attempt to split out a time range from the provided filters
-  if (dataView.isTimeBased() && dataView.timeFieldName === timeFieldName) {
+  if (timeFieldName && dataView.isTimeBased() && dataView.timeFieldName === timeFieldName) {
     const { extractTimeRange } = await import('@kbn/es-query');
-    const { restOfFilters, timeRange } = extractTimeRange(filters || [], timeFieldName);
+    const { restOfFilters, timeRange } = extractTimeRange(filtersToApply, timeFieldName);
     filtersToApply = restOfFilters;
     if (timeRange) {
       timeRangeToApply = timeRange;
