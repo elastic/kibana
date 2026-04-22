@@ -54,14 +54,33 @@ Two rich attachment types are available for entity analytics answers:
   You never call \`attachments.add\` for this type — just render the tag returned by the tool result.
 - \`security.entity_analytics_dashboard\` — an explicit **Entity Analytics home/overview** Canvas snapshot (risk level donut + highlights + entities together). You call \`attachments.add\` with this type **only** when the user explicitly asks to **show / open / view / display** the **Entity Analytics dashboard / home / overview / landing** product page.
 
-**Never duplicate the attachment in prose.** The \`security.entity\` attachment IS the user-facing presentation of the entity (the card for a single entity; the entities table for 2+ entities). Your prose reply is for narrative and recommendations only — it must NOT restate what the attachment already shows:
+**Never duplicate the attachment in prose.** Whichever rich attachment you render (the correct one depends on the user's ask — see the "Choosing the right rich attachment" table and the "Dashboard trigger" rule below), the Canvas you embedded IS the user-facing presentation. Your prose reply is for narrative and recommendations only — it must NOT restate what the attachment already shows.
+
+For \`security.entity\` (single-entity card or multi-entity table):
 
 - Do NOT emit an "Entity Overview" / "Entity Profile" / field-by-field markdown block after a single-entity card — the card already lists those fields.
 - Do NOT emit a ranked markdown table (e.g. columns like \`| Entity | Type | Risk score | Risk level | Criticality |\`) after an entities table — the table Canvas is the ranking.
 - Do NOT repeat the per-entity summary once per row in prose after the table — the rows in the attachment already cover that.
 - DO write a short prose narrative alongside the attachment: 1–3 sentences for a single-entity card (why this entity is / is not risky, what drove the score, what to investigate next), or 2–4 bullets for a list (top-level takeaways, biggest outliers, recommended follow-ups).
 
-The same principle applies to \`security.entity_analytics_dashboard\`: the Canvas snapshot is the dashboard view — prose should interpret it, not re-emit the donut/highlights/table as markdown.
+For \`security.entity_analytics_dashboard\` (Entity Analytics home/overview snapshot):
+
+- Do NOT restate the \`severity_count\` buckets (Critical / High / Moderate / Low / Unknown) as a markdown table — the donut and breakdown panel already show them.
+- Do NOT re-list the \`anomaly_highlights\` titles/bodies as bullets — the highlights panel already shows them.
+- Do NOT repeat the per-row entities list in markdown after the dashboard's entities table — the Canvas already shows it.
+- DO write 2–4 sentences interpreting the snapshot: what the risk distribution looks like, biggest outliers worth flagging, and recommended follow-ups.
+
+### Dashboard trigger — MUST use \`security.entity_analytics_dashboard\`
+
+If the user's prompt contains any of these phrase families (case-insensitive substring match is enough):
+
+- \`entity analytics dashboard\`, \`EA dashboard\`
+- \`entity analytics home\`, \`entity analytics overview\`, \`entity analytics landing\`
+- \`show\` / \`open\` / \`view\` / \`display\` / \`bring up\` **Entity Analytics** (the product page, not a generic Kibana dashboard)
+
+…then you **MUST** call \`attachments.add\` with \`type: 'security.entity_analytics_dashboard'\` **in addition to** any \`security.search_entities\` / \`security.get_entity\` calls used to populate it. Emitting only the \`security.entity\` table or card is **incorrect** for these prompts — the user explicitly asked for the Entity Analytics product-page Canvas, which is a different rich view.
+
+This rule takes **precedence** over the "do not use the dashboard for list / ranking / top-N questions" guidance elsewhere in this skill. If the literal dashboard / home / overview phrasing is present, emit the dashboard even when the same prompt also includes list / ranking / top-N framing.
 
 ## Mandatory — \`<render_attachment>\` (otherwise there is **no** Preview / Canvas)
 
@@ -248,7 +267,7 @@ When the user **explicitly** asked to open the **Entity Analytics home/overview*
 3. In your **markdown message**, on its own line, output \`<render_attachment id="ATTACHMENT_ID" version="VERSION" />\` from that tool result (**Mandatory — \`<render_attachment>\`** above).
 4. The UI shows an **inline** pill and **Preview → Canvas** with the same two-column **risk / highlights** layout as the product home page — **only** with the tag from step 3.
 5. Still write a concise narrative in the message; use the attachment for the structured dashboard view and deep investigation via **Open Entity Analytics in Security**.
-6. If the underlying \`security.search_entities\` also emitted an aggregate \`security.entity\` attachment (2+ entities), you may render **both** tags in the same turn — the entities table and the dashboard snapshot are complementary.
+6. If the underlying \`security.search_entities\` also emitted an aggregate \`security.entity\` attachment (2+ entities), you **must render both** tags in the same turn — the entities table and the dashboard snapshot are complementary. Rendering only the \`security.entity\` table while claiming in prose that it is the Entity Analytics dashboard is **incorrect**.
 
 ## Examples
 
@@ -351,6 +370,8 @@ Steps:
 2. Call \`attachments.add\` with \`type\` \`security.entity_analytics_dashboard\` and populate \`severity_count\`, \`anomaly_highlights\`, and \`entities\` from the tool outputs (see "Entity Analytics dashboard snapshot").
 3. Emit \`<render_attachment id="..." version="..." />\` from the \`attachments.add\` tool result so the user sees the dashboard Canvas.
 4. You may **also** render the aggregate \`security.entity\` tag from \`search_entities\` in the same turn — the entities table and the dashboard snapshot are complementary views.
+
+**Common mistake:** rendering only the \`security.entity\` entities table (titled e.g. "Top 10 Riskiest Users") and claiming in prose that it is the Entity Analytics dashboard. That is **wrong** — always render the \`security.entity_analytics_dashboard\` tag from \`attachments.add\` (and optionally the \`security.entity\` tag as a complement) when the user's prompt matches the "Dashboard trigger" phrases.
 
 ## Best Practices
 - Always use \`calculated_score_norm\` (0-100) when reporting risk scores
