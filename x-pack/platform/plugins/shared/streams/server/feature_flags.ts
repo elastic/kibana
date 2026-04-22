@@ -58,7 +58,8 @@ const sigEventsTuningConfigSchema = schema.object(
 
 export function registerFeatureFlags(
   core: CoreSetup<StreamsPluginStartDependencies>,
-  logger: Logger
+  logger: Logger,
+  { isAlertingV2PluginAvailable }: { isAlertingV2PluginAvailable: boolean }
 ) {
   core.pricing
     .isFeatureAvailable(STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE.id)
@@ -143,31 +144,36 @@ export function registerFeatureFlags(
             solutionViews: ['classic', 'oblt'],
             technicalPreview: true,
           },
-          [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_ALERTING_V2]: {
-            category: ['observability'],
-            name: i18n.translate('xpack.streams.significantEventsAlertingV2SettingsName', {
-              defaultMessage: 'Streams significant events — Alerting v2',
-            }) as string,
-            value: false,
-            description: i18n.translate(
-              'xpack.streams.significantEventsAlertingV2SettingsDescription',
-              {
-                defaultMessage:
-                  'Back significant event queries with Alerting v2 (kind: signal) instead of the custom streams.rules.esql rule type. ' +
-                  'Requires the write-alerting-v2-rules privilege. ' +
-                  'When disabled, rules are created via Alerting v1 (default). ' +
-                  'Note: turning this flag OFF after it was ON does not automatically remove orphaned v2 rules.',
-              }
-            ),
-            type: 'boolean',
-            schema: schema.boolean(),
-            requiresPageReload: false,
-            solutionViews: ['classic', 'oblt'],
-            technicalPreview: true,
-            readonly: true,
-            readonlyMode: 'ui',
-          },
         });
+
+        if (isAlertingV2PluginAvailable) {
+          core.uiSettings.register({
+            [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_ALERTING_V2]: {
+              category: ['observability'],
+              name: i18n.translate('xpack.streams.significantEventsAlertingV2SettingsName', {
+                defaultMessage: 'Streams significant events — Alerting v2',
+              }) as string,
+              value: false,
+              description: i18n.translate(
+                'xpack.streams.significantEventsAlertingV2SettingsDescription',
+                {
+                  defaultMessage:
+                    'Back significant event queries with Alerting v2 (kind: signal) instead of the custom streams.rules.esql rule type. ' +
+                    'Requires the write-alerting-v2-rules privilege. ' +
+                    'When disabled, rules are created via Alerting v1 (default). ' +
+                    'Note: turning this flag OFF after it was ON does not automatically remove orphaned v2 rules.',
+                }
+              ),
+              type: 'boolean',
+              schema: schema.boolean(),
+              requiresPageReload: false,
+              solutionViews: ['classic', 'oblt'],
+              technicalPreview: true,
+              readonly: true,
+              readonlyMode: 'ui',
+            },
+          });
+        }
 
         core.uiSettings.registerGlobal({
           [OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED]: {

@@ -374,7 +374,7 @@ export class StreamsPlugin
 
     registerRoutes({ repository: streamsRouteRepository, ...routeRegistrationOptions });
 
-    registerFeatureFlags(core, this.logger);
+    registerFeatureFlags(core, this.logger, { isAlertingV2PluginAvailable: 'alertingVTwo' in plugins });
 
     if (plugins.globalSearch) {
       plugins.globalSearch.registerResultProvider(
