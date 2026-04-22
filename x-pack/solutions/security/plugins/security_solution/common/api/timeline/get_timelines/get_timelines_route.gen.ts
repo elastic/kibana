@@ -26,10 +26,16 @@ import {
 export type GetTimelinesRequestQuery = z.infer<typeof GetTimelinesRequestQuery>;
 export const GetTimelinesRequestQuery = z.object({
   /**
-   * If true, only timelines that are marked as favorites by the user are returned.
+   * If `true`, only Timelines that the current user has marked as favorite are returned.
    */
   only_user_favorite: z.enum(['true', 'false']).nullable().optional(),
+  /**
+   * Restrict results to `default` investigation timelines or `template` timeline templates.
+   */
   timeline_type: TimelineType.nullable().optional(),
+  /**
+   * Field used to sort the list (`title`, `description`, `updated`, or `created`).
+   */
   sort_field: SortFieldTimeline.optional(),
   /**
    * Whether to sort the results `ascending` or `descending`
@@ -47,6 +53,9 @@ export const GetTimelinesRequestQuery = z.object({
    * Allows to search for timelines by their title
    */
   search: z.string().nullable().optional(),
+  /**
+   * Filter by timeline lifecycle state (`active`, `draft`, or `immutable`).
+   */
   status: TimelineStatus.nullable().optional(),
 });
 export type GetTimelinesRequestQueryInput = z.input<typeof GetTimelinesRequestQuery>;
