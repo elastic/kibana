@@ -9,11 +9,6 @@ export KIBANA_INSTALL_DIR=${KIBANA_BUILD_LOCATION}
 
 echo "--- AI Assistant - Security Solution Cypress Tests"
 
-# [test-injection, revert before merge] Force a CypressFailedRunResult for
-# prompts.cy.ts to validate the runner-failure handling path in real CI
-# (PR #264796). Only affects this one spec in this one job.
-export KBN_CYPRESS_INJECT_RUNNER_FAILURE="prompts.cy.ts"
-
 cd x-pack/solutions/security/test/security_solution_cypress
 
 set +e
