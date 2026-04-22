@@ -284,8 +284,9 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
     endDate: to,
     startDate: from,
     hostName: detailName,
+    entityId: entityStoreV2Enabled ? entityFromStoreResult.entityRecord?.entity?.id : undefined,
     indexNames: selectedPatterns,
-    skip: selectedPatterns.length === 0 || entityStoreV2Enabled,
+    skip: selectedPatterns.length === 0,
   });
 
   const hostDetailsForOverview = entityStoreV2Enabled ? observedHost.details : hostOverview;
