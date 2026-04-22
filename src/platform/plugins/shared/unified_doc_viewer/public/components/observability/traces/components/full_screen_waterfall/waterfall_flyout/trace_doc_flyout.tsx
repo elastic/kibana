@@ -13,7 +13,7 @@ import { DataSourcesProvider } from '../../../../../../hooks/use_data_sources';
 import { DocViewerExtensionActionsProvider } from '../../../../../../hooks/use_doc_viewer_extension_actions';
 import { DocumentDetailFlyout, type DocumentDetailFlyoutProps } from './document_detail_flyout';
 
-export type { TraceDocFlyoutType } from '../../../common/constants';
+export type { TraceDocFlyoutType } from '../../../common/types';
 
 export interface TraceDocFlyoutProps extends DocumentDetailFlyoutProps {
   indexes: ObservabilityIndexes;
@@ -21,7 +21,9 @@ export interface TraceDocFlyoutProps extends DocumentDetailFlyoutProps {
 
 export function TraceDocFlyout({ indexes, ...rest }: TraceDocFlyoutProps) {
   return (
-    <DataSourcesProvider indexes={indexes}>
+    // TODO review if makes sense to keep this as null because profiles are tied to discover specifically
+    // we might want to pass it as prop and reuse the concept
+    <DataSourcesProvider indexes={indexes} profileId="null">
       <DocViewerExtensionActionsProvider>
         <DocumentDetailFlyout {...rest} />
       </DocViewerExtensionActionsProvider>
