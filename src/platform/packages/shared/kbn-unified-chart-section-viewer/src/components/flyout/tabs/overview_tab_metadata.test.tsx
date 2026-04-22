@@ -57,6 +57,24 @@ describe('OverviewTabMetadata', () => {
     });
   });
 
+  describe('source classification label', () => {
+    it('renders "Data stream" label when sourceKind is data_stream', () => {
+      const metricItem = createMockMetric({ sourceKind: 'data_stream' });
+      const { getByText, queryByText } = render(<OverviewTabMetadata metricItem={metricItem} />);
+
+      expect(getByText('Data stream')).toBeInTheDocument();
+      expect(queryByText('Index')).not.toBeInTheDocument();
+    });
+
+    it('renders "Index" label when sourceKind is index', () => {
+      const metricItem = createMockMetric({ sourceKind: 'index' });
+      const { getByText, queryByText } = render(<OverviewTabMetadata metricItem={metricItem} />);
+
+      expect(getByText('Index')).toBeInTheDocument();
+      expect(queryByText('Data stream')).not.toBeInTheDocument();
+    });
+  });
+
   describe('unit display', () => {
     it('renders unit when present', () => {
       const metricItem = createMockMetric({ units: ['ms'] });

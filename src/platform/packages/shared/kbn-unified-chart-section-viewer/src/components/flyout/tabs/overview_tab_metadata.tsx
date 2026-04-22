@@ -13,15 +13,20 @@ import { i18n } from '@kbn/i18n';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import React, { useMemo } from 'react';
 import { getUnitLabel } from '../../../common/utils';
-import type { ParsedMetricItem } from '../../../types';
-import { BadgeGroup, MetricTypeBadge } from '../components';
+import type { ExternalServices, ParsedMetricItem } from '../../../types';
+import { BadgeGroup, DataStreamLink, MetricTypeBadge } from '../components';
+import { useStreamsNavigation } from '../hooks/use_streams_navigation';
 
 export interface OverviewTabMetadataProps {
   metricItem: ParsedMetricItem;
+  externalServices?: ExternalServices;
 }
 
-export const OverviewTabMetadata = ({ metricItem }: OverviewTabMetadataProps) => {
+export const OverviewTabMetadata = ({ metricItem, externalServices }: OverviewTabMetadataProps) => {
   const { euiTheme } = useEuiTheme();
+  const { getStreamUrl } = useStreamsNavigation(externalServices);
+  const isDataStream = metricItem.sourceKind === 'data_stream';
+  const streamUrl = getStreamUrl(metricItem.dataStream, isDataStream);
 
   const { rows, labelMinWidthPx } = useMemo(() => {
     const labelMinWidthPxInner = euiTheme.base * 11.25;
@@ -38,22 +43,15 @@ export const OverviewTabMetadata = ({ metricItem }: OverviewTabMetadataProps) =>
     }> = [
       {
         title: title(
-          i18n.translate('metricsExperience.overviewTab.strong.dataStreamLabel', {
-            defaultMessage: 'Data stream',
-          })
+          isDataStream
+            ? i18n.translate('metricsExperience.overviewTab.strong.dataStreamLabel', {
+                defaultMessage: 'Data stream',
+              })
+            : i18n.translate('metricsExperience.overviewTab.strong.indexLabel', {
+                defaultMessage: 'Index',
+              })
         ),
-        description: (
-          <EuiText
-            color="primary"
-            size="s"
-            css={css`
-              word-break: break-word;
-              overflow-wrap: anywhere;
-            `}
-          >
-            {metricItem.dataStream ?? ''}
-          </EuiText>
-        ),
+        description: <DataStreamLink dataStream={metricItem.dataStream} streamUrl={streamUrl} />,
       },
       {
         title: title(
@@ -110,10 +108,12 @@ export const OverviewTabMetadata = ({ metricItem }: OverviewTabMetadataProps) =>
     return { rows: rowsInner, labelMinWidthPx: labelMinWidthPxInner };
   }, [
     euiTheme.base,
+    isDataStream,
     metricItem.dataStream,
     metricItem.fieldTypes,
     metricItem.metricTypes,
     metricItem.units,
+    streamUrl,
   ]);
 
   return (

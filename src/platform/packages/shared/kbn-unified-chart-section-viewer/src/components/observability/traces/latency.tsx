@@ -35,6 +35,7 @@ const LatencyChartContent = ({ esqlQuery, seriesType, color, title }: LatencyCha
       metricTypes: ['histogram'],
       units: ['ms'],
       dataStream: indexes,
+      sourceKind: 'data_stream',
       fieldTypes: [ES_FIELD_TYPES.DOUBLE],
       dimensionFields: [],
     },

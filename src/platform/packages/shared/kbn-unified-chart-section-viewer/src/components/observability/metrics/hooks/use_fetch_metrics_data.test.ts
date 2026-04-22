@@ -195,6 +195,7 @@ describe('useFetchMetricsData', () => {
       mockParseMetricsWithTelemetry.mockReturnValue({
         metricItems: [],
         allDimensions: [],
+        uniqueSources: new Set(),
         telemetry: {
           total_number_of_metrics: 0,
           total_number_of_dimensions: 0,

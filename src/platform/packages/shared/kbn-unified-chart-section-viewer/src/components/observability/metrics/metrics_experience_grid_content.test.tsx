@@ -169,6 +169,7 @@ describe('MetricsExperienceGridContent', () => {
       metricName: i % 2 === 0 ? `cpu_field_${i}` : `mem_field_${i}`,
       dimensionFields: [dimensions[0]],
       dataStream: 'metrics-*',
+      sourceKind: 'data_stream' as const,
       units: ['ms'] as MetricUnit[],
       metricTypes: ['counter'] as MappingTimeSeriesMetricType[],
       fieldTypes: [ES_FIELD_TYPES.LONG] as ES_FIELD_TYPES[],
