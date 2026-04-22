@@ -302,7 +302,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
           data-test-subj={`streamOptions.inputStreams.${packageInputStream.data_stream.dataset}`}
         >
           <ScrollAnchor ref={containerRef} />
-          {hasStreamToggle || hasRequiredVarGroupErrors ? (
+          {showDescriptionColumn || hasStreamToggle || hasRequiredVarGroupErrors ? (
             <EuiFlexItem>
               <EuiFlexGroup gutterSize="none" alignItems="flexStart">
                 <EuiFlexItem grow={1} />
