@@ -137,6 +137,7 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
             style={{
               position: 'relative',
               backgroundColor: euiTheme.euiTheme.colors.backgroundBasePlain,
+              paddingTop: euiTheme.euiTheme.size.m,
             }}
           >
             {isManageIntegrationsView ? (
