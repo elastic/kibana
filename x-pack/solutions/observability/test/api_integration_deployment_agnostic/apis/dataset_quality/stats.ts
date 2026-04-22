@@ -261,10 +261,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    // Regression coverage for https://github.com/elastic/kibana/issues/250827:
-    // refreshing the Data Set Quality page with a text filter used to send both
-    // `types` and `datasetQuery` to /data_streams/stats, which the route schema
-    // (a t.union) incorrectly rejected as excess keys.
     describe('query schema accepts types and datasetQuery together', () => {
       let supertestDatasetQualityMonitorWithCookieCredentials: SupertestWithRoleScopeType;
       let roleAuthc: RoleCredentials;
