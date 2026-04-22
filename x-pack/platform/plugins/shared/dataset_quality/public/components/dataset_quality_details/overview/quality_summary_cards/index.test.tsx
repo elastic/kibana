@@ -189,12 +189,11 @@ describe('QualitySummaryCards', () => {
     renderWithI18n(<QualitySummaryCards {...defaultProps} selectedCard="degraded" />);
 
     expect(
-      screen.getByTestId('datasetQualityDetailsSummaryKpiCard-Degraded documents-selected')
-    ).toBeTruthy();
-    expect(screen.getByTestId('datasetQualityDetailsSummaryKpiCard-Failed documents')).toBeTruthy();
+      screen.getByTestId('datasetQualityDetailsSummaryKpiCard-Degraded documents')
+    ).toHaveAttribute('aria-pressed', 'true');
     expect(
-      screen.queryByTestId('datasetQualityDetailsSummaryKpiCard-Failed documents-selected')
-    ).toBeNull();
+      screen.getByTestId('datasetQualityDetailsSummaryKpiCard-Failed documents')
+    ).toHaveAttribute('aria-pressed', 'false');
   });
 
   it('does not call handleDocsTrendChartChange or setSelectedCard when the already-selected card is clicked', () => {
@@ -205,7 +204,7 @@ describe('QualitySummaryCards', () => {
       handleDocsTrendChartChange,
     });
 
-    // degraded card is selected — it renders as a plain div, not a button, so onClick is dropped
+    // degraded card is selected — it renders without an onClick handler, so clicks do nothing
     renderWithI18n(
       <QualitySummaryCards
         {...defaultProps}
@@ -215,7 +214,7 @@ describe('QualitySummaryCards', () => {
     );
 
     const selectedDegradedCard = screen.getByTestId(
-      'datasetQualityDetailsSummaryKpiCard-Degraded documents-selected'
+      'datasetQualityDetailsSummaryKpiCard-Degraded documents'
     );
     fireEvent.click(selectedDegradedCard);
 

@@ -109,7 +109,6 @@ export function Card({
   `;
 
   const dataTestSubject = `datasetQualityDetailsSummaryKpiCard-${dataTestSubjTitle || title}`;
-  const selectedDataTestSubject = isSelected ? `${dataTestSubject}-selected` : dataTestSubject;
   const displayKpiValue = isLoading ? '--' : kpiValue;
 
   const content = (
@@ -170,13 +169,13 @@ export function Card({
       }}
       aria-label={title}
       aria-pressed={Boolean(isSelected)}
-      data-test-subj={selectedDataTestSubject}
+      data-test-subj={dataTestSubject}
       color="text"
     >
       {content}
     </EuiButtonEmpty>
   ) : (
-    <div css={divStyle} data-test-subj={selectedDataTestSubject}>
+    <div css={divStyle} data-test-subj={dataTestSubject}>
       {content}
     </div>
   );
