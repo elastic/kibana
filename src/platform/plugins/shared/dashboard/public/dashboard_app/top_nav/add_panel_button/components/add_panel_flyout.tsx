@@ -169,7 +169,7 @@ function NewPanelContent({ dashboardApi }: { dashboardApi: DashboardApi }) {
                     <EuiText size="xs" color="subdued">
                       {i18nFn.translate(
                         'dashboard.addPanelFlyout.featured.visualizationDescription',
-                        { defaultMessage: 'Build charts using the point and click editor' }
+                        { defaultMessage: 'Build charts, metrics, and tables with a point-and-click editor' }
                       )}
                     </EuiText>
                   </EuiFlexItem>
