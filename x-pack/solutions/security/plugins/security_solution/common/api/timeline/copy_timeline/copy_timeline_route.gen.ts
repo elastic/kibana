@@ -21,6 +21,9 @@ import { SavedTimeline, PersistTimelineResponse } from '../model/components.gen'
 export type CopyTimelineRequestBody = z.infer<typeof CopyTimelineRequestBody>;
 export const CopyTimelineRequestBody = z.object({
   timeline: SavedTimeline,
+  /**
+   * The `savedObjectId` of the timeline or template to duplicate.
+   */
   timelineIdToCopy: z.string(),
 });
 export type CopyTimelineRequestBodyInput = z.input<typeof CopyTimelineRequestBody>;
