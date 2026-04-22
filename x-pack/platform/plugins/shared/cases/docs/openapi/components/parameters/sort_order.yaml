@@ -6,3 +6,4 @@ schema:
   type: string
   enum: [asc, desc]
   default: desc
+example: desc

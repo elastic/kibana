@@ -691,6 +691,11 @@ export const CaseResponseProperties = lazySchema(() =>
     external_service: ExternalService,
     id: z.string(),
     /**
+      * A monotonically increasing number assigned to each case, unique per space. This value is generated asynchronously after the case is created and may not be present immediately in the response.
+
+      */
+  incremental_id: z.number().int().nullable().optional(),
+  /**
      * Observables attached to the case.
      */
     observables: z.array(CaseObservable),
@@ -1185,6 +1190,11 @@ export const CaseResponseGetCase = lazySchema(() =>
     external_service: ExternalService,
     id: z.string(),
     /**
+      * A monotonically increasing number assigned to each case, unique per space. This value is generated asynchronously after the case is created and may not be present immediately in the response.
+
+      */
+  incremental_id: z.number().int().nullable().optional(),
+  /**
      * Observables attached to the case.
      */
     observables: z.array(CaseObservable),
@@ -1686,54 +1696,57 @@ export const PayloadUserComment = lazySchema(() =>
 );
 export type PayloadUserComment = z.infer<typeof PayloadUserComment>;
 
-export const UserActionsFindResponseProperties = lazySchema(() =>
-  z.object({
-    action: Actions,
-    comment_id: z.string().nullable(),
-    created_at: z.string().datetime(),
-    created_by: z.object({
-      email: z.string().nullable(),
-      full_name: z.string().nullable(),
-      username: z.string().nullable(),
-      profile_uid: z.string().optional(),
-    }),
-    id: z.string(),
-    owner: Owner,
-    payload: z.union([
-      PayloadAlertComment,
-      PayloadAssignees,
-      PayloadConnector,
-      PayloadCreateCase,
-      PayloadDelete,
-      PayloadDescription,
-      PayloadPushed,
-      PayloadSettings,
-      PayloadSeverity,
-      PayloadStatus,
-      PayloadTags,
-      PayloadTitle,
-      PayloadUserComment,
-    ]),
-    version: z.string(),
-    /**
-     * The type of action.
-     */
-    type: z.enum([
-      'assignees',
-      'create_case',
-      'comment',
-      'connector',
-      'description',
-      'pushed',
-      'tags',
-      'title',
-      'status',
-      'settings',
-      'severity',
-    ]),
-  })
-);
 export type UserActionsFindResponseProperties = z.infer<typeof UserActionsFindResponseProperties>;
+export const UserActionsFindResponseProperties = z.object({
+  action: Actions,
+  comment_id: z.string().nullable(),
+  created_at: z.string().datetime(),
+  created_by: z.object({
+    email: z.string().nullable(),
+    full_name: z.string().nullable(),
+    username: z.string().nullable(),
+    profile_uid: z.string().optional(),
+  }),
+  id: z.string(),
+  owner: Owner,
+  payload: z.union([
+    PayloadAlertComment,
+    PayloadAssignees,
+    PayloadConnector,
+    PayloadCreateCase,
+    PayloadDelete,
+    PayloadDescription,
+    PayloadPushed,
+    PayloadSettings,
+    PayloadSeverity,
+    PayloadStatus,
+    PayloadTags,
+    PayloadTitle,
+    PayloadUserComment,
+  ]),
+  version: z.string(),
+  /**
+   * The type of action.
+   */
+  type: z.enum([
+    'assignees',
+    'category',
+    'comment',
+    'connector',
+    'create_case',
+    'customFields',
+    'delete_case',
+    'description',
+    'extended_fields',
+    'observables',
+    'pushed',
+    'settings',
+    'severity',
+    'status',
+    'tags',
+    'title',
+  ]),
+});
 
 /**
  * Defines the file that will be attached to the case. Optional parameters will be generated automatically from the file metadata if not defined.
