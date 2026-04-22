@@ -40,12 +40,12 @@ const DEFAULT_STEPS: RemediationStep[] = [
   { id: '4', label: 'Jira incident ticket' },
 ];
 
-export const RemediationPlanPanel: React.FC<RemediationPlanPanelProps> = ({
+export function RemediationPlanPanel({
   steps = DEFAULT_STEPS,
   onRemediate,
   onRunInBackground,
   onOpenConversation,
-}) => {
+}: RemediationPlanPanelProps) {
   const { euiTheme } = useEuiTheme();
   const [detailsOpen, setDetailsOpen] = useState(false);
 
@@ -275,4 +275,4 @@ export const RemediationPlanPanel: React.FC<RemediationPlanPanelProps> = ({
       )}
     </EuiPanel>
   );
-};
+}

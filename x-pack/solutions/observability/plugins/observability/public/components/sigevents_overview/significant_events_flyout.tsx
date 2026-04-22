@@ -57,7 +57,7 @@ export interface SignificantEventsFlyoutProps {
   onOpenConversation?: () => void;
 }
 
-export const SignificantEventsFlyout: React.FC<SignificantEventsFlyoutProps> = ({
+export function SignificantEventsFlyout({
   onClose,
   events,
   healthyEntities = 24,
@@ -70,7 +70,7 @@ export const SignificantEventsFlyout: React.FC<SignificantEventsFlyoutProps> = (
   onRemediate,
   onRunInBackground,
   onOpenConversation,
-}) => {
+}: SignificantEventsFlyoutProps) {
   const { euiTheme } = useEuiTheme();
   const headingId = useGeneratedHtmlId({ prefix: 'sigEventsFlyout' });
   const childFlyoutHeadingId = useGeneratedHtmlId({ prefix: 'sigEventChildFlyoutHeading' });
@@ -352,4 +352,4 @@ export const SignificantEventsFlyout: React.FC<SignificantEventsFlyoutProps> = (
       ) : null}
     </EuiFlyout>
   );
-};
+}

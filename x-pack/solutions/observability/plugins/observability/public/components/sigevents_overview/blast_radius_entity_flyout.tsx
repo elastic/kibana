@@ -22,10 +22,7 @@ export interface BlastRadiusEntityFlyoutProps {
   onClose: () => void;
 }
 
-export const BlastRadiusEntityFlyout: React.FC<BlastRadiusEntityFlyoutProps> = ({
-  title,
-  onClose,
-}) => {
+export function BlastRadiusEntityFlyout({ title, onClose }: BlastRadiusEntityFlyoutProps) {
   const headingId = useGeneratedHtmlId();
 
   return (
@@ -63,4 +60,4 @@ export const BlastRadiusEntityFlyout: React.FC<BlastRadiusEntityFlyoutProps> = (
       </EuiFlyoutBody>
     </EuiFlyout>
   );
-};
+}

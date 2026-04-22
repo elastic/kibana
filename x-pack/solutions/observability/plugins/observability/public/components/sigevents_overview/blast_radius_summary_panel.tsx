@@ -110,7 +110,7 @@ const DEFAULT_SIGNIFICANT_EVENTS: SignificantEvent[] = [
   },
 ];
 
-export const BlastRadiusSummaryPanel: React.FC<BlastRadiusSummaryPanelProps> = ({
+export function BlastRadiusSummaryPanel({
   blastRadiusScore = 85,
   criticalCount = 6,
   highCount = 7,
@@ -124,7 +124,7 @@ export const BlastRadiusSummaryPanel: React.FC<BlastRadiusSummaryPanelProps> = (
   onAttachEntity,
   onAttachEvent,
   onOpenConversation,
-}) => {
+}: BlastRadiusSummaryPanelProps) {
   const { euiTheme } = useEuiTheme();
   const isCriticalBlast = blastRadiusScore > CRITICAL_SCORE_THRESHOLD;
 
@@ -424,4 +424,4 @@ export const BlastRadiusSummaryPanel: React.FC<BlastRadiusSummaryPanelProps> = (
       ) : null}
     </>
   );
-};
+}
