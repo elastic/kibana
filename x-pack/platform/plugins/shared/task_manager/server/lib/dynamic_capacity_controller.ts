@@ -6,7 +6,6 @@
  */
 
 import type { Logger, OpsMetrics } from '@kbn/core/server';
-import { cpuUsage } from 'node:process';
 import type { TaskManagerConfig } from '../config';
 
 const HYSTERESIS_FACTOR = 0.9;
@@ -18,7 +17,6 @@ interface DynamicCapacityState {
 
 interface ProcessHealthSignals {
   eventLoopUtilization: number;
-  processCpuUtilization: number;
   heapUsedFraction: number;
   eventLoopDelayMs: number;
   isUnhealthy: boolean;
@@ -33,7 +31,6 @@ type CapacityReason =
 
 interface ProjectedAtFullCapacityMetrics {
   eventLoopUtilization: number;
-  processCpuUtilization: number;
   eventLoopDelayMs: number;
 }
 
@@ -77,8 +74,6 @@ export class DynamicCapacityController {
   private postClaimUtilizationPct = 0;
   private projectionUtilizationPct = 0;
   private processHealth: ProcessHealthSignals;
-  private previousCpuUsage = cpuUsage();
-  private previousCpuSampleTimeMs = Date.now();
 
   constructor({ config, logger, startingCapacity }: DynamicCapacityControllerOpts) {
     this.config = config;
@@ -119,21 +114,7 @@ export class DynamicCapacityController {
   }
 
   public evaluate(nowMs: number = Date.now()): DynamicCapacityEvaluationResult {
-    const processCpuUtilization = getProcessCpuUtilization(
-      this.previousCpuUsage,
-      this.previousCpuSampleTimeMs,
-      nowMs
-    );
-    this.previousCpuUsage = cpuUsage();
-    this.previousCpuSampleTimeMs = nowMs;
-
-    const processHealthForEvaluation: ProcessHealthSignals = {
-      ...this.processHealth,
-      processCpuUtilization,
-      isUnhealthy:
-        this.processHealth.isUnhealthy ||
-        processCpuUtilization > this.config.dynamic_capacity.max_process_cpu_utilization,
-    };
+    const processHealthForEvaluation = this.processHealth;
 
     const previousCapacity = this.state.capacity;
     let nextCapacity = previousCapacity;
@@ -237,7 +218,6 @@ function getProcessHealthSignals(
   if (!opsMetrics) {
     return {
       eventLoopUtilization: 0,
-      processCpuUtilization: 0,
       heapUsedFraction: 0,
       eventLoopDelayMs: 0,
       isUnhealthy: false,
@@ -258,7 +238,6 @@ function getProcessHealthSignals(
 
   return {
     eventLoopUtilization,
-    processCpuUtilization: 0,
     heapUsedFraction,
     eventLoopDelayMs,
     isUnhealthy: eventLoopUnhealthy || heapUnhealthy || delayUnhealthy,
@@ -352,10 +331,6 @@ function getMetricDetails(
     processHealth.heapUsedFraction,
     config.dynamic_capacity.max_heap_used_fraction
   );
-  const cpuStatus = getStatusForThreshold(
-    processHealth.processCpuUtilization,
-    config.dynamic_capacity.max_process_cpu_utilization
-  );
   const delayStatus =
     config.dynamic_capacity.max_event_loop_delay_ms > 0 &&
     processHealth.eventLoopDelayMs > config.dynamic_capacity.max_event_loop_delay_ms
@@ -373,19 +348,13 @@ function getMetricDetails(
     3
   )}/${config.dynamic_capacity.max_heap_used_fraction.toFixed(
     3
-  )}(${heapStatus}), cpu=${processHealth.processCpuUtilization.toFixed(
-    3
-  )}/${config.dynamic_capacity.max_process_cpu_utilization.toFixed(
-    3
-  )}(${cpuStatus}), eventLoopDelayMs=${processHealth.eventLoopDelayMs.toFixed(
+  )}(${heapStatus}), eventLoopDelayMs=${processHealth.eventLoopDelayMs.toFixed(
     1
   )}/${config.dynamic_capacity.max_event_loop_delay_ms.toFixed(
     1
   )}(${delayStatus}), projectedAtFull(scaleFactor=${projectionFactor.toFixed(
     2
   )}): elu=${projectedAtFullCapacity.eventLoopUtilization.toFixed(
-    3
-  )}, cpu=${projectedAtFullCapacity.processCpuUtilization.toFixed(
     3
   )}, eventLoopDelayMs=${projectedAtFullCapacity.eventLoopDelayMs.toFixed(1)}, scaleDownStep=${
     scaleDownStepUsed ?? 0
@@ -396,21 +365,6 @@ function getMetricDetails(
 
 function getStatusForThreshold(value: number, threshold: number): 'healthy' | 'unhealthy' {
   return value > threshold ? 'unhealthy' : 'healthy';
-}
-
-function getProcessCpuUtilization(
-  previousUsage: NodeJS.CpuUsage,
-  previousSampleTimeMs: number,
-  nowMs: number
-) {
-  const elapsedMicroseconds = (nowMs - previousSampleTimeMs) * 1000;
-  if (elapsedMicroseconds <= 0) {
-    return 0;
-  }
-
-  const usageDiff = cpuUsage(previousUsage);
-  const processCpuUsedMicroseconds = usageDiff.user + usageDiff.system;
-  return processCpuUsedMicroseconds / elapsedMicroseconds;
 }
 
 function getExceededLimitDescriptions(
@@ -430,9 +384,6 @@ function getExceededLimitDescriptions(
   ) {
     out.push('event loop delay is above its limit');
   }
-  if (processHealth.processCpuUtilization > config.dynamic_capacity.max_process_cpu_utilization) {
-    out.push('process CPU utilization is above its limit');
-  }
   return out;
 }
 
@@ -443,7 +394,6 @@ function computeWorstOvershootRatio(
   const overshoots = [
     processHealth.eventLoopUtilization / config.dynamic_capacity.max_event_loop_utilization,
     processHealth.heapUsedFraction / config.dynamic_capacity.max_heap_used_fraction,
-    processHealth.processCpuUtilization / config.dynamic_capacity.max_process_cpu_utilization,
   ];
 
   if (config.dynamic_capacity.max_event_loop_delay_ms > 0) {
@@ -502,7 +452,6 @@ function projectAtFullCapacity({
     projectionFactor,
     projectedAtFullCapacity: {
       eventLoopUtilization: processHealth.eventLoopUtilization * projectionFactor,
-      processCpuUtilization: processHealth.processCpuUtilization * projectionFactor,
       eventLoopDelayMs: processHealth.eventLoopDelayMs * projectionFactor,
     },
   };
@@ -543,13 +492,11 @@ function getScaleUpGateDetails(
   config: TaskManagerConfig
 ): string {
   const eluGate = config.dynamic_capacity.max_event_loop_utilization * HYSTERESIS_FACTOR;
-  const cpuGate = config.dynamic_capacity.max_process_cpu_utilization * HYSTERESIS_FACTOR;
   const delayGate =
     config.dynamic_capacity.max_event_loop_delay_ms === 0
       ? 0
       : config.dynamic_capacity.max_event_loop_delay_ms * HYSTERESIS_FACTOR;
   const eluGateStatus = projectedAtFullCapacity.eventLoopUtilization < eluGate ? 'pass' : 'fail';
-  const cpuGateStatus = projectedAtFullCapacity.processCpuUtilization < cpuGate ? 'pass' : 'fail';
   const delayGateStatus =
     config.dynamic_capacity.max_event_loop_delay_ms === 0
       ? 'disabled'
@@ -561,11 +508,7 @@ function getScaleUpGateDetails(
     2
   )}; elu=${projectedAtFullCapacity.eventLoopUtilization.toFixed(3)}/${eluGate.toFixed(
     3
-  )}(${eluGateStatus}), cpu=${projectedAtFullCapacity.processCpuUtilization.toFixed(
-    3
-  )}/${cpuGate.toFixed(
-    3
-  )}(${cpuGateStatus}), eventLoopDelayMs=${projectedAtFullCapacity.eventLoopDelayMs.toFixed(
+  )}(${eluGateStatus}), eventLoopDelayMs=${projectedAtFullCapacity.eventLoopDelayMs.toFixed(
     1
   )}/${delayGate.toFixed(1)}(${delayGateStatus})`;
 }
@@ -625,7 +568,7 @@ function buildHumanDynamicCapacitySummary({
         : '';
       return (
         `Task Manager lowered claim concurrency from ${previousCapacity} to ${nextCapacity}: ` +
-        `Node process health (event loop utilization, heap, event loop delay, and process CPU against configured ceilings) exceeded configured limits, so concurrency was reduced immediately by ${step}.${signalDetail}` +
+        `Node process health (event loop utilization, heap, and event loop delay against configured ceilings) exceeded configured limits, so concurrency was reduced immediately by ${step}.${signalDetail}` +
         overshootSummary +
         utilizationSuffix
       );
@@ -643,7 +586,7 @@ function buildHumanDynamicCapacitySummary({
     if (reason === 'high_post_claim_utilization') {
       return (
         `Task Manager raised claim concurrency from ${previousCapacity} to ${nextCapacity}: ` +
-        `Projected event loop, process CPU, and event loop delay headroom suggest the node can safely run more overlapping tasks.` +
+        `Projected event loop and event loop delay headroom suggest the node can safely run more overlapping tasks.` +
         utilizationSuffix
       );
     }
@@ -718,12 +661,9 @@ function isHealthyForScaleUp(
   const eluHealthy =
     projectedAtFullCapacity.eventLoopUtilization <
     config.dynamic_capacity.max_event_loop_utilization * HYSTERESIS_FACTOR;
-  const cpuHealthy =
-    projectedAtFullCapacity.processCpuUtilization <
-    config.dynamic_capacity.max_process_cpu_utilization * HYSTERESIS_FACTOR;
   const delayHealthy =
     config.dynamic_capacity.max_event_loop_delay_ms === 0 ||
     projectedAtFullCapacity.eventLoopDelayMs <
       config.dynamic_capacity.max_event_loop_delay_ms * HYSTERESIS_FACTOR;
-  return eluHealthy && cpuHealthy && delayHealthy;
+  return eluHealthy && delayHealthy;
 }

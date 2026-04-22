@@ -22,7 +22,6 @@ export const DEFAULT_DYNAMIC_CAPACITY_SCALE_INTERVAL_MS = 10 * 1000;
 export const DEFAULT_DYNAMIC_CAPACITY_SCALE_UP_STEP = 1;
 export const DEFAULT_DYNAMIC_CAPACITY_MAX_EVENT_LOOP_UTILIZATION = 0.85;
 export const DEFAULT_DYNAMIC_CAPACITY_MAX_HEAP_USED_FRACTION = 0.85;
-export const DEFAULT_DYNAMIC_CAPACITY_MAX_PROCESS_CPU_UTILIZATION = 0.85;
 export const DEFAULT_DYNAMIC_CAPACITY_MAX_EVENT_LOOP_DELAY_MS = 500;
 export const DEFAULT_DYNAMIC_CAPACITY_SCALE_DOWN_COOLDOWN_MS = 30 * 1000;
 export const DEFAULT_DYNAMIC_CAPACITY_SCALE_DOWN_MAX_STEP_FRACTION = 0.5;
@@ -257,10 +256,6 @@ export const configSchema = schema.object(
         defaultValue: DEFAULT_DYNAMIC_CAPACITY_MAX_HEAP_USED_FRACTION,
         min: 0,
         max: 1,
-      }),
-      max_process_cpu_utilization: schema.number({
-        defaultValue: DEFAULT_DYNAMIC_CAPACITY_MAX_PROCESS_CPU_UTILIZATION,
-        min: 0,
       }),
       min_utilization_for_projection: schema.number({
         defaultValue: DEFAULT_DYNAMIC_CAPACITY_MIN_UTILIZATION_FOR_PROJECTION,

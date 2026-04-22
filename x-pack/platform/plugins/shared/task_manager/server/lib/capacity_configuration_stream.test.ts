@@ -245,6 +245,7 @@ function createConfig(
     api_key_type: 'es',
     adjust_capacity_for_elasticsearch_errors: true,
     auto_calculate_default_ech_capacity: false,
+    grant_uiam_api_keys: false,
     claim_strategy: CLAIM_STRATEGY_MGET,
     discovery: {
       active_nodes_lookback: '30s',
@@ -256,7 +257,6 @@ function createConfig(
       scale_up_step: 1,
       max_event_loop_utilization: 0.85,
       max_heap_used_fraction: 0.85,
-      max_process_cpu_utilization: 0.85,
       min_utilization_for_projection: 30,
       max_event_loop_delay_ms: 500,
       scale_down_cooldown_ms: 30000,
