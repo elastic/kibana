@@ -38,6 +38,7 @@ const generateQueriesRoute = createServerRoute({
     access: 'internal',
     summary: 'Generate significant events queries',
     description: 'Runs a single iteration of KI queries generation for the given stream.',
+    timeout: { idleSocket: 600_000 },
   },
   security: {
     authz: {
