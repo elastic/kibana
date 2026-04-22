@@ -13,6 +13,7 @@ import {
   getRuleDoctorFindingsResourceDefinition,
   type IndexResourceDefinition,
 } from './rule_doctor_findings';
+import { getRuleDoctorCoverageStateResourceDefinition } from './rule_doctor_coverage_state';
 
 export interface RegisterIndicesOptions {
   resourceManager: ResourceManagerContract;
@@ -32,5 +33,8 @@ export function registerIndices({
 }
 
 function getIndexResourceDefinitions(): IndexResourceDefinition[] {
-  return [getRuleDoctorFindingsResourceDefinition()];
+  return [
+    getRuleDoctorFindingsResourceDefinition(),
+    getRuleDoctorCoverageStateResourceDefinition(),
+  ];
 }

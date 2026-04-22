@@ -20,7 +20,7 @@ export interface FindingDoc {
   confidence: 'low' | 'medium' | 'high';
   summary: string;
   explanation: string;
-  rule_ids: string[];
+  rule_ids?: string[];
   details?: Record<string, unknown>;
   current?: Record<string, unknown> | null;
   proposed?: Record<string, unknown> | null;
@@ -41,6 +41,9 @@ export interface ExecutionSummary {
   status: string;
   startedAt: string;
   finishedAt: string | null;
+  durationMs: number | null;
+  dataViewName: string | null;
+  dataViewId: string | null;
 }
 
 export interface ListExecutionsResponse {

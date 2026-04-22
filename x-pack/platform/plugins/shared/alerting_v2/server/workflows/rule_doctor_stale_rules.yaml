@@ -318,29 +318,11 @@ steps:
               status: dismissed
 
   - name: persist_findings
-    type: foreach
-    foreach: '{{ variables.valid_rules }}'
-    steps:
-      - name: index_finding
-        type: elasticsearch.index
-        with:
-          index: '.rule-doctor-findings'
-          id: '{{ foreach.item.id }}'
-          document:
-            finding_id: '{{ foreach.item.id }}'
-            execution_id: '{{ execution.id }}'
-            space_id: '{{ inputs.space_id }}'
-            status: 'open'
-            type: '${{ foreach.item.meta.type }}'
-            action: '${{ foreach.item.meta.action }}'
-            impact: '${{ foreach.item.meta.impact }}'
-            confidence: '${{ foreach.item.meta.confidence }}'
-            summary: '${{ foreach.item.meta.summary }}'
-            explanation: '${{ foreach.item.meta.explanation }}'
-            rule_ids: '${{ foreach.item.meta.ruleIds }}'
-            details: '${{ foreach.item.meta.details }}'
-            proposed: '${{ foreach.item.meta.proposed }}'
-            diffs: '${{ foreach.item.meta.diffs }}'
+    type: alerting.persistFindings
+    with:
+      rules: '${{ variables.valid_rules }}'
+      execution_id: '{{ execution.id }}'
+      space_id: '{{ inputs.space_id }}'
 
   - name: output_findings
     type: workflow.output

@@ -18,6 +18,7 @@ import DEDUPLICATION_WORKFLOW_YAML from './rule_doctor_deduplication.yaml';
 import THRESHOLD_TUNING_WORKFLOW_YAML from './rule_doctor_threshold_tuning.yaml';
 import STALE_RULES_WORKFLOW_YAML from './rule_doctor_stale_rules.yaml';
 import COVERAGE_GAP_WORKFLOW_YAML from './rule_doctor_coverage_gap.yaml';
+import COVERAGE_GAP_DV_WORKFLOW_YAML from './rule_doctor_coverage_gap_dv.yaml';
 
 export const RULE_DOCTOR_WORKFLOW_ID = 'workflow-rule-doctor-a1b2c3d4-e5f6-7890-abcd-ef1234567890';
 
@@ -27,6 +28,8 @@ const RULE_DOCTOR_STALE_RULES_WORKFLOW_ID =
   'workflow-rule-doctor-stale-rules-c3d4e5f6-a7b8-9012-cdef-123456789012';
 const RULE_DOCTOR_COVERAGE_GAP_WORKFLOW_ID =
   'workflow-rule-doctor-coverage-gap-d4e5f6a7-b8c9-0123-defa-234567890123';
+const RULE_DOCTOR_COVERAGE_GAP_DV_WORKFLOW_ID =
+  'workflow-rule-doctor-coverage-gap-dv-e5f6a7b8-c9d0-1234-efab-345678901234';
 
 export type InsightType = 'deduplication' | 'threshold_tuning' | 'stale_rule' | 'coverage_gap';
 
@@ -39,7 +42,7 @@ interface WorkflowDefinition {
   stepOrder: Array<{ stepId: string; label: string }>;
 }
 
-const WORKFLOW_DEFINITIONS: WorkflowDefinition[] = [
+const CORE_WORKFLOW_DEFINITIONS: WorkflowDefinition[] = [
   {
     id: RULE_DOCTOR_WORKFLOW_ID,
     yaml: DEDUPLICATION_WORKFLOW_YAML,
@@ -91,25 +94,55 @@ const WORKFLOW_DEFINITIONS: WorkflowDefinition[] = [
       { stepId: 'output_findings', label: 'Preparing results' },
     ],
   },
-  {
-    id: RULE_DOCTOR_COVERAGE_GAP_WORKFLOW_ID,
-    yaml: COVERAGE_GAP_WORKFLOW_YAML,
-    insightType: 'coverage_gap',
-    label: 'Coverage Gap',
-    analyzeStepId: 'identify_gaps',
-    stepOrder: [
-      { stepId: 'discover_features', label: 'Discovering environment features' },
-      { stepId: 'identify_gaps', label: 'Identifying coverage gaps' },
-      { stepId: 'generate_rules', label: 'Generating proposed rules' },
-      { stepId: 'validate_rules', label: 'Validating proposed rules' },
-      { stepId: 'correction_loop', label: 'Correcting invalid rules' },
-      { stepId: 'fetch_open_findings', label: 'Fetching existing findings' },
-      { stepId: 'evaluate_existing', label: 'Evaluating stale findings' },
-      { stepId: 'dismiss_stale_findings', label: 'Dismissing stale findings' },
-      { stepId: 'persist_findings', label: 'Persisting findings' },
-      { stepId: 'output_findings', label: 'Preparing results' },
-    ],
-  },
+];
+
+const COVERAGE_GAP_DV_DEFINITION: WorkflowDefinition = {
+  id: RULE_DOCTOR_COVERAGE_GAP_DV_WORKFLOW_ID,
+  yaml: COVERAGE_GAP_DV_WORKFLOW_YAML,
+  insightType: 'coverage_gap',
+  label: 'Coverage Gap',
+  analyzeStepId: 'identify_gaps',
+  stepOrder: [
+    { stepId: 'identify_gaps', label: 'Identifying coverage gaps' },
+    { stepId: 'generate_rules', label: 'Generating proposed rules' },
+    { stepId: 'validate_rules', label: 'Validating proposed rules' },
+    { stepId: 'correction_loop', label: 'Correcting invalid rules' },
+    { stepId: 'fetch_open_findings', label: 'Fetching existing findings' },
+    { stepId: 'evaluate_existing', label: 'Evaluating stale findings' },
+    { stepId: 'dismiss_stale_findings', label: 'Dismissing stale findings' },
+    { stepId: 'persist_findings', label: 'Persisting findings' },
+    { stepId: 'output_findings', label: 'Preparing results' },
+  ],
+};
+
+/**
+ * Legacy coverage gap definition — kept for resolving old executions.
+ * New coverage gap runs use the per-data-view variant instead.
+ */
+const LEGACY_COVERAGE_GAP_DEFINITION: WorkflowDefinition = {
+  id: RULE_DOCTOR_COVERAGE_GAP_WORKFLOW_ID,
+  yaml: COVERAGE_GAP_WORKFLOW_YAML,
+  insightType: 'coverage_gap',
+  label: 'Coverage Gap (legacy)',
+  analyzeStepId: 'identify_gaps',
+  stepOrder: [
+    { stepId: 'discover_features', label: 'Discovering environment features' },
+    { stepId: 'identify_gaps', label: 'Identifying coverage gaps' },
+    { stepId: 'generate_rules', label: 'Generating proposed rules' },
+    { stepId: 'validate_rules', label: 'Validating proposed rules' },
+    { stepId: 'correction_loop', label: 'Correcting invalid rules' },
+    { stepId: 'fetch_open_findings', label: 'Fetching existing findings' },
+    { stepId: 'evaluate_existing', label: 'Evaluating stale findings' },
+    { stepId: 'dismiss_stale_findings', label: 'Dismissing stale findings' },
+    { stepId: 'persist_findings', label: 'Persisting findings' },
+    { stepId: 'output_findings', label: 'Preparing results' },
+  ],
+};
+
+const WORKFLOW_DEFINITIONS: WorkflowDefinition[] = [
+  ...CORE_WORKFLOW_DEFINITIONS,
+  COVERAGE_GAP_DV_DEFINITION,
+  LEGACY_COVERAGE_GAP_DEFINITION,
 ];
 
 export const ALL_WORKFLOW_IDS = WORKFLOW_DEFINITIONS.map((def) => def.id);
@@ -127,7 +160,9 @@ function extractStepDetail(stepId: string, step: WorkflowStepExecutionDto): stri
     const dataViews = output.data_views_processed;
     const featureCount = Array.isArray(features) ? features.length : 0;
     const dvCount = Array.isArray(dataViews) ? dataViews.length : 0;
-    return `Discovered ${featureCount} ${featureCount === 1 ? 'feature' : 'features'} from ${dvCount} data ${dvCount === 1 ? 'view' : 'views'}`;
+    return `Discovered ${featureCount} ${
+      featureCount === 1 ? 'feature' : 'features'
+    } from ${dvCount} data ${dvCount === 1 ? 'view' : 'views'}`;
   }
 
   if (stepId === 'identify_gaps') {
@@ -148,8 +183,7 @@ function extractStepDetail(stepId: string, step: WorkflowStepExecutionDto): stri
   if (analyzeStepIds.includes(stepId)) {
     const content = output.content as Record<string, unknown> | undefined;
     const findings =
-      content?.findings ??
-      (content?.response as Record<string, unknown> | undefined)?.findings;
+      content?.findings ?? (content?.response as Record<string, unknown> | undefined)?.findings;
     if (Array.isArray(findings)) {
       return findings.length > 0
         ? `Found ${findings.length} potential ${findings.length === 1 ? 'issue' : 'issues'}`
@@ -177,7 +211,9 @@ function extractStepDetail(stepId: string, step: WorkflowStepExecutionDto): stri
     const dismissals = content?.dismissals;
     if (Array.isArray(dismissals)) {
       return dismissals.length > 0
-        ? `Dismissing ${dismissals.length} stale ${dismissals.length === 1 ? 'finding' : 'findings'}`
+        ? `Dismissing ${dismissals.length} stale ${
+            dismissals.length === 1 ? 'finding' : 'findings'
+          }`
         : 'No stale findings to dismiss';
     }
   }
@@ -211,6 +247,35 @@ function buildStepProgress(
 
 const RULE_DOCTOR_TRIGGER = 'manual';
 
+const extractDataViewName = (context?: Record<string, unknown>): string | null => {
+  const inputs = context?.inputs as Record<string, unknown> | undefined;
+  const dataView = inputs?.data_view as { name?: string } | undefined;
+  return dataView?.name ?? null;
+};
+
+/**
+ * Workflow output_findings emits validated rules in `{ id, rule, meta }` shape
+ * where `meta` contains the original finding fields. Normalize to a flat
+ * RuleDoctorFinding regardless of whether the input is already flat or wrapped.
+ */
+const normalizeRawFinding = (raw: Record<string, unknown>): RuleDoctorFinding => {
+  const meta = (raw.meta ?? raw) as Record<string, unknown>;
+  return {
+    id: (raw.id ?? meta.id ?? '') as string,
+    type: (meta.type ?? '') as string,
+    action: (meta.action ?? '') as string,
+    impact: (meta.impact ?? 'low') as RuleDoctorFinding['impact'],
+    confidence: (meta.confidence ?? 'low') as RuleDoctorFinding['confidence'],
+    summary: (meta.summary ?? '') as string,
+    ruleIds: (Array.isArray(meta.ruleIds) ? meta.ruleIds : []) as string[],
+    details: (meta.details ?? {}) as Record<string, unknown>,
+    current: (meta.current ?? null) as Record<string, unknown> | null,
+    proposed: (meta.proposed ?? raw.rule ?? null) as Record<string, unknown> | null,
+    diffs: (Array.isArray(meta.diffs) ? meta.diffs : []) as RuleDoctorFinding['diffs'],
+    explanation: (meta.explanation ?? '') as string,
+  };
+};
+
 export interface RuleDoctorExecutionSummary {
   id: string;
   workflowId: string;
@@ -219,6 +284,9 @@ export interface RuleDoctorExecutionSummary {
   status: ExecutionStatusUnion;
   startedAt: string;
   finishedAt: string | null;
+  durationMs: number | null;
+  dataViewName: string | null;
+  dataViewId: string | null;
 }
 
 export interface RuleDoctorFinding {
@@ -263,9 +331,14 @@ export interface RuleDoctorWorkflowService {
     rules: unknown[];
     spaceId?: string;
   }): Promise<string[]>;
-  getLatestExecution(params: {
+  scheduleCoverageAnalysis(params: {
+    request: KibanaRequest;
+    rules: unknown[];
     spaceId?: string;
-  }): Promise<RuleDoctorExecutionSummary | null>;
+    dataView: { name: string; pattern: string };
+    features: unknown[];
+  }): Promise<string>;
+  getLatestExecution(params: { spaceId?: string }): Promise<RuleDoctorExecutionSummary | null>;
   listExecutions(params: { spaceId?: string }): Promise<RuleDoctorExecutionSummary[]>;
   getExecution(params: {
     executionId: string;
@@ -295,7 +368,9 @@ export const createRuleDoctorWorkflowService = (
         );
         if (result.validationErrors && result.validationErrors.length > 0) {
           log.error(
-            `Rule Doctor ${def.label} workflow YAML validation errors: ${result.validationErrors.join('; ')}`
+            `Rule Doctor ${
+              def.label
+            } workflow YAML validation errors: ${result.validationErrors.join('; ')}`
           );
         }
         log.info(
@@ -307,11 +382,7 @@ export const createRuleDoctorWorkflowService = (
       return;
     }
 
-    await managementApi.createWorkflow(
-      { yaml: def.yaml, id: def.id },
-      DEFAULT_SPACE_ID,
-      request
-    );
+    await managementApi.createWorkflow({ yaml: def.yaml, id: def.id }, DEFAULT_SPACE_ID, request);
 
     log.info(`Created Rule Doctor ${def.label} workflow ${def.id}`);
   };
@@ -320,7 +391,8 @@ export const createRuleDoctorWorkflowService = (
     def: WorkflowDefinition,
     request: KibanaRequest,
     rules: unknown[],
-    spaceId: string
+    spaceId: string,
+    extraInputs?: Record<string, unknown>
   ): Promise<string> => {
     const workflow = await managementApi.getWorkflow(def.id, DEFAULT_SPACE_ID);
 
@@ -339,7 +411,7 @@ export const createRuleDoctorWorkflowService = (
     const executionId = await managementApi.scheduleWorkflow(
       model,
       spaceId,
-      { rules, space_id: spaceId },
+      { rules, space_id: spaceId, ...extraInputs },
       request,
       RULE_DOCTOR_TRIGGER
     );
@@ -357,7 +429,10 @@ export const createRuleDoctorWorkflowService = (
     },
 
     async ensureWorkflows({ request }) {
-      await Promise.all(WORKFLOW_DEFINITIONS.map((def) => ensureSingleWorkflow(def, request)));
+      await Promise.all([
+        ...CORE_WORKFLOW_DEFINITIONS.map((def) => ensureSingleWorkflow(def, request)),
+        ensureSingleWorkflow(COVERAGE_GAP_DV_DEFINITION, request),
+      ]);
     },
 
     async runAnalysis({ request, rules, spaceId = DEFAULT_SPACE_ID }) {
@@ -369,7 +444,7 @@ export const createRuleDoctorWorkflowService = (
       await this.ensureWorkflows({ request });
 
       const results = await Promise.allSettled(
-        WORKFLOW_DEFINITIONS.map((def) => scheduleWorkflow(def, request, rules, spaceId))
+        CORE_WORKFLOW_DEFINITIONS.map((def) => scheduleWorkflow(def, request, rules, spaceId))
       );
 
       const executionIds: string[] = [];
@@ -379,12 +454,26 @@ export const createRuleDoctorWorkflowService = (
           executionIds.push(result.value);
         } else {
           log.error(
-            `Failed to schedule Rule Doctor ${WORKFLOW_DEFINITIONS[i].label} workflow: ${result.reason}`
+            `Failed to schedule Rule Doctor ${CORE_WORKFLOW_DEFINITIONS[i].label} workflow: ${result.reason}`
           );
         }
       }
 
       return executionIds;
+    },
+
+    async scheduleCoverageAnalysis({
+      request,
+      rules,
+      spaceId = DEFAULT_SPACE_ID,
+      dataView,
+      features,
+    }) {
+      await ensureSingleWorkflow(COVERAGE_GAP_DV_DEFINITION, request);
+      return scheduleWorkflow(COVERAGE_GAP_DV_DEFINITION, request, rules, spaceId, {
+        data_view: dataView,
+        features,
+      });
     },
 
     async getLatestExecution({ spaceId = DEFAULT_SPACE_ID }) {
@@ -402,6 +491,9 @@ export const createRuleDoctorWorkflowService = (
             status: exec.status as ExecutionStatusUnion,
             startedAt: exec.startedAt,
             finishedAt: exec.finishedAt ?? null,
+            durationMs: exec.duration ?? null,
+            dataViewName: extractDataViewName(exec.context),
+            dataViewId: null,
           }));
         })
       );
@@ -428,6 +520,9 @@ export const createRuleDoctorWorkflowService = (
             status: exec.status as ExecutionStatusUnion,
             startedAt: exec.startedAt,
             finishedAt: exec.finishedAt ?? null,
+            durationMs: exec.duration ?? null,
+            dataViewName: extractDataViewName(exec.context),
+            dataViewId: null,
           }));
         })
       );
@@ -460,7 +555,7 @@ export const createRuleDoctorWorkflowService = (
             raw = JSON.parse(raw);
           }
           if (Array.isArray(raw)) {
-            findings = raw as RuleDoctorFinding[];
+            findings = raw.map(normalizeRawFinding);
           }
         } catch (e) {
           log.warn(`Failed to parse Rule Doctor findings from execution ${executionId}: ${e}`);
@@ -475,6 +570,9 @@ export const createRuleDoctorWorkflowService = (
         status: exec.status as ExecutionStatusUnion,
         startedAt: exec.startedAt,
         finishedAt: exec.finishedAt ?? null,
+        durationMs: exec.duration ?? null,
+        dataViewName: extractDataViewName(exec.context),
+        dataViewId: null,
         error: exec.error?.message ?? null,
         findings,
         steps: buildStepProgress(exec.stepExecutions, def.stepOrder),

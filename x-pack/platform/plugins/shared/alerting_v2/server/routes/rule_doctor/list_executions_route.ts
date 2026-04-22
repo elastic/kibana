@@ -6,6 +6,7 @@
  */
 
 import type { RouteSecurity } from '@kbn/core-http-server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { inject, injectable } from 'inversify';
 import { z } from '@kbn/zod/v4';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
@@ -13,6 +14,8 @@ import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { RuleDoctorWorkflowServiceToken } from '../../workflows/tokens';
 import type { RuleDoctorWorkflowService } from '../../workflows/rule_doctor_workflow';
+import { EsServiceInternalToken } from '../../lib/services/es_service/tokens';
+import { enrichExecutionsWithDataViewNames } from './enrich_executions';
 
 const responseSchema = z.object({
   executions: z.array(
@@ -24,6 +27,9 @@ const responseSchema = z.object({
       status: z.string(),
       startedAt: z.string(),
       finishedAt: z.string().nullable(),
+      durationMs: z.number().nullable(),
+      dataViewName: z.string().nullable(),
+      dataViewId: z.string().nullable(),
     })
   ),
 });
@@ -56,13 +62,16 @@ export class ListRuleDoctorExecutionsRoute extends BaseAlertingRoute {
   constructor(
     @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(RuleDoctorWorkflowServiceToken)
-    private readonly ruleDoctorService: RuleDoctorWorkflowService
+    private readonly ruleDoctorService: RuleDoctorWorkflowService,
+    @inject(EsServiceInternalToken)
+    private readonly esClient: ElasticsearchClient
   ) {
     super(ctx);
   }
 
   protected async execute() {
     const executions = await this.ruleDoctorService.listExecutions({});
+    await enrichExecutionsWithDataViewNames(executions, this.esClient);
 
     return this.ctx.response.ok({
       body: { executions },

@@ -20,6 +20,7 @@ import { EsServiceInternalToken } from '../lib/services/es_service/tokens';
 import { registerProposedChangeAttachmentType } from '../agent_builder/proposed_change_attachment';
 import { registerAlertingV2Tools } from '../agent_builder/register_tools';
 import { validateRulesStepDefinition } from '../step_types/validate_rules';
+import { persistFindingsStepDefinition } from '../step_types/persist_findings';
 import { createDiscoverFeaturesStepDefinition } from '../step_types/discover_features';
 
 export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
@@ -68,6 +69,7 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
       PluginSetup<AlertingServerSetupDependencies['workflowsExtensions']>('workflowsExtensions')
     );
     workflowsExtensions.registerStepDefinition(validateRulesStepDefinition);
+    workflowsExtensions.registerStepDefinition(persistFindingsStepDefinition);
 
     const discoverFeaturesStep = createDiscoverFeaturesStepDefinition({
       getScopedSoClient: (fakeRequest) => {

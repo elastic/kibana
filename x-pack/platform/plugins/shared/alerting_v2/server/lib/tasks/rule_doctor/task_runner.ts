@@ -20,7 +20,7 @@ import type { AlertingServerStartDependencies } from '../../../types';
 import {
   RuleDoctorSettingsProviderToken,
   type RuleDoctorSettingsProvider,
-} from './task_definition';
+} from './constants';
 
 interface RuleDoctorTaskState {
   runs: number;

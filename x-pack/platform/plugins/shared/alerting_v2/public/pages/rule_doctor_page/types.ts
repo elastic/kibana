@@ -46,6 +46,8 @@ export interface RuleDoctorExecutionSummary {
   status: string;
   startedAt: string;
   finishedAt: string | null;
+  durationMs: number | null;
+  dataViewName: string | null;
 }
 
 export interface RuleDoctorExecutionDetail extends RuleDoctorExecutionSummary {

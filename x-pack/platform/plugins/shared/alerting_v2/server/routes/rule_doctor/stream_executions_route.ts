@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { inject, injectable } from 'inversify';
 import { Logger as PluginLogger } from '@kbn/core-di';
 import { Request } from '@kbn/core-di-server';
@@ -18,7 +19,12 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { RuleDoctorWorkflowServiceToken } from '../../workflows/tokens';
-import type { RuleDoctorWorkflowService } from '../../workflows/rule_doctor_workflow';
+import type {
+  RuleDoctorWorkflowService,
+  RuleDoctorExecutionSummary,
+} from '../../workflows/rule_doctor_workflow';
+import { EsServiceInternalToken } from '../../lib/services/es_service/tokens';
+import { enrichExecutionsWithDataViewNames } from './enrich_executions';
 
 const POLL_INTERVAL_MS = 2000;
 const STALE_THRESHOLD_MS = 15 * 60 * 1000;
@@ -32,15 +38,7 @@ const isEffectivelyTerminal = (execution: { status: string; startedAt: string })
 
 interface ExecutionUpdateEvent extends ServerSentEvent {
   type: 'executionUpdate';
-  executions: Array<{
-    id: string;
-    workflowId: string;
-    insightType: string;
-    insightLabel: string;
-    status: string;
-    startedAt: string;
-    finishedAt: string | null;
-  }>;
+  executions: RuleDoctorExecutionSummary[];
 }
 
 @injectable()
@@ -68,7 +66,9 @@ export class StreamExecutionsRoute extends BaseAlertingRoute {
     @inject(Request) private readonly request: KibanaRequest,
     @inject(PluginLogger) private readonly logger: Logger,
     @inject(RuleDoctorWorkflowServiceToken)
-    private readonly ruleDoctorService: RuleDoctorWorkflowService
+    private readonly ruleDoctorService: RuleDoctorWorkflowService,
+    @inject(EsServiceInternalToken)
+    private readonly esClient: ElasticsearchClient
   ) {
     super(ctx);
   }
@@ -82,7 +82,11 @@ export class StreamExecutionsRoute extends BaseAlertingRoute {
     const executions$: Observable<ExecutionUpdateEvent> = defer(() =>
       timer(0, POLL_INTERVAL_MS)
     ).pipe(
-      switchMap(async () => this.ruleDoctorService.listExecutions({})),
+      switchMap(async () => {
+        const executions = await this.ruleDoctorService.listExecutions({});
+        await enrichExecutionsWithDataViewNames(executions, this.esClient);
+        return executions;
+      }),
       distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)),
       map(
         (executions): ExecutionUpdateEvent => ({

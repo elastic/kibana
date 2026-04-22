@@ -13,3 +13,6 @@ export const ALERTING_V2_RULE_DOCTOR_INTERVAL_SETTING_ID =
 
 export const ALERTING_V2_RULE_DOCTOR_CONTINUOUS_SETTING_ID =
   'observability:alerting:ruleDoctorContinuous';
+
+export const ALERTING_V2_RULE_DOCTOR_COVERAGE_CADENCE_SETTING_ID =
+  'observability:alerting:ruleDoctorCoverageCadence';

@@ -11,6 +11,7 @@ import {
   EuiBasicTable,
   EuiCallOut,
   EuiEmptyPrompt,
+  EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
   type EuiBasicTableColumn,
@@ -18,6 +19,7 @@ import {
 import { useHistory } from 'react-router-dom';
 import { useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
+import { CoreStart, useService } from '@kbn/core-di-browser';
 import type { ExecutionSummary } from '../../services/rule_doctor_api';
 import { useFetchExecutions } from '../../hooks/use_fetch_executions';
 import type { useExecutionStream } from '../../hooks/use_execution_stream';
@@ -40,6 +42,16 @@ const formatDate = (dateStr: string | null): string => {
   return new Date(dateStr).toLocaleString();
 };
 
+const formatDuration = (ms: number | null): string => {
+  if (ms == null) return '-';
+  if (ms < 1000) return `${ms}ms`;
+  const seconds = Math.round(ms / 1000);
+  if (seconds < 60) return `${seconds}s`;
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  return remainingSeconds > 0 ? `${minutes}m ${remainingSeconds}s` : `${minutes}m`;
+};
+
 interface ExecutionsTabProps {
   executionStream: ReturnType<typeof useExecutionStream>;
 }
@@ -47,10 +59,17 @@ interface ExecutionsTabProps {
 export const ExecutionsTab = ({ executionStream }: ExecutionsTabProps) => {
   const history = useHistory();
   const queryClient = useQueryClient();
+  const { basePath } = useService(CoreStart('http'));
   const { data: fetchedExecutions, isLoading, isError, error } = useFetchExecutions();
   const { executions: streamedExecutions, isStreaming } = executionStream;
 
-  const executions = streamedExecutions ?? fetchedExecutions;
+  const unsorted = streamedExecutions ?? fetchedExecutions;
+  const executions = unsorted
+    ? [...unsorted].sort(
+        (a, b) =>
+          new Date(b.startedAt ?? 0).getTime() - new Date(a.startedAt ?? 0).getTime()
+      )
+    : unsorted;
 
   const wasStreamingRef = useRef(false);
   useEffect(() => {
@@ -83,6 +102,27 @@ export const ExecutionsTab = ({ executionStream }: ExecutionsTabProps) => {
       ),
     },
     {
+      field: 'dataViewName',
+      name: i18n.translate('xpack.alertingV2.ruleDoctor.executions.dataViewColumn', {
+        defaultMessage: 'Data View',
+      }),
+      render: (_: string | null, item: ExecutionSummary) => {
+        if (!item.dataViewName) return '-';
+        if (!item.dataViewId) return item.dataViewName;
+        const href = basePath.prepend(
+          `/app/management/kibana/dataViews/dataView/${encodeURIComponent(item.dataViewId)}`
+        );
+        return (
+          <EuiLink
+            href={href}
+            onClick={(e: React.MouseEvent) => e.stopPropagation()}
+          >
+            {item.dataViewName}
+          </EuiLink>
+        );
+      },
+    },
+    {
       field: 'status',
       name: i18n.translate('xpack.alertingV2.ruleDoctor.executions.statusColumn', {
         defaultMessage: 'Status',
@@ -101,11 +141,12 @@ export const ExecutionsTab = ({ executionStream }: ExecutionsTabProps) => {
       sortable: true,
     },
     {
-      field: 'finishedAt',
-      name: i18n.translate('xpack.alertingV2.ruleDoctor.executions.finishedAtColumn', {
-        defaultMessage: 'Finished',
+      field: 'durationMs',
+      name: i18n.translate('xpack.alertingV2.ruleDoctor.executions.durationColumn', {
+        defaultMessage: 'Duration',
       }),
-      render: formatDate,
+      width: '100px',
+      render: formatDuration,
     },
   ];
 

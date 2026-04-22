@@ -6,25 +6,18 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { ServiceIdentifier } from 'inversify';
 import type { AlertingTaskDefinition } from '../../services/task_run_scope_service/create_task_runner';
 import { RuleDoctorTaskRunner } from './task_runner';
+import { RULE_DOCTOR_TASK_TYPE, RULE_DOCTOR_TASK_TIMEOUT } from './constants';
 
-export const RULE_DOCTOR_TASK_TYPE = 'alerting_v2:rule_doctor' as const;
-export const RULE_DOCTOR_DEFAULT_INTERVAL = '1d';
-export const RULE_DOCTOR_TASK_TIMEOUT = '10m';
-
-export type RuleDoctorSettingsProvider = () => Promise<{
-  intervalHours: number;
-  continuous: boolean;
-}>;
-
-export const RuleDoctorSettingsProviderToken = Symbol.for(
-  'alerting_v2.RuleDoctorSettingsProvider'
-) as ServiceIdentifier<RuleDoctorSettingsProvider>;
-
-export const getRuleDoctorTaskId = (spaceId: string) =>
-  `${RULE_DOCTOR_TASK_TYPE}:${spaceId}` as const;
+export {
+  RULE_DOCTOR_TASK_TYPE,
+  RULE_DOCTOR_DEFAULT_INTERVAL,
+  RULE_DOCTOR_TASK_TIMEOUT,
+  RuleDoctorSettingsProviderToken,
+  getRuleDoctorTaskId,
+} from './constants';
+export type { RuleDoctorSettingsProvider } from './constants';
 
 export const RuleDoctorTaskDefinition: AlertingTaskDefinition<RuleDoctorTaskRunner> = {
   taskType: RULE_DOCTOR_TASK_TYPE,

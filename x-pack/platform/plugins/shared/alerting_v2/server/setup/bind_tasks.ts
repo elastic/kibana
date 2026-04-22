@@ -10,6 +10,7 @@ import type { ContainerModuleLoadOptions } from 'inversify';
 import { DispatcherTaskDefinition } from '../lib/dispatcher/task_definition';
 import { ApiKeyInvalidationTaskDefinition } from '../lib/tasks/invalidate_pending_api_keys/task_definition';
 import { RuleDoctorTaskDefinition } from '../lib/tasks/rule_doctor/task_definition';
+import { RuleDoctorCoverageTaskDefinition } from '../lib/tasks/rule_doctor_coverage/task_definition';
 import { RuleExecutorTaskDefinition } from '../lib/rule_executor/task_definition';
 import {
   TaskDefinition,
@@ -49,4 +50,5 @@ export function bindTasks({ bind, onActivation }: ContainerModuleLoadOptions) {
   bind(TaskDefinition).toConstantValue(DispatcherTaskDefinition);
   bind(TaskDefinition).toConstantValue(ApiKeyInvalidationTaskDefinition);
   bind(TaskDefinition).toConstantValue(RuleDoctorTaskDefinition);
+  bind(TaskDefinition).toConstantValue(RuleDoctorCoverageTaskDefinition);
 }

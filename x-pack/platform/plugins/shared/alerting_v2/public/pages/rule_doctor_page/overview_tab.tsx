@@ -22,7 +22,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FindingCard } from './finding_card';
-import { isValidFinding } from './types';
 import type { RuleDoctorFinding } from './types';
 import { useFetchFindings } from '../../hooks/use_fetch_findings';
 import type { FindingDoc, FindingStatus } from '../../services/rule_doctor_api';
@@ -35,7 +34,7 @@ const toFinding = (doc: FindingDoc): RuleDoctorFinding => ({
   confidence: doc.confidence,
   summary: doc.summary,
   explanation: doc.explanation,
-  ruleIds: doc.rule_ids,
+  ruleIds: doc.rule_ids ?? [],
   details: doc.details ?? {},
   current: doc.current ?? null,
   proposed: doc.proposed ?? null,
@@ -72,7 +71,6 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ onSwitchToExecutions }
     () =>
       (data?.findings ?? [])
         .map(toFinding)
-        .filter(isValidFinding)
         .filter((f) => f.confidence !== 'low'),
     [data]
   );

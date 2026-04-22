@@ -62,7 +62,7 @@ const toFinding = (doc: FindingDoc): RuleDoctorFinding => ({
   confidence: doc.confidence,
   summary: doc.summary,
   explanation: doc.explanation,
-  ruleIds: doc.rule_ids,
+  ruleIds: doc.rule_ids ?? [],
   details: doc.details ?? {},
   current: doc.current ?? null,
   proposed: doc.proposed ?? null,

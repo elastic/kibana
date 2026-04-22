@@ -1,6 +1,6 @@
 version: "1"
-name: ".alerting-v2-rule-doctor-coverage-gap"
-description: "Rule Doctor coverage gap workflow — identifies missing monitoring dimensions across the rule set. Do not modify."
+name: ".alerting-v2-rule-doctor-coverage-gap-dv"
+description: "Rule Doctor coverage gap workflow for a single data view — receives pre-discovered features and analyzes coverage gaps. Do not modify."
 enabled: true
 
 triggers:
@@ -9,17 +9,11 @@ triggers:
 settings:
   timeout: "10m"
   concurrency:
-    key: alerting-v2-rule-doctor-coverage-gap
-    strategy: cancel-in-progress
-    max: 1
+    key: alerting-v2-rule-doctor-coverage-gap-dv
+    strategy: drop
+    max: 3
 
 steps:
-  - name: discover_features
-    type: alerting.discoverFeatures
-    with:
-      rules: '${{ inputs.rules }}'
-      max_data_views: 5
-
   - name: identify_gaps
     type: ai.prompt
     with:
@@ -30,16 +24,18 @@ steps:
         Analyze the following alerting rules for **coverage gaps** — important monitoring dimensions
         that are conspicuously absent given the rules that already exist.
 
+        Focus your analysis on the data view: **{{ inputs.data_view.name }}** (pattern: `{{ inputs.data_view.pattern }}`).
+
         ## System context (discovered from actual data)
-        The following features were automatically discovered from data views in this space.
+        The following features were automatically discovered from this data view.
         They represent real services, technologies, infrastructure, and behavioral patterns
         in the user's environment. Use these to identify concrete coverage gaps -- components
         that exist but have no alerting rules.
 
-        {{ steps.discover_features.output.features | json }}
+        {{ inputs.features | json }}
 
-        ## Data views analyzed
-        {{ steps.discover_features.output.data_views_processed | json }}
+        ## Data view analyzed
+        {{ inputs.data_view | json }}
 
         ## How to identify coverage gaps
         Look at the set of rules as a whole and identify patterns:
@@ -100,7 +96,7 @@ steps:
                   type: array
                   items:
                     type: string
-                  description: IDs of existing rules that highlight this gap
+                  description: IDs of existing rules that highlight this gap (optional — may be empty if no related rules exist)
                 impact:
                   type: string
                   enum: [low, medium, high]
@@ -110,7 +106,7 @@ steps:
                 explanation:
                   type: string
                   description: Why this gap matters
-              required: [id, summary, missingDimension, suggestedIndexPattern, suggestedMetric, relatedRuleIds, impact, confidence, explanation]
+              required: [id, summary, missingDimension, suggestedIndexPattern, suggestedMetric, impact, confidence, explanation]
         required: [gaps]
     timeout: 180s
 
@@ -145,7 +141,7 @@ steps:
             {{ inputs.rules | json }}
 
             ## System context (discovered features)
-            {{ steps.discover_features.output.features | json }}
+            {{ inputs.features | json }}
 
             ## Instructions
             Generate a complete rule definition as a JSON object with:
@@ -171,7 +167,7 @@ steps:
             - `confidence`: "{{ foreach.item.confidence }}"
             - `summary`: "{{ foreach.item.summary }}"
             - `explanation`: "{{ foreach.item.explanation }}"
-            - `ruleIds`: the related rule IDs
+            - `ruleIds`: related rule IDs if any exist, otherwise omit or use an empty array
             - `diffs`: empty array (this is a new rule, not a modification)
             - `details`: object with `missingDimension` and `relatedRules`
 
@@ -217,7 +213,7 @@ steps:
                         type: object
                     explanation:
                       type: string
-                  required: [id, type, action, impact, confidence, summary, ruleIds, details, proposed, diffs, explanation]
+                  required: [id, type, action, impact, confidence, summary, details, proposed, diffs, explanation]
             required: [findings]
         timeout: 120s
 
@@ -432,3 +428,4 @@ steps:
     with:
       findings: "{{ variables.valid_rules | json }}"
       dismissals: "{{ steps.evaluate_existing.output.content.dismissals | json }}"
+      data_view: "{{ inputs.data_view | json }}"

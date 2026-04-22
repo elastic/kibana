@@ -59,7 +59,7 @@ export const ruleDoctorFindingDocSchema = z.object({
   confidence: z.enum(['low', 'medium', 'high']),
   summary: z.string(),
   explanation: z.string(),
-  rule_ids: z.array(z.string()),
+  rule_ids: z.array(z.string()).optional().default([]),
   details: z.record(z.string(), z.unknown()).optional(),
   current: z.record(z.string(), z.unknown()).nullable(),
   proposed: z.record(z.string(), z.unknown()).nullable(),

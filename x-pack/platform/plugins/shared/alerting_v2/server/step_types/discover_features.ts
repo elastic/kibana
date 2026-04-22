@@ -23,7 +23,7 @@ const FROM_PATTERN = /FROM\s+([^\s|]+)/i;
 const FEATURES_INDEX_ALIAS = '.kibana_streams_features';
 const STREAMS_INDEX_ALIAS = '.kibana_streams';
 
-interface FeatureSummary {
+export interface FeatureSummary {
   id: string;
   type: string;
   subtype?: string;
@@ -34,7 +34,7 @@ interface FeatureSummary {
   stream_name?: string;
 }
 
-interface DataViewReport {
+export interface DataViewReport {
   name: string;
   pattern: string;
   source: 'existing_kis' | 'inline_extraction' | 'skipped';
@@ -42,7 +42,7 @@ interface DataViewReport {
   feature_count: number;
 }
 
-function extractIndexPatternsFromRules(
+export function extractIndexPatternsFromRules(
   rules: Array<{ id: string; rule: Record<string, unknown> }>
 ): Set<string> {
   const patterns = new Set<string>();
@@ -66,13 +66,13 @@ function getNestedString(obj: Record<string, unknown>, path: string): string | n
   return typeof current === 'string' ? current : null;
 }
 
-function patternOverlaps(dataViewPattern: string, rulePattern: string): boolean {
+export function patternOverlaps(dataViewPattern: string, rulePattern: string): boolean {
   const dvBase = dataViewPattern.replace(/[*-]/g, '').toLowerCase();
   const ruleBase = rulePattern.replace(/[*-]/g, '').toLowerCase();
   return dvBase.includes(ruleBase) || ruleBase.includes(dvBase);
 }
 
-function streamNameMatchesPattern(streamName: string, pattern: string): boolean {
+export function streamNameMatchesPattern(streamName: string, pattern: string): boolean {
   if (streamName === pattern) return true;
   const normalizedStream = streamName.replace(/\./g, '-');
   const patternBase = pattern.replace(/[*]/g, '');
@@ -83,10 +83,10 @@ function streamNameMatchesPattern(streamName: string, pattern: string): boolean 
   );
 }
 
-async function fetchDataViews(
+export async function fetchDataViews(
   soClient: SavedObjectsClientContract,
   logger: { debug: (msg: string) => void }
-): Promise<Array<{ name: string; pattern: string }>> {
+): Promise<Array<{ id: string; name: string; pattern: string }>> {
   try {
     const response = await soClient.find<{ title: string; name?: string }>({
       type: 'index-pattern',
@@ -94,6 +94,7 @@ async function fetchDataViews(
       fields: ['title', 'name'],
     });
     return response.saved_objects.map((so) => ({
+      id: so.id,
       name: so.attributes.name || so.attributes.title,
       pattern: so.attributes.title,
     }));
@@ -103,7 +104,7 @@ async function fetchDataViews(
   }
 }
 
-async function fetchStreamNames(
+export async function fetchStreamNames(
   esClient: ElasticsearchClient,
   logger: { debug: (msg: string) => void }
 ): Promise<Set<string>> {
@@ -126,7 +127,7 @@ async function fetchStreamNames(
   }
 }
 
-async function fetchKIsForStream(
+export async function fetchKIsForStream(
   esClient: ElasticsearchClient,
   streamName: string,
   logger: { debug: (msg: string) => void }
@@ -157,7 +158,7 @@ async function fetchKIsForStream(
     });
 
     return response.hits.hits
-      .map((hit) => {
+      .map((hit): FeatureSummary | null => {
         const src = hit._source as Record<string, unknown> | undefined;
         if (!src) return null;
         const feature = src.feature as Record<string, unknown> | undefined;
@@ -181,7 +182,7 @@ async function fetchKIsForStream(
   }
 }
 
-async function runInlineExtraction(
+export async function runInlineExtraction(
   esClient: ElasticsearchClient,
   pattern: string,
   inferenceClient: InferenceClient,

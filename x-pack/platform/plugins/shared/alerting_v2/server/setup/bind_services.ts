@@ -70,11 +70,16 @@ import { MatcherSuggestionsService } from '../lib/services/matcher_suggestions_s
 import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
 import { createRuleDoctorWorkflowService } from '../workflows/rule_doctor_workflow';
 import { RuleDoctorWorkflowServiceToken } from '../workflows/tokens';
-import { RuleDoctorSettingsProviderToken } from '../lib/tasks/rule_doctor/task_definition';
+import { RuleDoctorSettingsProviderToken } from '../lib/tasks/rule_doctor/constants';
+import { CoverageInferenceProviderToken } from '../lib/tasks/rule_doctor_coverage/task_runner';
 import {
   ALERTING_V2_RULE_DOCTOR_INTERVAL_SETTING_ID,
   ALERTING_V2_RULE_DOCTOR_CONTINUOUS_SETTING_ID,
+  ALERTING_V2_RULE_DOCTOR_COVERAGE_CADENCE_SETTING_ID,
 } from '../../common/experimental_features';
+import {
+  CoverageSettingsProviderToken,
+} from '../lib/tasks/rule_doctor_coverage/constants';
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(AlertActionsClient).toSelf().inRequestScope();
@@ -271,6 +276,52 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
           client.get<boolean>(ALERTING_V2_RULE_DOCTOR_CONTINUOUS_SETTING_ID),
         ]);
         return { intervalHours, continuous };
+      };
+    })
+    .inSingletonScope();
+
+  bind(CoverageInferenceProviderToken)
+    .toDynamicValue(({ get }) => {
+      const request = get(Request);
+      return {
+        getClient: () => {
+          const inferenceToken =
+            PluginStart<NonNullable<AlertingServerStartDependencies['inference']>>('inference');
+          try {
+            const inference = get(inferenceToken);
+            return inference.getClient({ request });
+          } catch {
+            return undefined;
+          }
+        },
+        getDefaultConnectorId: async () => {
+          const inferenceToken =
+            PluginStart<NonNullable<AlertingServerStartDependencies['inference']>>('inference');
+          try {
+            const inference = get(inferenceToken);
+            const connector = await inference.getDefaultConnector(request);
+            return connector.connectorId;
+          } catch {
+            return undefined;
+          }
+        },
+      };
+    })
+    .inRequestScope();
+
+  bind(CoverageSettingsProviderToken)
+    .toDynamicValue(({ get }) => {
+      const savedObjects = get(CoreStart('savedObjects'));
+      const uiSettings = get(CoreStart('uiSettings'));
+      return async () => {
+        const soClient = savedObjects.createInternalRepository();
+        const client = uiSettings.globalAsScopedToClient(soClient);
+        const [intervalHours, continuous, cadenceMinutes] = await Promise.all([
+          client.get<number>(ALERTING_V2_RULE_DOCTOR_INTERVAL_SETTING_ID),
+          client.get<boolean>(ALERTING_V2_RULE_DOCTOR_CONTINUOUS_SETTING_ID),
+          client.get<number>(ALERTING_V2_RULE_DOCTOR_COVERAGE_CADENCE_SETTING_ID),
+        ]);
+        return { intervalHours, continuous, cadenceMinutes };
       };
     })
     .inSingletonScope();
