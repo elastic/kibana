@@ -35,5 +35,19 @@ export const InstallDependencies: Task = {
         cwd: build.resolvePath(),
       }
     );
+
+    await exec(
+      log,
+      'node',
+      [
+        config.resolveFromRepo('node_modules/.bin/patch-package'),
+        '--error-on-fail',
+        '--patch-dir',
+        config.resolveFromRepo('patches'),
+      ],
+      {
+        cwd: build.resolvePath(),
+      }
+    );
   },
 };
