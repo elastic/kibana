@@ -11,8 +11,7 @@ import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 
 import { ML_ALERT_TYPES } from './alerts';
 
-// cannot import because of cyclic dependency
-// import { PLUGIN_ID } from '@kbn/ml-common-constants/app';
+// TODO: Move to a shared constant package.
 const PLUGIN_ID = 'ml';
 
 import {
