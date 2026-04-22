@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiBadge,
@@ -49,7 +49,10 @@ import {
   ESQL_TYPE_DESCRIPTION,
 } from '../../../detection_engine/rule_creation_ui/components/description_step/translations';
 import { FiltersDisplay } from './filters_display';
-import { RuleTypeDetails } from './rule_type_details';
+
+const LazyRuleTypeDetails = React.lazy(() =>
+  import('./rule_type_details').then((m) => ({ default: m.RuleTypeDetails }))
+);
 
 type RuleAttachment = Attachment<string, { text: string; attachmentLabel?: string }>;
 
@@ -283,7 +286,9 @@ const RuleInlineContent: React.FC<AttachmentRenderProps<RuleAttachment>> = ({ at
       )}
 
       <EuiSpacer size="xs" />
-      <RuleTypeDetails rule={rule} />
+      <Suspense fallback={null}>
+        <LazyRuleTypeDetails rule={rule} />
+      </Suspense>
 
       {rule.tags && rule.tags.length > 0 && (
         <>

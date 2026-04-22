@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import type { RuleResponse } from '../../../../common/api/detection_engine/model/rule_schema';
 import {
   ThresholdDetails,
@@ -40,23 +40,27 @@ const makeApplication = () =>
     navigateToApp: jest.fn(),
   } as unknown as ApplicationStart);
 
-const renderInlineContent = (rule: Record<string, unknown>) => {
+const renderInlineContent = async (rule: Record<string, unknown>) => {
   const aiRuleCreation = new AiRuleCreationService();
   const application = makeApplication();
   const definition = createRuleAttachmentDefinition({ application, aiRuleCreation });
   const Renderer = definition.renderInlineContent!;
-  return render(
-    <Renderer
-      attachment={{
-        id: 'test',
-        type: 'security.rule',
-        data: { text: JSON.stringify(rule) },
-      }}
-      isSidebar={false}
-      isCanvas={false}
-      updateOrigin={jest.fn()}
-    />
-  );
+  let result: ReturnType<typeof render>;
+  await act(async () => {
+    result = render(
+      <Renderer
+        attachment={{
+          id: 'test',
+          type: 'security.rule',
+          data: { text: JSON.stringify(rule) },
+        }}
+        isSidebar={false}
+        isCanvas={false}
+        updateOrigin={jest.fn()}
+      />
+    );
+  });
+  return result!;
 };
 
 describe('ThresholdDetails', () => {
@@ -725,8 +729,8 @@ describe('RuleInlineContent integration', () => {
     (window as { location: unknown }).location = originalLocation;
   });
 
-  it('shows "Rule type: Indicator Match" for threat_match rule', () => {
-    const { container } = renderInlineContent({
+  it('shows "Rule type: Indicator Match" for threat_match rule', async () => {
+    const { container } = await renderInlineContent({
       ...baseRule,
       type: 'threat_match',
       query: '*:*',
@@ -742,8 +746,8 @@ describe('RuleInlineContent integration', () => {
     expect(allText).toContain('Indicator Match');
   });
 
-  it('shows Description heading and description text', () => {
-    renderInlineContent({
+  it('shows Description heading and description text', async () => {
+    await renderInlineContent({
       ...baseRule,
       type: 'query',
       query: 'host.name: *',
@@ -753,8 +757,8 @@ describe('RuleInlineContent integration', () => {
     expect(screen.getByText('A test rule')).toBeInTheDocument();
   });
 
-  it('shows "Severity: High" and "Risk Score: 73" inline', () => {
-    const { container } = renderInlineContent({
+  it('shows "Severity: High" and "Risk Score: 73" inline', async () => {
+    const { container } = await renderInlineContent({
       ...baseRule,
       type: 'query',
       query: 'host.name: *',
@@ -767,8 +771,8 @@ describe('RuleInlineContent integration', () => {
     expect(allText).toContain('73');
   });
 
-  it('shows "Interval: 5m" and "Lookback time" inline', () => {
-    renderInlineContent({
+  it('shows "Interval: 5m" and "Lookback time" inline', async () => {
+    await renderInlineContent({
       ...baseRule,
       type: 'query',
       query: 'host.name: *',
@@ -779,8 +783,8 @@ describe('RuleInlineContent integration', () => {
     expect(screen.getByText('Lookback time:')).toBeInTheDocument();
   });
 
-  it('shows query, threshold heading, aggregation field, and value for threshold rule', () => {
-    renderInlineContent({
+  it('shows query, threshold heading, aggregation field, and value for threshold rule', async () => {
+    await renderInlineContent({
       ...baseRule,
       type: 'threshold',
       query: 'host.name: *',
@@ -793,8 +797,8 @@ describe('RuleInlineContent integration', () => {
     expect(screen.getByText(/>= 5/)).toBeInTheDocument();
   });
 
-  it('shows query, indicator index patterns, and threat mapping for threat_match rule', () => {
-    const { container } = renderInlineContent({
+  it('shows query, indicator index patterns, and threat mapping for threat_match rule', async () => {
+    const { container } = await renderInlineContent({
       ...baseRule,
       type: 'threat_match',
       query: '*:*',
@@ -812,8 +816,8 @@ describe('RuleInlineContent integration', () => {
     expect(allText).toContain('source.ip MATCHES threat.indicator.ip');
   });
 
-  it('shows ML job ID and anomaly threshold for machine_learning rule', () => {
-    const { container } = renderInlineContent({
+  it('shows ML job ID and anomaly threshold for machine_learning rule', async () => {
+    const { container } = await renderInlineContent({
       ...baseRule,
       type: 'machine_learning',
       machine_learning_job_id: 'v3_linux_anomalous_network_activity',
@@ -826,8 +830,8 @@ describe('RuleInlineContent integration', () => {
     expect(allText).toContain('75');
   });
 
-  it('shows query, fields badge, and 7d history window for new_terms rule', () => {
-    const { container } = renderInlineContent({
+  it('shows query, fields badge, and 7d history window for new_terms rule', async () => {
+    const { container } = await renderInlineContent({
       ...baseRule,
       type: 'new_terms',
       query: '*:*',
@@ -842,8 +846,8 @@ describe('RuleInlineContent integration', () => {
     expect(allText).toContain('7d');
   });
 
-  it('shows EQL query heading, event category, and tiebreaker for eql rule', () => {
-    renderInlineContent({
+  it('shows EQL query heading, event category, and tiebreaker for eql rule', async () => {
+    await renderInlineContent({
       ...baseRule,
       type: 'eql',
       query: 'process where process.name == "cmd.exe"',
@@ -858,8 +862,8 @@ describe('RuleInlineContent integration', () => {
     expect(screen.getByText('event.sequence')).toBeInTheDocument();
   });
 
-  it('shows only EQL query heading when eql has no optional fields', () => {
-    renderInlineContent({
+  it('shows only EQL query heading when eql has no optional fields', async () => {
+    await renderInlineContent({
       ...baseRule,
       type: 'eql',
       query: 'process where process.name == "cmd.exe"',
@@ -870,8 +874,8 @@ describe('RuleInlineContent integration', () => {
     expect(screen.queryByText(/Event category field/)).not.toBeInTheDocument();
   });
 
-  it('shows Custom query heading but no type-specific fields for basic query rule', () => {
-    const { container } = renderInlineContent({
+  it('shows Custom query heading but no type-specific fields for basic query rule', async () => {
+    const { container } = await renderInlineContent({
       ...baseRule,
       type: 'query',
       query: 'host.name: *',
@@ -884,8 +888,8 @@ describe('RuleInlineContent integration', () => {
     expect(screen.queryByText(/Event category field/)).not.toBeInTheDocument();
   });
 
-  it('shows ES|QL query heading but no type-specific fields for esql rule', () => {
-    renderInlineContent({
+  it('shows ES|QL query heading but no type-specific fields for esql rule', async () => {
+    await renderInlineContent({
       ...baseRule,
       type: 'esql',
       query: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
@@ -898,8 +902,8 @@ describe('RuleInlineContent integration', () => {
     expect(screen.queryByText(/Event category field/)).not.toBeInTheDocument();
   });
 
-  it('shows saved query name and no other type-specific fields for saved_query rule', () => {
-    const { container } = renderInlineContent({
+  it('shows saved query name and no other type-specific fields for saved_query rule', async () => {
+    const { container } = await renderInlineContent({
       ...baseRule,
       type: 'saved_query',
       saved_id: 'my-saved-query',
@@ -912,8 +916,8 @@ describe('RuleInlineContent integration', () => {
     expect(allText).not.toContain('Machine Learning job');
   });
 
-  it('places threshold details between query and tags in DOM order', () => {
-    const { container } = renderInlineContent({
+  it('places threshold details between query and tags in DOM order', async () => {
+    const { container } = await renderInlineContent({
       ...baseRule,
       type: 'threshold',
       query: 'host.name: *',
@@ -930,8 +934,8 @@ describe('RuleInlineContent integration', () => {
     expect(thresholdPos).toBeLessThan(tagsPos);
   });
 
-  it('places ML job details before tags in DOM order', () => {
-    const { container } = renderInlineContent({
+  it('places ML job details before tags in DOM order', async () => {
+    const { container } = await renderInlineContent({
       ...baseRule,
       type: 'machine_learning',
       machine_learning_job_id: 'my_job',
@@ -946,8 +950,8 @@ describe('RuleInlineContent integration', () => {
     expect(mlPos).toBeLessThan(tagsPos);
   });
 
-  it('shows query, index patterns, threshold, and tags together for threshold rule', () => {
-    renderInlineContent({
+  it('shows query, index patterns, threshold, and tags together for threshold rule', async () => {
+    await renderInlineContent({
       ...baseRule,
       type: 'threshold',
       query: 'host.name: *',
@@ -963,29 +967,31 @@ describe('RuleInlineContent integration', () => {
     expect(screen.getByText('test-tag')).toBeInTheDocument();
   });
 
-  it('renders empty rule content for invalid JSON', () => {
+  it('shows "New Rule" callout when attachment data is not valid JSON', async () => {
     const aiRuleCreation = new AiRuleCreationService();
     const application = makeApplication();
     const definition = createRuleAttachmentDefinition({ application, aiRuleCreation });
     const Renderer = definition.renderInlineContent!;
-    render(
-      <Renderer
-        attachment={{
-          id: 'test',
-          type: 'security.rule',
-          data: { text: 'not-valid-json' },
-        }}
-        isSidebar={false}
-        isCanvas={false}
-        updateOrigin={jest.fn()}
-      />
-    );
+    await act(async () => {
+      render(
+        <Renderer
+          attachment={{
+            id: 'test',
+            type: 'security.rule',
+            data: { text: 'not-valid-json' },
+          }}
+          isSidebar={false}
+          isCanvas={false}
+          updateOrigin={jest.fn()}
+        />
+      );
+    });
 
     expect(screen.getByText('New Rule')).toBeInTheDocument();
   });
 
-  it('still renders description, query, and other fields when name is missing', () => {
-    const { container } = renderInlineContent({
+  it('still renders description, query, and other fields when name is missing', async () => {
+    const { container } = await renderInlineContent({
       type: 'query',
       query: '*:*',
       description: 'No name rule',
@@ -999,29 +1005,31 @@ describe('RuleInlineContent integration', () => {
     expect(allText).toContain('*:*');
   });
 
-  it('shows "New Rule" callout when attachment data is a JSON array', () => {
+  it('shows "New Rule" callout when attachment data is a JSON array', async () => {
     const aiRuleCreation = new AiRuleCreationService();
     const application = makeApplication();
     const definition = createRuleAttachmentDefinition({ application, aiRuleCreation });
     const Renderer = definition.renderInlineContent!;
-    render(
-      <Renderer
-        attachment={{
-          id: 'test',
-          type: 'security.rule',
-          data: { text: '[1,2,3]' },
-        }}
-        isSidebar={false}
-        isCanvas={false}
-        updateOrigin={jest.fn()}
-      />
-    );
+    await act(async () => {
+      render(
+        <Renderer
+          attachment={{
+            id: 'test',
+            type: 'security.rule',
+            data: { text: '[1,2,3]' },
+          }}
+          isSidebar={false}
+          isCanvas={false}
+          updateOrigin={jest.fn()}
+        />
+      );
+    });
 
     expect(screen.getByText('New Rule')).toBeInTheDocument();
   });
 
-  it('places filters between index patterns and threshold details in DOM order', () => {
-    const { container } = renderInlineContent({
+  it('places filters between index patterns and threshold details in DOM order', async () => {
+    const { container } = await renderInlineContent({
       ...baseRule,
       type: 'threshold',
       query: 'host.name: *',
@@ -1046,8 +1054,8 @@ describe('RuleInlineContent integration', () => {
     expect(filtersPos).toBeLessThan(thresholdPos);
   });
 
-  it('omits Filters heading when filters array is empty', () => {
-    renderInlineContent({
+  it('omits Filters heading when filters array is empty', async () => {
+    await renderInlineContent({
       ...baseRule,
       type: 'query',
       query: 'host.name: *',
@@ -1057,8 +1065,8 @@ describe('RuleInlineContent integration', () => {
     expect(screen.queryByText('Filters')).not.toBeInTheDocument();
   });
 
-  it('omits Filters heading when filters is undefined', () => {
-    renderInlineContent({
+  it('omits Filters heading when filters is undefined', async () => {
+    await renderInlineContent({
       ...baseRule,
       type: 'query',
       query: 'host.name: *',
@@ -1067,8 +1075,8 @@ describe('RuleInlineContent integration', () => {
     expect(screen.queryByText('Filters')).not.toBeInTheDocument();
   });
 
-  it('shows "Custom query" heading and query text for kuery language rule', () => {
-    const { container } = renderInlineContent({
+  it('shows "Custom query" heading and query text for kuery language rule', async () => {
+    const { container } = await renderInlineContent({
       ...baseRule,
       type: 'query',
       query: 'host.name: *',
@@ -1080,8 +1088,8 @@ describe('RuleInlineContent integration', () => {
     expect(allText).toContain('Custom query');
   });
 
-  it('shows Filters badge for indicator match rule with a filter on event.category', () => {
-    renderInlineContent({
+  it('shows Filters badge for indicator match rule with a filter on event.category', async () => {
+    await renderInlineContent({
       ...baseRule,
       type: 'threat_match',
       query: '*:*',
