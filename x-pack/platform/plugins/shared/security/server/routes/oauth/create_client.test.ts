@@ -57,13 +57,20 @@ describe('Create OAuth Client route', () => {
   });
 
   it('returns created client on success', async () => {
-    const mockClient = { id: 'client-1', resource: 'urn:test', client_name: 'Test' };
+    const mockClient = {
+      id: 'client-1',
+      resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+      client_name: 'Test',
+    };
     oauthMock.createClient.mockResolvedValue(mockClient);
 
     const response = await routeHandler(
       getMockContext(),
       httpServerMock.createKibanaRequest({
-        body: { resource: 'urn:test', client_name: 'Test' },
+        body: {
+          resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+          client_name: 'Test',
+        },
       }),
       kibanaResponseFactory
     );
@@ -78,7 +85,7 @@ describe('Create OAuth Client route', () => {
     const response = await routeHandler(
       getMockContext(),
       httpServerMock.createKibanaRequest({
-        body: { resource: 'urn:test' },
+        body: { resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud' },
       }),
       kibanaResponseFactory
     );
@@ -93,7 +100,7 @@ describe('Create OAuth Client route', () => {
     const response = await routeHandler(
       getMockContext(),
       httpServerMock.createKibanaRequest({
-        body: { resource: 'urn:test' },
+        body: { resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud' },
       }),
       kibanaResponseFactory
     );

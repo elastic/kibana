@@ -45,25 +45,31 @@ describe('UiamOAuth', () => {
       mockLicense.isEnabled.mockReturnValue(false);
       const request = createMockRequest('Bearer essu_token');
 
-      const result = await uiamOAuth.createClient(request, { resource: 'urn:test' });
+      const result = await uiamOAuth.createClient(request, {
+        resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+      });
 
       expect(result).toBeNull();
       expect(mockUiam.createOAuthClient).not.toHaveBeenCalled();
     });
 
     it('creates an OAuth client successfully', async () => {
-      const mockResponse = { id: 'client-id', resource: 'urn:test', client_name: 'Test' };
+      const mockResponse = {
+        id: 'client-id',
+        resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+        client_name: 'Test',
+      };
       mockUiam.createOAuthClient.mockResolvedValue(mockResponse);
       const request = createMockRequest('Bearer essu_access_token');
 
       const result = await uiamOAuth.createClient(request, {
-        resource: 'urn:test',
+        resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
         client_name: 'Test',
       });
 
       expect(result).toEqual(mockResponse);
       expect(mockUiam.createOAuthClient).toHaveBeenCalledWith('essu_access_token', {
-        resource: 'urn:test',
+        resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
         client_name: 'Test',
       });
     });
@@ -71,7 +77,7 @@ describe('UiamOAuth', () => {
     it('forwards logo, metadata, and redirect_uris when provided', async () => {
       const mockResponse = {
         id: 'client-id',
-        resource: 'urn:test',
+        resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
         client_name: 'Test',
         redirect_uris: ['https://example.com/cb'],
         client_logo: { media_type: 'image/png', data: 'abc' },
@@ -80,7 +86,7 @@ describe('UiamOAuth', () => {
       const request = createMockRequest('Bearer essu_access_token');
 
       const params = {
-        resource: 'urn:test',
+        resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
         client_name: 'Test',
         client_type: 'confidential' as const,
         client_metadata: { owner: 'admin' },
@@ -98,9 +104,11 @@ describe('UiamOAuth', () => {
       mockUiam.createOAuthClient.mockRejectedValue(new Error('UIAM error'));
       const request = createMockRequest('Bearer essu_access_token');
 
-      await expect(uiamOAuth.createClient(request, { resource: 'urn:test' })).rejects.toThrow(
-        'UIAM error'
-      );
+      await expect(
+        uiamOAuth.createClient(request, {
+          resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+        })
+      ).rejects.toThrow('UIAM error');
 
       expect(logger.error).toHaveBeenCalledWith('Failed to create OAuth client: UIAM error');
     });
@@ -117,7 +125,9 @@ describe('UiamOAuth', () => {
     });
 
     it('lists clients successfully', async () => {
-      const mockResponse = { clients: [{ id: 'c1', resource: 'urn:test' }] };
+      const mockResponse = {
+        clients: [{ id: 'c1', resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud' }],
+      };
       mockUiam.listOAuthClients.mockResolvedValue(mockResponse);
       const request = createMockRequest('Bearer essu_access_token');
 
@@ -139,7 +149,11 @@ describe('UiamOAuth', () => {
     });
 
     it('updates client successfully', async () => {
-      const mockResponse = { id: 'c1', resource: 'urn:test', client_name: 'Updated' };
+      const mockResponse = {
+        id: 'c1',
+        resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+        client_name: 'Updated',
+      };
       mockUiam.updateOAuthClient.mockResolvedValue(mockResponse);
       const request = createMockRequest('Bearer essu_access_token');
 
@@ -158,7 +172,7 @@ describe('UiamOAuth', () => {
     it('forwards redirect_uris replacement to UIAM', async () => {
       const mockResponse = {
         id: 'c1',
-        resource: 'urn:test',
+        resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
         redirect_uris: ['https://new.example/cb'],
       };
       mockUiam.updateOAuthClient.mockResolvedValue(mockResponse);
@@ -187,7 +201,11 @@ describe('UiamOAuth', () => {
     });
 
     it('revokes client successfully', async () => {
-      const mockResponse = { id: 'c1', resource: 'urn:test', revoked: true };
+      const mockResponse = {
+        id: 'c1',
+        resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+        revoked: true,
+      };
       mockUiam.revokeOAuthClient.mockResolvedValue(mockResponse);
       const request = createMockRequest('Bearer essu_access_token');
 
@@ -210,7 +228,13 @@ describe('UiamOAuth', () => {
 
     it('lists connections successfully', async () => {
       const mockResponse = {
-        connections: [{ id: 'conn1', client_id: 'c1', resource: 'urn:test' }],
+        connections: [
+          {
+            id: 'conn1',
+            client_id: 'c1',
+            resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+          },
+        ],
       };
       mockUiam.listOAuthConnections.mockResolvedValue(mockResponse);
       const request = createMockRequest('Bearer essu_access_token');
@@ -241,7 +265,7 @@ describe('UiamOAuth', () => {
       const mockResponse = {
         id: 'conn1',
         client_id: 'c1',
-        resource: 'urn:test',
+        resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
         name: 'New name',
       };
       mockUiam.updateOAuthConnection.mockResolvedValue(mockResponse);
@@ -288,7 +312,7 @@ describe('UiamOAuth', () => {
       const mockResponse = {
         id: 'conn1',
         client_id: 'c1',
-        resource: 'urn:test',
+        resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
         revoked: true,
       };
       mockUiam.revokeOAuthConnection.mockResolvedValue(mockResponse);

@@ -58,7 +58,11 @@ describe('Get OAuth Connection route', () => {
   });
 
   it('returns single connection on success', async () => {
-    const mockConnection = { id: 'conn-1', client_id: 'client-1', resource: 'urn:test' };
+    const mockConnection = {
+      id: 'conn-1',
+      client_id: 'client-1',
+      resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+    };
     oauthMock.listConnections.mockResolvedValue({ connections: [mockConnection] });
 
     const response = await routeHandler(

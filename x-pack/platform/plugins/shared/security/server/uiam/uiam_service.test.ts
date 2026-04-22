@@ -895,7 +895,7 @@ describe('UiamService', () => {
     it('properly calls UIAM service to create an OAuth client', async () => {
       const mockResponse: OAuthClientResponse = {
         id: 'client-id',
-        resource: 'urn:test:resource',
+        resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
         client_name: 'Test Client',
       };
 
@@ -906,7 +906,7 @@ describe('UiamService', () => {
 
       await expect(
         uiamService.createOAuthClient('access-token', {
-          resource: 'urn:test:resource',
+          resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
           client_name: 'Test Client',
         })
       ).resolves.toEqual(mockResponse);
@@ -919,7 +919,10 @@ describe('UiamService', () => {
           [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
           Authorization: 'Bearer access-token',
         },
-        body: JSON.stringify({ resource: 'urn:test:resource', client_name: 'Test Client' }),
+        body: JSON.stringify({
+          resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+          client_name: 'Test Client',
+        }),
         dispatcher: AGENT_MOCK,
       });
     });
@@ -933,14 +936,16 @@ describe('UiamService', () => {
       });
 
       await expect(
-        uiamService.createOAuthClient('access-token', { resource: 'urn:test' })
+        uiamService.createOAuthClient('access-token', {
+          resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+        })
       ).rejects.toThrowError('Bad request');
     });
 
     it('forwards redirect_uris, client_logo, and client_metadata verbatim to UIAM', async () => {
       const mockResponse: OAuthClientResponse = {
         id: 'client-id',
-        resource: 'urn:test',
+        resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
         redirect_uris: ['https://example.com/cb'],
         client_logo: { media_type: 'image/png', data: 'abc' },
       };
@@ -948,7 +953,7 @@ describe('UiamService', () => {
       fetchSpy.mockResolvedValue({ ok: true, json: async () => mockResponse });
 
       const body = {
-        resource: 'urn:test',
+        resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
         client_type: 'confidential' as const,
         client_metadata: { owner: 'admin' },
         client_logo: { media_type: 'image/png', data: 'abc' },
@@ -981,7 +986,9 @@ describe('UiamService', () => {
       });
 
       await expect(
-        uiamService.createOAuthClient('access-token', { resource: 'urn:test' })
+        uiamService.createOAuthClient('access-token', {
+          resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+        })
       ).rejects.toThrowError(
         '[INVALID_REDIRECT_URI/validation_error] Redirect URI must not contain a fragment (resource: redirect_uris[0])'
       );
@@ -1048,7 +1055,7 @@ describe('UiamService', () => {
     it('properly calls UIAM service to update an OAuth client', async () => {
       const mockResponse: OAuthClientResponse = {
         id: 'client-id',
-        resource: 'urn:test',
+        resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
         client_name: 'Updated Name',
       };
 
@@ -1098,7 +1105,10 @@ describe('UiamService', () => {
     it('encodes reserved characters in the client id path segment', async () => {
       fetchSpy.mockResolvedValue({
         ok: true,
-        json: async () => ({ id: 'weird/id?x#y', resource: 'urn:test' }),
+        json: async () => ({
+          id: 'weird/id?x#y',
+          resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+        }),
       });
 
       await uiamService.updateOAuthClient('access-token', 'weird/id?x#y', {
@@ -1116,7 +1126,7 @@ describe('UiamService', () => {
     it('properly calls UIAM service to revoke an OAuth client', async () => {
       const mockResponse: OAuthClientResponse = {
         id: 'client-id',
-        resource: 'urn:test',
+        resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
         revoked: true,
       };
 
@@ -1161,7 +1171,11 @@ describe('UiamService', () => {
     it('encodes reserved characters in the client id path segment', async () => {
       fetchSpy.mockResolvedValue({
         ok: true,
-        json: async () => ({ id: 'weird/id?x#y', resource: 'urn:test', revoked: true }),
+        json: async () => ({
+          id: 'weird/id?x#y',
+          resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+          revoked: true,
+        }),
       });
 
       await uiamService.revokeOAuthClient('access-token', 'weird/id?x#y');
@@ -1236,7 +1250,7 @@ describe('UiamService', () => {
       const mockResponse: OAuthConnectionResponse = {
         id: 'conn-id',
         client_id: 'client-id',
-        resource: 'urn:test',
+        resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
         name: 'New name',
       };
 
@@ -1285,7 +1299,7 @@ describe('UiamService', () => {
         json: async () => ({
           id: 'conn/id?x',
           client_id: 'client/id#y',
-          resource: 'urn:test',
+          resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
           name: 'n',
         }),
       });
@@ -1306,7 +1320,7 @@ describe('UiamService', () => {
       const mockResponse: OAuthConnectionResponse = {
         id: 'conn-id',
         client_id: 'client-id',
-        resource: 'urn:test',
+        resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
         revoked: true,
       };
 
@@ -1354,7 +1368,7 @@ describe('UiamService', () => {
         json: async () => ({
           id: 'conn/id?x',
           client_id: 'client/id#y',
-          resource: 'urn:test',
+          resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
           revoked: true,
         }),
       });

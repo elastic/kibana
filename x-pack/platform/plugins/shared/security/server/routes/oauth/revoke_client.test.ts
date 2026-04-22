@@ -45,7 +45,11 @@ describe('Revoke OAuth Client route', () => {
   });
 
   it('returns revoked client on success', async () => {
-    const mockClient = { id: 'c1', resource: 'urn:test', revoked: true };
+    const mockClient = {
+      id: 'c1',
+      resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+      revoked: true,
+    };
     oauthMock.revokeClient.mockResolvedValue(mockClient);
 
     const response = await routeHandler(

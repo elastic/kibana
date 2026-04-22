@@ -45,7 +45,11 @@ describe('Update OAuth Client route', () => {
   });
 
   it('returns updated client on success', async () => {
-    const mockClient = { id: 'c1', resource: 'urn:test', client_name: 'Updated' };
+    const mockClient = {
+      id: 'c1',
+      resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+      client_name: 'Updated',
+    };
     oauthMock.updateClient.mockResolvedValue(mockClient);
 
     const response = await routeHandler(
@@ -62,7 +66,10 @@ describe('Update OAuth Client route', () => {
   });
 
   it('defaults client_metadata to {} when omitted to satisfy UIAM PATCH contract', async () => {
-    oauthMock.updateClient.mockResolvedValue({ id: 'c1', resource: 'urn:test' });
+    oauthMock.updateClient.mockResolvedValue({
+      id: 'c1',
+      resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+    });
 
     await routeHandler(
       getMockContext(),
@@ -80,7 +87,10 @@ describe('Update OAuth Client route', () => {
   });
 
   it('forwards redirect_uris to the service when provided', async () => {
-    oauthMock.updateClient.mockResolvedValue({ id: 'c1', resource: 'urn:test' });
+    oauthMock.updateClient.mockResolvedValue({
+      id: 'c1',
+      resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+    });
 
     await routeHandler(
       getMockContext(),

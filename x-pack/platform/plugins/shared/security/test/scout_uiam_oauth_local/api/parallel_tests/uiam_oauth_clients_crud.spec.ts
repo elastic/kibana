@@ -46,9 +46,9 @@ apiTest.describe(
       'creates, reads, lists, patches (incl. redirect_uris), and revokes a client',
       async ({ apiClient }) => {
         const clientName = `scout-crud-${Date.now()}`;
-        const resource = `urn:scout-crud:${Date.now()}`;
-        const initialRedirectUri = 'https://example.test/callback';
-        const secondRedirectUri = 'https://example.test/callback-2';
+        const resource = `https://scout-crud-${Date.now()}.kb.us-central1.gcp.elastic.cloud`;
+        const initialRedirectUri = 'https://example.com/callback';
+        const secondRedirectUri = 'https://example.com/callback-2';
 
         let clientId: string | undefined;
 
@@ -137,7 +137,7 @@ apiTest.describe(
           headers: authHeaders,
           responseType: 'json',
           body: {
-            resource: 'urn:scout-crud:bad',
+            resource: 'https://scout-crud-bad.kb.us-central1.gcp.elastic.cloud',
             client_name: 'scout-bad',
             client_type: 'not-a-valid-type',
           },
@@ -148,7 +148,7 @@ apiTest.describe(
           headers: authHeaders,
           responseType: 'json',
           body: {
-            resource: 'urn:scout-crud:bad2',
+            resource: 'https://scout-crud-bad2.kb.us-central1.gcp.elastic.cloud',
             client_name: 'scout-bad2',
             client_type: 'public',
             client_logo: { media_type: 'application/json', data: 'abc' },

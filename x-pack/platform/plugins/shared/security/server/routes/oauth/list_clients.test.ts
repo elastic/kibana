@@ -56,7 +56,9 @@ describe('List OAuth Clients route', () => {
   });
 
   it('returns clients list on success', async () => {
-    const mockResponse = { clients: [{ id: 'c1', resource: 'urn:test' }] };
+    const mockResponse = {
+      clients: [{ id: 'c1', resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud' }],
+    };
     oauthMock.listClients.mockResolvedValue(mockResponse);
 
     const response = await routeHandler(

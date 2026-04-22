@@ -49,7 +49,7 @@ describe('Update OAuth Connection route', () => {
     const mockConnection = {
       id: 'conn1',
       client_id: 'c1',
-      resource: 'urn:test',
+      resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
       name: 'Updated',
     };
     oauthMock.updateConnection.mockResolvedValue(mockConnection);

@@ -57,7 +57,11 @@ describe('Get OAuth Client route', () => {
   });
 
   it('returns single client on success', async () => {
-    const mockClient = { id: 'client-1', resource: 'urn:test', client_name: 'Test' };
+    const mockClient = {
+      id: 'client-1',
+      resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+      client_name: 'Test',
+    };
     oauthMock.listClients.mockResolvedValue({ clients: [mockClient] });
 
     const response = await routeHandler(

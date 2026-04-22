@@ -46,7 +46,13 @@ describe('List OAuth Connections route', () => {
 
   it('returns connections list on success', async () => {
     const mockResponse = {
-      connections: [{ id: 'conn1', client_id: 'c1', resource: 'urn:test' }],
+      connections: [
+        {
+          id: 'conn1',
+          client_id: 'c1',
+          resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+        },
+      ],
     };
     oauthMock.listConnections.mockResolvedValue(mockResponse);
 
