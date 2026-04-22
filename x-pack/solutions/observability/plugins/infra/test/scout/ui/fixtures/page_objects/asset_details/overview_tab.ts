@@ -67,10 +67,11 @@ export class OverviewTab extends AssetDetailsTab {
     super(page, kbnUrl);
     this.tab = this.page.getByTestId(`infraAssetDetails${this.tabName}Tab`);
 
-    this.kpiCpuUsageChart = this.page.getByTestId('infraAssetDetailsKPIcpuUsage');
-    this.kpiNormalizedLoadChart = this.page.getByTestId('infraAssetDetailsKPInormalizedLoad1m');
-    this.kpiMemoryUsageChart = this.page.getByTestId('infraAssetDetailsKPImemoryUsage');
-    this.kpiDiskUsageChart = this.page.getByTestId('infraAssetDetailsKPIdiskUsage');
+    const kpiGrid = this.page.getByTestId('infraAssetDetailsKPIGrid');
+    this.kpiCpuUsageChart = kpiGrid.getByTestId('infraAssetDetailsKPIcpuUsage');
+    this.kpiNormalizedLoadChart = kpiGrid.getByTestId('infraAssetDetailsKPInormalizedLoad1m');
+    this.kpiMemoryUsageChart = kpiGrid.getByTestId('infraAssetDetailsKPImemoryUsage');
+    this.kpiDiskUsageChart = kpiGrid.getByTestId('infraAssetDetailsKPIdiskUsage');
 
     this.metadataSection = this.page
       .getByTestId('infraAssetDetailsCollapseExpandSection')
