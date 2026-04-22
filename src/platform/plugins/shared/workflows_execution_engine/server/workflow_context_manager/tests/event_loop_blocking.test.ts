@@ -198,6 +198,12 @@ const createTestContainer = (largeOutput: ReturnType<typeof createLargeCaseOutpu
 };
 
 const createBroaderSurfaceContainer = () => {
+  const largeStepOutputs = {
+    fetchCaseA: createLargeStepOutput('fetchCaseA'),
+    fetchCaseB: createLargeStepOutput('fetchCaseB'),
+    fetchCaseC: createLargeStepOutput('fetchCaseC'),
+  } as const;
+
   const workflow: WorkflowYaml = {
     name: 'Broader Surface Repro Workflow',
     version: '1',
@@ -254,11 +260,11 @@ const createBroaderSurfaceContainer = () => {
   workflowExecutionState.getLatestStepExecution = jest
     .fn()
     .mockImplementation((stepId: string): Partial<EsWorkflowStepExecution> | undefined => {
-      if (stepId === 'fetchCaseA' || stepId === 'fetchCaseB' || stepId === 'fetchCaseC') {
+      if (stepId in largeStepOutputs) {
         return {
           state: { fetched: true, stepId },
           input: undefined,
-          output: createLargeStepOutput(stepId),
+          output: largeStepOutputs[stepId as keyof typeof largeStepOutputs],
           error: null,
         };
       }

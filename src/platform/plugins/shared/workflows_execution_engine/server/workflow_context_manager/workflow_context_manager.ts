@@ -55,6 +55,8 @@ export class WorkflowContextManager {
   private fakeRequest: KibanaRequest;
   private coreStart: CoreStart;
   private dependencies: ContextDependencies;
+  private cachedTemplatingContext?: StepContext;
+  private isTemplatingContextCacheClearScheduled = false;
 
   private stackFrames: StackFrame[];
   public readonly node: GraphNodeUnion;
@@ -145,12 +147,12 @@ export class WorkflowContextManager {
    * ```
    */
   public renderValueAccordingToContext<T>(obj: T, additionalContext?: Record<string, unknown>): T {
-    const context = this.getContext();
+    const context = this.getTemplatingContext();
     return this.templateEngine.render(obj, { ...context, ...additionalContext });
   }
 
   public evaluateExpressionInContext(template: string): unknown {
-    const context = this.getContext();
+    const context = this.getTemplatingContext();
     return this.templateEngine.evaluateExpression(template, context);
   }
 
@@ -169,7 +171,7 @@ export class WorkflowContextManager {
 
     if (typeof renderedCondition === 'string') {
       try {
-        return evaluateKql(renderedCondition, this.getContext());
+        return evaluateKql(renderedCondition, this.getTemplatingContext());
       } catch (error) {
         if (error instanceof KQLSyntaxError) {
           throw new Error(
@@ -193,7 +195,7 @@ export class WorkflowContextManager {
 
   public readContextPath(propertyPath: string): { pathExists: boolean; value: unknown } {
     const propertyPathSegments = parseJsPropertyAccess(propertyPath);
-    let result: unknown = this.getContext();
+    let result: unknown = this.getTemplatingContext();
 
     for (const segment of propertyPathSegments) {
       if (result === null || result === undefined || typeof result !== 'object') {
@@ -266,6 +268,26 @@ export class WorkflowContextManager {
   private buildWorkflowContext(): WorkflowContext {
     const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
     return buildWorkflowContext(workflowExecution, this.coreStart, this.dependencies);
+  }
+
+  private getTemplatingContext(): StepContext {
+    if (!this.cachedTemplatingContext) {
+      this.cachedTemplatingContext = this.getContext();
+      this.scheduleTemplatingContextCacheClear();
+    }
+    return this.cachedTemplatingContext;
+  }
+
+  private scheduleTemplatingContextCacheClear(): void {
+    if (this.isTemplatingContextCacheClearScheduled) {
+      return;
+    }
+
+    this.isTemplatingContextCacheClearScheduled = true;
+    queueMicrotask(() => {
+      this.cachedTemplatingContext = undefined;
+      this.isTemplatingContextCacheClearScheduled = false;
+    });
   }
 
   private enrichStepContextWithMockedData(stepContext: StepContext): void {

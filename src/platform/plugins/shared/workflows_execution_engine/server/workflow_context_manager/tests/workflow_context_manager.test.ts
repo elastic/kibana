@@ -207,6 +207,12 @@ describe('WorkflowContextManager', () => {
   }
 
   function createBroaderSurfaceContainerWithRealTemplating() {
+    const largeStepOutputs = {
+      fetchCaseA: createLargeStepOutput('fetchCaseA'),
+      fetchCaseB: createLargeStepOutput('fetchCaseB'),
+      fetchCaseC: createLargeStepOutput('fetchCaseC'),
+    } as const;
+
     const broaderWorkflow: WorkflowYaml = {
       name: 'Broader Surface Repro Workflow',
       version: '1',
@@ -247,11 +253,11 @@ describe('WorkflowContextManager', () => {
     };
 
     return createTestContainerWithRealTemplating(broaderWorkflow, renderNode, (stepId) => {
-      if (stepId === 'fetchCaseA' || stepId === 'fetchCaseB' || stepId === 'fetchCaseC') {
+      if (stepId in largeStepOutputs) {
         return {
           state: { fetched: true, stepId },
           input: undefined,
-          output: createLargeStepOutput(stepId),
+          output: largeStepOutputs[stepId as keyof typeof largeStepOutputs],
           error: null,
         };
       }
