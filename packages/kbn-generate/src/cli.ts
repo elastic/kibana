@@ -16,6 +16,8 @@ import { PackageCommand } from './commands/package_command';
 import { CodeownersCommand } from './commands/codeowners_command';
 import { ConnectorCommand } from './commands/connector_command';
 import { UserActivityActionsDocsCommand } from './commands/user_activity_actions_docs_command';
+import { WorkflowStepDocsCommand } from './commands/workflow_step_docs_command';
+import { WorkflowTriggerDocsCommand } from './commands/workflow_trigger_docs_command';
 
 /**
  * Runs the generate CLI. Called by `node scripts/generate` and not intended for use outside of that script
@@ -30,6 +32,13 @@ export function runGenerateCli() {
         };
       },
     },
-    [PackageCommand, CodeownersCommand, ConnectorCommand, UserActivityActionsDocsCommand]
+    [
+      PackageCommand,
+      CodeownersCommand,
+      ConnectorCommand,
+      UserActivityActionsDocsCommand,
+      WorkflowStepDocsCommand,
+      WorkflowTriggerDocsCommand,
+    ]
   ).execute();
 }

@@ -26,3 +26,19 @@ export interface CommonTriggerDefinition<EventSchema extends z.ZodType = z.ZodTy
    */
   eventSchema: EventSchema;
 }
+
+/**
+ * Doc-only metadata for a trigger, used for documentation generation and in-app reference.
+ */
+export interface TriggerDocMetadata {
+  id: string;
+  title: string;
+  description: string;
+  documentation?: {
+    details?: string;
+    examples?: string[];
+  };
+  snippets?: {
+    condition?: string;
+  };
+}

@@ -111,4 +111,16 @@ toc:
       - file: commands/kibana-encryption-keys.md
       - file: commands/kibana-setup.md
       - file: commands/kibana-verification-code.md
+  - file: workflows/step-definitions-index.md
+    children:
+      # workflow-step-docs-toc:begin (auto-updated by node scripts/generate workflow-step-docs)
+      - file: workflows/step-definitions-category-ai.md
+      - file: workflows/step-definitions-category-data.md
+      - file: workflows/step-definitions-category-kibana_cases.md
+      # workflow-step-docs-toc:end
+  - file: workflows/trigger-definitions-index.md
+    children:
+      # workflow-trigger-docs-toc:begin (auto-updated by node scripts/generate workflow-trigger-docs)
+      - file: workflows/trigger-definitions-category-workflows.md
+      # workflow-trigger-docs-toc:end
   - file: case-analytics-indices-schema.md

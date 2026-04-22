@@ -9,3 +9,5 @@
 
 export { registerGetStepDefinitionsRoute } from './get_step_definitions';
 export { registerGetTriggerDefinitionsRoute } from './get_trigger_definitions';
+export { registerPostStepDocMetadataRoute } from './post_step_doc_metadata';
+export { registerPostTriggerDocMetadataRoute } from './post_trigger_doc_metadata';

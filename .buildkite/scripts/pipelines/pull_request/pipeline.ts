@@ -100,6 +100,17 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
+      await doAnyChangesMatch([
+        /^src\/platform\/plugins\/shared\/workflows_extensions\/test\/scout\/api\/fixtures\/approved_step_definitions\.ts$/,
+        /^src\/platform\/plugins\/shared\/workflows_extensions\/test\/scout\/api\/fixtures\/approved_trigger_definitions\.ts$/,
+      ])
+    ) {
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/workflow_reference_docs_verify.yml', cancelable)
+      );
+    }
+
+    if (
       (await doAnyChangesMatch([
         /^src\/platform\/plugins\/shared\/data/,
         /^x-pack\/platform\/plugins\/shared\/actions/,

@@ -20,3 +20,16 @@ export type CommonStepDefinition<
   OutputSchema extends z.ZodType = z.ZodType,
   ConfigSchema extends z.ZodObject = z.ZodObject
 > = BaseStepDefinition<InputSchema, OutputSchema, ConfigSchema>;
+
+/**
+ * Doc-only metadata for a step, used for documentation generation.
+ */
+export interface StepDocMetadata {
+  id: string;
+  label: string;
+  description: string;
+  documentation?: {
+    details?: string;
+    examples?: string[];
+  };
+}

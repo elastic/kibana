@@ -18,6 +18,8 @@ import type {
 import { emitEvent } from './emit_event';
 import { registerGetStepDefinitionsRoute } from './routes/get_step_definitions';
 import { registerGetTriggerDefinitionsRoute } from './routes/get_trigger_definitions';
+import { registerPostStepDocMetadataRoute } from './routes/post_step_doc_metadata';
+import { registerPostTriggerDocMetadataRoute } from './routes/post_trigger_doc_metadata';
 import { ServerStepRegistry } from './step_registry';
 import { registerInternalStepDefinitions } from './steps';
 import { TriggerRegistry } from './trigger_registry';
@@ -31,6 +33,7 @@ import type {
   WorkflowsExtensionsServerPluginStartDeps,
   WorkflowsRouteHandlerContext,
 } from './types';
+import type { StepDocMetadata, TriggerDocMetadata } from '../common';
 
 type WorkflowsExtensionsRequestHandlerContext = CustomRequestHandlerContext<{
   workflows: WorkflowsRouteHandlerContext;
@@ -48,6 +51,10 @@ export class WorkflowsExtensionsServerPlugin
   private readonly logger: Logger;
   private readonly stepRegistry: ServerStepRegistry;
   private readonly triggerRegistry: TriggerRegistry;
+  /** In-memory store for trigger doc metadata pushed by the public plugin (for docs generation). */
+  private readonly triggerDocMetadataStore = new Map<string, TriggerDocMetadata>();
+  /** In-memory store for step doc metadata pushed by the public plugin (for docs generation). */
+  private readonly stepDocMetadataStore = new Map<string, StepDocMetadata>();
   private triggerEventHandler: TriggerEventHandler | null = null;
   private emitEventFn: ((params: EmitEventParams) => Promise<void>) | null = null;
 
@@ -63,10 +70,14 @@ export class WorkflowsExtensionsServerPlugin
   ): WorkflowsExtensionsServerPluginSetup {
     const router = core.http.createRouter();
 
-    // Register HTTP route to expose step definitions for testing
-    registerGetStepDefinitionsRoute(router, this.stepRegistry);
-    // Register HTTP route to expose trigger definitions for testing
-    registerGetTriggerDefinitionsRoute(router, this.triggerRegistry);
+    // Register HTTP route to expose step definitions (testing + docs generator)
+    registerGetStepDefinitionsRoute(router, this.stepRegistry, this.stepDocMetadataStore);
+    // Register POST route for public plugin to push step doc metadata
+    registerPostStepDocMetadataRoute(router, this.stepRegistry, this.stepDocMetadataStore);
+    // Register HTTP route to expose trigger definitions (testing + docs generator)
+    registerGetTriggerDefinitionsRoute(router, this.triggerRegistry, this.triggerDocMetadataStore);
+    // Register POST route for public plugin to push trigger doc metadata
+    registerPostTriggerDocMetadataRoute(router, this.triggerRegistry, this.triggerDocMetadataStore);
     registerInternalStepDefinitions(core, this.stepRegistry);
     registerInternalTriggerDefinitions(this.triggerRegistry);
 
