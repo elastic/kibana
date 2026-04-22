@@ -5,12 +5,11 @@
  * 2.0.
  */
 import React, { useMemo, useState } from 'react';
-import { Redirect, useLocation, useRouteMatch } from 'react-router-dom';
+import { useRouteMatch } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 
 import { splitPkgKey } from '../../../../../../../common/services';
 import { isOnlyAgentlessIntegration } from '../../../../../../../common/services/agentless_policy_helper';
-import { Loading } from '../../../../components';
 
 import {
   useGetPackageInfoByKeyQuery,
@@ -65,7 +64,6 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
   prerelease,
 }) => {
   const { params } = useRouteMatch<AddToPolicyParams>();
-  const { pathname, search } = useLocation();
   const { pkgkey, policyId, integration } = params;
   const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
   const [onSplash, setOnSplash] = useState(true);
@@ -127,38 +125,7 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
     ...(prerelease ? { prerelease: 'true' } : {}),
   });
 
-  if (!packageInfo) {
-    // Render a minimal loading indicator rather than the splash while we
-    // wait for packageInfo — the splash itself is the "Ready to add your
-    // first integration?" page, and showing it before we know whether the
-    // integration is agentless (and therefore before deciding to redirect
-    // to the single-page layout) causes a visible flash.
-    if (packageInfoError || agentPolicyError) {
-      return (
-        <AddFirstIntegrationSplashScreen
-          isLoading={isPackageInfoLoading || isLoadingInitialRequest || isAgentPolicyLoading}
-          error={packageInfoError || agentPolicyError}
-          integrationInfo={integrationInfo}
-          packageInfo={packageInfo}
-          cancelUrl={cancelUrl}
-          onNext={splashScreenNext}
-        />
-      );
-    }
-    return <Loading />;
-  }
-
-  // Multi-page flow leads with "Install Elastic Agent" — not applicable for
-  // agentless integrations. Fall back to the single-page layout by dropping
-  // the useMultiPageLayout query param.
-  if (isAgentlessByDefault) {
-    const redirectParams = new URLSearchParams(search);
-    redirectParams.delete('useMultiPageLayout');
-    const redirectQuery = redirectParams.toString();
-    return <Redirect to={redirectQuery ? `${pathname}?${redirectQuery}` : pathname} />;
-  }
-
-  if (onSplash) {
+  if ((onSplash && !isAgentlessByDefault) || !packageInfo) {
     return (
       <AddFirstIntegrationSplashScreen
         isLoading={isPackageInfoLoading || isLoadingInitialRequest || isAgentPolicyLoading}
