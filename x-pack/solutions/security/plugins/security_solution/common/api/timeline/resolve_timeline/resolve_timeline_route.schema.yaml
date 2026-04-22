@@ -8,7 +8,7 @@ paths:
       x-labels: [serverless, ess]
       x-codegen-enabled: true
       operationId: ResolveTimeline
-      summary: Get an existing saved Timeline or Timeline template
+      summary: Resolve a Timeline or Timeline template
       description:
         Resolve a Timeline or Timeline template, surfacing outcomes such as `exactMatch`, `aliasMatch`, or `conflict` when object IDs have been remapped during upgrades or imports. Provide **either** `id` for default Timelines or `template_timeline_id` for templates.
       tags:
