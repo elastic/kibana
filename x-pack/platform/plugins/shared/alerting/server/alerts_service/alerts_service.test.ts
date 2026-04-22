@@ -2986,8 +2986,8 @@ describe('Alerts Service', () => {
                   _index: '.alerts-default',
                   _id: 'alert-1',
                   _source: {
-                    'host.name': 'web-01',
-                    'kibana.alert.severity': 'high',
+                    host: { name: 'web-01' },
+                    kibana: { alert: { severity: 'high' } },
                   },
                 },
               ],
