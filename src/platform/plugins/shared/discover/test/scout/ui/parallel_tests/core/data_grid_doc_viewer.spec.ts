@@ -91,7 +91,6 @@ spaceTest.describe('Discover data grid - doc viewer', { tag: testData.DISCOVER_C
     await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
     const flyoutDoc = await readMonacoJson(page);
     expect(flyoutDoc._id).toBe(popoverDoc._id);
-    expect(flyoutDoc._id).toBe(popoverDoc._id);
 
     await closeDocViewerFlyout(page);
   });
