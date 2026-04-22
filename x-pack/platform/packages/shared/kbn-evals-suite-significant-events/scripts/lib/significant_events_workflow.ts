@@ -286,7 +286,7 @@ export async function promoteQueries(config: ConnectionConfig): Promise<void> {
     'POST',
     '/internal/streams/queries/_promote'
   );
-  if (status !== 200) {
+  if (status < 200 || status >= 300) {
     throw new Error(`Failed to promote queries: ${status} ${JSON.stringify(data)}`);
   }
 }
