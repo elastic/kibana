@@ -145,8 +145,6 @@ src/core/packages/chrome/layout/core-chrome-layout @elastic/appex-sharedux
 src/core/packages/chrome/layout/core-chrome-layout-components @elastic/appex-sharedux
 src/core/packages/chrome/layout/core-chrome-layout-constants @elastic/appex-sharedux
 src/core/packages/chrome/layout/core-chrome-layout-utils @elastic/appex-sharedux
-src/platform/kbn-ui/_tooling @elastic/appex-sharedux
-src/platform/kbn-ui/side-navigation @elastic/appex-sharedux
 src/core/packages/chrome/sidebar/sidebar @elastic/appex-sharedux
 src/core/packages/chrome/sidebar/sidebar-components @elastic/appex-sharedux
 src/core/packages/chrome/sidebar/sidebar-context @elastic/appex-sharedux
@@ -349,6 +347,7 @@ src/core/packages/user-settings/server-internal @elastic/kibana-security
 src/core/packages/user-settings/server-mocks @elastic/kibana-security
 src/core/test-helpers/kbn-server @elastic/kibana-core
 src/core/test-helpers/model-versions @elastic/kibana-core
+src/platform/kbn-ui/side-navigation @elastic/appex-sharedux
 src/platform/packages/private/analytics/utils/analytics_collection_utils @elastic/kibana-core
 src/platform/packages/private/dashboard/dashboard-navigation-options-common @elastic/kibana-presentation
 src/platform/packages/private/dashboard/dashboard-navigation-options-components @elastic/kibana-presentation
