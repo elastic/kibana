@@ -12,10 +12,11 @@ export const getEntityIcon = (entityType: string): string => {
     case 'user':
       return 'user';
     case 'host':
-      return 'desktop';
+      return 'storage';
     case 'service':
-      return 'gear';
+      return 'node';
+    case 'generic':
     default:
-      return 'questionInCircle';
+      return 'globe';
   }
 };

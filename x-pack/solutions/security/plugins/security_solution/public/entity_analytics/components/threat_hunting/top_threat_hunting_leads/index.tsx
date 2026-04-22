@@ -35,7 +35,8 @@ import * as i18n from './translations';
 import illustrationGenAi from '../../../../common/images/illustration_genai.svg';
 
 const MAX_VISIBLE_CARDS = 5;
-const MIN_CARD_WIDTH = 200;
+const MIN_CARD_WIDTH = 280;
+const MAX_CARD_WIDTH = 480;
 const CARD_GAP = 16; // EUI gutterSize="m"
 
 interface TopThreatHuntingLeadsProps {
@@ -107,8 +108,8 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiTitle size="xs">
-                <h3>{i18n.TOP_THREAT_HUNTING_LEADS_TITLE}</h3>
+              <EuiTitle size="m">
+                <h2>{i18n.TOP_THREAT_HUNTING_LEADS_TITLE}</h2>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -328,16 +329,31 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
             </EuiPanel>
           ) : (
             <div ref={setCardsContainer} style={{ overflow: 'hidden' }}>
-              <EuiFlexGroup gutterSize="m" responsive={false} wrap={false}>
-                {Array.from({ length: visibleCardCount }, (_, idx) => {
-                  const lead = leads[idx];
-                  return (
-                    <EuiFlexItem key={lead?.id ?? `empty-${idx}`} style={{ minWidth: 0 }}>
-                      {lead ? <LeadCard lead={lead} onClick={onLeadClick} /> : <div />}
-                    </EuiFlexItem>
-                  );
-                })}
-              </EuiFlexGroup>
+              {(() => {
+                const renderCount = Math.min(leads.length, visibleCardCount);
+                const hasFewLeads = leads.length < visibleCardCount;
+                return (
+                  <EuiFlexGroup
+                    gutterSize="m"
+                    responsive={false}
+                    wrap={false}
+                    justifyContent={hasFewLeads ? 'flexStart' : undefined}
+                  >
+                    {leads.slice(0, renderCount).map((lead) => (
+                      <EuiFlexItem
+                        key={lead.id}
+                        grow={!hasFewLeads}
+                        style={{
+                          minWidth: 0,
+                          maxWidth: hasFewLeads ? MAX_CARD_WIDTH : undefined,
+                        }}
+                      >
+                        <LeadCard lead={lead} onClick={onLeadClick} />
+                      </EuiFlexItem>
+                    ))}
+                  </EuiFlexGroup>
+                );
+              })()}
             </div>
           )}
         </>
