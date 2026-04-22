@@ -21,7 +21,7 @@ const badgeCss = (euiTheme: EuiThemeComputed) => css`
 
 const euiPaletteRed9 = euiPaletteRed(14);
 interface EventTypeProps {
-  eventTypeValue: React.ReactNode;
+  eventTypeValue: string;
 }
 export function EventType({ eventTypeValue }: EventTypeProps) {
   const { euiTheme } = useEuiTheme();

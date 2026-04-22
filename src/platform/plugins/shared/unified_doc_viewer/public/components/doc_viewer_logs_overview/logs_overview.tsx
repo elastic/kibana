@@ -10,7 +10,13 @@
 import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { EuiSpacer } from '@elastic/eui';
-import { getLogDocumentOverview, fieldConstants } from '@kbn/discover-utils';
+import {
+  SERVICE_NAME_FIELD,
+  SPAN_ID_FIELD,
+  TRACE_ID_FIELD,
+  TRANSACTION_ID_FIELD,
+  getLogDocumentOverview,
+} from '@kbn/discover-utils';
 import type {
   ObservabilityLogsAIAssistantFeature,
   ObservabilityLogsAIInsightFeature,
@@ -85,7 +91,7 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
     const LogsOverviewAIInsight = renderAIInsight;
     const stacktraceFields = getStacktraceFields(hit as LogDocument);
     const isStacktraceAvailable = Object.values(stacktraceFields).some(Boolean);
-    const traceId = parsedDoc[fieldConstants.TRACE_ID_FIELD];
+    const traceId = parsedDoc[TRACE_ID_FIELD];
     const showSimilarErrors = traceId && hasErrorFields(parsedDoc);
     const qualityIssuesSectionRef = useRef<ScrollableSectionWrapperApi>(null);
     const stackTraceSectionRef = useRef<ScrollableSectionWrapperApi>(null);
@@ -156,11 +162,8 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
               {traceId && showTraceWaterfall ? (
                 <TraceWaterfall
                   traceId={traceId}
-                  docId={
-                    parsedDoc[fieldConstants.TRANSACTION_ID_FIELD] ||
-                    parsedDoc[fieldConstants.SPAN_ID_FIELD]
-                  }
-                  serviceName={parsedDoc[fieldConstants.SERVICE_NAME_FIELD]}
+                  docId={parsedDoc[TRANSACTION_ID_FIELD] || parsedDoc[SPAN_ID_FIELD]}
+                  serviceName={parsedDoc[SERVICE_NAME_FIELD]}
                   dataView={dataView}
                   initialState={initialState}
                   onInitialStateChange={onInitialStateChange}
