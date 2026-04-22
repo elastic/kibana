@@ -134,7 +134,7 @@ function NewPanelContent({ dashboardApi }: { dashboardApi: DashboardApi }) {
                 }}
                 aria-label={i18nFn.translate(
                   'dashboard.editorMenu.addPanelFlyout.searchLabelText',
-                  { defaultMessage: 'search field for panels' }
+                  { defaultMessage: 'Search field for panels' }
                 )}
                 data-test-subj="dashboardPanelSelectionFlyout__searchInput"
               />
