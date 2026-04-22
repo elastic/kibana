@@ -90,13 +90,13 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
     `,
   ]);
 
-  const rowLayoutStyles = css({
-    display: 'flex',
-    alignItems: 'center',
-    gap: euiTheme.size.xxs,
-    borderRadius: euiTheme.border.radius.small,
-    paddingInlineEnd: euiTheme.size.xxs,
-  });
+  const rowLayoutStyles = css`
+    display: flex;
+    align-items: center;
+    gap: ${euiTheme.size.xxs};
+    border-radius: ${euiTheme.border.radius.small};
+    padding-inline-end: ${euiTheme.size.xxs};
+  `;
 
   const rowHoverAndFocusStyles = css`
     &:hover .${ACTIONS_CLASS}, &:focus-within .${ACTIONS_CLASS} {
@@ -188,7 +188,12 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
         css={rowStyles}
         data-test-subj={`agentBuilderSidebarConversationRow-${conversationId}`}
       >
-        <EuiFlexItem grow css={css({ minWidth: 0 })}>
+        <EuiFlexItem
+          grow
+          css={css`
+            min-width: 0;
+          `}
+        >
           <Link
             to={appPaths.agent.conversations.byId({ agentId, conversationId })}
             css={linkStyles}
