@@ -209,7 +209,7 @@ For the Elastic Observability 9.4.0 release information, refer to [Elastic Obser
 For the Elastic Security 9.4.0 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
 
 **Kibana platform**:
-* Sets the heap limit to `min(60%, 4GB)` for containers if unset. Containers now set the default Node.js heap to 75% of available memory up to a maximum of 4096 MB [#246073]({{kib-pull}}246073).
+* In container deployments, automatically sets the Node.js heap size to 60% of available memory, up to a maximum of 4096 MB, when no heap size is explicitly configured [#246073]({{kib-pull}}246073).
 * Adds a feedback button to {{kib}}'s header [#225074]({{kib-pull}}225074).
 * Remembers the pagination state when navigating back from an edit on the **Users** page, instead of always returning to page 1 and resetting the search [#261152]({{kib-pull}}261152).
 * Distinguishes between session idle timeouts and session lifespan timeouts [#252779]({{kib-pull}}252779).
