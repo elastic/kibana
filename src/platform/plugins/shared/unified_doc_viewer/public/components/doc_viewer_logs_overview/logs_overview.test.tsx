@@ -171,7 +171,14 @@ const renderLogsOverview = (
 ) => {
   const { rerender: baseRerender, ...tools } = render(
     <EuiProvider highContrastMode={false}>
-      <LogsOverview ref={ref} dataView={dataView} hit={fullHit} indexes={indexes} {...props} />
+      <LogsOverview
+        ref={ref}
+        dataView={dataView}
+        hit={fullHit}
+        indexes={indexes}
+        profileId="test-profile"
+        {...props}
+      />
     </EuiProvider>
   );
 
@@ -183,6 +190,7 @@ const renderLogsOverview = (
           dataView={dataView}
           hit={fullHit}
           indexes={indexes}
+          profileId="test-profile"
           {...props}
           {...rerenderProps}
         />

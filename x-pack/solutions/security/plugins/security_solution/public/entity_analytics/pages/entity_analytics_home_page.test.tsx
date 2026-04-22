@@ -14,6 +14,13 @@ import { useSourcererDataView } from '../../sourcerer/containers';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 
+jest.mock('../../common/components/link_to', () => ({
+  useGetSecuritySolutionUrl:
+    () =>
+    ({ deepLinkId, path = '' }: { deepLinkId: string; path?: string }) =>
+      `/app/security/${deepLinkId}${path}`,
+}));
+
 jest.mock('../../sourcerer/containers', () => ({
   useSourcererDataView: jest.fn(() => ({
     indicesExist: true,
@@ -135,7 +142,7 @@ describe('EntityAnalyticsHomePage', () => {
       { wrapper: TestProviders }
     );
 
-    expect(screen.getByText('Entity Analytics')).toBeInTheDocument();
+    expect(screen.getByText('Entity analytics')).toBeInTheDocument();
   });
 
   it('renders the KQL search bar', () => {
@@ -198,6 +205,17 @@ describe('EntityAnalyticsHomePage', () => {
     );
 
     expect(screen.getByTestId('entityAnalyticsHomePageLoader')).toBeInTheDocument();
+  });
+
+  it('renders the watchlists settings button', () => {
+    render(
+      <MemoryRouter>
+        <EntityAnalyticsHomePage />
+      </MemoryRouter>,
+      { wrapper: TestProviders }
+    );
+
+    expect(screen.getByRole('link', { name: 'Watchlists settings' })).toBeInTheDocument();
   });
 
   it('renders empty prompt when indices do not exist', () => {

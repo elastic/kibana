@@ -878,6 +878,9 @@ If a record already exists for the specified entity, that record is overwritten 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Creates a new privileged user to be monitored by the Privilege Monitoring Engine.
+   */
   async createPrivMonUser(props: CreatePrivMonUserProps) {
     this.log.info(`${new Date().toISOString()} Calling API CreatePrivMonUser`);
     return this.kbnClient
@@ -1047,6 +1050,9 @@ For detailed information on Kibana actions and alerting, and additional API call
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Creates a new entity analytics watchlist with an optional set of entity sources. Watchlists apply a risk score modifier to matched entities.
+   */
   async createWatchlist(props: CreateWatchlistProps) {
     this.log.info(`${new Date().toISOString()} Calling API CreateWatchlist`);
     return this.kbnClient
@@ -1160,6 +1166,9 @@ For detailed information on Kibana actions and alerting, and additional API call
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Deletes the Privilege Monitoring Engine and optionally removes all associated privileged user data.
+   */
   async deleteMonitoringEngine(props: DeleteMonitoringEngineProps) {
     this.log.info(`${new Date().toISOString()} Calling API DeleteMonitoringEngine`);
     return this.kbnClient
@@ -1195,6 +1204,9 @@ Requires the **Timeline and Notes** write privilege (`notes_write`).
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Removes a privileged user from monitoring by their document ID.
+   */
   async deletePrivMonUser(props: DeletePrivMonUserProps) {
     this.log.info(`${new Date().toISOString()} Calling API DeletePrivMonUser`);
     return this.kbnClient
@@ -1312,6 +1324,9 @@ The entity will be immediately deleted from the latest index.  It will remain av
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Disables the Privilege Monitoring Engine, stopping all monitoring activity without removing data.
+   */
   async disableMonitoringEngine() {
     this.log.info(`${new Date().toISOString()} Calling API DisableMonitoringEngine`);
     return this.kbnClient
@@ -2022,6 +2037,9 @@ Requires the **Timeline and Notes** read privilege (`notes_read`).
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Returns the installation and ML module setup status of the privileged access detection package, along with the state of each associated ML job.
+   */
   async getPrivilegedAccessDetectionPackageStatus() {
     this.log.info(
       `${new Date().toISOString()} Calling API GetPrivilegedAccessDetectionPackageStatus`
@@ -2269,6 +2287,9 @@ Requires the **Timeline and Notes** read privilege (`notes_read`).
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Retrieves the details of an entity analytics watchlist by its unique identifier.
+   */
   async getWatchlist(props: GetWatchlistProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetWatchlist`);
     return this.kbnClient
@@ -2390,6 +2411,9 @@ Requires the **Timeline and Notes** read privilege (`notes_read`).
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Initializes the Privilege Monitoring Engine, setting up the required resources and starting the engine.
+   */
   async initMonitoringEngine() {
     this.log.info(`${new Date().toISOString()} Calling API InitMonitoringEngine`);
     return this.kbnClient
@@ -2494,6 +2518,9 @@ providing you with the most current and effective threat detection capabilities.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Installs the privileged access detection integration package and sets up the associated ML modules required for the Entity Analytics privileged user monitoring experience.
+   */
   async installPrivilegedAccessDetectionPackage() {
     this.log.info(
       `${new Date().toISOString()} Calling API InstallPrivilegedAccessDetectionPackage`
@@ -2575,6 +2602,9 @@ Each row will match up to 10,000 entities.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Returns a list of all privileged users currently being monitored. Supports optional KQL filtering.
+   */
   async listPrivMonUsers(props: ListPrivMonUsersProps) {
     this.log.info(`${new Date().toISOString()} Calling API ListPrivMonUsers`);
     return this.kbnClient
@@ -2606,6 +2636,9 @@ Each row will match up to 10,000 entities.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Returns a list of all entity analytics watchlists.
+   */
   async listWatchlists() {
     this.log.info(`${new Date().toISOString()} Calling API ListWatchlists`);
     return this.kbnClient
@@ -2767,6 +2800,9 @@ Requires the **Timeline and Notes** write privilege (`notes_write`).
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Bulk upserts privileged users by uploading a CSV file. Returns per-row errors and aggregate upload statistics.
+   */
   async privmonBulkUploadUsersCsv(props: PrivmonBulkUploadUsersCSVProps) {
     this.log.info(`${new Date().toISOString()} Calling API PrivmonBulkUploadUsersCSV`);
     return this.kbnClient
@@ -2780,6 +2816,9 @@ Requires the **Timeline and Notes** write privilege (`notes_write`).
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Returns the current health status of the Privilege Monitoring Engine, including engine status, error details, and user count statistics.
+   */
   async privMonHealth() {
     this.log.info(`${new Date().toISOString()} Calling API PrivMonHealth`);
     return this.kbnClient
@@ -3028,6 +3067,9 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Schedules the Privilege Monitoring Engine to run as soon as possible, triggering an immediate monitoring cycle.
+   */
   async scheduleMonitoringEngine() {
     this.log.info(`${new Date().toISOString()} Calling API ScheduleMonitoringEngine`);
     return this.kbnClient
@@ -3404,6 +3446,9 @@ remain on the watchlist.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Updates the details of an existing monitored privileged user by their document ID.
+   */
   async updatePrivMonUser(props: UpdatePrivMonUserProps) {
     this.log.info(`${new Date().toISOString()} Calling API UpdatePrivMonUser`);
     return this.kbnClient
@@ -3491,6 +3536,9 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Updates the name, description, risk modifier, or managed status of an existing entity analytics watchlist.
+   */
   async updateWatchlist(props: UpdateWatchlistProps) {
     this.log.info(`${new Date().toISOString()} Calling API UpdateWatchlist`);
     return this.kbnClient
