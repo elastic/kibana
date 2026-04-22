@@ -122,7 +122,6 @@ export function registerSignificantEventsInferenceFeatures(
       featureDescription: child.featureDescription,
       taskType: 'chat_completion',
       recommendedEndpoints: child.recommendedEndpoints,
-      isTechPreview: true,
     });
     if (childResult.ok) {
       logger.debug(`Registered child inference feature "${child.featureId}"`);
