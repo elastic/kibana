@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS } from '@kbn/management-settings-ids';
 import { tags } from '@kbn/scout';
 import { test } from '../../fixtures';
 import { generateLogsData } from '../../fixtures/generators';
@@ -23,11 +22,6 @@ test.describe.skip('Attachments', { tag: tags.stateful.classic }, () => {
   let sloId: string;
 
   test.beforeAll(async ({ logsSynthtraceEsClient, kbnClient, apiServices }) => {
-    // Enable attachments feature
-    await kbnClient.uiSettings.update({
-      [OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS]: true,
-    });
-
     const currentTime = Date.now();
     // Generate some logs to create the stream
     await generateLogsData(logsSynthtraceEsClient)({
@@ -130,11 +124,6 @@ test.describe.skip('Attachments', { tag: tags.stateful.classic }, () => {
 
     // Delete the stream
     await apiServices.streams.deleteStream(TEST_STREAM_NAME);
-
-    // Disable attachments feature
-    await kbnClient.uiSettings.update({
-      [OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS]: false,
-    });
   });
 
   test('shows empty attachments prompt when navigating to attachments tab', async ({
