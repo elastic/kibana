@@ -16,7 +16,6 @@ import {
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton,
   EuiButtonEmpty,
   EuiFormRow,
   EuiFieldText,
@@ -28,6 +27,7 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
+import { AiButton } from '@kbn/shared-ux-ai-components';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { css } from '@emotion/react';
 import { useParams } from 'react-router-dom';
@@ -444,29 +444,8 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
     isValidatingIndex,
   ]);
 
-  const handleAnalyzeLogs = useCallback(async () => {
-    if (!formData) return;
-
-    const trimmedIntegrationTitle = formData.title?.trim() ?? '';
-    const trimmedDataStreamTitle = formData.dataStreamTitle?.trim() ?? '';
-    if (!isValidTitle(trimmedIntegrationTitle) || !isValidTitle(trimmedDataStreamTitle)) {
-      return;
-    }
-
-    const integrationId = currentIntegrationId ?? normalizeTitleName(trimmedIntegrationTitle);
-    const dataStreamId = normalizeTitleName(trimmedDataStreamTitle);
-    const inputTypes: InputType[] = (formData.dataCollectionMethod ?? []).map((method) => ({
-      name: method as InputType['name'],
-    }));
-
-    const newDataStream: DataStream = {
-      dataStreamId,
-      title: formData.dataStreamTitle,
-      description: formData.dataStreamDescription ?? formData.dataStreamTitle,
-      inputTypes,
-    };
-
-    try {
+  const uploadSamples = useCallback(
+    async ({ integrationId, dataStreamId }: { integrationId: string; dataStreamId: string }) => {
       if (logsSourceOption === 'file' && logSample) {
         const { samples, linesOmittedOverLimit } = normalizeLogSamplesFromFileContent(logSample);
 
@@ -500,6 +479,41 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
           },
         });
       }
+    },
+    [
+      logsSourceOption,
+      logSample,
+      notifications,
+      uploadSamplesMutation,
+      uploadedFileName,
+      selectedIndex,
+    ]
+  );
+
+  const handleAnalyzeLogs = useCallback(async () => {
+    if (!formData) return;
+
+    const trimmedIntegrationTitle = formData.title?.trim() ?? '';
+    const trimmedDataStreamTitle = formData.dataStreamTitle?.trim() ?? '';
+    if (!isValidTitle(trimmedIntegrationTitle) || !isValidTitle(trimmedDataStreamTitle)) {
+      return;
+    }
+
+    const integrationId = currentIntegrationId ?? normalizeTitleName(trimmedIntegrationTitle);
+    const dataStreamId = normalizeTitleName(trimmedDataStreamTitle);
+    const inputTypes: InputType[] = (formData.dataCollectionMethod ?? []).map((method) => ({
+      name: method as InputType['name'],
+    }));
+
+    const newDataStream: DataStream = {
+      dataStreamId,
+      title: formData.dataStreamTitle,
+      description: formData.dataStreamDescription ?? formData.dataStreamTitle,
+      inputTypes,
+    };
+
+    try {
+      await uploadSamples({ integrationId, dataStreamId });
 
       const result = await createUpdateIntegrationMutation.mutateAsync({
         connectorId: formData.connectorId,
@@ -524,18 +538,18 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
       });
     } finally {
       reportAnalyzeLogsTriggered({
+        integrationId,
+        dataStreamId: normalizeTitleName(formData?.dataStreamTitle ?? ''),
         logsSource: logsSourceOption,
+        inputTypes: formData?.dataCollectionMethod ?? [],
       });
     }
   }, [
     formData,
     createUpdateIntegrationMutation,
-    uploadSamplesMutation,
+    uploadSamples,
     currentIntegrationId,
     logsSourceOption,
-    logSample,
-    selectedIndex,
-    uploadedFileName,
     onClose,
     reportAnalyzeLogsTriggered,
     notifications,
@@ -737,27 +751,29 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
             {isAnalyzeDisabled && analyzeLogsDisabledTooltipContent != null ? (
               <EuiToolTip content={analyzeLogsDisabledTooltipContent} position="top">
                 <span tabIndex={0}>
-                  <EuiButton
-                    fill
+                  <AiButton
+                    iconType="sparkles"
+                    variant="accent"
                     onClick={handleAnalyzeLogs}
                     disabled={isAnalyzeDisabled}
                     isLoading={isParsing || isLoading || isUploadingSamples}
                     data-test-subj="analyzeLogsButton"
                   >
                     {i18n.ANALYZE_LOGS_BUTTON}
-                  </EuiButton>
+                  </AiButton>
                 </span>
               </EuiToolTip>
             ) : (
-              <EuiButton
-                fill
+              <AiButton
+                iconType="sparkles"
+                variant="accent"
                 onClick={handleAnalyzeLogs}
                 disabled={isAnalyzeDisabled}
                 isLoading={isParsing || isLoading || isUploadingSamples}
                 data-test-subj="analyzeLogsButton"
               >
                 {i18n.ANALYZE_LOGS_BUTTON}
-              </EuiButton>
+              </AiButton>
             )}
           </EuiFlexItem>
         </EuiFlexGroup>

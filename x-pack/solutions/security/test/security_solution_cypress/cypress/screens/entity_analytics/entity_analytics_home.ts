@@ -19,7 +19,6 @@ export const DATAGRID_SORTING_SELECTOR = '[data-test-subj="dataGridColumnSorting
 export const EXPAND_ROW_BUTTON = '[data-test-subj="docTableExpandToggleColumn"]';
 
 export const TIMELINE_ACTION = '[data-test-subj="entity-analytics-home-timeline-icon"]';
-export const AI_ACTION = '[data-test-subj="entity-analytics-home-ai-action-icon"]';
 
 export const FIELDS_SELECTOR_BUTTON = '[data-test-subj="entityAnalyticsFieldsSelectorOpenButton"]';
 export const FIELDS_SELECTOR_MODAL = '[data-test-subj="entityAnalyticsFieldsSelectorModal"]';
