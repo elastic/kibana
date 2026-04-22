@@ -6,6 +6,6 @@ Evaluate the following feature set for semantic uniqueness:
 {{{totals}}}
 
 **Unique KIs by id**:
-{{{unique_features_by_id}}}
+{{{unique_kis_by_id}}}
 
 Please analyze the KIs and call the `analyze` tool with your findings.

@@ -320,8 +320,13 @@ export const ManageIntegrationsTable: React.FC<{
     [http, notifications, automaticImport]
   );
 
-  const approveAndDeployIntegration = useCallback(
-    async (integrationId: string, version: string, categories: string[]) => {
+  const approveAndInstallIntegration = useCallback(
+    async (
+      integrationId: string,
+      version: string,
+      categories: string[],
+      autoInstallAfterApproval: boolean
+    ) => {
       try {
         await http.post(
           `/api/automatic_import/integrations/${encodeURIComponent(integrationId)}/approve`,
@@ -332,12 +337,16 @@ export const ManageIntegrationsTable: React.FC<{
         );
 
         notifications.toasts.addSuccess({
-          title: i18n.translate(
-            'xpack.fleet.epmList.manageIntegrations.actions.approveSuccessTitle',
-            {
-              defaultMessage: 'Integration approved and ready to deploy',
-            }
-          ),
+          title: autoInstallAfterApproval
+            ? i18n.translate(
+                'xpack.fleet.epmList.manageIntegrations.actions.approveSuccessWithInstallTitle',
+                {
+                  defaultMessage: 'Integration approved and installed',
+                }
+              )
+            : i18n.translate('xpack.fleet.epmList.manageIntegrations.actions.approveSuccessTitle', {
+                defaultMessage: 'Integration approved',
+              }),
         });
         onRefetch();
       } catch (error) {
@@ -356,7 +365,8 @@ export const ManageIntegrationsTable: React.FC<{
   );
 
   const installToCluster = useCallback(
-    async (integrationId: string) => {
+    async (integrationId: string, options?: { skipSuccessToast?: boolean }) => {
+      const { skipSuccessToast = false } = options ?? {};
       try {
         const zipBlob = await http.get(
           `/api/automatic_import/integrations/${encodeURIComponent(integrationId)}/download`,
@@ -378,12 +388,14 @@ export const ManageIntegrationsTable: React.FC<{
         });
 
         await queryClient.invalidateQueries({ queryKey: ['get-packages'] });
-        notifications.toasts.addSuccess({
-          title: i18n.translate(
-            'xpack.fleet.epmList.manageIntegrations.actions.installSuccessTitle',
-            { defaultMessage: 'Integration installed to cluster successfully' }
-          ),
-        });
+        if (!skipSuccessToast) {
+          notifications.toasts.addSuccess({
+            title: i18n.translate(
+              'xpack.fleet.epmList.manageIntegrations.actions.installSuccessTitle',
+              { defaultMessage: 'Integration installed to cluster successfully' }
+            ),
+          });
+        }
       } catch (error) {
         notifications.toasts.addError(error as Error, {
           title: i18n.translate(
@@ -607,7 +619,7 @@ export const ManageIntegrationsTable: React.FC<{
                   automaticImport?.components.DataStreamResultsFlyout
                 }
                 onFetchReviewDetails={fetchIntegrationReviewDetails}
-                onApproveAndDeploy={approveAndDeployIntegration}
+                onApproveAndInstall={approveAndInstallIntegration}
                 onDownloadZip={downloadZipPackage}
                 onInstallToCluster={installToCluster}
               />
@@ -634,7 +646,7 @@ export const ManageIntegrationsTable: React.FC<{
             onDelete={deleteIntegration}
             DataStreamResultsFlyoutComponent={automaticImport?.components.DataStreamResultsFlyout}
             onFetchReviewDetails={fetchIntegrationReviewDetails}
-            onApproveAndDeploy={approveAndDeployIntegration}
+            onApproveAndInstall={approveAndInstallIntegration}
             onDownloadZip={downloadZipPackage}
             onInstallToCluster={installToCluster}
           />
@@ -646,7 +658,7 @@ export const ManageIntegrationsTable: React.FC<{
       goToEditIntegration,
       deleteIntegration,
       fetchIntegrationReviewDetails,
-      approveAndDeployIntegration,
+      approveAndInstallIntegration,
       downloadZipPackage,
       installToCluster,
       installedPackageVersions,
@@ -840,7 +852,7 @@ export const ManageIntegrationsTable: React.FC<{
                   : undefined
               }
             >
-              <span>
+              <span tabIndex={0}>
                 <EuiButton
                   size="s"
                   iconType="exportAction"
