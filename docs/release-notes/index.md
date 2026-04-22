@@ -271,15 +271,12 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Creates an initialization endpoint and migrates the list index creation flow [#258891]({{kib-pull}}258891).
 * Adds import and export features for workflows [#257976]({{kib-pull}}257976).
 * Adds the `workflows.executionFailed` trigger so you can run workflows when another workflow fails. Use it to send notifications (e.g., Slack), run cleanup, or trigger retries [#257633]({{kib-pull}}257633).
-* Adds leads cards, flyouts, and Agent Builder integration [#257610]({{kib-pull}}257610).
 * Adds a server-side workflow validation endpoint [#254502]({{kib-pull}}254502).
 * Makes the manual run API public [#253010]({{kib-pull}}253010).
 * Adds agent pre-execution workflows [#252452]({{kib-pull}}252452).
 * Whitelists Streams APIs as Kibana workflow steps [#252068]({{kib-pull}}252068).
 * Adds a gap scheduler error callout [#250393]({{kib-pull}}250393).
 * Adds metrics grid {{esql}} WHERE propagation [#249103]({{kib-pull}}249103).
-* Adds a SharePoint Online connector to the available list of connectors [#248737]({{kib-pull}}248737).
-* Adds a serverless Trial Companion [#244178]({{kib-pull}}244178).
 * Adds the `createConversation` and `inviteToConversation` actions [#260806]({{kib-pull}}260806).
 * Shows streams field description in {{esql}} editor and field side bar [#260582]({{kib-pull}}260582).
 * Updates OAS docs for Alerting create rule route [#260497]({{kib-pull}}260497).
@@ -287,9 +284,6 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Adds the `entries` Liquid filter for iterating over object keys [#259249]({{kib-pull}}259249).
 * Respects `observability:enableInspectEsQueries` in Hosts UI [#253618]({{kib-pull}}253618).
 * Adds audit logging for agent and tool actions [#252143]({{kib-pull}}252143).
-* Reduces output tokens in the `get_anomaly_detection_jobs` tool [#251415]({{kib-pull}}251415).
-* Adds **Steps** configuration options for infrastructure inventory metrics [#248360]({{kib-pull}}248360).
-
 ### Fixes [kibana-9.4.0-fixes]
 
 **Alerting**:
