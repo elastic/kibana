@@ -70,7 +70,31 @@ export const createSerializer =
          */
         if (isUsingRollover) {
           if (_meta.hot?.isUsingDefaultRollover) {
+            const existingRollover = hotPhaseActions.rollover;
+            const preservedRolloverFields = existingRollover
+              ? Object.entries(existingRollover).reduce<Record<string, unknown>>(
+                  (acc, [key, value]) => {
+                    // When switching to recommended defaults, we intentionally reset the rollover
+                    // thresholds controlled by the UI, but preserve any additional keys that the
+                    // UI does not manage (e.g. min_* settings).
+                    if (
+                      key === 'max_age' ||
+                      key === 'max_docs' ||
+                      key === 'max_primary_shard_size' ||
+                      key === 'max_primary_shard_docs' ||
+                      key === 'max_size'
+                    ) {
+                      return acc;
+                    }
+                    acc[key] = value;
+                    return acc;
+                  },
+                  {}
+                )
+              : {};
+
             hotPhaseActions.rollover = cloneDeep(defaultRolloverAction);
+            Object.assign(hotPhaseActions.rollover, preservedRolloverFields);
           } else {
             // Rollover may not exist if editing an existing policy with initially no rollover configured
             if (!hotPhaseActions.rollover) {
