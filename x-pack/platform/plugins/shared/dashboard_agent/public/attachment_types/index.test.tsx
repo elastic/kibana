@@ -324,7 +324,9 @@ describe('registerDashboardAttachmentUiDefinition', () => {
         events: {
           chat$: new Subject<ChatEvent>(),
           ui: {
-            activeConversation$: new BehaviorSubject<ActiveConversation | null>(null).asObservable(),
+            activeConversation$: new BehaviorSubject<ActiveConversation | null>(
+              null
+            ).asObservable(),
           },
         },
       } as unknown as AgentBuilderPluginStart,
