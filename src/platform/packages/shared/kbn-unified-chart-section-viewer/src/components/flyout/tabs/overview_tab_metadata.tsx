@@ -15,7 +15,7 @@ import React, { useMemo } from 'react';
 import { getUnitLabel } from '../../../common/utils';
 import type { ExternalServices, ParsedMetricItem } from '../../../types';
 import { BadgeGroup, DataStreamLink, MetricTypeBadge } from '../components';
-import { useStreamsNavigation } from '../hooks/use_streams_navigation';
+import { useStreamsNavigation } from '../../../hooks/use_streams_navigation';
 
 export interface OverviewTabMetadataProps {
   metricItem: ParsedMetricItem;

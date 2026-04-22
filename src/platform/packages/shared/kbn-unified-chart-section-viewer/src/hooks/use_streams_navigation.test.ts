@@ -9,7 +9,7 @@
 
 import { renderHook } from '@testing-library/react';
 import { OBSERVABILITY_STREAMS_FEATURE_ID } from '@kbn/discover-shared-plugin/public';
-import type { ExternalServices } from '../../../types';
+import type { ExternalServices } from '../types';
 import { useStreamsNavigation } from './use_streams_navigation';
 
 const mockGetRedirectUrl = jest.fn((params: { name: string }) => `/app/streams/${params.name}`);

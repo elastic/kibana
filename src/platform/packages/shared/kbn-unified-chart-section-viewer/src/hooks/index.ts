@@ -9,3 +9,4 @@
 
 export { useEsqlQueryInfo } from './use_esql_query_info';
 export { useGridNavigation } from './use_grid_navigation';
+export { useStreamsNavigation } from './use_streams_navigation';

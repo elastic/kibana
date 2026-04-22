@@ -11,7 +11,7 @@ import { useCallback, useMemo } from 'react';
 import { STREAMS_APP_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import { isCCSRemoteIndexName } from '@kbn/es-query';
 import { OBSERVABILITY_STREAMS_FEATURE_ID } from '@kbn/discover-shared-plugin/public';
-import type { ExternalServices } from '../../../types';
+import type { ExternalServices } from '../types';
 
 /**
  * Encapsulates Streams app navigation logic: permission gating, CCS filtering,
