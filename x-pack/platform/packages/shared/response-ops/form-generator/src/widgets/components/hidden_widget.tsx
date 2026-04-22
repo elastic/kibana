@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { EuiFieldTextProps } from '@elastic/eui';
-import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { FIELD_TYPES, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { z } from '@kbn/zod/v4';
 import { HiddenField as FormHiddenField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { BaseWidgetProps } from '../types';
@@ -25,7 +25,7 @@ export const HiddenWidget: React.FC<HiddenWidgetProps> = ({
     <UseField
       path={path}
       component={FormHiddenField}
-      config={fieldConfig}
+      config={{ ...fieldConfig, type: FIELD_TYPES.HIDDEN }}
       componentProps={fieldProps}
     />
   );
