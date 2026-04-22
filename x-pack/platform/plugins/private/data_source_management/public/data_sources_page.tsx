@@ -18,9 +18,10 @@ import {
   EuiPageSection,
   EuiSpacer,
   EuiTabbedContent,
-  EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import type { DataSetListItem } from '../common/sample_data_sets_client';
+import { SampleDataSetsClient } from '../common/sample_data_sets_client';
 import type { DataSourceListItem } from '../common/sample_data_sources_client';
 import { SampleDataSourcesClient } from '../common/sample_data_sources_client';
 
@@ -30,12 +31,18 @@ export interface DataSourcesPageProps {
 
 export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({ pageTitle }) => {
   const dataClient = useMemo(() => new SampleDataSourcesClient(), []);
+  const dataSetsClient = useMemo(() => new SampleDataSetsClient(), []);
   const [items, setItems] = useState<DataSourceListItem[]>([]);
   const [selectedItems, setSelectedItems] = useState<DataSourceListItem[]>([]);
+  const [dataSetItems, setDataSetItems] = useState<DataSetListItem[]>([]);
 
   useEffect(() => {
     setItems(dataClient.get());
   }, [dataClient]);
+
+  useEffect(() => {
+    setDataSetItems(dataSetsClient.get());
+  }, [dataSetsClient]);
 
   const columns = useMemo<Array<EuiBasicTableColumn<DataSourceListItem>>>(
     () => [
@@ -56,6 +63,39 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({ pageT
         sortable: true,
         truncateText: true,
         'data-test-subj': 'dataSourceManagementColDescription',
+      },
+    ],
+    []
+  );
+
+  const dataSetColumns = useMemo<Array<EuiBasicTableColumn<DataSetListItem>>>(
+    () => [
+      {
+        field: 'name',
+        name: i18n.translate('dataSourceManagement.dataSetsTable.columnName', {
+          defaultMessage: 'Name',
+        }),
+        sortable: true,
+        width: '22%',
+        'data-test-subj': 'dataSourceManagementSetsColName',
+      },
+      {
+        field: 'sourceName',
+        name: i18n.translate('dataSourceManagement.dataSetsTable.columnSourceName', {
+          defaultMessage: 'Source name',
+        }),
+        sortable: true,
+        width: '22%',
+        'data-test-subj': 'dataSourceManagementSetsColSourceName',
+      },
+      {
+        field: 'description',
+        name: i18n.translate('dataSourceManagement.dataSetsTable.columnDescription', {
+          defaultMessage: 'Description',
+        }),
+        sortable: true,
+        truncateText: true,
+        'data-test-subj': 'dataSourceManagementSetsColDescription',
       },
     ],
     []
@@ -171,16 +211,64 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({ pageT
         content: (
           <>
             <EuiSpacer size="m" />
-            <EuiText color="subdued" data-test-subj="dataSourceManagementSetsTabContent">
-              {i18n.translate('dataSourceManagement.setsTabPlaceholder', {
-                defaultMessage: 'No sets yet.',
+            <EuiInMemoryTable<DataSetListItem>
+              items={dataSetItems}
+              itemId="id"
+              columns={dataSetColumns}
+              search={{
+                box: {
+                  incremental: true,
+                  placeholder: i18n.translate('dataSourceManagement.dataSetsSearch.placeholder', {
+                    defaultMessage: 'Search data sets…',
+                  }),
+                  'data-test-subj': 'dataSourceManagementSetsSearch',
+                  schema: {
+                    fields: {
+                      name: { type: 'string' },
+                      description: { type: 'string' },
+                      sourceName: { type: 'string' },
+                    },
+                  },
+                },
+                toolsRight: (
+                  <EuiButtonIcon
+                    color="primary"
+                    display="fill"
+                    iconType="refresh"
+                    aria-label={i18n.translate(
+                      'dataSourceManagement.dataSetsRefreshButtonAriaLabel',
+                      {
+                        defaultMessage: 'Refresh data sets',
+                      }
+                    )}
+                    data-test-subj="dataSourceManagementSetsRefreshButton"
+                    onClick={() => {
+                      setDataSetItems(dataSetsClient.get());
+                    }}
+                  />
+                ),
+              }}
+              rowHeader="name"
+              sorting
+              pagination={{
+                pageSizeOptions: [5, 10, 20],
+                initialPageSize: 10,
+              }}
+              data-test-subj="dataSourceManagementSetsTable"
+              tableCaption={i18n.translate('dataSourceManagement.dataSetsTable.caption', {
+                defaultMessage: 'Data sets',
               })}
-            </EuiText>
+              noItemsMessage={i18n.translate('dataSourceManagement.dataSetsTable.noItems', {
+                defaultMessage: 'No data sets found',
+              })}
+              tableLayout="auto"
+              responsiveBreakpoint={false}
+            />
           </>
         ),
       },
     ],
-    [columns, dataClient, items, selectedItems]
+    [columns, dataClient, dataSetColumns, dataSetItems, dataSetsClient, items, selectedItems]
   );
 
   return (
