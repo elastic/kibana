@@ -30,6 +30,7 @@ import type { ISuggestionItem } from '../types';
 import { getFunctionDefinition } from '../../definitions/utils/functions';
 import { FunctionDefinitionTypes } from '../../definitions/types';
 import { TRAILING_COMMA_REGEX } from '../../definitions/utils/shared';
+import { ReplacementRangeStrategyKind } from '../../../language/autocomplete/utils/prefix_range';
 
 /**
  * Position of the caret in the sort command:
@@ -190,10 +191,8 @@ export const getCommaAndPipe = (
 
   // does the query end with whitespace?
   if (/\s$/.test(innerText)) {
-    // if so, comma needs to be sent back a column to replace the trailing space
-    commaSuggestion.rangeToReplace = {
-      start: innerText.length - 1,
-      end: innerText.length,
+    commaSuggestion.replacementRangeStrategy = {
+      kind: ReplacementRangeStrategyKind.TRAILING_WHITESPACE,
     };
   }
   // special case: cursor right after a column name
