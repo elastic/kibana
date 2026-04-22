@@ -10,7 +10,8 @@ import type {
   ReviewRuleInstallationResponseBody,
   ReviewRuleInstallationField,
 } from '../../../../../common/api/detection_engine/prebuilt_rules';
-import { fullyEscapeKQLStringParam, prepareKQLStringParam } from '../../../../../common/utils/kql';
+import type { GranularRulesSearch } from '../../../../../common/api/detection_engine/rule_management/granular_rules_contract.gen';
+import { prepareKQLStringParam } from '../../../../../common/utils/kql';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import * as i18n from '../translations';
 import { useFetchPrebuiltRulesInstallReviewQuery } from '../../api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_install_review_query';
@@ -27,7 +28,6 @@ interface UsePrebuiltRulesInstallReviewParams {
   fields?: ReviewRuleInstallationField[];
 }
 
-const ASSET_NAME_FIELD = 'security-rule.name';
 const ASSET_TAGS_FIELD = 'security-rule.tags';
 
 /**
@@ -42,11 +42,17 @@ export const usePrebuiltRulesInstallReview = (
 ) => {
   const { addError } = useAppToasts();
 
+  const trimmedSearchTerm = requestParameters.filterOptions?.name?.trim();
+  const search: GranularRulesSearch | undefined = trimmedSearchTerm?.length
+    ? { term: trimmedSearchTerm, mode: 'legacy' }
+    : undefined;
+
   return useFetchPrebuiltRulesInstallReviewQuery(
     {
       page: requestParameters.page,
       per_page: requestParameters.perPage,
       filter: buildInstallReviewKqlFilter(requestParameters.filterOptions),
+      search,
       sort: requestParameters.sort,
       aggregations: requestParameters.aggregations,
       fields: requestParameters.fields,
@@ -56,19 +62,6 @@ export const usePrebuiltRulesInstallReview = (
       ...options,
     }
   );
-};
-
-const buildNameClause = (name: string): string => {
-  const trimmed = name.trim();
-  if (!trimmed) {
-    return '';
-  }
-  const escapedTerm = fullyEscapeKQLStringParam(trimmed);
-  const isSingleTerm = escapedTerm.split(' ').length === 1;
-  if (isSingleTerm) {
-    return `${ASSET_NAME_FIELD}.keyword: *${escapedTerm}*`;
-  }
-  return `${ASSET_NAME_FIELD}: ${prepareKQLStringParam(trimmed)}`;
 };
 
 const buildTagsClause = (tags: string[]): string => {
@@ -95,13 +88,6 @@ export const buildInstallReviewKqlFilter = (
   }
 
   const parts: string[] = [];
-
-  if (filterOptions.name) {
-    const clause = buildNameClause(filterOptions.name);
-    if (clause) {
-      parts.push(clause);
-    }
-  }
 
   if (filterOptions.tags.length) {
     const clause = buildTagsClause(filterOptions.tags);

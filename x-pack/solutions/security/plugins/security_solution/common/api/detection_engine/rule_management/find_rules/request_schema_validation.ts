@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { validateSortFieldAndOrderCoexist } from '../granular_rules_search_request_schema_validation';
 import type { FindRulesRequestQueryInput } from './find_rules_route.gen';
-
-const FIND_RULES_SORT_FIELD_ORDER_COEXIST_MESSAGE =
-  'when "sort_order" and "sort_field" must exist together or not at all';
 
 /**
  * Additional validation that is implemented outside of the schema itself.
  */
 export const validateFindRulesRequestQuery = (query: FindRulesRequestQueryInput): string[] => {
-  const errors = [
-    ...validateSortFieldAndOrderCoexist(query, FIND_RULES_SORT_FIELD_ORDER_COEXIST_MESSAGE),
-  ];
+  const errors = [];
+  if (query.sort_order != null || query.sort_field != null) {
+    if (query.sort_order == null || query.sort_field == null) {
+      errors.push('when "sort_order" and "sort_field" must exist together or not at all');
+    }
+  }
+
   const ruleExecutionGapQueryParamsSet = new Set([
     Array.isArray(query.gap_fill_statuses) && query.gap_fill_statuses.length > 0,
     Boolean(query.gaps_range_start),

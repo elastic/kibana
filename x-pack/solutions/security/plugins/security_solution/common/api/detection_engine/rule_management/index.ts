@@ -21,7 +21,6 @@ export * from './export_rules/export_rules_details_schema';
 export * from './export_rules/export_rules_route.gen';
 export * from './find_rules/find_rules_route.gen';
 export * from './find_rules/request_schema_validation';
-export * from './granular_rules_search_request_schema_validation';
 export * from './search_rules/search_rules_route.gen';
 export * from './granular_rules_contract.gen';
 export * from './granular_rules_facet_dimensions';

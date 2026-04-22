@@ -27,7 +27,7 @@ import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebui
 import { excludeLicenseRestrictedRules } from '../../logic/utils';
 import type { BasicRuleInfo } from '../../logic/basic_rule_info';
 import type { MlAuthz } from '../../../../machine_learning/authz';
-import { buildGranularRulesKql } from '../../../rule_management/logic/search/build_granular_rules_kql';
+import { buildPrebuiltRuleInstallationKql } from '../../logic/build_prebuilt_rule_installation_kql';
 import { expandRawAggregationResult } from '../../../rule_management/logic/search/granular_facet_aggregations';
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../logic/rule_assets/prebuilt_rule_assets_type';
 
@@ -83,7 +83,7 @@ export const reviewRuleInstallationHandler = async (
       installedRuleVersions.map((version) => [version.rule_id, version])
     );
 
-    const combinedKql = buildGranularRulesKql({
+    const combinedKql = buildPrebuiltRuleInstallationKql({
       filter,
       search,
     });
