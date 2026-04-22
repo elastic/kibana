@@ -252,6 +252,7 @@ dependsOn:
   - '@kbn/core-metrics-server'
   - '@kbn/core-elasticsearch-server-utils'
   - '@kbn/rrule'
+  - '@kbn/agent-builder-esql-utils'
   - '@kbn/agent-builder-genai-utils'
   - '@kbn/agent-builder-server'
   - '@kbn/object-utils'
