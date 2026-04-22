@@ -163,7 +163,7 @@ const buildProcessorConfig = (kind: Emission['kind'], items: Emission[]): OtelPr
   }
   if (kind === 'filter') {
     const conditions = items.flatMap((e) => (e.kind === 'filter' ? e.conditions : []));
-    return { error_mode: 'ignore', logs: { log_record: conditions } };
+    return { error_mode: 'ignore', log_conditions: conditions };
   }
   // unsupported — we flatten into a single placeholder with the combined message.
   const first = items.find(

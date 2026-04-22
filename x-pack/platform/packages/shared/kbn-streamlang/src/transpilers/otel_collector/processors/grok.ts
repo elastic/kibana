@@ -6,15 +6,16 @@
  */
 
 import type { GrokProcessor } from '../../../../types/processors';
+import { unwrapPatternDefinitions } from '../../../../types/utils/grok_pattern_definitions';
 import { conditionToOttl } from '../condition_to_ottl';
 import type { Emission } from '../emission';
 import { attributePath, ottlStringLiteral, withWhereClause } from './common';
 
 /**
  * Emits one OTTL statement per grok pattern:
- *   `set(log.attributes, merge_maps(log.attributes,
+ *   `merge_maps(log.attributes,
  *     ExtractGrokPatterns(log.attributes["<from>"], "<pattern>", true),
- *     "upsert")) where <cond>`
+ *     "upsert") where <cond>`
  *
  * Semantics vs. ingest grok:
  * - Ingest grok tries each pattern until one matches, then stops. OTTL
@@ -22,14 +23,18 @@ import { attributePath, ottlStringLiteral, withWhereClause } from './common';
  *   pattern. If an earlier pattern already populated the expected fields, a
  *   later one may overwrite them — this is a lossy area and is flagged in the
  *   transpiler warnings for multi-pattern inputs.
- * - Named captures flow into `log.attributes` directly via `merge_maps`.
- * - `pattern_definitions` would need to be injected into the pattern string
- *   itself for OTTL; for Phase 1 we emit a warning if any are supplied.
+ * - Named captures flow into `log.attributes` directly via `merge_maps`, which
+ *   is usable as a top-level OTTL statement (docs: "merge_maps is a special
+ *   case of the set function").
+ * - `pattern_definitions` is inlined into each pattern string via the shared
+ *   `unwrapPatternDefinitions` helper (same approach as the ES|QL transpiler),
+ *   so the emitted OTTL is self-contained and doesn't require the collector
+ *   to support `ExtractGrokPatterns`'s 4th (definitions) argument.
  */
 export const convertGrokProcessorToOtel = (
   processor: GrokProcessor
 ): { emission: Emission; warnings: string[] } => {
-  const { from, patterns, pattern_definitions, ignore_missing = false, where } = processor;
+  const { from, patterns, ignore_missing = false, where } = processor;
   const fromAttr = attributePath(from);
 
   const whereParts: string[] = [];
@@ -43,17 +48,14 @@ export const convertGrokProcessorToOtel = (
       `grok processor on field "${from}" uses ${patterns.length} patterns; OTTL evaluates them sequentially and later matches overwrite earlier ones (ingest grok stops at first match).`
     );
   }
-  if (pattern_definitions && Object.keys(pattern_definitions).length > 0) {
-    warnings.push(
-      `grok processor on field "${from}" uses pattern_definitions; OTTL ExtractGrokPatterns does not support custom definitions — patterns referencing them will fail at runtime.`
-    );
-  }
 
-  const statements = patterns.map((pattern) =>
+  const expandedPatterns = unwrapPatternDefinitions(processor);
+
+  const statements = expandedPatterns.map((pattern) =>
     withWhereClause(
-      `set(log.attributes, merge_maps(log.attributes, ExtractGrokPatterns(${fromAttr}, ${ottlStringLiteral(
+      `merge_maps(log.attributes, ExtractGrokPatterns(${fromAttr}, ${ottlStringLiteral(
         pattern
-      )}, true), "upsert"))`,
+      )}, true), "upsert")`,
       whereExpr
     )
   );

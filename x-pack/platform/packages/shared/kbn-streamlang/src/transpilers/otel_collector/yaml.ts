@@ -85,13 +85,12 @@ const renderTransform = (config: OtelTransformProcessorConfig, pad: string): str
 const renderFilter = (config: OtelFilterProcessorConfig, pad: string): string[] => {
   const out: string[] = [];
   out.push(`${pad}error_mode: ${config.error_mode}`);
-  out.push(`${pad}logs:`);
-  out.push(`${pad}${INDENT}log_record:`);
-  if (config.logs.log_record.length === 0) {
-    out.push(`${pad}${INDENT.repeat(2)}# (empty)`);
+  out.push(`${pad}log_conditions:`);
+  if (config.log_conditions.length === 0) {
+    out.push(`${pad}${INDENT}# (empty)`);
   } else {
-    for (const condition of config.logs.log_record) {
-      out.push(`${pad}${INDENT.repeat(2)}- ${yamlString(condition)}`);
+    for (const condition of config.log_conditions) {
+      out.push(`${pad}${INDENT}- ${yamlString(condition)}`);
     }
   }
   return out;

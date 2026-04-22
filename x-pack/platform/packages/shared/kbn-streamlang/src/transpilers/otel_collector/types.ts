@@ -22,9 +22,7 @@ export interface OtelTransformProcessorConfig {
 
 export interface OtelFilterProcessorConfig {
   error_mode: 'ignore' | 'silent' | 'propagate';
-  logs: {
-    log_record: string[];
-  };
+  log_conditions: string[];
 }
 
 /**

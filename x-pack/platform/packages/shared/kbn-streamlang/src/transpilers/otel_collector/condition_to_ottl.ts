@@ -21,7 +21,7 @@ import { attributePath, ottlLiteralFromAny, ottlStringLiteral } from './processo
  * Convert a Streamlang `Condition` AST to an OTTL boolean expression string.
  *
  * Produces the expression form used inside `where` clauses and filter-processor
- * `log_record` conditions. The output is parenthesized conservatively so nested
+ * `log_conditions` entries. The output is parenthesized conservatively so nested
  * AND/OR/NOT combinations preserve precedence regardless of OTTL's parser.
  */
 export const conditionToOttl = (condition: Condition): string => {
@@ -92,10 +92,12 @@ const filterConditionToOttl = (condition: FilterCondition): string => {
     return `IsMatch(${field}, ${ottlStringLiteral(escapeRegex(String(condition.contains)))})`;
   }
   if ('startsWith' in condition) {
-    return `HasPrefix(${field}, ${ottlStringLiteral(String(condition.startsWith))})`;
+    // Wrap in String(...) because HasPrefix's first arg is a strict StringGetter
+    // and raises TypeError on non-string inputs (unlike IsMatch).
+    return `HasPrefix(String(${field}), ${ottlStringLiteral(String(condition.startsWith))})`;
   }
   if ('endsWith' in condition) {
-    return `HasSuffix(${field}, ${ottlStringLiteral(String(condition.endsWith))})`;
+    return `HasSuffix(String(${field}), ${ottlStringLiteral(String(condition.endsWith))})`;
   }
   if ('includes' in condition) {
     // OTTL has no first-class list-contains; best-effort via regex on JSON-encoded slice.

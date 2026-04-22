@@ -19,6 +19,11 @@ import { attributePath, ottlStringLiteral, withWhereClause } from './common';
  *   not acting when the source is missing. A warning could be surfaced here if
  *   we want stricter parity in a later phase.
  * - `override: false` (default) gates on target being absent.
+ * - Non-atomic: OTTL has no atomic rename editor, and under `error_mode: ignore`
+ *   the two statements are evaluated independently. If the `set()` succeeds and
+ *   the following `delete_key()` raises (very unlikely on a path just written),
+ *   the document would end up with both fields populated. Accepted risk for
+ *   Phase 1; no upstream primitive to fix it.
  */
 export const convertRenameProcessorToOtel = (processor: RenameProcessor): Emission => {
   const { from, to, ignore_missing = false, override = false, where } = processor;

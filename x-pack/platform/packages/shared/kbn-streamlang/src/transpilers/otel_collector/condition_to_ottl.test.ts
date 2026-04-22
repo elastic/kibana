@@ -58,15 +58,15 @@ describe('conditionToOttl', () => {
       );
     });
 
-    it('renders startsWith via HasPrefix', () => {
+    it('renders startsWith via HasPrefix with String() wrapping', () => {
       expect(conditionToOttl({ field: 'msg', startsWith: 'hello' })).toBe(
-        'HasPrefix(log.attributes["msg"], "hello")'
+        'HasPrefix(String(log.attributes["msg"]), "hello")'
       );
     });
 
-    it('renders endsWith via HasSuffix', () => {
+    it('renders endsWith via HasSuffix with String() wrapping', () => {
       expect(conditionToOttl({ field: 'msg', endsWith: 'world' })).toBe(
-        'HasSuffix(log.attributes["msg"], "world")'
+        'HasSuffix(String(log.attributes["msg"]), "world")'
       );
     });
   });

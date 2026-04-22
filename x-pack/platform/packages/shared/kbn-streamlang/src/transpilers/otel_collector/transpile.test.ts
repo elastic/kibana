@@ -109,7 +109,7 @@ describe('transpileOtelCollector', () => {
       };
       const result = await transpile(dsl);
       expect(asTransform(result.processors['transform/streamlang']).log_statements).toEqual([
-        'set(log.attributes["level"], ToUpperCase(log.attributes["level"])) where (log.attributes["level"] != nil)',
+        'set(log.attributes["level"], ToUpperCase(log.attributes["level"])) where (log.attributes["level"] != nil) and (IsString(log.attributes["level"]))',
       ]);
     });
 
@@ -119,7 +119,7 @@ describe('transpileOtelCollector', () => {
       };
       const result = await transpile(dsl);
       expect(asTransform(result.processors['transform/streamlang']).log_statements).toEqual([
-        'set(log.attributes["level_upper"], ToUpperCase(log.attributes["level"])) where (log.attributes["level"] != nil)',
+        'set(log.attributes["level_upper"], ToUpperCase(log.attributes["level"])) where (log.attributes["level"] != nil) and (IsString(log.attributes["level"]))',
       ]);
     });
   });
@@ -137,7 +137,7 @@ describe('transpileOtelCollector', () => {
       };
       const result = await transpile(dsl);
       expect(asTransform(result.processors['transform/streamlang']).log_statements).toEqual([
-        'set(log.attributes, merge_maps(log.attributes, ExtractGrokPatterns(log.attributes["message"], "%{IP:client.ip} %{NUMBER:bytes}", true), "upsert")) where (log.attributes["message"] != nil)',
+        'merge_maps(log.attributes, ExtractGrokPatterns(log.attributes["message"], "%{IP:client.ip} %{NUMBER:bytes}", true), "upsert") where (log.attributes["message"] != nil)',
       ]);
     });
 
@@ -156,6 +156,26 @@ describe('transpileOtelCollector', () => {
       expect(result.warnings).toHaveLength(1);
       expect(result.warnings[0]).toContain('2 patterns');
     });
+
+    it('inlines pattern_definitions into the emitted pattern', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            action: 'grok',
+            from: 'message',
+            patterns: ['%{GREETING:greeting} world'],
+            pattern_definitions: {
+              GREETING: 'hello|hi|hey',
+            },
+          },
+        ],
+      };
+      const result = await transpile(dsl);
+      expect(asTransform(result.processors['transform/streamlang']).log_statements).toEqual([
+        'merge_maps(log.attributes, ExtractGrokPatterns(log.attributes["message"], "(?<greeting>hello|hi|hey) world", true), "upsert") where (log.attributes["message"] != nil)',
+      ]);
+      expect(result.warnings).toEqual([]);
+    });
   });
 
   describe('drop_document processor', () => {
@@ -169,7 +189,7 @@ describe('transpileOtelCollector', () => {
         ],
       };
       const result = await transpile(dsl);
-      expect(asFilter(result.processors['filter/streamlang']).logs.log_record).toEqual([
+      expect(asFilter(result.processors['filter/streamlang']).log_conditions).toEqual([
         'log.attributes["level"] == "debug"',
       ]);
       expect(result.pipelineProcessors).toEqual(['filter/streamlang']);
@@ -282,9 +302,8 @@ describe('transpileOtelCollector', () => {
           '      - "set(log.attributes[\\"status\\"], \\"ok\\")"',
           '  "filter/streamlang":',
           '    error_mode: ignore',
-          '    logs:',
-          '      log_record:',
-          '        - "log.attributes[\\"level\\"] == \\"debug\\""',
+          '    log_conditions:',
+          '      - "log.attributes[\\"level\\"] == \\"debug\\""',
           'service:',
           '  pipelines:',
           '    logs:',
