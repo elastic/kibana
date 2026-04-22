@@ -125,6 +125,94 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cases-components",
+        "id": "def-common.UserActionTitle",
+        "type": "Function",
+        "tags": [],
+        "label": "UserActionTitle",
+        "description": [],
+        "signature": [
+          "React.NamedExoticComponent<",
+          {
+            "pluginId": "@kbn/cases-components",
+            "scope": "common",
+            "docId": "kibKbnCasesComponentsPluginApi",
+            "section": "def-common.UserActionTitleProps",
+            "text": "UserActionTitleProps"
+          },
+          ">"
+        ],
+        "path": "src/platform/packages/shared/kbn-cases-components/src/user_action_title/index.tsx",
+        "lineNumber": 35,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/cases-components",
+            "id": "def-common.UserActionTitle.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cases-components",
+        "id": "def-common.UserActionTitleLink",
+        "type": "Function",
+        "tags": [],
+        "label": "UserActionTitleLink",
+        "description": [],
+        "signature": [
+          "React.NamedExoticComponent<",
+          {
+            "pluginId": "@kbn/cases-components",
+            "scope": "common",
+            "docId": "kibKbnCasesComponentsPluginApi",
+            "section": "def-common.UserActionTitleLinkProps",
+            "text": "UserActionTitleLinkProps"
+          },
+          ">"
+        ],
+        "path": "src/platform/packages/shared/kbn-cases-components/src/user_action_title_link/index.tsx",
+        "lineNumber": 77,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/cases-components",
+            "id": "def-common.UserActionTitleLink.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -329,6 +417,259 @@
             ],
             "path": "src/platform/packages/shared/kbn-cases-components/src/tooltip/types.ts",
             "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cases-components",
+        "id": "def-common.UserActionTitleLinkProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserActionTitleLinkProps",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-cases-components/src/user_action_title_link/index.tsx",
+        "lineNumber": 15,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cases-components",
+            "id": "def-common.UserActionTitleLinkProps.targetId",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "targetId",
+            "description": [],
+            "signature": [
+              "string | null | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-cases-components/src/user_action_title_link/index.tsx",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cases-components",
+            "id": "def-common.UserActionTitleLinkProps.label",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "label",
+            "description": [],
+            "signature": [
+              "string | null | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-cases-components/src/user_action_title_link/index.tsx",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cases-components",
+            "id": "def-common.UserActionTitleLinkProps.fallbackLabel",
+            "type": "string",
+            "tags": [],
+            "label": "fallbackLabel",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-cases-components/src/user_action_title_link/index.tsx",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cases-components",
+            "id": "def-common.UserActionTitleLinkProps.getHref",
+            "type": "Function",
+            "tags": [],
+            "label": "getHref",
+            "description": [],
+            "signature": [
+              "((targetId: string | null | undefined) => string | undefined) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-cases-components/src/user_action_title_link/index.tsx",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/cases-components",
+                "id": "def-common.UserActionTitleLinkProps.getHref.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "targetId",
+                "description": [],
+                "signature": [
+                  "string | null | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-cases-components/src/user_action_title_link/index.tsx",
+                "lineNumber": 19,
+                "columnNumber": 14,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/cases-components",
+            "id": "def-common.UserActionTitleLinkProps.onClick",
+            "type": "Function",
+            "tags": [],
+            "label": "onClick",
+            "description": [],
+            "signature": [
+              "((targetId: string | null | undefined, ev: MouseEvent | React.MouseEvent<Element, MouseEvent>) => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-cases-components/src/user_action_title_link/index.tsx",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/cases-components",
+                "id": "def-common.UserActionTitleLinkProps.onClick.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "targetId",
+                "description": [],
+                "signature": [
+                  "string | null | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-cases-components/src/user_action_title_link/index.tsx",
+                "lineNumber": 20,
+                "columnNumber": 14,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/cases-components",
+                "id": "def-common.UserActionTitleLinkProps.onClick.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "ev",
+                "description": [],
+                "signature": [
+                  "MouseEvent | React.MouseEvent<Element, MouseEvent>"
+                ],
+                "path": "src/platform/packages/shared/kbn-cases-components/src/user_action_title_link/index.tsx",
+                "lineNumber": 20,
+                "columnNumber": 51,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/cases-components",
+            "id": "def-common.UserActionTitleLinkProps.dataTestSubj",
+            "type": "string",
+            "tags": [],
+            "label": "dataTestSubj",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-cases-components/src/user_action_title_link/index.tsx",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cases-components",
+            "id": "def-common.UserActionTitleLinkProps.isLoading",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isLoading",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-cases-components/src/user_action_title_link/index.tsx",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cases-components",
+        "id": "def-common.UserActionTitleProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserActionTitleProps",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-cases-components/src/user_action_title/index.tsx",
+        "lineNumber": 14,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cases-components",
+            "id": "def-common.UserActionTitleProps.label",
+            "type": "string",
+            "tags": [],
+            "label": "label",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-cases-components/src/user_action_title/index.tsx",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cases-components",
+            "id": "def-common.UserActionTitleProps.link",
+            "type": "Object",
+            "tags": [],
+            "label": "link",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/cases-components",
+                "scope": "common",
+                "docId": "kibKbnCasesComponentsPluginApi",
+                "section": "def-common.UserActionTitleLinkProps",
+                "text": "UserActionTitleLinkProps"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-cases-components/src/user_action_title/index.tsx",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cases-components",
+            "id": "def-common.UserActionTitleProps.dataTestSubj",
+            "type": "string",
+            "tags": [],
+            "label": "dataTestSubj",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-cases-components/src/user_action_title/index.tsx",
+            "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

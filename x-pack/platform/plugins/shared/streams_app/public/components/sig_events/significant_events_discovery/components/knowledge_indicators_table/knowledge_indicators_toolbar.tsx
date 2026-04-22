@@ -19,6 +19,7 @@ import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import React from 'react';
 import { TableTitle } from '../../../stream_detail_systems/table_title';
 import { KnowledgeIndicatorsTypeFilter } from '../../../stream_detail_significant_events_view/knowledge_indicators_type_filter';
+import { MATCH_QUERY_TYPE } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_type';
 import { KnowledgeIndicatorsStatusFilter } from '../../../stream_detail_significant_events_view/knowledge_indicators_status_filter';
 import { StreamFilter } from '../stream_filter';
 import {
@@ -31,6 +32,7 @@ import {
   RESTORE_SELECTED_LABEL,
   TABLE_LABEL,
   CANNOT_EXCLUDE_SELECTION_TOOLTIP,
+  PROMOTE_SELECTED_LABEL,
 } from './translations';
 
 const searchBarStyle = css`
@@ -50,9 +52,11 @@ interface KnowledgeIndicatorsToolbarProps {
   pagination: { pageIndex: number; pageSize: number };
   selectedKnowledgeIndicators: KnowledgeIndicator[];
   isBulkOperationInProgress: boolean;
+  isBulkPromoteInProgress: boolean;
   isDeleting: boolean;
   isSelectionActionsDisabled: boolean;
   selectionContainsNonExcludable: boolean;
+  hasPromotableSelected: boolean;
   onSearchChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onStatusFilterChange: (filter: 'active' | 'excluded') => void;
   onSelectedTypesChange: (types: string[]) => void;
@@ -61,6 +65,7 @@ interface KnowledgeIndicatorsToolbarProps {
   onClearSelection: () => void;
   onBulkExclude: () => void;
   onBulkRestore: () => void;
+  onBulkPromote: () => void;
   onDeleteSelected: () => void;
 }
 
@@ -76,9 +81,11 @@ export function KnowledgeIndicatorsToolbar({
   pagination,
   selectedKnowledgeIndicators,
   isBulkOperationInProgress,
+  isBulkPromoteInProgress,
   isDeleting,
   isSelectionActionsDisabled,
   selectionContainsNonExcludable,
+  hasPromotableSelected,
   onSearchChange,
   onStatusFilterChange,
   onSelectedTypesChange,
@@ -87,6 +94,7 @@ export function KnowledgeIndicatorsToolbar({
   onClearSelection,
   onBulkExclude,
   onBulkRestore,
+  onBulkPromote,
   onDeleteSelected,
 }: KnowledgeIndicatorsToolbarProps) {
   return (
@@ -184,6 +192,21 @@ export function KnowledgeIndicatorsToolbar({
               onClick={onBulkRestore}
             >
               {RESTORE_SELECTED_LABEL}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
+        {selectedTypes.length === 1 && selectedTypes[0] === MATCH_QUERY_TYPE && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              iconType="plusInCircle"
+              size="xs"
+              isDisabled={
+                isSelectionActionsDisabled || !hasPromotableSelected || isBulkPromoteInProgress
+              }
+              isLoading={isBulkPromoteInProgress}
+              onClick={onBulkPromote}
+            >
+              {PROMOTE_SELECTED_LABEL}
             </EuiButtonEmpty>
           </EuiFlexItem>
         )}
