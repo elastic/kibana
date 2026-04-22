@@ -420,9 +420,7 @@ describe('PluginsService', () => {
       it('reports PluginImported with sourceType "url" when installing from a URL', async () => {
         mockParsePluginFromUrl.mockResolvedValue(archiveWithSkills);
         mockClient.findByName.mockResolvedValue(undefined);
-        mockClient.create.mockResolvedValue(
-          createMockPersistedPlugin({ id: 'created-plugin-id' })
-        );
+        mockClient.create.mockResolvedValue(createMockPersistedPlugin({ id: 'created-plugin-id' }));
         mockSkillClient.bulkCreate.mockResolvedValue([]);
 
         await start.installPlugin({
@@ -440,9 +438,7 @@ describe('PluginsService', () => {
       it('reports PluginImported with sourceType "file" when installing from a file', async () => {
         mockParsePluginFromFile.mockResolvedValue(archiveWithSkills);
         mockClient.findByName.mockResolvedValue(undefined);
-        mockClient.create.mockResolvedValue(
-          createMockPersistedPlugin({ id: 'created-plugin-id' })
-        );
+        mockClient.create.mockResolvedValue(createMockPersistedPlugin({ id: 'created-plugin-id' }));
         mockSkillClient.bulkCreate.mockResolvedValue([]);
 
         await start.installPlugin({
