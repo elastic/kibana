@@ -47,21 +47,20 @@ async function readYamlFile(filePath: string): Promise<Record<string, unknown>> 
 
   fileContent = normalizeSingleQuotedScalars(fileContent);
 
-  // yaml-1.1 parses ISO timestamp strings as Date objects. We fix them up in
-  // the AST before converting to JS so we can inspect node.source to
-  // distinguish full timestamps from date-only strings:
-  //   - Full timestamps (source contains a time component, e.g. T00:00:00)
-  //     are converted to their full ISO-8601 string via toISOString(), so
-  //     midnight dates like 2024-12-31T00:00:00Z are never truncated to
-  //     2024-12-31.
-  //   - Date-only timestamps (YYYY-MM-DD, e.g. an API version field) keep the
-  //     date-only format so their value is not altered.
+  // Use the yaml-1.2 'core' schema so that unquoted extended boolean literals
+  // (yes/no/on/off/…) are read as plain strings rather than booleans, matching
+  // js-yaml's YAML-1.2 default behaviour. The 'core' schema also does not
+  // recognise ISO timestamp strings as Date objects, so they are preserved as
+  // strings throughout.
+  //
+  // The Date visitor below is retained as a safety net for any code path that
+  // might produce Date nodes; in normal operation it is a no-op.
   //
   // Using parseDocument + visit (rather than parse + reviver) also avoids a
   // "Maximum call stack size exceeded" crash that the reviver triggers when
   // yaml builds circular JS objects for recursive YAML anchors, because the
   // AST visitor never performs instanceof checks on complex JS objects.
-  const doc = parseDocument(fileContent, { schema: 'yaml-1.1', strict: false });
+  const doc = parseDocument(fileContent, { schema: 'core', strict: false });
   visit(doc, {
     Scalar(_key, node) {
       if (node.value instanceof Date) {
