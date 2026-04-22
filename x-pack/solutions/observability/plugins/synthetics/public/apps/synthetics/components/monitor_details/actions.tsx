@@ -34,6 +34,7 @@ export function Actions() {
       }
       isOpen={isPopoverOpen}
       closePopover={closePopover}
+      panelPaddingSize="none"
     >
       <EuiContextMenuPanel
         items={[

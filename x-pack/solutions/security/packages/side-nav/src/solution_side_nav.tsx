@@ -266,7 +266,7 @@ const SolutionSideNavItem: React.FC<SolutionSideNavItemProps> = React.memo(
 
     const effectiveHref = firstPanelChild ? firstPanelChild.href : href;
 
-    const solutionSideNavItemStyles = SolutionSideNavItemStyles(euiTheme, 'primary');
+    const solutionSideNavItemStyles = SolutionSideNavItemStyles(euiTheme);
     const itemClassNames = classNames(
       'solutionSideNavItem',
       { 'solutionSideNavItem--isSelected': isSelected },
@@ -339,6 +339,7 @@ const SolutionSideNavItem: React.FC<SolutionSideNavItemProps> = React.memo(
                 iconType={iconType}
                 label={listItemLabel}
                 href={effectiveHref}
+                isActive={isSelected}
                 wrapText
                 onClick={onLinkClick}
                 className={itemClassNames}

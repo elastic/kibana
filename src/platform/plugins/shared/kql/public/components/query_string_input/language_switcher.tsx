@@ -105,7 +105,7 @@ export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
       >
         {(list) => list}
       </EuiSelectable>
-      <EuiHorizontalRule margin="none" />
+      <EuiHorizontalRule margin="xs" />
       <EuiContextMenuItem
         key={'documentation'}
         icon={'documentation'}
