@@ -13,7 +13,6 @@ import { useConversationId } from '../../context/conversation/use_conversation_i
 import { useConversationTitle } from '../../hooks/use_conversation';
 
 export interface BaseDeleteConversationModalProps {
-  isOpen: boolean;
   onClose: () => void;
   conversationId: string;
   title: string;
@@ -21,7 +20,6 @@ export interface BaseDeleteConversationModalProps {
 }
 
 export const BaseDeleteConversationModal: React.FC<BaseDeleteConversationModalProps> = ({
-  isOpen,
   onClose,
   conversationId,
   title,
@@ -43,7 +41,7 @@ export const BaseDeleteConversationModal: React.FC<BaseDeleteConversationModalPr
     }
   }, [conversationId, onDelete, onClose]);
 
-  if (!isOpen || !conversationId) {
+  if (!conversationId) {
     return null;
   }
 
@@ -108,7 +106,6 @@ export const DeleteConversationModal: React.FC<DeleteConversationModalProps> = (
 
   return (
     <BaseDeleteConversationModal
-      isOpen={isOpen}
       onClose={onClose}
       conversationId={conversationId}
       title={title || ''}

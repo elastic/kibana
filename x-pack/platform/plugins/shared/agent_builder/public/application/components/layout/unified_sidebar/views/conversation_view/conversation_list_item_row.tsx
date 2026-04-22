@@ -218,7 +218,6 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
 
       {isRenameModalOpen ? (
         <BaseRenameConversationModal
-          isOpen
           onClose={() => setIsRenameModalOpen(false)}
           conversationId={conversationId}
           initialTitle={title}
@@ -228,7 +227,6 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
 
       {isDeleteModalOpen ? (
         <BaseDeleteConversationModal
-          isOpen
           onClose={() => setIsDeleteModalOpen(false)}
           conversationId={conversationId}
           title={title}

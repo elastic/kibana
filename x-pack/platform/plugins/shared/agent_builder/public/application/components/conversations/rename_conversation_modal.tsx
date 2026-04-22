@@ -35,7 +35,6 @@ const labels = {
 };
 
 export interface BaseRenameConversationModalProps {
-  isOpen: boolean;
   onClose: () => void;
   conversationId: string;
   initialTitle: string;
@@ -43,7 +42,6 @@ export interface BaseRenameConversationModalProps {
 }
 
 export const BaseRenameConversationModal: React.FC<BaseRenameConversationModalProps> = ({
-  isOpen,
   onClose,
   conversationId,
   initialTitle,
@@ -80,7 +78,7 @@ export const BaseRenameConversationModal: React.FC<BaseRenameConversationModalPr
 
   const modalTitleId = useGeneratedHtmlId();
 
-  if (!isOpen || !conversationId) return null;
+  if (!conversationId) return null;
 
   return (
     <EuiModal onClose={onClose} maxWidth="360px" aria-labelledby={modalTitleId}>
@@ -146,7 +144,6 @@ export const RenameConversationModal: React.FC<RenameConversationModalProps> = (
 
   return (
     <BaseRenameConversationModal
-      isOpen={isOpen}
       onClose={onClose}
       conversationId={conversationId}
       initialTitle={title || ''}
