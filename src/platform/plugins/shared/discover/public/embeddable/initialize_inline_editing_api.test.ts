@@ -7,17 +7,57 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
-import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common/types';
+import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DiscoverGridSettings, SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/common';
+import type { DataTableColumnsMeta, SortOrder, DataGridDensity } from '@kbn/unified-data-table';
+import { BehaviorSubject } from 'rxjs';
+import { createDiscoverServicesMock } from '../__mocks__/services';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { getPersistedTabMock } from '../application/main/state_management/redux/__mocks__/internal_state.mocks';
 import { initializeInlineEditingApi } from './initialize_inline_editing_api';
+import type { SearchEmbeddableStateManager } from './types';
 
-const tabs = [{ id: 'tab-1' }, { id: 'tab-2' }] as unknown as DiscoverSessionTab[];
+const defaultServices = createDiscoverServicesMock();
+
+const tab1 = getPersistedTabMock({
+  dataView: dataViewMock,
+  services: defaultServices,
+  tabId: 'tab-1',
+});
+
+const tab2 = getPersistedTabMock({
+  dataView: dataViewMock,
+  services: defaultServices,
+  tabId: 'tab-2',
+});
+
+const createSearchEmbeddableStateManager = (): SearchEmbeddableStateManager => ({
+  columns: new BehaviorSubject<string[] | undefined>(['message']),
+  columnsMeta: new BehaviorSubject<DataTableColumnsMeta | undefined>(undefined),
+  grid: new BehaviorSubject<DiscoverGridSettings | undefined>(undefined),
+  rowHeight: new BehaviorSubject<number | undefined>(undefined),
+  headerRowHeight: new BehaviorSubject<number | undefined>(undefined),
+  rowsPerPage: new BehaviorSubject<number | undefined>(undefined),
+  sampleSize: new BehaviorSubject<number | undefined>(100),
+  sort: new BehaviorSubject<SortOrder[] | undefined>(undefined),
+  viewMode: new BehaviorSubject<VIEW_MODE | undefined>(undefined),
+  density: new BehaviorSubject<DataGridDensity | undefined>(undefined),
+  rows: new BehaviorSubject<DataTableRecord[]>([]),
+  totalHitCount: new BehaviorSubject<number | undefined>(undefined),
+  inspectorAdapters: new BehaviorSubject<Record<string, unknown>>({}),
+});
+
+const createMockSavedSearch = (): SavedSearch => ({
+  searchSource: createSearchSourceMock(),
+  managed: false,
+});
 
 const buildSearchEmbeddable = () => ({
-  api: { savedSearch$: new BehaviorSubject({}) as never },
+  api: { savedSearch$: new BehaviorSubject(createMockSavedSearch()) },
   reinitializeState: jest.fn().mockResolvedValue(undefined),
-  stateManager: {} as never,
+  stateManager: createSearchEmbeddableStateManager(),
 });
 
 const setupApi = (
@@ -40,7 +80,7 @@ const setupApi = (
   const api = initializeInlineEditingApi({
     uuid: 'panel-1',
     parentApi,
-    tabs,
+    tabs: [tab1, tab2],
     analytics,
     selectedTabId$,
     savedObjectId$,
@@ -69,8 +109,8 @@ describe('initializeInlineEditingApi', () => {
         dashboardId: 'dashboard-1',
         embeddablePanelId: 'panel-1',
         savedSessionId: 'session-1',
-        tabSwitchedIdFrom: 'tab-1',
-        tabSwitchedIdTo: 'tab-2',
+        tabSwitchedFromId: 'tab-1',
+        tabSwitchedToId: 'tab-2',
       });
     });
 

@@ -176,8 +176,8 @@ export const initializeInlineEditingApi = ({
         : undefined,
       [DiscoverInDashboardEventDataKeys.EMBEDDABLE_PANEL_ID]: uuid,
       [DiscoverInDashboardEventDataKeys.SAVED_SESSION_ID]: savedObjectId$.getValue(),
-      [DiscoverInDashboardEventDataKeys.TAB_SWITCHED_ID_FROM]: committedTabId,
-      [DiscoverInDashboardEventDataKeys.TAB_SWITCHED_ID_TO]: draftTabId,
+      [DiscoverInDashboardEventDataKeys.TAB_SWITCHED_FROM_ID]: committedTabId,
+      [DiscoverInDashboardEventDataKeys.TAB_SWITCHED_TO_ID]: draftTabId,
     });
   };
 

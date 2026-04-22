@@ -21,8 +21,8 @@ export enum DiscoverInDashboardEventDataKeys {
   DASHBOARD_ID = 'dashboardId',
   EMBEDDABLE_PANEL_ID = 'embeddablePanelId',
   SAVED_SESSION_ID = 'savedSessionId',
-  TAB_SWITCHED_ID_FROM = 'tabSwitchedIdFrom',
-  TAB_SWITCHED_ID_TO = 'tabSwitchedIdTo',
+  TAB_SWITCHED_FROM_ID = 'tabSwitchedFromId',
+  TAB_SWITCHED_TO_ID = 'tabSwitchedToId',
 }
 
 export interface DiscoverInDashboardEBTEvent {
@@ -30,8 +30,8 @@ export interface DiscoverInDashboardEBTEvent {
   [DiscoverInDashboardEventDataKeys.DASHBOARD_ID]?: string;
   [DiscoverInDashboardEventDataKeys.EMBEDDABLE_PANEL_ID]?: string;
   [DiscoverInDashboardEventDataKeys.SAVED_SESSION_ID]?: string;
-  [DiscoverInDashboardEventDataKeys.TAB_SWITCHED_ID_FROM]?: string;
-  [DiscoverInDashboardEventDataKeys.TAB_SWITCHED_ID_TO]?: string;
+  [DiscoverInDashboardEventDataKeys.TAB_SWITCHED_FROM_ID]?: string;
+  [DiscoverInDashboardEventDataKeys.TAB_SWITCHED_TO_ID]?: string;
 }
 
 export const discoverInDashboardEventType: EventTypeOpts<Record<string, unknown>> = {
@@ -64,14 +64,14 @@ export const discoverInDashboardEventType: EventTypeOpts<Record<string, unknown>
         optional: true,
       },
     },
-    [DiscoverInDashboardEventDataKeys.TAB_SWITCHED_ID_FROM]: {
+    [DiscoverInDashboardEventDataKeys.TAB_SWITCHED_FROM_ID]: {
       type: 'keyword',
       _meta: {
         description: 'Tab identifier switched from (present for tabSwitched)',
         optional: true,
       },
     },
-    [DiscoverInDashboardEventDataKeys.TAB_SWITCHED_ID_TO]: {
+    [DiscoverInDashboardEventDataKeys.TAB_SWITCHED_TO_ID]: {
       type: 'keyword',
       _meta: {
         description: 'Tab identifier switched to (present for tabSwitched)',

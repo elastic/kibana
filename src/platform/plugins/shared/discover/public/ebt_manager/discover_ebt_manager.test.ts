@@ -162,14 +162,14 @@ describe('DiscoverEBTManager', () => {
               optional: true,
             },
           },
-          tabSwitchedIdFrom: {
+          tabSwitchedFromId: {
             type: 'keyword',
             _meta: {
               description: 'Tab identifier switched from (present for tabSwitched)',
               optional: true,
             },
           },
-          tabSwitchedIdTo: {
+          tabSwitchedToId: {
             type: 'keyword',
             _meta: {
               description: 'Tab identifier switched to (present for tabSwitched)',
@@ -1136,8 +1136,8 @@ describe('DiscoverEBTManager', () => {
         [DiscoverInDashboardEventDataKeys.DASHBOARD_ID]: 'dashboard-1',
         [DiscoverInDashboardEventDataKeys.EMBEDDABLE_PANEL_ID]: 'panel-1',
         [DiscoverInDashboardEventDataKeys.SAVED_SESSION_ID]: 'session-1',
-        [DiscoverInDashboardEventDataKeys.TAB_SWITCHED_ID_FROM]: 'tab-1',
-        [DiscoverInDashboardEventDataKeys.TAB_SWITCHED_ID_TO]: 'tab-2',
+        [DiscoverInDashboardEventDataKeys.TAB_SWITCHED_FROM_ID]: 'tab-1',
+        [DiscoverInDashboardEventDataKeys.TAB_SWITCHED_TO_ID]: 'tab-2',
       });
 
       expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledTimes(1);
@@ -1146,8 +1146,8 @@ describe('DiscoverEBTManager', () => {
         dashboardId: 'dashboard-1',
         embeddablePanelId: 'panel-1',
         savedSessionId: 'session-1',
-        tabSwitchedIdFrom: 'tab-1',
-        tabSwitchedIdTo: 'tab-2',
+        tabSwitchedFromId: 'tab-1',
+        tabSwitchedToId: 'tab-2',
       });
     });
   });
