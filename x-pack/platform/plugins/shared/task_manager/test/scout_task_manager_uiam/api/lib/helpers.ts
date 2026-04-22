@@ -277,24 +277,22 @@ export interface RunSoonOptions {
   apiClient: ApiClientFixture;
   cookieHeader: CookieHeader;
   taskId: string;
-  /** Passed as the `force` query param; defaults to true. */
-  force?: boolean;
 }
 
 /**
- * POST `internal/task_manager/tasks/:id/run_soon` (FTR internal route).
- * Accepts 200 or 409 (task already running).
+ * POST `internal/ftr/task_manager/:id/run_soon` (FTR `ftrApis` route; wraps Task Manager `runSoon` with default `force: false`).
+ * Returns 200; errors are in the response body as `{ id, error }` per the FTR handler.
  */
 export const runSoon = async (options: RunSoonOptions): Promise<void> => {
-  const { apiClient, cookieHeader, taskId, force = true } = options;
+  const { apiClient, cookieHeader, taskId } = options;
   const res = await apiClient.post(
-    `internal/task_manager/tasks/${encodeURIComponent(taskId)}/run_soon?force=${String(force)}`,
+    `internal/ftr/task_manager/${encodeURIComponent(taskId)}/run_soon`,
     {
       headers: { ...COMMON_HEADERS, ...cookieHeader },
       responseType: 'json',
     }
   );
-  expect([200, 409]).toContain(res.statusCode);
+  expect(res.statusCode).toBe(200);
 };
 
 export interface ScheduleDisabledFixtureTaskOptions {

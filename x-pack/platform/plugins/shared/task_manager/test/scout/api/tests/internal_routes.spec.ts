@@ -133,13 +133,10 @@ apiTest.describe(
       const taskId = (scheduleResponse.body as Record<string, unknown>).id as string;
       taskIdsToCleanup.push(taskId);
 
-      const runSoonResponse = await apiClient.post(
-        `internal/task_manager/tasks/${taskId}/run_soon?force=false`,
-        {
-          headers: { ...COMMON_HEADERS, ...cookieHeader },
-          responseType: 'json',
-        }
-      );
+      const runSoonResponse = await apiClient.post(`internal/ftr/task_manager/${taskId}/run_soon`, {
+        headers: { ...COMMON_HEADERS, ...cookieHeader },
+        responseType: 'json',
+      });
 
       expect(runSoonResponse).toHaveStatusCode(200);
       const runSoonBody = runSoonResponse.body as Record<string, unknown>;
@@ -149,12 +146,9 @@ apiTest.describe(
     apiTest('run_soon: returns 403 when called by a viewer', async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
 
-      const response = await apiClient.post(
-        'internal/task_manager/tasks/any-task-id/run_soon?force=false',
-        {
-          headers: { ...COMMON_HEADERS, ...cookieHeader },
-        }
-      );
+      const response = await apiClient.post('internal/ftr/task_manager/any-task-id/run_soon', {
+        headers: { ...COMMON_HEADERS, ...cookieHeader },
+      });
 
       expect(response).toHaveStatusCode(403);
     });
