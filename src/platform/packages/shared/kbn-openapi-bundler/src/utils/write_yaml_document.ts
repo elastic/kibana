@@ -44,15 +44,29 @@ const preserveDateTimestamps = (doc: Document): void => {
 };
 
 /**
+ * Returns true for string values that cannot be written as YAML plain scalars
+ * and therefore must be quoted. BLOCK_FOLDED should not be forced for these —
+ * the yaml serialiser will choose single quotes automatically.
+ *
+ * The characters checked are those that are illegal at the start of a plain
+ * scalar per the YAML 1.1 spec. In OpenAPI the primary case is $ref values
+ * that start with '#' (which would otherwise be parsed as a YAML comment).
+ */
+function requiresQuoting(str: string): boolean {
+  if (str.length === 0) return false;
+  return "#*&!|>'\":?@`".includes(str[0]);
+}
+
+/**
  * Walk the document tree and set explicit scalar types to match js-yaml's
  * block-scalar heuristics:
  *   - Strings with internal '\n' → BLOCK_LITERAL (|)
  *   - Strings whose length exceeds the effective line budget, or strings with
  *     only a trailing '\n' (from a folded block scalar source) → BLOCK_FOLDED (>)
  *
- * Map keys are skipped (they must stay inline). Flow-context scalars fall back
- * to quoted strings automatically in the serialiser, so it is safe to set block
- * types unconditionally on value/sequence-item scalars.
+ * Map keys are skipped (they must stay inline). Strings that cannot be YAML
+ * plain scalars (e.g. those starting with '#') are also skipped — the yaml
+ * serialiser will quote them naturally (e.g. as '#/components/schemas/Foo').
  *
  * A trailing '\n' is stripped before the internal-newline check because the
  * yaml package appends one to folded (>) block scalars via clip-chomping.
@@ -75,6 +89,9 @@ const applyBlockScalarTypes = (doc: Document): void => {
         if (body.includes('\n')) {
           node.type = 'BLOCK_LITERAL';
         } else {
+          // Strings that cannot be plain YAML scalars (e.g. '#/...' $ref
+          // values) must be quoted — don't force BLOCK_FOLDED on them.
+          if (requiresQuoting(body)) return;
           // Estimate the line budget remaining for the scalar value after
           // accounting for indentation and key overhead. Each entry in `path`
           // contributes roughly one character of YAML indentation (the default
@@ -109,14 +126,6 @@ function stringifyToYaml(document: unknown): string {
       // matching the behaviour of js-yaml's default schema.
       schema: 'yaml-1.1',
       strict: false,
-      // Remove the timestamp tag from the schema so that ISO-8601 timestamp
-      // strings (e.g. '2025-01-07T20:07:33.119Z') are written as plain scalars
-      // rather than being quoted to prevent re-interpretation as Date objects.
-      // This matches js-yaml's behaviour where timestamp strings are unquoted.
-      customTags: (tags) =>
-        tags.filter(
-          (tag) => !(typeof tag === 'object' && tag.tag === 'tag:yaml.org,2002:timestamp')
-        ),
     });
     prepareDocument(doc);
     // Prefer single quotes over double quotes when a string requires quoting,
@@ -131,10 +140,6 @@ function stringifyToYaml(document: unknown): string {
       sortMapEntries: sortYamlKeys,
       schema: 'yaml-1.1',
       strict: false,
-      customTags: (tags) =>
-        tags.filter(
-          (tag) => !(typeof tag === 'object' && tag.tag === 'tag:yaml.org,2002:timestamp')
-        ),
     });
     prepareDocument(doc);
     return doc.toString({ singleQuote: true });

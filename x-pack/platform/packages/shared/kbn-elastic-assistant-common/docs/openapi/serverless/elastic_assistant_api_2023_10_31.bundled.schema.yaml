@@ -1110,8 +1110,7 @@ paths:
                 error: Invalid input
                 message: The 'title' field is required.
               schema:
-                $ref: >-
-                  #/components/schemas/KnowledgeBaseEntryErrorSchema
+                $ref: '#/components/schemas/KnowledgeBaseEntryErrorSchema'
           description: >-
             A generic error occurred, such as invalid input or missing required
             fields.
@@ -1337,8 +1336,7 @@ paths:
                 message: >-
                   No Knowledge Base Entry found with the provided `id`.
               schema:
-                $ref: >-
-                  #/components/schemas/KnowledgeBaseEntryErrorSchema
+                $ref: '#/components/schemas/KnowledgeBaseEntryErrorSchema'
           description: >-
             A generic error occurred, such as an invalid `id` or the entry not
             being found.
@@ -1385,8 +1383,7 @@ paths:
                 message: >-
                   No Knowledge Base Entry found with the provided `id`.
               schema:
-                $ref: >-
-                  #/components/schemas/KnowledgeBaseEntryErrorSchema
+                $ref: '#/components/schemas/KnowledgeBaseEntryErrorSchema'
           description: >-
             A generic error occurred, such as an invalid `id` or the entry not
             being found.
@@ -1450,8 +1447,7 @@ paths:
                 error: Invalid input
                 message: The 'content' field cannot be empty.
               schema:
-                $ref: >-
-                  #/components/schemas/KnowledgeBaseEntryErrorSchema
+                $ref: '#/components/schemas/KnowledgeBaseEntryErrorSchema'
           description: >-
             A generic error occurred, such as invalid input or the entry not
             being found.
@@ -1548,8 +1544,7 @@ paths:
                     status_code: 200
                     success: true
               schema:
-                $ref: >-
-                  #/components/schemas/PromptsBulkCrudActionResponse
+                $ref: '#/components/schemas/PromptsBulkCrudActionResponse'
           description: >-
             Indicates a successful call with the results of the bulk action.
         '400':
@@ -1648,7 +1643,7 @@ paths:
                       consumer: security
                       content: >-
                         If you encounter an error, check the logs and retry.
-                      createdAt: 2025-04-20T21:00:00Z
+                      createdAt: '2025-04-20T21:00:00Z'
                       createdBy: jdoe
                       id: prompt-123
                       isDefault: true
@@ -1764,7 +1759,7 @@ components:
         createdAt:
           description: >-
             Timestamp of when the anonymization field was created.
-          example: 2023-10-31T12:00:00Z
+          example: '2023-10-31T12:00:00Z'
           type: string
         createdBy:
           description: >-
