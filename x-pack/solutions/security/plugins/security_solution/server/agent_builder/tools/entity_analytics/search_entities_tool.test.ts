@@ -24,9 +24,13 @@ jest.mock('../../utils/get_agent_builder_resource_availability', () => ({
   getAgentBuilderResourceAvailability: jest.fn(),
 }));
 
-jest.mock('@kbn/agent-builder-esql-utils', () => ({
-  executeEsql: jest.fn(),
-}));
+jest.mock(
+  '@kbn/agent-builder-esql-utils',
+  () => ({
+    executeEsql: jest.fn(),
+  }),
+  { virtual: true }
+);
 
 const mockGetAgentBuilderResourceAvailability = getAgentBuilderResourceAvailability as jest.Mock;
 

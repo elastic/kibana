@@ -11,9 +11,13 @@ import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools'
 import { createToolHandlerContext, createToolTestMocks } from '../__mocks__/test_helpers';
 import { attackDiscoverySearchTool } from './attack_discovery_search_tool';
 
-jest.mock('@kbn/agent-builder-esql-utils', () => ({
-  executeEsql: jest.fn(),
-}));
+jest.mock(
+  '@kbn/agent-builder-esql-utils',
+  () => ({
+    executeEsql: jest.fn(),
+  }),
+  { virtual: true }
+);
 
 describe('attackDiscoverySearchTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
