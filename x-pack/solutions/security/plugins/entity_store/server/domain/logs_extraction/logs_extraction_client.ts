@@ -359,8 +359,6 @@ export class LogsExtractionClient {
             recoveryId,
             opts,
           });
-          // One-shot id is consumed when the probe query is built (before ES runs), matching prior clear-before-await behavior.
-          recoveryId = undefined;
           const probeOutcome = await probePromise;
 
           if (!probeOutcome.hasLogsToProcess) {
@@ -555,7 +553,7 @@ export class LogsExtractionClient {
     let addedToPageCount = 0;
 
     let pagination = skipProbe ? entityPagination : undefined;
-    let recoveryIdForBounded = skipProbe ? recoveryId : undefined;
+    let recoveryIdForBounded = recoveryId;
 
     do {
       const query = buildLogsExtractionEsqlQuery({

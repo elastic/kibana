@@ -460,6 +460,40 @@ describe('LogsExtractionClient', () => {
       jest.useRealTimers();
     });
 
+    it('should preserve inclusive lower bound on first bounded extraction when recovering from paginationId', async () => {
+      const fromDateISO = '2025-01-15T10:00:00.000Z';
+      const toDateISO = '2025-01-15T11:00:00.000Z';
+      const recoveryId = 'recover-entity-id';
+      const mockDataView = {
+        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+      };
+
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+        createMockEngineDescriptor('user', {
+          paginationId: recoveryId,
+        }) as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>
+      );
+      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
+      mockExecuteEsqlQuery
+        .mockResolvedValueOnce(
+          mockLogPaginationCursorProbeRow(fromDateISO, 'probe-slice-end-id', 1 /* isLastLogsPage */)
+        )
+        .mockResolvedValueOnce({ columns: [], values: [] });
+      mockIngestEntities.mockResolvedValue(undefined);
+
+      const result = await client.extractLogs('user', {
+        specificWindow: { fromDateISO, toDateISO },
+      });
+
+      expect(result.success).toBe(true);
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2);
+
+      const probeQuery = mockExecuteEsqlQuery.mock.calls[0][0].query;
+      const boundedQuery = mockExecuteEsqlQuery.mock.calls[1][0].query;
+      expect(probeQuery).toContain(`@timestamp >= TO_DATETIME("${fromDateISO}")`);
+      expect(boundedQuery).toContain(`@timestamp >= TO_DATETIME("${fromDateISO}")`);
+    });
+
     it('should return error when specificWindow has from date after to date', async () => {
       mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
         createMockEngineDescriptor('user') as Awaited<
