@@ -74,7 +74,9 @@ The following [Playwright matchers](https://playwright.dev/docs/api/class-generi
 - `toBeNull()` - value is `null`
 - `toBeCloseTo(expected, numDigits?)` - compares floating point numbers for approximate equality
 - `toBeGreaterThan(n)` - value > n
+- `toBeGreaterThanOrEqual(n)` - value >= n
 - `toBeLessThan(n)` - value < n
+- `toBeLessThanOrEqual(n)` - value <= n
 - `toBeInstanceOf(expected)` - value is an instance of a class (uses `instanceof`)
 - `toContain(expected)` - string contains substring, or Array/Set contains item
 - `toHaveLength(n)` - value has `.length` property equal to n
