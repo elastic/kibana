@@ -12,6 +12,7 @@ import type { EntityType } from '../../../../../../common/entity_analytics/types
 import { EntityTypeToIdentifierField } from '../../../../../../common/entity_analytics/types';
 import { createDataProviders } from '../../../../../app/actions/add_to_timeline/data_provider';
 import { SecurityAgentBuilderAttachments } from '../../../../../../common/constants';
+import { useAgentBuilderAvailability } from '../../../../../agent_builder/hooks/use_agent_builder_availability';
 import { useKibana } from '../../../../../common/lib/kibana/use_kibana';
 import { getEntityFields } from '../utils';
 import { ENTITY_ANALYTICS_TABLE_ID } from '../constants';
@@ -40,6 +41,7 @@ export const useLeadingControlColumns = ({
   canUseTimeline,
   investigateInTimeline,
 }: UseLeadingControlColumnsArgs): RowControlColumn[] => {
+  const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
   const { agentBuilder } = useKibana().services;
 
   return useMemo(() => {
@@ -75,7 +77,7 @@ export const useLeadingControlColumns = ({
       });
     }
 
-    if (agentBuilder?.openChat) {
+    if (isAgentBuilderEnabled && agentBuilder?.openChat) {
       columns.push({
         id: 'entity-analytics-ai-action',
         render: (Control, { record }) => {
@@ -125,5 +127,5 @@ export const useLeadingControlColumns = ({
     }
 
     return columns;
-  }, [canUseTimeline, investigateInTimeline, agentBuilder]);
+  }, [canUseTimeline, investigateInTimeline, isAgentBuilderEnabled, agentBuilder]);
 };
