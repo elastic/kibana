@@ -30,7 +30,8 @@
     "@kbn/as-code-filters-transforms",
     "@kbn/as-code-shared-transforms",
     "@kbn/data-views-plugin",
-    "@kbn/test-jest-helpers"
+    "@kbn/test-jest-helpers",
+    "@kbn/semantic-layer-plugin"
   ],
   "exclude": ["target/**/*"]
 }

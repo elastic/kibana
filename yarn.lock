@@ -8875,6 +8875,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/semantic-layer-plugin@link:x-pack/platform/plugins/shared/semantic_layer":
+  version "0.0.0"
+  uid ""
+
 "@kbn/server-http-tools@link:src/platform/packages/shared/kbn-server-http-tools":
   version "0.0.0"
   uid ""
