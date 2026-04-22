@@ -8,75 +8,69 @@
 import type { Observable } from 'rxjs';
 import type {
   AgentCapabilities,
+  AgentExecutionMode,
   ChatEvent,
   ConverseInput,
   AgentConfigurationOverrides,
   BrowserApiToolMetadata,
   ConversationAction,
+  ExecutionStatus,
+  SerializedExecutionError,
 } from '@kbn/agent-builder-common';
-import type { AgentBuilderErrorCode } from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 
 /**
- * Possible statuses for an agent execution.
+ * Common execution parameters shared between conversation and standalone modes.
  */
-export enum ExecutionStatus {
-  scheduled = 'scheduled',
-  running = 'running',
-  completed = 'completed',
-  failed = 'failed',
-  aborted = 'aborted',
-}
-
-/**
- * Serializable execution parameters.
- * This is the serializable subset of {@link ExecuteAgentParams},
- * omitting `request` (reconstructed from fakeRequest on TM node)
- * and `abortSignal` (replaced by the abort polling mechanism).
- */
-export interface AgentExecutionParams {
-  /** Id of the conversational agent to converse with. */
+export interface BaseExecutionParams {
+  /** Id of the agent to execute. */
   agentId?: string;
   /** Id of the genAI connector to use. */
   connectorId?: string;
-  /** Id of the conversation to continue. */
-  conversationId?: string;
-  /** Set of capabilities to use for this round. */
+  /** Capabilities to use for this execution. */
   capabilities?: AgentCapabilities;
+  /** The input for this execution. */
+  nextInput: ConverseInput;
   /** Whether to use structured output mode. */
   structuredOutput?: boolean;
   /** Optional JSON schema for structured output. */
   outputSchema?: Record<string, unknown>;
+  /** Runtime configuration overrides for this execution only. */
+  configurationOverrides?: AgentConfigurationOverrides;
+  /** Id of the parent execution that spawned this execution. */
+  parentExecutionId?: string;
+}
+
+/**
+ * Execution parameters for conversation mode — tied to a conversation with persistence.
+ */
+export interface ConversationExecutionParams extends BaseExecutionParams {
+  /** Id of the conversation to continue. */
+  conversationId?: string;
   /** When false, the conversation will not be persisted. Defaults to true. */
   storeConversation?: boolean;
   /** Create conversation with specified ID if not found. */
   autoCreateConversationWithId?: boolean;
-  /** Next user input to start the round. */
-  nextInput: ConverseInput;
   /** Browser API tools to make available to the agent. */
   browserApiTools?: BrowserApiToolMetadata[];
-  /** Runtime configuration overrides for this execution only. */
-  configurationOverrides?: AgentConfigurationOverrides;
   /** The action to perform: "regenerate" re-executes the last round with original input (requires conversationId). */
   action?: ConversationAction;
 }
 
 /**
- * Serialized error stored in the execution document when the execution fails.
+ * Execution parameters for standalone mode — single execution, not tied to a conversation.
  */
-export interface SerializedExecutionError {
-  /** The error code. */
-  code: AgentBuilderErrorCode;
-  /** Human-readable error message. */
-  message: string;
-  /** Optional metadata associated with the error. */
-  meta?: Record<string, any>;
-}
+export type StandaloneExecutionParams = BaseExecutionParams;
 
 /**
- * The agent execution document persisted in the agent-executions index.
+ * Union of all execution parameter types.
  */
-export interface AgentExecution {
+export type AgentExecutionParams = ConversationExecutionParams | StandaloneExecutionParams;
+
+/**
+ * Common fields shared by all agent execution documents.
+ */
+interface BaseAgentExecution {
   /** Unique id of the execution. */
   executionId: string;
   /** Timestamp of the execution creation. */
@@ -87,8 +81,6 @@ export interface AgentExecution {
   agentId: string;
   /** Id of the space the execution was performed in. */
   spaceId: string;
-  /** Serialized execution parameters. */
-  agentParams: AgentExecutionParams;
   /** Error details, present when status is 'failed'. */
   error?: SerializedExecutionError;
   /** Number of events stored on the document (kept in sync with `events.length`). */
@@ -97,33 +89,34 @@ export interface AgentExecution {
   events: ChatEvent[];
   /** Caller-provided metadata. */
   metadata?: Record<string, string>;
+  /** The ID of the parent execution that spawned this standalone execution. */
+  parentExecutionId?: string;
 }
 
 /**
- * Parameters for {@link AgentExecutionService.executeAgent}.
+ * An agent execution in conversation mode — tied to a conversation with persistence.
  */
-export interface ExecuteAgentParams {
-  /** The request that initiated the execution (used to carry the API key for TM scheduling). */
-  request: KibanaRequest;
-  /** Execution parameters (serializable). */
-  params: AgentExecutionParams;
-  /** Optional execution ID. When provided, it will be used instead of generating a new one. Must be unique. */
-  executionId?: string;
-  /** Optional abort signal. When aborted, the execution will be cancelled. */
-  abortSignal?: AbortSignal;
-  /**
-   * Controls whether execution runs on a Task Manager node.
-   * - `true`: schedule on TM.
-   * - `false`: run locally.
-   * - `undefined` (default): auto-decide based on context (already on TM -> local; otherwise check the experimental features UI setting).
-   */
-  useTaskManager?: boolean;
-  /** Arbitrary key-value metadata stored with the execution, searchable via findExecutions. */
-  metadata?: Record<string, string>;
+export interface ConversationAgentExecution extends BaseAgentExecution {
+  executionMode: AgentExecutionMode.conversation;
+  agentParams: ConversationExecutionParams;
 }
 
 /**
- * Result of {@link AgentExecutionService.executeAgent}.
+ * An agent execution in standalone mode — single execution, not tied to a conversation.
+ */
+export interface StandaloneAgentExecution extends BaseAgentExecution {
+  executionMode: AgentExecutionMode.standalone;
+  agentParams: StandaloneExecutionParams;
+}
+
+/**
+ * The agent execution document persisted in the agent-executions index.
+ * Discriminated union on `executionMode`.
+ */
+export type AgentExecution = ConversationAgentExecution | StandaloneAgentExecution;
+
+/**
+ * Result of executing an agent.
  */
 export interface ExecuteAgentResult {
   /** The unique execution ID. */
@@ -135,6 +128,39 @@ export interface ExecuteAgentResult {
    */
   events$: Observable<ChatEvent>;
 }
+
+/**
+ * Base parameters for {@link AgentExecutionService.executeAgent}.
+ */
+interface ExecuteAgentBaseParams {
+  /** The request that initiated the execution (used to carry the API key for TM scheduling). */
+  request: KibanaRequest;
+  /** Optional abort signal. When aborted, the execution will be cancelled. */
+  abortSignal?: AbortSignal;
+  /** Optional execution ID. When provided, it will be used instead of generating a new one. Must be unique. */
+  executionId?: string;
+  /** Arbitrary key-value metadata stored with the execution, searchable via findExecutions. */
+  metadata?: Record<string, string>;
+  /**
+   * Controls whether execution runs on a Task Manager node.
+   * - `true`: schedule on TM.
+   * - `false`: run locally.
+   * - `undefined` (default): auto-decide based on context.
+   */
+  useTaskManager?: boolean;
+}
+
+export interface ExecuteConversationAgentParams extends ExecuteAgentBaseParams {
+  mode: AgentExecutionMode.conversation;
+  params: ConversationExecutionParams;
+}
+
+export interface ExecuteStandaloneAgentParams extends ExecuteAgentBaseParams {
+  mode: AgentExecutionMode.standalone;
+  params: StandaloneExecutionParams;
+}
+
+export type ExecuteAgentParams = ExecuteConversationAgentParams | ExecuteStandaloneAgentParams;
 
 /**
  * Options for {@link AgentExecutionService.followExecution}.
