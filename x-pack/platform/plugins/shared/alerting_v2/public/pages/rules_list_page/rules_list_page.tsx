@@ -37,7 +37,11 @@ import { buildRulesListFilter } from './utils';
 const DEFAULT_PER_PAGE = 20;
 export const SEARCH_DEBOUNCE_MS = 300;
 
-const SORT_FIELD_TO_TABLE_FIELD: Record<FindRulesSortField, RulesListTableSortField> = {
+// Partial: `lastExecutionOutcome` / `lastExecutionAt` exist on the API sort
+// enum but the column + table-field value that renders them live on the
+// rules-list UI branch; on this backend-only branch they resolve to
+// `undefined` which `RulesListTable.sortField?` accepts.
+const SORT_FIELD_TO_TABLE_FIELD: Partial<Record<FindRulesSortField, RulesListTableSortField>> = {
   kind: 'kind',
   enabled: 'enabled',
   name: 'metadata',
