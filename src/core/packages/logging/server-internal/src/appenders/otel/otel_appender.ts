@@ -7,70 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { OTLPLogExporter as OTLPLogExporterHTTP } from '@opentelemetry/exporter-logs-otlp-http';
+import type { OTLPLogExporter as OTLPLogExporterGRPC } from '@opentelemetry/exporter-logs-otlp-grpc';
+import type { OTLPLogExporter as OTLPLogExporterPROTO } from '@opentelemetry/exporter-logs-otlp-proto';
 import { schema } from '@kbn/config-schema';
 import type { DisposableAppender, Layout, LogLevel, LogRecord } from '@kbn/logging';
-import { ROOT_CONTEXT, TraceFlags, trace, type Context } from '@opentelemetry/api';
+import { ROOT_CONTEXT, TraceFlags, trace, type Context, type Attributes } from '@opentelemetry/api';
 import type { AnyValueMap } from '@opentelemetry/api-logs';
 import { SeverityNumber, type Logger } from '@opentelemetry/api-logs';
-import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
-import {
-  detectResources,
-  envDetector,
-  hostDetector,
-  osDetector,
-  processDetector,
-  resourceFromAttributes,
-} from '@opentelemetry/resources';
+import { resources } from '@elastic/opentelemetry-node/sdk';
 import { BatchLogRecordProcessor, LoggerProvider } from '@opentelemetry/sdk-logs';
 import type { OtelAppenderConfig, LayoutConfigType } from '@kbn/core-logging-server';
-// getConfiguration returns the already-initialised APM config singleton (loaded at bootstrap).
-// Both packages are platform/private so this import is within the allowed visibility boundary.
-import { getConfiguration } from '@kbn/apm-config-loader';
+import { buildOtelResources } from '@kbn/telemetry/src/build_otel_resources';
+import { getFlattenedObject } from '@kbn/std';
 import { Layouts } from '../../layouts/layouts';
 
 const DISPOSE_TIMEOUT_MS = 5_000;
-
-/**
- * Derives OTel service resource attributes from the APM configuration that was
- * already loaded at bootstrap time. This mirrors the approach used by
- * `initTelemetry` for traces so that all signals share a consistent service
- * identity without requiring the user to re-declare it in `kibana.yml`.
- */
-const deriveServiceAttributes = (): Record<string, string> => {
-  // telemetry.sdk.language is always known for this Node.js process.
-  const attrs: Record<string, string> = { 'telemetry.sdk.language': 'nodejs' };
-
-  const apmConfig = getConfiguration('kibana');
-  if (!apmConfig) {
-    return attrs;
-  }
-  if (apmConfig.serviceName) {
-    attrs['service.name'] = String(apmConfig.serviceName);
-  }
-  if (apmConfig.serviceVersion) {
-    attrs['service.version'] = String(apmConfig.serviceVersion);
-  }
-  if (apmConfig.environment) {
-    attrs['deployment.environment'] = String(apmConfig.environment);
-  }
-  // The Kibana node UUID is stored in globalLabels.kibana_uuid by ApmConfiguration.
-  // We surface it as service.instance.id per the OTel Resource semantic conventions.
-  const { globalLabels } = apmConfig;
-  if (globalLabels && typeof globalLabels === 'object' && !Array.isArray(globalLabels)) {
-    const kibanaUuid = globalLabels.kibana_uuid;
-    if (kibanaUuid) {
-      attrs['service.instance.id'] = String(kibanaUuid);
-    }
-  }
-  return attrs;
-};
 
 /**
  * Maps a Kibana log level to the corresponding OTel SeverityNumber.
  * Returns `undefined` for filter-only levels ('all', 'off') that should never
  * appear on an actual log record, causing the record to be silently dropped.
  */
-const toSeverityNumber = (level: LogLevel): SeverityNumber | undefined => {
+const toSeverityNumber = (level: LogLevel): SeverityNumber => {
   switch (level.id) {
     case 'trace':
       return SeverityNumber.TRACE;
@@ -86,7 +45,7 @@ const toSeverityNumber = (level: LogLevel): SeverityNumber | undefined => {
       return SeverityNumber.FATAL;
     default:
       // 'all' and 'off' are filter thresholds, not record severities.
-      return undefined;
+      return SeverityNumber.UNSPECIFIED;
   }
 };
 
@@ -100,12 +59,11 @@ const toTraceContext = (record: LogRecord): Context | undefined => {
   if (!record.traceId || !record.spanId) {
     return undefined;
   }
+
   return trace.setSpanContext(ROOT_CONTEXT, {
     traceId: record.traceId,
     spanId: record.spanId,
-    // Kibana only propagates IDs for sampled traces.
-    traceFlags: TraceFlags.SAMPLED,
-    isRemote: false,
+    traceFlags: TraceFlags.NONE,
   });
 };
 
@@ -160,11 +118,8 @@ const resolveLayoutConfig = (config?: LayoutConfigType): LayoutConfigType => {
  * - When using the JSON layout, `meta` is already part of the structured body,
  *   so `log.meta` is omitted from attributes to avoid duplication.
  */
-const toAttributes = (
-  record: LogRecord,
-  includeLogMeta: boolean
-): Record<string, string | number | boolean> => {
-  const attrs: Record<string, string | number | boolean> = {
+const toAttributes = (record: LogRecord, includeLogMeta: boolean): Attributes => {
+  const attrs: Attributes = {
     'log.logger': record.context,
   };
 
@@ -182,10 +137,22 @@ const toAttributes = (
     }
   }
 
-  if (includeLogMeta && record.meta) {
+  if (
+    includeLogMeta &&
+    record.meta &&
+    typeof record.meta === 'object' &&
+    !Array.isArray(record.meta)
+  ) {
     // Only included for pattern layout: with JSON layout the meta is part of
     // the structured body and repeating it here would be redundant.
-    attrs['log.meta'] = JSON.stringify(record.meta);
+    Object.entries(getFlattenedObject(record.meta)).forEach(([key, value]) => {
+      if (key.startsWith('service.')) {
+        // Service attributes are passed as-is to the resource.
+        attrs[key] = value;
+      } else {
+        attrs[`kibana.log.meta.${key}`] = value;
+      }
+    });
   }
 
   return attrs;
@@ -200,6 +167,10 @@ const toAttributes = (
 export class OtelAppender implements DisposableAppender {
   public static configSchema = schema.object({
     type: schema.literal('otel'),
+    protocol: schema.oneOf(
+      [schema.literal('http'), schema.literal('proto'), schema.literal('grpc')],
+      { defaultValue: 'proto' }
+    ),
     url: schema.string(),
     headers: schema.recordOf(schema.string(), schema.string(), { defaultValue: {} }),
     /**
@@ -219,17 +190,15 @@ export class OtelAppender implements DisposableAppender {
   private readonly useStructuredBody: boolean;
 
   constructor(config: OtelAppenderConfig) {
-    const exporter = new OTLPLogExporter({ url: config.url, headers: config.headers ?? {} });
+    const exporter = createExporter(config);
     // Layer the resource from three sources (each overriding the previous):
     //   1. Auto-detected: host, OS, process, env-var OTel attributes
     //   2. Derived: service.name / service.version / deployment.environment from the
     //      APM config singleton (mirrors how initTelemetry builds trace resources)
     //   3. User overrides: explicit attributes from kibana.yml (optional)
-    const resource = detectResources({
-      detectors: [envDetector, hostDetector, osDetector, processDetector],
-    })
-      .merge(resourceFromAttributes(deriveServiceAttributes()))
-      .merge(resourceFromAttributes(config.attributes ?? {}));
+    const resource = buildOtelResources().merge(
+      resources.resourceFromAttributes(config.attributes ?? {})
+    );
     this.loggerProvider = new LoggerProvider({
       processors: [new BatchLogRecordProcessor(exporter)],
       resource,
@@ -281,3 +250,35 @@ export class OtelAppender implements DisposableAppender {
     ]);
   }
 }
+
+const createExporter = (
+  config: OtelAppenderConfig
+): OTLPLogExporterHTTP | OTLPLogExporterGRPC | OTLPLogExporterPROTO => {
+  switch (config.protocol) {
+    case 'http': {
+      // No need to import the module at the top if not used in the switch statement.
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { OTLPLogExporter } = require('@opentelemetry/exporter-logs-otlp-http');
+      return new OTLPLogExporter({ url: config.url, headers: config.headers ?? {} });
+    }
+    case 'proto': {
+      // No need to import the module at the top if not used in the switch statement.
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { OTLPLogExporter } = require('@opentelemetry/exporter-logs-otlp-proto');
+      return new OTLPLogExporter({ url: config.url, headers: config.headers ?? {} });
+    }
+    case 'grpc': {
+      // No need to import the module at the top if not used in the switch statement.
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { Metadata } = require('@grpc/grpc-js');
+      const metadata = new Metadata();
+      Object.entries(config.headers ?? {}).forEach(([key, value]) => {
+        metadata.add(key, value);
+      });
+      // No need to import the module at the top if not used in the switch statement.
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { OTLPLogExporter } = require('@opentelemetry/exporter-logs-otlp-grpc');
+      return new OTLPLogExporter({ url: config.url, metadata });
+    }
+  }
+};

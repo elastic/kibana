@@ -28,6 +28,7 @@ import { OtelAppender } from './otel_appender';
 
 const validConfig = {
   type: 'otel' as const,
+  protocol: 'http' as const,
   url: 'http://collector:4318/v1/logs',
   headers: { Authorization: 'Bearer token' },
 };
@@ -112,7 +113,7 @@ describe('OtelAppender constructor', () => {
   });
 
   it('defaults to empty headers when none are provided', () => {
-    new OtelAppender({ type: 'otel', url: validConfig.url });
+    new OtelAppender({ type: 'otel', url: validConfig.url, protocol: 'http' });
 
     expect(mockOTLPLogExporter).toHaveBeenCalledWith({
       url: validConfig.url,
@@ -168,7 +169,7 @@ describe('OtelAppender constructor', () => {
       'telemetry.sdk.language': 'nodejs',
       'service.name': 'kibana',
       'service.version': '9.4.0',
-      'deployment.environment': 'production',
+      'deployment.environment.name': 'production',
     });
   });
 
@@ -298,11 +299,13 @@ describe('OtelAppender.append() — severity mapping', () => {
   it.each([
     ['off', LogLevel.Off],
     ['all', LogLevel.All],
-  ])('silently drops records with filter-only level %s', (_name, level) => {
+  ])('emits records with filter-only level %s as severityNumber UNSPECIFIED', (_name, level) => {
     const appender = new OtelAppender(validConfig);
     appender.append(makeRecord({ level }));
 
-    expect(mockEmit).not.toHaveBeenCalled();
+    expect(mockEmit).toHaveBeenCalledWith(
+      expect.objectContaining({ severityNumber: SeverityNumber.UNSPECIFIED })
+    );
   });
 });
 
@@ -361,8 +364,7 @@ describe('OtelAppender.append() — trace context', () => {
     expect(trace.setSpanContext).toHaveBeenCalledWith('root-context', {
       traceId: 'abc123',
       spanId: 'def456',
-      traceFlags: 1, // TraceFlags.SAMPLED
-      isRemote: false,
+      traceFlags: undefined, // TraceFlags.NONE
     });
     const emittedContext = mockEmit.mock.calls[0][0].context;
     expect(emittedContext).toBeDefined();
@@ -453,7 +455,10 @@ describe('OtelAppender.append() — attributes', () => {
 
       expect(mockEmit).toHaveBeenCalledWith(
         expect.objectContaining({
-          attributes: expect.objectContaining({ 'log.meta': JSON.stringify(meta) }),
+          attributes: expect.objectContaining({
+            'kibana.log.meta.http.method': 'GET',
+            'kibana.log.meta.tags': ['api'],
+          }),
         })
       );
     });

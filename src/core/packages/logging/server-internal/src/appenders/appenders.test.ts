@@ -37,6 +37,7 @@ test('`configSchema` creates correct schema.', () => {
 
   const validConfig3 = {
     type: 'otel',
+    protocol: 'http',
     url: 'http://collector:4318/v1/logs',
     headers: { Authorization: 'Bearer token' },
     attributes: { 'service.name': 'kibana' },
@@ -91,6 +92,7 @@ test('`create()` creates correct appender.', () => {
 
   const otelAppender = Appenders.create({
     type: 'otel',
+    protocol: 'http',
     url: 'http://collector:4318/v1/logs',
     headers: {},
     attributes: {},

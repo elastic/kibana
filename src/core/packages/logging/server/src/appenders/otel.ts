@@ -29,6 +29,11 @@ import type { LayoutConfigType } from '../layout';
 export interface OtelAppenderConfig {
   /** Discriminator for this appender type. */
   type: 'otel';
+  /**
+   * The protocol to use for the OTLP exporter.
+   * Defaults to 'grpc'.
+   */
+  protocol: 'http' | 'proto' | 'grpc';
   /** OTLP HTTP endpoint URL, e.g. https://collector:4318/v1/logs */
   url: string;
   /**

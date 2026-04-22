@@ -21,6 +21,7 @@ jest.mock('@kbn/apm-config-loader', () => {
 
   return {
     ...originalPkg,
+    getConfiguration: jest.fn(),
     loadConfiguration: jest.fn(),
   };
 });
@@ -108,8 +109,9 @@ describe('initTelemetry', () => {
         false
       );
 
-      const { loadConfiguration } = jest.requireMock('@kbn/apm-config-loader');
+      const { loadConfiguration, getConfiguration } = jest.requireMock('@kbn/apm-config-loader');
       loadConfiguration.mockImplementationOnce(() => apmConfig);
+      getConfiguration.mockImplementationOnce(() => apmConfig.getConfig('test-service'));
 
       const resourceFromAttributesSpy = jest.spyOn(resources, 'resourceFromAttributes');
 
@@ -120,9 +122,10 @@ describe('initTelemetry', () => {
           // Using expect.objectContaining to ignore other attributes introduced by CI adding apmConfig.globalLabels
           'service.name': 'test-service',
           'service.version': PKG_JSON.version,
-          'service.instance.id': undefined,
+          'service.instance.id': expect.any(String),
           'deployment.environment.name': apmConfig.getConfig('test-service').environment, // using this reference because CI overrides the config via environment vars
           git_rev: expect.any(String),
+          'telemetry.sdk.language': 'nodejs',
         })
       );
     });

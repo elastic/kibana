@@ -26,18 +26,20 @@ jest.mock('@opentelemetry/sdk-logs', () => ({
 jest.mock('@opentelemetry/exporter-logs-otlp-http', () => ({
   OTLPLogExporter: jest.fn(),
 }));
-jest.mock('@opentelemetry/resources', () => {
+jest.mock('@elastic/opentelemetry-node/sdk', () => {
   interface MockResource {
     merge: jest.Mock<MockResource>;
   }
   const makeMergeableResource = (): MockResource => ({ merge: jest.fn(makeMergeableResource) });
   return {
-    detectResources: jest.fn(makeMergeableResource),
-    resourceFromAttributes: jest.fn(makeMergeableResource),
-    envDetector: 'envDetector',
-    hostDetector: 'hostDetector',
-    osDetector: 'osDetector',
-    processDetector: 'processDetector',
+    resources: {
+      detectResources: jest.fn(makeMergeableResource),
+      resourceFromAttributes: jest.fn(makeMergeableResource),
+      envDetector: 'envDetector',
+      hostDetector: 'hostDetector',
+      osDetector: 'osDetector',
+      processDetector: 'processDetector',
+    },
   };
 });
 jest.mock('@opentelemetry/api', () => ({
