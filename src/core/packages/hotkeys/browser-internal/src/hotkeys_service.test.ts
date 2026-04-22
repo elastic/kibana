@@ -58,6 +58,28 @@ describe('HotkeysService', () => {
       expect(regs[0]).toMatchObject({ id: 'test:a', scope: 'context', label: 'Save' });
     });
 
+    it('stamps defaultKeys from the declared keys on the projected registration', async () => {
+      const start = service.start({ application: createApplication() });
+      start.register({ id: 'def:a', keys: 'Mod+S', label: 'Save' }, jest.fn());
+      const regs = await takeRegistrations(start);
+      expect(regs[0]).toMatchObject({ keys: 'Mod+S', defaultKeys: 'Mod+S' });
+    });
+
+    it('ignores a caller-supplied defaultKeys and derives it from keys', async () => {
+      const start = service.start({ application: createApplication() });
+      start.register(
+        {
+          id: 'def:b',
+          keys: 'Mod+S',
+          defaultKeys: 'Mod+Shift+S',
+          label: 'Save',
+        },
+        jest.fn()
+      );
+      const regs = await takeRegistrations(start);
+      expect(regs[0]).toMatchObject({ keys: 'Mod+S', defaultKeys: 'Mod+S' });
+    });
+
     it('returns a handle whose unregister removes the registration', async () => {
       const start = service.start({ application: createApplication() });
       const handle = start.register(
@@ -89,6 +111,22 @@ describe('HotkeysService', () => {
         id: 'upd:a',
         label: 'Save all',
         description: 'Saves all tabs',
+      });
+    });
+
+    it('preserves defaultKeys across updates', async () => {
+      const start = service.start({ application: createApplication() });
+      const handle = start.register(
+        { id: 'upd:b', keys: 'Mod+S', label: 'Save', scope: 'global' },
+        jest.fn()
+      );
+      handle.update({ label: 'Save all' });
+      const regs = await takeRegistrations(start);
+      expect(regs[0]).toMatchObject({
+        id: 'upd:b',
+        keys: 'Mod+S',
+        defaultKeys: 'Mod+S',
+        label: 'Save all',
       });
     });
 
