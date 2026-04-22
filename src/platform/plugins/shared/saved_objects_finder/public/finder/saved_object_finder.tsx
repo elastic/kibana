@@ -81,6 +81,7 @@ interface BaseSavedObjectFinder {
     name: string,
     savedObject: SavedObjectCommon
   ) => void;
+  getHref?: (id: SavedObjectCommon['id'], type: SavedObjectCommon['type']) => string | undefined;
   noItemsMessage?: ReactNode;
   savedObjectMetaData: Array<SavedObjectMetaData<FinderAttributes>>;
   showFilter?: boolean;
@@ -214,6 +215,7 @@ class SavedObjectFinderUiClass extends React.Component<
   public render() {
     const {
       onChoose,
+      getHref,
       savedObjectMetaData,
       euiTablePersist: { pageSize, sorting, onTableChange },
     } = this.props;
@@ -297,9 +299,14 @@ class SavedObjectFinderUiClass extends React.Component<
 
           const link = (
             <EuiLink
+              href={getHref?.(item.id, item.type)}
               onClick={
                 onChoose
-                  ? () => {
+                  ? (e: React.MouseEvent) => {
+                      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) {
+                        return;
+                      }
+                      e.preventDefault();
                       onChoose(item.id, item.type, fullName, item.simple);
                     }
                   : undefined
