@@ -1233,7 +1233,7 @@ paths:
                 additionalProperties: true
                 type: object
           description: The (template) Timeline was not found
-      summary: Get an existing saved Timeline or Timeline template
+      summary: Resolve a Timeline or Timeline template
       tags:
         - Security Timeline API
         - access:securitySolution
