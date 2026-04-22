@@ -41,34 +41,45 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Adds the `region` parameter to the Bedrock Connector schema [#252956]({{kib-pull}}252956).
 
 **Dashboards and Visualizations**:
-* Adds a **Badge** color option for table values in Lens, allowing cell values to be displayed as colored badges instead of text or background coloring [#257408]({{kib-pull}}257408).
-* Adds a new list legend layout for horizontal legends (top and bottom), offering a more space-efficient alternative to the grid layout. This is now the default for XY charts [#257092]({{kib-pull}}257092).
-* Makes the Dashboard API endpoints available as technical preview [#256302]({{kib-pull}}256302).
+% main features
+* A new Dashboard skill is now available in Agent Builder. This skill allows you to create and update dashboards through natural language [chat](/explore-analyze/ai-features/agent-builder/chat.md), using the chat UI in {{product.kibana}}, the [Chat API](/explore-analyze/ai-features/agent-builder/kibana-api.md), or the [MCP server](/explore-analyze/ai-features/agent-builder/mcp-server.md). Describe what you want to visualize and the agent builds a dashboard with [{{esql}}](/explore-analyze/query-filter/languages/esql-kibana.md)-powered visualizations. [#261530]({{kib-pull}}261530).
+* New API endpoints are now available in technical preview to manage your dashboards and visulization library. The Dashboards API gives you full read and write access to dashboards, including their panels, controls, sections, and display options. The Visualizations API lets you create and manage visualizations as standalone saved objects in the {{product.kibana}} Visualizations library. [#256302]({{kib-pull}}256302).
 * Adds the ability to show and export Dashboard API JSON in a flyout [#255382]({{kib-pull}}255382).
-* Adds a new line-optimized color palette for line charts in Lens [#253437]({{kib-pull}}253437).
-* Supports {{esql}} in Vega [#247186]({{kib-pull}}247186).
+
+% controls
 * Controls are now available as a panel type, allowing them to be freely placed anywhere in your dashboards [#245588]({{kib-pull}}245588).
-* Adds sort order controls for heatmap visualization axes [#244696]({{kib-pull}}244696).
-* Adds a middle position option for the primary metric in Metric charts in Lens [#260902]({{kib-pull}}260902).
-* Improves tick labels for time-based X axes in {{esql}} heatmap visualizations [#259218]({{kib-pull}}259218).
-* Enables section dragging via the entire header and collapse/expand on click [#258502]({{kib-pull}}258502).
+* Makes **Contains** the default search technique for options list controls [#250992]({{kib-pull}}250992).
+* Allows IP fields to be searched using CIDR notation in controls [#250875]({{kib-pull}}250875).
+
+% sections
+* Extends the selectable area for dragging, collapsing and expanding sections to their entire header [#258502]({{kib-pull}}258502).
 * Allows dragging of opened collapsible sections [#257191]({{kib-pull}}257191).
-* Improves datatable visualization performance for large datasets in Lens [#256234]({{kib-pull}}256234).
+
+% dashboard usability
 * Makes the filter pills section collapsible [#255887]({{kib-pull}}255887).
 * Adds a grid size gauge while resizing panels [#255363]({{kib-pull}}255363).
 * Adds a borderless option to panel settings [#255021]({{kib-pull}}255021).
-* Retrieves variable types from the query response [#254436]({{kib-pull}}254436).
-* Defaults to line chart when the x-axis contains a timestamp, instead of a histogram [#253930]({{kib-pull}}253930).
-* Suggests line charts for timeseries queries (TS / PromQL) in Lens [#252661]({{kib-pull}}252661).
-* Adds `id` as a create request parameter [#251975]({{kib-pull}}251975).
-* Redesigns the panel titles [#251720]({{kib-pull}}251720).
-* Enables monospace numeric font features for Lens renderers [#251576]({{kib-pull}}251576).
+* Adds library support for markdown panels [#248779]({{kib-pull}}248779).
 * Allows panels to be dragged while they're in focus for editing [#251327]({{kib-pull}}251327).
-* Makes **Contains** the default search technique for options list controls [#250992]({{kib-pull}}250992).
-* Allows IP fields to be searched using CIDR notation in controls [#250875]({{kib-pull}}250875).
-* Allows filtering from legend actions when possible [#248789]({{kib-pull}}248789).
-* Adds library support for the Markdown embeddable [#248779]({{kib-pull}}248779).
+* Redesigns the panel titles [#251720]({{kib-pull}}251720).
+
+% esql + viz
+* Adds {{esql}} support to Vega visualizations [#247186]({{kib-pull}}247186).
 * Enables {{esql}} multi-terms charts in Lens [#244743]({{kib-pull}}244743).
+* Allows filtering from legend actions when possible for {{esql}} visualizations [#248789]({{kib-pull}}248789).
+* Suggests line charts for timeseries {{esql}} queries (TS / PromQL) in Lens [#252661]({{kib-pull}}252661).
+* Retrieves variable types from the {{esql}} query response [#254436]({{kib-pull}}254436).
+
+% chart options and improvements
+* Defaults the visualization type a to line chart when the x-axis contains a timestamp, instead of a bar chart [#253930]({{kib-pull}}253930).
+* Adds a new optimized color palette for line charts [#253437]({{kib-pull}}253437).
+* Adds a **Badge** color option for table values in Lens, allowing cell values to be displayed as colored badges instead of text or background coloring [#257408]({{kib-pull}}257408).
+* Adds a new list legend layout for horizontal legends (top and bottom), offering a more space-efficient alternative to the grid layout. This is now the default for XY charts [#257092]({{kib-pull}}257092).
+* Adds sort order options for heatmap visualization axes [#244696]({{kib-pull}}244696).
+* Adds a middle position option for the primary metric styling settings of metric charts [#260902]({{kib-pull}}260902).
+* Improves tick labels for time-based X axes in {{esql}} heatmap visualizations [#259218]({{kib-pull}}259218).
+* Improves datatable visualization performance for large datasets in Lens [#256234]({{kib-pull}}256234).
+* Enables monospace numeric font features for Lens renderers [#251576]({{kib-pull}}251576).
 
 **Data ingestion and Fleet**:
 * Allows remote {{es}} outputs and service tokens in Serverless [#262101]({{kib-pull}}262101).
@@ -163,7 +174,6 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Integrates the new app menu with dashboards [#246153]({{kib-pull}}246153).
 
 **Machine Learning**:
-* Removes the `experimental` guard from dashboards [#261530]({{kib-pull}}261530).
 * Updates Security ML jobs to use entity analytics fields for host and user fields [#255339]({{kib-pull}}255339).
 * Adds sparkline charts for `CATEGORIZE` in Discover [#254269]({{kib-pull}}254269).
 * Adds a link to manage anomaly detection jobs in the Machine Learning left navigation [#260605]({{kib-pull}}260605).
@@ -310,41 +320,34 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Fixes the wrong time zone being applied when a CSV report has a local date comparison [#244405]({{kib-pull}}244405).
 
 **Dashboards and Visualizations**:
-* Clears `location.state` after locator merge to fix stale reload overrides [#262695]({{kib-pull}}262695).
-* Fixes the need for a refresh after adding a visualization to the current dashboard from AI agent chat [#262107]({{kib-pull}}262107).
-* Fixes the date picker showing empty when switching from KQL to {{esql}} [#261175]({{kib-pull}}261175).
+* Fixes an issue that could prevent a dashboard from showing its latest saved state [#262695]({{kib-pull}}262695).
 * Prevents a false positive warning about unsaved changes when sharing a dashboard while in View Mode [#261051]({{kib-pull}}261051).
 * Fixes regressions for space-relative links and same-window target [#260782]({{kib-pull}}260782).
 * Improves {{esql}} suggestions logic in Lens [#258475]({{kib-pull}}258475).
-* Adjusts scroll on drop [#258445]({{kib-pull}}258445).
+* Adjusts scroll behavior when dropping a panel to a new position [#258445]({{kib-pull}}258445).
 * Fixes screen reader announcements when entering full screen mode on a dashboard [#258230]({{kib-pull}}258230).
-* Fixes the backups service [#257762]({{kib-pull}}257762).
-* Fixes a bug where visualizations stayed focused after closing the variables editor flyout [#257263]({{kib-pull}}257263).
+* Fixes an issue with logic for detecting unsaved changes for dashboards in non-default spaces [#257762]({{kib-pull}}257762).
+* Fixes an issue where visualizations stayed focused after closing the variables editor flyout [#257263]({{kib-pull}}257263).
 * Fixes **Add from library** adding incorrect embeddable state [#257261]({{kib-pull}}257261).
 * Fixes dashboard panels getting stuck in infinite loading state after an error instead of showing error messages [#257188]({{kib-pull}}257188).
-* Fixes saving Lens by-ref dashboard panels where editing a by-reference visualization would correctly save changes but visually revert the panel until the page was refreshed [#256984]({{kib-pull}}256984).
+* Fixes an issue where editing a library visualization would correctly save changes but visually show its previous saved state in dashboards referencing that visualization until the page was refreshed [#256984]({{kib-pull}}256984).
 * Stops adding a default title when creating {{esql}} charts in Lens [#256475]({{kib-pull}}256475).
-* Fixes an issue in serverless [#256354]({{kib-pull}}256354).
-* Fixes an issue only applicable to serverless deployments [#256327]({{kib-pull}}256327).
-* Fixes the pinned state for {{esql}} and range slider controls [#256035]({{kib-pull}}256035).
-* Restores fallback to `dataViewId` stored explicitly in control state [#255878]({{kib-pull}}255878).
-* Throws on RPC route validation error in dev mode [#255181]({{kib-pull}}255181).
-* Fixes `timeFilter` mode `quick` in map stored state preventing map from loading [#255178]({{kib-pull}}255178).
-* Fixes saving a dashboard including access control features when a user profile was not available [#255065]({{kib-pull}}255065).
-* Types `meta.value` as string or object [#253537]({{kib-pull}}253537).
-* Fixes config panel scrolling in the Lens editor when content exceeds available height [#253247]({{kib-pull}}253247).
-* Sets the white background directly on the dashboard [#253068]({{kib-pull}}253068).
-* Adjusts the Horizontal Link panel height to 2 rows [#252707]({{kib-pull}}252707).
+* Fixes the pinned state for variable ({{esql}}) and range slider controls [#256035]({{kib-pull}}256035).
+* Fixes `timeFilter`'s `quick` mode in Maps stored state, that could prevent maps from loading [#255178]({{kib-pull}}255178).
+* Fixes an issue where saving a dashboard included access control features when a user profile, which is required for access control, was not available [#255065]({{kib-pull}}255065).
+* Fixes an issue occurring when saving a map containing filters [#253537]({{kib-pull}}253537).
+* Fixes configuration panel scrolling in the Lens editor when the content exceeds available height [#253247]({{kib-pull}}253247).
+* Changes dashboard background color to white [#253068]({{kib-pull}}253068).
+* Changes the default height of link panels to 2 rows [#252707]({{kib-pull}}252707).
 * Fixes the library annotation group not syncing across panels after an update in Lens [#252640]({{kib-pull}}252640).
-* Applies embeddable transforms to embeddable elements [#252191]({{kib-pull}}252191).
-* Fixes KQL character escaping when query is generated from Top values column (breakdown) in Lens [#250925]({{kib-pull}}250925).
-* Fixes a Reporting issue [#249644]({{kib-pull}}249644).
+* Fixes KQL character escaping when a query is generated from the Top values column (breakdown) in Lens [#250925]({{kib-pull}}250925).
+* Fixes an issue where PDF/PNG reports are cut off at the end when a dashboard has a markdown panel [#249644]({{kib-pull}}249644).
 * Limits variable suggestions to variables within scope [#248365]({{kib-pull}}248365).
-* Refetches controls options when the timerange changes [#248068]({{kib-pull}}248068).
+* Re-fetches control options when the timerange changes [#248068]({{kib-pull}}248068).
 * Fixes link color contrast in Lens data tables [#247721]({{kib-pull}}247721).
 * Removes `| LIMIT 10` from the {{esql}} panel in dashboards when creating a visualization in Lens [#247427]({{kib-pull}}247427).
 * Fixes compound filters showing unsaved changes on dashboard load [#247309]({{kib-pull}}247309).
-* Increases default top values from 3/5 to 9 categories in Lens [#247015]({{kib-pull}}247015).
+* Increases default top values from 3 or 5 to 9 categories in Lens [#247015]({{kib-pull}}247015).
 * Fixes the handling of a quote as a dead key [#246773]({{kib-pull}}246773).
 
 **Data ingestion and Fleet**:
@@ -374,6 +377,7 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Adds back support for generating a CSV report of Fleet agent data in serverless environments [#247185]({{kib-pull}}247185).
 
 **Discover**:
+* Fixes the date picker showing empty when switching from KQL to {{esql}} [#261175]({{kib-pull}}261175).
 * Correctly reports controls server-side errors [#263020]({{kib-pull}}263020).
 * Fixes a tab URL state leak when leaving Discover [#262929]({{kib-pull}}262929).
 * Resets the time field when the updated index pattern does not have it [#262001]({{kib-pull}}262001).
