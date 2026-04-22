@@ -73,8 +73,8 @@ describe('runBackfillInstalledPackageInfo', () => {
           id: 'pkg-1',
           type: 'epm-packages',
           references: [],
-          attributes: { name: 'my_pkg', version: '1.0.0', install_source: 'registry' } as any,
-        },
+          attributes: { name: 'my_pkg', version: '1.0.0', install_source: 'registry' },
+        } as any,
       ],
     });
 
@@ -115,8 +115,8 @@ describe('runBackfillInstalledPackageInfo', () => {
           id: 'pkg-1',
           type: 'epm-packages',
           references: [],
-          attributes: { name: 'my_pkg', version: '1.0.0', install_source: 'registry' } as any,
-        },
+          attributes: { name: 'my_pkg', version: '1.0.0', install_source: 'registry' },
+        } as any,
       ],
     });
 
@@ -138,14 +138,14 @@ describe('runBackfillInstalledPackageInfo', () => {
           id: 'pkg-1',
           type: 'epm-packages',
           references: [],
-          attributes: { name: 'pkg_a', version: '1.0.0', install_source: 'registry' } as any,
-        },
+          attributes: { name: 'pkg_a', version: '1.0.0', install_source: 'registry' },
+        } as any,
         {
           id: 'pkg-2',
           type: 'epm-packages',
           references: [],
-          attributes: { name: 'pkg_b', version: '1.0.0', install_source: 'registry' } as any,
-        },
+          attributes: { name: 'pkg_b', version: '1.0.0', install_source: 'registry' },
+        } as any,
       ],
     });
 
@@ -186,8 +186,8 @@ describe('runBackfillInstalledPackageInfo', () => {
             name: 'cloud_security_posture',
             version: '1.0.0',
             install_source: 'registry',
-          } as any,
-        },
+          },
+        } as any,
       ],
     });
 
@@ -232,8 +232,8 @@ describe('runBackfillInstalledPackageInfo', () => {
             name: 'cloud_security_posture',
             version: '2.0.0',
             install_source: 'registry',
-          } as any,
-        },
+          },
+        } as any,
       ],
     });
 
