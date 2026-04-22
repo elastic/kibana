@@ -13,8 +13,8 @@ import { getTransforms } from '../../../common/embeddables/alerts/transforms/tra
 /**
  * Registers the schema and transforms for the SLO Alerts embeddable
  */
-export const registerAlertsEmbeddableTransforms = (embeddable: EmbeddableSetup): void => {
-  embeddable.registerTransforms(SLO_ALERTS_EMBEDDABLE_ID, {
+export const registerAlertsEmbeddable = (embeddable: EmbeddableSetup): void => {
+  embeddable.registerEmbeddableServerDefinition(SLO_ALERTS_EMBEDDABLE_ID, {
     title: 'SLO alerts',
     getSchema: getAlertsEmbeddableSchema,
     getTransforms,
