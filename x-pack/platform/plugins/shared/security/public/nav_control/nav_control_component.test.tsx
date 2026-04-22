@@ -334,7 +334,7 @@ describe('SecurityNavControl', () => {
                   Dummy Component
                 </div>
                 <div
-                  class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-isInteractive-euiContextMenuItem-center"
+                  class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-euiContextMenuItem-center"
                   data-test-subj="logoutLink"
                 >
                   <span
@@ -492,7 +492,7 @@ describe('SecurityNavControl', () => {
                   </span>
                 </a>
                 <div
-                  class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-isInteractive-euiContextMenuItem-center"
+                  class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-euiContextMenuItem-center"
                   data-test-subj="logoutLink"
                 >
                   <span
@@ -575,7 +575,7 @@ describe('SecurityNavControl', () => {
                 class="euiContextMenuPanel__list"
               >
                 <div
-                  class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-isInteractive-euiContextMenuItem-center"
+                  class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-euiContextMenuItem-center"
                   data-test-subj="logoutLink"
                 >
                   <span
