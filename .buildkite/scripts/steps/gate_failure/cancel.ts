@@ -9,16 +9,32 @@
 
 import { BuildkiteClient } from '#pipeline-utils';
 
-const METADATA_PREFIX = 'cancel_on_gate_failure:';
+const LEGACY_PREFIX = 'cancel_on_gate_failure:';
+const BATCH_PREFIX = 'cancel_on_gate_failure_batch:';
 
 function run(): void {
   const bk = new BuildkiteClient();
 
-  // Discover cancelable step keys from metadata set at pipeline upload time
-  const stepKeys = bk
-    .getMetadataKeys()
-    .filter((key) => key.startsWith(METADATA_PREFIX))
-    .map((key) => key.slice(METADATA_PREFIX.length));
+  const allMetadataKeys = bk.getMetadataKeys();
+
+  // New format: each batch key holds a JSON array of step keys
+  const batchStepKeys = allMetadataKeys
+    .filter((key) => key.startsWith(BATCH_PREFIX))
+    .flatMap((key) => {
+      const value = bk.getMetadata(key);
+      try {
+        return value ? (JSON.parse(value) as string[]) : [];
+      } catch {
+        return [];
+      }
+    });
+
+  // Legacy format: each key is a single step key
+  const legacyStepKeys = allMetadataKeys
+    .filter((key) => key.startsWith(LEGACY_PREFIX))
+    .map((key) => key.slice(LEGACY_PREFIX.length));
+
+  const stepKeys = [...new Set([...batchStepKeys, ...legacyStepKeys])];
 
   if (stepKeys.length === 0) {
     return;
