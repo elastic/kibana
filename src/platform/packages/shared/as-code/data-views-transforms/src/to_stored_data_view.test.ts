@@ -30,14 +30,13 @@ describe('toStoredDataView', () => {
       type: AS_CODE_DATA_VIEW_SPEC_TYPE,
       index_pattern: 'my-index-*',
       time_field: '@timestamp',
-      runtime_fields: [
-        {
-          name: 'rt',
+      field_settings: {
+        rt: {
           type: 'keyword',
           script: 'emit(doc["id"].value)',
           format: { type: 'string' },
         },
-      ],
+      },
     };
     const result = toStoredDataView(dataView);
     expect(result).toEqual({
@@ -98,16 +97,12 @@ describe('toStoredDataView', () => {
     });
   });
 
-  it('prefers runtime_fields over overlapping field_settings', () => {
+  it('stores a single field_settings entry per field name', () => {
     const dataView: AsCodeDataViewSpec = {
       type: AS_CODE_DATA_VIEW_SPEC_TYPE,
       index_pattern: 'logs-*',
-      runtime_fields: [{ name: 'rt', type: 'keyword', format: { type: 'string' } }],
       field_settings: {
-        rt: {
-          format: { type: 'bytes' },
-          custom_label: 'Mapped',
-        },
+        rt: { type: 'keyword', format: { type: 'string' } },
       },
     };
 

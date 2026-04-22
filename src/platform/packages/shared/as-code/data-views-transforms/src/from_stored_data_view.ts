@@ -30,10 +30,15 @@ export function fromStoredDataView(
     return { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: index };
   }
   if (!index.title) throw new Error('Cannot derive data view without `title` or `id`');
+  const fieldSettings = fromStoredFields(
+    index.runtimeFieldMap,
+    index.fieldFormats,
+    index.fieldAttrs
+  );
   return {
     type: AS_CODE_DATA_VIEW_SPEC_TYPE,
     index_pattern: index.title,
     time_field: index.timeFieldName,
-    ...fromStoredFields(index.runtimeFieldMap, index.fieldFormats, index.fieldAttrs),
+    ...(fieldSettings && { field_settings: fieldSettings }),
   };
 }

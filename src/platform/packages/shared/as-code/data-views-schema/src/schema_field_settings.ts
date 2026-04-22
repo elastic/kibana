@@ -9,7 +9,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const fieldSettingsSchema = schema.object(
+export const fieldSettingsBaseSchema = schema.object(
   {
     format: schema.maybe(
       schema.object(
@@ -56,11 +56,6 @@ export const fieldSettingsSchema = schema.object(
       title: 'Field settings',
       description:
         'Display overrides for a field. These settings can define a custom label, description, and format.',
-    },
-    validate(value) {
-      if (!value.format && !value.custom_label && !value.custom_description) {
-        return 'At least one of `format`, `custom_label`, or `custom_description` must be defined.';
-      }
     },
   }
 );

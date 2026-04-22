@@ -69,7 +69,7 @@ describe('fromStoredDataView', () => {
     expect(toStoredDataView(api)).toEqual(stored);
   });
 
-  it('keeps overlapping runtime field settings on runtime_fields', () => {
+  it('inlines primitive runtime field metadata under field_settings', () => {
     expect(
       fromStoredDataView({
         title: 'logs-*',
@@ -81,17 +81,12 @@ describe('fromStoredDataView', () => {
       type: AS_CODE_DATA_VIEW_SPEC_TYPE,
       index_pattern: 'logs-*',
       time_field: undefined,
-      runtime_fields: [
-        {
-          name: 'rt',
+      field_settings: {
+        rt: {
           type: 'keyword',
-          script: undefined,
           format: { type: 'string', params: undefined },
           custom_label: 'Runtime',
-          custom_description: undefined,
         },
-      ],
-      field_settings: {
         mapped: {
           format: { type: 'bytes', params: undefined },
           custom_label: 'Mapped',
@@ -100,7 +95,7 @@ describe('fromStoredDataView', () => {
     });
   });
 
-  it('does not emit composite runtime subfield settings into field_settings', () => {
+  it('inlines composite runtime fields with nested field_settings for subfields', () => {
     expect(
       fromStoredDataView({
         title: 'logs-*',
@@ -114,23 +109,17 @@ describe('fromStoredDataView', () => {
       type: AS_CODE_DATA_VIEW_SPEC_TYPE,
       index_pattern: 'logs-*',
       time_field: undefined,
-      runtime_fields: [
-        {
-          name: 'parent',
+      field_settings: {
+        parent: {
           type: 'composite',
-          script: undefined,
-          fields: [
-            {
-              name: 'child',
+          fields: {
+            child: {
               type: 'keyword',
               format: { type: 'string', params: undefined },
               custom_label: 'Runtime subfield',
-              custom_description: undefined,
             },
-          ],
+          },
         },
-      ],
-      field_settings: {
         mapped: {
           format: { type: 'bytes', params: undefined },
         },

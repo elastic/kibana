@@ -13,9 +13,9 @@ import type {
   PrimitiveRuntimeFieldTypes,
   RuntimeFieldCompositeType,
 } from '@kbn/data-views-plugin/common';
-import { fieldSettingsSchema } from './schema_field_settings';
+import { fieldSettingsBaseSchema } from './schema_field_settings';
 
-const PRIMITIVE_RUNTIME_FIELD_TYPES: PrimitiveRuntimeFieldTypes = [
+export const PRIMITIVE_RUNTIME_FIELD_TYPES: PrimitiveRuntimeFieldTypes = [
   'keyword',
   'long',
   'double',
@@ -25,52 +25,23 @@ const PRIMITIVE_RUNTIME_FIELD_TYPES: PrimitiveRuntimeFieldTypes = [
   'geo_point',
 ];
 
-const RUNTIME_FIELD_COMPOSITE_TYPE: RuntimeFieldCompositeType = 'composite';
+export const RUNTIME_FIELD_COMPOSITE_TYPE: RuntimeFieldCompositeType = 'composite';
 
 const MAX_NAME_LENGTH = 1000;
 
-/**
- * Both composite and primitive runtime fields share the same base - name and script.
- */
-const commonRuntimeFieldSchema = {
-  /**
-   * The name of the runtime field.
-   * Example: 'my_runtime_field'
-   */
-  name: schema.string({
+const scriptSchema = schema.maybe(
+  schema.string({
     minLength: 1,
-    maxLength: MAX_NAME_LENGTH,
     meta: {
-      id: 'kbn-runtime-field-name',
-      title: 'Name',
-      description: 'The name of the runtime field. Example: "my_runtime_field".',
+      id: 'kbn-runtime-field-script',
+      title: 'Script',
+      description:
+        "The script that defines the runtime field. This should be a painless script that computes the field value at query time. Runtime fields without a script retrieve values from _source. If the field doesn't exist in _source, a search request returns no value.",
     },
-  }),
-  /**
-   * The script that defines the runtime field. This should be a painless script that computes the field value at query time.
-   * Example: 'emit(doc["field_name"].value * 2);'
-   */
-  script: schema.maybe(
-    schema.string({
-      minLength: 1,
-      meta: {
-        id: 'kbn-runtime-field-script',
-        title: 'Script',
-        description:
-          "The script that defines the runtime field. This should be a painless script that computes the field value at query time. Runtime fields without a script retrieve values from _source. If the field doesn't exist in _source, a search request returns no value.",
-      },
-    })
-  ),
-};
+  })
+);
 
-/**
- * The field definition is applicable for both top level fields in a primitive runtime field and subfields in a composite runtime field.
- */
-const commonFieldSchema = fieldSettingsSchema.extends({
-  /**
-   * The type of the runtime field (e.g., 'keyword', 'long', 'date').
-   * Example: 'keyword'
-   */
+export const runtimeFieldBaseSchema = fieldSettingsBaseSchema.extends({
   type: schema.oneOf(
     PRIMITIVE_RUNTIME_FIELD_TYPES.map((type) => schema.literal(type)) as [
       Type<(typeof PRIMITIVE_RUNTIME_FIELD_TYPES)[number]>
@@ -85,10 +56,9 @@ const commonFieldSchema = fieldSettingsSchema.extends({
   ),
 });
 
-export const primitiveRuntimeFieldSchema = schema.object(
+export const primitiveRuntimeFieldSchema = runtimeFieldBaseSchema.extends(
   {
-    ...commonFieldSchema.getPropSchemas(),
-    ...commonRuntimeFieldSchema,
+    script: scriptSchema,
   },
   { meta: { id: 'kbn-runtime-field-schema', title: 'Runtime field' } }
 );
@@ -96,25 +66,11 @@ export const primitiveRuntimeFieldSchema = schema.object(
 export const compositeRuntimeFieldSchema = schema.object(
   {
     type: schema.literal(RUNTIME_FIELD_COMPOSITE_TYPE),
-    fields: schema.arrayOf(
-      schema.object({
-        /**
-         * The name of the subfield.
-         * If the name is "field" and this subname is "name" the full name of the subfield will be "field.name".
-         */
-        name: schema.string({
-          minLength: 1,
-          maxLength: MAX_NAME_LENGTH,
-          meta: {
-            description:
-              'The name of the runtime subfield, it gets appended to the parent field name. Example: "parent_name.my_runtime_subfield".',
-          },
-        }),
-        ...commonFieldSchema.getPropSchemas(),
-      }),
-      { maxSize: 1000 }
+    fields: schema.recordOf(
+      schema.string({ minLength: 1, maxLength: MAX_NAME_LENGTH }),
+      runtimeFieldBaseSchema
     ),
-    ...commonRuntimeFieldSchema,
+    script: scriptSchema,
   },
   { meta: { id: 'kbn-composite-runtime-field-schema', title: 'Composite runtime field' } }
 );

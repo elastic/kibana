@@ -12,81 +12,69 @@
  *
  * CONVERSION APPROACH:
  * - Type-first: Uses the `type` property to distinguish composite vs primitive fields
- * - Composite fields: Expanded into named subfields with their own type/format/attrs
+ * - Composite fields: Subfields are keyed under `fields` with their short names
  * - Primitive fields: Mapped directly with optional script, format, and attribute metadata
  *
- * Three DataViewSpec maps are combined into a single AsCodeRuntimeField per field name,
- * making the as-code representation self-contained and human-readable.
+ * Three DataViewSpec maps are combined into a single `field_settings` map keyed by field name.
  */
 
 import { RUNTIME_FIELD_COMPOSITE_TYPE, type DataViewSpec } from '@kbn/data-views-plugin/common';
-import type { AsCodeFieldSettings, AsCodeDataViewSpec } from '@kbn/as-code-data-views-schema';
+import type {
+  AsCodeRuntimeBaseField,
+  AsCodeFieldSettings,
+  AsCodeDataViewSpec,
+} from '@kbn/as-code-data-views-schema';
 
 /**
  * Convert stored field metadata maps from DataViewSpec to as-code field representations.
  *
- * Produces both:
- * - `runtime_fields`: runtime-field definitions merged with matching format/attribute metadata
- * - `field_settings`: indexed-field display overrides (formats/attrs not owned by runtime fields)
- *
- * Runtime-owned keys (including composite subfields under `parent.child`) are consumed into
- * `runtime_fields` and excluded from `field_settings` to preserve precedence and avoid duplication.
+ * Produces `field_settings` where runtime fields appear inline (with `type` and optional `script`)
+ * alongside indexed-field display overrides.
  *
  * @param runtimeFields Map of field name → `{ type, script, fields? }` from DataViewSpec
  * @param fieldFormats Map of field name → display format `{ id, params }` from DataViewSpec
  * @param fieldAttrs Map of field name → `{ customLabel, customDescription }` from DataViewSpec
- * @returns Object containing optional `runtime_fields` and optional `field_settings`
+ * @returns `field_settings` map, or `undefined` when there is nothing to persist
  */
 export function fromStoredFields(
   runtimeFields: DataViewSpec['runtimeFieldMap'] = {},
   fieldFormats: DataViewSpec['fieldFormats'] = {},
   fieldAttrs: DataViewSpec['fieldAttrs'] = {}
-): Pick<AsCodeDataViewSpec, 'runtime_fields' | 'field_settings'> {
-  const fieldSettings: Record<string, AsCodeFieldSettings> = {};
+): AsCodeDataViewSpec['field_settings'] {
+  const fieldSettings: AsCodeDataViewSpec['field_settings'] = {};
   new Set([...Object.keys(fieldFormats), ...Object.keys(fieldAttrs)]).forEach((name) => {
     fieldSettings[name] = getCommonProperties(name, fieldAttrs, fieldFormats);
   });
 
-  const runtimeFieldsAsCode = Object.keys(runtimeFields).map((name) => {
-    const runtimeField = runtimeFields[name];
-
+  for (const [name, runtimeField] of Object.entries(runtimeFields)) {
     if (runtimeField.type === RUNTIME_FIELD_COMPOSITE_TYPE) {
-      const fields = runtimeField.fields || {};
+      const fields = runtimeField.fields ?? {};
 
-      const compositeFields = Object.keys(fields).map((fieldName) => {
-        const compositeName = `${name}.${fieldName}`;
-        const commonProps = fieldSettings[compositeName];
-        delete fieldSettings[compositeName];
-
-        return {
-          type: fields[fieldName].type,
-          name: fieldName,
-          ...commonProps,
+      const compositeFields: Record<string, AsCodeRuntimeBaseField> = {};
+      for (const [subName, subField] of Object.entries(fields)) {
+        const compositeName = `${name}.${subName}`;
+        compositeFields[subName] = {
+          ...fieldSettings[compositeName],
+          type: subField.type,
         };
-      });
+        delete fieldSettings[compositeName];
+      }
 
-      return {
+      fieldSettings[name] = {
         type: RUNTIME_FIELD_COMPOSITE_TYPE,
-        name,
-        script: runtimeField.script?.source,
+        ...(runtimeField.script?.source !== undefined && { script: runtimeField.script.source }),
         fields: compositeFields,
       };
+    } else {
+      fieldSettings[name] = {
+        ...fieldSettings[name],
+        type: runtimeField.type,
+        ...(runtimeField.script?.source !== undefined && { script: runtimeField.script.source }),
+      };
     }
+  }
 
-    const commonProps = fieldSettings[name];
-    delete fieldSettings[name];
-    return {
-      type: runtimeField.type,
-      name,
-      script: runtimeField.script?.source,
-      ...commonProps,
-    };
-  });
-
-  return {
-    ...(runtimeFieldsAsCode.length > 0 && { runtime_fields: runtimeFieldsAsCode }),
-    ...(Object.keys(fieldSettings).length > 0 && { field_settings: fieldSettings }),
-  };
+  return Object.keys(fieldSettings).length > 0 ? fieldSettings : undefined;
 }
 
 function getCommonProperties(

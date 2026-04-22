@@ -7,132 +7,166 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { RUNTIME_FIELD_COMPOSITE_TYPE } from '@kbn/data-views-plugin/common';
+import type {
+  AsCodeCompositeRuntimeField,
+  AsCodeFieldSettings,
+  AsCodeRuntimeField,
+} from '@kbn/as-code-data-views-schema';
 import { fromStoredFields } from './from_stored_fields';
+import { isCompositeRuntimeField, isRuntimeField } from './to_stored_fields';
 
-describe('fromStoredFields.runtime_fields', () => {
+function assertPrimitiveRuntimeEntry(
+  entry: AsCodeFieldSettings | undefined
+): asserts entry is Exclude<AsCodeRuntimeField, AsCodeCompositeRuntimeField> {
+  if (!entry || !isRuntimeField(entry) || isCompositeRuntimeField(entry)) {
+    throw new Error('expected primitive runtime entry');
+  }
+}
+
+function assertCompositeRuntimeEntry(
+  entry: AsCodeFieldSettings | undefined
+): asserts entry is AsCodeCompositeRuntimeField {
+  if (!entry || !isCompositeRuntimeField(entry)) {
+    throw new Error('expected composite runtime entry');
+  }
+}
+
+describe('fromStoredFields.field_settings (runtime inline)', () => {
   describe('default arguments', () => {
-    it('does not include runtime_fields when called with no arguments', () => {
-      const { runtime_fields: result } = fromStoredFields();
+    it('does not include field_settings when called with no arguments', () => {
+      const result = fromStoredFields();
       expect(result).toBeUndefined();
     });
 
-    it('does not include runtime_fields when runtimeFields is empty', () => {
-      const { runtime_fields: result } = fromStoredFields({});
+    it('does not include field_settings when runtimeFields is empty', () => {
+      const result = fromStoredFields({});
       expect(result).toBeUndefined();
     });
   });
 
   describe('primitive runtime fields', () => {
     describe('basic mapping', () => {
-      it('maps the object key to the name property', () => {
-        const { runtime_fields: [result] = [] } = fromStoredFields({
+      it('uses the runtimeFieldMap key as the field_settings entry key', () => {
+        const fs = fromStoredFields({
           my_field: { type: 'keyword' },
         });
-        expect(result.name).toBe('my_field');
+        const myField = fs?.my_field;
+        assertPrimitiveRuntimeEntry(myField);
+        expect(myField.type).toBe('keyword');
       });
 
       it('maps runtimeField.type to type', () => {
-        const { runtime_fields: [result] = [] } = fromStoredFields({ my_field: { type: 'long' } });
-        expect(result.type).toBe('long');
+        const fs = fromStoredFields({ my_field: { type: 'long' } });
+        const myField = fs?.my_field;
+        assertPrimitiveRuntimeEntry(myField);
+        expect(myField.type).toBe('long');
       });
 
       it('maps runtimeField.script.source to script', () => {
-        const { runtime_fields: [result] = [] } = fromStoredFields({
+        const fs = fromStoredFields({
           my_field: { type: 'keyword', script: { source: 'emit("hello")' } },
         });
-        expect(result.script).toBe('emit("hello")');
+        const myField = fs?.my_field;
+        assertPrimitiveRuntimeEntry(myField);
+        expect(myField.script).toBe('emit("hello")');
       });
 
       it('returns undefined for script when runtimeField.script is absent', () => {
-        const { runtime_fields: [result] = [] } = fromStoredFields({
+        const fs = fromStoredFields({
           my_field: { type: 'keyword' },
         });
-        expect(result.script).toBeUndefined();
+        const myField = fs?.my_field;
+        assertPrimitiveRuntimeEntry(myField);
+        expect(myField.script).toBeUndefined();
       });
     });
 
     describe('format handling', () => {
       it('sets format when fieldFormats entry has an id', () => {
-        const { runtime_fields: [field] = [] } = fromStoredFields(
+        const fs = fromStoredFields(
           { my_field: { type: 'date' } },
           { my_field: { id: 'date', params: { pattern: 'MM/DD/YYYY' } } }
         );
-        if (field.type === RUNTIME_FIELD_COMPOSITE_TYPE) throw new Error('expected primitive');
-        expect(field.format).toEqual({ type: 'date', params: { pattern: 'MM/DD/YYYY' } });
+        const myField = fs?.my_field;
+        assertPrimitiveRuntimeEntry(myField);
+        expect(myField.format).toEqual({
+          type: 'date',
+          params: { pattern: 'MM/DD/YYYY' },
+        });
       });
 
       it('sets format to undefined when fieldFormats entry has no id', () => {
-        const { runtime_fields: [field] = [] } = fromStoredFields(
-          { my_field: { type: 'keyword' } },
-          { my_field: {} }
-        );
-        if (field.type === RUNTIME_FIELD_COMPOSITE_TYPE) throw new Error('expected primitive');
-        expect(field.format).toBeUndefined();
+        const fs = fromStoredFields({ my_field: { type: 'keyword' } }, { my_field: {} });
+        const myField = fs?.my_field;
+        assertPrimitiveRuntimeEntry(myField);
+        expect(myField.format).toBeUndefined();
       });
 
       it('sets format to undefined when fieldFormats has no entry for the field', () => {
-        const { runtime_fields: [field] = [] } = fromStoredFields(
+        const fs = fromStoredFields(
           { my_field: { type: 'keyword' } },
           { other_field: { id: 'string' } }
         );
-        if (field.type === RUNTIME_FIELD_COMPOSITE_TYPE) throw new Error('expected primitive');
-        expect(field.format).toBeUndefined();
+        const myField = fs?.my_field;
+        assertPrimitiveRuntimeEntry(myField);
+        expect(myField.format).toBeUndefined();
       });
 
       it('passes format.params through as-is', () => {
         const params = { pattern: 'YYYY', timezone: 'UTC' };
-        const { runtime_fields: [field] = [] } = fromStoredFields(
+        const fs = fromStoredFields(
           { my_field: { type: 'date' } },
           { my_field: { id: 'date', params } }
         );
-        if (field.type === RUNTIME_FIELD_COMPOSITE_TYPE) throw new Error('expected primitive');
-        expect(field.format?.params).toBe(params);
+        const myField = fs?.my_field;
+        assertPrimitiveRuntimeEntry(myField);
+        expect(myField.format?.params).toBe(params);
       });
 
       it('passes undefined params through when params is not set', () => {
-        const { runtime_fields: [field] = [] } = fromStoredFields(
+        const fs = fromStoredFields(
           { my_field: { type: 'keyword' } },
           { my_field: { id: 'string' } }
         );
-        if (field.type === RUNTIME_FIELD_COMPOSITE_TYPE) throw new Error('expected primitive');
-        expect(field.format).toEqual({ type: 'string', params: undefined });
+        const myField = fs?.my_field;
+        assertPrimitiveRuntimeEntry(myField);
+        expect(myField.format).toEqual({ type: 'string', params: undefined });
       });
     });
 
     describe('field attributes', () => {
       it('maps fieldAttrs customLabel to custom_label', () => {
-        const { runtime_fields: [field] = [] } = fromStoredFields(
+        const fs = fromStoredFields(
           { my_field: { type: 'keyword' } },
           {},
           {
             my_field: { customLabel: 'My Field' },
           }
         );
-        if (field.type === RUNTIME_FIELD_COMPOSITE_TYPE) throw new Error('expected primitive');
-        expect(field.custom_label).toBe('My Field');
+        const myField = fs?.my_field;
+        assertPrimitiveRuntimeEntry(myField);
+        expect(myField.custom_label).toBe('My Field');
       });
 
       it('maps fieldAttrs customDescription to custom_description', () => {
-        const { runtime_fields: [field] = [] } = fromStoredFields(
+        const fs = fromStoredFields(
           { my_field: { type: 'keyword' } },
           {},
           {
             my_field: { customDescription: 'A description' },
           }
         );
-        if (field.type === RUNTIME_FIELD_COMPOSITE_TYPE) throw new Error('expected primitive');
-        expect(field.custom_description).toBe('A description');
+        const myField = fs?.my_field;
+        assertPrimitiveRuntimeEntry(myField);
+        expect(myField.custom_description).toBe('A description');
       });
 
       it('returns undefined for all field attrs when no entry exists for the field', () => {
-        const { runtime_fields: [field] = [] } = fromStoredFields(
-          { my_field: { type: 'keyword' } },
-          {},
-          {}
-        );
-        if (field.type === RUNTIME_FIELD_COMPOSITE_TYPE) throw new Error('expected primitive');
-        expect(field.custom_label).toBeUndefined();
-        expect(field.custom_description).toBeUndefined();
+        const fs = fromStoredFields({ my_field: { type: 'keyword' } }, {}, {});
+        const myField = fs?.my_field;
+        assertPrimitiveRuntimeEntry(myField);
+        expect(myField.custom_label).toBeUndefined();
+        expect(myField.custom_description).toBeUndefined();
       });
     });
   });
@@ -140,66 +174,67 @@ describe('fromStoredFields.runtime_fields', () => {
   describe('composite runtime fields', () => {
     describe('basic mapping', () => {
       it('sets type to RUNTIME_FIELD_COMPOSITE_TYPE', () => {
-        const { runtime_fields: [result] = [] } = fromStoredFields({
+        const fs = fromStoredFields({
           my_composite: { type: RUNTIME_FIELD_COMPOSITE_TYPE, fields: {} },
         });
-        expect(result.type).toBe(RUNTIME_FIELD_COMPOSITE_TYPE);
-      });
-
-      it('maps the object key to name', () => {
-        const { runtime_fields: [result] = [] } = fromStoredFields({
-          my_composite: { type: RUNTIME_FIELD_COMPOSITE_TYPE, fields: {} },
-        });
-        expect(result.name).toBe('my_composite');
+        const myComposite = fs?.my_composite;
+        assertCompositeRuntimeEntry(myComposite);
+        expect(myComposite.type).toBe(RUNTIME_FIELD_COMPOSITE_TYPE);
       });
 
       it('maps runtimeField.script.source to script', () => {
-        const { runtime_fields: [result] = [] } = fromStoredFields({
+        const fs = fromStoredFields({
           my_composite: {
             type: RUNTIME_FIELD_COMPOSITE_TYPE,
             fields: {},
             script: { source: 'emit("a", "b")' },
           },
         });
-        expect(result.script).toBe('emit("a", "b")');
+        const myComposite = fs?.my_composite;
+        assertCompositeRuntimeEntry(myComposite);
+        expect(myComposite.script).toBe('emit("a", "b")');
       });
 
       it('returns undefined for script when absent', () => {
-        const { runtime_fields: [result] = [] } = fromStoredFields({
+        const fs = fromStoredFields({
           my_composite: { type: RUNTIME_FIELD_COMPOSITE_TYPE, fields: {} },
         });
-        expect(result.script).toBeUndefined();
+        const myComposite = fs?.my_composite;
+        assertCompositeRuntimeEntry(myComposite);
+        expect(myComposite.script).toBeUndefined();
       });
 
-      it('returns fields as an array', () => {
-        const { runtime_fields: [result] = [] } = fromStoredFields({
+      it('returns fields as a record keyed by subfield name', () => {
+        const fs = fromStoredFields({
           my_composite: {
             type: RUNTIME_FIELD_COMPOSITE_TYPE,
             fields: { sub_a: { type: 'keyword' }, sub_b: { type: 'long' } },
           },
         });
-        if (result.type !== RUNTIME_FIELD_COMPOSITE_TYPE) throw new Error('expected composite');
-        expect(result.fields).toHaveLength(2);
+        const composite = fs?.my_composite;
+        assertCompositeRuntimeEntry(composite);
+        expect(Object.keys(composite.fields).sort()).toEqual(['sub_a', 'sub_b']);
       });
     });
 
     describe('subfield key construction', () => {
       it('looks up subfield format using "parentName.subFieldName"', () => {
-        const { runtime_fields: [result] = [] } = fromStoredFields(
+        const fs = fromStoredFields(
           {
             my_composite: { type: RUNTIME_FIELD_COMPOSITE_TYPE, fields: { sub: { type: 'date' } } },
           },
           { 'my_composite.sub': { id: 'date', params: { pattern: 'MM/DD/YYYY' } } }
         );
-        if (result.type !== RUNTIME_FIELD_COMPOSITE_TYPE) throw new Error('expected composite');
-        expect(result.fields[0].format).toEqual({
+        const composite = fs?.my_composite;
+        assertCompositeRuntimeEntry(composite);
+        expect(composite.fields.sub.format).toEqual({
           type: 'date',
           params: { pattern: 'MM/DD/YYYY' },
         });
       });
 
       it('looks up subfield attrs using "parentName.subFieldName"', () => {
-        const { runtime_fields: [result] = [] } = fromStoredFields(
+        const fs = fromStoredFields(
           {
             my_composite: {
               type: RUNTIME_FIELD_COMPOSITE_TYPE,
@@ -209,34 +244,37 @@ describe('fromStoredFields.runtime_fields', () => {
           {},
           { 'my_composite.sub': { customLabel: 'Sub Label', customDescription: 'desc' } }
         );
-        if (result.type !== RUNTIME_FIELD_COMPOSITE_TYPE) throw new Error('expected composite');
-        expect(result.fields[0].custom_label).toBe('Sub Label');
-        expect(result.fields[0].custom_description).toBe('desc');
+        const composite = fs?.my_composite;
+        assertCompositeRuntimeEntry(composite);
+        expect(composite.fields.sub.custom_label).toBe('Sub Label');
+        expect(composite.fields.sub.custom_description).toBe('desc');
       });
 
-      it('sets subfield name to the subfield key (not the dotted path)', () => {
-        const { runtime_fields: [result] = [] } = fromStoredFields({
+      it('keys subfields by the short name under fields', () => {
+        const fs = fromStoredFields({
           my_composite: {
             type: RUNTIME_FIELD_COMPOSITE_TYPE,
             fields: { sub_field: { type: 'keyword' } },
           },
         });
-        if (result.type !== RUNTIME_FIELD_COMPOSITE_TYPE) throw new Error('expected composite');
-        expect(result.fields[0].name).toBe('sub_field');
+        const myComposite = fs?.my_composite;
+        assertCompositeRuntimeEntry(myComposite);
+        expect(myComposite.fields.sub_field.type).toBe('keyword');
       });
 
       it('maps subfield type from runtimeField.fields entry', () => {
-        const { runtime_fields: [result] = [] } = fromStoredFields({
+        const fs = fromStoredFields({
           my_composite: { type: RUNTIME_FIELD_COMPOSITE_TYPE, fields: { sub: { type: 'ip' } } },
         });
-        if (result.type !== RUNTIME_FIELD_COMPOSITE_TYPE) throw new Error('expected composite');
-        expect(result.fields[0].type).toBe('ip');
+        const myComposite = fs?.my_composite;
+        assertCompositeRuntimeEntry(myComposite);
+        expect(myComposite.fields.sub.type).toBe('ip');
       });
     });
 
     describe('subfield format handling', () => {
       it('sets subfield format to undefined when no matching entry', () => {
-        const { runtime_fields: [result] = [] } = fromStoredFields(
+        const fs = fromStoredFields(
           {
             my_composite: {
               type: RUNTIME_FIELD_COMPOSITE_TYPE,
@@ -245,12 +283,13 @@ describe('fromStoredFields.runtime_fields', () => {
           },
           {}
         );
-        if (result.type !== RUNTIME_FIELD_COMPOSITE_TYPE) throw new Error('expected composite');
-        expect(result.fields[0].format).toBeUndefined();
+        const myComposite = fs?.my_composite;
+        assertCompositeRuntimeEntry(myComposite);
+        expect(myComposite.fields.sub.format).toBeUndefined();
       });
 
       it('sets subfield format to undefined when entry exists but has no id', () => {
-        const { runtime_fields: [result] = [] } = fromStoredFields(
+        const fs = fromStoredFields(
           {
             my_composite: {
               type: RUNTIME_FIELD_COMPOSITE_TYPE,
@@ -259,68 +298,70 @@ describe('fromStoredFields.runtime_fields', () => {
           },
           { 'my_composite.sub': {} }
         );
-        if (result.type !== RUNTIME_FIELD_COMPOSITE_TYPE) throw new Error('expected composite');
-        expect(result.fields[0].format).toBeUndefined();
+        const myComposite = fs?.my_composite;
+        assertCompositeRuntimeEntry(myComposite);
+        expect(myComposite.fields.sub.format).toBeUndefined();
       });
     });
 
     describe('subfield field attributes', () => {
       it('returns undefined for all attrs when no matching fieldAttrs entry', () => {
-        const { runtime_fields: [result] = [] } = fromStoredFields({
+        const fs = fromStoredFields({
           my_composite: {
             type: RUNTIME_FIELD_COMPOSITE_TYPE,
             fields: { sub: { type: 'keyword' } },
           },
         });
-        if (result.type !== RUNTIME_FIELD_COMPOSITE_TYPE) throw new Error('expected composite');
-        expect(result.fields[0].custom_label).toBeUndefined();
-        expect(result.fields[0].custom_description).toBeUndefined();
+        const myComposite = fs?.my_composite;
+        assertCompositeRuntimeEntry(myComposite);
+        expect(myComposite.fields.sub.custom_label).toBeUndefined();
+        expect(myComposite.fields.sub.custom_description).toBeUndefined();
       });
     });
 
     describe('empty subfields', () => {
-      it('returns an empty fields array when runtimeField.fields is an empty object', () => {
-        const { runtime_fields: [result] = [] } = fromStoredFields({
+      it('returns an empty fields object when runtimeField.fields is an empty object', () => {
+        const fs = fromStoredFields({
           my_composite: { type: RUNTIME_FIELD_COMPOSITE_TYPE, fields: {} },
         });
-        if (result.type !== RUNTIME_FIELD_COMPOSITE_TYPE) throw new Error('expected composite');
-        expect(result.fields).toEqual([]);
+        const myComposite = fs?.my_composite;
+        assertCompositeRuntimeEntry(myComposite);
+        expect(myComposite.fields).toEqual({});
       });
 
-      it('returns an empty fields array when runtimeField.fields is absent', () => {
-        const { runtime_fields: [result] = [] } = fromStoredFields({
+      it('returns an empty fields object when runtimeField.fields is absent', () => {
+        const fs = fromStoredFields({
           my_composite: { type: RUNTIME_FIELD_COMPOSITE_TYPE },
         });
-        if (result.type !== RUNTIME_FIELD_COMPOSITE_TYPE) throw new Error('expected composite');
-        expect(result.fields).toEqual([]);
+        const myComposite = fs?.my_composite;
+        assertCompositeRuntimeEntry(myComposite);
+        expect(myComposite.fields).toEqual({});
       });
     });
   });
 
   describe('multiple fields', () => {
-    it('returns one result per key in runtimeFieldMap', () => {
-      const { runtime_fields: result = [] } = fromStoredFields({
+    it('returns one field_settings entry per key in runtimeFieldMap', () => {
+      const fs = fromStoredFields({
         field_a: { type: 'keyword' },
         field_b: { type: 'long' },
         field_c: { type: RUNTIME_FIELD_COMPOSITE_TYPE, fields: {} },
       });
-      expect(result).toHaveLength(3);
+      expect(Object.keys(fs ?? {})).toHaveLength(3);
     });
 
     it('correctly maps each field independently', () => {
-      const { runtime_fields: result = [] } = fromStoredFields(
+      const fs = fromStoredFields(
         {
           field_a: { type: 'keyword', script: { source: 'emit("a")' } },
           field_b: { type: 'long' },
         },
         { field_b: { id: 'number' } }
       );
-      const fieldA = result.find((f) => f.name === 'field_a');
-      const fieldB = result.find((f) => f.name === 'field_b');
-      if (!fieldA || fieldA.type === RUNTIME_FIELD_COMPOSITE_TYPE)
-        throw new Error('expected primitive');
-      if (!fieldB || fieldB.type === RUNTIME_FIELD_COMPOSITE_TYPE)
-        throw new Error('expected primitive');
+      const fieldA = fs?.field_a;
+      const fieldB = fs?.field_b;
+      assertPrimitiveRuntimeEntry(fieldA);
+      assertPrimitiveRuntimeEntry(fieldB);
       expect(fieldA.script).toBe('emit("a")');
       expect(fieldA.format).toBeUndefined();
       expect(fieldB.format).toEqual({ type: 'number', params: undefined });
@@ -328,15 +369,16 @@ describe('fromStoredFields.runtime_fields', () => {
   });
 });
 
-describe('fromStoredFields.field_settings', () => {
-  it('emits indexed field settings when not owned by runtime fields', () => {
+describe('fromStoredFields.field_settings (indexed)', () => {
+  it('emits indexed field settings alongside inline runtime fields', () => {
     const result = fromStoredFields(
       { rt: { type: 'keyword' } },
       { mapped: { id: 'bytes' } },
       { mapped: { customLabel: 'Mapped' } }
     );
 
-    expect(result.field_settings).toEqual({
+    expect(result).toEqual({
+      rt: { type: 'keyword' },
       mapped: {
         format: { type: 'bytes', params: undefined },
         custom_label: 'Mapped',
@@ -344,7 +386,7 @@ describe('fromStoredFields.field_settings', () => {
     });
   });
 
-  it('omits runtime field and runtime composite subfield keys from field_settings', () => {
+  it('merges runtime, composite subfield formats, and indexed field_settings in one map', () => {
     const result = fromStoredFields(
       {
         rt: { type: 'keyword' },
@@ -354,7 +396,22 @@ describe('fromStoredFields.field_settings', () => {
       { rt: { customLabel: 'runtime' }, 'parent.child': { customLabel: 'sub' } }
     );
 
-    expect(result.field_settings).toEqual({
+    expect(result).toEqual({
+      rt: {
+        type: 'keyword',
+        format: { type: 'string', params: undefined },
+        custom_label: 'runtime',
+      },
+      parent: {
+        type: RUNTIME_FIELD_COMPOSITE_TYPE,
+        fields: {
+          child: {
+            type: 'keyword',
+            format: { type: 'number', params: undefined },
+            custom_label: 'sub',
+          },
+        },
+      },
       mapped: {
         format: { type: 'bytes', params: undefined },
       },
