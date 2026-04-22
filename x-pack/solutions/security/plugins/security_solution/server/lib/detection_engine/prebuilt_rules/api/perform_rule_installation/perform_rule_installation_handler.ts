@@ -53,16 +53,6 @@ export const performRuleInstallationHandler = async (
     // pages first, the rules package might be missing.
     await ensureLatestRulesPackageInstalled(ruleAssetsClient, ctx.securitySolution, logger);
 
-    const allLatestVersions = await ruleAssetsClient.fetchLatestVersions();
-    const currentRuleVersions = await ruleObjectsClient.fetchInstalledRuleVersions();
-    const currentRuleVersionsMap = new Map(
-      currentRuleVersions.map((version) => [version.rule_id, version])
-    );
-
-    const allInstallableRules = allLatestVersions.filter(
-      (latestVersion) => !currentRuleVersionsMap.has(latestVersion.rule_id)
-    );
-
     const ruleInstallQueue: Array<{
       rule_id: RuleSignatureId;
       version: RuleVersion;
@@ -73,10 +63,21 @@ export const performRuleInstallationHandler = async (
 
     // Perform all the checks we can before we start the upgrade process
     if (mode === 'SPECIFIC_RULES') {
-      const installableRuleIds = new Set(allInstallableRules.map((rule) => rule.rule_id));
+      const requestedRuleIds = request.body.rules.map((rule) => rule.rule_id);
+      const [latestVersions, installedVersions] = await Promise.all([
+        ruleAssetsClient.fetchLatestVersions({ ruleIds: requestedRuleIds }),
+        ruleObjectsClient.fetchInstalledRuleVersionsByIds({ ruleIds: requestedRuleIds }),
+      ]);
+      const installedRuleIds = new Set(installedVersions.map((version) => version.rule_id));
+      const installableRuleIds = new Set(
+        latestVersions
+          .filter((version) => !installedRuleIds.has(version.rule_id))
+          .map((version) => version.rule_id)
+      );
+
       request.body.rules.forEach((rule) => {
         // Check that the requested rule is not installed yet
-        if (currentRuleVersionsMap.has(rule.rule_id)) {
+        if (installedRuleIds.has(rule.rule_id)) {
           skippedRules.push({
             rule_id: rule.rule_id,
             reason: SkipRuleInstallReason.ALREADY_INSTALLED,
@@ -98,6 +99,14 @@ export const performRuleInstallationHandler = async (
         ruleInstallQueue.push(rule);
       });
     } else if (mode === 'ALL_RULES') {
+      const allLatestVersions = await ruleAssetsClient.fetchLatestVersions();
+      const currentRuleVersions = await ruleObjectsClient.fetchInstalledRuleVersions();
+      const currentRuleVersionsMap = new Map(
+        currentRuleVersions.map((version) => [version.rule_id, version])
+      );
+      const allInstallableRules = allLatestVersions.filter(
+        (latestVersion) => !currentRuleVersionsMap.has(latestVersion.rule_id)
+      );
       ruleInstallQueue.push(...(await excludeLicenseRestrictedRules(allInstallableRules, mlAuthz)));
     }
 
