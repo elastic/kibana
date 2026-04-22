@@ -144,6 +144,8 @@ describe('rule_error_log', () => {
       <RuleErrorLog ruleId={mockRule.id} loadActionErrorLog={loadActionErrorLogMock} />
     );
 
+    expect(screen.getByText('No items found')).toBeInTheDocument();
+
     // Run the initial load fetch call
     expect(loadActionErrorLogMock).toHaveBeenCalledTimes(1);
 
@@ -160,8 +162,10 @@ describe('rule_error_log', () => {
 
     expect(screen.getByTestId('tableHeaderCell_timestamp_0')).toBeInTheDocument();
 
-    const rows = await screen.findAllByRole('row');
-    expect(rows.length).toBeGreaterThan(1);
+    await waitFor(() => {
+      // 10 data rows + 1 header row
+      expect(screen.getAllByRole('row')).toHaveLength(11);
+    });
 
     nowMock.mockRestore();
   });
@@ -229,8 +233,8 @@ describe('rule_error_log', () => {
       })
     );
 
-    // Paginate to the next page
-    await screen.findByTestId('pagination-button-next');
+    expect(await screen.findByRole('navigation', { name: /pagination/i })).toBeInTheDocument();
+
     await userEvent.click(screen.getByTestId('pagination-button-next'));
 
     await waitFor(() =>

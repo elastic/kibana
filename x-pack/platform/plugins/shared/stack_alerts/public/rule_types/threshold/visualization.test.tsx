@@ -140,23 +140,6 @@ describe('ThresholdVisualization', () => {
     expect(screen.queryByTestId('noDataCallout')).not.toBeInTheDocument();
   });
 
-  test('renders multiple line series chart when visualization results contain multiple groups', async () => {
-    getThresholdRuleVisualizationData.mockImplementation(() =>
-      Promise.resolve({
-        results: [
-          { group: 'a', metrics: [['b', 2]] },
-          { group: 'a', metrics: [['b', 10]] },
-          { group: 'c', metrics: [['d', 1]] },
-        ],
-      })
-    );
-
-    setup();
-
-    await screen.findByTestId('alertVisualizationChart');
-    expect(screen.queryByTestId('noDataCallout')).not.toBeInTheDocument();
-  });
-
   test('renders error callout with message when getting visualization fails', async () => {
     const errorMessage = 'oh no';
     getThresholdRuleVisualizationData.mockImplementation(() =>

@@ -165,21 +165,21 @@ describe('ResilientParamsFields renders', () => {
   });
 
   describe('UI updates', () => {
-    test('name update triggers editAction :D', async () => {
+    test('name update triggers editAction', async () => {
       render(<ResilientParamsFields {...defaultProps} />);
       await userEvent.tripleClick(screen.getByTestId('nameInput'));
       await userEvent.paste('Bug');
       expect(editAction.mock.calls.at(-1)[1].incident.name).toEqual('Bug');
     });
 
-    test('description update triggers editAction :D', async () => {
+    test('description update triggers editAction', async () => {
       render(<ResilientParamsFields {...defaultProps} />);
       await userEvent.tripleClick(screen.getByTestId('descriptionTextArea'));
       await userEvent.paste('Bug');
       expect(editAction.mock.calls.at(-1)[1].incident.description).toEqual('Bug');
     });
 
-    test('severityCode update triggers editAction :D', async () => {
+    test('severityCode update triggers editAction', async () => {
       render(<ResilientParamsFields {...defaultProps} />);
       await userEvent.selectOptions(screen.getByTestId('severitySelect'), '4');
       expect(editAction.mock.calls.at(-1)[1].incident.severityCode).toEqual('4');

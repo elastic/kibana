@@ -50,6 +50,7 @@ describe('TinesConnectorFields renders', () => {
     expect(screen.getByTestId('secrets.email-input')).toBeInTheDocument();
     expect(screen.getByTestId('secrets.email-input')).toHaveValue(email);
     expect(screen.getByTestId('secrets.token-input')).toBeInTheDocument();
+    expect(screen.getByTestId('secrets.token-input')).toHaveValue(token);
   });
 
   describe('Validation', () => {

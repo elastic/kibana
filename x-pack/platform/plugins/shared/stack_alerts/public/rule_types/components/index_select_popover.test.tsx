@@ -152,7 +152,7 @@ describe('IndexSelectPopover', () => {
     await userEvent.click(comboOptions[0]);
 
     await waitFor(() => {
-      expect(onIndexChange).toHaveBeenCalled();
+      expect(onIndexChange).toHaveBeenCalledWith(['index1']);
     });
 
     await userEvent.selectOptions(

@@ -192,63 +192,63 @@ describe('ServiceNowITOMParamsFields renders', () => {
   });
 
   describe('UI updates', () => {
-    test('source update triggers editAction :D', async () => {
+    test('source update triggers editAction', async () => {
       render(<ServiceNowITOMParamsFields {...defaultProps} />);
       await userEvent.tripleClick(screen.getByTestId('sourceInput'));
       await userEvent.paste('Bug');
       expect(editAction.mock.calls.at(-1)[1].source).toEqual('Bug');
     });
 
-    test('description update triggers editAction :D', async () => {
+    test('description update triggers editAction', async () => {
       render(<ServiceNowITOMParamsFields {...defaultProps} />);
       await userEvent.tripleClick(screen.getByTestId('descriptionTextArea'));
       await userEvent.paste('Bug');
       expect(editAction.mock.calls.at(-1)[1].description).toEqual('Bug');
     });
 
-    test('node update triggers editAction :D', async () => {
+    test('node update triggers editAction', async () => {
       render(<ServiceNowITOMParamsFields {...defaultProps} />);
       await userEvent.tripleClick(screen.getByTestId('nodeInput'));
       await userEvent.paste('Bug');
       expect(editAction.mock.calls.at(-1)[1].node).toEqual('Bug');
     });
 
-    test('type update triggers editAction :D', async () => {
+    test('type update triggers editAction', async () => {
       render(<ServiceNowITOMParamsFields {...defaultProps} />);
       await userEvent.tripleClick(screen.getByTestId('typeInput'));
       await userEvent.paste('Bug');
       expect(editAction.mock.calls.at(-1)[1].type).toEqual('Bug');
     });
 
-    test('resource update triggers editAction :D', async () => {
+    test('resource update triggers editAction', async () => {
       render(<ServiceNowITOMParamsFields {...defaultProps} />);
       await userEvent.tripleClick(screen.getByTestId('resourceInput'));
       await userEvent.paste('Bug');
       expect(editAction.mock.calls.at(-1)[1].resource).toEqual('Bug');
     });
 
-    test('metric_name update triggers editAction :D', async () => {
+    test('metric_name update triggers editAction', async () => {
       render(<ServiceNowITOMParamsFields {...defaultProps} />);
       await userEvent.tripleClick(screen.getByTestId('metric_nameInput'));
       await userEvent.paste('Bug');
       expect(editAction.mock.calls.at(-1)[1].metric_name).toEqual('Bug');
     });
 
-    test('event_class update triggers editAction :D', async () => {
+    test('event_class update triggers editAction', async () => {
       render(<ServiceNowITOMParamsFields {...defaultProps} />);
       await userEvent.tripleClick(screen.getByTestId('event_classInput'));
       await userEvent.paste('Bug');
       expect(editAction.mock.calls.at(-1)[1].event_class).toEqual('Bug');
     });
 
-    test('message_key update triggers editAction :D', async () => {
+    test('message_key update triggers editAction', async () => {
       render(<ServiceNowITOMParamsFields {...defaultProps} />);
       await userEvent.tripleClick(screen.getByTestId('message_keyInput'));
       await userEvent.paste('Bug');
       expect(editAction.mock.calls.at(-1)[1].message_key).toEqual('Bug');
     });
 
-    test('severity update triggers editAction :D', async () => {
+    test('severity update triggers editAction', async () => {
       render(<ServiceNowITOMParamsFields {...defaultProps} />);
       await userEvent.selectOptions(screen.getByTestId('severitySelect'), '1');
       expect(editAction.mock.calls.at(-1)[1].severity).toEqual('1');

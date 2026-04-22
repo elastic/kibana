@@ -377,7 +377,7 @@ describe('ServiceNowSIRParamsFields renders', () => {
     ];
 
     simpleFields.forEach((field) =>
-      test(`${field.key} update triggers editAction :D`, async () => {
+      test(`${field.key} update triggers editAction`, async () => {
         renderWithI18n(<ServiceNowSIRParamsFields {...defaultProps} />);
         act(() => {
           onChoicesSuccess(choicesResponse.choices);

@@ -261,7 +261,7 @@ describe('ServiceNowITSMParamsFields renders', () => {
   });
 
   describe('UI updates', () => {
-    test('short_description update triggers editAction :D', async () => {
+    test('short_description update triggers editAction', async () => {
       renderWithI18n(<ServiceNowITSMParamsFields {...defaultProps} />);
       act(() => {
         onChoices(useGetChoicesResponse.choices);
@@ -272,7 +272,7 @@ describe('ServiceNowITSMParamsFields renders', () => {
       expect(editAction.mock.calls.at(-1)![1].incident.short_description).toEqual('Bug');
     });
 
-    test('correlation_id update triggers editAction :D', async () => {
+    test('correlation_id update triggers editAction', async () => {
       renderWithI18n(<ServiceNowITSMParamsFields {...defaultProps} />);
       act(() => {
         onChoices(useGetChoicesResponse.choices);
@@ -283,7 +283,7 @@ describe('ServiceNowITSMParamsFields renders', () => {
       expect(editAction.mock.calls.at(-1)![1].incident.correlation_id).toEqual('Bug');
     });
 
-    test('correlation_display update triggers editAction :D', async () => {
+    test('correlation_display update triggers editAction', async () => {
       renderWithI18n(<ServiceNowITSMParamsFields {...defaultProps} />);
       act(() => {
         onChoices(useGetChoicesResponse.choices);
@@ -294,7 +294,7 @@ describe('ServiceNowITSMParamsFields renders', () => {
       expect(editAction.mock.calls.at(-1)![1].incident.correlation_display).toEqual('Bug');
     });
 
-    test('description update triggers editAction :D', async () => {
+    test('description update triggers editAction', async () => {
       renderWithI18n(<ServiceNowITSMParamsFields {...defaultProps} />);
       act(() => {
         onChoices(useGetChoicesResponse.choices);
@@ -305,7 +305,7 @@ describe('ServiceNowITSMParamsFields renders', () => {
       expect(editAction.mock.calls.at(-1)![1].incident.description).toEqual('Bug');
     });
 
-    test('urgency update triggers editAction :D', async () => {
+    test('urgency update triggers editAction', async () => {
       renderWithI18n(<ServiceNowITSMParamsFields {...defaultProps} />);
       act(() => {
         onChoices(useGetChoicesResponse.choices);
@@ -314,7 +314,7 @@ describe('ServiceNowITSMParamsFields renders', () => {
       expect(editAction.mock.calls[0][1].incident.urgency).toEqual('1');
     });
 
-    test('severity update triggers editAction :D', async () => {
+    test('severity update triggers editAction', async () => {
       renderWithI18n(<ServiceNowITSMParamsFields {...defaultProps} />);
       act(() => {
         onChoices(useGetChoicesResponse.choices);
@@ -323,7 +323,7 @@ describe('ServiceNowITSMParamsFields renders', () => {
       expect(editAction.mock.calls[0][1].incident.severity).toEqual('2');
     });
 
-    test('impact update triggers editAction :D', async () => {
+    test('impact update triggers editAction', async () => {
       renderWithI18n(<ServiceNowITSMParamsFields {...defaultProps} />);
       act(() => {
         onChoices(useGetChoicesResponse.choices);
@@ -332,7 +332,7 @@ describe('ServiceNowITSMParamsFields renders', () => {
       expect(editAction.mock.calls[0][1].incident.impact).toEqual('1');
     });
 
-    test('category update triggers editAction :D', async () => {
+    test('category update triggers editAction', async () => {
       renderWithI18n(<ServiceNowITSMParamsFields {...defaultProps} />);
       act(() => {
         onChoices(useGetChoicesResponse.choices);
@@ -341,7 +341,7 @@ describe('ServiceNowITSMParamsFields renders', () => {
       expect(editAction.mock.calls[0][1].incident.category).toEqual('failed_login');
     });
 
-    test('subcategory update triggers editAction :D', async () => {
+    test('subcategory update triggers editAction', async () => {
       renderWithI18n(<ServiceNowITSMParamsFields {...defaultProps} />);
       act(() => {
         onChoices(useGetChoicesResponse.choices);
