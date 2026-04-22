@@ -235,8 +235,6 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Remembers the pagination state when navigating back from an edit on the **Users** page, instead of always returning to page 1 and resetting the search [#261152]({{kib-pull}}261152).
 * Distinguishes between session idle timeouts and session lifespan timeouts [#252779]({{kib-pull}}252779).
 * Improves Index Management index list load performance on large clusters with many indices [#246276]({{kib-pull}}246276).
-
-**Management**:
 * Adds a **Query Activity** page under Stack Management for viewing and canceling long-running queries [#253216]({{kib-pull}}253216).
 
 **Machine Learning**:
