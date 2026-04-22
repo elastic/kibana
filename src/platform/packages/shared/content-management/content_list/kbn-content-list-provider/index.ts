@@ -118,4 +118,4 @@ export {
 } from './src/item';
 
 // Utilities.
-export { contentListKeys } from './src/query';
+export { contentListKeys, contentListQueryClient } from './src/query';

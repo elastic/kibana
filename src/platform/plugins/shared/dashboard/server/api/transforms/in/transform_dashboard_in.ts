@@ -55,14 +55,15 @@ export const transformDashboardIn = (
     query
   );
 
-  const { pinnedPanels, references: controlGroupReferences } =
-    transformPinnedPanelsIn(pinned_panels);
+  const { pinnedPanels, references: controlGroupReferences } = transformPinnedPanelsIn(
+    pinned_panels ?? []
+  );
 
   const attributes = {
     description: '',
     title: '',
     ...rest,
-    ...(pinnedPanels && {
+    ...(Object.keys(pinnedPanels).length && {
       pinned_panels: { panels: pinnedPanels },
     }),
     optionsJSON: transformOptionsIn(options ?? {}),

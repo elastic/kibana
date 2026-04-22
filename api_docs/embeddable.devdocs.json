@@ -3713,7 +3713,7 @@
             "<any, any>) => void"
           ],
           "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
-          "lineNumber": 54,
+          "lineNumber": 55,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -3729,7 +3729,7 @@
                 "string"
               ],
               "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
-              "lineNumber": 54,
+              "lineNumber": 55,
               "columnNumber": 24,
               "deprecated": false,
               "trackAdoption": false,
@@ -3747,7 +3747,7 @@
                 "<any, any>"
               ],
               "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
-              "lineNumber": 54,
+              "lineNumber": 55,
               "columnNumber": 38,
               "deprecated": false,
               "trackAdoption": false,
@@ -3774,7 +3774,7 @@
             }
           ],
           "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
-          "lineNumber": 55,
+          "lineNumber": 56,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -3808,7 +3808,7 @@
           "section": "def-server.EmbeddableStateWithType",
           "text": "EmbeddableStateWithType"
         },
-        "> & { getAllEmbeddableSchemas: () => { [key: string]: ",
+        "> & { getAllEmbeddableSchemas: () => { [key: string]: { schema: ",
         {
           "pluginId": "@kbn/config-schema",
           "scope": "common",
@@ -3816,7 +3816,7 @@
           "section": "def-common.ObjectType",
           "text": "ObjectType"
         },
-        "<any>; }; getTransforms: (type: string) => (",
+        "<any>; title: string; }; }; getTransforms: (type: string) => (",
         {
           "pluginId": "embeddable",
           "scope": "server",
@@ -3835,7 +3835,7 @@
         "<object> | undefined; throwOnUnmappedPanel?: ((config: object) => void) | undefined; }) | undefined; }"
       ],
       "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
-      "lineNumber": 58,
+      "lineNumber": 59,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
