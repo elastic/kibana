@@ -20,7 +20,7 @@ import { uiActionsService } from '../services/kibana_services';
 const timeSliderAddPanelDisabledTooltip = i18n.translate(
   'dashboard.addPanelFlyout.timeSliderOnlyOneTooltip',
   {
-    defaultMessage: 'Only one time slider control can be added per dashboard.',
+    defaultMessage: 'You can only add one time slider control per dashboard.',
   }
 );
 
