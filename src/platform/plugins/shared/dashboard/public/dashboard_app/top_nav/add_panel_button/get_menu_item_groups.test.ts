@@ -7,71 +7,62 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ACTION_CREATE_TIME_SLIDER } from '@kbn/controls-constants';
 import { buildMockDashboardApi } from '../../../mocks';
 import { getMenuItemGroups } from './get_menu_item_groups';
 
+const mockGetTriggerCompatibleActions = jest.fn();
+const mockGetAction = jest.fn();
 jest.mock('../../../services/kibana_services', () => {
   const actual = jest.requireActual('../../../services/kibana_services');
   return {
     ...actual,
     uiActionsService: {
-      ...actual.uiActionsService,
-      getTriggerCompatibleActions: async () => [
-        {
-          id: 'mockAddPanelAction',
-          type: '',
-          order: 10,
-          grouping: [
-            {
-              id: 'myGroup',
-              order: 900,
-              getDisplayName: (): string => 'My group',
-            },
-          ],
-          getDisplayName: (): string => 'mockAddPanelAction',
-          getIconType: (): string => 'empty',
-          execute: () => {},
-          isCompatible: async (): Promise<boolean> => true,
-        },
-        {
-          id: 'myVis',
-          type: '',
-          order: 10,
-          grouping: [
-            {
-              id: 'visualizations',
-              order: 1000,
-              getDisplayName: (): string => 'Other visualizations',
-            },
-          ],
-          getDisplayName: (): string => 'myVis',
-          getIconType: (): string => 'empty',
-          execute: () => {},
-          isCompatible: async (): Promise<boolean> => true,
-        },
-        {
-          id: 'createSomeControl',
-          type: '',
-          order: 0,
-          grouping: [
-            {
-              id: 'controls',
-              order: 950,
-              getDisplayName: (): string => 'Controls',
-            },
-          ],
-          getDisplayName: (): string => 'A control',
-          getIconType: (): string => 'controls',
-          execute: () => {},
-          isCompatible: async (): Promise<boolean> => true,
-        },
-      ],
+      getTriggerCompatibleActions: jest
+        .fn()
+        .mockImplementation(() => mockGetTriggerCompatibleActions()),
+      getAction: jest.fn().mockImplementation((id: string) => mockGetAction(id)),
     },
   };
 });
 
 describe('getMenuItemGroups', () => {
   test('gets sorted groups from visTypes, visTypeAliases, and add panel actions', async () => {
+    mockGetTriggerCompatibleActions.mockResolvedValueOnce([
+      {
+        id: 'mockAddPanelAction',
+        type: '',
+        order: 10,
+        grouping: [
+          {
+            id: 'myGroup',
+            order: 900,
+            getDisplayName: () => 'My group',
+          },
+        ],
+        getDisplayName: () => 'mockAddPanelAction',
+        getIconType: () => 'empty',
+        execute: () => {},
+        isCompatible: async () => true,
+      },
+      {
+        id: 'myVis',
+        type: '',
+        order: 10,
+        grouping: [
+          {
+            id: 'visualizations',
+            order: 1000,
+            getDisplayName: () => 'Visualizations',
+          },
+        ],
+        getDisplayName: () => 'myVis',
+        getIconType: () => 'empty',
+        execute: () => {},
+        isCompatible: async () => true,
+      },
+    ]);
+
     const api = {
       ...buildMockDashboardApi().api,
       getAppContext: () => ({
@@ -81,18 +72,35 @@ describe('getMenuItemGroups', () => {
       clearOverlays: () => {},
     };
     const groups = await getMenuItemGroups(api);
-    expect(groups.length).toBe(3);
-    expect(groups[0].title).toBe('Other visualizations');
+    expect(groups.length).toBe(2);
+
+    expect(groups[0].title).toBe('Visualizations');
     expect(groups[0].items.length).toBe(1);
-    expect(groups[1].title).toBe('Controls');
+    expect(groups[1].title).toBe('My group');
     expect(groups[1].items.length).toBe(1);
-    expect(groups[1].items[0].id).toBe('createTimeSlider');
-    expect(groups[1].items[0].isDisabled).toBeFalsy();
-    expect(groups[2].title).toBe('My group');
-    expect(groups[2].items.length).toBe(1);
+    expect(mockGetAction).not.toBeCalled();
   });
 
-  test('disables time slider menu item when a time slider is already pinned', async () => {
+  test('do not fetch time slider action if control group does not exist', async () => {
+    mockGetTriggerCompatibleActions.mockResolvedValueOnce([
+      {
+        id: 'mockAddPanelAction',
+        type: '',
+        order: 1,
+        grouping: [
+          {
+            id: 'myGroup',
+            order: 950,
+            getDisplayName: () => 'My group',
+          },
+        ],
+        getDisplayName: () => 'mockAddPanelAction',
+        getIconType: () => 'empty',
+        execute: () => {},
+        isCompatible: async () => true,
+      },
+    ]);
+
     const api = {
       ...buildMockDashboardApi().api,
       getAppContext: () => ({
@@ -100,19 +108,88 @@ describe('getMenuItemGroups', () => {
       }),
       openOverlay: () => {},
       clearOverlays: () => {},
-      layout$: {
-        getValue: () => ({
-          pinnedPanels: {
-            ts1: { type: 'time_slider_control' },
-          },
-          panels: {},
-          sections: {},
-        }),
-      },
     };
     const groups = await getMenuItemGroups(api);
-    const controlsGroup = groups.find((g) => g.id === 'controls');
-    expect(controlsGroup?.items[0].isDisabled).toBe(true);
-    expect(controlsGroup?.items[0].description).toBe('Only one time slider');
+    expect(groups.length).toBe(1);
+    expect(mockGetAction).not.toBeCalled();
+  });
+
+  test('fetch time slider action if control group exists', async () => {
+    mockGetTriggerCompatibleActions.mockResolvedValueOnce([
+      {
+        id: 'createSomeControl',
+        type: '',
+        order: 1,
+        grouping: [
+          {
+            id: 'controls',
+            order: 900,
+            getDisplayName: (): string => 'Controls',
+          },
+        ],
+        getDisplayName: (): string => 'A control',
+        getIconType: (): string => 'controls',
+        execute: () => {},
+        isCompatible: async (): Promise<boolean> => true,
+      },
+    ]);
+    mockGetAction.mockResolvedValueOnce({
+      getDisplayName: () => 'Time slider',
+      isCompatible: async (): Promise<boolean> => true,
+    });
+
+    const api = {
+      ...buildMockDashboardApi().api,
+      getAppContext: () => ({
+        currentAppId: 'dashboards',
+      }),
+      openOverlay: () => {},
+      clearOverlays: () => {},
+    };
+    const groups = await getMenuItemGroups(api);
+    expect(groups.length).toBe(1);
+    expect(mockGetAction).toBeCalledWith(ACTION_CREATE_TIME_SLIDER);
+    expect(groups[0].title).toBe('Controls');
+    expect(groups[0].items.length).toBe(2);
+    expect(groups[0].items[1].isDisabled).toBe(false);
+  });
+
+  test('disable time slider action if it is incompatible', async () => {
+    mockGetTriggerCompatibleActions.mockResolvedValueOnce([
+      {
+        id: 'createSomeControl',
+        type: '',
+        order: 1,
+        grouping: [
+          {
+            id: 'controls',
+            order: 900,
+            getDisplayName: (): string => 'Controls',
+          },
+        ],
+        getDisplayName: (): string => 'A control',
+        getIconType: (): string => 'controls',
+        execute: () => {},
+        isCompatible: async (): Promise<boolean> => true,
+      },
+    ]);
+
+    mockGetAction.mockResolvedValueOnce({
+      getDisplayName: () => 'Time slider',
+      isCompatible: async (): Promise<boolean> => false,
+    });
+
+    const api = {
+      ...buildMockDashboardApi().api,
+      getAppContext: () => ({
+        currentAppId: 'dashboards',
+      }),
+      openOverlay: () => {},
+      clearOverlays: () => {},
+    };
+    const groups = await getMenuItemGroups(api);
+    expect(groups.length).toBe(1);
+    expect(groups[0].items.length).toBe(2);
+    expect(groups[0].items[1].isDisabled).toBe(true);
   });
 });
