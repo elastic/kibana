@@ -50,6 +50,11 @@ const readMonacoJson = async (
 };
 
 spaceTest.describe('Discover data grid - doc viewer', { tag: testData.DISCOVER_CORE_TAGS }, () => {
+  // EUI DataGrid hides/truncates inline cellActions at narrow widths. The FTR
+  // equivalent ran at 1600x1200 via `browser.setWindowSize`; match that here so
+  // the doc-viewer flyout has room to render its "toggle column" actions.
+  spaceTest.use({ viewport: { width: 1600, height: 1200 } });
+
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.load(testData.DISCOVER_KBN_ARCHIVE);
     await scoutSpace.uiSettings.setDefaultIndex(testData.DEFAULT_DATA_VIEW);
@@ -145,45 +150,34 @@ spaceTest.describe('Discover data grid - doc viewer', { tag: testData.DISCOVER_C
     }
   );
 
-  // TODO(data-discovery): the EUI DataGrid cellAction "toggleColumnButton"
-  // rendered inside the doc-viewer flyout's table tab doesn't react to
-  // Playwright-dispatched clicks the same way the FTR test's WebDriver clicks
-  // did — either the cellAction wrapper isn't rendered on our hover/focus, or
-  // the click lands on a non-trusted-event listener that EUI ignores. The
-  // matching FTR test has been removed, so this gap is tracked here until a
-  // Scout-friendly interaction is identified (likely a shared helper in
-  // `@kbn/scout`'s DataGrid component).
-  spaceTest.skip(
-    'adds and removes columns from the detail panel',
-    async ({ page, pageObjects }) => {
-      const fields = ['_id', '_index', 'agent'];
+  spaceTest('adds and removes columns from the detail panel', async ({ page, pageObjects }) => {
+    const fields = ['_id', '_index', 'agent'];
 
-      await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
-      // The "toggle column" action is only exposed on the field-table tab.
-      await page.locator('#kbn_doc_viewer_tab_doc_view_table').click();
+    await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
+    // The "toggle column" action is only exposed on the field-table tab.
+    await page.locator('#kbn_doc_viewer_tab_doc_view_table').click();
 
-      for (const field of fields) {
-        await toggleColumnInDocViewer(page, field);
-      }
-      for (const field of fields) {
-        await expect(
-          pageObjects.discover.getColumnHeader(field),
-          `column ${field} should appear in the grid after adding it from the flyout`
-        ).toBeVisible();
-      }
-
-      // Calling the same toggle again removes the column.
-      for (const field of fields) {
-        await toggleColumnInDocViewer(page, field);
-      }
-      for (const field of fields) {
-        await expect(
-          pageObjects.discover.getColumnHeader(field),
-          `column ${field} should be removed from the grid`
-        ).toBeHidden();
-      }
-
-      await closeDocViewerFlyout(page);
+    for (const field of fields) {
+      await toggleColumnInDocViewer(page, field);
     }
-  );
+    for (const field of fields) {
+      await expect(
+        pageObjects.discover.getColumnHeader(field),
+        `column ${field} should appear in the grid after adding it from the flyout`
+      ).toBeVisible();
+    }
+
+    // Calling the same toggle again removes the column.
+    for (const field of fields) {
+      await toggleColumnInDocViewer(page, field);
+    }
+    for (const field of fields) {
+      await expect(
+        pageObjects.discover.getColumnHeader(field),
+        `column ${field} should be removed from the grid`
+      ).toBeHidden();
+    }
+
+    await closeDocViewerFlyout(page);
+  });
 });

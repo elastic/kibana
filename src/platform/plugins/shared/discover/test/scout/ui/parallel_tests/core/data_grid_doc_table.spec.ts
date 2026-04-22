@@ -33,7 +33,6 @@ spaceTest.describe('Discover data grid - doc table', { tag: testData.DISCOVER_CO
     await scoutSpace.savedObjects.load(testData.DISCOVER_KBN_ARCHIVE);
     await scoutSpace.uiSettings.setDefaultIndex(testData.DEFAULT_DATA_VIEW);
     await scoutSpace.uiSettings.setDefaultTime(testData.DEFAULT_TIME_RANGE);
-    // Mirror the FTR suite: force single-line rows for a deterministic layout.
     await scoutSpace.uiSettings.set({ 'discover:rowHeightOption': 0 });
   });
 
