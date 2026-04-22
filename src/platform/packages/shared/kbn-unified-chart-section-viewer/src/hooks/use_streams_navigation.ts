@@ -9,7 +9,7 @@
 
 import { useCallback, useMemo } from 'react';
 import { STREAMS_APP_LOCATOR_ID } from '@kbn/deeplinks-observability';
-import { isCCSRemoteIndexName } from '@kbn/es-query';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import type { ExternalServices } from '../types';
 
 export interface UseStreamsNavigationResult {
@@ -48,10 +48,10 @@ export const useStreamsNavigation = (
         // so index-pattern wildcards like `metrics-*` are not navigable.
         name.includes('*') ||
         // Product decision (see https://github.com/elastic/kibana/issues/239387):
-        // suppress the link when the data stream lives in a remote cluster
-        // (CCS / CPS) because the URL would target the local cluster and not
-        // the remote one.
-        isCCSRemoteIndexName(name)
+        // suppress the link when the data stream is non-local (remote cluster
+        // via CCS, or linked project via CPS) because the URL would target the
+        // local cluster/project and not the remote one.
+        isNonLocalIndexName(name)
       ) {
         return undefined;
       }
