@@ -8,10 +8,12 @@
 import type { CoreSetup, Plugin } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { LIST_BREADCRUMB, PLUGIN_ID, PLUGIN_NAME } from '../common';
+import { CreateDataSourceFlyout } from './create_data_source_flyout';
+import type { DataSourceManagementPluginStart } from './plugin_start_contract';
 import type { SetupDependencies, StartDependencies } from './types';
 
 export class DataSourceManagementPlugin
-  implements Plugin<void, void, SetupDependencies, StartDependencies>
+  implements Plugin<void, DataSourceManagementPluginStart, SetupDependencies, StartDependencies>
 {
   public setup(core: CoreSetup<StartDependencies>, { management }: SetupDependencies): void {
     management.sections.section.kibana.registerApp({
@@ -37,5 +39,9 @@ export class DataSourceManagementPlugin
     });
   }
 
-  public start() {}
+  public start(): DataSourceManagementPluginStart {
+    return {
+      CreateDataSourceFlyout,
+    };
+  }
 }

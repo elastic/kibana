@@ -49,7 +49,7 @@ export class SampleDataSetsClient {
     this.rows = cloneRows(INITIAL_ROWS);
   }
 
-  public get(): DataSetListItem[] {
+  public async get(): Promise<DataSetListItem[]> {
     return cloneRows(this.rows);
   }
 }
