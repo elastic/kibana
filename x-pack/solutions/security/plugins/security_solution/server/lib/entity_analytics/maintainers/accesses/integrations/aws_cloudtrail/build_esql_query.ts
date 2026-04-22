@@ -12,6 +12,6 @@ export function buildEsqlQuery(namespace: string): string {
   return buildAccessEsqlQuery(
     getIndexPattern(namespace),
     `event.module == "aws"
-    AND event.action == "StartSession"`
+    AND event.action IN ("StartSession", "SendSSHPublicKey")`
   );
 }
