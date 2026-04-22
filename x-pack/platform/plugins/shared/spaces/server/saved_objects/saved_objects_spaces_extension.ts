@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ISavedObjectsSpacesExtension } from '@kbn/core-saved-objects-server';
+import { type ISavedObjectsSpacesExtension } from '@kbn/core-saved-objects-server';
 
 import { ALL_SPACES_ID } from '../../common/constants';
 import { spaceIdToNamespace } from '../lib/utils/namespace';
@@ -34,10 +34,6 @@ export class SavedObjectsSpacesExtension implements ISavedObjectsSpacesExtension
     return spaceIdToNamespace(this.activeSpaceId);
   }
 
-  async validateActiveSpace() {
-    await this.spacesClient.get(this.activeSpaceId);
-  }
-
   async getSearchableNamespaces(namespaces: string[] | undefined): Promise<string[]> {
     if (!namespaces) {
       // If no namespaces option was specified, fall back to the active space.
@@ -62,5 +58,9 @@ export class SavedObjectsSpacesExtension implements ISavedObjectsSpacesExtension
       activeSpaceId: namespace,
       spacesClient: this.spacesClient,
     });
+  }
+
+  async validateActiveNamespace() {
+    await this.spacesClient.get(this.activeSpaceId);
   }
 }

@@ -63,6 +63,10 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
    */
   initialNamespaces?: string[];
   /**
+   * Validate the active namespace (defaults to false).
+   */
+  validateActiveNamespace?: boolean;
+  /**
    * Flag indicating if a saved object is managed by Kibana (default=false)
    *
    * This can be leveraged by applications to e.g. prevent edits to a managed

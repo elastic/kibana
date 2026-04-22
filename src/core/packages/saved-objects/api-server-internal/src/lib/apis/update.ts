@@ -45,7 +45,9 @@ export const performUpdate = async <T>(
   const { allowedTypes, helpers, extensions } = apiContext;
   const namespace = helpers.common.getCurrentNamespace(options.namespace);
 
-  await extensions.spacesExtension?.validateActiveSpace?.();
+  if (options.validateActiveNamespace) {
+    await extensions.spacesExtension?.validateActiveNamespace?.();
+  }
 
   // check request is valid
   const { validRequest, error } = isValidRequest({ allowedTypes, type, id });

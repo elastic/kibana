@@ -152,17 +152,17 @@ describe('#asScopedToNamespace', () => {
   });
 });
 
-describe('#validateActiveSpace', () => {
-  test('loads the active space via the spaces client', async () => {
+describe('#validateActiveNamespace', () => {
+  test('validates active space via the spaces client.get', async () => {
     const { spacesClient, spacesExtension } = setup();
     spacesClient.get.mockResolvedValue({ id: ACTIVE_SPACE_ID, name: '', disabledFeatures: [] });
-    await spacesExtension.validateActiveSpace!();
+    await spacesExtension.validateActiveNamespace!();
     expect(spacesClient.get).toHaveBeenCalledWith(ACTIVE_SPACE_ID);
   });
 
   test('propagates errors from the spaces client', async () => {
     const { spacesClient, spacesExtension } = setup();
     spacesClient.get.mockRejectedValue(Boom.notFound());
-    await expect(spacesExtension.validateActiveSpace!()).rejects.toThrow('Not Found');
+    await expect(spacesExtension.validateActiveNamespace!()).rejects.toThrow('Not Found');
   });
 });

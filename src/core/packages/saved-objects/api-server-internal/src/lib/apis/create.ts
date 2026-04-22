@@ -58,7 +58,9 @@ export const performCreate = async <T>(
 
   const namespace = commonHelper.getCurrentNamespace(options.namespace);
 
-  await extensions.spacesExtension?.validateActiveSpace?.();
+  if (options.validateActiveNamespace) {
+    await extensions.spacesExtension?.validateActiveNamespace?.();
+  }
 
   const {
     migrationVersion,
