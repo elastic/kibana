@@ -11,7 +11,8 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/management-plugin",
-    "@kbn/i18n"
+    "@kbn/i18n",
+    "@elastic/eui"
   ],
   "exclude": [
     "target/**/*",
