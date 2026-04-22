@@ -161,6 +161,8 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 **Discover**:
 * Redesigns the {{esql}} editor footer in Discover: removes the row limit and timestamp indicators, and adds query run statistics [#244284]({{kib-pull}}244284).
+* Filters from the top-level {{esql}} WHERE clause now propagate into per-metric charts in the Discover metrics grid [#249103]({{kib-pull}}249103).
+* Shows Streams field descriptions in the {{esql}} editor and field sidebar [#260582]({{kib-pull}}260582).
 * Adds `hideTable` to the app state and connects it with a layout toggle [#259083]({{kib-pull}}259083).
 * Adds a fields browser to the {{esql}} editor in Discover [#252749]({{kib-pull}}252749).
 * Adds support for visualizing histogram metrics in the unified metrics grid by introducing `PERCENTILE` aggregations based on the metric's instrument and field type, which enables rendering of `tdigest` and `exponential_histogram` metric types. [#249269]({{kib-pull}}249269).
@@ -277,9 +279,7 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Makes the manual run API public [#253010]({{kib-pull}}253010).
 * Whitelists Streams APIs as Kibana workflow steps [#252068]({{kib-pull}}252068).
 * Adds a gap scheduler error callout [#250393]({{kib-pull}}250393).
-* Adds metrics grid {{esql}} WHERE propagation [#249103]({{kib-pull}}249103).
 * Adds the `createConversation` and `inviteToConversation` actions [#260806]({{kib-pull}}260806).
-* Shows streams field description in {{esql}} editor and field side bar [#260582]({{kib-pull}}260582).
 * Updates OAS docs for Alerting create rule route [#260497]({{kib-pull}}260497).
 * Adds **Default model** and **Disallow all other models** settings to the **Model Settings** page [#259932]({{kib-pull}}259932).
 * Adds the `entries` Liquid filter for iterating over object keys [#259249]({{kib-pull}}259249).
