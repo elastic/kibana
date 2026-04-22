@@ -38,5 +38,6 @@ module.exports = {
     require_kbn_fs: require('./rules/require_kbn_fs'),
     require_include_in_check_a11y: require('./rules/require_include_in_check_a11y'),
     no_wrapped_error_in_logger: require('./rules/no_wrapped_error_in_logger'),
+    eui_link_href_with_onclick: require('./rules/eui_link_href_with_onclick'),
   },
 };
