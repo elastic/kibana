@@ -25,6 +25,11 @@ import type {
 } from '@kbn/core-hotkeys-browser';
 import { createAppScopedHotkeys } from './app_scoped_hotkeys';
 import { createDerivedRegistrations, type DerivedRegistrations } from './derive_registrations';
+import {
+  createEmptyOverridesSource,
+  type HotkeyOverride,
+  type HotkeyOverridesSource,
+} from './overrides_source';
 
 /** @internal */
 export type SetupDeps = Record<string, never>;
@@ -32,18 +37,27 @@ export type SetupDeps = Record<string, never>;
 /** @internal */
 export interface StartDeps {
   application: Pick<ApplicationStart, 'currentAppId$'>;
+  /**
+   * Optional source of user hotkey overrides. When omitted the service
+   * uses an empty source and every registration runs with its declared
+   * binding. Platform callers wire a real implementation once override
+   * storage is available.
+   */
+  overrides?: HotkeyOverridesSource;
 }
 
 /**
- * Internal bookkeeping for a single registered hotkey. Holds the
- * definition the caller provided (plus normalized defaults) and the
- * TanStack handle that backs it, so `update()` and future re-bind paths
- * can act on both without having to re-query the manager.
+ * Internal bookkeeping for a single registered hotkey. Tracks both the
+ * declaration the caller provided and the last-applied resolved binding
+ * (chord + enabled) so the service can reconcile cheaply when overrides
+ * change without re-registering unchanged entries.
  */
 interface InternalEntry {
   def: HotkeyDefinition;
   callback: HotkeyCallback;
   managerHandle: HotkeyRegistrationHandle;
+  lastResolvedKeys: HotkeyDefinition['keys'];
+  lastResolvedEnabled: boolean;
 }
 
 const buildMeta = (def: HotkeyDefinition) => ({
@@ -59,12 +73,23 @@ const buildMeta = (def: HotkeyDefinition) => ({
 });
 
 /**
+ * Cheap structural comparison for {@link HotkeyDefinition.keys}. Works
+ * for both string chords and `RawHotkey` objects without pulling in a
+ * deep-equal dependency.
+ */
+const keysEqual = (a: HotkeyDefinition['keys'], b: HotkeyDefinition['keys']): boolean => {
+  if (a === b) return true;
+  return JSON.stringify(a) === JSON.stringify(b);
+};
+
+/**
  * Core browser-side hotkeys service. Wraps a shared `HotkeyManager` instance
  * from `@tanstack/hotkeys` and projects its live `registrations` store back
  * into the Kibana {@link HotkeyDefinition} shape consumed by discovery UIs
- * (cheat sheet, keyboard settings, etc.). The manager is the single source
- * of truth; this service only keeps a small lookup map so it can honor
- * `update()`/`unregister()` without duplicating the registry.
+ * (cheat sheet, keyboard settings, etc.). An optional
+ * {@link HotkeyOverridesSource} feeds user rebindings into the same
+ * reconciliation path so declared bindings and persisted overrides are
+ * merged in a single place.
  *
  * @internal
  */
@@ -74,13 +99,14 @@ export class HotkeysService {
   private readonly subscriptions = new Subscription();
   private derived: DerivedRegistrations | undefined;
   private latestAppId: string | undefined;
+  private latestOverrides: ReadonlyMap<string, HotkeyOverride> = new Map();
   private started = false;
 
   public setup(_deps: SetupDeps = {}): HotkeysSetup {
     return {};
   }
 
-  public start({ application }: StartDeps): HotkeysStart {
+  public start({ application, overrides = createEmptyOverridesSource() }: StartDeps): HotkeysStart {
     this.started = true;
     this.derived = createDerivedRegistrations(this.manager);
     this.subscriptions.add(
@@ -88,6 +114,7 @@ export class HotkeysService {
         this.latestAppId = id;
       })
     );
+    this.subscriptions.add(overrides.overrides$.subscribe((next) => this.applyOverrides(next)));
 
     const register: HotkeysStart['register'] = (def, handler) => this.doRegister(def, handler);
 
@@ -123,6 +150,7 @@ export class HotkeysService {
     this.derived?.dispose();
     this.derived = undefined;
     this.internal.clear();
+    this.latestOverrides = new Map();
     this.manager.destroy();
   }
 
@@ -136,12 +164,21 @@ export class HotkeysService {
       defaultKeys: def.keys,
     };
     const callback: HotkeyCallback = (event) => handler(event);
-    const managerHandle = this.manager.register(stored.keys as RegisterableHotkey, callback, {
-      enabled: stored.enabled !== false,
+    const override = this.latestOverrides.get(stored.id);
+    const resolvedKeys = override?.keys ?? stored.keys;
+    const resolvedEnabled = override?.enabled ?? stored.enabled !== false;
+    const managerHandle = this.manager.register(resolvedKeys as RegisterableHotkey, callback, {
+      enabled: resolvedEnabled,
       target: stored.target ?? undefined,
       meta: buildMeta(stored),
     });
-    const entry: InternalEntry = { def: stored, callback, managerHandle };
+    const entry: InternalEntry = {
+      def: stored,
+      callback,
+      managerHandle,
+      lastResolvedKeys: resolvedKeys,
+      lastResolvedEnabled: resolvedEnabled,
+    };
     this.internal.set(stored.id, entry);
 
     return {
@@ -151,24 +188,65 @@ export class HotkeysService {
         if (!current) {
           return;
         }
-        const next: HotkeyDefinition = { ...current.def, ...partial };
-        current.def = next;
-        const options: Parameters<typeof managerHandle.setOptions>[0] = {
-          meta: buildMeta(next),
-        };
-        if (partial.enabled !== undefined) {
-          options.enabled = partial.enabled !== false;
-        }
-        managerHandle.setOptions(options);
+        current.def = { ...current.def, ...partial };
+        this.rebindEntry(current);
       },
       unregister: () => {
-        if (!this.internal.has(stored.id)) {
+        const current = this.internal.get(stored.id);
+        if (!current) {
           return;
         }
-        managerHandle.unregister();
+        current.managerHandle.unregister();
         this.internal.delete(stored.id);
       },
     };
+  }
+
+  private applyOverrides(next: ReadonlyMap<string, HotkeyOverride>): void {
+    const previous = this.latestOverrides;
+    this.latestOverrides = next;
+    if (this.internal.size === 0) {
+      return;
+    }
+    for (const entry of this.internal.values()) {
+      const prev = previous.get(entry.def.id);
+      const curr = next.get(entry.def.id);
+      if (prev === curr) {
+        continue;
+      }
+      this.rebindEntry(entry);
+    }
+  }
+
+  /**
+   * Reconciles the TanStack registration for a single entry against the
+   * current declaration and override. Falls back to `setOptions` when the
+   * chord is unchanged (cheap path that preserves the existing handle),
+   * and re-registers via the manager when the chord differs so the
+   * underlying key listener routes the new chord.
+   */
+  private rebindEntry(entry: InternalEntry): void {
+    const override = this.latestOverrides.get(entry.def.id);
+    const resolvedKeys = override?.keys ?? entry.def.keys;
+    const resolvedEnabled = override?.enabled ?? entry.def.enabled !== false;
+    const meta = buildMeta(entry.def);
+
+    if (keysEqual(entry.lastResolvedKeys, resolvedKeys)) {
+      entry.managerHandle.setOptions({ enabled: resolvedEnabled, meta });
+    } else {
+      entry.managerHandle.unregister();
+      entry.managerHandle = this.manager.register(
+        resolvedKeys as RegisterableHotkey,
+        entry.callback,
+        {
+          enabled: resolvedEnabled,
+          target: entry.def.target ?? undefined,
+          meta,
+        }
+      );
+    }
+    entry.lastResolvedKeys = resolvedKeys;
+    entry.lastResolvedEnabled = resolvedEnabled;
   }
 }
 
