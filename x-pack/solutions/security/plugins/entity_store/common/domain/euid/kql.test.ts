@@ -175,6 +175,7 @@ describe('getEuidKqlFilterBasedOnDocument', () => {
       });
 
       expect(result).toBeDefined();
+      expect(result).toBe(`user.name: "alice" AND host.id: "host-1"`);
       expect(result).toContain('user.name: "alice"');
       expect(result).toContain('host.id: "host-1"');
       expect(result).not.toContain('entity.namespace');
@@ -227,7 +228,7 @@ describe('getEuidKqlFilterBasedOnDocument', () => {
             type: 'Identity',
           },
         })
-      ).toMatchSnapshot();
+      ).toBe(`user.name: "tyrese.goldner" AND host.id: "4a7a8b68-1814-487f-9e56-5e7bed425edc"`);
     });
   });
 

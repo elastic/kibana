@@ -115,22 +115,28 @@ export function getEuidKqlFilterBasedOnDocument(
     .filter(([field]) => !evaluatedDestinations.has(field))
     .map(([field, value]) => `${field}: "${escapeQuotes(value)}"`);
 
-  const toBeFilteredOut = getFieldsToBeFilteredOut(effectiveRanking, fieldsToBeFilteredOn).filter(
-    (field) => !evaluatedDestinations.has(field)
-  );
-  for (const field of toBeFilteredOut) {
-    conditions.push(fieldMissingOrEmptyKql(field));
-  }
-
-  if (fieldEvaluations.length > 0) {
-    for (const evaluation of fieldEvaluations) {
+  // Compute source match specs once, excluding evaluations whose sources are themselves evaluated.
+  const evaluationSpecs = fieldEvaluations
+    .filter((evaluation) => {
       const { exactMatchFields, prefixMatchFields } = getSourceFieldNames(evaluation.sources);
-      const sourceFields = [...exactMatchFields, ...prefixMatchFields];
-      const hasEvaluatedSource = sourceFields.some((f) => evaluatedDestinations.has(f));
-      if (hasEvaluatedSource) {
-        continue;
-      }
-      const spec = getSourceMatchSpec(doc, evaluation);
+      return ![...exactMatchFields, ...prefixMatchFields].some((f) => evaluatedDestinations.has(f));
+    })
+    .map((evaluation) => ({ evaluation, spec: getSourceMatchSpec(doc, evaluation) }));
+
+  // For condition-based namespaces (e.g. local users identified by user.name + host.id from
+  // authentication events), the identity fields alone are sufficient — no higher-ranked field
+  // guards or source clause needed.
+  const isConditionBased = evaluationSpecs.some(({ spec }) => spec.type === 'condition');
+
+  if (!isConditionBased) {
+    const toBeFilteredOut = getFieldsToBeFilteredOut(effectiveRanking, fieldsToBeFilteredOn).filter(
+      (field) => !evaluatedDestinations.has(field)
+    );
+    for (const field of toBeFilteredOut) {
+      conditions.push(fieldMissingOrEmptyKql(field));
+    }
+
+    for (const { evaluation, spec } of evaluationSpecs) {
       const kqlClause = buildSourceClauseKql(evaluation, spec);
       if (kqlClause !== undefined) {
         conditions.push(kqlClause);
