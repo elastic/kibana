@@ -75,6 +75,7 @@ import { generateIndicatorAttachmentType } from './cases/attachments/indicator/u
 import { defaultDeepLinks } from './app/links/default_deep_links';
 import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
 import { registerAttachmentUiDefinitions } from './agent_builder/attachment_types';
+import { registerEntityAnalyticsDashboardAttachment } from './agent_builder/attachment_types/entity_analytics_dashboard_attachment';
 import { registerRuleAttachment } from './agent_builder/attachment_types/rule_attachment';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
@@ -299,6 +300,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         attachments: plugins.agentBuilder.attachments,
         application: core.application,
         aiRuleCreation: this.services.aiRuleCreation,
+      });
+      registerEntityAnalyticsDashboardAttachment({
+        attachments: plugins.agentBuilder.attachments,
+        application: core.application,
+        agentBuilder: plugins.agentBuilder,
+        chrome: core.chrome,
       });
     }
 

@@ -74,6 +74,7 @@ const baseEntity = (override: Partial<EntityForAttachment> = {}): EntityForAttac
   isEntityInStore: true,
   firstSeen: null,
   lastSeen: '2024-01-01T00:00:00Z',
+  timestamp: '2024-01-01T00:00:00Z',
   riskScore: 88,
   riskLevel: 'High',
   riskStats: {

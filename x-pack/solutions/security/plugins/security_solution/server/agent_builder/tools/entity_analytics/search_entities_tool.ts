@@ -499,6 +499,8 @@ export const searchEntitiesTool = (
     Supports filtering by normalized risk score, asset criticality, entity attributes, lifecycle timestamps,
     and data source (entity.source) via the "sources" parameter (e.g. ["crowdstrike"]).
     Use this tool to find entities matching specific criteria.
+    When this tool returns 2+ entities, it automatically emits an aggregate "security.entity" attachment whose renderer shows an **entities table** in Canvas; when it returns exactly 1 entity, the attachment uses the single-entity id scheme and a follow-up security.get_entity bumps the same pill with a richer **entity card** payload. In either case you MUST render the attachment inline by emitting \`<render_attachment id="..." version="..." />\` from the tool's \`other\` result on its own line in your markdown reply (see entity-analytics skill). You never call attachments.add with "security.entity" — the tool emits it as a side effect.
+    When the user asks to show, open, view, or summarize the Entity Analytics dashboard/home/overview (built-in Security page), use these results (and optional security.get_entity) then call attachments.add with type "security.entity_analytics_dashboard" so the UI shows Preview→Canvas (see entity-analytics skill). Do not treat that as a request to compose a new Kibana saved dashboard.
     Do NOT use if entity ID (EUID) is known; use the "security.get_entity" tool instead.`,
     tags: ['security', 'entity-store', 'entity-analytics'],
     schema,

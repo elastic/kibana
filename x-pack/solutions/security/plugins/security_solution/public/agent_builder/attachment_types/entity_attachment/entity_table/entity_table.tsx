@@ -399,7 +399,7 @@ export const EntityTable: React.FC<EntityTableProps> = ({ entities }) => {
           columns={columns}
           itemId={(row) => keyFor(row.identifier)}
           tableLayout="auto"
-          responsive={false}
+          responsiveBreakpoint={false}
           {...paginationProps}
         />
       </div>
