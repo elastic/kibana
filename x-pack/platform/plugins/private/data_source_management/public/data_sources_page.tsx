@@ -6,7 +6,7 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn, EuiTabbedContentTab } from '@elastic/eui';
 import {
@@ -24,6 +24,7 @@ import type { DataSetListItem } from '../common/sample_data_sets_client';
 import { SampleDataSetsClient } from '../common/sample_data_sets_client';
 import type { DataSourceListItem } from '../common/sample_data_sources_client';
 import { SampleDataSourcesClient } from '../common/sample_data_sources_client';
+import { CreateDataSourceFlyout } from './create_data_source_flyout';
 
 export interface DataSourcesPageProps {
   pageTitle: string;
@@ -35,14 +36,46 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({ pageT
   const [items, setItems] = useState<DataSourceListItem[]>([]);
   const [selectedItems, setSelectedItems] = useState<DataSourceListItem[]>([]);
   const [dataSetItems, setDataSetItems] = useState<DataSetListItem[]>([]);
+  const [isCreateFlyoutOpen, setCreateFlyoutOpen] = useState(false);
 
   useEffect(() => {
-    setItems(dataClient.get());
+    let cancelled = false;
+    void (async () => {
+      const nextItems = await dataClient.get();
+      if (!cancelled) {
+        setItems(nextItems);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [dataClient]);
 
   useEffect(() => {
-    setDataSetItems(dataSetsClient.get());
+    let cancelled = false;
+    void (async () => {
+      const nextItems = await dataSetsClient.get();
+      if (!cancelled) {
+        setDataSetItems(nextItems);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [dataSetsClient]);
+
+  const handleCreateDataSourceSave = useCallback(
+    async (values: { name: string; description: string }): Promise<string | null> => {
+      try {
+        await dataClient.add(values);
+        setItems(await dataClient.get());
+        return null;
+      } catch (e) {
+        return e instanceof Error ? e.message : 'Unknown error';
+      }
+    },
+    [dataClient]
+  );
 
   const columns = useMemo<Array<EuiBasicTableColumn<DataSourceListItem>>>(
     () => [
@@ -136,9 +169,11 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({ pageT
                       data-test-subj="dataSourceManagementDeleteButton"
                       iconType="trash"
                       onClick={() => {
-                        dataClient.delete(selectedItems.map((item) => item.name));
-                        setItems(dataClient.get());
-                        setSelectedItems([]);
+                        void (async () => {
+                          await dataClient.delete(selectedItems.map((item) => item.name));
+                          setItems(await dataClient.get());
+                          setSelectedItems([]);
+                        })();
                       }}
                     >
                       {i18n.translate('dataSourceManagement.deleteButtonLabel', {
@@ -154,7 +189,7 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({ pageT
                         data-test-subj="dataSourceManagementCreateButton"
                         iconType="plusInCircle"
                         onClick={() => {
-                          window.alert('create');
+                          setCreateFlyoutOpen(true);
                         }}
                       >
                         {i18n.translate('dataSourceManagement.addButtonLabel', {
@@ -172,8 +207,10 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({ pageT
                         })}
                         data-test-subj="dataSourceManagementRefreshButton"
                         onClick={() => {
-                          setItems(dataClient.get());
-                          setSelectedItems([]);
+                          void (async () => {
+                            setItems(await dataClient.get());
+                            setSelectedItems([]);
+                          })();
                         }}
                       />
                     </EuiFlexItem>
@@ -243,7 +280,9 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({ pageT
                     )}
                     data-test-subj="dataSourceManagementSetsRefreshButton"
                     onClick={() => {
-                      setDataSetItems(dataSetsClient.get());
+                      void (async () => {
+                        setDataSetItems(await dataSetsClient.get());
+                      })();
                     }}
                   />
                 ),
@@ -272,17 +311,25 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({ pageT
   );
 
   return (
-    <EuiPageSection paddingSize="m">
-      <EuiTitle size="l">
-        <h1 data-test-subj="dataSourceManagementPageTitle">{pageTitle}</h1>
-      </EuiTitle>
-      <EuiSpacer size="l" />
-      <EuiTabbedContent
-        tabs={tabs}
-        initialSelectedTab={tabs[0]}
-        autoFocus="selected"
-        data-test-subj="dataSourceManagementTabs"
-      />
-    </EuiPageSection>
+    <>
+      <EuiPageSection paddingSize="m">
+        <EuiTitle size="l">
+          <h1 data-test-subj="dataSourceManagementPageTitle">{pageTitle}</h1>
+        </EuiTitle>
+        <EuiSpacer size="l" />
+        <EuiTabbedContent
+          tabs={tabs}
+          initialSelectedTab={tabs[0]}
+          autoFocus="selected"
+          data-test-subj="dataSourceManagementTabs"
+        />
+      </EuiPageSection>
+      {isCreateFlyoutOpen ? (
+        <CreateDataSourceFlyout
+          onClose={() => setCreateFlyoutOpen(false)}
+          onSave={handleCreateDataSourceSave}
+        />
+      ) : null}
+    </>
   );
 };

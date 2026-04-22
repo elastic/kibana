@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export interface DataSourceListItem {
   id: string;
   name: string;
@@ -50,14 +52,36 @@ export class SampleDataSourcesClient {
     this.rows = cloneRows(INITIAL_ROWS);
   }
 
-  public get(): DataSourceListItem[] {
+  public async get(): Promise<DataSourceListItem[]> {
     return cloneRows(this.rows);
+  }
+
+  public async add(input: { name: string; description: string }): Promise<DataSourceListItem> {
+    const name = input.name.trim();
+    if (!name) {
+      throw new Error(
+        i18n.translate('dataSourceManagement.errors.nameRequired', {
+          defaultMessage: 'Name is required.',
+        })
+      );
+    }
+    if (this.rows.some((row) => row.name === name)) {
+      throw new Error(
+        i18n.translate('dataSourceManagement.errors.duplicateName', {
+          defaultMessage: 'A data source with this name already exists.',
+        })
+      );
+    }
+    const id = `ds-${Date.now().toString(36)}`;
+    const row: DataSourceListItem = { id, name, description: input.description.trim() };
+    this.rows.push(row);
+    return { ...row };
   }
 
   /**
    * Removes every data source whose `name` is included in `names`.
    */
-  public delete(names: string | readonly string[]): void {
+  public async delete(names: string | readonly string[]): Promise<void> {
     const nameSet = new Set(typeof names === 'string' ? [names] : names);
     this.rows = this.rows.filter((row) => !nameSet.has(row.name));
   }
