@@ -2806,7 +2806,7 @@ function buildVerifierCredentialVars(
   } else if (provider === 'gcp') {
     const gcpVars = connectorVars as GcpCloudConnectorVars;
     vars.credentials_service_account_email = gcpVars.service_account;
-    vars.credentials_workload_identity_provider = gcpVars.audience;
+    vars.credentials_audience = gcpVars.audience;
   }
 
   return vars;

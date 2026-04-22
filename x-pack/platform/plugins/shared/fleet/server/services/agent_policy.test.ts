@@ -3052,11 +3052,11 @@ describe('Agent policy', () => {
         type: 'text',
         value: 'sa@project.iam.gserviceaccount.com',
       });
-      const expectedWifValue =
+      const expectedAudienceValue =
         '//iam.googleapis.com/projects/123/locations/global/workloadIdentityPools/pool/providers/prov';
-      expect(vars.credentials_workload_identity_provider).toEqual({
+      expect(vars.credentials_audience).toEqual({
         type: 'text',
-        value: expectedWifValue,
+        value: expectedAudienceValue,
       });
       expect(vars.credentials_role_arn).toBeUndefined();
     });
