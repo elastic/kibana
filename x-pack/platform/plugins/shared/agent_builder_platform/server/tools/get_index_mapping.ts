@@ -13,7 +13,10 @@ import { getIndexFields } from '@kbn/agent-builder-genai-utils';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 
 const getIndexMappingsSchema = z.object({
-  indices: z.array(z.string()).min(1).describe('List of indices to retrieve mappings for.'),
+  indices: z
+    .array(z.string())
+    .min(1)
+    .describe('List of indices, aliases or datastreams to retrieve mappings for.'),
   raw: z
     .boolean()
     .default(false)

@@ -6,6 +6,7 @@
  */
 
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import pLimit from 'p-limit';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { MappingField } from './mappings';
 import { flattenMapping, getIndexMappings, getDataStreamMappings } from './mappings';
@@ -137,32 +138,28 @@ const resolveLocalTarget = async ({
   input: string;
   esClient: ElasticsearchClient;
 }): Promise<LocalResolution> => {
-  // Keep listSearchSources' defaults for `excludeIndicesRepresentedAs*`
-  // (both `true`). That way a wildcard matching e.g. a data stream plus its
-  // backing indices collapses to just the data stream, so `total === 1` and
-  // we route to the dataStream bucket (rich rawMapping) instead of falling
-  // into the indexPattern bucket (flat field list only).
-  //
-  // We do override `includeKibanaIndices` / `includeHidden` to `true`: the
-  // caller asked for a specific resource by name, so we shouldn't silently
-  // drop Kibana/hidden matches.
   const res = await listSearchSources({
     pattern: input,
     esClient,
     includeKibanaIndices: true,
     includeHidden: true,
+    excludeIndicesRepresentedAsAlias: true,
+    excludeIndicesRepresentedAsDatastream: true,
   });
 
   const total = res.indices.length + res.data_streams.length + res.aliases.length;
-  if (total === 1 && res.indices.length === 1) {
-    return { input, kind: 'index', concreteName: res.indices[0].name };
+  if (total === 1) {
+    if (res.indices.length === 1) {
+      return { input, kind: 'index', concreteName: res.indices[0].name };
+    }
+    if (res.data_streams.length === 1) {
+      return { input, kind: 'dataStream', concreteName: res.data_streams[0].name };
+    }
+    if (res.aliases.length === 1) {
+      return { input, kind: 'alias', concreteName: res.aliases[0].name };
+    }
   }
-  if (total === 1 && res.data_streams.length === 1) {
-    return { input, kind: 'dataStream', concreteName: res.data_streams[0].name };
-  }
-  if (total === 1 && res.aliases.length === 1) {
-    return { input, kind: 'alias', concreteName: res.aliases[0].name };
-  }
+
   return { input, kind: 'indexPattern' };
 };
 
@@ -186,60 +183,67 @@ export const getIndexFields = async ({
   const result: Record<string, IndexFieldsResult> = {};
 
   if (local.length > 0) {
+    const resolveLimit = pLimit(5);
     const resolutions = await Promise.all(
-      local.map((input) => resolveLocalTarget({ input, esClient }))
+      local.map((input) => resolveLimit(() => resolveLocalTarget({ input, esClient })))
     );
 
-    const indexInputs: Array<{ input: string; concrete: string }> = [];
-    const dataStreamInputs: Array<{ input: string; concrete: string }> = [];
-    const aliasInputs: Array<{ input: string; concrete: string }> = [];
-    const patternInputs: string[] = [];
+    // All buckets share the same `{input, concrete}` shape. For `indexPattern`
+    // entries we don't have a resolved concrete name, so we use `input` (the
+    // user's verbatim string) — `_field_caps` treats it as a pattern anyway.
+    const buckets: Record<IndexFieldType, Array<{ input: string; concrete: string }>> = {
+      index: [],
+      dataStream: [],
+      alias: [],
+      indexPattern: [],
+    };
     for (const r of resolutions) {
-      if (r.kind === 'index') {
-        indexInputs.push({ input: r.input, concrete: r.concreteName });
-      } else if (r.kind === 'dataStream') {
-        dataStreamInputs.push({ input: r.input, concrete: r.concreteName });
-      } else if (r.kind === 'alias') {
-        aliasInputs.push({ input: r.input, concrete: r.concreteName });
-      } else {
-        patternInputs.push(r.input);
-      }
+      const concrete = r.kind === 'indexPattern' ? r.input : r.concreteName;
+      buckets[r.kind].push({ input: r.input, concrete });
     }
 
+    // Shared concurrency cap across all four fetch paths (index/ds/alias/
+    // pattern). Each per-input field_caps call and each batched mapping call
+    // counts as one slot against this limit.
+    const fetchLimit = pLimit(5);
     const [indexMappings, dsMappings, aliasResults, patternResults] = await Promise.all([
-      indexInputs.length > 0
-        ? getIndexMappings({
-            indices: indexInputs.map((i) => i.concrete),
-            cleanup,
-            esClient,
-          })
+      buckets.index.length > 0
+        ? fetchLimit(() =>
+            getIndexMappings({
+              indices: buckets.index.map((i) => i.concrete),
+              cleanup,
+              esClient,
+            })
+          )
         : Promise.resolve({} as GetIndexMappingsResult),
-      dataStreamInputs.length > 0
-        ? getDataStreamMappings({
-            datastreams: dataStreamInputs.map((i) => i.concrete),
-            cleanup,
-            esClient,
-          })
+      buckets.dataStream.length > 0
+        ? fetchLimit(() =>
+            getDataStreamMappings({
+              datastreams: buckets.dataStream.map((i) => i.concrete),
+              cleanup,
+              esClient,
+            })
+          )
         : Promise.resolve({} as GetDataStreamMappingsResults),
-      aliasInputs.length > 0
-        ? Promise.all(
-            aliasInputs.map(async (a) => ({
-              input: a.input,
-              fields: await getFieldsFromFieldCaps({ resource: a.concrete, esClient }),
-            }))
-          )
-        : Promise.resolve([] as Array<{ input: string; fields: MappingField[] }>),
-      patternInputs.length > 0
-        ? Promise.all(
-            patternInputs.map(async (input) => ({
-              input,
-              fields: await getFieldsFromFieldCaps({ resource: input, esClient }),
-            }))
-          )
-        : Promise.resolve([] as Array<{ input: string; fields: MappingField[] }>),
+      Promise.all(
+        buckets.alias.map(async (a) => ({
+          input: a.input,
+          fields: await fetchLimit(() =>
+            getFieldsFromFieldCaps({ resource: a.concrete, esClient })
+          ),
+        }))
+      ),
+      Promise.all(
+        buckets.indexPattern.map(async (p) => ({
+          input: p.input,
+          fields: await fetchLimit(() =>
+            getFieldsFromFieldCaps({ resource: p.concrete, esClient })
+          ),
+        }))
+      ),
     ]);
 
-    for (const { input, concrete } of indexInputs) {
+    for (const { input, concrete } of buckets.index) {
       const entry = indexMappings[concrete];
       if (!entry) {
         // Race: resolved to a concrete index, but it's gone by the time we
@@ -253,7 +257,7 @@ export const getIndexFields = async ({
         rawMapping: entry.mappings,
       };
     }
-    for (const { input, concrete } of dataStreamInputs) {
+    for (const { input, concrete } of buckets.dataStream) {
       const entry = dsMappings[concrete];
       if (!entry) {
         result[input] = { type: 'indexPattern', fields: [] };
