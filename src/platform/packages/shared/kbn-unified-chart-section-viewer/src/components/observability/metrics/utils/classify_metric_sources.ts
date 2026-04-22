@@ -59,11 +59,10 @@ export const classifyMetricSources = async (
       isRollupIndex: () => false,
     });
 
-    // `getIndices` swallows network failures and returns []
-    // (see data_views/public/services/get_indices.ts). When we asked
-    // for N sources and got back zero results, treat it as a silent
-    // resolution failure and route to the configured fallback to
-    // align with the documented intent.
+    // `getIndices` swallows network failures and returns [] (see
+    // https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/data_views/public/services/get_indices.ts#L122).
+    // When we asked for N sources and got back zero results, treat it as a
+    // silent resolution failure and route to the configured fallback.
     if (resolved.length === 0) {
       return metricItems.map((item) => ({ ...item, sourceKind: options.fallbackKind }));
     }
@@ -76,6 +75,7 @@ export const classifyMetricSources = async (
     }));
   } catch {
     // TODO: add monitoring/telemetry to track resolution failures
+    // (https://github.com/elastic/kibana/issues/265117)
     return metricItems.map((item) => ({ ...item, sourceKind: options.fallbackKind }));
   }
 };
