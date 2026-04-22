@@ -176,26 +176,16 @@ export async function suggest(
         ...recommendedQueriesSuggestionsFromStaticTemplates
       );
 
-      const sourceCommandsSuggestions = attachRootQueryReplacementRanges(
-        suggestions.filter(isSourceCommandSuggestion),
-        fullText,
-        offset
-      );
       const headerCommandsSuggestions = suggestions.filter(isHeaderCommandSuggestion);
-      const resolvedRecommendedQueriesSuggestions = attachRootQueryReplacementRanges(
-        recommendedQueriesSuggestions,
+      const rootLevelQuerySuggestions = attachRootQueryReplacementRanges(
+        [...suggestions.filter(isSourceCommandSuggestion), ...recommendedQueriesSuggestions],
         fullText,
         offset
       );
 
-      return orderingEngine.sort(
-        [
-          ...headerCommandsSuggestions,
-          ...sourceCommandsSuggestions,
-          ...resolvedRecommendedQueriesSuggestions,
-        ],
-        { command: '' }
-      );
+      return orderingEngine.sort([...headerCommandsSuggestions, ...rootLevelQuerySuggestions], {
+        command: '',
+      });
     }
 
     return suggestions.filter(
