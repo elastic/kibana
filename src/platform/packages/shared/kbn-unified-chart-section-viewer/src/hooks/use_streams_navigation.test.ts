@@ -46,24 +46,6 @@ describe('useStreamsNavigation', () => {
     jest.clearAllMocks();
   });
 
-  describe('canNavigate', () => {
-    it('returns true when streams feature is registered', () => {
-      const { result } = renderHook(() =>
-        useStreamsNavigation(createMockExternalServices({ hasStreamsFeature: true }))
-      );
-
-      expect(result.current.canNavigate).toBe(true);
-    });
-
-    it('returns false when streams feature is not registered', () => {
-      const { result } = renderHook(() =>
-        useStreamsNavigation(createMockExternalServices({ hasStreamsFeature: false }))
-      );
-
-      expect(result.current.canNavigate).toBe(false);
-    });
-  });
-
   describe('getStreamUrl', () => {
     it('returns a URL for a valid data stream when user has permissions', () => {
       const { result } = renderHook(() =>

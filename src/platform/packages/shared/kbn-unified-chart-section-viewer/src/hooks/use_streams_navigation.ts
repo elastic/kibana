@@ -13,7 +13,6 @@ import { isCCSRemoteIndexName } from '@kbn/es-query';
 import type { ExternalServices } from '../types';
 
 export interface UseStreamsNavigationResult {
-  canNavigate: boolean;
   getStreamUrl: (name: string) => string | undefined;
 }
 
@@ -21,10 +20,9 @@ export interface UseStreamsNavigationResult {
  * Encapsulates Streams app navigation logic: permission gating, CCS filtering,
  * wildcard rejection, and URL generation via the Streams locator.
  *
- * Returns `{ canNavigate, getStreamUrl }`. `getStreamUrl(name)` yields a URL
- * when the given name is navigable in the Streams app, or `undefined` when the
- * name is invalid (empty, wildcard, CCS) or the user lacks permissions.
- *
+ * `getStreamUrl(name)` returns a URL when the given name is navigable in the
+ * Streams app, or `undefined` when the name is invalid (empty, wildcard, CCS)
+ * or the user lacks permissions / the locator is unavailable.
  */
 export const useStreamsNavigation = (
   externalServices?: ExternalServices
@@ -62,5 +60,5 @@ export const useStreamsNavigation = (
     [canNavigate, locator]
   );
 
-  return { canNavigate, getStreamUrl };
+  return { getStreamUrl };
 };
