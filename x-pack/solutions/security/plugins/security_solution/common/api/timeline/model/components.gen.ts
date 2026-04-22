@@ -335,15 +335,16 @@ export type BareNote = z.infer<typeof BareNote>;
 export const BareNote = NoteCreatedAndUpdatedMetadata.merge(
   z.object({
     /**
-     * The `_id` of the associated event for this note.
-     */
+      * Elasticsearch document `_id` for the event or alert this note refers to. Same value as the `documentIds` query parameter when fetching notes via GET /api/note.
+
+      */
     eventId: z.string().nullable().optional(),
     /**
      * The text of the note
      */
     note: z.string().nullable().optional(),
     /**
-     * The `savedObjectId` of the Timeline that this note is associated with
+     * The `savedObjectId` of the Timeline this note belongs to (not the note's own ID).
      */
     timelineId: z.string(),
   })
@@ -490,15 +491,16 @@ export type BareNoteWithoutExternalRefs = z.infer<typeof BareNoteWithoutExternal
 export const BareNoteWithoutExternalRefs = NoteCreatedAndUpdatedMetadata.merge(
   z.object({
     /**
-     * The `_id` of the associated event for this note.
-     */
+      * Elasticsearch document `_id` for the event or alert this note refers to. Same value as the `documentIds` query parameter when fetching notes via GET /api/note.
+
+      */
     eventId: z.string().nullable().optional(),
     /**
      * The text of the note
      */
     note: z.string().nullable().optional(),
     /**
-     * The `savedObjectId` of the timeline that this note is associated with
+     * The `savedObjectId` of the Timeline that this note is associated with
      */
     timelineId: z.string().optional(),
   })
