@@ -23,7 +23,7 @@ export const RecentAnomaliesHeatmapNoResults: React.FC = () => {
                 defaultMessage="No anomaly results match your search criteria"
               />
             </h3>
-          </EuiTitle>   
+          </EuiTitle>
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
