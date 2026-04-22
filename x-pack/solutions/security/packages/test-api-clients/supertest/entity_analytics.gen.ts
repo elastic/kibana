@@ -236,6 +236,9 @@ If a record already exists for the specified entity, that record is overwritten 
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
+  /**
+   * Creates a new privileged user to be monitored by the Privilege Monitoring Engine.
+   */
   createPrivMonUser(props: CreatePrivMonUserProps, kibanaSpace: string = 'default') {
     return supertest
       .post(getRouteUrlForSpace('/api/entity_analytics/monitoring/users', kibanaSpace))
@@ -244,6 +247,9 @@ If a record already exists for the specified entity, that record is overwritten 
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
+  /**
+   * Creates a new entity analytics watchlist with an optional set of entity sources. Watchlists apply a risk score modifier to matched entities.
+   */
   createWatchlist(props: CreateWatchlistProps, kibanaSpace: string = 'default') {
     return supertest
       .post(getRouteUrlForSpace('/api/entity_analytics/watchlists', kibanaSpace))
@@ -318,6 +324,9 @@ If a record already exists for the specified entity, that record is overwritten 
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
+  /**
+   * Deletes the Privilege Monitoring Engine and optionally removes all associated privileged user data.
+   */
   deleteMonitoringEngine(props: DeleteMonitoringEngineProps, kibanaSpace: string = 'default') {
     return supertest
       .delete(getRouteUrlForSpace('/api/entity_analytics/monitoring/engine/delete', kibanaSpace))
@@ -326,6 +335,9 @@ If a record already exists for the specified entity, that record is overwritten 
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .query(props.query);
   },
+  /**
+   * Removes a privileged user from monitoring by their document ID.
+   */
   deletePrivMonUser(props: DeletePrivMonUserProps, kibanaSpace: string = 'default') {
     return supertest
       .delete(
@@ -388,6 +400,9 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
+  /**
+   * Disables the Privilege Monitoring Engine, stopping all monitoring activity without removing data.
+   */
   disableMonitoringEngine(kibanaSpace: string = 'default') {
     return supertest
       .post(getRouteUrlForSpace('/api/entity_analytics/monitoring/engine/disable', kibanaSpace))
@@ -500,6 +515,9 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .query(props.query);
   },
+  /**
+   * Returns the installation and ML module setup status of the privileged access detection package, along with the state of each associated ML job.
+   */
   getPrivilegedAccessDetectionPackageStatus(kibanaSpace: string = 'default') {
     return supertest
       .get(
@@ -522,6 +540,9 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
+  /**
+   * Retrieves the details of an entity analytics watchlist by its unique identifier.
+   */
   getWatchlist(props: GetWatchlistProps, kibanaSpace: string = 'default') {
     return supertest
       .get(
@@ -576,6 +597,9 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
+  /**
+   * Initializes the Privilege Monitoring Engine, setting up the required resources and starting the engine.
+   */
   initMonitoringEngine(kibanaSpace: string = 'default') {
     return supertest
       .post(getRouteUrlForSpace('/api/entity_analytics/monitoring/engine/init', kibanaSpace))
@@ -593,6 +617,9 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
+  /**
+   * Installs the privileged access detection integration package and sets up the associated ML modules required for the Entity Analytics privileged user monitoring experience.
+   */
   installPrivilegedAccessDetectionPackage(kibanaSpace: string = 'default') {
     return supertest
       .post(
@@ -649,6 +676,9 @@ Each row will match up to 10,000 entities.
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .query(props.query);
   },
+  /**
+   * Returns a list of all privileged users currently being monitored. Supports optional KQL filtering.
+   */
   listPrivMonUsers(props: ListPrivMonUsersProps, kibanaSpace: string = 'default') {
     return supertest
       .get(getRouteUrlForSpace('/api/entity_analytics/monitoring/users/list', kibanaSpace))
@@ -676,6 +706,9 @@ Each row will match up to 10,000 entities.
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .query(props.query);
   },
+  /**
+   * Returns a list of all entity analytics watchlists.
+   */
   listWatchlists(kibanaSpace: string = 'default') {
     return supertest
       .get(getRouteUrlForSpace('/api/entity_analytics/watchlists/list', kibanaSpace))
@@ -694,6 +727,9 @@ Each row will match up to 10,000 entities.
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
+  /**
+   * Bulk upserts privileged users by uploading a CSV file. Returns per-row errors and aggregate upload statistics.
+   */
   privmonBulkUploadUsersCsv(kibanaSpace: string = 'default') {
     return supertest
       .post(getRouteUrlForSpace('/api/entity_analytics/monitoring/users/_csv', kibanaSpace))
@@ -701,6 +737,9 @@ Each row will match up to 10,000 entities.
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
+  /**
+   * Returns the current health status of the Privilege Monitoring Engine, including engine status, error details, and user count statistics.
+   */
   privMonHealth(kibanaSpace: string = 'default') {
     return supertest
       .get(getRouteUrlForSpace('/api/entity_analytics/monitoring/privileges/health', kibanaSpace))
@@ -741,6 +780,9 @@ Each row will match up to 10,000 entities.
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
+  /**
+   * Schedules the Privilege Monitoring Engine to run as soon as possible, triggering an immediate monitoring cycle.
+   */
   scheduleMonitoringEngine(kibanaSpace: string = 'default') {
     return supertest
       .post(
@@ -863,6 +905,9 @@ remain on the watchlist.
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
+  /**
+   * Updates the details of an existing monitored privileged user by their document ID.
+   */
   updatePrivMonUser(props: UpdatePrivMonUserProps, kibanaSpace: string = 'default') {
     return supertest
       .put(
@@ -876,6 +921,9 @@ remain on the watchlist.
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
+  /**
+   * Updates the name, description, risk modifier, or managed status of an existing entity analytics watchlist.
+   */
   updateWatchlist(props: UpdateWatchlistProps, kibanaSpace: string = 'default') {
     return supertest
       .put(

@@ -21,6 +21,11 @@ paths:
                 properties:
                   cleanup_successful:
                     type: boolean
+              examples:
+                CleanUpRiskEngineResponse:
+                  summary: Successful cleanup response
+                  value:
+                    cleanup_successful: true
         '400':
           description: Task manager is unavailable
           content:
