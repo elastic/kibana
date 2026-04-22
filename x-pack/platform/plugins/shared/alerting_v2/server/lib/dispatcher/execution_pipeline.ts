@@ -15,6 +15,7 @@ import type {
   DispatcherPipelineInput,
   DispatcherPipelineState,
   DispatcherStageCounts,
+  DispatcherStageError,
   DispatcherStageTiming,
   DispatcherStep,
   DispatcherStepOutput,
@@ -77,31 +78,63 @@ export class DispatcherPipeline implements DispatcherPipelineContract {
     };
   }
 
+  /**
+   * Execute a single step and return its timing entry plus the next state.
+   *
+   * A step can end a tick in three ways:
+   *   1. Resolve with `{ type: 'continue' }` — pipeline proceeds.
+   *   2. Resolve with `{ type: 'halt', reason }`   — controlled halt; the
+   *      timing is recorded with `halted: true` and the reason bubbles up.
+   *   3. Throw                                    — treated as a halt with
+   *      reason `step_error`; the error is logged at `error` level (for
+   *      stack trace) and a compact `error` field is attached to the
+   *      timing so the per-tick summary stays queryable. The pipeline
+   *      itself never throws out of `execute`.
+   */
   private async runStage(
     step: DispatcherStep,
     state: DispatcherPipelineState
   ): Promise<StageExecutionResult> {
     const startedAt = process.hrtime.bigint();
 
-    const output = await withDispatcherSpan(
-      step.name,
-      () => step.execute(state),
-      (stepOutput) => toSpanLabels(computeStateCounts(applyStepOutput(state, stepOutput)))
-    );
+    try {
+      const output = await withDispatcherSpan(
+        step.name,
+        () => step.execute(state),
+        (stepOutput) => toSpanLabels(computeStateCounts(applyStepOutput(state, stepOutput)))
+      );
 
-    const durationMs = Number(process.hrtime.bigint() - startedAt) / 1_000_000;
-    const nextState = applyStepOutput(state, output);
+      const durationMs = Number(process.hrtime.bigint() - startedAt) / 1_000_000;
+      const nextState = applyStepOutput(state, output);
 
-    return {
-      timing: {
-        name: step.name,
-        duration_ms: roundMs(durationMs),
-        halted: output.type === 'halt',
-        counts: computeStateCounts(nextState),
-      },
-      haltReason: output.type === 'halt' ? output.reason : undefined,
-      nextState,
-    };
+      return {
+        timing: {
+          name: step.name,
+          duration_ms: roundMs(durationMs),
+          halted: output.type === 'halt',
+          counts: computeStateCounts(nextState),
+        },
+        haltReason: output.type === 'halt' ? output.reason : undefined,
+        nextState,
+      };
+    } catch (err) {
+      const durationMs = Number(process.hrtime.bigint() - startedAt) / 1_000_000;
+      const error = err instanceof Error ? err : new Error(String(err));
+
+      this.logger.error({ error, type: `dispatcher:${step.name}` });
+
+      return {
+        timing: {
+          name: step.name,
+          duration_ms: roundMs(durationMs),
+          halted: true,
+          counts: computeStateCounts(state),
+          error: toStageError(error),
+        },
+        haltReason: 'step_error',
+        nextState: state,
+      };
+    }
   }
 }
 
@@ -134,6 +167,13 @@ function toSpanLabels(counts: DispatcherStageCounts): Record<string, number> {
   return Object.fromEntries(
     Object.entries(counts).map(([key, value]) => [`count_${key}`, value as number])
   );
+}
+
+function toStageError(error: Error): DispatcherStageError {
+  return {
+    type: error.name || 'Error',
+    message: error.message,
+  };
 }
 
 function roundMs(value: number): number {

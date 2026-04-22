@@ -60,11 +60,23 @@ export type DispatcherCountKey =
   | 'dispatch'
   | 'throttled';
 
+/**
+ * Minimal, log-safe representation of an error thrown by a pipeline step.
+ * We intentionally only keep the class name and message here — stack traces
+ * are emitted separately at `error` level so the per-tick summary stays
+ * compact and queryable.
+ */
+export interface DispatcherStageError {
+  readonly type: string;
+  readonly message: string;
+}
+
 export interface DispatcherStageTiming {
   readonly name: string;
   readonly duration_ms: number;
   readonly halted: boolean;
   readonly counts: DispatcherStageCounts;
+  readonly error?: DispatcherStageError;
 }
 
 export interface DispatcherTickSummary {
@@ -175,7 +187,15 @@ export interface DispatcherPipelineState {
   readonly throttled?: NotificationGroup[];
 }
 
-export type DispatcherHaltReason = 'no_episodes' | 'no_actions';
+/**
+ * Reasons a dispatcher tick stopped before completing all stages.
+ *
+ * - `no_episodes` / `no_actions`: controlled halts, returned by a step's
+ *   own output when there is nothing further to do. Expected, non-error.
+ * - `step_error`: a step threw an unhandled exception. Never returned by
+ *   a step directly; produced by the pipeline when it catches a throw.
+ */
+export type DispatcherHaltReason = 'no_episodes' | 'no_actions' | 'step_error';
 
 export type DispatcherStepOutput =
   | { type: 'continue'; data?: Partial<Omit<DispatcherPipelineState, 'input'>> }

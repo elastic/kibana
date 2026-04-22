@@ -114,22 +114,72 @@ describe('DispatcherPipeline', () => {
       expect(result.finalState.dispatchable).toBeDefined();
     });
 
-    it('propagates errors from steps', async () => {
-      const { loggerService } = createLoggerService();
+    it('converts a thrown step into a step_error halt and stops execution', async () => {
+      const { loggerService, mockLogger } = createLoggerService();
 
-      const step1 = createMockDispatcherStep('step1', async () => {
-        throw new Error('Step failed');
+      const step1 = createMockDispatcherStep('fetch_episodes', async () => ({
+        type: 'continue',
+        data: {
+          episodes: [{ rule_id: 'r', group_hash: 'g', episode_id: 'e1' } as any],
+        },
+      }));
+      const failingStep = createMockDispatcherStep('apply_suppression', async () => {
+        const err = new TypeError('boom');
+        throw err;
       });
+      const step3 = createMockDispatcherStep('fetch_rules', async () => ({ type: 'continue' }));
 
-      const step2 = createMockDispatcherStep('step2', async () => {
-        return { type: 'continue' };
-      });
-
-      const pipeline = new DispatcherPipeline(loggerService, [step1, step2]);
+      const pipeline = new DispatcherPipeline(loggerService, [step1, failingStep, step3]);
       const input = createDispatcherPipelineInput();
 
-      await expect(pipeline.execute(input)).rejects.toThrow('Step failed');
-      expect(step2.execute).not.toHaveBeenCalled();
+      const result = await pipeline.execute(input);
+
+      expect(result.completed).toBe(false);
+      expect(result.haltReason).toBe('step_error');
+      expect(step3.execute).not.toHaveBeenCalled();
+
+      expect(result.stageTimings).toHaveLength(2);
+      expect(result.stageTimings[0]).toMatchObject({ name: 'fetch_episodes', halted: false });
+      expect(result.stageTimings[0].error).toBeUndefined();
+
+      const failed = result.stageTimings[1];
+      expect(failed).toMatchObject({
+        name: 'apply_suppression',
+        halted: true,
+        error: { type: 'TypeError', message: 'boom' },
+      });
+      // State reached by the prior successful step is preserved.
+      expect(failed.counts.episodes).toBe(1);
+      expect(result.finalState.episodes).toHaveLength(1);
+
+      // The exception is also surfaced at error level with a stack trace
+      // so operators can filter on log.level=ERROR without parsing tick meta.
+      expect(mockLogger.error).toHaveBeenCalledTimes(1);
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'boom',
+        expect.objectContaining({
+          error: expect.objectContaining({ type: 'dispatcher:apply_suppression' }),
+        })
+      );
+    });
+
+    it('wraps non-Error throws with a synthetic Error and still halts cleanly', async () => {
+      const { loggerService } = createLoggerService();
+
+      const step = createMockDispatcherStep('fetch_episodes', async () => {
+        // eslint-disable-next-line no-throw-literal
+        throw 'just a string';
+      });
+
+      const pipeline = new DispatcherPipeline(loggerService, [step]);
+      const result = await pipeline.execute(createDispatcherPipelineInput());
+
+      expect(result.completed).toBe(false);
+      expect(result.haltReason).toBe('step_error');
+      expect(result.stageTimings[0].error).toEqual({
+        type: 'Error',
+        message: 'just a string',
+      });
     });
 
     it('returns completed result when no steps', async () => {

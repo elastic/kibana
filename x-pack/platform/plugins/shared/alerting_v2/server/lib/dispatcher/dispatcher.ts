@@ -11,7 +11,11 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../services/logger_service/logger_service';
-import { DispatcherPipeline, type DispatcherPipelineContract } from './execution_pipeline';
+import {
+  DispatcherPipeline,
+  type DispatcherPipelineContract,
+  type DispatcherPipelineResult,
+} from './execution_pipeline';
 import type {
   DispatcherExecutionParams,
   DispatcherExecutionResult,
@@ -49,19 +53,43 @@ export class DispatcherService implements DispatcherServiceContract {
   }: DispatcherExecutionParams): Promise<DispatcherExecutionResult> {
     const startedAt = new Date();
 
-    const pipelineResult = await this.pipeline.execute({ startedAt, previousStartedAt });
+    let pipelineResult: DispatcherPipelineResult;
+    try {
+      pipelineResult = await this.pipeline.execute({ startedAt, previousStartedAt });
+    } catch (err) {
+      // The pipeline catches step exceptions internally and converts them
+      // into `step_error` halts, so reaching this branch means something
+      // below the pipeline (span wrapper, instrumentation, etc.) threw.
+      // We still emit a tick summary so the outage is visible in logs,
+      // then re-throw so Task Manager records the task as failed.
+      const error = err instanceof Error ? err : new Error(String(err));
+      this.emitTickSummary(
+        buildTickSummary({
+          startedAt,
+          previousStartedAt,
+          completed: false,
+          haltReason: 'step_error',
+          stages: [],
+        })
+      );
+      this.logger.error({ error, type: 'dispatcher:pipeline' });
+      throw error;
+    }
 
-    const finishedAt = new Date();
-    const tick: DispatcherTickSummary = {
-      started_at: startedAt.toISOString(),
-      finished_at: finishedAt.toISOString(),
-      duration_ms: finishedAt.getTime() - startedAt.getTime(),
-      previous_started_at: previousStartedAt.toISOString(),
+    const tick = buildTickSummary({
+      startedAt,
+      previousStartedAt,
       completed: pipelineResult.completed,
-      halt_reason: pipelineResult.haltReason ?? null,
+      haltReason: pipelineResult.haltReason ?? null,
       stages: pipelineResult.stageTimings,
-    };
+    });
 
+    this.emitTickSummary(tick);
+
+    return { startedAt, tick };
+  }
+
+  private emitTickSummary(tick: DispatcherTickSummary): void {
     this.logger.info<DispatcherTickLogMeta>({
       message: 'dispatcher tick complete',
       meta: {
@@ -72,7 +100,30 @@ export class DispatcherService implements DispatcherServiceContract {
         },
       },
     });
-
-    return { startedAt, tick };
   }
+}
+
+function buildTickSummary({
+  startedAt,
+  previousStartedAt,
+  completed,
+  haltReason,
+  stages,
+}: {
+  startedAt: Date;
+  previousStartedAt: Date;
+  completed: boolean;
+  haltReason: DispatcherTickSummary['halt_reason'];
+  stages: DispatcherTickSummary['stages'];
+}): DispatcherTickSummary {
+  const finishedAt = new Date();
+  return {
+    started_at: startedAt.toISOString(),
+    finished_at: finishedAt.toISOString(),
+    duration_ms: finishedAt.getTime() - startedAt.getTime(),
+    previous_started_at: previousStartedAt.toISOString(),
+    completed,
+    halt_reason: haltReason,
+    stages,
+  };
 }

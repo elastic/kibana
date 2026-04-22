@@ -759,5 +759,82 @@ describe('DispatcherService', () => {
       expect(result.tick.halt_reason).toBe('no_episodes');
       expect(result.tick.completed).toBe(false);
     });
+
+    it('emits a tick summary with halt_reason=step_error when a step throws', async () => {
+      // Make the first ES|QL call (fetch_episodes) reject. The pipeline
+      // should catch the throw, record it on the failing stage, and
+      // surface it on the tick summary rather than letting it escape.
+      queryEsClient.esql.query.mockRejectedValueOnce(new Error('es unavailable'));
+
+      const result = await dispatcherService.run({
+        previousStartedAt: new Date('2026-01-22T07:30:00.000Z'),
+      });
+
+      const tickInfoCalls = mockLogger.info.mock.calls.filter(
+        ([message]) => message === 'dispatcher tick complete'
+      );
+      expect(tickInfoCalls).toHaveLength(1);
+
+      const tick = (tickInfoCalls[0][1] as any)?.kibana?.alerting_v2?.dispatcher?.tick;
+      expect(tick.completed).toBe(false);
+      expect(tick.halt_reason).toBe('step_error');
+
+      expect(tick.stages).toHaveLength(1);
+      const failed = tick.stages[0];
+      expect(failed.name).toBe('fetch_episodes');
+      expect(failed.halted).toBe(true);
+      expect(failed.error).toEqual({
+        type: expect.any(String),
+        message: 'es unavailable',
+      });
+      expect(failed.counts.episodes).toBe(0);
+
+      // The underlying error is also emitted at ERROR level.
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'es unavailable',
+        expect.objectContaining({
+          error: expect.objectContaining({ type: 'dispatcher:fetch_episodes' }),
+        })
+      );
+
+      // Return value mirrors the log.
+      expect(result.tick).toEqual(tick);
+      expect(storageEsClient.bulk).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('defence in depth: pipeline-level throw', () => {
+    it('still emits a tick summary and rethrows when pipeline.execute itself throws', async () => {
+      const { loggerService, mockLogger: localLogger } = createLoggerService();
+      const throwingPipeline: { execute: jest.Mock } = {
+        execute: jest.fn().mockRejectedValue(new Error('pipeline exploded')),
+      };
+
+      const service = new DispatcherService(throwingPipeline as any, loggerService);
+
+      const previousStartedAt = new Date('2026-01-22T07:30:00.000Z');
+
+      await expect(service.run({ previousStartedAt })).rejects.toThrow('pipeline exploded');
+
+      const tickInfoCalls = localLogger.info.mock.calls.filter(
+        ([message]) => message === 'dispatcher tick complete'
+      );
+      expect(tickInfoCalls).toHaveLength(1);
+
+      const tick = (tickInfoCalls[0][1] as any)?.kibana?.alerting_v2?.dispatcher?.tick;
+      expect(tick).toMatchObject({
+        completed: false,
+        halt_reason: 'step_error',
+        previous_started_at: previousStartedAt.toISOString(),
+        stages: [],
+      });
+
+      expect(localLogger.error).toHaveBeenCalledWith(
+        'pipeline exploded',
+        expect.objectContaining({
+          error: expect.objectContaining({ type: 'dispatcher:pipeline' }),
+        })
+      );
+    });
   });
 });
