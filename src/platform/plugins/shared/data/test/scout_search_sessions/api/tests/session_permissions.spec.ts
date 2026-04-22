@@ -20,7 +20,7 @@ apiTest.describe(
     apiTest.beforeAll(async ({ samlAuth }) => {
       // Role with only dashboard read — no session store privileges
       ({ cookieHeader: analystCookieHeader } = await samlAuth.asInteractiveUser({
-        elasticsearch: { cluster: [] },
+        elasticsearch: { cluster: [], indices: [] },
         kibana: [{ base: [], feature: { dashboard: ['read'] }, spaces: ['*'] }],
       }));
     });
