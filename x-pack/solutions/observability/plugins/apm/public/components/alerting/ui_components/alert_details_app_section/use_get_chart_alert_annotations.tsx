@@ -16,6 +16,7 @@ import {
   AlertThresholdTimeRangeRect,
 } from '@kbn/observability-alert-details';
 import { useEuiTheme } from '@elastic/eui';
+import { isAnomalyRuleType } from './helpers';
 
 interface UseGetChartAlertAnnotationsProps {
   alert: TopAlert;
@@ -34,6 +35,8 @@ export const useGetChartAlertAnnotations = ({
 }: UseGetChartAlertAnnotationsProps): ReactElement[] | undefined => {
   const { euiTheme } = useEuiTheme();
 
+  const isAnomaly = isAnomalyRuleType(alert.fields[ALERT_RULE_TYPE_ID]);
+
   if (
     !isMatchingRuleType(alert.fields[ALERT_RULE_TYPE_ID]) &&
     customAlertEvaluationThreshold == null
@@ -47,7 +50,7 @@ export const useGetChartAlertAnnotations = ({
     const alertEvalThreshold =
       customAlertEvaluationThreshold ?? alert.fields[ALERT_EVALUATION_THRESHOLD];
 
-    if (alertEvalThreshold == null) return [];
+    if (alertEvalThreshold == null || isAnomaly) return [];
 
     const normalizedThreshold = normalizeThreshold
       ? normalizeThreshold(alertEvalThreshold)

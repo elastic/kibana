@@ -27,7 +27,7 @@ import { isTimeComparison } from '../../../shared/time_comparison/get_comparison
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { getLatencyChartSelector } from '../../../../selectors/latency_chart_selectors';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
-import { isLatencyThresholdRuleType } from './helpers';
+import { isLatencyThresholdRuleType, isAnomalyRuleType } from './helpers';
 import { useGetChartAlertAnnotations } from './use_get_chart_alert_annotations';
 import { ApmDocumentType } from '../../../../../common/document_type';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
@@ -137,7 +137,8 @@ export function LatencyChart({
   const alertAnnotations = useGetChartAlertAnnotations({
     alert,
     customAlertEvaluationThreshold,
-    isMatchingRuleType: isLatencyThresholdRuleType,
+    isMatchingRuleType: (id) =>
+      isLatencyThresholdRuleType(id) || (!!threshold && isAnomalyRuleType(id)),
     dateFormat,
   });
 

@@ -6,51 +6,75 @@
  */
 
 import type { ReactElement } from 'react';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { formatAlertEvaluationValue, Threshold } from '@kbn/observability-plugin/public';
+import {
+  AnomalyThreshold,
+  formatAlertEvaluationValue,
+  Threshold,
+} from '@kbn/observability-plugin/public';
 import { useChartThemes } from '@kbn/observability-shared-plugin/public';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
-import type { ApmRuleType } from '@kbn/rule-data-utils';
 import {
   ALERT_END,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_RULE_TYPE_ID,
+  ALERT_SEVERITY,
   ALERT_START,
 } from '@kbn/rule-data-utils';
 import { EuiCallOut } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
+import { capitalize } from 'lodash';
 import {
+  ANOMALY_DETECTOR_TYPE,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../../../common/es_fields/apm';
+import {
+  ANOMALY_ALERT_SEVERITY_TYPES,
+  getApmMlDetectorLabel,
+} from '../../../../../common/rules/apm_rule_types';
+import type { AnomalyDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
 import { TimeRangeMetadataContextProvider } from '../../../../context/time_range_metadata/time_range_metadata_context';
 import { getComparisonChartTheme } from '../../../shared/time_comparison/get_comparison_chart_theme';
 import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
 import { FailedTransactionChart } from './failed_transaction_chart';
-import { getAggsTypeFromRule } from './helpers';
+import { getAggsTypeFromRule, isAnomalyRuleType } from './helpers';
 import { LatencyChart } from './latency_chart';
 import { ThroughputChart } from './throughput_chart';
 import type { AlertDetailsAppSectionProps, ChartId } from './types';
-import { DEFAULT_LAYOUT, RULE_TYPE_CHART_LAYOUTS } from './types';
+import { DEFAULT_LAYOUT, getAnomalyChartLayout, RULE_TYPE_CHART_LAYOUTS } from './types';
 
-export function AlertDetailsAppSection({ rule, alert, timeZone }: AlertDetailsAppSectionProps) {
+export function AlertDetailsAppSection({
+  rule,
+  alert,
+  timeZone,
+  setSources,
+}: AlertDetailsAppSectionProps) {
   const { services } = useKibana();
   createCallApmApi(services as CoreStart);
 
   const alertRuleTypeId = alert.fields[ALERT_RULE_TYPE_ID];
   const alertEvaluationValue = alert.fields[ALERT_EVALUATION_VALUE];
   const alertEvaluationThreshold = alert.fields[ALERT_EVALUATION_THRESHOLD];
+  const alertSeverity = alert.fields[ALERT_SEVERITY];
+  const detectorType = alert.fields[ANOMALY_DETECTOR_TYPE];
 
-  const chartLayout = RULE_TYPE_CHART_LAYOUTS[alertRuleTypeId as ApmRuleType] ?? DEFAULT_LAYOUT;
+  const isAnomaly = isAnomalyRuleType(alertRuleTypeId);
+
+  const chartLayout = useMemo(() => {
+    if (isAnomaly) return getAnomalyChartLayout(detectorType);
+
+    return RULE_TYPE_CHART_LAYOUTS[alertRuleTypeId] ?? DEFAULT_LAYOUT;
+  }, [isAnomaly, detectorType, alertRuleTypeId]);
 
   const environment = alert.fields[SERVICE_ENVIRONMENT];
   const serviceName = String(alert.fields[SERVICE_NAME]);
@@ -58,13 +82,45 @@ export function AlertDetailsAppSection({ rule, alert, timeZone }: AlertDetailsAp
   const transactionType = alert.fields[TRANSACTION_TYPE];
 
   const params = rule.params;
-  const latencyAggregationType = getAggsTypeFromRule(params.aggregationType);
+  const latencyAggregationType = getAggsTypeFromRule(params.aggregationType ?? 'avg');
   const timeRange = getPaddedAlertTimeRange(alert.fields[ALERT_START]!, alert.fields[ALERT_END]);
   const comparisonChartTheme = getComparisonChartTheme();
   const chartThemes = useChartThemes();
 
-  const thresholdComponent =
-    alertEvaluationValue && alertEvaluationThreshold ? (
+  const thresholdComponent = useMemo(() => {
+    if (isAnomaly) {
+      const detectorLabel = getApmMlDetectorLabel(detectorType as AnomalyDetectorType);
+      const severityMatch = ANOMALY_ALERT_SEVERITY_TYPES.find(
+        (s) => s.threshold === alertEvaluationThreshold
+      );
+
+      return (
+        <AnomalyThreshold
+          chartProps={chartThemes}
+          id={`${chartLayout.primary}-anomaly-threshold`}
+          title={i18n.translate('xpack.apm.alertDetails.anomalyThresholdTitle', {
+            defaultMessage: 'APM Anomaly detected',
+          })}
+          value={i18n.translate('xpack.apm.alertDetails.anomalyValueLabel', {
+            defaultMessage: '{severity} {detector} anomaly',
+            values: {
+              severity: capitalize(alertSeverity),
+              detector: capitalize(detectorLabel),
+            },
+          })}
+          extra={i18n.translate('xpack.apm.alertDetails.anomalySeveritySubtitle', {
+            defaultMessage: 'Alert when {severity} or above',
+            values: {
+              severity: severityMatch?.label ?? alertEvaluationThreshold,
+            },
+          })}
+        />
+      );
+    }
+
+    if (!alertEvaluationValue || !alertEvaluationThreshold) return undefined;
+
+    return (
       <Threshold
         chartProps={chartThemes}
         id={`${chartLayout.primary}-threshold`}
@@ -76,9 +132,20 @@ export function AlertDetailsAppSection({ rule, alert, timeZone }: AlertDetailsAp
         })}
         comparator={COMPARATORS.GREATER_THAN}
       />
-    ) : undefined;
+    );
+  }, [
+    isAnomaly,
+    detectorType,
+    alertSeverity,
+    alertEvaluationValue,
+    alertEvaluationThreshold,
+    chartThemes,
+    chartLayout.primary,
+    alertRuleTypeId,
+  ]);
 
   const { from, to } = timeRange;
+
   if (!from || !to) {
     return (
       <EuiCallOut
@@ -138,8 +205,9 @@ export function AlertDetailsAppSection({ rule, alert, timeZone }: AlertDetailsAp
         ruleTypeId={alertRuleTypeId}
       />
     ),
-    throughput: () => (
+    throughput: (isPrimary) => (
       <ThroughputChart
+        alert={alert}
         transactionType={transactionType}
         transactionName={transactionName}
         serviceName={serviceName}
@@ -150,6 +218,7 @@ export function AlertDetailsAppSection({ rule, alert, timeZone }: AlertDetailsAp
         comparisonEnabled={false}
         offset={''}
         timeZone={timeZone}
+        threshold={isPrimary ? thresholdComponent : undefined}
         ruleTypeId={alertRuleTypeId}
       />
     ),

@@ -73,6 +73,7 @@ const ObservabilityApmAlertRequired = rt.type({
 // prettier-ignore
 const ObservabilityApmAlertOptional = rt.partial({
   'agent.name': schemaString,
+  'anomaly.detector_type': schemaString,
   'container.id': schemaString,
   'error.grouping_key': schemaString,
   'error.grouping_name': schemaString,

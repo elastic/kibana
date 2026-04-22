@@ -20,6 +20,8 @@ export const isLatencyThresholdRuleType = (ruleTypeId: string) =>
 export const isFailedTransactionRateRuleType = (ruleTypeId: string) =>
   ruleTypeId === ApmRuleType.TransactionErrorRate;
 
+export const isAnomalyRuleType = (ruleTypeId: string) => ruleTypeId === ApmRuleType.Anomaly;
+
 export const yLabelFormat = (y?: number | null) => {
   return asPercent(y || 0, 1);
 };

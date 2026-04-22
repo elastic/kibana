@@ -8,11 +8,14 @@
 import type { Rule } from '@kbn/alerting-plugin/common';
 import type { TopAlert } from '@kbn/observability-plugin/public';
 import type { TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
+import type { AlertDetailsAppSectionProps as ObsAlertDetailsAppSectionProps } from '@kbn/observability-plugin/public';
 import { ApmRuleType } from '@kbn/rule-data-utils';
+import { AnomalyDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
 import type {
+  ANOMALY_DETECTOR_TYPE,
   SERVICE_NAME,
-  TRANSACTION_TYPE,
   SERVICE_ENVIRONMENT,
+  TRANSACTION_TYPE,
   TRANSACTION_NAME,
 } from '../../../../../common/es_fields/apm';
 
@@ -28,7 +31,7 @@ export const DEFAULT_LAYOUT: ChartLayout = {
   secondary: ['throughput', 'failedTransactionRate'],
 };
 
-export const RULE_TYPE_CHART_LAYOUTS: Partial<Record<ApmRuleType, ChartLayout>> = {
+export const RULE_TYPE_CHART_LAYOUTS: Record<string, ChartLayout> = {
   [ApmRuleType.TransactionDuration]: DEFAULT_LAYOUT,
   [ApmRuleType.TransactionErrorRate]: {
     primary: 'failedTransactionRate',
@@ -36,10 +39,30 @@ export const RULE_TYPE_CHART_LAYOUTS: Partial<Record<ApmRuleType, ChartLayout>> 
   },
 };
 
-export interface AlertDetailsAppSectionProps {
+const ANOMALY_DETECTOR_CHART_LAYOUTS: Record<AnomalyDetectorType, ChartLayout> = {
+  [AnomalyDetectorType.txLatency]: DEFAULT_LAYOUT,
+  [AnomalyDetectorType.txThroughput]: {
+    primary: 'throughput',
+    secondary: ['latency', 'failedTransactionRate'],
+  },
+  [AnomalyDetectorType.txFailureRate]: {
+    primary: 'failedTransactionRate',
+    secondary: ['throughput', 'latency'],
+  },
+};
+
+export const getAnomalyChartLayout = (detectorType?: string): ChartLayout => {
+  if (detectorType && detectorType in ANOMALY_DETECTOR_CHART_LAYOUTS) {
+    return ANOMALY_DETECTOR_CHART_LAYOUTS[detectorType as AnomalyDetectorType];
+  }
+
+  return DEFAULT_LAYOUT;
+};
+
+export interface AlertDetailsAppSectionProps extends ObsAlertDetailsAppSectionProps {
   rule: Rule<{
     environment: string;
-    aggregationType: string;
+    aggregationType?: string;
     windowSize: number;
     windowUnit: TIME_UNITS;
   }>;
@@ -48,6 +71,7 @@ export interface AlertDetailsAppSectionProps {
     [TRANSACTION_TYPE]: string;
     [TRANSACTION_NAME]?: string;
     [SERVICE_ENVIRONMENT]: string;
+    [ANOMALY_DETECTOR_TYPE]?: string;
   }>;
   timeZone: string;
 }
