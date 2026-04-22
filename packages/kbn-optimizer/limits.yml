@@ -3,7 +3,7 @@ pageLoadAssetSize:
   advancedSettings: 6196
   agentBuilder: 45717
   agentBuilderPlatform: 8886
-  aiAssistantManagementSelection: 13590
+  aiAssistantManagementSelection: 11569
   aiops: 15227
   alerting: 22371
   alertingVTwo: 47881
@@ -47,7 +47,7 @@ pageLoadAssetSize:
   discover: 30501
   discoverEnhanced: 5509
   discoverShared: 2322
-  elasticAssistant: 301540
+  elasticAssistant: 298502
   elasticAssistantSharedState: 4881
   elasticConsole: 4451
   embeddable: 16634
@@ -115,7 +115,7 @@ pageLoadAssetSize:
   maps: 45917
   mapsEms: 6734
   metricsDataAccess: 44950
-  ml: 102091
+  ml: 102017
   mockIdpPlugin: 7463
   monitoring: 28983
   navigation: 11814
@@ -154,7 +154,7 @@ pageLoadAssetSize:
   searchAssistant: 7079
   searchGettingStarted: 6678
   searchHomepage: 9005
-  searchInferenceEndpoints: 10345
+  searchInferenceEndpoints: 9695
   searchNavigation: 8900
   searchNotebooks: 18826
   searchPlayground: 12122
@@ -162,7 +162,7 @@ pageLoadAssetSize:
   searchQueryRules: 6689
   searchSynonyms: 6371
   security: 79627
-  securitySolution: 160000
+  securitySolution: 190778
   securitySolutionEss: 38689
   securitySolutionServerless: 52082
   serverless: 7412
