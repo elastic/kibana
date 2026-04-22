@@ -28,7 +28,6 @@ import type { AgentsServiceSetup, AgentsServiceStart } from './agents';
 import type { ConversationService } from './conversation';
 import type { AttachmentServiceSetup, AttachmentServiceStart } from './attachments';
 import type { SkillServiceSetup, SkillServiceStart } from './skills';
-import type { SmlService, SmlServiceSetup } from './sml';
 import type { TrackingService } from '../telemetry/tracking_service';
 import type { AnalyticsService } from '../telemetry';
 import type { AuditLogService } from '../audit';
@@ -44,7 +43,6 @@ export interface InternalSetupServices {
   skills: SkillServiceSetup;
   plugins: PluginsServiceSetup;
   metering: MeteringService;
-  sml: SmlServiceSetup;
 }
 
 export interface InternalStartServices {
@@ -62,7 +60,6 @@ export interface InternalStartServices {
   savedObjects: SavedObjectsServiceStart;
   execution: AgentExecutionService;
   taskHandler: TaskHandler;
-  sml: SmlService;
   plugins: PluginsServiceStart;
   consumption: ConsumptionServiceStart;
 }

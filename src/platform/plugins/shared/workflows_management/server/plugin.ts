@@ -272,13 +272,20 @@ export class WorkflowsPlugin
   ): void {
     void core.plugins
       .onSetup<{ agentBuilder: AgentBuilderPluginSetupContract }>('agentBuilder')
-      .then(({ agentBuilder }) => {
+      .then(async ({ agentBuilder }) => {
         if (agentBuilder.found) {
           this.logger.debug(
             'Workflows Management: Agent Builder found, registering AI integration'
           );
+          const semanticLayerResult = await core.plugins.onSetup<{
+            semanticLayer: { registerType: (def: unknown) => void };
+          }>('semanticLayer');
+          const semanticLayerContract = semanticLayerResult.semanticLayer.found
+            ? semanticLayerResult.semanticLayer.contract
+            : undefined;
           registerWorkflowAgentBuilderIntegration({
             agentBuilder: agentBuilder.contract,
+            semanticLayer: semanticLayerContract,
             logger: this.logger,
             api,
             aiTelemetryClient,
@@ -293,22 +300,19 @@ export class WorkflowsPlugin
       });
 
     void core.plugins
-      .onStart<{ agentBuilder: { sml: { indexAttachment: SmlIndexAttachmentFn } } }>('agentBuilder')
-      .then(({ agentBuilder }) => {
-        if (agentBuilder.found) {
-          api.setSmlIndexAttachment(
-            agentBuilder.contract.sml.indexAttachment,
-            this.logger.get('sml')
-          );
+      .onStart<{ semanticLayer: { indexAttachment: SmlIndexAttachmentFn } }>('semanticLayer')
+      .then(({ semanticLayer }) => {
+        if (semanticLayer.found) {
+          api.setSmlIndexAttachment(semanticLayer.contract.indexAttachment, this.logger.get('sml'));
           this.logger.debug(
-            'Workflows Management: SML event-driven indexing wired to workflow CRUD'
+            'Workflows Management: SML event-driven indexing wired to Semantic Layer'
           );
         }
       })
       .catch((err) => {
         const message = err instanceof Error ? err.message : String(err);
         this.logger.warn(
-          `Workflows Management: Failed to wire SML indexing with Agent Builder: ${message}`
+          `Workflows Management: Failed to wire SML indexing with Semantic Layer: ${message}`
         );
       });
   }

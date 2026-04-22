@@ -12,22 +12,17 @@ import {
   type VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { resolveSmlAttachItems } from '@kbn/semantic-layer-plugin/server';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
 import { internalApiPath } from '../../../common/constants';
 import {
   SML_HTTP_ATTACH_ITEMS_MAX,
-  SML_HTTP_SEARCH_QUERY_MAX_LENGTH,
   type SmlAttachHttpResponse,
   type SmlAttachHttpResultItem,
-  type SmlSearchHttpResponse,
 } from '../../../common/http_api/sml';
-import { AGENT_BUILDER_READ_SECURITY, AGENT_BUILDER_WRITE_SECURITY } from '../route_security';
-import { resolveSmlAttachItems } from '../../services/sml/execute_sml_attach_items';
+import { AGENT_BUILDER_WRITE_SECURITY } from '../route_security';
 import { applyAttachmentRefsToRounds } from '../../services/conversation/client/migrate_attachments';
-
-/** Max page size for SML HTTP search (separate from default UI size). */
-const SML_SEARCH_SIZE_MAX = 1000;
 
 const mergeAttachmentsById = (
   latestAttachments: VersionedAttachment[],
@@ -56,55 +51,6 @@ export function registerInternalSmlRoutes({
 
   router.post(
     {
-      path: `${internalApiPath}/sml/_search`,
-      validate: {
-        body: schema.object({
-          query: schema.string({ minLength: 1, maxLength: SML_HTTP_SEARCH_QUERY_MAX_LENGTH }),
-          size: schema.maybe(schema.number({ min: 1, max: SML_SEARCH_SIZE_MAX })),
-          skip_content: schema.maybe(schema.boolean()),
-        }),
-      },
-      options: { access: 'internal' },
-      security: AGENT_BUILDER_READ_SECURITY,
-    },
-    wrapHandler(
-      async (ctx, request, response) => {
-        const { sml } = getInternalServices();
-        const { query, size, skip_content: skipContent } = request.body;
-        const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
-        const spaceId = (await ctx.agentBuilder).spaces.getSpaceId();
-
-        const { results, total } = await sml.search({
-          query,
-          size,
-          spaceId,
-          esClient,
-          request,
-          skipContent,
-        });
-
-        const body: SmlSearchHttpResponse = {
-          total,
-          results: results.map(({ id, type, origin_id, title, score, content }) => ({
-            id,
-            type,
-            origin_id,
-            title,
-            score,
-            ...(skipContent ? {} : { content }),
-          })),
-        };
-
-        return response.ok({ body });
-      },
-      {
-        featureFlag: AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
-      }
-    )
-  );
-
-  router.post(
-    {
       path: `${internalApiPath}/sml/_attach`,
       validate: {
         body: schema.object({
@@ -120,13 +66,11 @@ export function registerInternalSmlRoutes({
     },
     wrapHandler(
       async (ctx, request, response) => {
-        const {
-          sml,
-          conversations: conversationsService,
-          attachments: attachmentsService,
-        } = getInternalServices();
+        const [coreStart, startDeps] = await coreSetup.getStartServices();
+        const sml = startDeps.semanticLayer.getSmlService();
+        const { conversations: conversationsService, attachments: attachmentsService } =
+          getInternalServices();
         const { conversation_id: conversationId, chunk_ids: chunkIds } = request.body;
-        const [coreStart] = await coreSetup.getStartServices();
         const spaceId = (await ctx.agentBuilder).spaces.getSpaceId();
         const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
         const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
@@ -155,7 +99,6 @@ export function registerInternalSmlRoutes({
           getTypeDefinition: attachmentsService.getTypeDefinition,
         });
 
-        // Format the results for the HTTP API
         const resultItems = await Promise.all(
           resolvedItems.map(async (r): Promise<SmlAttachHttpResultItem> => {
             if (!r.success) {
@@ -192,7 +135,6 @@ export function registerInternalSmlRoutes({
           })
         );
 
-        // Update the conversation with the new attachments
         if (resultItems.some((r) => r.success)) {
           const latestConversation = await conversationClient.get(conversationId);
           const newRefs = stateManager.getAccessedRefs();
@@ -202,7 +144,6 @@ export function registerInternalSmlRoutes({
             latestConversation.rounds,
             new Map([[lastRoundIndex, newRefs]])
           );
-          // Merge attachments to prevent duplication or overwriting older attachments
           const mergedAttachments = mergeAttachmentsById(
             latestConversation.attachments ?? [],
             stateManager.getAll()

@@ -2168,6 +2168,8 @@
       "@kbn/securitysolution-t-grid/*": ["x-pack/solutions/security/packages/kbn-securitysolution-t-grid/*"],
       "@kbn/securitysolution-utils": ["x-pack/solutions/security/packages/kbn-securitysolution-utils"],
       "@kbn/securitysolution-utils/*": ["x-pack/solutions/security/packages/kbn-securitysolution-utils/*"],
+      "@kbn/semantic-layer-plugin": ["x-pack/platform/plugins/shared/semantic_layer"],
+      "@kbn/semantic-layer-plugin/*": ["x-pack/platform/plugins/shared/semantic_layer/*"],
       "@kbn/server-http-tools": ["src/platform/packages/shared/kbn-server-http-tools"],
       "@kbn/server-http-tools/*": ["src/platform/packages/shared/kbn-server-http-tools/*"],
       "@kbn/server-route-repository": ["src/platform/packages/shared/kbn-server-route-repository"],

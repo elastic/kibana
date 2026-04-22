@@ -33,7 +33,8 @@
       "triggersActionsUi",
       "esUiShared",
       "workflowsExtensions",
-      "searchInferenceEndpoints"
+      "searchInferenceEndpoints",
+      "semanticLayer"
     ],
     "requiredBundles": [
       "kibanaReact",
