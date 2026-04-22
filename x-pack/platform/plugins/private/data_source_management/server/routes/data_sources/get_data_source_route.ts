@@ -7,7 +7,6 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
-import { i18n } from '@kbn/i18n';
 
 import { DATA_SOURCE_BY_ID_ROUTE_PATH } from '../../../common';
 import { DataSourcesClient } from '../../data_sources_client';
@@ -25,9 +24,6 @@ export function registerGetDataSourceRoute(router: IRouter): void {
       },
       options: {
         access: 'internal',
-        summary: i18n.translate('dataSourceManagement.routes.getDataSource.summary', {
-          defaultMessage: 'Get a data source by id',
-        }),
       },
       validate: {
         params: schema.object({

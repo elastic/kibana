@@ -7,9 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
-import { i18n } from '@kbn/i18n';
 
-import type { DataSource } from '../../../common/types';
+import type { DataSource } from '../../../common';
 import { DATA_SOURCE_BY_ID_ROUTE_PATH } from '../../../common';
 import { DataSourcesClient } from '../../data_sources_client';
 
@@ -31,9 +30,6 @@ export function registerPutDataSourceRoute(router: IRouter): void {
       },
       options: {
         access: 'internal',
-        summary: i18n.translate('dataSourceManagement.routes.putDataSource.summary', {
-          defaultMessage: 'Create or update a data source',
-        }),
       },
       validate: {
         params: schema.object({
