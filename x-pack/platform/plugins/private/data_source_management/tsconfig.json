@@ -6,9 +6,11 @@
   "include": [
     "common/**/*",
     "public/**/*",
+    "server/**/*",
     "../../../../../typings/**/*"
   ],
   "kbn_references": [
+    "@kbn/config-schema",
     "@kbn/core",
     "@kbn/management-plugin",
     "@kbn/i18n",

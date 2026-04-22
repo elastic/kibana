@@ -9,6 +9,18 @@ import { i18n } from '@kbn/i18n';
 
 export const PLUGIN_ID = 'data_source_management';
 
+/** Base path for this plugin's HTTP APIs (internal). */
+export const INTERNAL_API_BASE_PATH = '/internal/data_source_management' as const;
+
+/** GET — list data sources (proxies to Elasticsearch `GET /_query/datasource`). */
+export const DATA_SOURCES_LIST_ROUTE_PATH = `${INTERNAL_API_BASE_PATH}/data_sources` as const;
+
+/**
+ * GET — single data source by id (Kibana route path; `{id}` is a path parameter).
+ * Proxies to Elasticsearch `GET /_query/datasource/{id}`.
+ */
+export const DATA_SOURCE_BY_ID_ROUTE_PATH = `${INTERNAL_API_BASE_PATH}/data_sources/{id}` as const;
+
 export const PLUGIN_NAME = i18n.translate('dataSourceManagement.pluginName', {
   defaultMessage: 'Data sources',
 });
