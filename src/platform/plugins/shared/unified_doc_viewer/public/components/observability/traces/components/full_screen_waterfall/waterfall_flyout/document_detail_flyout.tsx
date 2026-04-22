@@ -70,6 +70,7 @@ export interface DocumentDetailFlyoutProps {
   onCloseFlyout: EuiFlyoutProps['onClose'];
   activeSection?: TraceOverviewSections;
   skipNextEventReport?: boolean;
+  size?: EuiFlyoutProps['size'];
 }
 
 export function DocumentDetailFlyout({
@@ -83,6 +84,7 @@ export function DocumentDetailFlyout({
   onCloseFlyout,
   activeSection,
   skipNextEventReport,
+  size,
 }: DocumentDetailFlyoutProps) {
   const data = useDocumentFlyoutData({ type, docId, traceId, docIndex });
 
@@ -99,6 +101,7 @@ export function DocumentDetailFlyout({
       hasAnimation={hasAnimation}
       flyoutContentId={flyoutConfig.contentId}
       skipNextEventReport={skipNextEventReport}
+      size={size}
     >
       {data.error && <EuiCallOut announceOnMount title={data.error} color="danger" />}
       {flyoutConfig.render({ data, dataView, activeSection })}

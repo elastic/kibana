@@ -92,6 +92,7 @@ export function TraceWaterfallFlyout({
           dataView={dataView}
           indexes={indexes}
           onCloseFlyout={closeDetailFlyout}
+          size="fill"
         />
       )}
     </EuiFlyout>
