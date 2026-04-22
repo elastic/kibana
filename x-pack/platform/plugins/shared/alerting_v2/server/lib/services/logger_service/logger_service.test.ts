@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import type { LogMeta } from '@kbn/logging';
 import { loggerMock } from '@kbn/logging-mocks';
 import { LoggerService } from './logger_service';
 
@@ -29,7 +30,68 @@ describe('LoggerService', () => {
       loggerService.debug({ message });
 
       expect(mockLogger.debug).toHaveBeenCalledTimes(1);
-      expect(mockLogger.debug).toHaveBeenCalledWith(message);
+      expect(mockLogger.debug).toHaveBeenCalledWith(message, undefined);
+    });
+
+    it('should forward structured meta to logger.debug when provided', () => {
+      interface DebugMeta extends LogMeta {
+        kibana: { alerting_v2: { dispatcher: { tick_id: string } } };
+      }
+      const meta: DebugMeta = { kibana: { alerting_v2: { dispatcher: { tick_id: 't1' } } } };
+
+      loggerService.debug<DebugMeta>({ message: 'with meta', meta });
+
+      expect(mockLogger.debug).toHaveBeenCalledWith('with meta', meta);
+    });
+  });
+
+  describe('info', () => {
+    it('should call logger.info with only a message', () => {
+      loggerService.info({ message: 'hello' });
+      expect(mockLogger.info).toHaveBeenCalledWith('hello', undefined);
+    });
+
+    it('should forward structured meta to logger.info when provided', () => {
+      interface InfoMeta extends LogMeta {
+        kibana: {
+          alerting_v2: {
+            dispatcher: {
+              tick: { duration_ms: number; completed: boolean; stages: unknown[] };
+            };
+          };
+        };
+      }
+      const meta: InfoMeta = {
+        kibana: {
+          alerting_v2: {
+            dispatcher: {
+              tick: { duration_ms: 42, completed: true, stages: [] },
+            },
+          },
+        },
+      };
+
+      loggerService.info<InfoMeta>({ message: 'dispatcher tick complete', meta });
+
+      expect(mockLogger.info).toHaveBeenCalledWith('dispatcher tick complete', meta);
+    });
+  });
+
+  describe('warn', () => {
+    it('should call logger.warn with only a message', () => {
+      loggerService.warn({ message: 'warn msg' });
+      expect(mockLogger.warn).toHaveBeenCalledWith('warn msg', undefined);
+    });
+
+    it('should forward structured meta to logger.warn when provided', () => {
+      interface WarnMeta extends LogMeta {
+        kibana: { alerting_v2: { something: string } };
+      }
+      const meta: WarnMeta = { kibana: { alerting_v2: { something: 'off' } } };
+
+      loggerService.warn<WarnMeta>({ message: 'with meta', meta });
+
+      expect(mockLogger.warn).toHaveBeenCalledWith('with meta', meta);
     });
   });
 

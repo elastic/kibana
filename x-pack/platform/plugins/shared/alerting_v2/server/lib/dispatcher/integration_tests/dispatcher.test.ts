@@ -541,7 +541,7 @@ describe('DispatcherService integration tests', () => {
       new DispatchStep(mockLoggerService, mockWfm),
       new StoreActionsStep(storageService),
     ]);
-    dispatcherService = new DispatcherService(pipeline);
+    dispatcherService = new DispatcherService(pipeline, mockLoggerService);
 
     await setNotificationPolicyThrottle(npSoService, null);
     await setNotificationPolicyEnabled(npSoService, NOTIFICATION_POLICY_ID, true);

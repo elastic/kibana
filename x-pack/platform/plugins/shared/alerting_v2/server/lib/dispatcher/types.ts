@@ -39,8 +39,47 @@ export interface DispatcherExecutionParams {
   abortController?: AbortController;
 }
 
+/**
+ * Counts of entities present in the pipeline state after a given stage
+ * completes. Keys are a stable subset of `DispatcherPipelineState` field names
+ * and are always present (defaulting to 0) so downstream consumers (APM, logs,
+ * ES|QL) can aggregate without special-casing per step or tolerating missing
+ * fields.
+ */
+export type DispatcherStageCounts = Readonly<Record<DispatcherCountKey, number>>;
+
+export type DispatcherCountKey =
+  | 'episodes'
+  | 'suppressions'
+  | 'dispatchable'
+  | 'suppressed'
+  | 'rules'
+  | 'policies'
+  | 'matched'
+  | 'groups'
+  | 'dispatch'
+  | 'throttled';
+
+export interface DispatcherStageTiming {
+  readonly name: string;
+  readonly duration_ms: number;
+  readonly halted: boolean;
+  readonly counts: DispatcherStageCounts;
+}
+
+export interface DispatcherTickSummary {
+  readonly started_at: string;
+  readonly finished_at: string;
+  readonly duration_ms: number;
+  readonly previous_started_at: string;
+  readonly completed: boolean;
+  readonly halt_reason: DispatcherHaltReason | null;
+  readonly stages: readonly DispatcherStageTiming[];
+}
+
 export interface DispatcherExecutionResult {
   startedAt: Date;
+  tick: DispatcherTickSummary;
 }
 
 export interface DispatcherTaskState {

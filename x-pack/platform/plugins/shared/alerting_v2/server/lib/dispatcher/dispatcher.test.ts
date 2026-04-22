@@ -7,7 +7,7 @@
 
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import moment from 'moment';
 import {
@@ -102,8 +102,8 @@ function buildDispatcherService(deps: {
   rulesSoService: RulesSavedObjectServiceContract;
   npSoService: NotificationPolicySavedObjectServiceContract;
   workflowsManagement: WorkflowsServerPluginSetup['management'];
-}): DispatcherService {
-  const { loggerService } = createLoggerService();
+}): { dispatcherService: DispatcherService; mockLogger: jest.Mocked<Logger> } {
+  const { loggerService, mockLogger } = createLoggerService();
   const pipeline = new DispatcherPipeline(loggerService, [
     new FetchEpisodesStep(deps.queryService),
     new FetchSuppressionsStep(deps.queryService),
@@ -116,11 +116,13 @@ function buildDispatcherService(deps: {
     new DispatchStep(loggerService, deps.workflowsManagement),
     new StoreActionsStep(deps.storageService),
   ]);
-  return new DispatcherService(pipeline);
+  const dispatcherService = new DispatcherService(pipeline, loggerService);
+  return { dispatcherService, mockLogger };
 }
 
 describe('DispatcherService', () => {
   let dispatcherService: DispatcherService;
+  let mockLogger: jest.Mocked<Logger>;
   let queryService: QueryServiceContract;
   let storageService: StorageServiceContract;
   let queryEsClient: DeeplyMockedApi<ElasticsearchClient>;
@@ -147,13 +149,13 @@ describe('DispatcherService', () => {
 
     mockWfm = createMockWorkflowsManagement();
 
-    dispatcherService = buildDispatcherService({
+    ({ dispatcherService, mockLogger } = buildDispatcherService({
       queryService,
       storageService,
       rulesSoService,
       npSoService,
       workflowsManagement: mockWfm,
-    });
+    }));
   });
 
   afterEach(() => {
@@ -386,13 +388,13 @@ describe('DispatcherService', () => {
 
       mockWfm = createMockWorkflowsManagement();
 
-      dispatcherService = buildDispatcherService({
+      ({ dispatcherService, mockLogger } = buildDispatcherService({
         queryService,
         storageService,
         rulesSoService,
         npSoService,
         workflowsManagement: mockWfm,
-      });
+      }));
 
       // Dataset: 5 rules, 9 episodes total
       // rule-001: single series, ack then unack → fire
@@ -634,6 +636,128 @@ describe('DispatcherService', () => {
           }),
         ])
       );
+    });
+  });
+
+  describe('per-tick summary log', () => {
+    it('emits a single structured info log with tick metadata and per-stage timings after a completed run', async () => {
+      const alertEpisodes: AlertEpisode[] = [
+        {
+          last_event_timestamp: '2026-01-22T07:10:00.000Z',
+          rule_id: 'rule-1',
+          group_hash: 'hash-1',
+          episode_id: 'episode-1',
+          episode_status: 'active',
+        },
+        {
+          last_event_timestamp: '2026-01-22T07:15:00.000Z',
+          rule_id: 'rule-2',
+          group_hash: 'hash-2',
+          episode_id: 'episode-2',
+          episode_status: 'inactive',
+        },
+      ];
+
+      queryEsClient.esql.query
+        .mockResolvedValueOnce(createDispatchableAlertEventsResponse(alertEpisodes))
+        .mockResolvedValueOnce(createAlertEpisodeSuppressionsResponse([]))
+        .mockResolvedValueOnce(createLastNotifiedTimestampsResponse());
+
+      storageEsClient.bulk.mockResolvedValue({
+        items: [{ create: { _id: '1', status: 201 } }, { create: { _id: '2', status: 201 } }],
+        errors: false,
+      } as BulkResponse);
+
+      const previousStartedAt = new Date('2026-01-22T07:30:00.000Z');
+      const result = await dispatcherService.run({ previousStartedAt });
+
+      const tickInfoCalls = mockLogger.info.mock.calls.filter(
+        ([message]) => message === 'dispatcher tick complete'
+      );
+      expect(tickInfoCalls).toHaveLength(1);
+
+      const [message, meta] = tickInfoCalls[0];
+      expect(message).toBe('dispatcher tick complete');
+
+      const tick = (meta as any)?.kibana?.alerting_v2?.dispatcher?.tick;
+      expect(tick).toBeDefined();
+      expect(tick.previous_started_at).toBe(previousStartedAt.toISOString());
+      expect(tick.started_at).toBe(result.startedAt.toISOString());
+      expect(new Date(tick.finished_at).getTime()).toBeGreaterThanOrEqual(
+        result.startedAt.getTime()
+      );
+      expect(tick.duration_ms).toBeGreaterThanOrEqual(0);
+      expect(tick.completed).toBe(true);
+      expect(tick.halt_reason).toBeNull();
+
+      const stageNames = tick.stages.map((s: { name: string }) => s.name);
+      expect(stageNames).toEqual([
+        'fetch_episodes',
+        'fetch_suppressions',
+        'apply_suppression',
+        'fetch_rules',
+        'fetch_policies',
+        'evaluate_matchers',
+        'build_groups',
+        'apply_throttling',
+        'dispatch',
+        'record_actions',
+      ]);
+
+      // Every stage reports the full set of known count keys (defaulting to 0),
+      // so downstream ES|QL/APM aggregations have a stable schema.
+      const expectedCountKeys = [
+        'episodes',
+        'suppressions',
+        'dispatchable',
+        'suppressed',
+        'rules',
+        'policies',
+        'matched',
+        'groups',
+        'dispatch',
+        'throttled',
+      ].sort();
+      for (const stage of tick.stages) {
+        expect(Object.keys(stage.counts).sort()).toEqual(expectedCountKeys);
+      }
+
+      for (const stage of tick.stages) {
+        expect(stage.duration_ms).toBeGreaterThanOrEqual(0);
+        expect(stage.halted).toBe(false);
+        expect(stage.counts).toEqual(expect.any(Object));
+      }
+
+      const fetchEpisodes = tick.stages.find(
+        (s: { name: string }) => s.name === 'fetch_episodes'
+      );
+      expect(fetchEpisodes.counts.episodes).toBe(alertEpisodes.length);
+
+      expect(result.tick).toEqual(tick);
+    });
+
+    it('emits a tick summary with halt_reason set when the pipeline halts early', async () => {
+      queryEsClient.esql.query.mockResolvedValueOnce(createDispatchableAlertEventsResponse([]));
+
+      const previousStartedAt = new Date('2026-01-22T07:30:00.000Z');
+      const result = await dispatcherService.run({ previousStartedAt });
+
+      const tickInfoCalls = mockLogger.info.mock.calls.filter(
+        ([message]) => message === 'dispatcher tick complete'
+      );
+      expect(tickInfoCalls).toHaveLength(1);
+
+      const tick = (tickInfoCalls[0][1] as any)?.kibana?.alerting_v2?.dispatcher?.tick;
+      expect(tick.completed).toBe(false);
+      expect(tick.halt_reason).toBe('no_episodes');
+
+      const haltedStage = tick.stages.find((s: { halted: boolean }) => s.halted);
+      expect(haltedStage).toBeDefined();
+      expect(haltedStage.name).toBe('fetch_episodes');
+      expect(haltedStage.counts.episodes).toBe(0);
+
+      expect(result.tick.halt_reason).toBe('no_episodes');
+      expect(result.tick.completed).toBe(false);
     });
   });
 });

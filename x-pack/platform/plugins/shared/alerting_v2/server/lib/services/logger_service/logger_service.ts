@@ -7,20 +7,23 @@
 
 import { inject, injectable } from 'inversify';
 import type { ServiceIdentifier } from 'inversify';
-import type { Logger, LogMessageSource } from '@kbn/logging';
+import type { Logger, LogMeta, LogMessageSource } from '@kbn/logging';
 import { Logger as BaseLogger } from '@kbn/core-di';
 import type { EcsError } from '@elastic/ecs';
 
-export interface DebugParams {
+export interface DebugParams<Meta extends LogMeta = LogMeta> {
   message: LogMessageSource;
+  meta?: Meta;
 }
 
-export interface InfoParams {
+export interface InfoParams<Meta extends LogMeta = LogMeta> {
   message: LogMessageSource;
+  meta?: Meta;
 }
 
-export interface WarnParams {
+export interface WarnParams<Meta extends LogMeta = LogMeta> {
   message: LogMessageSource;
+  meta?: Meta;
 }
 
 export interface ErrorParams {
@@ -30,9 +33,9 @@ export interface ErrorParams {
 }
 
 export interface LoggerServiceContract {
-  debug(params: DebugParams): void;
-  info(params: InfoParams): void;
-  warn(params: WarnParams): void;
+  debug<Meta extends LogMeta = LogMeta>(params: DebugParams<Meta>): void;
+  info<Meta extends LogMeta = LogMeta>(params: InfoParams<Meta>): void;
+  warn<Meta extends LogMeta = LogMeta>(params: WarnParams<Meta>): void;
   error(params: ErrorParams): void;
 }
 
@@ -44,8 +47,8 @@ export const LoggerServiceToken = Symbol.for(
 export class LoggerService implements LoggerServiceContract {
   constructor(@inject(BaseLogger) private readonly logger: Logger) {}
 
-  public debug({ message }: DebugParams): void {
-    this.logger.debug(message);
+  public debug<Meta extends LogMeta = LogMeta>({ message, meta }: DebugParams<Meta>): void {
+    this.logger.debug<Meta>(message, meta);
   }
 
   public error({ error, code, type }: ErrorParams): void {
@@ -55,12 +58,12 @@ export class LoggerService implements LoggerServiceContract {
     });
   }
 
-  public info({ message }: InfoParams): void {
-    this.logger.info(message);
+  public info<Meta extends LogMeta = LogMeta>({ message, meta }: InfoParams<Meta>): void {
+    this.logger.info<Meta>(message, meta);
   }
 
-  public warn({ message }: WarnParams): void {
-    this.logger.warn(message);
+  public warn<Meta extends LogMeta = LogMeta>({ message, meta }: WarnParams<Meta>): void {
+    this.logger.warn<Meta>(message, meta);
   }
 
   private buildError({ error, code, type }: ErrorParams): EcsError {

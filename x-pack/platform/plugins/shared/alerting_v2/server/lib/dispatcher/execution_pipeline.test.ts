@@ -141,6 +141,90 @@ describe('DispatcherPipeline', () => {
 
       expect(result.completed).toBe(true);
       expect(result.finalState).toEqual({ input });
+      expect(result.stageTimings).toEqual([]);
+    });
+
+    it('captures a timing entry for every executed step with post-step counts', async () => {
+      const { loggerService } = createLoggerService();
+
+      const step1 = createMockDispatcherStep('fetch_episodes', async () => ({
+        type: 'continue',
+        data: {
+          episodes: [
+            { rule_id: 'r', group_hash: 'g', episode_id: 'e1' } as any,
+            { rule_id: 'r', group_hash: 'g', episode_id: 'e2' } as any,
+          ],
+        },
+      }));
+      const step2 = createMockDispatcherStep('fetch_suppressions', async () => ({
+        type: 'continue',
+        data: {
+          suppressions: [{ rule_id: 'r', group_hash: 'g', episode_id: 'e1' } as any],
+        },
+      }));
+
+      const pipeline = new DispatcherPipeline(loggerService, [step1, step2]);
+      const input = createDispatcherPipelineInput();
+
+      const result = await pipeline.execute(input);
+
+      expect(result.stageTimings).toHaveLength(2);
+      expect(result.stageTimings[0]).toMatchObject({
+        name: 'fetch_episodes',
+        halted: false,
+        counts: { episodes: 2, suppressions: 0 },
+      });
+      expect(result.stageTimings[0].duration_ms).toBeGreaterThanOrEqual(0);
+      expect(result.stageTimings[1]).toMatchObject({
+        name: 'fetch_suppressions',
+        halted: false,
+        counts: { episodes: 2, suppressions: 1 },
+      });
+    });
+
+    it('records the halting step with halted=true and no further stage timings', async () => {
+      const { loggerService } = createLoggerService();
+
+      const step1 = createMockDispatcherStep('fetch_episodes', async () => ({
+        type: 'continue',
+        data: { episodes: [] },
+      }));
+      const step2 = createMockDispatcherStep('fetch_suppressions', async () => ({
+        type: 'halt',
+        reason: 'no_episodes',
+      }));
+      const step3 = createMockDispatcherStep('apply_suppression', async () => ({
+        type: 'continue',
+      }));
+
+      const pipeline = new DispatcherPipeline(loggerService, [step1, step2, step3]);
+      const result = await pipeline.execute(createDispatcherPipelineInput());
+
+      expect(result.completed).toBe(false);
+      expect(result.haltReason).toBe('no_episodes');
+      expect(result.stageTimings).toHaveLength(2);
+      expect(result.stageTimings[0]).toMatchObject({ name: 'fetch_episodes', halted: false });
+      expect(result.stageTimings[1]).toMatchObject({ name: 'fetch_suppressions', halted: true });
+    });
+
+    it('counts Map-sized state fields (rules, policies)', async () => {
+      const { loggerService } = createLoggerService();
+      const rules = new Map<string, any>([
+        ['r1', { id: 'r1' }],
+        ['r2', { id: 'r2' }],
+        ['r3', { id: 'r3' }],
+      ]);
+      const policies = new Map<string, any>([['p1', { id: 'p1' }]]);
+
+      const step = createMockDispatcherStep('fetch_rules_and_policies', async () => ({
+        type: 'continue',
+        data: { rules, policies },
+      }));
+
+      const pipeline = new DispatcherPipeline(loggerService, [step]);
+      const result = await pipeline.execute(createDispatcherPipelineInput());
+
+      expect(result.stageTimings[0].counts).toMatchObject({ rules: 3, policies: 1 });
     });
   });
 });

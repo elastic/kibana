@@ -9,6 +9,22 @@ import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task'
 import type { DispatcherServiceContract } from './dispatcher';
 import type { DispatcherEnabledProvider } from './tokens';
 import { DispatcherTaskRunner } from './task_runner';
+import type { DispatcherExecutionResult } from './types';
+
+function stubExecutionResult(startedAt: Date): DispatcherExecutionResult {
+  return {
+    startedAt,
+    tick: {
+      started_at: startedAt.toISOString(),
+      finished_at: startedAt.toISOString(),
+      duration_ms: 0,
+      previous_started_at: startedAt.toISOString(),
+      completed: true,
+      halt_reason: null,
+      stages: [],
+    },
+  };
+}
 
 describe('DispatcherTaskRunner', () => {
   let dispatcherService: jest.Mocked<DispatcherServiceContract>;
@@ -40,9 +56,9 @@ describe('DispatcherTaskRunner', () => {
 
   describe('run', () => {
     it('maps task state to dispatcher params', async () => {
-      dispatcherService.run.mockResolvedValue({
-        startedAt: new Date('2026-01-22T07:45:00.000Z'),
-      });
+      dispatcherService.run.mockResolvedValue(
+        stubExecutionResult(new Date('2026-01-22T07:45:00.000Z'))
+      );
 
       await runner.run({ taskInstance, abortController });
 
@@ -52,9 +68,9 @@ describe('DispatcherTaskRunner', () => {
     });
 
     it('returns updated previousStartedAt in state', async () => {
-      dispatcherService.run.mockResolvedValue({
-        startedAt: new Date('2026-01-22T07:45:00.000Z'),
-      });
+      dispatcherService.run.mockResolvedValue(
+        stubExecutionResult(new Date('2026-01-22T07:45:00.000Z'))
+      );
 
       const result = await runner.run({ taskInstance, abortController });
 
@@ -84,9 +100,9 @@ describe('DispatcherTaskRunner', () => {
 
     it('defaults to enabled when uiSettings read fails', async () => {
       dispatcherEnabledProvider.mockRejectedValue(new Error('SO unavailable'));
-      dispatcherService.run.mockResolvedValue({
-        startedAt: new Date('2026-01-22T07:45:00.000Z'),
-      });
+      dispatcherService.run.mockResolvedValue(
+        stubExecutionResult(new Date('2026-01-22T07:45:00.000Z'))
+      );
 
       await runner.run({ taskInstance, abortController });
 
