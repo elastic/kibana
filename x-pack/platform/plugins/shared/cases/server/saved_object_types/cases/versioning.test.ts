@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { isZod } from '@kbn/zod/v4';
 import { isConfigSchema } from '@kbn/config-schema';
 import { coreMock } from '@kbn/core/server/mocks';
 import { createCaseSavedObjectType } from './cases';
@@ -196,10 +195,9 @@ describe('caseSavedObjectType model version transformations', () => {
         },
       }).attributes;
 
+      expect(isConfigSchema(createSchema)).toBe(true);
       if (isConfigSchema(createSchema)) {
         expect(() => createSchema.validate(attributes)).not.toThrow();
-      } else if (isZod(createSchema)) {
-        expect(() => createSchema.parse(attributes)).not.toThrow();
       }
     });
   });
