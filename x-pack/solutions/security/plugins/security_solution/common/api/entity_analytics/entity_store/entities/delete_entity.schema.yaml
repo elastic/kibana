@@ -21,12 +21,18 @@ paths:
           required: true
           schema:
             $ref: '../common.schema.yaml#/components/schemas/EntityType'
+          description: The entity type of the entity to delete.
           example: user
       requestBody:
         description: Schema for the deleting entity
         required: true
         content:
           application/json:
+            examples:
+              deleteEntityRequest:
+                summary: Delete a user entity by ID
+                value:
+                  id: 'arn:aws:iam::123456789012:user/jane.doe'
             schema:
               type: object
               properties:

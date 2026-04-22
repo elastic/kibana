@@ -32,6 +32,7 @@ paths:
           required: true
           schema:
             $ref: '../common.schema.yaml#/components/schemas/EntityType'
+          description: The entity type of the entity to create or update.
           example: user
         - name: force
           in: query
@@ -45,6 +46,18 @@ paths:
         required: true
         content:
           application/json:
+            examples:
+              upsertUserEntityRequest:
+                summary: Create or update a user entity
+                value:
+                  entity:
+                    id: 'arn:aws:iam::123456789012:user/jane.doe'
+                    name: 'jane.doe'
+                    type: 'user'
+                  user:
+                    name: 'jane.doe'
+                    email:
+                      - 'jane.doe@example.com'
             schema:
               $ref: './common.schema.yaml#/components/schemas/Entity'
       responses:
@@ -60,3 +73,15 @@ paths:
             application/json:
               schema:
                 $ref: './common.schema.yaml#/components/schemas/Entity'
+              examples:
+                upsertUserEntityResponse:
+                  summary: User entity created
+                  value:
+                    entity:
+                      id: 'arn:aws:iam::123456789012:user/jane.doe'
+                      name: 'jane.doe'
+                      type: 'user'
+                    user:
+                      name: 'jane.doe'
+                      email:
+                        - 'jane.doe@example.com'

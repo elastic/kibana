@@ -17,6 +17,13 @@ paths:
         required: true
         content:
           application/json:
+            examples:
+              initEntityStoreRequest:
+                summary: Initialize with default settings
+                value:
+                  entityTypes:
+                    - host
+                    - user
             schema:
               type: object
               properties:

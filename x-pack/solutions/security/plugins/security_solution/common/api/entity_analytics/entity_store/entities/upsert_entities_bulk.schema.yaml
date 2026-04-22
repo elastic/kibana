@@ -30,6 +30,27 @@ paths:
         required: true
         content:
           application/json:
+            examples:
+              upsertEntitiesBulkRequest:
+                summary: Bulk upsert a user and a host entity
+                value:
+                  entities:
+                    - type: user
+                      record:
+                        entity:
+                          id: 'arn:aws:iam::123456789012:user/jane.doe'
+                          name: 'jane.doe'
+                          type: 'user'
+                        user:
+                          name: 'jane.doe'
+                    - type: host
+                      record:
+                        entity:
+                          id: 'web-server-01'
+                          name: 'web-server-01'
+                          type: 'host'
+                        host:
+                          name: 'web-server-01'
             schema:
               $ref: '#/components/schemas/EntitiesContainer'
                     
