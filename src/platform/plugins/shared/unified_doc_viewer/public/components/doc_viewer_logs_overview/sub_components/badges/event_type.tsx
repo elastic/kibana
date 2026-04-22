@@ -21,13 +21,13 @@ const badgeCss = (euiTheme: EuiThemeComputed) => css`
 
 const euiPaletteRed9 = euiPaletteRed(14);
 interface EventTypeProps {
-  eventTypeValue: string;
+  eventTypeValue: string | undefined;
 }
 export function EventType({ eventTypeValue }: EventTypeProps) {
   const { euiTheme } = useEuiTheme();
   return (
     <EuiBadge color={euiPaletteRed9[9]} data-test-subj={dataTestSubj} css={badgeCss(euiTheme)}>
-      <EuiText size="xs">{eventTypeValue}</EuiText>
+      <EuiText size="xs">{eventTypeValue ?? ''}</EuiText>
     </EuiBadge>
   );
 }
