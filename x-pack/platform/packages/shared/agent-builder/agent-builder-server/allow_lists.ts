@@ -63,6 +63,24 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.streams}.set_failure_store`,
   `${internalNamespaces.streams}.update_stream_description`,
 
+  // Alerting v2 – read
+  `${internalNamespaces.platformAlertingV2}.get_rule`,
+  `${internalNamespaces.platformAlertingV2}.find_rules`,
+  `${internalNamespaces.platformAlertingV2}.bulk_get_rules`,
+  `${internalNamespaces.platformAlertingV2}.get_rule_tags`,
+
+  // Alerting v2 – write
+  `${internalNamespaces.platformAlertingV2}.create_rule`,
+  `${internalNamespaces.platformAlertingV2}.update_rule`,
+  `${internalNamespaces.platformAlertingV2}.delete_rule`,
+  `${internalNamespaces.platformAlertingV2}.enable_rule`,
+  `${internalNamespaces.platformAlertingV2}.disable_rule`,
+
+  // Alerting v2 – bulk write
+  `${internalNamespaces.platformAlertingV2}.bulk_delete_rules`,
+  `${internalNamespaces.platformAlertingV2}.bulk_enable_rules`,
+  `${internalNamespaces.platformAlertingV2}.bulk_disable_rules`,
+
   // Workflows
   `${internalNamespaces.workflows}.validate_workflow`,
   `${internalNamespaces.workflows}.get_step_definitions`,
