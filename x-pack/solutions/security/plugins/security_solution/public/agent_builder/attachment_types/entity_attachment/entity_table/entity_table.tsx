@@ -234,11 +234,7 @@ export const EntityTable: React.FC<EntityTableProps> = ({ entities }) => {
     (identifier: EntityAttachmentIdentifier, result: EntityRow) => {
       setRowsByKey((prev) => {
         const existing = prev[keyFor(identifier)];
-        if (
-          existing &&
-          existing.isLoading === result.isLoading &&
-          existing.data === result.data
-        ) {
+        if (existing && existing.isLoading === result.isLoading && existing.data === result.data) {
           return prev;
         }
         return { ...prev, [keyFor(identifier)]: result };
@@ -303,9 +299,11 @@ export const EntityTable: React.FC<EntityTableProps> = ({ entities }) => {
         name: COLUMN_LABELS.type,
         render: (_value: unknown, row: EntityRow) => (
           <EuiBadge color="hollow">
-            {entityTypeLabels[
-              row.data?.entityType ?? identifierTypeToEntityType(row.identifier.identifierType)
-            ]}
+            {
+              entityTypeLabels[
+                row.data?.entityType ?? identifierTypeToEntityType(row.identifier.identifierType)
+              ]
+            }
           </EuiBadge>
         ),
         width: '110px',
@@ -383,11 +381,7 @@ export const EntityTable: React.FC<EntityTableProps> = ({ entities }) => {
       data-test-subj="entityAttachmentTable"
     >
       {entities.map((identifier) => (
-        <EntityRowLoader
-          key={keyFor(identifier)}
-          identifier={identifier}
-          onLoaded={handleLoaded}
-        />
+        <EntityRowLoader key={keyFor(identifier)} identifier={identifier} onLoaded={handleLoaded} />
       ))}
       <div css={tableScrollStyles}>
         <EuiBasicTable

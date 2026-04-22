@@ -45,9 +45,7 @@ jest.mock('./entity_summary_grid', () => ({
 jest.mock('./risk_summary_mini', () => ({
   RiskSummaryMini: (props: Record<string, unknown>) => {
     const riskStats = props.riskStats as Record<string, unknown> | undefined;
-    const resolutionRiskStats = props.resolutionRiskStats as
-      | Record<string, unknown>
-      | undefined;
+    const resolutionRiskStats = props.resolutionRiskStats as Record<string, unknown> | undefined;
     return (
       <div
         data-test-subj="riskSummaryMiniMock"
@@ -63,9 +61,8 @@ jest.mock('./risk_summary_mini', () => ({
   },
 }));
 
-const mockedUseEntityForAttachment =
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  require('../use_entity_for_attachment').useEntityForAttachment as jest.Mock;
+const mockedUseEntityForAttachment = require('../use_entity_for_attachment')
+  .useEntityForAttachment as jest.Mock;
 
 const baseEntity = (override: Partial<EntityForAttachment> = {}): EntityForAttachment => ({
   entityType: EntityType.user,

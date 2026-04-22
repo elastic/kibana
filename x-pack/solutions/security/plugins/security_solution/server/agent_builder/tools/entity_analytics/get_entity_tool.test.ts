@@ -1229,7 +1229,10 @@ describe('getEntityTool', () => {
     it('carries the composite entity.id on the attachment for a local user so the client can rehydrate by entity.id', async () => {
       const compositeEntityId = "user:Lena Medhurst@Lena's MacBook Pro@local";
       const compositeEntityName = "Lena Medhurst@Lena's MacBook Pro";
-      const expectedLocalUserAttachmentId = buildSingleEntityAttachmentId('user', compositeEntityName);
+      const expectedLocalUserAttachmentId = buildSingleEntityAttachmentId(
+        'user',
+        compositeEntityName
+      );
 
       (executeEsql as jest.Mock)
         // 1. Exact id match — empty (the input is the bare name, not the id)

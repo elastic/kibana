@@ -95,8 +95,7 @@ export const normaliseEntityAttachment = (
 
   if (isValidIdentifier(data)) {
     const rawRiskStats = (data as { riskStats?: unknown }).riskStats;
-    const rawResolutionRiskStats = (data as { resolutionRiskStats?: unknown })
-      .resolutionRiskStats;
+    const rawResolutionRiskStats = (data as { resolutionRiskStats?: unknown }).resolutionRiskStats;
     const entityStoreId = pickEntityStoreId(data);
     return {
       isSingle: true,

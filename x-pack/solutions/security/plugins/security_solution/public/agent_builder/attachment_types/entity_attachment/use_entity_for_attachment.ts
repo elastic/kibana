@@ -143,8 +143,7 @@ const shapeRecord = (
   const entityField = record?.entity;
   const assetField = record?.asset;
 
-  const riskScore =
-    entityField?.risk?.calculated_score_norm ?? entityField?.risk?.calculated_score;
+  const riskScore = entityField?.risk?.calculated_score_norm ?? entityField?.risk?.calculated_score;
   const riskLevel = entityField?.risk?.calculated_level as RiskSeverity | undefined;
 
   const assetCriticality =
@@ -195,19 +194,22 @@ const fetchEntity = async ({
   if (!filterQuery) return undefined;
 
   const entityType = toEntityType(identifier.identifierType);
-  const response = await http.fetch<ListEntitiesResponseShape>(ENTITY_STORE_ROUTES.public.CRUD_GET, {
-    version: ENTITY_STORE_API_VERSION,
-    method: 'GET',
-    query: {
-      entity_types: [entityType],
-      filterQuery,
-      page: 1,
-      per_page: 1,
-      sort_field: '@timestamp',
-      sort_order: 'desc',
-    },
-    signal,
-  });
+  const response = await http.fetch<ListEntitiesResponseShape>(
+    ENTITY_STORE_ROUTES.public.CRUD_GET,
+    {
+      version: ENTITY_STORE_API_VERSION,
+      method: 'GET',
+      query: {
+        entity_types: [entityType],
+        filterQuery,
+        page: 1,
+        per_page: 1,
+        sort_field: '@timestamp',
+        sort_order: 'desc',
+      },
+      signal,
+    }
+  );
   return response?.records?.[0];
 };
 
@@ -241,12 +243,15 @@ export const useEntityForAttachment = (
 
   const enabled = Boolean(http) && !skip && Boolean(identifier?.identifier);
 
-  const { data: record, isLoading, error, refetch } = useQuery<
-    EntityRecordShape | undefined,
-    IHttpFetchError
-  >({
+  const {
+    data: record,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery<EntityRecordShape | undefined, IHttpFetchError>({
     queryKey,
-    queryFn: ({ signal }) => fetchEntity({ http: http as HttpStart, identifier: identifier!, signal }),
+    queryFn: ({ signal }) =>
+      fetchEntity({ http: http as HttpStart, identifier: identifier!, signal }),
     enabled,
   });
 

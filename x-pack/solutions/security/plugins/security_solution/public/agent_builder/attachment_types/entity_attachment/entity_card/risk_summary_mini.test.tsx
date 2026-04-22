@@ -25,7 +25,6 @@ jest.mock('../../../../entity_analytics/components/home/entities_table/risk_scor
   ),
 }));
 
-// eslint-disable-next-line import/order, @typescript-eslint/no-require-imports
 const { RiskSummaryMini } = require('./risk_summary_mini') as typeof import('./risk_summary_mini');
 
 const stats = (override: Partial<RiskStats> = {}): RiskStats =>
