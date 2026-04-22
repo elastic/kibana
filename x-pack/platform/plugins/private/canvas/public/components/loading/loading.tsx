@@ -51,7 +51,7 @@ export const Loading: FC<Props> = ({
           &nbsp;
         </span>
       )}
-      <EuiIcon color={color} type="clock" />
+      <EuiIcon color={color} type="clock" aria-hidden={true} />
     </div>
   );
 };

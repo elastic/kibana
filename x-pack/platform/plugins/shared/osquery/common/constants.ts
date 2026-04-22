@@ -30,7 +30,20 @@ export const API_VERSIONS = {
   },
 };
 
+/**
+ * How long osqueryd on the agent is allowed to execute a single query.
+ * Validated server-side via inRangeRt() in @kbn/osquery-io-ts-types and client-side in timeout_field.tsx.
+ * The max of 24h matches what osquerybeat actually supports.
+ */
 export enum QUERY_TIMEOUT {
-  DEFAULT = 60, // 60 seconds
-  MAX = 900, // 15 minutes (matches backend inRangeRt(60, 60 * 15))
+  DEFAULT = 60,
+  MAX = 86400,
 }
+
+/**
+ * How long Fleet Server holds an undelivered action for offline agents.
+ * Agents that check in within this window will receive the query; after that, the action expires.
+ * Set to 2 weeks to match endpoint response actions (isolate/release) and cover
+ * extended offline periods (weekends, travel, intermittent connectivity).
+ */
+export const ACTION_EXPIRATION_WEEKS = 2;

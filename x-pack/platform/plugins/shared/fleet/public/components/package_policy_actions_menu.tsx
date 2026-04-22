@@ -8,6 +8,7 @@
 import React, { useMemo, useState } from 'react';
 import { EuiContextMenuItem, EuiPortal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
 import { useAgentPolicyRefresh, useAuthz, useLink } from '../hooks';
@@ -191,6 +192,10 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
         isOpen={isActionsMenuOpen}
         items={menuItems}
         onChange={(open) => setIsActionsMenuOpen(open)}
+        aria-label={i18n.translate('xpack.fleet.packagePolicyActionsMenu.actionsAriaLabel', {
+          defaultMessage: 'Actions for {policyName}',
+          values: { policyName: packagePolicy.name },
+        })}
       />
     </>
   );

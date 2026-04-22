@@ -133,6 +133,12 @@ export class ChangeAllPrivilegesControl extends Component<Props, State> {
         closePopover={this.closePopover}
         panelPaddingSize="none"
         anchorPosition="downLeft"
+        aria-label={i18n.translate(
+          'xpack.security.management.editRole.changeAllPrivileges.popoverAriaLabel',
+          {
+            defaultMessage: 'Bulk actions',
+          }
+        )}
       >
         <EuiContextMenuPanel items={items} />
       </EuiPopover>

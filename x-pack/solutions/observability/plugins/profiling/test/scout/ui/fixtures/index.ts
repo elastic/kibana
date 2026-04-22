@@ -59,3 +59,4 @@ export const test = base.extend<ExtendedScoutTestFixtures, ObltWorkerFixtures>({
 });
 
 export * as testData from '../../common/fixtures/constants';
+export const EXTENDED_TIMEOUT = 45000 as const;

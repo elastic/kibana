@@ -13,8 +13,9 @@ import UseUnmount from 'react-use/lib/useUnmount';
 import type { EuiBreadcrumb, EuiToolTipProps, UseEuiTheme } from '@elastic/eui';
 import {
   EuiBadge,
-  EuiHorizontalRule,
+  EuiButtonEmpty,
   EuiIcon,
+  EuiHorizontalRule,
   EuiLink,
   EuiPopover,
   EuiScreenReaderOnly,
@@ -146,15 +147,16 @@ export function InternalDashboardTopNav({
           viewMode === 'edit' ? (
             <>
               {dashboardTitle}
-              <EuiIcon
-                tabIndex={0}
-                role="button"
-                aria-label={topNavStrings.settings.description}
-                size="s"
-                type="pencil"
+              <EuiButtonEmpty
                 onClick={() => openSettingsFlyout(dashboardApi)}
-                css={styles.updateIcon}
-              />
+                size="xs"
+                aria-label={topNavStrings.settings.description}
+                color="text"
+                textProps={false}
+                css={styles.updateEditButton}
+              >
+                <EuiIcon size="s" type="pencil" aria-hidden={true} />
+              </EuiButtonEmpty>
             </>
           ) : (
             dashboardTitle
@@ -195,7 +197,7 @@ export function InternalDashboardTopNav({
     dashboardApi,
     viewMode,
     customLeadingBreadCrumbs,
-    styles.updateIcon,
+    styles.updateEditButton,
   ]);
 
   /**
@@ -407,12 +409,10 @@ const topNavStyles = {
         },
       },
     }),
-  updateIcon: ({ euiTheme }: UseEuiTheme) =>
+  updateEditButton: ({ euiTheme }: UseEuiTheme) =>
     css({
-      '.kbnBody &': {
-        marginLeft: euiTheme.size.xs,
-        marginTop: `calc(-1 * ${euiTheme.size.xxs})`,
-        cursor: 'pointer',
-      },
+      blockSize: '100%',
+      marginLeft: euiTheme.size.xxs,
+      padding: 0,
     }),
 };

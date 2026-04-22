@@ -21,7 +21,7 @@ import { EntityType } from '../common.gen';
 export type StopEntityEngineRequestParams = z.infer<typeof StopEntityEngineRequestParams>;
 export const StopEntityEngineRequestParams = z.object({
   /**
-   * The entity type of the engine (either 'user' or 'host').
+   * The entity type of the engine to stop.
    */
   entityType: EntityType,
 });
@@ -29,5 +29,8 @@ export type StopEntityEngineRequestParamsInput = z.input<typeof StopEntityEngine
 
 export type StopEntityEngineResponse = z.infer<typeof StopEntityEngineResponse>;
 export const StopEntityEngineResponse = z.object({
+  /**
+   * Whether the engine was successfully stopped.
+   */
   stopped: z.boolean().optional(),
 });

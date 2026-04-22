@@ -241,6 +241,15 @@ test.describe('Discover app', { tag: tags.stateful.classic }, () => {
   });
 
   test('download CSV report and validate row length', async ({ pageObjects }) => {
+    const csvStartTime = 'Sep 21, 2015 @ 00:00:00.000';
+    const csvHitCount = 9247;
+
+    await pageObjects.datePicker.setAbsoluteRange({
+      from: csvStartTime,
+      to: defaultEndTime,
+    });
+    await pageObjects.discover.waitUntilSearchingHasFinished();
+
     // Can download saved searches only, so save first
     await pageObjects.discover.saveSearch(queryName3);
     await pageObjects.toasts.closeAll(); // close toast to avoid obstruction
@@ -257,7 +266,7 @@ test.describe('Discover app', { tag: tags.stateful.classic }, () => {
       skipEmptyLines: true,
     });
     const rows = parseResult.data as string[][];
-    expect(rows).toHaveLength(totalHitCount + 1); // +1 for header row
+    expect(rows).toHaveLength(csvHitCount + 1); // +1 for header row
   });
   // Click on Patterns works with sample data, tbd once pipeline is in place
 });

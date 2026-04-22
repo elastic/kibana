@@ -27,6 +27,7 @@ type Props = {
   isOpen?: boolean;
   isManaged?: boolean;
   onChange?: (isOpen: boolean) => void;
+  'aria-label'?: string;
 } & (
   | {
       items: EuiContextMenuPanelProps['items'];
@@ -36,64 +37,69 @@ type Props = {
     }
 );
 
-export const ContextMenuActions = React.memo<Props>(({ button, onChange, isOpen, ...props }) => {
-  const [isOpenState, setIsOpenState] = useState(false);
-  const handleCloseMenu = useCallback(() => {
-    if (onChange) {
-      onChange(false);
-    } else {
-      setIsOpenState(false);
-    }
-  }, [setIsOpenState, onChange]);
-  const handleToggleMenu = useCallback(() => {
-    if (onChange) {
-      onChange(!isOpen);
-    } else {
-      setIsOpenState(!isOpenState);
-    }
-  }, [isOpenState, onChange, isOpen]);
-
-  const actionButton = button ? (
-    <EuiButton {...button.props} onClick={handleToggleMenu} isDisabled={props.isManaged}>
-      {button.children}
-    </EuiButton>
-  ) : (
-    <EuiButtonIcon
-      isDisabled={props.isManaged}
-      iconType="boxesHorizontal"
-      onClick={handleToggleMenu}
-      aria-label={i18n.translate('xpack.fleet.genericActionsMenuText', {
-        defaultMessage: 'Open',
-      })}
-      data-test-subj="agentActionsBtn"
-    />
-  );
-
-  return (
-    <EuiPopover
-      anchorPosition="downRight"
-      panelPaddingSize="none"
-      button={
-        props.isManaged ? (
-          <EuiToolTip
-            title={i18n.translate('xpack.fleet.externallyManagedLabel', {
-              defaultMessage: 'This is externally managed integration policy.',
-            })}
-          >
-            {actionButton}
-          </EuiToolTip>
-        ) : (
-          actionButton
-        )
+export const ContextMenuActions = React.memo<Props>(
+  ({ button, onChange, isOpen, 'aria-label': ariaLabel, ...props }) => {
+    const [isOpenState, setIsOpenState] = useState(false);
+    const handleCloseMenu = useCallback(() => {
+      if (onChange) {
+        onChange(false);
+      } else {
+        setIsOpenState(false);
       }
-      isOpen={isOpen === undefined ? isOpenState : isOpen}
-      closePopover={handleCloseMenu}
-    >
-      {'items' in props ? (
-        <EuiContextMenuPanel items={props.items} />
-      ) : (
-        <EuiContextMenu panels={props.panels} initialPanelId={0} />
-      )}
-    </EuiPopover>
-  );
-});
+    }, [setIsOpenState, onChange]);
+    const handleToggleMenu = useCallback(() => {
+      if (onChange) {
+        onChange(!isOpen);
+      } else {
+        setIsOpenState(!isOpenState);
+      }
+    }, [isOpenState, onChange, isOpen]);
+
+    const actionButton = button ? (
+      <EuiButton {...button.props} onClick={handleToggleMenu} isDisabled={props.isManaged}>
+        {button.children}
+      </EuiButton>
+    ) : (
+      <EuiButtonIcon
+        isDisabled={props.isManaged}
+        iconType="boxesHorizontal"
+        onClick={handleToggleMenu}
+        aria-label={
+          ariaLabel ??
+          i18n.translate('xpack.fleet.genericActionsMenuText', {
+            defaultMessage: 'Actions',
+          })
+        }
+        data-test-subj="agentActionsBtn"
+      />
+    );
+
+    return (
+      <EuiPopover
+        anchorPosition="downRight"
+        panelPaddingSize="none"
+        button={
+          props.isManaged ? (
+            <EuiToolTip
+              title={i18n.translate('xpack.fleet.externallyManagedLabel', {
+                defaultMessage: 'This is externally managed integration policy.',
+              })}
+            >
+              {actionButton}
+            </EuiToolTip>
+          ) : (
+            actionButton
+          )
+        }
+        isOpen={isOpen === undefined ? isOpenState : isOpen}
+        closePopover={handleCloseMenu}
+      >
+        {'items' in props ? (
+          <EuiContextMenuPanel items={props.items} />
+        ) : (
+          <EuiContextMenu panels={props.panels} initialPanelId={0} />
+        )}
+      </EuiPopover>
+    );
+  }
+);
