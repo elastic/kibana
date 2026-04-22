@@ -45,6 +45,7 @@ describe('Lens API - Visualizations Search Route', () => {
       contentManagement: mockContentManagement,
       builder: mockBuilder,
       logger: {} as unknown as Logger,
+      usageCounter: undefined,
     });
 
     expect(mockRouter.get).toHaveBeenCalledWith(
