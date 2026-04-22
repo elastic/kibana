@@ -38,6 +38,11 @@ paths:
               example:
                 id: pd1WRJQBs4HAK3VQeHFI
                 value: 255.255.255.255
+            examples:
+              changeValue:
+                value:
+                  id: pd1WRJQBs4HAK3VQeHFI
+                  value: 255.255.255.255
       responses:
         200:
           description: Successful response

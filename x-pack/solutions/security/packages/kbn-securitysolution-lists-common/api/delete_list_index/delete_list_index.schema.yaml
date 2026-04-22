@@ -21,6 +21,10 @@ paths:
                   acknowledged:
                     type: boolean
                 required: [acknowledged]
+              examples:
+                acknowledged:
+                  value:
+                    acknowledged: true
         400:
           description: Invalid input data response
           content:
@@ -29,6 +33,11 @@ paths:
                 oneOf:
                   - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
                   - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                badRequest:
+                  value:
+                    message: "Unable to delete value list data streams: invalid or missing index metadata"
+                    status_code: 400
         401:
           description: Unsuccessful authentication response
           content:
@@ -47,12 +56,23 @@ paths:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                forbidden:
+                  value:
+                    statusCode: 403
+                    error: Forbidden
+                    message: "API [DELETE /api/lists/index] is not authorized; lists-all (or equivalent) is required to delete data streams"
         404:
           description: List data stream not found response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                notFound:
+                  value:
+                    message: "The value list data stream was not found in this space"
+                    status_code: 404
         500:
           description: Internal server error response
           content:

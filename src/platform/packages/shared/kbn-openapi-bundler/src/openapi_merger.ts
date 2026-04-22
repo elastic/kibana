@@ -15,7 +15,7 @@ import { createBlankOpenApiDocument } from './bundler/merge_documents/create_bla
 import type { ResolvedDocument } from './bundler/ref_resolver/resolved_document';
 import { writeDocuments } from './utils/write_documents';
 import { resolveGlobs } from './utils/resolve_globs';
-import { bundleDocument } from './bundler/bundle_document';
+import { bundleDocument, SkipException } from './bundler/bundle_document';
 import { withNamespaceComponentsProcessor } from './bundler/processor_sets';
 import type { PrototypeDocument } from './prototype_document';
 import { validatePrototypeDocument } from './validate_prototype_document';
@@ -92,11 +92,36 @@ function logSchemas(schemaFilePaths: string[]): void {
 }
 
 async function bundleDocuments(schemaFilePaths: string[]): Promise<ResolvedDocument[]> {
-  return await Promise.all(
-    schemaFilePaths.map(async (schemaFilePath) =>
-      bundleDocument(schemaFilePath, withNamespaceComponentsProcessor([], '/info/title'))
-    )
+  const resolvedDocuments = await Promise.all(
+    schemaFilePaths.map(async (schemaFilePath) => {
+      try {
+        return await bundleDocument(
+          schemaFilePath,
+          withNamespaceComponentsProcessor([], '/info/title')
+        );
+      } catch (e) {
+        if (e instanceof SkipException) {
+          logger.info(`Skipped ${chalk.bold(e.documentPath)}: ${e.message}`);
+          return;
+        }
+        throw e;
+      }
+    })
   );
+
+  return filterOutSkippedDocuments(resolvedDocuments);
+}
+
+function filterOutSkippedDocuments(
+  documents: Array<ResolvedDocument | undefined>
+): ResolvedDocument[] {
+  const out: ResolvedDocument[] = [];
+  for (const document of documents) {
+    if (document) {
+      out.push(document);
+    }
+  }
+  return out;
 }
 
 const DEFAULT_INFO = {
