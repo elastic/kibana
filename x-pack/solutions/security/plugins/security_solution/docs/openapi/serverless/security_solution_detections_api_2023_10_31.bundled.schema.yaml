@@ -3459,6 +3459,7 @@ paths:
         '200':
           content:
             application/json:
+              description: Elasticsearch update by query or update by IDs response
               examples:
                 add:
                   value:
@@ -3477,10 +3478,6 @@ paths:
                     total: 1
                     updated: 1
                     version_conflicts: 0
-              schema:
-                additionalProperties: true
-                description: Elasticsearch update by query or update by IDs response
-                type: object
           description: Indicates a successful call.
         '400':
           content:

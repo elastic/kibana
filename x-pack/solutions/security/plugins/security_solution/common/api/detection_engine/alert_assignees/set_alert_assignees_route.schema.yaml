@@ -32,10 +32,7 @@ paths:
           description: Indicates a successful call.
           content:
             application/json:
-              schema:
-                type: object
-                additionalProperties: true
-                description: Elasticsearch update by query or update by IDs response
+              description: Elasticsearch update by query or update by IDs response
               examples:
                 add:
                   value:
