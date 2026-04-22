@@ -7,6 +7,8 @@
 
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { chatSystemIndex } from '@kbn/agent-builder-server';
+import { skillIndexName } from '../services/skills/persisted/client/storage';
+import { pluginIndexName } from '../services/plugins/client/storage';
 
 export const isIndexNotFoundError = (error: unknown): boolean => {
   if (!error || typeof error !== 'object') {
@@ -220,9 +222,8 @@ export class QueryUtils {
     plugin: number;
   }> {
     try {
-      const skillsIndexName = chatSystemIndex('skills');
       const response = await this.esClient.search({
-        index: skillsIndexName,
+        index: skillIndexName,
         size: 0,
         track_total_hits: true,
         aggs: {
@@ -266,9 +267,8 @@ export class QueryUtils {
    */
   async getPluginsCount(): Promise<number> {
     try {
-      const pluginsIndexName = chatSystemIndex('plugins');
       const response = await this.esClient.count({
-        index: pluginsIndexName,
+        index: pluginIndexName,
       });
 
       return response.count || 0;
