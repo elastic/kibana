@@ -367,7 +367,22 @@ describe('createEntityAttachmentType', () => {
       const description = attachmentType.getAgentDescription?.();
 
       expect(description).toContain('<render_attachment');
+    });
+
+    it('uses the platform attribute names `id` and `version`, not the legacy `attachment_id` attribute', () => {
+      const description = attachmentType.getAgentDescription?.();
+
+      expect(description).toContain('id="ATTACHMENT_ID"');
+      expect(description).toContain('version="VERSION"');
+      expect(description).not.toMatch(/<render_attachment[^>]*\battachment_id=/);
+    });
+
+    it('points the agent at the manifest `attachment_id` and `current_version` fields (not synthesis)', () => {
+      const description = attachmentType.getAgentDescription?.();
+
       expect(description).toContain('attachment_id');
+      expect(description).toContain('current_version');
+      expect(description?.toLowerCase()).toContain('verbatim');
     });
 
     it('does not leak the removed {riskEntityData} placeholder', () => {

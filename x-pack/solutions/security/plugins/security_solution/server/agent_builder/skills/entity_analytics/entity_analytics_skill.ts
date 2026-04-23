@@ -28,18 +28,25 @@ export interface EntityAnalyticsSkillsContext {
   logger: Logger;
 }
 
-// The "Inline rendering" sections below instruct the LLM to emit the
-// <render_attachment/> tag followed by a BLANK LINE before any prose. This is a
-// workaround for an upstream bug in agent_builder's createTagParser
+// The "Inline rendering" sections below follow a strict copy-verbatim
+// contract: the entity tools (security.get_entity / security.search_entities)
+// embed a pre-formatted `renderTag` string in their `ToolResultType.other`
+// payload (see `buildRenderAttachmentTag` in
+// server/agent_builder/tools/entity_analytics/entity_attachment_utils.ts)
+// and the skill instructs the model to paste that exact string onto its own
+// line. We do NOT ask the model to assemble a `<render_attachment>` tag from
+// `attachmentId` / `version` any more — doing so has empirically produced
+// hallucinated ids (e.g. `security.entity:single:<email>`) which contain
+// `@` / `.` and shatter the upstream HTML tokenizer in
+// remark-parse-no-trim (its openTag regex rejects underscores, and the
+// autolink / email inline tokenizers run before the HTML tokenizer so any
+// URL-shaped substring breaks the tag into multiple AST nodes). The skill
+// also keeps the "blank line between <render_attachment> and prose" rule
+// as a second line of defense; removing it depends on a platform-side
+// fix to `createTagParser`
 // (x-pack/platform/plugins/shared/agent_builder/public/application/components/
-// conversations/conversation_rounds/round_response/markdown_plugins/utils.ts):
-// when <render_attachment .../> shares a text node with trailing prose, the
-// parser mutates the node, deletes node.value, and drops the prose.
-// remark-parse-no-trim does not recognise `<render_attachment>` as an HTML tag
-// because its openTag regex rejects underscores, so the only way to keep the
-// prose is to force the parser to treat it as its own block — which it does
-// when separated by a blank line. Remove these template notes once the
-// upstream parser handles this case.
+// conversations/conversation_rounds/round_response/markdown_plugins/utils.ts)
+// that is out of scope for this plugin.
 const entityStoreV2Content = `
 This skill provides a guide to investigating specific security entities (hosts, users, services, generic) by entity ID (EUID)
 or by surfacing risky entities based on their risk scores, asset criticality levels and other behavioral and lifecycle attributes.
@@ -86,14 +93,23 @@ This rule takes **precedence** over the "do not use the dashboard for list / ran
 
 Rich attachments do **not** show the interactive pill, **Preview**, or **Canvas** unless you **embed** them in your **assistant markdown** in the **same turn**.
 
-Immediately after a tool emits a rich attachment (\`security.entity\` from \`security.get_entity\` / \`security.search_entities\`, or a successful \`attachments.add\` for \`security.entity_analytics_dashboard\`), add its own line in your reply (copy \`attachment_id\` and \`version\` **exactly** from that tool result):
+\`security.get_entity\` and \`security.search_entities\` return an \`other\` result that contains a ready-made \`renderTag\` string, for example:
 
-\`<render_attachment id="ATTACHMENT_ID" version="VERSION" />\`
+\`\`\`json
+{ "attachmentId": "security.entity:user:<hex>", "version": 1, "renderTag": "<render_attachment id=\\"security.entity:user:<hex>\\" version=\\"1\\" />" }
+\`\`\`
 
-Example (values come from the tool): \`<render_attachment id="att-abc123" version="1" />\`
+To render the attachment you **copy the value of \`renderTag\` EXACTLY** onto its own line in your reply — byte-for-byte, including the quoting. Do not rewrite it, do not reformat it, do not substitute the id with anything you inferred from the question (email, username, host name, prose description), do not wrap it in backticks/quotes/code fences.
 
-- **One** \`<render_attachment>\` per attachment (if you emit an entity attachment AND add a dashboard attachment, output **two** tags with each id/version pair).
-- **Without** this tag, the UI only shows subdued italic text like **Attachment added: …** — the user **cannot** open the Canvas. **That is incorrect** for these attachment types.
+For \`security.entity_analytics_dashboard\` the \`attachments.add\` tool returns \`{ id, current_version }\` on its result. No \`renderTag\` is provided for that path, so you assemble the tag by substituting those values verbatim into this exact template:
+
+\`<render_attachment id="<id from attachments.add>" version="<current_version from attachments.add>" />\`
+
+Rules:
+- **Copy from the tool's own result.** If the tool's \`other\` result contains a \`renderTag\`, copy that string verbatim. If a dashboard \`attachments.add\` call succeeded, copy \`id\` and \`current_version\` verbatim into the template above. Never invent an id; never derive one from the user's prompt or any other field.
+- **No \`renderTag\`, no tag.** If the tool result did not include a \`renderTag\` (e.g. \`security.get_entity\` resolved multiple candidates and fell back to an RLIKE match — no single-entity attachment was stored), do NOT emit a \`<render_attachment>\` tag. Write prose only.
+- **One \`<render_attachment>\` per attachment.** If you emit an entity attachment AND add a dashboard attachment, output two tags (one per id/version pair).
+- **Without** these tags, the UI only shows subdued italic text like **Attachment added: …** — the user **cannot** open the Canvas. **That is incorrect** for these attachment types.
 - ALWAYS insert a BLANK LINE between the \`<render_attachment>\` tag and any following prose. Without this blank line, the prose will be dropped by the markdown parser.
 
 ## Choosing the right rich attachment
@@ -142,7 +158,8 @@ Use this skill when:
     - entity.attributes.asset - whether this entity is an asset
     - entity.behaviors.rule_names - detection rules associated with this entity
     - entity.behaviors.anomaly_job_ids - anomaly detection jobs that have detected this entity
-    - entity.source - multi-value list of integration/data sources that produced this entity (e.g. crowdstrike, endgame, okta, island_browser). Always lowercase integration keys.
+    - entity.source - multi-value list of integration/data source keys that produced this entity. Values are heterogeneous and may be vendor keys (e.g. \`aws\`, \`okta\`, \`crowdstrike\`), dataset keys (e.g. \`aws.cloudtrail\`, \`aws.guardduty\`, \`okta.system\`), or integration keys (e.g. \`entityanalytics_okta\`, \`entityanalytics_entra_id\`, \`island_browser\`). Always stored lowercase.
+    - entity.namespace - normalized **single-value** vendor namespace, user entities only. Collapses the heterogeneous \`entity.source\` values into canonical names: \`okta\`, \`entra_id\`, \`microsoft_365\`, \`active_directory\`, \`local\`, \`unknown\`, or pass-through of \`event.module\` (e.g. \`aws\`, \`gcp\`) when no dedicated mapping exists.
     - entity.lifecycle.first_seen - first time this entity has been seen in the entity store
     - entity.lifecycle.last_activity - last time this entity has been active in the entity store
     - risk_score_inputs - the alert inputs that contributed to the risk score calculation for this entity.
@@ -153,21 +170,18 @@ Use this skill when:
       - You MUST mention the other results found and provide the COMPLETE entity ID for each
 
 #### Inline rendering (REQUIRED when a single entity is resolved)
-When \`security.get_entity\` resolves exactly one entity, it also stores a \`security.entity\` attachment
-and returns an \`other\` result containing \`attachmentId\` and \`version\`. You MUST render that
-attachment inline using the custom XML element, on its own line, followed by a BLANK LINE, and then
-your prose summary:
+When \`security.get_entity\` resolves exactly one entity, its \`other\` result includes a \`renderTag\` field alongside \`attachmentId\` and \`version\`. Copy that \`renderTag\` string **verbatim** onto its own line, then a BLANK LINE, then your prose summary:
 
-    <render_attachment id="ATTACHMENT_ID" version="VERSION" />
+    <contents of the renderTag field from the tool's other result — copy byte-for-byte>
 
     <your prose summary here>
 
 Rules:
-- Copy \`id\` and \`version\` verbatim from the tool result. Do not invent or alter them.
+- **Copy \`renderTag\` verbatim.** It already contains the correct attachment id and version — do not modify, reorder, or paraphrase any character. Do not build the tag yourself from \`attachmentId\` and \`version\`, do not replace the id with anything derived from the user's prompt (name, email, prose description).
 - Emit the \`<render_attachment>\` tag BEFORE your prose summary so the user sees the rich entity card first.
 - ALWAYS insert a BLANK LINE between the \`<render_attachment>\` tag and any following prose. Without this blank line, the prose will be dropped by the markdown parser.
 - Render each \`security.entity\` attachment at most once per turn.
-- When multiple results are returned (fallback match), no attachment is stored — skip the render tag and summarise in prose.
+- When \`security.get_entity\` resolves multiple candidates (fallback RLIKE match), no attachment is stored and the \`other\` result contains no \`renderTag\`. In that case, **do not emit a \`<render_attachment>\` tag** — write prose only.
 
 ### Search Entities Tool
 - \`security.search_entities\` - Search the entity store for security entities (host, user, service, generic) matching specific criteria.
@@ -178,42 +192,64 @@ Rules:
     - entity attributes (watchlists, managed status, MFA status, asset)
     - entity behaviors (behavior rule names, anomaly job IDs)
     - entity lifecycle timestamps (first seen, last activity)
-    - data source (entity.source) - pass the raw integration key(s) via the \`sources\` parameter; e.g. \`sources: ['crowdstrike']\`. Use the stored lowercase key, not a pretty-printed label (so pass \`island_browser\`, not \`Island Browser\`).
+    - data source (entity.source) - pass the raw lowercase integration key(s) via the \`sources\` parameter. Matching is **exact-or-prefix**: \`sources: ['aws']\` matches \`aws\`, \`aws.cloudtrail\`, \`aws.guardduty\`, \`aws.s3access\`, etc. (a single vendor key is usually enough — do not fan out into \`['aws', 'aws.cloudtrail']\`). Always use the stored key, not a pretty-printed label (pass \`island_browser\`, not \`Island Browser\`).
+    - normalized user vendor (entity.namespace) - pass canonical values via the \`namespaces\` parameter; e.g. \`namespaces: ['okta']\`. Canonical values are \`okta\`, \`entra_id\`, \`microsoft_365\`, \`active_directory\`, \`local\`, \`unknown\`, or pass-through of \`event.module\` (e.g. \`aws\`, \`gcp\`). \`entity.namespace\` only exists on **user** entities — for host/service/generic entities use \`sources\` instead. When a canonical namespace exists for the vendor the user named, prefer \`namespaces\` over \`sources\` for user queries (it is single-valued and already normalized).
     Do NOT use this tool if the entity ID (EUID) is known; use the \`security.get_entity\` tool instead.
     ALWAYS use real entities from the entity store, do not invent entities.
     ALWAYS use the \`security.get_entity\` after using this tool to get the full profile for each entity found.
 
-#### Inline rendering (REQUIRED when 2+ entities are returned)
-When \`security.search_entities\` returns 2 or more entities, it also stores an aggregate
-\`security.entity\` attachment and returns an \`other\` result containing \`attachmentId\` and
-\`version\`. You MUST render that attachment inline using the custom XML element, on its own
-line, followed by a BLANK LINE, and then your prose summary:
+#### Inline rendering (REQUIRED when an aggregate attachment is emitted)
+When \`security.search_entities\` stores an aggregate \`security.entity\` attachment, its \`other\` result includes a \`renderTag\` field alongside \`attachmentId\` and \`version\`. Copy that \`renderTag\` string **verbatim** onto its own line, then a BLANK LINE, then your prose summary:
 
-    <render_attachment id="ATTACHMENT_ID" version="VERSION" />
+    <contents of the renderTag field from the tool's other result — copy byte-for-byte>
 
     <your prose summary here>
 
 Rules:
-- Copy \`id\` and \`version\` verbatim from the \`other\` tool result. Do not invent or alter them.
+- **Copy \`renderTag\` verbatim.** It already contains the correct attachment id and version — do not modify it, do not build your own tag from \`attachmentId\` and \`version\`, do not derive the id from entity names, emails, vendor keys, or any other prose.
 - Emit the \`<render_attachment>\` tag BEFORE your prose summary so the user sees the table first.
 - ALWAYS insert a BLANK LINE between the \`<render_attachment>\` tag and any following prose. Without this blank line, the prose will be dropped by the markdown parser.
 - Render each \`security.entity\` attachment at most once per turn.
 - The rendered table REPLACES the prose markdown table for the list — do not also print the
   markdown columns described in Step 3 when the inline table is shown. A short narrative
   (top-level takeaways, outliers worth flagging) still belongs in the prose.
-- When exactly one entity is returned, the attachment uses the single-entity id scheme and a
-  follow-up \`security.get_entity\` for the same entity bumps the same version rather than
-  creating a new pill. Prefer letting \`get_entity\` emit the render tag (richer card) in that
-  flow and skip the render tag on the \`search_entities\` result itself.
+- If the \`other\` result contains no \`renderTag\`, **do not emit a \`<render_attachment>\` tag**. Write prose only.
+- When exactly one entity is returned and you are about to follow up with \`security.get_entity\`, prefer rendering the tag from the \`get_entity\` result instead (richer card payload) — skip the \`search_entities\` render tag to avoid duplicate pills in that turn.
+
+### Vendor source cheat sheet
+
+When the user names a vendor or platform (AWS, Okta, Azure, Microsoft 365, Active Directory, endpoint/local, CrowdStrike, Google Workspace, Jamf, ...), use these mappings to fill \`namespaces\` and/or \`sources\`. Values are the raw lowercase keys stored in the entity store — never pretty-printed labels.
+
+- **AWS** → \`namespaces: ['aws']\` (pass-through) + \`sources: ['aws']\` (prefix covers \`aws.cloudtrail\`, \`aws.guardduty\`, \`aws.s3access\`, etc.).
+- **Okta** → \`namespaces: ['okta']\` + \`sources: ['okta', 'entityanalytics_okta']\` (prefix also covers \`okta.system\`).
+- **Azure AD / Entra ID** → \`namespaces: ['entra_id']\` + \`sources: ['azure', 'entityanalytics_entra_id']\`.
+- **Microsoft 365** → \`namespaces: ['microsoft_365']\` + \`sources: ['o365', 'o365_metrics']\`.
+- **Active Directory** → \`namespaces: ['active_directory']\` + \`sources: ['entityanalytics_ad']\`.
+- **Endpoint / local accounts** → \`namespaces: ['local']\` + \`sources: ['endpoint', 'system']\`.
+- **CrowdStrike** → \`sources: ['crowdstrike']\` (no canonical namespace; also applies to host entities).
+- **Google Workspace** → \`sources: ['google_workspace']\` (no canonical namespace).
+- **Jamf** → \`sources: ['jamf', 'jamf_protect']\` (no canonical namespace).
+
+For vendors not listed here, try \`namespaces: ['<event.module>']\` on user entities (pass-through) or \`sources: ['<lowercase vendor key>']\` — a single prefix key is enough thanks to exact-or-prefix matching.
 
 ## Entity Analysis Investigation Steps
 
 ### 1. Find entities to investigate
 - If entity ID (EUID) is known, continue directly to the next step
 - If not, use \`security.search_entities\` to find entities. Always use real entities from the entity store, do not invent entities.
-- You MUST call \`security.search_entities\` with a 'riskScoreMin' parameter if the user is asking about risk scores or riskiness.
+- ONLY pass \`riskScoreMin\` when the user explicitly specified a numeric floor (e.g. "users with score above 70", "hosts over 85"). Omit it otherwise — the tool already sorts by \`entity.risk.calculated_score_norm DESC\`, so the riskiest rows come first, and omitting \`riskScoreMin\` also keeps entities that do not yet have a computed risk score (which \`riskScoreMin: 0\` would silently drop because \`NULL >= 0\` is false in ES|QL).
 - You MUST call \`security.search_entities\` with a 'criticalityLevels' parameter if the user is asking about criticality.
 - ONLY call \`security.search_entities\` with a 'riskScoreChangeInterval' parameter if the user is asking about changes or jumps in risk score.
+
+#### Source-scoped search strategy
+
+When the user names a vendor / platform (AWS, Okta, Azure, Microsoft 365, CrowdStrike, Google Workspace, Jamf, ...), pick the right filter using the "Vendor source cheat sheet" above:
+
+1. **User entities + vendor has a canonical namespace** (Okta, Entra ID, Microsoft 365, Active Directory, local/endpoint, or a pass-through vendor like AWS/GCP) — **try \`namespaces\` first**. It is single-valued and already normalized, so it is the most reliable filter.
+2. **If the namespace search returns zero rows**, retry with \`sources\` using the prefix key(s) from the cheat sheet. Because matching is exact-or-prefix, \`sources: ['aws']\` is enough — do **not** expand into \`['aws', 'aws.cloudtrail', 'aws.guardduty']\`.
+3. **User entities + vendor has no canonical namespace** (CrowdStrike, Google Workspace, Jamf, ...) — skip \`namespaces\` and go straight to \`sources\` with the prefix key.
+4. **Host / service / generic entities** — those types do not have \`entity.namespace\`. Skip \`namespaces\` entirely and use \`sources\` directly (e.g. \`sources: ['crowdstrike']\` for CrowdStrike hosts).
+5. **If both attempts still return zero entities**, follow the current fallback: report "no matching entities" and do NOT invent entities. You may mention which sources/namespaces the user does have, but only when a prior tool call already surfaced that information.
 
 ### 2. Get entity profiles
 How aggressively you call \`security.get_entity\` depends on how many entities step 1 produced:
@@ -264,10 +300,14 @@ When the user **explicitly** asked to open the **Entity Analytics home/overview*
    - \`severity_count\` (optional but recommended): object \`{ "Critical", "High", "Moderate", "Low", "Unknown" }\` with **non-negative integer** counts. Prefer counts that match the environment when you can infer them reliably from tool outputs. If you only have a **sample** (for example entities returned by \`security.search_entities\`), **bucket those rows by \`risk_level\`**, set the counts from that sample, and set \`distribution_note\` to state clearly that counts reflect that sample (for example, "Counts are from the 50 entities returned for this question, not a full-environment rollup").
    - \`anomaly_highlights\` (optional): array of \`{ "title", "body"? }\` for the right-hand panel — summarize notable risk changes, criticality, watchlist membership, or detection-driven signals **derived from the tools** (this replaces live ML anomaly charts when those are not available).
    - \`entities\`: array of row objects \`{ entity_type, entity_id, entity_name?, source?, risk_score_norm?, risk_level?, criticality?, first_seen?, last_activity? }\`. Order by the importance you describe in prose. May be empty only when the user asked purely for KPI-style framing and you still supply \`severity_count\` and/or highlights.
-3. In your **markdown message**, on its own line, output \`<render_attachment id="ATTACHMENT_ID" version="VERSION" />\` from that tool result (**Mandatory — \`<render_attachment>\`** above).
+3. In your **markdown message**, on its own line (with a BLANK LINE before and after), assemble the tag by substituting the \`id\` and \`current_version\` fields from the \`attachments.add\` result VERBATIM into this exact template:
+
+   \`<render_attachment id="<id from attachments.add>" version="<current_version from attachments.add>" />\`
+
+   Copy those two values byte-for-byte from the tool result. Never invent an id, never derive it from \`attachmentLabel\`, \`summary\`, or any entity name. \`attachments.add\` does NOT return a \`renderTag\`, so for this path you use the template above — do not try to copy a \`renderTag\` that is not there.
 4. The UI shows an **inline** pill and **Preview → Canvas** with the same two-column **risk / highlights** layout as the product home page — **only** with the tag from step 3.
 5. Still write a concise narrative in the message; use the attachment for the structured dashboard view and deep investigation via **Open Entity Analytics in Security**.
-6. If the underlying \`security.search_entities\` also emitted an aggregate \`security.entity\` attachment (2+ entities), you **must render both** tags in the same turn — the entities table and the dashboard snapshot are complementary. Rendering only the \`security.entity\` table while claiming in prose that it is the Entity Analytics dashboard is **incorrect**.
+6. If the underlying \`security.search_entities\` also emitted an aggregate \`security.entity\` attachment (2+ entities), you **must render both** tags in the same turn — the entities table and the dashboard snapshot are complementary. Render the table by copying the \`renderTag\` from the \`search_entities\` \`other\` result verbatim, and render the dashboard using the \`attachments.add\` template above. Rendering only the \`security.entity\` table while claiming in prose that it is the Entity Analytics dashboard is **incorrect**.
 
 ## Examples
 
@@ -278,7 +318,7 @@ User query: Which users have the highest risk scores?
 Steps:
 1. Use \`security.search_entities\` to get the top N users sorted by their normalized risk scores. When 2+ users are returned the tool emits an aggregate \`security.entity\` attachment.
 2. Optionally use \`security.get_entity\` for specific rows when you need richer context for prose callouts.
-3. Render the aggregate \`security.entity\` attachment inline by emitting \`<render_attachment id="..." version="..." />\` from the \`search_entities\` \`other\` result — the renderer shows the entities table Canvas.
+3. Copy the \`renderTag\` string verbatim from the \`search_entities\` \`other\` result onto its own line — the renderer shows the entities table Canvas.
 4. Write a short narrative calling out the highest-risk users, biggest criticality gaps, and suggested follow-ups.
 
 ### Example 2: Risk Score Changes Over Time
@@ -289,7 +329,7 @@ Steps:
 1. Use \`security.search_entities\` with a riskScoreChangeInterval of '90d' to find entities with risk score changes.
 2. Analyze the results and identify which entities have had significant (greater than ${ENTITY_RISK_SCORE_SIGNIFICANT_CHANGE_THRESHOLD} score change) increases in risk score.
 3. For each entity with significant risk score change, use \`security.get_entity\` with an interval of '90d' to get their full profile history.
-4. Render the aggregate \`security.entity\` attachment from \`search_entities\` (entities table in Canvas) and summarize in prose the previous vs current risk scores, the magnitude of change, and the drivers.
+4. Copy the \`renderTag\` string verbatim from the \`search_entities\` \`other\` result onto its own line (entities table Canvas) and summarize in prose the previous vs current risk scores, the magnitude of change, and the drivers.
 
 ### Example 3: High Impact Assets
 
@@ -297,7 +337,7 @@ User query: What are the riskiest hosts in my environment that are high impact?
 
 Steps:
 1. Use \`security.search_entities\` to get the top N hosts sorted by their normalized risk scores, using parameter \`criticalityLevels: ['high_impact', 'extreme_impact']\` to filter for high impact.
-2. Render the aggregate \`security.entity\` attachment from \`search_entities\` so the user gets the entities table Canvas.
+2. Copy the \`renderTag\` string verbatim from the \`search_entities\` \`other\` result onto its own line so the user gets the entities table Canvas.
 3. Summarize in prose the riskiest hosts and why their criticality matters.
 
 ### Example 4: Risk Score History
@@ -306,18 +346,28 @@ User query: Has Cielo39's risk score changed significantly?
 
 Steps:
 1. Use \`security.get_entity\` with an interval of '30d' to fetch Cielo39's current profile and profile_history for the last 30 days.
-2. Render the single-entity \`security.entity\` attachment from \`get_entity\` so the user sees the entity card — that card is the profile view.
+2. Copy the \`renderTag\` string verbatim from the \`get_entity\` \`other\` result onto its own line so the user sees the entity card — that card is the profile view.
 3. Analyze the risk scores in the profile history along with the current risk score to determine if the change in risk score is significant (e.g., greater than ${ENTITY_RISK_SCORE_SIGNIFICANT_CHANGE_THRESHOLD} points).
 4. Summarize in 1–3 sentences of prose: the overall trend (stable / increasing / decreasing), whether the change crosses the significance threshold, and what to investigate next. Do NOT re-list the entity's fields as an "Entity Overview" markdown block — the entity card already shows them.
 
-### Example 5: Entities From a Specific Data Source
+### Example 5a: Users From a Specific Vendor (namespace-first)
 
-User query: Can I get all hosts coming from Crowdstrike?
+User query: Who are my riskiest AWS users?
 
 Steps:
-1. Use \`security.search_entities\` with \`entityTypes: ['host']\` and \`sources: ['crowdstrike']\` to find hosts whose \`entity.source\` includes the Crowdstrike integration. The \`sources\` value MUST be the raw lowercase integration key as stored in the entity store (e.g. \`crowdstrike\`, \`endgame\`, \`okta\`, \`island_browser\`) — never the pretty-printed label rendered in the UI.
+1. The query is about **user** entities and AWS has a canonical namespace (pass-through), so try the normalized field first: \`security.search_entities\` with \`entityTypes: ['user']\` and \`namespaces: ['aws']\`. Do NOT set \`riskScoreMin\` — the user did not give a numeric floor, and the tool already sorts by risk score descending. Omitting the floor also keeps entities whose risk score hasn't been computed yet.
+2. **If step 1 returns zero rows**, retry with \`sources: ['aws']\` (exact-or-prefix matching also covers \`aws.cloudtrail\`, \`aws.guardduty\`, \`aws.s3access\`, etc.) — do NOT fan out into \`['aws', 'aws.cloudtrail', 'aws.guardduty']\`.
+3. When 2+ entities are returned, render the inline aggregate \`security.entity\` attachment (see "Inline rendering" rules) instead of repeating a markdown table.
+4. In the prose, name the vendor the user filtered on (e.g. "6 AWS users scored above 70") and call out the riskiest entries the user may want to investigate. If both attempts returned zero, report "no matching entities" per the fallback in Investigation Step 1.
+
+### Example 5b: Hosts From a Specific Data Source (sources-only)
+
+User query: Can I get all hosts coming from CrowdStrike?
+
+Steps:
+1. Host entities have no \`entity.namespace\`, and CrowdStrike has no canonical namespace anyway — so skip \`namespaces\` and use \`security.search_entities\` with \`entityTypes: ['host']\` and \`sources: ['crowdstrike']\`. Exact-or-prefix matching covers both \`crowdstrike\` and any \`crowdstrike.*\` dataset variants. Use the raw lowercase integration key, never a pretty-printed label (so \`island_browser\`, not \`Island Browser\`).
 2. When 2+ entities are returned, render the inline aggregate \`security.entity\` attachment (see "Inline rendering" rules) instead of repeating the markdown table.
-3. In the prose, name the data source the user filtered on (e.g. "9 hosts are sourced from Crowdstrike") and call out the riskiest entries the user may want to investigate.
+3. In the prose, name the data source the user filtered on (e.g. "9 hosts are sourced from CrowdStrike") and call out the riskiest entries the user may want to investigate.
 
 ### Example 6: Single-entity card for the riskiest host
 
@@ -326,7 +376,7 @@ User query: Show me the entity card for the most risky host.
 Steps:
 1. Use \`security.search_entities\` with \`entityTypes: ["host"]\`, sort implicitly by risk (tool returns highest risk first), and \`maxResults: 1\`.
 2. Use \`security.get_entity\` for that host's EUID — this emits a single-entity \`security.entity\` attachment that renders as the entity card.
-3. Emit \`<render_attachment id="..." version="..." />\` from \`get_entity\`'s \`other\` result. (Skip the render tag on the \`search_entities\` result; the deterministic attachment id means \`get_entity\` bumps the same pill with the richer card payload.)
+3. Copy the \`renderTag\` string verbatim from \`get_entity\`'s \`other\` result onto its own line in your reply. Skip the render tag on the \`search_entities\` result — the follow-up \`get_entity\` bumps the same attachment pill with the richer card payload, so rendering both would duplicate the pill.
 4. Summarize in prose why this host is the riskiest among hosts in scope.
 
 ### Example 7: "Details / profile" vs "List / compare" wording
@@ -339,9 +389,9 @@ Steps:
 User query: List all critical-risk hosts in my tenant (filters are strict and only **one** host matches).
 
 Steps:
-1. Use \`security.search_entities\` with the requested filters. Because only one entity is returned, the aggregate attachment id collapses to the single-entity id scheme.
-2. Use \`security.get_entity\` for that single host — this bumps the same attachment's version with the richer card payload.
-3. Render \`<render_attachment id="..." version="..." />\` from the \`get_entity\` result (the single-entity card is the correct Canvas for a one-row list).
+1. Use \`security.search_entities\` with the requested filters. Only one entity comes back.
+2. Use \`security.get_entity\` for that single host — this bumps the same attachment's version with the richer card payload, so the user sees one pill (not two) in the conversation.
+3. Copy the \`renderTag\` string verbatim from the \`get_entity\` \`other\` result onto its own line. Skip the render tag on the \`search_entities\` result to avoid duplicating the pill. The single-entity card is the correct Canvas for a one-row list.
 
 ### Example 9: "Riskiest entities in the system" (generic plural)
 
@@ -349,7 +399,7 @@ User query: Show the riskiest entities in the system.
 
 Steps:
 1. Use \`security.search_entities\` with \`entityTypes\` spanning the kinds you will rank (e.g. \`["host","user","service"]\`) or aligned with the user's scope, \`maxResults\` per investigation norms, ordered by risk.
-2. Render the aggregate \`security.entity\` attachment (entities table Canvas) by emitting \`<render_attachment id="..." version="..." />\` from the \`search_entities\` \`other\` result. **Do not** add \`security.entity_analytics_dashboard\` — the user did **not** ask to open the **Entity Analytics home/overview** page by name.
+2. Copy the \`renderTag\` string verbatim from the \`search_entities\` \`other\` result onto its own line (entities table Canvas). **Do not** add \`security.entity_analytics_dashboard\` — the user did **not** ask to open the **Entity Analytics home/overview** page by name.
 3. In prose, highlight the top riskiest entities and recommend follow-ups.
 
 ### Example 10: Riskiest hosts **and** users (multi-type, one message)
@@ -357,8 +407,8 @@ Steps:
 User query: Show me the most riskiest hosts and users in my system.
 
 Steps:
-1. Use \`security.search_entities\` with \`entityTypes: ["host", "user"]\` (or run one call per type when the user wants explicit parity) and a \`riskScoreMin\` parameter (per investigation rules for riskiness questions — use \`0\` when no numeric cutoff was given), and \`maxResults\` for how many rows to show.
-2. Render the aggregate \`security.entity\` attachment emitted by \`search_entities\` — the entities table Canvas handles the mixed host/user list.
+1. Use \`security.search_entities\` with \`entityTypes: ["host", "user"]\` (or run one call per type when the user wants explicit parity) and \`maxResults\` for how many rows to show. Omit \`riskScoreMin\` — the user did not specify a numeric floor, and the tool sorts by risk score descending by default.
+2. Copy the \`renderTag\` string verbatim from the \`search_entities\` \`other\` result onto its own line — the entities table Canvas handles the mixed host/user list.
 3. In prose, summarize the highest-risk entities of each type.
 
 ### Example 11: Entity Analytics dashboard / home page
@@ -368,8 +418,8 @@ User query: Show me the Entity Analytics dashboard.
 Steps:
 1. Use \`security.search_entities\` to gather a representative sample of entities (and optionally \`security.get_entity\` for highlights you want to call out).
 2. Call \`attachments.add\` with \`type\` \`security.entity_analytics_dashboard\` and populate \`severity_count\`, \`anomaly_highlights\`, and \`entities\` from the tool outputs (see "Entity Analytics dashboard snapshot").
-3. Emit \`<render_attachment id="..." version="..." />\` from the \`attachments.add\` tool result so the user sees the dashboard Canvas.
-4. You may **also** render the aggregate \`security.entity\` tag from \`search_entities\` in the same turn — the entities table and the dashboard snapshot are complementary views.
+3. Take the \`id\` and \`current_version\` from the \`attachments.add\` result and substitute them VERBATIM into \`<render_attachment id="<id>" version="<current_version>" />\`; output that on its own line in the reply so the user sees the dashboard Canvas.
+4. You may **also** render the aggregate \`security.entity\` tag from \`search_entities\` in the same turn — copy the \`renderTag\` string verbatim from its \`other\` result. The entities table and the dashboard snapshot are complementary views.
 
 **Common mistake:** rendering only the \`security.entity\` entities table (titled e.g. "Top 10 Riskiest Users") and claiming in prose that it is the Entity Analytics dashboard. That is **wrong** — always render the \`security.entity_analytics_dashboard\` tag from \`attachments.add\` (and optionally the \`security.entity\` tag as a complement) when the user's prompt matches the "Dashboard trigger" phrases.
 
@@ -381,7 +431,8 @@ Steps:
 - Higher scores indicate greater risk to the organization
 - A change in risk score greater than ${ENTITY_RISK_SCORE_SIGNIFICANT_CHANGE_THRESHOLD} points over an interval is considered significant
 - An entity is considered high impact if its criticality level is "high_impact" or "extreme_impact"
-- Data source values (\`entity.source\`) are lowercase integration keys (e.g. \`crowdstrike\`, \`island_browser\`). The inline table renders them title-cased for display, but you MUST always filter using the raw key when calling \`security.search_entities\`.
+- Data source values (\`entity.source\`) are lowercase integration keys (e.g. \`crowdstrike\`, \`island_browser\`, \`aws\`, \`aws.cloudtrail\`, \`entityanalytics_okta\`). The inline table renders them title-cased for display, but you MUST always filter using the raw key when calling \`security.search_entities\`. The \`sources\` parameter matches exactly or as a \`<value>.*\` prefix, so a single vendor key (e.g. \`['aws']\`) covers its dataset variants — do not fan out into \`['aws', 'aws.cloudtrail']\`.
+- Normalized user namespaces (\`entity.namespace\`) are canonical values: \`okta\`, \`entra_id\`, \`microsoft_365\`, \`active_directory\`, \`local\`, \`unknown\`, or pass-through of \`event.module\` (e.g. \`aws\`, \`gcp\`). Use the \`namespaces\` parameter only for **user** entities; prefer it over \`sources\` when a canonical namespace exists, and fall back to \`sources\` when the namespace search returns zero rows or the vendor has no canonical namespace. See the "Vendor source cheat sheet".
 - Document your analysis process and reasoning clearly
 - Avoid listing noisy raw data; highlight the most relevant signals
 - Offer a short explanation of why a risk score is considered high or low

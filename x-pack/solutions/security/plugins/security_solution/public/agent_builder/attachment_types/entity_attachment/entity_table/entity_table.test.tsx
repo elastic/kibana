@@ -185,4 +185,73 @@ describe('EntityTable', () => {
       });
     });
   });
+
+  describe('duplicate entity.name with distinct entityStoreId', () => {
+    // Regression: two local service accounts share `entity.name` ("okta") but
+    // have distinct `entity.id`s. Keying rows by `identifier` alone caused the
+    // shared `rowsByKey` slot to be overwritten by whichever fetch resolved
+    // last, so every row rendered with the same entity's data. Keying off
+    // `entityStoreId` (when present) keeps the rows distinct.
+    it('renders each row with its own resolved data instead of clobbering the shared slot', () => {
+      const storeIdA = 'user:okta@i-aaaaaaaaaaaaaaaaa@local';
+      const storeIdB = 'user:okta@i-bbbbbbbbbbbbbbbbb@local';
+
+      // Cache one stable hook result per entityStoreId so the data reference
+      // does not change between re-renders. Without caching, every render
+      // produces a fresh `data` object, which fires `EntityRowLoader`'s
+      // `useEffect` → `setRowsByKey` loop indefinitely.
+      const resultByStoreId: Record<string, ReturnType<typeof mockedUseEntityForAttachment>> = {
+        [storeIdA]: {
+          data: baseEntityData({
+            entityType: EntityType.user,
+            displayName: 'okta',
+            entityId: storeIdA,
+          }),
+          isLoading: false,
+          error: null,
+          refetch: jest.fn(),
+        },
+        [storeIdB]: {
+          data: baseEntityData({
+            entityType: EntityType.user,
+            displayName: 'okta',
+            entityId: storeIdB,
+          }),
+          isLoading: false,
+          error: null,
+          refetch: jest.fn(),
+        },
+      };
+
+      mockedUseEntityForAttachment.mockImplementation(
+        (identifier: { entityStoreId?: string }) =>
+          (identifier.entityStoreId && resultByStoreId[identifier.entityStoreId]) || {
+            data: null,
+            isLoading: false,
+            error: null,
+            refetch: jest.fn(),
+          }
+      );
+
+      const application = { navigateToApp: jest.fn() } as unknown as ApplicationStart;
+
+      renderTable({
+        entities: [
+          { identifierType: 'user', identifier: 'okta', entityStoreId: storeIdA },
+          { identifierType: 'user', identifier: 'okta', entityStoreId: storeIdB },
+        ],
+        application,
+      });
+
+      const exploreButtons = screen.getAllByTestId('entityAttachmentTableOpenEntity');
+      expect(exploreButtons).toHaveLength(2);
+
+      fireEvent.click(exploreButtons[0]);
+      fireEvent.click(exploreButtons[1]);
+
+      expect(mockedNavigateToSecurityEntityInApp).toHaveBeenCalledTimes(2);
+      expect(mockedNavigateToSecurityEntityInApp.mock.calls[0][0].row.entity_id).toBe(storeIdA);
+      expect(mockedNavigateToSecurityEntityInApp.mock.calls[1][0].row.entity_id).toBe(storeIdB);
+    });
+  });
 });

@@ -29,6 +29,7 @@ import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../lib/telemetry/eve
 import { securityTool } from '../constants';
 import {
   buildListEntityAttachmentId,
+  buildRenderAttachmentTag,
   buildSingleEntityAttachmentId,
   describeAttachmentForRow,
   ensureEntityAttachment,
@@ -104,7 +105,10 @@ const schema = z.object({
     .max(100)
     .optional()
     .describe(
-      'Minimum normalized risk score (0-100). Only returns entities with entity.risk.calculated_score_norm >= this value.'
+      'Minimum normalized risk score (1-100). When >0, only returns entities with entity.risk.calculated_score_norm >= this value. ' +
+        'Pass 0 or omit this parameter to apply no minimum — this preserves entities that do not have a computed risk score yet ' +
+        '(calculated_score_norm IS NULL), which otherwise would be dropped because NULL >= 0 is false in ES|QL. ' +
+        'Only set a positive floor when the user explicitly asked for a score threshold (e.g. "above 70").'
     ),
   riskScoreMax: z
     .number()
@@ -134,9 +138,25 @@ const schema = z.object({
     .array(z.string().min(1))
     .optional()
     .describe(
-      'Filter for entities whose `entity.source` (multi-value) includes ANY of the given values. ' +
-        'Values are the raw integration keys from the entity store (e.g. "crowdstrike", "endgame", "okta", "island_browser"). ' +
-        'Compared exactly against the stored value — do not pretty-print (e.g. pass "island_browser", not "Island Browser").'
+      'Filter for entities whose multi-value `entity.source` field matches ANY of the given values either exactly ' +
+        'or as a "<value>.*" prefix. For example `sources: ["aws"]` matches entities with `entity.source` of ' +
+        '"aws", "aws.cloudtrail", "aws.guardduty", "aws.s3access", etc. Values are the raw lowercase integration ' +
+        'keys from the entity store (e.g. "crowdstrike", "okta", "entityanalytics_okta", "island_browser") — do ' +
+        'not pretty-print (pass "island_browser", not "Island Browser"). For user entities prefer the normalized ' +
+        '`namespaces` parameter when possible; fall back to `sources` when no canonical namespace exists or when ' +
+        'searching host/service/generic entities.'
+    ),
+  namespaces: z
+    .array(z.string().min(1))
+    .optional()
+    .describe(
+      'Filter user entities by normalized vendor namespace (`entity.namespace`). This is single-value and ' +
+        'collapses heterogeneous source keys into canonical names. Known canonical values: "okta" (from okta / ' +
+        'entityanalytics_okta), "entra_id" (from azure / entityanalytics_entra_id), "microsoft_365" (from o365 / ' +
+        'o365_metrics), "active_directory" (from entityanalytics_ad), "local" (non-IDP endpoint/system accounts), ' +
+        '"unknown" (missing source), plus pass-through of `event.module` for vendors without a dedicated mapping ' +
+        '(e.g. "aws", "gcp"). Only effective on user entities; host/service/generic rows do not have ' +
+        '`entity.namespace` and will be filtered out when this parameter is set.'
     ),
   managedOnly: z
     .boolean()
@@ -216,6 +236,23 @@ const buildInListClause = (field: string, values: string[]): string => {
 const buildMvContainsClause = (field: string, values: string[]): string =>
   values.map((v) => `MV_CONTAINS(${field}, "${escapeEsqlString(v)}")`).join(' OR ');
 
+/**
+ * Builds a WHERE clause fragment matching `entity.source` against any of the given values
+ * either exactly or as a "<value>.*" prefix. `entity.source` is multi-valued and may carry
+ * vendor keys (`"aws"`), dataset keys (`"aws.cloudtrail"`), or integration keys
+ * (`"entityanalytics_okta"`), so exact-only matching misses dataset-shaped variants. ESQL
+ * `LIKE` on a multi-value keyword field returns true if ANY value matches the pattern, and
+ * we anchor the prefix with a trailing `.` to avoid false positives on unrelated prefixes
+ * (e.g. `"awsome_*"` will not match `sources: ["aws"]`).
+ */
+const buildSourceMatchClause = (values: string[]): string =>
+  values
+    .map((v) => {
+      const esc = escapeEsqlString(v);
+      return `(MV_CONTAINS(entity.source, "${esc}") OR entity.source LIKE "${esc}.*")`;
+    })
+    .join(' OR ');
+
 const intervalToEsql = (interval: string) => {
   const match = interval.match(/^(\d+)([smhdwM])$/);
   if (match == null) {
@@ -263,7 +300,11 @@ const buildRiskAndAssetCriticalityFilterClauses = ({
       `WHERE @timestamp >= DATE_TRUNC(1 day, ${intervalToEsql(riskScoreChangeInterval)})`
     );
   }
-  if (riskScoreMin != null) {
+  // Treat `riskScoreMin: 0` as "no floor" rather than `>= 0`. In ES|QL any comparison
+  // against NULL is false, so emitting `calculated_score_norm >= 0` would silently drop
+  // every entity whose risk score hasn't been computed yet. Only emit the filter when
+  // the caller asks for a strictly positive floor.
+  if (riskScoreMin != null && riskScoreMin > 0) {
     clauses.push(`WHERE entity.risk.calculated_score_norm >= ${riskScoreMin}`);
   }
   if (riskScoreMax != null) {
@@ -281,6 +322,7 @@ const buildRiskAndAssetCriticalityFilterClauses = ({
 const buildAttributeFilterClauses = ({
   watchlists,
   sources,
+  namespaces,
   managedOnly,
   mfaEnabledOnly,
   assetOnly,
@@ -290,7 +332,10 @@ const buildAttributeFilterClauses = ({
     clauses.push(`WHERE ${buildMvContainsClause('entity.attributes.watchlists', watchlists)}`);
   }
   if (sources && sources.length > 0) {
-    clauses.push(`WHERE ${buildMvContainsClause('entity.source', sources)}`);
+    clauses.push(`WHERE ${buildSourceMatchClause(sources)}`);
+  }
+  if (namespaces && namespaces.length > 0) {
+    clauses.push(`WHERE ${buildInListClause('entity.namespace', namespaces)}`);
   }
   if (managedOnly === true) {
     clauses.push(`WHERE entity.attributes.managed == true`);
@@ -417,7 +462,7 @@ const buildAttachmentSideEffectResults = async ({
   Array<{
     tool_result_id: string;
     type: typeof ToolResultType.other;
-    data: { attachmentId: string; version: number };
+    data: { attachmentId: string; version: number; renderTag: string };
   }>
 > => {
   if (!experimentalFeatures.entityAttachmentRichRenderer) {
@@ -482,6 +527,7 @@ const buildAttachmentSideEffectResults = async ({
       data: {
         attachmentId: attachmentResult.attachmentId,
         version: attachmentResult.version,
+        renderTag: buildRenderAttachmentTag(attachmentResult),
       },
     },
   ];
@@ -497,9 +543,12 @@ export const searchEntitiesTool = (
     type: ToolType.builtin,
     description: `Search entity store for security entities (host, user, service, generic).
     Supports filtering by normalized risk score, asset criticality, entity attributes, lifecycle timestamps,
-    and data source (entity.source) via the "sources" parameter (e.g. ["crowdstrike"]).
+    and data source via two complementary parameters:
+      - "sources" matches the multi-value "entity.source" field exactly or as a "<value>.*" prefix (e.g. ["aws"] matches "aws", "aws.cloudtrail", "aws.guardduty").
+      - "namespaces" matches the normalized single-value "entity.namespace" field on user entities (canonical values: okta, entra_id, microsoft_365, active_directory, local, unknown, or pass-through of event.module like "aws").
+    Prefer "namespaces" for user queries when a canonical vendor exists; fall back to "sources" for vendors without a namespace mapping and for host/service/generic entities.
     Use this tool to find entities matching specific criteria.
-    When this tool returns 2+ entities, it automatically emits an aggregate "security.entity" attachment whose renderer shows an **entities table** in Canvas; when it returns exactly 1 entity, the attachment uses the single-entity id scheme and a follow-up security.get_entity bumps the same pill with a richer **entity card** payload. In either case you MUST render the attachment inline by emitting \`<render_attachment id="..." version="..." />\` from the tool's \`other\` result on its own line in your markdown reply (see entity-analytics skill). You never call attachments.add with "security.entity" — the tool emits it as a side effect.
+    When this tool stores a "security.entity" attachment (2+ entities returned, or a single-entity attachment shared with security.get_entity), its "other" result includes a pre-formatted \`renderTag\` string alongside \`attachmentId\` and \`version\`. To render the attachment inline, copy that \`renderTag\` string VERBATIM onto its own line in your markdown reply — do NOT assemble the tag yourself from \`attachmentId\` and \`version\`, and do NOT derive the id from entity names, emails, vendor keys, or any other prose. If the \`other\` result contains no \`renderTag\`, do NOT emit a \`<render_attachment>\` tag. You never call attachments.add with "security.entity" — the tool emits it as a side effect.
     When the user asks to show, open, view, or summarize the Entity Analytics dashboard/home/overview (built-in Security page), use these results (and optional security.get_entity) then call attachments.add with type "security.entity_analytics_dashboard" so the UI shows Preview→Canvas (see entity-analytics skill). Do not treat that as a request to compose a new Kibana saved dashboard.
     Do NOT use if entity ID (EUID) is known; use the "security.get_entity" tool instead.`,
     tags: ['security', 'entity-store', 'entity-analytics'],

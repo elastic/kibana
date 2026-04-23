@@ -26,6 +26,7 @@ import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../lib/telemetry/event_based/events';
 import {
   buildListEntityAttachmentId,
+  buildRenderAttachmentTag,
   buildSingleEntityAttachmentId,
 } from './entity_attachment_utils';
 import { searchEntitiesTool, SECURITY_SEARCH_ENTITIES_TOOL_ID } from './search_entities_tool';
@@ -135,6 +136,18 @@ describe('searchEntitiesTool', () => {
 
     it('rejects empty source string', () => {
       const result = tool.schema.safeParse({ sources: [''] });
+      expect(result.success).toBe(false);
+    });
+
+    it('accepts namespaces (canonical vendor namespaces)', () => {
+      const result = tool.schema.safeParse({
+        namespaces: ['okta', 'entra_id', 'aws'],
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects empty namespace string', () => {
+      const result = tool.schema.safeParse({ namespaces: [''] });
       expect(result.success).toBe(false);
     });
 
@@ -329,6 +342,54 @@ describe('searchEntitiesTool', () => {
       expect(query).toContain('WHERE entity.risk.calculated_score_norm <= 100');
     });
 
+    it('treats riskScoreMin:0 as "no floor" and does not emit a calculated_score_norm >= clause (keeps null-scored entities)', async () => {
+      mockSingleEntityResponse();
+
+      await tool.handler(
+        { riskScoreMin: 0 },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      );
+
+      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      expect(query).not.toContain('entity.risk.calculated_score_norm >=');
+    });
+
+    it('still emits the >= clause when riskScoreMin is strictly positive', async () => {
+      mockSingleEntityResponse();
+
+      await tool.handler(
+        { riskScoreMin: 1 },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      );
+
+      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      expect(query).toContain('WHERE entity.risk.calculated_score_norm >= 1');
+    });
+
+    it('does not emit the >= clause when riskScoreMin is omitted', async () => {
+      mockSingleEntityResponse();
+
+      await tool.handler(
+        { entityTypes: ['user'] },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      );
+
+      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      expect(query).not.toContain('entity.risk.calculated_score_norm >=');
+    });
+
+    it('still emits riskScoreMax when it is set to 0 (upper bound is not ambiguous)', async () => {
+      mockSingleEntityResponse();
+
+      await tool.handler(
+        { riskScoreMax: 0 },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      );
+
+      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      expect(query).toContain('WHERE entity.risk.calculated_score_norm <= 0');
+    });
+
     it('includes risk level filter in query', async () => {
       mockSingleEntityResponse();
 
@@ -366,7 +427,7 @@ describe('searchEntitiesTool', () => {
       expect(query).toContain('MV_CONTAINS(entity.attributes.watchlists, "threat-actors")');
     });
 
-    it('includes data source filter using MV_CONTAINS on entity.source', async () => {
+    it('includes data source filter using exact-or-prefix match on entity.source', async () => {
       mockSingleEntityResponse();
 
       await tool.handler(
@@ -375,8 +436,23 @@ describe('searchEntitiesTool', () => {
       );
 
       const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
-      expect(query).toContain('MV_CONTAINS(entity.source, "crowdstrike")');
-      expect(query).toContain('MV_CONTAINS(entity.source, "island_browser")');
+      expect(query).toContain(
+        'WHERE (MV_CONTAINS(entity.source, "crowdstrike") OR entity.source LIKE "crowdstrike.*") OR (MV_CONTAINS(entity.source, "island_browser") OR entity.source LIKE "island_browser.*")'
+      );
+    });
+
+    it('expands a single-vendor source to exact-or-prefix match (e.g. "aws" matches "aws.cloudtrail")', async () => {
+      mockSingleEntityResponse();
+
+      await tool.handler(
+        { sources: ['aws'] },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      );
+
+      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      expect(query).toContain(
+        'WHERE (MV_CONTAINS(entity.source, "aws") OR entity.source LIKE "aws.*")'
+      );
     });
 
     it('does not include entity.source filter when sources param is absent', async () => {
@@ -389,6 +465,46 @@ describe('searchEntitiesTool', () => {
 
       const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
       expect(query).not.toContain('MV_CONTAINS(entity.source');
+      expect(query).not.toContain('entity.source LIKE');
+    });
+
+    it('includes namespace filter using IN list on entity.namespace', async () => {
+      mockSingleEntityResponse();
+
+      await tool.handler(
+        { namespaces: ['okta', 'entra_id'] },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      );
+
+      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      expect(query).toContain('WHERE entity.namespace IN ("okta", "entra_id")');
+    });
+
+    it('combines sources (prefix) and namespaces filters in the same query', async () => {
+      mockSingleEntityResponse();
+
+      await tool.handler(
+        { entityTypes: ['user'], sources: ['aws'], namespaces: ['aws'] },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      );
+
+      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      expect(query).toContain(
+        'WHERE (MV_CONTAINS(entity.source, "aws") OR entity.source LIKE "aws.*")'
+      );
+      expect(query).toContain('WHERE entity.namespace IN ("aws")');
+    });
+
+    it('does not include entity.namespace filter when namespaces param is absent', async () => {
+      mockSingleEntityResponse();
+
+      await tool.handler(
+        { entityTypes: ['user'] },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      );
+
+      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      expect(query).not.toContain('entity.namespace');
     });
 
     it('includes managedOnly filter in query', async () => {
@@ -718,7 +834,9 @@ describe('searchEntitiesTool', () => {
       expect(query).toContain('WHERE entity.risk.calculated_level IN ("High", "Critical")');
       expect(query).toContain('WHERE asset.criticality IN ("extreme_impact")');
       expect(query).toContain('MV_CONTAINS(entity.attributes.watchlists, "vip")');
-      expect(query).toContain('MV_CONTAINS(entity.source, "crowdstrike")');
+      expect(query).toContain(
+        'WHERE (MV_CONTAINS(entity.source, "crowdstrike") OR entity.source LIKE "crowdstrike.*")'
+      );
       expect(query).toContain('WHERE entity.attributes.managed == true');
       expect(query).toContain('WHERE entity.attributes.mfa_enabled == true');
       expect(query).toContain('WHERE entity.attributes.asset == true');
@@ -817,11 +935,16 @@ describe('searchEntitiesTool', () => {
       const otherResult = result.results[3] as OtherResult<{
         attachmentId: string;
         version: number;
+        renderTag: string;
       }>;
       expect(otherResult.type).toBe(ToolResultType.other);
       expect(otherResult.data).toEqual({
         attachmentId: expectedListAttachmentId,
         version: 1,
+        renderTag: buildRenderAttachmentTag({
+          attachmentId: expectedListAttachmentId,
+          version: 1,
+        }),
       });
     });
 
@@ -859,11 +982,16 @@ describe('searchEntitiesTool', () => {
       const otherResult = result.results[1] as OtherResult<{
         attachmentId: string;
         version: number;
+        renderTag: string;
       }>;
       expect(otherResult.type).toBe(ToolResultType.other);
       expect(otherResult.data).toEqual({
         attachmentId: expectedSingleAttachmentId,
         version: 1,
+        renderTag: buildRenderAttachmentTag({
+          attachmentId: expectedSingleAttachmentId,
+          version: 1,
+        }),
       });
     });
 
@@ -900,11 +1028,16 @@ describe('searchEntitiesTool', () => {
       const otherResult = result.results[1] as OtherResult<{
         attachmentId: string;
         version: number;
+        renderTag: string;
       }>;
       expect(otherResult.type).toBe(ToolResultType.other);
       expect(otherResult.data).toEqual({
         attachmentId: expectedSingleAttachmentId,
         version: 2,
+        renderTag: buildRenderAttachmentTag({
+          attachmentId: expectedSingleAttachmentId,
+          version: 2,
+        }),
       });
     });
 
@@ -966,11 +1099,16 @@ describe('searchEntitiesTool', () => {
       const otherResult = result.results[3] as OtherResult<{
         attachmentId: string;
         version: number;
+        renderTag: string;
       }>;
       expect(otherResult.type).toBe(ToolResultType.other);
       expect(otherResult.data).toEqual({
         attachmentId: filteredAttachmentId,
         version: 1,
+        renderTag: buildRenderAttachmentTag({
+          attachmentId: filteredAttachmentId,
+          version: 1,
+        }),
       });
     });
 

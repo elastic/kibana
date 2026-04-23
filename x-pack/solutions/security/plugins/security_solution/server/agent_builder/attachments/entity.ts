@@ -120,12 +120,19 @@ The attachment data is one of two shapes:
 Handle both shapes.
 
 ## INLINE RENDERING (REQUIRED)
-When a ${SecurityAgentBuilderAttachments.entity} attachment is present in the conversation, you MUST render it inline in your response using the custom XML element:
+When a ${SecurityAgentBuilderAttachments.entity} attachment is present in the conversation, you MUST render it inline using the exact custom XML element shown below. The element name is literally \`render_attachment\` and the attribute names are literally \`id\` and \`version\` — do not rename, translate, or abbreviate them.
 
-    <render_attachment attachment_id="ATTACHMENT_ID" />
+Assemble the tag by substituting \`ATTACHMENT_ID\` with the value of the attachment's \`attachment_id\` field from the conversation's attachment manifest, and \`VERSION\` with the value of the \`current_version\` field:
+
+    <render_attachment id="ATTACHMENT_ID" version="VERSION" />
+
+For example, given a manifest entry \`{ "attachment_id": "security.entity:user:a1b2…", "current_version": 3 }\`, the tag you emit is literally:
+
+    <render_attachment id="security.entity:user:a1b2…" version="3" />
 
 Rules:
-- Copy ATTACHMENT_ID verbatim from the attachment's \`attachment_id\` field shown to you in the conversation's attachment manifest. Do not invent or alter it.
+- Copy \`attachment_id\` and \`current_version\` VERBATIM from the manifest. Never invent, guess, rewrite, or paraphrase them, and never construct an id from the entity name, email, or other fields.
+- Put the \`<render_attachment>\` tag on its OWN LINE, with a blank line before and after it. Do not wrap it in backticks, quotes, code fences, or surrounding prose.
 - Emit the \`<render_attachment>\` tag BEFORE your prose summary so the user sees the rich entity card or table first.
 - Render each ${SecurityAgentBuilderAttachments.entity} attachment at most once per turn.
 - Only omit the render tag if the user explicitly asks you not to show the entity card/table.

@@ -253,9 +253,20 @@ export const EntityTable: React.FC<EntityTableProps> = ({
   const [pageIndex, setPageIndex] = useState(0);
   const [rowsByKey, setRowsByKey] = useState<Record<string, EntityRow>>({});
 
+  /**
+   * Stable per-row key for React reconciliation, `rowsByKey` lookups, and the
+   * EuiBasicTable `itemId`. When the attachment carries a canonical
+   * `entityStoreId` (always present for modern attachments emitted by the
+   * security tools) we key off it so rows whose `entity.name` collides — e.g.
+   * 19 local `okta` service accounts across different EC2 hosts — do not
+   * clobber each other in `rowsByKey` / share a React key. Legacy attachments
+   * that pre-date `entityStoreId` fall back to the non-unique name-based key.
+   */
   const keyFor = useCallback(
     (identifier: EntityAttachmentIdentifier) =>
-      `${identifier.identifierType}:${identifier.identifier}`,
+      identifier.entityStoreId
+        ? `${identifier.identifierType}:id:${identifier.entityStoreId}`
+        : `${identifier.identifierType}:name:${identifier.identifier}`,
     []
   );
 

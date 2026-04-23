@@ -8,6 +8,7 @@
 import { createHash } from 'crypto';
 import type { Logger } from '@kbn/logging';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
+import { renderAttachmentElement } from '@kbn/agent-builder-common/tools/custom_rendering';
 import type { EntityRiskScoreRecord } from '../../../../common/api/entity_analytics/common';
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 
@@ -237,6 +238,56 @@ export const buildListEntityAttachmentId = (
     .join('\n');
   const hash = createHash('sha256').update(serialized).digest('hex');
   return `${SecurityAgentBuilderAttachments.entity}:list:${hash}`;
+};
+
+/**
+ * Any character outside this set risks triggering the upstream markdown
+ * autolinker / email tokenizer (they run before the HTML tokenizer in
+ * `remark-parse-no-trim` and shatter inline `<render_attachment>` tags
+ * whose `id` contains `@` or URL-shaped substrings). Our `buildSingle*` and
+ * `buildList*` helpers already emit `security.entity:<type>:<hex>`, which
+ * satisfies this pattern, so the regex is a belt-and-braces regression
+ * detector — not a substitute for hashing.
+ */
+const AUTOLINK_SAFE_ATTACHMENT_ID_PATTERN = /^[a-z0-9:.]+$/;
+
+/**
+ * Returns a pre-formatted `<render_attachment id="..." version="..." />`
+ * string the model can copy verbatim into its reply.
+ *
+ * Why pre-format server-side:
+ * - Asking the model to assemble the tag from `attachmentId` / `version`
+ *   has empirically produced hallucinated ids containing `@` or
+ *   email-shaped substrings, which the upstream markdown pipeline
+ *   shatters across multiple inline AST nodes (see the long comment on
+ *   `buildSingleEntityAttachmentId` for mechanics). A ready-made string
+ *   removes that degree of freedom.
+ * - Using `renderAttachmentElement.tagName` / `.attributes` (from the
+ *   platform common package) keeps this string in lockstep with whatever
+ *   the markdown parser expects, so a future rename on the platform side
+ *   does not silently desynchronise security-emitted tags.
+ *
+ * Callers MUST pass an id produced by `buildSingleEntityAttachmentId` or
+ * `buildListEntityAttachmentId`; the assertion below fires otherwise so
+ * a future refactor that bypasses hashing surfaces immediately instead
+ * of shipping a broken tag to the client.
+ */
+export const buildRenderAttachmentTag = ({
+  attachmentId,
+  version,
+}: {
+  attachmentId: string;
+  version: number;
+}): string => {
+  if (!AUTOLINK_SAFE_ATTACHMENT_ID_PATTERN.test(attachmentId)) {
+    throw new Error(
+      `buildRenderAttachmentTag received an unsafe attachmentId "${attachmentId}" — ` +
+        `expected a hashed id from buildSingleEntityAttachmentId / buildListEntityAttachmentId.`
+    );
+  }
+  const { tagName } = renderAttachmentElement;
+  const { attachmentId: idAttr, version: versionAttr } = renderAttachmentElement.attributes;
+  return `<${tagName} ${idAttr}="${attachmentId}" ${versionAttr}="${version}" />`;
 };
 
 /**

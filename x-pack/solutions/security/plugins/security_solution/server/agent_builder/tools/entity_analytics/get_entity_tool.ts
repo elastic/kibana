@@ -28,6 +28,7 @@ import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_build
 import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../lib/telemetry/event_based/events';
 import { securityTool } from '../constants';
 import {
+  buildRenderAttachmentTag,
   buildSingleEntityAttachmentId,
   describeAttachmentForRow,
   ensureEntityAttachment,
@@ -581,7 +582,7 @@ export const getEntityTool = (
     type: ToolType.builtin,
     description: `Retrieve profile for security entity (user, host, service, generic) from the Entity store using entity ID (EUID). Includes the alerts that contributed to the risk score if the entity has a risk score.
 
-When exactly one entity is resolved, this tool also stores a \`security.entity\` attachment (creating new or updating existing) so the rich entity card can render inline. Use the returned \`attachmentId\` and \`version\` with \`<render_attachment id="..." version="..." />\` BEFORE your prose summary so the user sees the card alongside your analysis.`,
+When exactly one entity is resolved, this tool also stores a \`security.entity\` attachment (creating new or updating existing) and its \`other\` result includes a pre-formatted \`renderTag\` string. To show the rich entity card inline, copy that \`renderTag\` string verbatim onto its own line in your reply BEFORE your prose summary. Do NOT assemble the tag yourself from \`attachmentId\` and \`version\`, and do NOT substitute the id with anything derived from the user's prompt. When the query resolves multiple candidates (fallback match) no attachment is stored, no \`renderTag\` is returned, and you must not emit a render tag in that case.`,
     schema,
     tags: ['security', 'entity-store', 'entity-analytics'],
     availability: {
@@ -753,6 +754,7 @@ When exactly one entity is resolved, this tool also stores a \`security.entity\`
                 data: {
                   attachmentId: attachmentResult.attachmentId,
                   version: attachmentResult.version,
+                  renderTag: buildRenderAttachmentTag(attachmentResult),
                 },
               },
             ]
