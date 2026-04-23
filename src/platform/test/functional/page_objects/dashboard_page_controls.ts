@@ -261,7 +261,6 @@ export class DashboardPageControls extends FtrService {
     additionalSettings?: OptionsListAdditionalSettings | RangeSliderAdditionalSettings;
     skipOpenFlyout?: boolean;
   }) {
-    
     this.log.debug(`Creating ${controlType} control ${title ?? fieldName}`);
     if (!skipOpenFlyout) {
       await this.openCreateControlFlyout();
