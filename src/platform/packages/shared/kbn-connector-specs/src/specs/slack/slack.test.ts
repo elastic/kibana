@@ -9,7 +9,7 @@
 
 import type { ActionContext } from '../../connector_spec';
 import { getConnectorSpec } from '../../..';
-import { Slack } from './slack';
+import { Slack, SlackListChannelsInputSchema, SlackResolveChannelIdInputSchema } from './slack';
 
 describe('Slack', () => {
   const mockClient = {
@@ -181,9 +181,10 @@ describe('Slack', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      const result = await Slack.actions.resolveChannelId.handler(mockContext, {
-        name: '#general',
-      });
+      const result = await Slack.actions.resolveChannelId.handler(
+        mockContext,
+        SlackResolveChannelIdInputSchema.parse({ name: '#general' })
+      );
 
       expect(mockClient.get).toHaveBeenCalledWith('https://slack.com/api/conversations.list', {
         params: {
@@ -220,11 +221,14 @@ describe('Slack', () => {
           },
         });
 
-      const result = await Slack.actions.resolveChannelId.handler(mockContext, {
-        name: 'alerts',
-        match: 'contains',
-        maxPages: 5,
-      });
+      const result = await Slack.actions.resolveChannelId.handler(
+        mockContext,
+        SlackResolveChannelIdInputSchema.parse({
+          name: 'alerts',
+          match: 'contains',
+          maxPages: 5,
+        })
+      );
 
       expect(mockClient.get).toHaveBeenCalledTimes(2);
       expect(mockClient.get).toHaveBeenNthCalledWith(
@@ -281,7 +285,10 @@ describe('Slack', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      const result = await Slack.actions.listChannels.handler(mockContext, {});
+      const result = await Slack.actions.listChannels.handler(
+        mockContext,
+        SlackListChannelsInputSchema.parse({})
+      );
 
       expect(mockClient.get).toHaveBeenCalledWith('https://slack.com/api/conversations.list', {
         params: {
@@ -324,12 +331,15 @@ describe('Slack', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      await Slack.actions.listChannels.handler(mockContext, {
-        cursor: 'prev-cursor',
-        limit: 200,
-        types: ['private_channel'],
-        excludeArchived: false,
-      });
+      await Slack.actions.listChannels.handler(
+        mockContext,
+        SlackListChannelsInputSchema.parse({
+          cursor: 'prev-cursor',
+          limit: 200,
+          types: ['private_channel'],
+          excludeArchived: false,
+        })
+      );
 
       expect(mockClient.get).toHaveBeenCalledWith('https://slack.com/api/conversations.list', {
         params: {
@@ -351,7 +361,10 @@ describe('Slack', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      const result = await Slack.actions.listChannels.handler(mockContext, {});
+      const result = await Slack.actions.listChannels.handler(
+        mockContext,
+        SlackListChannelsInputSchema.parse({})
+      );
 
       expect(result).toEqual({
         ok: true,
@@ -380,7 +393,10 @@ describe('Slack', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      const result = await Slack.actions.listChannels.handler(mockContext, { raw: true });
+      const result = await Slack.actions.listChannels.handler(
+        mockContext,
+        SlackListChannelsInputSchema.parse({ raw: true })
+      );
 
       expect(result).toEqual(mockResponse.data);
     });
@@ -389,9 +405,9 @@ describe('Slack', () => {
       const mockResponse = { data: { ok: false, error: 'missing_scope' } };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      await expect(Slack.actions.listChannels.handler(mockContext, {})).rejects.toThrow(
-        'Slack listChannels error: missing_scope'
-      );
+      await expect(
+        Slack.actions.listChannels.handler(mockContext, SlackListChannelsInputSchema.parse({}))
+      ).rejects.toThrow('Slack listChannels error: missing_scope');
     });
   });
 

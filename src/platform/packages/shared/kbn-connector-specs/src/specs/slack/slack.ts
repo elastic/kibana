@@ -104,22 +104,28 @@ const SlackSearchMessagesInputSchema = z.object({
 });
 type SlackSearchMessagesInput = z.infer<typeof SlackSearchMessagesInputSchema>;
 
-const SlackResolveChannelIdInputSchema = z.object({
+const slackConversationTypesWithPublicDefault = () =>
+  z
+    .array(z.enum(SLACK_CONVERSATION_TYPES))
+    .optional()
+    .transform(
+      (val): Array<(typeof SLACK_CONVERSATION_TYPES)[number]> =>
+        val && val.length > 0 ? val : ['public_channel']
+    );
+
+export const SlackResolveChannelIdInputSchema = z.object({
   name: z
     .string()
     .min(1)
     .describe(
       'Channel name to resolve (e.g. "general" or "#general"). Returns the first matching conversation ID (C.../G...). To list or browse channels (e.g. what is available), use listChannels instead of probing many names here.'
     ),
-  types: z
-    .array(z.enum(SLACK_CONVERSATION_TYPES))
-    .optional()
-    .describe(
-      'Conversation types to search. Defaults to public_channel. Valid: public_channel, private_channel, im, mpim.'
-    ),
+  types: slackConversationTypesWithPublicDefault().describe(
+    'Conversation types to search. Defaults to public_channel. Valid: public_channel, private_channel, im, mpim.'
+  ),
   match: z
     .enum(['exact', 'contains'])
-    .optional()
+    .default('exact')
     .describe(
       'How to match the channel name. exact is fastest/most precise. contains is for a partial name you already know (e.g. a word from the channel name); do not use contains with very short strings to scan or discover channels — use listChannels for discovery.'
     ),
@@ -133,7 +139,7 @@ const SlackResolveChannelIdInputSchema = z.object({
     .int()
     .min(1)
     .max(SLACK_MAX_CONVERSATIONS_LIST_LIMIT)
-    .optional()
+    .default(SLACK_DEFAULT_CONVERSATIONS_LIST_LIMIT)
     .describe(
       `Channels per page to request (1-${SLACK_MAX_CONVERSATIONS_LIST_LIMIT}). Defaults to ${SLACK_DEFAULT_CONVERSATIONS_LIST_LIMIT}.`
     ),
@@ -142,20 +148,17 @@ const SlackResolveChannelIdInputSchema = z.object({
     .int()
     .min(1)
     .max(SLACK_MAX_RESOLVE_CHANNEL_MAX_PAGES)
-    .optional()
+    .default(SLACK_DEFAULT_RESOLVE_CHANNEL_MAX_PAGES)
     .describe(
       `Maximum number of pages to scan before giving up. Defaults to ${SLACK_DEFAULT_RESOLVE_CHANNEL_MAX_PAGES}.`
     ),
 });
-type SlackResolveChannelIdInput = z.infer<typeof SlackResolveChannelIdInputSchema>;
+export type SlackResolveChannelIdInput = z.infer<typeof SlackResolveChannelIdInputSchema>;
 
-const SlackListChannelsInputSchema = z.object({
-  types: z
-    .array(z.enum(SLACK_CONVERSATION_TYPES))
-    .optional()
-    .describe(
-      'Conversation types to list. Defaults to public_channel only. Valid: public_channel, private_channel, im, mpim.'
-    ),
+export const SlackListChannelsInputSchema = z.object({
+  types: slackConversationTypesWithPublicDefault().describe(
+    'Conversation types to list. Defaults to public_channel only. Valid: public_channel, private_channel, im, mpim.'
+  ),
   excludeArchived: z.boolean().default(true).describe('Exclude archived channels (default true)'),
   cursor: z
     .string()
@@ -168,7 +171,7 @@ const SlackListChannelsInputSchema = z.object({
     .int()
     .min(1)
     .max(SLACK_MAX_CONVERSATIONS_LIST_LIMIT)
-    .optional()
+    .default(SLACK_DEFAULT_CONVERSATIONS_LIST_LIMIT)
     .describe(
       `Channels per page to request (1-${SLACK_MAX_CONVERSATIONS_LIST_LIMIT}). Defaults to ${SLACK_DEFAULT_CONVERSATIONS_LIST_LIMIT}.`
     ),
@@ -491,25 +494,14 @@ export const Slack: ConnectorSpec = {
       description:
         'List Slack channels/conversations the token can see (one page per call). Use this to answer which channels exist or to browse IDs before sendMessage. Pass nextCursor from the previous response to fetch the next page. Prefer this over many resolveChannelId calls for discovery.',
       input: SlackListChannelsInputSchema,
-      handler: async (ctx, input) => {
-        const typedInput: SlackListChannelsInput = SlackListChannelsInputSchema.parse(input);
-
-        const types =
-          typedInput.types && typedInput.types.length > 0
-            ? typedInput.types
-            : (['public_channel'] as Array<(typeof SLACK_CONVERSATION_TYPES)[number]>);
-        const excludeArchived = typedInput.excludeArchived ?? true;
-        const limit = typedInput.limit ?? SLACK_DEFAULT_CONVERSATIONS_LIST_LIMIT;
-        const cursor = typedInput.cursor;
-
+      handler: async (ctx, input: SlackListChannelsInput) => {
         const params: Record<string, string | number | boolean> = {
-          types: types.join(','),
-          exclude_archived: excludeArchived,
-          limit,
-          ...(cursor ? { cursor } : {}),
+          types: input.types.join(','),
+          exclude_archived: input.excludeArchived,
+          limit: input.limit,
+          ...(input.cursor ? { cursor: input.cursor } : {}),
         };
 
-        ctx.log.debug('Slack listChannels request');
         const response = await slackRequestWithRateLimitRetry<{
           ok: boolean;
           error?: string;
@@ -540,7 +532,7 @@ export const Slack: ConnectorSpec = {
           );
         }
 
-        if (typedInput.raw) {
+        if (input.raw) {
           return response.data;
         }
 
@@ -572,28 +564,17 @@ export const Slack: ConnectorSpec = {
       description:
         'Look up a Slack channel/conversation ID from a human-readable channel name (e.g. "general" or "#general"). Use before sendMessage when you already know the target name but need its ID. To list or explore channels, use listChannels instead of many resolveChannelId calls.',
       input: SlackResolveChannelIdInputSchema,
-      handler: async (ctx, input) => {
-        const typedInput: SlackResolveChannelIdInput =
-          SlackResolveChannelIdInputSchema.parse(input);
+      handler: async (ctx, input: SlackResolveChannelIdInput) => {
+        const nameNorm = input.name.trim().replace(/^#/, '').toLowerCase();
 
-        const nameNorm = typedInput.name.trim().replace(/^#/, '').toLowerCase();
-        const types =
-          typedInput.types && typedInput.types.length > 0
-            ? typedInput.types
-            : (['public_channel'] as Array<(typeof SLACK_CONVERSATION_TYPES)[number]>);
-        const match = typedInput.match ?? 'exact';
-        const excludeArchived = typedInput.excludeArchived ?? true;
-        const limit = typedInput.limit ?? SLACK_DEFAULT_CONVERSATIONS_LIST_LIMIT;
-        const maxPages = typedInput.maxPages ?? SLACK_DEFAULT_RESOLVE_CHANNEL_MAX_PAGES;
-
-        let cursor = typedInput.cursor;
+        let cursor = input.cursor;
         let pagesFetched = 0;
 
-        while (pagesFetched < maxPages) {
+        while (pagesFetched < input.maxPages) {
           const params: Record<string, string | number | boolean> = {
-            types: types.join(','),
-            exclude_archived: excludeArchived,
-            limit,
+            types: input.types.join(','),
+            exclude_archived: input.excludeArchived,
+            limit: input.limit,
             ...(cursor ? { cursor } : {}),
           };
 
@@ -626,7 +607,7 @@ export const Slack: ConnectorSpec = {
           const found = channels.find((c) => {
             const cName = (c.name ?? '').toString().toLowerCase();
             if (!cName) return false;
-            return match === 'exact' ? cName === nameNorm : cName.includes(nameNorm);
+            return input.match === 'exact' ? cName === nameNorm : cName.includes(nameNorm);
           });
 
           if (found?.id) {
