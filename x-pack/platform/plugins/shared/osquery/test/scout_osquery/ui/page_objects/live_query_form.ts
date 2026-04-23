@@ -282,9 +282,14 @@ export class LiveQueryFormPage {
     await searchInput.pressSequentially(packName, { delay: 20 });
     await this.page.keyboard.press('ArrowDown');
     await this.page.keyboard.press('Enter');
-    await expect(searchInput).toHaveValue(
-      new RegExp(packName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
-    );
+    // `packs_combobox_field.tsx` uses `singleSelection={{ asPlainText: true }}`
+    // — after Enter, EuiComboBox replaces the `comboBoxSearchInput` `<input>`
+    // with a plain text label, so `toHaveValue` on the input times out with
+    // "element(s) not found". Assert on the label rendered inside the
+    // `select-live-pack` wrapper instead.
+    await expect(
+      this.page.locator('[data-test-subj="select-live-pack"]').getByText(packName, { exact: true })
+    ).toBeVisible({ timeout: 10_000 });
   }
 
   // Click the per-query accordion toggle in pack results. Callers assert on

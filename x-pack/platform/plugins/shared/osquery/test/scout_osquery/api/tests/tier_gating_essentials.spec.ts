@@ -22,9 +22,17 @@ import { apiTest, testData } from '../fixtures';
  * #260947) but does not block based on tier.
  *
  * The original Cypress tests verified the NEGATIVE case (UI shows upselling
- * message + disabled button). This test verifies only the POSITIVE case (API
- * accepts). The UI-level blocking assertions are tracked in Phase 2 spec:
- * "Tier gating upselling component tests (deferred from Phase 1)".
+ * message + disabled button). The UI rendering branch of that contract is
+ * covered by the Jest test at
+ * `x-pack/solutions/security/plugins/security_solution/public/detection_engine/
+ * rule_response_actions/osquery/osquery_response_action.test.tsx`
+ * (`renders upselling component when user lacks Complete tier`,
+ * `calls useUpsellingComponent with osqueryAutomatedResponseActions key`).
+ * This API test verifies the server-side contract: the API accepts rule
+ * creation regardless of tier because PLI gating is enforced only at the UI
+ * layer. A Scout E2E against an Essentials serverless config is intentionally
+ * NOT added — the Jest + API split covers the contract end-to-end without the
+ * cost of a dedicated serverless config set and CI pipeline.
  */
 
 apiTest.describe(

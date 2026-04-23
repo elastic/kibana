@@ -231,15 +231,17 @@ async function waitForOsqueryReady(kbnClient: KbnClient, log: any, timeoutMs = 3
 /**
  * Build Docker args for Fleet Server in managed mode (stateful / ESS).
  * Uses a Kibana-issued service token and a Fleet Server agent policy.
+ *
+ * `FLEET_SERVER_SERVICE_TOKEN` is passed as a name-only `--env` entry; the value
+ * is supplied via execa's `env` option at call time so the token is not visible
+ * to `ps`, `docker inspect`, or included in stringified execa error messages.
  */
 function getManagedFleetServerArgs({
   esHost,
-  serviceToken,
   policyId,
   artifact,
 }: {
   esHost: string;
-  serviceToken: string;
   policyId: string;
   artifact: string;
 }): string[] {
@@ -259,7 +261,7 @@ function getManagedFleetServerArgs({
     '--env',
     `FLEET_SERVER_ELASTICSEARCH_HOST=${esHost}`,
     '--env',
-    `FLEET_SERVER_SERVICE_TOKEN=${serviceToken}`,
+    'FLEET_SERVER_SERVICE_TOKEN',
     '--env',
     `FLEET_SERVER_POLICY=${policyId}`,
     '--rm',
@@ -272,6 +274,12 @@ function getManagedFleetServerArgs({
  * Uses the dev service account token, cert/key mounts, and a custom config file.
  * The ES hostname is rewritten to the first serverless Docker node (es01)
  * so that traffic stays inside the `elastic` Docker network.
+ *
+ * `ELASTICSEARCH_SERVICE_TOKEN` is passed as a name-only `--env` entry; the
+ * value is supplied via execa's `env` option at call time so the token is not
+ * visible to `ps`, `docker inspect`, or included in stringified execa error
+ * messages. Even though this is a static dev credential, keeping the pattern
+ * consistent with managed mode avoids drift.
  */
 function getStandaloneFleetServerArgs({ esUrl }: { esUrl: string }): string[] {
   // Rewrite hostname to the first serverless ES node so Fleet Server connects
@@ -301,7 +309,7 @@ function getStandaloneFleetServerArgs({ esUrl }: { esUrl: string }): string[] {
     '--env',
     `ELASTICSEARCH_HOSTS=${dockerEsUrl.toString()}`,
     '--env',
-    `ELASTICSEARCH_SERVICE_TOKEN=${fleetServerDevServiceAccount.token}`,
+    'ELASTICSEARCH_SERVICE_TOKEN',
     '--env',
     `ELASTICSEARCH_CA_TRUSTED_FINGERPRINT=${CA_TRUSTED_FINGERPRINT}`,
     '--volume',
@@ -472,7 +480,13 @@ globalSetupHook(
         esUrl: config.hosts.elasticsearch,
       });
 
-      const fleetServerContainer = await execa('docker', fleetServerArgs);
+      // Supply the service token via execa `env` (see `getStandaloneFleetServerArgs` docstring).
+      const fleetServerContainer = await execa('docker', fleetServerArgs, {
+        env: {
+          ...process.env,
+          ELASTICSEARCH_SERVICE_TOKEN: fleetServerDevServiceAccount.token,
+        },
+      });
       containerIds.push(fleetServerContainer.stdout.trim());
       log.info(
         `[osquery-setup] Fleet Server (standalone) started: ${fleetServerContainer.stdout.trim()}`
@@ -501,12 +515,14 @@ globalSetupHook(
       log.info('[osquery-setup] Starting Fleet Server Docker container (managed)...');
       const fleetServerArgs = getManagedFleetServerArgs({
         esHost: `http://${host}:${esPort}`,
-        serviceToken,
         policyId: fleetServerPolicyId,
         artifact: agentArtifact,
       });
 
-      const fleetServerContainer = await execa('docker', fleetServerArgs);
+      // Supply the service token via execa `env` (see `getManagedFleetServerArgs` docstring).
+      const fleetServerContainer = await execa('docker', fleetServerArgs, {
+        env: { ...process.env, FLEET_SERVER_SERVICE_TOKEN: serviceToken },
+      });
       containerIds.push(fleetServerContainer.stdout.trim());
       log.info(
         `[osquery-setup] Fleet Server (managed) started: ${fleetServerContainer.stdout.trim()}`

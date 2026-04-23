@@ -225,14 +225,21 @@ export class AlertFlyoutPage {
     await this.packSearchInput.pressSequentially(packName, { delay: 20 });
     await this.page.keyboard.press('ArrowDown');
     await this.page.keyboard.press('Enter');
-    // Confirm the pack is actually chosen before returning. EuiComboBox with
-    // `singleSelection={asPlainText}` writes the selected option's label into
-    // the input's `value` attribute.
+    // Confirm the pack is actually chosen before returning. `packs_combobox_field.tsx`
+    // uses `singleSelection={{ asPlainText: true }}`, so after the Enter press
+    // EuiComboBox REPLACES the `comboBoxSearchInput` `<input>` with a plain
+    // text node holding the option's label. Asserting on `toHaveValue` of the
+    // input therefore times out with "element(s) not found" even though the
+    // selection committed. Instead, assert on the label text rendered inside
+    // the `select-live-pack` wrapper — this is stable across EUI's
+    // input-vs-plain-text modes.
     // NOTE: do NOT press Escape here — the key bubbles up and the surrounding
     // alert flyout also listens for Escape, which silently closes it.
-    await expect(this.packSearchInput).toHaveValue(
-      new RegExp(packName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
-    );
+    await expect(
+      this.flyoutBody
+        .locator('[data-test-subj="select-live-pack"]')
+        .getByText(packName, { exact: true })
+    ).toBeVisible({ timeout: 10_000 });
   }
 
   async clickAddToCaseFromResults(): Promise<void> {
