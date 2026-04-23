@@ -128,6 +128,7 @@ export function createTracesFlyout(page: ScoutPage): TracesFlyout {
         // service badge links rendered along the left side of each row, which
         // would otherwise navigate to APM instead of opening the full-screen flyout.
         async clickWaterfallPreview() {
+          await waterfallClickArea.waitFor({ state: 'visible' });
           const box = await waterfallClickArea.boundingBox();
           if (!box) {
             throw new Error('waterfallClickArea is not visible');
