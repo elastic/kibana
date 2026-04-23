@@ -38,12 +38,6 @@ export function runCli() {
             type: 'boolean',
             default: false,
           })
-          .option('zodHelpersImportMode', {
-            describe:
-              'minimal: import only inferred zod helpers (default). full: import all four when any is needed.',
-            choices: ['minimal', 'full'] as const,
-            default: 'minimal' as const,
-          })
           .showHelpOnFail(false),
       (argv) => {
         generate(argv).catch((err) => {
