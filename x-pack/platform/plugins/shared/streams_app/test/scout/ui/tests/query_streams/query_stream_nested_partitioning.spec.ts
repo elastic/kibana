@@ -20,11 +20,18 @@ const ROOT_STREAM_NAMES = ['logs.ecs', 'logs.otel'];
 const QUERY_ROOT_STREAM_NAME = 'parent-query-stream';
 const QUERY_CHILD_STREAM_NAME = `child-query-stream`;
 const QUERY_GRANDCHILD_STREAM_NAME = `grandchild-query-stream`;
+
+const INGEST_PARENT_STREAM_NAME = 'logs.ecs';
+const INGEST_CHILD_STREAM_NAME = 'qs-ingest-child';
+const INGEST_GRANDCHILD_STREAM_NAME = 'qs-ingest-grandchild';
+
 const STREAM_NAMES_CREATED_BY_SPEC = [
   ...ROOT_STREAM_NAMES,
   QUERY_ROOT_STREAM_NAME,
   `${QUERY_ROOT_STREAM_NAME}.${QUERY_CHILD_STREAM_NAME}`,
   `${QUERY_ROOT_STREAM_NAME}.${QUERY_CHILD_STREAM_NAME}.${QUERY_GRANDCHILD_STREAM_NAME}`,
+  `${INGEST_PARENT_STREAM_NAME}.${INGEST_CHILD_STREAM_NAME}`,
+  `${INGEST_PARENT_STREAM_NAME}.${INGEST_CHILD_STREAM_NAME}.${INGEST_GRANDCHILD_STREAM_NAME}`,
 ];
 
 test.describe(
@@ -54,6 +61,9 @@ test.describe(
       page,
       pageObjects,
     }) => {
+      const childFullName = `${QUERY_ROOT_STREAM_NAME}.${QUERY_CHILD_STREAM_NAME}`;
+      const grandchildFullName = `${childFullName}.${QUERY_GRANDCHILD_STREAM_NAME}`;
+
       // create parent root query stream
       await pageObjects.streams.createRootQueryStream(
         QUERY_ROOT_STREAM_NAME,
@@ -69,7 +79,6 @@ test.describe(
       await pageObjects.streams.openCreateChildQueryStreamForm();
       const initialChildEsqlQuery =
         await pageObjects.streams.kibanaMonacoEditor.getCodeEditorValue();
-      // child should properly reference the parent view in the editor initially
       expect(initialChildEsqlQuery).toBe(`FROM $.${QUERY_ROOT_STREAM_NAME}`);
       await pageObjects.streams.fillAndSaveChildQueryStream(
         QUERY_CHILD_STREAM_NAME,
@@ -77,37 +86,25 @@ test.describe(
       );
       await expect(pageObjects.streams.queryStreamFlyout).toBeHidden();
 
-      // navigate back to the streams list view and create a grandchild query stream under the child
+      // navigate to the child's partitioning tab and create a grandchild query stream
       await pageObjects.streams.gotoStreamMainPage();
-      await pageObjects.streams.clickStreamNameLink(
-        `${QUERY_ROOT_STREAM_NAME}.${QUERY_CHILD_STREAM_NAME}`
-      );
-      await pageObjects.streams.gotoPartitioningTab(
-        `${QUERY_ROOT_STREAM_NAME}.${QUERY_CHILD_STREAM_NAME}`
-      );
+      await pageObjects.streams.clickStreamNameLink(childFullName);
+      await pageObjects.streams.gotoPartitioningTab(childFullName);
       await pageObjects.streams.selectChildStreamType('Query');
       await pageObjects.streams.openCreateChildQueryStreamForm();
       const initialGrandchildEsqlQuery =
         await pageObjects.streams.kibanaMonacoEditor.getCodeEditorValue();
-      // grandchild should properly reference the child view in the editor initially
-      expect(initialGrandchildEsqlQuery).toBe(
-        `FROM $.${QUERY_ROOT_STREAM_NAME}.${QUERY_CHILD_STREAM_NAME}`
-      );
+      expect(initialGrandchildEsqlQuery).toBe(`FROM $.${childFullName}`);
       await pageObjects.streams.fillAndSaveChildQueryStream(
         QUERY_GRANDCHILD_STREAM_NAME,
-        `FROM $.${QUERY_ROOT_STREAM_NAME}.${QUERY_CHILD_STREAM_NAME} | LIMIT 100`
+        `FROM $.${childFullName} | LIMIT 100`
       );
       await expect(pageObjects.streams.queryStreamFlyout).toBeHidden();
 
-      // navigate back to the streams list view and verify the nested query streams were created in the UI
+      // verify the breadcrumb hierarchy on the grandchild's partitioning tab
       await pageObjects.streams.gotoStreamMainPage();
-      await pageObjects.streams.clickStreamNameLink(
-        `${QUERY_ROOT_STREAM_NAME}.${QUERY_CHILD_STREAM_NAME}.${QUERY_GRANDCHILD_STREAM_NAME}`
-      );
-      await pageObjects.streams.gotoPartitioningTab(
-        `${QUERY_ROOT_STREAM_NAME}.${QUERY_CHILD_STREAM_NAME}.${QUERY_GRANDCHILD_STREAM_NAME}`
-      );
-      // breadcrumbs should show the proper nesting structure we just created
+      await pageObjects.streams.clickStreamNameLink(grandchildFullName);
+      await pageObjects.streams.gotoPartitioningTab(grandchildFullName);
       await page.getByTestId('streamsAppCurrentStreamPanel').waitFor({ state: 'visible' });
       const breadcrumbs = await page
         .getByTestId('streamsAppCurrentStreamPanel')
@@ -115,12 +112,62 @@ test.describe(
         .allInnerTexts();
       expect(breadcrumbs).toStrictEqual([
         QUERY_ROOT_STREAM_NAME,
-        `${QUERY_ROOT_STREAM_NAME}.${QUERY_CHILD_STREAM_NAME}`,
-        `${QUERY_ROOT_STREAM_NAME}.${QUERY_CHILD_STREAM_NAME}.${QUERY_GRANDCHILD_STREAM_NAME}`,
+        childFullName,
+        grandchildFullName,
       ]);
     });
 
-    test.fixme('Should create nested query streams from ingest stream parent', async () => {});
+    test('Should create nested query streams from ingest stream parent', async ({
+      page,
+      pageObjects,
+    }) => {
+      // navigate to the ingest parent stream's partitioning tab and create a child query stream
+      await pageObjects.streams.clickStreamNameLink(INGEST_PARENT_STREAM_NAME);
+      await pageObjects.streams.gotoPartitioningTab(INGEST_PARENT_STREAM_NAME);
+      await pageObjects.streams.selectChildStreamType('Query');
+      await pageObjects.streams.openCreateChildQueryStreamForm();
+      const initialChildEsqlQuery =
+        await pageObjects.streams.kibanaMonacoEditor.getCodeEditorValue();
+      expect(initialChildEsqlQuery).toBe(`FROM $.${INGEST_PARENT_STREAM_NAME}`);
+      await pageObjects.streams.fillAndSaveChildQueryStream(
+        INGEST_CHILD_STREAM_NAME,
+        `FROM $.${INGEST_PARENT_STREAM_NAME} | LIMIT 100`
+      );
+      await expect(pageObjects.streams.queryStreamFlyout).toBeHidden();
+
+      // navigate to the child query stream's partitioning tab and create a grandchild
+      const childFullName = `${INGEST_PARENT_STREAM_NAME}.${INGEST_CHILD_STREAM_NAME}`;
+      await pageObjects.streams.gotoStreamMainPage();
+      await pageObjects.streams.clickStreamNameLink(childFullName);
+      await pageObjects.streams.gotoPartitioningTab(childFullName);
+      await pageObjects.streams.selectChildStreamType('Query');
+      await pageObjects.streams.openCreateChildQueryStreamForm();
+      const initialGrandchildEsqlQuery =
+        await pageObjects.streams.kibanaMonacoEditor.getCodeEditorValue();
+      expect(initialGrandchildEsqlQuery).toBe(`FROM $.${childFullName}`);
+      await pageObjects.streams.fillAndSaveChildQueryStream(
+        INGEST_GRANDCHILD_STREAM_NAME,
+        `FROM $.${childFullName} | LIMIT 100`
+      );
+      await expect(pageObjects.streams.queryStreamFlyout).toBeHidden();
+
+      // verify the breadcrumb hierarchy on the grandchild's partitioning tab
+      const grandchildFullName = `${childFullName}.${INGEST_GRANDCHILD_STREAM_NAME}`;
+      await pageObjects.streams.gotoStreamMainPage();
+      await pageObjects.streams.clickStreamNameLink(grandchildFullName);
+      await pageObjects.streams.gotoPartitioningTab(grandchildFullName);
+      await page.getByTestId('streamsAppCurrentStreamPanel').waitFor({ state: 'visible' });
+      const breadcrumbs = await page
+        .getByTestId('streamsAppCurrentStreamPanel')
+        .locator('[data-test-subj^="streamsAppBreadcrumbEntry-"]')
+        .allInnerTexts();
+      expect(breadcrumbs).toStrictEqual([
+        INGEST_PARENT_STREAM_NAME,
+        childFullName,
+        grandchildFullName,
+      ]);
+    });
+
     test.fixme(
       'Should properly remove deleted child query streams from streams list view',
       async () => {}
