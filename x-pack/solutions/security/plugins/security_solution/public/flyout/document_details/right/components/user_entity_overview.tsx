@@ -306,8 +306,6 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
   }, [userRiskData]);
 
   const displayName = entityRecord?.entity?.name ?? userName;
-  console.log('Entity record:', entityRecord);
-  console.log('user identity fields:', userIdentityFields);
   return (
     <EuiFlexGroup
       direction="column"
