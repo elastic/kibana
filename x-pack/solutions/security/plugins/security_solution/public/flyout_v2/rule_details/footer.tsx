@@ -15,6 +15,9 @@ import { useAgentBuilderAvailability } from '../../agent_builder/hooks/use_agent
 import { RULE_DETAILS_FOOTER_TEST_ID, RULE_DETAILS_FOOTER_LINK_TEST_ID } from './test_ids';
 
 export interface FooterProps {
+  /**
+   * Rule object that represents relevant information about a rule
+   */
   rule: RuleResponse;
 }
 

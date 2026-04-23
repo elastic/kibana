@@ -38,6 +38,9 @@ const panelViewStyle = css`
 `;
 
 export interface ContentProps {
+  /**
+   * Rule object that represents relevant information about a rule
+   */
   rule: RuleResponse;
 }
 

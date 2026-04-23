@@ -31,7 +31,13 @@ import {
 const urlParamOverride = { timeline: { isOpen: false } };
 
 export interface HeaderProps {
+  /**
+   * Rule object that represents relevant information about a rule
+   */
   rule: RuleResponse;
+  /**
+   * Whether the rule has been deleted. When true, a "Deleted rule" badge is shown.
+   * */
   isSuppressed: boolean;
 }
 
