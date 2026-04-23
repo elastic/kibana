@@ -30,7 +30,7 @@ import {
 } from '@kbn/observability-plugin/common';
 import { useEditableSettings, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { isEmpty } from 'lodash';
-import React from 'react';
+import React, { Fragment } from 'react';
 import { FieldRowProvider } from '@kbn/management-settings-components-field-row';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
@@ -228,8 +228,8 @@ export function Settings() {
             settings: miscSettings,
           },
         ].map((item) => (
-          <>
-            <EuiPanel key={item.label} grow={false} hasShadow={false} hasBorder paddingSize="none">
+          <Fragment key={item.label}>
+            <EuiPanel grow={false} hasShadow={false} hasBorder paddingSize="none">
               <EuiPanel color="subdued" hasShadow={false}>
                 <EuiTitle size="s">
                   <EuiText>{item.label}</EuiText>
@@ -290,7 +290,7 @@ export function Settings() {
               </EuiPanel>
             </EuiPanel>
             <EuiSpacer />
-          </>
+          </Fragment>
         ))}
 
         {!isEmpty(unsavedChanges) && (

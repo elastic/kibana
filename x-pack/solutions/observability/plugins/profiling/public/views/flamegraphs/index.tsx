@@ -54,7 +54,7 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
       tabs={tabs}
       hideSearchBar={isDifferentialView}
       pageTitle={i18n.translate('xpack.profiling.flameGraphsView.pageTitle', {
-        defaultMessage: 'Flamegraph',
+        defaultMessage: 'Flamegraphs',
       })}
     >
       {children}

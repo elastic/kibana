@@ -83,26 +83,27 @@ export function ProfilingAppPageTemplate({
           </EuiFlexGroup>
         ),
         color: 'subdued' as unknown as EuiPageHeaderProps['color'], // This value is valid but not properly typed
-        children: (tabs.length > 0 || !hideSearchBar) && (
-          <EuiFlexGroup direction="column">
-            {tabs.length > 0 && (
-              <EuiFlexItem grow={false}>
-                <EuiTabs size="m">
-                  {tabs.map(({ label, ...tabRest }, index) => (
-                    <EuiTab key={index} {...tabRest}>
-                      {label}
-                    </EuiTab>
-                  ))}
-                </EuiTabs>
-              </EuiFlexItem>
-            )}
-            {!hideSearchBar && (
-              <EuiFlexItem grow={false}>
-                <PrimaryProfilingSearchBar />
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        ),
+        children:
+          tabs.length > 0 || !hideSearchBar ? (
+            <EuiFlexGroup direction="column">
+              {tabs.length > 0 && (
+                <EuiFlexItem grow={false}>
+                  <EuiTabs size="m">
+                    {tabs.map(({ label, ...tabRest }) => (
+                      <EuiTab key={tabRest.href} {...tabRest}>
+                        {label}
+                      </EuiTab>
+                    ))}
+                  </EuiTabs>
+                </EuiFlexItem>
+              )}
+              {!hideSearchBar && (
+                <EuiFlexItem grow={false}>
+                  <PrimaryProfilingSearchBar />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          ) : undefined,
       }}
       restrictWidth={restrictWidth}
       pageSectionProps={{

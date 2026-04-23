@@ -80,7 +80,7 @@ export function AddDataView() {
   const secretToken = data?.collector?.secretToken;
   const collectionAgentHost = data?.collector?.host;
   const symbolUrl = data?.symbolizer?.host;
-  const stackVersion = data?.stackVersion!;
+  const stackVersion = data?.stackVersion;
   const majorVersion = stackVersion ? major(stackVersion).toString() : undefined;
 
   const tabs: Tab[] = useMemo(
