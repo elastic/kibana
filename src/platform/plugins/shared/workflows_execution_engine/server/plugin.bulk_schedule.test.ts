@@ -44,16 +44,25 @@ jest.mock('@kbn/workflows', () => {
 });
 
 const mockConcurrencyCheckConcurrency = jest.fn();
+const mockEvaluateConcurrencyKey = jest.fn();
 jest.mock('./concurrency/concurrency_manager', () => ({
   ConcurrencyManager: jest.fn().mockImplementation(() => ({
     checkConcurrency: mockConcurrencyCheckConcurrency,
-    evaluateConcurrencyKey: jest.fn().mockReturnValue(null),
+    evaluateConcurrencyKey: mockEvaluateConcurrencyKey,
   })),
 }));
 
 import { checkLicense } from './lib/check_license';
 import { getAuthenticatedUser } from './lib/get_user';
 import { WorkflowsExecutionEnginePlugin } from './plugin';
+
+const makeGate = () => {
+  let resolve!: (value: boolean) => void;
+  const promise = new Promise<boolean>((r) => {
+    resolve = r;
+  });
+  return { promise, resolve };
+};
 
 const createWorkflow = (
   id: string,
@@ -83,6 +92,7 @@ describe('bulkScheduleWorkflow', () => {
   beforeEach(async () => {
     jest.clearAllMocks();
     mockConcurrencyCheckConcurrency.mockResolvedValue(true);
+    mockEvaluateConcurrencyKey.mockReturnValue(null);
     mockAreWorkflowsEnabled.mockResolvedValue(new Map<string, boolean>());
 
     const initializerContext = coreMock.createPluginInitializerContext({
@@ -312,6 +322,120 @@ describe('bulkScheduleWorkflow', () => {
       status: 'scheduled',
       workflowExecutionId: expect.any(String),
     });
+  });
+
+  it('serializes concurrency checks within the same concurrency group', async () => {
+    const workflow = createWorkflow('wf-a', {
+      definition: {
+        name: 'wf-a',
+        enabled: true,
+        version: '1',
+        triggers: [{ type: 'manual' }],
+        steps: [],
+        settings: {
+          concurrency: { key: 'same-group', limit: 1, onCollision: 'drop' as const },
+        },
+      } as any,
+    });
+    mockAreWorkflowsEnabled.mockResolvedValue(new Map([['default:wf-a', true]]));
+    mockBulkCreateWorkflowExecutions.mockImplementation(async (executions: Array<{ id: string }>) =>
+      executions.map(({ id }) => ({ id }))
+    );
+    mockEvaluateConcurrencyKey.mockReturnValue('same-group');
+
+    const gate1 = makeGate();
+    const gate2 = makeGate();
+    const startedIds: string[] = [];
+    mockConcurrencyCheckConcurrency.mockImplementation(
+      async (_settings: unknown, _key: string, currentExecutionId: string) => {
+        startedIds.push(currentExecutionId);
+        return startedIds.length === 1 ? gate1.promise : gate2.promise;
+      }
+    );
+
+    const pending = pluginStart.bulkScheduleWorkflow(
+      [
+        { workflow, context: { spaceId: 'default' } },
+        { workflow, context: { spaceId: 'default' } },
+      ],
+      request
+    );
+
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(startedIds).toHaveLength(1);
+
+    gate1.resolve(true);
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(startedIds).toHaveLength(2);
+
+    gate2.resolve(true);
+    await pending;
+
+    expect(mockConcurrencyCheckConcurrency).toHaveBeenCalledTimes(2);
+  });
+
+  it('runs concurrency checks for different concurrency groups in parallel', async () => {
+    const workflowA = createWorkflow('wf-a', {
+      definition: {
+        name: 'wf-a',
+        enabled: true,
+        version: '1',
+        triggers: [{ type: 'manual' }],
+        steps: [],
+        settings: {
+          concurrency: { key: 'group-a', limit: 1, onCollision: 'drop' as const },
+        },
+      } as any,
+    });
+    const workflowB = createWorkflow('wf-b', {
+      definition: {
+        name: 'wf-b',
+        enabled: true,
+        version: '1',
+        triggers: [{ type: 'manual' }],
+        steps: [],
+        settings: {
+          concurrency: { key: 'group-b', limit: 1, onCollision: 'drop' as const },
+        },
+      } as any,
+    });
+    mockAreWorkflowsEnabled.mockResolvedValue(
+      new Map([
+        ['default:wf-a', true],
+        ['default:wf-b', true],
+      ])
+    );
+    mockBulkCreateWorkflowExecutions.mockImplementation(async (executions: Array<{ id: string }>) =>
+      executions.map(({ id }) => ({ id }))
+    );
+    mockEvaluateConcurrencyKey.mockReturnValueOnce('group-a').mockReturnValueOnce('group-b');
+
+    const gate1 = makeGate();
+    const gate2 = makeGate();
+    const startedIds: string[] = [];
+    mockConcurrencyCheckConcurrency.mockImplementation(
+      async (_settings: unknown, _key: string, currentExecutionId: string) => {
+        startedIds.push(currentExecutionId);
+        return startedIds.length === 1 ? gate1.promise : gate2.promise;
+      }
+    );
+
+    const pending = pluginStart.bulkScheduleWorkflow(
+      [
+        { workflow: workflowA, context: { spaceId: 'default' } },
+        { workflow: workflowB, context: { spaceId: 'default' } },
+      ],
+      request
+    );
+
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(startedIds).toHaveLength(2);
+
+    gate1.resolve(true);
+    gate2.resolve(true);
+    await pending;
+
+    expect(mockConcurrencyCheckConcurrency).toHaveBeenCalledTimes(2);
   });
 
   it('skips bulkCreate and taskManager when no items are enabled', async () => {

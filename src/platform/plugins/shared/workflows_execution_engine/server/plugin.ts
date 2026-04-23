@@ -981,12 +981,45 @@ export class WorkflowsExecutionEnginePlugin
         };
       }
 
-      // The concurrency check only decides which executions also get a TM task.
-      const shouldSchedule = await Promise.all(
-        succeeded.map((p) => this.checkConcurrencyIfNeeded(p.workflowExecution))
-      );
+      // Concurrency checks for items in the same group must run sequentially:
+      // they read and mutate the same ES state, so running them in parallel
+      // would let siblings in one batch see each other as "in flight" and,
+      // with max=1 and strategy='drop', drop every item; with
+      // 'cancel-in-progress' they would also race to cancel each other.
+      // Items without a key, and items in different groups, stay parallel.
+      const keylessItems: PreparedItem[] = [];
+      const bucketsByGroup = new Map<string, PreparedItem[]>();
+      for (const p of succeeded) {
+        const groupKey = p.workflowExecution.concurrencyGroupKey;
+        if (!groupKey) {
+          keylessItems.push(p);
+        } else {
+          const bucketKey = `${p.workflowExecution.spaceId ?? 'default'}:${groupKey}`;
+          const existing = bucketsByGroup.get(bucketKey);
+          if (existing) {
+            existing.push(p);
+          } else {
+            bucketsByGroup.set(bucketKey, [p]);
+          }
+        }
+      }
 
-      const toSchedule = succeeded.filter((_, i) => shouldSchedule[i]);
+      const passingIdx = new Set<number>();
+      const runCheck = async (p: PreparedItem) => {
+        if (await this.checkConcurrencyIfNeeded(p.workflowExecution)) {
+          passingIdx.add(p.idx);
+        }
+      };
+      await Promise.all([
+        ...keylessItems.map(runCheck),
+        ...Array.from(bucketsByGroup.values()).map(async (bucket) => {
+          for (const p of bucket) {
+            await runCheck(p);
+          }
+        }),
+      ]);
+
+      const toSchedule = succeeded.filter((p) => passingIdx.has(p.idx));
       if (toSchedule.length > 0) {
         const tasks = toSchedule.map((p) =>
           createTaskInstance(
