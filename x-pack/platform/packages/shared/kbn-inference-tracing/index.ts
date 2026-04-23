@@ -11,5 +11,7 @@ export { withInferenceContext } from './src/with_inference_context';
 export { GenAISemanticConventions, ElasticGenAIAttributes } from './src/types';
 export { EVAL_RUN_ID_BAGGAGE_KEY } from './src/baggage';
 
+export { InferencePreservingSampler } from './src/inference_preserving_sampler';
+export { AgentBuilderSpanProcessor } from './src/agent_builder/agent_builder_span_processor';
 export { LangfuseSpanProcessor } from './src/langfuse/langfuse_span_processor';
 export { PhoenixSpanProcessor } from './src/phoenix/phoenix_span_processor';

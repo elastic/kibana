@@ -9,6 +9,8 @@
 import type { resources } from '@elastic/opentelemetry-node/sdk';
 import { core, node, tracing } from '@elastic/opentelemetry-node/sdk';
 import {
+  InferencePreservingSampler,
+  AgentBuilderSpanProcessor,
   EVAL_RUN_ID_BAGGAGE_KEY,
   LangfuseSpanProcessor,
   PhoenixSpanProcessor,
@@ -54,12 +56,12 @@ export function initTracing({
 
   const traceIdSampler = new tracing.TraceIdRatioBasedSampler(tracingConfig.sample_rate);
 
+  const baseSampler = new tracing.ParentBasedSampler({
+    root: traceIdSampler,
+  });
+
   const nodeTracerProvider = new node.NodeTracerProvider({
-    // by default, base sampling on parent context,
-    // or for root spans, based on the configured sample rate
-    sampler: new tracing.ParentBasedSampler({
-      root: traceIdSampler,
-    }),
+    sampler: new InferencePreservingSampler(baseSampler),
     spanProcessors: allSpanProcessors,
     resource,
   });
@@ -85,6 +87,10 @@ export function initTracing({
 
       case 'http':
         LateBindingSpanProcessor.get().register(new OTLPSpanProcessor(variant.value, 'http'));
+        break;
+
+      case 'agent_builder':
+        LateBindingSpanProcessor.get().register(new AgentBuilderSpanProcessor(variant.value));
         break;
     }
   });

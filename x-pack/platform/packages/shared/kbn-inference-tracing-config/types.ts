@@ -57,10 +57,31 @@ export interface InferenceTracingPhoenixExportConfig {
 }
 
 /**
+ * Configuration for the Agent Builder exporter that sends
+ * inference spans to Elasticsearch via OTLP.
+ */
+export interface InferenceTracingAgentBuilderExportConfig {
+  /**
+   * The OTLP receiver URL for Elasticsearch.
+   */
+  url: string;
+  /**
+   * Optional headers for authentication or metadata.
+   */
+  headers?: Record<string, string>;
+  /**
+   * The delay in milliseconds before the exporter sends another
+   * batch of spans.
+   */
+  scheduled_delay: number;
+}
+
+/**
  * Configuration schema for inference tracing exporters.
  *
  * @internal
  */
 export type InferenceTracingExportConfig =
   | { langfuse: InferenceTracingLangfuseExportConfig }
-  | { phoenix: InferenceTracingPhoenixExportConfig };
+  | { phoenix: InferenceTracingPhoenixExportConfig }
+  | { agent_builder: InferenceTracingAgentBuilderExportConfig };
