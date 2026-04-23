@@ -10,7 +10,7 @@
 import moment from 'moment-timezone';
 import type { DataViewFieldBase, IFieldSubTypeNested, IFieldSubTypeMulti } from './es_query';
 
-/** @internal */
+/** @internal -- temporary no-op change to verify selective testing with shallow clone */
 export function getTimeZoneFromSettings(dateFormatTZ: string) {
   const detectedTimezone = moment.tz.guess();
 
