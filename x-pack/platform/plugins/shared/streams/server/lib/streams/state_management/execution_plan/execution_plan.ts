@@ -29,6 +29,7 @@ import {
   deleteIngestPipeline,
   upsertIngestPipeline,
 } from '../../ingest_pipelines/manage_ingest_pipelines';
+import { ATTACHMENT_TYPES } from '../../attachments/types';
 import { getErrorMessage } from '../../errors/parse_error';
 import { upsertEsqlView, deleteEsqlView } from '../../esql_views/manage_esql_views';
 import { retryTransientEsErrors } from '../../helpers/retry';
@@ -292,11 +293,11 @@ export class ExecutionPlan {
     }
 
     return Promise.all(
-      actions.flatMap((action) => [
-        this.dependencies.attachmentClient.syncAttachmentList(action.request.name, [], 'dashboard'),
-        this.dependencies.attachmentClient.syncAttachmentList(action.request.name, [], 'rule'),
-        this.dependencies.attachmentClient.syncAttachmentList(action.request.name, [], 'slo'),
-      ])
+      actions.flatMap((action) =>
+        ATTACHMENT_TYPES.map((type) =>
+          this.dependencies.attachmentClient.syncAttachmentList(action.request.name, [], type)
+        )
+      )
     );
   }
 

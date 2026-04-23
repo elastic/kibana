@@ -88,7 +88,7 @@ const ATTACHMENTS_STEP: Omit<TourStepConfig, 'step' | 'stepsTotal'> = {
     <EuiText size="s" css={tightContentCss}>
       {i18n.translate('xpack.streams.tour.attachments.content', {
         defaultMessage:
-          'Link dashboards, rules, SLOs, and other assets based on this stream’s data so you can manage them from a single page.',
+          'Link dashboards, rules, and SLOs based on this stream’s data so you can manage them from a single page.',
       })}
     </EuiText>
   ),

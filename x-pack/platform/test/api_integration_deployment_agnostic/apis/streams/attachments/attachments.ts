@@ -27,6 +27,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const esClient = getService('es');
   const spaces = getService('spaces');
+  const log = getService('log');
 
   let apiClient: StreamsSupertestRepositoryClient;
 
@@ -1096,48 +1097,33 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     describe('query stream attachments', () => {
+      // Query-stream names use the `$.` prefix convention.
       const QUERY_ATTACH_TEST_STREAM = '$.logs.otel.query_attach_test';
 
       before(async () => {
-        await putQueryStream(apiClient, QUERY_ATTACH_TEST_STREAM, {
-          query: { esql: 'FROM logs.otel' },
-        });
         await loadDashboards(kibanaServer, DASHBOARD_ARCHIVES, SPACE_ID);
         await kibanaServer.importExport.load(RULE_ARCHIVE, { space: SPACE_ID });
       });
 
       after(async () => {
-        for (const attempt of [
-          () =>
-            unlinkAttachment({
-              apiClient,
-              stream: QUERY_ATTACH_TEST_STREAM,
-              type: 'dashboard',
-              id: SEARCH_DASHBOARD_ID,
-            }),
-          () =>
-            unlinkAttachment({
-              apiClient,
-              stream: QUERY_ATTACH_TEST_STREAM,
-              type: 'rule',
-              id: FIRST_RULE_ID,
-            }),
-        ]) {
-          try {
-            await attempt();
-          } catch {
-            // Best-effort cleanup (e.g. link already removed).
-          }
-        }
-
-        try {
-          await deleteStream(apiClient, QUERY_ATTACH_TEST_STREAM);
-        } catch {
-          // Stream may already be absent if a prior step failed.
-        }
-
         await unloadDashboards(kibanaServer, DASHBOARD_ARCHIVES, SPACE_ID);
         await kibanaServer.importExport.unload(RULE_ARCHIVE, { space: SPACE_ID });
+      });
+
+      beforeEach(async () => {
+        await putQueryStream(apiClient, QUERY_ATTACH_TEST_STREAM, {
+          query: { esql: 'FROM logs.otel' },
+        });
+      });
+
+      afterEach(async () => {
+        try {
+          await deleteStream(apiClient, QUERY_ATTACH_TEST_STREAM);
+        } catch (err) {
+          log.warning(
+            `Query stream cleanup: deleteStream failed for ${QUERY_ATTACH_TEST_STREAM}: ${err?.message ?? err}`
+          );
+        }
       });
 
       it('attaches a dashboard to a query stream', async () => {
@@ -1176,7 +1162,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(listResponse.attachments[0].id).to.eql(FIRST_RULE_ID);
       });
 
-      it('lists all attachments on a query stream', async () => {
+      it('lists multiple attachments on a query stream', async () => {
+        await linkAttachment({
+          apiClient,
+          stream: QUERY_ATTACH_TEST_STREAM,
+          type: 'dashboard',
+          id: SEARCH_DASHBOARD_ID,
+        });
+        await linkAttachment({
+          apiClient,
+          stream: QUERY_ATTACH_TEST_STREAM,
+          type: 'rule',
+          id: FIRST_RULE_ID,
+        });
+
         const response = await getAttachments({ apiClient, stream: QUERY_ATTACH_TEST_STREAM });
 
         expect(response.attachments.length).to.eql(2);
@@ -1185,6 +1184,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('unlinks an attachment from a query stream', async () => {
+        await linkAttachment({
+          apiClient,
+          stream: QUERY_ATTACH_TEST_STREAM,
+          type: 'dashboard',
+          id: SEARCH_DASHBOARD_ID,
+        });
+        await linkAttachment({
+          apiClient,
+          stream: QUERY_ATTACH_TEST_STREAM,
+          type: 'rule',
+          id: FIRST_RULE_ID,
+        });
+
         const unlinkResponse = await unlinkAttachment({
           apiClient,
           stream: QUERY_ATTACH_TEST_STREAM,
@@ -1304,8 +1316,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         } finally {
           try {
             await deleteStream(apiClient, SLO_TEST_STREAM);
-          } catch {
-            // Stream may already be absent if a prior step failed.
+          } catch (err) {
+            log.warning(
+              `SLO cascade-unlink cleanup: deleteStream failed for ${SLO_TEST_STREAM}: ${err?.message ?? err}`
+            );
           }
           if (sloId) {
             await supertest
