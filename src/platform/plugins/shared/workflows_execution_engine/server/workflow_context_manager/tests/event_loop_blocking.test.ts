@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { performance } from 'node:perf_hooks';
-import { setImmediate as setImmediateAsync } from 'node:timers/promises';
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type {
@@ -110,6 +108,8 @@ const createBroaderSurfaceContainer = () => {
     fetchCaseC: createLargeStepOutput('fetchCaseC'),
   } as const;
 
+  const renderSpy = jest.fn();
+
   const workflow: WorkflowYaml = {
     name: 'Broader Surface Repro Workflow',
     version: '1',
@@ -189,6 +189,11 @@ const createBroaderSurfaceContainer = () => {
   } as unknown as ElasticsearchClient;
 
   const templatingEngine = new WorkflowTemplatingEngine();
+  const actualRender = templatingEngine.render.bind(templatingEngine);
+  jest.spyOn(templatingEngine, 'render').mockImplementation((obj, context) => {
+    renderSpy(context);
+    return actualRender(obj, context);
+  });
 
   const contextManager = new WorkflowContextManager({
     templateEngine: templatingEngine,
@@ -204,53 +209,53 @@ const createBroaderSurfaceContainer = () => {
 
   return {
     contextManager,
+    renderSpy,
+    largeStepOutputs,
   };
 };
 
 describe('WorkflowContextManager post-fix regressions', () => {
-  it('keeps timer drift low for repeated lightweight renders over large predecessor context', async () => {
-    const { contextManager } = createBroaderSurfaceContainer();
+  it('narrows the render context to referenced paths only, excluding heavy predecessor fields', () => {
+    const { contextManager, renderSpy, largeStepOutputs } = createBroaderSurfaceContainer();
 
-    await setImmediateAsync();
+    const rendered = contextManager.renderValueAccordingToContext(createLightweightRenderPayload());
 
-    const warmupIterations = 10;
-    const iterations = 3_500;
-    let timerDriftMs = 0;
-    let totalElapsedMs = 0;
-    let lastSummary = '';
-
-    for (let index = 0; index < warmupIterations; index++) {
-      const rendered = contextManager.renderValueAccordingToContext(
-        createLightweightRenderPayload()
-      );
-      lastSummary = String(rendered.summary);
-    }
-
-    const timerStartedAt = performance.now();
-    const blockedTimer = new Promise<void>((resolve) => {
-      setTimeout(() => {
-        timerDriftMs = performance.now() - timerStartedAt;
-        resolve();
-      }, 0);
-    });
-
-    const workStartedAt = performance.now();
-
-    for (let index = 0; index < iterations; index++) {
-      const rendered = contextManager.renderValueAccordingToContext(
-        createLightweightRenderPayload()
-      );
-      lastSummary = String(rendered.summary);
-    }
-
-    totalElapsedMs = performance.now() - workStartedAt;
-
-    await blockedTimer;
-
-    expect(lastSummary).toBe(
+    expect(rendered.summary).toBe(
       'A=Synthetic large case, B=Synthetic large case, C=Synthetic large case'
     );
-    expect(timerDriftMs).toBeLessThan(110);
-    expect(totalElapsedMs).toBeLessThan(110);
+
+    expect(renderSpy).toHaveBeenCalledTimes(1);
+    const passedContext = renderSpy.mock.calls[0][0] as {
+      steps: Record<string, { output?: { case?: Record<string, unknown> } }>;
+    };
+
+    for (const stepId of ['fetchCaseA', 'fetchCaseB', 'fetchCaseC'] as const) {
+      const stepCase = passedContext.steps[stepId]?.output?.case;
+      expect(stepCase).toBeDefined();
+      expect(stepCase).toHaveProperty('title', 'Synthetic large case');
+      expect(stepCase).not.toHaveProperty('comments');
+      expect(stepCase).not.toHaveProperty('customFields');
+      expect(stepCase).not.toHaveProperty('description');
+    }
+
+    const narrowedSize = JSON.stringify(passedContext).length;
+    const fullStepsSize = JSON.stringify(largeStepOutputs).length;
+    // The narrowed context must be orders of magnitude smaller than the full step outputs;
+    // this is what keeps template rendering from walking the 500-comment array on every call.
+    expect(narrowedSize * 100).toBeLessThan(fullStepsSize);
+  });
+
+  it('reuses the same narrowed context shape across repeated lightweight renders', () => {
+    const { contextManager, renderSpy } = createBroaderSurfaceContainer();
+
+    for (let index = 0; index < 5; index++) {
+      contextManager.renderValueAccordingToContext(createLightweightRenderPayload());
+    }
+
+    expect(renderSpy).toHaveBeenCalledTimes(5);
+    const stepsSnapshots = renderSpy.mock.calls.map(([ctx]) =>
+      JSON.stringify((ctx as { steps: unknown }).steps)
+    );
+    expect(new Set(stepsSnapshots).size).toBe(1);
   });
 });
