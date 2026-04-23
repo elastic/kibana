@@ -35,7 +35,7 @@ actions:
           -H "kbn-xsrf: true" \
           -H "Content-Type: application/json" \
           -d '{
-            "title": "My first dashboard",
+            "title": "My first API dashboard",
             "panels": [
               {
                 "grid": {
@@ -639,7 +639,6 @@ actions:
                       "type": "vis",
                       "config": {
                         "type": "metric",
-                        "title": "Total requests",
                         "data_source": {
                           "type": "data_view_spec",
                           "index_pattern": "kibana_sample_data_logs",
@@ -663,7 +662,6 @@ actions:
                       "type": "vis",
                       "config": {
                         "type": "metric",
-                        "title": "Average response size",
                         "data_source": {
                           "type": "data_view_spec",
                           "index_pattern": "kibana_sample_data_logs",
@@ -716,7 +714,14 @@ actions:
                               }
                             ]
                           }
-                        ]
+                        ],
+                        "axis": {
+                          "x": {
+                            "title": {
+                              "visible": false
+                            }
+                          }
+                        }
                       }
                     },
                     {
@@ -800,7 +805,6 @@ actions:
                       "type": "vis",
                       "config": {
                         "type": "metric",
-                        "title": "Total requests",
                         "data_source": {
                           "type": "data_view_spec",
                           "index_pattern": "kibana_sample_data_logs",
@@ -824,7 +828,6 @@ actions:
                       "type": "vis",
                       "config": {
                         "type": "metric",
-                        "title": "Average response size",
                         "data_source": {
                           "type": "data_view_spec",
                           "index_pattern": "kibana_sample_data_logs",
@@ -877,7 +880,14 @@ actions:
                               }
                             ]
                           }
-                        ]
+                        ],
+                        "axis": {
+                          "x": {
+                            "title": {
+                              "visible": false
+                            }
+                          }
+                        }
                       }
                     },
                     {
