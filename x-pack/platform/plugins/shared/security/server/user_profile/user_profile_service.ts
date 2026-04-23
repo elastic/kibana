@@ -373,29 +373,31 @@ export class UserProfileService {
       return null;
     }
 
-    if (request.auth.isAuthenticated === false) {
-      throw new Error('Request to get current user profile is not authenticated.');
+    if (request.isFakeRequest) {
+      const currentUser = getCurrentUser(request);
+      if (currentUser?.profile_uid) {
+        this.logger.debug(
+          `Resolving current user profile directly from profile_uid on the authenticated user.`
+        );
+        try {
+          const profile = await this.getUserProfile<D>(
+            clusterClient,
+            currentUser.profile_uid,
+            dataPath
+          );
+          this.recordGetCurrentSuccess({});
+          return profile;
+        } catch (error) {
+          this.logger.warn(
+            `Failed to resolve enriched user profile "${currentUser.profile_uid}", ` +
+              `falling back to session/API-key resolution: ${getDetailedErrorMessage(error)}`
+          );
+        }
+      }
     }
 
-    // When the authenticated user already has a profile_uid (e.g. enriched fake request from
-    // Task Manager), use it directly to avoid expensive session/API-key resolution round-trips.
-    const currentUser = getCurrentUser(request);
-    if (currentUser?.profile_uid) {
-      this.logger.debug(
-        `Resolving current user profile directly from profile_uid on the authenticated user.`
-      );
-      try {
-        const profile = await this.getUserProfile<D>(
-          clusterClient,
-          currentUser.profile_uid,
-          dataPath
-        );
-        this.recordGetCurrentSuccess({});
-        return profile;
-      } catch (error) {
-        this.recordGetCurrentFailure({});
-        throw error;
-      }
+    if (request.auth.isAuthenticated === false) {
+      throw new Error('Request to get current user profile is not authenticated.');
     }
 
     let profileId: string | undefined;

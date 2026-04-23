@@ -24,6 +24,7 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { FakeRequestEnricher } from '@kbn/core-security-server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { asSpaceId } from '@kbn/core-spaces-common';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
@@ -138,7 +139,7 @@ type Opts = {
   getPollInterval: () => number;
   apiKeyStrategy: ApiKeyStrategy;
   eventLogger: TaskEventLogger;
-  enrichFakeRequest?: (request: KibanaRequest, userProfileId: string) => void;
+  enrichFakeRequest?: FakeRequestEnricher;
 } & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
 
 export enum TaskRunResult {
@@ -196,7 +197,7 @@ export class TaskManagerRunner implements TaskRunner {
   private apiKeyStrategy: ApiKeyStrategy;
   private eventLogger: TaskEventLogger;
   private isCancelled = false;
-  private readonly enrichFakeRequest?: (request: KibanaRequest, userProfileId: string) => void;
+  private readonly enrichFakeRequest?: FakeRequestEnricher;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -447,21 +448,30 @@ export class TaskManagerRunner implements TaskRunner {
             userProfileId
           );
 
-          if (fakeRequest && userProfileId && this.enrichFakeRequest) {
+          const enrichFakeRequest = this.enrichFakeRequest;
+          const enrichRequest: ((request: KibanaRequest) => void) | undefined =
+            fakeRequest && userProfileId && enrichFakeRequest
+              ? (request: KibanaRequest) => {
+                  try {
+                    enrichFakeRequest(request, userProfileId);
+                  } catch (err) {
+                    this.logger.warn(
+                      `Failed to enrich fake request with user profile ID "${userProfileId}" for task ${this}: ${
+                        (err as Error).message
+                      }`,
+                      { tags: ['task:enrichRequest', this.id, this.taskType] }
+                    );
+                  }
+                }
+              : undefined;
+
+          if (fakeRequest && enrichRequest) {
             this.logger.debug(
               `Enriching fake request with user profile ID "${userProfileId}" for task ${this}`,
               { tags: ['task:enrichRequest', this.id, this.taskType] }
             );
-            this.enrichFakeRequest(fakeRequest, userProfileId);
+            enrichRequest(fakeRequest);
           }
-
-          const enrichFakeRequestRef = this.enrichFakeRequest;
-          const enrichRequest =
-            fakeRequest && userProfileId && enrichFakeRequestRef
-              ? async (request: KibanaRequest) => {
-                  enrichFakeRequestRef(request, userProfileId);
-                }
-              : undefined;
 
           const abortController = new AbortController();
 

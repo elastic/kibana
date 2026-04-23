@@ -1815,5 +1815,62 @@ export default function ({ getService }: FtrProviderContext) {
         expect(retryAt).to.be.lessThan(now + 6.5 * 60 * 1000);
       });
     });
+
+    describe('user profile enrichment', () => {
+      // Placeholder string used by core security when building the minimal
+      // AuthenticatedUser for an enriched fake request. Kept in sync with
+      // ENRICHED_USER_PLACEHOLDER in src/core/packages/security/server-internal.
+      const ENRICHED_USER_PLACEHOLDER = '__kbn_enriched_fake_request__';
+
+      function scheduleTaskForProfileTest(
+        task: Partial<ConcreteTaskInstance>,
+        userProfileId: string
+      ): Promise<SerializedConcreteTaskInstance> {
+        return supertest
+          .post('/api/sample_tasks/schedule_for_profile_test')
+          .set('kbn-xsrf', 'xxx')
+          .send({ task, userProfileId })
+          .expect(200)
+          .then((response: { body: SerializedConcreteTaskInstance }) => {
+            log.debug(`Task Scheduled: ${response.body.id}`);
+            return response.body;
+          });
+      }
+
+      it('persists userProfileId on userScope and resolves it via getCurrentUser at run time', async () => {
+        const testProfileUid = 'test-user-profile-uid-1';
+        const scheduled = await scheduleTaskForProfileTest(
+          {
+            id: 'test-task-for-user-profile-enrichment',
+            taskType: 'sampleUserResolvingTask',
+            params: {},
+          },
+          testProfileUid
+        );
+
+        expect(scheduled.userScope?.userProfileId).to.eql(testProfileUid);
+        expect(scheduled.userScope?.apiKeyCreatedByUser).to.be(true);
+
+        await retry.try(async () => {
+          const task = await currentTask<{
+            resolvedFromTaskRequest: { username?: string; profileUid?: string } | null;
+            resolvedFromChildRequest: { username?: string; profileUid?: string } | null;
+            ran?: boolean;
+          }>(scheduled.id);
+
+          expect(task.state.ran).to.be(true);
+
+          expect(task.state.resolvedFromTaskRequest).to.be.an('object');
+          expect(task.state.resolvedFromTaskRequest?.profileUid).to.eql(testProfileUid);
+          expect(task.state.resolvedFromTaskRequest?.username).to.eql(ENRICHED_USER_PLACEHOLDER);
+
+          expect(task.state.resolvedFromChildRequest).to.be.an('object');
+          expect(task.state.resolvedFromChildRequest?.profileUid).to.eql(testProfileUid);
+          expect(task.state.resolvedFromChildRequest?.username).to.eql(ENRICHED_USER_PLACEHOLDER);
+
+          expect(task.userScope?.userProfileId).to.eql(testProfileUid);
+        });
+      });
+    });
   });
 }

@@ -10,15 +10,112 @@
 import type { CoreSecurityDelegateContract } from '@kbn/core-security-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { convertSecurityApi } from './convert_security_api';
+import type { CoreFakeRequestEnrichment } from './convert_security_api';
+import {
+  ENRICHED_USER_PLACEHOLDER,
+  convertSecurityApi,
+  createFakeRequestEnrichment,
+} from './convert_security_api';
 import { createAuditLoggerMock } from '../test_helpers/create_audit_logger.mock';
 
-describe('convertSecurityApi', () => {
-  let source: CoreSecurityDelegateContract;
+describe('createFakeRequestEnrichment', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
+  });
+
+  it('returns an enricher and an override getter bound to the same WeakMap', () => {
+    const { enrichRequestWithUserProfile, getOverride } = createFakeRequestEnrichment(logger);
+    const request = httpServerMock.createFakeKibanaRequest({});
+
+    expect(getOverride(request)).toBeUndefined();
+
+    enrichRequestWithUserProfile(request, 'u_test_profile_123');
+
+    const override = getOverride(request);
+    expect(override).toBeDefined();
+    expect(override!.profile_uid).toBe('u_test_profile_123');
+  });
+
+  describe('enrichRequestWithUserProfile', () => {
+    it('sets a minimal user with the given profile_uid on the fake request', () => {
+      const { enrichRequestWithUserProfile, getOverride } = createFakeRequestEnrichment(logger);
+      const request = httpServerMock.createFakeKibanaRequest({});
+
+      enrichRequestWithUserProfile(request, 'u_test_profile_123');
+
+      const user = getOverride(request);
+      expect(user).toBeDefined();
+      expect(user!.profile_uid).toBe('u_test_profile_123');
+      expect(user!.authentication_realm.name).toBe('background_task');
+      expect(user!.authentication_provider.name).toBe('background_task');
+    });
+
+    it('sets non-profile_uid identity fields to placeholder values', () => {
+      const { enrichRequestWithUserProfile, getOverride } = createFakeRequestEnrichment(logger);
+      const request = httpServerMock.createFakeKibanaRequest({});
+
+      enrichRequestWithUserProfile(request, 'u_test_profile_123');
+
+      const user = getOverride(request)!;
+      expect(user.username).toBe(ENRICHED_USER_PLACEHOLDER);
+      expect(user.authentication_type).toBe(ENRICHED_USER_PLACEHOLDER);
+      expect(user.roles).toEqual([]);
+      expect(user.authentication_realm).toEqual({
+        name: 'background_task',
+        type: 'background_task',
+      });
+      expect(user.lookup_realm).toEqual({
+        name: 'background_task',
+        type: 'background_task',
+      });
+      expect(user.authentication_provider).toEqual({
+        type: 'background_task',
+        name: 'background_task',
+      });
+    });
+
+    it('does not affect other fake requests', () => {
+      const { enrichRequestWithUserProfile, getOverride } = createFakeRequestEnrichment(logger);
+      const enrichedRequest = httpServerMock.createFakeKibanaRequest({});
+      const otherRequest = httpServerMock.createFakeKibanaRequest({});
+
+      enrichRequestWithUserProfile(enrichedRequest, 'u_enriched');
+
+      expect(getOverride(otherRequest)).toBeUndefined();
+    });
+
+    it('warns and does not populate the override when called on a real (non-fake) request', () => {
+      const { enrichRequestWithUserProfile, getOverride } = createFakeRequestEnrichment(logger);
+      const realRequest = httpServerMock.createKibanaRequest();
+
+      enrichRequestWithUserProfile(realRequest, 'u_profile_123');
+
+      expect(getOverride(realRequest)).toBeUndefined();
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('non-fake request'));
+    });
+
+    it('warns and keeps the original enrichment when called twice on the same fake request', () => {
+      const { enrichRequestWithUserProfile, getOverride } = createFakeRequestEnrichment(logger);
+      const request = httpServerMock.createFakeKibanaRequest({});
+
+      enrichRequestWithUserProfile(request, 'u_first');
+      enrichRequestWithUserProfile(request, 'u_second');
+
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('already-enriched'));
+      expect(getOverride(request)!.profile_uid).toBe('u_first');
+    });
+  });
+});
+
+describe('convertSecurityApi', () => {
+  let source: CoreSecurityDelegateContract;
+  let fakeRequestEnrichment: CoreFakeRequestEnrichment;
+
+  beforeEach(() => {
     source = {
       authc: {
         getCurrentUser: jest.fn(),
@@ -45,10 +142,14 @@ describe('convertSecurityApi', () => {
         withoutRequest: createAuditLoggerMock.create(),
       },
     };
+    fakeRequestEnrichment = {
+      enrichRequestWithUserProfile: jest.fn(),
+      getOverride: jest.fn(),
+    };
   });
 
   it('passes through delegate apiKeys, audit, and getRedactedSessionId', () => {
-    const output = convertSecurityApi(source, logger);
+    const output = convertSecurityApi(source, fakeRequestEnrichment);
     expect(output.authc.apiKeys).toBe(source.authc.apiKeys);
     expect(output.authc.getRedactedSessionId).toBe(source.authc.getRedactedSessionId);
     expect(output.audit.asScoped).toBe(source.audit.asScoped);
@@ -56,70 +157,44 @@ describe('convertSecurityApi', () => {
   });
 
   describe('getCurrentUser', () => {
-    it('delegates to the source when no enrichment has been applied', () => {
-      const output = convertSecurityApi(source, logger);
+    it('delegates to the source for real (non-fake) requests without consulting the override', () => {
+      const output = convertSecurityApi(source, fakeRequestEnrichment);
       const request = httpServerMock.createKibanaRequest();
 
       output.authc.getCurrentUser(request);
 
+      expect(fakeRequestEnrichment.getOverride).not.toHaveBeenCalled();
       expect(source.authc.getCurrentUser).toHaveBeenCalledTimes(1);
       expect(source.authc.getCurrentUser).toHaveBeenCalledWith(request);
     });
 
-    it('returns the enriched user instead of delegating when the request has been enriched', () => {
-      const output = convertSecurityApi(source, logger);
-      const request = httpServerMock.createKibanaRequest();
-      const profileId = 'u_test_profile_123';
+    it('consults the override for fake requests and returns the enriched user when present', () => {
+      const enrichedUser = { profile_uid: 'u_enriched' } as any;
+      (fakeRequestEnrichment.getOverride as jest.Mock).mockReturnValue(enrichedUser);
 
-      output.authc.enrichRequestWithUserProfile(request, profileId);
+      const output = convertSecurityApi(source, fakeRequestEnrichment);
+      const request = httpServerMock.createFakeKibanaRequest({});
 
       const user = output.authc.getCurrentUser(request);
 
+      expect(fakeRequestEnrichment.getOverride).toHaveBeenCalledWith(request);
       expect(source.authc.getCurrentUser).not.toHaveBeenCalled();
-      expect(user).not.toBeNull();
-      expect(user!.profile_uid).toBe(profileId);
+      expect(user).toBe(enrichedUser);
     });
-  });
 
-  describe('enrichRequestWithUserProfile', () => {
-    it('sets a minimal user with the given profile_uid on the request', () => {
-      const output = convertSecurityApi(source, logger);
-      const request = httpServerMock.createKibanaRequest();
-      const profileId = 'u_test_profile_123';
+    it('falls back to the delegate for fake requests when no override is present', () => {
+      const delegateUser = { profile_uid: 'u_delegate' } as any;
+      (fakeRequestEnrichment.getOverride as jest.Mock).mockReturnValue(undefined);
+      (source.authc.getCurrentUser as jest.Mock).mockReturnValue(delegateUser);
 
-      output.authc.enrichRequestWithUserProfile(request, profileId);
+      const output = convertSecurityApi(source, fakeRequestEnrichment);
+      const request = httpServerMock.createFakeKibanaRequest({});
 
       const user = output.authc.getCurrentUser(request);
-      expect(user).not.toBeNull();
-      expect(user!.profile_uid).toBe(profileId);
-      expect(user!.authentication_realm.name).toBe('background_task');
-      expect(user!.authentication_provider.name).toBe('background_task');
-    });
 
-    it('overrides delegate getCurrentUser for the enriched request', () => {
-      const output = convertSecurityApi(source, logger);
-      const request = httpServerMock.createKibanaRequest();
-
-      const existingUser = { profile_uid: 'u_original' } as any;
-      (source.authc.getCurrentUser as jest.Mock).mockReturnValue(existingUser);
-
-      expect(output.authc.getCurrentUser(request)!.profile_uid).toBe('u_original');
-
-      output.authc.enrichRequestWithUserProfile(request, 'u_enriched');
-
-      const user = output.authc.getCurrentUser(request);
-      expect(user!.profile_uid).toBe('u_enriched');
-    });
-
-    it('does not affect other requests', () => {
-      const output = convertSecurityApi(source, logger);
-      const enrichedRequest = httpServerMock.createKibanaRequest();
-      const otherRequest = httpServerMock.createKibanaRequest();
-
-      output.authc.enrichRequestWithUserProfile(enrichedRequest, 'u_enriched');
-
-      output.authc.getCurrentUser(otherRequest);
-      expect(source.authc.getCurrentUser).toHaveBeenCalledWith(otherRequest);
+      expect(fakeRequestEnrichment.getOverride).toHaveBeenCalledWith(request);
+      expect(source.authc.getCurrentUser).toHaveBeenCalledWith(request);
+      expect(user).toBe(delegateUser);
     });
   });
 });

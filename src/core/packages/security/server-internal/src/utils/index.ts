@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { convertSecurityApi } from './convert_security_api';
+export {
+  convertSecurityApi,
+  createFakeRequestEnrichment,
+  ENRICHED_USER_PLACEHOLDER,
+} from './convert_security_api';
+export type { CoreFakeRequestEnrichment } from './convert_security_api';
 export { getDefaultSecurityImplementation } from './default_implementation';
 
 export interface SecurityServiceConfigType {

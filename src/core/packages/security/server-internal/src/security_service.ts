@@ -17,14 +17,23 @@ import type {
   InternalSecurityServiceSetup,
   InternalSecurityServiceStart,
 } from './internal_contracts';
-import type { SecurityServiceConfigType, PKCS12ConfigType } from './utils';
-import { getDefaultSecurityImplementation, convertSecurityApi } from './utils';
+import type {
+  CoreFakeRequestEnrichment,
+  SecurityServiceConfigType,
+  PKCS12ConfigType,
+} from './utils';
+import {
+  createFakeRequestEnrichment,
+  getDefaultSecurityImplementation,
+  convertSecurityApi,
+} from './utils';
 
 export class SecurityService
   implements CoreService<InternalSecurityServiceSetup, InternalSecurityServiceStart>
 {
   private readonly log: Logger;
   private securityApi?: CoreSecurityDelegateContract;
+  private fakeRequestEnrichment?: CoreFakeRequestEnrichment;
   private config$: Observable<Config>;
   private configSubscription?: Subscription;
   private config: Config | undefined;
@@ -52,6 +61,8 @@ export class SecurityService
 
     checkFipsConfig(securityConfig, elasticsearchConfig, serverConfig, this.log);
 
+    this.fakeRequestEnrichment = createFakeRequestEnrichment(this.log);
+
     return {
       registerSecurityDelegate: (api) => {
         if (this.securityApi) {
@@ -59,6 +70,7 @@ export class SecurityService
         }
         this.securityApi = api;
       },
+      getFakeRequestEnricher: () => this.fakeRequestEnrichment!.enrichRequestWithUserProfile,
       fips: {
         isEnabled: () => isFipsEnabled(securityConfig),
       },
@@ -73,7 +85,7 @@ export class SecurityService
       this.log.warn('Security API was not registered, using default implementation');
     }
     const apiContract = this.securityApi ?? getDefaultSecurityImplementation();
-    return convertSecurityApi(apiContract, this.log);
+    return convertSecurityApi(apiContract, this.fakeRequestEnrichment!);
   }
 
   public stop() {

@@ -7,7 +7,7 @@
 
 import { random } from 'lodash';
 import { schema } from '@kbn/config-schema';
-import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
+import type { Plugin, CoreSetup, CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { throwRetryableError } from '@kbn/task-manager-plugin/server/task_running';
 import { EventEmitter } from 'events';
@@ -16,6 +16,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
   ConcreteTaskInstance,
+  RunContext,
 } from '@kbn/task-manager-plugin/server';
 import { DEFAULT_MAX_WORKERS } from '@kbn/task-manager-plugin/server/config';
 import {
@@ -23,6 +24,7 @@ import {
   TaskCost,
   TaskPriority,
 } from '@kbn/task-manager-plugin/server/task';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { initRoutes } from './init_routes';
 
 // this plugin's dependendencies
@@ -48,6 +50,9 @@ export class SampleTaskManagerFixturePlugin
   public setup(core: CoreSetup, { taskManager }: SampleTaskManagerFixtureSetupDeps) {
     const taskTestingEvents = new EventEmitter();
     taskTestingEvents.setMaxListeners(DEFAULT_MAX_WORKERS * 2);
+
+    const fakeRequestEnricher = core.security.getFakeRequestEnricher();
+    const pluginSecurityStart = this.securityStart;
 
     const defaultSampleTaskConfig = {
       timeout: '1m',
@@ -116,6 +121,90 @@ export class SampleTaskManagerFixturePlugin
             }),
           },
         },
+      },
+      sampleUserResolvingTask: {
+        title: 'Sample User Resolving Task',
+        description:
+          'A task that captures security.authc.getCurrentUser(fakeRequest) and the output of enriching a child request into task state, used to verify profile_uid enrichment end-to-end.',
+        timeout: '1m',
+        maxAttempts: 1,
+        stateSchemaByVersion: {
+          1: {
+            up: (state: Record<string, unknown>) => state,
+            schema: schema.object({
+              resolvedFromTaskRequest: schema.maybe(
+                schema.nullable(
+                  schema.object({
+                    username: schema.maybe(schema.string()),
+                    profileUid: schema.maybe(schema.string()),
+                  })
+                )
+              ),
+              resolvedFromChildRequest: schema.maybe(
+                schema.nullable(
+                  schema.object({
+                    username: schema.maybe(schema.string()),
+                    profileUid: schema.maybe(schema.string()),
+                  })
+                )
+              ),
+              ran: schema.maybe(schema.boolean()),
+            }),
+          },
+        },
+        createTaskRunner: ({ taskInstance, fakeRequest, enrichRequest }: RunContext) => ({
+          async run() {
+            const security = await pluginSecurityStart;
+
+            const resolveUser = (request: KibanaRequest | undefined) => {
+              if (!request || !security) {
+                return null;
+              }
+              const user = security.authc.getCurrentUser(request);
+              if (!user) {
+                return null;
+              }
+              return { username: user.username, profileUid: user.profile_uid };
+            };
+
+            const resolvedFromTaskRequest = resolveUser(fakeRequest);
+
+            let resolvedFromChildRequest = null;
+            if (fakeRequest && enrichRequest) {
+              const childFakeRequest = kibanaRequestFactory({
+                headers: {
+                  authorization: (fakeRequest.headers.authorization as string) ?? '',
+                },
+                path: '/',
+              });
+              enrichRequest(childFakeRequest);
+              resolvedFromChildRequest = resolveUser(childFakeRequest);
+            }
+
+            const [{ elasticsearch }] = await core.getStartServices();
+            await elasticsearch.client.asInternalUser.index({
+              index: '.kibana_task_manager_test_result',
+              document: {
+                type: 'task',
+                taskId: taskInstance.id,
+                state: JSON.stringify({
+                  resolvedFromTaskRequest,
+                  resolvedFromChildRequest,
+                }),
+                ranAt: new Date(),
+              },
+              refresh: true,
+            });
+
+            return {
+              state: {
+                resolvedFromTaskRequest,
+                resolvedFromChildRequest,
+                ran: true,
+              },
+            };
+          },
+        }),
       },
       sampleRecurringTask: {
         timeout: '1m',
@@ -564,7 +653,8 @@ export class SampleTaskManagerFixturePlugin
       core.http.createRouter(),
       this.taskManagerStart,
       this.securityStart,
-      taskTestingEvents
+      taskTestingEvents,
+      fakeRequestEnricher
     );
   }
 

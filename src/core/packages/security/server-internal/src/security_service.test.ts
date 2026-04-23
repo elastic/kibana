@@ -74,6 +74,18 @@ describe('SecurityService', function () {
       });
     });
 
+    describe('#getFakeRequestEnricher', () => {
+      it('returns a stable function across invocations', () => {
+        const setup = service.setup();
+
+        const enricherA = setup.getFakeRequestEnricher();
+        const enricherB = setup.getFakeRequestEnricher();
+
+        expect(enricherA).toBe(enricherB);
+        expect(typeof enricherA).toBe('function');
+      });
+    });
+
     describe('#uiam', () => {
       it('should be set to `null` if UIAM is not configured ', () => {
         expect(service.setup().uiam).toBeNull();
@@ -131,7 +143,7 @@ describe('SecurityService', function () {
       `);
     });
 
-    it('calls convertSecurityApi with the registered API and the logger', () => {
+    it('calls convertSecurityApi with the registered API and the fake request enrichment', () => {
       const { registerSecurityDelegate } = service.setup();
 
       const contract = createStubInternalContract();
@@ -140,7 +152,13 @@ describe('SecurityService', function () {
       service.start();
 
       expect(convertSecurityApiMock).toHaveBeenCalledTimes(1);
-      expect(convertSecurityApiMock).toHaveBeenCalledWith(contract, expect.anything());
+      expect(convertSecurityApiMock).toHaveBeenCalledWith(
+        contract,
+        expect.objectContaining({
+          enrichRequestWithUserProfile: expect.any(Function),
+          getOverride: expect.any(Function),
+        })
+      );
     });
 
     it('calls convertSecurityApi with the default implementation when no API was registered', () => {
@@ -151,7 +169,13 @@ describe('SecurityService', function () {
       service.start();
 
       expect(convertSecurityApiMock).toHaveBeenCalledTimes(1);
-      expect(convertSecurityApiMock).toHaveBeenCalledWith(contract, expect.anything());
+      expect(convertSecurityApiMock).toHaveBeenCalledWith(
+        contract,
+        expect.objectContaining({
+          enrichRequestWithUserProfile: expect.any(Function),
+          getOverride: expect.any(Function),
+        })
+      );
     });
 
     it('returns the result of convertSecurityApi as contract', () => {

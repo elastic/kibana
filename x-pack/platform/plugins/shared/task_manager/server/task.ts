@@ -95,12 +95,16 @@ export interface RunContext {
   abortController: AbortController;
 
   /**
-   * If the task was scheduled on behalf of a user with a known profile, this callback
-   * can be used to enrich additional KibanaRequest objects with the same user context.
-   * After enrichment, `security.authc.getCurrentUser(request)` will return the
-   * originating user (including `profile_uid`).
+   * If the task was scheduled on behalf of a user with a known `profile_uid`,
+   * this callback binds that `profile_uid` to an additional fake request so
+   * that downstream `security.authc.getCurrentUser(request)` resolves to the
+   * originating user.
+   *
+   * Intended for task implementations that construct child fake requests to
+   * invoke profile-keyed APIs (e.g. `userProfiles.getCurrent()` or per-user
+   * credential lookups) on behalf of the same user as the enclosing task.
    */
-  enrichRequest?: (request: KibanaRequest) => Promise<void>;
+  enrichRequest?: (request: KibanaRequest) => void;
 }
 
 /**

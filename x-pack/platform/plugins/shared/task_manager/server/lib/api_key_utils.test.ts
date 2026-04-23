@@ -375,5 +375,84 @@ describe('api_key_utils', () => {
         },
       });
     });
+
+    test('should still capture userProfileId when apiKeyCreatedByUser is true', async () => {
+      const mockApiKey = Buffer.from('apiKeyId:apiKey').toString('base64');
+      const request = httpServerMock.createKibanaRequest({
+        headers: {
+          authorization: `ApiKey: ${mockApiKey}`,
+        },
+      });
+
+      const coreStart = coreMock.createStart();
+      const mockUser = {
+        authentication_type: 'api_key',
+        username: 'testUser',
+        profile_uid: 'u_profile_12345',
+      };
+
+      coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
+      coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue(mockUser);
+
+      const basePathMock = {
+        get: jest.fn(() => '/'),
+        serverBasePath: '/',
+      } as unknown as IBasePath;
+
+      const result = await getApiKeyAndUserScope(
+        [mockTask],
+        request,
+        coreStart.security,
+        basePathMock
+      );
+
+      expect(result.get('task')).toEqual({
+        apiKey: 'YXBpS2V5SWQ6YXBpS2V5',
+        userScope: {
+          apiKeyId: 'apiKeyId',
+          spaceId: 'default',
+          apiKeyCreatedByUser: true,
+          userProfileId: 'u_profile_12345',
+        },
+      });
+    });
+
+    test('should only call getCurrentUser once when processing multiple tasks', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const coreStart = coreMock.createStart();
+
+      const mockUser = {
+        authentication_type: 'basic',
+        username: 'testUser',
+        profile_uid: 'u_profile_12345',
+      };
+
+      coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
+      coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue(mockUser);
+
+      coreStart.security.authc.apiKeys.grantAsInternalUser = jest.fn().mockResolvedValueOnce({
+        id: 'apiKeyId',
+        name: 'TaskManager: report',
+        api_key: 'apiKey',
+      });
+
+      const basePathMock = {
+        get: jest.fn(() => '/'),
+        serverBasePath: '/',
+      } as unknown as IBasePath;
+
+      await getApiKeyAndUserScope(
+        [
+          { ...mockTask, id: 'task-1' },
+          { ...mockTask, id: 'task-2' },
+          { ...mockTask, id: 'task-3' },
+        ],
+        request,
+        coreStart.security,
+        basePathMock
+      );
+
+      expect(coreStart.security.authc.getCurrentUser).toHaveBeenCalledTimes(1);
+    });
   });
 });

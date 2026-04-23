@@ -25,17 +25,6 @@ export interface CoreAuthenticationService {
    */
   getCurrentUser(request: KibanaRequest): AuthenticatedUser | null;
   /**
-   * Bind a user profile to a fake request so that
-   * {@link getCurrentUser} returns an {@link AuthenticatedUser} whose
-   * `profile_uid` matches the provided value. Intended for background
-   * execution contexts (e.g. Task Manager, alerting) where only the
-   * originating user's profile ID is available.
-   *
-   * @param request The (fake) request to enrich.
-   * @param userProfileId The user profile UID to associate.
-   */
-  enrichRequestWithUserProfile(request: KibanaRequest, userProfileId: string): void;
-  /**
    * Retrieve the redacted session ID for the provided request.
    * Returns a redacted form of the session ID (e.g. last N characters).
    * Returns undefined if no session exists for the request.
@@ -45,3 +34,17 @@ export interface CoreAuthenticationService {
   getRedactedSessionId(request: KibanaRequest): Promise<string | undefined>;
   apiKeys: APIKeysType;
 }
+
+/**
+ * Binds a user profile UID to a fake request so that downstream
+ * `security.authc.getCurrentUser(request)` resolves to a minimal
+ * {@link AuthenticatedUser} whose `profile_uid` matches the provided value.
+ *
+ * Obtained via {@link SecurityServiceSetup.getFakeRequestEnricher} at Core
+ * setup time. See that method for the full security boundary and intended
+ * use.
+ *
+ * @internal Intended for trusted orchestrators that own the fake request
+ *   lifecycle (e.g. Task Manager). Not for general plugin consumption.
+ */
+export type FakeRequestEnricher = (request: KibanaRequest, userProfileId: string) => void;

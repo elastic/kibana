@@ -17,6 +17,8 @@ import {
   httpServerMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
+import type { FakeRawRequest } from '@kbn/core-http-server';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { prefixCommaSeparatedValues, UserProfileService } from './user_profile_service';
@@ -471,6 +473,16 @@ describe('UserProfileService', () => {
     });
 
     describe('with enriched fake request (profile_uid on authenticated user)', () => {
+      let enrichedFakeRequest: ReturnType<typeof httpServerMock.createFakeKibanaRequest>;
+
+      beforeEach(() => {
+        enrichedFakeRequest = httpServerMock.createFakeKibanaRequest({});
+      });
+
+      afterEach(() => {
+        logger.warn.mockClear();
+      });
+
       it('resolves the profile directly via profile_uid without session or API key lookup', async () => {
         const mockCurrentUser = securityMock.createMockAuthenticatedUser({
           profile_uid: 'enriched-profile-uid',
@@ -478,7 +490,9 @@ describe('UserProfileService', () => {
         mockStartParams.getCurrentUser.mockReturnValue(mockCurrentUser);
 
         const startContract = userProfileService.start(mockStartParams);
-        await expect(startContract.getCurrent({ request: mockRequest })).resolves.toMatchObject({
+        await expect(
+          startContract.getCurrent({ request: enrichedFakeRequest })
+        ).resolves.toMatchObject({
           uid: 'UID',
         });
 
@@ -500,7 +514,7 @@ describe('UserProfileService', () => {
 
         const startContract = userProfileService.start(mockStartParams);
         await expect(
-          startContract.getCurrent({ request: mockRequest, dataPath: 'some.path' })
+          startContract.getCurrent({ request: enrichedFakeRequest, dataPath: 'some.path' })
         ).resolves.toMatchObject({ uid: 'UID' });
 
         expect(
@@ -515,7 +529,33 @@ describe('UserProfileService', () => {
         });
       });
 
-      it('throws if profile is not found', async () => {
+      it('skips the fast path (without warning) when the fake request has no profile_uid on the current user', async () => {
+        mockStartParams.getCurrentUser.mockReturnValue(
+          securityMock.createMockAuthenticatedUser({ profile_uid: undefined })
+        );
+
+        const authenticatedEnrichedFakeRequest = kibanaRequestFactory({
+          headers: {},
+          path: '/',
+          auth: { isAuthenticated: true },
+        } as FakeRawRequest);
+
+        mockStartParams.session.getSID.mockResolvedValue('some-session-id');
+        mockStartParams.session.get.mockResolvedValue({
+          error: null,
+          value: sessionMock.createValue({ userProfileId: mockUserProfile.uid }),
+        });
+
+        const startContract = userProfileService.start(mockStartParams);
+        await expect(
+          startContract.getCurrent({ request: authenticatedEnrichedFakeRequest })
+        ).resolves.toMatchObject({ uid: 'UID' });
+
+        expect(logger.warn).not.toHaveBeenCalled();
+        expect(mockStartParams.session.getSID).toHaveBeenCalled();
+      });
+
+      it('logs a warning and falls back when enriched profile cannot be resolved, returning `null` when the fallback path has no session or API key', async () => {
         const mockCurrentUser = securityMock.createMockAuthenticatedUser({
           profile_uid: 'missing-uid',
         });
@@ -524,14 +564,62 @@ describe('UserProfileService', () => {
           profiles: [],
         } as unknown as SecurityGetUserProfileResponse);
 
+        const authenticatedEnrichedFakeRequest = kibanaRequestFactory({
+          headers: {},
+          path: '/',
+          auth: { isAuthenticated: true },
+        } as FakeRawRequest);
+
         const startContract = userProfileService.start(mockStartParams);
         await expect(
-          startContract.getCurrent({ request: mockRequest })
-        ).rejects.toThrowErrorMatchingInlineSnapshot(`"User profile is not found."`);
+          startContract.getCurrent({ request: authenticatedEnrichedFakeRequest })
+        ).resolves.toBeNull();
 
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining('Failed to resolve enriched user profile "missing-uid"')
+        );
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining('falling back to session/API-key resolution')
+        );
+
+        expect(
+          mockStartParams.clusterClient.asInternalUser.security.getUserProfile
+        ).toHaveBeenCalledWith({ uid: 'missing-uid', data: undefined });
+        expect(mockStartParams.session.getSID).toHaveBeenCalled();
         expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenLastCalledWith({
           outcome: 'failure',
         });
+      });
+    });
+
+    it('does not use the profile_uid fast path for real requests (uses session / API key resolution instead)', async () => {
+      const mockCurrentUser = securityMock.createMockAuthenticatedUser({
+        profile_uid: 'enriched-profile-uid',
+      });
+      mockStartParams.getCurrentUser.mockReturnValue(mockCurrentUser);
+      mockStartParams.session.getSID.mockResolvedValue('some-session-id');
+      mockStartParams.session.get.mockResolvedValue({
+        error: null,
+        value: sessionMock.createValue({ userProfileId: mockUserProfile.uid }),
+      });
+
+      const startContract = userProfileService.start(mockStartParams);
+      await expect(startContract.getCurrent({ request: mockRequest })).resolves.toMatchObject({
+        uid: 'UID',
+      });
+
+      expect(
+        mockStartParams.clusterClient.asInternalUser.security.getUserProfile
+      ).toHaveBeenCalledTimes(1);
+      expect(
+        mockStartParams.clusterClient.asInternalUser.security.getUserProfile
+      ).toHaveBeenCalledWith({ uid: 'UID', data: undefined });
+      expect(
+        mockStartParams.clusterClient.asInternalUser.security.getUserProfile
+      ).not.toHaveBeenCalledWith(expect.objectContaining({ uid: 'enriched-profile-uid' }));
+
+      expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenLastCalledWith({
+        outcome: 'success',
       });
     });
 
