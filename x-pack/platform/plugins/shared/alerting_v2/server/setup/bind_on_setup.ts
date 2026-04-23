@@ -19,6 +19,7 @@ import { EsServiceInternalToken } from '../lib/services/es_service/tokens';
 import { createRuleAttachmentType } from '../agent_builder/attachments/rule_attachment_type';
 import { buildScopedRulesClientFactory } from '../agent_builder/scoped_rules_client_factory';
 import { createRuleSmlType } from '../agent_builder/sml/rule_sml_type';
+import { registerSkills } from '../agent_builder/skills/register_skills';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 
 export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
@@ -71,6 +72,7 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
       agentBuilder.sml.registerType(
         createRuleSmlType({ getScopedRulesClient, getInternalRepository })
       );
+      registerSkills(agentBuilder);
     }
 
     if (container.isBound(usageCollectionToken)) {
