@@ -81,21 +81,15 @@ export const registerDeleteExampleRoute = ({
           const evalsContext = await context.evals;
           const esClient = coreContext.elasticsearch.client.asCurrentUser;
           const datasetClient = evalsContext.datasetService.getClient(esClient);
-          const dataset = await datasetClient.get(datasetId);
 
-          if (!dataset) {
+          const exists = await datasetClient.datasetExists(datasetId);
+          if (!exists) {
             return response.notFound({
               body: { message: `Evaluation dataset not found: ${datasetId}` },
             });
           }
 
-          if (!dataset.examples.some((example) => example.id === exampleId)) {
-            return response.notFound({
-              body: { message: `Evaluation dataset example not found: ${exampleId}` },
-            });
-          }
-
-          const wasDeleted = await datasetClient.deleteExample(exampleId);
+          const wasDeleted = await datasetClient.deleteExample(exampleId, datasetId);
           if (!wasDeleted) {
             return response.notFound({
               body: { message: `Evaluation dataset example not found: ${exampleId}` },

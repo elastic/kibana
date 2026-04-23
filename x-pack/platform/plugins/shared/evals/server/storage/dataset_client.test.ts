@@ -290,6 +290,91 @@ describe('DatasetClient', () => {
     expect(fetched).toBeUndefined();
   });
 
+  it('returns true for datasetExists when the dataset exists', async () => {
+    const { client } = createClient();
+
+    const created = await client.create('dataset-1', 'A dataset', [baseExampleA]);
+
+    await expect(client.datasetExists(created.id)).resolves.toBe(true);
+  });
+
+  it('returns false for datasetExists when the dataset does not exist', async () => {
+    const { client } = createClient();
+
+    await expect(client.datasetExists('non-existent-id')).resolves.toBe(false);
+  });
+
+  it('deletes a single example and preserves remaining examples', async () => {
+    const { client } = createClient();
+
+    const created = await client.create('dataset-1', 'A dataset', [baseExampleA, baseExampleB]);
+    const exampleToDelete = created.examples[0];
+
+    const wasDeleted = await client.deleteExample(exampleToDelete.id);
+    const fetched = await client.get(created.id);
+
+    expect(wasDeleted).toBe(true);
+    expect(fetched?.examples).toHaveLength(1);
+    expect(fetched?.examples[0].input).toEqual(baseExampleB.input);
+  });
+
+  it('returns false when deleting a non-existent example', async () => {
+    const { client } = createClient();
+
+    await client.create('dataset-1', 'A dataset', [baseExampleA]);
+
+    const wasDeleted = await client.deleteExample('non-existent-example-id');
+
+    expect(wasDeleted).toBe(false);
+  });
+
+  it('deletes an example when expectedDatasetId matches', async () => {
+    const { client } = createClient();
+
+    const created = await client.create('dataset-1', 'A dataset', [baseExampleA]);
+    const exampleToDelete = created.examples[0];
+
+    const wasDeleted = await client.deleteExample(exampleToDelete.id, created.id);
+    const fetched = await client.get(created.id);
+
+    expect(wasDeleted).toBe(true);
+    expect(fetched?.examples).toHaveLength(0);
+  });
+
+  it('refuses to delete an example when expectedDatasetId does not match', async () => {
+    const { client } = createClient();
+
+    const created = await client.create('dataset-1', 'A dataset', [baseExampleA]);
+    const exampleToDelete = created.examples[0];
+
+    const wasDeleted = await client.deleteExample(exampleToDelete.id, 'wrong-dataset-id');
+    const fetched = await client.get(created.id);
+
+    expect(wasDeleted).toBe(false);
+    expect(fetched?.examples).toHaveLength(1);
+  });
+
+  it('deleteExamplesByDatasetId removes all examples for a dataset', async () => {
+    const { client } = createClient();
+
+    const created = await client.create('dataset-1', 'A dataset', [baseExampleA, baseExampleB]);
+    const result = await client.deleteExamplesByDatasetId(created.id);
+
+    expect(result).toEqual({ deleted: 2 });
+
+    const fetched = await client.get(created.id);
+    expect(fetched?.examples).toHaveLength(0);
+  });
+
+  it('deleteExamplesByDatasetId returns zero when dataset has no examples', async () => {
+    const { client } = createClient();
+
+    const created = await client.create('dataset-1', 'A dataset');
+    const result = await client.deleteExamplesByDatasetId(created.id);
+
+    expect(result).toEqual({ deleted: 0 });
+  });
+
   it('throws DatasetAlreadyExistsError when creating a dataset with a duplicate name', async () => {
     const { client } = createClient();
 

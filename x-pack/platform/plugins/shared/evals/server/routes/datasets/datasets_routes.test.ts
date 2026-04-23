@@ -74,6 +74,7 @@ const buildRouteSetup = ({
     list: jest.fn(),
     create: jest.fn(),
     get: jest.fn(),
+    datasetExists: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
     addExamples: jest.fn(),
@@ -696,7 +697,7 @@ describe('dataset routes', () => {
         method: 'delete',
         path: EVALS_DATASET_EXAMPLE_URL,
       });
-      datasetClient.get.mockResolvedValueOnce({ ...dataset, examples: [datasetExample] });
+      datasetClient.datasetExists.mockResolvedValueOnce(true);
       datasetClient.deleteExample.mockResolvedValueOnce(true);
 
       const request = httpServerMock.createKibanaRequest({
@@ -712,6 +713,7 @@ describe('dataset routes', () => {
 
       expect(response.status).toBe(200);
       expect(response.payload).toEqual({ success: true });
+      expect(datasetClient.deleteExample).toHaveBeenCalledWith(exampleId, datasetId);
     });
 
     it('returns 404 when dataset does not exist', async () => {
@@ -720,7 +722,7 @@ describe('dataset routes', () => {
         method: 'delete',
         path: EVALS_DATASET_EXAMPLE_URL,
       });
-      datasetClient.get.mockResolvedValueOnce(undefined);
+      datasetClient.datasetExists.mockResolvedValueOnce(false);
 
       const request = httpServerMock.createKibanaRequest({
         method: 'delete',
@@ -735,6 +737,7 @@ describe('dataset routes', () => {
 
       expect(response.status).toBe(404);
       expect(response.payload).toEqual({ message: `Evaluation dataset not found: ${datasetId}` });
+      expect(datasetClient.deleteExample).not.toHaveBeenCalled();
     });
 
     it('returns 404 when example is not in dataset', async () => {
@@ -743,7 +746,8 @@ describe('dataset routes', () => {
         method: 'delete',
         path: EVALS_DATASET_EXAMPLE_URL,
       });
-      datasetClient.get.mockResolvedValueOnce({ ...dataset, examples: [] });
+      datasetClient.datasetExists.mockResolvedValueOnce(true);
+      datasetClient.deleteExample.mockResolvedValueOnce(false);
 
       const request = httpServerMock.createKibanaRequest({
         method: 'delete',
@@ -760,7 +764,7 @@ describe('dataset routes', () => {
       expect(response.payload).toEqual({
         message: `Evaluation dataset example not found: ${exampleId}`,
       });
-      expect(datasetClient.deleteExample).not.toHaveBeenCalled();
+      expect(datasetClient.deleteExample).toHaveBeenCalledWith(exampleId, datasetId);
     });
   });
 
