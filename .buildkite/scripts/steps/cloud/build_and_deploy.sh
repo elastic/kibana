@@ -47,7 +47,7 @@ esac
 echo "--- Download Kibana Distribution"
 
 mkdir -p ./target
-download_artifact "kibana-$VERSION-linux-x86_64.tar.gz" ./target --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
+download_artifact "kibana-$VERSION-linux-x86_64.tar.zst" ./target --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
 
 echo "--- Build Cloud Distribution"
 ELASTICSEARCH_MANIFEST_URL="https://storage.googleapis.com/kibana-ci-es-snapshots-daily/$(jq -r '.version' package.json)/manifest-latest-verified.json"
@@ -77,6 +77,7 @@ else
     --skip-platform-folders \
     --skip-archives \
     --skip-cdn-assets \
+    --tar-zstd \
     --docker-images \
     --docker-tag-qualifier="$GIT_COMMIT" \
     --docker-push \
