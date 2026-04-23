@@ -18,6 +18,7 @@ export const observedUserDetailsSchema = requestBasicOptionsSchema.extend({
   timerange,
   inspect,
   factoryQueryType: z.literal(UsersQueries.observedDetails),
+  entityStoreV2: z.boolean().optional(),
 });
 
 export type ObservedUserDetailsRequestOptionsInput = z.input<typeof observedUserDetailsSchema>;

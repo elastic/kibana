@@ -6,6 +6,7 @@
  */
 
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
+import type { FieldMapping } from '../../agents/state';
 import type { FieldMappingEntry } from '../saved_objects/saved_objects_service';
 
 interface SampleObj {
@@ -111,7 +112,8 @@ const collectFields = (obj: unknown, parentPath: string): RawField[] => {
  */
 export const generateFieldMappings = async (
   pipelineDocs: Array<Record<string, unknown>>,
-  fieldsMetadataClient: IFieldsMetadataClient
+  fieldsMetadataClient: IFieldsMetadataClient,
+  agentFieldMappings?: FieldMapping[]
 ): Promise<FieldMappingEntry[]> => {
   if (pipelineDocs.length === 0) return [];
 
@@ -126,6 +128,13 @@ export const generateFieldMappings = async (
 
   if (rawFields.length === 0) return [];
 
+  const agentTypeMap = new Map<string, string>();
+  if (agentFieldMappings) {
+    for (const mapping of agentFieldMappings) {
+      agentTypeMap.set(mapping.name, mapping.type);
+    }
+  }
+
   const allFieldNames = rawFields.map((f) => f.name);
   const ecsFieldsDict = await fieldsMetadataClient.find({
     fieldNames: allFieldNames,
@@ -136,9 +145,10 @@ export const generateFieldMappings = async (
   return rawFields.map((f) => {
     const ecsEntry = ecsFieldsMap[f.name];
     const isEcs = !!ecsEntry;
+    const agentType = agentTypeMap.get(f.name);
     return {
       ...f,
-      type: isEcs && ecsEntry.type ? ecsEntry.type : f.type,
+      type: isEcs && ecsEntry.type ? ecsEntry.type : agentType ?? f.type,
       is_ecs: isEcs,
     };
   });

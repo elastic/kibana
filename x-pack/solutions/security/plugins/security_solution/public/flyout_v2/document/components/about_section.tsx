@@ -63,7 +63,7 @@ export const AboutSection = memo(({ hit }: AboutSectionProps) => {
     <ExpandableSection
       data-test-subj={ABOUT_SECTION_TEST_ID}
       expanded={expanded}
-      gutterSize="m"
+      gutterSize="none"
       localStorageKey={FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS}
       sectionId={LOCAL_STORAGE_SECTION_KEY}
       title={ABOUT_SECTION_TITLE}

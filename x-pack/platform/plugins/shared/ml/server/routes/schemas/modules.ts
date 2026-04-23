@@ -18,6 +18,7 @@ export const setupModuleBodySchema = schema.object({
   ),
   groups: schema.maybe(
     schema.arrayOf(schema.string(), {
+      maxSize: 10000,
       meta: {
         description:
           'List of group IDs. This will override the groups assigned to each job created by the module (optional).',
@@ -140,7 +141,8 @@ export const recognizeModulesSchemaResponse = () =>
       query: schema.any(),
       description: schema.string(),
       logo: schema.any(),
-    })
+    }),
+    { maxSize: 10000 }
   );
 
 const moduleSchema = schema.object({
@@ -152,14 +154,14 @@ const moduleSchema = schema.object({
   logoFile: schema.maybe(schema.string()),
   defaultIndexPattern: schema.maybe(schema.string()),
   query: schema.maybe(schema.any()),
-  jobs: schema.arrayOf(schema.any()),
-  datafeeds: schema.arrayOf(schema.any()),
+  jobs: schema.arrayOf(schema.any(), { maxSize: 10000 }),
+  datafeeds: schema.arrayOf(schema.any(), { maxSize: 10000 }),
   kibana: schema.maybe(schema.any()),
-  tags: schema.maybe(schema.arrayOf(schema.string())),
+  tags: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10000 })),
 });
 
 export const getModulesSchemaResponse = () =>
-  schema.oneOf([moduleSchema, schema.arrayOf(moduleSchema)]);
+  schema.oneOf([moduleSchema, schema.arrayOf(moduleSchema, { maxSize: 10000 })]);
 
 /**
  *
@@ -167,8 +169,8 @@ export const getModulesSchemaResponse = () =>
  */
 export const dataRecognizerConfigResponse = () =>
   schema.object({
-    datafeeds: schema.arrayOf(schema.any()),
-    jobs: schema.arrayOf(schema.any()),
+    datafeeds: schema.arrayOf(schema.any(), { maxSize: 10000 }),
+    jobs: schema.arrayOf(schema.any(), { maxSize: 10000 }),
     kibana: schema.maybe(schema.any()),
   });
 
@@ -182,7 +184,8 @@ export const jobExistsResponse = () =>
           earliestTimestampMs: schema.number(),
           latestTimestampMs: schema.number(),
           latestResultsTimestampMs: schema.maybe(schema.number()),
-        })
+        }),
+        { maxSize: 10000 }
       )
     ),
   });

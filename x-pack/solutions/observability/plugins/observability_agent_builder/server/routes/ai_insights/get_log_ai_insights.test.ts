@@ -22,7 +22,7 @@ jest.mock('../../utils/warning_and_above_log_filter', () => ({
   isWarningOrAbove: jest.fn().mockReturnValue(false),
 }));
 
-jest.mock('../../agent/register_observability_agent', () => ({
+jest.mock('../../utils/get_entity_linking_instructions', () => ({
   getEntityLinkingInstructions: jest.fn().mockReturnValue(''),
 }));
 

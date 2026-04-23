@@ -17,7 +17,9 @@
   ],
   "kbn_references": [
     "@kbn/alerting-v2-schemas",
+    "@kbn/core",
     "@kbn/core-http-browser",
+    "@kbn/core-user-profile-browser",
     "@kbn/data-views-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/i18n",
@@ -30,9 +32,12 @@
     "@kbn/discover-utils",
     "@kbn/i18n-react",
     "@kbn/es-query",
+    "@kbn/esql-utils",
     "@kbn/react-hooks",
     "@kbn/alerting-v2-constants",
     "@kbn/es-types",
-    "@kbn/search-types"
+    "@kbn/kibana-react-plugin",
+    "@kbn/search-types",
+    "@kbn/user-profile-components"
   ]
 }

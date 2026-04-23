@@ -27,7 +27,7 @@ export async function autocomplete(
 
   switch (position) {
     case 'after_limit_keyword': {
-      return buildConstantsDefinitions(defaultLimitValueSuggestions, '', undefined, {
+      return buildConstantsDefinitions(defaultLimitValueSuggestions, '', {
         advanceCursorAndOpenSuggestions: true,
       });
     }

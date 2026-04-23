@@ -55,7 +55,7 @@ export class TelemetryOptIn extends React.Component<Props, State> {
     this.setState({ showExample: true });
     this.closeReadMorePopover();
   };
-  onChangeOptIn = (event: any) => {
+  onChangeOptIn = (event: React.ChangeEvent<HTMLInputElement>) => {
     const isOptingInToTelemetry = event.target.checked;
     const { onOptInChange } = this.props;
     onOptInChange(isOptingInToTelemetry);

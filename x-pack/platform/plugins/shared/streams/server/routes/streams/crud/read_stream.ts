@@ -132,7 +132,7 @@ export async function readStream({
       index_mode: dataStream?.index_mode,
       replicated: dataStream?.replicated ?? false,
       elasticsearch_assets:
-        dataStream && privileges.manage
+        dataStream && privileges.manage && dataStream.replicated !== true
           ? await getUnmanagedElasticsearchAssets({
               dataStream,
               esClient: scopedClusterClient.asCurrentUser,

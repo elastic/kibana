@@ -18,6 +18,7 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
+  EuiIconTip,
   EuiPanel,
   EuiSpacer,
   EuiSplitPanel,
@@ -27,24 +28,52 @@ import {
   euiDragDropReorder,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { InferenceConnector } from '@kbn/inference-common';
+import { InferenceConnectorType } from '@kbn/inference-common';
 import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import { css } from '@emotion/react';
-import * as translations from '../../../common/translations';
-import { useQueryInferenceEndpoints } from '../../hooks/use_inference_endpoints';
+import { NO_DEFAULT_MODEL } from '../../../common/constants';
 import { useRegisteredFeatures } from '../../hooks/use_registered_features';
-import { getModelId } from '../../utils/get_model_id';
+import { getProviderKeyForCreator } from '../../utils/eis_utils';
 import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../../common/types';
 import { AddModelPopover } from './add_model_popover';
 import { CopyToModal } from './copy_to_modal';
+import { useConnectors } from '../../hooks/use_connectors';
 
 const COLLAPSED_COUNT = 5;
+
+const getConnectorIcon = (connector: InferenceConnector): string => {
+  let key: string | undefined;
+  switch (connector.type) {
+    case InferenceConnectorType.OpenAI:
+      key = connector.config?.apiProvider === 'Azure OpenAI' ? 'azureopenai' : 'openai';
+      break;
+    case InferenceConnectorType.Bedrock:
+      key = 'amazonbedrock';
+      break;
+    case InferenceConnectorType.Gemini:
+      key = 'googlevertexai';
+      break;
+    case InferenceConnectorType.Inference:
+      key =
+        getProviderKeyForCreator(connector.config?.modelCreator) ??
+        connector.config?.service ??
+        connector.config?.provider;
+      break;
+  }
+  return SERVICE_PROVIDERS[key as ServiceProviderKeys]?.icon ?? 'compute';
+};
 
 interface SubFeatureCardProps {
   featureId: string;
   feature: InferenceFeatureConfig;
   endpointIds: string[];
   onEndpointsChange: (featureId: string, newEndpointIds: string[]) => void;
+  invalidEndpointIds: Set<string>;
+  globalDefaultId: string;
+  hasSavedObject: boolean;
+  isFeatureDirty: boolean;
 }
 
 export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
@@ -52,8 +81,12 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
   feature,
   endpointIds,
   onEndpointsChange,
+  invalidEndpointIds,
+  globalDefaultId,
+  hasSavedObject,
+  isFeatureDirty,
 }) => {
-  const { data: inferenceEndpoints = [] } = useQueryInferenceEndpoints();
+  const { data: connectors = [] } = useConnectors();
   const { features: registeredFeatures } = useRegisteredFeatures();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
@@ -72,15 +105,15 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
   const endpointDisplayMap = useMemo(
     () =>
       new Map(
-        inferenceEndpoints.map((ep) => [
-          ep.inference_id,
+        connectors.map((connector) => [
+          connector.connectorId,
           {
-            icon: SERVICE_PROVIDERS[ep.service as ServiceProviderKeys]?.icon ?? 'compute',
-            label: getModelId(ep) ?? ep.inference_id,
+            icon: getConnectorIcon(connector),
+            label: connector.name,
           },
         ])
       ),
-    [inferenceEndpoints]
+    [connectors]
   );
 
   const hasOtherSubFeatures = registeredFeatures.some(
@@ -90,6 +123,9 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
   const hasOverflow = endpointIds.length > COLLAPSED_COUNT;
   const visibleEndpoints = isExpanded ? endpointIds : endpointIds.slice(0, COLLAPSED_COUNT);
   const hiddenCount = endpointIds.length - COLLAPSED_COUNT;
+  const showGlobalDefaultRow = !hasSavedObject && globalDefaultId !== NO_DEFAULT_MODEL;
+  const { icon: globalDefaultIcon = 'compute', label: globalDefaultLabel = globalDefaultId } =
+    endpointDisplayMap.get(globalDefaultId) ?? {};
   const canAddMore =
     !feature.maxNumberOfEndpoints || endpointIds.length < feature.maxNumberOfEndpoints;
 
@@ -198,13 +234,71 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
         >
           <EuiPanel color="subdued" paddingSize="s" hasBorder={false}>
             <EuiText size="xs" color="subdued">
-              <strong>{translations.SETTINGS_ASSIGNED_MODELS}</strong>
+              <strong>
+                {i18n.translate('xpack.searchInferenceEndpoints.settings.assignedModels', {
+                  defaultMessage: 'Assigned models',
+                })}
+              </strong>
             </EuiText>
             <EuiSpacer size="s" />
 
             <EuiDragDropContext onDragEnd={handleDragEnd}>
               <div ref={listRef}>
                 <EuiSplitPanel.Outer hasBorder>
+                  {showGlobalDefaultRow && (
+                    <>
+                      <EuiSplitPanel.Inner
+                        paddingSize="s"
+                        color="subdued"
+                        data-test-subj={`global-default-row-${featureId}`}
+                      >
+                        <EuiFlexGroup alignItems="center" gutterSize="s">
+                          <EuiFlexItem grow={false}>
+                            <EuiPanel color="transparent" paddingSize="none">
+                              <EuiIcon type="lock" size="s" color="subdued" aria-hidden />
+                            </EuiPanel>
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <EuiIcon type={globalDefaultIcon} size="m" aria-hidden />
+                          </EuiFlexItem>
+                          <EuiFlexItem grow>
+                            <EuiToolTip
+                              title={globalDefaultLabel}
+                              content={globalDefaultId}
+                              position="top"
+                            >
+                              <EuiText
+                                size="s"
+                                color="subdued"
+                                tabIndex={0}
+                                css={css`
+                                  overflow: hidden;
+                                  text-overflow: ellipsis;
+                                  white-space: nowrap;
+                                `}
+                              >
+                                <span>{globalDefaultLabel}</span>
+                              </EuiText>
+                            </EuiToolTip>
+                          </EuiFlexItem>
+                          {!isFeatureDirty && (
+                            <EuiFlexItem grow={false}>
+                              <EuiBadge
+                                color="hollow"
+                                data-test-subj={`global-default-badge-${featureId}`}
+                              >
+                                {i18n.translate(
+                                  'xpack.searchInferenceEndpoints.settings.globalDefaultBadge',
+                                  { defaultMessage: 'Global default' }
+                                )}
+                              </EuiBadge>
+                            </EuiFlexItem>
+                          )}
+                        </EuiFlexGroup>
+                      </EuiSplitPanel.Inner>
+                      <EuiHorizontalRule margin="none" />
+                    </>
+                  )}
                   <EuiDroppable droppableId={`assigned-models-${featureId}`} spacing="none">
                     {visibleEndpoints.map((endpointId, index) => (
                       <EuiDraggable
@@ -217,6 +311,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                         {(provided) => {
                           const { icon = 'compute', label = endpointId } =
                             endpointDisplayMap.get(endpointId) ?? {};
+                          const isInvalid = invalidEndpointIds.has(endpointId);
                           return (
                             <div>
                               <EuiSplitPanel.Inner
@@ -238,7 +333,30 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                                     </EuiPanel>
                                   </EuiFlexItem>
                                   <EuiFlexItem grow={false}>
-                                    <EuiIcon type={icon} size="m" aria-hidden />
+                                    {isInvalid ? (
+                                      <EuiIconTip
+                                        type="warning"
+                                        size="m"
+                                        color="warning"
+                                        content={i18n.translate(
+                                          'xpack.searchInferenceEndpoints.settings.endpointUnavailable',
+                                          {
+                                            defaultMessage:
+                                              'This inference endpoint is no longer available',
+                                          }
+                                        )}
+                                        aria-label={i18n.translate(
+                                          'xpack.searchInferenceEndpoints.settings.endpointUnavailable.ariaLabel',
+                                          {
+                                            defaultMessage:
+                                              'Inference endpoint {label} is no longer available',
+                                            values: { label },
+                                          }
+                                        )}
+                                      />
+                                    ) : (
+                                      <EuiIcon type={icon} size="m" aria-hidden />
+                                    )}
                                   </EuiFlexItem>
                                   <EuiFlexItem
                                     grow
@@ -260,10 +378,13 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                                       </EuiText>
                                     </EuiToolTip>
                                   </EuiFlexItem>
-                                  {index === 0 && (
+                                  {index === 0 && !showGlobalDefaultRow && (
                                     <EuiFlexItem grow={false}>
                                       <EuiBadge color="hollow">
-                                        {translations.SETTINGS_DEFAULT_BADGE}
+                                        {i18n.translate(
+                                          'xpack.searchInferenceEndpoints.settings.defaultBadge',
+                                          { defaultMessage: 'Default' }
+                                        )}
                                       </EuiBadge>
                                     </EuiFlexItem>
                                   )}

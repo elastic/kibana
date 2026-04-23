@@ -70,7 +70,7 @@ export const PluginDetails: React.FC<PluginDetailsProps> = ({ plugin }) => {
   const { createAgentBuilderUrl } = useNavigation();
 
   return (
-    <KibanaPageTemplate panelled data-test-subj="agentBuilderPluginDetailsPage">
+    <KibanaPageTemplate data-test-subj="agentBuilderPluginDetailsPage">
       <KibanaPageTemplate.Header
         pageTitle={plugin.name}
         css={css`

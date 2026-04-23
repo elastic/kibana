@@ -251,6 +251,22 @@
           },
           {
             "parentPluginId": "@kbn/security-solution-side-nav",
+            "id": "def-common.SolutionSideNavItem.prependSeparator",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "prependSeparator",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/side-nav/src/types.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-side-nav",
             "id": "def-common.SolutionSideNavItem.appendSeparator",
             "type": "CompoundType",
             "tags": [],
@@ -260,7 +276,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/security/packages/side-nav/src/types.ts",
-            "lineNumber": 28,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -283,7 +299,7 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/security/packages/side-nav/src/types.ts",
-            "lineNumber": 29,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -299,7 +315,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/security/packages/side-nav/src/types.ts",
-            "lineNumber": 30,
+            "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -315,7 +331,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/security/packages/side-nav/src/types.ts",
-            "lineNumber": 31,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -331,7 +347,7 @@
               "{ text: string; } | undefined"
             ],
             "path": "x-pack/solutions/security/packages/side-nav/src/types.ts",
-            "lineNumber": 32,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -347,7 +363,7 @@
         "label": "SolutionSideNavProps",
         "description": [],
         "path": "x-pack/solutions/security/packages/side-nav/src/solution_side_nav.tsx",
-        "lineNumber": 38,
+        "lineNumber": 37,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -372,7 +388,7 @@
               "<string>[]"
             ],
             "path": "x-pack/solutions/security/packages/side-nav/src/solution_side_nav.tsx",
-            "lineNumber": 39,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -387,7 +403,7 @@
               "The id of the selected item to highlight. It only affects the top level items rendered in the main panel"
             ],
             "path": "x-pack/solutions/security/packages/side-nav/src/solution_side_nav.tsx",
-            "lineNumber": 41,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -412,7 +428,7 @@
               "<string>[] | undefined"
             ],
             "path": "x-pack/solutions/security/packages/side-nav/src/solution_side_nav.tsx",
-            "lineNumber": 43,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -430,7 +446,7 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/packages/side-nav/src/solution_side_nav.tsx",
-            "lineNumber": 45,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -448,7 +464,7 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/packages/side-nav/src/solution_side_nav.tsx",
-            "lineNumber": 47,
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -473,7 +489,7 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/security/packages/side-nav/src/solution_side_nav.tsx",
-            "lineNumber": 49,
+            "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -510,7 +526,7 @@
           "(type: string, event: string | string[], count?: number | undefined) => void"
         ],
         "path": "x-pack/solutions/security/packages/side-nav/src/types.ts",
-        "lineNumber": 37,
+        "lineNumber": 38,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -524,7 +540,7 @@
             "label": "type",
             "description": [],
             "path": "x-pack/solutions/security/packages/side-nav/src/types.ts",
-            "lineNumber": 38,
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -540,7 +556,7 @@
               "string | string[]"
             ],
             "path": "x-pack/solutions/security/packages/side-nav/src/types.ts",
-            "lineNumber": 39,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -556,7 +572,7 @@
               "number | undefined"
             ],
             "path": "x-pack/solutions/security/packages/side-nav/src/types.ts",
-            "lineNumber": 40,
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

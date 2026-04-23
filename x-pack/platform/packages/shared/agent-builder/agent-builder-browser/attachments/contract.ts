@@ -85,6 +85,10 @@ export interface ActionButton {
   icon?: IconType;
   /** Whether this is the primary action button */
   type: ActionButtonType;
+  /** Whether the action is currently unavailable */
+  disabled?: boolean;
+  /** Optional explanation shown when a disabled action remains visible */
+  disabledReason?: string;
   /** Handler function called when the button is clicked */
   handler: () => void | Promise<void>;
 }
@@ -124,6 +128,13 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
    * using the <render_attachment> tag.
    */
   renderInlineContent?: (props: AttachmentRenderProps<TAttachment>) => ReactNode;
+  /**
+   * Optional preferred width for the canvas flyout when opened in full-screen context.
+   * Accepts any valid CSS width value (e.g. `'600px'`, `'40vw'`).
+   * Defaults to `'50vw'` when not specified.
+   * Has no effect in sidebar context.
+   */
+  canvasWidth?: string;
   /**
    * Optional custom content renderer for canvas mode (expanded flyout view).
    * When provided, attachments can be opened in an expanded view via action buttons.

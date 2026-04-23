@@ -24,7 +24,7 @@ const getSmlService = jest.fn(() => ({
 
 const mockContext = {
   spaceId: 'default',
-  esClient: { asCurrentUser: {} },
+  esClient: { asCurrentUser: {}, asInternalUser: {} },
   request: {},
   savedObjectsClient: {},
   attachments: { add: jest.fn() },
@@ -42,6 +42,12 @@ describe('createSmlSearchTool', () => {
     expect(tool.tags).toEqual(['sml', 'search']);
   });
 
+  it('description mentions workflows and wildcard query', () => {
+    const tool = createSmlSearchTool({ getSmlService });
+    expect(tool.description).toContain('workflows');
+    expect(tool.description).toContain('"*"');
+  });
+
   it('calls search with correct params', async () => {
     mockSearch.mockResolvedValue({ results: [], total: 0 });
     const tool = createSmlSearchTool({ getSmlService });
@@ -54,7 +60,7 @@ describe('createSmlSearchTool', () => {
       query: 'cpu usage',
       size: 20,
       spaceId: 'default',
-      esClient: mockContext.esClient.asCurrentUser,
+      esClient: mockContext.esClient,
       request: mockContext.request,
     });
   });

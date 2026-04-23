@@ -31,7 +31,7 @@ export const basicChartSchema = {
   end: schema.number(),
   intervalMs: schema.number(),
   query: schema.any(),
-  aggFieldNamePairs: schema.arrayOf(schema.any()),
+  aggFieldNamePairs: schema.arrayOf(schema.any(), { maxSize: 10000 }),
   splitFieldName: schema.nullable(schema.string()),
   splitFieldValue: schema.nullable(schema.string()),
   runtimeMappings: schema.maybe(runtimeMappingsSchema),
@@ -46,7 +46,7 @@ export const populationChartSchema = {
   end: schema.number(),
   intervalMs: schema.number(),
   query: schema.any(),
-  aggFieldNamePairs: schema.arrayOf(schema.any()),
+  aggFieldNamePairs: schema.arrayOf(schema.any(), { maxSize: 10000 }),
   splitFieldName: schema.nullable(schema.string()),
   splitFieldValue: schema.maybe(schema.nullable(schema.string())),
   runtimeMappings: schema.maybe(runtimeMappingsSchema),
@@ -55,13 +55,16 @@ export const populationChartSchema = {
 };
 
 export const forceStartDatafeedSchema = schema.object({
-  datafeedIds: schema.arrayOf(schema.string()),
+  datafeedIds: schema.arrayOf(schema.string(), { maxSize: 10000 }),
   start: schema.maybe(schema.number()),
   end: schema.maybe(schema.number()),
 });
 
 const jobIds = {
-  jobIds: schema.arrayOf(schema.string(), { meta: { description: 'List of job IDs.' } }),
+  jobIds: schema.arrayOf(schema.string(), {
+    maxSize: 10000,
+    meta: { description: 'List of job IDs.' },
+  }),
 };
 
 export const jobIdsSchema = schema.object({
@@ -95,8 +98,9 @@ export const updateGroupsSchema = schema.object({
   jobs: schema.arrayOf(
     schema.object({
       jobId: schema.string(),
-      groups: schema.arrayOf(schema.string()),
-    })
+      groups: schema.arrayOf(schema.string(), { maxSize: 10000 }),
+    }),
+    { maxSize: 10000 }
   ),
 });
 
@@ -112,7 +116,8 @@ export const revertModelSnapshotSchema = schema.object({
         start: schema.number(),
         end: schema.number(),
         description: schema.string(),
-      })
+      }),
+      { maxSize: 10000 }
     )
   ),
 });
@@ -145,7 +150,7 @@ export const datafeedPreviewSchema = schema.object(
 );
 
 export const jobsExistSchema = schema.object({
-  jobIds: schema.arrayOf(schema.string()),
+  jobIds: schema.arrayOf(schema.string(), { maxSize: 10000 }),
   allSpaces: schema.maybe(schema.boolean()),
 });
 
@@ -154,7 +159,8 @@ export const bulkCreateSchema = schema.oneOf([
     schema.object({
       job: schema.object(anomalyDetectionJobSchema),
       datafeed: datafeedConfigSchema,
-    })
+    }),
+    { maxSize: 10000 }
   ),
   schema.object({
     job: schema.object(anomalyDetectionJobSchema),
