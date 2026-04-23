@@ -34,6 +34,7 @@ export {
 export { sumTokens } from './src/helpers/sum_tokens';
 export {
   identifyFeatures,
+  toPreviouslyIdentifiedFeature,
   type IdentifyFeaturesOptions,
   type PreviouslyIdentifiedFeature,
   type ExcludedFeatureSummary,

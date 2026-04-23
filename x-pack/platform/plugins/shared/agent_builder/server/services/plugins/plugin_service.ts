@@ -15,7 +15,7 @@ import { isAllowedBuiltinPlugin } from '@kbn/agent-builder-server/allow_lists';
 import type { BuiltInPluginDefinition } from '@kbn/agent-builder-server/plugins';
 import type { ToolRegistry } from '@kbn/agent-builder-server/tools';
 import type { AgentBuilderConfig } from '../../config';
-import type { AnalyticsService } from '../../telemetry';
+import type { AnalyticsService, TrackingService } from '../../telemetry';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { PluginClient, PersistedPluginDefinition } from './client';
 import { createClient, parsedArchiveToCreateRequest } from './client';
@@ -64,6 +64,7 @@ export interface PluginsServiceStartDeps {
   config: AgentBuilderConfig;
   getToolRegistry: (opts: { request: KibanaRequest }) => Promise<ToolRegistry>;
   analyticsService?: AnalyticsService;
+  trackingService?: TrackingService;
 }
 
 export const createPluginsService = (): PluginsService => {
@@ -191,12 +192,13 @@ class PluginsServiceImpl implements PluginsService {
 
     const created = await pluginClient.create(createRequest);
 
-    const { analyticsService } = this.getStartDeps();
+    const { analyticsService, trackingService } = this.getStartDeps();
     analyticsService?.reportPluginImported({
       pluginId: created.id,
       sourceType: source.type,
       skillCount: createRequests.length,
     });
+    trackingService?.trackPluginImport(source.type);
 
     return created;
   }
