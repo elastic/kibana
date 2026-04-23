@@ -14,14 +14,17 @@ export const EMPTY_TOKENS: ChatCompletionTokenCount = {
   cached: 0,
 };
 
-export function sumTokens(
-  a: ChatCompletionTokenCount,
-  b?: ChatCompletionTokenCount
-): ChatCompletionTokenCount {
+export function sumTokens({
+  total = EMPTY_TOKENS,
+  added,
+}: {
+  total?: ChatCompletionTokenCount;
+  added?: ChatCompletionTokenCount;
+}): ChatCompletionTokenCount {
   return {
-    completion: a.completion + (b?.completion ?? 0),
-    prompt: a.prompt + (b?.prompt ?? 0),
-    total: a.total + (b?.total ?? 0),
-    cached: (a.cached ?? 0) + (b?.cached ?? 0),
+    completion: total.completion + (added?.completion ?? 0),
+    prompt: total.prompt + (added?.prompt ?? 0),
+    total: total.total + (added?.total ?? 0),
+    cached: (total.cached ?? 0) + (added?.cached ?? 0),
   };
 }

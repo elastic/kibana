@@ -28,5 +28,7 @@ export function deriveSuccessCount(results: IterationResult[]): number {
 }
 
 export function deriveTotalTokensUsed(results: IterationResult[]): ChatCompletionTokenCount {
-  return results.reduce((acc, r) => sumTokens(acc, r.tokensUsed), { ...EMPTY_TOKENS });
+  return results.reduce((acc, r) => sumTokens({ total: acc, added: r.tokensUsed }), {
+    ...EMPTY_TOKENS,
+  });
 }
