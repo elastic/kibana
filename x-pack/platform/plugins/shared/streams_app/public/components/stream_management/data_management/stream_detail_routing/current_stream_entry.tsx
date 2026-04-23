@@ -33,6 +33,7 @@ export function CurrentStreamEntry({ definition }: { definition: PartitionableDe
         hasShadow={false}
         hasBorder={false}
         paddingSize="m"
+        data-test-subj="streamsAppCurrentStreamPanel"
         className={css`
           overflow: hidden;
           border: ${euiTheme.border.thin};
@@ -56,7 +57,11 @@ export function CurrentStreamEntry({ definition }: { definition: PartitionableDe
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       {isLast ? (
-                        <EuiText size="xs" color="subdued">
+                        <EuiText
+                          size="xs"
+                          color="subdued"
+                          data-test-subj={`streamsAppBreadcrumbEntry-${streamName}`}
+                        >
                           {streamName}
                         </EuiText>
                       ) : (
@@ -70,6 +75,7 @@ export function CurrentStreamEntry({ definition }: { definition: PartitionableDe
                         >
                           <EuiText
                             size="xs"
+                            data-test-subj={`streamsAppBreadcrumbEntry-${streamName}`}
                             css={css`
                               font-weight: ${euiTheme.font.weight.bold};
                             `}

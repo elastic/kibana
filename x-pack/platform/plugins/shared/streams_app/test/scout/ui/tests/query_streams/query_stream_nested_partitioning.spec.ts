@@ -50,7 +50,10 @@ test.describe(
       await disableQueryStreams(kbnClient);
     });
 
-    test('Should create nested query streams from query stream parent', async ({ pageObjects }) => {
+    test('Should create nested query streams from query stream parent', async ({
+      page,
+      pageObjects,
+    }) => {
       // create parent root query stream
       await pageObjects.streams.createRootQueryStream(
         QUERY_ROOT_STREAM_NAME,
@@ -95,6 +98,26 @@ test.describe(
         `FROM $.${QUERY_ROOT_STREAM_NAME}.${QUERY_CHILD_STREAM_NAME} | LIMIT 100`
       );
       await expect(pageObjects.streams.queryStreamFlyout).toBeHidden();
+
+      // navigate back to the streams list view and verify the nested query streams were created in the UI
+      await pageObjects.streams.gotoStreamMainPage();
+      await pageObjects.streams.clickStreamNameLink(
+        `${QUERY_ROOT_STREAM_NAME}.${QUERY_CHILD_STREAM_NAME}.${QUERY_GRANDCHILD_STREAM_NAME}`
+      );
+      await pageObjects.streams.gotoPartitioningTab(
+        `${QUERY_ROOT_STREAM_NAME}.${QUERY_CHILD_STREAM_NAME}.${QUERY_GRANDCHILD_STREAM_NAME}`
+      );
+      // breadcrumbs should show the proper nesting structure we just created
+      await page.getByTestId('streamsAppCurrentStreamPanel').waitFor({ state: 'visible' });
+      const breadcrumbs = await page
+        .getByTestId('streamsAppCurrentStreamPanel')
+        .locator('[data-test-subj^="streamsAppBreadcrumbEntry-"]')
+        .allInnerTexts();
+      expect(breadcrumbs).toStrictEqual([
+        QUERY_ROOT_STREAM_NAME,
+        `${QUERY_ROOT_STREAM_NAME}.${QUERY_CHILD_STREAM_NAME}`,
+        `${QUERY_ROOT_STREAM_NAME}.${QUERY_CHILD_STREAM_NAME}.${QUERY_GRANDCHILD_STREAM_NAME}`,
+      ]);
     });
 
     test.fixme('Should create nested query streams from ingest stream parent', async () => {});
