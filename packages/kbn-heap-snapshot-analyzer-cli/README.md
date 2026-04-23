@@ -118,6 +118,18 @@ pollutes the baseline.
 kill -SIGUSR2 <kibana-pid>
 ```
 
+Optionally also dump the `require.cache` (what's loaded server-side and who
+loaded it — pairs with the heap snapshot for deterministic dependency tracing):
+
+```sh
+kill -SIGUSR1 <kibana-pid>
+```
+
+Output is JSONL at `$REQUIRE_CACHE_OUTPUT` (or `$HEAP_TRACK_DIR/require-cache-<ts>.jsonl`),
+one line per loaded module:
+`{"id":"<absolute path>","parent":"<absolute path>"|null}`.
+Inspect with `node scripts/require_cache_analyzer.js <dump.jsonl> [pattern...]`.
+
 The preload writes to `$HEAP_TRACK_OUTPUT`. Watch for:
 
 ```

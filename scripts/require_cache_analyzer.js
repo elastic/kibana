@@ -7,6 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { runHeapSnapshotAnalyzerCli } from './src/run_cli';
-export { runRequireCacheAnalyzerCli } from './src/run_require_cache_cli';
-export { getHeapTrackPreloadPath } from './src/preload_path';
+require('@kbn/setup-node-env');
+require('@kbn/heap-snapshot-analyzer-cli').runRequireCacheAnalyzerCli();

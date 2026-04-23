@@ -95,7 +95,39 @@ if (process.env.HEAP_TRACK_FORCE === '1' || process.env.isDevCliChild === 'true'
 
   process.on('SIGUSR2', takeSnapshot);
 
+  // SIGUSR1: dump require.cache (each module's filename + its parent's
+  // filename) to a file. Pairs with the heap snapshot to give a deterministic
+  // answer to 'what's loaded server-side and who loaded it'. Output is JSONL,
+  // one line per module: {"id": "<absolute path>", "parent": "<absolute path>"
+  // | null}. The first parentless entry is the entry script.
+  const dumpRequireCache = () => {
+    const outDir = process.env.HEAP_TRACK_DIR || process.cwd();
+    const outPath =
+      process.env.REQUIRE_CACHE_OUTPUT ||
+      path.join(outDir, `require-cache-${new Date().toISOString().replace(/[:.]/g, '-')}.jsonl`);
+
+    const start = Date.now();
+    const stream = fs.createWriteStream(outPath);
+    let count = 0;
+    for (const id of Object.keys(require.cache)) {
+      const mod = require.cache[id];
+      const parent = mod && mod.parent ? mod.parent.filename || mod.parent.id : null;
+      stream.write(JSON.stringify({ id, parent }) + '\n');
+      count++;
+    }
+    stream.end(() => {
+      const elapsed = ((Date.now() - start) / 1000).toFixed(2);
+      const sizeKb = (fs.statSync(outPath).size / 1024).toFixed(1);
+      console.error(
+        `[heap-track] require.cache dumped (${count} modules, ${sizeKb} KB) in ${elapsed}s -> ${outPath}`
+      );
+    });
+  };
+
+  process.on('SIGUSR1', dumpRequireCache);
+
   console.error(
-    `[heap-track] preload installed (PID ${process.pid}) — kill -SIGUSR2 ${process.pid} to capture`
+    `[heap-track] preload installed (PID ${process.pid}) — ` +
+      `SIGUSR2 = heap snapshot, SIGUSR1 = require.cache dump`
   );
 }
