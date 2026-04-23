@@ -11,7 +11,7 @@ import type {
   QueriesOccurrencesGetResponse,
   SignificantEventsQueriesGenerationResult,
 } from '@kbn/streams-schema';
-import { queryTypeSchema } from '@kbn/streams-schema';
+import { generatedSignificantEventQuerySchema } from '@kbn/streams-schema';
 import { sortForQueriesTable } from '../../../../lib/sig_events/utils';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { generateKIQueries } from '../../../../lib/sig_events/ki_queries_generation_service';
@@ -413,17 +413,7 @@ const persistQueriesRoute = createServerRoute({
       streamName: z.string().describe('The name of the stream'),
     }),
     body: z.object({
-      queries: z.array(
-        z.object({
-          type: queryTypeSchema,
-          title: z.string(),
-          esql: z.object({ query: z.string() }),
-          severity_score: z.number(),
-          description: z.string(),
-          evidence: z.array(z.string()).optional(),
-          replaces: z.string().optional(),
-        })
-      ),
+      queries: z.array(generatedSignificantEventQuerySchema),
     }),
   }),
   options: {
