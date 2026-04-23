@@ -68,9 +68,7 @@ export const EmbeddableRenderer = <
       const buildEmbeddable = async () => {
         const factory = await getReactEmbeddableFactory<SerializedState, Api>(type);
 
-        const finalizeApi = (
-          apiRegistration: EmbeddableApiRegistration<SerializedState, Api>
-        ) => {
+        const finalizeApi = (apiRegistration: EmbeddableApiRegistration<SerializedState, Api>) => {
           const hasLockedHoverActions$ = new BehaviorSubject(false);
           const panelCapabilitiesDefaults: HasPanelCapabilities = {
             isExpandable: true,
@@ -93,8 +91,7 @@ export const EmbeddableRenderer = <
           } as unknown as Api;
         };
 
-        const initialState =
-          parentApi.getSerializedStateForChild(uuid) ?? ({} as SerializedState);
+        const initialState = parentApi.getSerializedStateForChild(uuid) ?? ({} as SerializedState);
         const { api, Component } = await factory.buildEmbeddable({
           initialState,
           finalizeApi,
