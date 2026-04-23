@@ -33,7 +33,12 @@ import {
   touchedCriticalFiles,
   CRITICAL_FILES_JEST_INTEGRATION_TESTS,
 } from '../affected-packages';
-import { collectEnvFromLabels, expandAgentQueue, getRequiredEnv } from '#pipeline-utils';
+import {
+  collectEnvFromLabels,
+  expandAgentQueue,
+  getRequiredEnv,
+  PULL_REQUEST_FTR_FANOUT_AGENT_CONFIG,
+} from '#pipeline-utils';
 
 // TODO: this is always false on on-merge, when switching to enable this by default, check if this is a PR
 const USE_SELECTIVE_TESTING = process.env.GITHUB_PR_LABELS?.includes(SELECTIVE_TESTS_LABEL);
@@ -185,10 +190,7 @@ export async function pickTestGroupRunOrder() {
     : {};
   const envFromlabels: Record<string, string> = collectEnvFromLabels();
 
-  const { defaultQueue, ftrConfigsByQueue } = getEnabledFtrConfigs(
-    FTR_CONFIG_PATTERNS,
-    LIMIT_SOLUTIONS
-  );
+  const { ftrConfigsByQueue } = getEnabledFtrConfigs(FTR_CONFIG_PATTERNS, LIMIT_SOLUTIONS);
 
   const ftrConfigsIncluded = LIMIT_CONFIG_TYPE.includes('functional');
 
@@ -351,7 +353,6 @@ export async function pickTestGroupRunOrder() {
     title: string;
     key: string;
     sortBy: number | string;
-    queue: string;
   }> = [];
   // the map that we will write to the artifacts for informing ftr config jobs of what they should do
   const ftrRunOrder: Record<
@@ -360,7 +361,7 @@ export async function pickTestGroupRunOrder() {
   > = {};
 
   if (ftrConfigsByQueue.size) {
-    for (const { groups, queue } of getRunGroups(bk, types, FUNCTIONAL_TYPE)) {
+    for (const { groups } of getRunGroups(bk, types, FUNCTIONAL_TYPE)) {
       for (const group of groups) {
         if (!group.names.length) {
           continue;
@@ -381,7 +382,6 @@ export async function pickTestGroupRunOrder() {
           title,
           key,
           sortBy,
-          queue: queue ?? defaultQueue,
         });
         ftrRunOrder[key] = {
           title,
@@ -463,14 +463,15 @@ export async function pickTestGroupRunOrder() {
                 : -1
             )
             .map(
-              ({ title, key, queue = defaultQueue }): BuildkiteStep => ({
+              ({ title, key }): BuildkiteStep => ({
                 label: title,
                 command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
                 timeout_in_minutes: 50,
                 key,
-                agents: expandAgentQueue(queue, 105),
+                agents: { ...PULL_REQUEST_FTR_FANOUT_AGENT_CONFIG },
                 env: {
                   FTR_CONFIG_GROUP_KEY: key,
+                  EXTRA_GIT_CLONE_FLAGS: '--depth 1',
                   ...ftrExtraArgs,
                   ...envFromlabels,
                 },

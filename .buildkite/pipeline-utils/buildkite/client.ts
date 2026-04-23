@@ -48,6 +48,9 @@ export interface BuildkiteAgentTargetingRule {
   provider?: string;
   image?: string;
   imageProject?: string;
+  cpu?: string | number;
+  memory?: string;
+  ephemeralStorage?: string;
   machineType?: string;
   minCpuPlatform?: string;
   preemptible?: boolean;
