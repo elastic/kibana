@@ -820,13 +820,7 @@
         "description": [],
         "signature": [
           "(http: ",
-          {
-            "pluginId": "@kbn/core",
-            "scope": "common",
-            "docId": "kibKbnCorePluginApi",
-            "section": "def-common.HttpSetup",
-            "text": "HttpSetup"
-          },
+          "HttpSetup",
           ") => string"
         ],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/utils/navigate_to_connectors.ts",
@@ -843,13 +837,7 @@
             "label": "http",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core",
-                "scope": "common",
-                "docId": "kibKbnCorePluginApi",
-                "section": "def-common.HttpSetup",
-                "text": "HttpSetup"
-              }
+              "HttpSetup"
             ],
             "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/utils/navigate_to_connectors.ts",
             "lineNumber": 10,
@@ -908,13 +896,7 @@
         "description": [],
         "signature": [
           "(application: ",
-          {
-            "pluginId": "@kbn/core",
-            "scope": "common",
-            "docId": "kibKbnCorePluginApi",
-            "section": "def-common.ApplicationStart",
-            "text": "ApplicationStart"
-          },
+          "ApplicationStart",
           ") => void"
         ],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/utils/navigate_to_connectors.ts",
@@ -931,13 +913,7 @@
             "label": "application",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core",
-                "scope": "common",
-                "docId": "kibKbnCorePluginApi",
-                "section": "def-common.ApplicationStart",
-                "text": "ApplicationStart"
-              }
+              "ApplicationStart"
             ],
             "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/utils/navigate_to_connectors.ts",
             "lineNumber": 14,
@@ -959,13 +935,7 @@
         "description": [],
         "signature": [
           "(application: ",
-          {
-            "pluginId": "@kbn/core",
-            "scope": "common",
-            "docId": "kibKbnCorePluginApi",
-            "section": "def-common.ApplicationStart",
-            "text": "ApplicationStart"
-          },
+          "ApplicationStart",
           ") => void"
         ],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/utils/navigate_to_settings.ts",
@@ -982,13 +952,7 @@
             "label": "application",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core",
-                "scope": "common",
-                "docId": "kibKbnCorePluginApi",
-                "section": "def-common.ApplicationStart",
-                "text": "ApplicationStart"
-              }
+              "ApplicationStart"
             ],
             "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/utils/navigate_to_settings.ts",
             "lineNumber": 10,
@@ -1336,21 +1300,9 @@
             "text": "KibanaReactContextValue"
           },
           "<Partial<",
-          {
-            "pluginId": "@kbn/core",
-            "scope": "common",
-            "docId": "kibKbnCorePluginApi",
-            "section": "def-common.CoreStart",
-            "text": "CoreStart"
-          },
+          "CoreStart",
           "> & ",
-          {
-            "pluginId": "@kbn/core",
-            "scope": "common",
-            "docId": "kibKbnCorePluginApi",
-            "section": "def-common.CoreStart",
-            "text": "CoreStart"
-          },
+          "CoreStart",
           " & { plugins: { start: ",
           "ObservabilityAIAssistantPluginStartDependencies",
           "; }; } & AdditionalServices>"
@@ -1873,7 +1825,7 @@
             "label": "confidence",
             "description": [],
             "signature": [
-              "\"low\" | \"medium\" | \"high\" | undefined"
+              "\"medium\" | \"high\" | \"low\" | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/types.ts",
             "lineNumber": 134,
@@ -2904,429 +2856,6 @@
       },
       {
         "parentPluginId": "observabilityAIAssistant",
-        "id": "def-public.ObservabilityAIAssistantPublicSetup",
-        "type": "Interface",
-        "tags": [],
-        "label": "ObservabilityAIAssistantPublicSetup",
-        "description": [],
-        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/types.ts",
-        "lineNumber": 151,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityAIAssistant",
-        "id": "def-public.ObservabilityAIAssistantPublicStart",
-        "type": "Interface",
-        "tags": [],
-        "label": "ObservabilityAIAssistantPublicStart",
-        "description": [],
-        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/types.ts",
-        "lineNumber": 153,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observabilityAIAssistant",
-            "id": "def-public.ObservabilityAIAssistantPublicStart.service",
-            "type": "Object",
-            "tags": [],
-            "label": "service",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "observabilityAIAssistant",
-                "scope": "public",
-                "docId": "kibObservabilityAIAssistantPluginApi",
-                "section": "def-public.ObservabilityAIAssistantService",
-                "text": "ObservabilityAIAssistantService"
-              }
-            ],
-            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/types.ts",
-            "lineNumber": 154,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observabilityAIAssistant",
-            "id": "def-public.ObservabilityAIAssistantPublicStart.ObservabilityAIAssistantContextualInsight",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "ObservabilityAIAssistantContextualInsight",
-            "description": [],
-            "signature": [
-              "React.ForwardRefExoticComponent<",
-              "InsightProps",
-              "> | null"
-            ],
-            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/types.ts",
-            "lineNumber": 155,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observabilityAIAssistant",
-            "id": "def-public.ObservabilityAIAssistantPublicStart.ObservabilityAIAssistantMultipaneFlyoutContext",
-            "type": "Object",
-            "tags": [],
-            "label": "ObservabilityAIAssistantMultipaneFlyoutContext",
-            "description": [],
-            "signature": [
-              "React.Context<",
-              "ChatFlyoutSecondSlotHandler",
-              " | undefined>"
-            ],
-            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/types.ts",
-            "lineNumber": 156,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observabilityAIAssistant",
-            "id": "def-public.ObservabilityAIAssistantPublicStart.ObservabilityAIAssistantChatServiceContext",
-            "type": "Object",
-            "tags": [],
-            "label": "ObservabilityAIAssistantChatServiceContext",
-            "description": [],
-            "signature": [
-              "React.Context<",
-              {
-                "pluginId": "observabilityAIAssistant",
-                "scope": "public",
-                "docId": "kibObservabilityAIAssistantPluginApi",
-                "section": "def-public.ObservabilityAIAssistantChatService",
-                "text": "ObservabilityAIAssistantChatService"
-              },
-              " | undefined>"
-            ],
-            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/types.ts",
-            "lineNumber": 157,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observabilityAIAssistant",
-            "id": "def-public.ObservabilityAIAssistantPublicStart.useObservabilityAIAssistantChatService",
-            "type": "Function",
-            "tags": [],
-            "label": "useObservabilityAIAssistantChatService",
-            "description": [],
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "observabilityAIAssistant",
-                "scope": "public",
-                "docId": "kibObservabilityAIAssistantPluginApi",
-                "section": "def-public.ObservabilityAIAssistantChatService",
-                "text": "ObservabilityAIAssistantChatService"
-              }
-            ],
-            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/types.ts",
-            "lineNumber": 158,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": []
-          },
-          {
-            "parentPluginId": "observabilityAIAssistant",
-            "id": "def-public.ObservabilityAIAssistantPublicStart.useGenAIConnectors",
-            "type": "Function",
-            "tags": [],
-            "label": "useGenAIConnectors",
-            "description": [],
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "observabilityAIAssistant",
-                "scope": "public",
-                "docId": "kibObservabilityAIAssistantPluginApi",
-                "section": "def-public.UseGenAIConnectorsResult",
-                "text": "UseGenAIConnectorsResult"
-              }
-            ],
-            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/types.ts",
-            "lineNumber": 159,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "observabilityAIAssistant",
-            "id": "def-public.ObservabilityAIAssistantPublicStart.useChat",
-            "type": "Function",
-            "tags": [],
-            "label": "useChat",
-            "description": [],
-            "signature": [
-              "(props: ",
-              "UseChatProps",
-              ") => ",
-              {
-                "pluginId": "observabilityAIAssistant",
-                "scope": "public",
-                "docId": "kibObservabilityAIAssistantPluginApi",
-                "section": "def-public.UseChatResult",
-                "text": "UseChatResult"
-              }
-            ],
-            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/types.ts",
-            "lineNumber": 160,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "observabilityAIAssistant",
-                "id": "def-public.ObservabilityAIAssistantPublicStart.useChat.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "props",
-                "description": [],
-                "signature": [
-                  "{ initialMessages: ",
-                  {
-                    "pluginId": "observabilityAIAssistant",
-                    "scope": "common",
-                    "docId": "kibObservabilityAIAssistantPluginApi",
-                    "section": "def-common.Message",
-                    "text": "Message"
-                  },
-                  "[]; initialConversationId?: string | undefined; service: ",
-                  {
-                    "pluginId": "observabilityAIAssistant",
-                    "scope": "public",
-                    "docId": "kibObservabilityAIAssistantPluginApi",
-                    "section": "def-public.ObservabilityAIAssistantService",
-                    "text": "ObservabilityAIAssistantService"
-                  },
-                  "; chatService: ",
-                  {
-                    "pluginId": "observabilityAIAssistant",
-                    "scope": "public",
-                    "docId": "kibObservabilityAIAssistantPluginApi",
-                    "section": "def-public.ObservabilityAIAssistantChatService",
-                    "text": "ObservabilityAIAssistantChatService"
-                  },
-                  "; connectorId?: string | undefined; persist: boolean; disableFunctions?: boolean | undefined; onConversationUpdate?: ((event: ({ conversation: { id: string; title: string; last_updated: string; }; } & { type: ",
-                  {
-                    "pluginId": "observabilityAIAssistant",
-                    "scope": "common",
-                    "docId": "kibObservabilityAIAssistantPluginApi",
-                    "section": "def-common.StreamingChatResponseEventType",
-                    "text": "StreamingChatResponseEventType"
-                  },
-                  ".ConversationCreate; }) | ({ conversation: { id: string; title: string; last_updated: string; }; } & { type: ",
-                  {
-                    "pluginId": "observabilityAIAssistant",
-                    "scope": "common",
-                    "docId": "kibObservabilityAIAssistantPluginApi",
-                    "section": "def-common.StreamingChatResponseEventType",
-                    "text": "StreamingChatResponseEventType"
-                  },
-                  ".ConversationUpdate; })) => void) | undefined; onChatComplete?: ((messages: ",
-                  {
-                    "pluginId": "observabilityAIAssistant",
-                    "scope": "common",
-                    "docId": "kibObservabilityAIAssistantPluginApi",
-                    "section": "def-common.Message",
-                    "text": "Message"
-                  },
-                  "[]) => void) | undefined; scopes: ",
-                  {
-                    "pluginId": "@kbn/ai-assistant-common",
-                    "scope": "common",
-                    "docId": "kibKbnAiAssistantCommonPluginApi",
-                    "section": "def-common.AssistantScope",
-                    "text": "AssistantScope"
-                  },
-                  "[]; }"
-                ],
-                "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_chat.ts",
-                "lineNumber": 293,
-                "columnNumber": 25,
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "observabilityAIAssistant",
-            "id": "def-public.ObservabilityAIAssistantPublicStart.getContextualInsightMessages",
-            "type": "Function",
-            "tags": [],
-            "label": "getContextualInsightMessages",
-            "description": [],
-            "signature": [
-              "({}: { message: string; instructions: string; }) => ",
-              {
-                "pluginId": "observabilityAIAssistant",
-                "scope": "common",
-                "docId": "kibObservabilityAIAssistantPluginApi",
-                "section": "def-common.Message",
-                "text": "Message"
-              },
-              "[]"
-            ],
-            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/types.ts",
-            "lineNumber": 161,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "observabilityAIAssistant",
-                "id": "def-public.ObservabilityAIAssistantPublicStart.getContextualInsightMessages.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "{}",
-                "description": [],
-                "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/types.ts",
-                "lineNumber": 161,
-                "columnNumber": 38,
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "observabilityAIAssistant",
-                    "id": "def-public.ObservabilityAIAssistantPublicStart.getContextualInsightMessages.$1.message",
-                    "type": "string",
-                    "tags": [],
-                    "label": "message",
-                    "description": [],
-                    "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/types.ts",
-                    "lineNumber": 161,
-                    "columnNumber": 40,
-                    "deprecated": false,
-                    "trackAdoption": false
-                  },
-                  {
-                    "parentPluginId": "observabilityAIAssistant",
-                    "id": "def-public.ObservabilityAIAssistantPublicStart.getContextualInsightMessages.$1.instructions",
-                    "type": "string",
-                    "tags": [],
-                    "label": "instructions",
-                    "description": [],
-                    "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/types.ts",
-                    "lineNumber": 161,
-                    "columnNumber": 57,
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "observabilityAIAssistant",
-            "id": "def-public.ObservabilityAIAssistantPublicStart.createScreenContextAction",
-            "type": "Function",
-            "tags": [],
-            "label": "createScreenContextAction",
-            "description": [],
-            "signature": [
-              "<TActionDefinition extends Omit<",
-              "ScreenContextActionDefinition",
-              "<any>, \"respond\">, TRespondFunction extends ",
-              "ScreenContextActionRespondFunction",
-              "<ReturnOf<TActionDefinition>>>(definition: TActionDefinition, respond: TRespondFunction) => ",
-              "ScreenContextActionDefinition",
-              "<ReturnOf<TActionDefinition>>"
-            ],
-            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/types.ts",
-            "lineNumber": 162,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "observabilityAIAssistant",
-                "id": "def-public.ObservabilityAIAssistantPublicStart.createScreenContextAction.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "definition",
-                "description": [],
-                "signature": [
-                  "TActionDefinition"
-                ],
-                "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/utils/create_screen_context_action.ts",
-                "lineNumber": 23,
-                "columnNumber": 3,
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observabilityAIAssistant",
-                "id": "def-public.ObservabilityAIAssistantPublicStart.createScreenContextAction.$2",
-                "type": "Function",
-                "tags": [],
-                "label": "respond",
-                "description": [],
-                "signature": [
-                  "TRespondFunction"
-                ],
-                "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/utils/create_screen_context_action.ts",
-                "lineNumber": 24,
-                "columnNumber": 3,
-                "deprecated": false,
-                "trackAdoption": false,
-                "returnComment": [],
-                "children": [
-                  {
-                    "parentPluginId": "observabilityAIAssistant",
-                    "id": "def-public.ObservabilityAIAssistantPublicStart.createScreenContextAction.$2.$1",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "__0",
-                    "description": [],
-                    "signature": [
-                      "{ args: TArguments; signal: AbortSignal; connectorId: string; client: Pick<",
-                      {
-                        "pluginId": "observabilityAIAssistant",
-                        "scope": "public",
-                        "docId": "kibObservabilityAIAssistantPluginApi",
-                        "section": "def-public.ObservabilityAIAssistantChatService",
-                        "text": "ObservabilityAIAssistantChatService"
-                      },
-                      ", \"chat\" | \"complete\">; messages: ",
-                      {
-                        "pluginId": "observabilityAIAssistant",
-                        "scope": "common",
-                        "docId": "kibObservabilityAIAssistantPluginApi",
-                        "section": "def-common.Message",
-                        "text": "Message"
-                      },
-                      "[]; }"
-                    ],
-                    "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/types.ts",
-                    "lineNumber": 171,
-                    "columnNumber": 63,
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              }
-            ]
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityAIAssistant",
         "id": "def-public.ObservabilityAIAssistantService",
         "type": "Interface",
         "tags": [],
@@ -3669,13 +3198,7 @@
                 "text": "InferenceModelState"
               },
               "; currentInferenceId?: string | undefined; concreteWriteIndex: string | undefined; isReIndexing: boolean; productDocStatus: ",
-              {
-                "pluginId": "productDocBase",
-                "scope": "common",
-                "docId": "kibProductDocBasePluginApi",
-                "section": "def-common.InstallationStatus",
-                "text": "InstallationStatus"
-              },
+              "InstallationStatus",
               "; }, ",
               "ObservabilityAIAssistantRouteCreateOptions",
               ">; \"POST /internal/observability_ai_assistant/kb/reindex\": ",
@@ -4436,14 +3959,8 @@
               "ObservabilityAIAssistantRouteHandlerResources",
               ", void, ",
               "ObservabilityAIAssistantRouteCreateOptions",
-              ">; }, TEndpoint> & Omit<FetchOptions, \"query\" | \"body\" | \"signal\" | \"pathname\"> & { signal: AbortSignal | null; } & ",
-              {
-                "pluginId": "@kbn/core",
-                "scope": "common",
-                "docId": "kibKbnCorePluginApi",
-                "section": "def-common.HttpFetchOptions",
-                "text": "HttpFetchOptions"
-              },
+              ">; }, TEndpoint> & Omit<FetchOptions, \"signal\" | \"query\" | \"body\" | \"pathname\"> & { signal: AbortSignal | null; } & ",
+              "HttpFetchOptions",
               ">) => Promise<",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
@@ -4767,13 +4284,7 @@
                 "text": "InferenceModelState"
               },
               "; currentInferenceId?: string | undefined; concreteWriteIndex: string | undefined; isReIndexing: boolean; productDocStatus: ",
-              {
-                "pluginId": "productDocBase",
-                "scope": "common",
-                "docId": "kibProductDocBasePluginApi",
-                "section": "def-common.InstallationStatus",
-                "text": "InstallationStatus"
-              },
+              "InstallationStatus",
               "; }, ",
               "ObservabilityAIAssistantRouteCreateOptions",
               ">; \"POST /internal/observability_ai_assistant/kb/reindex\": ",
@@ -5577,13 +5088,7 @@
                     "text": "ClientRequestParamsOf"
                   },
                   "<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions & ",
-                  {
-                    "pluginId": "@kbn/core",
-                    "scope": "common",
-                    "docId": "kibKbnCorePluginApi",
-                    "section": "def-common.HttpFetchOptions",
-                    "text": "HttpFetchOptions"
-                  },
+                  "HttpFetchOptions",
                   "> extends never ? [] | [",
                   {
                     "pluginId": "@kbn/server-route-repository-utils",
@@ -5593,13 +5098,7 @@
                     "text": "ClientRequestParamsOf"
                   },
                   "<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions & ",
-                  {
-                    "pluginId": "@kbn/core",
-                    "scope": "common",
-                    "docId": "kibKbnCorePluginApi",
-                    "section": "def-common.HttpFetchOptions",
-                    "text": "HttpFetchOptions"
-                  },
+                  "HttpFetchOptions",
                   "] : [",
                   {
                     "pluginId": "@kbn/server-route-repository-utils",
@@ -5609,13 +5108,7 @@
                     "text": "ClientRequestParamsOf"
                   },
                   "<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions & ",
-                  {
-                    "pluginId": "@kbn/core",
-                    "scope": "common",
-                    "docId": "kibKbnCorePluginApi",
-                    "section": "def-common.HttpFetchOptions",
-                    "text": "HttpFetchOptions"
-                  },
+                  "HttpFetchOptions",
                   "]"
                 ],
                 "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
@@ -6917,13 +6410,7 @@
             "text": "InferenceModelState"
           },
           "; currentInferenceId?: string | undefined; concreteWriteIndex: string | undefined; isReIndexing: boolean; productDocStatus: ",
-          {
-            "pluginId": "productDocBase",
-            "scope": "common",
-            "docId": "kibProductDocBasePluginApi",
-            "section": "def-common.InstallationStatus",
-            "text": "InstallationStatus"
-          },
+          "InstallationStatus",
           "; }, ",
           "ObservabilityAIAssistantRouteCreateOptions",
           ">; \"POST /internal/observability_ai_assistant/kb/reindex\": ",
@@ -7693,23 +7180,11 @@
             "text": "ServerRoute"
           },
           "<any, any, any, infer TReturnType extends ServerRouteHandlerReturnType, any> ? TReturnType extends ",
-          {
-            "pluginId": "@kbn/core",
-            "scope": "common",
-            "docId": "kibKbnCorePluginApi",
-            "section": "def-common.IKibanaResponse",
-            "text": "IKibanaResponse"
-          },
-          "<infer TWrappedResponseType extends string | Error | ",
+          "IKibanaResponse",
+          "<infer TWrappedResponseType extends string | Record<string, any> | Error | Buffer | ",
           "stream",
-          " | Record<string, any> | Buffer | { message: string | Error; attributes?: ",
-          {
-            "pluginId": "@kbn/core",
-            "scope": "common",
-            "docId": "kibKbnCorePluginApi",
-            "section": "def-common.ResponseErrorAttributes",
-            "text": "ResponseErrorAttributes"
-          },
+          " | { message: string | Error; attributes?: ",
+          "ResponseErrorAttributes",
           " | undefined; } | undefined> ? TWrappedResponseType : TReturnType : never"
         ],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/api/index.ts",
@@ -8015,7 +7490,7 @@
         "label": "Feedback",
         "description": [],
         "signature": [
-          "\"positive\" | \"negative\""
+          "\"negative\" | \"positive\""
         ],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/components/buttons/feedback_buttons.tsx",
         "lineNumber": 13,
@@ -8364,13 +7839,7 @@
             "text": "InferenceModelState"
           },
           "; currentInferenceId?: string | undefined; concreteWriteIndex: string | undefined; isReIndexing: boolean; productDocStatus: ",
-          {
-            "pluginId": "productDocBase",
-            "scope": "common",
-            "docId": "kibProductDocBasePluginApi",
-            "section": "def-common.InstallationStatus",
-            "text": "InstallationStatus"
-          },
+          "InstallationStatus",
           "; }, ",
           "ObservabilityAIAssistantRouteCreateOptions",
           ">; \"POST /internal/observability_ai_assistant/kb/reindex\": ",
@@ -9445,7 +8914,432 @@
         ],
         "initialIsOpen": false
       }
-    ]
+    ],
+    "setup": {
+      "parentPluginId": "observabilityAIAssistant",
+      "id": "def-public.ObservabilityAIAssistantPublicSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "ObservabilityAIAssistantPublicSetup",
+      "description": [],
+      "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/types.ts",
+      "lineNumber": 151,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "observabilityAIAssistant",
+      "id": "def-public.ObservabilityAIAssistantPublicStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "ObservabilityAIAssistantPublicStart",
+      "description": [],
+      "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/types.ts",
+      "lineNumber": 153,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "observabilityAIAssistant",
+          "id": "def-public.ObservabilityAIAssistantPublicStart.service",
+          "type": "Object",
+          "tags": [],
+          "label": "service",
+          "description": [],
+          "signature": [
+            {
+              "pluginId": "observabilityAIAssistant",
+              "scope": "public",
+              "docId": "kibObservabilityAIAssistantPluginApi",
+              "section": "def-public.ObservabilityAIAssistantService",
+              "text": "ObservabilityAIAssistantService"
+            }
+          ],
+          "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/types.ts",
+          "lineNumber": 154,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "observabilityAIAssistant",
+          "id": "def-public.ObservabilityAIAssistantPublicStart.ObservabilityAIAssistantContextualInsight",
+          "type": "CompoundType",
+          "tags": [],
+          "label": "ObservabilityAIAssistantContextualInsight",
+          "description": [],
+          "signature": [
+            "React.ForwardRefExoticComponent<",
+            "InsightProps",
+            "> | null"
+          ],
+          "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/types.ts",
+          "lineNumber": 155,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "observabilityAIAssistant",
+          "id": "def-public.ObservabilityAIAssistantPublicStart.ObservabilityAIAssistantMultipaneFlyoutContext",
+          "type": "Object",
+          "tags": [],
+          "label": "ObservabilityAIAssistantMultipaneFlyoutContext",
+          "description": [],
+          "signature": [
+            "React.Context<",
+            "ChatFlyoutSecondSlotHandler",
+            " | undefined>"
+          ],
+          "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/types.ts",
+          "lineNumber": 156,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "observabilityAIAssistant",
+          "id": "def-public.ObservabilityAIAssistantPublicStart.ObservabilityAIAssistantChatServiceContext",
+          "type": "Object",
+          "tags": [],
+          "label": "ObservabilityAIAssistantChatServiceContext",
+          "description": [],
+          "signature": [
+            "React.Context<",
+            {
+              "pluginId": "observabilityAIAssistant",
+              "scope": "public",
+              "docId": "kibObservabilityAIAssistantPluginApi",
+              "section": "def-public.ObservabilityAIAssistantChatService",
+              "text": "ObservabilityAIAssistantChatService"
+            },
+            " | undefined>"
+          ],
+          "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/types.ts",
+          "lineNumber": 157,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "observabilityAIAssistant",
+          "id": "def-public.ObservabilityAIAssistantPublicStart.useObservabilityAIAssistantChatService",
+          "type": "Function",
+          "tags": [],
+          "label": "useObservabilityAIAssistantChatService",
+          "description": [],
+          "signature": [
+            "() => ",
+            {
+              "pluginId": "observabilityAIAssistant",
+              "scope": "public",
+              "docId": "kibObservabilityAIAssistantPluginApi",
+              "section": "def-public.ObservabilityAIAssistantChatService",
+              "text": "ObservabilityAIAssistantChatService"
+            }
+          ],
+          "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/types.ts",
+          "lineNumber": 158,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": []
+        },
+        {
+          "parentPluginId": "observabilityAIAssistant",
+          "id": "def-public.ObservabilityAIAssistantPublicStart.useGenAIConnectors",
+          "type": "Function",
+          "tags": [],
+          "label": "useGenAIConnectors",
+          "description": [],
+          "signature": [
+            "() => ",
+            {
+              "pluginId": "observabilityAIAssistant",
+              "scope": "public",
+              "docId": "kibObservabilityAIAssistantPluginApi",
+              "section": "def-public.UseGenAIConnectorsResult",
+              "text": "UseGenAIConnectorsResult"
+            }
+          ],
+          "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/types.ts",
+          "lineNumber": 159,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "observabilityAIAssistant",
+          "id": "def-public.ObservabilityAIAssistantPublicStart.useChat",
+          "type": "Function",
+          "tags": [],
+          "label": "useChat",
+          "description": [],
+          "signature": [
+            "(props: ",
+            "UseChatProps",
+            ") => ",
+            {
+              "pluginId": "observabilityAIAssistant",
+              "scope": "public",
+              "docId": "kibObservabilityAIAssistantPluginApi",
+              "section": "def-public.UseChatResult",
+              "text": "UseChatResult"
+            }
+          ],
+          "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/types.ts",
+          "lineNumber": 160,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "observabilityAIAssistant",
+              "id": "def-public.ObservabilityAIAssistantPublicStart.useChat.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "{ connectorId?: string | undefined; service: ",
+                {
+                  "pluginId": "observabilityAIAssistant",
+                  "scope": "public",
+                  "docId": "kibObservabilityAIAssistantPluginApi",
+                  "section": "def-public.ObservabilityAIAssistantService",
+                  "text": "ObservabilityAIAssistantService"
+                },
+                "; scopes: ",
+                {
+                  "pluginId": "@kbn/ai-assistant-common",
+                  "scope": "common",
+                  "docId": "kibKbnAiAssistantCommonPluginApi",
+                  "section": "def-common.AssistantScope",
+                  "text": "AssistantScope"
+                },
+                "[]; initialMessages: ",
+                {
+                  "pluginId": "observabilityAIAssistant",
+                  "scope": "common",
+                  "docId": "kibObservabilityAIAssistantPluginApi",
+                  "section": "def-common.Message",
+                  "text": "Message"
+                },
+                "[]; initialConversationId?: string | undefined; chatService: ",
+                {
+                  "pluginId": "observabilityAIAssistant",
+                  "scope": "public",
+                  "docId": "kibObservabilityAIAssistantPluginApi",
+                  "section": "def-public.ObservabilityAIAssistantChatService",
+                  "text": "ObservabilityAIAssistantChatService"
+                },
+                "; persist: boolean; disableFunctions?: boolean | undefined; onConversationUpdate?: ((event: ({ conversation: { id: string; title: string; last_updated: string; }; } & { type: ",
+                {
+                  "pluginId": "observabilityAIAssistant",
+                  "scope": "common",
+                  "docId": "kibObservabilityAIAssistantPluginApi",
+                  "section": "def-common.StreamingChatResponseEventType",
+                  "text": "StreamingChatResponseEventType"
+                },
+                ".ConversationCreate; }) | ({ conversation: { id: string; title: string; last_updated: string; }; } & { type: ",
+                {
+                  "pluginId": "observabilityAIAssistant",
+                  "scope": "common",
+                  "docId": "kibObservabilityAIAssistantPluginApi",
+                  "section": "def-common.StreamingChatResponseEventType",
+                  "text": "StreamingChatResponseEventType"
+                },
+                ".ConversationUpdate; })) => void) | undefined; onChatComplete?: ((messages: ",
+                {
+                  "pluginId": "observabilityAIAssistant",
+                  "scope": "common",
+                  "docId": "kibObservabilityAIAssistantPluginApi",
+                  "section": "def-common.Message",
+                  "text": "Message"
+                },
+                "[]) => void) | undefined; }"
+              ],
+              "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_chat.ts",
+              "lineNumber": 293,
+              "columnNumber": 25,
+              "deprecated": false,
+              "trackAdoption": false
+            }
+          ]
+        },
+        {
+          "parentPluginId": "observabilityAIAssistant",
+          "id": "def-public.ObservabilityAIAssistantPublicStart.getContextualInsightMessages",
+          "type": "Function",
+          "tags": [],
+          "label": "getContextualInsightMessages",
+          "description": [],
+          "signature": [
+            "({}: { message: string; instructions: string; }) => ",
+            {
+              "pluginId": "observabilityAIAssistant",
+              "scope": "common",
+              "docId": "kibObservabilityAIAssistantPluginApi",
+              "section": "def-common.Message",
+              "text": "Message"
+            },
+            "[]"
+          ],
+          "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/types.ts",
+          "lineNumber": 161,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "observabilityAIAssistant",
+              "id": "def-public.ObservabilityAIAssistantPublicStart.getContextualInsightMessages.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "{}",
+              "description": [],
+              "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/types.ts",
+              "lineNumber": 161,
+              "columnNumber": 38,
+              "deprecated": false,
+              "trackAdoption": false,
+              "children": [
+                {
+                  "parentPluginId": "observabilityAIAssistant",
+                  "id": "def-public.ObservabilityAIAssistantPublicStart.getContextualInsightMessages.$1.message",
+                  "type": "string",
+                  "tags": [],
+                  "label": "message",
+                  "description": [],
+                  "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/types.ts",
+                  "lineNumber": 161,
+                  "columnNumber": 40,
+                  "deprecated": false,
+                  "trackAdoption": false
+                },
+                {
+                  "parentPluginId": "observabilityAIAssistant",
+                  "id": "def-public.ObservabilityAIAssistantPublicStart.getContextualInsightMessages.$1.instructions",
+                  "type": "string",
+                  "tags": [],
+                  "label": "instructions",
+                  "description": [],
+                  "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/types.ts",
+                  "lineNumber": 161,
+                  "columnNumber": 57,
+                  "deprecated": false,
+                  "trackAdoption": false
+                }
+              ]
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "observabilityAIAssistant",
+          "id": "def-public.ObservabilityAIAssistantPublicStart.createScreenContextAction",
+          "type": "Function",
+          "tags": [],
+          "label": "createScreenContextAction",
+          "description": [],
+          "signature": [
+            "<TActionDefinition extends Omit<",
+            "ScreenContextActionDefinition",
+            "<any>, \"respond\">, TRespondFunction extends ",
+            "ScreenContextActionRespondFunction",
+            "<ReturnOf<TActionDefinition>>>(definition: TActionDefinition, respond: TRespondFunction) => ",
+            "ScreenContextActionDefinition",
+            "<ReturnOf<TActionDefinition>>"
+          ],
+          "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/types.ts",
+          "lineNumber": 162,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "observabilityAIAssistant",
+              "id": "def-public.ObservabilityAIAssistantPublicStart.createScreenContextAction.$1",
+              "type": "Uncategorized",
+              "tags": [],
+              "label": "definition",
+              "description": [],
+              "signature": [
+                "TActionDefinition"
+              ],
+              "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/utils/create_screen_context_action.ts",
+              "lineNumber": 23,
+              "columnNumber": 3,
+              "deprecated": false,
+              "trackAdoption": false
+            },
+            {
+              "parentPluginId": "observabilityAIAssistant",
+              "id": "def-public.ObservabilityAIAssistantPublicStart.createScreenContextAction.$2",
+              "type": "Function",
+              "tags": [],
+              "label": "respond",
+              "description": [],
+              "signature": [
+                "TRespondFunction"
+              ],
+              "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/utils/create_screen_context_action.ts",
+              "lineNumber": 24,
+              "columnNumber": 3,
+              "deprecated": false,
+              "trackAdoption": false,
+              "returnComment": [],
+              "children": [
+                {
+                  "parentPluginId": "observabilityAIAssistant",
+                  "id": "def-public.ObservabilityAIAssistantPublicStart.createScreenContextAction.$2.$1",
+                  "type": "Object",
+                  "tags": [],
+                  "label": "__0",
+                  "description": [],
+                  "signature": [
+                    "{ args: TArguments; signal: AbortSignal; connectorId: string; client: Pick<",
+                    {
+                      "pluginId": "observabilityAIAssistant",
+                      "scope": "public",
+                      "docId": "kibObservabilityAIAssistantPluginApi",
+                      "section": "def-public.ObservabilityAIAssistantChatService",
+                      "text": "ObservabilityAIAssistantChatService"
+                    },
+                    ", \"complete\" | \"chat\">; messages: ",
+                    {
+                      "pluginId": "observabilityAIAssistant",
+                      "scope": "common",
+                      "docId": "kibObservabilityAIAssistantPluginApi",
+                      "section": "def-common.Message",
+                      "text": "Message"
+                    },
+                    "[]; }"
+                  ],
+                  "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/types.ts",
+                  "lineNumber": 171,
+                  "columnNumber": 63,
+                  "deprecated": false,
+                  "trackAdoption": false
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
   },
   "server": {
     "classes": [
@@ -9499,7 +9393,7 @@
                     "label": "config",
                     "description": [],
                     "signature": [
-                      "{ readonly scope?: \"observability\" | \"search\" | undefined; readonly enabled: boolean; readonly enableKnowledgeBase: boolean; readonly disableKbSemanticTextMigration: boolean; }"
+                      "{ readonly scope?: \"search\" | \"observability\" | undefined; readonly enabled: boolean; readonly enableKnowledgeBase: boolean; readonly disableKbSemanticTextMigration: boolean; }"
                     ],
                     "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
                     "lineNumber": 94,
@@ -9515,13 +9409,7 @@
                     "label": "core",
                     "description": [],
                     "signature": [
-                      {
-                        "pluginId": "@kbn/core",
-                        "scope": "common",
-                        "docId": "kibKbnCorePluginApi",
-                        "section": "def-common.CoreSetup",
-                        "text": "CoreSetup"
-                      },
+                      "CoreSetup",
                       "<",
                       "ObservabilityAIAssistantPluginStartDependencies",
                       ", unknown>"
@@ -9540,22 +9428,18 @@
                     "label": "actionsClient",
                     "description": [],
                     "signature": [
-                      "{ get: ({ id, throwIfSystemAction, }: { id: string; throwIfSystemAction?: boolean | undefined; }) => Promise<",
+                      "{ execute: (connectorExecuteParams: ",
+                      "ConnectorExecuteParams",
+                      ") => Promise<",
                       {
                         "pluginId": "actions",
-                        "scope": "server",
+                        "scope": "common",
                         "docId": "kibActionsPluginApi",
-                        "section": "def-server.Connector",
-                        "text": "Connector"
+                        "section": "def-common.ActionTypeExecutorResult",
+                        "text": "ActionTypeExecutorResult"
                       },
-                      ">; delete: ({ id }: { id: string; }) => Promise<{}>; isPreconfigured: (connectorId: string) => boolean; create: ({ action, options, }: Omit<",
-                      {
-                        "pluginId": "actions",
-                        "scope": "server",
-                        "docId": "kibActionsPluginApi",
-                        "section": "def-server.ConnectorCreateParams",
-                        "text": "ConnectorCreateParams"
-                      },
+                      "<unknown>>; create: ({ action, options, }: Omit<",
+                      "ConnectorCreateParams",
                       ", \"context\">) => Promise<",
                       {
                         "pluginId": "actions",
@@ -9565,14 +9449,16 @@
                         "text": "Connector"
                       },
                       ">; update: ({ id, action, }: Pick<",
+                      "ConnectorUpdateParams",
+                      ", \"id\" | \"action\">) => Promise<",
                       {
                         "pluginId": "actions",
                         "scope": "server",
                         "docId": "kibActionsPluginApi",
-                        "section": "def-server.ConnectorUpdateParams",
-                        "text": "ConnectorUpdateParams"
+                        "section": "def-server.Connector",
+                        "text": "Connector"
                       },
-                      ", \"id\" | \"action\">) => Promise<",
+                      ">; get: ({ id, throwIfSystemAction, }: { id: string; throwIfSystemAction?: boolean | undefined; }) => Promise<",
                       {
                         "pluginId": "actions",
                         "scope": "server",
@@ -9613,71 +9499,19 @@
                         "text": "InMemoryConnector"
                       },
                       "<",
-                      {
-                        "pluginId": "actions",
-                        "scope": "server",
-                        "docId": "kibActionsPluginApi",
-                        "section": "def-server.ActionTypeConfig",
-                        "text": "ActionTypeConfig"
-                      },
+                      "ActionTypeConfig",
                       ", ",
-                      {
-                        "pluginId": "actions",
-                        "scope": "server",
-                        "docId": "kibActionsPluginApi",
-                        "section": "def-server.ActionTypeSecrets",
-                        "text": "ActionTypeSecrets"
-                      },
-                      ">)[]>; getOAuthAccessToken: ({ type, options }: Readonly<{} & { type: \"jwt\" | \"client\" | \"authorization_code\"; options: Readonly<{} & { config: Readonly<{} & { clientId: string; jwtKeyId: string; userIdentifierValue: string; }>; tokenUrl: string; secrets: Readonly<{ privateKeyPassword?: string | undefined; } & { clientSecret: string; privateKey: string; }>; }> | Readonly<{} & { config: Readonly<{} & { clientId: string; }>; scope: string; tokenUrl: string; secrets: Readonly<{} & { clientSecret: string; }>; }> | Readonly<{ scope?: string | undefined; } & { connectorId: string; config: Readonly<{} & { tokenUrl: string; clientId: string; }>; tokenUrl: string; secrets: Readonly<{} & { clientSecret: string; }>; }>; }>, configurationUtilities: ",
-                      {
-                        "pluginId": "actions",
-                        "scope": "server",
-                        "docId": "kibActionsPluginApi",
-                        "section": "def-server.ActionsConfigurationUtilities",
-                        "text": "ActionsConfigurationUtilities"
-                      },
-                      ") => Promise<{ accessToken: string | null; }>; execute: (connectorExecuteParams: ",
-                      {
-                        "pluginId": "actions",
-                        "scope": "server",
-                        "docId": "kibActionsPluginApi",
-                        "section": "def-server.ConnectorExecuteParams",
-                        "text": "ConnectorExecuteParams"
-                      },
-                      ") => Promise<",
-                      {
-                        "pluginId": "actions",
-                        "scope": "common",
-                        "docId": "kibActionsPluginApi",
-                        "section": "def-common.ActionTypeExecutorResult",
-                        "text": "ActionTypeExecutorResult"
-                      },
-                      "<unknown>>; getAxiosInstance: (actionId: string) => Promise<",
+                      "ActionTypeSecrets",
+                      ">)[]>; getOAuthAccessToken: ({ type, options }: Readonly<{} & { type: \"jwt\" | \"client\" | \"authorization_code\"; options: Readonly<{} & { tokenUrl: string; config: Readonly<{} & { clientId: string; jwtKeyId: string; userIdentifierValue: string; }>; secrets: Readonly<{ privateKeyPassword?: string | undefined; } & { clientSecret: string; privateKey: string; }>; }> | Readonly<{} & { tokenUrl: string; config: Readonly<{} & { clientId: string; }>; secrets: Readonly<{} & { clientSecret: string; }>; scope: string; }> | Readonly<{ scope?: string | undefined; } & { tokenUrl: string; config: Readonly<{} & { tokenUrl: string; clientId: string; }>; secrets: Readonly<{} & { clientSecret: string; }>; connectorId: string; }>; }>, configurationUtilities: ",
+                      "ActionsConfigurationUtilities",
+                      ") => Promise<{ accessToken: string | null; }>; delete: ({ id }: { id: string; }) => Promise<{}>; getAxiosInstance: (actionId: string) => Promise<",
                       "AxiosInstance",
                       ">; bulkEnqueueExecution: (options: ",
-                      {
-                        "pluginId": "actions",
-                        "scope": "server",
-                        "docId": "kibActionsPluginApi",
-                        "section": "def-server.ExecuteOptions",
-                        "text": "ExecuteOptions"
-                      },
+                      "ExecuteOptions",
                       "[]) => Promise<",
-                      {
-                        "pluginId": "actions",
-                        "scope": "server",
-                        "docId": "kibActionsPluginApi",
-                        "section": "def-server.ExecutionResponse",
-                        "text": "ExecutionResponse"
-                      },
+                      "ExecutionResponse",
                       ">; listTypes: ({ featureId, includeSystemActionTypes, }?: ",
-                      {
-                        "pluginId": "actions",
-                        "scope": "server",
-                        "docId": "kibActionsPluginApi",
-                        "section": "def-server.ListTypesParams",
-                        "text": "ListTypesParams"
-                      },
+                      "ListTypesParams",
                       ") => Promise<",
                       {
                         "pluginId": "actions",
@@ -9686,7 +9520,7 @@
                         "section": "def-server.ConnectorType",
                         "text": "ConnectorType"
                       },
-                      "[]>; isActionTypeEnabled: (actionTypeId: string, options?: { notifyUsage: boolean; }) => boolean; isSystemAction: (connectorId: string) => boolean; getGlobalExecutionLogWithAuth: ({ dateStart, dateEnd, filter, page, perPage, sort, namespaces, }: ",
+                      "[]>; isActionTypeEnabled: (actionTypeId: string, options?: { notifyUsage: boolean; }) => boolean; isPreconfigured: (connectorId: string) => boolean; isSystemAction: (connectorId: string) => boolean; getGlobalExecutionLogWithAuth: ({ dateStart, dateEnd, filter, page, perPage, sort, namespaces, }: ",
                       {
                         "pluginId": "actions",
                         "scope": "common",
@@ -9726,13 +9560,7 @@
                     "label": "uiSettingsClient",
                     "description": [],
                     "signature": [
-                      {
-                        "pluginId": "@kbn/core",
-                        "scope": "common",
-                        "docId": "kibKbnCorePluginApi",
-                        "section": "def-common.IUiSettingsClient",
-                        "text": "IUiSettingsClient"
-                      }
+                      "IUiSettingsClient"
                     ],
                     "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
                     "lineNumber": 97,
@@ -9762,21 +9590,9 @@
                     "description": [],
                     "signature": [
                       "{ asInternalUser: ",
-                      {
-                        "pluginId": "@kbn/core",
-                        "scope": "common",
-                        "docId": "kibKbnCorePluginApi",
-                        "section": "def-common.ElasticsearchClient",
-                        "text": "ElasticsearchClient"
-                      },
+                      "ElasticsearchClient",
                       "; asCurrentUser: ",
-                      {
-                        "pluginId": "@kbn/core",
-                        "scope": "common",
-                        "docId": "kibKbnCorePluginApi",
-                        "section": "def-common.ElasticsearchClient",
-                        "text": "ElasticsearchClient"
-                      },
+                      "ElasticsearchClient",
                       "; }"
                     ],
                     "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
@@ -10969,13 +10785,7 @@
                 "text": "InferenceModelState"
               },
               "; currentInferenceId?: string | undefined; concreteWriteIndex: string | undefined; isReIndexing: boolean; productDocStatus: ",
-              {
-                "pluginId": "productDocBase",
-                "scope": "common",
-                "docId": "kibProductDocBasePluginApi",
-                "section": "def-common.InstallationStatus",
-                "text": "InstallationStatus"
-              },
+              "InstallationStatus",
               "; }>"
             ],
             "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
@@ -11156,7 +10966,7 @@
                     "label": "entry",
                     "description": [],
                     "signature": [
-                      "{ public: boolean; title?: string | undefined; id: string; text: string; user?: { name: string; } | undefined; labels?: Record<string, string> | undefined; confidence?: \"low\" | \"medium\" | \"high\" | undefined; is_correction?: boolean | undefined; }"
+                      "{ id: string; text: string; user?: { name: string; } | undefined; title?: string | undefined; labels?: Record<string, string> | undefined; public: boolean; confidence?: \"medium\" | \"high\" | \"low\" | undefined; is_correction?: boolean | undefined; }"
                     ],
                     "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
                     "lineNumber": 779,
@@ -11214,7 +11024,7 @@
                     "label": "entry",
                     "description": [],
                     "signature": [
-                      "{ public: boolean; title?: string | undefined; id: string; text: string; user?: { name: string; } | undefined; labels?: Record<string, string> | undefined; role: ",
+                      "{ id: string; text: string; user?: { name: string; } | undefined; title?: string | undefined; role: ",
                       {
                         "pluginId": "observabilityAIAssistant",
                         "scope": "common",
@@ -11222,7 +11032,7 @@
                         "section": "def-common.KnowledgeBaseEntryRole",
                         "text": "KnowledgeBaseEntryRole"
                       },
-                      "; confidence?: \"low\" | \"medium\" | \"high\" | undefined; is_correction?: boolean | undefined; }"
+                      "; labels?: Record<string, string> | undefined; public: boolean; confidence?: \"medium\" | \"high\" | \"low\" | undefined; is_correction?: boolean | undefined; }"
                     ],
                     "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
                     "lineNumber": 816,
@@ -11613,13 +11423,7 @@
         "description": [],
         "signature": [
           "(esClient: { asInternalUser: ",
-          {
-            "pluginId": "@kbn/core",
-            "scope": "common",
-            "docId": "kibKbnCorePluginApi",
-            "section": "def-common.ElasticsearchClient",
-            "text": "ElasticsearchClient"
-          },
+          "ElasticsearchClient",
           "; }, logger: ",
           {
             "pluginId": "@kbn/logging",
@@ -11657,35 +11461,51 @@
                 "label": "asInternalUser",
                 "description": [],
                 "signature": [
-                  "{ security: ",
+                  "{ child: (opts: ",
+                  "ClientOptions",
+                  ") => ",
                   "default",
-                  "; search: { <TDocument = unknown, TAggregations = Record<string, ",
-                  "AggregationsAggregate",
-                  ">>(this: That, params?: ",
-                  "SearchRequest",
-                  " | undefined, options?: ",
+                  "; create: { <TDocument = unknown>(this: That, params: ",
+                  "CreateRequest",
+                  "<TDocument>, options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
-                  "SearchResponse",
-                  "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
-                  "AggregationsAggregate",
-                  ">>(this: That, params?: ",
-                  "SearchRequest",
-                  " | undefined, options?: ",
+                  "WriteResponseBase",
+                  ">; <TDocument = unknown>(this: That, params: ",
+                  "CreateRequest",
+                  "<TDocument>, options?: ",
                   "TransportRequestOptionsWithMeta",
                   " | undefined): Promise<",
                   "TransportResult",
                   "<",
-                  "SearchResponse",
-                  "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
-                  "AggregationsAggregate",
-                  ">>(this: That, params?: ",
-                  "SearchRequest",
-                  " | undefined, options?: ",
+                  "WriteResponseBase",
+                  ", unknown>>; <TDocument = unknown>(this: That, params: ",
+                  "CreateRequest",
+                  "<TDocument>, options?: ",
                   "TransportRequestOptions",
                   " | undefined): Promise<",
-                  "SearchResponse",
-                  "<TDocument, TAggregations>>; }; name: string | symbol; get: { <TDocument = unknown>(this: That, params: ",
+                  "WriteResponseBase",
+                  ">; }; update: { <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
+                  "UpdateRequest",
+                  "<TDocument, TPartialDocument>, options?: ",
+                  "TransportRequestOptionsWithOutMeta",
+                  " | undefined): Promise<",
+                  "UpdateResponse",
+                  "<TDocumentR>>; <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
+                  "UpdateRequest",
+                  "<TDocument, TPartialDocument>, options?: ",
+                  "TransportRequestOptionsWithMeta",
+                  " | undefined): Promise<",
+                  "TransportResult",
+                  "<",
+                  "UpdateResponse",
+                  "<TDocumentR>, unknown>>; <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
+                  "UpdateRequest",
+                  "<TDocument, TPartialDocument>, options?: ",
+                  "TransportRequestOptions",
+                  " | undefined): Promise<",
+                  "UpdateResponse",
+                  "<TDocumentR>>; }; get: { <TDocument = unknown>(this: That, params: ",
                   "GetRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithOutMeta",
@@ -11725,59 +11545,9 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "WriteResponseBase",
-                  ">; }; transform: ",
-                  "default",
-                  "; features: ",
-                  "default",
-                  "; inference: ",
-                  "default",
-                  "; capabilities: { (this: That, params?: ",
-                  "CapabilitiesRequest",
-                  " | undefined, options?: ",
-                  "TransportRequestOptionsWithOutMeta",
-                  " | undefined): Promise<",
-                  "CapabilitiesResponse",
-                  ">; (this: That, params?: ",
-                  "CapabilitiesRequest",
-                  " | undefined, options?: ",
-                  "TransportRequestOptionsWithMeta",
-                  " | undefined): Promise<",
-                  "TransportResult",
-                  "<",
-                  "CapabilitiesResponse",
-                  ", unknown>>; (this: That, params?: ",
-                  "CapabilitiesRequest",
-                  " | undefined, options?: ",
-                  "TransportRequestOptions",
-                  " | undefined): Promise<",
-                  "CapabilitiesResponse",
-                  ">; }; index: { <TDocument = unknown>(this: That, params: ",
-                  "IndexRequest",
-                  "<TDocument>, options?: ",
-                  "TransportRequestOptionsWithOutMeta",
-                  " | undefined): Promise<",
-                  "WriteResponseBase",
-                  ">; <TDocument = unknown>(this: That, params: ",
-                  "IndexRequest",
-                  "<TDocument>, options?: ",
-                  "TransportRequestOptionsWithMeta",
-                  " | undefined): Promise<",
-                  "TransportResult",
-                  "<",
-                  "WriteResponseBase",
-                  ", unknown>>; <TDocument = unknown>(this: That, params: ",
-                  "IndexRequest",
-                  "<TDocument>, options?: ",
-                  "TransportRequestOptions",
-                  " | undefined): Promise<",
-                  "WriteResponseBase",
-                  ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+                  ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
                   "default",
                   "; helpers: ",
-                  "default",
-                  "; child: (opts: ",
-                  "ClientOptions",
-                  ") => ",
                   "default",
                   "; asyncSearch: ",
                   "default",
@@ -11803,6 +11573,26 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "BulkResponse",
+                  ">; }; capabilities: { (this: That, params?: ",
+                  "CapabilitiesRequest",
+                  " | undefined, options?: ",
+                  "TransportRequestOptionsWithOutMeta",
+                  " | undefined): Promise<",
+                  "CapabilitiesResponse",
+                  ">; (this: That, params?: ",
+                  "CapabilitiesRequest",
+                  " | undefined, options?: ",
+                  "TransportRequestOptionsWithMeta",
+                  " | undefined): Promise<",
+                  "TransportResult",
+                  "<",
+                  "CapabilitiesResponse",
+                  ", unknown>>; (this: That, params?: ",
+                  "CapabilitiesRequest",
+                  " | undefined, options?: ",
+                  "TransportRequestOptions",
+                  " | undefined): Promise<",
+                  "CapabilitiesResponse",
                   ">; }; cat: ",
                   "default",
                   "; ccr: ",
@@ -11871,26 +11661,6 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "CountResponse",
-                  ">; }; create: { <TDocument = unknown>(this: That, params: ",
-                  "CreateRequest",
-                  "<TDocument>, options?: ",
-                  "TransportRequestOptionsWithOutMeta",
-                  " | undefined): Promise<",
-                  "WriteResponseBase",
-                  ">; <TDocument = unknown>(this: That, params: ",
-                  "CreateRequest",
-                  "<TDocument>, options?: ",
-                  "TransportRequestOptionsWithMeta",
-                  " | undefined): Promise<",
-                  "TransportResult",
-                  "<",
-                  "WriteResponseBase",
-                  ", unknown>>; <TDocument = unknown>(this: That, params: ",
-                  "CreateRequest",
-                  "<TDocument>, options?: ",
-                  "TransportRequestOptions",
-                  " | undefined): Promise<",
-                  "WriteResponseBase",
                   ">; }; danglingIndices: ",
                   "default",
                   "; deleteByQuery: { (this: That, params: ",
@@ -12007,7 +11777,9 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "ExplainResponse",
-                  "<TDocument>>; }; fieldCaps: { (this: That, params?: ",
+                  "<TDocument>>; }; features: ",
+                  "default",
+                  "; fieldCaps: { (this: That, params?: ",
                   "FieldCapsRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptionsWithOutMeta",
@@ -12127,7 +11899,29 @@
                   "HealthReportResponse",
                   ">; }; ilm: ",
                   "default",
-                  "; indices: ",
+                  "; index: { <TDocument = unknown>(this: That, params: ",
+                  "IndexRequest",
+                  "<TDocument>, options?: ",
+                  "TransportRequestOptionsWithOutMeta",
+                  " | undefined): Promise<",
+                  "WriteResponseBase",
+                  ">; <TDocument = unknown>(this: That, params: ",
+                  "IndexRequest",
+                  "<TDocument>, options?: ",
+                  "TransportRequestOptionsWithMeta",
+                  " | undefined): Promise<",
+                  "TransportResult",
+                  "<",
+                  "WriteResponseBase",
+                  ", unknown>>; <TDocument = unknown>(this: That, params: ",
+                  "IndexRequest",
+                  "<TDocument>, options?: ",
+                  "TransportRequestOptions",
+                  " | undefined): Promise<",
+                  "WriteResponseBase",
+                  ">; }; indices: ",
+                  "default",
+                  "; inference: ",
                   "default",
                   "; info: { (this: That, params?: ",
                   "InfoRequest",
@@ -12463,6 +12257,32 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "ScrollResponse",
+                  "<TDocument, TAggregations>>; }; search: { <TDocument = unknown, TAggregations = Record<string, ",
+                  "AggregationsAggregate",
+                  ">>(this: That, params?: ",
+                  "SearchRequest",
+                  " | undefined, options?: ",
+                  "TransportRequestOptionsWithOutMeta",
+                  " | undefined): Promise<",
+                  "SearchResponse",
+                  "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
+                  "AggregationsAggregate",
+                  ">>(this: That, params?: ",
+                  "SearchRequest",
+                  " | undefined, options?: ",
+                  "TransportRequestOptionsWithMeta",
+                  " | undefined): Promise<",
+                  "TransportResult",
+                  "<",
+                  "SearchResponse",
+                  "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
+                  "AggregationsAggregate",
+                  ">>(this: That, params?: ",
+                  "SearchRequest",
+                  " | undefined, options?: ",
+                  "TransportRequestOptions",
+                  " | undefined): Promise<",
+                  "SearchResponse",
                   "<TDocument, TAggregations>>; }; searchApplication: ",
                   "default",
                   "; searchMvt: { (this: That, params: ",
@@ -12520,6 +12340,8 @@
                   " | undefined): Promise<",
                   "SearchTemplateResponse",
                   "<TDocument>>; }; searchableSnapshots: ",
+                  "default",
+                  "; security: ",
                   "default",
                   "; shutdown: ",
                   "default",
@@ -12581,27 +12403,9 @@
                   "TermvectorsResponse",
                   ">; }; textStructure: ",
                   "default",
-                  "; update: { <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
-                  "UpdateRequest",
-                  "<TDocument, TPartialDocument>, options?: ",
-                  "TransportRequestOptionsWithOutMeta",
-                  " | undefined): Promise<",
-                  "UpdateResponse",
-                  "<TDocumentR>>; <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
-                  "UpdateRequest",
-                  "<TDocument, TPartialDocument>, options?: ",
-                  "TransportRequestOptionsWithMeta",
-                  " | undefined): Promise<",
-                  "TransportResult",
-                  "<",
-                  "UpdateResponse",
-                  "<TDocumentR>, unknown>>; <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
-                  "UpdateRequest",
-                  "<TDocument, TPartialDocument>, options?: ",
-                  "TransportRequestOptions",
-                  " | undefined): Promise<",
-                  "UpdateResponse",
-                  "<TDocumentR>>; }; updateByQuery: { (this: That, params: ",
+                  "; transform: ",
+                  "default",
+                  "; updateByQuery: { (this: That, params: ",
                   "UpdateByQueryRequest",
                   ", options?: ",
                   "TransportRequestOptionsWithOutMeta",
@@ -13354,13 +13158,7 @@
             "text": "InferenceModelState"
           },
           "; currentInferenceId?: string | undefined; concreteWriteIndex: string | undefined; isReIndexing: boolean; productDocStatus: ",
-          {
-            "pluginId": "productDocBase",
-            "scope": "common",
-            "docId": "kibProductDocBasePluginApi",
-            "section": "def-common.InstallationStatus",
-            "text": "InstallationStatus"
-          },
+          "InstallationStatus",
           "; }, ",
           "ObservabilityAIAssistantRouteCreateOptions",
           ">; \"POST /internal/observability_ai_assistant/kb/reindex\": ",
@@ -15268,7 +15066,7 @@
             "label": "confidence",
             "description": [],
             "signature": [
-              "\"low\" | \"medium\" | \"high\" | undefined"
+              "\"medium\" | \"high\" | \"low\" | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/types.ts",
             "lineNumber": 134,
@@ -15840,7 +15638,7 @@
             "section": "def-common.Conversation",
             "text": "Conversation"
           },
-          ", \"conversation\" | \"user\" | \"namespace\"> & { conversation: { title: string; id?: string | undefined; }; }"
+          ", \"namespace\" | \"user\" | \"conversation\"> & { conversation: { title: string; id?: string | undefined; }; }"
         ],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/types.ts",
         "lineNumber": 117,

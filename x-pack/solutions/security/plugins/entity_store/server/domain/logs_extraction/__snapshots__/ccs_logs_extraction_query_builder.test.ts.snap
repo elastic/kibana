@@ -5,7 +5,7 @@ exports[`buildCcsLogsExtractionEsqlQuery generates expected query for host entit
 FROM remote:metrics-*
     METADATA _index, _id
   | WHERE 
-      @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
+      @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
       AND (NOT(\`host.id\` IS NULL) AND COALESCE(\`host.id\` != \\"\\", FALSE) OR NOT(\`host.name\` IS NULL) AND COALESCE(\`host.name\` != \\"\\", FALSE) OR NOT(\`host.hostname\` IS NULL) AND COALESCE(\`host.hostname\` != \\"\\", FALSE))
 | EVAL _src_entity_source0 = MV_FIRST(event.module),
@@ -174,7 +174,7 @@ exports[`buildCcsLogsExtractionEsqlQuery generates expected query with paginatio
 FROM remote:logs-*
     METADATA _index, _id
   | WHERE 
-      @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
+      @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
       AND ((\`event.outcome\` IS NULL OR COALESCE(\`event.outcome\` != \\"failure\\", FALSE)) AND (NOT(\`user.email\` IS NULL) AND COALESCE(\`user.email\` != \\"\\", FALSE) OR NOT(\`user.id\` IS NULL) AND COALESCE(\`user.id\` != \\"\\", FALSE) OR NOT(\`user.name\` IS NULL) AND COALESCE(\`user.name\` != \\"\\", FALSE)))
 | EVAL _src_entity_source0 = MV_FIRST(event.module),
@@ -331,7 +331,7 @@ exports[`buildCcsLogsExtractionEsqlQuery generates query for generic entity type
 FROM remote_cluster:logs-*
     METADATA _index, _id
   | WHERE 
-      @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
+      @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
       AND ((entity.id IS NOT NULL AND entity.id != \\"\\"))
 | EVAL _src_entity_source0 = MV_FIRST(event.module),
