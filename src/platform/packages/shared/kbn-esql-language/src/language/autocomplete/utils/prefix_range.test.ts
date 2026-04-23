@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { computePrefixRange, attachReplacementRanges, type PrefixResult } from './prefix_range';
+import {
+  computePrefixRange,
+  attachReplacementRanges,
+  attachRootQueryReplacementRanges,
+  type PrefixResult,
+} from './prefix_range';
 import type { ISuggestionItem } from '../../../commands/registry/types';
 
 describe('computePrefixRange', () => {
@@ -190,5 +195,27 @@ describe('attachReplacementRanges', () => {
     const result = attachReplacementRanges('FROM a | WHERE x > ', suggestions);
 
     expect(result[0].rangeToReplace).toEqual({ start: 19, end: 19 });
+  });
+});
+
+describe('attachRootQueryReplacementRanges', () => {
+  const makeSuggestion = (text: string, rangeToReplace?: { start: number; end: number }) =>
+    ({
+      text,
+      label: text,
+      kind: 'Variable' as const,
+      sortText: text,
+      ...(rangeToReplace ? { rangeToReplace } : {}),
+    } as ISuggestionItem);
+
+  it('replaces the typed root prefix and trailing query', () => {
+    const suggestions = [makeSuggestion('FROM kibana_sample_data_logs | LIMIT 10')];
+    const result = attachRootQueryReplacementRanges(
+      suggestions,
+      'FROM kibana_sample_data_logs | STATS count = COUNT(*)',
+      2
+    );
+
+    expect(result[0].rangeToReplace).toEqual({ start: 0, end: 54 });
   });
 });

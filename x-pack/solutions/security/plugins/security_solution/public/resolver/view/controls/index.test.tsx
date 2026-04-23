@@ -100,8 +100,35 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
     ).toYieldEqualTo({ showPanelButton: 1 });
   });
 
-  it('should open the analyzer details panel when clicking the view button', async () => {
+  it('should open the analyzer details panel using system flyout by default', async () => {
     (await simulator.resolve('resolver:graph-controls:show-panel-button'))?.simulate('click');
+
+    expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledTimes(0);
+  });
+
+  it('should open the analyzer details panel in expandable flyout when legacy mode is enabled', async () => {
+    jest.clearAllMocks();
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
+    const {
+      metadata: { databaseDocumentID },
+      dataAccessLayer,
+    } = noAncestorsTwoChildren();
+
+    const legacyFlyoutSimulator = new Simulator({
+      dataAccessLayer,
+      databaseDocumentID,
+      resolverComponentInstanceID: `${resolverComponentInstanceID}-legacy-flyout`,
+      history: createMemoryHistory(),
+      indices: [],
+      shouldUpdate: false,
+      filters: {},
+      useLegacyExpandableFlyout: true,
+    });
+
+    await legacyFlyoutSimulator.resolve('resolver:graph-controls:zoom-in');
+    (await legacyFlyoutSimulator.resolve('resolver:graph-controls:show-panel-button'))?.simulate(
+      'click'
+    );
 
     expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledTimes(1);
   });
