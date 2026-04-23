@@ -40,8 +40,6 @@ Fetch the original PR's diff and file list via `GET /repos/elastic/kibana/pulls/
 
 Review the backport PR diff against the original PR. When a parity issue is found, link to the equivalent line in the original PR.
 
-### A. Diff parity
-
 Highlight:
 
 - **Missing or extra files:** flag files missing from the backport (dropped cherry-picks) or unjustified new files (scope creep)
