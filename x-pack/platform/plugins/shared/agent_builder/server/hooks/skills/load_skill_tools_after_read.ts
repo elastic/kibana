@@ -14,14 +14,15 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { pickTools } from '../../services/execution/run_agent/utils/select_tools';
 import { isSkillFileEntry } from '../../services/execution/runner/store/volumes/skills/utils';
-import type { AnalyticsService } from '../../telemetry';
+import type { AnalyticsService, TrackingService } from '../../telemetry';
 import { classifySkill } from '../../telemetry/utils';
 
 const MAX_SKILL_REGISTRY_TOOLS = 25;
 
 export const createLoadSkillToolsAfterRead = ({
   analyticsService,
-}: { analyticsService?: AnalyticsService } = {}) => {
+  trackingService,
+}: { analyticsService?: AnalyticsService; trackingService?: TrackingService } = {}) => {
   return async (context: AfterToolCallHookContext): Promise<void> => {
     if (context.toolId !== filestoreTools.read) {
       return;
@@ -51,6 +52,7 @@ export const createLoadSkillToolsAfterRead = ({
       logger,
       runContext,
       analyticsService,
+      trackingService,
     });
   };
 };
@@ -64,6 +66,7 @@ const loadSkillTools = async ({
   logger,
   runContext,
   analyticsService,
+  trackingService,
 }: {
   skillsService: SkillsService;
   skillId: string;
@@ -73,6 +76,7 @@ const loadSkillTools = async ({
   logger: Logger;
   runContext: RunContext;
   analyticsService?: AnalyticsService;
+  trackingService?: TrackingService;
 }): Promise<void> => {
   const skill = await skillsService.get(skillId);
   if (!skill) {
@@ -105,14 +109,10 @@ const loadSkillTools = async ({
     }
   );
 
-  if (!analyticsService) {
-    return;
-  }
-
   try {
     const agentContext = getAgentFromRunContext(runContext);
     const { origin, solution_area: solutionArea } = classifySkill(skill);
-    analyticsService.reportSkillInvoked({
+    analyticsService?.reportSkillInvoked({
       skillId: skill.id,
       origin,
       solutionArea,
@@ -122,6 +122,7 @@ const loadSkillTools = async ({
       executionId: agentContext?.executionId,
       toolCount: inlineExecutableTools.length + registryExecutableTools.length,
     });
+    trackingService?.trackSkillInvocation(origin);
   } catch (e) {
     logger.warn(`Failed to report SkillInvoked telemetry: ${e}`);
   }
