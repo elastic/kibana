@@ -132,3 +132,35 @@ export function trackQueryToResultTime(
     incrementBy: 1,
   });
 }
+
+/**
+ * Helper to track skill invocations by origin
+ */
+export function trackSkillInvocation(
+  usageCounter: UsageCounter | undefined,
+  origin: 'builtin' | 'custom' | 'plugin'
+): void {
+  if (!usageCounter) return;
+
+  usageCounter.incrementCounter({
+    counterName: `${AGENTBUILDER_USAGE_DOMAIN}_skill_invocation_${origin}`,
+    counterType: 'count',
+    incrementBy: 1,
+  });
+}
+
+/**
+ * Helper to track plugin imports by source type
+ */
+export function trackPluginImport(
+  usageCounter: UsageCounter | undefined,
+  sourceType: 'url' | 'upload'
+): void {
+  if (!usageCounter) return;
+
+  usageCounter.incrementCounter({
+    counterName: `${AGENTBUILDER_USAGE_DOMAIN}_plugin_import_${sourceType}`,
+    counterType: 'count',
+    incrementBy: 1,
+  });
+}
