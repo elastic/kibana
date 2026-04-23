@@ -28,7 +28,7 @@ const TASK_TYPE = 'fleet:verify_permissions';
 const TASK_TITLE = 'OTel Verify Permission Task';
 const TASK_TIMEOUT = '1d';
 const TASK_ID = `${TASK_TYPE}:1.0.0`;
-const TASK_INTERVAL = '12h';
+const TASK_INTERVAL = '10m';
 export const VERIFY_PERMISSIONS_TASK = '[OTel Verify Permissions Task]';
 const VERIFICATION_TTL_MS = 5 * 60 * 1000;
 const ELIGIBILITY_WINDOW_MS = 5 * 60 * 1000;
@@ -124,10 +124,10 @@ async function runPermissionVerifierTask(
 ): Promise<{ shouldReschedule: boolean }> {
   const logger = appContextService.getLogger().get('otel-verifier');
 
-  if (!appContextService.getExperimentalFeatures()?.enableOTelVerifier) {
-    logger.debug(`${VERIFY_PERMISSIONS_TASK} OTel verifier is disabled, skipping`);
-    return { shouldReschedule: false };
-  }
+  // if (!appContextService.getExperimentalFeatures()?.enableOTelVerifier) {
+  //   logger.debug(`${VERIFY_PERMISSIONS_TASK} OTel verifier is disabled, skipping`);
+  //   return { shouldReschedule: false };
+  // }
 
   logger.debug(`${VERIFY_PERMISSIONS_TASK} Task run started`);
 
