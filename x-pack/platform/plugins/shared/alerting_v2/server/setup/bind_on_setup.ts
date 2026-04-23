@@ -6,7 +6,7 @@
  */
 
 import { Logger, OnSetup, PluginSetup, PluginStart } from '@kbn/core-di';
-import { CoreSetup } from '@kbn/core-di-server';
+import { CoreSetup, CoreStart } from '@kbn/core-di-server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
 import { registerTelemetryTask } from '../lib/usage/task_definition';
@@ -17,6 +17,7 @@ import { registerSavedObjects } from '../saved_objects';
 import { dispatcherUiSettings } from '../lib/dispatcher/ui_settings';
 import { EsServiceInternalToken } from '../lib/services/es_service/tokens';
 import { createRuleAttachmentType } from '../agent_builder/attachments/rule_attachment_type';
+import { buildScopedRulesClientFactory } from '../agent_builder/scoped_rules_client_factory';
 
 export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
   bind(OnSetup).toConstantValue((container) => {
@@ -54,12 +55,13 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
       PluginSetup<NonNullable<AlertingServerSetupDependencies['agentBuilder']>>('agentBuilder');
     if (container.isBound(agentBuilderToken)) {
       const agentBuilder = container.get(agentBuilderToken);
+      const getScopedRulesClient = buildScopedRulesClientFactory(
+        () => container.get(CoreStart('injection'))
+      );
       agentBuilder.attachments.registerType(
         createRuleAttachmentType({
           logger,
-          getRulesClient: (_context) => {
-            throw new Error('getRulesClient not yet wired for attachments');
-          },
+          getRulesClient: (context) => getScopedRulesClient(context.request),
         }) as Parameters<typeof agentBuilder.attachments.registerType>[0]
       );
     }
