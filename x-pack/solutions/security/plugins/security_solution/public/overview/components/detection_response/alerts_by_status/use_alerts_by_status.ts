@@ -192,7 +192,7 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
 
   const euidApi = useEntityStoreEuidApi();
   const entityFilters = useMemo(() => {
-    if (entityStoreV2Enabled && euidApi?.euid && (entityRecord || entityRecordInput)) {
+    if (entityStoreV2Enabled && euidApi?.euid) {
       const filter = euidApi.euid?.dsl.getEuidFilterBasedOnDocument(
         storeEntityType ?? 'generic',
         entityRecord ?? entityRecordInput
