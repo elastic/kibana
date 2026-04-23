@@ -36,8 +36,6 @@ const styles = {
 };
 
 const DEBOUNCE_DELAY = 500;
-const ON_LABEL = i18n.translate('console.settingsPage.onLabel', { defaultMessage: 'On' });
-const OFF_LABEL = i18n.translate('console.settingsPage.offLabel', { defaultMessage: 'Off' });
 
 const onceTimeInterval = () =>
   i18n.translate('console.settingsPage.refreshInterval.onceTimeInterval', {
@@ -241,45 +239,45 @@ export const SettingsEditor = (props: Props) => {
         })}
       />
       <SettingsFormRow
+        id="saveRequestsToHistory-label"
         label={i18n.translate('console.settingsPage.saveRequestsToHistoryLabel', {
           defaultMessage: 'Save requests to history',
         })}
       >
         <EuiSwitch
           checked={isHistoryEnabled}
-          label={isHistoryEnabled ? ON_LABEL : OFF_LABEL}
-          aria-label={i18n.translate('console.settingsPage.saveRequestsToHistoryAriaLabel', {
-            defaultMessage: 'Save requests to history',
-          })}
+          showLabel={false}
+          label=""
+          aria-labelledby="saveRequestsToHistory-label"
           onChange={(e) => toggleSavingToHistory(e.target.checked)}
         />
       </SettingsFormRow>
       <SettingsFormRow
+        id="keyboardShortcuts-label"
         label={i18n.translate('console.settingsPage.enableKeyboardShortcutsLabel', {
           defaultMessage: 'Keyboard shortcuts',
         })}
       >
         <EuiSwitch
           data-test-subj="enableKeyboardShortcuts"
-          label={isKeyboardShortcutsEnabled ? ON_LABEL : OFF_LABEL}
-          aria-label={i18n.translate('console.settingsPage.enableKeyboardShortcutsAriaLabel', {
-            defaultMessage: 'Keyboard shortcuts',
-          })}
+          showLabel={false}
+          label=""
+          aria-labelledby="keyboardShortcuts-label"
           checked={isKeyboardShortcutsEnabled}
           onChange={(e) => toggleKeyboardShortcuts(e.target.checked)}
         />
       </SettingsFormRow>
       <SettingsFormRow
+        id="accessibilityOverlay-label"
         label={i18n.translate('console.settingsPage.enableAccessibilityOverlayLabel', {
           defaultMessage: 'Accessibility overlay',
         })}
       >
         <EuiSwitch
           data-test-subj="enableA11yOverlay"
-          label={isAccessibilityOverlayEnabled ? ON_LABEL : OFF_LABEL}
-          aria-label={i18n.translate('console.settingsPage.enableAccessibilityOverlayAriaLabel', {
-            defaultMessage: 'Accessibility overlay',
-          })}
+          showLabel={false}
+          label=""
+          aria-labelledby="accessibilityOverlay-label"
           checked={isAccessibilityOverlayEnabled}
           onChange={(e) => toggleAccessibilityOverlay(e.target.checked)}
         />
@@ -312,6 +310,7 @@ export const SettingsEditor = (props: Props) => {
         })}
       />
       <SettingsFormRow
+        id="fontSize-label"
         label={i18n.translate('console.settingsPage.fontSizeLabel', {
           defaultMessage: 'Font size',
         })}
@@ -320,9 +319,7 @@ export const SettingsEditor = (props: Props) => {
           css={styles.minWidthControl}
           compressed
           data-test-subj="setting-font-size-input"
-          aria-label={i18n.translate('console.settingsPage.fontSizeAriaLabel', {
-            defaultMessage: 'Font size',
-          })}
+          aria-labelledby="fontSize-label"
           value={fontSize}
           min={6}
           max={50}
@@ -334,32 +331,32 @@ export const SettingsEditor = (props: Props) => {
         />
       </SettingsFormRow>
       <SettingsFormRow
+        id="wrapLongLines-label"
         label={i18n.translate('console.settingsPage.wrapLongLinesLabel', {
           defaultMessage: 'Wrap long lines',
         })}
       >
         <EuiSwitch
           data-test-subj="settingsWrapLines"
-          label={wrapMode ? ON_LABEL : OFF_LABEL}
-          aria-label={i18n.translate('console.settingsPage.wrapLongLinesAriaLabel', {
-            defaultMessage: 'Wrap long lines',
-          })}
+          showLabel={false}
+          label=""
+          aria-labelledby="wrapLongLines-label"
           checked={wrapMode}
           onChange={(e) => setWrapMode(e.target.checked)}
           id="wrapLines"
         />
       </SettingsFormRow>
       <SettingsFormRow
+        id="tripleQuotes-label"
         label={i18n.translate('console.settingsPage.tripleQuotesMessage', {
           defaultMessage: 'Triple quotes in output',
         })}
       >
         <EuiSwitch
           data-test-subj="tripleQuotes"
-          label={tripleQuotes ? ON_LABEL : OFF_LABEL}
-          aria-label={i18n.translate('console.settingsPage.tripleQuotesAriaLabel', {
-            defaultMessage: 'Triple quotes in output',
-          })}
+          showLabel={false}
+          label=""
+          aria-labelledby="tripleQuotes-label"
           checked={tripleQuotes}
           onChange={(e) => setTripleQuotes(e.target.checked)}
           id="tripleQuotes"
@@ -373,11 +370,12 @@ export const SettingsEditor = (props: Props) => {
         })}
       />
       {autoCompleteCheckboxes.map((opts) => (
-        <SettingsFormRow key={opts.id} label={opts.label}>
+        <SettingsFormRow key={opts.id} id={`autocomplete-${opts.id}-label`} label={opts.label}>
           <EuiSwitch
             data-test-subj={`autocomplete-settings-${opts.id}`}
-            label={opts.checked ? ON_LABEL : OFF_LABEL}
-            aria-label={opts.label}
+            showLabel={false}
+            label=""
+            aria-labelledby={`autocomplete-${opts.id}-label`}
             checked={opts.checked}
             onChange={(e) => opts.stateSetter(e.target.checked)}
           />
