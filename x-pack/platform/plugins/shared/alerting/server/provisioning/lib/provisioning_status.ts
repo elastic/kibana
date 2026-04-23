@@ -11,6 +11,7 @@ import {
   UiamApiKeyProvisioningEntityType,
 } from '../../saved_objects/schemas/raw_uiam_api_keys_provisioning_status';
 import type { ProvisioningStatusDocs, UiamApiKeyByRuleId } from '../types';
+import { getErrorMessage } from './error_utils';
 
 /**
  * Builds a provisioning status doc for a rule that was skipped (no API key, already has UIAM key, or user-created key).
