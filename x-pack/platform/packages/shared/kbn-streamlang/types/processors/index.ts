@@ -162,13 +162,6 @@ export const dissectProcessorSchema = processorBaseWithWhereSchema
 
 /**
  * URI parts processor
- *
- * Parses a URI string into its components (scheme, domain, port, path, query,
- * fragment, user/password, extension). The Ingest Pipeline transpiler maps this
- * to the native Elasticsearch `uri_parts` processor, which stores the parts as
- * an object at `target_field`. The ES|QL transpiler maps it to the
- * `URI_PARTS <prefix> = <source>` processing command, which emits flat prefixed
- * columns sharing the same prefix.
  */
 
 export interface UriPartsProcessor extends ProcessorBaseWithWhere {
