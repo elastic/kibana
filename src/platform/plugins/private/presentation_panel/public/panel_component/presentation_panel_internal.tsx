@@ -99,7 +99,7 @@ const PresentationPanelChrome = <
     dataLoading: dataLoading ?? false,
     rendered: rendered ?? true,
     title: panelTitle ?? defaultPanelTitle,
-    description: defaultPanelTitle ?? defaultPanelDescription,
+    description: panelDescription ?? defaultPanelDescription,
   });
 
   return (
