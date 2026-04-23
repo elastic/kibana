@@ -231,10 +231,14 @@ test.describe('Manage Integrations Table', { tag: tags.stateful.classic }, () =>
     await pageObjects.manageIntegrationsTable.getReviewApproveMenuItem().click();
     await expect(pageObjects.manageIntegrationsTable.getReviewApproveModal()).toBeVisible();
 
-    await expect(pageObjects.manageIntegrationsTable.getReviewApproveDeployButton()).toBeDisabled();
+    await expect(
+      pageObjects.manageIntegrationsTable.getReviewApproveInstallButton()
+    ).toBeDisabled();
 
     await pageObjects.manageIntegrationsTable.getReviewModalVersionInput().fill('1.0.0');
-    await expect(pageObjects.manageIntegrationsTable.getReviewApproveDeployButton()).toBeDisabled();
+    await expect(
+      pageObjects.manageIntegrationsTable.getReviewApproveInstallButton()
+    ).toBeDisabled();
 
     const categoryInput = pageObjects.manageIntegrationsTable
       .getReviewModalCategoriesComboBox()
@@ -242,7 +246,7 @@ test.describe('Manage Integrations Table', { tag: tags.stateful.classic }, () =>
     await categoryInput.click();
     await categoryInput.press('ArrowDown');
     await categoryInput.press('Enter');
-    await expect(pageObjects.manageIntegrationsTable.getReviewApproveDeployButton()).toBeEnabled();
+    await expect(pageObjects.manageIntegrationsTable.getReviewApproveInstallButton()).toBeEnabled();
   });
 
   test('Approve flow calls the approve API and closes the modal', async ({ page, pageObjects }) => {
@@ -273,14 +277,156 @@ test.describe('Manage Integrations Table', { tag: tags.stateful.classic }, () =>
     await categoryInput.press('ArrowDown');
     await categoryInput.press('Enter');
 
+    await pageObjects.manageIntegrationsTable.getReviewModalAutoInstallCheckbox().uncheck();
+
     const approveRequest = page.waitForRequest(
       (req) =>
         req.url().includes(`/integrations/${MOCK_COMPLETED.integrationId}/approve`) &&
         req.method() === 'POST'
     );
-    await pageObjects.manageIntegrationsTable.getReviewApproveDeployButton().click();
+    await pageObjects.manageIntegrationsTable.getReviewApproveInstallButton().click();
     await approveRequest;
     await expect(pageObjects.manageIntegrationsTable.getReviewApproveModal()).toBeHidden();
+  });
+
+  test('Review modal auto-install checkbox: is checked by default', async ({
+    page,
+    pageObjects,
+  }) => {
+    await mockIntegrationsList(page, [MOCK_COMPLETED]);
+    await mockIntegrationDetails(page, MOCK_COMPLETED.integrationId);
+    await pageObjects.manageIntegrationsTable.navigateTo();
+    await pageObjects.manageIntegrationsTable.openActionsMenu('Completed Integration');
+    await pageObjects.manageIntegrationsTable.getReviewApproveMenuItem().click();
+    await expect(pageObjects.manageIntegrationsTable.getReviewApproveModal()).toBeVisible();
+    const checkbox = pageObjects.manageIntegrationsTable.getReviewModalAutoInstallCheckbox();
+    await expect(checkbox).toBeVisible();
+    await expect(checkbox).toBeChecked();
+  });
+
+  test('Review modal auto-install checkbox: approve with it on calls approve, download, and EPM install then closes', async ({
+    page,
+    pageObjects,
+  }) => {
+    await mockIntegrationsList(page, [MOCK_COMPLETED]);
+    await mockIntegrationDetails(page, MOCK_COMPLETED.integrationId);
+    await page.route('**/api/fleet/epm/categories**', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ items: [{ id: 'security', title: 'Security', count: 1 }] }),
+      })
+    );
+    await page.route(
+      `**/api/automatic_import/integrations/${MOCK_COMPLETED.integrationId}/approve`,
+      (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '{}' })
+    );
+    await page.route(
+      `**/api/automatic_import/integrations/${MOCK_COMPLETED.integrationId}/download*`,
+      (route) =>
+        route.fulfill({
+          status: 200,
+          headers: { 'content-type': 'application/zip' },
+          body: Buffer.from('PK'),
+        })
+    );
+    await page.route('**/api/fleet/epm/packages', (route) => {
+      if (route.request().method() === 'POST') {
+        return route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
+      }
+      return route.continue();
+    });
+
+    await pageObjects.manageIntegrationsTable.navigateTo();
+    await pageObjects.manageIntegrationsTable.openActionsMenu('Completed Integration');
+    await pageObjects.manageIntegrationsTable.getReviewApproveMenuItem().click();
+    await expect(pageObjects.manageIntegrationsTable.getReviewApproveModal()).toBeVisible();
+    await expect(
+      pageObjects.manageIntegrationsTable.getReviewModalAutoInstallCheckbox()
+    ).toBeChecked();
+
+    await pageObjects.manageIntegrationsTable.getReviewModalVersionInput().fill('1.0.0');
+    const categoryInput = pageObjects.manageIntegrationsTable
+      .getReviewModalCategoriesComboBox()
+      .locator('input');
+    await categoryInput.click();
+    await categoryInput.press('ArrowDown');
+    await categoryInput.press('Enter');
+
+    const approveRequest = page.waitForRequest(
+      (req) =>
+        req.url().includes(`/integrations/${MOCK_COMPLETED.integrationId}/approve`) &&
+        req.method() === 'POST'
+    );
+    const downloadRequest = page.waitForRequest(
+      (req) =>
+        req.url().includes(`/integrations/${MOCK_COMPLETED.integrationId}/download`) &&
+        req.url().includes('intent=install') &&
+        req.method() === 'GET'
+    );
+    const installRequest = page.waitForRequest(
+      (req) => req.url().includes('/api/fleet/epm/packages') && req.method() === 'POST'
+    );
+    await pageObjects.manageIntegrationsTable.getReviewApproveInstallButton().click();
+    await Promise.all([approveRequest, downloadRequest, installRequest]);
+    await expect(pageObjects.manageIntegrationsTable.getReviewApproveModal()).toBeHidden();
+  });
+
+  test('Review modal auto-install checkbox: when off, only the approve API runs (no install download)', async ({
+    page,
+    pageObjects,
+  }) => {
+    let installIntentDownloadCount = 0;
+    await page.route('**/api/automatic_import/integrations/**/download**', (route) => {
+      if (new URL(route.request().url()).searchParams.get('intent') === 'install') {
+        installIntentDownloadCount += 1;
+      }
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/zip',
+        body: Buffer.from('PK'),
+      });
+    });
+
+    await mockIntegrationsList(page, [MOCK_COMPLETED]);
+    await mockIntegrationDetails(page, MOCK_COMPLETED.integrationId);
+    await page.route('**/api/fleet/epm/categories**', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ items: [{ id: 'security', title: 'Security', count: 1 }] }),
+      })
+    );
+    await page.route(
+      `**/api/automatic_import/integrations/${MOCK_COMPLETED.integrationId}/approve`,
+      (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '{}' })
+    );
+
+    await pageObjects.manageIntegrationsTable.navigateTo();
+    await pageObjects.manageIntegrationsTable.openActionsMenu('Completed Integration');
+    await pageObjects.manageIntegrationsTable.getReviewApproveMenuItem().click();
+    await expect(pageObjects.manageIntegrationsTable.getReviewApproveModal()).toBeVisible();
+    await pageObjects.manageIntegrationsTable.getReviewModalVersionInput().fill('1.0.0');
+    const categoryInput = pageObjects.manageIntegrationsTable
+      .getReviewModalCategoriesComboBox()
+      .locator('input');
+    await categoryInput.click();
+    await categoryInput.press('ArrowDown');
+    await categoryInput.press('Enter');
+    await pageObjects.manageIntegrationsTable.getReviewModalAutoInstallCheckbox().uncheck();
+    await expect(
+      pageObjects.manageIntegrationsTable.getReviewModalAutoInstallCheckbox()
+    ).not.toBeChecked();
+
+    const approveRequest = page.waitForRequest(
+      (req) =>
+        req.url().includes(`/integrations/${MOCK_COMPLETED.integrationId}/approve`) &&
+        req.method() === 'POST'
+    );
+    await pageObjects.manageIntegrationsTable.getReviewApproveInstallButton().click();
+    await approveRequest;
+    await expect(pageObjects.manageIntegrationsTable.getReviewApproveModal()).toBeHidden();
+    expect(installIntentDownloadCount).toBe(0);
   });
 
   test('closing the Review & Approve modal via Cancel dismisses it', async ({
@@ -648,7 +794,9 @@ test.describe('Manage Integrations Table', { tag: tags.stateful.classic }, () =>
     await expect(pageObjects.manageIntegrationsTable.getReviewApproveModal()).toBeVisible();
 
     await pageObjects.manageIntegrationsTable.getReviewModalVersionInput().fill('1.0.0');
-    await expect(pageObjects.manageIntegrationsTable.getReviewApproveDeployButton()).toBeDisabled();
+    await expect(
+      pageObjects.manageIntegrationsTable.getReviewApproveInstallButton()
+    ).toBeDisabled();
     await expect(page.getByText('Select at least one category.')).toBeVisible();
   });
 
@@ -783,7 +931,8 @@ test.describe('Manage Integrations Table', { tag: tags.stateful.classic }, () =>
     await categoryInput.press('ArrowDown');
     await categoryInput.press('Enter');
 
-    await pageObjects.manageIntegrationsTable.getReviewApproveDeployButton().click();
+    await pageObjects.manageIntegrationsTable.getReviewModalAutoInstallCheckbox().uncheck();
+    await pageObjects.manageIntegrationsTable.getReviewApproveInstallButton().click();
 
     const modal = pageObjects.manageIntegrationsTable.getReviewApproveModal();
     await expect(modal).toBeVisible();

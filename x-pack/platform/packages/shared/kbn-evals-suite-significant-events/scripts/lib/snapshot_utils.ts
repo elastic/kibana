@@ -18,6 +18,10 @@ import {
   VALID_SYSTEM_INDICES,
 } from './constants';
 
+export function toSnapshotName(index: string): string {
+  return `snapshot-${index.slice(1)}`;
+}
+
 export const parseRepeatableFlag = (value: unknown): string[] => {
   if (!value) return [];
   if (Array.isArray(value)) return value.map(String);
@@ -114,36 +118,6 @@ export async function resolvePatterns(
   return resolved;
 }
 
-export const validateIndexPrivileges = async (
-  esClient: Client,
-  log: ToolingLog,
-  patterns: string[],
-  onUnauthorized: (missing: string) => string
-): Promise<void> => {
-  // Superusers bypass index-level privilege checks at operation time, but
-  // has_privileges returns false for restricted index wildcards even for
-  // superusers. Check for the superuser role first and skip the index check.
-  const authInfo = await esClient.security.authenticate();
-  const roles: string[] = authInfo.roles ?? [];
-  if (roles.includes('superuser')) {
-    log.debug('Superuser detected — skipping index privilege check');
-    return;
-  }
-
-  const privResult = await esClient.security.hasPrivileges({
-    index: [{ names: patterns, privileges: ['manage'], allow_restricted_indices: true }],
-  });
-
-  if (!privResult.has_all_requested) {
-    const missing = Object.entries(privResult.index ?? {})
-      .filter(([, privs]) => !Object.values(privs as Record<string, boolean>).every(Boolean))
-      .map(([idx]) => idx);
-    throw new Error(onUnauthorized(missing.length > 0 ? missing.join(', ') : patterns.join(', ')));
-  }
-
-  log.debug('Index privilege check passed');
-};
-
 export const ensureKnownAliases = async ({
   esClient,
   log,
@@ -221,6 +195,46 @@ export async function resolveExisting(esClient: Client, patterns: string[]): Pro
   return found;
 }
 
+/**
+ * Detect bare concrete indices whose name equals a stable alias from INDEX_ALIAS_CONFIG.
+ * Versioned wildcard patterns like `.kibana_alerting_cases_*` do not match a bare index named
+ * exactly `.kibana_alerting_cases`, so these slip past `resolveExisting` and only surface later
+ * as `invalid_alias_name_exception` during `updateAliases`. Deleting them up-front keeps the
+ * restore linear.
+ */
+async function findCollidingAliasNameIndices(
+  esClient: Client,
+  patterns: string[]
+): Promise<string[]> {
+  const aliasNames = new Set<string>();
+  for (const pattern of patterns) {
+    const config = INDEX_ALIAS_CONFIG[pattern as keyof typeof INDEX_ALIAS_CONFIG];
+    if (config?.alias) {
+      aliasNames.add(config.alias);
+    }
+  }
+
+  const colliding: string[] = [];
+  for (const aliasName of aliasNames) {
+    try {
+      const response = await esClient.indices.resolveIndex({
+        name: aliasName,
+        expand_wildcards: 'all',
+      });
+      const exactConcrete = (response.indices ?? []).find((i) => i.name === aliasName);
+      if (exactConcrete) {
+        colliding.push(aliasName);
+      }
+    } catch (err) {
+      if (err instanceof errors.ResponseError && err.statusCode === 404) {
+        continue;
+      }
+      throw err;
+    }
+  }
+  return colliding;
+}
+
 export async function deleteExisting(
   esClient: Client,
   log: ToolingLog,
@@ -270,11 +284,19 @@ export async function ensureCleanEnvironment({
   logsIndex: string;
   clean: boolean;
 }): Promise<void> {
-  const allExisting = await resolveExisting(esClient, [
-    logsIndex,
-    ...systemIndices,
-    ...alertIndices,
+  const [matchedByPattern, aliasNameCollisions] = await Promise.all([
+    resolveExisting(esClient, [logsIndex, ...systemIndices, ...alertIndices]),
+    findCollidingAliasNameIndices(esClient, [...systemIndices, ...alertIndices]),
   ]);
+
+  const seen = new Set<string>();
+  const allExisting: string[] = [];
+  for (const name of [...matchedByPattern, ...aliasNameCollisions]) {
+    if (!seen.has(name)) {
+      seen.add(name);
+      allExisting.push(name);
+    }
+  }
 
   if (allExisting.length === 0) {
     log.debug('Environment is clean — no existing indices found');

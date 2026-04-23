@@ -8,6 +8,8 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@kbn/react-query';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { useKibana } from '../../../../common/lib/kibana';
+import { EntityEventTypes } from '../../../../common/lib/telemetry';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
 import { fromApiLead } from './types';
 import * as i18n from './translations';
@@ -40,6 +42,7 @@ export const useHuntingLeads = (connectorId: string, isEnabled: boolean = true) 
   } = useEntityAnalyticsRoutes();
   const queryClient = useQueryClient();
   const { addSuccess, addError, addWarning } = useAppToasts();
+  const { telemetry } = useKibana().services;
   const abortCtrl = useRef(new AbortController());
   const [hasGenerated, setHasGenerated] = useState(false);
 
@@ -88,6 +91,7 @@ export const useHuntingLeads = (connectorId: string, isEnabled: boolean = true) 
       abortCtrl.current = new AbortController();
       const { signal } = abortCtrl.current;
 
+      telemetry.reportEvent(EntityEventTypes.LeadGenerationGenerateClicked, {});
       const { executionUuid } = await generateLeadsApi({ params: { connectorId }, signal });
       return pollForCompletion(executionUuid, signal);
     },

@@ -646,6 +646,8 @@ $$$visualization-uselegacytimeaxis$$$`visualization:useLegacyTimeAxis` {applies_
 $$$dev-tools-enable-persistent-console$$$`devTools:enablePersistentConsole` {applies_to}`stack: ga` {applies_to}`elasticsearch: ga`
 :   Enables a persistent console in the {{product.kibana}} UI. This setting does not affect the standard Console in Dev Tools. `true` by default.
 
+:::{settings} /reference/advanced-settings-space.yml
+:::
 
 ## Change the global settings [kibana-global-settings-reference]
 ```{applies_to}
@@ -653,36 +655,5 @@ stack: ga
 serverless: unavailable
 ```
 
-Change the settings that apply to all of {{product.kibana}}.
-
-1. Go to the **Advanced settings** page using the navigation menu or the [global search field](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md).
-2. Click **Global Settings**.
-3. Scroll or search for the setting.
-4. Make your change, then click **Save changes**.
-
-### General [kibana-general-global-settings]
-
-$$$hideAnnouncements-global$$$`hideAnnouncements` {applies_to}`stack: ga 9.4+` {applies_to}`serverless: unavailable`
-:   Stops showing messages and tours that highlight new features. `false` by default.
-
-
-### Custom branding [kibana-custom-branding-settings]
-
-::::{note}
-Custom branding is a [subscription feature](https://www.elastic.co/subscriptions).
-::::
-
-$$$custom-logo$$$`xpackCustomBranding:logo` {applies_to}`stack: ga` {applies_to}`serverless: unavailable`
-:   A custom image that appears in the header of all {{product.kibana}} pages. Images must have a transparent background, and 128x128 pixels or smaller.
-
-$$$organization-name$$$`xpackCustomBranding:customizedLogo` {applies_to}`stack: ga` {applies_to}`serverless: unavailable`
-:   The custom text that appears in the header of all {{product.kibana}} pages. Images must have a transparent background, and 200x84 pixels or smaller.
-
-$$$page-title$$$`xpackCustomBranding:pageTitle` {applies_to}`stack: ga` {applies_to}`serverless: unavailable`
-:   The custom text that appears on {{product.kibana}} browser tabs.
-
-$$$favicon-svg$$$`xpackCustomBranding:faviconSVG` {applies_to}`stack: ga` {applies_to}`serverless: unavailable`
-:   The URL of a custom SVG image that appears on {{product.kibana}} browser tabs. Images must be 16x16 pixels.
-
-$$$favicon-png$$$`xpackCustomBranding:faviconPNG` {applies_to}`stack: ga` {applies_to}`serverless: unavailable`
-:   The URL of a custom PNG image that appears on {{product.kibana}} browser tabs.
+:::{settings} /reference/advanced-settings-global.yml
+:::
