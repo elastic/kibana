@@ -13,6 +13,12 @@ import {
   createDetectionRule,
   deleteDetectionRule,
 } from '../helpers/detection_rule_lifecycle';
+import { getFirstOnlineAgent } from '../helpers/fleet_agents';
+import {
+  bootstrapSecurityAlertsIndex,
+  deleteSeededAlerts,
+  seedAlertForRule,
+} from '../helpers/seed_alert';
 
 const localTags = [...tags.stateful.classic, ...tags.serverless.security.complete];
 
@@ -22,7 +28,7 @@ test.describe('Alert flyout Osquery case creation', { tag: localTags }, () => {
   let packId: string;
   let packName: string;
 
-  test.beforeAll(async ({ kbnClient, apiServices }) => {
+  test.beforeAll(async ({ esClient, kbnClient, apiServices }) => {
     const pack = await apiServices.osquery.packs.create({
       name: `scout-alert-case-pack-${Date.now()}`,
       enabled: true,
@@ -40,9 +46,14 @@ test.describe('Alert flyout Osquery case creation', { tag: localTags }, () => {
     const created = await createDetectionRule(kbnClient, rule);
     ruleId = created.id;
     ruleName = created.name;
+
+    // Pre-warm the security alerts index so the per-test seed goes to a
+    // ready data stream. Idempotent.
+    await bootstrapSecurityAlertsIndex(kbnClient);
   });
 
-  test.afterAll(async ({ kbnClient, apiServices }) => {
+  test.afterAll(async ({ esClient, kbnClient, apiServices }) => {
+    await deleteSeededAlerts(esClient, ruleId).catch(() => {});
     await deleteDetectionRule(kbnClient, ruleId);
     await apiServices.osquery.packs.delete(packId);
   });
@@ -55,6 +66,8 @@ test.describe('Alert flyout Osquery case creation', { tag: localTags }, () => {
   // cost in half without losing either coverage branch.
   test('runs osquery from an alert and attaches results to an existing + a new case', async ({
     browserAuth,
+    esClient,
+    kbnClient,
     page,
     pageObjects,
     apiServices,
@@ -80,6 +93,13 @@ test.describe('Alert flyout Osquery case creation', { tag: localTags }, () => {
     const existingCaseId = existingCase.data.id;
 
     try {
+      // Seed an alert directly into `.alerts-security.alerts-default` for this
+      // rule + a known Osquery-enrolled agent. Bypasses task-manager latency;
+      // `openRuleAlertsView` sees the row immediately. See `helpers/seed_alert.ts`
+      // for the schema contract and the `agent.id` gating on the Run Osquery menu.
+      const { agentId, hostName } = await getFirstOnlineAgent(kbnClient);
+      await seedAlertForRule(esClient, { ruleId, ruleName, agentId, hostName });
+
       await browserAuth.loginAsOsqueryPowerUser();
 
       await test.step('submit osquery in pack mode from the alert flyout', async () => {

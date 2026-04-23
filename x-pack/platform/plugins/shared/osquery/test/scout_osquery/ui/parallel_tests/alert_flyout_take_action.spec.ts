@@ -13,6 +13,12 @@ import {
   createDetectionRule,
   deleteDetectionRule,
 } from '../helpers/detection_rule_lifecycle';
+import { getFirstOnlineAgent } from '../helpers/fleet_agents';
+import {
+  bootstrapSecurityAlertsIndex,
+  deleteSeededAlerts,
+  seedAlertForRule,
+} from '../helpers/seed_alert';
 
 const localTags = [...tags.stateful.classic, ...tags.serverless.security.complete];
 
@@ -25,9 +31,11 @@ test.describe('Alert flyout take action and investigation guide', { tag: localTa
     const created = await createDetectionRule(kbnClient, rule);
     ruleId = created.id;
     ruleName = created.name;
+    await bootstrapSecurityAlertsIndex(kbnClient);
   });
 
-  test.afterAll(async ({ kbnClient }) => {
+  test.afterAll(async ({ esClient, kbnClient }) => {
+    await deleteSeededAlerts(esClient, ruleId).catch(() => {});
     await deleteDetectionRule(kbnClient, ruleId);
   });
 
@@ -57,10 +65,16 @@ test.describe('Alert flyout take action and investigation guide', { tag: localTa
 
   test('runs a live query from the alert flyout and adds the action to Timeline', async ({
     browserAuth,
+    esClient,
+    kbnClient,
     page,
     pageObjects,
   }) => {
     test.setTimeout(300_000);
+
+    const { agentId, hostName } = await getFirstOnlineAgent(kbnClient);
+    await seedAlertForRule(esClient, { ruleId, ruleName, agentId, hostName });
+
     await browserAuth.loginAsOsqueryPowerUser();
 
     await pageObjects.osqueryRuleEditor.openRuleAlertsView(ruleName);

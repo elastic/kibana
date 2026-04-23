@@ -50,9 +50,21 @@ export interface SubmitLiveQueryOptions {
   maxAttempts?: number;
 }
 
+export interface SubmitLiveQueryResult {
+  response: Response;
+  /**
+   * The `action_id` returned by `POST /api/osquery/live_queries`. Callers can
+   * feed this to `helpers/poll_live_query_history.ts::waitForLiveQueryComplete`
+   * to gate subsequent UI assertions on agent-side completion rather than
+   * racing the aggregator.
+   */
+  actionId?: string;
+}
+
 /**
  * Click a LiveQuery form's Submit button and assert the network call actually
- * went out. Returns the successful `POST /api/osquery/live_queries` response.
+ * went out. Returns the successful `POST /api/osquery/live_queries` response
+ * along with the parsed `action_id` for downstream polling.
  *
  * Throws with a descriptive message if no attempt produced a response within
  * the budget, or if the server rejected the submission.
@@ -61,7 +73,7 @@ export async function submitLiveQuery(
   page: ScoutPage,
   submitButton: Locator,
   options: SubmitLiveQueryOptions = {}
-): Promise<Response> {
+): Promise<SubmitLiveQueryResult> {
   const { timeoutMs = 60_000, perAttemptTimeoutMs = 10_000, maxAttempts = 3 } = options;
 
   await submitButton.waitFor({ state: 'visible', timeout: 30_000 });
@@ -94,7 +106,18 @@ export async function submitLiveQuery(
         );
       }
 
-      return response;
+      // The response shape is `{ data: { action_id, queries: [...] } }`.
+      // Parsing failures shouldn't break the click contract — we return
+      // `undefined` and let the caller decide whether the id is required.
+      let actionId: string | undefined;
+      try {
+        const parsed = (await response.json()) as { data?: { action_id?: string } };
+        actionId = parsed?.data?.action_id;
+      } catch {
+        actionId = undefined;
+      }
+
+      return { response, actionId };
     } catch (error) {
       lastError = error;
       // Before retrying, give the Monaco 500 ms debounce a chance to flush and

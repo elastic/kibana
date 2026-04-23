@@ -26,6 +26,10 @@ import type { KibanaRole } from '@kbn/scout';
  *  - feature_visualize_v2.all         — Lens popup in packs_crud
  *  - feature_savedQueryManagement.all — saved_queries_crud
  *  - feature_actions / builtInAlerts  — detection-rule + response-action internals
+ *  - feature_infrastructure.all       — inventory_osquery_tab (Infra/Metrics host detail page
+ *                                       at /app/metrics/detail/host/...; feature id resolves
+ *                                       via `METRICS_FEATURE_ID = 'infrastructure'` in
+ *                                       x-pack/solutions/observability/plugins/infra/common/constants.ts)
  */
 export const osqueryPowerUserRole: KibanaRole = {
   elasticsearch: {
@@ -45,6 +49,8 @@ export const osqueryPowerUserRole: KibanaRole = {
           '.fleet-actions*',
           'logs-osquery_manager.*',
           'logs-*',
+          'metrics-*',
+          'metricbeat-*',
           'metrics-endpoint.metadata_current_*',
         ],
         privileges: ['all'],
@@ -74,6 +80,7 @@ export const osqueryPowerUserRole: KibanaRole = {
         maps_v2: ['all'],
         savedQueryManagement: ['all'],
         indexPatterns: ['all'],
+        infrastructure: ['all'],
       },
       spaces: ['*'],
     },

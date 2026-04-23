@@ -9,6 +9,7 @@ import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 import { uiTest as test } from '../fixtures';
 import { waitForAtLeastOneAgentOnline } from '../helpers/fleet_agents';
+import { waitForLiveQueryComplete } from '../helpers/poll_live_query_history';
 
 const localTags = [...tags.stateful.classic, ...tags.serverless.security.complete];
 
@@ -37,7 +38,11 @@ test.describe('Live query submission with enrolled agents', { tag: localTags }, 
       await pageObjects.osqueryLiveQueryForm.clearAndInputQuery('select * from os_version;');
       await pageObjects.osqueryLiveQueryForm.clickAdvanced();
       await pageObjects.osqueryLiveQueryForm.fillInQueryTimeout('120');
-      await pageObjects.osqueryLiveQueryForm.submitQuery();
+      const actionId = await pageObjects.osqueryLiveQueryForm.submitQuery();
+      if (actionId) {
+        await waitForLiveQueryComplete(kbnClient, actionId);
+      }
+
       await pageObjects.osqueryLiveQueryForm.waitForResults();
       await expect(pageObjects.osqueryLiveQueryForm.resultsTable).toBeVisible({
         timeout: 180_000,

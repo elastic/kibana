@@ -13,6 +13,12 @@ import {
   createDetectionRule,
   deleteDetectionRule,
 } from '../helpers/detection_rule_lifecycle';
+import { getFirstOnlineAgent } from '../helpers/fleet_agents';
+import {
+  bootstrapSecurityAlertsIndex,
+  deleteSeededAlerts,
+  seedAlertForRule,
+} from '../helpers/seed_alert';
 
 const localTags = [...tags.stateful.classic, ...tags.serverless.security.complete];
 
@@ -25,9 +31,11 @@ test.describe('Osquery parameter substitution from alerts', { tag: localTags }, 
     const created = await createDetectionRule(kbnClient, rule);
     ruleId = created.id;
     ruleName = created.name;
+    await bootstrapSecurityAlertsIndex(kbnClient);
   });
 
-  test.afterAll(async ({ kbnClient }) => {
+  test.afterAll(async ({ esClient, kbnClient }) => {
+    await deleteSeededAlerts(esClient, ruleId).catch(() => {});
     await deleteDetectionRule(kbnClient, ruleId);
   });
 
@@ -42,10 +50,16 @@ test.describe('Osquery parameter substitution from alerts', { tag: localTags }, 
 
   test('runs a take-action query against all enrolled agents with substituted parameters', async ({
     browserAuth,
+    esClient,
+    kbnClient,
     page,
     pageObjects,
   }) => {
     test.setTimeout(300_000);
+
+    const { agentId, hostName } = await getFirstOnlineAgent(kbnClient);
+    await seedAlertForRule(esClient, { ruleId, ruleName, agentId, hostName });
+
     await browserAuth.loginAsOsqueryPowerUser();
 
     await pageObjects.osqueryRuleEditor.openRuleAlertsView(ruleName);
@@ -65,10 +79,16 @@ test.describe('Osquery parameter substitution from alerts', { tag: localTags }, 
 
   test('substitutes parameters in osquery launched from timeline-linked alerts', async ({
     browserAuth,
+    esClient,
+    kbnClient,
     page,
     pageObjects,
   }) => {
     test.setTimeout(300_000);
+
+    const { agentId, hostName } = await getFirstOnlineAgent(kbnClient);
+    await seedAlertForRule(esClient, { ruleId, ruleName, agentId, hostName });
+
     await browserAuth.loginAsOsqueryPowerUser();
 
     await pageObjects.osqueryRuleEditor.openRuleAlertsView(ruleName);

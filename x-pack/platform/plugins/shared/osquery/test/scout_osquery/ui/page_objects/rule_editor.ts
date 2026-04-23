@@ -65,9 +65,13 @@ export class RuleEditorPage {
     await this.openRuleByName(ruleName);
     await this.goToAlertsTab();
 
+    // Callers seed an alert deterministically via `helpers/seed_alert.ts`
+    // before invoking this method, so this wait only covers UI render, not
+    // task-manager latency. 30 s is comfortable for the first row to mount
+    // off an already-indexed document.
     // eslint-disable-next-line playwright/no-nth-methods -- waits for the first alert row to render; any row appearing is sufficient readiness for the caller which will then expand it
     const firstAlert = this.expandEvent.first();
-    await firstAlert.waitFor({ state: 'visible', timeout: 120_000 });
+    await firstAlert.waitFor({ state: 'visible', timeout: 30_000 });
   }
 
   async goToAlertsTab(): Promise<void> {

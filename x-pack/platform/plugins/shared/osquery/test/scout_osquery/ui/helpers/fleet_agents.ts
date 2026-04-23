@@ -63,6 +63,48 @@ interface FleetAgentPolicyItem {
   space_ids?: string[];
 }
 
+interface FleetAgentItem {
+  id: string;
+  status: string;
+  local_metadata?: {
+    host?: { hostname?: string; name?: string };
+  };
+}
+
+/**
+ * Return the first Fleet-enrolled agent that is `online` or `degraded`, plus
+ * its hostname. Used by `seedAlertForRule` — the alert flyout's Take Action →
+ * Run Osquery item is gated on `agent.id` being present on the alert doc AND
+ * the agent being Osquery-enabled in Fleet.
+ *
+ * Internally gates on `waitForAtLeastOneAgentOnline` so callers don't race the
+ * Fleet listing when `global.setup.ts` enrollment has just completed.
+ */
+export async function getFirstOnlineAgent(
+  kbnClient: KbnClient,
+  opts?: { timeoutMs?: number; pollIntervalMs?: number }
+): Promise<{ agentId: string; hostName: string }> {
+  await waitForAtLeastOneAgentOnline(kbnClient, opts);
+
+  const { data } = await kbnClient.request<{ items: FleetAgentItem[] }>({
+    method: 'GET',
+    path: '/api/fleet/agents',
+    query: { perPage: 100 },
+  });
+
+  const agent = data.items.find((item) => item.status === 'online' || item.status === 'degraded');
+  if (!agent) {
+    throw new Error(
+      'getFirstOnlineAgent: Fleet listed zero online/degraded agents after waitForAtLeastOneAgentOnline resolved'
+    );
+  }
+
+  const hostName =
+    agent.local_metadata?.host?.hostname ?? agent.local_metadata?.host?.name ?? 'scout-host';
+
+  return { agentId: agent.id, hostName };
+}
+
 /**
  * Share the default-space osquery-manager-backed agent policies with an
  * additional space.

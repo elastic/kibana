@@ -10,6 +10,7 @@ import { tags } from '@kbn/scout';
 import { uiTest as test } from '../fixtures';
 import { getMinimalLiveQuery } from '../../api/fixtures/constants';
 import { waitForAtLeastOneAgentOnline } from '../helpers/fleet_agents';
+import { waitForLiveQueryComplete } from '../helpers/poll_live_query_history';
 
 const localTags = [...tags.stateful.classic, ...tags.serverless.security.complete];
 
@@ -31,6 +32,9 @@ test.describe('Osquery results attached to Security cases', { tag: localTags }, 
       })
     );
     const actionId = (live.data as { data: { action_id: string } }).data.action_id;
+    // Gate on agent-side completion so the history row has a populated result
+    // set by the time the UI asserts on it.
+    await waitForLiveQueryComplete(kbnClient, actionId);
 
     const caseTitle = `scout-sec-case-${Date.now()}`;
     const createdCase = await apiServices.cases.create({

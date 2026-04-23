@@ -181,7 +181,7 @@ async function waitForOsqueryReady(kbnClient: KbnClient, log: any, timeoutMs = 3
       log.info(`[osquery-warmup] Submitted query, action_id=${actionId}`);
 
       // Poll using the details endpoint to check query status
-      for (let i = 0; i < 24; i++) {
+      for (let i = 0; i < 12; i++) {
         await new Promise((r) => setTimeout(r, 5_000));
         try {
           const { data: detailsResponse } = await kbnClient.request<any>({

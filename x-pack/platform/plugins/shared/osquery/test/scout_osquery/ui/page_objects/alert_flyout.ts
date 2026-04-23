@@ -159,8 +159,26 @@ export class AlertFlyoutPage {
     // resolves freshly on every action. Scope to the flyout body + the pack-
     // selector so we don't cross-match a different combobox elsewhere on the page.
     const searchInput = this.packSearchInput;
-    await searchInput.click();
-    await searchInput.fill(packName);
+    // Re-anchor after switchFlyoutToPackMode's React re-renders settle. The
+    // combobox wrapper can still be mid-remount at the exact moment the caller
+    // reaches this line, which makes Playwright's default 10 s click
+    // actionability budget insufficient on serverless CI.
+    await searchInput.waitFor({ state: 'visible', timeout: 15_000 });
+    await searchInput.click({ timeout: 15_000 });
+
+    // EuiComboBox re-renders the input node once the listbox mounts after the
+    // click (new `aria-controls` id is assigned to the freshly-mounted input).
+    // `fill()` is an atomic "locate-focus-set-value" and races that detach;
+    // seen in serverless CI as "element was detached from the DOM, retrying"
+    // followed by a 10 s timeout. Two mitigations:
+    //   1. Wait for the input's `aria-expanded` to flip to "true" — that's
+    //      EuiComboBox's signal that the popover mounted and the re-render
+    //      triggered by the click has settled.
+    //   2. Use `pressSequentially` (per-key keystrokes through `page.keyboard`)
+    //      with a small delay — each keystroke follows focus, and the delay
+    //      gives React time to reconcile between options-list filter updates.
+    await expect(searchInput).toHaveAttribute('aria-expanded', 'true', { timeout: 5_000 });
+    await searchInput.pressSequentially(packName, { delay: 20 });
     await this.page.keyboard.press('ArrowDown');
     await this.page.keyboard.press('Enter');
     // Confirm the pack is actually chosen before returning. EuiComboBox with
@@ -174,9 +192,16 @@ export class AlertFlyoutPage {
   }
 
   async clickAddToCaseFromResults(): Promise<void> {
-    const addToCase = this.flyoutBody.getByRole('button', { name: 'Add to Case' });
     // eslint-disable-next-line playwright/no-nth-methods -- the results panel renders an aggregate header "Add to Case" plus one per row; first-match targets the aggregate header action that drives the new-case flow (same semantics as the Cypress helper that preceded it)
-    await addToCase.first().click();
+    const addToCase = this.flyoutBody.getByRole('button', { name: 'Add to Case' }).first();
+    // The aggregate header button only renders once `actionId` is set and the
+    // PackResultsHeader mounts. On cold stacks the results panel can appear in
+    // stages (loading cell → populated cell → header actions), so wait for the
+    // button explicitly with a generous budget instead of relying on the
+    // 10 s default click-actionability budget, which was racing against the
+    // header-render after `waitForResults` returned.
+    await addToCase.waitFor({ state: 'visible', timeout: 60_000 });
+    await addToCase.click();
   }
 
   async clearAgentsAndSelectAllAgents(): Promise<void> {

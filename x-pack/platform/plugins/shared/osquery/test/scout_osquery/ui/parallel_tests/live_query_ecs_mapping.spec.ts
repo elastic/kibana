@@ -9,6 +9,7 @@ import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 import { uiTest as test } from '../fixtures';
 import { waitForAtLeastOneAgentOnline } from '../helpers/fleet_agents';
+import { waitForLiveQueryComplete } from '../helpers/poll_live_query_history';
 
 const localTags = [...tags.stateful.classic, ...tags.serverless.security.complete];
 
@@ -26,6 +27,7 @@ test.describe('Live query ECS mapping', { tag: localTags }, () => {
   // response — cutting the agent-submit budget for this file in half without
   // losing either assertion.
   test('submits a query with dynamic + static ECS mappings and surfaces both columns in results', async ({
+    kbnClient,
     page,
     pageObjects,
   }) => {
@@ -54,7 +56,13 @@ test.describe('Live query ECS mapping', { tag: localTags }, () => {
     });
 
     await test.step('submit and assert both mapped columns render', async () => {
-      await pageObjects.osqueryLiveQueryForm.submitQuery();
+      const actionId = await pageObjects.osqueryLiveQueryForm.submitQuery();
+      // Gate UI assertions on agent-side completion rather than racing the
+      // aggregator. See helpers/poll_live_query_history.ts for rationale.
+      if (actionId) {
+        await waitForLiveQueryComplete(kbnClient, actionId);
+      }
+
       await pageObjects.osqueryLiveQueryForm.waitForResults();
       // `message` appears only when the server persisted the dynamic pairing
       // AND the agent's `days` column resolved to a value. `tags` appears only

@@ -146,14 +146,22 @@ export class LiveQueryFormPage {
     await this.submitButton.click();
   }
 
-  async submitQuery(): Promise<void> {
+  /**
+   * Submit the live-query form and surface the server-assigned `action_id`
+   * (when the POST response carries one). Callers can feed the id to
+   * `helpers/poll_live_query_history.ts::waitForLiveQueryComplete` before
+   * asserting results, to gate on agent-side completion rather than racing
+   * the UI aggregator. Returns `undefined` if the response body can't be
+   * parsed — existing callers that don't need the id remain unaffected.
+   */
+  async submitQuery(): Promise<string | undefined> {
     await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
     // Clear any open toasts that may intercept the Submit click.
     for (let dismissRound = 0; dismissRound < 2; dismissRound++) {
       await dismissVisibleToasts(this.page);
     }
 
-    await submitLiveQuery(this.page, this.submitButton);
+    const { actionId } = await submitLiveQuery(this.page, this.submitButton);
 
     // Results UI lands as either a tab (single query) or a heading (pack).
     // Do a best-effort wait so callers can chain on results visibility.
@@ -161,6 +169,8 @@ export class LiveQueryFormPage {
       this.resultsTab.waitFor({ state: 'visible', timeout: 30_000 }),
       this.packResultsHeading.waitFor({ state: 'visible', timeout: 30_000 }),
     ]).catch(() => {});
+
+    return actionId;
   }
 
   async waitForResults(): Promise<void> {
@@ -172,8 +182,13 @@ export class LiveQueryFormPage {
     }
 
     while (Date.now() - start < maxWaitMs) {
-      // eslint-disable-next-line playwright/no-nth-methods -- any populated cell indicates results loaded
-      const dataCell = this.page.testSubj.locator('dataGridRowCell').first();
+      // Scope the cell probe to the osquery results panel. Page-wide `dataGridRowCell`
+      // also matches cells in the alerts EuiDataGrid rendered behind the osquery flyout,
+      // which would cause this race to resolve immediately — before any osquery result
+      // has actually landed — and leave downstream actions (e.g. clicking "Add to Case")
+      // clicking against a still-loading flyout.
+      // eslint-disable-next-line playwright/no-nth-methods -- any populated cell in the osquery panel indicates results loaded
+      const dataCell = this.resultsPanel.getByTestId('dataGridRowCell').first();
 
       try {
         await Promise.race([

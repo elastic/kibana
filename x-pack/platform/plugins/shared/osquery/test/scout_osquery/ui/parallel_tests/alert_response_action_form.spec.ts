@@ -83,6 +83,7 @@ test.describe('Pack-based Osquery response actions in the rule editor', { tag: l
 
   test('persists pack response actions and expands queries on save', async ({
     browserAuth,
+    kbnClient,
     page,
     pageObjects,
   }) => {
@@ -141,7 +142,7 @@ test.describe('Pack-based Osquery response actions in the rule editor', { tag: l
     const secondBody = JSON.parse(secondPostData ?? '{}') as {
       response_actions?: Array<{ params?: { queries?: unknown[] } }>;
     };
-    expect(secondBody.response_actions?.[0]?.params?.queries).toStrictEqual([
+    const expectedSentMultiQueries = [
       {
         interval: 3600,
         query: 'SELECT * FROM memory_info;',
@@ -158,6 +159,38 @@ test.describe('Pack-based Osquery response actions in the rule editor', { tag: l
         query: 'select opera_extensions.* from users join opera_extensions using (uid);',
         id: multiKeys[2],
       },
-    ]);
+    ];
+    expect(secondBody.response_actions?.[0]?.params?.queries).toStrictEqual(
+      expectedSentMultiQueries
+    );
+
+    // Post-save API verification (§3.4.1 of `osquery-scout-ui-hardening` tasks.md).
+    // The combobox-commit guard in `rule_editor.ts:selectPackInComboBox`
+    // (toHaveValue(packName) before save) prevents the in-flight POST body
+    // from carrying the wrong pack's queries, but we re-read the persisted
+    // rule to ensure server-side state matches what the UI claims — this
+    // catches any future regression where the POST body is correct but
+    // server-side merging drops fields.
+    //
+    // Detection-engine's `OsqueryQuery` zod schema
+    // (x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/
+    //  model/rule_response_actions/response_actions.gen.ts) does not declare
+    // `interval`, so zod strips it on persist/read. The UI still ships
+    // `interval` in the POST body (verified above), but the round-tripped
+    // value omits it.
+    const expectedPersistedMultiQueries = expectedSentMultiQueries.map(
+      ({ interval: _interval, ...rest }) => rest
+    );
+    const persisted = await kbnClient.request<{
+      response_actions?: Array<{
+        params?: { queries?: Array<{ id: string; query: string }> };
+      }>;
+    }>({
+      method: 'GET',
+      path: `/api/detection_engine/rules?id=${ruleId}`,
+    });
+    expect(persisted.data.response_actions?.[0]?.params?.queries).toStrictEqual(
+      expectedPersistedMultiQueries
+    );
   });
 });

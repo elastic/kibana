@@ -10,6 +10,7 @@ import { tags } from '@kbn/scout';
 import { uiTest as test } from '../fixtures';
 import { getMinimalLiveQuery } from '../../api/fixtures/constants';
 import { waitForAtLeastOneAgentOnline } from '../helpers/fleet_agents';
+import { waitForLiveQueryComplete } from '../helpers/poll_live_query_history';
 
 const localTags = [...tags.stateful.classic, ...tags.serverless.security.complete];
 
@@ -21,18 +22,28 @@ test.describe('Live query history', { tag: localTags }, () => {
     // appear on the first page of history, independent of prior test state.
     // Live-query actions are ephemeral records, not persistent SOs, so no
     // cleanup is required here — they age out of history naturally.
+    let lastSeedActionId: string | undefined;
     for (let i = 0; i < 2; i++) {
-      await apiServices.osquery.liveQueries.create(
+      const seed = await apiServices.osquery.liveQueries.create(
         getMinimalLiveQuery({
           query: `select * from uptime; -- history-seed-${Date.now()}-${i}`,
           agent_all: true,
         })
       );
+      lastSeedActionId = (seed.data as { data?: { action_id?: string } }).data?.action_id;
+    }
+
+    // Wait only on the most recent seed — once it completes, the earlier one
+    // has necessarily completed too (agent serializes queries, and both seeds
+    // share the same agent pool), so a single wait covers both.
+    if (lastSeedActionId) {
+      await waitForLiveQueryComplete(kbnClient, lastSeedActionId);
     }
   });
 
   test('re-runs the most recent query from history and restores its editor state', async ({
     browserAuth,
+    kbnClient,
     page,
     pageObjects,
   }) => {
@@ -54,7 +65,11 @@ test.describe('Live query history', { tag: localTags }, () => {
     await pageObjects.osqueryLiveQueryForm.clearAndInputQuery(`select '${uniqueMarker}';`);
     await pageObjects.osqueryLiveQueryForm.clickAdvanced();
     await pageObjects.osqueryLiveQueryForm.fillInQueryTimeout('601');
-    await pageObjects.osqueryLiveQueryForm.submitQuery();
+    const actionId = await pageObjects.osqueryLiveQueryForm.submitQuery();
+    if (actionId) {
+      await waitForLiveQueryComplete(kbnClient, actionId);
+    }
+
     await pageObjects.osqueryLiveQueryForm.waitForResults();
 
     await pageObjects.osqueryNavigation.gotoHistory();
@@ -69,6 +84,7 @@ test.describe('Live query history', { tag: localTags }, () => {
   test('opens query details from history and surfaces the submitted query body', async ({
     apiServices,
     browserAuth,
+    kbnClient,
     page,
     pageObjects,
   }) => {
@@ -79,12 +95,16 @@ test.describe('Live query history', { tag: localTags }, () => {
     // seeds — both of which could land on or off the first page depending on
     // sort + prior state.
     const detailsMarker = `scout-details-${Date.now()}`;
-    await apiServices.osquery.liveQueries.create(
+    const seed = await apiServices.osquery.liveQueries.create(
       getMinimalLiveQuery({
         query: `select '${detailsMarker}';`,
         agent_all: true,
       })
     );
+    const seedActionId = (seed.data as { data?: { action_id?: string } }).data?.action_id;
+    if (seedActionId) {
+      await waitForLiveQueryComplete(kbnClient, seedActionId);
+    }
 
     await browserAuth.loginAsOsqueryPowerUser();
     await pageObjects.osqueryNavigation.gotoHistory();

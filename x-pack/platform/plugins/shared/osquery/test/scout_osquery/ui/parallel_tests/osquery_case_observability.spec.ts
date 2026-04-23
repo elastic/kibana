@@ -10,6 +10,7 @@ import { tags } from '@kbn/scout';
 import { uiTest as test } from '../fixtures';
 import { getMinimalLiveQuery } from '../../api/fixtures/constants';
 import { waitForAtLeastOneAgentOnline } from '../helpers/fleet_agents';
+import { waitForLiveQueryComplete } from '../helpers/poll_live_query_history';
 
 // Observability-owner Cases are not available in serverless security projects —
 // `feature_observabilityCases` is not wired into the security project type, so a
@@ -37,6 +38,7 @@ test.describe('Osquery results attached to Observability cases', { tag: stateful
     );
     const liveBody = live.data as { data: { action_id: string } };
     const actionId = liveBody.data.action_id;
+    await waitForLiveQueryComplete(kbnClient, actionId);
 
     const caseTitle = `scout-oblt-case-${Date.now()}`;
     const createdCase = await apiServices.cases.create({
