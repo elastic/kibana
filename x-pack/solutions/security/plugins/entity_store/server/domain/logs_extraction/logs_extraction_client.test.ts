@@ -81,10 +81,10 @@ jest.mock('../../infra/elasticsearch/ingest');
 
 const mockExecuteEsqlQuery = executeEsqlQuery as jest.MockedFunction<typeof executeEsqlQuery>;
 const mockIngestEntities = ingestEntities as jest.MockedFunction<typeof ingestEntities>;
-
+type Nullable<T> = { [K in keyof T]: T[K] | null };
 function createMockEngineDescriptor(
   type: EntityType = 'user',
-  overrides?: Partial<{
+  overrides?: Nullable<{
     lookbackPeriod: string;
     delay: string;
     paginationTimestamp: string;
@@ -97,13 +97,13 @@ function createMockEngineDescriptor(
   }>
 ) {
   const logExtractionState = {
-    paginationTimestamp: overrides?.paginationTimestamp,
-    paginationId: overrides?.paginationId,
-    lastExecutionTimestamp: overrides?.lastExecutionTimestamp,
-    logsPageCursorStartTimestamp: overrides?.logsPageCursorStartTimestamp,
-    logsPageCursorStartId: overrides?.logsPageCursorStartId,
-    logsPageCursorEndTimestamp: overrides?.logsPageCursorEndTimestamp,
-    logsPageCursorEndId: overrides?.logsPageCursorEndId,
+    paginationTimestamp: overrides?.paginationTimestamp ?? null,
+    paginationId: overrides?.paginationId ?? null,
+    lastExecutionTimestamp: overrides?.lastExecutionTimestamp ?? null,
+    logsPageCursorStartTimestamp: overrides?.logsPageCursorStartTimestamp ?? null,
+    logsPageCursorStartId: overrides?.logsPageCursorStartId ?? null,
+    logsPageCursorEndTimestamp: overrides?.logsPageCursorEndTimestamp ?? null,
+    logsPageCursorEndId: overrides?.logsPageCursorEndId ?? null,
   };
   return {
     type,
