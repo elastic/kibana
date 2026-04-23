@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_SIG_EVENTS_TUNING_CONFIG } from '@kbn/streams-plugin/common/sig_events_tuning_config';
 import {
   BANK_OF_ANTHOS_GCS_BASE_PATH_PREFIX,
   BANK_OF_ANTHOS_NAMESPACE,
@@ -110,7 +111,7 @@ export const bankOfAnthosDataset: DatasetConfig = {
             score: 2,
             sampling_filters: [
               { term: { 'resource.attributes.app': 'userservice' } },
-              { match_phrase: { 'resource.attributes.app': 'accounts-db' } },
+              { term: { 'resource.attributes.app.keyword': 'accounts-db' } },
             ],
           },
           {
@@ -279,7 +280,6 @@ export const bankOfAnthosDataset: DatasetConfig = {
                         ],
                       },
                     },
-                    { match_phrase: { 'resource.attributes.app': 'ledger-db' } },
                   ],
                   minimum_should_match: 1,
                 },
@@ -319,12 +319,11 @@ export const bankOfAnthosDataset: DatasetConfig = {
       },
     },
   ],
-  kiFeatureDuplication: [
+  kiFeatureDeduplication: [
     {
       input: {
         scenario_id: 'healthy-baseline',
-        sample_document_count: 20,
-        runs: 5,
+        iterations: DEFAULT_SIG_EVENTS_TUNING_CONFIG.max_iterations,
       },
     },
   ],

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_SIG_EVENTS_TUNING_CONFIG } from '@kbn/streams-plugin/common/sig_events_tuning_config';
 import {
   GCS_BUCKET,
   QUARKUS_SUPER_HEROES_GCS_BASE_PATH_PREFIX,
@@ -664,12 +665,11 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
       },
     },
   ],
-  kiFeatureDuplication: [
+  kiFeatureDeduplication: [
     {
       input: {
         scenario_id: 'healthy-baseline',
-        sample_document_count: 20,
-        runs: 5,
+        iterations: DEFAULT_SIG_EVENTS_TUNING_CONFIG.max_iterations,
       },
     },
   ],
