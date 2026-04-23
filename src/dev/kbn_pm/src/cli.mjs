@@ -108,7 +108,7 @@ try {
     });
   }
 
-  if (timings.length) {
+  if (timings.length && !args.getBooleanValue('offline')) {
     const reporter = await tryToGetCiStatsReporter(log);
     if (reporter) {
       await reporter.timings({ timings });
