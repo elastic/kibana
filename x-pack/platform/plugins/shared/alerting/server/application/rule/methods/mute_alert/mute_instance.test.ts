@@ -323,6 +323,74 @@ describe('mute alert instance', () => {
     expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
   });
 
+  it('throws 500 when alertsService is null and validateAlertsExistence is true', async () => {
+    const contextWithoutAlertsService = {
+      ...context,
+      alertsService: null,
+    } as unknown as RulesClientContext;
+
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'test-rule-type',
+      attributes: {
+        alertTypeId: '123',
+        schedule: { interval: '10s' },
+        params: { bar: true },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        actions: [],
+        notifyWhen: 'onActiveAlert',
+      },
+      references: [],
+      version: 'v1',
+    });
+
+    await expect(() =>
+      muteInstance(contextWithoutAlertsService, {
+        params: { alertId: '1', alertInstanceId: 'instance1' },
+        query: { validateAlertsExistence: true },
+      })
+    ).rejects.toThrow('Alerts service is unavailable');
+
+    expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
+  });
+
+  it('throws 500 when alertsService is null and a conditional snooze body is provided', async () => {
+    const contextWithoutAlertsService = {
+      ...context,
+      alertsService: null,
+    } as unknown as RulesClientContext;
+
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'test-rule-type',
+      attributes: {
+        alertTypeId: '123',
+        schedule: { interval: '10s' },
+        params: { bar: true },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        actions: [],
+        notifyWhen: 'onActiveAlert',
+      },
+      references: [],
+      version: 'v1',
+    });
+
+    await expect(() =>
+      muteInstance(contextWithoutAlertsService, {
+        params: { alertId: '1', alertInstanceId: 'instance1' },
+        query: { validateAlertsExistence: false },
+        body: {
+          expiresAt: '2026-05-01T00:00:00.000Z',
+          conditions: [{ type: 'field_change', field: 'host.name' }],
+        },
+      })
+    ).rejects.toThrow('Alerts service is unavailable');
+
+    expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
+  });
+
   it('rejects expiresAt that is not a full ISO 8601 date-time string', async () => {
     await expect(() =>
       muteInstance(context, {

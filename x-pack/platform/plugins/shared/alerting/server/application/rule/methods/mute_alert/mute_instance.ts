@@ -101,7 +101,11 @@ async function muteInstanceWithOCC(
   const updatedAt = new Date().toISOString();
   const updatedBy = await context.getUserName();
   const ensureAlertExists = async () => {
-    const isExistingAlert = await context.alertsService?.isExistingAlert({
+    if (!context.alertsService) {
+      throw Boom.internal('Alerts service is unavailable');
+    }
+
+    const isExistingAlert = await context.alertsService.isExistingAlert({
       indices,
       alertId: alertInstanceId,
       ruleId,
@@ -127,8 +131,12 @@ async function muteInstanceWithOCC(
     let snoozeSnapshot: Record<string, unknown> | undefined;
 
     if (snapshotFields.length > 0) {
+      if (!context.alertsService) {
+        throw Boom.internal('Alerts service is unavailable');
+      }
+
       snoozeSnapshot =
-        (await context.alertsService?.getAlertSnoozeSnapshot({
+        (await context.alertsService.getAlertSnoozeSnapshot({
           indices,
           alertId: alertInstanceId,
           ruleId,
