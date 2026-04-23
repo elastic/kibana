@@ -594,7 +594,9 @@ export class LogsExtractionClient {
   ): EngineLogExtractionState {
     return {
       ...state,
-      paginationTimestamp: undefined,
+      // this is the leading state for the next log page if we break in the middle of the processing
+      paginationTimestamp: logsPageCursorEnd.timestampCursor,
+
       paginationId: undefined,
       logsPageCursorEndTimestamp: undefined,
       logsPageCursorEndId: undefined,
@@ -632,25 +634,12 @@ export class LogsExtractionClient {
   ): { fromDateISO: string; toDateISO: string } {
     const fromDateISO =
       engineState.paginationTimestamp ||
-      this.getDelayedLastExecutionTimestamp(engineState, delayMs) ||
+      engineState.lastExecutionTimestamp ||
       this.getFromDateBasedOnLookback(config);
 
     const toDateISO = moment().utc().subtract(delayMs, 'millisecond').toISOString();
 
     return { fromDateISO, toDateISO };
-  }
-
-  private getDelayedLastExecutionTimestamp(
-    engineState: EngineLogExtractionState,
-    durationMs: number
-  ): string | undefined {
-    if (!engineState.lastExecutionTimestamp) {
-      return undefined;
-    }
-
-    return moment(engineState.lastExecutionTimestamp)
-      .subtract(durationMs, 'millisecond')
-      .toISOString();
   }
 
   private getFromDateBasedOnLookback({ lookbackPeriod }: LogExtractionConfig): string {

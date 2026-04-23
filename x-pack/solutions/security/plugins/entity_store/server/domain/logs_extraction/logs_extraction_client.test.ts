@@ -377,10 +377,7 @@ describe('LogsExtractionClient', () => {
 
       const logPageCursorStart = '2025-01-15T06:00:00.000Z';
       const lastExecutionTimestamp = '2025-01-15T11:00:00.000Z';
-      const delayedLastExecution = moment
-        .utc(lastExecutionTimestamp)
-        .subtract(5, 'seconds')
-        .toISOString();
+      const delayedLastExecution = moment.utc(fixedNow).subtract(5, 'seconds').toISOString();
 
       const mockDataView = {
         getIndexPattern: jest.fn().mockReturnValue('logs-*'),
