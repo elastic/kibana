@@ -70,7 +70,7 @@ Post inline on the offending line. Use this format (skip the `<details>` block i
 
 Post exactly one top-level comment using this template. Do not include headings, severity breakdowns, or per-commit logs:
 
-**Backport Review** (target: `<targetBranch>`, source: [#<originalPR>](https://github.com/elastic/kibana/pull/<originalPR>)): <status>
+**Backport Review**: <status>
 <sup>Share feedback in the [#appex-qa](https://elastic.slack.com/archives/C04HT4P1YS3) channel.</sup>
 
 **`<status>` must be exactly one of:**
