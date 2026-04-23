@@ -30,6 +30,7 @@ export function getAccessorNameForXY(
   accessorType: 'x' | 'y' | 'y_ref' | 'breakdown' | 'threshold' | 'event',
   index?: number
 ): string {
+  console.log('test');
   if (index == null) {
     return `${layer.type}_${accessorType}`;
   }

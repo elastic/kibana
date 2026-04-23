@@ -5,21 +5,14 @@
  * 2.0.
  */
 
+import type { Filter } from '@kbn/es-query';
 import type { DataViewsService } from '@kbn/data-views-plugin/public';
 import { type EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { getInitialESQLQuery } from '@kbn/esql-utils';
+import { appendEsqlFilterExpressionToQuery, convertFiltersToESQLExpression } from '@kbn/esql-utils';
 import { createOpenInDiscoverAction } from './open_in_discover_action';
 import type { DiscoverAppLocator } from './open_in_discover_helpers';
 import { getLensApiMock } from '../react_embeddable/mocks';
-
-jest.mock('@kbn/esql-utils', () => {
-  const actual = jest.requireActual('@kbn/esql-utils');
-  return {
-    ...actual,
-    getInitialESQLQuery: jest.fn(() => 'FROM index-pattern-id'),
-  };
-});
 
 describe('open in discover action', () => {
   const compatibleEmbeddableApi = getLensApiMock();
@@ -148,14 +141,89 @@ describe('open in discover action', () => {
     expect(embeddable.getViewUnderlyingDataArgs).toHaveBeenCalled();
     expect(locator.getRedirectUrl).toHaveBeenCalledWith(viewUnderlyingDataArgs);
     expect(globalThis.open).toHaveBeenCalledWith(discoverUrl, '_blank');
-    expect(getInitialESQLQuery).not.toHaveBeenCalled();
   });
 
-  it('navigates to discover for an ES|QL chart with merged filters', async () => {
+  it('merges translatable filters into the ES|QL string for text-based Lens and passes only untranslatable as pills', async () => {
+    const translatable: Filter = {
+      meta: { key: 'machine.os' },
+      query: { match_phrase: { 'machine.os': 'ios' } },
+    };
+    const untranslatable: Filter = {
+      meta: { type: 'range', key: 'scripted_field' },
+      query: {
+        script: {
+          script: {
+            source: 'test',
+            lang: 'painless',
+            params: { gte: 0, lt: 100 },
+          },
+        },
+      },
+    };
+
+    const { esqlExpression: multiExpr, untranslatableFilters } = convertFiltersToESQLExpression([
+      translatable,
+      untranslatable,
+    ]);
+    const expectedEsql = appendEsqlFilterExpressionToQuery('FROM index-pattern-id', multiExpr!);
+
     const viewUnderlyingDataArgs = {
       dataViewSpec: { id: 'index-pattern-id' },
       timeRange: {},
-      filters: [{ meta: { type: 'range' } }],
+      filters: [translatable, untranslatable],
+      query: { esql: 'FROM index-pattern-id' },
+      esqlControls: undefined,
+      columns: ['col_a'],
+    };
+
+    const embeddable = {
+      ...compatibleEmbeddableApi,
+      getViewUnderlyingDataArgs: jest.fn(() => viewUnderlyingDataArgs),
+      isTextBasedLanguage: jest.fn(() => true),
+    };
+
+    const discoverUrl = 'https://discover-redirect-url';
+    const locator = {
+      getRedirectUrl: jest.fn(() => discoverUrl),
+    } as unknown as DiscoverAppLocator;
+
+    globalThis.open = jest.fn();
+
+    await createOpenInDiscoverAction(
+      locator,
+      {
+        get: () => ({
+          isTimeBased: () => true,
+          toSpec: () => ({ id: 'index-pattern-id' }),
+        }),
+      } as unknown as DataViewsService,
+      true
+    ).execute({
+      embeddable,
+    } as ActionExecutionContext<EmbeddableApiContext>);
+
+    expect(multiExpr).toBe('`machine.os` : "ios"');
+    expect(untranslatableFilters).toHaveLength(1);
+    expect(locator.getRedirectUrl).toHaveBeenCalledWith({
+      ...viewUnderlyingDataArgs,
+      query: { esql: expectedEsql },
+      filters: untranslatableFilters,
+    });
+    expect(globalThis.open).toHaveBeenCalledWith(discoverUrl, '_blank');
+  });
+
+  it('passes all filters as pills when text-based but there is no ES|QL in underlying args', async () => {
+    const filters: Filter[] = [
+      {
+        meta: { type: 'range', key: 'bytes' },
+        query: { range: { bytes: { gte: 100, lt: 1000 } } },
+      } as Filter,
+    ];
+
+    const viewUnderlyingDataArgs = {
+      dataViewSpec: { id: 'index-pattern-id' },
+      timeRange: {},
+      filters,
       query: undefined,
       esqlControls: undefined,
       columns: ['viz_metric', 'Over time'],
@@ -187,15 +255,12 @@ describe('open in discover action', () => {
       embeddable,
     } as ActionExecutionContext<EmbeddableApiContext>);
 
-    expect(embeddable.getViewUnderlyingDataArgs).toHaveBeenCalled();
     expect(locator.getRedirectUrl).toHaveBeenCalledWith({
       ...viewUnderlyingDataArgs,
-      query: { esql: 'FROM index-pattern-id' },
-      columns: [],
-      filters: [],
+      query: undefined,
+      filters,
     });
     expect(globalThis.open).toHaveBeenCalledWith(discoverUrl, '_blank');
-    expect(getInitialESQLQuery).toHaveBeenCalled();
   });
 
   it('does not replace query with generated ES|QL for form-based Lens when filters are present', async () => {
@@ -235,6 +300,5 @@ describe('open in discover action', () => {
     } as ActionExecutionContext<EmbeddableApiContext>);
 
     expect(locator.getRedirectUrl).toHaveBeenCalledWith(viewUnderlyingDataArgs);
-    expect(getInitialESQLQuery).not.toHaveBeenCalled();
   });
 });

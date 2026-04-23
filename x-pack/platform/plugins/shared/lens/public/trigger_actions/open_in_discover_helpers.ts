@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import {
+  isOfAggregateQueryType,
+  type AggregateQuery,
+  type Filter,
+  type Query,
+  type TimeRange,
+} from '@kbn/es-query';
 import type { DataViewsService } from '@kbn/data-views-plugin/public';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
@@ -13,7 +19,11 @@ import {
   type EmbeddableApiContext,
   apiIsPresentationContainer,
 } from '@kbn/presentation-publishing';
-import { getEsqlControls, getInitialESQLQuery } from '@kbn/esql-utils';
+import {
+  appendEsqlFilterExpressionToQuery,
+  convertFiltersToESQLExpression,
+  getEsqlControls,
+} from '@kbn/esql-utils';
 import { isLensApi } from '../react_embeddable/type_guards';
 
 interface DiscoverAppLocatorParams extends SerializableRecord {
@@ -46,6 +56,34 @@ export function isCompatible({ hasDiscoverAccess, embeddable }: Context) {
     return false;
   }
 }
+
+const getQueryWithFilter = (
+  originalQuery: Query | AggregateQuery | undefined,
+  filtersToApply: Filter[]
+): {
+  query: Query | AggregateQuery | undefined;
+  untranslatableFilters: Filter[];
+} => {
+  if (!filtersToApply.length) {
+    return { query: originalQuery, untranslatableFilters: [] };
+  }
+
+  if (!isOfAggregateQueryType(originalQuery) || !originalQuery.esql?.trim()) {
+    return { query: originalQuery, untranslatableFilters: filtersToApply };
+  }
+
+  const { esqlExpression, untranslatableFilters } = convertFiltersToESQLExpression(filtersToApply);
+  if (!esqlExpression) {
+    return { query: originalQuery, untranslatableFilters };
+  }
+
+  return {
+    query: {
+      esql: appendEsqlFilterExpressionToQuery(originalQuery.esql, esqlExpression),
+    },
+    untranslatableFilters,
+  };
+};
 
 async function getDiscoverLocationParams({
   embeddable,
@@ -84,23 +122,24 @@ async function getDiscoverLocationParams({
     ? embeddable.parentApi
     : undefined;
 
-  const useGeneratedFromFilters = embeddable.isTextBasedLanguage() && (filters || []).length > 0;
+  const shouldMergeFiltersIntoEsql = embeddable.isTextBasedLanguage() && filtersToApply.length > 0;
 
-  const discoverQuery: AggregateQuery | Query | undefined = useGeneratedFromFilters
-    ? { esql: getInitialESQLQuery(dataView, undefined, filtersToApply) }
-    : args.query;
+  let discoverQuery: AggregateQuery | Query | undefined = args.query;
+  let untranslatableFilters: Filter[] = [];
+  if (shouldMergeFiltersIntoEsql) {
+    const merged = getQueryWithFilter(args.query, filtersToApply);
+    discoverQuery = merged.query;
+    untranslatableFilters = merged.untranslatableFilters;
+  }
 
-  // When filters are baked into the ES|QL string, do not pass the same DSL filters again
-  const filtersForDiscover = useGeneratedFromFilters ? [] : filtersToApply;
+  // Translatable filter predicates are merged into the ES|QL string; the rest stay as Kibana filter pills
+  const filtersForDiscover = shouldMergeFiltersIntoEsql ? untranslatableFilters : filtersToApply;
 
-  const columns = useGeneratedFromFilters ? [] : args.columns;
-
-  const esqlQueryForControls = useGeneratedFromFilters ? discoverQuery : args.query;
+  const esqlQueryForControls = shouldMergeFiltersIntoEsql ? discoverQuery : args.query;
 
   return {
     ...args,
     query: discoverQuery,
-    columns,
     filters: filtersForDiscover,
     timeRange: timeRangeToApply,
     esqlControls: presentationContainer

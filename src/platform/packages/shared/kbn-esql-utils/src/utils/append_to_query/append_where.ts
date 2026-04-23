@@ -327,3 +327,44 @@ export function appendWhereClauseToESQLQuery(
 
   return appendToESQLQuery(baseESQLQuery, `AND ${filterExpression}`);
 }
+
+const isSourceCommand = (name: string) => ['from', 'ts'].includes(name);
+
+/**
+ * Merges a pre-built ES|QL WHERE fragment (e.g. from `convertFiltersToESQLExpression`) into an
+ * existing query. The filter is applied immediately after the first `FROM` / `TS` source command
+ * (so it applies before `STATS` and the rest of the pipeline), not at the end of the query.
+ * If a `WHERE` already follows the source, the expression is combined with `AND`.
+ */
+export function appendEsqlFilterExpressionToQuery(
+  baseESQLQuery: string,
+  filterExpression: string
+): string {
+  const trimmed = filterExpression.trim();
+  if (!trimmed) {
+    return baseESQLQuery;
+  }
+  try {
+    const { root } = Parser.parse(baseESQLQuery);
+    const sourceIndex = root.commands.findIndex((cmd) => isSourceCommand(cmd.name));
+    if (sourceIndex < 0) {
+      return appendToESQLQuery(baseESQLQuery, `| WHERE ${trimmed}`);
+    }
+    const sourceCommand = root.commands[sourceIndex];
+    const nextCommand = root.commands[sourceIndex + 1];
+
+    if (nextCommand?.name === 'where') {
+      return `${baseESQLQuery.substring(
+        0,
+        nextCommand.location.max + 1
+      )} AND ${trimmed}${baseESQLQuery.substring(nextCommand.location.max + 1)}`;
+    }
+
+    const afterSource = sourceCommand.location.max + 1;
+    return `${baseESQLQuery.substring(0, afterSource)}\n| WHERE ${trimmed}${baseESQLQuery.substring(
+      afterSource
+    )}`;
+  } catch {
+    return appendToESQLQuery(baseESQLQuery, `| WHERE ${trimmed}`);
+  }
+}

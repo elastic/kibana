@@ -18,6 +18,7 @@ export const getValueColumn = (
   fieldType: DatatableColumnType = 'string',
   inMetricDimension?: boolean
 ): TextBasedLayerColumn => {
+  console.log('getValueColumn');
   const format = fromFormatAPIToLensState(column?.format);
 
   return {

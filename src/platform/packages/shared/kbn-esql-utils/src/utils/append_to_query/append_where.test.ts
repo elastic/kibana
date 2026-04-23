@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { appendWhereClauseToESQLQuery } from './append_where';
+import { appendEsqlFilterExpressionToQuery, appendWhereClauseToESQLQuery } from './append_where';
 
 describe('appendWhereClauseToESQLQuery', () => {
   it('appends a filter in where clause in an existing query', () => {
@@ -428,6 +428,35 @@ AND MV_CONTAINS(\`tags.keyword\`, ["info", "success"]::keyword)`
     ).toBe(
       `from logs-*
 | WHERE \`message\` == "Error: \\"path\\\\to\\\\file\\"\\nStack trace\\r\\nwith\\ttabs"`
+    );
+  });
+});
+
+describe('appendEsqlFilterExpressionToQuery', () => {
+  it('returns the base query unchanged when the filter expression is empty or whitespace', () => {
+    expect(appendEsqlFilterExpressionToQuery('from logs-*', '')).toBe('from logs-*');
+    expect(appendEsqlFilterExpressionToQuery('from logs-*', '   ')).toBe('from logs-*');
+  });
+
+  it('appends | WHERE when the query has no trailing WHERE command', () => {
+    expect(appendEsqlFilterExpressionToQuery('from logs-*', '`status` : 200')).toBe(
+      `from logs-*
+| WHERE \`status\` : 200`
+    );
+  });
+
+  it('appends AND when the last command is WHERE', () => {
+    expect(appendEsqlFilterExpressionToQuery('from logs-*\n| WHERE `a` : 1', '`b` : 2')).toBe(
+      `from logs-*
+| WHERE \`a\` : 1
+AND \`b\` : 2`
+    );
+  });
+
+  it('falls back to | WHERE when parsing fails', () => {
+    expect(appendEsqlFilterExpressionToQuery('not valid esql !!!', '`x` : 1')).toBe(
+      `not valid esql !!!
+| WHERE \`x\` : 1`
     );
   });
 });
