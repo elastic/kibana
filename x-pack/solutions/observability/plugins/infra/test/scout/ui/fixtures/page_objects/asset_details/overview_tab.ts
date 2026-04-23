@@ -189,20 +189,16 @@ export class OverviewTab extends AssetDetailsTab {
   }
 
   /**
-   * Waits for each KPI Lens chart to finish both attribute resolution and
-   * inner-embeddable rendering. `-loading` clears when Lens attributes are
-   * ready, but elastic-charts may still be painting; waiting on the metric
-   * value element guarantees the heading is in the DOM.
+   * Waits for all KPI Lens charts to finish rendering in parallel. The
+   * `.echMetricText__value` element only appears once elastic-charts has
+   * painted, so it's a sufficient single signal: it implies the outer panel
+   * dropped `-loading`, Lens attributes resolved, and the chart didn't end up
+   * in the `-error` state. Running the waits concurrently shares the budget
+   * across all 4 charts instead of cascading it.
    */
   public async waitForKPIChartsToLoad(timeout?: number) {
-    for (const metric of KPI_METRICS) {
-      await this.kpiGrid
-        .getByTestId(`infraAssetDetailsKPI${metric}-loading`)
-        .waitFor({ state: 'hidden', timeout });
-      await this.kpiGrid
-        .getByTestId(`infraAssetDetailsKPI${metric}-error`)
-        .waitFor({ state: 'hidden' });
-      await this.getKPIValue(metric).waitFor({ state: 'visible', timeout });
-    }
+    await Promise.all(
+      KPI_METRICS.map((metric) => this.getKPIValue(metric).waitFor({ state: 'visible', timeout }))
+    );
   }
 }

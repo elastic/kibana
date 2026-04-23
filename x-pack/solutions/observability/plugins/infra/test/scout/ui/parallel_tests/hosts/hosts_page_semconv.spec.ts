@@ -47,11 +47,14 @@ test.describe(
     test('should display KPI metrics for semconv data', async ({ pageObjects: { hostsPage } }) => {
       const kpiTiles = ['cpuUsage', 'normalizedLoad1m', 'memoryUsage', 'diskUsage'];
 
+      await hostsPage.waitForHostKPIChartsToLoad(kpiTiles, EXTENDED_TIMEOUT);
+
       for (const metric of kpiTiles) {
         await test.step(`verify ${metric} KPI tile has a value`, async () => {
-          const value = hostsPage.getHostKPIChartValueLocator(metric);
-          await expect(value).toBeVisible({ timeout: EXTENDED_TIMEOUT });
-          await expect(value).toHaveAttribute('title', /.+/);
+          await expect(hostsPage.getHostKPIChartValueLocator(metric)).toHaveAttribute(
+            'title',
+            /.+/
+          );
         });
       }
     });
@@ -96,7 +99,7 @@ test.describe(
           assetDetailsPage.hostOverviewTab.kpiCpuUsageChart.getByRole('heading', {
             name: 'CPU Usage',
           })
-        ).toBeVisible({ timeout: EXTENDED_TIMEOUT });
+        ).toBeVisible();
       });
     });
   }

@@ -42,7 +42,7 @@ test.describe(
           assetDetailsPage.hostOverviewTab.kpiCpuUsageChart.getByRole('heading', {
             name: 'CPU Usage',
           })
-        ).toBeVisible({ timeout: EXTENDED_TIMEOUT });
+        ).toBeVisible();
         await expect(
           assetDetailsPage.hostOverviewTab.kpiNormalizedLoadChart.getByRole('heading', {
             name: 'Normalized Load',

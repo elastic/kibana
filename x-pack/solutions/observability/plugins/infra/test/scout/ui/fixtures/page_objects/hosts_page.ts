@@ -204,6 +204,19 @@ export class HostsPage {
       .locator('.echMetricText__value');
   }
 
+  /**
+   * Waits for the shared host KPI tiles to finish rendering. Uses parallel
+   * `waitFor` calls so the budget is shared across charts instead of compounding
+   * when one takes longer to render than the others (a common CI flake source).
+   */
+  public async waitForHostKPIChartsToLoad(metrics: readonly string[], timeout?: number) {
+    await Promise.all(
+      metrics.map((metric) =>
+        this.getHostKPIChartValueLocator(metric).waitFor({ state: 'visible', timeout })
+      )
+    );
+  }
+
   // Metrics tab
 
   public async visitMetricsTab() {

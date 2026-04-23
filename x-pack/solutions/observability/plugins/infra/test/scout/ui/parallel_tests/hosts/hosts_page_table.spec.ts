@@ -100,6 +100,9 @@ test.describe(
       });
 
       const kpiTiles = ['cpuUsage', 'memoryUsage', 'normalizedLoad1m', 'diskUsage'];
+
+      await hostsPage.waitForHostKPIChartsToLoad(kpiTiles, EXTENDED_TIMEOUT);
+
       for (const metric of kpiTiles) {
         await test.step(`verify ${metric} KPI is present`, async () => {
           await expect(hostsPage.getHostKPIChartValueLocator(metric)).toHaveAttribute(
