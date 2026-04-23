@@ -42,7 +42,8 @@ describe('registerWorkflowSteps (server)', () => {
     registerWorkflowSteps(workflowsExtensions, core);
 
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(2);
-    expect(core.getStartServices).not.toHaveBeenCalled();
+    // getStartServices is called once eagerly to create the shared memoized promise
+    expect(core.getStartServices).toHaveBeenCalledTimes(1);
   });
 
   it('async loader returns step definitions when feature flag is enabled', async () => {
@@ -73,17 +74,18 @@ describe('registerWorkflowSteps (server)', () => {
     await expect(loader2()).resolves.toBeUndefined();
   });
 
-  it('checks the correct feature flag key and default value', async () => {
+  it('checks the feature flag exactly once even when both loaders resolve', async () => {
     const { core, coreStart } = buildCoreMock(true);
     const workflowsExtensions = createWorkflowsExtensionsMock();
 
     registerWorkflowSteps(workflowsExtensions, core);
 
-    const [loader] = workflowsExtensions.registerStepDefinition.mock.calls.map(
+    const [loader1, loader2] = workflowsExtensions.registerStepDefinition.mock.calls.map(
       ([arg]) => arg as StepLoader
     );
-    await loader();
+    await Promise.all([loader1(), loader2()]);
 
+    expect(coreStart.featureFlags.getBooleanValue).toHaveBeenCalledTimes(1);
     expect(coreStart.featureFlags.getBooleanValue).toHaveBeenCalledWith(
       REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG,
       REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT

@@ -23,21 +23,22 @@ export const registerWorkflowSteps = (
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup,
   core: CoreSetup
 ): void => {
-  const isEnabled = async () => {
-    const [coreStart] = await core.getStartServices();
-    return coreStart.featureFlags.getBooleanValue(
-      REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG,
-      REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT
+  const isEnabled = core
+    .getStartServices()
+    .then(([coreStart]) =>
+      coreStart.featureFlags.getBooleanValue(
+        REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG,
+        REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT
+      )
     );
-  };
 
   workflowsExtensions.registerStepDefinition(async () => {
-    if (!(await isEnabled())) return undefined;
+    if (!(await isEnabled)) return undefined;
     return renderAlertNarrativeStepDefinition;
   });
 
   workflowsExtensions.registerStepDefinition(async () => {
-    if (!(await isEnabled())) return undefined;
+    if (!(await isEnabled)) return undefined;
     return buildAlertEntityGraphStepDefinition;
   });
 };
