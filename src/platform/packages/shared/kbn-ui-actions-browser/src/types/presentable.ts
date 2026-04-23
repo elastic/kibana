@@ -8,7 +8,7 @@
  */
 
 import type { FC } from 'react';
-import type { EuiIconProps } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
 
 /**
  * Represents something that can be displayed to user in UI.
@@ -34,7 +34,7 @@ export interface Presentable<Context = unknown> {
   /**
    * Optional EUI icon type that can be displayed along with the title.
    */
-  getIconType(context: Context): string | undefined | FC<EuiIconProps>;
+  getIconType(context: Context): IconType | undefined;
 
   /**
    * Returns a title to be displayed to the user.
