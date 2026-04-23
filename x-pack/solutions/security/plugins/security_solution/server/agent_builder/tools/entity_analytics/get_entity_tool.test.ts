@@ -1278,12 +1278,7 @@ describe('getEntityTool', () => {
             { name: 'host.name', type: 'keyword' },
           ],
           values: [
-            [
-              'host:LAPTOP-SALES05',
-              'LAPTOP-SALES05',
-              'host',
-              ['LAPTOP-SALES04', 'LAPTOP-SALES05'],
-            ],
+            ['host:LAPTOP-SALES05', 'LAPTOP-SALES05', 'host', ['LAPTOP-SALES04', 'LAPTOP-SALES05']],
           ],
         });
 

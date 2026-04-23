@@ -305,21 +305,13 @@ const normalizeParams = (params: ToolParams, logger: Logger): ToolParams => {
     out.lastSeenBefore = undefined;
   }
 
-  if (
-    out.firstSeenAfter &&
-    out.firstSeenBefore &&
-    out.firstSeenAfter === out.firstSeenBefore
-  ) {
+  if (out.firstSeenAfter && out.firstSeenBefore && out.firstSeenAfter === out.firstSeenBefore) {
     dropped.push('firstSeenAfter', 'firstSeenBefore');
     out.firstSeenAfter = undefined;
     out.firstSeenBefore = undefined;
   }
 
-  if (
-    out.lastSeenAfter &&
-    out.lastSeenBefore &&
-    out.lastSeenAfter === out.lastSeenBefore
-  ) {
+  if (out.lastSeenAfter && out.lastSeenBefore && out.lastSeenAfter === out.lastSeenBefore) {
     dropped.push('lastSeenAfter', 'lastSeenBefore');
     out.lastSeenAfter = undefined;
     out.lastSeenBefore = undefined;
