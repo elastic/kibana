@@ -33,7 +33,7 @@ download_artifacts() {
   echo "Unzip kibana build, plugins and scalability traces"
   cd "$WORKSPACE"
   mkdir -p "$KIBANA_BUILD_LOCATION"
-  tar -xzf "${LATEST_RUN_ARTIFACTS_DIR}/kibana-default.tar.gz" -C "$KIBANA_BUILD_LOCATION" --strip=1
+  tar -xf "${LATEST_RUN_ARTIFACTS_DIR}/kibana-default.tar.zst" -I zstd -C "$KIBANA_BUILD_LOCATION" --strip=1
 
   cd "$KIBANA_DIR"
   tar -xzf "${LATEST_RUN_ARTIFACTS_DIR}/scalability_traces.tar.gz"

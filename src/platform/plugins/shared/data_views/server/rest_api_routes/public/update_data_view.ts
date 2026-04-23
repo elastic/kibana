@@ -26,6 +26,7 @@ import {
   SERVICE_KEY,
   SERVICE_KEY_LEGACY,
   INITIAL_REST_VERSION,
+  UPDATE_DATA_VIEW_SUMMARY,
   UPDATE_DATA_VIEW_DESCRIPTION,
 } from '../../constants';
 import { toApiSpec } from './util/to_api_spec';
@@ -136,7 +137,7 @@ export const updateDataView = async ({
 };
 
 const updateDataViewRouteFactory =
-  (path: string, serviceKey: string, description?: string) =>
+  (path: string, serviceKey: string, summary?: string, description?: string) =>
   (
     router: IRouter,
     getStartServices: StartServicesAccessor<
@@ -149,6 +150,7 @@ const updateDataViewRouteFactory =
       .post({
         path,
         access: 'public',
+        summary,
         description,
         security: {
           authz: {
@@ -166,12 +168,21 @@ const updateDataViewRouteFactory =
                   id: schema.string({
                     minLength: 1,
                     maxLength: 1_000,
+                    meta: { description: 'The unique identifier of the data view to update.' },
                   }),
                 },
                 { unknowns: 'allow' }
               ),
               body: schema.object({
-                refresh_fields: schema.maybe(schema.boolean({ defaultValue: false })),
+                refresh_fields: schema.maybe(
+                  schema.boolean({
+                    defaultValue: false,
+                    meta: {
+                      description:
+                        'When `true`, reloads the data view fields after the data view is updated.',
+                    },
+                  })
+                ),
                 [serviceKey]: indexPatternUpdateSchema,
               }),
             },
@@ -230,10 +241,13 @@ const updateDataViewRouteFactory =
 export const registerUpdateDataViewRoute = updateDataViewRouteFactory(
   SPECIFIC_DATA_VIEW_PATH,
   SERVICE_KEY,
+  UPDATE_DATA_VIEW_SUMMARY,
   UPDATE_DATA_VIEW_DESCRIPTION
 );
 
 export const registerUpdateDataViewRouteLegacy = updateDataViewRouteFactory(
   SPECIFIC_DATA_VIEW_PATH_LEGACY,
-  SERVICE_KEY_LEGACY
+  SERVICE_KEY_LEGACY,
+  UPDATE_DATA_VIEW_SUMMARY,
+  'Deprecated in 8.0.0. Use the data_views/data_view/{id} endpoint instead.'
 );

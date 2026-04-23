@@ -18,10 +18,13 @@ import { onboardingHubTelemetryEvents } from './onboarding';
 import { previewRuleTelemetryEvents } from './preview_rule';
 import { siemMigrationsTelemetryEvents } from './siem_migrations';
 import { ruleUpgradeTelemetryEvents } from './rule_upgrade';
+import { ruleCreationTelemetryEvents } from './rule_creation';
 import { aiValueReportTelemetryEvents } from './ai_value_report';
 import { attacksTelemetryEvents } from './attacks';
+import { siemReadinessTelemetryEvents } from './siem_readiness';
 
 export const telemetryEvents = [
+  ...ruleCreationTelemetryEvents,
   ...attacksTelemetryEvents,
   ...alertsTelemetryEvents,
   ...previewRuleTelemetryEvents,
@@ -38,4 +41,5 @@ export const telemetryEvents = [
   ...siemMigrationsTelemetryEvents,
   ...aiValueReportTelemetryEvents,
   ...trialCompanionTelemetryEvents,
+  ...siemReadinessTelemetryEvents,
 ];
