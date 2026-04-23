@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -42,18 +42,16 @@ export const FeedbackContainerSkeleton = () => {
         <EuiSkeletonRectangle width="100%" height={52} borderRadius="s" />
       </EuiFlexItem>
       <EuiSpacer size="m" />
-      <EuiFlexItem grow={false}>
-        <EuiSkeletonText lines={1} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiSkeletonRectangle width="100%" height={108} borderRadius="s" />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiSkeletonText lines={1} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiSkeletonRectangle width="100%" height={108} borderRadius="s" />
-      </EuiFlexItem>
+      {Array.from({ length: 2 }, (_, i) => (
+        <Fragment key={i}>
+          <EuiFlexItem grow={false}>
+            <EuiSkeletonText lines={1} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiSkeletonRectangle width="100%" height={108} borderRadius="s" />
+          </EuiFlexItem>
+        </Fragment>
+      ))}
       <EuiSpacer size="l" />
       <EuiFlexItem grow={false}>
         <EuiSkeletonRectangle width="100%" height={72} borderRadius="s" />

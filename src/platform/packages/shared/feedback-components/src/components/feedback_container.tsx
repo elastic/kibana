@@ -16,6 +16,7 @@ import { FeedbackHeader } from './header';
 import { FeedbackBody } from './body/feedback_body';
 import { FeedbackFooter } from './footer/feedback_footer';
 import { FeedbackContainerSkeleton } from './feedback_container_skeleton';
+import { useQuestionsForApp } from '../hooks/use_questions_for_app';
 
 interface Props {
   getQuestions: (appId: string) => Promise<FeedbackRegistryEntry[]>;
@@ -43,10 +44,9 @@ export const FeedbackContainer = ({
   const [isEmailValid, setIsEmailValid] = useState(true);
   const [forceShowEmailError, setForceShowEmailError] = useState(false);
 
-  const [questions, setQuestions] = useState<FeedbackRegistryEntry[]>([]);
-  const [isLoadingQuestions, setIsLoadingQuestions] = useState(true);
-
   const { title: appTitle, id: appId, url: appUrl } = getAppDetails();
+
+  const { questions, isLoading, error } = useQuestionsForApp({ getQuestions, appId });
 
   const containerCss = css`
     padding: ${euiTheme.size.l};
@@ -54,33 +54,18 @@ export const FeedbackContainer = ({
   `;
 
   useEffect(() => {
-    const abortController = new AbortController();
-    setIsLoadingQuestions(true);
-    getQuestions(appId)
-      .then((q) => {
-        if (!abortController.signal.aborted) {
-          setQuestions(q);
-          setIsLoadingQuestions(false);
-        }
-      })
-      .catch(() => {
-        if (!abortController.signal.aborted) {
-          setIsLoadingQuestions(false);
-          hideFeedbackContainer();
-          showToast(
-            i18n.translate('feedback.loadQuestionsFailureToast.title', {
-              defaultMessage: 'Failed to load feedback form. Please try again later.',
-            }),
-            'error'
-          );
-        }
-      });
-    return () => {
-      abortController.abort();
-    };
-  }, [getQuestions, appId, hideFeedbackContainer, showToast]);
+    if (error) {
+      hideFeedbackContainer();
+      showToast(
+        i18n.translate('feedback.loadQuestionsFailureToast.title', {
+          defaultMessage: 'Failed to load feedback form. Please try again later.',
+        }),
+        'error'
+      );
+    }
+  }, [error, hideFeedbackContainer, showToast]);
 
-  if (isLoadingQuestions) {
+  if (isLoading || error) {
     return <FeedbackContainerSkeleton />;
   }
 
