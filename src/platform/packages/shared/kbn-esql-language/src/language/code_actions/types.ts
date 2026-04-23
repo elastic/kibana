@@ -12,7 +12,7 @@ import type { ESQLCallbacks } from '@kbn/esql-types';
 export interface QuickFix {
   // Title of the quick fix button
   title: string;
-  // A function that recieves the current query and returns it corrected.
+  // A function that receives the current query and returns it corrected.
   fixQuery: (query: string) => string;
   // A function that determines if the quick fix should be displayed under some special condition,
   // it will be always visible if not provided.
