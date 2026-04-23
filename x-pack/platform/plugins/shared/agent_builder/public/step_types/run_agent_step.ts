@@ -7,7 +7,10 @@
 
 import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
-import { runAgentStepCommonDefinition, RunAgentOutputSchema } from '../../common/step_types';
+import {
+  runAgentStepCommonDefinition,
+  OutputSchema as RunAgentOutputSchema,
+} from '../../common/step_types/run_agent_step';
 
 export const runAgentStepDefinition = createPublicStepDefinition({
   ...runAgentStepCommonDefinition,
