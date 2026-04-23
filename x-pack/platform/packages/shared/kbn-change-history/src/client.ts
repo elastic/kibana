@@ -294,7 +294,7 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
       { '@timestamp': { order: 'desc' } },
       { 'event.id': { order: 'desc' } },
     ];
-    const history = await client.search<Record<string, ChangeHistoryDocument>>({
+    const history = await client.search({
       space: spaceId,
       query: { bool: { filter } },
       sort: opts?.sort ?? defaultSort,
