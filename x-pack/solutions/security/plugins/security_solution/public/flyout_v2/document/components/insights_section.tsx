@@ -26,7 +26,7 @@ import { useExpandSection } from '../../shared/hooks/use_expand_section';
 import { ThreatIntelligenceOverview } from './threat_intelligence_overview';
 import { CorrelationsOverview } from './correlations_overview';
 import { PrevalenceOverview } from './prevalence_overview';
-import { PrevalenceDetails } from '../../prevalence/prevalence';
+import { PrevalenceDetails } from '../../prevalence';
 import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { CorrelationsDetails } from '../../correlations';
@@ -35,6 +35,7 @@ import {
   defaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
 } from '../../shared/hooks/use_default_flyout_properties';
+import { ChildLink } from '../../shared/components/child_link';
 
 export const INSIGHTS_SECTION_TEST_ID = `${PREFIX}InsightsSection` as const;
 
@@ -168,7 +169,7 @@ export const InsightsSection = memo(({ hit, onAlertUpdated }: InsightsSectionPro
             hit={hit}
             investigationFields={investigationFields}
             scopeId={''}
-            columns={getColumns(cellActionRenderer, isInSecurityApp, '')}
+            columns={getColumns(cellActionRenderer, isInSecurityApp, '', ChildLink)}
           />
         ),
       }),

@@ -12,8 +12,10 @@ import userEvent from '@testing-library/user-event';
 import { EuiProvider } from '@elastic/eui';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { AgentBuilderAnnouncementModal } from './agent_builder_announcement_modal';
+import * as i18n from './translations';
 
 const defaultProps = {
+  variant: '1b' as const,
   onContinue: jest.fn(),
   onRevert: jest.fn(),
 };
@@ -57,21 +59,40 @@ describe('AgentBuilderAnnouncementModal', () => {
     expect(defaultProps.onContinue).toHaveBeenCalled();
   });
 
-  it('hides revert, omits bullets and history callout, and shows documentation link when canRevertToAssistant is false', () => {
-    renderWithEui(<AgentBuilderAnnouncementModal {...defaultProps} canRevertToAssistant={false} />);
+  it('variant 1a shows feature list and no important notes or revert', () => {
+    renderWithEui(<AgentBuilderAnnouncementModal {...defaultProps} variant="1a" />);
 
+    expect(screen.getByText(i18n.FEATURE_TAKES_ACTION_TITLE)).toBeInTheDocument();
+    expect(screen.queryByTestId('agentBuilderAnnouncementImportantNotes')).not.toBeInTheDocument();
     expect(screen.queryByTestId('agentBuilderAnnouncementRevertButton')).not.toBeInTheDocument();
-    expect(screen.queryByText('What to expect:')).not.toBeInTheDocument();
-    expect(screen.queryByText('Need your history?')).not.toBeInTheDocument();
-    expect(screen.getByTestId('agentBuilderAnnouncementLearnMoreCallout')).toBeInTheDocument();
-    const docLink = screen.getByTestId('agentBuilderAnnouncementDocumentationLink');
-    expect(docLink).toHaveAttribute(
+    expect(screen.getByTestId('agentBuilderAnnouncementModal-1a')).toBeInTheDocument();
+  });
+
+  it('variant 1b shows features, important notes with settings copy, and revert', () => {
+    renderWithEui(<AgentBuilderAnnouncementModal {...defaultProps} variant="1b" />);
+
+    expect(screen.getByText(i18n.FEATURE_TAKES_ACTION_TITLE)).toBeInTheDocument();
+    expect(screen.getByTestId('agentBuilderAnnouncementImportantNotes')).toBeInTheDocument();
+    expect(screen.getByText(i18n.NOTE_REVERT_IN_SETTINGS)).toBeInTheDocument();
+    expect(screen.getByTestId('agentBuilderAnnouncementRevertButton')).toBeInTheDocument();
+  });
+
+  it('variant 2a shows important notes with admin copy, no features, no revert', () => {
+    renderWithEui(<AgentBuilderAnnouncementModal {...defaultProps} variant="2a" />);
+
+    expect(screen.queryByText(i18n.FEATURE_TAKES_ACTION_TITLE)).not.toBeInTheDocument();
+    expect(screen.getByTestId('agentBuilderAnnouncementImportantNotes')).toBeInTheDocument();
+    expect(screen.getByText(i18n.NOTE_CONTACT_ADMIN)).toBeInTheDocument();
+    expect(screen.queryByTestId('agentBuilderAnnouncementRevertButton')).not.toBeInTheDocument();
+  });
+
+  it('release notes link points at documentation URL', () => {
+    renderWithEui(<AgentBuilderAnnouncementModal {...defaultProps} variant="1a" />);
+
+    const releaseNotes = screen.getByTestId('agentBuilderAnnouncementReleaseNotesButton');
+    expect(releaseNotes).toHaveAttribute(
       'href',
       'https://www.elastic.co/docs/explore-analyze/ai-features/elastic-agent-builder'
-    );
-    expect(screen.getByText(/Learn more in our/i)).toBeInTheDocument();
-    expect(screen.getByTestId('agentBuilderAnnouncementContinueButton')).toHaveTextContent(
-      'Got it'
     );
   });
 });

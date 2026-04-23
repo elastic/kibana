@@ -14,6 +14,8 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_co
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 import {
+  createEsqlView,
+  deleteEsqlView,
   deleteStream,
   disableStreams,
   enableStreams,
@@ -26,9 +28,6 @@ import {
   putStream,
 } from './helpers/requests';
 
-/**
- * Helper to create a query stream upsert request
- */
 function createQueryStreamRequest(
   esql: string,
   viewName: string,
@@ -46,31 +45,6 @@ function createQueryStreamRequest(
     },
     ...emptyAssets,
   };
-}
-
-/**
- * Helper to create an ES|QL view (simulating wired stream views that will land soon)
- */
-async function createEsqlView(esClient: Client, viewName: string, query: string): Promise<void> {
-  await esClient.transport.request({
-    method: 'PUT',
-    path: `/_query/view/${viewName}`,
-    body: { query },
-  });
-}
-
-/**
- * Helper to delete an ES|QL view
- */
-async function deleteEsqlView(esClient: Client, viewName: string): Promise<void> {
-  try {
-    await esClient.transport.request({
-      method: 'DELETE',
-      path: `/_query/view/${viewName}`,
-    });
-  } catch {
-    // Ignore if view doesn't exist
-  }
 }
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {

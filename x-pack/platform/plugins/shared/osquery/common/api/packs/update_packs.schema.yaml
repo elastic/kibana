@@ -27,47 +27,42 @@ components:
         type: object
         properties:
           data:
-            description: 'The updated pack.'
             type: object
             properties:
               saved_object_id:
                 description: 'The saved object ID of the pack.'
                 type: string
               name:
-                description: 'The pack name.'
-                type: string
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackName'
               description:
-                description: 'The pack description.'
-                type: string
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackDescriptionOrUndefined'
               queries:
-                description: 'The queries in the pack.'
-                type: object
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ObjectQueries'
               version:
-                description: 'The pack version.'
+                description: 'The pack version number.'
                 type: integer
               enabled:
-                description: 'Whether the pack is enabled.'
-                type: boolean
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/EnabledOrUndefined'
               created_at:
-                description: 'The creation timestamp.'
                 type: string
+                format: date-time
               created_by:
-                description: 'The user who created the pack.'
+                type: string
+                nullable: true
+              created_by_profile_uid:
                 type: string
               updated_at:
-                description: 'The last update timestamp.'
                 type: string
+                format: date-time
               updated_by:
-                description: 'The user who last updated the pack.'
+                type: string
+                nullable: true
+              updated_by_profile_uid:
                 type: string
               policy_ids:
-                description: 'A list of agent policy IDs associated with the pack.'
-                type: array
-                items:
-                  type: string
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PolicyIdsOrUndefined'
               shards:
-                description: 'Shard configuration for the pack.'
-                type: object
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/Shards'
         example:
           data:
             saved_object_id: "1c266590-381f-428c-878f-c80c1334f856"
