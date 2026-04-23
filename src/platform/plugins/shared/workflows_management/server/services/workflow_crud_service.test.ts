@@ -8,10 +8,13 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import type { WorkflowCrudDeps } from './types';
 import { WorkflowCrudService } from './workflow_crud_service';
+import type { WorkflowExecutionQueryService } from './workflow_execution_query_service';
+import type { WorkflowValidationService } from './workflow_validation_service';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 
 const makeSource = (overrides?: Partial<WorkflowProperties>): WorkflowProperties => ({
@@ -42,17 +45,24 @@ const makeDeps = (
   clientOverrides?: Partial<ReturnType<typeof makeStorageClient>>
 ): { deps: WorkflowCrudDeps; client: ReturnType<typeof makeStorageClient> } => {
   const client = { ...makeStorageClient(), ...clientOverrides };
-  const deps: WorkflowCrudDeps = {
-    logger: loggerMock.create(),
-    workflowStorage: { getClient: () => client } as any,
-    getSecurity: () => undefined,
-    workflowsExtensions: undefined,
-    getTaskScheduler: () => null,
+  const executionQueryService = {
     getWorkflowExecutions: jest.fn().mockResolvedValue({ total: 0, results: [] }),
+  } as unknown as WorkflowExecutionQueryService;
+  const validationService = {
     getWorkflowZodSchema: jest.fn().mockResolvedValue({
       parse: (v: unknown) => v,
       safeParse: (v: unknown) => ({ success: true, data: v }),
     }),
+  } as unknown as WorkflowValidationService;
+  const deps: WorkflowCrudDeps = {
+    logger: loggerMock.create(),
+    esClient: elasticsearchServiceMock.createElasticsearchClient(),
+    workflowStorage: { getClient: () => client } as any,
+    getSecurity: () => undefined,
+    workflowsExtensions: undefined,
+    getTaskScheduler: () => null,
+    executionQueryService,
+    validationService,
   };
   return { deps, client };
 };
@@ -110,6 +120,28 @@ describe('WorkflowCrudService', () => {
       const service = new WorkflowCrudService(deps);
 
       await expect(service.getWorkflow('wf-1', 'default')).rejects.toThrow('internal server error');
+    });
+
+    it('excludes soft-deleted workflows by default', async () => {
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValue({ hits: { hits: [] } });
+
+      const service = new WorkflowCrudService(deps);
+      await service.getWorkflow('wf-1', 'default');
+
+      const query = client.search.mock.calls[0][0].query.bool;
+      expect(query.must_not).toContainEqual({ exists: { field: 'deleted_at' } });
+    });
+
+    it('includes soft-deleted workflows when opted in', async () => {
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValue({ hits: { hits: [] } });
+
+      const service = new WorkflowCrudService(deps);
+      await service.getWorkflow('wf-1', 'default', { includeDeleted: true });
+
+      const query = client.search.mock.calls[0][0].query.bool;
+      expect(query.must_not ?? []).not.toContainEqual({ exists: { field: 'deleted_at' } });
     });
   });
 

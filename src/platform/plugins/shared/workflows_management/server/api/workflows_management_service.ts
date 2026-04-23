@@ -59,7 +59,6 @@ import type {
 
 import type { BulkFailureEntry } from '../lib/bulk_id_helpers';
 import { WorkflowCrudService } from '../services/workflow_crud_service';
-import { WorkflowDeletionService } from '../services/workflow_deletion_service';
 import { WorkflowExecutionQueryService } from '../services/workflow_execution_query_service';
 import { WorkflowSearchService } from '../services/workflow_search_service';
 import { WorkflowValidationService } from '../services/workflow_validation_service';
@@ -89,7 +88,6 @@ export class WorkflowsService {
   private validationService!: WorkflowValidationService;
   private executionQueryService!: WorkflowExecutionQueryService;
   private searchService!: WorkflowSearchService;
-  private deletionService!: WorkflowDeletionService;
   private crudService!: WorkflowCrudService;
   private getActionsClient: () => Promise<IUnsecuredActionsClient>;
   private getActionsClientWithRequest: (
@@ -160,45 +158,44 @@ export class WorkflowsService {
       esClient: this.esClient,
     });
 
-    this.deletionService = new WorkflowDeletionService({
-      logger: this.logger,
-      workflowStorage: this.workflowStorage,
-      esClient: this.esClient,
-      getTaskScheduler: () => this.taskScheduler,
-      getWorkflowExecutions: (params, sp) =>
-        this.executionQueryService.getWorkflowExecutions(params, sp),
-    });
-
     this.crudService = new WorkflowCrudService({
       logger: this.logger,
+      esClient: this.esClient,
       workflowStorage: this.workflowStorage,
       getSecurity: () => this.security,
       workflowsExtensions: this.workflowsExtensions,
       getTaskScheduler: () => this.taskScheduler,
-      getWorkflowExecutions: (params, sp) =>
-        this.executionQueryService.getWorkflowExecutions(params, sp),
-      getWorkflowZodSchema: (options, spaceId, request) =>
-        this.validationService.getWorkflowZodSchema(options, spaceId, request),
+      executionQueryService: this.executionQueryService,
+      validationService: this.validationService,
     });
   }
 
-  public async getWorkflow(id: string, spaceId: string): Promise<WorkflowDetailDto | null> {
+  public async getWorkflow(
+    id: string,
+    spaceId: string,
+    options?: { includeDeleted?: boolean }
+  ): Promise<WorkflowDetailDto | null> {
     await this.ensureInitialized();
-    return this.crudService.getWorkflow(id, spaceId);
+    return this.crudService.getWorkflow(id, spaceId, options);
   }
 
-  public async getWorkflowsByIds(ids: string[], spaceId: string): Promise<WorkflowDetailDto[]> {
+  public async getWorkflowsByIds(
+    ids: string[],
+    spaceId: string,
+    options?: { includeDeleted?: boolean }
+  ): Promise<WorkflowDetailDto[]> {
     await this.ensureInitialized();
-    return this.crudService.getWorkflowsByIds(ids, spaceId);
+    return this.crudService.getWorkflowsByIds(ids, spaceId, options);
   }
 
   public async getWorkflowsSourceByIds(
     ids: string[],
     spaceId: string,
-    source?: string[]
+    source?: string[],
+    options?: { includeDeleted?: boolean }
   ): Promise<WorkflowPartialDetailDto[]> {
     await this.ensureInitialized();
-    return this.crudService.getWorkflowsSourceByIds(ids, spaceId, source);
+    return this.crudService.getWorkflowsSourceByIds(ids, spaceId, source, options);
   }
 
   public async createWorkflow(
@@ -236,7 +233,7 @@ export class WorkflowsService {
     options?: { force?: boolean }
   ): Promise<DeleteWorkflowsResponse> {
     await this.ensureInitialized();
-    return this.deletionService.deleteWorkflows(ids, spaceId, options);
+    return this.crudService.deleteWorkflows(ids, spaceId, options);
   }
 
   public async disableAllWorkflows(): Promise<{
@@ -245,7 +242,7 @@ export class WorkflowsService {
     failures: Array<{ id: string; error: string }>;
   }> {
     await this.ensureInitialized();
-    return this.deletionService.disableAllWorkflows();
+    return this.crudService.disableAllWorkflows();
   }
 
   public async getWorkflowsSubscribedToTrigger(
