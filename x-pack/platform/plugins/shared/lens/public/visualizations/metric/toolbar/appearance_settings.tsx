@@ -17,7 +17,7 @@ import type {
   MetricLayoutWithDefault,
 } from '@kbn/lens-common';
 import {
-  LENS_METRIC_LAYOUT_BY_POSITION,
+  LENS_METRIC_STYLE_TEMPLATE,
   LENS_LEGACY_METRIC_STATE_DEFAULTS,
   LENS_METRIC_STATE_DEFAULTS,
 } from '@kbn/lens-common';
@@ -40,7 +40,7 @@ const getDefaultLayoutConfig = (
   primaryMetricPosition: PrimaryMetricPosition,
   { hasMetricIcon, hasSecondaryMetric }: { hasMetricIcon: boolean; hasSecondaryMetric: boolean }
 ): MetricLayoutWithDefault => {
-  let config = { ...LENS_METRIC_LAYOUT_BY_POSITION[primaryMetricPosition] };
+  let config = { ...LENS_METRIC_STYLE_TEMPLATE[primaryMetricPosition] };
 
   if (!hasMetricIcon) {
     const { iconAlign, ...rest } = config;

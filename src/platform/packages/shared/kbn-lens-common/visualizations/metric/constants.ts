@@ -27,41 +27,43 @@ export const LENS_LEGACY_METRIC_STATE_DEFAULTS: Pick<MetricStateDefaults, 'iconA
 };
 
 /**
- * Defaults for select optional Metric vis state options
+ * Style template presets by primary metric position
  */
-export const LENS_METRIC_STATE_DEFAULTS: MetricStateDefaults = {
-  titlesTextAlign: 'left',
-  primaryAlign: 'right',
-  secondaryAlign: 'right',
-  iconAlign: 'right',
-  valueFontMode: 'default',
-  primaryPosition: 'bottom',
-  secondaryLabelPosition: 'before',
-  applyColorTo: 'background',
-};
-
-export const LENS_METRIC_LAYOUT_BY_POSITION: Record<
-  PrimaryMetricPosition,
-  MetricLayoutWithDefault
-> = {
+export const LENS_METRIC_STYLE_TEMPLATE: Record<PrimaryMetricPosition, MetricLayoutWithDefault> = {
   bottom: {
     titlesTextAlign: 'left',
-    primaryAlign: 'right',
-    iconAlign: 'right',
-    secondaryAlign: 'right',
+    primaryAlign: 'left',
+    iconAlign: 'left',
+    secondaryAlign: 'left',
   },
   middle: {
     titlesTextAlign: 'left',
-    primaryAlign: 'center',
-    iconAlign: 'right',
-    secondaryAlign: 'right',
+    primaryAlign: 'left',
+    iconAlign: 'left',
+    secondaryAlign: 'left',
   },
   top: {
     titlesTextAlign: 'left',
     primaryAlign: 'left',
-    iconAlign: 'right',
+    iconAlign: 'left',
     secondaryAlign: 'left',
   },
+};
+
+const DEFAULT_STYLE_TEMPLATE: PrimaryMetricPosition = 'top';
+const defaultStyleTemplate = LENS_METRIC_STYLE_TEMPLATE[DEFAULT_STYLE_TEMPLATE];
+
+/**
+ * Defaults for select optional Metric vis state options
+ */
+export const LENS_METRIC_STATE_DEFAULTS: MetricStateDefaults = {
+  ...defaultStyleTemplate,
+  iconAlign: defaultStyleTemplate.iconAlign ?? 'right',
+  secondaryAlign: defaultStyleTemplate.secondaryAlign ?? 'right',
+  valueFontMode: 'default',
+  primaryPosition: DEFAULT_STYLE_TEMPLATE,
+  secondaryLabelPosition: 'before',
+  applyColorTo: 'background',
 };
 
 export const LENS_METRIC_SECONDARY_DEFAULT_STATIC_COLOR = '#E4E8F1';
