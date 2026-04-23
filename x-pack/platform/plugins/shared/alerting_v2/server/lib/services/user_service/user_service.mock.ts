@@ -23,11 +23,11 @@ const mockProfile: UserProfileWithSecurity = {
   labels: {},
 };
 
-export function createUserService(): {
+export function createUserService({ isAuthenticated = true }: { isAuthenticated?: boolean } = {}): {
   userService: UserService;
   userProfileService: jest.Mocked<UserProfileServiceStart>;
 } {
-  const request = httpServerMock.createKibanaRequest();
+  const request = httpServerMock.createKibanaRequest({ auth: { isAuthenticated } });
   const userProfileService = userProfileServiceMock.createStart();
 
   userProfileService.getCurrent.mockResolvedValue(createUserProfile());

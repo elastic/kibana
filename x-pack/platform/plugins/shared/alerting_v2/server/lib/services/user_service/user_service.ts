@@ -25,11 +25,17 @@ export class UserService implements UserServiceContract {
   ) {}
 
   public async getCurrentUserProfileUid(): Promise<string | null> {
+    if (!this.request.auth.isAuthenticated) {
+      return null;
+    }
     const profile = await this.userProfile.getCurrent({ request: this.request });
     return profile?.uid ?? null;
   }
 
   public async getCurrentUserProfile(): Promise<{ uid: string | null; username: string | null }> {
+    if (!this.request.auth.isAuthenticated) {
+      return { uid: null, username: null };
+    }
     const profile = await this.userProfile.getCurrent({ request: this.request });
     return profile
       ? { uid: profile.uid, username: profile.user.username }
@@ -37,6 +43,9 @@ export class UserService implements UserServiceContract {
   }
 
   public async getCurrentUsername(): Promise<string | null> {
+    if (!this.request.auth.isAuthenticated) {
+      return null;
+    }
     const profile = await this.userProfile.getCurrent({ request: this.request });
     return profile?.user.username ?? null;
   }

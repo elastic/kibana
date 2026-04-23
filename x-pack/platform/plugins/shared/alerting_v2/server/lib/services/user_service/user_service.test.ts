@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0.
- */
 import { createUserService } from './user_service.mock';
 
 describe('UserService', () => {
@@ -17,43 +12,80 @@ describe('UserService', () => {
     jest.clearAllMocks();
   });
 
-  it('returns the current user profile uid when user profile service is available', async () => {
-    const { userService, userProfileService } = createUserService();
+  describe('when request is authenticated (browser session)', () => {
+    it('returns the current user profile uid', async () => {
+      const { userService, userProfileService } = createUserService();
 
-    await expect(userService.getCurrentUserProfileUid()).resolves.toBe('elastic_profile_uid');
+      await expect(userService.getCurrentUserProfileUid()).resolves.toBe('elastic_profile_uid');
 
-    expect(userProfileService.getCurrent).toHaveBeenCalledWith({
-      request: expect.anything(),
+      expect(userProfileService.getCurrent).toHaveBeenCalledWith({
+        request: expect.anything(),
+      });
+    });
+
+    it('returns the current user profile', async () => {
+      const { userService, userProfileService } = createUserService();
+
+      await expect(userService.getCurrentUserProfile()).resolves.toEqual({
+        uid: 'elastic_profile_uid',
+        username: 'elastic',
+      });
+
+      expect(userProfileService.getCurrent).toHaveBeenCalledWith({
+        request: expect.anything(),
+      });
+    });
+
+    it('returns the current username', async () => {
+      const { userService } = createUserService();
+
+      await expect(userService.getCurrentUsername()).resolves.toBe('elastic');
+    });
+
+    it('returns null uid when profile is not found', async () => {
+      const { userService, userProfileService } = createUserService();
+      userProfileService.getCurrent.mockResolvedValue(null);
+
+      await expect(userService.getCurrentUserProfileUid()).resolves.toBeNull();
+    });
+
+    it('returns null user info when profile is not found', async () => {
+      const { userService, userProfileService } = createUserService();
+      userProfileService.getCurrent.mockResolvedValue(null);
+
+      await expect(userService.getCurrentUserProfile()).resolves.toEqual({
+        uid: null,
+        username: null,
+      });
     });
   });
 
-  it('returns the current user info when user profile service is available', async () => {
-    const { userService, userProfileService } = createUserService();
+  describe('when request is not authenticated (Task Manager fakeRequest)', () => {
+    it('returns null uid without calling userProfile service', async () => {
+      const { userService, userProfileService } = createUserService({ isAuthenticated: false });
 
-    await expect(userService.getCurrentUserProfile()).resolves.toEqual({
-      uid: 'elastic_profile_uid',
-      username: 'elastic',
+      await expect(userService.getCurrentUserProfileUid()).resolves.toBeNull();
+
+      expect(userProfileService.getCurrent).not.toHaveBeenCalled();
     });
 
-    expect(userProfileService.getCurrent).toHaveBeenCalledWith({
-      request: expect.anything(),
+    it('returns null user profile without calling userProfile service', async () => {
+      const { userService, userProfileService } = createUserService({ isAuthenticated: false });
+
+      await expect(userService.getCurrentUserProfile()).resolves.toEqual({
+        uid: null,
+        username: null,
+      });
+
+      expect(userProfileService.getCurrent).not.toHaveBeenCalled();
     });
-  });
 
-  it('returns null when the profile is not found', async () => {
-    const { userService, userProfileService } = createUserService();
-    userProfileService.getCurrent.mockResolvedValue(null);
+    it('returns null username without calling userProfile service', async () => {
+      const { userService, userProfileService } = createUserService({ isAuthenticated: false });
 
-    await expect(userService.getCurrentUserProfileUid()).resolves.toBeNull();
-  });
+      await expect(userService.getCurrentUsername()).resolves.toBeNull();
 
-  it('returns null user info when the profile is not found', async () => {
-    const { userService, userProfileService } = createUserService();
-    userProfileService.getCurrent.mockResolvedValue(null);
-
-    await expect(userService.getCurrentUserProfile()).resolves.toEqual({
-      uid: null,
-      username: null,
+      expect(userProfileService.getCurrent).not.toHaveBeenCalled();
     });
   });
 });
