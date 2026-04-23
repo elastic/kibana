@@ -422,7 +422,10 @@ import type {
   CreateTimelinesResponse,
 } from './timeline/create_timelines/create_timelines_route.gen';
 import type { DeleteNoteRequestBodyInput } from './timeline/delete_note/delete_note_route.gen';
-import type { DeleteTimelinesRequestBodyInput } from './timeline/delete_timelines/delete_timelines_route.gen';
+import type {
+  DeleteTimelinesRequestBodyInput,
+  DeleteTimelinesResponse,
+} from './timeline/delete_timelines/delete_timelines_route.gen';
 import type {
   ExportTimelinesRequestQueryInput,
   ExportTimelinesRequestBodyInput,
@@ -757,7 +760,7 @@ If asset criticality records already exist for the specified entities, those rec
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
-        method: 'GET',
+        method: 'POST',
         body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
@@ -1283,7 +1286,7 @@ The entity will be immediately deleted from the latest index.  It will remain av
   async deleteTimelines(props: DeleteTimelinesProps) {
     this.log.info(`${new Date().toISOString()} Calling API DeleteTimelines`);
     return this.kbnClient
-      .request({
+      .request<DeleteTimelinesResponse>({
         path: '/api/timeline',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -2980,6 +2983,9 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Resolve a Timeline or Timeline template, surfacing outcomes such as `exactMatch`, `aliasMatch`, or `conflict` when object IDs have been remapped during upgrades or imports. Provide **either** `id` for default Timelines or `template_timeline_id` for templates.
+   */
   async resolveTimeline(props: ResolveTimelineProps) {
     this.log.info(`${new Date().toISOString()} Calling API ResolveTimeline`);
     return this.kbnClient
