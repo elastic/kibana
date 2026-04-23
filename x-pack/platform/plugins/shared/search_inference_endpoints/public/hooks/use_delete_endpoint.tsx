@@ -9,7 +9,6 @@ import { useMutation, useQueryClient } from '@kbn/react-query';
 import type { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from './use_kibana';
-import { useEventTracker } from '../analytics/event_tracker_context';
 
 import { INFERENCE_ENDPOINTS_QUERY_KEY } from '../../common/constants';
 
@@ -22,7 +21,6 @@ export const useDeleteEndpoint = (onSuccess?: () => void) => {
   const queryClient = useQueryClient();
   const { services } = useKibana();
   const toasts = services.notifications?.toasts;
-  const eventTracker = useEventTracker();
 
   return useMutation(
     async ({ type, id }: MutationArgs) => {
@@ -31,7 +29,6 @@ export const useDeleteEndpoint = (onSuccess?: () => void) => {
     {
       onSuccess: () => {
         queryClient.invalidateQueries([INFERENCE_ENDPOINTS_QUERY_KEY]);
-        eventTracker.endpointDeleted();
         toasts?.addSuccess({
           title: i18n.translate('xpack.searchInferenceEndpoints.deleteEndpoint.deleteSuccess', {
             defaultMessage: 'The inference endpoint has been deleted sucessfully.',
@@ -42,7 +39,6 @@ export const useDeleteEndpoint = (onSuccess?: () => void) => {
         }
       },
       onError: (error: { body: KibanaServerError }) => {
-        eventTracker.apiError('delete');
         toasts?.addError(new Error(error.body.message), {
           title: i18n.translate(
             'xpack.searchInferenceEndpoints.deleteEndpoint.endpointDeletionFailed',

@@ -26,11 +26,11 @@ export const renderElasticInferenceServiceApp = async (
       <KibanaContextProvider services={{ ...core, ...services }}>
         <I18nProvider>
           <InferenceEndpointsProvider>
-            <Router history={services.history}>
-              <EventTrackerProvider analytics={core.analytics}>
+            <EventTrackerProvider analytics={core.analytics}>
+              <Router history={services.history}>
                 <ElasticInferenceService />
-              </EventTrackerProvider>
-            </Router>
+              </Router>
+            </EventTrackerProvider>
           </InferenceEndpointsProvider>
         </I18nProvider>
       </KibanaContextProvider>

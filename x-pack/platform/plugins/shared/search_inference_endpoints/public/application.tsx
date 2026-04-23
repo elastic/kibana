@@ -25,11 +25,11 @@ const renderMgmtApp = (
     <KibanaRenderContextProvider {...core}>
       <KibanaContextProvider services={{ ...core, ...services }}>
         <I18nProvider>
-          <Router history={services.history}>
-            <EventTrackerProvider analytics={core.analytics}>
+          <EventTrackerProvider analytics={core.analytics}>
+            <Router history={services.history}>
               <Component />
-            </EventTrackerProvider>
-          </Router>
+            </Router>
+          </EventTrackerProvider>
         </I18nProvider>
       </KibanaContextProvider>
     </KibanaRenderContextProvider>,

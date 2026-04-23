@@ -9,15 +9,12 @@ import type { AnalyticsServiceStart } from '@kbn/core/public';
 
 export enum EventType {
   ENDPOINT_CREATED = 'searchInferenceEndpoints_endpoint_created',
-  ENDPOINT_DELETED = 'searchInferenceEndpoints_endpoint_deleted',
   ENDPOINT_EDITED = 'searchInferenceEndpoints_endpoint_edited',
   DEFAULT_MODEL_CHANGED = 'searchInferenceEndpoints_default_model_changed',
   FEATURE_SETTINGS_SAVED = 'searchInferenceEndpoints_feature_settings_saved',
   FILTER_APPLIED = 'searchInferenceEndpoints_filter_applied',
   GROUP_BY_CHANGED = 'searchInferenceEndpoints_group_by_changed',
-  ENDPOINT_USAGE_SCANNED = 'searchInferenceEndpoints_endpoint_usage_scanned',
   EMPTY_STATE_VIEWED = 'searchInferenceEndpoints_empty_state_viewed',
-  API_ERROR = 'searchInferenceEndpoints_api_error',
   FLYOUT_OPENED = 'searchInferenceEndpoints_flyout_opened',
   FLYOUT_CLOSED = 'searchInferenceEndpoints_flyout_closed',
   MODAL_OPENED = 'searchInferenceEndpoints_modal_opened',
@@ -40,9 +37,6 @@ export class EventTracker {
   endpointCreated() {
     this.track(EventType.ENDPOINT_CREATED);
   }
-  endpointDeleted() {
-    this.track(EventType.ENDPOINT_DELETED);
-  }
   endpointEdited() {
     this.track(EventType.ENDPOINT_EDITED);
   }
@@ -58,14 +52,8 @@ export class EventTracker {
   groupByChanged(groupBy: string) {
     this.track(EventType.GROUP_BY_CHANGED, { group_by: groupBy });
   }
-  endpointUsageScanned() {
-    this.track(EventType.ENDPOINT_USAGE_SCANNED);
-  }
   emptyStateViewed() {
     this.track(EventType.EMPTY_STATE_VIEWED);
-  }
-  apiError(operation: string) {
-    this.track(EventType.API_ERROR, { operation });
   }
   flyoutOpened(flyout: string) {
     this.track(EventType.FLYOUT_OPENED, { flyout });

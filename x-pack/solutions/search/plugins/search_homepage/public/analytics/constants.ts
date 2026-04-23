@@ -7,7 +7,5 @@
 
 export enum AnalyticsEvents {
   openedApp = 'opened_app',
-  metricPanelClicked = 'metric_panel_clicked',
-  connectionDetailsOpened = 'connection_details_opened',
   metricFetchFailed = 'metric_fetch_failed',
 }

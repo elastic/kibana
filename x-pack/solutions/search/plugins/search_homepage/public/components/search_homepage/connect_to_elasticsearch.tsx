@@ -22,12 +22,9 @@ import { FormInfoField } from '@kbn/search-shared-ui';
 import { openWiredConnectionDetails } from '@kbn/cloud/connection_details';
 import { useSearchApiKey, Status } from '@kbn/search-api-keys-components';
 import { useElasticsearchUrl } from '../../hooks/use_elasticsearch_url';
-import { useUsageTracker } from '../../contexts/usage_tracker_context';
-import { AnalyticsEvents } from '../../analytics/constants';
 
 export const ConnectToElasticsearch = () => {
   const elasticsearchUrl = useElasticsearchUrl();
-  const usageTracker = useUsageTracker();
 
   const { status } = useSearchApiKey();
   const hasAPIKeyManagePermissions = useMemo(() => {
@@ -66,15 +63,11 @@ export const ConnectToElasticsearch = () => {
             color="text"
             iconType="plusCircle"
             size="s"
-            onClick={() => {
-              usageTracker.click([
-                AnalyticsEvents.connectionDetailsOpened,
-                `${AnalyticsEvents.connectionDetailsOpened}_apiKeys`,
-              ]);
+            onClick={() =>
               openWiredConnectionDetails({
                 props: { options: { defaultTabId: 'apiKeys' } },
-              });
-            }}
+              })
+            }
             disabled={!hasAPIKeyManagePermissions}
           >
             <FormattedMessage
@@ -90,10 +83,7 @@ export const ConnectToElasticsearch = () => {
           size="s"
           iconSize="m"
           iconType="plugs"
-          onClick={() => {
-            usageTracker.click(AnalyticsEvents.connectionDetailsOpened);
-            openWiredConnectionDetails();
-          }}
+          onClick={() => openWiredConnectionDetails()}
           data-test-subj="searchHomepageConnectToElasticsearchConnectionDetailsButton"
           color="text"
           aria-label={i18n.translate(

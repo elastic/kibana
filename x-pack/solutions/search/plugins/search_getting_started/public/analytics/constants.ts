@@ -11,6 +11,4 @@ export enum AnalyticsEvents {
   claudeCliPromptCopied = 'claude_cli_prompt_copied',
   codeExampleCopied = 'code_example_copied',
   languageSelected = 'language_selected',
-  tutorialSelected = 'tutorial_selected',
-  connectionDetailsViewed = 'connection_details_viewed',
 }

@@ -21,8 +21,6 @@ import { orderBy } from 'lodash';
 import { useKibana } from '../../hooks/use_kibana';
 import { isNew } from '../../common/utils';
 import { TutorialCardStyles } from './styles';
-import { useUsageTracker } from '../../contexts/usage_tracker_context';
-import { AnalyticsEvents } from '../../analytics/constants';
 
 interface TutorialMetadata {
   title: string;
@@ -37,7 +35,6 @@ export const ConsoleTutorialsGroup = () => {
   const isMediumBreakpoint = useIsWithinMaxBreakpoint('m');
   const isSmallBreakpoint = useIsWithinMaxBreakpoint('s');
   const tutorialColumns = isSmallBreakpoint ? 1 : isMediumBreakpoint ? 2 : 3;
-  const usageTracker = useUsageTracker();
 
   const openConsole = useCallback(
     (request: string) =>
@@ -166,13 +163,7 @@ export const ConsoleTutorialsGroup = () => {
                 css={TutorialCardStyles}
                 data-test-subj={tutorial.dataTestSubj}
                 data-telemetry-id={tutorial.dataTestSubj}
-                onClick={() => {
-                  usageTracker.click([
-                    AnalyticsEvents.tutorialSelected,
-                    `${AnalyticsEvents.tutorialSelected}_${tutorial.dataTestSubj}`,
-                  ]);
-                  openConsole(tutorial.request);
-                }}
+                onClick={() => openConsole(tutorial.request)}
               >
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>

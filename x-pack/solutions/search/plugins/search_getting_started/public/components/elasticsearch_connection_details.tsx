@@ -13,12 +13,9 @@ import { openWiredConnectionDetails } from '@kbn/cloud/connection_details';
 import { ApiKeyForm } from '@kbn/search-api-keys-components';
 import { FormInfoField } from '@kbn/search-shared-ui';
 import { useElasticsearchUrl } from '../hooks/use_elasticsearch_url';
-import { useUsageTracker } from '../contexts/usage_tracker_context';
-import { AnalyticsEvents } from '../analytics/constants';
 
 export const ElasticsearchConnectionDetails = () => {
   const elasticsearchUrl = useElasticsearchUrl();
-  const usageTracker = useUsageTracker();
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -70,10 +67,7 @@ export const ElasticsearchConnectionDetails = () => {
                 iconType="plugs"
                 iconSide="left"
                 target="_blank"
-                onClick={() => {
-                  usageTracker.click(AnalyticsEvents.connectionDetailsViewed);
-                  openWiredConnectionDetails();
-                }}
+                onClick={() => openWiredConnectionDetails()}
                 color="text"
                 aria-label={i18n.translate(
                   'xpack.search.gettingStarted.elasticsearchConnectionDetails.viewDetails',
