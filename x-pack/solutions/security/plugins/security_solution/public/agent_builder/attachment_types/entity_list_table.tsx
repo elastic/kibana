@@ -220,19 +220,15 @@ export const EntityListTable: React.FC<{
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
-                <EuiToolTip position="top" content={label}>
-                  <EuiText
-                    size="s"
-                    tabIndex={0}
-                    css={{
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                    }}
-                  >
-                    {label}
-                  </EuiText>
-                </EuiToolTip>
+                <EuiText
+                  size="s"
+                  css={{
+                    overflowWrap: 'anywhere',
+                    wordBreak: 'break-word',
+                  }}
+                >
+                  {label}
+                </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
           );
