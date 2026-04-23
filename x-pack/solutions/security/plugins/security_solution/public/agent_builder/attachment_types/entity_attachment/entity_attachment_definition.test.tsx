@@ -183,9 +183,9 @@ describe('createEntityAttachmentDefinition', () => {
   describe('getLabel', () => {
     it('returns the default label for a single-entity payload', () => {
       const def = buildDefinition();
-      expect(
-        def.getLabel(attachmentOf({ identifierType: 'host', identifier: 'alpha' }))
-      ).toBe('Risk Entity');
+      expect(def.getLabel(attachmentOf({ identifierType: 'host', identifier: 'alpha' }))).toBe(
+        'Risk Entity'
+      );
     });
 
     it('returns a pluralised label for a multi-entity payload', () => {

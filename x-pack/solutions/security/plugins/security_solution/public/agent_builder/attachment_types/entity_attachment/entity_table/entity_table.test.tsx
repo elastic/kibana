@@ -30,17 +30,13 @@ jest.mock('../../entity_explore_navigation', () => {
   };
 });
 
-const mockedUseEntityForAttachment =
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  require('../use_entity_for_attachment').useEntityForAttachment as jest.Mock;
+const mockedUseEntityForAttachment = require('../use_entity_for_attachment')
+  .useEntityForAttachment as jest.Mock;
 
-const mockedUseKibana =
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  require('@kbn/kibana-react-plugin/public').useKibana as jest.Mock;
+const mockedUseKibana = require('@kbn/kibana-react-plugin/public').useKibana as jest.Mock;
 
-const mockedNavigateToSecurityEntityInApp =
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  require('../../entity_explore_navigation').navigateToSecurityEntityInApp as jest.Mock;
+const mockedNavigateToSecurityEntityInApp = require('../../entity_explore_navigation')
+  .navigateToSecurityEntityInApp as jest.Mock;
 
 const baseEntityData = (override: Partial<EntityForAttachment> = {}): EntityForAttachment => ({
   entityType: EntityType.host,
@@ -93,9 +89,7 @@ describe('EntityTable', () => {
 
   it('keeps the footer "Open Entity Analytics" button visible', () => {
     renderTable();
-    expect(
-      screen.getByTestId('entityAttachmentTableOpenEntityAnalytics')
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('entityAttachmentTableOpenEntityAnalytics')).toBeInTheDocument();
   });
 
   describe('per-row Explore button', () => {
@@ -172,7 +166,9 @@ describe('EntityTable', () => {
       fireEvent.click(screen.getAllByTestId('entityAttachmentTableOpenEntity')[0]);
 
       expect(mockedNavigateToSecurityEntityInApp).toHaveBeenCalledTimes(1);
-      expect(mockedNavigateToSecurityEntityInApp.mock.calls[0][0].searchSession).toBe(searchSession);
+      expect(mockedNavigateToSecurityEntityInApp.mock.calls[0][0].searchSession).toBe(
+        searchSession
+      );
     });
 
     it('falls back to the raw identifier when useEntityForAttachment has not resolved yet', () => {
@@ -185,9 +181,7 @@ describe('EntityTable', () => {
       const application = { navigateToApp: jest.fn() } as unknown as ApplicationStart;
 
       renderTable({
-        entities: [
-          { identifierType: 'user', identifier: 'bob', entityStoreId: 'user:bob@local' },
-        ],
+        entities: [{ identifierType: 'user', identifier: 'bob', entityStoreId: 'user:bob@local' }],
         application,
       });
 

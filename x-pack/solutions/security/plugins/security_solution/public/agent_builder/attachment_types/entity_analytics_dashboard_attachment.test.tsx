@@ -14,7 +14,10 @@ import type { EntityAnalyticsDashboardAttachment } from './entity_analytics_dash
 import { createEntityAnalyticsDashboardAttachmentDefinition } from './entity_analytics_dashboard_attachment';
 import { navigateToEntityAnalyticsHomePageInApp } from './entity_explore_navigation';
 
-type ResizeDimensions = { width: number; height: number };
+interface ResizeDimensions {
+  width: number;
+  height: number;
+}
 
 const RESIZE_CALLBACK_KEY = '__eaDashboardOnResize';
 
