@@ -231,10 +231,7 @@ export const pciComplianceTool = (
             (earliest, r) => (r.from < earliest ? r.from : earliest),
             ranges[0].from
           );
-          const to = ranges.reduce(
-            (latest, r) => (r.to > latest ? r.to : latest),
-            ranges[0].to
-          );
+          const to = ranges.reduce((latest, r) => (r.to > latest ? r.to : latest), ranges[0].to);
           return { from, to };
         })();
 
