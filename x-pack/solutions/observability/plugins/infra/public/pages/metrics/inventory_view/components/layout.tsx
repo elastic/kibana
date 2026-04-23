@@ -228,4 +228,3 @@ export const Layout = React.memo(({ interval, nodes, loading }: Props) => {
     </>
   );
 });
-
