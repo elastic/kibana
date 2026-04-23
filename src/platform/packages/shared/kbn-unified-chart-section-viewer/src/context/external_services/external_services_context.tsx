@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { createContext, useMemo, type ReactNode } from 'react';
+import React, { createContext, type ReactNode } from 'react';
 import type { ExternalServices } from '../../types';
 
 export const ExternalServicesContext = createContext<ExternalServices | undefined>(undefined);
@@ -20,9 +20,8 @@ export interface ExternalServicesProviderProps {
 export const ExternalServicesProvider = ({
   externalServices,
   children,
-}: ExternalServicesProviderProps) => {
-  const value = useMemo(() => externalServices, [externalServices]);
-  return (
-    <ExternalServicesContext.Provider value={value}>{children}</ExternalServicesContext.Provider>
-  );
-};
+}: ExternalServicesProviderProps) => (
+  <ExternalServicesContext.Provider value={externalServices}>
+    {children}
+  </ExternalServicesContext.Provider>
+);
