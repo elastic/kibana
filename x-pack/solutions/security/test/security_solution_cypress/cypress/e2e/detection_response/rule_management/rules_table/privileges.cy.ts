@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { QueryRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   ADD_ELASTIC_RULES_BTN,
   CREATE_NEW_RULE_BTN,
@@ -21,6 +22,14 @@ import {
   rulesReadUser,
   secAll as rulesNone,
   secAllUser as rulesNoneUser,
+  rulesReadManualRunAllUser,
+  rulesReadManualRunAll,
+  rulesReadEnableDisableAll,
+  rulesReadEnableDisableAllUser,
+  rulesAllEnableDisableNoneUser,
+  rulesAllEnableDisableNone,
+  rulesAllManualRunNoneUser,
+  rulesAllManualRunNone,
 } from '../../../../tasks/privileges';
 
 import { RULES_URL } from '../../../../urls/navigation';
@@ -32,10 +41,17 @@ import {
   fillDefineCustomRuleAndContinue,
   fillScheduleRuleAndContinue,
 } from '../../../../tasks/create_new_rule';
-import { enableRule, selectRulesByName } from '../../../../tasks/alerts_detection_rules';
+import {
+  assertEnableRuleToggleDisabled,
+  bulkGapFillFromRulesTablePage,
+  bulkManualRuleRunFromRulesTablePage,
+  enableRule,
+  selectRulesByName,
+} from '../../../../tasks/alerts_detection_rules';
 import {
   BULK_ACTIONS_BTN,
   BULK_EXPORT_ACTION_BTN,
+  BULK_FILL_RULE_GAPS_BTN,
   BULK_MANUAL_RULE_RUN_BTN,
   DELETE_RULE_BULK_BTN,
   DISABLE_RULE_BULK_BTN,
@@ -44,16 +60,56 @@ import {
 } from '../../../../screens/rules_bulk_actions';
 import { NO_PRIVILEGES_BOX } from '../../../../screens/common/page';
 import { assertSuccessToast } from '../../../../screens/common/toast';
-const usersToCreate = [rulesAllUser, rulesReadUser, rulesNoneUser];
-const rolesToCreate = [rulesAll, rulesRead, rulesNone];
+import type { CreateRulePropsRewrites } from '../../../../objects/types';
+const usersToCreate = [
+  rulesAllUser,
+  rulesReadUser,
+  rulesNoneUser,
+  rulesReadManualRunAllUser,
+  rulesAllManualRunNoneUser,
+  rulesAllEnableDisableNoneUser,
+  rulesReadEnableDisableAllUser,
+];
+const rolesToCreate = [
+  rulesAll,
+  rulesRead,
+  rulesNone,
+  rulesReadManualRunAll,
+  rulesAllManualRunNone,
+  rulesReadEnableDisableAll,
+  rulesAllEnableDisableNone,
+];
 
-// As part of the rules RBAC effort, we have created these tests with roles that only have the new rules feature 'securitySolutionVX' enabled in order to test
+// As part of the rules RBAC effort, we have created these tests with roles that only have the new rules feature 'securitySolutionRulesVX' enabled in order to test
 // the features that said roles should have access to. Notice that the roles created are very minimal and only contain the new rules feature.
 
+type ActionsButtonEnableArray = [string, 'enabled' | 'disabled'][];
+const getBulkActionsButtonConfiguration = (enabledButtons: string[]) => {
+  const baseConfig: ActionsButtonEnableArray = [
+    [BULK_MANUAL_RULE_RUN_BTN, 'disabled'],
+    [DISABLE_RULE_BULK_BTN, 'disabled'],
+    [ENABLE_RULE_BULK_BTN, 'disabled'],
+    [DELETE_RULE_BULK_BTN, 'disabled'],
+    [DUPLICATE_RULE_BULK_BTN, 'disabled'],
+    [BULK_EXPORT_ACTION_BTN, 'disabled'],
+  ];
+
+  return baseConfig.map((config) => {
+    if (enabledButtons.includes(config[0])) {
+      return [config[0], 'enabled'];
+    }
+
+    return config;
+  });
+};
+
 describe('Rules table - privileges', { tags: ['@ess'] }, () => {
-  const ruleName = 'My rule';
-  const createRule = () => {
-    const rule = getCustomQueryRuleParams({ name: ruleName });
+  const testRuleName = 'My rule';
+  const createRule = (
+    ruleName: string,
+    rewrites: CreateRulePropsRewrites<QueryRuleCreateProps> = {}
+  ) => {
+    const rule = getCustomQueryRuleParams({ name: ruleName, ...rewrites });
     loginWithUser(rulesAllUser);
     visit(RULES_URL);
     cy.get(CREATE_NEW_RULE_BTN).click();
@@ -68,10 +124,10 @@ describe('Rules table - privileges', { tags: ['@ess'] }, () => {
     deleteAlertsAndRules();
     deleteUsersAndRoles(usersToCreate, rolesToCreate);
     createUsersAndRoles(usersToCreate, rolesToCreate);
-    createRule();
+    createRule(testRuleName);
   });
 
-  describe('securitySolutionRulesV1.all', () => {
+  describe('securitySolutionRulesV4.all', () => {
     beforeEach(() => {
       loginWithUser(rulesAllUser);
       visit(RULES_URL);
@@ -88,18 +144,16 @@ describe('Rules table - privileges', { tags: ['@ess'] }, () => {
     });
 
     it(`should see enabled bulk actions from context menu`, () => {
-      selectRulesByName([ruleName]);
+      selectRulesByName([testRuleName]);
       cy.get(BULK_ACTIONS_BTN).click();
 
-      type ActionsButtonEnableArray = [string, 'enabled' | 'disabled'][];
-      const bulkActionButtonsWhenEnabled: ActionsButtonEnableArray = [
-        [BULK_MANUAL_RULE_RUN_BTN, 'enabled'],
-        [DISABLE_RULE_BULK_BTN, 'enabled'],
-        [ENABLE_RULE_BULK_BTN, 'disabled'],
-        [DELETE_RULE_BULK_BTN, 'enabled'],
-        [DUPLICATE_RULE_BULK_BTN, 'enabled'],
-        [BULK_EXPORT_ACTION_BTN, 'enabled'],
-      ];
+      const bulkActionButtonsWhenEnabled = getBulkActionsButtonConfiguration([
+        BULK_MANUAL_RULE_RUN_BTN,
+        DISABLE_RULE_BULK_BTN,
+        DELETE_RULE_BULK_BTN,
+        DUPLICATE_RULE_BULK_BTN,
+        BULK_EXPORT_ACTION_BTN,
+      ]);
 
       for (const [actionButton, enableState] of bulkActionButtonsWhenEnabled) {
         cy.get(actionButton).should(`be.${enableState}`);
@@ -111,22 +165,22 @@ describe('Rules table - privileges', { tags: ['@ess'] }, () => {
 
       cy.get(BULK_ACTIONS_BTN).click();
 
-      const bulkActionsWhenDisabled: ActionsButtonEnableArray = [
-        [BULK_MANUAL_RULE_RUN_BTN, 'disabled'],
-        [DISABLE_RULE_BULK_BTN, 'disabled'],
-        [ENABLE_RULE_BULK_BTN, 'enabled'],
-        [DELETE_RULE_BULK_BTN, 'enabled'],
-        [DUPLICATE_RULE_BULK_BTN, 'enabled'],
-        [BULK_EXPORT_ACTION_BTN, 'enabled'],
-      ];
+      const bulkActionsWhenDisabled = getBulkActionsButtonConfiguration([
+        ENABLE_RULE_BULK_BTN,
+        DELETE_RULE_BULK_BTN,
+        DUPLICATE_RULE_BULK_BTN,
+        BULK_EXPORT_ACTION_BTN,
+      ]);
 
       for (const [actionButton, disabledState] of bulkActionsWhenDisabled) {
         cy.get(actionButton).should(`be.${disabledState}`);
       }
+      // Enable the rule again
+      enableRule(0);
     });
   });
 
-  describe('securitySolutionRulesV1.read', () => {
+  describe('securitySolutionRulesV4.read', () => {
     beforeEach(() => {
       loginWithUser(rulesReadUser);
       visit(RULES_URL);
@@ -142,6 +196,133 @@ describe('Rules table - privileges', { tags: ['@ess'] }, () => {
 
     it(`should be able to "Add" a prebuilt rule`, () => {
       cy.get(ADD_ELASTIC_RULES_BTN).should('be.enabled');
+    });
+  });
+
+  describe('securitySolutionRulesV4.read with enable/disable', () => {
+    beforeEach(() => {
+      loginWithUser(rulesReadEnableDisableAllUser);
+      visit(RULES_URL);
+
+      selectRulesByName([testRuleName]);
+      cy.get(BULK_ACTIONS_BTN).click();
+    });
+
+    it(`should be able to "Enable/Disable" a rule`, () => {
+      // Click the rule enable toggle for the only rule we have. The rule is enabled when created so we click to disable
+      enableRule(0);
+      assertSuccessToast('Rules disabled', 'Successfully disabled 1 rule');
+
+      // Click again to enable
+      enableRule(0);
+      assertSuccessToast('Rules enabled', 'Successfully enabled 1 rule');
+    });
+
+    it(`should see enabled bulk actions from context menu`, () => {
+      selectRulesByName([testRuleName]);
+      cy.get(BULK_ACTIONS_BTN).click();
+
+      const bulkActionButtonsWhenEnabled = getBulkActionsButtonConfiguration([
+        DISABLE_RULE_BULK_BTN,
+        BULK_EXPORT_ACTION_BTN,
+      ]);
+
+      for (const [actionButton, enableState] of bulkActionButtonsWhenEnabled) {
+        cy.get(actionButton).should(`be.${enableState}`);
+      }
+
+      // Click to disable the rule
+      enableRule(0);
+      assertSuccessToast('Rules disabled', 'Successfully disabled 1 rule');
+
+      cy.get(BULK_ACTIONS_BTN).click();
+
+      const bulkActionsWhenDisabled = getBulkActionsButtonConfiguration([
+        ENABLE_RULE_BULK_BTN,
+        BULK_EXPORT_ACTION_BTN,
+      ]);
+
+      for (const [actionButton, disabledState] of bulkActionsWhenDisabled) {
+        cy.get(actionButton).should(`be.${disabledState}`);
+      }
+
+      // Enable the rule again
+      enableRule(0);
+    });
+  });
+
+  describe('securitySolutionRulesV4.ALL without enable/disable', () => {
+    beforeEach(() => {
+      loginWithUser(rulesAllEnableDisableNoneUser);
+      visit(RULES_URL);
+    });
+
+    it(`should not be able to "Enable/Disable" a rule`, () => {
+      selectRulesByName([testRuleName]);
+      cy.get(BULK_ACTIONS_BTN).click();
+      assertEnableRuleToggleDisabled(0);
+    });
+
+    it(`should see enabled bulk actions in a disabled state from context menu`, () => {
+      selectRulesByName([testRuleName]);
+      cy.get(BULK_ACTIONS_BTN).click();
+
+      const bulkActionButtonsWhenEnabled = getBulkActionsButtonConfiguration([
+        BULK_MANUAL_RULE_RUN_BTN,
+        DELETE_RULE_BULK_BTN,
+        DUPLICATE_RULE_BULK_BTN,
+        BULK_EXPORT_ACTION_BTN,
+      ]);
+
+      for (const [actionButton, enableState] of bulkActionButtonsWhenEnabled) {
+        cy.get(actionButton).should(`be.${enableState}`);
+      }
+    });
+  });
+
+  describe('securitySolutionRulesV4.read with manual run', () => {
+    beforeEach(() => {
+      loginWithUser(rulesReadManualRunAllUser);
+      visit(RULES_URL);
+
+      selectRulesByName([testRuleName]);
+      cy.get(BULK_ACTIONS_BTN).click();
+    });
+
+    it('should be able to trigger manual runs', () => {
+      cy.get(BULK_MANUAL_RULE_RUN_BTN).should('be.enabled');
+      bulkManualRuleRunFromRulesTablePage(1);
+    });
+
+    it('should be able to trigger gap fills', () => {
+      cy.get(BULK_FILL_RULE_GAPS_BTN).should('be.enabled');
+      bulkGapFillFromRulesTablePage();
+    });
+  });
+
+  describe('securitySolutionRulesV4.all without manual run', () => {
+    beforeEach(() => {
+      loginWithUser(rulesAllManualRunNoneUser);
+      visit(RULES_URL);
+
+      selectRulesByName([testRuleName]);
+      cy.get(BULK_ACTIONS_BTN).click();
+    });
+
+    it(`should see manual run and fill gaps bulk actions in a disabled state from context menu`, () => {
+      selectRulesByName([testRuleName]);
+      cy.get(BULK_ACTIONS_BTN).click();
+
+      const bulkActionButtonsWhenEnabled = getBulkActionsButtonConfiguration([
+        DISABLE_RULE_BULK_BTN,
+        DELETE_RULE_BULK_BTN,
+        DUPLICATE_RULE_BULK_BTN,
+        BULK_EXPORT_ACTION_BTN,
+      ]);
+
+      for (const [actionButton, enableState] of bulkActionButtonsWhenEnabled) {
+        cy.get(actionButton).should(`be.${enableState}`);
+      }
     });
   });
 

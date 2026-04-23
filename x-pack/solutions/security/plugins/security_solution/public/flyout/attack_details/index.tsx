@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import type { EsHitRecord } from '@kbn/discover-utils';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { AttackDetailsProps } from './types';
 import { FlyoutNavigation } from '../shared/components/flyout_navigation';
 
@@ -20,16 +22,20 @@ import { useTabs } from './hooks/use_tabs';
 import { useNavigateToAttackDetailsLeftPanel } from './hooks/use_navigate_to_attack_details_left_panel';
 import { useAttackDetailsContext } from './context';
 import { PanelHeader } from './header';
+import { RemoteDocumentCallout } from '../../flyout_v2/document/components/remote_document_callout';
 
 export type AttackDetailsPanelPaths = 'overview' | 'table' | 'json';
+export { ATTACK_PREVIEW_BANNER } from './context';
 
 /**
- * Panel to be displayed in Attack Details flyout
+ * Panel to be displayed in Attack Details flyout right section.
  */
-export const AttackDetailsPanel: React.FC<Partial<AttackDetailsProps>> = memo(({ path }) => {
+export const AttackDetailsRightPanel: React.FC<Partial<AttackDetailsProps>> = memo(({ path }) => {
   const { storage } = useKibana().services;
   const { openRightPanel } = useExpandableFlyoutApi();
-  const { attackId, indexName } = useAttackDetailsContext();
+  const { attackId, indexName, searchHit } = useAttackDetailsContext();
+  const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
+
   const expandDetails = useNavigateToAttackDetailsLeftPanel();
 
   const { tabsDisplayed, selectedTabId } = useTabs({ path });
@@ -39,8 +45,12 @@ export const AttackDetailsPanel: React.FC<Partial<AttackDetailsProps>> = memo(({
       openRightPanel({
         id: AttackDetailsRightPanelKey,
         path: { tab: tabId },
-        params: { attackId, indexName },
+        params: {
+          attackId,
+          indexName,
+        },
       });
+
       // saving which tab is currently selected in the right panel in local storage
       storage.set(FLYOUT_STORAGE_KEYS.RIGHT_PANEL_SELECTED_TABS, tabId);
     },
@@ -49,6 +59,7 @@ export const AttackDetailsPanel: React.FC<Partial<AttackDetailsProps>> = memo(({
 
   return (
     <>
+      <RemoteDocumentCallout hit={hit} />
       <FlyoutNavigation flyoutIsExpandable={true} expandDetails={expandDetails} />
       <PanelHeader
         selectedTabId={selectedTabId}
@@ -61,4 +72,5 @@ export const AttackDetailsPanel: React.FC<Partial<AttackDetailsProps>> = memo(({
   );
 });
 
-AttackDetailsPanel.displayName = 'AttackDetailsPanel';
+AttackDetailsRightPanel.displayName = 'AttackDetailsRightPanel';
+export { AttackDetailsPreviewPanel } from './preview';

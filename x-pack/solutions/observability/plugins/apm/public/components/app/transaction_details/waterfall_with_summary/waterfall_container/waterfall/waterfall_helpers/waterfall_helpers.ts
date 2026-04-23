@@ -10,6 +10,7 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type { Dictionary } from 'lodash';
 import { first, flatten, groupBy, isEmpty, sortBy, uniq } from 'lodash';
 import type { Error } from '@kbn/apm-types';
+import { getTimestampUs } from '../../../../../../../../common/utils/get_timestamp_us';
 import type { IWaterfallLegend } from '../../../../../../../../common/waterfall/legend';
 import { WaterfallLegendType } from '../../../../../../../../common/waterfall/legend';
 import { isOpenTelemetryAgentName } from '../../../../../../../../common/agent_name';
@@ -162,8 +163,8 @@ function getErrorItem(
   items: IWaterfallItem[],
   entryWaterfallTransaction?: IWaterfallTransaction
 ): IWaterfallError {
-  const entryTimestamp = entryWaterfallTransaction?.doc.timestamp.us ?? 0;
-  const parent = items.find((waterfallItem) => waterfallItem.id === error.parent?.id) as
+  const entryTimestamp = getTimestampUs(entryWaterfallTransaction?.doc);
+  const parent = items?.find((waterfallItem) => waterfallItem.id === error.parent?.id) as
     | IWaterfallSpanOrTransaction
     | undefined;
 
@@ -173,7 +174,7 @@ function getErrorItem(
     id: error.error.id ?? error.id,
     parent,
     parentId: parent?.id,
-    offset: error.timestamp.us - entryTimestamp,
+    offset: getTimestampUs(error) - entryTimestamp,
     skew: 0,
     color: '',
   };
@@ -198,10 +199,10 @@ export function getClockSkew(
       return parentItem.skew;
     // transaction is the initial entry in a service. Calculate skew for this, and it will be propagated to all child spans
     case 'transaction': {
-      const parentStart = parentItem.doc.timestamp.us + parentItem.skew;
+      const parentStart = getTimestampUs(parentItem.doc) + parentItem.skew;
 
       // determine if child starts before the parent
-      const offsetStart = parentStart - item.doc.timestamp.us;
+      const offsetStart = parentStart - getTimestampUs(item.doc);
       if (offsetStart > 0) {
         const latency = Math.max(parentItem.duration - item.duration, 0) / 2;
         return offsetStart + latency;
@@ -220,7 +221,7 @@ export function getOrderedWaterfallItems(
   if (!entryWaterfallTransaction) {
     return [];
   }
-  const entryTimestamp = entryWaterfallTransaction.doc.timestamp.us;
+  const entryTimestamp = getTimestampUs(entryWaterfallTransaction.doc);
   const visitedWaterfallItemSet = new Set();
 
   function getSortedChildren(
@@ -236,7 +237,7 @@ export function getOrderedWaterfallItems(
 
     item.parent = parentItem;
     // get offset from the beginning of trace
-    item.offset = item.doc.timestamp.us - entryTimestamp;
+    item.offset = getTimestampUs(item.doc) - entryTimestamp;
     // move the item to the right if it starts before its parent
     item.skew = getClockSkew(item, parentItem);
 
@@ -387,7 +388,7 @@ const getEntryWaterfallTransaction = (
   entryTransactionId: string,
   waterfallItems: IWaterfallItem[]
 ): IWaterfallTransaction | undefined =>
-  waterfallItems.find(
+  waterfallItems?.find(
     (item) => item.docType === 'transaction' && item.id === entryTransactionId
   ) as IWaterfallTransaction;
 
@@ -431,6 +432,10 @@ function getWaterfallErrors(
   { 'parentId': 2 }
   */
 function getErrorCountByParentId(errorDocs: TraceAPIResponse['traceItems']['errorDocs']) {
+  if (!Array.isArray(errorDocs)) {
+    return {};
+  }
+
   return errorDocs.reduce<Record<string, number>>((acc, doc) => {
     const parentId = doc.parent?.id;
 
@@ -474,7 +479,7 @@ export function reparentOrphanItems(
         entryWaterfallTransaction && item.duration > entryWaterfallTransaction?.duration;
       const hasStartedBeforeEntryTransaction =
         entryWaterfallTransaction &&
-        item.doc.timestamp.us < entryWaterfallTransaction.doc.timestamp.us;
+        getTimestampUs(item.doc) < getTimestampUs(entryWaterfallTransaction.doc);
 
       if (isLongerThanEntryTransaction || hasStartedBeforeEntryTransaction) {
         return acc;
@@ -519,7 +524,7 @@ export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
     traceItems.spanLinksCountById
   );
 
-  const entryWaterfallTransaction = getEntryWaterfallTransaction(
+  let entryWaterfallTransaction: IWaterfallTransaction | undefined = getEntryWaterfallTransaction(
     entryTransaction.transaction.id,
     waterfallItems
   );
@@ -529,10 +534,14 @@ export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
     reparentOrphanItems(orphanItemsIds, reparentSpans(waterfallItems), entryWaterfallTransaction)
   );
 
+  const rootWaterfallTransaction = getRootWaterfallTransaction(childrenByParentId);
+
+  if (!entryWaterfallTransaction && rootWaterfallTransaction) {
+    entryWaterfallTransaction = rootWaterfallTransaction;
+  }
+
   const items = getOrderedWaterfallItems(childrenByParentId, entryWaterfallTransaction);
   const errorItems = getWaterfallErrors(traceItems.errorDocs, items, entryWaterfallTransaction);
-
-  const rootWaterfallTransaction = getRootWaterfallTransaction(childrenByParentId);
 
   const duration = getWaterfallDuration(items);
   const { legends, colorBy } = generateLegendsAndAssignColorsToWaterfall(items);

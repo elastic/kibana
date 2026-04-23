@@ -13,6 +13,7 @@ export type {
   SidebarComponentProps,
   SidebarComponentType,
   SidebarApp,
+  SidebarAppConfig,
   SidebarAppDefinition,
   SidebarSetup,
   SidebarStart,

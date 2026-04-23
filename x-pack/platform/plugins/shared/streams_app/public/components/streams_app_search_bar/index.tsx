@@ -9,18 +9,23 @@ import type { UncontrolledStreamsAppSearchBarProps } from './uncontrolled_stream
 import { UncontrolledStreamsAppSearchBar } from './uncontrolled_streams_app_bar';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { useTimeRangeUpdate } from '../../hooks/use_time_range_update';
+import { useTimefilter } from '../../hooks/use_timefilter';
 
 export type StreamsAppSearchBarProps = UncontrolledStreamsAppSearchBarProps;
 
 export function StreamsAppSearchBar({ onQuerySubmit, ...props }: StreamsAppSearchBarProps) {
   const { rangeFrom, rangeTo } = useTimeRange();
   const { updateTimeRange } = useTimeRangeUpdate();
+  const { refresh } = useTimefilter();
 
   return (
     <UncontrolledStreamsAppSearchBar
       onQuerySubmit={({ dateRange, query }, isUpdate) => {
         if (dateRange) {
           updateTimeRange(dateRange);
+        }
+        if (!isUpdate) {
+          refresh();
         }
         onQuerySubmit?.({ dateRange, query }, isUpdate);
       }}

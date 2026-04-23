@@ -63,7 +63,7 @@ export const FleetServerHostsSection: React.FunctionComponent<FleetServerHostsSe
         <>
           <EuiSpacer size="s" />
           <EuiButtonEmpty
-            iconType="plusInCircle"
+            iconType="plusCircle"
             href={getHref('settings_create_fleet_server_hosts')}
             data-test-subj="settings.fleetServerHosts.addFleetServerHostBtn"
           >

@@ -15,9 +15,9 @@ import {
   selectEvaluators,
   withEvaluatorSpan,
   createSpanLatencyEvaluator,
+  createSkillInvocationEvaluator,
   createRagEvaluators,
   type GroundTruth,
-  type RetrievedDoc,
   type ExperimentTask,
   type TaskOutput,
 } from '@kbn/evals';
@@ -33,6 +33,7 @@ import {
   getToolCallSteps,
 } from '@kbn/evals';
 import type { AgentBuilderEvaluationChatClient } from './chat_client';
+import { extractSearchRetrievedDocs } from './rag_extractor';
 
 interface DatasetExample extends Example {
   input: {
@@ -114,26 +115,7 @@ function configureExperiment({
   const ragEvaluators = createRagEvaluators({
     k: 10,
     relevanceThreshold: 1,
-    extractRetrievedDocs: (output: TaskOutput) => {
-      const steps =
-        (
-          output as {
-            steps?: Array<{
-              type: string;
-              tool_id?: string;
-              results?: Array<{ data?: { reference?: { id?: string; index?: string } } }>;
-            }>;
-          }
-        )?.steps ?? [];
-      return steps
-        .filter((step) => step.type === 'tool_call' && step.tool_id === 'platform.core.search')
-        .flatMap((step) => step.results ?? [])
-        .map((result) => ({
-          index: result.data?.reference?.index,
-          id: result.data?.reference?.id,
-        }))
-        .filter((doc): doc is RetrievedDoc => Boolean(doc.id && doc.index));
-    },
+    extractRetrievedDocs: extractSearchRetrievedDocs,
     extractGroundTruth: (referenceOutput: DatasetExample['output']) =>
       referenceOutput?.groundTruth ?? {},
   });
@@ -208,6 +190,70 @@ function configureExperiment({
         spanName: 'Converse',
       }),
     }),
+    createSkillInvocationEvaluator({
+      traceEsClient,
+      log,
+      skillName: 'data-exploration',
+    }),
+    {
+      name: 'ExpectedSkillInvocation',
+      kind: 'CODE' as const,
+      evaluate: async ({ output, metadata }) => {
+        const expectedSkill = getStringMeta(metadata, 'expectedSkill');
+        const shouldNotActivate = getStringMeta(metadata, 'shouldNotActivateSkill');
+        const skillName = expectedSkill ?? shouldNotActivate;
+
+        if (!skillName) return { score: 1 };
+        if (!/^[a-zA-Z0-9_-]+$/.test(skillName)) {
+          return { score: null, label: 'error', explanation: `Invalid skill name: ${skillName}` };
+        }
+
+        const traceId = (output as Record<string, unknown>)?.traceId as string | undefined;
+        if (!traceId) {
+          return {
+            score: null,
+            label: 'unavailable',
+            explanation: 'No traceId available for skill invocation check',
+          };
+        }
+
+        const query = `FROM traces-*
+| WHERE trace.id == "${traceId}"
+| STATS skill_invoked = COUNT(
+    CASE(
+      attributes.gen_ai.tool.name == "filestore.read"
+        AND attributes.elastic.tool.parameters LIKE "*/${skillName}/SKILL.md*",
+      1,
+      NULL
+    )
+  )`;
+
+        try {
+          const response = (await traceEsClient.esql.query({ query })) as unknown as {
+            values: number[][];
+          };
+          const invoked = (response.values?.[0]?.[0] ?? 0) > 0;
+
+          if (expectedSkill) {
+            return {
+              score: invoked ? 1 : 0,
+              metadata: { expectedSkill, invoked },
+            };
+          }
+          return {
+            score: invoked ? 0 : 1,
+            metadata: { shouldNotActivateSkill: shouldNotActivate, invoked },
+          };
+        } catch (error) {
+          log.warning(
+            `ExpectedSkillInvocation failed for trace ${traceId}: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+          return { score: null, label: 'error' };
+        }
+      },
+    },
   ]);
 
   return { task, evaluators: selectedEvaluators };
@@ -215,13 +261,13 @@ function configureExperiment({
 
 export function createEvaluateDataset({
   evaluators,
-  phoenixClient,
+  executorClient,
   chatClient,
   traceEsClient,
   log,
 }: {
   evaluators: DefaultEvaluators;
-  phoenixClient: EvalsExecutorClient;
+  executorClient: EvalsExecutorClient;
   chatClient: AgentBuilderEvaluationChatClient;
   traceEsClient: EsClient;
   log: ToolingLog;
@@ -248,7 +294,7 @@ export function createEvaluateDataset({
       log,
     });
 
-    await phoenixClient.runExperiment(
+    await executorClient.runExperiment(
       {
         dataset,
         task,
@@ -260,18 +306,19 @@ export function createEvaluateDataset({
 
 export function createEvaluateExternalDataset({
   evaluators,
-  phoenixClient,
+  executorClient,
   chatClient,
   traceEsClient,
   log,
 }: {
   evaluators: DefaultEvaluators;
-  phoenixClient: EvalsExecutorClient;
+  executorClient: EvalsExecutorClient;
   chatClient: AgentBuilderEvaluationChatClient;
   traceEsClient: EsClient;
   log: ToolingLog;
 }): EvaluateExternalDataset {
   return async function evaluateExternalDataset(datasetName: string) {
+    const resolvesFromPhoenix = process.env.KBN_EVALS_EXECUTOR === 'phoenix';
     const { task, evaluators: selectedEvaluators } = configureExperiment({
       evaluators,
       chatClient,
@@ -279,12 +326,15 @@ export function createEvaluateExternalDataset({
       log,
     });
 
-    await phoenixClient.runExperiment(
+    await executorClient.runExperiment(
       {
         dataset: {
           name: datasetName,
-          description: 'External dataset resolved from Phoenix by name',
-          examples: [], // Examples will be loaded from Phoenix, not provided in code
+          description: resolvesFromPhoenix
+            ? 'External dataset resolved from Phoenix by name'
+            : 'External dataset resolved from Elasticsearch by name',
+          // Examples are resolved from upstream dataset storage, not provided in code.
+          examples: [],
         },
         task,
         trustUpstreamDataset: true,

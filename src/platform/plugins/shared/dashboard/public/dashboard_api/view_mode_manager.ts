@@ -13,7 +13,7 @@ import { BehaviorSubject } from 'rxjs';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import type { DashboardUser } from './types';
 import { getAccessControlClient } from '../services/access_control_service';
-import { getDashboardBackupService } from '../services/dashboard_backup_service';
+import { getDashboardBackupService } from '../services/dashboard_api_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 
 export function initializeViewModeManager({

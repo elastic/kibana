@@ -24,7 +24,7 @@ export const apiKeysMock = {
       uiam: {
         grant: jest.fn(),
         invalidate: jest.fn(),
-        getScopedClusterClientWithApiKey: jest.fn(),
+        convert: jest.fn(),
       },
     }),
 };

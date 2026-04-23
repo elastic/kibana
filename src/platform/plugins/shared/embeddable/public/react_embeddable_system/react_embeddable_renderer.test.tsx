@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
+import { getMockPresentationContainer } from '@kbn/presentation-publishing/interfaces/containers/mocks';
 import { setStubKibanaServices as setupPresentationPanelServices } from '@kbn/presentation-panel-plugin/public/mocks';
 import { render, waitFor, screen, fireEvent } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { registerReactEmbeddableFactory } from './react_embeddable_registry';
+import { registerEmbeddablePublicDefinition } from './react_embeddable_registry';
 import { EmbeddableRenderer } from './react_embeddable_renderer';
 import type { EmbeddableFactory } from './types';
 
@@ -26,6 +26,7 @@ const testEmbeddableFactory: EmbeddableFactory<{ name: string; bork: string }> =
         name: initialState.name,
         bork: initialState.bork,
       }),
+      applySerializedState: jest.fn(),
     });
     return {
       Component: () => (
@@ -44,7 +45,7 @@ describe('embeddable renderer', () => {
   };
 
   beforeAll(() => {
-    registerReactEmbeddableFactory('test', getTestEmbeddableFactory);
+    registerEmbeddablePublicDefinition('test', getTestEmbeddableFactory);
     setupPresentationPanelServices();
   });
 
@@ -62,6 +63,7 @@ describe('embeddable renderer', () => {
     );
     await waitFor(() => {
       expect(buildEmbeddableSpy).toHaveBeenCalledWith({
+        initializeDrilldownsManager: expect.any(Function),
         initialState: { bork: 'blorp?' },
         parentApi: expect.any(Object),
         uuid: expect.any(String),
@@ -85,6 +87,7 @@ describe('embeddable renderer', () => {
     );
     await waitFor(() => {
       expect(buildEmbeddableSpy).toHaveBeenCalledWith({
+        initializeDrilldownsManager: expect.any(Function),
         initialState: { bork: 'blorp?' },
         parentApi: expect.any(Object),
         uuid: '12345',
@@ -104,6 +107,7 @@ describe('embeddable renderer', () => {
     render(<EmbeddableRenderer type={'test'} getParentApi={() => parentApi} />);
     await waitFor(() => {
       expect(buildEmbeddableSpy).toHaveBeenCalledWith({
+        initializeDrilldownsManager: expect.any(Function),
         initialState: { bork: 'blorp?' },
         parentApi,
         uuid: expect.any(String),
@@ -154,6 +158,7 @@ describe('embeddable renderer', () => {
         phase$: expect.any(Object),
         hasLockedHoverActions$: expect.any(Object),
         lockHoverActions: expect.any(Function),
+        applySerializedState: expect.any(Function),
         isCustomizable: true,
         isDuplicable: true,
         isExpandable: true,
@@ -185,12 +190,12 @@ describe('embeddable renderer', () => {
   it('catches error when thrown in buildEmbeddable', async () => {
     const errorInInitializeFactory: EmbeddableFactory<{ name: string; bork: string }> = {
       ...testEmbeddableFactory,
-      type: 'errorInBuildEmbeddable',
+      type: 'error_in_build_embeddable',
       buildEmbeddable: () => {
         throw new Error('error in buildEmbeddable');
       },
     };
-    registerReactEmbeddableFactory('errorInBuildEmbeddable', () =>
+    registerEmbeddablePublicDefinition('error_in_build_embeddable', () =>
       Promise.resolve(errorInInitializeFactory)
     );
     setupPresentationPanelServices();
@@ -200,7 +205,7 @@ describe('embeddable renderer', () => {
     const embeddable = render(
       <EuiThemeProvider>
         <EmbeddableRenderer
-          type={'errorInBuildEmbeddable'}
+          type={'error_in_build_embeddable'}
           maybeId={'12345'}
           onApiAvailable={onApiAvailable}
           getParentApi={() => ({
@@ -211,10 +216,79 @@ describe('embeddable renderer', () => {
     );
 
     await waitFor(() => expect(embeddable.getByTestId('errorMessageMarkdown')).toBeInTheDocument());
-    expect(onApiAvailable).not.toBeCalled();
     expect(embeddable.getByTestId('errorMessageMarkdown')).toHaveTextContent(
       'error in buildEmbeddable'
     );
+  });
+
+  it('registers error API via onApiAvailable when buildEmbeddable throws', async () => {
+    const errorFactory: EmbeddableFactory<{ name: string; bork: string }> = {
+      ...testEmbeddableFactory,
+      type: 'error_registers_api',
+      buildEmbeddable: () => {
+        throw new Error('saved object not found');
+      },
+    };
+    registerEmbeddablePublicDefinition('error_registers_api', () => Promise.resolve(errorFactory));
+    setupPresentationPanelServices();
+
+    const onApiAvailable = jest.fn();
+    render(
+      <EuiThemeProvider>
+        <EmbeddableRenderer
+          type={'error_registers_api'}
+          maybeId={'67890'}
+          onApiAvailable={onApiAvailable}
+          getParentApi={() => ({
+            getSerializedStateForChild: () => ({}),
+          })}
+        />
+      </EuiThemeProvider>
+    );
+
+    await waitFor(() => expect(onApiAvailable).toHaveBeenCalledTimes(1));
+
+    const errorApi = onApiAvailable.mock.calls[0][0];
+    expect(errorApi.uuid).toBe('67890');
+    expect(errorApi.parentApi).toBeUndefined();
+    expect(errorApi.blockingError$.getValue()).toEqual(new Error('saved object not found'));
+  });
+
+  it('assigns parentApi on error API when parent is a presentation container', async () => {
+    const errorFactory: EmbeddableFactory<{ name: string; bork: string }> = {
+      ...testEmbeddableFactory,
+      type: 'error_with_container_parent',
+      buildEmbeddable: () => {
+        throw new Error('container parent error');
+      },
+    };
+    registerEmbeddablePublicDefinition('error_with_container_parent', () =>
+      Promise.resolve(errorFactory)
+    );
+    setupPresentationPanelServices();
+
+    const parentApi = {
+      ...getMockPresentationContainer(),
+      getSerializedStateForChild: () => ({}),
+    };
+    const onApiAvailable = jest.fn();
+    render(
+      <EuiThemeProvider>
+        <EmbeddableRenderer
+          type={'error_with_container_parent'}
+          maybeId={'99999'}
+          onApiAvailable={onApiAvailable}
+          getParentApi={() => parentApi}
+        />
+      </EuiThemeProvider>
+    );
+
+    await waitFor(() => expect(onApiAvailable).toHaveBeenCalledTimes(1));
+
+    const errorApi = onApiAvailable.mock.calls[0][0];
+    expect(errorApi.uuid).toBe('99999');
+    expect(errorApi.parentApi).toBe(parentApi);
+    expect(errorApi.blockingError$.getValue()).toEqual(new Error('container parent error'));
   });
 });
 
@@ -222,9 +296,9 @@ describe('reactEmbeddable phase events', () => {
   it('publishes rendered phase immediately when dataLoading is not defined', async () => {
     const immediateLoadEmbeddableFactory: EmbeddableFactory<{ name: string; bork: string }> = {
       ...testEmbeddableFactory,
-      type: 'immediateLoad',
+      type: 'immediate_load',
     };
-    registerReactEmbeddableFactory('immediateLoad', () =>
+    registerEmbeddablePublicDefinition('immediate_load', () =>
       Promise.resolve(immediateLoadEmbeddableFactory)
     );
     setupPresentationPanelServices();
@@ -254,7 +328,7 @@ describe('reactEmbeddable phase events', () => {
   it('publishes rendered phase event when dataLoading is complete', async () => {
     const dataLoadingEmbeddableFactory: EmbeddableFactory<{ name: string; bork: string }> = {
       ...testEmbeddableFactory,
-      type: 'loadClicker',
+      type: 'load_clicker',
       buildEmbeddable: async ({ initialState, finalizeApi }) => {
         const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
         const api = finalizeApi({
@@ -262,6 +336,7 @@ describe('reactEmbeddable phase events', () => {
             name: initialState.name,
             bork: initialState.bork,
           }),
+          applySerializedState: jest.fn(),
           dataLoading$,
         });
         return {
@@ -279,7 +354,7 @@ describe('reactEmbeddable phase events', () => {
         };
       },
     };
-    registerReactEmbeddableFactory('loadClicker', () =>
+    registerEmbeddablePublicDefinition('load_clicker', () =>
       Promise.resolve(dataLoadingEmbeddableFactory)
     );
     setupPresentationPanelServices();
@@ -287,7 +362,7 @@ describe('reactEmbeddable phase events', () => {
     const phaseFn = jest.fn();
     render(
       <EmbeddableRenderer
-        type={'loadClicker'}
+        type={'load_clicker'}
         maybeId={'12345'}
         onApiAvailable={(api) => {
           api.phase$.subscribe((phase) => {

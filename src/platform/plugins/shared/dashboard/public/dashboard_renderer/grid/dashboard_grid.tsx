@@ -256,6 +256,8 @@ const dashboardGridStyles = {
       // Adjust borders/etc... for non-spaced out and expanded panels
       '&.dshLayout-withoutMargins': {
         paddingTop: euiTheme.size.s,
+        paddingLeft: euiTheme.size.s,
+        paddingRight: euiTheme.size.s,
         '.embPanel__content, .embPanel, .embPanel__hoverActionsAnchor, .lnsExpressionRenderer': {
           borderRadius: 0,
         },

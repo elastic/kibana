@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { deleteEndpointExceptionList } from '../../../../../tasks/api_calls/exceptions';
+import {
+  createEndpointExceptionList,
+  deleteEndpointExceptionList,
+} from '../../../../../tasks/api_calls/exceptions';
 import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 import {
   expandFirstAlert,
@@ -54,9 +57,12 @@ describe(
       login();
       deleteAlertsAndRules();
       deleteEndpointExceptionList();
+      createEndpointExceptionList();
 
       cy.task('esArchiverLoad', { archiveName: 'endpoint' });
-      createRule(getEndpointRule()).then((rule) => visitRuleDetailsPage(rule.body.id));
+      createRule(getEndpointRule()).then((rule) =>
+        visitRuleDetailsPage(rule.body.id, { tab: 'alerts' })
+      );
 
       waitForTheRuleToBeExecuted();
       waitForAlertsToPopulate();

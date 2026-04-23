@@ -19,6 +19,8 @@ import type {
   AlertItem as AlertItemType,
 } from './types';
 
+const STORYBOOK_SCOPE_ID = 'storybook-grouped-item';
+
 // Base interface for common props across all stories
 interface BaseStoryProps {
   isLoading?: boolean;
@@ -55,10 +57,11 @@ export const EntityItem: StoryFn<EntityStoryProps> = ({
 }: EntityStoryProps) => {
   const item: EntityItemType = {
     itemType: DOCUMENT_TYPE_ENTITY,
+    entity: {},
     ...itemArgs,
   };
 
-  return <GroupedItemComp isLoading={isLoading} item={item} />;
+  return <GroupedItemComp isLoading={isLoading} item={item} scopeId={STORYBOOK_SCOPE_ID} />;
 };
 
 EntityItem.args = {
@@ -86,7 +89,7 @@ export const EventItem: StoryFn<EventAlertStoryProps> = ({
     ...itemArgs,
   };
 
-  return <GroupedItemComp isLoading={isLoading} item={item} />;
+  return <GroupedItemComp isLoading={isLoading} item={item} scopeId={STORYBOOK_SCOPE_ID} />;
 };
 
 EventItem.args = {
@@ -111,7 +114,7 @@ export const AlertItem: StoryFn<EventAlertStoryProps> = ({
     ...itemArgs,
   };
 
-  return <GroupedItemComp isLoading={isLoading} item={item} />;
+  return <GroupedItemComp isLoading={isLoading} item={item} scopeId={STORYBOOK_SCOPE_ID} />;
 };
 
 AlertItem.args = {

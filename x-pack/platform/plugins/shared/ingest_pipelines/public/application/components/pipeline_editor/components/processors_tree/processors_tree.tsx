@@ -18,6 +18,7 @@ import { selectorToDataTestSubject } from '../../utils';
 import { AddProcessorButton } from '../add_processor_button';
 
 import { PrivateTree, DropZoneButton } from './components';
+import { processorsTreeI18nTexts } from './i18n_texts';
 
 export interface ProcessorInfo {
   id: string;
@@ -42,6 +43,7 @@ export interface Props {
   baseSelector: ProcessorSelector;
   onAction: OnActionHandler;
   movingProcessor?: ProcessorInfo;
+  movingProcessorLabel?: string;
   'data-test-subj'?: string;
 }
 
@@ -59,9 +61,10 @@ const useStyles = () => {
  * also contains top-level state concerns for an instance of the component
  */
 export const ProcessorsTree: FunctionComponent<Props> = memo((props) => {
-  const { processors, baseSelector, onAction, movingProcessor } = props;
+  const { processors, baseSelector, onAction, movingProcessor, movingProcessorLabel } = props;
   const styles = useStyles();
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const sectionLabel = processorsTreeI18nTexts.getSectionLabel(baseSelector);
   // These refs are created here so they can be shared with all
   // recursively rendered trees. Their values should come from react-virtualized
   // List component and WindowScroller component.
@@ -110,6 +113,7 @@ export const ProcessorsTree: FunctionComponent<Props> = memo((props) => {
           level={1}
           onAction={onAction}
           movingProcessor={movingProcessor}
+          movingProcessorLabel={movingProcessorLabel}
           processors={processors}
           selector={baseSelector}
         />
@@ -129,6 +133,14 @@ export const ProcessorsTree: FunctionComponent<Props> = memo((props) => {
                 data-test-subj="dropButtonEmptyTree"
                 isVisible={Boolean(movingProcessor)}
                 isDisabled={false}
+                availableAriaLabel={
+                  movingProcessor && movingProcessorLabel
+                    ? processorsTreeI18nTexts.moveToEmptyTreeLabel({
+                        movingProcessor: movingProcessorLabel,
+                        sectionLabel,
+                      })
+                    : undefined
+                }
                 onClick={(event) => {
                   event.preventDefault();
                   onAction({

@@ -11,6 +11,7 @@ import type { PlaywrightTestConfig } from '@playwright/test';
 import { defineConfig, devices } from '@playwright/test';
 import {
   scoutFailedTestsReporter,
+  scoutFailureSummaryReporter,
   scoutPlaywrightReporter,
   generateTestRunId,
 } from '@kbn/scout-reporting';
@@ -69,6 +70,7 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
           name: `setup-${project?.name}`,
           use: project?.use ? { ...project.use } : {},
           testMatch: /global.setup\.ts/,
+          timeout: 180000, // Default to 3 minutes for global setup
         },
         { ...project, dependencies: [`setup-${project?.name}`] },
       ])
@@ -90,6 +92,7 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
       ['json', { outputFile: './.scout/reports/test-results.json' }], // JSON report
       scoutPlaywrightReporter({ name: 'scout-playwright', runId }), // Scout events report
       scoutFailedTestsReporter({ name: 'scout-playwright-failed-tests', runId }), // Scout failed test report
+      scoutFailureSummaryReporter({ name: 'scout-failure-summary', runId }), // Scout failure summary (local only)
     ],
     /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
     use: {
@@ -109,6 +112,7 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
       // video: 'retain-on-failure',
       // storageState: './output/reports/state.json', // Store session state (like cookies)
       timezoneId: 'GMT',
+      ignoreHTTPSErrors: true,
     },
 
     // Timeout for each test, includes test, hooks and fixtures

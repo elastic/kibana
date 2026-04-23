@@ -6,7 +6,7 @@
  */
 
 import type { IKibanaResponse, IRouter, Logger, ElasticsearchClient } from '@kbn/core/server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { AttackDiscoveryMissingPrivileges } from '@kbn/elastic-assistant-common';
 import {
@@ -18,6 +18,7 @@ import type {
   SecurityHasPrivilegesResponse,
   SecurityIndexPrivilege,
 } from '@elastic/elasticsearch/lib/api/types';
+import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
 import { ATTACK_DISCOVERY_API_ACTION_ALL } from '@kbn/security-solution-features/actions';
 
 import { getScheduledIndexPattern } from '../../../lib/attack_discovery/persistence/get_scheduled_index_pattern';
@@ -53,7 +54,7 @@ export const getMissingIndexPrivilegesInternalRoute = (
       path: ATTACK_DISCOVERY_INTERNAL_MISSING_PRIVILEGES,
       security: {
         authz: {
-          requiredPrivileges: [ATTACK_DISCOVERY_API_ACTION_ALL],
+          requiredPrivileges: [ATTACK_DISCOVERY_API_ACTION_ALL, ALERTS_API_READ],
         },
       },
     })

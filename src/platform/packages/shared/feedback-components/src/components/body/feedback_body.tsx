@@ -11,11 +11,11 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiForm } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import type { FeedbackRegistryEntry } from '@kbn/feedback-registry';
 import { FeedbackTextArea } from './feedback_text_area';
 import { EmailSection } from './email';
 import { PrivacyAndSessionDisclaimer } from './privacy_and_session_disclaimer';
 import { CsatButtons } from './csat_buttons';
+import type { FeedbackRegistryEntry } from '../../types';
 
 export interface FeedbackBodyProps {
   selectedCsatOptionId: string;
@@ -30,6 +30,7 @@ export interface FeedbackBodyProps {
   handleChangeEmail: (email: string) => void;
   onEmailValidationChange: (isValid: boolean) => void;
   getCurrentUserEmail: () => Promise<string | undefined>;
+  forceShowEmailError?: boolean;
 }
 
 export const FeedbackBody = ({
@@ -45,6 +46,7 @@ export const FeedbackBody = ({
   handleChangeEmail,
   onEmailValidationChange,
   getCurrentUserEmail,
+  forceShowEmailError = false,
 }: FeedbackBodyProps) => {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -92,6 +94,7 @@ export const FeedbackBody = ({
             handleChangeEmail={handleChangeEmail}
             onEmailValidationChange={onEmailValidationChange}
             getCurrentUserEmail={getCurrentUserEmail}
+            forceShowEmailError={forceShowEmailError}
           />
         </EuiForm>
       </EuiFlexItem>

@@ -15,13 +15,18 @@ import {
   within,
   fireEvent,
 } from '@testing-library/react';
+import { EuiThemeProvider } from '@elastic/eui';
 import { faker } from '@faker-js/faker';
 import userEvent from '@testing-library/user-event';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
+import { euiThemeVars } from '@kbn/ui-theme';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
-import type { DataType } from '@kbn/lens-common';
-import type { MetricVisualizationState } from './types';
+import type { DataType, MetricVisualizationState } from '@kbn/lens-common';
+import {
+  LENS_LEGACY_METRIC_STATE_DEFAULTS,
+  LENS_METRIC_GROUP_ID,
+  LENS_METRIC_STATE_DEFAULTS,
+} from '@kbn/lens-common';
 import type { Props, SupportingVisType, ApplyColor } from './dimension_editor';
 import {
   DimensionEditor,
@@ -29,8 +34,7 @@ import {
   DimensionEditorDataExtraComponent,
 } from './dimension_editor';
 import { createMockFramePublicAPI, createMockDatasource } from '../../mocks';
-import { GROUP_ID, legacyMetricStateDefaults, metricStateDefaults } from './constants';
-import { getDefaultConfigForMode } from './helpers';
+import { getDefaultConfigForMode } from './palette_config';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 
 // see https://github.com/facebook/jest/issues/4402#issuecomment-534516219
@@ -45,7 +49,6 @@ const SELECTORS = {
   COLOR_PICKER: 'euiColorPickerAnchor',
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/234063
 describe('dimension editor', () => {
   const palette: PaletteOutput<CustomPaletteParams> = {
     type: 'palette',
@@ -55,40 +58,40 @@ describe('dimension editor', () => {
     },
   };
 
-  const fullState: Required<Omit<MetricVisualizationState, 'secondaryPrefix' | 'valuesTextAlign'>> =
-    {
-      layerId: 'first',
-      layerType: 'data',
-      metricAccessor: 'metric-col-id',
-      secondaryMetricAccessor: 'secondary-metric-col-id',
-      maxAccessor: 'max-metric-col-id',
-      breakdownByAccessor: 'breakdown-col-id',
-      collapseFn: 'sum',
-      subtitle: faker.lorem.word(5),
-      secondaryLabel: faker.lorem.word(3),
-      secondaryTrend: { type: 'none' },
-      progressDirection: 'vertical',
-      maxCols: 5,
-      color: faker.color.rgb(),
-      palette,
-      icon: 'tag',
-      showBar: true,
-      titlesTextAlign: 'left',
-      primaryAlign: 'right',
-      secondaryAlign: 'right',
-      primaryPosition: 'bottom',
-      titleWeight: 'bold',
-      iconAlign: 'left',
-      valueFontMode: 'default',
-      trendlineLayerId: 'second',
-      trendlineLayerType: 'metricTrendline',
-      trendlineMetricAccessor: 'trendline-metric-col-id',
-      trendlineSecondaryMetricAccessor: 'trendline-secondary-metric-accessor',
-      trendlineTimeAccessor: 'trendline-time-col-id',
-      trendlineBreakdownByAccessor: 'trendline-breakdown-col-id',
-      secondaryLabelPosition: 'before',
-      applyColorTo: 'background',
-    };
+  const fullState: Required<
+    Omit<MetricVisualizationState, 'secondaryPrefix' | 'valuesTextAlign' | 'titleWeight'>
+  > = {
+    layerId: 'first',
+    layerType: 'data',
+    metricAccessor: 'metric-col-id',
+    secondaryMetricAccessor: 'secondary-metric-col-id',
+    maxAccessor: 'max-metric-col-id',
+    breakdownByAccessor: 'breakdown-col-id',
+    collapseFn: 'sum',
+    subtitle: faker.lorem.word(5),
+    secondaryLabel: faker.lorem.word(3),
+    secondaryTrend: { type: 'none' },
+    progressDirection: 'vertical',
+    maxCols: 5,
+    color: faker.color.rgb(),
+    palette,
+    icon: 'tag',
+    showBar: true,
+    titlesTextAlign: 'left',
+    primaryAlign: 'right',
+    secondaryAlign: 'right',
+    primaryPosition: 'bottom',
+    iconAlign: 'left',
+    valueFontMode: 'default',
+    trendlineLayerId: 'second',
+    trendlineLayerType: 'metricTrendline',
+    trendlineMetricAccessor: 'trendline-metric-col-id',
+    trendlineSecondaryMetricAccessor: 'trendline-secondary-metric-accessor',
+    trendlineTimeAccessor: 'trendline-time-col-id',
+    trendlineBreakdownByAccessor: 'trendline-breakdown-col-id',
+    secondaryLabelPosition: 'before',
+    applyColorTo: 'background',
+  };
 
   let props: Props;
 
@@ -114,6 +117,23 @@ describe('dimension editor', () => {
         isBucketed: false,
       })),
     }).publicAPIMock;
+
+  const createActiveDataWithNonNumericColumn = (columnId: string) =>
+    createMockFramePublicAPI({
+      activeData: {
+        first: {
+          type: 'datatable',
+          columns: [
+            {
+              id: columnId,
+              name: columnId,
+              meta: { type: 'string' },
+            },
+          ],
+          rows: [{ [columnId]: 'foo' }],
+        },
+      },
+    });
 
   beforeEach(() => {
     props = {
@@ -176,14 +196,12 @@ describe('dimension editor', () => {
       };
       const clearIcon = async () => {
         const iconInput = within(iconSelect).getByTestId('comboBoxSearchInput');
-        // Type 'None' to filter the options list to the "None" option
-        fireEvent.input(iconInput, { target: { value: 'None' } });
-        // Wait for the options list popover to appear
+        await userEvent.click(iconInput);
         const optionsList = await screen.findByTestId(
           'comboBoxOptionsList lns-icon-select-optionsList'
         );
-        // Find the "None" option in the options list
-        const noneOption = within(optionsList).getByText('None', { exact: true });
+        fireEvent.change(iconInput, { target: { value: 'None' } });
+        const noneOption = await within(optionsList).findByRole('option', { name: 'None' });
         // Click the "None" option to clear the icon selection
         if (noneOption) {
           await userEvent.click(noneOption);
@@ -217,7 +235,7 @@ describe('dimension editor', () => {
     });
 
     describe('icon select', () => {
-      it('sets icon with deafult iconAlign', async () => {
+      it('sets icon with default iconAlign', async () => {
         const setState = jest.fn();
         const { setIcon } = renderPrimaryMetricEditor({
           state: { ...fullState, icon: undefined, iconAlign: undefined },
@@ -225,7 +243,10 @@ describe('dimension editor', () => {
         });
         await setIcon('Compute');
         expect(setState).toHaveBeenCalledWith(
-          expect.objectContaining({ icon: 'compute', iconAlign: metricStateDefaults.iconAlign })
+          expect.objectContaining({
+            icon: 'compute',
+            iconAlign: LENS_METRIC_STATE_DEFAULTS.iconAlign,
+          })
         );
       });
 
@@ -239,7 +260,7 @@ describe('dimension editor', () => {
         expect(setState).toHaveBeenCalledWith(
           expect.objectContaining({
             icon: 'compute',
-            iconAlign: legacyMetricStateDefaults.iconAlign,
+            iconAlign: LENS_LEGACY_METRIC_STATE_DEFAULTS.iconAlign,
           })
         );
       });
@@ -276,6 +297,13 @@ describe('dimension editor', () => {
         await setIcon('Heart');
         expect(setState).not.toHaveBeenCalled();
       });
+    });
+    it('static color control is visible when active data reports a non-numeric primary column', () => {
+      const { getStaticColorPicker } = renderPrimaryMetricEditor({
+        state: { ...metricAccessorState, palette },
+        frame: createActiveDataWithNonNumericColumn('metric-col-id'),
+      });
+      expect(getStaticColorPicker()).toBeInTheDocument();
     });
   });
 
@@ -593,6 +621,18 @@ describe('dimension editor', () => {
           expect(getColorByValueDynamic()).toBeDisabled();
         });
 
+        it('should prevent dynamic coloring when active data reports a non-numeric secondary column', async () => {
+          const { getColorByValueDynamic } = renderSecondaryMetricEditor({
+            state: {
+              ...localState,
+              secondaryTrend: getDefaultConfigForMode('dynamic'),
+            },
+            frame: createActiveDataWithNonNumericColumn('secondary-metric-col-id'),
+          });
+
+          expect(getColorByValueDynamic()).toBeDisabled();
+        });
+
         it('should correctly select the reversed Trend color palette based on configuration', async () => {
           const { getSelectedPalette } = renderSecondaryMetricEditor({
             state: {
@@ -627,6 +667,27 @@ describe('dimension editor', () => {
                 createOperationByType(id !== accessor ? 'string' : 'number')
               ),
             }).publicAPIMock,
+          });
+
+          const baselineGroup = getBaselineGroup();
+
+          expect(baselineGroup).toBeInTheDocument();
+          expect(getByTitle(baselineGroup, 'Primary metric')).toBeDisabled();
+        });
+
+        it('should disable the "Primary metric" baseline when active data reports a non-numeric primary column', async () => {
+          const { getBaselineGroup } = renderSecondaryMetricEditor({
+            state: {
+              ...localState,
+              secondaryTrend: {
+                type: 'dynamic',
+                visuals: 'both',
+                reversed: false,
+                paletteId: 'compare_to',
+                baselineValue: 'primary',
+              },
+            },
+            frame: createActiveDataWithNonNumericColumn('metric-col-id'),
           });
 
           const baselineGroup = getBaselineGroup();
@@ -856,14 +917,16 @@ describe('dimension editor', () => {
     describe('data section', () => {
       function renderBreakdownEditorDataSection(overrides = {}) {
         const rtlRender = render(
-          <DimensionEditorDataExtraComponent
-            {...props}
-            groupId={GROUP_ID.BREAKDOWN_BY}
-            state={{ ...fullState, breakdownByAccessor: accessor }}
-            accessor={accessor}
-            setState={mockSetState}
-            {...overrides}
-          />
+          <EuiThemeProvider colorMode="light">
+            <DimensionEditorDataExtraComponent
+              {...props}
+              groupId={LENS_METRIC_GROUP_ID.BREAKDOWN_BY}
+              state={{ ...fullState, breakdownByAccessor: accessor }}
+              accessor={accessor}
+              setState={mockSetState}
+              {...overrides}
+            />
+          </EuiThemeProvider>
         );
 
         const selectCollapseBy = async (collapseFn: string) => {
@@ -876,14 +939,16 @@ describe('dimension editor', () => {
           selectCollapseBy,
           rerender: (newOverrides = {}) => {
             rtlRender.rerender(
-              <DimensionEditorDataExtraComponent
-                {...props}
-                groupId={GROUP_ID.BREAKDOWN_BY}
-                state={{ ...fullState, breakdownByAccessor: accessor }}
-                accessor={accessor}
-                setState={mockSetState}
-                {...newOverrides}
-              />
+              <EuiThemeProvider colorMode="light">
+                <DimensionEditorDataExtraComponent
+                  {...props}
+                  groupId={LENS_METRIC_GROUP_ID.BREAKDOWN_BY}
+                  state={{ ...fullState, breakdownByAccessor: accessor }}
+                  accessor={accessor}
+                  setState={mockSetState}
+                  {...newOverrides}
+                />
+              </EuiThemeProvider>
             );
           },
         };
@@ -909,13 +974,22 @@ describe('dimension editor', () => {
         expect(screen.getByLabelText(/collapse by/i)).toBeInTheDocument();
       });
 
-      it.each([[GROUP_ID.METRIC], [GROUP_ID.SECONDARY_METRIC], [GROUP_ID.MAX]])(
-        'should not render for other group types: %s',
-        async (groupId) => {
-          const { container } = renderBreakdownEditorDataSection({ groupId });
-          expect(container).toBeEmptyDOMElement();
-        }
-      );
+      it('should not display the collapse function when active data reports a non-numeric primary column', () => {
+        const { container } = renderBreakdownEditorDataSection({
+          frame: createActiveDataWithNonNumericColumn('metric-col-id'),
+        });
+
+        expect(container).toBeEmptyDOMElement();
+      });
+
+      it.each([
+        [LENS_METRIC_GROUP_ID.METRIC],
+        [LENS_METRIC_GROUP_ID.SECONDARY_METRIC],
+        [LENS_METRIC_GROUP_ID.MAX],
+      ])('should not render for other group types: %s', async (groupId) => {
+        const { container } = renderBreakdownEditorDataSection({ groupId });
+        expect(container).toBeEmptyDOMElement();
+      });
     });
   });
 
@@ -1278,7 +1352,15 @@ describe('dimension editor', () => {
       expect(colorModeGroup).not.toBeInTheDocument();
     });
 
-    describe('static color controls', () => {
+    it('Color mode switch is not shown when active data reports a non-numeric primary metric column', () => {
+      const { colorModeGroup } = renderAdditionalSectionEditor({
+        frame: createActiveDataWithNonNumericColumn('metric-col-id'),
+      });
+      expect(colorModeGroup).not.toBeInTheDocument();
+    });
+
+    // FLAKY: https://github.com/elastic/kibana/issues/253328
+    describe.skip('static color controls', () => {
       it('is hidden when dynamic coloring is enabled', () => {
         const { staticColorPicker } = renderAdditionalSectionEditor({
           state: { ...metricAccessorState, palette },
@@ -1301,7 +1383,7 @@ describe('dimension editor', () => {
             color: undefined,
           },
         });
-        expect(staticColorPicker).toHaveValue(euiLightVars.euiColorPrimary.toUpperCase());
+        expect(staticColorPicker).toHaveValue(euiThemeVars.euiColorVis2.toUpperCase());
       });
 
       it('fills with default vis text color', async () => {

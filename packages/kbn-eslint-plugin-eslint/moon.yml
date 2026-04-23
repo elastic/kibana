@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/eslint-plugin-eslint'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-operations'
-toolchain:
+toolchains:
   default: node
 language: javascript
 project:
-  name: '@kbn/eslint-plugin-eslint'
+  title: '@kbn/eslint-plugin-eslint'
   description: Moon project for @kbn/eslint-plugin-eslint
   channel: ''
   owner: '@elastic/kibana-operations'
-  metadata:
-    sourceRoot: packages/kbn-eslint-plugin-eslint
+  sourceRoot: packages/kbn-eslint-plugin-eslint
 tags:
   - shared-common
   - package
@@ -24,16 +23,13 @@ tags:
   - group-platform
   - private
   - jest-unit-tests
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+fileGroups:
+  src:
+    - rules/**/*
+    - helpers/**/*
+    - index.js
+    - jest.config.js
+    - lib.js
+  jest-config:
+    - jest.config.js
+tasks: {}

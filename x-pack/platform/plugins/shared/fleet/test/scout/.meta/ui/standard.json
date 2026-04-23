@@ -1,17 +1,17 @@
 {
-  "lastModified": "2026-01-30T09:08:08.646Z",
-  "sha1": "1d1fc389253d2dd25e492d220aee962c6da0d2ae",
+  "sha1": "62eb681391ebdf24c631e5a3f68a1d1b39f1bad0",
   "tests": [
     {
       "id": "0ab9aa6583f6769-b18346ef7c3b1d3",
       "title": "Browse integration loads the browse integration page and allow to scroll through it",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/browse_integration.spec.ts",
-        "line": 24,
+        "line": 40,
         "column": 7
       }
     },
@@ -20,11 +20,12 @@
       "title": "Browse integration it allow to sort integrations",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/browse_integration.spec.ts",
-        "line": 39,
+        "line": 55,
         "column": 7
       }
     },
@@ -33,11 +34,12 @@
       "title": "Browse integration it allow to search for an integration",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/browse_integration.spec.ts",
-        "line": 52,
+        "line": 68,
         "column": 7
       }
     },
@@ -46,11 +48,11 @@
       "title": "Copy integration can copy nginx package policy",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/copy_integration.spec.ts",
-        "line": 118,
+        "line": 120,
         "column": 7
       }
     },
@@ -59,11 +61,12 @@
       "title": "When the user has Editor built-in role It should not show a callout if fleet server is setup",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_editor_role.spec.ts",
-        "line": 14,
+        "line": 15,
         "column": 7
       }
     },
@@ -72,11 +75,12 @@
       "title": "When the user has Editor built-in role It should show a callout with missing privileges if fleet server is not setup",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_editor_role.spec.ts",
-        "line": 43,
+        "line": 53,
         "column": 7
       }
     },
@@ -85,11 +89,12 @@
       "title": "When the user has Editor built-in role Integrations are visible and can be added",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_editor_role.spec.ts",
-        "line": 72,
+        "line": 87,
         "column": 7
       }
     },
@@ -98,12 +103,12 @@
       "title": "When the user has Fleet Agents Read built-in role is accessible but user cannot perform any write actions on agent tabs",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_fleet_agents_read_integrations_none.spec.ts",
-        "line": 14,
-        "column": 7
+        "line": 18,
+        "column": 9
       }
     },
     {
@@ -111,12 +116,12 @@
       "title": "When the user has Fleet Agents Read built-in role is accessible and user only see agents tab",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_fleet_agents_read_integrations_none.spec.ts",
-        "line": 35,
-        "column": 7
+        "line": 39,
+        "column": 9
       }
     },
     {
@@ -124,7 +129,7 @@
       "title": "When the user has All privilege for Fleet but None for integrations Fleet is accessible",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_fleet_all_integrations_none.spec.ts",
@@ -135,26 +140,28 @@
     {
       "id": "552ea79f1070fc2-0b34f7f592355fd",
       "title": "When the user has All privilege for Fleet but Read for integrations Some elements in the Fleet UI are not enabled",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_fleet_all_integrations_read.spec.ts",
-        "line": 47,
+        "line": 41,
         "column": 9
       }
     },
     {
       "id": "552ea79f1070fc2-537d5e277314165",
       "title": "When the user has All privilege for Fleet but Read for integrations Integrations are visible but cannot be added",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_fleet_all_integrations_read.spec.ts",
-        "line": 68,
+        "line": 62,
         "column": 9
       }
     },
@@ -163,155 +170,13 @@
       "title": "When the user has All privileges for Integrations but None for Fleet Integrations are visible but cannot be added",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_fleet_none_integrations_all.spec.ts",
-        "line": 17,
+        "line": 18,
         "column": 9
-      }
-    },
-    {
-      "id": "21c4bb2c8afd40c-37db7bcaa8547e8",
-      "title": "User with basic license should hit License Paywall Create Integration is not accessible when user is basic",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_integrations_automatic_import_license.spec.ts",
-        "line": 13,
-        "column": 7
-      }
-    },
-    {
-      "id": "f889bf265dfad5e-8da8916d674b46f",
-      "title": "Integrations automatic import privileges When the user has 'read' role for fleet and 'read' role for Integrations, Create Assistant is not accessible",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_integrations_automatic_import.spec.ts",
-        "line": 26,
-        "column": 9
-      }
-    },
-    {
-      "id": "f889bf265dfad5e-ef81d2bbe8ad9d4",
-      "title": "Integrations automatic import privileges When the user has 'read' role for fleet and 'read' role for Integrations, Create upload is not accessible",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_integrations_automatic_import.spec.ts",
-        "line": 39,
-        "column": 9
-      }
-    },
-    {
-      "id": "f889bf265dfad5e-7071dadd7439030",
-      "title": "Integrations automatic import privileges When the user has 'read' role for fleet and 'all' role for Integrations, Create Assistant is not accessible",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_integrations_automatic_import.spec.ts",
-        "line": 26,
-        "column": 9
-      }
-    },
-    {
-      "id": "f889bf265dfad5e-53706a850c724a8",
-      "title": "Integrations automatic import privileges When the user has 'read' role for fleet and 'all' role for Integrations, Create upload is not accessible",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_integrations_automatic_import.spec.ts",
-        "line": 39,
-        "column": 9
-      }
-    },
-    {
-      "id": "f889bf265dfad5e-119744d0007271c",
-      "title": "Integrations automatic import privileges When the user has 'all' role for fleet and 'read' role for Integrations, Create Assistant is not accessible",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_integrations_automatic_import.spec.ts",
-        "line": 26,
-        "column": 9
-      }
-    },
-    {
-      "id": "f889bf265dfad5e-e88fc94b830f899",
-      "title": "Integrations automatic import privileges When the user has 'all' role for fleet and 'read' role for Integrations, Create upload is not accessible",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_integrations_automatic_import.spec.ts",
-        "line": 39,
-        "column": 9
-      }
-    },
-    {
-      "id": "f889bf265dfad5e-7e788ef5dbf66b2",
-      "title": "Integrations automatic import privileges With All Integrations and No actions permissions, Create Assistant is not accessible but upload is accessible",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_integrations_automatic_import.spec.ts",
-        "line": 53,
-        "column": 7
-      }
-    },
-    {
-      "id": "f889bf265dfad5e-8adeae8be819834",
-      "title": "Integrations automatic import privileges With All Integrations and Read actions permissions, Create Assistant and upload are accessible",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_integrations_automatic_import.spec.ts",
-        "line": 67,
-        "column": 7
-      }
-    },
-    {
-      "id": "f889bf265dfad5e-dde0b4f6053b952",
-      "title": "Integrations automatic import privileges With All Integrations and Read actions permissions, connectors are not accessible",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_integrations_automatic_import.spec.ts",
-        "line": 81,
-        "column": 7
-      }
-    },
-    {
-      "id": "f889bf265dfad5e-e41aa8363dc02d6",
-      "title": "Integrations automatic import privileges With All Integrations and All actions permissions, connectors are visible",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_integrations_automatic_import.spec.ts",
-        "line": 96,
-        "column": 7
       }
     },
     {
@@ -319,11 +184,11 @@
       "title": "When the user has Viewer built-in role Fleet is accessible but user cannot perform any write actions on agent tabs",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_viewer_role.spec.ts",
-        "line": 14,
+        "line": 15,
         "column": 7
       }
     },
@@ -332,11 +197,11 @@
       "title": "When the user has Viewer built-in role Fleet is accessible but user cannot perform any write actions on agent policies tabs",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_viewer_role.spec.ts",
-        "line": 35,
+        "line": 36,
         "column": 7
       }
     },
@@ -345,11 +210,11 @@
       "title": "When the user has Viewer built-in role Fleet is accessible but user cannot perform any write actions on settings tabs",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_viewer_role.spec.ts",
-        "line": 50,
+        "line": 51,
         "column": 7
       }
     },
@@ -358,11 +223,11 @@
       "title": "When the user has Viewer built-in role Integrations are visible but cannot be added",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_viewer_role.spec.ts",
-        "line": 66,
+        "line": 67,
         "column": 7
       }
     }

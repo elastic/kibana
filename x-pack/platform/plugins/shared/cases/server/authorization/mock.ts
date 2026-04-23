@@ -15,7 +15,11 @@ export const createAuthorizationMock = () => {
   const mocked: AuthorizationMock = {
     ensureAuthorized: jest.fn(),
     getAuthorizationFilter: jest.fn().mockImplementation(async () => {
-      return { filter: undefined, ensureSavedObjectsAreAuthorized: () => {} };
+      return {
+        filter: undefined,
+        ensureSavedObjectsAreAuthorized: () => {},
+        authorizedOwners: undefined,
+      };
     }),
     getAndEnsureAuthorizedEntities: jest.fn(),
   };

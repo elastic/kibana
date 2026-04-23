@@ -7,9 +7,47 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
+import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { UnifiedMetricsExperienceGrid } from '@kbn/unified-chart-section-viewer';
+import {
+  internalStateActions,
+  useAppStateSelector,
+  useCurrentTabAction,
+  useInternalStateDispatch,
+} from '../../../../../application/main/state_management/redux';
+import type { ChartSectionConfigurationExtensionParams } from '../../../../types';
+import type { DiscoverAppState } from '../../../../../application/main/state_management/redux';
 import type { DataSourceProfileProvider } from '../../../../profiles';
+import { METRICS_DATA_SOURCE_PROFILE_ID } from '../profile';
+/**
+ * Wrapper component that reads breakdownField from Discover's app state
+ * and passes it to UnifiedMetricsExperienceGrid for syncing with dimensions selector.
+ */
+const MetricsExperienceGridWrapper = (
+  props: ChartSectionProps & { actions: ChartSectionConfigurationExtensionParams['actions'] }
+) => {
+  const breakdownField = useAppStateSelector((state: DiscoverAppState) => state.breakdownField);
+  const dispatch = useInternalStateDispatch();
+  const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
+
+  const onBreakdownFieldChange = useCallback(
+    (nextBreakdownField?: string) => {
+      dispatch(updateAppState({ appState: { breakdownField: nextBreakdownField } }));
+    },
+    [dispatch, updateAppState]
+  );
+
+  return (
+    <UnifiedMetricsExperienceGrid
+      {...props}
+      actions={props.actions}
+      profileId={METRICS_DATA_SOURCE_PROFILE_ID}
+      breakdownField={breakdownField}
+      onBreakdownFieldChange={onBreakdownFieldChange}
+    />
+  );
+};
 
 export const createChartSection =
   (): DataSourceProfileProvider['profile']['getChartSectionConfiguration'] =>
@@ -18,7 +56,7 @@ export const createChartSection =
     return {
       ...prev(params),
       renderChartSection: (props) => {
-        return <UnifiedMetricsExperienceGrid {...props} actions={params.actions} />;
+        return <MetricsExperienceGridWrapper {...props} actions={params.actions} />;
       },
       replaceDefaultChart: true,
       localStorageKeyPrefix: 'discover:metricsExperience',

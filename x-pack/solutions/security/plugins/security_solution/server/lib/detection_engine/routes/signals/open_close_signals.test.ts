@@ -8,6 +8,7 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '../../../../../common/constants';
+import { AlertDefaultClosingReasonValues } from '../../../../../common/types';
 import {
   getSetSignalStatusByIdsRequest,
   getSetSignalStatusByQueryRequest,
@@ -32,6 +33,7 @@ describe('set signal status', () => {
     logger = loggingSystemMock.createLogger();
     ({ context } = requestContextMock.createTools());
 
+    context.core.uiSettings.client.get.mockResolvedValue([]);
     context.core.elasticsearch.client.asCurrentUser.updateByQuery.mockResponse(
       getSuccessfulSignalUpdateResponse()
     );
@@ -111,6 +113,57 @@ describe('set signal status', () => {
           query: { bool: { filter: { terms: { _id: ['somefakeid1', 'somefakeid2'] } } } },
         })
       );
+    });
+
+    test('returns 400 when closing reason is invalid', async () => {
+      const response = await server.inject(
+        requestMock.create({
+          method: 'post',
+          path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
+          body: {
+            ...typicalSetStatusSignalByIdsPayload(),
+            reason: 'invalid_reason',
+          },
+        }),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(400);
+      expect(context.core.elasticsearch.client.asCurrentUser.updateByQuery).not.toHaveBeenCalled();
+    });
+
+    test('returns 200 when closing reason is in configured custom reasons', async () => {
+      context.core.uiSettings.client.get.mockResolvedValue(['configured_custom_reason']);
+
+      const response = await server.inject(
+        requestMock.create({
+          method: 'post',
+          path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
+          body: {
+            ...typicalSetStatusSignalByIdsPayload(),
+            reason: 'configured_custom_reason',
+          },
+        }),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(200);
+    });
+
+    test('returns 200 when closing reason is in default reasons', async () => {
+      const response = await server.inject(
+        requestMock.create({
+          method: 'post',
+          path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
+          body: {
+            ...typicalSetStatusSignalByQueryPayload(),
+            reason: AlertDefaultClosingReasonValues.true_positive,
+          },
+        }),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(200);
     });
   });
 

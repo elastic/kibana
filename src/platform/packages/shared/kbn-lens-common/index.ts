@@ -209,6 +209,11 @@ export type {
   SecondaryTrend,
   MetricVisualizationState,
   MetricVisualizationStateOptionals,
+  PrimaryMetricFontSize,
+  IconPosition,
+  Alignment,
+  PrimaryMetricPosition,
+  MetricLayoutWithDefault,
 } from './visualizations/metric/types';
 export type {
   SharedPartitionLayerState,
@@ -237,8 +242,22 @@ export type {
   XYLayerConfig,
   ValidXYDataLayerConfig,
   ValidLayer,
-  XYState,
+  XYVisualizationState,
 } from './visualizations/xy/types';
+export type {
+  XYPersistedAnnotationLayerConfig,
+  XYPersistedByReferenceAnnotationLayerConfig,
+  XYPersistedByValueAnnotationLayerConfig,
+  XYPersistedLinkedByValueAnnotationLayerConfig,
+  XYPersistedLayerConfig,
+  XYPersistedState,
+} from './visualizations/xy/persistence';
+export {
+  isPersistedAnnotationsLayer,
+  isPersistedByReferenceAnnotationsLayer,
+  isPersistedByValueAnnotationsLayer,
+  isPersistedLinkedByValueAnnotationsLayer,
+} from './visualizations/xy/persistence';
 export type {
   LensEmbeddableInput,
   TypedLensByValueInput,
@@ -271,7 +290,6 @@ export type {
   ExpressionWrapperProps,
   GetStateType,
   StructuredDatasourceStates,
-  SupportedDatasourceId,
   LensByValueInput,
   TypedLensSerializedState,
   ESQLVariablesCompatibleDashboardApi,
@@ -348,12 +366,14 @@ export {
   LENS_LEGACY_METRIC_DEFAULT_TEXT_ALIGNMENT,
 } from './visualizations/legacy_metric/constants';
 export {
+  LENS_LEGACY_METRIC_STATE_DEFAULTS,
   LENS_METRIC_ID,
   LENS_METRIC_GROUP_ID,
   LENS_METRIC_STATE_DEFAULTS,
   LENS_METRIC_SECONDARY_DEFAULT_STATIC_COLOR,
   LENS_METRIC_DEFAULT_TRENDLINE_NAME,
-  METRIC_TRENDLINE_NAME,
+  LENS_METRIC_LAYOUT_BY_POSITION,
+  LENS_METRIC_TRENDLINE_NAME,
   LENS_METRIC_LABEL_POSITION,
   LENS_METRIC_SECONDARY_BASELINE_DEFAULT_VALUE,
   LENS_METRIC_BREAKDOWN_DEFAULT_MAX_COLUMNS,
@@ -391,3 +411,8 @@ export {
   getReferencedColumnIds,
   cleanupFormulaReferenceColumns,
 } from './datasources/form_based/helpers';
+
+export { DRAG_DROP_EXTRA_TARGETS_WIDTH, DRAG_DROP_EXTRA_TARGETS_PADDING } from './editor/constants';
+export { LENS_DATASOURCE_ID } from './embeddable/types';
+export type { LensDatasourceId } from './embeddable/types';
+export { LENS_EMBEDDABLE_TYPE } from './embeddable/constants';

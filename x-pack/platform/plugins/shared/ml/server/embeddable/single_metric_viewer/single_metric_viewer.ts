@@ -6,15 +6,18 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { storedFilterSchema, querySchema, timeRangeSchema } from '@kbn/es-query-server';
+import { storedFilterSchema, querySchema } from '@kbn/es-query-server';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
-import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
+import {
+  serializedTimeRangeSchema,
+  serializedTitlesSchema,
+} from '@kbn/presentation-publishing-schemas';
 import { mlEntityFieldValueSchema } from '@kbn/ml-anomaly-utils/schemas';
 
 const baseUserInputProps = schema.object({
   forecastId: schema.maybe(schema.string()),
   functionDescription: schema.maybe(schema.string()),
-  jobIds: schema.arrayOf(schema.string()),
+  jobIds: schema.arrayOf(schema.string(), { maxSize: 10000 }),
   selectedDetectorIndex: schema.number(),
   selectedEntities: schema.maybe(
     schema.recordOf(schema.string(), schema.maybe(mlEntityFieldValueSchema))
@@ -28,11 +31,11 @@ export const singleMetricViewerEmbeddableUserInputSchema = schema.object({
 
 export const singleMetricViewerEmbeddableCustomInputSchema = schema.object({
   ...baseUserInputProps.getPropSchemas(),
+  ...serializedTimeRangeSchema.getPropSchemas(),
   id: schema.maybe(schema.string()),
-  filters: schema.maybe(schema.arrayOf(storedFilterSchema)),
+  filters: schema.maybe(schema.arrayOf(storedFilterSchema, { maxSize: 10000 })),
   query: schema.maybe(querySchema),
   refreshConfig: schema.maybe(refreshIntervalSchema),
-  timeRange: schema.maybe(timeRangeSchema),
 });
 
 export const singleMetricViewerEmbeddableInputSchema = schema.object({

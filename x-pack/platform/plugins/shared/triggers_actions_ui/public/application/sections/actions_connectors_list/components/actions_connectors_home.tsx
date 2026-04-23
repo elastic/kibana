@@ -11,7 +11,14 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 import { useLocation, matchPath } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiPageTemplate, EuiSpacer, EuiPageHeader, EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiPageTemplate,
+  EuiSpacer,
+  EuiPageHeader,
+  EuiButton,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 import type { Section } from '../../../constants';
 import { routeToConnectorEdit, routeToConnectors, routeToLogs } from '../../../constants';
 import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
@@ -28,6 +35,7 @@ import { EditConnectorFlyout } from '../../action_connector_form/edit_connector_
 import type { EditConnectorProps } from './types';
 import { loadAllActions } from '../../../lib/action_connector_api';
 import { hasSaveActionsCapability } from '../../../lib/capabilities';
+import { useSkippedPreconfiguredConnectorIds } from '../../../hooks/use_conflicted_connector_ids';
 
 const ConnectorsList = lazy(() => import('./actions_connectors_list'));
 
@@ -52,6 +60,8 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
   } = useKibana().services;
 
   const location = useLocation();
+
+  const { skippedPreconfiguredConnectorIds } = useSkippedPreconfiguredConnectorIds();
 
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
   const [editConnectorProps, setEditConnectorProps] = useState<EditConnectorProps>({});
@@ -156,7 +166,7 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
     <EuiButton
       data-test-subj="createConnectorButton"
       fill
-      iconType="plusInCircle"
+      iconType="plusCircle"
       iconSide="left"
       onClick={() => setAddFlyoutVisibility(true)}
       isLoading={false}
@@ -223,6 +233,28 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
       />
 
       <EuiSpacer size="l" />
+
+      {skippedPreconfiguredConnectorIds.length > 0 && (
+        <>
+          <EuiCallOut
+            announceOnMount={false}
+            color="warning"
+            size="s"
+            data-test-subj="preconfiguredSkippedBanner"
+            title={
+              <FormattedMessage
+                id="xpack.triggersActionsUI.connectors.home.preconfiguredSkippedWarning"
+                defaultMessage="{count, plural, one {Preconfigured connector} other {Preconfigured connectors}} with {count, plural, one {ID} other {IDs}} [{ids}] {count, plural, one {was} other {were}} skipped because {count, plural, one {it conflicts} other {they conflict}} with an already existing connector."
+                values={{
+                  count: skippedPreconfiguredConnectorIds.length,
+                  ids: skippedPreconfiguredConnectorIds.join(', '),
+                }}
+              />
+            }
+          />
+          <EuiSpacer size="s" />
+        </>
+      )}
 
       {addFlyoutVisible && (
         <CreateConnectorFlyout

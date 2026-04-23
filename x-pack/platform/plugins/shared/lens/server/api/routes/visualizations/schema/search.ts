@@ -9,31 +9,28 @@ import { schema } from '@kbn/config-schema';
 import { searchOptionsSchemas } from '@kbn/content-management-utils';
 
 import { lensCMSearchOptionsSchema } from '../../../../content_management';
-import { pickFromObjectSchema } from '../../../../utils';
 import { lensResponseItemSchema } from './common';
 
-// TODO cleanup and align search options types with client side options
-// TODO align defaults with cm and other schema definitions (i.e. searchOptionsSchemas)
-// TODO See if these should be in body or params?
 export const lensSearchRequestQuerySchema = schema.object({
-  ...lensCMSearchOptionsSchema.getPropSchemas(),
+  fields: lensCMSearchOptionsSchema.getPropSchemas().fields,
+  search_fields: lensCMSearchOptionsSchema.getPropSchemas().searchFields,
   query: schema.maybe(
     schema.string({
       meta: {
-        description: 'The text to search for Lens visualizations',
+        description: 'Text to match against `search_fields`.',
       },
     })
   ),
   page: schema.number({
     meta: {
-      description: 'Specifies the current page number of the paginated result.',
+      description: 'Page number.',
     },
     min: 1,
     defaultValue: 1,
   }),
-  perPage: schema.number({
+  per_page: schema.number({
     meta: {
-      description: 'Maximum number of Lens visualizations included in a single response',
+      description: 'Results per page.',
     },
     defaultValue: 20,
     min: 1,
@@ -43,8 +40,11 @@ export const lensSearchRequestQuerySchema = schema.object({
 
 const lensSearchResponseMetaSchema = schema.object(
   {
-    ...pickFromObjectSchema(searchOptionsSchemas, ['page', 'perPage']),
-    total: schema.number(), // TODO use shared definition
+    page: searchOptionsSchemas.page,
+    per_page: searchOptionsSchemas.perPage,
+    total: schema.number({
+      meta: { description: 'Total number of matching visualizations.' },
+    }),
   },
   { unknowns: 'forbid' }
 );

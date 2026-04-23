@@ -9,6 +9,7 @@
 
 import type { ReactNode } from 'react';
 import React from 'react';
+import { euiIncludeSelectorInFocusTrap } from '@kbn/core-chrome-layout-constants';
 
 import { styles } from './layout_sidebar.styles';
 
@@ -28,6 +29,7 @@ export const LayoutSidebar = ({ children }: LayoutSidebarProps) => {
       css={styles.root}
       className="kbnChromeLayoutSidebar"
       data-test-subj="kbnChromeLayoutSidebar"
+      {...euiIncludeSelectorInFocusTrap.prop}
     >
       {children}
     </div>

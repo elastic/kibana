@@ -11,6 +11,10 @@ import type {
   AgentBuilderTelemetryEventsMap,
 } from '@kbn/agent-builder-common/telemetry';
 import type {
+  RuleCreationEventTypes,
+  RuleCreationTelemetryEventsMap,
+} from './events/rule_creation/types';
+import type {
   AlertsEventTypes,
   AlertsGroupingTelemetryEventsMap,
 } from './events/alerts_grouping/types';
@@ -59,12 +63,15 @@ import type {
   AIValueReportEventTypes,
   AIValueReportTelemetryEventsMap,
 } from './events/ai_value_report/types';
+import type { AttacksEventTypes, AttacksTelemetryEventsMap } from './events/attacks/types';
 import type {
   TrialCompanionEventTypes,
   TrialCompanionTelemetryEventsMap,
 } from './events/trial_companion/types';
 
+export * from './events/rule_creation/types';
 export * from './events/app/types';
+export * from './events/attacks/types';
 export * from './events/alerts_grouping/types';
 export * from './events/data_quality/types';
 export * from './events/onboarding/types';
@@ -81,7 +88,9 @@ export interface TelemetryServiceSetupParams {
 }
 
 // Combine all event type data
-export type TelemetryEventTypeData<T extends TelemetryEventTypes> = T extends AlertsEventTypes
+export type TelemetryEventTypeData<T extends TelemetryEventTypes> = T extends RuleCreationEventTypes
+  ? RuleCreationTelemetryEventsMap[T]
+  : T extends AlertsEventTypes
   ? AlertsGroupingTelemetryEventsMap[T]
   : T extends PreviewRuleEventTypes
   ? PreviewRuleTelemetryEventsMap[T]
@@ -115,9 +124,12 @@ export type TelemetryEventTypeData<T extends TelemetryEventTypes> = T extends Al
   ? TrialCompanionTelemetryEventsMap[T]
   : T extends AgentBuilderEventTypes
   ? AgentBuilderTelemetryEventsMap[T]
+  : T extends AttacksEventTypes
+  ? AttacksTelemetryEventsMap[T]
   : never;
 
 export type TelemetryEventTypes =
+  | RuleCreationEventTypes
   | AlertsEventTypes
   | PreviewRuleEventTypes
   | EntityEventTypes
@@ -134,4 +146,5 @@ export type TelemetryEventTypes =
   | RuleUpgradeEventTypes
   | AIValueReportEventTypes
   | TrialCompanionEventTypes
-  | AgentBuilderEventTypes;
+  | AgentBuilderEventTypes
+  | AttacksEventTypes;

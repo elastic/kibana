@@ -30,22 +30,7 @@ interface EsqlErrorResponse {
   type: 'error';
 }
 
-export function fetchEsql({
-  query,
-  inputQuery,
-  filters,
-  timeRange,
-  dataView,
-  abortSignal,
-  inspectorAdapters,
-  data,
-  expressions,
-  scopedProfilesManager,
-  esqlVariables,
-  searchSessionId,
-  projectRouting,
-  inspectorConfig,
-}: {
+export interface FetchEsqlParams {
   query: Query | AggregateQuery;
   inputQuery?: Query;
   filters?: Filter[];
@@ -63,7 +48,24 @@ export function fetchEsql({
     title: string;
     description: string;
   };
-}): Promise<RecordsFetchResponse> {
+}
+
+export function fetchEsql({
+  query,
+  inputQuery,
+  filters,
+  timeRange,
+  dataView,
+  abortSignal,
+  inspectorAdapters,
+  data,
+  expressions,
+  scopedProfilesManager,
+  esqlVariables,
+  searchSessionId,
+  projectRouting,
+  inspectorConfig,
+}: FetchEsqlParams): Promise<RecordsFetchResponse> {
   const props = getTextBasedQueryStateToAstProps({
     query,
     inputQuery,

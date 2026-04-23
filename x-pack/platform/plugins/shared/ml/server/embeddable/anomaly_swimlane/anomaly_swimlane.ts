@@ -6,8 +6,11 @@
  */
 import { schema } from '@kbn/config-schema';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
-import { storedFilterSchema, querySchema, timeRangeSchema } from '@kbn/es-query-server';
-import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
+import { storedFilterSchema, querySchema } from '@kbn/es-query-server';
+import {
+  serializedTimeRangeSchema,
+  serializedTitlesSchema,
+} from '@kbn/presentation-publishing-schemas';
 
 export const SWIMLANE_TYPE = {
   OVERALL: 'overall',
@@ -20,7 +23,7 @@ const swimlaneTypeSchema = schema.oneOf([
 ]);
 
 const commonUserInputProps = schema.object({
-  jobIds: schema.arrayOf(schema.string()),
+  jobIds: schema.arrayOf(schema.string(), { maxSize: 10000 }),
 });
 
 const anomalySwimlaneOverallSchema = schema.object({
@@ -35,11 +38,11 @@ const anomalySwimlaneViewBySchema = schema.object({
 });
 
 const anomalySwimlaneEmbeddableCustomInputCommonSchema = schema.object({
+  ...serializedTimeRangeSchema.getPropSchemas(),
   id: schema.maybe(schema.string()),
   perPage: schema.maybe(schema.number()),
-  filters: schema.maybe(schema.arrayOf(storedFilterSchema)),
+  filters: schema.maybe(schema.arrayOf(storedFilterSchema, { maxSize: 10000 })),
   query: schema.maybe(querySchema),
-  timeRange: schema.maybe(timeRangeSchema),
   refreshConfig: schema.maybe(refreshIntervalSchema),
 });
 
@@ -59,7 +62,7 @@ export const anomalySwimlaneEmbeddableCustomInputSchema = schema.oneOf([
 ]);
 
 export const anomalySwimlaneEmbeddableUserInputSchema = schema.object({
-  jobIds: schema.arrayOf(schema.string()),
+  jobIds: schema.arrayOf(schema.string(), { maxSize: 10000 }),
   swimlaneType: swimlaneTypeSchema,
   viewBy: schema.maybe(schema.string()),
   panelTitle: schema.maybe(schema.string()),
@@ -71,7 +74,7 @@ export const anomalySwimlanePropsSchema = schema.object({
 });
 
 export const anomalySwimlaneInitialInputSchema = schema.object({
-  jobIds: schema.maybe(schema.arrayOf(schema.string())),
+  jobIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10000 })),
   swimlaneType: schema.maybe(swimlaneTypeSchema),
   viewBy: schema.maybe(schema.string()),
   title: schema.maybe(schema.string()),
@@ -79,7 +82,7 @@ export const anomalySwimlaneInitialInputSchema = schema.object({
 });
 
 export const anomalySwimLaneControlsStateSchema = schema.object({
-  jobIds: schema.arrayOf(schema.string()),
+  jobIds: schema.arrayOf(schema.string(), { maxSize: 10000 }),
   swimlaneType: swimlaneTypeSchema,
   viewBy: schema.maybe(schema.string()),
   perPage: schema.maybe(schema.number()),

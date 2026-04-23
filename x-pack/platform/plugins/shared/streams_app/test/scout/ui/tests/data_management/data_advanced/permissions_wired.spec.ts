@@ -5,38 +5,48 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../../../fixtures';
 
-const WIRED_STREAM = 'logs';
+const WIRED_STREAM = 'logs.otel';
 
-test.describe('Advanced tab permissions - Wired streams', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeEach(async ({ pageObjects }) => {
-    // Navigate to the wired stream's retention tab (a tab that's always visible)
-    await pageObjects.streams.gotoDataRetentionTab(WIRED_STREAM);
-  });
+test.describe(
+  'Advanced tab permissions - Wired streams',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  () => {
+    test.beforeAll(async ({ apiServices }) => {
+      // Ensure logs.otel has a backing data stream (deferred by default) so stream tabs render
+      await apiServices.streams.restoreDataStream('logs.otel');
+    });
 
-  test('should NOT show Advanced tab for viewer role', async ({ browserAuth, page }) => {
-    await browserAuth.loginAsViewer();
-    await page.reload();
+    test.beforeEach(async ({ pageObjects }) => {
+      // Navigate to the wired stream's retention tab (a tab that's always visible)
+      await pageObjects.streams.gotoDataRetentionTab(WIRED_STREAM);
+    });
 
-    // Verify the Advanced tab is not visible for viewer
-    await expect(page.getByRole('tab', { name: 'Advanced' })).toBeHidden();
-  });
+    test('should NOT show Advanced tab for viewer role', async ({ browserAuth, page }) => {
+      await browserAuth.loginAsViewer();
+      await page.reload();
 
-  test('should NOT show Advanced tab for editor role', async ({ browserAuth, page }) => {
-    await browserAuth.loginAs('editor');
-    await page.reload();
+      // Verify the Advanced tab is not visible for viewer
+      await expect(page.getByRole('tab', { name: 'Advanced' })).toBeHidden();
+    });
 
-    // Verify the Advanced tab is not visible for editor
-    await expect(page.getByRole('tab', { name: 'Advanced' })).toBeHidden();
-  });
+    test('should NOT show Advanced tab for editor role', async ({ browserAuth, page }) => {
+      await browserAuth.loginAs('editor');
+      await page.reload();
 
-  test('should show Advanced tab for admin role', async ({ browserAuth, page }) => {
-    await browserAuth.loginAsAdmin();
-    await page.reload();
+      // Verify the Advanced tab is not visible for editor
+      await expect(page.getByRole('tab', { name: 'Advanced' })).toBeHidden();
+    });
 
-    // Verify the Advanced tab is visible for admin
-    await expect(page.getByRole('tab', { name: 'Advanced' })).toBeVisible();
-  });
-});
+    test('should show Advanced tab for admin role', async ({ browserAuth, page }) => {
+      await browserAuth.loginAsAdmin();
+      await page.reload();
+
+      // Verify the Advanced tab is visible for admin
+      await expect(page.getByRole('tab', { name: 'Advanced' })).toBeVisible();
+    });
+  }
+);

@@ -24,6 +24,7 @@ import { executeEsqlTool } from './execute_esql';
 import { searchTool } from './search';
 import { createVisualizationTool } from './create_visualization';
 import { getWorkflowExecutionStatusTool } from './get_workflow_execution_status';
+import { resumeWorkflowExecutionTool } from './resume_workflow_execution';
 
 export const registerTools = ({
   coreSetup,
@@ -35,7 +36,7 @@ export const registerTools = ({
   const { agentBuilder } = setupDeps;
 
   const tools: Array<BuiltinToolDefinition<any>> = [
-    searchTool(),
+    searchTool({ coreSetup, topSnippetsDefaults: agentBuilder.topSnippets }),
     getDocumentByIdTool(),
     executeEsqlTool(),
     generateEsqlTool(),
@@ -50,7 +51,8 @@ export const registerTools = ({
 
   if (setupDeps.workflowsManagement) {
     tools.push(
-      getWorkflowExecutionStatusTool({ workflowsManagement: setupDeps.workflowsManagement })
+      getWorkflowExecutionStatusTool({ workflowsManagement: setupDeps.workflowsManagement }),
+      resumeWorkflowExecutionTool({ workflowsManagement: setupDeps.workflowsManagement })
     );
   }
 

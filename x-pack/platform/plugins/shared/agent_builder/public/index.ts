@@ -14,12 +14,10 @@ import type {
   ConfigSchema,
 } from './types';
 import { AgentBuilderPlugin } from './plugin';
-import { RobotIcon } from './application/components/common/icons/robot';
-import { AGENTBUILDER_FEATURE_ID } from '../common/features';
+import { AGENTBUILDER_FEATURE_ID, uiPrivileges } from '../common/features';
 
 export type { AgentBuilderPluginSetup, AgentBuilderPluginStart };
-export { RobotIcon as agentBuilderIconType };
-export { AGENTBUILDER_FEATURE_ID };
+export { AGENTBUILDER_FEATURE_ID, uiPrivileges };
 export const plugin: PluginInitializer<
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,

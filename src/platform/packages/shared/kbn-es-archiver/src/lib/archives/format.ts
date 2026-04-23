@@ -9,14 +9,14 @@
 
 import { createGzip, Z_BEST_COMPRESSION } from 'zlib';
 import { PassThrough } from 'stream';
-import stringify from 'json-stable-stringify';
+import { stableStringify } from '@kbn/std';
 
 import { createMapStream, createIntersperseStream } from '@kbn/utils';
 import { RECORD_SEPARATOR } from './constants';
 
 export function createFormatArchiveStreams({ gzip = false }: { gzip?: boolean } = {}) {
   return [
-    createMapStream((record) => stringify(record, { space: '  ' })),
+    createMapStream((record) => stableStringify(record, { space: '  ' })),
     createIntersperseStream(RECORD_SEPARATOR),
     gzip ? createGzip({ level: Z_BEST_COMPRESSION }) : new PassThrough(),
   ];

@@ -14,6 +14,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
 import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from '../translations';
 import type { AlertTableContextMenuItem } from '../types';
+import { generateEventAttachmentWithoutOwner } from '../../../../cases/attachments/event/utils';
 
 export interface UseAddToCaseActions {
   onMenuItemClick: () => void;
@@ -41,15 +42,11 @@ export const useAddToCaseActions = ({
 
   const caseAttachments: CaseAttachmentsWithoutOwner = useMemo(() => {
     if (!isAlert) {
-      return ecsData?._id
-        ? [
-            {
-              eventId: ecsData?._id ?? '',
-              index: ecsData?._index ?? '',
-              type: AttachmentType.event,
-            },
-          ]
-        : [];
+      const eventAttachment = generateEventAttachmentWithoutOwner({
+        attachmentId: ecsData?._id,
+        index: ecsData?._index,
+      });
+      return eventAttachment ? [eventAttachment] : [];
     }
 
     return ecsData?._id

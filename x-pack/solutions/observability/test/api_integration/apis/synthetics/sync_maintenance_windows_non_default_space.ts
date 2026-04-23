@@ -4,31 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  HTTPFields,
-  PrivateLocation,
-  ServiceLocation,
-} from '@kbn/synthetics-plugin/common/runtime_types';
-import { ConfigKey, LocationStatus } from '@kbn/synthetics-plugin/common/runtime_types';
+import type { HTTPFields, PrivateLocation } from '@kbn/synthetics-plugin/common/runtime_types';
+import { ConfigKey } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
 import { syntheticsParamType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
-import { PrivateLocationTestService } from './services/private_location_test_service';
+import {
+  PrivateLocationTestService,
+  cleanSyntheticsTestData,
+} from './services/private_location_test_service';
 import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_policy';
 import { omitMonitorKeys } from './add_monitor';
-
-export const LOCAL_LOCATION = {
-  id: 'dev',
-  label: 'Dev Service',
-  geo: {
-    lat: 0,
-    lon: 0,
-  },
-  isServiceManaged: true,
-};
 
 export default function ({ getService }: FtrProviderContext) {
   describe('SyncMaintenanceWindowsNonDefaultSpace', function () {
@@ -48,8 +37,8 @@ export default function ({ getService }: FtrProviderContext) {
     const monitorTestService = new SyntheticsMonitorTestService(getService);
 
     before(async () => {
-      await kServer.savedObjects.cleanStandardList();
-      await testPrivateLocations.installSyntheticsPackage();
+      await testPrivateLocations.cleanupFleetPolicies();
+      await cleanSyntheticsTestData(kServer);
 
       _browserMonitorJson = getFixtureJson('browser_monitor');
       await kServer.savedObjects.clean({ types: [syntheticsParamType] });
@@ -70,7 +59,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // Create private location in the non-default space
       loc = await testPrivateLocations.createPrivateLocation({
-        spaceId,
+        spaces: [spaceId],
         label: 'Test private location non-default space',
       });
       testFleetPolicyID = loc.agentPolicyId;
@@ -78,25 +67,10 @@ export default function ({ getService }: FtrProviderContext) {
       const apiResponse = await supertestAPI.get(
         `/s/${spaceId}${SYNTHETICS_API_URLS.SERVICE_LOCATIONS}`
       );
-      const testLocations: Array<PrivateLocation | ServiceLocation> = [
-        {
-          id: 'dev',
-          label: 'Dev Service',
-          geo: { lat: 0, lon: 0 },
-          url: 'mockDevUrl',
-          isServiceManaged: true,
-          status: LocationStatus.EXPERIMENTAL,
-          isInvalid: false,
-        },
-        {
-          id: 'dev2',
-          label: 'Dev Service 2',
-          geo: { lat: 0, lon: 0 },
-          url: 'mockDevUrl',
-          isServiceManaged: true,
-          status: LocationStatus.EXPERIMENTAL,
-          isInvalid: false,
-        },
+
+      expect(
+        apiResponse.body.locations.filter((pvtLoc: PrivateLocation) => !pvtLoc.isServiceManaged)
+      ).eql([
         {
           id: loc.id,
           isInvalid: false,
@@ -109,8 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
           agentPolicyId: testFleetPolicyID,
           spaces: [spaceId],
         },
-      ];
-      expect(apiResponse.body.locations).eql(testLocations);
+      ]);
 
       // Create monitor in non-default space with maintenance window
       const pvtLoc = {
@@ -126,8 +99,9 @@ export default function ({ getService }: FtrProviderContext) {
 
       const newMonitor = {
         ...browserMonitorJson,
-        locations: [LOCAL_LOCATION, pvtLoc],
+        locations: [pvtLoc],
         maintenance_windows: [mwObject.id],
+        timeout: null,
       };
 
       const createResponse = await monitorTestService.createMonitor({
@@ -141,7 +115,7 @@ export default function ({ getService }: FtrProviderContext) {
           ...newMonitor,
           [ConfigKey.MONITOR_QUERY_ID]: newBrowserMonitorId,
           [ConfigKey.CONFIG_ID]: newBrowserMonitorId,
-          locations: [LOCAL_LOCATION, pvtLoc],
+          locations: [pvtLoc],
           spaces: [spaceId],
         })
       );
@@ -162,8 +136,9 @@ export default function ({ getService }: FtrProviderContext) {
           id: newBrowserMonitorId,
           isBrowser: true,
           location: { id: testFleetPolicyID },
-          spaceId,
+          spaceIds: [spaceId],
           mws: [mwObject],
+          packageVersion: testPrivateLocations.installedVersion,
         })
       );
     });

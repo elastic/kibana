@@ -7,26 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Observable, Subscription } from 'rxjs';
-import { BehaviorSubject, filter, map, take } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, map } from 'rxjs';
 import type { SidebarAppId } from '@kbn/core-chrome-sidebar';
 import { isValidSidebarAppId } from '@kbn/core-chrome-sidebar';
 import type { SidebarRegistryService } from './sidebar_registry_service';
 import type { StorageHelper } from './storage_helper';
 import { bind, memoize } from './utils';
 
-const DEFAULT_WIDTH = 460;
 const MIN_WIDTH = 320;
+const DEFAULT_WIDTH_PERCENT = 0.3;
 const MAX_WIDTH_PERCENT = 0.5;
 
 function getMaxWidth(): number {
-  return Math.floor(window.innerWidth * MAX_WIDTH_PERCENT);
+  return Math.max(MIN_WIDTH, Math.floor(window.innerWidth * MAX_WIDTH_PERCENT));
+}
+
+function getDefaultWidth(): number {
+  return Math.max(MIN_WIDTH, Math.floor(window.innerWidth * DEFAULT_WIDTH_PERCENT));
 }
 
 export class SidebarStateService {
   private readonly currentAppId$ = new BehaviorSubject<SidebarAppId | null>(null);
-  private readonly width$ = new BehaviorSubject<number>(DEFAULT_WIDTH);
-  private pendingRestoreSubscription?: Subscription;
+  private readonly width$ = new BehaviorSubject<number>(getDefaultWidth());
 
   constructor(
     private readonly registry: SidebarRegistryService,
@@ -58,13 +61,10 @@ export class SidebarStateService {
       currentAppId &&
       isValidSidebarAppId(currentAppId) &&
       this.registry.hasApp(currentAppId) &&
-      this.registry.isRestorable(currentAppId)
+      this.registry.isRestorable(currentAppId) &&
+      this.registry.isOpenable(currentAppId)
     ) {
-      if (this.registry.isAccessible(currentAppId)) {
-        this.open(currentAppId);
-      } else {
-        this.waitForAccessibilityAndRestore(currentAppId);
-      }
+      this.open(currentAppId);
     }
 
     const width = this.storage.get<number>('width');
@@ -79,35 +79,15 @@ export class SidebarStateService {
     this.setWidth(this.getWidth());
   };
 
-  /** Wait for app to become accessible, then restore it */
-  private waitForAccessibilityAndRestore(appId: SidebarAppId): void {
-    this.pendingRestoreSubscription?.unsubscribe();
-
-    this.pendingRestoreSubscription = this.registry
-      .getStatus$(appId)
-      .pipe(
-        filter((status) => status === 'accessible'),
-        take(1)
-      )
-      .subscribe(() => {
-        if (this.currentAppId$.getValue() === null) {
-          this.open(appId);
-        }
-      });
-  }
-
   @bind
   open(appId: SidebarAppId): void {
     if (!this.registry.hasApp(appId)) {
       throw new Error(`[Sidebar State] Cannot open sidebar. App not registered: ${appId}`);
     }
 
-    if (!this.registry.isAccessible(appId)) {
-      throw new Error(`[Sidebar State] Cannot open sidebar. App not accessible: ${appId}`);
+    if (!this.registry.isOpenable(appId)) {
+      throw new Error(`[Sidebar State] Cannot open sidebar. App is unavailable: ${appId}`);
     }
-
-    this.pendingRestoreSubscription?.unsubscribe();
-    this.pendingRestoreSubscription = undefined;
 
     this.currentAppId$.next(appId);
     this.storage.set('currentAppId', appId, 'session');
@@ -144,5 +124,9 @@ export class SidebarStateService {
   @bind
   getCurrentAppId(): SidebarAppId | null {
     return this.currentAppId$.getValue();
+  }
+
+  stop() {
+    window.removeEventListener('resize', this.handleWindowResize);
   }
 }

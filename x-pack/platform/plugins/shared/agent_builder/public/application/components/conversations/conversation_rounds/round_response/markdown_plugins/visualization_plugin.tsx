@@ -8,12 +8,14 @@ import React from 'react';
 import { EuiCode, EuiText } from '@elastic/eui';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common';
 import {
-  visualizationElement,
-  type VisualizationElementAttributes,
-  type TabularDataResult,
+  type EsqlResults,
   type VisualizationResult,
   ToolResultType,
 } from '@kbn/agent-builder-common/tools/tool_result';
+import {
+  visualizationElement,
+  type VisualizationElementAttributes,
+} from '@kbn/agent-builder-common/tools/custom_rendering';
 
 import type { AgentBuilderStartDependencies } from '../../../../../../types';
 import { VisualizeESQL } from '../../../../tools/esql/visualize_esql';
@@ -66,9 +68,12 @@ export function createVisualizationRenderer({
       </EuiCode>
     );
 
-    // First, look for tabular data results (from execute_esql)
-    let toolResult: TabularDataResult | VisualizationResult | undefined =
-      findToolResult<TabularDataResult>(steps, toolResultId, ToolResultType.tabularData);
+    // First, look for esql results (from execute_esql)
+    let toolResult: EsqlResults | VisualizationResult | undefined = findToolResult<EsqlResults>(
+      steps,
+      toolResultId,
+      ToolResultType.esqlResults
+    );
 
     // If not found, look for visualization results (from create_visualization)
     if (!toolResult) {
@@ -85,18 +90,19 @@ export function createVisualizationRenderer({
 
     // Handle visualization result (pre-built Lens config)
     if (toolResult.type === 'visualization') {
-      const { visualization } = toolResult.data;
+      const { visualization, time_range: visTimeRange } = toolResult.data;
       return (
         <VisualizeLens
           lensConfig={visualization}
           dataViews={startDependencies.dataViews}
           lens={startDependencies.lens}
           uiActions={startDependencies.uiActions}
+          timeRange={visTimeRange}
         />
       );
     }
 
-    const { columns, query } = toolResult.data;
+    const { columns, query, time_range: resultTimeRange } = toolResult.data;
 
     if (!query) {
       return <EuiText>Unable to find esql query for {ToolResultAttribute}.</EuiText>;
@@ -110,6 +116,7 @@ export function createVisualizationRenderer({
         esqlQuery={query}
         esqlColumns={columns}
         preferredChartType={chartType}
+        timeRange={resultTimeRange}
       />
     );
   };

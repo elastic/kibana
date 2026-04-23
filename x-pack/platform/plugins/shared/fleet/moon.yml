@@ -4,21 +4,21 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/fleet-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/fleet'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/fleet-plugin'
+  title: '@kbn/fleet-plugin'
   description: Moon project for @kbn/fleet-plugin
   channel: ''
   owner: '@elastic/fleet'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/fleet
+  sourceRoot: x-pack/platform/plugins/shared/fleet
 dependsOn:
   - '@kbn/core'
+  - '@kbn/tracing-utils'
   - '@kbn/licensing-plugin'
   - '@kbn/data-plugin'
   - '@kbn/encrypted-saved-objects-plugin'
@@ -100,8 +100,6 @@ dependsOn:
   - '@kbn/core-security-server-mocks'
   - '@kbn/server-http-tools'
   - '@kbn/zod'
-  - '@kbn/reporting-public'
-  - '@kbn/field-formats-plugin'
   - '@kbn/core-security-server'
   - '@kbn/core-notifications-browser-mocks'
   - '@kbn/handlebars'
@@ -119,6 +117,14 @@ dependsOn:
   - '@kbn/fs'
   - '@kbn/kql'
   - '@kbn/scout'
+  - '@kbn/reporting-common'
+  - '@kbn/reporting-plugin'
+  - '@kbn/user-profile-components'
+  - '@kbn/css-utils'
+  - '@kbn/rison'
+  - '@kbn/rule-data-utils'
+  - '@kbn/doc-links'
+  - '@kbn/yaml-loader'
 tags:
   - plugin
   - prod
@@ -135,5 +141,6 @@ fileGroups:
     - scripts/**/*
     - package.json
     - test/scout/**/*
+    - test/scout_automatic_import/**/*
     - '!target/**/*'
 tasks: {}

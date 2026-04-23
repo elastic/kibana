@@ -52,7 +52,6 @@ export const updateListItem = async ({
     return null;
   } else {
     const elasticQuery = transformListItemToElasticQuery({
-      serializer: listItem.serializer,
       type: listItem.type,
       value: value ?? listItem.value,
     });
@@ -125,11 +124,9 @@ export const updateListItem = async ({
         _version: updatedOCCVersion,
         created_at: listItem.created_at,
         created_by: listItem.created_by,
-        deserializer: listItem.deserializer,
         id,
         list_id: listItem.list_id,
         meta: isPatch ? meta ?? listItem.meta : meta,
-        serializer: listItem.serializer,
         tie_breaker_id: listItem.tie_breaker_id,
         type: listItem.type,
         updated_at: updatedAt,

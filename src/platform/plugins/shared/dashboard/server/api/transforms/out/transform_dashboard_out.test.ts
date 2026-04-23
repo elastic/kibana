@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PinnedControlState } from '@kbn/controls-schemas';
 import type {
   DashboardSavedObjectAttributes,
   SavedDashboardPanel,
 } from '../../../dashboard_saved_object';
-import type { DashboardState } from '../../types';
 import { transformDashboardOut } from './transform_dashboard_out';
 
 jest.mock('../../../kibana_services', () => ({
@@ -23,8 +21,8 @@ jest.mock('../../../kibana_services', () => ({
 }));
 
 describe('transformDashboardOut', () => {
-  const controlGroupInputControlsSo = {
-    explicitInput: { anyKey: 'some value' },
+  const pinnedPanelSo = {
+    config: { anyKey: 'some value' },
     type: 'type1',
     order: 0,
   };
@@ -48,75 +46,39 @@ describe('transformDashboardOut', () => {
         searchSourceJSON: '{}',
       },
       optionsJSON: '{}',
-      panelsJSON: '',
+      panelsJSON: '[]',
       timeRestore: false,
       title: 'my title',
     };
-    expect(transformDashboardOut(input)).toEqual<DashboardState>({
-      title: 'my title',
-    });
-  });
-
-  test('should not supply defaults for optional nested properties', () => {
-    const input: DashboardSavedObjectAttributes = {
-      controlGroupInput: {
-        panelsJSON: JSON.stringify({ foo: controlGroupInputControlsSo }),
-      },
-      panelsJSON: JSON.stringify(panelsSo),
-      optionsJSON: JSON.stringify({
-        hidePanelTitles: false,
-      }),
-      kibanaSavedObjectMeta: {},
-      title: 'my title',
-      description: 'my description',
-    };
-    expect(transformDashboardOut(input)).toEqual<DashboardState>({
-      pinned_panels: [
-        {
-          config: { anyKey: 'some value' },
-          uid: 'foo',
-          type: 'type1',
-        } as unknown as PinnedControlState,
-      ],
-      description: 'my description',
-      options: {
-        hide_panel_titles: false,
-      },
-      panels: [
-        {
-          config: {
-            enhancements: {},
-            title: 'title1',
-          },
-          grid: { x: 0, y: 0, w: 10, h: 10 },
-          uid: '1',
-          type: 'type1',
-          version: '2',
+    expect(transformDashboardOut(input)).toMatchInlineSnapshot(`
+      Object {
+        "dashboardState": Object {
+          "panels": Array [],
+          "pinned_panels": Array [],
+          "title": "my title",
         },
-      ],
-      title: 'my title',
-    });
+        "warnings": Array [],
+      }
+    `);
   });
 
   test('should transform full attributes correctly', () => {
     const input: DashboardSavedObjectAttributes = {
-      controlGroupInput: {
-        panelsJSON: JSON.stringify({
+      pinned_panels: {
+        panels: {
           foo: {
-            ...controlGroupInputControlsSo,
+            ...pinnedPanelSo,
             grow: false,
             width: 'small',
           },
-        }),
-        ignoreParentSettingsJSON: JSON.stringify({ ignoreFilters: true }),
-        controlStyle: 'twoLine',
-        showApplySelections: true,
+        },
       },
       description: 'description',
       kibanaSavedObjectMeta: {
         searchSourceJSON: JSON.stringify({ query: { query: 'test', language: 'KQL' } }),
       },
       optionsJSON: JSON.stringify({
+        autoApplyFilters: false,
         hidePanelTitles: true,
         useMargins: false,
         syncColors: false,
@@ -147,56 +109,151 @@ describe('transformDashboardOut', () => {
         name: 'index-pattern-ref-index-pattern1',
       },
     ];
-    expect(transformDashboardOut(input, references)).toEqual<DashboardState>({
-      pinned_panels: [
-        {
-          uid: 'foo',
-          grow: false,
-          width: 'small',
-          config: {
-            anyKey: 'some value',
+    expect(transformDashboardOut(input, references)).toMatchInlineSnapshot(`
+      Object {
+        "dashboardState": Object {
+          "description": "description",
+          "options": Object {
+            "auto_apply_filters": false,
+            "hide_panel_titles": true,
+            "sync_colors": false,
+            "sync_cursor": false,
+            "sync_tooltips": false,
+            "use_margins": false,
           },
-          type: 'type1',
-        } as unknown as PinnedControlState,
-      ],
-      description: 'description',
-      query: { query: 'test', language: 'KQL' },
-      options: {
-        hide_panel_titles: true,
-        use_margins: false,
-        sync_colors: false,
-        sync_tooltips: false,
-        sync_cursor: false,
-        auto_apply_filters: false,
-      },
-      panels: [
-        {
-          config: {
-            enhancements: {},
-            title: 'title1',
+          "panels": Array [
+            Object {
+              "config": Object {
+                "enhancements": Object {},
+                "title": "title1",
+              },
+              "grid": Object {
+                "h": 10,
+                "w": 10,
+                "x": 0,
+                "y": 0,
+              },
+              "id": "1",
+              "type": "type1",
+            },
+          ],
+          "pinned_panels": Array [
+            Object {
+              "config": Object {
+                "anyKey": "some value",
+              },
+              "grow": false,
+              "id": "foo",
+              "type": "type1",
+              "width": "small",
+            },
+          ],
+          "query": Object {
+            "expression": "test",
+            "language": "kql",
           },
-          grid: {
-            x: 0,
-            y: 0,
-            w: 10,
-            h: 10,
+          "refresh_interval": Object {
+            "pause": true,
+            "value": 1000,
           },
-          uid: '1',
-          type: 'type1',
-          version: '2',
+          "tags": Array [
+            "tag1",
+            "tag2",
+          ],
+          "time_range": Object {
+            "from": "now-15m",
+            "to": "now",
+          },
+          "title": "title",
         },
-      ],
-      refresh_interval: {
-        pause: true,
-        value: 1000,
+        "warnings": Array [],
+      }
+    `);
+  });
+
+  test('should transform <9.4 legacy attributes correctly', () => {
+    const input: DashboardSavedObjectAttributes = {
+      controlGroupInput: {
+        panelsJSON: JSON.stringify({
+          foo: {
+            ...pinnedPanelSo,
+            grow: false,
+            width: 'small',
+          },
+        }),
+        ignoreParentSettingsJSON: JSON.stringify({ ignoreFilters: true }),
+        controlStyle: 'twoLine',
+        showApplySelections: true,
       },
-      tags: ['tag1', 'tag2'],
-      time_range: {
-        from: 'now-15m',
-        to: 'now',
+      description: 'description',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: JSON.stringify({ query: { query: 'test', language: 'KQL' } }),
       },
+      optionsJSON: JSON.stringify({
+        hidePanelTitles: true,
+        useMargins: false,
+        syncColors: false,
+        syncTooltips: false,
+        syncCursor: false,
+      }),
+      panelsJSON: JSON.stringify(panelsSo),
       title: 'title',
-    });
+    };
+    const references = [
+      {
+        type: 'index-pattern',
+        id: 'index-pattern1',
+        name: 'index-pattern-ref-index-pattern1',
+      },
+    ];
+    expect(transformDashboardOut(input, references)).toMatchInlineSnapshot(`
+      Object {
+        "dashboardState": Object {
+          "description": "description",
+          "options": Object {
+            "auto_apply_filters": false,
+            "hide_panel_titles": true,
+            "sync_colors": false,
+            "sync_cursor": false,
+            "sync_tooltips": false,
+            "use_margins": false,
+          },
+          "panels": Array [
+            Object {
+              "config": Object {
+                "enhancements": Object {},
+                "title": "title1",
+              },
+              "grid": Object {
+                "h": 10,
+                "w": 10,
+                "x": 0,
+                "y": 0,
+              },
+              "id": "1",
+              "type": "type1",
+            },
+          ],
+          "pinned_panels": Array [
+            Object {
+              "config": Object {
+                "anyKey": "some value",
+              },
+              "grow": false,
+              "id": "foo",
+              "type": "type1",
+              "width": "small",
+            },
+          ],
+          "query": Object {
+            "expression": "test",
+            "language": "kql",
+          },
+          "title": "title",
+        },
+        "warnings": Array [],
+      }
+    `);
   });
 
   describe('project_routing', () => {
@@ -209,8 +266,8 @@ describe('transformDashboardOut', () => {
         description: 'my description',
         projectRouting: '_alias:_origin',
       };
-      const result = transformDashboardOut(input);
-      expect(result.project_routing).toBe('_alias:_origin');
+      const { dashboardState } = transformDashboardOut(input);
+      expect(dashboardState.project_routing).toBe('_alias:_origin');
     });
 
     test('should not include project_routing when it is undefined', () => {
@@ -222,9 +279,9 @@ describe('transformDashboardOut', () => {
         description: 'my description',
         // projectRouting is undefined
       };
-      const result = transformDashboardOut(input);
-      expect(result.project_routing).toBeUndefined();
-      expect(result).not.toHaveProperty('project_routing');
+      const { dashboardState } = transformDashboardOut(input);
+      expect(dashboardState.project_routing).toBeUndefined();
+      expect(dashboardState).not.toHaveProperty('project_routing');
     });
   });
 });

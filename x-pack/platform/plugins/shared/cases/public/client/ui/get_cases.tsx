@@ -16,6 +16,7 @@ export type GetCasesProps = Omit<
   GetCasesPropsInternal,
   | 'externalReferenceAttachmentTypeRegistry'
   | 'persistableStateAttachmentTypeRegistry'
+  | 'unifiedAttachmentTypeRegistry'
   | 'getFilesClient'
 >;
 
@@ -24,6 +25,7 @@ const CasesRoutesLazy: React.FC<CasesProps> = lazy(() => import('../../component
 export const getCasesLazy = ({
   externalReferenceAttachmentTypeRegistry,
   persistableStateAttachmentTypeRegistry,
+  unifiedAttachmentTypeRegistry,
   getFilesClient,
   owner,
   permissions,
@@ -38,12 +40,12 @@ export const getCasesLazy = ({
   features,
   releasePhase,
   renderAlertsTable,
-  renderEventsTable,
 }: GetCasesPropsInternal) => (
   <CasesProvider
     value={{
       externalReferenceAttachmentTypeRegistry,
       persistableStateAttachmentTypeRegistry,
+      unifiedAttachmentTypeRegistry,
       getFilesClient,
       owner,
       permissions,
@@ -62,7 +64,6 @@ export const getCasesLazy = ({
         refreshRef={refreshRef}
         timelineIntegration={timelineIntegration}
         renderAlertsTable={renderAlertsTable}
-        renderEventsTable={renderEventsTable}
       />
     </Suspense>
   </CasesProvider>

@@ -68,7 +68,7 @@ export function ColorRangesExtraActions({
         >
           <EuiButtonEmpty
             data-test-subj={`lnsPalettePanel_dynamicColoring_addColor`}
-            iconType="plusInCircle"
+            iconType="plusCircle"
             color="primary"
             aria-label={i18n.translate('coloring.dynamicColoring.customPalette.addColorAriaLabel', {
               defaultMessage: 'Add color',

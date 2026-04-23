@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import { createPrompt } from '@kbn/inference-common';
+import { z } from '@kbn/zod/v4';
+import { createPrompt, type ToolDefinition } from '@kbn/inference-common';
 import significantEventsSystemPrompt from './system_prompt.text';
 import significantEventsUserPrompt from './user_prompt.text';
 import {
@@ -16,18 +16,25 @@ import {
   SIGNIFICANT_EVENT_TYPE_RESOURCE_HEALTH,
   SIGNIFICANT_EVENT_TYPE_SECURITY,
 } from './types';
+import { SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES } from './tools/features_tool';
 
 export { significantEventsSystemPrompt as significantEventsPrompt };
 
-export function createGenerateSignificantEventsPrompt({ systemPrompt }: { systemPrompt: string }) {
+export function createGenerateSignificantEventsPrompt({
+  systemPrompt,
+  additionalTools,
+}: {
+  systemPrompt: string;
+  additionalTools?: Record<string, ToolDefinition>;
+}) {
   return createPrompt({
     name: 'generate_significant_events',
     input: z.object({
       name: z.string(),
       description: z.string(),
-      dataset_analysis: z.string(),
-      features: z.string(),
+      available_feature_types: z.string(),
       computed_feature_instructions: z.string(),
+      existing_queries: z.string(),
     }),
   })
     .version({
@@ -42,6 +49,31 @@ export function createGenerateSignificantEventsPrompt({ systemPrompt }: { system
         },
       },
       tools: {
+        get_stream_features: {
+          description:
+            'Fetches extracted stream features for this stream. Supports optional filtering by type, confidence, and limit.',
+          schema: {
+            type: 'object',
+            properties: {
+              feature_types: {
+                type: 'array',
+                items: {
+                  type: 'string',
+                  enum: SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES,
+                },
+              },
+              min_confidence: {
+                type: 'number',
+                minimum: 0,
+                maximum: 100,
+              },
+              limit: {
+                type: 'number',
+                minimum: 1,
+              },
+            },
+          },
+        },
         add_queries: {
           description: `Add queries to suggest to the user`,
           schema: {
@@ -52,11 +84,16 @@ export function createGenerateSignificantEventsPrompt({ systemPrompt }: { system
                 items: {
                   type: 'object',
                   properties: {
-                    kql: {
+                    esql: {
                       type: 'string',
                     },
                     title: {
                       type: 'string',
+                    },
+                    description: {
+                      type: 'string',
+                      description:
+                        'A semantically searchable description explaining what the query detects and why it matters. Should be 1-2 sentences that help users find this query when searching by concept or intent.',
                     },
                     category: {
                       type: 'string',
@@ -73,20 +110,32 @@ export function createGenerateSignificantEventsPrompt({ systemPrompt }: { system
                       minimum: 0,
                       maximum: 100,
                     },
+                    type: {
+                      type: 'string',
+                      enum: ['match', 'stats'],
+                      description:
+                        'Hint for query type. "match" for WHERE-only filters, "stats" for aggregation queries. The system derives the authoritative type from ES|QL content.',
+                    },
                     evidence: {
                       type: 'array',
                       items: {
                         type: 'string',
                       },
                     },
+                    replaces: {
+                      type: 'string',
+                      description:
+                        'If this query replaces an existing one (same detection intent but updated ES|QL), set this to the ID of the existing query from `existing_queries`.',
+                    },
                   },
-                  required: ['kql', 'title', 'category', 'severity_score'],
+                  required: ['esql', 'title', 'description', 'category', 'severity_score'],
                 },
               },
             },
             required: ['queries'],
           },
         },
+        ...(additionalTools ?? {}),
       } as const,
     })
     .get();

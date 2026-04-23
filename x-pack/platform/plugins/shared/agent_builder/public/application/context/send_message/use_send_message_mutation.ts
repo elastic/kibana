@@ -6,11 +6,14 @@
  */
 
 import { useMutation } from '@kbn/react-query';
-import { useRef, useState, useMemo, useCallback, useEffect } from 'react';
+import { useRef, useState, useMemo, useCallback } from 'react';
 import { toToolMetadata } from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import { firstValueFrom } from 'rxjs';
 import { isEqual } from 'lodash';
-import type { ConversationRoundStep } from '@kbn/agent-builder-common/chat/conversation';
+import type {
+  ConversationAction,
+  ConversationRoundStep,
+} from '@kbn/agent-builder-common/chat/conversation';
 import type {
   Attachment,
   ScreenContextAttachmentData,
@@ -32,6 +35,11 @@ interface UseSendMessageMutationProps {
   connectorId?: string;
 }
 
+interface SendMessageParams {
+  message?: string;
+  action?: ConversationAction;
+}
+
 const SCREEN_CONTEXT_ATTACHMENT_ID = 'screen-context';
 
 const buildScreenContextData = async ({
@@ -41,26 +49,18 @@ const buildScreenContextData = async ({
 }): Promise<ScreenContextAttachmentData | undefined> => {
   const url = window.location.href;
   const app = await firstValueFrom(services.application.currentAppId$);
-  const additionalData: Record<string, string> = {};
-
   const timefilter = services.plugins.data?.query.timefilter.timefilter;
-  if (timefilter) {
-    const time = timefilter.getTime();
-    if (time?.from) {
-      additionalData.time_from = String(time.from);
-    }
-    if (time?.to) {
-      additionalData.time_to = String(time.to);
-    }
-  }
+  const time = timefilter?.getTime();
+  const timeRange =
+    time?.from && time?.to ? { from: String(time.from), to: String(time.to) } : undefined;
 
   const data: ScreenContextAttachmentData = {
     ...(url ? { url } : {}),
     ...(app ? { app } : {}),
-    ...(Object.keys(additionalData).length > 0 ? { additional_data: additionalData } : {}),
+    ...(timeRange ? { time_range: timeRange } : {}),
   };
 
-  if (!data.url && !data.app && !data.additional_data) {
+  if (!data.url && !data.app && !data.time_range) {
     return undefined;
   }
 
@@ -108,6 +108,7 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
   const conversationId = useConversationId();
   const { conversation } = useConversation();
   const isMutatingNewConversationRef = useRef(false);
+  const isRegeneratingRef = useRef(false);
   const agentId = useAgentId();
   const messageControllerRef = useRef<AbortController | null>(null);
 
@@ -116,15 +117,8 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
 
   const removeError = useCallback(() => {
     setError(null);
-    setErrorSteps([]);
+    setErrorSteps((prev) => (prev.length === 0 ? prev : []));
   }, []);
-
-  useEffect(() => {
-    // Clear errors any time conversation id changes - we do not persist it.
-    if (conversationId) {
-      removeError();
-    }
-  }, [conversationId, removeError]);
 
   const browserApiToolsMetadata = useMemo(() => {
     if (!browserApiTools) return undefined;
@@ -147,10 +141,32 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
     browserToolExecutor,
   });
 
-  const sendMessage = async ({ message }: { message: string }) => {
+  const sendMessage = async ({ message, action }: SendMessageParams) => {
     const signal = messageControllerRef.current?.signal;
+    const isRegenerate = action === 'regenerate';
     if (!signal) {
       return Promise.reject(new Error('Abort signal not present'));
+    }
+
+    if (isRegenerate) {
+      if (!conversationId) {
+        return Promise.reject(new Error('Conversation ID is required to resend'));
+      }
+
+      const events$ = chatService.regenerate({
+        signal,
+        conversationId,
+        agentId,
+        connectorId,
+        browserApiTools: browserApiToolsMetadata,
+      });
+
+      return subscribeToChatEvents(events$);
+    }
+
+    // Normal send: requires a message
+    if (!message) {
+      return Promise.reject(new Error('Message is required'));
     }
 
     const contextAttachments = await withScreenContextAttachment({
@@ -174,21 +190,32 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
   const { mutate, isLoading } = useMutation({
     mutationKey: mutationKeys.sendMessage,
     mutationFn: sendMessage,
-    onMutate: ({ message }) => {
-      const isNewConversation = !conversationId;
-      isMutatingNewConversationRef.current = isNewConversation;
-      setPendingMessage(message);
+    onMutate: ({ message, action }) => {
+      const isRegenerate = action === 'regenerate';
       removeError();
       messageControllerRef.current = new AbortController();
-      conversationActions.addOptimisticRound({
-        userMessage: message,
-        attachments: attachments ?? [],
-      });
-      if (isNewConversation) {
-        if (!agentId) {
-          throw new Error('Agent id must be defined for a new conversation');
+      isRegeneratingRef.current = isRegenerate;
+
+      if (isRegenerate) {
+        // Clear the existing response immediately so UI shows empty state
+        // This must happen before setIsResponseLoading triggers the streaming UI
+        conversationActions.clearLastRoundResponse();
+      } else if (message) {
+        const isNewConversation = !conversationId;
+        isMutatingNewConversationRef.current = isNewConversation;
+        setPendingMessage(message);
+        conversationActions.addOptimisticRound({
+          userMessage: message,
+          attachments: attachments ?? [],
+        });
+        if (isNewConversation) {
+          if (!agentId) {
+            throw new Error('Agent id must be defined for a new conversation');
+          }
+          conversationActions.setAgentId(agentId);
         }
-        conversationActions.setAgentId(agentId);
+      } else {
+        throw new Error('Message is required');
       }
       setIsResponseLoading(true);
     },
@@ -199,8 +226,10 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
       if (isResponseLoading) {
         setIsResponseLoading(false);
       }
+      isRegeneratingRef.current = false;
     },
     onSuccess: () => {
+      if (isRegeneratingRef.current) return;
       removePendingMessage();
       resetAttachments?.();
       if (isMutatingNewConversationRef.current) {
@@ -213,6 +242,7 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
       if (steps) {
         setErrorSteps(steps);
       }
+      if (isRegeneratingRef.current) return;
       // When we error, we should immediately remove the round rather than waiting for a refetch after invalidation
       // Otherwise, the error round and the optimistic round will be visible together.
       conversationActions.removeOptimisticRound();
@@ -265,5 +295,12 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
         removePendingMessage();
       }
     },
+    /**
+     * Regenerate the last conversation round.
+     * Uses the same mutation flow but with action=regenerate.
+     */
+    regenerate: () => mutate({ action: 'regenerate' }),
+    isRegenerating: isLoading && isRegeneratingRef.current,
+    removeError,
   };
 };

@@ -29,6 +29,7 @@ import type {
   WiredStreamsStatus,
 } from './types';
 import type { StreamsRepositoryClient } from './api';
+import { createStreamsSourceEnricher } from './services/esql_source_enricher';
 
 export class Plugin implements StreamsPluginClass {
   public config: StreamsPublicConfig;
@@ -45,6 +46,14 @@ export class Plugin implements StreamsPluginClass {
 
   setup(core: CoreSetup, pluginSetup: StreamsPluginSetupDependencies): StreamsPluginSetup {
     this.repositoryClient = createRepositoryClient(core);
+
+    if (pluginSetup.esql) {
+      const application = core.getStartServices().then(([coreStart]) => coreStart.application);
+      pluginSetup.esql.registerSourceEnricher(
+        createStreamsSourceEnricher(this.repositoryClient, application)
+      );
+    }
+
     return {};
   }
 
@@ -62,7 +71,7 @@ export class Plugin implements StreamsPluginClass {
             signal: new AbortController().signal,
           });
         } catch (error) {
-          this.logger.error(error);
+          this.logger.error(error instanceof Error ? error : String(error));
           return UNKNOWN_WIRED_STATUS;
         }
       },
@@ -72,7 +81,7 @@ export class Plugin implements StreamsPluginClass {
             signal: new AbortController().signal,
           });
         } catch (error) {
-          this.logger.error(error);
+          this.logger.error(error instanceof Error ? error : String(error));
           return UNKNOWN_CLASSIC_STATUS;
         }
       },
@@ -93,7 +102,12 @@ export class Plugin implements StreamsPluginClass {
   stop() {}
 }
 
-const UNKNOWN_WIRED_STATUS: WiredStreamsStatus = { enabled: 'unknown', can_manage: false };
+const UNKNOWN_WIRED_STATUS: WiredStreamsStatus = {
+  logs: 'unknown',
+  'logs.otel': 'unknown',
+  'logs.ecs': 'unknown',
+  can_manage: false,
+};
 const UNKNOWN_CLASSIC_STATUS: ClassicStreamsStatus = { can_manage: false };
 
 const createStreamsNavigationStatusObservable = once(

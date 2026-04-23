@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/lens-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-visualizations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/lens-plugin'
+  title: '@kbn/lens-plugin'
   description: Moon project for @kbn/lens-plugin
   channel: ''
   owner: '@elastic/kibana-visualizations'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/lens
+  sourceRoot: x-pack/platform/plugins/shared/lens
 dependsOn:
   - '@kbn/spaces-plugin'
   - '@kbn/core'
@@ -32,7 +31,6 @@ dependsOn:
   - '@kbn/url-forwarding-plugin'
   - '@kbn/visualizations-plugin'
   - '@kbn/ui-actions-plugin'
-  - '@kbn/ui-actions-enhanced-plugin'
   - '@kbn/share-plugin'
   - '@kbn/usage-collection-plugin'
   - '@kbn/saved-objects-plugin'
@@ -101,7 +99,6 @@ dependsOn:
   - '@kbn/field-utils'
   - '@kbn/shared-ux-button-toolbar'
   - '@kbn/cell-actions'
-  - '@kbn/presentation-containers'
   - '@kbn/discover-utils'
   - '@kbn/code-editor'
   - '@kbn/calculate-width-from-char-count'
@@ -120,7 +117,6 @@ dependsOn:
   - '@kbn/licensing-plugin'
   - '@kbn/react-kibana-context-render'
   - '@kbn/react-kibana-mount'
-  - '@kbn/embeddable-enhanced-plugin'
   - '@kbn/es-types'
   - '@kbn/esql-datagrid'
   - '@kbn/transpose-utils'
@@ -144,13 +140,20 @@ dependsOn:
   - '@kbn/react-kibana-context-common'
   - '@kbn/control-group-renderer'
   - '@kbn/unified-tabs'
-  - '@kbn/esql-language'
   - '@kbn/cps'
   - '@kbn/kql'
-  - '@kbn/controls-constants'
   - '@kbn/core-base-browser-mocks'
   - '@kbn/react-kibana-context-env'
   - '@kbn/scout'
+  - '@kbn/cps-utils'
+  - '@kbn/controls-constants'
+  - '@kbn/presentation-publishing-schemas'
+  - '@kbn/field-formats-common'
+  - '@kbn/calculate-auto'
+  - '@kbn/esql-language'
+  - '@kbn/as-code-shared-schemas'
+  - '@kbn/as-code-shared-telemetry'
+  - '@kbn/core-http-browser'
 tags:
   - plugin
   - prod
@@ -165,16 +168,6 @@ fileGroups:
     - server/**/*
     - test/scout/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

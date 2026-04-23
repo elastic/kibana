@@ -5,197 +5,180 @@
  * 2.0.
  */
 
-import type { StoryObj, Meta } from '@storybook/react';
-import cytoscape from 'cytoscape';
+import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
-import type { PopoverProps } from '.';
-import { Popover } from '.';
-import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
+import { MarkerType } from '@xyflow/react';
+import { SPAN_DESTINATION_SERVICE_RESOURCE, SPAN_TYPE, SPAN_SUBTYPE } from '@kbn/apm-types';
 import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
-import { mockApmApiCallResponse } from '../../../../services/rest/call_apm_api_spy';
-import { CytoscapeContext } from '../cytoscape';
-import exampleGroupedConnectionsData from '../__stories__/example_grouped_connections.json';
+import { PopoverContent } from './popover_content';
+import type { ServiceMapNode, ServiceMapEdge } from '../../../../../common/service_map';
 
-interface Args extends PopoverProps {
-  nodeData: cytoscape.NodeDataDefinition;
-}
+const routePath = '/service-map?rangeFrom=now-15m&rangeTo=now';
+const noop = () => {};
 
-const stories: Meta<Args> = {
-  title: 'app/ServiceMap/popover',
-  component: Popover,
-  decorators: [
-    (StoryComponent) => {
-      mockApmApiCallResponse('GET /internal/apm/service-map/dependency', () => {
-        return {
-          currentPeriod: {
-            cpuUsage: { value: 0.32809666568309237 },
-            failedTransactionsRate: { value: 0.556068173242986 },
-            memoryUsage: { value: 0.5504868173242986 },
-            transactionStats: {
-              latency: {
-                value: 61634.38905590272,
-              },
-              throughput: {
-                value: 164.47222031860858,
-              },
-            },
-          },
-          previousPeriod: {},
-        };
-      });
+const decorators: Meta['decorators'] = [
+  (Story) => (
+    <MockApmPluginStorybook routePath={routePath}>
+      <Story />
+    </MockApmPluginStorybook>
+  ),
+];
 
-      return (
-        <MockApmPluginStorybook routePath="/service-map?rangeFrom=now-15m&rangeTo=now&comparisonEnabled=true&offset=1d">
-          <div style={{ height: 325 }}>
-            <StoryComponent />
-          </div>
-        </MockApmPluginStorybook>
-      );
-    },
-    (StoryComponent, { args }) => {
-      const node = {
-        data: args?.nodeData!,
-      };
-
-      const cy = cytoscape({
-        elements: [
-          { data: { id: 'upstreamService' } },
-          {
-            data: {
-              id: 'edge',
-              source: 'upstreamService',
-              target: node.data.id,
-            },
-          },
-          node,
-        ],
-      });
-
-      setTimeout(() => {
-        cy.$id(node.data.id!).select();
-      }, 0);
-
-      return (
-        <CytoscapeContext.Provider value={cy}>
-          <StoryComponent />
-        </CytoscapeContext.Provider>
-      );
-    },
-  ],
-};
-export default stories;
-
-export const Dependency: StoryObj<Args> = {
-  render: () => {
-    return (
-      <Popover
-        environment={ENVIRONMENT_ALL.value}
-        kuery=""
-        start="2021-08-20T10:00:00.000Z"
-        end="2021-08-20T10:15:00.000Z"
-      />
-    );
-  },
-
-  args: {
-    nodeData: {
-      'span.subtype': 'postgresql',
-      'span.destination.service.resource': 'postgresql',
-      'span.type': 'db',
-      id: '>postgresql',
-      label: 'postgresql',
-    },
-  },
+const meta: Meta<typeof PopoverContent> = {
+  title: 'app/ServiceMap/Popover',
+  component: PopoverContent,
+  decorators,
 };
 
-export const DependencyWithLongTitle: StoryObj<Args> = {
-  render: () => {
-    return (
-      <Popover
-        environment={ENVIRONMENT_ALL.value}
-        kuery=""
-        start="2021-08-20T10:00:00.000Z"
-        end="2021-08-20T10:15:00.000Z"
-      />
-    );
-  },
+export default meta;
 
-  args: {
-    nodeData: {
-      'span.subtype': 'http',
-      'span.destination.service.resource':
-        '8b37cb7ca2ae49ada54db165f32d3a19.us-central1.gcp.foundit.no:9243',
-      'span.type': 'external',
-      id: '>8b37cb7ca2ae49ada54db165f32d3a19.us-central1.gcp.foundit.no:9243',
-      label: '8b37cb7ca2ae49ada54db165f32d3a19.us-central1.gcp.foundit.no:9243',
-    },
-  },
+type Story = StoryObj<typeof PopoverContent>;
+
+const dependencyNode: ServiceMapNode = {
+  id: 'postgres',
+  type: 'dependency',
+  position: { x: 0, y: 0 },
+  data: { id: 'postgres', label: 'postgres', isService: false },
 };
 
-export const ExternalsList: StoryObj<Args> = {
-  render: () => {
-    return (
-      <Popover
-        environment={ENVIRONMENT_ALL.value}
-        kuery=""
-        start="2021-08-20T10:00:00.000Z"
-        end="2021-08-20T10:15:00.000Z"
-      />
-    );
-  },
-
-  args: {
-    nodeData: exampleGroupedConnectionsData,
-  },
+export const Dependency: Story = {
+  render: () => (
+    <PopoverContent
+      selectedNode={dependencyNode}
+      selectedEdge={null}
+      environment="ENVIRONMENT_ALL"
+      kuery=""
+      start="now-15m"
+      end="now"
+      onFocusClick={noop}
+    />
+  ),
 };
 
-export const Resource: StoryObj<Args> = {
-  render: () => {
-    return (
-      <Popover
-        environment={ENVIRONMENT_ALL.value}
-        kuery=""
-        start="2021-08-20T10:00:00.000Z"
-        end="2021-08-20T10:15:00.000Z"
-      />
-    );
-  },
-
-  args: {
-    nodeData: {
-      id: '>cdn.loom.com:443',
-      label: 'cdn.loom.com:443',
-      'span.destination.service.resource': 'cdn.loom.com:443',
-      'span.subtype': 'css',
-      'span.type': 'resource',
-    },
-  },
-};
-
-export const Service: StoryObj<Args> = {
-  render: () => {
-    return (
-      <Popover
-        environment={ENVIRONMENT_ALL.value}
-        kuery=""
-        start="2021-08-20T10:00:00.000Z"
-        end="2021-08-20T10:15:00.000Z"
-      />
-    );
-  },
-
-  args: {
-    nodeData: {
-      id: 'example service',
-      'service.name': 'example service',
-      serviceAnomalyStats: {
-        serviceName: 'opbeans-java',
-        jobId: 'apm-production-802c-high_mean_transaction_duration',
-        transactionType: 'request',
-        actualValue: 16258.496000000017,
-        anomalyScore: 0,
-        healthStatus: 'healthy',
+const externalsListNode: ServiceMapNode = {
+  id: 'externals-group',
+  type: 'groupedResources',
+  position: { x: 0, y: 0 },
+  data: {
+    id: 'externals-group',
+    label: 'External resources',
+    isService: false,
+    isGrouped: true,
+    groupedConnections: [
+      {
+        id: 'ext-1',
+        label: '813-mam-392.mktoresp.com:443',
+        spanType: 'external',
+        spanSubtype: 'http',
       },
-    },
+    ],
+    count: 1,
   },
+};
+
+export const ExternalsList: Story = {
+  render: () => (
+    <PopoverContent
+      selectedNode={externalsListNode}
+      selectedEdge={null}
+      environment="ENVIRONMENT_ALL"
+      kuery=""
+      start="now-15m"
+      end="now"
+      onFocusClick={noop}
+    />
+  ),
+};
+
+const resourceNode: ServiceMapNode = {
+  id: 'resource-id',
+  type: 'dependency',
+  position: { x: 0, y: 0 },
+  data: {
+    id: 'resource-id',
+    label: 'Resource',
+    isService: false,
+    spanType: 'resource',
+    spanSubtype: 'elasticsearch',
+  },
+};
+
+export const Resource: Story = {
+  render: () => (
+    <PopoverContent
+      selectedNode={resourceNode}
+      selectedEdge={null}
+      environment="ENVIRONMENT_ALL"
+      kuery=""
+      start="now-15m"
+      end="now"
+      onFocusClick={noop}
+    />
+  ),
+};
+
+const serviceNode: ServiceMapNode = {
+  id: 'opbeans-node',
+  type: 'service',
+  position: { x: 0, y: 0 },
+  data: {
+    id: 'opbeans-node',
+    label: 'opbeans-node',
+    isService: true,
+  },
+};
+
+export const Service: Story = {
+  render: () => (
+    <PopoverContent
+      selectedNode={serviceNode}
+      selectedEdge={null}
+      environment="ENVIRONMENT_ALL"
+      kuery=""
+      start="now-15m"
+      end="now"
+      onFocusClick={noop}
+    />
+  ),
+};
+
+const edgeSelection: ServiceMapEdge = {
+  id: 'e1',
+  source: 'svc-a',
+  target: 'svc-b',
+  type: 'default',
+  data: {
+    isBidirectional: false,
+    sourceData: {
+      id: 'svc-a',
+      [SPAN_DESTINATION_SERVICE_RESOURCE]: 'svc-a',
+      [SPAN_TYPE]: 'external',
+      [SPAN_SUBTYPE]: 'http',
+      label: 'svc-a',
+    },
+    targetData: {
+      id: 'svc-b',
+      [SPAN_DESTINATION_SERVICE_RESOURCE]: 'svc-b',
+      [SPAN_TYPE]: 'external',
+      [SPAN_SUBTYPE]: 'http',
+      label: 'svc-b',
+    },
+    resources: ['svc-b'],
+  },
+  style: { stroke: '#000', strokeWidth: 1 },
+  markerEnd: { type: MarkerType.ArrowClosed, width: 20, height: 20, color: '#000' },
+};
+
+export const Edge: Story = {
+  render: () => (
+    <PopoverContent
+      selectedNode={null}
+      selectedEdge={edgeSelection}
+      environment="ENVIRONMENT_ALL"
+      kuery=""
+      start="now-15m"
+      end="now"
+      onFocusClick={noop}
+    />
+  ),
 };

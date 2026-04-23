@@ -15,8 +15,10 @@ import type {
   PromptRequestEvent,
   BrowserToolCallEvent,
   ToolResultEvent,
+  BackgroundAgentCompleteEvent,
 } from '@kbn/agent-builder-common/chat/events';
 import { ChatEventType } from '@kbn/agent-builder-common';
+import type { BackgroundExecutionState } from '@kbn/agent-builder-common/chat';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { PromptRequestSource, PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 
@@ -48,6 +50,7 @@ export const createToolCallEvent = (data: {
   toolCallId: string;
   toolId: string;
   params: Record<string, unknown>;
+  toolCallGroupId?: string;
 }): ToolCallEvent => {
   return {
     type: ChatEventType.toolCall,
@@ -55,6 +58,7 @@ export const createToolCallEvent = (data: {
       tool_call_id: data.toolCallId,
       tool_id: data.toolId,
       params: data.params,
+      tool_call_group_id: data.toolCallGroupId,
     },
   };
 };
@@ -126,7 +130,7 @@ export const createMessageEvent = (
     type: ChatEventType.messageComplete,
     data: {
       message_id: messageId,
-      message_content: typeof content === 'string' ? content : '',
+      message_content: typeof content === 'string' ? content : JSON.stringify(content),
       ...(typeof content === 'object' ? { structured_output: content } : {}),
     },
   };
@@ -134,13 +138,19 @@ export const createMessageEvent = (
 
 export const createReasoningEvent = (
   reasoning: string,
-  { transient }: { transient?: boolean } = {}
+  {
+    transient,
+    toolCallId,
+    toolCallGroupId,
+  }: { transient?: boolean; toolCallId?: string; toolCallGroupId?: string } = {}
 ): ReasoningEvent => {
   return {
     type: ChatEventType.reasoning,
     data: {
       reasoning,
       transient,
+      tool_call_id: toolCallId,
+      tool_call_group_id: toolCallGroupId,
     },
   };
 };
@@ -151,5 +161,14 @@ export const createThinkingCompleteEvent = (timeToFirstToken: number): ThinkingC
     data: {
       time_to_first_token: timeToFirstToken,
     },
+  };
+};
+
+export const createBackgroundAgentCompleteEvent = (
+  execution: BackgroundExecutionState
+): BackgroundAgentCompleteEvent => {
+  return {
+    type: ChatEventType.backgroundAgentComplete,
+    data: { execution },
   };
 };

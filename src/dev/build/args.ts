@@ -35,6 +35,7 @@ export function readCliArgs(argv: string[]) {
       'skip-docker-cloud-fips',
       'skip-docker-serverless',
       'skip-docker-fips',
+      'skip-serverless',
       'release',
       'skip-node-download',
       'skip-cloud-dependencies-download',
@@ -49,6 +50,7 @@ export function readCliArgs(argv: string[]) {
       'with-test-plugins',
       'with-example-plugins',
       'serverless',
+      'tar-zstd',
     ],
     string: ['docker-namespace', 'epr-registry'],
     alias: {
@@ -144,14 +146,17 @@ export function readCliArgs(argv: string[]) {
     createDockerCloudFIPS:
       isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-cloud-fips']),
     createDockerServerless:
-      (isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-serverless'])) ||
-      Boolean(flags.serverless),
+      !Boolean(flags['skip-serverless']) &&
+      ((isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-serverless'])) ||
+        Boolean(flags.serverless)),
     createDockerUBI: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-ubi']),
     createDockerContexts: !Boolean(flags['skip-docker-contexts']),
     createDockerFIPS: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-fips']),
     targetAllPlatforms: Boolean(flags['all-platforms']),
     targetServerlessPlatforms: Boolean(flags.serverless),
+    skipServerless: Boolean(flags['skip-serverless']),
     eprRegistry: flags['epr-registry'],
+    tarZstd: Boolean(flags['tar-zstd']),
     withExamplePlugins: Boolean(flags['with-example-plugins']),
     withTestPlugins: Boolean(flags['with-test-plugins']),
   };

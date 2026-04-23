@@ -36,13 +36,19 @@ describe('drilldown registry', () => {
       );
     }
 
+    test('should throw when there is no intersection with supported triggers', () => {
+      expect(() => {
+        registry.getSchema([]);
+      }).toThrow();
+    });
+
     test('should include drilldowns that intersect with supported triggers', () => {
       const onClickDrilldownsSchema = registry.getSchema(['ON_CLICK']);
       const drilldownsJoiSchema = onClickDrilldownsSchema.getPropSchemas().drilldowns?.getSchema();
       const matches = drilldownsJoiSchema.describe().items[0].matches;
       expect(matches.length).toBe(2);
-      expect(getType(matches[0])).toBe('foo_drilldown');
-      expect(getType(matches[1])).toBe('bar_drilldown');
+      expect(getType(matches[0])).toBe('bar_drilldown');
+      expect(getType(matches[1])).toBe('foo_drilldown');
     });
 
     test('should remove drilldowns that do not intersect with supported triggers', () => {
@@ -57,9 +63,9 @@ describe('drilldown registry', () => {
       const drilldownsSchema = registry.getSchema(['ON_CLICK', 'ON_ROW_CLICK']);
       const drilldownsJoiSchema = drilldownsSchema.getPropSchemas().drilldowns?.getSchema();
       const matches = drilldownsJoiSchema.describe().items[0].matches;
+      expect(getTriggerLiterals(matches[0])).toEqual(['ON_CLICK']);
       // foo drilldown schema should not show 'ON_HOVER' because that trigger does not intersect supported triggers
-      expect(getTriggerLiterals(matches[0])).toEqual(['ON_CLICK', 'ON_ROW_CLICK']);
-      expect(getTriggerLiterals(matches[1])).toEqual(['ON_CLICK']);
+      expect(getTriggerLiterals(matches[1])).toEqual(['ON_CLICK', 'ON_ROW_CLICK']);
     });
   });
 });

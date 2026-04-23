@@ -9,39 +9,59 @@
 
 import type { Dispatch } from 'react';
 import type { ContentListItem } from '../item';
-import type { ActiveFilters } from '../datasource';
 
 /**
  * Action type constants for state reducer.
- *
- * @internal
  */
 export const CONTENT_LIST_ACTIONS = {
+  /** Set the query text (source of truth for search, filters, and flags). */
+  SET_QUERY: 'SET_QUERY',
+  /** Hard-reset: clear all query text (search, filters, and flags). */
+  RESET_QUERY: 'RESET_QUERY',
+  /** Set sort field and direction. */
   SET_SORT: 'SET_SORT',
+  /** Set page index. */
+  SET_PAGE_INDEX: 'SET_PAGE_INDEX',
+  /** Set page size. */
+  SET_PAGE_SIZE: 'SET_PAGE_SIZE',
+  SET_SELECTION: 'SET_SELECTION',
+  CLEAR_SELECTION: 'CLEAR_SELECTION',
 } as const;
-
-/**
- * Default filter state.
- */
-export const DEFAULT_FILTERS: ActiveFilters = {
-  search: undefined,
-};
 
 /**
  * Client-controlled state managed by the reducer.
  *
- * This includes user-driven state like filters and sort configuration.
+ * This includes user-driven state like query text, sort, and pagination.
  * Query data (items, loading, error) comes directly from React Query.
  */
 export interface ContentListClientState {
-  /** Filter state - currently applied filters. */
-  filters: ActiveFilters;
+  /**
+   * The query text — single source of truth for the search bar.
+   *
+   * All search, filter, and flag state lives in this string (e.g.,
+   * `"createdBy:jane@elastic.co is:starred dashboard"`). The structured
+   * model ({@link ContentListQueryModel}) is derived on-demand via
+   * `useQueryModel`.
+   */
+  queryText: string;
   /** Sort state. */
   sort: {
     /** Field name to sort by. */
     field: string;
     /** Sort direction. */
     direction: 'asc' | 'desc';
+  };
+  /** Pagination state. */
+  page: {
+    /** Current page index (0-based). */
+    index: number;
+    /** Current number of items per page. */
+    size: number;
+  };
+  /** Selection state - IDs of currently selected items. */
+  selection: {
+    /** IDs of selected items. */
+    selectedIds: string[];
   };
 }
 
@@ -55,8 +75,25 @@ export interface ContentListQueryData {
   items: ContentListItem[];
   /** Total number of items matching the current query (for pagination). */
   totalItems: number;
-  /** Whether data is currently being fetched. */
+  /**
+   * Whether the initial data load is in progress (no data available yet).
+   *
+   * This is `true` only on the first fetch before any data has been received.
+   * Use this for hard loading states (e.g., skeletons, spinners) when there is
+   * nothing to show. Once data has been loaded, subsequent fetches triggered by
+   * filter or search changes keep `isLoading` as `false` while the previous
+   * data remains visible.
+   */
   isLoading: boolean;
+  /**
+   * Whether a fetch is currently in progress (including background refetches).
+   *
+   * Unlike `isLoading`, this is `true` during any fetch, including background
+   * refetches triggered by search, sort, or filter changes. Use this for subtle
+   * loading indicators (e.g., progress bar, reduced opacity) that should not
+   * hide existing content.
+   */
+  isFetching: boolean;
   /** Error from the most recent fetch attempt. */
   error?: Error;
 }
@@ -68,15 +105,36 @@ export interface ContentListQueryData {
  */
 export type ContentListState = ContentListClientState & ContentListQueryData;
 
+/** Set the query text. */
+interface SetQueryAction {
+  type: typeof CONTENT_LIST_ACTIONS.SET_QUERY;
+  payload: { queryText: string };
+}
+
+/** Hard-reset: clear all query text (search, filters, and flags). */
+interface ResetQueryAction {
+  type: typeof CONTENT_LIST_ACTIONS.RESET_QUERY;
+}
+
+/** Set sort field and direction. */
+interface SetSortAction {
+  type: typeof CONTENT_LIST_ACTIONS.SET_SORT;
+  payload: { field: string; direction: 'asc' | 'desc' };
+}
+
 /**
  * Union type of all possible state actions.
  *
  * @internal Used by the state reducer and dispatch function.
  */
-export interface ContentListAction {
-  type: typeof CONTENT_LIST_ACTIONS.SET_SORT;
-  payload: { field: string; direction: 'asc' | 'desc' };
-}
+export type ContentListAction =
+  | SetQueryAction
+  | ResetQueryAction
+  | SetSortAction
+  | { type: typeof CONTENT_LIST_ACTIONS.SET_PAGE_INDEX; payload: { index: number } }
+  | { type: typeof CONTENT_LIST_ACTIONS.SET_PAGE_SIZE; payload: { size: number } }
+  | { type: typeof CONTENT_LIST_ACTIONS.SET_SELECTION; payload: { ids: string[] } }
+  | { type: typeof CONTENT_LIST_ACTIONS.CLEAR_SELECTION };
 
 /**
  * Context value provided by `ContentListStateProvider`.
@@ -84,8 +142,17 @@ export interface ContentListAction {
 export interface ContentListStateContextValue {
   /** Current state of the content list (client state + query data). */
   state: ContentListState;
-  /** Dispatch function for client state updates (filters, sort). */
+  /** Dispatch function for client state updates (search, filters, sort). */
   dispatch: Dispatch<ContentListAction>;
-  /** Function to manually refetch items from the data source. */
-  refetch: () => void;
+  /**
+   * Full refetch: clears the data-source cache (`onInvalidate`) then
+   * re-executes the query. Use after item mutations (edit, delete, create).
+   */
+  refetch: () => Promise<void>;
+  /**
+   * Lightweight refresh: re-decorates cached items with external data
+   * (`onRefresh`) then re-executes the query without clearing the cache.
+   * Use after external data mutations (star/unstar).
+   */
+  refresh: () => Promise<void>;
 }

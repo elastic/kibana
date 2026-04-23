@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isFunctionExpression } from '../../../../../../ast/is';
+import { isFunctionExpression } from '@elastic/esql';
 import type { ISuggestionItem } from '../../../../../registry/types';
 import { getOperatorSuggestion } from '../../../operators';
 import type { ExpressionContext } from '../types';
@@ -29,7 +29,6 @@ export async function suggestAfterNot(ctx: ExpressionContext): Promise<ISuggesti
     await builder.addFields({
       types: ['boolean'],
       addSpaceAfterField: true,
-      promoteToTop: false,
     });
 
     builder.addFunctions({

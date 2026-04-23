@@ -53,9 +53,9 @@ export function TabSelectionApp({
 
   return (
     <>
-      <SidebarHeader onClose={onClose}>
+      <SidebarHeader title={`Tabs: ${currentTab.label}`} onClose={onClose}>
         <EuiTitle size="xs">
-          <h3>Tabs: {currentTab.label}</h3>
+          <h2>Tabs: {currentTab.label}</h2>
         </EuiTitle>
       </SidebarHeader>
       <SidebarBody>

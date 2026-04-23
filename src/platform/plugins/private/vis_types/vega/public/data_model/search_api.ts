@@ -26,18 +26,17 @@ export const extendSearchParamsWithRuntimeFields = async (
   indexPatternString?: string
 ) => {
   if (indexPatternString) {
-    let runtimeMappings = requestParams.runtime_mappings;
-
-    if (!runtimeMappings) {
-      const indexPattern = (await indexPatterns.find(indexPatternString, 1)).find(
-        (index) => index.title === indexPatternString
-      );
-      runtimeMappings = indexPattern?.getRuntimeMappings();
+    if (requestParams.runtime_mappings) {
+      return requestParams;
     }
+
+    const indexPattern = (await indexPatterns.find(indexPatternString, 1)).find(
+      (index) => index.title === indexPatternString
+    );
 
     return {
       ...requestParams,
-      runtime_mappings: runtimeMappings,
+      runtime_mappings: indexPattern?.getRuntimeMappings(),
     };
   }
 
@@ -66,11 +65,17 @@ export class SearchAPI {
 
     return combineLatest(
       searchRequests.map((request) => {
-        const { name: requestId, ...restRequest } = request;
+        const { name: requestId, body, ...restRequest } = request;
 
-        const requestParams = getSearchParamsFromRequest(restRequest, {
-          getConfig: this.dependencies.uiSettings.get.bind(this.dependencies.uiSettings),
-        });
+        const requestParams = getSearchParamsFromRequest(
+          {
+            ...body,
+            ...restRequest,
+          },
+          {
+            getConfig: this.dependencies.uiSettings.get.bind(this.dependencies.uiSettings),
+          }
+        );
 
         return from(
           extendSearchParamsWithRuntimeFields(indexPatterns, requestParams, `${request.index}`)

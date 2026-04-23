@@ -26,13 +26,16 @@ import {
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import {
   apiPublishesProjectRoutingOverrides,
+  apiCanAccessViewMode,
+  getInheritedViewMode,
   type ProjectRoutingOverrides,
 } from '@kbn/presentation-publishing';
 import { i18n } from '@kbn/i18n';
+import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { triggers } from '@kbn/ui-actions-plugin/public';
 import { CPS_USAGE_OVERRIDES_BADGE } from './constants';
 import { uiActions, core } from '../../kibana_services';
 import { ACTION_EDIT_PANEL } from '../edit_panel_action/constants';
-import { CONTEXT_MENU_TRIGGER } from '../triggers';
 
 export class CpsUsageOverridesBadge
   implements Action<EmbeddableApiContext>, FrequentCompatibilityChangeAction<EmbeddableApiContext>
@@ -56,53 +59,70 @@ export class CpsUsageOverridesBadge
     const overrideValues = this.getOverrideValues(embeddable);
     if (!overrideValues || overrideValues.length === 0) throw new IncompatibleActionError();
 
+    const isViewMode =
+      apiCanAccessViewMode(embeddable) && getInheritedViewMode(embeddable) === 'view';
+
     return (
       <EuiPopover
         button={
-          <button onClick={() => setIsPopoverOpen(!isPopoverOpen)}>{strings.badgeLabel}</button>
+          <button
+            onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+            css={{ fontWeight: euiTheme.font.weight.semiBold }}
+          >
+            {strings.badgeLabel}
+          </button>
         }
         isOpen={isPopoverOpen}
         closePopover={() => setIsPopoverOpen(false)}
         anchorPosition="downCenter"
         panelStyle={{ minWidth: 250 }}
         panelPaddingSize="none"
+        aria-label={strings.badgeLabel}
       >
         <div css={{ padding: euiTheme.size.m }}>
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem>
-              <EuiText size="xs" css={{ fontWeight: euiTheme.font.weight.semiBold }}>
+              <EuiText size="s" css={{ fontWeight: euiTheme.font.weight.semiBold }}>
                 {strings.badgeLabel}
               </EuiText>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                onClick={async () => {
-                  setIsPopoverOpen(false);
-                  try {
-                    const action = await uiActions.getAction(ACTION_EDIT_PANEL);
-                    if (action) {
-                      await action.execute({
-                        ...context,
-                        trigger: { id: CONTEXT_MENU_TRIGGER },
+            {!isViewMode && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  onClick={async () => {
+                    setIsPopoverOpen(false);
+                    try {
+                      const action = await uiActions.getAction(ACTION_EDIT_PANEL);
+                      if (action) {
+                        await action.execute({
+                          ...context,
+                          trigger: triggers[ON_OPEN_PANEL_MENU],
+                        });
+                      }
+                    } catch (error) {
+                      core.notifications.toasts.addError(error, {
+                        title: strings.error,
                       });
                     }
-                  } catch (error) {
-                    core.notifications.toasts.addError(error, {
-                      title: strings.error,
-                    });
-                  }
-                }}
-                size="xs"
-                flush="right"
-              >
-                {strings.editButton}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
+                  }}
+                  size="xs"
+                  flush="right"
+                >
+                  {strings.editButton}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
           {overrideValues.map((override, index) => (
             <div key={index} css={{ marginTop: index > 0 ? euiTheme.size.s : 0 }}>
               {override.name && (
-                <EuiText size="xs" css={{ marginBottom: euiTheme.size.xs }}>
+                <EuiText
+                  size="xs"
+                  css={{
+                    marginBottom: euiTheme.size.xs,
+                    fontWeight: euiTheme.font.weight.semiBold,
+                  }}
+                >
                   {override.name}
                 </EuiText>
               )}
@@ -147,13 +167,16 @@ export class CpsUsageOverridesBadge
 
 const strings = {
   badgeLabel: i18n.translate('presentationPanel.badge.cpsUsageOverrides.label', {
-    defaultMessage: 'CPS overrides',
+    defaultMessage: 'Custom CPS scope',
   }),
   displayName: i18n.translate('presentationPanel.badge.cpsUsageOverrides.displayName', {
-    defaultMessage: 'This panel overrides the CPS scope',
+    defaultMessage: 'This panel uses custom CPS scope',
   }),
   editButton: i18n.translate('presentationPanel.badge.cpsUsageOverrides.popover.editButton', {
     defaultMessage: 'Edit',
+  }),
+  exploreButton: i18n.translate('presentationPanel.badge.cpsUsageOverrides.popover.exploreButton', {
+    defaultMessage: 'Explore',
   }),
   error: i18n.translate('presentationPanel.badge.cpsUsageOverrides.editError', {
     defaultMessage: 'Failed to open panel configuration',

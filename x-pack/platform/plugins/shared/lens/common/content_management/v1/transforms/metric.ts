@@ -32,7 +32,9 @@ export function metricMigrations(attributes: LensAttributes): LensAttributes {
   };
 }
 
-const getUpdatedMetricState = (state: MetricVisualizationState): MetricVisualizationState => {
+export const getUpdatedMetricState = (
+  state: MetricVisualizationState
+): MetricVisualizationState => {
   const { secondaryPrefix, valuesTextAlign, ...restState } = state;
   let newState = { ...restState };
 

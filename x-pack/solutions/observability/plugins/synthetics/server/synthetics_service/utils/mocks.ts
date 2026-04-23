@@ -5,19 +5,23 @@
  * 2.0.
  */
 
-import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import type {
+  EncryptedSavedObjectsClient,
+  EncryptedSavedObjectsPluginStart,
+} from '@kbn/encrypted-saved-objects-plugin/server';
 import { cloneDeep } from 'lodash';
 import { syntheticsParamType } from '../../../common/types/saved_objects';
 
 export const mockEncryptedSO = ({
   monitors = null,
   params,
-}: { monitors?: any; params?: any } = {}) => {
+}: { monitors?: any; params?: any } = {}): EncryptedSavedObjectsPluginStart => {
   const result = cloneDeep(monitors);
   const mockParams = params ?? [
     { attributes: { key: 'username', value: 'elastic' }, namespaces: ['*'] },
   ];
   return {
+    __testCreateDangerousExtension: jest.fn(),
     isEncryptionError: jest.fn(),
     getClient: jest.fn().mockReturnValue({
       getDecryptedAsInternalUser: jest.fn().mockResolvedValue(monitors),

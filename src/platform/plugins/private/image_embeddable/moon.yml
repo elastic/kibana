@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/image-embeddable-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-sharedux'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/image-embeddable-plugin'
+  title: '@kbn/image-embeddable-plugin'
   description: Moon project for @kbn/image-embeddable-plugin
   channel: ''
   owner: '@elastic/appex-sharedux'
-  metadata:
-    sourceRoot: src/platform/plugins/private/image_embeddable
+  sourceRoot: src/platform/plugins/private/image_embeddable
 dependsOn:
   - '@kbn/core'
   - '@kbn/embeddable-plugin'
@@ -33,10 +32,8 @@ dependsOn:
   - '@kbn/core-http-browser'
   - '@kbn/ui-actions-plugin'
   - '@kbn/screenshot-mode-plugin'
-  - '@kbn/presentation-containers'
   - '@kbn/presentation-publishing'
   - '@kbn/presentation-publishing-schemas'
-  - '@kbn/embeddable-enhanced-plugin'
   - '@kbn/presentation-util'
   - '@kbn/config-schema'
   - '@kbn/content-management-utils'
@@ -52,16 +49,6 @@ fileGroups:
     - public/**/*
     - server/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

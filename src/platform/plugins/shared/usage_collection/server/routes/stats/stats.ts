@@ -51,13 +51,20 @@ export function registerStatsRoute({
     {
       path: '/api/stats',
       security: {
+        ...(config.allowAnonymous
+          ? {
+              authc: {
+                enabled: false,
+                reason: 'Route is configured to allow anonymous access for stats collection.',
+              },
+            }
+          : {}),
         authz: {
           enabled: false,
           reason: 'This route is opted out from authorization',
         },
       },
       options: {
-        authRequired: !config.allowAnonymous,
         excludeFromRateLimiter: true,
         // The `api` tag ensures that unauthenticated calls receive a 401 rather than a 302 redirect to login page.
         // The `security:acceptJWT` tag allows route to be accessed with JWT credentials. It points to

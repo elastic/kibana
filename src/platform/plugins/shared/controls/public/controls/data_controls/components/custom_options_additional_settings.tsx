@@ -10,7 +10,7 @@
 import React, { useState } from 'react';
 
 import { EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
-import { DEFAULT_IGNORE_VALIDATIONS, DEFAULT_USE_GLOBAL_FILTERS } from '@kbn/controls-constants';
+import { DEFAULT_DATA_CONTROL_STATE } from '@kbn/controls-constants';
 
 import { ControlSettingTooltipLabel } from '../../../control_group/components/control_setting_tooltip_label';
 import { DataControlEditorStrings } from '../data_control_constants';
@@ -27,10 +27,10 @@ export const CustomOptionsAdditionalSettings: React.FC<Props> = ({
   updateState,
 }) => {
   const [useGlobalFilters, setUseGlobalFilters] = useState<boolean>(
-    initialState.useGlobalFilters ?? DEFAULT_USE_GLOBAL_FILTERS
+    initialState.use_global_filters ?? DEFAULT_DATA_CONTROL_STATE.use_global_filters
   );
   const [ignoreValidations, setIgnoreValidations] = useState<boolean>(
-    initialState.ignoreValidations ?? DEFAULT_IGNORE_VALIDATIONS
+    initialState.ignore_validations ?? DEFAULT_DATA_CONTROL_STATE.ignore_validations
   );
   return (
     <EuiFormRow label={DataControlEditorStrings.manageControl.getAdditionalSettingsTitle()}>
@@ -42,7 +42,7 @@ export const CustomOptionsAdditionalSettings: React.FC<Props> = ({
           onChange={() => {
             const newUseGlobalFilters = !useGlobalFilters;
             setUseGlobalFilters(newUseGlobalFilters);
-            updateState({ useGlobalFilters: newUseGlobalFilters });
+            updateState({ use_global_filters: newUseGlobalFilters });
           }}
           data-test-subj={'dataControl__useGlobalFiltersAdditionalSetting'}
         />
@@ -59,7 +59,7 @@ export const CustomOptionsAdditionalSettings: React.FC<Props> = ({
           onChange={() => {
             const newIgnoreValidations = !ignoreValidations;
             setIgnoreValidations(newIgnoreValidations);
-            updateState({ ignoreValidations: newIgnoreValidations });
+            updateState({ ignore_validations: newIgnoreValidations });
           }}
           data-test-subj={'dataControl__ignoreValidationsAdditionalSetting'}
         />

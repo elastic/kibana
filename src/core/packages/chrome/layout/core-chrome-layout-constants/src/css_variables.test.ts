@@ -33,6 +33,7 @@ describe('CSS Variables', () => {
     });
 
     it('should convert camelCase properties to kebab-case', () => {
+      expect(layoutVarName('application.marginTop')).toBe('--kbn-layout--application-margin-top');
       expect(layoutVarName('application.marginBottom')).toBe(
         '--kbn-layout--application-margin-bottom'
       );

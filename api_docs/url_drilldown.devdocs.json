@@ -1,0 +1,52 @@
+{
+  "id": "urlDrilldown",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "urlDrilldown",
+        "id": "def-server.UrlDrilldownState",
+        "type": "Type",
+        "tags": [],
+        "label": "UrlDrilldownState",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "embeddable",
+            "scope": "server",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-server.DrilldownState",
+            "text": "DrilldownState"
+          },
+          " & Readonly<{} & { url: string; open_in_new_tab: boolean; encode_url: boolean; }>"
+        ],
+        "path": "x-pack/platform/plugins/private/drilldowns/url_drilldown/server/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

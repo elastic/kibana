@@ -13,16 +13,40 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { CodeEditorProps } from '@kbn/code-editor';
 import { CodeEditor } from '@kbn/code-editor';
 import { yamlLanguageService } from './yaml_language_service';
+import { sanitizeText } from '../../lib/sanitize_text';
 
 export interface YamlEditorProps extends Omit<CodeEditorProps, 'languageId' | 'onChange'> {
   onChange: (value: string) => void;
   schemas: MonacoYamlOptions['schemas'] | null;
+  /**
+   * Callback fired when the sync state changes.
+   * `isSynced: true` means all debounced changes have been flushed to the onChange callback.
+   * `isSynced: false` means there are pending changes waiting to be flushed.
+   * This can be used to disable save buttons while changes are pending.
+   */
+  onSyncStateChange?: (isSynced: boolean) => void;
 }
 
 export const YamlEditor = React.memo(
-  ({ value, onChange, editorWillUnmount: _editorWillUnmount, ...props }: YamlEditorProps) => {
+  ({
+    value,
+    onChange,
+    onSyncStateChange,
+    editorWillUnmount: _editorWillUnmount,
+    ...props
+  }: YamlEditorProps) => {
     const [internalValue, setInternalValue] = useState(value);
-    const onChangeDebounced = useMemo(() => debounce(onChange, 200), [onChange]);
+
+    // Create a wrapped onChange that also updates sync state
+    const onChangeWithSync = useCallback(
+      (newValue: string) => {
+        onChange(newValue);
+        onSyncStateChange?.(true);
+      },
+      [onChange, onSyncStateChange]
+    );
+
+    const onChangeDebounced = useMemo(() => debounce(onChangeWithSync, 200), [onChangeWithSync]);
 
     useEffect(() => {
       // Update the internal value to the latest value from the props
@@ -32,12 +56,15 @@ export const YamlEditor = React.memo(
 
     const onChangeInternal = useCallback(
       (newValue: string) => {
+        const sanitizedValue = sanitizeText(newValue);
         // Update internal state quickly so the change is reflected instantly in the editor
-        setInternalValue(newValue);
+        setInternalValue(sanitizedValue);
+        // Notify that the changes are not synced since we have pending changes
+        onSyncStateChange?.(false);
         // Debounce the call to onChange to prevent excessive re-renders upstream
-        onChangeDebounced(newValue);
+        onChangeDebounced(sanitizedValue);
       },
-      [onChangeDebounced]
+      [onChangeDebounced, onSyncStateChange]
     );
 
     useEffect(() => {
@@ -46,11 +73,13 @@ export const YamlEditor = React.memo(
     }, [props.schemas]);
 
     const handleEditorWillUnmount = useCallback(() => {
+      // Flush any pending changes before unmounting
+      onChangeDebounced.flush();
       // Clear schemas when unmounting to avoid conflicts with other YamlEditor instances
       // Note: We don't dispose the service entirely as other instances might still be using it
       yamlLanguageService.clearSchemas();
       _editorWillUnmount?.();
-    }, [_editorWillUnmount]);
+    }, [_editorWillUnmount, onChangeDebounced]);
 
     return (
       <CodeEditor

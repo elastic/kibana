@@ -10,7 +10,7 @@ import { INTERNAL_BULK_CREATE_ATTACHMENTS_URL } from '../../../../common/constan
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import { escapeHatch } from '../utils';
-import type { attachmentApiV1 } from '../../../../common/types/api';
+import type { attachmentApiV2 } from '../../../../common/types/api';
 import type { caseDomainV1 } from '../../../../common/types/domain';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 
@@ -32,7 +32,7 @@ export const bulkCreateAttachmentsRoute = createCasesRoute({
       const casesContext = await context.cases;
       const casesClient = await casesContext.getCasesClient();
       const caseId = request.params.case_id;
-      const attachments = request.body as attachmentApiV1.BulkCreateAttachmentsRequest;
+      const attachments = request.body as attachmentApiV2.BulkCreateAttachmentsRequestV2;
       const res: caseDomainV1.Case = await casesClient.attachments.bulkCreate({
         caseId,
         attachments,

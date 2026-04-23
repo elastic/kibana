@@ -9,4 +9,3 @@
 
 // Components that are meant for internal use only (chrome-internal)
 export { Sidebar } from './src/components';
-export type { SidebarProps } from './src/components';

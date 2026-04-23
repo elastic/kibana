@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { z } from '@kbn/zod';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
-import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
+import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../common';
+import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
 import { EntityType } from '../../../common/domain/definitions/entity_schema';
@@ -25,8 +26,11 @@ const bodySchema = z.object({
 export function registerForceLogExtraction(router: EntityStorePluginRouter) {
   router.versioned
     .post({
-      path: '/internal/security/entity-store/{entityType}/force-log-extraction',
+      path: ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION,
       access: 'internal',
+      summary: 'Force log extraction',
+      description:
+        'Trigger an immediate log extraction run for the specified entity type and date range.',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },

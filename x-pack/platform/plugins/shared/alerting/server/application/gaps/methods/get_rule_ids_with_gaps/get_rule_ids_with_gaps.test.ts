@@ -27,6 +27,15 @@ import type { ConstructorOptions } from '../../../../rules_client';
 import { RulesClient } from '../../../../rules_client';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { gapFillStatus, gapStatus } from '../../../../../common';
+import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
+import { getSchedulerContextInternal } from '../../auto_fill_scheduler/methods/utils';
+
+jest.mock('../../auto_fill_scheduler/methods/utils', () => ({
+  getSchedulerContextInternal: jest.fn(),
+}));
+const mockGetSchedulerContext = getSchedulerContextInternal as jest.MockedFunction<
+  typeof getSchedulerContextInternal
+>;
 
 describe('getRuleIdsWithGaps', () => {
   let rulesClient: RulesClient;
@@ -86,6 +95,8 @@ describe('getRuleIdsWithGaps', () => {
       connectorAdapterRegistry: new ConnectorAdapterRegistry(),
       uiSettings: uiSettingsServiceMock.createStartContract(),
       eventLogger,
+      featureFlags: coreFeatureFlagsMock.createStart(),
+      isServerless: false,
     } as jest.Mocked<ConstructorOptions>;
 
     jest.clearAllMocks();
@@ -214,6 +225,19 @@ describe('getRuleIdsWithGaps', () => {
         total: 2,
         ruleIds: ['rule-1', 'rule-2'],
         latestGapTimestamp: 1704067200000,
+        summary: {
+          totalUnfilledDurationMs: 100,
+          totalInProgressDurationMs: 50,
+          totalFilledDurationMs: 0,
+          totalErrorDurationMs: 0,
+          totalDurationMs: 150,
+          rulesByGapFillStatus: {
+            unfilled: 1,
+            inProgress: 1,
+            filled: 0,
+            error: 0,
+          },
+        },
       });
     });
 
@@ -249,6 +273,19 @@ describe('getRuleIdsWithGaps', () => {
         total: 0,
         ruleIds: [],
         latestGapTimestamp: undefined,
+        summary: {
+          totalUnfilledDurationMs: 0,
+          totalInProgressDurationMs: 0,
+          totalFilledDurationMs: 0,
+          totalErrorDurationMs: 0,
+          totalDurationMs: 0,
+          rulesByGapFillStatus: {
+            unfilled: 0,
+            inProgress: 0,
+            filled: 0,
+            error: 0,
+          },
+        },
       });
     });
 
@@ -463,6 +500,214 @@ describe('getRuleIdsWithGaps', () => {
           filter: expect.not.stringContaining('rule.id:'),
         })
       );
+    });
+  });
+
+  describe('scheduler-aware error status', () => {
+    const schedulerContext = { enabled: true, numRetries: 3 };
+
+    const getByRuleAggs = () => {
+      const callArgs = eventLogClient.aggregateEventsWithAuthFilter.mock.calls[0][2] as {
+        aggs: { by_rule: { aggs: Record<string, unknown> } };
+      };
+      return callArgs.aggs.by_rule.aggs;
+    };
+
+    beforeEach(() => {
+      mockGetSchedulerContext.mockResolvedValue(schedulerContext);
+    });
+
+    it('should include exhaustedRetryGaps agg when schedulerId is provided and scheduler is enabled', async () => {
+      eventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue({
+        aggregations: {
+          by_rule: { buckets: [] },
+          latest_gap_timestamp: { value: null },
+        },
+      });
+
+      await rulesClient.getRuleIdsWithGaps({
+        ...params,
+        schedulerId: 'scheduler-1',
+      });
+
+      expect(mockGetSchedulerContext).toHaveBeenCalledWith(
+        unsecuredSavedObjectsClient,
+        'scheduler-1'
+      );
+
+      expect(eventLogClient.aggregateEventsWithAuthFilter).toHaveBeenCalledWith(
+        RULE_SAVED_OBJECT_TYPE,
+        filter,
+        expect.objectContaining({
+          aggs: expect.objectContaining({
+            by_rule: expect.objectContaining({
+              aggs: expect.objectContaining({
+                exhaustedRetryGaps: expect.objectContaining({
+                  filter: expect.objectContaining({
+                    bool: expect.objectContaining({
+                      must: expect.arrayContaining([
+                        {
+                          range: {
+                            'kibana.alert.rule.gap.failed_auto_fill_attempts': { gte: 3 },
+                          },
+                        },
+                      ]),
+                    }),
+                  }),
+                }),
+              }),
+            }),
+          }),
+        })
+      );
+    });
+
+    it('should not include exhaustedRetryGaps agg when schedulerId is not provided', async () => {
+      eventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue({
+        aggregations: {
+          by_rule: { buckets: [] },
+          latest_gap_timestamp: { value: null },
+        },
+      });
+
+      await rulesClient.getRuleIdsWithGaps(params);
+
+      expect(mockGetSchedulerContext).not.toHaveBeenCalled();
+
+      expect(getByRuleAggs()).not.toHaveProperty('exhaustedRetryGaps');
+    });
+
+    it('should not include exhaustedRetryGaps agg when scheduler is disabled', async () => {
+      mockGetSchedulerContext.mockResolvedValue({ enabled: false, numRetries: 3 });
+
+      eventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue({
+        aggregations: {
+          by_rule: { buckets: [] },
+          latest_gap_timestamp: { value: null },
+        },
+      });
+
+      await rulesClient.getRuleIdsWithGaps({
+        ...params,
+        schedulerId: 'scheduler-1',
+      });
+
+      expect(getByRuleAggs()).not.toHaveProperty('exhaustedRetryGaps');
+    });
+
+    it('should not include exhaustedRetryGaps agg when scheduler is not found', async () => {
+      mockGetSchedulerContext.mockResolvedValue(null);
+
+      eventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue({
+        aggregations: {
+          by_rule: { buckets: [] },
+          latest_gap_timestamp: { value: null },
+        },
+      });
+
+      await rulesClient.getRuleIdsWithGaps({
+        ...params,
+        schedulerId: 'nonexistent',
+      });
+
+      expect(getByRuleAggs()).not.toHaveProperty('exhaustedRetryGaps');
+    });
+
+    it('should count error status and split duration when gaps have exhausted retries', async () => {
+      eventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue({
+        aggregations: {
+          by_rule: {
+            buckets: [
+              {
+                key: 'rule-error',
+                totalUnfilledDurationMs: { value: 500 },
+                totalInProgressDurationMs: { value: 0 },
+                totalFilledDurationMs: { value: 100 },
+                totalDurationMs: { value: 600 },
+                exhaustedRetryGaps: {
+                  doc_count: 2,
+                  totalUnfilledDurationMs: { value: 300 },
+                },
+              },
+              {
+                key: 'rule-unfilled',
+                totalUnfilledDurationMs: { value: 200 },
+                totalInProgressDurationMs: { value: 0 },
+                totalFilledDurationMs: { value: 0 },
+                totalDurationMs: { value: 200 },
+                exhaustedRetryGaps: {
+                  doc_count: 0,
+                  totalUnfilledDurationMs: { value: 0 },
+                },
+              },
+            ],
+          },
+          latest_gap_timestamp: { value: 1704067200000 },
+        },
+      });
+
+      const result = await rulesClient.getRuleIdsWithGaps({
+        ...params,
+        schedulerId: 'scheduler-1',
+        highestPriorityGapFillStatuses: [],
+      });
+
+      expect(result.summary.rulesByGapFillStatus).toEqual({
+        error: 1,
+        unfilled: 1,
+        inProgress: 0,
+        filled: 0,
+      });
+      // Error rule: 500ms total unfilled, 300ms from exhausted retry gaps
+      // -> totalErrorDurationMs: 300, totalUnfilledDurationMs: 500 - 300 = 200
+      // Unfilled rule: 200ms unfilled
+      // -> totalUnfilledDurationMs: 200 + 200 = 400... wait, let me check
+      // Actually: error rule contributes (500 - 300) = 200 to unfilled + unfilled rule contributes 200
+      expect(result.summary.totalErrorDurationMs).toBe(300);
+      expect(result.summary.totalUnfilledDurationMs).toBe(400);
+    });
+
+    it('should filter to only error status rules when highestPriorityGapFillStatuses includes error', async () => {
+      eventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue({
+        aggregations: {
+          by_rule: {
+            buckets: [
+              {
+                key: 'rule-error',
+                totalUnfilledDurationMs: { value: 500 },
+                totalInProgressDurationMs: { value: 0 },
+                totalFilledDurationMs: { value: 0 },
+                totalDurationMs: { value: 500 },
+                exhaustedRetryGaps: {
+                  doc_count: 1,
+                  totalUnfilledDurationMs: { value: 500 },
+                },
+              },
+              {
+                key: 'rule-unfilled',
+                totalUnfilledDurationMs: { value: 200 },
+                totalInProgressDurationMs: { value: 0 },
+                totalFilledDurationMs: { value: 0 },
+                totalDurationMs: { value: 200 },
+                exhaustedRetryGaps: {
+                  doc_count: 0,
+                  totalUnfilledDurationMs: { value: 0 },
+                },
+              },
+            ],
+          },
+          latest_gap_timestamp: { value: 1704067200000 },
+        },
+      });
+
+      const result = await rulesClient.getRuleIdsWithGaps({
+        ...params,
+        schedulerId: 'scheduler-1',
+        highestPriorityGapFillStatuses: [gapFillStatus.ERROR],
+      });
+
+      expect(result.ruleIds).toEqual(['rule-error']);
+      expect(result.total).toBe(1);
     });
   });
 

@@ -25,7 +25,6 @@ import {
   EIS_PRECONFIGURED_INFERENCE_IDS,
   EisKnowledgeBaseCallout,
   useEisKnowledgeBaseCalloutDismissed,
-  useAIAgentTourDismissed,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { useInferenceEndpoints } from '../hooks/use_inference_endpoints';
 import type { ModelOptionsData } from '../utils/get_model_options_for_inference_endpoints';
@@ -36,14 +35,12 @@ interface SelectModelAndInstallKnowledgeBaseProps {
   onInstall: (inferenceId: string) => Promise<void>;
   isInstalling: boolean;
   eisCalloutZIndex?: number;
-  isInKnowledgeBaseTab?: boolean;
 }
 
 export function SelectModelAndInstallKnowledgeBase({
   onInstall,
   isInstalling,
   eisCalloutZIndex,
-  isInKnowledgeBaseTab = false,
 }: SelectModelAndInstallKnowledgeBaseProps) {
   const { euiTheme } = useEuiTheme();
 
@@ -56,16 +53,11 @@ export function SelectModelAndInstallKnowledgeBase({
   const [selectedInferenceId, setSelectedInferenceId] = useState<string>('');
   const [eisKnowledgeBaseCalloutDismissed, setEisKnowledgeBaseCalloutDismissed] =
     useEisKnowledgeBaseCalloutDismissed();
-  const [aiAgentTourDismissed] = useAIAgentTourDismissed();
 
   const { inferenceEndpoints, isLoading: isLoadingEndpoints, error } = useInferenceEndpoints();
 
   const isSelectedModelFromEis = EIS_PRECONFIGURED_INFERENCE_IDS.includes(selectedInferenceId);
   const showEisKnowledgeBaseCallout = isSelectedModelFromEis && !eisKnowledgeBaseCalloutDismissed;
-
-  // Position callout to the left when AI Agent tour is visible to avoid overlap
-  const eisCalloutAnchorPosition =
-    !isInKnowledgeBaseTab && !aiAgentTourDismissed ? 'leftCenter' : 'downCenter';
 
   const handleDismissEisKnowledgeBaseCallout = () => {
     setEisKnowledgeBaseCalloutDismissed(true);
@@ -111,7 +103,7 @@ export function SelectModelAndInstallKnowledgeBase({
       >
         <EuiFlexGroup direction="row" alignItems="center" justifyContent="center" gutterSize="xs">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="alert" color="danger" />
+            <EuiIcon type="warning" color="danger" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText color="danger">
@@ -169,7 +161,7 @@ export function SelectModelAndInstallKnowledgeBase({
             isOpen={showEisKnowledgeBaseCallout}
             dismissCallout={handleDismissEisKnowledgeBaseCallout}
             zIndex={eisCalloutZIndex}
-            anchorPosition={eisCalloutAnchorPosition}
+            anchorPosition="downCenter"
           >
             <EuiSuperSelect
               fullWidth
@@ -197,7 +189,7 @@ export function SelectModelAndInstallKnowledgeBase({
             color="primary"
             fill
             isLoading={isInstalling}
-            iconType="importAction"
+            iconType="download"
             data-test-subj="observabilityAiAssistantWelcomeMessageSetUpKnowledgeBaseButton"
             onClick={handleInstall}
           >

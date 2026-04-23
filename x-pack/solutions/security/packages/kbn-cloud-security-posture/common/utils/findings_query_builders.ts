@@ -16,7 +16,30 @@ import {
 import type { CspBenchmarkRulesStates } from '../schema/rules/latest';
 import type { UseCspOptions } from '../types/findings';
 
-const MISCONFIGURATIONS_SOURCE_FIELDS = ['result.*', 'rule.*', 'resource.*'];
+/**
+ * Fields required on `_source` so `@kbn/entity-store` `euid.getEuidFromObject` can resolve identity
+ * for generic / user / host / service (see entity_store host/user/service/generic definitions).
+ */
+const MISCONFIGURATIONS_EUID_IDENTITY_FIELDS = [
+  'entity.id',
+  'host.id',
+  'host.name',
+  'host.hostname',
+  'user.email',
+  'user.id',
+  'user.name',
+  'user.domain',
+  'event.module',
+  'data_stream.dataset',
+  'service.name',
+] as const;
+
+const MISCONFIGURATIONS_SOURCE_FIELDS = [
+  'result.*',
+  'rule.*',
+  'resource.*',
+  ...MISCONFIGURATIONS_EUID_IDENTITY_FIELDS,
+];
 interface AggregationBucket {
   doc_count?: number;
 }

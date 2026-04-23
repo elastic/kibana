@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../fixtures';
 import {
@@ -25,7 +26,7 @@ const CONTAINER_ID = CONTAINER_IDS[CONTAINER_COUNT - 1];
 
 test.describe(
   'Infrastructure Inventory - Container Asset Details Flyout',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     let savedViewId: string = '';
 
@@ -61,7 +62,8 @@ test.describe(
       await test.step('is selected as default tab', async () => {
         await expect(assetDetailsPage.dockerOverviewTab.tab).toHaveAttribute(
           'aria-selected',
-          'true'
+          'true',
+          { timeout: EXTENDED_TIMEOUT }
         );
       });
 
@@ -181,7 +183,9 @@ test.describe(
 
     test('Metadata Tab', async ({ pageObjects: { assetDetailsPage } }) => {
       await test.step('accessible from default tab', async () => {
-        await expect(assetDetailsPage.metadataTab.tab).toHaveAttribute('aria-selected', 'false');
+        await expect(assetDetailsPage.metadataTab.tab).toHaveAttribute('aria-selected', 'false', {
+          timeout: EXTENDED_TIMEOUT,
+        });
         await assetDetailsPage.metadataTab.clickTab();
         await expect(assetDetailsPage.metadataTab.tab).toHaveAttribute('aria-selected', 'true');
       });
@@ -223,6 +227,9 @@ test.describe(
     test('Metadata Tab - Is accessible from overview tab section show all', async ({
       pageObjects: { assetDetailsPage },
     }) => {
+      await expect(assetDetailsPage.dockerOverviewTab.metadataShowAllButton).toBeVisible({
+        timeout: EXTENDED_TIMEOUT,
+      });
       await assetDetailsPage.dockerOverviewTab.metadataShowAllButton.click();
       await expect(assetDetailsPage.metadataTab.tab).toHaveAttribute('aria-selected', 'true');
     });
@@ -231,7 +238,8 @@ test.describe(
       await test.step('accessible from default tab', async () => {
         await expect(assetDetailsPage.dockerMetricsTab.tab).toHaveAttribute(
           'aria-selected',
-          'false'
+          'false',
+          { timeout: EXTENDED_TIMEOUT }
         );
         await assetDetailsPage.dockerMetricsTab.clickTab();
         await expect(assetDetailsPage.dockerMetricsTab.tab).toHaveAttribute(
@@ -280,6 +288,9 @@ test.describe(
       pageObjects: { assetDetailsPage },
     }) => {
       const goBackToOverviewTab = async () => {
+        await expect(assetDetailsPage.dockerOverviewTab.tab).toBeVisible({
+          timeout: EXTENDED_TIMEOUT,
+        });
         await assetDetailsPage.dockerOverviewTab.tab.click();
         await expect(assetDetailsPage.dockerOverviewTab.tab).toHaveAttribute(
           'aria-selected',
@@ -288,16 +299,22 @@ test.describe(
       };
 
       await test.step('cpu section', async () => {
+        await expect(assetDetailsPage.dockerOverviewTab.metricsCpuUsageChart).toBeVisible();
+        await expect(assetDetailsPage.dockerOverviewTab.metricsCpuShowAllButton).toBeVisible({
+          timeout: EXTENDED_TIMEOUT,
+        });
         await assetDetailsPage.dockerOverviewTab.metricsCpuShowAllButton.click();
         await expect(assetDetailsPage.dockerMetricsTab.tab).toHaveAttribute(
           'aria-selected',
-          'true'
+          'true',
+          { timeout: EXTENDED_TIMEOUT }
         );
         await expect(assetDetailsPage.dockerMetricsTab.cpuSectionTitle).toBeInViewport();
         await goBackToOverviewTab();
       });
 
       await test.step('memory section', async () => {
+        await expect(assetDetailsPage.dockerOverviewTab.metricsMemoryUsageChart).toBeVisible();
         await assetDetailsPage.dockerOverviewTab.metricsMemoryShowAllButton.click();
         await expect(assetDetailsPage.dockerMetricsTab.tab).toHaveAttribute(
           'aria-selected',
@@ -308,6 +325,7 @@ test.describe(
       });
 
       await test.step('network section', async () => {
+        await expect(assetDetailsPage.dockerOverviewTab.metricsNetworkChart).toBeVisible();
         await assetDetailsPage.dockerOverviewTab.metricsNetworkShowAllButton.click();
         await expect(assetDetailsPage.dockerMetricsTab.tab).toHaveAttribute(
           'aria-selected',
@@ -318,6 +336,7 @@ test.describe(
       });
 
       await test.step('disk section', async () => {
+        await expect(assetDetailsPage.dockerOverviewTab.metricsDiskIOChart).toBeVisible();
         await assetDetailsPage.dockerOverviewTab.metricsDiskShowAllButton.click();
         await expect(assetDetailsPage.dockerMetricsTab.tab).toHaveAttribute(
           'aria-selected',
@@ -330,7 +349,9 @@ test.describe(
 
     test('Logs Tab', async ({ page, pageObjects: { assetDetailsPage } }) => {
       await test.step('accessible from default tab', async () => {
-        await expect(assetDetailsPage.logsTag.tab).toHaveAttribute('aria-selected', 'false');
+        await expect(assetDetailsPage.logsTag.tab).toHaveAttribute('aria-selected', 'false', {
+          timeout: EXTENDED_TIMEOUT,
+        });
         await assetDetailsPage.logsTag.clickTab();
         await expect(assetDetailsPage.logsTag.tab).toHaveAttribute('aria-selected', 'true');
       });

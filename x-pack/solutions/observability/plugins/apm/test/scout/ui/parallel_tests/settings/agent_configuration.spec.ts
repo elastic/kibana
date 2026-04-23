@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../fixtures';
 
-test.describe('Agent Configuration', { tag: ['@ess'] }, () => {
+test.describe('Agent Configuration', { tag: tags.stateful.classic }, () => {
   test('Viewer should not be able to modify settings', async ({
     pageObjects: { agentConfigurationsPage },
     browserAuth,
@@ -67,9 +68,8 @@ test.describe('Agent Configuration', { tag: ['@ess'] }, () => {
 
     await test.step('verify configuration created and removed', async () => {
       await expect(page).toHaveURL(/.*apm\/settings\/agent-configuration/);
-      await expect(page.getByText('Configurations')).toBeVisible();
+      await expect(page.getByTestId('apmAgentConfigurationPanelTitle')).toBeVisible();
       await agentConfigurationsPage.checkConfigurationExists('All', 'production ');
-
       // Delete the configuration
       await agentConfigurationsPage.clickDeleteConfiguration();
       await expect(page.getByText('No configurations found')).toBeVisible();

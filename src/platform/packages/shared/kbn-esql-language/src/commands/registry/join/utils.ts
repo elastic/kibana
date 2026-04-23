@@ -8,22 +8,22 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
-import { within } from '../../../ast/location';
-import { isOptionNode } from '../../../ast/is';
-import { buildFieldsDefinitionsWithMetadata } from '../../definitions/utils';
+import { within, isOptionNode } from '@elastic/esql';
 import type {
   ESQLAstAllCommands,
   ESQLAstJoinCommand,
   ESQLCommand,
   ESQLCommandOption,
   ESQLSingleAstItem,
-} from '../../../types';
+} from '@elastic/esql/types';
+import { buildFieldsDefinitionsWithMetadata } from '../../definitions/utils';
 
 import type { ICommand } from '../registry';
 import type { GetColumnsByTypeFn, ICommandContext, ISuggestionItem } from '../types';
 import type { JoinCommandPosition, JoinStaticPosition } from './types';
-import { SuggestionCategory } from '../../../shared/sorting/types';
+import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting/types';
 import { getLookupJoinSource } from '../../definitions/utils/sources';
+import { TRAILING_COMMA_REGEX } from '../../definitions/utils/shared';
 
 const REGEX =
   /^(?<type>\w+((?<after_type>\s+((?<mnemonic>(JOIN|JOI|JO|J)((?<after_mnemonic>\s+((?<index>\S+((?<after_index>\s+(?<as>(AS|A))?(?<after_as>\s+(((?<alias>\S+)?(?<after_alias>\s+)?)?))?((?<on>(ON|O))?))?))?))?))?))?))?/i;
@@ -122,7 +122,7 @@ export const getPosition = (
     const expressions = onOption.args as ESQLSingleAstItem[];
 
     // No expressions yet or starting new expression after comma
-    if (expressions.length === 0 || /,\s*$/.test(text)) {
+    if (expressions.length === 0 || TRAILING_COMMA_REGEX.test(text)) {
       return { pos: 'on_expression', expression: undefined, isExpressionComplete: false };
     }
 
@@ -188,7 +188,6 @@ export const markCommonFields = (
 
       return {
         ...suggestion,
-        sortText: '1-' + (suggestion.sortText || suggestion.label),
         detail,
         category: SuggestionCategory.LOOKUP_COMMON_FIELD,
         documentation: {

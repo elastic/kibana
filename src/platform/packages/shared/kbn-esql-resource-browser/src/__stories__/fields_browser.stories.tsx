@@ -10,7 +10,8 @@
 import React, { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import type { ESQLFieldWithMetadata, RecommendedField } from '@kbn/esql-types';
+import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { FieldsBrowser } from '../fields_browser';
 
 const mockFields: ESQLFieldWithMetadata[] = [
@@ -24,13 +25,6 @@ const mockFields: ESQLFieldWithMetadata[] = [
   { name: 'status_code', type: 'integer', userDefined: false },
   { name: 'user.name', type: 'keyword', userDefined: false },
   { name: 'tags', type: 'keyword', userDefined: false },
-];
-
-const mockRecommendedFields: RecommendedField[] = [
-  { name: '@timestamp', pattern: 'logs-*' },
-  { name: 'message', pattern: 'logs-*' },
-  { name: 'host.name', pattern: 'logs-*' },
-  { name: 'bytes', pattern: 'logs-*' },
 ];
 
 const meta: Meta<typeof FieldsBrowser> = {
@@ -47,37 +41,41 @@ const meta: Meta<typeof FieldsBrowser> = {
 export default meta;
 type Story = StoryObj<typeof FieldsBrowser>;
 
-const InteractiveWrapper = ({
-  isLoading = false,
-  recommendedFields = [],
-}: {
-  isLoading?: boolean;
-  recommendedFields?: RecommendedField[];
-}) => {
+const InteractiveWrapper = () => {
   const [isOpen, setIsOpen] = useState(true);
+  const services = {
+    core: {
+      // Not used by this story (we preload fields + do not pass activeSolutionId),
+      // but required by `useKibana`.
+      http: {} as any,
+    },
+    data: {
+      // Not used by this story (we preload fields), but required by `useKibana`.
+      search: { search: {} as any },
+      query: { timefilter: { timefilter: { getTime: () => ({ from: 'now-15m', to: 'now' }) } } },
+    },
+  };
 
   return (
-    <FieldsBrowser
-      isOpen={isOpen}
-      isLoading={isLoading}
-      onClose={() => {
-        setIsOpen(false);
-        action('onClose')();
-      }}
-      onSelect={(fieldNames, previousCount) => {
-        action('onSelect')(fieldNames, previousCount);
-      }}
-      allFields={mockFields}
-      recommendedFields={recommendedFields}
-      position={{ top: 100, left: 100 }}
-    />
+    <KibanaContextProvider services={services as any}>
+      <FieldsBrowser
+        isOpen={isOpen}
+        onClose={() => {
+          setIsOpen(false);
+          action('onClose')();
+        }}
+        onSelect={(fieldName, change) => {
+          action('onSelect')(fieldName, change);
+        }}
+        preloadedFields={mockFields.map((f) => ({ name: f.name, type: f.type }))}
+        indexPattern="index1,index2"
+        fullQuery="FROM index1, index2"
+        position={{ top: 100, left: 100 }}
+      />
+    </KibanaContextProvider>
   );
 };
 
 export const Default: Story = {
   render: () => <InteractiveWrapper />,
-};
-
-export const WithRecommendedFields: Story = {
-  render: () => <InteractiveWrapper recommendedFields={mockRecommendedFields} />,
 };

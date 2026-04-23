@@ -81,7 +81,7 @@
         "label": "isRuleType",
         "description": [],
         "signature": [
-          "(ruleType: unknown) => ruleType is \"eql\" | \"esql\" | \"query\" | \"threshold\" | \"threat_match\" | \"saved_query\" | \"machine_learning\" | \"new_terms\""
+          "(ruleType: unknown) => ruleType is \"eql\" | \"esql\" | \"query\" | \"threshold\" | \"machine_learning\" | \"saved_query\" | \"threat_match\" | \"new_terms\""
         ],
         "path": "src/platform/packages/shared/kbn-securitysolution-rules/src/utils.ts",
         "lineNumber": 14,
@@ -287,7 +287,7 @@
         "label": "RuleType",
         "description": [],
         "signature": [
-          "\"eql\" | \"esql\" | \"query\" | \"threshold\" | \"threat_match\" | \"saved_query\" | \"machine_learning\" | \"new_terms\""
+          "\"eql\" | \"esql\" | \"query\" | \"threshold\" | \"machine_learning\" | \"saved_query\" | \"threat_match\" | \"new_terms\""
         ],
         "path": "src/platform/packages/shared/kbn-securitysolution-rules/src/rule_type_mappings.ts",
         "lineNumber": 36,

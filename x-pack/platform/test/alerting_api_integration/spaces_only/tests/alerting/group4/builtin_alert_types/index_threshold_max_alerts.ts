@@ -26,15 +26,20 @@ export default function maxAlertsRuleTests({ getService }: FtrProviderContext) {
   describe('index threshold rule that hits max alerts circuit breaker', () => {
     const objectRemover = new ObjectRemover(supertest);
 
-    beforeEach(async () => {
-      await esTestIndexTool.destroy();
+    before(async () => {
       await esTestIndexTool.setup();
+    });
+
+    beforeEach(async () => {
       await deleteDocs();
     });
 
     afterEach(async () => {
       await deleteDocs();
       await objectRemover.removeAll();
+    });
+
+    after(async () => {
       await esTestIndexTool.destroy();
     });
 

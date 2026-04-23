@@ -55,7 +55,7 @@ export function SloInstance({ slo }: { slo: SLOWithSummaryResponse }) {
         <EuiButtonIcon
           disabled={!isFlyoutAvailable}
           data-test-subj="sloOpenSelectInstanceFlyoutButton"
-          iconType="search"
+          iconType="magnify"
           aria-label={i18n.translate('xpack.slo.sloInstance.selectInstanceFlyoutLabel', {
             defaultMessage: 'Open instance selector flyout',
           })}

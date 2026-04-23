@@ -27,6 +27,7 @@ import type {
 import type { UiActionsStart, VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type {
   CellValueContext,
+  EmbeddableEditorBreadcrumb,
   EmbeddableEditorState,
   EmbeddableStateTransfer,
 } from '@kbn/embeddable-plugin/public';
@@ -424,8 +425,10 @@ export interface ValueFormatConfig {
 }
 
 export interface LensDocument {
+  /**
+   * savedObjectId must be required when the LensDocument is by ref
+   */
   savedObjectId?: string;
-  type?: string; // what is this type for? It's always 'lens'
   title: string;
   description?: string;
   visualizationType: string | null;
@@ -629,7 +632,10 @@ export type VisualizeEditorContext<T extends LensConfiguration = LensConfigurati
   savedObjectId?: string;
   embeddableId?: string;
   vizEditorOriginatingAppUrl?: string;
+  legacyEditorOriginatingApp?: string;
   originatingApp?: string;
+  originatingPath?: string;
+  breadcrumbs?: EmbeddableEditorBreadcrumb[];
   isVisualizeAction: boolean;
   searchQuery?: Query;
   searchFilters?: Filter[];
@@ -1194,6 +1200,11 @@ export interface SuggestionRequest<T = unknown> {
   activeData?: Record<string, Datatable>;
   allowMixed?: boolean;
   datasourceId?: string;
+  /**
+   * Optional query (e.g. ES|QL) passed when suggesting from context (e.g. Visualize Editor).
+   * Visualizations can use it to tailor suggestions (e.g. prefer line for time series).
+   */
+  query?: AggregateQuery;
 }
 
 /**

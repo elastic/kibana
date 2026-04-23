@@ -5,33 +5,40 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
-import type { DefendInsight, DefendInsightsPostRequestBody } from '@kbn/elastic-assistant-common';
-import { DefendInsightType } from '@kbn/elastic-assistant-common';
-import { InvalidDefendInsightTypeError } from '@kbn/elastic-assistant-plugin/server/lib/defend_insights/errors';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
-import type { SecurityWorkflowInsight } from '../../../../../common/endpoint/types/workflow_insights';
-
+import type {
+  DefendInsight,
+  SecurityWorkflowInsight,
+} from '../../../../../common/endpoint/types/workflow_insights';
 import type { EndpointMetadataService } from '../../metadata';
+import { WorkflowInsightType } from '../../../../../common/endpoint/types/workflow_insights';
 import { buildIncompatibleAntivirusWorkflowInsights } from './incompatible_antivirus';
-import { buildPolicyResponseFailureWorkflowInsights } from './policy_response_failure';
+import { buildCustomWorkflowInsights } from './custom';
 
 export interface BuildWorkflowInsightParams {
   defendInsights: DefendInsight[];
-  request: KibanaRequest<unknown, unknown, DefendInsightsPostRequestBody>;
   endpointMetadataService: EndpointMetadataService;
   esClient: ElasticsearchClient;
+  options: {
+    insightType: WorkflowInsightType;
+    endpointIds: string[];
+    connectorId?: string;
+    model?: string;
+  };
 }
 
 export function buildWorkflowInsights(
   params: BuildWorkflowInsightParams
 ): Promise<SecurityWorkflowInsight[]> {
-  switch (params.request.body.insightType) {
-    case DefendInsightType.Enum.incompatible_antivirus:
+  switch (params.options.insightType) {
+    case WorkflowInsightType.enum.incompatible_antivirus:
       return buildIncompatibleAntivirusWorkflowInsights(params);
-    case DefendInsightType.Enum.policy_response_failure:
-      return buildPolicyResponseFailureWorkflowInsights(params);
+    case WorkflowInsightType.enum.policy_response_failure:
+      return buildCustomWorkflowInsights(params);
+    case WorkflowInsightType.enum.custom:
+      return buildCustomWorkflowInsights(params);
     default:
-      throw new InvalidDefendInsightTypeError();
+      throw new Error('Invalid insight type');
   }
 }

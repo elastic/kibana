@@ -225,11 +225,21 @@ export interface GetModelDownloadConfigOptions {
 
 export interface LocalInferenceServiceSettings {
   service: 'elasticsearch';
-  service_settings: {
-    num_allocations: number;
-    num_threads: number;
-    model_id: string;
-  };
+  service_settings:
+    | {
+        num_allocations: number;
+        num_threads: number;
+        model_id: string;
+      }
+    | {
+        num_threads: number;
+        model_id: string;
+        adaptive_allocations: {
+          enabled: true;
+          min_number_of_allocations: number;
+          max_number_of_allocations: number;
+        };
+      };
 }
 
 export type InferenceServiceSettings =
@@ -326,6 +336,12 @@ export type InferenceServiceSettings =
         region: string;
         provider: string;
         model: string;
+      };
+    }
+  | {
+      service: 'elastic';
+      service_settings: {
+        model_id: string;
       };
     };
 

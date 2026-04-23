@@ -19,6 +19,7 @@ export interface InstallationStatusResponse {
   perProducts: Record<ProductName, ProductInstallState>;
   /** Resource type for this installation status */
   resourceType?: ResourceType;
+  openApiStatus?: OpenAPISpecInstallStatusResponse;
 }
 
 export interface PerformInstallResponse {
@@ -44,16 +45,16 @@ export interface ProductDocInstallParams {
    */
   resourceType?: ResourceType;
 }
-
-/**
- * Security Labs specific installation status response.
- */
-export interface SecurityLabsInstallStatusResponse {
+export interface BaseInstallStatusResponse<T extends ResourceType> {
   inferenceId: string;
-  resourceType: 'security_labs';
+  resourceType: T;
   status: InstallationStatus;
   version?: string;
   latestVersion?: string;
   isUpdateAvailable?: boolean;
   failureReason?: string;
 }
+
+export type OpenAPISpecInstallStatusResponse = BaseInstallStatusResponse<'openapi_spec'>;
+
+export type SecurityLabsInstallStatusResponse = BaseInstallStatusResponse<'security_labs'>;

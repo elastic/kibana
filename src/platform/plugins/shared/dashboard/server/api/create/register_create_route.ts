@@ -9,62 +9,69 @@
 
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
-import { commonRouteConfig, INTERNAL_API_VERSION } from '../constants';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { once } from 'lodash';
+import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
+import { getRouteConfig } from '../get_route_config';
 import { getCreateRequestBodySchema, getCreateResponseBodySchema } from './schemas';
 import { create } from './create';
-import { allowUnmappedKeysSchema } from '../dashboard_state_schemas';
-import { throwOnUnmappedKeys } from '../scope_tooling';
-import { DASHBOARD_API_PATH } from '../../../common/constants';
+import { getDashboardStateSchema } from '../dashboard_state_schemas';
+import { writeErrorHandler } from '../write_error_handler';
 
-export function registerCreateRoute(router: VersionedRouter<RequestHandlerContext>) {
+export function registerCreateRoute(
+  router: VersionedRouter<RequestHandlerContext>,
+  usageCounter: UsageCounter | undefined,
+  isDashboardAppRequest: boolean
+) {
+  const { basePath, routeConfig, routeVersion } = getRouteConfig(isDashboardAppRequest);
   const createRoute = router.post({
-    path: DASHBOARD_API_PATH,
+    path: basePath,
     summary: 'Create a dashboard',
-    ...commonRouteConfig,
+    ...routeConfig,
+    description: 'Creates a new dashboard and returns its ID, full state, and metadata.',
+  });
+
+  // Do not call getDashboardStateSchema when registering route.
+  // Route is registered during setup and before all plugins have registered embeddable schemas.
+  // Instead, use once to only call getDashboardStateSchema the first time a route handler is executed.
+  const getCachedDashboardStateSchema = once(() => {
+    return getDashboardStateSchema(isDashboardAppRequest);
   });
 
   createRoute.addVersion(
     {
-      version: INTERNAL_API_VERSION,
+      version: routeVersion,
       validate: () => ({
         request: {
-          query: schema.maybe(
-            schema.object({
-              allowUnmappedKeys: schema.maybe(allowUnmappedKeysSchema),
-            })
-          ),
-          body: getCreateRequestBodySchema(),
+          body: getCreateRequestBodySchema(isDashboardAppRequest),
         },
         response: {
-          200: {
-            body: getCreateResponseBodySchema,
+          201: {
+            body: () => getCreateResponseBodySchema(isDashboardAppRequest),
+            description: 'created',
+          },
+          400: {
+            description: 'invalid request',
+          },
+          403: {
+            description: 'forbidden',
           },
         },
       }),
     },
-    async (ctx, req, res) => {
-      try {
-        const allowUnmappedKeys = req.query?.allowUnmappedKeys ?? false;
-        if (!allowUnmappedKeys) throwOnUnmappedKeys(req.body.data);
-
-        const result = await create(ctx, req.body);
-        return res.ok({ body: result });
-      } catch (e) {
-        if (e.isBoom && e.output.statusCode === 409) {
-          return res.conflict({
-            body: {
-              message: `A dashboard with ID ${req.body.id} already exists.`,
-            },
-          });
+    async (ctx, req, res) =>
+      telemetryHandler(req, usageCounter, async () => {
+        try {
+          const result = await create(
+            ctx,
+            getCachedDashboardStateSchema(),
+            req.body,
+            isDashboardAppRequest
+          );
+          return res.created({ body: result });
+        } catch (e) {
+          return writeErrorHandler(e, res);
         }
-
-        if (e.isBoom && e.output.statusCode === 403) {
-          return res.forbidden();
-        }
-
-        return res.badRequest({ body: e });
-      }
-    }
+      })
   );
 }

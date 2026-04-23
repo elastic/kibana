@@ -11,6 +11,7 @@ import type { ServerlessProjectType } from '@kbn/es';
 
 export interface ScoutTestConfig {
   serverless: boolean;
+  http2: boolean;
   uiam: boolean;
   projectType?: ServerlessProjectType;
   organizationId?: string;
@@ -25,6 +26,15 @@ export interface ScoutTestConfig {
   auth: {
     username: string;
     password: string;
+  };
+  linkedProject?: {
+    hosts: {
+      elasticsearch: string;
+    };
+    auth: {
+      username: string;
+      password: string;
+    };
   };
   metadata?: any;
 }

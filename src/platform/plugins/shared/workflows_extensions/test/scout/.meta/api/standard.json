@@ -1,21 +1,47 @@
 {
-  "lastModified": "2026-01-30T09:09:02.895Z",
-  "sha1": "49203d30f2206cfc3ca9f7d2c72715b4a966aaab",
+  "sha1": "2649b953164e3b025c3d73d7b544f30c5ab67a8b",
   "tests": [
     {
       "id": "2e9661be655a029-bbe4bc87d5491d8",
       "title": "Workflows Extensions - Custom Step Definitions Approval should validate that all registered custom step definitions are approved by workflows-eng team",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
-        "@ess",
-        "@svlSearch",
-        "@svlSecurity",
-        "@svlOblt",
-        "@svlWorkplaceAI"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-workplaceai",
+        "@cloud-serverless-workplaceai"
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_extensions/test/scout/api/tests/step_definitions_approval.spec.ts",
-        "line": 25,
+        "line": 35,
+        "column": 12
+      }
+    },
+    {
+      "id": "e9644e578f7a84b-b113663c1fae506",
+      "title": "Workflows Extensions - Event-Driven Trigger Definitions Approval should validate that all registered event-driven trigger definitions are approved by workflows-eng team",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-workplaceai",
+        "@cloud-serverless-workplaceai"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_extensions/test/scout/api/tests/trigger_definitions_approval.spec.ts",
+        "line": 34,
         "column": 12
       }
     }

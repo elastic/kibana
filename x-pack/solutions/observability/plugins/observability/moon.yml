@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/observability-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/observability-ui'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/observability-plugin'
+  title: '@kbn/observability-plugin'
   description: Moon project for @kbn/observability-plugin
   channel: ''
   owner: '@elastic/observability-ui'
-  metadata:
-    sourceRoot: x-pack/solutions/observability/plugins/observability
+  sourceRoot: x-pack/solutions/observability/plugins/observability
 dependsOn:
   - '@kbn/rule-data-utils'
   - '@kbn/triggers-actions-ui-plugin'
@@ -133,6 +132,7 @@ dependsOn:
   - '@kbn/esql'
   - '@kbn/synthtrace-client'
   - '@kbn/scout-oblt'
+  - '@kbn/scout-synthtrace'
   - '@kbn/licensing-types'
   - '@kbn/deeplinks-management'
   - '@kbn/content-management-content-editor'
@@ -141,7 +141,6 @@ dependsOn:
   - '@kbn/core-http-browser-mocks'
   - '@kbn/discover-utils'
   - '@kbn/deeplinks-management'
-  - '@kbn/observability-nav-icons'
   - '@kbn/react-query'
   - '@kbn/content-management-utils'
   - '@kbn/maintenance-windows-plugin'
@@ -154,6 +153,11 @@ dependsOn:
   - '@kbn/kql'
   - '@kbn/shared-ux-utility'
   - '@kbn/lens-common'
+  - '@kbn/apm-types'
+  - '@kbn/apm-types-shared'
+  - '@kbn/cps'
+  - '@kbn/expressions-plugin'
+  - '@kbn/ingest-hub-plugin'
 tags:
   - plugin
   - prod
@@ -168,16 +172,6 @@ fileGroups:
     - server/**/*
     - test/scout/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

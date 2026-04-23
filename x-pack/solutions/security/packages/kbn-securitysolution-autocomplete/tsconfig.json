@@ -16,6 +16,7 @@
     "@kbn/securitysolution-list-hooks",
     "@kbn/securitysolution-list-utils",
     "@kbn/securitysolution-utils",
+    "@kbn/kql",
     "@kbn/kibana-react-plugin",
   ],
   "exclude": [

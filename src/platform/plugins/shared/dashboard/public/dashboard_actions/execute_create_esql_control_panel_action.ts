@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { addPanelMenuTrigger } from '@kbn/ui-actions-plugin/public';
+import { triggers, type ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { ACTION_CREATE_ESQL_CONTROL } from '@kbn/controls-constants';
+import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { coreServices, uiActionsService } from '../services/kibana_services';
 import type { DashboardApi } from '../dashboard_api/types';
 
@@ -19,7 +19,7 @@ export async function executeCreateESQLControlPanelAction(dashboardApi: Dashboar
     const createControlPanelAction = await uiActionsService.getAction(ACTION_CREATE_ESQL_CONTROL);
     createControlPanelAction.execute({
       embeddable: dashboardApi,
-      trigger: addPanelMenuTrigger,
+      trigger: triggers[ADD_PANEL_TRIGGER],
       isPinned: true,
     } as ActionExecutionContext);
   } catch (error) {

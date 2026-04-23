@@ -451,6 +451,67 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
     ],
   },
 
+  redact: {
+    name: i18n.translate('xpack.streamlang.actionMetadata.redact.name', {
+      defaultMessage: 'Redact',
+    }),
+    description: i18n.translate('xpack.streamlang.actionMetadata.redact.description', {
+      defaultMessage:
+        'Mask sensitive data in a field using Grok patterns to identify and replace PII',
+    }),
+    usage: i18n.translate('xpack.streamlang.actionMetadata.redact.usage', {
+      defaultMessage:
+        'Provide the source field and Grok patterns to match sensitive data. Matched content is replaced with the semantic name wrapped in configurable prefix/suffix delimiters.',
+    }),
+    examples: [
+      {
+        description: i18n.translate('xpack.streamlang.actionMetadata.redact.examples.ip', {
+          defaultMessage: 'Redact IP addresses',
+        }),
+        yaml: `- action: redact
+  from: message
+  patterns:
+    - "%{IP:client_ip}"`,
+      },
+      {
+        description: i18n.translate('xpack.streamlang.actionMetadata.redact.examples.multiple', {
+          defaultMessage: 'Redact multiple sensitive data types with custom delimiters',
+        }),
+        yaml: `- action: redact
+  from: message
+  patterns:
+    - "%{IP:ip_address}"
+    - "%{EMAILADDRESS:email}"
+    - "%{MAC:mac_address}"
+  prefix: "["
+  suffix: "]"`,
+      },
+      {
+        description: i18n.translate('xpack.streamlang.actionMetadata.redact.examples.custom', {
+          defaultMessage: 'Redact with custom pattern definitions',
+        }),
+        yaml: `- action: redact
+  from: message
+  patterns:
+    - "%{CREDIT_CARD:cc_number}"
+  pattern_definitions:
+    CREDIT_CARD: "\\\\b(?:\\\\d{4}[- ]?){3}\\\\d{4}\\\\b"`,
+      },
+    ],
+    tips: [
+      i18n.translate('xpack.streamlang.actionMetadata.redact.tips.grokPatterns', {
+        defaultMessage: 'Common patterns include IP, EMAILADDRESS, MAC, UUID, and URI',
+      }),
+      i18n.translate('xpack.streamlang.actionMetadata.redact.tips.semantic', {
+        defaultMessage:
+          'The semantic name from the pattern (the part after the colon) becomes the replacement text',
+      }),
+      i18n.translate('xpack.streamlang.actionMetadata.redact.tips.prefix', {
+        defaultMessage: 'Customize prefix and suffix to change how redacted values appear',
+      }),
+    ],
+  },
+
   math: {
     name: i18n.translate('xpack.streamlang.actionMetadata.math.name', {
       defaultMessage: 'Math',
@@ -606,6 +667,88 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
     ],
   },
 
+  split: {
+    name: i18n.translate('xpack.streamlang.actionMetadata.split.name', {
+      defaultMessage: 'Split',
+    }),
+    description: i18n.translate('xpack.streamlang.actionMetadata.split.description', {
+      defaultMessage: 'Split a string field into an array using a separator',
+    }),
+    usage: i18n.translate('xpack.streamlang.actionMetadata.split.usage', {
+      defaultMessage:
+        'Provide `from` for the source field, `separator` for the delimiter pattern, and optionally `to` for a target field. The separator supports regex patterns in Ingest Pipelines.',
+    }),
+    examples: [
+      {
+        description: i18n.translate('xpack.streamlang.actionMetadata.split.examples.simple', {
+          defaultMessage: 'Split a comma-separated string into an array',
+        }),
+        yaml: `- action: split
+  from: tags
+  separator: ","`,
+      },
+      {
+        description: i18n.translate('xpack.streamlang.actionMetadata.split.examples.target', {
+          defaultMessage: 'Split into a new field while preserving the original',
+        }),
+        yaml: `- action: split
+  from: tags
+  separator: ","
+  to: tags_array`,
+      },
+    ],
+    tips: [
+      i18n.translate('xpack.streamlang.actionMetadata.split.tips.regex', {
+        defaultMessage:
+          'In Ingest Pipelines, the separator supports regex patterns. In ES|QL, only single byte delimiters are supported.',
+      }),
+      i18n.translate('xpack.streamlang.actionMetadata.split.tips.preserveTrailing', {
+        defaultMessage:
+          'Use preserve_trailing: true to keep empty trailing elements in the result array (Ingest Pipeline only)',
+      }),
+    ],
+  },
+
+  sort: {
+    name: i18n.translate('xpack.streamlang.actionMetadata.sort.name', {
+      defaultMessage: 'Sort',
+    }),
+    description: i18n.translate('xpack.streamlang.actionMetadata.sort.description', {
+      defaultMessage: 'Sort the elements of an array field in ascending or descending order',
+    }),
+    usage: i18n.translate('xpack.streamlang.actionMetadata.sort.usage', {
+      defaultMessage:
+        'Provide `from` for the array field to sort, optionally `to` for a target field, and `order` for sort direction ("asc" or "desc", defaults to "asc").',
+    }),
+    examples: [
+      {
+        description: i18n.translate('xpack.streamlang.actionMetadata.sort.examples.simple', {
+          defaultMessage: 'Sort an array in ascending order (default)',
+        }),
+        yaml: `- action: sort
+  from: tags`,
+      },
+      {
+        description: i18n.translate('xpack.streamlang.actionMetadata.sort.examples.descending', {
+          defaultMessage: 'Sort an array in descending order into a new field',
+        }),
+        yaml: `- action: sort
+  from: values
+  to: sorted_values
+  order: desc`,
+      },
+    ],
+    tips: [
+      i18n.translate('xpack.streamlang.actionMetadata.sort.tips.types', {
+        defaultMessage:
+          'Homogeneous arrays of numbers are sorted numerically. Arrays of strings or mixed types are sorted lexicographically.',
+      }),
+      i18n.translate('xpack.streamlang.actionMetadata.sort.tips.esql', {
+        defaultMessage: 'In ES|QL, uses the MV_SORT function which sorts multivalued fields.',
+      }),
+    ],
+  },
+
   concat: {
     name: i18n.translate('xpack.streamlang.actionMetadata.concat.name', {
       defaultMessage: 'Concat',
@@ -632,6 +775,109 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
         value: last_name
     to: full_name`,
       },
+    ],
+  },
+
+  network_direction: {
+    name: i18n.translate('xpack.streamlang.actionMetadata.networkDirection.name', {
+      defaultMessage: 'Network Direction',
+    }),
+    description: i18n.translate('xpack.streamlang.actionMetadata.networkDirection.description', {
+      defaultMessage:
+        'Calculates the network direction given a source IP address, destination IP address, and a list of internal networks.',
+    }),
+    usage: i18n.translate('xpack.streamlang.actionMetadata.networkDirection.usage', {
+      defaultMessage:
+        'Provide a `source_ip` and `destination_ip` field to specify the source and destination IP addresses. Use `internal_networks` or `internal_networks_field` to specify the list of internal networks.',
+    }),
+    examples: [
+      {
+        description: i18n.translate(
+          'xpack.streamlang.actionMetadata.networkDirection.examples.simple',
+          {
+            defaultMessage:
+              'Calculate the network direction from a source IP address to a destination IP address',
+          }
+        ),
+        yaml: `action: network_direction
+    source_ip: attributes.source_ip
+    destination_ip: attributes.destination_ip
+    internal_networks:
+      - private`,
+      },
+    ],
+  },
+
+  json_extract: {
+    name: i18n.translate('xpack.streamlang.actionMetadata.jsonExtract.name', {
+      defaultMessage: 'JSON Extract',
+    }),
+    description: i18n.translate('xpack.streamlang.actionMetadata.jsonExtract.description', {
+      defaultMessage: 'Extract values from JSON strings using JSONPath-like selectors',
+    }),
+    usage: i18n.translate('xpack.streamlang.actionMetadata.jsonExtract.usage', {
+      defaultMessage:
+        'Provide a `field` containing the JSON string and an array of `extractions` with `selector` (JSONPath-like path) and `target_field` pairs to extract specific values.',
+    }),
+    examples: [
+      {
+        description: i18n.translate('xpack.streamlang.actionMetadata.jsonExtract.examples.simple', {
+          defaultMessage: 'Extract a simple top-level field',
+        }),
+        yaml: `- action: json_extract
+  field: message
+  extractions:
+    - selector: user_id
+      target_field: user.id`,
+      },
+      {
+        description: i18n.translate('xpack.streamlang.actionMetadata.jsonExtract.examples.nested', {
+          defaultMessage: 'Extract nested values using dot notation',
+        }),
+        yaml: `- action: json_extract
+  field: message
+  extractions:
+    - selector: "$.metadata.client.ip"
+      target_field: client_ip
+    - selector: "items[0].name"
+      target_field: first_item_name`,
+      },
+    ],
+    tips: [
+      i18n.translate('xpack.streamlang.actionMetadata.jsonExtract.tips.selector', {
+        defaultMessage:
+          "Selectors support dot notation (user.name), bracket notation (['user']['name']), and array indices (items[0])",
+      }),
+      i18n.translate('xpack.streamlang.actionMetadata.jsonExtract.tips.root', {
+        defaultMessage: 'The $ root selector is optional and can be omitted',
+      }),
+    ],
+  },
+
+  enrich: {
+    name: i18n.translate('xpack.streamlang.actionMetadata.enrich.name', {
+      defaultMessage: 'Enrich',
+    }),
+    description: i18n.translate('xpack.streamlang.actionMetadata.enrich.description', {
+      defaultMessage: 'Enrich a field with a policy',
+    }),
+    usage: i18n.translate('xpack.streamlang.actionMetadata.enrich.usage', {
+      defaultMessage: 'Provide a `policy_name` to enrich data with the policy.',
+    }),
+    examples: [
+      {
+        description: i18n.translate('xpack.streamlang.actionMetadata.enrich.examples.simple', {
+          defaultMessage: 'Enrich data with a policy',
+        }),
+        yaml: `- action: enrich
+  policy_name: my_policy
+  to: my_enriched_field`,
+      },
+    ],
+    tips: [
+      i18n.translate('xpack.streamlang.actionMetadata.enrich.tips.ignoreMissing', {
+        defaultMessage: 'Ignore missing fields by setting ignore_missing to true',
+      }),
     ],
   },
 

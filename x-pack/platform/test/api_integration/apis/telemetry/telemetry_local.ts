@@ -215,5 +215,33 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(expected.every((m) => actual.includes(m))).to.be.ok();
     });
+
+    it('should include core saved objects indices usage stats', () => {
+      const indices = stats.stack_stats.kibana.plugins.core.services.savedObjects.indices;
+
+      expect(indices).to.be.an('array');
+      expect(indices.length).to.be.greaterThan(0);
+
+      const kibanaIndex = indices.find(({ alias }: { alias: string }) => alias === '.kibana');
+      const taskManagerIndex = indices.find(
+        ({ alias }: { alias: string }) => alias === '.kibana_task_manager'
+      );
+
+      expect(kibanaIndex).to.be.an('object');
+      expect(taskManagerIndex).to.be.an('object');
+
+      [kibanaIndex, taskManagerIndex].forEach((index) => {
+        expect(index.docsCount).to.be.a('number');
+        expect(index.docsCount).to.be.greaterThan(-1);
+        expect(index.docsDeleted).to.be.a('number');
+        expect(index.docsDeleted).to.be.greaterThan(-1);
+        expect(index.storeSizeBytes).to.be.a('number');
+        expect(index.storeSizeBytes).to.be.greaterThan(-1);
+        expect(index.primaryStoreSizeBytes).to.be.a('number');
+        expect(index.primaryStoreSizeBytes).to.be.greaterThan(-1);
+        expect(index.savedObjectsDocsCount).to.be.a('number');
+        expect(index.savedObjectsDocsCount).to.be.greaterThan(-1);
+      });
+    });
   });
 }

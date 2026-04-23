@@ -122,7 +122,7 @@ export const ItemFilterPopover: FC<ItemFilterPopoverProps> = ({
           onClick={onItemSelectionButtonClick}
           disabled={disabled}
           size="s"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           iconSize="s"
           color="text"
@@ -220,7 +220,6 @@ export const ItemFilterPopover: FC<ItemFilterPopoverProps> = ({
               onClick={() => {
                 onChange(skippedItems);
                 setItemSearchText('');
-                setIsItemSelectionPopoverOpen(false);
                 closePopover();
               }}
               disabled={disabledApplyButton || selectedItemCount < selectedItemLimit || !isTouched}

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID } from '../../common';
+import { observabilityAttachmentDataSchema } from './observability_attachment_data_schema';
 
-const aiInsightAttachmentDataSchema = z.object({
+const aiInsightAttachmentDataSchema = observabilityAttachmentDataSchema.extend({
   summary: z.string(),
   context: z.string(),
-  attachmentLabel: z.string().optional(),
 });
 
 type AiInsightAttachmentData = z.infer<typeof aiInsightAttachmentDataSchema>;

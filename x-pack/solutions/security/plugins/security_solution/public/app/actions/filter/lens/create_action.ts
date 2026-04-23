@@ -68,7 +68,7 @@ export const createFilterLensAction = ({
   return createAction<CellValueContext>({
     id,
     order,
-    getIconType: () => (negate ? 'minusInCircle' : 'plusInCircle'),
+    getIconType: () => (negate ? 'minusCircle' : 'plusCircle'),
     getDisplayName: () =>
       negate
         ? i18n.translate('xpack.securitySolution.actions.filterOutTimeline', {

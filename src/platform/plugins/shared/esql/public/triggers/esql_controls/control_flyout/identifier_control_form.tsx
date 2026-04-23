@@ -15,8 +15,10 @@ import { isEqual } from 'lodash';
 import { EuiComboBox, EuiFormRow, type EuiComboBoxOptionOption } from '@elastic/eui';
 import type { monaco } from '@kbn/monaco';
 import type { ISearchGeneric } from '@kbn/search-types';
-import type { ESQLControlVariable } from '@kbn/esql-types';
-import { ESQLVariableType, EsqlControlType, type ESQLControlState } from '@kbn/esql-types';
+import type { ESQLControlVariable, StaticESQLControl } from '@kbn/esql-types';
+import { ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
+import { DEFAULT_ESQL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import { aggFunctionDefinitions } from '@kbn/esql-language/src/commands/definitions/generated/aggregation_functions';
 import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
 import { ControlLabel } from './shared_form_components';
@@ -28,9 +30,9 @@ interface IdentifierControlFormProps {
   variableName: string;
   queryString: string;
   esqlVariables: ESQLControlVariable[];
-  setControlState: (state: ESQLControlState) => void;
+  setControlState: (state: OptionsListESQLControlState) => void;
   cursorPosition?: monaco.Position;
-  initialState?: ESQLControlState;
+  initialState?: OptionsListESQLControlState;
   currentApp?: string;
 }
 
@@ -46,21 +48,20 @@ export function IdentifierControlForm({
   search,
 }: IdentifierControlFormProps) {
   const isMounted = useMountedState();
+  const { available_options: initialAvailableOptions } = { available_options: [], ...initialState };
 
   const [availableIdentifiersOptions, setAvailableIdentifiersOptions] = useState<
     EuiComboBoxOptionOption[]
   >([]);
 
   const [selectedIdentifiers, setSelectedIdentifiers] = useState<EuiComboBoxOptionOption[]>(
-    initialState?.availableOptions
-      ? initialState.availableOptions.map((option) => {
-          return {
-            label: option,
-            key: option,
-            'data-test-subj': option,
-          };
-        })
-      : []
+    initialAvailableOptions.map((option) => {
+      return {
+        label: option,
+        key: option,
+        'data-test-subj': option,
+      };
+    })
   );
   const [label, setLabel] = useState(initialState?.title ?? '');
 
@@ -149,13 +150,13 @@ export function IdentifierControlForm({
     // removes the double question mark from the variable name
     const variableNameWithoutQuestionmark = variableName.replace(/^\?+/, '');
     const state = {
-      availableOptions,
-      selectedOptions: [availableOptions[0]],
+      ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
+      available_options: availableOptions,
+      selected_options: [availableOptions[0]],
       title: label || variableNameWithoutQuestionmark,
-      variableName: variableNameWithoutQuestionmark,
-      variableType,
-      esqlQuery: queryString,
-      controlType: EsqlControlType.STATIC_VALUES,
+      variable_name: variableNameWithoutQuestionmark,
+      variable_type: variableType,
+      control_type: EsqlControlType.STATIC_VALUES as StaticESQLControl['control_type'],
     };
     if (!isEqual(state, initialState)) {
       setControlState(state);

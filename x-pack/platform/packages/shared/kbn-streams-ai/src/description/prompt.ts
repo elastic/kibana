@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { createPrompt } from '@kbn/inference-common';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import descriptionSystemPrompt from './system_prompt.text';
 import descriptionUserPrompt from './user_prompt.text';
 

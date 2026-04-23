@@ -13,6 +13,7 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "allow_reading_invalid_state": true,
+        "api_key_type": "es",
         "auto_calculate_default_ech_capacity": false,
         "claim_strategy": "mget",
         "discovery": Object {
@@ -23,6 +24,7 @@ describe('config validation', () => {
           "monitor": true,
           "warn_threshold": 5000,
         },
+        "grant_uiam_api_keys": false,
         "invalidate_api_key_task": Object {
           "interval": "5m",
           "removalDelay": "1h",
@@ -75,6 +77,7 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "allow_reading_invalid_state": true,
+        "api_key_type": "es",
         "auto_calculate_default_ech_capacity": false,
         "claim_strategy": "mget",
         "discovery": Object {
@@ -85,6 +88,7 @@ describe('config validation', () => {
           "monitor": true,
           "warn_threshold": 5000,
         },
+        "grant_uiam_api_keys": false,
         "invalidate_api_key_task": Object {
           "interval": "5m",
           "removalDelay": "1h",
@@ -135,6 +139,7 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "allow_reading_invalid_state": true,
+        "api_key_type": "es",
         "auto_calculate_default_ech_capacity": false,
         "claim_strategy": "mget",
         "discovery": Object {
@@ -145,6 +150,7 @@ describe('config validation', () => {
           "monitor": true,
           "warn_threshold": 5000,
         },
+        "grant_uiam_api_keys": false,
         "invalidate_api_key_task": Object {
           "interval": "5m",
           "removalDelay": "1h",

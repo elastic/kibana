@@ -41,6 +41,7 @@
       "{index}/_msearch"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-msearch",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-msearch",
     "availability": {
       "stack": true,
       "serverless": true

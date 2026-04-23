@@ -12,10 +12,17 @@ import { useShallowEqualSelector } from '../../hooks/use_selector';
 import { licenseService } from '../../hooks/use_license';
 import type { ActionsComponentProps } from './actions';
 import { Actions } from './actions';
-import { useIsInvestigateInResolverActionEnabled } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
+import { useIsAnalyzerEnabled } from '../../../detections/hooks/use_is_analyzer_enabled';
+import { AlertContextMenu } from '../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
 
+jest.mock(
+  '../../../detections/components/alerts_table/timeline_actions/alert_context_menu',
+  () => ({
+    AlertContextMenu: jest.fn(() => null),
+  })
+);
 jest.mock('../../hooks/use_selector');
-jest.mock('../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver');
+jest.mock('../../../detections/hooks/use_is_analyzer_enabled');
 jest.mock('../../hooks/use_license', () => {
   const licenseServiceInstance = {
     isPlatinumPlus: jest.fn(),
@@ -36,8 +43,10 @@ const defaultProps: ActionsComponentProps = {
   disablePinAction: false,
   disableTimelineAction: false,
   ecsData: mockTimelineData[0].ecs,
+  eventData: undefined,
   eventId: 'abc',
   eventIdToNoteIds: {},
+  hit: { id: 'id', raw: {}, flattened: {} },
   isEventViewer: false,
   onEventDetailsPanelOpened: jest.fn(),
   onRuleChange: jest.fn(),
@@ -200,9 +209,49 @@ describe('Actions', () => {
   });
 
   describe('alert context menu', () => {
+    describe('more actions button', () => {
+      beforeEach(() => {
+        jest.mocked(AlertContextMenu).mockClear();
+      });
+
+      it('should not be disabled when document is local', () => {
+        render(
+          <TestProviders>
+            <Actions {...defaultProps} />
+          </TestProviders>
+        );
+
+        expect(jest.mocked(AlertContextMenu)).toHaveBeenCalledWith(
+          expect.objectContaining({ disabled: false }),
+          expect.anything()
+        );
+      });
+
+      it('should be disabled when document is remote', () => {
+        const props = {
+          ...defaultProps,
+          ecsData: {
+            ...mockTimelineData[0].ecs,
+            _index: 'remote_cluster:.ds-logs-endpoint.events.process-default',
+          },
+        };
+
+        render(
+          <TestProviders>
+            <Actions {...props} />
+          </TestProviders>
+        );
+
+        expect(jest.mocked(AlertContextMenu)).toHaveBeenCalledWith(
+          expect.objectContaining({ disabled: true }),
+          expect.anything()
+        );
+      });
+    });
+
     describe('analyzer icon', () => {
       it('should render', () => {
-        (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(true);
+        (useIsAnalyzerEnabled as jest.Mock).mockReturnValue(true);
 
         const { getByTestId } = render(
           <TestProviders>
@@ -214,7 +263,7 @@ describe('Actions', () => {
       });
 
       test('should not show analyzer icon', () => {
-        (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(false);
+        (useIsAnalyzerEnabled as jest.Mock).mockReturnValue(false);
 
         const { queryByTestId } = render(
           <TestProviders>

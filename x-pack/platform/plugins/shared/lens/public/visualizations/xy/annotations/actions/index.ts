@@ -18,7 +18,7 @@ import type {
   LensStartServices as StartServices,
   StateSetter,
 } from '@kbn/lens-common';
-import type { XYState, XYAnnotationLayerConfig } from '../../types';
+import type { XYVisualizationState, XYAnnotationLayerConfig } from '../../types';
 import { getUnlinkLayerAction } from './unlink_action';
 import { getSaveLayerAction } from './save_action';
 import { isByReferenceAnnotationsLayer } from '../../visualization_helpers';
@@ -36,9 +36,9 @@ export const createAnnotationActions = ({
   dataViews,
   startServices,
 }: {
-  state: XYState;
+  state: XYVisualizationState;
   layer: XYAnnotationLayerConfig;
-  setState: StateSetter<XYState, unknown>;
+  setState: StateSetter<XYVisualizationState, unknown>;
   registerLibraryAnnotationGroup: RegisterLibraryAnnotationGroupFunction;
   core: CoreStart;
   isSaveable?: boolean;
@@ -53,7 +53,9 @@ export const createAnnotationActions = ({
     core.application.capabilities.visualize_v2.save && isSaveable
   );
 
-  if (savingToLibraryPermitted) {
+  // Linked annotations are auto-saved to library on Apply/Save, so the
+  // explicit "Save to library" action is only offered for by-value layers.
+  if (savingToLibraryPermitted && !isByReferenceAnnotationsLayer(layer)) {
     actions.push(
       getSaveLayerAction({
         state,

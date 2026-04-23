@@ -19,7 +19,7 @@ import type {
   DataTableRecord,
   ShouldShowFieldInTableHandler,
 } from '@kbn/discover-utils/types';
-import { formatFieldValue } from '@kbn/discover-utils';
+import { formatFieldValueReact } from '@kbn/discover-utils';
 import { UnifiedDataTableContext } from '../table_context';
 import type { CustomCellRenderer } from '../types';
 import { SourceDocument } from '../components/source_document';
@@ -107,6 +107,7 @@ export const getRenderCellValueFn = ({
             fieldFormats={fieldFormats}
             closePopover={closePopover}
             isCompressed={isCompressed}
+            columnsMeta={columnsMeta}
           />
         </span>
       );
@@ -129,10 +130,15 @@ export const getRenderCellValueFn = ({
         useTopLevelObjectColumns,
         fieldFormats,
         closePopover,
+        isPlainRecord,
       });
     }
 
-    if (field?.type === '_source' || useTopLevelObjectColumns) {
+    if (
+      field?.type === '_source' ||
+      useTopLevelObjectColumns ||
+      (isPlainRecord && columnId === '_source')
+    ) {
       return (
         <SourceDocument
           useTopLevelObjectColumns={useTopLevelObjectColumns}
@@ -144,19 +150,21 @@ export const getRenderCellValueFn = ({
           maxEntries={maxEntries}
           isPlainRecord={isPlainRecord}
           isCompressed={isCompressed}
+          columnsMeta={columnsMeta}
         />
       );
     }
 
     return (
-      <span
-        className={CELL_CLASS}
-        // formatFieldValue guarantees sanitized values
-        // eslint-disable-next-line react/no-danger
-        dangerouslySetInnerHTML={{
-          __html: formatFieldValue(row.flattened[columnId], row.raw, fieldFormats, dataView, field),
-        }}
-      />
+      <span className={CELL_CLASS}>
+        {formatFieldValueReact({
+          value: row.flattened[columnId],
+          hit: row.raw,
+          fieldFormats,
+          dataView,
+          field,
+        })}
+      </span>
     );
   };
 
@@ -180,6 +188,7 @@ function renderPopoverContent({
   useTopLevelObjectColumns,
   fieldFormats,
   closePopover,
+  isPlainRecord,
 }: {
   row: DataTableRecord;
   field: DataViewField | undefined;
@@ -188,6 +197,7 @@ function renderPopoverContent({
   useTopLevelObjectColumns: boolean;
   fieldFormats: FieldFormatsStart;
   closePopover: () => void;
+  isPlainRecord?: boolean;
 }) {
   const closeButton = (
     <EuiButtonIcon
@@ -201,7 +211,11 @@ function renderPopoverContent({
       onClick={closePopover}
     />
   );
-  if (useTopLevelObjectColumns || field?.type === '_source') {
+  if (
+    useTopLevelObjectColumns ||
+    field?.type === '_source' ||
+    (isPlainRecord && columnId === '_source')
+  ) {
     return (
       <SourcePopoverContent
         row={row}
@@ -221,19 +235,15 @@ function renderPopoverContent({
     >
       <EuiFlexItem>
         <DataTablePopoverCellValue>
-          <span
-            // formatFieldValue guarantees sanitized values
-            // eslint-disable-next-line react/no-danger
-            dangerouslySetInnerHTML={{
-              __html: formatFieldValue(
-                row.flattened[columnId],
-                row.raw,
-                fieldFormats,
-                dataView,
-                field
-              ),
-            }}
-          />
+          <span>
+            {formatFieldValueReact({
+              value: row.flattened[columnId],
+              hit: row.raw,
+              fieldFormats,
+              dataView,
+              field,
+            })}
+          </span>
         </DataTablePopoverCellValue>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>{closeButton}</EuiFlexItem>

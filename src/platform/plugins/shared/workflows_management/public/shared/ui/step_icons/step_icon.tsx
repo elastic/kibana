@@ -8,13 +8,17 @@
  */
 
 import type { EuiIconProps, IconType } from '@elastic/eui';
-import { EuiBeacon, EuiIcon, EuiLoadingSpinner, EuiToken, useEuiTheme } from '@elastic/eui';
+import { EuiIcon, EuiLoadingSpinner, EuiToken, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { Suspense } from 'react';
 import type { TypeRegistry } from '@kbn/alerts-ui-shared/lib';
 import type { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { ExecutionStatus } from '@kbn/workflows';
-import { getStepIconType } from './get_step_icon_type';
+import type {
+  PublicStepDefinition,
+  WorkflowsExtensionsPublicPluginStart,
+} from '@kbn/workflows-extensions/public';
+import { getStepIconType, getTriggerTypeIconType } from './get_step_icon_type';
 import { useKibana } from '../../../hooks/use_kibana';
 import { getExecutionStatusColors, getExecutionStatusIcon } from '../status_badge';
 
@@ -40,31 +44,70 @@ export const StepIcon = React.memo(
       return <EuiLoadingSpinner size="m" />;
     }
     if (executionStatus === ExecutionStatus.WAITING_FOR_INPUT) {
-      return <EuiBeacon size={14} color="warning" />;
-    }
-
-    const actionTypeIcon = getActionTypeIcon(stepType, actionTypeRegistry);
-    if (actionTypeIcon) {
       return (
-        <Suspense fallback={<EuiLoadingSpinner size="s" />}>
-          <EuiIcon type={actionTypeIcon} size="m" />
-        </Suspense>
+        <EuiIcon
+          type="hourglass"
+          size="m"
+          color={getExecutionStatusColors(euiTheme, executionStatus).color}
+          aria-hidden={true}
+        />
       );
     }
 
-    const stepDefinition = workflowsExtensions.getStepDefinition(stepType);
-    if (stepDefinition?.icon) {
+    let iconType: IconType;
+    if (stepType.startsWith('trigger_')) {
+      iconType = getTriggerTypeIconType(stepType);
+    } else {
+      const stepDefinition =
+        workflowsExtensions.getStepDefinition(stepType) ??
+        findStepDefinitionByBaseType(stepType, workflowsExtensions);
+      if (stepDefinition?.icon) {
+        return (
+          <Suspense fallback={<EuiLoadingSpinner size="s" />}>
+            <EuiIcon type={stepDefinition.icon} size="m" {...rest} aria-hidden={true} />
+          </Suspense>
+        );
+      }
+
+      const actionTypeIcon = getActionTypeIcon(stepType, actionTypeRegistry);
+      if (actionTypeIcon) {
+        return (
+          <Suspense fallback={<EuiLoadingSpinner size="s" />}>
+            <EuiIcon type={actionTypeIcon} size="m" {...rest} aria-hidden={true} />
+          </Suspense>
+        );
+      }
+
+      iconType = getStepIconType(stepType);
+    }
+
+    if (typeof iconType === 'string' && iconType.startsWith('data:')) {
+      const statusColor = shouldApplyColorToIcon
+        ? getExecutionStatusColors(euiTheme, executionStatus).color
+        : undefined;
       return (
-        <Suspense fallback={<EuiLoadingSpinner size="s" />}>
-          <EuiIcon type={stepDefinition.icon} size="m" />
-        </Suspense>
+        <span
+          css={css`
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            mask-image: url('${iconType}');
+            mask-size: contain;
+            mask-repeat: no-repeat;
+            mask-position: center;
+            background-color: ${statusColor ?? euiTheme.colors.textParagraph};
+          `}
+          title={rest.title}
+          onClick={onClick}
+          aria-hidden={true}
+        />
       );
     }
 
-    const iconType = getStepIconType(stepType);
-    if (iconType.startsWith('token')) {
+    if (typeof iconType === 'string' && iconType.startsWith('token')) {
       return (
         <EuiToken
+          title={rest.title}
           iconType={iconType}
           size="s"
           color={
@@ -100,6 +143,7 @@ export const StepIcon = React.memo(
         }
         onClick={onClick}
         {...rest}
+        aria-hidden={true}
       />
     );
   }
@@ -118,4 +162,15 @@ function getActionTypeIcon(
     return actionType.iconClass;
   }
   return undefined;
+}
+
+// List rows aggregate by base type (e.g. `cases` from `cases.createCase`), but extension steps
+// register full ids (e.g. `cases.createCase`). Fall back to the first registered step whose id
+// starts with `${baseType}.` so the list inherits the extension icon chosen for that family.
+function findStepDefinitionByBaseType(
+  baseType: string,
+  workflowsExtensions: WorkflowsExtensionsPublicPluginStart
+): PublicStepDefinition | undefined {
+  const prefix = `${baseType}.`;
+  return workflowsExtensions.getAllStepDefinitions().find((def) => def.id.startsWith(prefix));
 }

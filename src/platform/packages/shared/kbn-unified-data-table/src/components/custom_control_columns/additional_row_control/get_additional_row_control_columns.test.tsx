@@ -9,7 +9,7 @@
 
 import { getAdditionalRowControlColumns } from './get_additional_row_control_columns';
 import { mockRowAdditionalLeadingControls } from '../../../../__mocks__/external_control_columns';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { UnifiedDataTableContext } from '../../../table_context';
 import { dataTableContextComplexMock } from '../../../../__mocks__/table_context';
@@ -85,8 +85,11 @@ describe('getAdditionalRowControlColumns', () => {
 
     // The other elements are hidden under the menu button
     await user.click(screen.getByTestId('unifiedDataTable_additionalRowControl_actionsMenu'));
-    expect(screen.getByTestId(mocks[1].id)).toBeVisible();
-    expect(screen.getByTestId(mocks[2].id)).toBeVisible();
+
+    await waitFor(() => {
+      expect(screen.getByTestId(mocks[1].id)).toBeVisible();
+      expect(screen.getByTestId(mocks[2].id)).toBeVisible();
+    });
   });
 
   it('should calculate total width correctly for 2 controls', () => {

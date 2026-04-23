@@ -52,7 +52,6 @@ import { canRedirectRequest } from '../authentication';
 import type { OnlineStatusRetryScheduler } from '../elasticsearch';
 import { createRedirectHtmlPage } from '../lib/html_page_utils';
 import type { SpacesService } from '../plugin';
-import type { UiamServicePublic } from '../uiam';
 
 export { Actions } from '@kbn/security-authorization-core';
 
@@ -67,7 +66,6 @@ interface AuthorizationServiceSetupParams {
   kibanaIndexName: string;
 
   getSpacesService(): SpacesService | undefined;
-  getUiamService(): UiamServicePublic | undefined;
 
   getCurrentUser(request: KibanaRequest): AuthenticatedUser | null;
 
@@ -107,7 +105,6 @@ export class AuthorizationService {
     features,
     kibanaIndexName,
     getSpacesService,
-    getUiamService,
     getCurrentUser,
     customBranding,
   }: AuthorizationServiceSetupParams): AuthorizationServiceSetupInternal {
@@ -121,7 +118,6 @@ export class AuthorizationService {
     const { checkPrivilegesWithRequest, checkUserProfilesPrivileges } = checkPrivilegesFactory(
       actions,
       getClusterClient,
-      getUiamService,
       this.applicationName
     );
 
@@ -187,13 +183,6 @@ export class AuthorizationService {
 
     http.registerOnPreResponse(async (request, preResponse, toolkit) => {
       if (preResponse.statusCode === 403) {
-        const user = getCurrentUser(request);
-        if (user?.roles.length === 0) {
-          this.logger.warn(
-            `A user authenticated with the "${user.authentication_realm.name}" (${user.authentication_realm.type}) realm doesn't have any roles and isn't authorized to perform request.`
-          );
-        }
-
         if (canRedirectRequest(request)) {
           const next = `${http.basePath.get(request)}${request.url.pathname}${request.url.search}`;
 

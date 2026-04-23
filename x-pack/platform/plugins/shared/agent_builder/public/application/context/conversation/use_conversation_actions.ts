@@ -15,8 +15,15 @@ import type {
   ToolCallProgress,
   ToolCallStep,
   Conversation,
+  CompactionStep,
+  BackgroundAgentCompleteStep,
 } from '@kbn/agent-builder-common';
-import { isToolCallStep, ConversationRoundStatus } from '@kbn/agent-builder-common';
+import {
+  isToolCallStep,
+  isCompactionStep,
+  ConversationRoundStatus,
+  ConversationRoundStepType,
+} from '@kbn/agent-builder-common';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
@@ -41,6 +48,7 @@ export interface ConversationActions {
     attachments?: AttachmentInput[];
   }) => void;
   removeOptimisticRound: () => void;
+  clearLastRoundResponse: () => void;
   setAgentId: (agentId: string) => void;
   addReasoningStep: ({ step }: { step: ReasoningStep }) => void;
   addToolCall: ({ step }: { step: ToolCallStep }) => void;
@@ -61,14 +69,23 @@ export interface ConversationActions {
   setAssistantMessage: ({ assistantMessage }: { assistantMessage: string }) => void;
   addAssistantMessageChunk: ({ messageChunk }: { messageChunk: string }) => void;
   setTimeToFirstToken: ({ timeToFirstToken }: { timeToFirstToken: number }) => void;
-  setPendingPrompt: ({ prompt }: { prompt: PromptRequest }) => void;
-  clearPendingPrompt: () => void;
+  addPendingPrompt: ({ prompt }: { prompt: PromptRequest }) => void;
+  clearPendingPrompts: () => void;
   onConversationCreated: ({
     conversationId,
     title,
   }: {
     conversationId: string;
     title: string;
+  }) => void;
+  addBackgroundExecutionCompleteStep: ({ step }: { step: BackgroundAgentCompleteStep }) => void;
+  addCompactionStep: ({ tokenCountBefore }: { tokenCountBefore: number }) => void;
+  setCompactionStepComplete: ({
+    tokenCountAfter,
+    summarizedRoundCount,
+  }: {
+    tokenCountAfter: number;
+    summarizedRoundCount: number;
   }) => void;
   deleteConversation: (id: string) => Promise<void>;
   renameConversation: (id: string, title: string) => Promise<void>;
@@ -157,6 +174,13 @@ const createConversationActions = ({
         })
       );
     },
+    clearLastRoundResponse: () => {
+      setCurrentRound((round) => {
+        round.response.message = '';
+        round.steps = [];
+        round.status = ConversationRoundStatus.inProgress;
+      });
+    },
     setAgentId: (agentId: string) => {
       // We allow to change agent only at the start of the conversation
       if (conversationId) {
@@ -210,6 +234,37 @@ const createConversationActions = ({
         }
       });
     },
+    addBackgroundExecutionCompleteStep: ({ step }: { step: BackgroundAgentCompleteStep }) => {
+      setCurrentRound((round) => {
+        round.steps.push(step);
+      });
+    },
+    addCompactionStep: ({ tokenCountBefore }: { tokenCountBefore: number }) => {
+      setCurrentRound((round) => {
+        const step: CompactionStep = {
+          type: ConversationRoundStepType.compaction,
+          summarized_round_count: 0,
+          token_count_before: tokenCountBefore,
+          token_count_after: 0,
+        };
+        round.steps.push(step);
+      });
+    },
+    setCompactionStepComplete: ({
+      tokenCountAfter,
+      summarizedRoundCount,
+    }: {
+      tokenCountAfter: number;
+      summarizedRoundCount: number;
+    }) => {
+      setCurrentRound((round) => {
+        const step = round.steps.find(isCompactionStep);
+        if (step) {
+          step.token_count_after = tokenCountAfter;
+          step.summarized_round_count = summarizedRoundCount;
+        }
+      });
+    },
     setAssistantMessage: ({ assistantMessage }: { assistantMessage: string }) => {
       setCurrentRound((round) => {
         round.response.message = assistantMessage;
@@ -225,15 +280,18 @@ const createConversationActions = ({
         round.time_to_first_token = timeToFirstToken;
       });
     },
-    setPendingPrompt: ({ prompt }: { prompt: PromptRequest }) => {
+    addPendingPrompt: ({ prompt }: { prompt: PromptRequest }) => {
       setCurrentRound((round) => {
-        round.pending_prompt = prompt;
+        if (!round.pending_prompts) {
+          round.pending_prompts = [];
+        }
+        round.pending_prompts.push(prompt);
         round.status = ConversationRoundStatus.awaitingPrompt;
       });
     },
-    clearPendingPrompt: () => {
+    clearPendingPrompts: () => {
       setCurrentRound((round) => {
-        round.pending_prompt = undefined;
+        round.pending_prompts = undefined;
         round.status = ConversationRoundStatus.inProgress;
       });
     },

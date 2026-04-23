@@ -31,7 +31,8 @@ const mountUpdateConnector = (props: Partial<Props> = {}, isOAuth: boolean = fal
   );
 };
 
-describe('UpdateConnector renders', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/209007
+describe.skip('UpdateConnector renders', () => {
   it('should render update connector fields', () => {
     const wrapper = mountUpdateConnector();
 

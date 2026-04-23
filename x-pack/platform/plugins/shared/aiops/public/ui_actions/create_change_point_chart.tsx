@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { openLazyFlyout } from '@kbn/presentation-util';
-import type { PresentationContainer } from '@kbn/presentation-containers';
+import type { PresentationContainer } from '@kbn/presentation-publishing';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
@@ -23,7 +23,7 @@ import type { ChangePointEmbeddableState } from '../../common/embeddables/change
 const parentApiIsCompatible = async (
   parentApi: unknown
 ): Promise<PresentationContainer | undefined> => {
-  const { apiIsPresentationContainer } = await import('@kbn/presentation-containers');
+  const { apiIsPresentationContainer } = await import('@kbn/presentation-publishing');
   // we cannot have an async type check, so return the casted parentApi rather than a boolean
   return apiIsPresentationContainer(parentApi) ? (parentApi as PresentationContainer) : undefined;
 };
@@ -45,7 +45,7 @@ export function createAddChangePointChartAction(
       },
     ],
     order: 10,
-    getIconType: () => 'changePointDetection',
+    getIconType: () => 'chartChangePoint',
     getDisplayName: () =>
       i18n.translate('xpack.aiops.embeddableChangePointChartDisplayName', {
         defaultMessage: 'Change point detection',

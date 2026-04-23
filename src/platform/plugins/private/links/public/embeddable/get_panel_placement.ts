@@ -20,10 +20,8 @@ export async function getPanelPlacement(serializedState?: LinksEmbeddableState) 
   let layout = LINKS_HORIZONTAL_LAYOUT;
   let numLinks = 1;
   try {
-    const savedObjectId = (serializedState as { savedObjectId?: string }).savedObjectId;
-    const linksState = savedObjectId
-      ? await loadFromLibrary(savedObjectId)
-      : (serializedState as LinksState);
+    const refId = (serializedState as { ref_id?: string }).ref_id;
+    const linksState = refId ? await loadFromLibrary(refId) : (serializedState as LinksState);
     if (linksState.layout) layout = linksState.layout;
     if (linksState.links) numLinks = linksState.links.length;
   } catch (error) {
@@ -31,6 +29,6 @@ export async function getPanelPlacement(serializedState?: LinksEmbeddableState) 
   }
   const isHorizontal = layout === LINKS_HORIZONTAL_LAYOUT;
   const width = isHorizontal ? DASHBOARD_GRID_COLUMN_COUNT : 8;
-  const height = isHorizontal ? 4 : numLinks * 3 + 4;
+  const height = isHorizontal ? 2 : numLinks * 3 + 4;
   return { width, height, strategy: PanelPlacementStrategy.placeAtTop };
 }

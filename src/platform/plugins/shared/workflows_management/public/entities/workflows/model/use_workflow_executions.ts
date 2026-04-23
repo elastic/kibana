@@ -10,7 +10,7 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useInfiniteQuery, type UseInfiniteQueryOptions } from '@kbn/react-query';
 import type { ExecutionStatus, ExecutionType, WorkflowExecutionListDto } from '@kbn/workflows';
-import { useKibana } from '../../../hooks/use_kibana';
+import { useWorkflowsApi } from '@kbn/workflows-ui';
 
 const DEFAULT_PAGE_SIZE = 100;
 const MAX_RETRIES = 3;
@@ -21,6 +21,7 @@ interface UseWorkflowExecutionsParams {
   executionTypes?: ExecutionType[];
   executedBy?: string[];
   size?: number;
+  omitStepRuns?: boolean;
 }
 
 export function useWorkflowExecutions(
@@ -36,30 +37,32 @@ export function useWorkflowExecutions(
     'queryKey' | 'queryFn' | 'getNextPageParam'
   > = {}
 ) {
-  const { http } = useKibana().services;
+  const api = useWorkflowsApi();
   const currentSize = params.size ?? DEFAULT_PAGE_SIZE;
 
   const queryFn = useCallback(
     async ({ pageParam = 1 }: { pageParam?: number }) => {
-      return http.get<WorkflowExecutionListDto>(`/api/workflowExecutions`, {
-        query: {
-          workflowId: params.workflowId,
-          statuses: params.statuses,
-          executionTypes: params.executionTypes,
-          ...(params.executedBy && params.executedBy.length > 0
-            ? { executedBy: params.executedBy }
-            : {}),
-          page: pageParam,
-          size: currentSize,
-        },
+      if (!params.workflowId) {
+        throw new Error('Workflow ID is required');
+      }
+      return api.getWorkflowExecutions(params.workflowId, {
+        statuses: params.statuses,
+        executionTypes: params.executionTypes,
+        ...(params.executedBy && params.executedBy.length > 0
+          ? { executedBy: params.executedBy }
+          : {}),
+        ...(params.omitStepRuns != null && { omitStepRuns: params.omitStepRuns }),
+        page: pageParam,
+        size: currentSize,
       });
     },
     [
-      http,
+      api,
       params.workflowId,
       params.statuses,
       params.executionTypes,
       params.executedBy,
+      params.omitStepRuns,
       currentSize,
     ]
   );

@@ -16,13 +16,10 @@ export type { ChromeSetup, ChromeStart } from './contracts';
 export type { ChromeDocTitle } from './doc_title';
 export type {
   ChromeHelpExtension,
-  ChromeHelpMenuActions,
   ChromeHelpExtensionLinkBase,
   ChromeHelpExtensionMenuLink,
   ChromeHelpExtensionMenuCustomLink,
-  ChromeHelpExtensionMenuDiscussLink,
   ChromeHelpExtensionMenuDocumentationLink,
-  ChromeHelpExtensionMenuGitHubLink,
   ChromeGlobalHelpExtensionMenuLink,
 } from './help_extension';
 export type { ChromeNavControls, ChromeNavControl, ChromeHelpMenuLink } from './nav_controls';
@@ -54,4 +51,10 @@ export type {
   RenderAs,
 } from './project_navigation';
 
-export type { SidebarApp, SidebarAppDefinition, SidebarSetup, SidebarStart } from './sidebar';
+export type {
+  SidebarApp,
+  SidebarAppConfig,
+  SidebarAppDefinition,
+  SidebarSetup,
+  SidebarStart,
+} from './sidebar';

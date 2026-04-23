@@ -21,8 +21,8 @@ import {
 import { FormattedRelative } from '@kbn/i18n-react';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ALERT_RULE_NAME, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
+import { SECURITY_CELL_ACTIONS_ALERTS_COUNT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { PageScope } from '../../../../data_view_manager/constants';
-import { SecurityCellActionsTrigger } from '../../../../app/actions/constants';
 import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use_navigate_to_alerts_page_with_filters';
 import { HeaderSection } from '../../../../common/components/header_section';
 
@@ -40,6 +40,7 @@ import { FormattedCount } from '../../../../common/components/formatted_number';
 import { CellActionsMode, SecurityCellActions } from '../../../../common/components/cell_actions';
 import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
 import { useRiskSeverityColors } from '../../../../common/utils/risk_color_palette';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 export interface RuleAlertsTableProps {
   signalIndexName: string | null;
@@ -59,6 +60,7 @@ export const useGetTableColumns: GetTableColumns = ({
   navigateTo,
   openRuleInAlertsPage,
 }) => {
+  const canReadRules = useUserPrivileges().rulesPrivileges.rules.read;
   const severityColors = useRiskSeverityColors();
   return useMemo(
     () => [
@@ -74,10 +76,9 @@ export const useGetTableColumns: GetTableColumns = ({
               content={name}
               anchorClassName="eui-textTruncate"
             >
-              {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
               <EuiLink
+                disabled={!canReadRules}
                 data-test-subj="severityRuleAlertsTable-name"
-                href={url}
                 onClick={(ev?: React.MouseEvent) => {
                   if (ev) {
                     ev.preventDefault();
@@ -108,7 +109,7 @@ export const useGetTableColumns: GetTableColumns = ({
               field: ALERT_RULE_NAME,
             }}
             mode={CellActionsMode.HOVER_RIGHT}
-            triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+            triggerId={SECURITY_CELL_ACTIONS_ALERTS_COUNT}
             sourcererScopeId={PageScope.alerts}
             metadata={{
               andFilters: [{ field: 'kibana.alert.workflow_status', value: 'open' }],
@@ -133,7 +134,7 @@ export const useGetTableColumns: GetTableColumns = ({
         ),
       },
     ],
-    [getAppUrl, navigateTo, openRuleInAlertsPage, severityColors]
+    [canReadRules, getAppUrl, navigateTo, openRuleInAlertsPage, severityColors]
   );
 };
 
@@ -155,8 +156,8 @@ export const RuleAlertsTable = React.memo<RuleAlertsTableProps>(({ signalIndexNa
     (ruleName: string) =>
       openAlertsPageWithFilter({
         title: i18n.OPEN_IN_ALERTS_TITLE_RULENAME,
-        selectedOptions: [ruleName],
-        fieldName: ALERT_RULE_NAME,
+        selected_options: [ruleName],
+        field_name: ALERT_RULE_NAME,
       }),
     [openAlertsPageWithFilter]
   );
@@ -164,8 +165,8 @@ export const RuleAlertsTable = React.memo<RuleAlertsTableProps>(({ signalIndexNa
   const navigateToAlerts = useCallback(() => {
     openAlertsPageWithFilter({
       title: i18n.OPEN_IN_ALERTS_TITLE_STATUS,
-      selectedOptions: ['open'],
-      fieldName: ALERT_WORKFLOW_STATUS,
+      selected_options: ['open'],
+      field_name: ALERT_WORKFLOW_STATUS,
     });
   }, [openAlertsPageWithFilter]);
 

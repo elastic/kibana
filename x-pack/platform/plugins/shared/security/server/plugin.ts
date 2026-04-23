@@ -57,7 +57,6 @@ import { setupSavedObjects } from './saved_objects';
 import type { Session } from './session_management';
 import { SessionManagementService } from './session_management';
 import { setupSpacesClient } from './spaces';
-import type { UiamServicePublic } from './uiam';
 import { UiamService } from './uiam';
 import { registerSecurityUsageCollector } from './usage_collector';
 import { UserProfileService } from './user_profile';
@@ -175,8 +174,6 @@ export class SecurityPlugin
   private readonly userProfileService: UserProfileService;
   private userProfileStart?: UserProfileServiceStartInternal;
 
-  private uiamService?: UiamServicePublic;
-
   private readonly getUserProfileService = () => {
     if (!this.userProfileStart) {
       throw new Error(`userProfileStart is not registered!`);
@@ -186,6 +183,8 @@ export class SecurityPlugin
 
   private readonly fipsService: FipsService;
   private fipsServiceSetup?: FipsServiceSetupInternal;
+
+  private elasticsearchUrl?: string;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
@@ -216,7 +215,7 @@ export class SecurityPlugin
 
   public setup(
     core: CoreSetup<PluginStartDependencies, SecurityPluginStart>,
-    { features, licensing, taskManager, usageCollection, spaces }: PluginSetupDependencies
+    { features, licensing, taskManager, usageCollection, spaces, cloud }: PluginSetupDependencies
   ) {
     this.kibanaIndexName = core.savedObjects.getDefaultIndex();
     const config$ = this.initializerContext.config.create<TypeOf<typeof ConfigSchema>>().pipe(
@@ -246,6 +245,10 @@ export class SecurityPlugin
     securityFeatures.forEach((securityFeature) =>
       features.registerElasticsearchFeature(securityFeature)
     );
+
+    if (cloud?.cloudId) {
+      this.elasticsearchUrl = this.decodeElasticsearchUrlFromCloudId(cloud.cloudId);
+    }
 
     this.elasticsearchService.setup({ license, status: core.status });
     this.featureUsageService.setup({ featureUsage: licensing.featureUsage });
@@ -286,7 +289,6 @@ export class SecurityPlugin
       kibanaIndexName,
       packageVersion: this.initializerContext.env.packageInfo.version,
       getSpacesService: () => spaces?.spacesService,
-      getUiamService: () => this.uiamService,
       features,
       getCurrentUser,
       customBranding: core.customBranding,
@@ -332,6 +334,7 @@ export class SecurityPlugin
     core.security.registerSecurityDelegate(
       buildSecurityApi({
         getAuthc: this.getAuthentication.bind(this),
+        getSession: this.getSession,
         audit: this.auditSetup,
         config,
       })
@@ -419,9 +422,9 @@ export class SecurityPlugin
         : undefined;
 
     const config = this.getConfig();
-    this.uiamService = config.uiam?.enabled
-      ? new UiamService(this.logger.get('uiam'), config.uiam)
-      : undefined;
+
+    const { protocol, hostname, port } = core.http.getServerInfo();
+    const serverConfig = { protocol, hostname, port, ...config.public };
 
     this.authenticationStart = this.authenticationService.start({
       audit: this.auditSetup!,
@@ -432,12 +435,18 @@ export class SecurityPlugin
       http: core.http,
       loggers: this.initializerContext.logger,
       session,
-      uiam: this.uiamService,
+      uiam: config.uiam?.enabled
+        ? new UiamService(this.logger.get('uiam'), config.uiam, {
+            kibanaServerURL: `${serverConfig.protocol}://${serverConfig.hostname}:${serverConfig.port}`,
+            elasticsearchUrl: this.elasticsearchUrl,
+          })
+        : undefined,
       applicationName: this.authorizationSetup!.applicationName,
       kibanaFeatures: features.getKibanaFeatures(),
       isElasticCloudDeployment: () => cloud?.isCloudEnabled === true,
       customLogoutURL,
       buildFlavor: this.initializerContext.env.packageInfo.buildFlavor,
+      userActivity: core.userActivity,
     });
 
     this.authorizationService.start({
@@ -513,5 +522,34 @@ export class SecurityPlugin
       packageInfo: this.initializerContext.env.packageInfo,
       docLinks: core.docLinks,
     });
+  }
+
+  private decodeElasticsearchUrlFromCloudId(cloudId: string): string | undefined {
+    this.logger.debug(`CloudId: ${cloudId}`);
+
+    const id = cloudId.split(':').pop();
+    if (!id) {
+      return undefined;
+    }
+
+    try {
+      const decoded = Buffer.from(id, 'base64').toString('utf8');
+      const parts = decoded.split('$');
+      if (parts.length < 2) {
+        return undefined;
+      }
+
+      const [hostWithPort, esIdWithPort] = parts;
+      const [host, defaultPort = '443'] = hostWithPort.split(':');
+      const [esId, esPort = defaultPort] = esIdWithPort.split(':');
+
+      const esHost = esId ? `${esId}.${host}` : host;
+      const endpoint = `https://${esHost}:${esPort}`;
+      this.logger.debug(`Endpoint: ${endpoint}`);
+      return endpoint;
+    } catch {
+      this.logger.debug(`Failed to decode cloud.id: ${cloudId}`);
+      return undefined;
+    }
   }
 }

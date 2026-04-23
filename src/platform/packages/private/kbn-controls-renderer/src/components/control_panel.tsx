@@ -26,20 +26,17 @@ import type { HasCustomPrepend, PinnedControlLayoutState } from '@kbn/controls-s
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { EmbeddableRenderer, type DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import {
-  apiPublishesTitle,
-  useBatchedPublishingSubjects,
-  type PublishingSubject,
-} from '@kbn/presentation-publishing';
+import { useBatchedPublishingSubjects, type PublishingSubject } from '@kbn/presentation-publishing';
 
 import type { ControlsRendererParentApi } from '../types';
+import { apiPublishesLabel } from '../utils';
 import { controlWidthStyles } from './control_panel.styles';
 import { DragHandle } from './drag_handle';
 import { FloatingActions } from './floating_actions';
 
 export const ControlPanel = ({
   parentApi,
-  control: { uid, grow, width, type },
+  control: { id, grow, width, type },
   setControlPanelRef,
 }: {
   parentApi: ControlsRendererParentApi;
@@ -51,7 +48,7 @@ export const ControlPanel = ({
   const [api, setApi] = useState<(DefaultEmbeddableApi & Partial<HasCustomPrepend>) | null>(null);
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: uid,
+    id,
   });
 
   const [viewMode, disabledActionIds] = useBatchedPublishingSubjects(
@@ -59,8 +56,7 @@ export const ControlPanel = ({
     parentApi.disabledActionIds$ ?? (of([] as string[]) as PublishingSubject<string[]>)
   );
 
-  const [panelTitle, setPanelTitle] = useState<string | undefined>();
-  const [defaultPanelTitle, setDefaultPanelTitle] = useState<string | undefined>();
+  const [panelLabel, setPanelLabel] = useState<string | undefined>();
 
   const prependWrapperRef = useRef<HTMLDivElement>(null);
 
@@ -69,19 +65,12 @@ export const ControlPanel = ({
 
     /** Setup subscriptions for necessary state once API is available */
     const subscriptions = new Subscription();
-    if (apiPublishesTitle(api)) {
+    if (apiPublishesLabel(api)) {
       subscriptions.add(
-        api.title$.subscribe((result) => {
-          setPanelTitle(result);
+        api.label$.subscribe((result) => {
+          setPanelLabel(result);
         })
       );
-      if (api.defaultTitle$) {
-        subscriptions.add(
-          api.defaultTitle$.subscribe((result) => {
-            setDefaultPanelTitle(result);
-          })
-        );
-      }
     }
     return () => {
       subscriptions.unsubscribe();
@@ -91,9 +80,9 @@ export const ControlPanel = ({
   const setRefs = useCallback(
     (ref: HTMLElement | null) => {
       setNodeRef(ref);
-      setControlPanelRef(uid, ref);
+      setControlPanelRef(id, ref);
     },
-    [uid, setNodeRef, setControlPanelRef]
+    [id, setNodeRef, setControlPanelRef]
   );
 
   const onApiAvailable = useCallback(
@@ -121,7 +110,7 @@ export const ControlPanel = ({
       <FloatingActions
         data-test-subj="control-frame-floating-actions"
         api={api}
-        uuid={uid}
+        uuid={id}
         viewMode={viewMode}
         disabledActions={disabledActionIds}
         prependWrapperRef={prependWrapperRef}
@@ -129,10 +118,10 @@ export const ControlPanel = ({
         <EuiFormRow
           data-test-subj="control-frame-title"
           fullWidth
-          id={`control-title-${uid}`}
+          id={`control-title-${id}`}
           aria-label={i18n.translate('controls.controlGroup.controlFrameAriaLabel', {
             defaultMessage: 'Control for ${controlTitle}',
-            values: { controlTitle: panelTitle },
+            values: { controlTitle: panelLabel },
           })}
         >
           <EuiFormControlLayout
@@ -144,34 +133,44 @@ export const ControlPanel = ({
             css={styles.formControl}
             prepend={
               <>
-                <DragHandle
-                  isEditable={isEditable}
-                  controlTitle={panelTitle || defaultPanelTitle}
-                  {...attributes}
-                  {...listeners}
-                />
-
                 {api?.CustomPrependComponent ? (
-                  <api.CustomPrependComponent />
+                  <>
+                    <DragHandle
+                      isEditable={isEditable}
+                      controlTitle={panelLabel}
+                      className="controlFrame__dragHandle"
+                      {...attributes}
+                      {...listeners}
+                    />
+                    <api.CustomPrependComponent />
+                  </>
                 ) : (
-                  <EuiToolTip
-                    content={panelTitle || defaultPanelTitle}
-                    anchorProps={{ className: 'eui-textTruncate', css: styles.tooltipStyles }}
+                  <DragHandle
+                    isEditable={isEditable}
+                    controlTitle={panelLabel}
+                    className="controlFrame__dragHandle"
+                    {...attributes}
+                    {...listeners}
                   >
-                    <EuiFormLabel className="controlPanel--label">
-                      <span css={styles.prependWrapperStyles} ref={prependWrapperRef}>
-                        {panelTitle || defaultPanelTitle}
-                      </span>
-                    </EuiFormLabel>
-                  </EuiToolTip>
+                    <EuiToolTip
+                      content={panelLabel}
+                      anchorProps={{ className: 'eui-textTruncate', css: styles.tooltipStyles }}
+                    >
+                      <EuiFormLabel className="controlPanel--label">
+                        <span css={styles.prependWrapperStyles} ref={prependWrapperRef}>
+                          {panelLabel}
+                        </span>
+                      </EuiFormLabel>
+                    </EuiToolTip>
+                  </DragHandle>
                 )}
               </>
             }
             compressed={parentApi.isCompressed ? parentApi.isCompressed() : true}
           >
             <EmbeddableRenderer
-              key={uid}
-              maybeId={uid}
+              key={id}
+              maybeId={id}
               type={type}
               getParentApi={() => parentApi}
               onApiAvailable={onApiAvailable}

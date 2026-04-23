@@ -16,8 +16,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'unifiedSearch',
   ]);
 
-  const testSubjects = getService('testSubjects');
-
   describe('Default query mode', () => {
     afterEach(async () => {
       await discover.resetQueryMode();
@@ -31,7 +29,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(queryMode).to.be(null);
 
         // Go to discover and validate classic mode
-        await testSubjects.existOrFail('discover-dataView-switch-link');
+        await discover.isInClassicMode();
       });
     });
 
@@ -45,7 +43,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         // Reload the app and validate ES|QL mode is persisted
         await common.navigateToApp('discover', { path: '' });
-        await discover.expectSourceViewerToExist();
+        await discover.isInEsqlMode();
       });
     });
 
@@ -60,7 +58,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         // Reload the app and validate classic mode is persisted
         await common.navigateToApp('discover', { path: '' });
-        await testSubjects.existOrFail('discover-dataView-switch-link');
+        await discover.isInClassicMode();
       });
     });
   });

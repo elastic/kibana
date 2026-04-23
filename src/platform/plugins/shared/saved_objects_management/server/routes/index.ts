@@ -16,6 +16,11 @@ import { registerScrollForCountRoute } from './scroll_count';
 import { registerRelationshipsRoute } from './relationships';
 import { registerGetAllowedTypesRoute } from './get_allowed_types';
 
+// Maximum allowed saved object types in API requests. Currently 149 types registered
+// (see SAVED_OBJECT_TYPES_COUNT in src/core/packages/saved-objects/server-internal/src/object_types/index.ts).
+// Set to 200 to accommodate current types plus headroom for future growth.
+export const SAVED_OBJECT_TYPES_MAX_SIZE = 200 as const;
+
 interface RegisterRouteOptions {
   http: HttpServiceSetup;
   managementServicePromise: Promise<ISavedObjectsManagement>;

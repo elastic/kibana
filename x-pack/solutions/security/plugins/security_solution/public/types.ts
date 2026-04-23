@@ -69,6 +69,9 @@ import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/publi
 import type { KqlPluginStart } from '@kbn/kql/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { Logger } from '@kbn/logging';
+import type { CPSPluginStart } from '@kbn/cps/public';
+import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
+import type { EvalsPublicStart } from '@kbn/evals-plugin/public';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -103,6 +106,7 @@ import type { SecuritySolutionUiConfigType } from './common/types';
 import type { OnboardingService } from './onboarding/service';
 import type { TelemetryServiceStart } from './common/lib/telemetry';
 import type { SiemMigrationsService } from './siem_migrations/service';
+import type { AiRuleCreationService } from './detection_engine/common/ai_rule_creation_store';
 
 export interface SetupPlugins {
   cloud?: CloudSetup;
@@ -117,6 +121,7 @@ export interface SetupPlugins {
   cases?: CasesPublicSetup;
   data: DataPublicPluginSetup;
   discoverShared: DiscoverSharedPublicStart;
+  workflowsExtensions?: WorkflowsExtensionsPublicPluginSetup;
 }
 
 /**
@@ -172,6 +177,8 @@ export interface StartPlugins {
   inference: InferencePublicStart;
   share?: SharePluginStart;
   agentBuilder?: AgentBuilderPluginStart;
+  cps?: CPSPluginStart;
+  evals?: EvalsPublicStart;
 }
 
 export interface StartPluginsDependencies extends StartPlugins {
@@ -213,6 +220,7 @@ export type StartServices = CoreStart &
     siemMigrations: SiemMigrationsService;
     productDocBase: ProductDocBasePluginStart;
     logger: Logger;
+    aiRuleCreation: AiRuleCreationService;
   };
 
 export type StartRenderServices = Pick<
@@ -239,7 +247,11 @@ export interface PluginStart {
   setSolutionNavigationTree: (navigationTree: NavigationTreeDefinition | null) => void;
 }
 
-export type InspectResponse = Inspect & { response: string[] };
+export type InspectResponse = Inspect & {
+  response: string[];
+  /** Index pattern(s) for the Inspect Statistics tab (e.g. entity store queries). */
+  indexPattern?: string[];
+};
 
 export const CASES_SUB_PLUGIN_KEY = 'cases';
 

@@ -5,17 +5,44 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlyoutFooter, EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { TakeAction } from '../shared/components/take_action';
+import { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
+import type { IdentityFields } from '../../document_details/shared/utils';
+import type { EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
 
-export const HostPanelFooter = ({ hostName }: { hostName: string }) => {
+export const HostPanelFooter = ({
+  identityFields,
+  entity,
+}: {
+  identityFields: IdentityFields;
+  /** When entity store v2 is enabled: entity record from the store. */
+  entity?: EntityStoreRecord;
+}) => {
+  const hostName = useMemo(
+    () => identityFields[EntityIdentifierFields.hostName] || Object.values(identityFields)[0] || '',
+    [identityFields]
+  );
+
+  const euidApi = useEntityStoreEuidApi();
+  const euidEntityFilter = useMemo((): string | undefined => {
+    if (!euidApi?.euid || !entity) {
+      return undefined;
+    }
+    return euidApi.euid.kql.getEuidFilterBasedOnDocument('host', entity);
+  }, [euidApi?.euid, entity]);
+
   return (
     <EuiFlyoutFooter>
       <EuiPanel color="transparent">
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
           <EuiFlexItem grow={false}>
-            <TakeAction isDisabled={!hostName} kqlQuery={`host.name: "${hostName}"`} />
+            <TakeAction
+              isDisabled={!hostName}
+              kqlQuery={euidEntityFilter ?? `host.name: "${hostName}"`}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>

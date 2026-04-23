@@ -10,19 +10,16 @@
 import type { RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
-import {
-  apiTest,
-  COMMON_HEADERS,
-  DASHBOARD_API_PATH,
-  KBN_ARCHIVES,
-  TEST_DASHBOARD_ID,
-} from '../fixtures';
+import { apiTest, COMMON_HEADERS, DASHBOARD_API_PATH, KBN_ARCHIVES } from '../fixtures';
 
-apiTest.describe('dashboards - create', { tag: tags.ESS_ONLY }, () => {
+apiTest.describe('dashboards - create', { tag: tags.deploymentAgnostic }, () => {
   let editorCredentials: RoleApiCredentials;
+  let viewerCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ kbnClient, requestAuth }) => {
-    editorCredentials = await requestAuth.getApiKey('editor');
+    // returns editor role in most deployment project and deployment types
+    editorCredentials = await requestAuth.getApiKeyForPrivilegedUser();
+    viewerCredentials = await requestAuth.getApiKeyForViewer();
     await kbnClient.importExport.load(KBN_ARCHIVES.BASIC);
     await kbnClient.importExport.load(KBN_ARCHIVES.TAGS);
   });
@@ -40,40 +37,13 @@ apiTest.describe('dashboards - create', { tag: tags.ESS_ONLY }, () => {
         ...editorCredentials.apiKeyHeader,
       },
       body: {
-        data: {
-          title,
-        },
+        title,
       },
       responseType: 'json',
     });
 
-    expect(response).toHaveStatusCode(200);
-    expect(response.body.spaces).toStrictEqual(['default']);
-    expect(response.body.data).toStrictEqual({
-      title,
-    });
-  });
-
-  apiTest('can create a dashboard with a specific id', async ({ apiClient }) => {
-    const title = `foo-${Date.now()}-${Math.random()}`;
-    const id = `bar-${Date.now()}-${Math.random()}`;
-
-    const response = await apiClient.post(DASHBOARD_API_PATH, {
-      headers: {
-        ...COMMON_HEADERS,
-        ...editorCredentials.apiKeyHeader,
-      },
-      body: {
-        id,
-        data: {
-          title,
-        },
-      },
-      responseType: 'json',
-    });
-
-    expect(response).toHaveStatusCode(200);
-    expect(response.body.id).toBe(id);
+    expect(response).toHaveStatusCode(201);
+    expect(response.body.data.title).toStrictEqual(title);
   });
 
   // TODO Maybe move this test to x-pack/platform/test/api_integration/dashboards
@@ -81,43 +51,18 @@ apiTest.describe('dashboards - create', { tag: tags.ESS_ONLY }, () => {
     const title = `foo-${Date.now()}-${Math.random()}`;
     const spaceId = 'space-1';
 
-    const response = await apiClient.post(DASHBOARD_API_PATH, {
+    const response = await apiClient.post(`s/${spaceId}/${DASHBOARD_API_PATH}`, {
       headers: {
         ...COMMON_HEADERS,
         ...editorCredentials.apiKeyHeader,
       },
       body: {
-        data: {
-          title,
-        },
-        spaces: [spaceId],
+        title,
       },
       responseType: 'json',
     });
 
-    expect(response).toHaveStatusCode(200);
-    expect(response.body.spaces).toStrictEqual([spaceId]);
-  });
-
-  apiTest('return error if provided id already exists', async ({ apiClient }) => {
-    const title = `foo-${Date.now()}-${Math.random()}`;
-
-    const response = await apiClient.post(DASHBOARD_API_PATH, {
-      headers: {
-        ...COMMON_HEADERS,
-        ...editorCredentials.apiKeyHeader,
-      },
-      body: {
-        id: TEST_DASHBOARD_ID,
-        data: {
-          title,
-        },
-      },
-      responseType: 'json',
-    });
-
-    expect(response).toHaveStatusCode(409);
-    expect(response.body.message).toBe(`A dashboard with ID ${TEST_DASHBOARD_ID} already exists.`);
+    expect(response).toHaveStatusCode(201);
   });
 
   apiTest('validation - returns error when title is not provided', async ({ apiClient }) => {
@@ -126,15 +71,13 @@ apiTest.describe('dashboards - create', { tag: tags.ESS_ONLY }, () => {
         ...COMMON_HEADERS,
         ...editorCredentials.apiKeyHeader,
       },
-      body: {
-        data: {},
-      },
+      body: {},
       responseType: 'json',
     });
 
     expect(response).toHaveStatusCode(400);
     expect(response.body.message).toBe(
-      '[request body.data.title]: expected value of type [string] but got [undefined]'
+      '[request body.title]: expected value of type [string] but got [undefined]'
     );
   });
 
@@ -145,17 +88,34 @@ apiTest.describe('dashboards - create', { tag: tags.ESS_ONLY }, () => {
         ...editorCredentials.apiKeyHeader,
       },
       body: {
-        data: {
-          title: 'foo',
-          panels: {},
-        },
+        title: 'foo',
+        panels: {},
       },
       responseType: 'json',
     });
 
     expect(response).toHaveStatusCode(400);
     expect(response.body.message).toBe(
-      '[request body.data.panels]: expected value of type [array] but got [Object]'
+      '[request body.panels]: expected value of type [array] but got [Object]'
     );
   });
+
+  apiTest(
+    'validation - returns error if user does not have permission to create a dashboard',
+    async ({ apiClient }) => {
+      const response = await apiClient.post(DASHBOARD_API_PATH, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...viewerCredentials.apiKeyHeader,
+        },
+        body: {
+          title: 'foo',
+        },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(403);
+      expect(response.body.message).toBe('Unable to create dashboard');
+    }
+  );
 });

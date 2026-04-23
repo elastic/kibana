@@ -11,10 +11,12 @@ import {
   apiPublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
 import { isObject } from 'lodash';
-import type {
-  LensApiCallbacks,
-  LensPublicCallbacks,
-  LensComponentForwardedProps,
+import {
+  type LensApiCallbacks,
+  type LensPublicCallbacks,
+  type LensComponentForwardedProps,
+  type UserMessage,
+  LENS_EMBEDDABLE_TYPE,
 } from '@kbn/lens-common';
 import type { LensApi } from '@kbn/lens-common-2';
 
@@ -31,7 +33,7 @@ function apiHasLensCallbacks(api: unknown): api is LensApiCallbacks {
 export const isLensApi = (api: unknown): api is LensApi => {
   return Boolean(
     api &&
-      apiIsOfType(api, 'lens') &&
+      apiIsOfType(api, LENS_EMBEDDABLE_TYPE) &&
       'canViewUnderlyingData$' in api &&
       apiHasLensCallbacks(api) &&
       apiPublishesTitle(api) &&
@@ -46,6 +48,10 @@ export function apiHasLensComponentCallbacks(api: unknown): api is LensPublicCal
       Object.hasOwn(api, fn)
     )
   );
+}
+
+export function apiHasUserMessages(api: unknown): api is { userMessages?: UserMessage[] } {
+  return isObject(api) && Object.hasOwn(api, 'userMessages');
 }
 
 export function apiHasLensComponentProps(api: unknown): api is LensComponentForwardedProps {

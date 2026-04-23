@@ -13,18 +13,23 @@ import { auditServiceMock } from './audit/mocks';
 import { authenticationServiceMock } from './authentication/authentication_service.mock';
 import { buildSecurityApi, buildUserProfileApi } from './build_delegate_apis';
 import { securityMock } from './mocks';
+import { getPrintableSessionId } from './session_management';
+import { sessionMock } from './session_management/session.mock';
 import { userProfileServiceMock } from './user_profile/user_profile_service.mock';
 
 describe('buildSecurityApi', () => {
   let authc: ReturnType<typeof authenticationServiceMock.createStart>;
   let auditService: ReturnType<typeof auditServiceMock.create>;
+  let session: ReturnType<typeof sessionMock.create>;
   let api: CoreSecurityDelegateContract;
 
   beforeEach(() => {
     authc = authenticationServiceMock.createStart();
     auditService = auditServiceMock.create();
+    session = sessionMock.create();
     api = buildSecurityApi({
       getAuthc: () => authc,
+      getSession: () => session,
       audit: auditService,
       config: { uiam: { enabled: false } },
     });
@@ -85,13 +90,38 @@ describe('buildSecurityApi', () => {
     });
   });
 
+  describe('authc.getRedactedSessionId', () => {
+    it('properly delegates to session.getSID and redacts the result', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const fullSid = '1234567890abcdefghijklmno';
+      session.getSID.mockResolvedValue(fullSid);
+
+      const result = await api.authc.getRedactedSessionId(request);
+
+      expect(session.getSID).toHaveBeenCalledTimes(1);
+      expect(session.getSID).toHaveBeenCalledWith(request);
+      expect(result).toBe(getPrintableSessionId(fullSid));
+    });
+
+    it('returns undefined when session.getSID resolves to undefined', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      session.getSID.mockResolvedValue(undefined);
+
+      const result = await api.authc.getRedactedSessionId(request);
+
+      expect(result).toBeUndefined();
+    });
+  });
+
   describe('config.uiam', () => {
     describe('when uiam is enabled', () => {
       beforeEach(() => {
         authc = authenticationServiceMock.createStart();
         auditService = auditServiceMock.create();
+        session = sessionMock.create();
         api = buildSecurityApi({
           getAuthc: () => authc,
+          getSession: () => session,
           audit: auditService,
           config: { uiam: { enabled: true } },
         });
@@ -126,23 +156,16 @@ describe('buildSecurityApi', () => {
         expect(authc.apiKeys.uiam!.invalidate).toHaveBeenCalledTimes(1);
         expect(authc.apiKeys.uiam!.invalidate).toHaveBeenCalledWith(request, invalidateParams);
       });
-
-      it('should properly delegate getScopedClusterClientWithApiKey to the service', () => {
-        const apiKey = 'test-api-key';
-
-        api.authc.apiKeys.uiam!.getScopedClusterClientWithApiKey(apiKey);
-
-        expect(authc.apiKeys.uiam!.getScopedClusterClientWithApiKey).toHaveBeenCalledTimes(1);
-        expect(authc.apiKeys.uiam!.getScopedClusterClientWithApiKey).toHaveBeenCalledWith(apiKey);
-      });
     });
 
     describe('when uiam is disabled', () => {
       beforeEach(() => {
         authc = authenticationServiceMock.createStart();
         auditService = auditServiceMock.create();
+        session = sessionMock.create();
         api = buildSecurityApi({
           getAuthc: () => authc,
+          getSession: () => session,
           audit: auditService,
           config: { uiam: { enabled: false } },
         });
@@ -157,8 +180,10 @@ describe('buildSecurityApi', () => {
       beforeEach(() => {
         authc = authenticationServiceMock.createStart();
         auditService = auditServiceMock.create();
+        session = sessionMock.create();
         api = buildSecurityApi({
           getAuthc: () => authc,
+          getSession: () => session,
           audit: auditService,
           config: {},
         });

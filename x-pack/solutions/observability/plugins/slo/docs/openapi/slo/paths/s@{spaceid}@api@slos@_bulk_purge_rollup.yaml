@@ -16,6 +16,24 @@ post:
       application/json:
         schema:
           $ref: '../components/schemas/bulk_purge_rollup_request.yaml'
+        examples:
+          purgeByAgeExample:
+            summary: Purge rollup data older than 7 days
+            value:
+              list:
+                - 8853df00-ae2e-11ed-90af-09bb6422b258
+              purgePolicy:
+                purgeType: fixed-age
+                age: 7d
+          purgeByTimestampExample:
+            summary: Purge rollup data before a specific date
+            value:
+              list:
+                - 8853df00-ae2e-11ed-90af-09bb6422b258
+                - d077e940-1515-11ee-9c50-9d096392f520
+              purgePolicy:
+                purgeType: fixed-time
+                timestamp: '2024-12-31T00:00:00.000Z'
   responses:
     '200':
       description: Successful request
@@ -23,21 +41,47 @@ post:
         application/json:
           schema:
             $ref: '../components/schemas/bulk_purge_rollup_response.yaml'
+          examples:
+            bulkPurgeResponse:
+              summary: Bulk purge response with task ID
+              value:
+                taskId: 8853df00-ae2e-11ed-90af-09bb6422b258
     '400':
       description: Bad request
       content:
         application/json:
           schema:
             $ref: '../components/schemas/400_response.yaml'
+          examples:
+            badRequestExample:
+              summary: Bad request
+              value:
+                statusCode: 400
+                error: Bad Request
+                message: "Invalid value 'foo' supplied to: purgePolicy/purgeType"
     '401':
       description: Unauthorized response
       content:
         application/json:
           schema:
             $ref: '../components/schemas/401_response.yaml'
+          examples:
+            unauthorizedExample:
+              summary: Unauthorized
+              value:
+                statusCode: 401
+                error: Unauthorized
+                message: "security_exception: unable to authenticate user for REST request [/api/observability/slos]"
     '403':
-      description: Unauthorized response
+      description: Forbidden response
       content:
         application/json:
           schema:
             $ref: '../components/schemas/403_response.yaml'
+          examples:
+            forbiddenExample:
+              summary: Forbidden
+              value:
+                statusCode: 403
+                error: Forbidden
+                message: "security_exception: action [slo_write] is unauthorized for user"

@@ -4,19 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiFlexGroupProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
+import { ApmEnvironmentFilter } from '../environment_filter';
 import { TimeComparison } from '../time_comparison';
 import { TransactionTypeSelect } from '../transaction_type_select';
 import { UnifiedSearchBar } from '../unified_search_bar';
+import { useSecondaryFiltersWidthStyle } from './use_secondary_filters_width_style';
 
 interface Props {
   hidden?: boolean;
   showUnifiedSearchBar?: boolean;
   showTimeComparison?: boolean;
+  showEnvironmentFilter?: boolean;
   showQueryInput?: boolean;
   showTransactionTypeSelector?: boolean;
   searchBarPlaceholder?: string;
@@ -27,62 +30,95 @@ export function SearchBar({
   hidden = false,
   showUnifiedSearchBar = true,
   showTimeComparison = false,
+  showEnvironmentFilter = false,
   showTransactionTypeSelector = false,
   showQueryInput = true,
   searchBarPlaceholder,
   searchBarBoolFilter,
 }: Props) {
-  const { isSmall, isMedium, isLarge, isXl, isXXL, isXXXL } = useBreakpoints();
+  const { isMedium } = useBreakpoints();
+  const hasSecondaryFilters =
+    showTransactionTypeSelector || showEnvironmentFilter || showTimeComparison;
+
+  const { secondaryFiltersWidthStyle, setSearchBarContainerRef } = useSecondaryFiltersWidthStyle({
+    isMedium,
+    enabled: showUnifiedSearchBar && showQueryInput,
+  });
 
   if (hidden) {
     return null;
   }
 
-  const searchBarDirection: EuiFlexGroupProps['direction'] =
-    isXXXL || (!isXl && !showTimeComparison) ? 'row' : 'column';
-
   return (
-    <EuiFlexItem grow={false}>
-      <EuiFlexGroup gutterSize="s" responsive={false} direction={searchBarDirection}>
+    <div ref={setSearchBarContainerRef}>
+      {showUnifiedSearchBar && (
         <EuiFlexItem>
-          <EuiFlexGroup
-            direction={isLarge ? 'columnReverse' : 'row'}
-            gutterSize="s"
-            responsive={false}
-          >
+          <UnifiedSearchBar
+            placeholder={searchBarPlaceholder}
+            boolFilter={searchBarBoolFilter}
+            showQueryInput={showQueryInput}
+            showDatePicker
+            showSubmitButton
+          />
+        </EuiFlexItem>
+      )}
+      {showUnifiedSearchBar && hasSecondaryFilters && <EuiSpacer size="s" />}
+      {showUnifiedSearchBar && hasSecondaryFilters && (
+        <EuiFlexGroup gutterSize="none" justifyContent="flexStart" responsive={false}>
+          <EuiFlexItem grow={false} style={secondaryFiltersWidthStyle}>
+            <EuiFlexGrid
+              columns={!isMedium ? 3 : 1}
+              gutterSize="s"
+              css={css`
+                width: 100%;
+                max-width: 100%;
+              `}
+            >
+              {showTransactionTypeSelector && (
+                <EuiFlexItem>
+                  <TransactionTypeSelect compressed fullWidth />
+                </EuiFlexItem>
+              )}
+
+              {showEnvironmentFilter && (
+                <EuiFlexItem>
+                  <ApmEnvironmentFilter compressed fullWidth />
+                </EuiFlexItem>
+              )}
+
+              {showTimeComparison && (
+                <EuiFlexItem>
+                  <TimeComparison compressed fullWidth />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGrid>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+      {!showUnifiedSearchBar && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiFlexGrid columns={!isMedium ? 3 : 1} gutterSize="s">
             {showTransactionTypeSelector && (
-              <EuiFlexItem grow={false}>
-                <TransactionTypeSelect />
+              <EuiFlexItem>
+                <TransactionTypeSelect compressed fullWidth />
               </EuiFlexItem>
             )}
 
-            {showUnifiedSearchBar && (
+            {showEnvironmentFilter && (
               <EuiFlexItem>
-                <UnifiedSearchBar
-                  placeholder={searchBarPlaceholder}
-                  boolFilter={searchBarBoolFilter}
-                  showQueryInput={showQueryInput}
-                />
+                <ApmEnvironmentFilter compressed fullWidth />
               </EuiFlexItem>
             )}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={showTimeComparison && !isXXXL}>
-          <EuiFlexGroup
-            direction={isSmall || isMedium || isLarge ? 'columnReverse' : 'row'}
-            justifyContent={isXXL ? 'flexEnd' : undefined}
-            gutterSize="s"
-            responsive={false}
-          >
+
             {showTimeComparison && (
-              <EuiFlexItem grow={isXXXL} style={{ minWidth: 300 }}>
-                <TimeComparison />
+              <EuiFlexItem>
+                <TimeComparison compressed fullWidth />
               </EuiFlexItem>
             )}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-    </EuiFlexItem>
+          </EuiFlexGrid>
+        </>
+      )}
+    </div>
   );
 }

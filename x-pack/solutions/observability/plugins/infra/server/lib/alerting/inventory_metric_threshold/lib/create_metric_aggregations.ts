@@ -16,7 +16,7 @@ import type {
   InfraTimerangeInput,
   SnapshotCustomMetricInput,
 } from '../../../../../common/http_api';
-import { isMetricRate, isCustomMetricRate, isInterfaceRateAgg } from './is_rate';
+import { isMetricRate, isCustomMetricRate, getInterfaceRateFields } from './is_rate';
 import { createRateAggs } from './create_rate_aggs';
 import { createLogRateAggs } from './create_log_rate_aggs';
 import { createRateAggsWithInterface } from './create_rate_agg_with_interface';
@@ -46,17 +46,12 @@ export const createMetricAggregations = async (
     const aggregations = await inventoryModel.metrics.getAggregations({ schema });
     const metricAgg = aggregations.get(metric);
 
-    if (isInterfaceRateAgg(metricAgg)) {
-      const field = get(
-        metricAgg,
-        `${metric}_interfaces.aggregations.${metric}_interface_max.max.field`
-      ) as unknown as string;
-      const interfaceField = get(
-        metricAgg,
-        `${metric}_interfaces.terms.field`
-      ) as unknown as string;
-      return createRateAggsWithInterface(timerange, metric, field, interfaceField);
+    const interfaceRateConfig = getInterfaceRateFields(metricAgg, metric);
+    if (interfaceRateConfig) {
+      const { field, interfaceField, filter } = interfaceRateConfig;
+      return createRateAggsWithInterface(timerange, metric, field, interfaceField, filter);
     }
+
     if (isMetricRate(metricAgg)) {
       const field = get(metricAgg, `${metric}_max.max.field`) as unknown as string;
       return createRateAggs(timerange, metric, field);

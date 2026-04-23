@@ -35,15 +35,17 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
     margin,
     showAccordion,
     onClick,
-    highlightedTraceId,
+    contextSpanIds,
+    selectedSpanId,
     criticalPathSegmentsById,
     showCriticalPath,
   } = useTraceWaterfallContext();
-  const isHighlighted = highlightedTraceId === item.id;
+  const isContext = contextSpanIds?.includes(item.id) ?? false;
+  const isSelected = selectedSpanId === item.id;
   const widthPercent = (item.duration / duration) * 100;
   const leftPercent = ((item.offset + item.skew) / duration) * 100;
   const hasToggle = showAccordion && childrenCount > 0;
-  const accordionIndent = ACCORDION_PADDING_LEFT * item.depth;
+  const accordionIndent = ACCORDION_PADDING_LEFT * (item.depth > 200 ? 200 : item.depth);
   const { euiTheme } = useEuiTheme();
   const itemStatusIsFailureOrError = isFailureOrError(item.status?.value);
 
@@ -57,9 +59,7 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
 
   function calculateMarginLeft() {
     const marginLeft =
-      margin.left -
-      accordionIndent -
-      (itemStatusIsFailureOrError ? BORDER_THICKNESS * 2 : BORDER_THICKNESS);
+      margin.left - (itemStatusIsFailureOrError ? BORDER_THICKNESS * 2 : BORDER_THICKNESS);
     return hasToggle ? marginLeft - TOGGLE_BUTTON_WIDTH : marginLeft;
   }
 
@@ -90,11 +90,18 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
               : `${euiTheme.border.thin};`
           }
           padding: 6px 0;
-          ${isHighlighted ? `background-color: ${euiTheme.colors.lightestShade};` : undefined}
           ${
-            !highlightedTraceId &&
+            isSelected
+              ? `background-color: ${euiTheme.colors.backgroundBaseInteractiveSelect};`
+              : isContext
+              ? `background-color: ${euiTheme.colors.backgroundBaseWarning};`
+              : undefined
+          }
+          ${
+            !!onClick &&
+            !isSelected &&
             ` &:hover {
-            background-color: ${euiTheme.colors.lightestShade};
+            background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
           }`
           }
         `}

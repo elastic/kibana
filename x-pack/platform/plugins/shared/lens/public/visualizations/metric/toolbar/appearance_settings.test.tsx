@@ -8,9 +8,9 @@
 import React from 'react';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { fireEvent, render, screen } from '@testing-library/react';
-import type { Alignment, MetricVisualizationState, PrimaryMetricPosition } from '../types';
+import type { Alignment, MetricVisualizationState, PrimaryMetricPosition } from '@kbn/lens-common';
+import { LENS_METRIC_LAYOUT_BY_POSITION } from '@kbn/lens-common';
 import { EuiButtonGroupTestHarness } from '@kbn/test-eui-helpers';
-import { METRIC_LAYOUT_BY_POSITION } from '../constants';
 import { MetricAppearanceSettings } from './appearance_settings';
 
 const palette: PaletteOutput<CustomPaletteParams> = {
@@ -22,7 +22,9 @@ const palette: PaletteOutput<CustomPaletteParams> = {
 };
 
 // Remove legacy state properties as they should be removed in the initialize method
-const fullState: Required<Omit<MetricVisualizationState, 'secondaryPrefix' | 'valuesTextAlign'>> = {
+const fullState: Required<
+  Omit<MetricVisualizationState, 'secondaryPrefix' | 'valuesTextAlign' | 'titleWeight'>
+> = {
   layerId: 'first',
   layerType: 'data',
   metricAccessor: 'metric-col-id',
@@ -35,7 +37,7 @@ const fullState: Required<Omit<MetricVisualizationState, 'secondaryPrefix' | 'va
   progressDirection: 'vertical',
   maxCols: 5,
   color: 'static-color',
-  icon: 'compute',
+  icon: 'processor',
   palette,
   showBar: true,
   trendlineLayerId: 'second',
@@ -48,7 +50,6 @@ const fullState: Required<Omit<MetricVisualizationState, 'secondaryPrefix' | 'va
   primaryAlign: 'right',
   secondaryAlign: 'right',
   primaryPosition: 'bottom',
-  titleWeight: 'bold',
   iconAlign: 'left',
   valueFontMode: 'default',
   secondaryTrend: { type: 'none' },
@@ -267,39 +268,13 @@ describe('appearance settings', () => {
     expect(screen.queryByTestId('lens-metric-appearance-other-icon-position-btn')).toBeDisabled();
   });
 
-  it('should set Regular titleWeight', async () => {
-    renderComponent({ titleWeight: 'bold' });
-
-    const fontWeightBtnGroup = new EuiButtonGroupTestHarness(
-      'lens-metric-appearance-title-and-subtitle-font-weight-btn'
-    );
-
-    expect(fontWeightBtnGroup.getSelected()?.textContent).toBe('Bold');
-
-    fontWeightBtnGroup.select('Regular');
-    fontWeightBtnGroup.select('Bold');
-
-    expect(mockSetState.mock.calls.map(([s]) => s.titleWeight)).toEqual(['normal']);
-  });
-
-  it('should set Bold titleWeight', async () => {
-    renderComponent({ titleWeight: 'normal' });
-
-    const fontWeightBtnGroup = new EuiButtonGroupTestHarness(
-      'lens-metric-appearance-title-and-subtitle-font-weight-btn'
-    );
-
-    expect(fontWeightBtnGroup.getSelected()?.textContent).toBe('Regular');
-
-    fontWeightBtnGroup.select('Regular');
-    fontWeightBtnGroup.select('Bold');
-
-    expect(mockSetState.mock.calls.map(([s]) => s.titleWeight)).toEqual(['bold']);
-  });
-
   it.each<[PrimaryMetricPosition, string, PrimaryMetricPosition, string]>([
     ['top', 'Top', 'bottom', 'Bottom'],
+    ['middle', 'Middle', 'bottom', 'Bottom'],
     ['bottom', 'Bottom', 'top', 'Top'],
+    ['bottom', 'Bottom', 'middle', 'Middle'],
+    ['middle', 'Middle', 'top', 'Top'],
+    ['top', 'Top', 'middle', 'Middle'],
   ])(
     'should set default config when changing from %j (%s) to %j (%s)',
     (newPosition, newLabel, prevPosition, prevLabel) => {
@@ -316,7 +291,7 @@ describe('appearance settings', () => {
       expect(mockSetState).toHaveBeenCalledWith(
         expect.objectContaining({
           primaryPosition: newPosition,
-          ...METRIC_LAYOUT_BY_POSITION[newPosition],
+          ...LENS_METRIC_LAYOUT_BY_POSITION[newPosition],
         })
       );
     }

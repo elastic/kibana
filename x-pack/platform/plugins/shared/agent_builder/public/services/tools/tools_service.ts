@@ -28,6 +28,7 @@ import type {
   ListToolHealthResponse,
   ListMcpToolsHealthResponse,
   BulkCreateMcpToolsResponse,
+  BulkDeleteConnectorsResponse,
   ValidateNamespaceResponse,
 } from '../../../common/http_api/tools';
 import { publicApiPath, internalApiPath } from '../../../common/constants';
@@ -50,8 +51,10 @@ export class ToolsService {
     return await this.http.get<GetToolResponse>(`${publicApiPath}/tools/${toolId}`, {});
   }
 
-  async delete({ toolId }: { toolId: string }) {
-    return await this.http.delete<DeleteToolResponse>(`${publicApiPath}/tools/${toolId}`, {});
+  async delete({ toolId, force }: { toolId: string; force?: boolean }) {
+    return await this.http.delete<DeleteToolResponse>(`${publicApiPath}/tools/${toolId}`, {
+      query: { force: force ?? false },
+    });
   }
 
   async create(tool: CreateToolPayload) {
@@ -78,9 +81,9 @@ export class ToolsService {
 
   // internal APIs
 
-  async bulkDelete(toolsIds: string[]) {
+  async bulkDelete(toolIds: string[], options?: { force?: boolean }) {
     return await this.http.post<BulkDeleteToolResponse>(`${internalApiPath}/tools/_bulk_delete`, {
-      body: JSON.stringify({ ids: toolsIds }),
+      body: JSON.stringify({ ids: toolIds, force: options?.force ?? true }),
     });
   }
 
@@ -120,6 +123,13 @@ export class ToolsService {
   async getConnector({ connectorId }: { connectorId: string }) {
     return await this.http.get<GetConnectorResponse>(
       `${internalApiPath}/tools/_get_connector/${connectorId}`
+    );
+  }
+
+  async bulkDeleteConnectors(connectorIds: string[]) {
+    return await this.http.post<BulkDeleteConnectorsResponse>(
+      `${internalApiPath}/connectors/_bulk_delete`,
+      { body: JSON.stringify({ ids: connectorIds }) }
     );
   }
 

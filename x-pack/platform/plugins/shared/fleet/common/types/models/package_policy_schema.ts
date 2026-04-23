@@ -46,6 +46,23 @@ export const VarGroupSelectionsSchema = schema.maybe(
   })
 );
 
+export const DeprecationInfoSchema = schema.object({
+  description: schema.string(),
+  since: schema.maybe(schema.string()),
+  replaced_by: schema.maybe(
+    schema.recordOf(
+      schema.oneOf([
+        schema.literal('package'),
+        schema.literal('policyTemplate'),
+        schema.literal('input'),
+        schema.literal('dataStream'),
+        schema.literal('variable'),
+      ]),
+      schema.string()
+    )
+  ),
+});
+
 const PackagePolicyStreamsSchema = {
   id: schema.maybe(schema.string()), // BWC < 7.11
   enabled: schema.boolean(),
@@ -55,7 +72,7 @@ const PackagePolicyStreamsSchema = {
   ),
   data_stream: schema.object({
     dataset: schema.string(),
-    type: schema.string(),
+    type: schema.maybe(schema.string()),
     elasticsearch: schema.maybe(
       schema.object({
         privileges: schema.maybe(
@@ -72,17 +89,23 @@ const PackagePolicyStreamsSchema = {
   var_group_selections: VarGroupSelectionsSchema,
   config: schema.maybe(ConfigRecordSchema),
   compiled_stream: schema.maybe(schema.any()),
+  deprecated: schema.maybe(DeprecationInfoSchema),
+  migrate_from: schema.maybe(schema.string()),
 };
 
 export const PackagePolicyInputsSchema = {
   id: schema.maybe(schema.string()),
+  name: schema.maybe(schema.string()),
   type: schema.string(),
   policy_template: schema.maybe(schema.string()),
   enabled: schema.boolean(),
   keep_enabled: schema.maybe(schema.boolean()),
   vars: schema.maybe(ConfigRecordSchema),
+  var_group_selections: VarGroupSelectionsSchema,
   config: schema.maybe(ConfigRecordSchema),
-  streams: schema.arrayOf(schema.object(PackagePolicyStreamsSchema), { maxSize: 100 }),
+  streams: schema.arrayOf(schema.object(PackagePolicyStreamsSchema), { maxSize: 1000 }),
+  deprecated: schema.maybe(DeprecationInfoSchema),
+  migrate_from: schema.maybe(schema.string()),
 };
 
 export const ExperimentalDataStreamFeaturesSchema = schema.arrayOf(
@@ -241,6 +264,7 @@ export const PackagePolicyBaseSchema = {
       }),
     ])
   ),
+  package_agent_version_condition: schema.maybe(schema.string()),
 };
 
 export const NewPackagePolicySchema = schema.object({
@@ -248,6 +272,21 @@ export const NewPackagePolicySchema = schema.object({
   id: schema.maybe(schema.string()),
   force: schema.maybe(schema.boolean()),
 });
+
+/**
+ * Snapshot of the package policy SO schema as of model version 10.22.0.
+ * Permissive on enabled, inputs, and package so the SO layer can store
+ * internal shapes (e.g. compiled_input, minimal fixtures). If NewPackagePolicySchema
+ * gains new fields, create PackagePolicySchemaV{next} that extends this one.
+ */
+export const PackagePolicySchemaV22 = NewPackagePolicySchema.extends(
+  {
+    enabled: schema.maybe(schema.boolean()),
+    inputs: schema.maybe(schema.arrayOf(schema.any(), { maxSize: 1000 })),
+    package: schema.maybe(schema.any()),
+  },
+  { unknowns: 'ignore' }
+);
 
 const CreatePackagePolicyProps = {
   ...PackagePolicyBaseSchema,
@@ -257,7 +296,7 @@ const CreatePackagePolicyProps = {
     schema.object({
       ...PackagePolicyInputsSchema,
       streams: schema.maybe(
-        schema.arrayOf(schema.object(PackagePolicyStreamsSchema), { maxSize: 100 })
+        schema.arrayOf(schema.object(PackagePolicyStreamsSchema), { maxSize: 1000 })
       ),
     }),
     { maxSize: 1000 }
@@ -301,9 +340,9 @@ export const SimplifiedVarsSchema = schema.recordOf(
   schema.string(),
   schema.nullable(
     schema.oneOf([
-      schema.boolean(),
       schema.string(),
       schema.number(),
+      schema.boolean(),
       schema.arrayOf(schema.string(), { maxSize: 100 }),
       schema.arrayOf(schema.number(), { maxSize: 100 }),
       // Secrets
@@ -332,6 +371,7 @@ export const SimplifiedPackagePolicyInputsSchema = schema.maybe(
           },
         })
       ),
+      deprecated: schema.maybe(DeprecationInfoSchema),
       vars: schema.maybe(SimplifiedVarsSchema),
       streams: schema.maybe(
         schema.recordOf(
@@ -346,6 +386,7 @@ export const SimplifiedPackagePolicyInputsSchema = schema.maybe(
             ),
             vars: schema.maybe(SimplifiedVarsSchema),
             var_group_selections: VarGroupSelectionsSchema,
+            deprecated: schema.maybe(DeprecationInfoSchema),
           }),
           {
             meta: {
@@ -491,10 +532,10 @@ export const UpdatePackagePolicyRequestBodySchema = schema.object({
       schema.object({
         ...PackagePolicyInputsSchema,
         streams: schema.maybe(
-          schema.arrayOf(schema.object(PackagePolicyStreamsSchema), { maxSize: 100 })
+          schema.arrayOf(schema.object(PackagePolicyStreamsSchema), { maxSize: 1000 })
         ),
       }),
-      { maxSize: 100 }
+      { maxSize: 1000 }
     )
   ),
   version: schema.maybe(schema.string()),
@@ -554,7 +595,7 @@ export const PackagePolicySchema = schema.object({
       schema.object({
         id: schema.string(),
       }),
-      { maxSize: 100 }
+      { maxSize: 1000 }
     )
   ),
 });
