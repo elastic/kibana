@@ -78,6 +78,13 @@ export const changeHistoryMappings = {
 
       metadata: mappings.flattened(),
 
+      // <- managed upstream by `@kbn/data-streams`, please keep me commented out.
+      // kibana: mappings.object({
+      //   properties: {
+      //     space_ids: mappings.keyword(),
+      //   },
+      // }),
+
       service: mappings.object({
         properties: {
           type: mappings.keyword(),
