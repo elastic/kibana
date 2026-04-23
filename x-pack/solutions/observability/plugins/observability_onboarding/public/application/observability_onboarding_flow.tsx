@@ -27,11 +27,13 @@ import { useFlowBreadcrumb } from './shared/use_flow_breadcrumbs';
 import { useManagedOtlpServiceAvailability } from './shared/use_managed_otlp_service_availability';
 
 const queryClient = new QueryClient();
+const INGEST_HUB_ENABLED_FLAG = 'ingestHub.enabled';
 
 export function ObservabilityOnboardingFlow() {
   const { pathname } = useLocation();
   const {
     services: {
+      featureFlags,
       context: { isDev, isCloud, isServerless },
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
@@ -43,6 +45,7 @@ export function ObservabilityOnboardingFlow() {
   }, [pathname]);
 
   const isManagedOtlpServiceAvailable = useManagedOtlpServiceAvailability();
+  const isIngestHubEnabled = featureFlags.getBooleanValue(INGEST_HUB_ENABLED_FLAG, false);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -55,12 +58,6 @@ export function ObservabilityOnboardingFlow() {
         </Route>
         <Route path="/otel-kubernetes">
           <OtelKubernetesPage />
-        </Route>
-        <Route path="/unified-kubernetes">
-          <UnifiedKubernetesPage />
-        </Route>
-        <Route path="/host/:platform(linux|mac|windows)">
-          <UnifiedHostPage />
         </Route>
         <Route path="/otel-logs">
           <OtelLogsPage />
@@ -79,6 +76,16 @@ export function ObservabilityOnboardingFlow() {
           <Route path="/cloudforwarder">
             <CloudForwarderPage />
           </Route>
+        )}
+        {isIngestHubEnabled && (
+          <>
+            <Route path="/unified-kubernetes">
+              <UnifiedKubernetesPage />
+            </Route>
+            <Route path="/host/:platform(linux|mac|windows)">
+              <UnifiedHostPage />
+            </Route>
+          </>
         )}
         <Route>
           <LandingPage />
