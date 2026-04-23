@@ -101,16 +101,15 @@ ${prompts.examples}
 
 ## Instructions
 
-*Note: When conflicting, user instructions should take precedence over the default instructions.*
-
 ${getEsqlInstructions({ defaultLimit: rowLimit, disableNamedParams })}
 
 ${
   additionalInstructions
-    ? `<user-instructions>\n${additionalInstructions}\n</user-instructions>`
+    ? `<user-instructions>\n${additionalInstructions}\n</user-instructions>
+
+*Note: When conflicting, user instructions should take precedence over the default instructions.*`
     : ''
 }
-
 
 Take your time and think step by step about the natural language query and how to convert it into ES|QL.
 
