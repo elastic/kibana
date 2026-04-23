@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { waitFor } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { loadGlobalConnectorExecutionLogAggregations } from '../../../lib/action_connector_api/load_execution_log_aggregations';
 import { ConnectorEventLogListTable } from './actions_connectors_event_log_list_table';
@@ -83,23 +83,18 @@ describe('actions_connectors_event_log_list_table', () => {
       );
     });
 
+    const getCellsByColumn = (columnId: string) =>
+      within(screen.getByRole('grid'))
+        .getAllByRole('gridcell')
+        .filter((cell: HTMLElement) => cell.getAttribute('data-gridcell-column-id') === columnId);
+
     // After load, check data grid cell content
     await waitFor(() => {
-      const statusCells = document.querySelectorAll(
-        '[data-gridcell-column-id="status"] .euiDataGridRowCell__content'
-      );
-      expect(statusCells[0]).toHaveTextContent('succeeded');
+      expect(getCellsByColumn('status')[0]).toHaveTextContent('succeeded');
     });
 
-    const connectorNameCells = document.querySelectorAll(
-      '[data-gridcell-column-id="connector_name"] .euiDataGridRowCell__content'
-    );
-    expect(connectorNameCells[0]).toHaveTextContent('test connector');
-
-    const messageCells = document.querySelectorAll(
-      '[data-gridcell-column-id="message"] .euiDataGridRowCell__content'
-    );
-    expect(messageCells[0]).toHaveTextContent(
+    expect(getCellsByColumn('connector_name')[0]).toHaveTextContent('test connector');
+    expect(getCellsByColumn('message')[0]).toHaveTextContent(
       'action executed: .server-log:86020b10-9b3b-11ed-8422-2f5a388a317d: test'
     );
   });

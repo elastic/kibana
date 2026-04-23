@@ -250,7 +250,7 @@ describe('EsQueryRuleTypeExpression', () => {
     uiSettingsMock.get.mockReturnValue(true);
   });
 
-  test('should render options by default', async () => {
+  test('should render options by default', () => {
     setup({} as EsQueryRuleParams<SearchType.esQuery>);
     expect(screen.getByTestId('queryFormTypeChooserTitle')).toBeInTheDocument();
     expect(screen.getByTestId('queryFormType_searchSource')).toBeInTheDocument();
@@ -259,7 +259,7 @@ describe('EsQueryRuleTypeExpression', () => {
     expect(screen.queryByTestId('queryFormTypeChooserCancel')).not.toBeInTheDocument();
   });
 
-  test('should hide ESQL option when not enabled', async () => {
+  test('should hide ESQL option when not enabled', () => {
     uiSettingsMock.get.mockReturnValueOnce(false);
     setup({} as EsQueryRuleParams<SearchType.esQuery>);
     expect(screen.getByTestId('queryFormTypeChooserTitle')).toBeInTheDocument();

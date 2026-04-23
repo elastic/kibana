@@ -192,7 +192,7 @@ describe('ResilientParamsFields renders', () => {
       await userEvent.type(input, 'Malware');
       const option = await screen.findByText('Malware');
       await userEvent.click(option, { pointerEventsCheck: 0 });
-      expect(editAction.mock.calls[0][1].incident.incidentTypes).toBeDefined();
+      expect(editAction.mock.calls[0][1].incident.incidentTypes).toEqual(['19']);
     });
 
     test('incidentTypes undefined triggers editAction', async () => {
