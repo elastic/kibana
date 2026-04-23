@@ -138,43 +138,40 @@ export function registerKibanaFunction({
 
       const data = body ? JSON.stringify(body) : undefined;
 
+      const makeRequest = (url: string) =>
+        axios({ method, headers, url, data, signal }).then((response) => ({
+          content: response.data,
+        }));
+
+      const primaryUrl = format(nextUrl);
+
       try {
-        const response = await axios({
-          method,
-          headers,
-          url: format(nextUrl),
-          data,
-          signal,
-        });
-        return { content: response.data };
+        return await makeRequest(primaryUrl);
       } catch (e) {
-        if (isEnotfoundError(e)) {
-          const localUrl = getLocalServerUrl();
-          logger.debug(
-            `publicBaseUrl "${format(nextUrl)}" is not reachable from the Kibana server ` +
-              `(ENOTFOUND). Retrying with local server address: ` +
-              `"${method} ${format(localUrl)}"`
+        const localUrl = isEnotfoundError(e) ? getLocalServerUrl() : undefined;
+
+        if (!localUrl) {
+          logger.error(
+            `Error calling Kibana API: ${method} ${primaryUrl}. Failed with ${e}`
           );
-          try {
-            const response = await axios({
-              method,
-              headers,
-              url: format(localUrl),
-              data,
-              signal,
-            });
-            return { content: response.data };
-          } catch (retryError) {
-            logger.error(
-              `Error calling Kibana API via local fallback: ${method} ${format(localUrl)}. ` +
-                `Failed with ${retryError}`
-            );
-            throw retryError;
-          }
+          throw e;
         }
 
-        logger.error(`Error calling Kibana API: ${method} ${format(nextUrl)}. Failed with ${e}`);
-        throw e;
+        const fallbackUrl = format(localUrl);
+        logger.warn(
+          `publicBaseUrl "${primaryUrl}" is not reachable from the Kibana server (ENOTFOUND). ` +
+            `Retrying with local server address: "${method} ${fallbackUrl}"`
+        );
+
+        try {
+          return await makeRequest(fallbackUrl);
+        } catch (retryError) {
+          logger.error(
+            `Error calling Kibana API via local fallback: ${method} ${fallbackUrl}. ` +
+              `Failed with ${retryError}`
+          );
+          throw retryError;
+        }
       }
     }
   );
