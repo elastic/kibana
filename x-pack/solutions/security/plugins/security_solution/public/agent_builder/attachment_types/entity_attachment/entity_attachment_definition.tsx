@@ -98,9 +98,7 @@ export const createEntityAttachmentDefinition = ({
   resolveSecurityCanvasContext?: () => Promise<SecurityCanvasEmbeddedBundle>;
   searchSession?: ISessionService;
 }): AttachmentUIDefinition<EntityAttachment> => {
-  const canRenderCanvas = application != null && resolveSecurityCanvasContext != null;
-
-  return {
+  const baseDefinition: AttachmentUIDefinition<EntityAttachment> = {
     getLabel: (attachment) => {
       const customLabel = attachment?.data?.attachmentLabel;
       if (customLabel) return customLabel;
@@ -122,75 +120,82 @@ export const createEntityAttachmentDefinition = ({
         />
       </React.Suspense>
     ),
-    ...(canRenderCanvas
-      ? {
-          renderCanvasContent: (props: AttachmentRenderProps<EntityAttachment>) => (
-            <React.Suspense
-              fallback={
-                <EuiFlexGroup alignItems="center" justifyContent="center" css={{ minHeight: 200 }}>
-                  <EuiFlexItem grow={false}>
-                    <EuiLoadingSpinner size="l" />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              }
-            >
-              <LazyEntityAttachmentCanvasContent
-                {...props}
-                experimentalFeatures={experimentalFeatures}
-                application={application!}
-                agentBuilder={agentBuilder}
-                chrome={chrome}
-                resolveSecurityCanvasContext={resolveSecurityCanvasContext!}
-                searchSession={searchSession}
-              />
-            </React.Suspense>
-          ),
-          getActionButtons: ({ attachment, isCanvas, openCanvas, openSidebarConversation }) => {
-            const parsed = normaliseEntityAttachment(attachment);
-            if (!parsed || !parsed.isSingle) {
-              return [];
-            }
-            const identifier = parsed.entities[0];
-            if (!isFlyoutCapableIdentifierType(identifier.identifierType)) {
-              return [];
-            }
-            if (isCanvas) {
-              return [
-                {
-                  label: OPEN_IN_SECURITY_LABEL,
-                  icon: 'popout',
-                  type: ActionButtonType.SECONDARY,
-                  handler: () => {
-                    navigateToSecurityEntityInApp({
-                      application: application!,
-                      appId: APP_UI_ID,
-                      row: {
-                        entity_type: identifier.identifierType,
-                        entity_id: identifier.entityStoreId ?? identifier.identifier,
-                        entity_name: identifier.identifier,
-                      },
-                      agentBuilder,
-                      chrome,
-                      openSidebarConversation,
-                      searchSession,
-                    });
-                  },
-                },
-              ];
-            }
-            if (!openCanvas) {
-              return [];
-            }
-            return [
-              {
-                label: PREVIEW_LABEL,
-                icon: 'eye',
-                type: ActionButtonType.SECONDARY,
-                handler: openCanvas,
-              },
-            ];
-          },
+  };
+
+  if (application == null || resolveSecurityCanvasContext == null) {
+    return baseDefinition;
+  }
+
+  const resolvedApplication = application;
+  const resolvedResolveCanvasContext = resolveSecurityCanvasContext;
+
+  return {
+    ...baseDefinition,
+    renderCanvasContent: (props: AttachmentRenderProps<EntityAttachment>) => (
+      <React.Suspense
+        fallback={
+          <EuiFlexGroup alignItems="center" justifyContent="center" css={{ minHeight: 200 }}>
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="l" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         }
-      : {}),
+      >
+        <LazyEntityAttachmentCanvasContent
+          {...props}
+          experimentalFeatures={experimentalFeatures}
+          application={resolvedApplication}
+          agentBuilder={agentBuilder}
+          chrome={chrome}
+          resolveSecurityCanvasContext={resolvedResolveCanvasContext}
+          searchSession={searchSession}
+        />
+      </React.Suspense>
+    ),
+    getActionButtons: ({ attachment, isCanvas, openCanvas, openSidebarConversation }) => {
+      const parsed = normaliseEntityAttachment(attachment);
+      if (!parsed || !parsed.isSingle) {
+        return [];
+      }
+      const identifier = parsed.entities[0];
+      if (!isFlyoutCapableIdentifierType(identifier.identifierType)) {
+        return [];
+      }
+      if (isCanvas) {
+        return [
+          {
+            label: OPEN_IN_SECURITY_LABEL,
+            icon: 'popout',
+            type: ActionButtonType.SECONDARY,
+            handler: () => {
+              navigateToSecurityEntityInApp({
+                application: resolvedApplication,
+                appId: APP_UI_ID,
+                row: {
+                  entity_type: identifier.identifierType,
+                  entity_id: identifier.entityStoreId ?? identifier.identifier,
+                  entity_name: identifier.identifier,
+                },
+                agentBuilder,
+                chrome,
+                openSidebarConversation,
+                searchSession,
+              });
+            },
+          },
+        ];
+      }
+      if (!openCanvas) {
+        return [];
+      }
+      return [
+        {
+          label: PREVIEW_LABEL,
+          icon: 'eye',
+          type: ActionButtonType.SECONDARY,
+          handler: openCanvas,
+        },
+      ];
+    },
   };
 };

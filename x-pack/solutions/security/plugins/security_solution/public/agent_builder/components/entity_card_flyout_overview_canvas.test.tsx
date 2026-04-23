@@ -10,7 +10,9 @@ import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { EntityForAttachment } from '../attachment_types/entity_attachment/use_entity_for_attachment';
+import { useEntityForAttachment } from '../attachment_types/entity_attachment/use_entity_for_attachment';
 import { EntityType } from '../../../common/entity_analytics/types';
+import { EntityCardFlyoutOverviewCanvas } from './entity_card_flyout_overview_canvas';
 
 /**
  * The canvas component is a thin dispatcher:
@@ -32,9 +34,7 @@ jest.mock('../../flyout/shared/components/flyout_loading', () => ({
   FlyoutLoading: () => <div data-test-subj="flyoutLoadingMock" />,
 }));
 
-const mockedUseEntityForAttachment =
-  require('../attachment_types/entity_attachment/use_entity_for_attachment')
-    .useEntityForAttachment as jest.Mock;
+const mockedUseEntityForAttachment = useEntityForAttachment as jest.Mock;
 
 const baseEntityData = (override: Partial<EntityForAttachment> = {}): EntityForAttachment => ({
   entityType: EntityType.host,
@@ -48,8 +48,6 @@ const baseEntityData = (override: Partial<EntityForAttachment> = {}): EntityForA
   sources: [],
   ...override,
 });
-
-const { EntityCardFlyoutOverviewCanvas } = require('./entity_card_flyout_overview_canvas');
 
 const applicationStub = { navigateToApp: jest.fn() } as unknown as ApplicationStart;
 

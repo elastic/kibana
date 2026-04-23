@@ -10,8 +10,11 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { ISessionService } from '@kbn/data-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import type { EntityForAttachment } from '../use_entity_for_attachment';
+import { useEntityForAttachment } from '../use_entity_for_attachment';
+import { navigateToSecurityEntityInApp } from '../../entity_explore_navigation';
 import { EntityTable } from './entity_table';
 
 jest.mock('../use_entity_for_attachment', () => ({
@@ -30,13 +33,9 @@ jest.mock('../../entity_explore_navigation', () => {
   };
 });
 
-const mockedUseEntityForAttachment = require('../use_entity_for_attachment')
-  .useEntityForAttachment as jest.Mock;
-
-const mockedUseKibana = require('@kbn/kibana-react-plugin/public').useKibana as jest.Mock;
-
-const mockedNavigateToSecurityEntityInApp = require('../../entity_explore_navigation')
-  .navigateToSecurityEntityInApp as jest.Mock;
+const mockedUseEntityForAttachment = useEntityForAttachment as jest.Mock;
+const mockedUseKibana = useKibana as jest.Mock;
+const mockedNavigateToSecurityEntityInApp = navigateToSecurityEntityInApp as jest.Mock;
 
 const baseEntityData = (override: Partial<EntityForAttachment> = {}): EntityForAttachment => ({
   entityType: EntityType.host,

@@ -71,7 +71,7 @@ const renderProvider = (
   render(
     <I18nProvider>
       <SecurityReduxEmbeddedProvider resolveCanvasContext={resolveCanvasContext}>
-        <span data-test-subj="embeddedChild">embedded</span>
+        <span data-test-subj="embeddedChild">{'embedded'}</span>
       </SecurityReduxEmbeddedProvider>
     </I18nProvider>
   );

@@ -12,6 +12,7 @@ import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import type { EntityAttachment } from './types';
 import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
+import { EntityAttachmentCanvasContent } from './entity_attachment_canvas_content';
 
 /**
  * Canvas-content dispatcher tests.
@@ -48,8 +49,6 @@ jest.mock('./entity_card/entity_card', () => ({
   ),
 }));
 
-const { EntityAttachmentCanvasContent } = require('./entity_attachment_canvas_content');
-
 const experimentalFeatures = {
   entityAnalyticsWatchlistEnabled: false,
   enableRiskScorePrivmonModifier: false,
@@ -69,7 +68,6 @@ const renderCanvas = (data: unknown) =>
       <EntityAttachmentCanvasContent
         attachment={attachmentOf(data)}
         isSidebar={false}
-        isCanvas
         experimentalFeatures={experimentalFeatures}
         application={applicationStub}
         resolveSecurityCanvasContext={resolveSecurityCanvasContext}
