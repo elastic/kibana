@@ -103,6 +103,7 @@ export const MetricsExperienceGrid = ({
 
   const { toggleActions, leftSideActions, rightSideActions } = useToolbarActions({
     allDimensions,
+    metricItems,
     renderToggleActions,
     onDimensionsChange: onToolbarDimensionsChange,
     isLoading: isDiscoverLoading,
