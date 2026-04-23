@@ -13,14 +13,23 @@
 export interface DataSourceCommon {
   type: DataSourceType;
   description: string;
+  id: string;
 }
 
-export type DataSourceSettings =
+export type DataSource =
   | S3DataSource
   | GCSDataSource
   | AzureBlobDataSource
   | IcebergDataSource
   | JdbcDataSource
+  | FlightDataSource;
+
+export type DataSourceWithSecrets =
+  | S3DataSourceWithSecrets
+  | GCSDataSourceWithSecrets
+  | AzureBlobDataSourceWithSecrets
+  | IcebergDataSourceWithSecrets
+  | JdbcDataSourceWithSecrets
   | FlightDataSource;
 
 export type DataSourceType = 's3' | 'gcs' | 'azure_blob' | 'iceberg' | 'jdbc' | 'flight';
@@ -30,13 +39,17 @@ export interface S3DataSource extends DataSourceCommon {
   settings: S3DataSourceSettings;
 }
 
+export interface S3DataSourceWithSecrets extends S3DataSource {
+  settings: S3DataSourceSettingsWithSecrets;
+}
+
 export interface S3DataSourceSettings {
   region?: string;
   endpoint?: string;
   auth?: string;
 }
 
-export interface S3SourceSettingsWithSecrets extends S3DataSourceSettings {
+export interface S3DataSourceSettingsWithSecrets extends S3DataSourceSettings {
   access_key?: string;
   secret_key?: string;
 }
@@ -44,6 +57,10 @@ export interface S3SourceSettingsWithSecrets extends S3DataSourceSettings {
 export interface GCSDataSource extends DataSourceCommon {
   type: 'gcs';
   settings: GCSDataSourceSettings;
+}
+
+export interface GCSDataSourceWithSecrets extends GCSDataSource {
+  settings: GCSDataSourceSettingsWithSecrets;
 }
 
 export interface GCSDataSourceSettings {
@@ -60,6 +77,10 @@ export interface GCSDataSourceSettingsWithSecrets extends GCSDataSourceSettings 
 export interface AzureBlobDataSource extends DataSourceCommon {
   type: 'azure_blob';
   settings: AzureBlobDataSourceSettings;
+}
+
+export interface AzureBlobDataSourceWithSecrets extends AzureBlobDataSource {
+  settings: AzureBlobDataSourceSettingsWithSecrets;
 }
 
 export interface AzureBlobDataSourceSettings {
@@ -79,6 +100,10 @@ export interface IcebergDataSource extends DataSourceCommon {
   settings: IcebergDataSourceSettings;
 }
 
+export interface IcebergDataSourceWithSecrets extends IcebergDataSource {
+  settings: IcebergDataSourceSettingsWithSecrets;
+}
+
 export interface IcebergDataSourceSettings {
   region?: string;
   endpoint?: string;
@@ -94,6 +119,10 @@ export interface IcebergDataSourceSettingsWithSecrets extends IcebergDataSourceS
 export interface JdbcDataSource extends DataSourceCommon {
   type: 'jdbc';
   settings: JdbcDataSourceSettings;
+}
+
+export interface JdbcDataSourceWithSecrets extends JdbcDataSource {
+  settings: JdbcDataSourceSettingsWithSecrets;
 }
 
 export interface JdbcDataSourceSettings extends DataSourceCommon {

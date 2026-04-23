@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export type { DataSource } from './types';
+export type { DataSource, DataSourceWithSecrets } from './datasource_types';
 
 export const PLUGIN_ID = 'data_source_management';
 
