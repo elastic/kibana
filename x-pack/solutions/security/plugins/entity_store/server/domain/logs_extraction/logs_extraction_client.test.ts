@@ -81,10 +81,10 @@ jest.mock('../../infra/elasticsearch/ingest');
 
 const mockExecuteEsqlQuery = executeEsqlQuery as jest.MockedFunction<typeof executeEsqlQuery>;
 const mockIngestEntities = ingestEntities as jest.MockedFunction<typeof ingestEntities>;
-type Nullable<T> = { [K in keyof T]: T[K] | null };
+
 function createMockEngineDescriptor(
   type: EntityType = 'user',
-  overrides?: Nullable<{
+  overrides?: Partial<{
     lookbackPeriod: string;
     delay: string;
     paginationTimestamp: string;
