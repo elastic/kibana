@@ -7,26 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { combineLatest, debounceTime, skip } from 'rxjs';
 import type {
   AnyPublishingSubject,
   PublishingSubject,
   UnwrapPublishingSubjectTuple,
 } from './types';
-
-const hasSubjectsArrayChanged = (
-  subjectsA: AnyPublishingSubject[],
-  subjectsB: AnyPublishingSubject[]
-) => {
-  if (subjectsA.length !== subjectsB.length) return true;
-
-  for (let i = 0; i < subjectsA.length; i++) {
-    // here we only compare if the subjects are both either defined or undefined.
-    if (Boolean(subjectsA[i]) !== Boolean(subjectsB[i])) return true;
-  }
-  return false;
-};
 
 /**
  * Batches the latest values of multiple publishing subjects into a single object. Use this to avoid unnecessary re-renders.
@@ -70,7 +57,6 @@ export const useBatchedPublishingSubjects = <
           setLatestPublishedValues(values as UnwrapPublishingSubjectTuple<SubjectsType>);
         }),
     // 'subjects' gets a new reference on each call because of spread
-    // Use 'useBatchedOptionalPublishingSubjects' when 'subjects' are expected to change.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
