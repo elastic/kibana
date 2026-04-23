@@ -43,13 +43,6 @@ export interface GeneratorConfig {
    * @default undefined
    */
   schemaNameTransform?: 'pascalCase';
-  /**
-   * How to populate `@kbn/zod-helpers/v4` imports:
-   * - `minimal` (default): import only helpers static analysis believes are used.
-   * - `full`: when any helper is needed, import all four (`isValidDateMath`, `isNonEmptyString`,
-   *   `ArrayFromString`, `BooleanFromString`)—useful if a spec shape is not yet covered by analysis.
-   */
-  zodHelpersImportMode?: 'minimal' | 'full';
 }
 
 export const generate = async (config: GeneratorConfig) => {
@@ -78,7 +71,6 @@ export const generate = async (config: GeneratorConfig) => {
         generatedPath: getGeneratedFilePath(sourcePath),
         generationContext: getGenerationContext(parsedSchema, {
           schemaNameTransform: config.schemaNameTransform,
-          zodHelpersImportMode: config.zodHelpersImportMode,
         }),
       };
     })
@@ -125,7 +117,6 @@ export const generate = async (config: GeneratorConfig) => {
       },
       config: {
         schemaNameTransform: config.schemaNameTransform,
-        zodHelpersImportMode: config.zodHelpersImportMode,
       },
     });
 
