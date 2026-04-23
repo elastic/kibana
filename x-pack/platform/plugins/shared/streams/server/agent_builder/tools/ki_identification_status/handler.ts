@@ -15,16 +15,14 @@ import {
 
 interface GetKiIdentificationStatusHandlerParams {
   streamName: string;
-  saveQueries: boolean;
   taskClient: TaskClient<StreamsTaskType>;
 }
 
 export async function getKiIdentificationStatusToolHandler({
   streamName,
-  saveQueries,
   taskClient,
 }: GetKiIdentificationStatusHandlerParams) {
-  const taskId = getOnboardingTaskId(streamName, saveQueries);
+  const taskId = getOnboardingTaskId(streamName, true);
   const status = await taskClient.getStatus<OnboardingTaskParams, OnboardingResult>(taskId);
 
   return {

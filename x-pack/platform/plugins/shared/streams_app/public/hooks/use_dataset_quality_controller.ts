@@ -13,13 +13,13 @@ import type {
 } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality_details';
 import { DEFAULT_DATEPICKER_REFRESH } from '@kbn/dataset-quality-plugin/common';
 import { STREAMS_APP_LOCATOR_ID } from '@kbn/deeplinks-observability';
+import type { StreamsAppLocationParams } from '@kbn/streams-plugin/common';
 import {
   getDatasetQualityDetailsStateFromUrl,
   updateUrlFromDatasetQualityDetailsState,
 } from '../util/url_state_storage_service';
 import { useKibana } from './use_kibana';
 import { useKbnUrlStateStorageFromRouterContext } from '../util/kbn_url_state_context';
-import type { StreamsAppLocatorParams } from '../../common/locators/streams_locator';
 import { useTimeRange } from './use_time_range';
 import { useTimeRangeUpdate } from './use_time_range_update';
 
@@ -47,7 +47,7 @@ export const useDatasetQualityController = (
   const { updateTimeRange } = useTimeRangeUpdate();
 
   const streamsUrls = useMemo(() => {
-    const streamsLocator = locators.get<StreamsAppLocatorParams>(STREAMS_APP_LOCATOR_ID);
+    const streamsLocator = locators.get<StreamsAppLocationParams>(STREAMS_APP_LOCATOR_ID);
     if (!streamsLocator) {
       return undefined;
     }
@@ -57,11 +57,11 @@ export const useDatasetQualityController = (
       processingUrl: streamsLocator.getRedirectUrl({
         name: streamName,
         managementTab: 'processing',
-      } as StreamsAppLocatorParams),
+      } as StreamsAppLocationParams),
       schemaUrl: streamsLocator.getRedirectUrl({
         name: streamName,
         managementTab: 'schema',
-      } as StreamsAppLocatorParams),
+      } as StreamsAppLocationParams),
     };
   }, [locators, definition.stream.name]);
 

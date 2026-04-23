@@ -19,13 +19,6 @@ export const STREAMS_KI_IDENTIFICATION_STATUS_TOOL_ID =
 
 const onboardingStatusSchema = z.object({
   stream_name: z.string().describe('Target stream name, e.g. "logs.ecs.nginx".'),
-  save_queries: z
-    .boolean()
-    .optional()
-    .default(true)
-    .describe(
-      'When true, checks the KI identification background task that persists generated queries.'
-    ),
 });
 
 export const createKiIdentificationStatusTool = ({
@@ -45,7 +38,6 @@ export const createKiIdentificationStatusTool = ({
     - Poll KI identification background task progress programmatically
     - Retrieve completed KI identification results
     - Inspect failure details when the background task fails
-    - Check status for tasks with or without query persistence (\`save_queries\`)
 
     Returns:
     - On success: task status payload for the stream (includes terminal results when available)
@@ -53,12 +45,11 @@ export const createKiIdentificationStatusTool = ({
   `,
   tags: ['streams', 'significant_events'],
   schema: onboardingStatusSchema,
-  handler: async ({ stream_name: streamName, save_queries: saveQueries }, { request }) => {
+  handler: async ({ stream_name: streamName }, { request }) => {
     try {
       const { taskClient } = await getScopedClients({ request });
       const data = await getKiIdentificationStatusToolHandler({
         streamName,
-        saveQueries: saveQueries ?? true,
         taskClient,
       });
 

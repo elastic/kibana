@@ -34,20 +34,6 @@ describe('createKiIdentificationCancelTool', () => {
     }
   });
 
-  it('uses save_queries to resolve task id', async () => {
-    const { tool, context, taskClient } = setup();
-
-    await tool.handler(
-      {
-        stream_name: 'logs.nginx',
-        save_queries: false,
-      },
-      context
-    );
-
-    expect(taskClient.cancel).toHaveBeenCalledWith('streams_onboarding_logs.nginx_no_save_queries');
-  });
-
   it('returns error result when cancellation fails', async () => {
     const { tool, context, taskClient } = setup();
     taskClient.cancel.mockRejectedValueOnce(new Error('boom'));

@@ -15,9 +15,8 @@ describe('cancelKiIdentificationToolHandler', () => {
     };
 
     const result = await cancelKiIdentificationToolHandler({
-      streamName: 'logs.nginx',
-      saveQueries: true,
-      taskClient: taskClient as never,
+      stream_name: 'logs.nginx',
+      task_client: taskClient as never,
     });
 
     expect(taskClient.cancel).toHaveBeenCalledWith('streams_onboarding_logs.nginx');

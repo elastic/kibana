@@ -16,7 +16,6 @@ describe('getKiIdentificationStatusToolHandler', () => {
 
     const result = await getKiIdentificationStatusToolHandler({
       streamName: 'logs.nginx',
-      saveQueries: true,
       taskClient: taskClient as never,
     });
 

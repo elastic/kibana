@@ -25,7 +25,6 @@ describe('startKiIdentificationToolHandler', () => {
 
     const result = await startKiIdentificationToolHandler({
       streamName: 'logs.nginx',
-      saveQueries: true,
       steps: ['features_identification', 'queries_generation'],
       taskClient: taskClient as never,
       request,

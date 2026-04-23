@@ -11,9 +11,8 @@ import type { StreamsTaskType } from '../../../lib/tasks/task_definitions';
 import { getOnboardingTaskId } from '../../../lib/tasks/task_definitions/onboarding';
 
 interface CancelKiIdentificationHandlerParams {
-  streamName: string;
-  saveQueries: boolean;
-  taskClient: TaskClient<StreamsTaskType>;
+  stream_name: string;
+  task_client: TaskClient<StreamsTaskType>;
 }
 
 interface CancelKiIdentificationHandlerResult {
@@ -23,11 +22,10 @@ interface CancelKiIdentificationHandlerResult {
 }
 
 export async function cancelKiIdentificationToolHandler({
-  streamName,
-  saveQueries,
-  taskClient,
+  stream_name: streamName,
+  task_client: taskClient,
 }: CancelKiIdentificationHandlerParams): Promise<CancelKiIdentificationHandlerResult> {
-  const taskId = getOnboardingTaskId(streamName, saveQueries);
+  const taskId = getOnboardingTaskId(streamName, true);
 
   await taskClient.cancel(taskId);
 

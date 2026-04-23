@@ -19,11 +19,6 @@ export const STREAMS_KI_IDENTIFICATION_CANCEL_TOOL_ID =
 
 const cancelSchema = z.object({
   stream_name: z.string().describe('Target stream name, e.g. "logs.ecs.nginx".'),
-  save_queries: z
-    .boolean()
-    .optional()
-    .default(true)
-    .describe('When true, cancels the KI identification task variant that persists queries.'),
 });
 
 export const createKiIdentificationCancelTool = ({
@@ -38,7 +33,6 @@ export const createKiIdentificationCancelTool = ({
 
     Use this tool to:
     - Stop a running KI identification background task when the user requests cancellation
-    - Cancel the matching task variant based on \`save_queries\`
 
     Returns:
     - On success: task cancel acknowledgement payload with stream, task id, and status
@@ -46,13 +40,12 @@ export const createKiIdentificationCancelTool = ({
   `,
   tags: ['streams', 'significant_events', 'management', 'kis', 'knowledge_indicators'],
   schema: cancelSchema,
-  handler: async ({ stream_name: streamName, save_queries: saveQueries }, { request }) => {
+  handler: async ({ stream_name: streamName }, { request }) => {
     try {
       const { taskClient } = await getScopedClients({ request });
       const data = await cancelKiIdentificationToolHandler({
-        streamName,
-        saveQueries: saveQueries ?? true,
-        taskClient,
+        stream_name: streamName,
+        task_client: taskClient,
       });
 
       return {

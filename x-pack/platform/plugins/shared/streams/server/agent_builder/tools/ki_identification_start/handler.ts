@@ -7,6 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { OnboardingStep } from '@kbn/streams-schema';
+import { getStreamsLocation } from '../../../../common/get_streams_location/get_streams_location';
 import type { TaskClient } from '../../../lib/tasks/task_client';
 import type { StreamsTaskType } from '../../../lib/tasks/task_definitions';
 import {
@@ -19,7 +20,6 @@ const DEFAULT_LOOKBACK_MS = 24 * 60 * 60 * 1000;
 
 interface StartKiIdentificationHandlerParams {
   streamName: string;
-  saveQueries: boolean;
   steps: OnboardingStep[];
   connectors?: {
     features?: string;
@@ -35,13 +35,13 @@ interface StartKiIdentificationHandlerResult {
 
 export async function startKiIdentificationToolHandler({
   streamName,
-  saveQueries,
   steps,
   connectors,
   taskClient,
   request,
 }: StartKiIdentificationHandlerParams): Promise<StartKiIdentificationHandlerResult> {
-  const taskId = getOnboardingTaskId(streamName, saveQueries);
+  const taskId = getOnboardingTaskId(streamName, true);
+  const now = Date.now();
 
   await taskClient.schedule<OnboardingTaskParams>({
     task: {
@@ -51,19 +51,22 @@ export async function startKiIdentificationToolHandler({
     },
     params: {
       streamName,
-      from: Date.now() - DEFAULT_LOOKBACK_MS,
-      to: Date.now(),
+      from: now - DEFAULT_LOOKBACK_MS,
+      to: now,
       steps,
-      saveQueries,
+      saveQueries: true,
       connectors,
     },
     request,
   });
 
   const origin = new URL(request.url).origin;
-  const path = `/app/streams/${streamName}/management/significantEvents`;
+  const location = getStreamsLocation({
+    name: streamName,
+    managementTab: 'significantEvents',
+  });
 
   return {
-    url: `${origin}${path}`,
+    url: `${origin}/app/${location.app}${location.path}`,
   };
 }

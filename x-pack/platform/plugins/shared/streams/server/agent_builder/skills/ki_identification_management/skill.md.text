@@ -42,14 +42,12 @@ Example: start KI identification background task
 Tool: `ki_identification_start`
 Parameters:
 - stream_name: target stream
-- save_queries: optional, default true
 - steps: optional ordered KI identification steps
 - connectors: optional per-step connector overrides
 
 Example call:
 {
   "stream_name": "logs.ecs.linux",
-  "save_queries": true,
   "steps": ["features_identification", "queries_generation"]
 }
 
@@ -66,12 +64,10 @@ Example: check KI identification status
 Tool: `ki_identification_status`
 Parameters:
 - stream_name: target stream
-- save_queries: optional, default true (must match task variant)
 
 Example call:
 {
-  "stream_name": "logs.ecs.linux",
-  "save_queries": true
+  "stream_name": "logs.ecs.linux"
 }
 
 Example output shape:
@@ -85,12 +81,10 @@ Example: cancel KI identification background task
 Tool: `ki_identification_cancel`
 Parameters:
 - stream_name: target stream
-- save_queries: optional, default true (must match task variant)
 
 Example call:
 {
-  "stream_name": "logs.ecs.linux",
-  "save_queries": true
+  "stream_name": "logs.ecs.linux"
 }
 
 Example output shape:

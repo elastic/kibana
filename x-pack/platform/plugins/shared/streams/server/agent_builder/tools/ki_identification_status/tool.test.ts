@@ -47,22 +47,6 @@ describe('createKiIdentificationStatusTool', () => {
     }
   });
 
-  it('uses save_queries to resolve task id', async () => {
-    const { tool, context, taskClient } = setup();
-
-    await tool.handler(
-      {
-        stream_name: 'logs.nginx',
-        save_queries: false,
-      },
-      context
-    );
-
-    expect(taskClient.getStatus).toHaveBeenCalledWith(
-      'streams_onboarding_logs.nginx_no_save_queries'
-    );
-  });
-
   it('returns error result when status retrieval fails', async () => {
     const { tool, context, taskClient } = setup();
     taskClient.getStatus.mockRejectedValueOnce(new Error('boom'));
@@ -72,7 +56,7 @@ describe('createKiIdentificationStatusTool', () => {
     if ('results' in result) {
       expect(result.results[0].type).toBe('error');
       const data = result.results[0].data as Record<string, unknown>;
-      expect(data.message).toContain('Failed to get KI identification onboarding status');
+      expect(data.message).toContain('Failed to get KI identification background task status');
       expect(data.operation).toBe('ki_identification_status');
     }
   });
