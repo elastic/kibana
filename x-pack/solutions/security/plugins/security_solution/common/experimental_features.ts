@@ -233,7 +233,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the deprecated prebuilt rules UI
    * Release: 9.4
    */
-  prebuiltRulesDeprecationUIEnabled: false,
+  prebuiltRulesDeprecationUIEnabled: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
