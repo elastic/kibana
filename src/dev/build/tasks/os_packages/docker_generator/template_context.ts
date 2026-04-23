@@ -35,4 +35,6 @@ export interface TemplateContext {
   revision: string;
   architecture?: string;
   fips?: boolean;
+  tarZstd?: boolean;
+  tarExt: string;
 }
