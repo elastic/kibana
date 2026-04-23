@@ -10,6 +10,7 @@ import type { CRUDClient } from '@kbn/entity-store/server/domain/crud/crud_clien
 import type { MonitoringEntitySource } from '../../../../../../common/api/entity_analytics/watchlists/data_source/common.gen';
 import type { WatchlistBulkEntity } from '../types';
 import { getErrorFromBulkResponse, errorsMsg } from '../sync/utils';
+import { buildWatchlistDocId } from '../../entities/utils';
 import { addWatchlistAttributeToStore } from '../sync/entity_store_sync';
 
 export const UPDATE_SCRIPT_SOURCE = `
@@ -84,7 +85,7 @@ export const bulkUpsertOperationsFactory =
         );
       } else {
         ops.push(
-          { index: { _index: targetIndex, _id: entity.euid } },
+          { index: { _index: targetIndex, _id: buildWatchlistDocId(watchlist.id, entity.euid) } },
           buildCreateDoc(entity, sourceLabel, watchlist)
         );
       }

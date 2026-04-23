@@ -31,6 +31,38 @@ const capabilitiesAllowRevert: Capabilities = {
   agentBuilder: { manageAgents: true },
 };
 
+function createHttpMock({
+  observabilityConversationCount = 0,
+  securityTotal = 0,
+}: {
+  observabilityConversationCount?: number;
+  securityTotal?: number;
+} = {}) {
+  return {
+    fetch: jest.fn((path: string, options?: { method?: string }) => {
+      if (
+        path.includes('internal/observability_ai_assistant/conversations') &&
+        options?.method === 'POST'
+      ) {
+        return Promise.resolve({
+          conversations: Array(observabilityConversationCount).fill({
+            conversation: { id: 'c1', title: 't', last_updated: '' },
+          }),
+        });
+      }
+      if (path.includes('conversations/_find')) {
+        return Promise.resolve({
+          total: securityTotal,
+          page: 1,
+          perPage: 1,
+          data: [],
+        });
+      }
+      return Promise.resolve({});
+    }),
+  };
+}
+
 function buildServices({
   hideAnnouncements = false,
   announcementSeenInProfile = false,
@@ -39,35 +71,42 @@ function buildServices({
   agentBuilderSeenJson,
   chatExperienceCapabilities = capabilitiesAllowRevert,
   chatExperience = AIChatExperience.Agent,
+  observabilityConversationCount = 0,
+  securityTotal = 0,
 }: {
   hideAnnouncements?: boolean;
   announcementSeenInProfile?: boolean;
   spaceId?: string;
   userProfileEnabled?: boolean;
-  /** Overrides the JSON stored in user profile for per-space dismissal (default derives from announcementSeenInProfile). */
+  /** Overrides legacy per-space JSON in user profile (when set, takes precedence over announcementSeenInProfile). */
   agentBuilderSeenJson?: string;
   chatExperienceCapabilities?: Capabilities;
   chatExperience?: AIChatExperience;
+  observabilityConversationCount?: number;
+  securityTotal?: number;
 } = {}) {
   const space$ = new BehaviorSubject({ id: spaceId, name: spaceId });
   const reportEvent = jest.fn();
   const navigateToApp = jest.fn();
   const partialUpdate = jest.fn().mockResolvedValue(undefined);
-  const seenJson =
-    agentBuilderSeenJson ??
-    (announcementSeenInProfile ? JSON.stringify({ [spaceId]: true }) : JSON.stringify({}));
+  const userSettings =
+    agentBuilderSeenJson !== undefined
+      ? { agentBuilderAnnouncementModalSeenBySpaceJson: agentBuilderSeenJson }
+      : announcementSeenInProfile
+      ? { agentBuilderAnnouncementModalSeen: true as const }
+      : { agentBuilderAnnouncementModalSeenBySpaceJson: JSON.stringify({}) };
 
   const userProfile = {
     getEnabled$: () => of(userProfileEnabled),
     getCurrent: jest.fn().mockResolvedValue({
       data: {
-        userSettings: {
-          agentBuilderAnnouncementModalSeenBySpaceJson: seenJson,
-        },
+        userSettings,
       },
     }),
     partialUpdate,
   };
+
+  const http = createHttpMock({ observabilityConversationCount, securityTotal });
 
   const services = {
     settings: {
@@ -89,9 +128,10 @@ function buildServices({
     analytics: { reportEvent },
     application: { navigateToApp, capabilities: chatExperienceCapabilities },
     userProfile,
+    http,
   };
 
-  return { services, reportEvent, navigateToApp, partialUpdate, userProfile, space$ };
+  return { services, reportEvent, navigateToApp, partialUpdate, userProfile, space$, http };
 }
 
 function renderController(services: ReturnType<typeof buildServices>['services']) {
@@ -184,9 +224,10 @@ describe('AgentBuilderAnnouncementModalController', () => {
     await waitFor(() => {
       expect(screen.getByTestId('agentBuilderAnnouncementContinueButton')).toBeInTheDocument();
     });
+    expect(screen.getByTestId('agentBuilderAnnouncementModal-1a')).toBeInTheDocument();
   });
 
-  it('shows the modal after switching to a space where the announcement was not dismissed', async () => {
+  it('does not show the modal again after switching space when dismissal was recorded for another space (legacy profile)', async () => {
     const spaceA = 'space-a';
     const spaceB = 'space-b';
     const { services, space$ } = buildServices({
@@ -206,7 +247,9 @@ describe('AgentBuilderAnnouncementModalController', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByTestId('agentBuilderAnnouncementContinueButton')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('agentBuilderAnnouncementContinueButton')
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -224,20 +267,24 @@ describe('AgentBuilderAnnouncementModalController', () => {
     await waitFor(() => {
       expect(partialUpdate).toHaveBeenCalledWith({
         userSettings: {
-          agentBuilderAnnouncementModalSeenBySpaceJson: JSON.stringify({ [SPACE_ID]: true }),
+          agentBuilderAnnouncementModalSeen: true,
         },
       });
     });
     expect(reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.OptInAction, {
       action: 'confirmed',
       source: 'agent_builder_nav_control',
+      announcement_variant: '1a',
+      had_prior_ai_assistant_usage: false,
     });
     expect(screen.queryByTestId('agentBuilderAnnouncementContinueButton')).not.toBeInTheDocument();
   });
 
   it('calls partialUpdate, reports OptOut telemetry, navigates to GenAI settings, and hides the modal on revert', async () => {
     const user = userEvent.setup();
-    const { services, reportEvent, navigateToApp, partialUpdate } = buildServices();
+    const { services, reportEvent, navigateToApp, partialUpdate } = buildServices({
+      observabilityConversationCount: 1,
+    });
     renderController(services);
 
     await waitFor(() =>
@@ -247,21 +294,28 @@ describe('AgentBuilderAnnouncementModalController', () => {
     await user.click(screen.getByTestId('agentBuilderAnnouncementRevertButton'));
 
     await waitFor(() => {
-      expect(partialUpdate).toHaveBeenCalled();
+      expect(partialUpdate).toHaveBeenCalledWith({
+        userSettings: {
+          agentBuilderAnnouncementModalSeen: true,
+        },
+      });
     });
     expect(reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.OptOut, {
       source: 'agent_builder_nav_control',
+      announcement_variant: '1b',
+      had_prior_ai_assistant_usage: true,
     });
     expect(navigateToApp).toHaveBeenCalledWith('management', { path: '/ai/genAiSettings' });
     expect(screen.queryByTestId('agentBuilderAnnouncementRevertButton')).not.toBeInTheDocument();
   });
 
-  it('does not show revert when the user cannot change space-level chat experience', async () => {
+  it('shows variant 2a when the user has prior assistant usage but cannot change chat experience', async () => {
     const { services } = buildServices({
       chatExperienceCapabilities: {
         ...capabilitiesAllowRevert,
         advancedSettings: { save: false },
       },
+      observabilityConversationCount: 1,
     });
     renderController(services);
 
@@ -269,11 +323,7 @@ describe('AgentBuilderAnnouncementModalController', () => {
       expect(screen.getByTestId('agentBuilderAnnouncementContinueButton')).toBeInTheDocument();
     });
     expect(screen.queryByTestId('agentBuilderAnnouncementRevertButton')).not.toBeInTheDocument();
-    expect(screen.queryByText('Need your history?')).not.toBeInTheDocument();
-    expect(screen.getByTestId('agentBuilderAnnouncementLearnMoreCallout')).toBeInTheDocument();
-    expect(screen.getByTestId('agentBuilderAnnouncementDocumentationLink')).toHaveAttribute(
-      'href',
-      'https://www.elastic.co/docs/explore-analyze/ai-features/elastic-agent-builder'
-    );
+    expect(screen.getByTestId('agentBuilderAnnouncementModal-2a')).toBeInTheDocument();
+    expect(screen.getByTestId('agentBuilderAnnouncementImportantNotes')).toBeInTheDocument();
   });
 });
