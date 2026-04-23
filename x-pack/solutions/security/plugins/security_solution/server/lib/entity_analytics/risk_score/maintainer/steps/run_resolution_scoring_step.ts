@@ -95,8 +95,8 @@ export const runResolutionScoringStep = async ({
     const skipReason = abortedBetweenPages
       ? 'aborted'
       : pagesProcessed === 0
-        ? 'lookup_empty'
-        : 'no_matching_alerts';
+      ? 'lookup_empty'
+      : 'no_matching_alerts';
     runLogger.debug(
       `phase 2 resolution scoring produced no writes: reason=${skipReason}, pages=${pagesProcessed}`
     );
