@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { findCompositeSLOParamsSchema, findCompositeSLOResponseSchema } from '@kbn/slo-schema';
+import { findCompositeSLOParamsSchema } from '@kbn/slo-schema';
 import {
   type CompositeSLORepository,
   DefaultBurnRatesClient,
@@ -79,7 +79,7 @@ export const findCompositeSLORoute = createSloServerRoute({
     const page = query.page ? Number(query.page) : 1;
     const perPage = query.perPage ? Number(query.perPage) : 25;
     const tags = query.tags ? query.tags.split(',').map((tag) => tag.trim()) : [];
-    const statusFilter = query.status ? query.status.split(',').map((s) => s.trim()) : [];
+    const statusFilter = query.status ?? [];
 
     if (statusFilter.length > 0) {
       const burnRatesClient = new DefaultBurnRatesClient(scopedClusterClient.asCurrentUser);
@@ -93,7 +93,7 @@ export const findCompositeSLORoute = createSloServerRoute({
         summaryClient
       );
 
-      const result = await findWithComputedStatusFilter({
+      return await findWithComputedStatusFilter({
         compositeSloRepository,
         getCompositeSLO,
         statusFilter,
@@ -104,7 +104,6 @@ export const findCompositeSLORoute = createSloServerRoute({
         page,
         perPage,
       });
-      return findCompositeSLOResponseSchema.encode(result);
     }
 
     const result = await compositeSloRepository.search({
@@ -114,6 +113,6 @@ export const findCompositeSLORoute = createSloServerRoute({
       sortBy: query.sortBy,
       sortDirection: query.sortDirection,
     });
-    return findCompositeSLOResponseSchema.encode(result);
+    return result;
   },
 });
