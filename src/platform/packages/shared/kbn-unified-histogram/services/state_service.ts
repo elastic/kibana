@@ -16,12 +16,7 @@ import type {
   UnifiedHistogramChartLoadEvent,
   UnifiedHistogramTopPanelHeightContext,
 } from '../types';
-import {
-  getChartHidden,
-  getTopPanelHeight,
-  setChartHidden,
-  setTopPanelHeight,
-} from '../utils/local_storage_utils';
+import { getChartHidden, getTopPanelHeight, setTopPanelHeight } from '../utils/local_storage_utils';
 
 /**
  * The current state of the container
@@ -142,10 +137,6 @@ export const createStateService = (
     state$,
 
     setChartHidden: (chartHidden: boolean) => {
-      if (localStorageKeyPrefix) {
-        setChartHidden(services.storage, localStorageKeyPrefix, chartHidden);
-      }
-
       updateState({ chartHidden });
     },
 

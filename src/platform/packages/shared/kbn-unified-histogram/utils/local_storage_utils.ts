@@ -26,6 +26,15 @@ export const getChartHidden = (
   storage.get(getLocalStorageKey(localStorageKeyPrefix, CHART_HIDDEN_KEY)) ?? undefined;
 
 /**
+ * Get the table hidden state from local storage
+ */
+export const getTableHidden = (
+  storage: Storage,
+  localStorageKeyPrefix: string
+): boolean | undefined =>
+  storage.get(getLocalStorageKey(localStorageKeyPrefix, 'tableHidden')) ?? undefined;
+
+/**
  * Get the top panel height from local storage
  */
 export const getTopPanelHeight = (
@@ -52,6 +61,15 @@ export const setChartHidden = (
   localStorageKeyPrefix: string,
   chartHidden: boolean | undefined
 ) => storage.set(getLocalStorageKey(localStorageKeyPrefix, CHART_HIDDEN_KEY), chartHidden);
+
+/**
+ * Set the table hidden state in local storage
+ */
+export const setTableHidden = (
+  storage: Storage,
+  localStorageKeyPrefix: string,
+  tableHidden: boolean | undefined
+) => storage.set(getLocalStorageKey(localStorageKeyPrefix, 'tableHidden'), tableHidden);
 
 /**
  * Set the top panel height in local storage
