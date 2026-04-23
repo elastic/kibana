@@ -111,8 +111,8 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 % discover sessions in dashboards
 * Adds a **Discover session** panel option to dashboards [#256293]({{kib-pull}}256293).
-* Editing an unlinked Discover session panel in a dashboard now saves changes back to that panel without affecting the original saved session [#250438]({{kib-pull}}250438).
-* Clicking on a filterable field value in a Discover {{esql}} session embedded in a dashboard now creates a DSL filter, consistent with how filtering works elsewhere [#249357]({{kib-pull}}249357).
+* Editing an unlinked Discover session panel in a dashboard now saves changes back to that panel [#250438]({{kib-pull}}250438).
+* Filtering a field value in a Discover {{esql}} session embedded in a dashboard now creates a DSL filter, consistent with how filtering works elsewhere [#249357]({{kib-pull}}249357).
 * Adds a tab selector to Discover session panels in Dashboards, with improved warning messages when a tab or data view can't be retrieved [#252311]({{kib-pull}}252311).
 
 % esql + viz
@@ -170,7 +170,6 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Adds a grouped view in Discover for {{esql}} queries that use `STATS ... BY` with a single grouping field. A new toolbar selector lets you pivot by that field or switch back to the standard table view. [#220119]({{kib-pull}}220119).
 * Converts DSL filters to {{esql}} when possible when switching to {{esql}} mode [#259260]({{kib-pull}}259260).
 * Persists the query mode ({{esql}} or classic) to local storage so that the next sessions open with the last mode used [#250388]({{kib-pull}}250388).
-* Adds a feature tour to the **Tab** menu for Switch to classic / {{esql}} modes [#254183]({{kib-pull}}254183).
 * Shows Streams field descriptions in the {{esql}} editor and field sidebar [#260582]({{kib-pull}}260582).
 
 % metrics
@@ -188,13 +187,10 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 % general
 * Highlights multiple word occurrences in search results [#258764]({{kib-pull}}258764).
-* Returns to the Discover session after **Save As** [#255323]({{kib-pull}}255323).
-* Shows a table view for indexes and views with a small number of columns [#255292]({{kib-pull}}255292).
+* Adds default table columns for indexes and views with a small number of fields [#255292]({{kib-pull}}255292).
 
 % doc viewer
-* The document viewer **Table** tab now restores your previous state — including search, filters, pinned fields, and pagination — when you reopen the flyout [#249682]({{kib-pull}}249682).
 * The doc viewer flyout now stays open when switching between Discover tabs and remembers which tab (such as **Table** or **JSON**) was active in each [#246612]({{kib-pull}}246612).
-* Uses a restorable state in doc viewer's **JSON** tab [#252054]({{kib-pull}}252054).
 
 **{{esql}} editor**:
 % new commands and language features
@@ -395,17 +391,17 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Fixes a tab URL state leak when leaving Discover [#262929]({{kib-pull}}262929).
 * Resets the time field when the updated index pattern does not have it [#262001]({{kib-pull}}262001).
 * Resets the default profile state when transitioning between tab modes [#255226]({{kib-pull}}255226).
-* Makes matches expandable for long filter matches [#255093]({{kib-pull}}255093).
+* Makes matches cells expandable for long field filter matches [#255093]({{kib-pull}}255093).
 * Aborts in-flight long-running queries [#254487]({{kib-pull}}254487).
 * Fixes incorrect KQL bar results for some indices [#254119]({{kib-pull}}254119).
 * Fixes URL, Badge, Color, and other field formatters incorrectly rendering fields with missing or null values [#251892]({{kib-pull}}251892).
 * Fixes filtering out null values from the Discover histogram legend in {{esql}} mode [#249302]({{kib-pull}}249302).
 * Fixes **Search entire time range** for date nanos [#248495]({{kib-pull}}248495).
 * Prevents doc viewer flyout tabs from unnecessarily re-mounting on query refresh [#248203]({{kib-pull}}248203).
-* Fixes the toolbar mode selector not responding when clicking on tabs [#247836]({{kib-pull}}247836).
+* Fixes dropdown menus staying open when switching tabs [#247836]({{kib-pull}}247836).
 * Makes static-lookup formatter work with aggregated boolean fields [#249311]({{kib-pull}}249311).
 * Adds a check to ensure {{esql}} is valid before matching the Metrics profile [#248917]({{kib-pull}}248917).
-* Fixes query drafts when switching tabs [#247968]({{kib-pull}}247968).
+* Prevents losing draft queries when switching tabs [#247968]({{kib-pull}}247968).
 * Fixes an issue where quickly opened tabs could not complete loading [#246941]({{kib-pull}}246941).
 * Fixes the default app state handling when detecting unsaved changes [#246664]({{kib-pull}}246664).
 
