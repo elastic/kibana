@@ -11,10 +11,13 @@ import type { Emission } from '../emission';
 import { attributePath, withWhereClause } from './common';
 
 /**
- * Emits `set(log.attributes["<to|from>"], TrimSpace(log.attributes["<from>"])) where <cond>`.
+ * Emits `set(log.attributes["<to|from>"], Trim(log.attributes["<from>"], " ")) where <cond>`.
  *
- * `TrimSpace` uses OTTL's strict `StringGetter`; we add an `IsString` guard
- * so non-string attributes are skipped rather than triggering a TypeError.
+ * `Trim(value, cutset)` removes leading/trailing characters in `cutset` from
+ * the string. We add an `IsString` guard so non-string attributes are skipped
+ * rather than triggering a TypeError.
+ *
+ * Note: OTTL has no `TrimSpace` function; `Trim(value, " ")` is the equivalent.
  */
 export const convertTrimProcessorToOtel = (processor: TrimProcessor): Emission => {
   const { from, to, ignore_missing = false, where } = processor;
@@ -30,6 +33,6 @@ export const convertTrimProcessorToOtel = (processor: TrimProcessor): Emission =
 
   return {
     kind: 'transform',
-    statements: [withWhereClause(`set(${targetAttr}, TrimSpace(${fromAttr}))`, whereExpr)],
+    statements: [withWhereClause(`set(${targetAttr}, Trim(${fromAttr}, " "))`, whereExpr)],
   };
 };

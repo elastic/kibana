@@ -68,14 +68,16 @@ describe('transpileOtelCollector', () => {
   });
 
   describe('rename processor', () => {
-    it('emits a copy + delete pair with presence + override guards', async () => {
+    it('emits a copy + delete pair; set uses override guard, delete does not', async () => {
       const dsl: StreamlangDSL = {
         steps: [{ action: 'rename', from: 'old_field', to: 'new_field' }],
       };
       const result = await transpile(dsl);
       expect(asTransform(result.processors['transform/streamlang']).log_statements).toEqual([
         'set(log.attributes["new_field"], log.attributes["old_field"]) where (log.attributes["old_field"] != nil) and (log.attributes["new_field"] == nil)',
-        'delete_key(log.attributes, "old_field") where (log.attributes["old_field"] != nil) and (log.attributes["new_field"] == nil)',
+        // delete uses only the source-presence guard — not the override guard —
+        // so the delete fires after set() populates the target field.
+        'delete_key(log.attributes, "old_field") where (log.attributes["old_field"] != nil)',
       ]);
     });
   });
@@ -438,7 +440,7 @@ describe('transpileOtelCollector', () => {
       };
       const result = await transpile(dsl);
       expect(asTransform(result.processors['transform/streamlang']).log_statements).toEqual([
-        'set(log.attributes["message"], TrimSpace(log.attributes["message"])) where (log.attributes["message"] != nil) and (IsString(log.attributes["message"]))',
+        'set(log.attributes["message"], Trim(log.attributes["message"], " ")) where (log.attributes["message"] != nil) and (IsString(log.attributes["message"]))',
       ]);
     });
 
@@ -448,7 +450,7 @@ describe('transpileOtelCollector', () => {
       };
       const result = await transpile(dsl);
       expect(asTransform(result.processors['transform/streamlang']).log_statements).toEqual([
-        'set(log.attributes["message_trimmed"], TrimSpace(log.attributes["message"])) where (log.attributes["message"] != nil) and (IsString(log.attributes["message"]))',
+        'set(log.attributes["message_trimmed"], Trim(log.attributes["message"], " ")) where (log.attributes["message"] != nil) and (IsString(log.attributes["message"]))',
       ]);
     });
   });
@@ -480,7 +482,13 @@ describe('transpileOtelCollector', () => {
     it('drops the nil guard when ignore_missing is true', async () => {
       const dsl: StreamlangDSL = {
         steps: [
-          { action: 'replace', from: 'message', pattern: 'foo', replacement: 'bar', ignore_missing: true },
+          {
+            action: 'replace',
+            from: 'message',
+            pattern: 'foo',
+            replacement: 'bar',
+            ignore_missing: true,
+          },
         ],
       };
       const result = await transpile(dsl);
@@ -589,7 +597,13 @@ describe('transpileOtelCollector', () => {
     it('uses custom prefix and suffix', async () => {
       const dsl: StreamlangDSL = {
         steps: [
-          { action: 'redact', from: 'message', patterns: ['%{IP:client}'], prefix: '[', suffix: ']' },
+          {
+            action: 'redact',
+            from: 'message',
+            patterns: ['%{IP:client}'],
+            prefix: '[',
+            suffix: ']',
+          },
         ],
       };
       const result = await transpile(dsl);
@@ -614,7 +628,9 @@ describe('transpileOtelCollector', () => {
 
     it('adds a nil guard when ignore_missing is false', async () => {
       const dsl: StreamlangDSL = {
-        steps: [{ action: 'redact', from: 'message', patterns: ['%{IP:client}'], ignore_missing: false }],
+        steps: [
+          { action: 'redact', from: 'message', patterns: ['%{IP:client}'], ignore_missing: false },
+        ],
       };
       const result = await transpile(dsl);
       const statements = asTransform(result.processors['transform/streamlang']).log_statements;
@@ -648,7 +664,10 @@ describe('transpileOtelCollector', () => {
         steps: [
           {
             action: 'concat',
-            from: [{ type: 'field', value: 'a' }, { type: 'field', value: 'b' }],
+            from: [
+              { type: 'field', value: 'a' },
+              { type: 'field', value: 'b' },
+            ],
             to: 'ab',
             ignore_missing: true,
           },
@@ -847,9 +866,7 @@ describe('transpileOtelCollector', () => {
 
     it('tries formats in order via target == nil guard', async () => {
       const dsl: StreamlangDSL = {
-        steps: [
-          { action: 'date', from: 'ts', formats: ['yyyy-MM-dd HH:mm:ss', 'yyyy-MM-dd'] },
-        ],
+        steps: [{ action: 'date', from: 'ts', formats: ['yyyy-MM-dd HH:mm:ss', 'yyyy-MM-dd'] }],
       };
       const result = await transpile(dsl);
       const stmts = asTransform(result.processors['transform/streamlang']).log_statements;
@@ -941,12 +958,8 @@ describe('transpileOtelCollector', () => {
         ],
       };
       const result = await transpile(dsl, { errorMode: 'propagate' });
-      expect(
-        asTransform(result.processors['transform/streamlang']).error_mode
-      ).toBe('propagate');
-      expect(
-        asFilter(result.processors['filter/streamlang']).error_mode
-      ).toBe('propagate');
+      expect(asTransform(result.processors['transform/streamlang']).error_mode).toBe('propagate');
+      expect(asFilter(result.processors['filter/streamlang']).error_mode).toBe('propagate');
     });
 
     it('defaults to ignore when no option is given', async () => {
@@ -954,9 +967,304 @@ describe('transpileOtelCollector', () => {
         steps: [{ action: 'set', to: 'status', value: 'ok' }],
       };
       const result = await transpile(dsl);
-      expect(
-        asTransform(result.processors['transform/streamlang']).error_mode
-      ).toBe('ignore');
+      expect(asTransform(result.processors['transform/streamlang']).error_mode).toBe('ignore');
+    });
+
+    it('passes silent to all emitted processors', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          { action: 'set', to: 'status', value: 'ok' },
+          { action: 'drop_document', where: { field: 'level', eq: 'debug' } },
+        ],
+      };
+      const result = await transpile(dsl, { errorMode: 'silent' });
+      expect(asTransform(result.processors['transform/streamlang']).error_mode).toBe('silent');
+      expect(asFilter(result.processors['filter/streamlang']).error_mode).toBe('silent');
+    });
+  });
+
+  describe('grok processor additional edge cases', () => {
+    it('includes the where condition in the statement', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            action: 'grok',
+            from: 'message',
+            patterns: ['%{IP:client.ip}'],
+            where: { field: 'type', eq: 'access' },
+          },
+        ],
+      };
+      const result = await transpile(dsl);
+      const stmts = asTransform(result.processors['transform/streamlang']).log_statements;
+      expect(stmts[0]).toContain('log.attributes["type"] == "access"');
+      expect(stmts[0]).toContain('ExtractGrokPatterns(');
+    });
+
+    it('drops the nil guard on the source field when ignore_missing is true', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            action: 'grok',
+            from: 'message',
+            patterns: ['%{IP:client.ip}'],
+            ignore_missing: true,
+          },
+        ],
+      };
+      const result = await transpile(dsl);
+      const stmts = asTransform(result.processors['transform/streamlang']).log_statements;
+      expect(stmts[0]).not.toContain('where');
+    });
+  });
+
+  describe('date processor additional edge cases', () => {
+    it('emits a warning for non-English locale', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [{ action: 'date', from: 'ts', formats: ['yyyy-MM-dd'], locale: 'fr' }],
+      };
+      const result = await transpile(dsl);
+      expect(result.warnings).toHaveLength(1);
+      expect(result.warnings[0]).toContain('locale');
+      expect(result.warnings[0]).toContain('fr');
+    });
+
+    it('does not emit a locale warning for en locale', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [{ action: 'date', from: 'ts', formats: ['yyyy-MM-dd'], locale: 'en' }],
+      };
+      const result = await transpile(dsl);
+      expect(result.warnings).toEqual([]);
+    });
+
+    it('includes the where condition in the statement', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            action: 'date',
+            from: 'ts',
+            formats: ['yyyy-MM-dd'],
+            where: { field: 'type', eq: 'log' },
+          },
+        ],
+      };
+      const result = await transpile(dsl);
+      const stmts = asTransform(result.processors['transform/streamlang']).log_statements;
+      expect(stmts[0]).toContain('log.attributes["type"] == "log"');
+      expect(stmts[0]).toContain('UnixNano(Time(');
+    });
+
+    it('translates HH:mm:ss Java format tokens to Go layout', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [{ action: 'date', from: 'ts', formats: ['yyyy-MM-dd HH:mm:ss'] }],
+      };
+      const result = await transpile(dsl);
+      const stmts = asTransform(result.processors['transform/streamlang']).log_statements;
+      expect(stmts[0]).toContain('"2006-01-02 15:04:05"');
+    });
+
+    it('translates 12h hour and AM/PM tokens', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [{ action: 'date', from: 'ts', formats: ['hh:mm:ss a'] }],
+      };
+      const result = await transpile(dsl);
+      const stmts = asTransform(result.processors['transform/streamlang']).log_statements;
+      expect(stmts[0]).toContain('"03:04:05 PM"');
+    });
+  });
+
+  describe('json_extract processor additional edge cases', () => {
+    it('drops the nil guard on the source field when ignore_missing is true', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            action: 'json_extract',
+            field: 'payload',
+            extractions: [{ selector: 'id', target_field: 'doc_id' }],
+            ignore_missing: true,
+          },
+        ],
+      };
+      const result = await transpile(dsl);
+      const stmts = asTransform(result.processors['transform/streamlang']).log_statements;
+      expect(stmts[0]).not.toContain('where');
+    });
+
+    it('includes the where condition in the parse statement', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            action: 'json_extract',
+            field: 'payload',
+            extractions: [{ selector: 'id', target_field: 'doc_id' }],
+            where: { field: 'type', eq: 'json' },
+          },
+        ],
+      };
+      const result = await transpile(dsl);
+      const stmts = asTransform(result.processors['transform/streamlang']).log_statements;
+      expect(stmts[0]).toContain('log.attributes["type"] == "json"');
+      expect(stmts[0]).toContain('ParseJSON(');
+    });
+
+    it('strips a bare $ prefix from the selector', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            action: 'json_extract',
+            field: 'payload',
+            extractions: [{ selector: '$name', target_field: 'doc_name' }],
+          },
+        ],
+      };
+      const result = await transpile(dsl);
+      const stmts = asTransform(result.processors['transform/streamlang']).log_statements;
+      expect(stmts[1]).toContain('["name"]');
+    });
+  });
+
+  describe('concat processor additional edge cases', () => {
+    it('emits no where clause when all entries are literals', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            action: 'concat',
+            from: [
+              { type: 'literal', value: 'hello' },
+              { type: 'literal', value: ' world' },
+            ],
+            to: 'greeting',
+          },
+        ],
+      };
+      const result = await transpile(dsl);
+      const stmts = asTransform(result.processors['transform/streamlang']).log_statements;
+      expect(stmts[0]).not.toContain('where');
+      expect(stmts[0]).toContain('Concat(["hello", " world"], "")');
+    });
+
+    it('includes the where condition in the statement', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            action: 'concat',
+            from: [
+              { type: 'field', value: 'first' },
+              { type: 'literal', value: '-' },
+              { type: 'field', value: 'last' },
+            ],
+            to: 'name',
+            where: { field: 'enabled', eq: true },
+          },
+        ],
+      };
+      const result = await transpile(dsl);
+      const stmts = asTransform(result.processors['transform/streamlang']).log_statements;
+      expect(stmts[0]).toContain('log.attributes["enabled"] == true');
+      expect(stmts[0]).toContain('Concat(');
+    });
+  });
+
+  describe('redact processor additional edge cases', () => {
+    it('emits no nil guard when ignore_missing is true (default)', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [{ action: 'redact', from: 'message', patterns: ['%{IP:client}'] }],
+      };
+      const result = await transpile(dsl);
+      const stmts = asTransform(result.processors['transform/streamlang']).log_statements;
+      expect(stmts[0]).not.toContain('where');
+    });
+
+    it('uses custom pattern_definitions when compiling grok patterns', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            action: 'redact',
+            from: 'message',
+            patterns: ['%{MY_SECRET:secret}'],
+            pattern_definitions: { MY_SECRET: 'token-[a-z]+' },
+          },
+        ],
+      };
+      const result = await transpile(dsl);
+      const stmts = asTransform(result.processors['transform/streamlang']).log_statements;
+      expect(stmts).toHaveLength(1);
+      expect(stmts[0]).toContain('<secret>');
+      expect(stmts[0]).toContain('token-');
+    });
+
+    it('emits a warning when a pattern cannot be compiled', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            action: 'redact',
+            from: 'message',
+            patterns: ['%{TOTALLY_UNKNOWN_PATTERN_XYZ:val}'],
+          },
+        ],
+      };
+      const result = await transpile(dsl);
+      expect(result.warnings).toHaveLength(1);
+      expect(result.warnings[0]).toContain('skipped');
+    });
+  });
+
+  describe('replace processor additional edge cases', () => {
+    it('emits a single replace_pattern when to equals from explicitly', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          { action: 'replace', from: 'message', to: 'message', pattern: 'foo', replacement: 'bar' },
+        ],
+      };
+      const result = await transpile(dsl);
+      const stmts = asTransform(result.processors['transform/streamlang']).log_statements;
+      expect(stmts).toHaveLength(1);
+      expect(stmts[0]).toContain('replace_pattern(log.attributes["message"]');
+    });
+  });
+
+  describe('set processor additional edge cases', () => {
+    it('handles dotted field names in copy_from', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [{ action: 'set', to: 'dest.field', copy_from: 'source.field' }],
+      };
+      const result = await transpile(dsl);
+      const stmts = asTransform(result.processors['transform/streamlang']).log_statements;
+      expect(stmts[0]).toContain('log.attributes["dest.field"]');
+      expect(stmts[0]).toContain('log.attributes["source.field"]');
+    });
+  });
+
+  describe('append processor additional edge cases', () => {
+    it('passes the where condition through to each append statement', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            action: 'append',
+            to: 'tags',
+            value: ['a', 'b'],
+            where: { field: 'enabled', eq: true },
+          },
+        ],
+      };
+      const result = await transpile(dsl);
+      const stmts = asTransform(result.processors['transform/streamlang']).log_statements;
+      expect(stmts).toHaveLength(2);
+      expect(stmts[0]).toContain('log.attributes["enabled"] == true');
+      expect(stmts[1]).toContain('log.attributes["enabled"] == true');
+    });
+
+    it('emits IsMatch dedup guards for each value when allow_duplicates is false', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [{ action: 'append', to: 'tags', value: ['x', 'y'], allow_duplicates: false }],
+      };
+      const result = await transpile(dsl);
+      const stmts = asTransform(result.processors['transform/streamlang']).log_statements;
+      expect(stmts).toHaveLength(2);
+      expect(stmts[0]).toContain('"x"');
+      expect(stmts[1]).toContain('"y"');
+      expect(stmts[0]).toContain('IsMatch');
+      expect(stmts[1]).toContain('IsMatch');
     });
   });
 });

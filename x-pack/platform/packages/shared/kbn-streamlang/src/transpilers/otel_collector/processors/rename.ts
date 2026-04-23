@@ -30,18 +30,28 @@ export const convertRenameProcessorToOtel = (processor: RenameProcessor): Emissi
   const fromAttr = attributePath(from);
   const toAttr = attributePath(to);
 
-  const whereParts: string[] = [];
-  if (where) whereParts.push(conditionToOttl(where));
-  if (!ignore_missing) whereParts.push(`${fromAttr} != nil`);
-  if (!override) whereParts.push(`${toAttr} == nil`);
+  const commonParts: string[] = [];
+  if (where) commonParts.push(conditionToOttl(where));
+  if (!ignore_missing) commonParts.push(`${fromAttr} != nil`);
 
-  const whereExpr = whereParts.length ? whereParts.map((p) => `(${p})`).join(' and ') : undefined;
+  // The set statement additionally guards against overwriting an existing target.
+  const setWhereParts = [...commonParts];
+  if (!override) setWhereParts.push(`${toAttr} == nil`);
+
+  // The delete statement must NOT gate on toAttr == nil: after set() runs,
+  // toAttr is populated and the guard would prevent the delete from firing.
+  const setWhereExpr = setWhereParts.length
+    ? setWhereParts.map((p) => `(${p})`).join(' and ')
+    : undefined;
+  const deleteWhereExpr = commonParts.length
+    ? commonParts.map((p) => `(${p})`).join(' and ')
+    : undefined;
 
   return {
     kind: 'transform',
     statements: [
-      withWhereClause(`set(${toAttr}, ${fromAttr})`, whereExpr),
-      withWhereClause(`delete_key(log.attributes, ${ottlStringLiteral(from)})`, whereExpr),
+      withWhereClause(`set(${toAttr}, ${fromAttr})`, setWhereExpr),
+      withWhereClause(`delete_key(log.attributes, ${ottlStringLiteral(from)})`, deleteWhereExpr),
     ],
   };
 };
