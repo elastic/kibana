@@ -15,7 +15,12 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
-import { ArrayFromString } from '@kbn/zod-helpers/v4';
+import {
+  isValidDateMath,
+  isNonEmptyString,
+  ArrayFromString,
+  BooleanFromString,
+} from '@kbn/zod-helpers/v4';
 
 import { PromptItemArray } from './common_attributes.gen';
 

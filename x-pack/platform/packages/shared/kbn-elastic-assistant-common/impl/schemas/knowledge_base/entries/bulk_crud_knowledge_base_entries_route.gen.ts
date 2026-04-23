@@ -19,6 +19,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import {
   KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryUpdateProps,
+  KnowledgeBaseEntryErrorSchema,
   KnowledgeBaseEntryResponse,
 } from './common_attributes.gen';
 
