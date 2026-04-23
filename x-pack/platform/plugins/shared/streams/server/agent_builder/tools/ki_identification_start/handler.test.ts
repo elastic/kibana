@@ -20,7 +20,7 @@ describe('startKiIdentificationToolHandler', () => {
     };
   };
 
-  it('schedules task and returns tracking url', async () => {
+  it('schedules task and returns tracking Kibana path', async () => {
     const { taskClient, request } = setup();
 
     const result = await startKiIdentificationToolHandler({
@@ -31,7 +31,7 @@ describe('startKiIdentificationToolHandler', () => {
     });
 
     expect(result).toEqual({
-      url: 'http://localhost/app/streams/logs.nginx/management/significantEvents',
+      kibanaPath: '/app/streams/logs.nginx/management/significantEvents',
     });
 
     expect(taskClient.schedule).toHaveBeenCalledWith(

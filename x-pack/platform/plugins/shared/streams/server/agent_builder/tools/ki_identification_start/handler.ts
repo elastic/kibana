@@ -30,7 +30,7 @@ interface StartKiIdentificationHandlerParams {
 }
 
 interface StartKiIdentificationHandlerResult {
-  url: string;
+  kibanaPath: string;
 }
 
 export async function startKiIdentificationToolHandler({
@@ -60,13 +60,12 @@ export async function startKiIdentificationToolHandler({
     request,
   });
 
-  const origin = new URL(request.url).origin;
   const location = getStreamsLocation({
     name: streamName,
     managementTab: 'significantEvents',
   });
 
   return {
-    url: `${origin}/app/${location.app}${location.path}`,
+    kibanaPath: `/app/${location.app}${location.path}`,
   };
 }

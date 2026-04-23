@@ -46,16 +46,16 @@ export const createKiIdentificationStartTool = ({
   description: dedent`
     Start stream Knowledge Indicator (KI) identification as a background task.
 
-    This tool schedules the KI identification background task and returns immediately with a path
-    to the Significant Events page where progress can be tracked.
+    This tool schedules the KI identification background task and returns immediately with a
+    Kibana path to the Significant Events page where progress can be tracked.
 
     Use this tool to:
     - Kick off KI identification for a stream
     - Run feature identification and query generation steps in a background task
-    - Get a direct URL to track background task progress in the Streams UI
+    - Get a direct Kibana path to track background task progress in the Streams UI
 
     Returns:
-    - On success: \`{ url: "https://<kibana-host>/app/streams/<stream>/management/significantEvents" }\`
+    - On success: \`{ kibanaPath: "/app/streams/<stream>/management/significantEvents" }\`
     - On failure: an error result with \`message\`, \`operation\`, and \`likely_cause\`
   `,
   tags: ['streams', 'significant_events', 'management', 'kis', 'knowledge_indicators'],

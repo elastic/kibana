@@ -49,7 +49,7 @@ describe('createKiIdentificationStartTool', () => {
     if ('results' in result) {
       expect(result.results[0].type).toBe('other');
       expect(result.results[0].data).toEqual({
-        url: 'http://localhost/app/streams/logs.nginx/management/significantEvents',
+        kibanaPath: '/app/streams/logs.nginx/management/significantEvents',
       });
     }
   });

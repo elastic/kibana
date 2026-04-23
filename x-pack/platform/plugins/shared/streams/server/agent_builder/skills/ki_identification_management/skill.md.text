@@ -25,16 +25,16 @@ You have 3 tools for KI identification task management:
 <required_workflow>
 Follow this workflow for KI identification requests:
 1. Call `ki_identification_start`.
-2. Read the returned `url` from the tool result.
-3. In chat, output this `url` as a clickable URL for the user.
-   - Preferred format: `[Track KI identification progress](<url>)`
-   - Also include the raw URL so users can copy/paste if needed.
+2. Read the returned `kibanaPath` from the tool result.
+3. In chat, output this `kibanaPath` as a clickable link for the user.
+   - Preferred format: `[Track KI identification progress](<kibanaPath>)`
+   - Also include the raw path so users can copy/paste if needed.
 4. If the user asks for status updates in chat, call `ki_identification_status`.
 5. If the user asks to stop the task, call `ki_identification_cancel`.
 
 URL output rule (required):
-- Always surface the returned `url` from `ki_identification_start` to the user as a clickable URL in your response.
-- Do not hide or paraphrase the URL.
+- Always surface the returned `kibanaPath` from `ki_identification_start` to the user as a clickable link in your response.
+- Do not hide or paraphrase the path.
 </required_workflow>
 
 <tool_examples>
@@ -53,12 +53,12 @@ Example call:
 
 Example success output:
 {
-  "url": "https://kibana.example.com/app/streams/logs.ecs.linux/management/significantEvents"
+  "kibanaPath": "/app/streams/logs.ecs.linux/management/significantEvents"
 }
 
 Example chat response after start:
-- [Open KI identification progress](https://kibana.example.com/app/streams/logs.ecs.linux/management/significantEvents)
-- https://kibana.example.com/app/streams/logs.ecs.linux/management/significantEvents
+- [Open KI identification progress](/app/streams/logs.ecs.linux/management/significantEvents)
+- /app/streams/logs.ecs.linux/management/significantEvents
 
 Example: check KI identification status
 Tool: `ki_identification_status`
