@@ -28,7 +28,6 @@
     "@kbn/i18n",
     "@kbn/std",
     "@kbn/esql-server-utils",
-    "@kbn/utility-types",
     "@kbn/esql-language",
     "@kbn/datemath",
     "@kbn/es-query",
