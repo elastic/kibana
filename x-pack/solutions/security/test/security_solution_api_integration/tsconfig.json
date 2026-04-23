@@ -63,5 +63,6 @@
     "@kbn/setup-node-env",
     "@kbn/security-solution-test-api-clients",
     "@kbn/detections-response-ftr-services",
+    "@kbn/security-plugin-types-common",
   ]
 }
