@@ -78,7 +78,29 @@ For approved breaking changes, add entries to `allowlist.json`:
 ```
 
 **Required fields:** `path`, `method`, `reason`, `approvedBy`
-**Optional fields:** `prUrl`, `expiresAt`
+**Optional fields:** `prUrl`, `expiresAt`, `oasdiffId`, `source`
+
+### Granular suppression
+
+By default, an allowlist entry suppresses **all** breaking changes for a given `(path, method)`. To scope suppression to a specific breaking change, use `oasdiffId` and/or `source`:
+
+- `oasdiffId` — matches the oasdiff rule ID (e.g. `request-property-removed`). See the [Breaking Change Rules](#breaking-change-rules) table for known IDs.
+- `source` — matches the JSON pointer / source location reported by oasdiff (e.g. `/components/schemas/Output/properties/name`).
+
+When present, these fields are AND'd: the entry only suppresses changes that match **all** specified fields. Omitted fields are not checked (legacy behavior).
+
+```json
+{
+  "path": "/api/fleet/outputs",
+  "method": "post",
+  "reason": "Approved removal of deprecated 'name' field from request body",
+  "approvedBy": "@elastic/terraform-provider",
+  "oasdiffId": "request-property-removed",
+  "source": "/components/schemas/Output/properties/name"
+}
+```
+
+This entry only suppresses `request-property-removed` at that specific schema location — other breaking changes on the same endpoint will still be flagged.
 
 ## API Ownership
 

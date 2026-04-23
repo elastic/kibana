@@ -14,6 +14,8 @@ export interface ImpactEntry {
   path: string;
   method?: string;
   reason: string;
+  oasdiffId?: string;
+  source?: string;
   terraformResource: string;
   owners: string[];
 }
@@ -36,9 +38,11 @@ export const buildCommentBody = (entries: ImpactEntry[]): string => {
   const rows = entries
     .map((e) => {
       const method = e.method ? ` \`${e.method.toUpperCase()}\`` : '';
+      const oasdiffId = e.oasdiffId ? `\`${escapeCell(e.oasdiffId)}\`` : '';
+      const source = e.source ? `\`${escapeCell(e.source)}\`` : '';
       return `| \`${e.path}\`${method} | ${escapeCell(e.terraformResource)} | ${escapeCell(
         e.reason
-      )} | ${(e.owners || []).join(', ')} |`;
+      )} | ${oasdiffId} | ${source} | ${(e.owners || []).join(', ')} |`;
     })
     .join('\n');
 
@@ -48,14 +52,14 @@ cc ${ownerMentions}
 
 The following breaking change(s) affect APIs consumed by the [Elastic Terraform Provider](https://github.com/elastic/terraform-provider-elasticstack).
 
-| Endpoint | Terraform Resource | Reason | Owners |
-|----------|--------------------|--------|--------|
+| Endpoint | Terraform Resource | Reason | oasdiffId | Source | Owners |
+|----------|--------------------|--------|-----------|--------|--------|
 ${rows}
 
 ### What to do
 
 1. **Fix the breaking change** if it was unintentional.
-2. **If intentional**, add an approved entry to [\`${ALLOWLIST_PATH}\`](https://github.com/elastic/kibana/blob/main/${ALLOWLIST_PATH}) and coordinate with \`@elastic/terraform-provider\`.
+2. **If intentional**, add an approved entry to [\`${ALLOWLIST_PATH}\`](https://github.com/elastic/kibana/blob/main/${ALLOWLIST_PATH}) and coordinate with members in the \`#kibana-oas-terraform\` Slack channel. Use the \`oasdiffId\` and \`source\` values from the table above to [scope the allowlist entry](https://github.com/elastic/kibana/blob/main/${README_PATH}#granular-suppression) to this specific change.
 
 See the [\`@kbn/api-contracts\` README](https://github.com/elastic/kibana/blob/main/${README_PATH}) for details on the allowlist schema and workflow.`;
 };
@@ -86,7 +90,12 @@ async function main() {
   }
 
   const deduped = Array.from(
-    new Map(allEntries.map((e) => [`${e.path}::${e.method ?? ''}`, e])).values()
+    new Map(
+      allEntries.map((e) => [
+        `${e.path}::${e.method ?? ''}::${e.oasdiffId ?? ''}::${e.source ?? ''}`,
+        e,
+      ])
+    ).values()
   );
 
   const body = buildCommentBody(deduped);
