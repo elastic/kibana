@@ -774,7 +774,7 @@ describe('Alerts Client', () => {
           alertsClient.determineDelayedAlerts({ ...determineDelayedAlertsOpts, alertDelay });
           alertsClient.logAlerts(logAlertsOpts);
 
-          await alertsClient.persistAlerts(); // todo
+          await alertsClient.persistAlerts();
 
           expect(clusterClient.bulk).not.toHaveBeenCalled();
           expect(logger.error).not.toHaveBeenCalled();
