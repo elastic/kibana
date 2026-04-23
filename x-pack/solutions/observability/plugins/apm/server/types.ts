@@ -114,6 +114,7 @@ export interface APMPluginStartDependencies {
   metricsDataAccess: MetricsDataPluginSetup;
   dataViews: DataViewsServerPluginStart;
   share: undefined;
+  embeddable: undefined;
   logsDataAccess: LogsDataAccessPluginStart;
   // optional dependencies
   observabilityAgentBuilder?: ObservabilityAgentBuilderPluginStart;

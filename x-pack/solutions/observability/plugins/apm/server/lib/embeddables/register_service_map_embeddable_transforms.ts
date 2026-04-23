@@ -10,7 +10,7 @@ import { APM_SERVICE_MAP_EMBEDDABLE } from '../../../common/embeddable/service_m
 import { getServiceMapEmbeddableSchema } from './service_map_embeddable_schema';
 
 export const registerServiceMapEmbeddableTransforms = (embeddable: EmbeddableSetup): void => {
-  embeddable.registerTransforms(APM_SERVICE_MAP_EMBEDDABLE, {
+  embeddable.registerEmbeddableServerDefinition(APM_SERVICE_MAP_EMBEDDABLE, {
     title: 'APM Service map',
     getSchema: getServiceMapEmbeddableSchema,
   });
