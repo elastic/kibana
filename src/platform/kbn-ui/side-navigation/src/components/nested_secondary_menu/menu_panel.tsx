@@ -42,17 +42,17 @@ export const Panel: FC<PanelProps> = ({ children, id, title }) => {
   const isRootPanel = panelStackDepth === 0;
 
   const navigationInstructions = isRootPanel
-    ? i18n.translate('core.ui.chrome.sideNavigation.morePanelInstructions', {
+    ? i18n.translate('kbnUI.sideNavigation.morePanelInstructions', {
         defaultMessage:
           'You are in the More primary menu dialog. Use Up and Down arrow keys to navigate. Press Escape to exit to the menu trigger.',
       })
-    : i18n.translate('core.ui.chrome.sideNavigation.nestedPanelInstructions', {
+    : i18n.translate('kbnUI.sideNavigation.nestedPanelInstructions', {
         defaultMessage:
           'You are in a submenu. Use Up and Down arrow keys to navigate. Press Go back or Escape to exit to the parent menu.',
       });
 
   const enterSubmenuInstructions = i18n.translate(
-    'core.ui.chrome.sideNavigation.panelEnterSubmenuInstruction',
+    'kbnUI.sideNavigation.panelEnterSubmenuInstruction',
     {
       defaultMessage: 'Press Enter to go to the submenu.',
     }

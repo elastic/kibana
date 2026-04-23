@@ -82,7 +82,7 @@ export const PrimaryMenuBase = forwardRef<HTMLElement, PrimaryMenuProps>(
       <>
         <EuiScreenReaderOnly>
           <p id={mainNavigationInstructionsId}>
-            {i18n.translate('core.ui.chrome.sideNavigation.primaryMenuInstructions', {
+            {i18n.translate('kbnUI.sideNavigation.primaryMenuInstructions', {
               defaultMessage:
                 'You are in the main navigation primary menu. Use Up and Down arrow keys to navigate the menu.',
             })}
@@ -91,7 +91,7 @@ export const PrimaryMenuBase = forwardRef<HTMLElement, PrimaryMenuProps>(
         {/* The footer itself is not interactive but the children are */}
         {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
         <nav
-          aria-label={i18n.translate('core.ui.chrome.sideNavigation.primaryMenuAriaLabel', {
+          aria-label={i18n.translate('kbnUI.sideNavigation.primaryMenuAriaLabel', {
             defaultMessage: 'Main',
           })}
           css={styles}

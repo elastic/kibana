@@ -72,7 +72,7 @@ export const Logo = ({
   const menuItem = (
     <div data-test-subj={logoWrapperTestSubj} css={wrapperStyles}>
       <MenuItem
-        aria-label={i18n.translate('core.ui.chrome.sideNavigation.logoAriaLabel', {
+        aria-label={i18n.translate('kbnUI.sideNavigation.logoAriaLabel', {
           defaultMessage: '{label} homepage',
           values: { label },
         })}

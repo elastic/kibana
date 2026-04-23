@@ -54,10 +54,10 @@ export const SideNavCollapseButton: FC<Props> = ({ isCollapsed, toggle }) => {
         iconType={iconType}
         aria-label={
           isCollapsed
-            ? i18n.translate('core.ui.chrome.sideNavigation.expandButtonLabel', {
+            ? i18n.translate('kbnUI.sideNavigation.expandButtonLabel', {
                 defaultMessage: 'Expand navigation menu',
               })
-            : i18n.translate('core.ui.chrome.sideNavigation.collapseButtonLabel', {
+            : i18n.translate('kbnUI.sideNavigation.collapseButtonLabel', {
                 defaultMessage: 'Collapse navigation menu',
               })
         }

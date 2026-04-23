@@ -285,7 +285,7 @@ export const Popover = ({
       {hasContent && !isSidePanelOpen && (
         <EuiScreenReaderOnly>
           <p id={popoverEnterAndExitInstructionsId}>
-            {i18n.translate('core.ui.chrome.sideNavigation.popoverInstruction', {
+            {i18n.translate('kbnUI.sideNavigation.popoverInstruction', {
               defaultMessage: 'Press Enter to go to the submenu.',
             })}
           </p>
@@ -329,7 +329,7 @@ export const Popover = ({
         >
           <EuiScreenReaderOnly>
             <p id={popoverNavigationInstructionsId}>
-              {i18n.translate('core.ui.chrome.sideNavigation.popoverNavigationInstructions', {
+              {i18n.translate('kbnUI.sideNavigation.popoverNavigationInstructions', {
                 defaultMessage:
                   'You are in the {label} secondary menu dialog. Use Up and Down arrow keys to navigate the menu. Press Escape to exit to the menu trigger.',
                 values: {

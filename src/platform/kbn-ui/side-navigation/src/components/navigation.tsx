@@ -225,7 +225,7 @@ export const Navigation = ({
                   isSidePanelOpen={false}
                   isAnyPopoverLocked={isAnyPopoverLocked}
                   setIsLocked={setIsAnyPopoverLocked}
-                  label={i18n.translate('core.ui.chrome.sideNavigation.moreMenuLabel', {
+                  label={i18n.translate('kbnUI.sideNavigation.moreMenuLabel', {
                     defaultMessage: 'More',
                   })}
                   persistent
@@ -242,12 +242,12 @@ export const Navigation = ({
                         (item) => item.id === visuallyActivePageId
                       )}
                       isNew={overflowMenuItems.some((item) => getIsNewPrimary(item.id))}
-                      label={i18n.translate('core.ui.chrome.sideNavigation.moreMenuItemLabel', {
+                      label={i18n.translate('kbnUI.sideNavigation.moreMenuItemLabel', {
                         defaultMessage: 'More',
                       })}
                     >
                       <FormattedMessage
-                        id="core.ui.chrome.sideNavigation.moreMenuItemText"
+                        id="kbnUI.sideNavigation.moreMenuItemText"
                         defaultMessage="More"
                       />
                     </SideNav.PrimaryMenu.Item>
@@ -258,7 +258,7 @@ export const Navigation = ({
                       <SideNav.NestedSecondaryMenu.Panel
                         id={MAIN_PANEL_ID}
                         title={i18n.translate(
-                          'core.ui.chrome.sideNavigation.nestedSecondaryMenuMoreTitle',
+                          'kbnUI.sideNavigation.nestedSecondaryMenuMoreTitle',
                           { defaultMessage: 'More' }
                         )}
                       >

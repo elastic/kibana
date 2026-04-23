@@ -39,7 +39,7 @@ export const Header: FC<HeaderProps> = ({ title, 'aria-describedby': ariaDescrib
     <div css={titleStyle}>
       <EuiButtonIcon
         aria-describedby={ariaDescribedBy}
-        aria-label={i18n.translate('core.ui.chrome.sideNavigation.goBackButtonIconAriaLabel', {
+        aria-label={i18n.translate('kbnUI.sideNavigation.goBackButtonIconAriaLabel', {
           defaultMessage: 'Go back',
         })}
         color="text"

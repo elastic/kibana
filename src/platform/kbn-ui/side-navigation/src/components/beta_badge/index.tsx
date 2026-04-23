@@ -40,18 +40,18 @@ export const BetaBadge = ({ type, isInverted, alignment = 'bottom' }: BetaBadgeP
   const config: Record<BadgeType, BadgeConfig> = {
     techPreview: {
       iconType: 'flask',
-      label: i18n.translate('core.ui.chrome.sideNavigation.techPreviewBadgeLabel', {
+      label: i18n.translate('kbnUI.sideNavigation.techPreviewBadgeLabel', {
         defaultMessage: 'Tech preview',
       }),
     },
     beta: {
       iconType: 'beta',
-      label: i18n.translate('core.ui.chrome.sideNavigation.betaBadgeLabel', {
+      label: i18n.translate('kbnUI.sideNavigation.betaBadgeLabel', {
         defaultMessage: 'Beta',
       }),
     },
     new: {
-      label: i18n.translate('core.ui.chrome.sideNavigation.newBadgeLabel', {
+      label: i18n.translate('kbnUI.sideNavigation.newBadgeLabel', {
         defaultMessage: 'New',
       }),
     },

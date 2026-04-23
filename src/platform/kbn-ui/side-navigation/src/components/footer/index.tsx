@@ -102,7 +102,7 @@ const FooterBase = forwardRef<HTMLElement, FooterProps>(
       <>
         <EuiScreenReaderOnly>
           <p id={footerNavigationInstructionsId}>
-            {i18n.translate('core.ui.chrome.sideNavigation.footerInstructions', {
+            {i18n.translate('kbnUI.sideNavigation.footerInstructions', {
               defaultMessage:
                 'You are in the main navigation footer menu. Use Up and Down arrow keys to navigate the menu.',
             })}
@@ -111,7 +111,7 @@ const FooterBase = forwardRef<HTMLElement, FooterProps>(
         {/* The footer itself is not interactive but the children are */}
         {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
         <footer
-          aria-label={i18n.translate('core.ui.chrome.sideNavigation.footerAriaLabel', {
+          aria-label={i18n.translate('kbnUI.sideNavigation.footerAriaLabel', {
             defaultMessage: 'Side navigation',
           })}
           css={wrapperStyles.root}

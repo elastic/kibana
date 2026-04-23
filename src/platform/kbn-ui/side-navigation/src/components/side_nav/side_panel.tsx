@@ -100,7 +100,7 @@ export const SidePanel = ({ children, footer, openerNode }: SidePanelProps): JSX
     <>
       <EuiScreenReaderOnly>
         <p id={secondaryNavigationInstructionsId}>
-          {i18n.translate('core.ui.chrome.sideNavigation.sidePanelInstructions', {
+          {i18n.translate('kbnUI.sideNavigation.sidePanelInstructions', {
             defaultMessage:
               'You are in the {label} secondary menu side panel. Use Up and Down arrow keys to navigate the menu.',
             values: {
@@ -110,7 +110,7 @@ export const SidePanel = ({ children, footer, openerNode }: SidePanelProps): JSX
         </p>
       </EuiScreenReaderOnly>
       <EuiSplitPanel.Outer
-        aria-label={i18n.translate('core.ui.chrome.sideNavigation.sidePanelAriaLabel', {
+        aria-label={i18n.translate('kbnUI.sideNavigation.sidePanelAriaLabel', {
           defaultMessage: `Side panel for {label}`,
           values: {
             label: openerNode.label,
