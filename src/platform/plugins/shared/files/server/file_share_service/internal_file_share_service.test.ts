@@ -13,14 +13,14 @@ import type { FileShare } from '../../common/types';
 import { FileShareNotFoundError, FileShareTokenInvalidError } from './errors';
 import { InternalFileShareService } from './internal_file_share_service';
 
-const createShareSO = (validUntil: number): SavedObject<FileShare> => ({
+const createShareSO = (opts: { validUntil: number }): SavedObject<FileShare> => ({
   id: 'share-id',
   type: 'fileShare',
   attributes: {
     created: new Date().toISOString(),
     name: 'my-share',
     token: 'abc123',
-    valid_until: validUntil,
+    valid_until: opts.validUntil,
   },
   references: [{ name: 'file.png', id: 'file-id', type: 'file' }],
 });
@@ -55,14 +55,18 @@ describe('InternalFileShareService', () => {
     it('throws FileShareTokenInvalidError when valid_until is in the past (ms)', async () => {
       // valid_until is stored in milliseconds — a value less than Date.now() means expired.
       const oneMinuteAgoMs = Date.now() - 60 * 1000;
-      savedObjects.find.mockResolvedValue(createFindResponse([createShareSO(oneMinuteAgoMs)]));
+      savedObjects.find.mockResolvedValue(
+        createFindResponse([createShareSO({ validUntil: oneMinuteAgoMs })])
+      );
 
       await expect(service.getByToken('abc123')).rejects.toBeInstanceOf(FileShareTokenInvalidError);
     });
 
     it('returns the share when valid_until is in the future (ms)', async () => {
       const oneDayFromNowMs = Date.now() + 24 * 60 * 60 * 1000;
-      savedObjects.find.mockResolvedValue(createFindResponse([createShareSO(oneDayFromNowMs)]));
+      savedObjects.find.mockResolvedValue(
+        createFindResponse([createShareSO({ validUntil: oneDayFromNowMs })])
+      );
 
       await expect(service.getByToken('abc123')).resolves.toEqual(
         expect.objectContaining({
@@ -72,6 +76,15 @@ describe('InternalFileShareService', () => {
           fileId: 'file-id',
         })
       );
+    });
+
+    it('does not return the share when valid_until is 1 second in the past (ms)', async () => {
+      const oneSecondAgoMs = Date.now() - 1000;
+      savedObjects.find.mockResolvedValue(
+        createFindResponse([createShareSO({ validUntil: oneSecondAgoMs })])
+      );
+
+      await expect(service.getByToken('abc123')).rejects.toBeInstanceOf(FileShareTokenInvalidError);
     });
   });
 });
