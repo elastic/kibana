@@ -67,7 +67,6 @@ export const ContextTab: FunctionComponent = () => {
           options={painlessContextOptions}
           valueOfSelected={context}
           onChange={(nextContext: PainlessContext) => updatePayload({ context: nextContext })}
-          itemLayoutAlign="top"
           fullWidth
           data-test-subj="painlessContextDropDown"
         />

@@ -131,7 +131,6 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
             compressed={compressed}
             data-test-subj={TEST_IDS.PROMPT_SUPERSELECT}
             fullWidth
-            itemLayoutAlign="top"
             disabled={isDisabled}
             isOpen={isOpenLocal && !isSettingsModalVisible}
             onChange={onChange}

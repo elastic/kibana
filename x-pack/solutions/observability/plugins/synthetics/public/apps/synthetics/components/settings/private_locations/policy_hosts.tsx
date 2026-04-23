@@ -135,7 +135,6 @@ export const PolicyHostsField = ({
               aria-label={SELECT_POLICY_HOSTS}
               placeholder={SELECT_POLICY_HOSTS}
               valueOfSelected={field.value}
-              itemLayoutAlign="top"
               popoverProps={{ repositionOnScroll: true }}
               isInvalid={showFieldInvalid}
               options={policyHostsOptions ?? []}

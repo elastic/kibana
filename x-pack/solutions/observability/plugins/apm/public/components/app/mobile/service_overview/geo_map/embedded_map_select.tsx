@@ -86,7 +86,6 @@ export function EmbeddedMapSelect({
         options={options}
         valueOfSelected={selectedMap}
         onChange={onChange}
-        itemLayoutAlign="top"
         aria-label={i18n.translate('xpack.apm.serviceOverview.embeddedMap.dropdown.ariaLabel', {
           defaultMessage: 'Map',
         })}

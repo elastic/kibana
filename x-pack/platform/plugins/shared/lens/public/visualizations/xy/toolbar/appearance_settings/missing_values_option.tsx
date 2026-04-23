@@ -81,7 +81,6 @@ export const MissingValuesOptions: React.FC<MissingValuesOptionProps> = ({
               })}
               valueOfSelected={fittingFunction || FittingFunctions.LINEAR}
               onChange={(value) => onFittingFnChange(value)}
-              itemLayoutAlign="top"
             />
           </EuiFormRow>
           {fittingFunction && fittingFunction !== FittingFunctions.NONE && (
@@ -112,7 +111,6 @@ export const MissingValuesOptions: React.FC<MissingValuesOptionProps> = ({
                   })}
                   valueOfSelected={endValue || FittingFunctions.NONE}
                   onChange={(value) => onEndValueChange(value)}
-                  itemLayoutAlign="top"
                 />
               </EuiFormRow>
               <EuiFormRow

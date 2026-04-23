@@ -95,7 +95,6 @@ export function TreemapSelect({
             options={options}
             valueOfSelected={selectedTreemap}
             onChange={onChange}
-            itemLayoutAlign="top"
             aria-label={i18n.translate(
               'xpack.apm.mobile.errorOverview.treemap.dropdown.ariaLabel',
               {

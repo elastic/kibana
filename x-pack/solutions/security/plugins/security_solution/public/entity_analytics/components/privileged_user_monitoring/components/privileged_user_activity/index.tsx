@@ -122,7 +122,6 @@ export const UserActivityPrivilegedUsersPanel: React.FC<{
                   options={stackByOptions}
                   prepend={stackByLabel}
                   valueOfSelected={selectedStackByOption}
-                  itemLayoutAlign="top"
                   aria-label={stackByLabel}
                 />
               )}
