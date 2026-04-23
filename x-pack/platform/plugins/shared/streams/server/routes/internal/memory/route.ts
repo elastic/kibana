@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import type { IUiSettingsClient, Logger } from '@kbn/core/server';
 import { OBSERVABILITY_STREAMS_ENABLE_MEMORY } from '@kbn/management-settings-ids';
 import type { TaskResult } from '@kbn/streams-schema';
+import { featureSchema, generatedSignificantEventQuerySchema } from '@kbn/streams-schema';
 import { notFound } from '@hapi/boom';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
@@ -32,6 +33,10 @@ import {
   type MemoryConsolidationTaskParams,
   type MemoryConsolidationTaskResult,
 } from '../../../lib/tasks/task_definitions/memory_consolidation';
+import { resolveConnectorForSignificantEventsDiscovery } from '../../utils/resolve_connector_for_feature';
+import { getRequestAbortSignal } from '../../utils/get_request_abort_signal';
+import type { MemoryGenerationResult } from '../../../lib/sig_events/memory_generation';
+import { generateMemory } from '../../../lib/sig_events/memory_generation';
 
 const assertMemoryEnabled = async (uiSettingsClient: IUiSettingsClient) => {
   const useMemory = await uiSettingsClient.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_MEMORY);
@@ -517,6 +522,67 @@ const consolidateMemoryRoute = createServerRoute({
   },
 });
 
+const isMemoryEnabled = async (uiSettingsClient: IUiSettingsClient): Promise<boolean> => {
+  return uiSettingsClient.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_MEMORY);
+};
+
+const generateMemoryRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/{streamName}/memory/_generate',
+  params: z.object({
+    path: z.object({ streamName: z.string() }),
+    body: z.object({
+      features: z.array(featureSchema).optional(),
+      queries: z.array(generatedSignificantEventQuerySchema).optional(),
+    }),
+  }),
+  options: {
+    access: 'internal',
+    summary: 'Generate memory from discovery indicators',
+    description:
+      'Runs the memory generation reasoning agent to synthesize features and queries into memory pages.',
+    timeout: { idleSocket: 600_000 },
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    logger,
+  }): Promise<MemoryGenerationResult & { skipped?: boolean; reason?: string }> => {
+    const { inferenceClient, uiSettingsClient } = await getScopedClients({ request });
+
+    if (!(await isMemoryEnabled(uiSettingsClient))) {
+      return { streamsProcessed: 0, skipped: true, reason: 'memory_disabled' };
+    }
+
+    const { streamName } = params.path;
+    const { features, queries: rawQueries } = params.body;
+
+    const queries = rawQueries?.map((query) => ({ streamName, query }));
+
+    const connectorId = await resolveConnectorForSignificantEventsDiscovery({
+      searchInferenceEndpoints: server.searchInferenceEndpoints,
+      request,
+    });
+
+    return generateMemory(
+      { features, queries },
+      {
+        inferenceClient,
+        connectorId,
+        esClient: server.core.elasticsearch.client.asInternalUser,
+        logger: logger.get('memory_generation'),
+        signal: getRequestAbortSignal(request),
+      }
+    );
+  },
+});
+
 export const internalMemoryRoutes = {
   ...createEntryRoute,
   ...getEntryRoute,
@@ -531,4 +597,5 @@ export const internalMemoryRoutes = {
   ...recentChangesRoute,
   ...scrapeConversationsRoute,
   ...consolidateMemoryRoute,
+  ...generateMemoryRoute,
 };

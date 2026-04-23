@@ -59,7 +59,6 @@ const identifyInferredFeaturesRoute = createServerRoute({
         maxExcludedFeaturesInPrompt: z.number().optional(),
         maxPreviouslyIdentifiedFeatures: z.number().optional(),
         diverseOffset: z.number().min(0).optional(),
-        recencyThresholdHours: z.number().min(0).nullable().optional(),
       })
       .nullable()
       .optional(),
@@ -95,20 +94,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
       maxExcludedFeaturesInPrompt = tuningConfig.max_excluded_features_in_prompt,
       maxPreviouslyIdentifiedFeatures,
       diverseOffset,
-      recencyThresholdHours,
     } = params.body ?? {};
-
-    if (recencyThresholdHours != null) {
-      const featureClient = await getFeatureClient();
-      const recency = await areFeaturesRecent({
-        featureClient,
-        streamName,
-        thresholdHours: recencyThresholdHours,
-      });
-      if (recency.isRecent) {
-        return { skipped: true, reason: 'features_recent', newestLastSeen: recency.newestLastSeen };
-      }
-    }
 
     const [connectorId, stream, featureClient] = await Promise.all([
       connectorIdOverride
@@ -213,7 +199,6 @@ const identifyComputedFeaturesRoute = createServerRoute({
         end: z.number().optional(),
         runId: z.string().optional(),
         featureTtlDays: z.number().optional(),
-        recencyThresholdHours: z.number().min(0).nullable().optional(),
       })
       .nullable()
       .optional(),
@@ -238,25 +223,7 @@ const identifyComputedFeaturesRoute = createServerRoute({
       end = now,
       runId = uuidv4(),
       featureTtlDays = tuningConfig.feature_ttl_days,
-      recencyThresholdHours,
     } = params.body ?? {};
-
-    if (recencyThresholdHours != null) {
-      const featureClient = await getFeatureClient();
-      const recency = await areFeaturesRecent({
-        featureClient,
-        streamName,
-        thresholdHours: recencyThresholdHours,
-      });
-      if (recency.isRecent) {
-        return {
-          skipped: true,
-          reason: 'features_recent',
-          computedFeatures: [],
-          computedFeaturesCount: 0,
-        };
-      }
-    }
 
     const [featureClient, stream] = await Promise.all([
       getFeatureClient(),
@@ -292,10 +259,46 @@ const identifyComputedFeaturesRoute = createServerRoute({
 });
 
 // ---------------------------------------------------------------------------
+// Route 3: Check features recency
+// ---------------------------------------------------------------------------
+
+const featuresRecencyRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/{streamName}/features/_recency',
+  options: {
+    access: 'internal',
+    summary: 'Check whether KI features for a stream were identified recently',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    path: z.object({ streamName: z.string() }),
+    query: z.object({
+      thresholdHours: z.coerce.number().min(0),
+    }),
+  }),
+  handler: async ({ params, request, getScopedClients, server }) => {
+    const { getFeatureClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const featureClient = await getFeatureClient();
+    return areFeaturesRecent({
+      featureClient,
+      streamName: params.path.streamName,
+      thresholdHours: params.query.thresholdHours,
+    });
+  },
+});
+
+// ---------------------------------------------------------------------------
 // Exports
 // ---------------------------------------------------------------------------
 
 export const identifyFeaturesRoutes = {
   ...identifyInferredFeaturesRoute,
   ...identifyComputedFeaturesRoute,
+  ...featuresRecencyRoute,
 };
