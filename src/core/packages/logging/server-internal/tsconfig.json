@@ -22,7 +22,7 @@
     "@kbn/utility-types-jest",
     "@kbn/utility-types",
     "@kbn/security-hardening",
-    "@kbn/apm-config-loader",
+    "@kbn/telemetry",
   ],
   "exclude": [
     "target/**/*",
