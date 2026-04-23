@@ -50,7 +50,7 @@ test.describe(
       await page.goto(kbnUrl.get('/app/observability/overview'));
 
       await expect(page.getByTestId('obltSigeventsOverviewPageHeader')).toBeVisible();
-      await expect(page.getByTestId('obltSigeventsOverviewPlaceholder')).toBeVisible();
+      await expect(page.getByTestId('sigeventsOverview')).toBeVisible();
       await expect(page.getByTestId('obltSigeventsConversation')).toBeVisible();
       await expect(page.getByTestId('agentBuilderEmbeddableConversation')).toBeVisible();
     });
