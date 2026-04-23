@@ -34,7 +34,7 @@ export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
     const savedObjects = container.get(CoreStart('savedObjects'));
     const uiSettingsService = container.get(CoreStart('uiSettings'));
     const soClient = savedObjects.createInternalRepository();
-    const uiSettingsClient = uiSettingsService.globalAsScopedToClient(soClient);
+    const uiSettingsClient = uiSettingsService.asScopedToClient(soClient);
     const experimentalFeaturesEnabled = await uiSettingsClient.get<boolean>(
       ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID
     );

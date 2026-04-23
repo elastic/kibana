@@ -19,7 +19,7 @@ export const experimentalFeaturesUiSettings: Record<string, UiSettingsParams> = 
     name: i18n.translate('xpack.alertingVTwo.experimentalFeaturesSettingName', {
       defaultMessage: 'Alerting v2: Experimental features',
     }),
-    scope: 'global',
+    type: 'boolean',
     value: false,
     description: i18n.translate('xpack.alertingVTwo.experimentalFeaturesSettingDescription', {
       defaultMessage: 'Enables experimental alerting v2 features such as Rule Doctor.',
@@ -33,7 +33,7 @@ export const experimentalFeaturesUiSettings: Record<string, UiSettingsParams> = 
     name: i18n.translate('xpack.alertingVTwo.ruleDoctorIntervalSettingName', {
       defaultMessage: 'Alerting v2: Rule Doctor continuous analysis interval (hours)',
     }),
-    scope: 'global',
+    type: 'number',
     value: null,
     description: i18n.translate('xpack.alertingVTwo.ruleDoctorIntervalSettingDescription', {
       defaultMessage:
