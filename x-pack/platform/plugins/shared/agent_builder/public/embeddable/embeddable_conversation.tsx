@@ -87,3 +87,5 @@ export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInte
     </div>
   );
 };
+
+export default EmbeddableConversationInternal;
