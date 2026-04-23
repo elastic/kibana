@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import { IntlProvider } from '@kbn/i18n-react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { RuleCoveragePanel } from './rule_coverage_panel';
 import { useKibana } from '../../../../common/lib/kibana';
 import { SiemReadinessEventTypes } from '../../../../common/lib/telemetry/events/siem_readiness/types';
