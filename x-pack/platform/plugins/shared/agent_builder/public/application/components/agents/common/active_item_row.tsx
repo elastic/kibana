@@ -21,7 +21,7 @@ export interface ActiveItemRowProps {
   canEditAgent: boolean;
 }
 
-const REMOVE_BUTTON_CLASS = 'agentBuilder__agentActiveItemRowRemoveButton';
+const SHOW_ON_HOVER_CLASS = 'agentBuilder__agentActiveItemRow--showOnHover';
 
 export const ActiveItemRow: React.FC<ActiveItemRowProps> = ({
   name,
@@ -36,9 +36,9 @@ export const ActiveItemRow: React.FC<ActiveItemRowProps> = ({
   const { euiTheme } = useEuiTheme();
   const isReadOnly = Boolean(readOnlyContent);
   const showRemoveButton = canEditAgent && !isReadOnly;
-  const showReadonlyContent = isSelected && isReadOnly;
 
   const rowStyles = css`
+    block-size: 40px;
     padding: ${euiTheme.size.s} ${euiTheme.size.m};
     cursor: pointer;
     border-radius: ${euiTheme.border.radius.medium};
@@ -50,13 +50,17 @@ export const ActiveItemRow: React.FC<ActiveItemRowProps> = ({
     }
 
     /* Show remove button on row hover / focus */
-    &:hover .${REMOVE_BUTTON_CLASS}, &:focus-within .${REMOVE_BUTTON_CLASS} {
+    &:hover .${SHOW_ON_HOVER_CLASS}, &:focus-within .${SHOW_ON_HOVER_CLASS} {
+      display: inline;
       opacity: 1;
     }
-  `;
-  const removeButtonStyles = css`
-    opacity: ${isSelected ? 1 : 0};
-    transition: opacity ${euiTheme.animation.fast};
+
+    & .${SHOW_ON_HOVER_CLASS} {
+      /* Always show when row is selected */
+      display: ${isSelected ? 'inline' : 'none'};
+      opacity: ${isSelected ? 1 : 0};
+      transition: opacity ${euiTheme.animation.fast};
+    }
   `;
 
   return (
@@ -86,11 +90,15 @@ export const ActiveItemRow: React.FC<ActiveItemRowProps> = ({
           {name}
         </EuiText>
       </EuiFlexItem>
-      {showReadonlyContent && <EuiFlexItem grow={false}>{readOnlyContent}</EuiFlexItem>}
+      {isReadOnly && (
+        <EuiFlexItem grow={false} className={SHOW_ON_HOVER_CLASS}>
+          {readOnlyContent}
+        </EuiFlexItem>
+      )}
       {showRemoveButton && (
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
-            className={REMOVE_BUTTON_CLASS}
+            className={SHOW_ON_HOVER_CLASS}
             iconType="cross"
             aria-label={removeAriaLabel}
             disabled={isRemoving}
@@ -98,7 +106,6 @@ export const ActiveItemRow: React.FC<ActiveItemRowProps> = ({
               event.stopPropagation();
               onRemove();
             }}
-            css={removeButtonStyles}
           />
         </EuiFlexItem>
       )}
