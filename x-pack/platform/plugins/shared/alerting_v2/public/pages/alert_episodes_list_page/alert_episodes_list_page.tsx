@@ -340,6 +340,7 @@ export const AlertEpisodesListPage = () => {
                 rowHeightState={rowHeight}
                 onUpdateRowHeight={setRowHeight}
                 customBulkActions={customBulkActions}
+                enableComparisonMode={false}
                 services={services}
               />
             )}

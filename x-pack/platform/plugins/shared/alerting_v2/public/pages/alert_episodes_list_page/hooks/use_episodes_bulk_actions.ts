@@ -10,7 +10,7 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import type { CoreStart } from '@kbn/core/public';
 import type { CustomBulkActions } from '@kbn/unified-data-table';
 import type { BulkCreateAlertActionBody } from '@kbn/alerting-v2-schemas';
-import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
+import { ALERT_EPISODE_ACTION_TYPE, ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisode } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
 import type {
   AlertEpisodeGroupAction,
@@ -43,12 +43,19 @@ const isGroupSnoozed = (
 ) =>
   groupActionsMap?.get(episode.group_hash)?.lastSnoozeAction === ALERT_EPISODE_ACTION_TYPE.SNOOZE;
 
-const isGroupDeactivated = (
+const isGroupResolved = (
   episode: AlertEpisode,
   groupActionsMap: Map<string, AlertEpisodeGroupAction> | undefined
 ) =>
   groupActionsMap?.get(episode.group_hash)?.lastDeactivateAction ===
   ALERT_EPISODE_ACTION_TYPE.DEACTIVATE;
+
+const isGroupUnresolved = (
+  episode: AlertEpisode,
+  groupActionsMap: Map<string, AlertEpisodeGroupAction> | undefined
+) =>
+  groupActionsMap?.get(episode.group_hash)?.lastDeactivateAction ===
+  ALERT_EPISODE_ACTION_TYPE.ACTIVATE;
 
 interface UseEpisodesBulkActionsResult {
   customBulkActions: CustomBulkActions;
@@ -127,7 +134,8 @@ export const useEpisodesBulkActions = ({
       {
         key: 'acknowledge',
         label: i18n.BULK_ACKNOWLEDGE,
-        available: ({ selectedDocIds }) => {
+        icon: 'info',
+        isAvailable: ({ selectedDocIds }) => {
           const selected = getEpisodesFromDocIds(selectedDocIds, episodesData ?? []);
           return selected.some((ep) => !isEpisodeAcknowledged(ep, episodeActionsMap));
         },
@@ -146,7 +154,8 @@ export const useEpisodesBulkActions = ({
       {
         key: 'unacknowledge',
         label: i18n.BULK_UNACKNOWLEDGE,
-        available: ({ selectedDocIds }) => {
+        icon: 'crossInCircle',
+        isAvailable: ({ selectedDocIds }) => {
           const selected = getEpisodesFromDocIds(selectedDocIds, episodesData ?? []);
           return selected.some((ep) => isEpisodeAcknowledged(ep, episodeActionsMap));
         },
@@ -165,7 +174,8 @@ export const useEpisodesBulkActions = ({
       {
         key: 'snooze',
         label: i18n.BULK_SNOOZE,
-        available: ({ selectedDocIds }) => {
+        icon: 'bellSlash',
+        isAvailable: ({ selectedDocIds }) => {
           const groups = uniqueGroupEpisodes(
             getEpisodesFromDocIds(selectedDocIds, episodesData ?? [])
           );
@@ -178,7 +188,8 @@ export const useEpisodesBulkActions = ({
       {
         key: 'unsnooze',
         label: i18n.BULK_UNSNOOZE,
-        available: ({ selectedDocIds }) => {
+        icon: 'bell',
+        isAvailable: ({ selectedDocIds }) => {
           const groups = uniqueGroupEpisodes(
             getEpisodesFromDocIds(selectedDocIds, episodesData ?? [])
           );
@@ -197,11 +208,16 @@ export const useEpisodesBulkActions = ({
       {
         key: 'resolve',
         label: i18n.BULK_RESOLVE,
-        available: ({ selectedDocIds }) => {
+        icon: 'check',
+        isAvailable: ({ selectedDocIds }) => {
           const groups = uniqueGroupEpisodes(
             getEpisodesFromDocIds(selectedDocIds, episodesData ?? [])
           );
-          return groups.some((ep) => !isGroupDeactivated(ep, groupActionsMap));
+          return groups.some(
+            (ep) =>
+              !isGroupResolved(ep, groupActionsMap) &&
+              ep['episode.status'] !== ALERT_EPISODE_STATUS.INACTIVE
+          );
         },
         onClick: ({ selectedDocIds }) => {
           const items: BulkCreateAlertActionBody = uniqueGroupEpisodes(
@@ -215,13 +231,18 @@ export const useEpisodesBulkActions = ({
         },
       },
       {
-        key: 'activate',
-        label: i18n.BULK_ACTIVATE,
-        available: ({ selectedDocIds }) => {
+        key: 'unresolve',
+        label: i18n.BULK_UNRESOLVE,
+        icon: 'cross',
+        isAvailable: ({ selectedDocIds }) => {
           const groups = uniqueGroupEpisodes(
             getEpisodesFromDocIds(selectedDocIds, episodesData ?? [])
           );
-          return groups.some((ep) => isGroupDeactivated(ep, groupActionsMap));
+          return groups.some(
+            (ep) =>
+              !isGroupUnresolved(ep, groupActionsMap) &&
+              ep['episode.status'] !== ALERT_EPISODE_STATUS.ACTIVE
+          );
         },
         onClick: ({ selectedDocIds }) => {
           const items: BulkCreateAlertActionBody = uniqueGroupEpisodes(
@@ -237,6 +258,7 @@ export const useEpisodesBulkActions = ({
       {
         key: 'edit-tags',
         label: i18n.BULK_EDIT_TAGS,
+        icon: 'tag',
         onClick: ({ selectedDocIds }) => {
           setPendingBulkState({ action: 'tag', selectedDocIds });
         },

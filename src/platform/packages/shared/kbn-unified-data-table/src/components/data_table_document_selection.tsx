@@ -195,7 +195,7 @@ export function DataTableDocumentToolbarBtn({
         ? customBulkActions
             .filter(
               (bulkAction) =>
-                bulkAction.available?.({ selectedDocIds: docIdsInSelectionOrder }) ?? true
+                bulkAction.isAvailable?.({ selectedDocIds: docIdsInSelectionOrder }) ?? true
             )
             .map((bulkAction) => {
               return (

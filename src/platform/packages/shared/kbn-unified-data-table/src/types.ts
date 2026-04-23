@@ -73,7 +73,7 @@ export type CustomBulkActions = Array<
      * current selection. Returning `false` hides the action from the menu.
      * If omitted, the action is always shown.
      */
-    available?: (payload: { selectedDocIds: string[] }) => boolean;
+    isAvailable?: (payload: { selectedDocIds: string[] }) => boolean;
     label: React.ReactElement | string;
     key: string;
   }

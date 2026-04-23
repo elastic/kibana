@@ -47,8 +47,8 @@ export const BULK_RESOLVE = i18n.translate('xpack.alertingV2.episodes.bulkAction
   defaultMessage: 'Resolve',
 });
 
-export const BULK_ACTIVATE = i18n.translate('xpack.alertingV2.episodes.bulkActions.activate', {
-  defaultMessage: 'Activate',
+export const BULK_UNRESOLVE = i18n.translate('xpack.alertingV2.episodes.bulkActions.activate', {
+  defaultMessage: 'Unresolve',
 });
 
 export const BULK_EDIT_TAGS = i18n.translate('xpack.alertingV2.episodes.bulkActions.editTags', {
