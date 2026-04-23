@@ -7,6 +7,7 @@
 
 import type { KibanaUrl, ScoutPage, Locator } from '@kbn/scout-oblt';
 import { EuiComboBoxWrapper } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import type { ServiceDetailsPageTabName } from './service_details_tab';
 import { ServiceDetailsTab } from './service_details_tab';
 import { EXTENDED_TIMEOUT } from '../../constants';
@@ -31,15 +32,21 @@ export class DashboardsTab extends ServiceDetailsTab {
       .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 
+  public async waitForDashboardsToLoad(): Promise<void> {
+    await expect(this.page.getByRole('progressbar')).toBeHidden({ timeout: EXTENDED_TIMEOUT });
+    await this.addServiceDashboardButton.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+  }
+
   public async linkDashboardByTitle(dashboardTitle: string) {
     await this.addServiceDashboardButton.waitFor({ timeout: EXTENDED_TIMEOUT });
     await this.addServiceDashboardButton.click();
-
-    await this.page.getByTestId('apmSelectDashboardButton').waitFor({ timeout: EXTENDED_TIMEOUT });
-
+    // The combo box is disabled while the dashboard list is loading asynchronously.
+    // Wait for it to become enabled before interacting.
+    const comboBoxInput = this.page
+      .getByTestId('apmSelectServiceDashboard')
+      .getByTestId('comboBoxSearchInput');
+    await expect(comboBoxInput).toBeEnabled({ timeout: EXTENDED_TIMEOUT });
     await this.dashboardComboBox.selectSingleOption(dashboardTitle);
-
-    await this.page.getByTestId('apmSelectDashboardButton').waitFor({ timeout: EXTENDED_TIMEOUT });
     await this.page.getByTestId('apmSelectDashboardButton').click();
   }
 
