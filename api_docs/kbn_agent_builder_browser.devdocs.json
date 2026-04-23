@@ -27,7 +27,7 @@
         "label": "AgentBuilderAnnouncementModal",
         "description": [],
         "signature": [
-          "({ onRevert, onContinue, canRevertToAssistant, }: ",
+          "({ variant, onRevert, onContinue, }: ",
           {
             "pluginId": "@kbn/agent-builder-browser",
             "scope": "common",
@@ -38,7 +38,7 @@
           ") => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/announcement_modal/agent_builder_announcement_modal.tsx",
-        "lineNumber": 40,
+        "lineNumber": 97,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -48,7 +48,7 @@
             "id": "def-common.AgentBuilderAnnouncementModal.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  onRevert,\n  onContinue,\n  canRevertToAssistant = true,\n}",
+            "label": "{\n  variant,\n  onRevert,\n  onContinue,\n}",
             "description": [],
             "signature": [
               {
@@ -60,7 +60,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/announcement_modal/agent_builder_announcement_modal.tsx",
-            "lineNumber": 40,
+            "lineNumber": 97,
             "columnNumber": 93,
             "deprecated": false,
             "trackAdoption": false,
@@ -168,11 +168,27 @@
         "label": "AgentBuilderAnnouncementModalProps",
         "description": [],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/announcement_modal/agent_builder_announcement_modal.tsx",
-        "lineNumber": 30,
+        "lineNumber": 27,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.AgentBuilderAnnouncementModalProps.variant",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "variant",
+            "description": [],
+            "signature": [
+              "\"1b\" | \"1a\" | \"2a\""
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/announcement_modal/agent_builder_announcement_modal.tsx",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "@kbn/agent-builder-browser",
             "id": "def-common.AgentBuilderAnnouncementModalProps.onRevert",
@@ -184,7 +200,7 @@
               "() => void"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/announcement_modal/agent_builder_announcement_modal.tsx",
-            "lineNumber": 31,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -202,30 +218,12 @@
               "() => void"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/announcement_modal/agent_builder_announcement_modal.tsx",
-            "lineNumber": 32,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
             "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/agent-builder-browser",
-            "id": "def-common.AgentBuilderAnnouncementModalProps.canRevertToAssistant",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "canRevertToAssistant",
-            "description": [
-              "\nWhen false, the revert action is hidden and the body shows a short FYI plus a link to\ndocumentation (no bullets or history callout), since the user cannot change Gen AI settings."
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/announcement_modal/agent_builder_announcement_modal.tsx",
-            "lineNumber": 33,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1454,6 +1452,23 @@
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "@kbn/agent-builder-browser",
+        "id": "def-common.AgentBuilderAnnouncementVariant",
+        "type": "Type",
+        "tags": [],
+        "label": "AgentBuilderAnnouncementVariant",
+        "description": [],
+        "signature": [
+          "\"1b\" | \"1a\" | \"2a\""
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/announcement_modal/translations.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/agent-builder-browser",
         "id": "def-common.BrowserChatEvent",

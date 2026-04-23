@@ -14485,15 +14485,15 @@
               },
               {
                 "plugin": "observability",
+                "path": "x-pack/solutions/observability/plugins/observability/public/components/annotations/hooks/use_fetch_slo_list.ts"
+              },
+              {
+                "plugin": "observability",
                 "path": "x-pack/solutions/observability/plugins/observability/public/hooks/use_fetch_rule.ts"
               },
               {
                 "plugin": "observability",
                 "path": "x-pack/solutions/observability/plugins/observability/public/hooks/use_fetch_rule_types.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/solutions/observability/plugins/observability/public/components/annotations/hooks/use_fetch_slo_list.ts"
               },
               {
                 "plugin": "slo",

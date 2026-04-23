@@ -27784,6 +27784,10 @@
               },
               {
                 "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/to_expression.ts"
+              },
+              {
+                "plugin": "lens",
                 "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/xy_config_panel/dimension_editor.tsx"
               },
               {
@@ -27884,11 +27888,31 @@
               },
               {
                 "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/color_assignment.test.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/color_assignment.test.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/color_assignment.test.ts"
+              },
+              {
+                "plugin": "lens",
                 "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/reference_line_helpers.test.ts"
               },
               {
                 "plugin": "lens",
                 "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/reference_line_helpers.test.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/to_expression.test.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/to_expression.test.ts"
               },
               {
                 "plugin": "lens",
