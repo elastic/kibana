@@ -16,6 +16,7 @@ import {
   EuiTabs,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { NoDataPageProps } from '@kbn/shared-ux-page-no-data-types';
@@ -88,7 +89,7 @@ export function ProfilingAppPageTemplate({
             <EuiFlexGroup direction="column">
               {tabs.length > 0 && (
                 <EuiFlexItem grow={false}>
-                  <EuiTabs size="m">
+                  <EuiTabs size="m" bottomBorder={!hideSearchBar}>
                     {tabs.map(({ label, ...tabRest }) => (
                       <EuiTab key={tabRest.href} {...tabRest}>
                         {label}
@@ -104,6 +105,15 @@ export function ProfilingAppPageTemplate({
               )}
             </EuiFlexGroup>
           ) : undefined,
+        bottomBorder: 'extended',
+        css:
+          hideSearchBar && tabs.length > 0
+            ? css`
+                .euiPageHeaderContent {
+                  padding-bottom: 0px;
+                }
+              `
+            : undefined,
       }}
       restrictWidth={restrictWidth}
       pageSectionProps={{
