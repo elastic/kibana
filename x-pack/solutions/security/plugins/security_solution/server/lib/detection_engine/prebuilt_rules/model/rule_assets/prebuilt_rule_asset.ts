@@ -6,6 +6,7 @@
  */
 
 import * as z from '@kbn/zod/v4';
+import { lazySchema } from '@kbn/zod/v4';
 import {
   RuleSignatureId,
   RuleVersion,
@@ -39,8 +40,8 @@ const BASE_PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET = zodMaskFor<BaseCreateProps>(
 ]);
 
 export type PrebuiltAssetBaseProps = z.infer<typeof PrebuiltAssetBaseProps>;
-export const PrebuiltAssetBaseProps = BaseCreateProps.omit(
-  BASE_PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET
+export const PrebuiltAssetBaseProps = lazySchema(() =>
+  BaseCreateProps.omit(BASE_PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET)
 );
 
 /**
