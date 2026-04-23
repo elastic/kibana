@@ -24,7 +24,23 @@ import {
 import { ContentTabIds } from '../types';
 import { Callouts } from './callouts';
 
-export const Content = () => {
+const DATE_PICKER_VISIBLE_TABS = [
+  ContentTabIds.OVERVIEW,
+  ContentTabIds.LOGS,
+  ContentTabIds.METADATA,
+  ContentTabIds.METRICS,
+  ContentTabIds.PROCESSES,
+  ContentTabIds.ANOMALIES,
+  ContentTabIds.DASHBOARDS,
+];
+
+export const Content = ({
+  showDatePicker = true,
+  showProfilingSearchBar = true,
+}: {
+  showDatePicker?: boolean;
+  showProfilingSearchBar?: boolean;
+}) => {
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
       <EuiFlexItem grow={false}>
@@ -32,19 +48,11 @@ export const Content = () => {
           <EuiFlexItem grow={false}>
             <Callouts />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <DatePickerWrapper
-              visibleFor={[
-                ContentTabIds.OVERVIEW,
-                ContentTabIds.LOGS,
-                ContentTabIds.METADATA,
-                ContentTabIds.METRICS,
-                ContentTabIds.PROCESSES,
-                ContentTabIds.ANOMALIES,
-                ContentTabIds.DASHBOARDS,
-              ]}
-            />
-          </EuiFlexItem>
+          {showDatePicker && (
+            <EuiFlexItem grow={false}>
+              <DatePickerWrapper />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -70,7 +78,7 @@ export const Content = () => {
           <Processes />
         </TabPanel>
         <TabPanel activeWhen={ContentTabIds.PROFILING}>
-          <Profiling />
+          <Profiling showSearchBar={showProfilingSearchBar} />
         </TabPanel>
         <TabPanel activeWhen={ContentTabIds.DASHBOARDS}>
           <Dashboards />
@@ -80,11 +88,11 @@ export const Content = () => {
   );
 };
 
-const DatePickerWrapper = ({ visibleFor }: { visibleFor: ContentTabIds[] }) => {
+const DatePickerWrapper = () => {
   const { activeTabId } = useTabSwitcherContext();
 
   return (
-    <div hidden={!visibleFor.includes(activeTabId as ContentTabIds)}>
+    <div hidden={!DATE_PICKER_VISIBLE_TABS.includes(activeTabId as ContentTabIds)}>
       <DatePicker />
     </div>
   );
