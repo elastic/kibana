@@ -21,10 +21,10 @@ import { AlertsLocatorDefinition, sloFeatureId } from '@kbn/observability-plugin
 import { DEPRECATED_ALERTING_CONSUMERS, SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { mapValues } from 'lodash';
 import { LOCK_ID_RESOURCE_INSTALLER } from '../common/constants';
-import { registerOverviewEmbeddableTransforms } from './lib/embeddables/register_overview_embeddable_transforms';
-import { registerErrorBudgetEmbeddableTransforms } from './lib/embeddables/register_error_budget_embeddable_transforms';
-import { registerAlertsEmbeddableTransforms } from './lib/embeddables/register_alerts_embeddable_transforms';
-import { registerBurnRateEmbeddableTransforms } from './lib/embeddables/register_burn_rate_embeddable_transforms';
+import { registerOverviewEmbeddable } from './lib/embeddables/register_overview_embeddable';
+import { registerErrorBudgetEmbeddable } from './lib/embeddables/register_error_budget_embeddable';
+import { registerAlertsEmbeddable } from './lib/embeddables/register_alerts_embeddable';
+import { registerBurnRateEmbeddable } from './lib/embeddables/register_burn_rate_embeddable';
 import { getSloClientWithRequest } from './client';
 import { registerSloUsageCollector } from './lib/collectors/register';
 import { registerBurnRateRule } from './lib/rules/register_burn_rate_rule';
@@ -305,10 +305,10 @@ export class SLOPlugin
       config: this.config,
     });
 
-    registerOverviewEmbeddableTransforms(plugins.embeddable);
-    registerErrorBudgetEmbeddableTransforms(plugins.embeddable);
-    registerAlertsEmbeddableTransforms(plugins.embeddable);
-    registerBurnRateEmbeddableTransforms(plugins.embeddable);
+    registerOverviewEmbeddable(plugins.embeddable);
+    registerErrorBudgetEmbeddable(plugins.embeddable);
+    registerAlertsEmbeddable(plugins.embeddable);
+    registerBurnRateEmbeddable(plugins.embeddable);
 
     return {};
   }
