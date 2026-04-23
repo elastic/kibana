@@ -15,12 +15,6 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
-import {
-  isValidDateMath,
-  isNonEmptyString,
-  ArrayFromString,
-  BooleanFromString,
-} from '@kbn/zod-helpers/v4';
 
 import { NonEmptyString } from '../../../../../common_attributes.gen';
 import { AttackDiscoveryApiSchedule } from '../schedules_api.gen';
