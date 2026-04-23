@@ -61,6 +61,6 @@ export class ThreatMatchRuleCreatePage {
     await this.threatFieldComboBox.locator('input').click();
     await this.threatFieldComboBox.locator('input').fill(fieldName);
 
-    return this.page.locator('[role="option"]').filter({ hasText: fieldName });
+    return this.page.getByRole('option', { name: fieldName });
   }
 }
