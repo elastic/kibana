@@ -135,7 +135,9 @@ export const IntegrationSelectablePopover = (props: IntegrationSelectablePopover
             <EuiFlexItem grow={false}>
               <EuiLink
                 color={disabled ? 'subdued' : 'primary'}
-                onClick={() => !disabled && (isPopoverOpen ? setIsPopoverOpen(false) : handlePopoverOpen())}
+                onClick={() =>
+                  !disabled && (isPopoverOpen ? setIsPopoverOpen(false) : handlePopoverOpen())
+                }
                 style={disabled ? { cursor: 'default' } : undefined}
               >
                 {i18n.translate(
@@ -149,7 +151,9 @@ export const IntegrationSelectablePopover = (props: IntegrationSelectablePopover
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 isDisabled={disabled}
-                onClick={() => !disabled && (isPopoverOpen ? setIsPopoverOpen(false) : handlePopoverOpen())}
+                onClick={() =>
+                  !disabled && (isPopoverOpen ? setIsPopoverOpen(false) : handlePopoverOpen())
+                }
                 color="text"
                 size="xs"
                 style={{
