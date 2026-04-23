@@ -82,6 +82,7 @@ import type { EntityAttachmentIdentifier } from '../attachment_types/entity_atta
 import { useEntityForAttachment } from '../attachment_types/entity_attachment/use_entity_for_attachment';
 import {
   getHostNameForHostDetailsUrl,
+  getServiceNameForServiceDetailsUrl,
   getUserNameForUserDetailsUrl,
   navigateToEntityAnalyticsWithFlyoutInApp,
   type SecurityAgentBuilderChrome,
@@ -1098,7 +1099,7 @@ export const EntityCardFlyoutOverviewCanvas: React.FC<EntityCardFlyoutOverviewCa
   }
 
   if (identifier.identifierType === 'service') {
-    const displayName = entityName?.trim() && entityName !== 'name' ? entityName : entityId;
+    const displayName = getServiceNameForServiceDetailsUrl(exploreRow);
     return (
       <ServiceEntityFlyoutOverviewCanvas
         serviceName={displayName}

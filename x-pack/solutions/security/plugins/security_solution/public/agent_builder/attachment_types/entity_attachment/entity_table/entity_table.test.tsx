@@ -264,4 +264,35 @@ describe('EntityTable', () => {
       expect(mockedNavigateToSecurityEntityInApp.mock.calls[1][0].row.entity_id).toBe(storeIdB);
     });
   });
+
+  describe('pagination-aware row loading', () => {
+    // Regression: `EntityRowLoader` fans out one HTTP request per identifier. A
+    // chat round with many entities used to fire all of them on mount because
+    // the loader was rendered for `entities` (full list) rather than
+    // `pagedItems` (current page slice). Only the visible page should fetch;
+    // additional pages lazy-load as the user navigates.
+    it('only calls useEntityForAttachment for identifiers on the current page', () => {
+      const identifiers = Array.from({ length: 12 }, (_, i) => ({
+        identifierType: 'host' as const,
+        identifier: `host-${i}`,
+      }));
+
+      mockedUseEntityForAttachment.mockReturnValue({
+        data: null,
+        isLoading: true,
+        error: null,
+        refetch: jest.fn(),
+      });
+
+      renderTable({ entities: identifiers });
+
+      const calledIdentifiers = mockedUseEntityForAttachment.mock.calls.map(
+        ([identifier]: [{ identifier: string }]) => identifier.identifier
+      );
+      const unique = new Set(calledIdentifiers);
+      expect(unique.size).toBe(10);
+      expect(unique.has('host-10')).toBe(false);
+      expect(unique.has('host-11')).toBe(false);
+    });
+  });
 });

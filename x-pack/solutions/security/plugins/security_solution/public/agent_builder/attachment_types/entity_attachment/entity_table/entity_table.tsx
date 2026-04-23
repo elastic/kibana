@@ -510,8 +510,12 @@ export const EntityTable: React.FC<EntityTableProps> = ({
       paddingSize="m"
       data-test-subj="entityAttachmentTable"
     >
-      {entities.map((identifier) => (
-        <EntityRowLoader key={keyFor(identifier)} identifier={identifier} onLoaded={handleLoaded} />
+      {pagedItems.map((row) => (
+        <EntityRowLoader
+          key={keyFor(row.identifier)}
+          identifier={row.identifier}
+          onLoaded={handleLoaded}
+        />
       ))}
       <div css={tableScrollStyles}>
         <EuiBasicTable

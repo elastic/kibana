@@ -142,7 +142,12 @@ export const getHostNameForHostDetailsUrl = (row: SecurityEntityExploreRow): str
   if (trimmed && trimmed !== INVALID_PLACEHOLDER_ENTITY_NAME) {
     return trimmed;
   }
-  if (trimmed) {
+  return row.entity_id;
+};
+
+export const getServiceNameForServiceDetailsUrl = (row: SecurityEntityExploreRow): string => {
+  const trimmed = row.entity_name?.trim();
+  if (trimmed && trimmed !== INVALID_PLACEHOLDER_ENTITY_NAME) {
     return trimmed;
   }
   return row.entity_id;

@@ -1606,6 +1606,7 @@ describe('getEntityTool', () => {
         expect(mockEsClient.asCurrentUser.search).toHaveBeenCalledTimes(1);
         const searchCall = mockEsClient.asCurrentUser.search.mock.calls[0][0] as {
           index: string;
+          ignore_unavailable?: boolean;
           size: number;
           query: {
             bool: { filter: unknown[]; must_not?: unknown[] };
@@ -1613,6 +1614,12 @@ describe('getEntityTool', () => {
         };
         expect(searchCall.index).toBe('risk-score.risk-score-default');
         expect(searchCall.size).toBe(1);
+        // `ignore_unavailable: true` keeps spaces without a risk engine from
+        // tripping `index_not_found_exception` — the tool's availability gate
+        // only guarantees the entity-store index, not the risk time-series
+        // one, so a missing risk index should degrade to "no risk stats"
+        // rather than throw.
+        expect(searchCall.ignore_unavailable).toBe(true);
         // Filter matches both the prefixed EUID (V2 `user.risk.id_value`
         // convention — mirrored for hosts) and the bare identifier (V1
         // convention), which is how the flyout stays robust across

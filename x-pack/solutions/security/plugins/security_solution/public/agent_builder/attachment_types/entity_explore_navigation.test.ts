@@ -12,7 +12,9 @@ import { SecurityPageName } from '../../../common/constants';
 import { parseEntityResolutionFromUrlState } from '../../common/components/link_to/entity_resolution_query_params';
 import {
   getAgentBuilderLastAgentIdForSecurityOpenChat,
+  getHostNameForHostDetailsUrl,
   getSecurityEntityExploreNavigateTarget,
+  getServiceNameForServiceDetailsUrl,
   getUserNameForUserDetailsUrl,
   isAgentBuilderSidebarOpen,
   navigateToEntityAnalyticsHomePageInApp,
@@ -83,6 +85,88 @@ describe('entity_explore_navigation', () => {
           source: { host: { name: 'MacBookPro.localdomain' } },
         })
       ).toBe('yuliianaumenko@MacBookPro.localdomain');
+    });
+  });
+
+  describe('getHostNameForHostDetailsUrl', () => {
+    it('uses entity_name when it is a real host.name-style value', () => {
+      expect(
+        getHostNameForHostDetailsUrl({
+          entity_type: 'host',
+          entity_id: 'host:B377958D-B4A8-5FCA-B237-F2DE40404617',
+          entity_name: 'MacBookPro.localdomain',
+        })
+      ).toBe('MacBookPro.localdomain');
+    });
+
+    it('falls back to entity_id when entity_name is the placeholder "name"', () => {
+      expect(
+        getHostNameForHostDetailsUrl({
+          entity_type: 'host',
+          entity_id: 'host:B377958D-B4A8-5FCA-B237-F2DE40404617',
+          entity_name: 'name',
+        })
+      ).toBe('host:B377958D-B4A8-5FCA-B237-F2DE40404617');
+    });
+
+    it('falls back to entity_id when entity_name is whitespace-wrapped placeholder " name "', () => {
+      expect(
+        getHostNameForHostDetailsUrl({
+          entity_type: 'host',
+          entity_id: 'host:B377958D-B4A8-5FCA-B237-F2DE40404617',
+          entity_name: ' name ',
+        })
+      ).toBe('host:B377958D-B4A8-5FCA-B237-F2DE40404617');
+    });
+
+    it('falls back to entity_id when entity_name is missing', () => {
+      expect(
+        getHostNameForHostDetailsUrl({
+          entity_type: 'host',
+          entity_id: 'host:B377958D-B4A8-5FCA-B237-F2DE40404617',
+        })
+      ).toBe('host:B377958D-B4A8-5FCA-B237-F2DE40404617');
+    });
+  });
+
+  describe('getServiceNameForServiceDetailsUrl', () => {
+    it('uses entity_name when it is a real service.name-style value', () => {
+      expect(
+        getServiceNameForServiceDetailsUrl({
+          entity_type: 'service',
+          entity_id: 'service:abc-123',
+          entity_name: 'api.example',
+        })
+      ).toBe('api.example');
+    });
+
+    it('falls back to entity_id when entity_name is the placeholder "name"', () => {
+      expect(
+        getServiceNameForServiceDetailsUrl({
+          entity_type: 'service',
+          entity_id: 'service:abc-123',
+          entity_name: 'name',
+        })
+      ).toBe('service:abc-123');
+    });
+
+    it('falls back to entity_id when entity_name is whitespace-wrapped placeholder " name "', () => {
+      expect(
+        getServiceNameForServiceDetailsUrl({
+          entity_type: 'service',
+          entity_id: 'service:abc-123',
+          entity_name: ' name ',
+        })
+      ).toBe('service:abc-123');
+    });
+
+    it('falls back to entity_id when entity_name is missing', () => {
+      expect(
+        getServiceNameForServiceDetailsUrl({
+          entity_type: 'service',
+          entity_id: 'service:abc-123',
+        })
+      ).toBe('service:abc-123');
     });
   });
 

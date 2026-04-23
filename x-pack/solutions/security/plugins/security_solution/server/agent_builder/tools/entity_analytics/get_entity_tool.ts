@@ -266,6 +266,7 @@ const searchRiskDocForCandidates = async ({
   try {
     const response = await esClient.search<Record<EntityType, { risk: EntityRiskScoreRecord }>>({
       index: getRiskScoreTimeSeriesIndex(spaceId),
+      ignore_unavailable: true,
       size: 1,
       sort: [{ '@timestamp': { order: 'desc' } }],
       query: {
