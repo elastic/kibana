@@ -19,6 +19,7 @@ import { MonitorBarSeries } from '../components/monitor_bar_series';
 import { useMonitorHistogram } from '../../../../hooks/use_monitor_histogram';
 import type { OverviewStatusMetaData } from '../../../../../../../../../common/runtime_types';
 import { MonitorTypeBadge } from '../../../../../common/components/monitor_type_badge';
+import { SyntheticsRemoteBadge } from '../../../../../common/components/synthetics_remote_badge';
 import { getFilterForTypeMessage } from '../../../../management/monitor_list_table/labels';
 import type { FlyoutParamProps } from '../../types';
 import { MonitorsActions } from '../components/monitors_actions';
@@ -109,11 +110,18 @@ export const useMonitorsTableColumns = ({
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <MonitorTypeBadge
-                monitorType={monitor.type}
-                ariaLabel={getFilterForTypeMessage(monitor.type)}
-                onClick={() => onClickMonitorFilter('monitorTypes', monitor.type)}
-              />
+              <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <MonitorTypeBadge
+                    monitorType={monitor.type}
+                    ariaLabel={getFilterForTypeMessage(monitor.type)}
+                    onClick={() => onClickMonitorFilter('monitorTypes', monitor.type)}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <SyntheticsRemoteBadge remote={monitor.remote} />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
         ),

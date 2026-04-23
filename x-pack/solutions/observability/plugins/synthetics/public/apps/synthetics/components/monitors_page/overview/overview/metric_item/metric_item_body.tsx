@@ -10,6 +10,7 @@ import { useHistory } from 'react-router-dom';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
 import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { MonitorTypeBadge } from '../../../../common/components/monitor_type_badge';
+import { SyntheticsRemoteBadge } from '../../../../common/components/synthetics_remote_badge';
 import * as labels from '../../../management/monitor_list_table/labels';
 import type { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
 
@@ -28,11 +29,20 @@ export const MetricItemBody = ({ monitor }: { monitor: OverviewStatusMetaData })
       }}
     />
   );
+  const remoteBadge = <SyntheticsRemoteBadge remote={monitor.remote} />;
+
+  const badges = (
+    <>
+      {typeBadge}
+      {remoteBadge}
+    </>
+  );
+
   if (tags.length === 0) {
     return (
       <>
         <EuiSpacer size="xs" />
-        {typeBadge}
+        {badges}
       </>
     );
   }
@@ -42,7 +52,7 @@ export const MetricItemBody = ({ monitor }: { monitor: OverviewStatusMetaData })
       <EuiSpacer size="xs" />
       {(tags ?? []).length > 0 && (
         <TagsList
-          prependChildren={<EuiFlexItem grow={false}>{typeBadge}</EuiFlexItem>}
+          prependChildren={<EuiFlexItem grow={false}>{badges}</EuiFlexItem>}
           color="default"
           tags={tags}
           disableExpand={true}
