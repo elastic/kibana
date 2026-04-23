@@ -33,10 +33,9 @@ describe('IntegrationSelectablePopover telemetry', () => {
       <IntegrationSelectablePopover options={options} telemetrySource="data_coverage" />
     );
     fireEvent.click(getByText('View Integrations'));
-    expect(mockReportEvent).toHaveBeenCalledWith(
-      SiemReadinessEventTypes.IntegrationPopoverOpened,
-      { source: 'data_coverage' }
-    );
+    expect(mockReportEvent).toHaveBeenCalledWith(SiemReadinessEventTypes.IntegrationPopoverOpened, {
+      source: 'data_coverage',
+    });
   });
 
   it('reports IntegrationPopoverOpened with the correct source', () => {
@@ -44,10 +43,9 @@ describe('IntegrationSelectablePopover telemetry', () => {
       <IntegrationSelectablePopover options={options} telemetrySource="all_rules_enabled" />
     );
     fireEvent.click(getByText('View Integrations'));
-    expect(mockReportEvent).toHaveBeenCalledWith(
-      SiemReadinessEventTypes.IntegrationPopoverOpened,
-      { source: 'all_rules_enabled' }
-    );
+    expect(mockReportEvent).toHaveBeenCalledWith(SiemReadinessEventTypes.IntegrationPopoverOpened, {
+      source: 'all_rules_enabled',
+    });
   });
 
   it('reports IntegrationClicked when an integration is selected from the popover', async () => {
@@ -57,10 +55,10 @@ describe('IntegrationSelectablePopover telemetry', () => {
     fireEvent.click(getByText('View Integrations'));
     await waitFor(() => getByText('Endpoint Security'));
     fireEvent.click(getByText('Endpoint Security'));
-    expect(mockReportEvent).toHaveBeenCalledWith(
-      SiemReadinessEventTypes.IntegrationClicked,
-      { integrationPackage: 'endpoint', source: 'all_rules_missing' }
-    );
+    expect(mockReportEvent).toHaveBeenCalledWith(SiemReadinessEventTypes.IntegrationClicked, {
+      integrationPackage: 'endpoint',
+      source: 'all_rules_missing',
+    });
   });
 
   it('does not report IntegrationPopoverOpened when disabled', () => {

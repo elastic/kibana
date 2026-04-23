@@ -23,12 +23,16 @@ jest.mock('react-use/lib/useLocalStorage', () => jest.fn(() => [[], jest.fn()]))
 jest.mock('@kbn/siem-readiness', () => ({ ALL_CATEGORIES: [] }));
 jest.mock('./visibility_section_boxes', () => ({
   VisibilitySectionBoxes: ({ onTabSelect }: { onTabSelect: (id: string) => void }) => (
-    <button type="button" onClick={() => onTabSelect('quality')}>box-tab</button>
+    <button type="button" onClick={() => onTabSelect('quality')}>
+      {'box-tab'}
+    </button>
   ),
 }));
 jest.mock('./visibility_section_tabs', () => ({
   VisibilitySectionTabs: ({ onTabSelect }: { onTabSelect: (id: string) => void }) => (
-    <button type="button" onClick={() => onTabSelect('continuity')}>nav-tab</button>
+    <button type="button" onClick={() => onTabSelect('continuity')}>
+      {'nav-tab'}
+    </button>
   ),
 }));
 jest.mock('./components/configuration_panel', () => ({

@@ -51,10 +51,9 @@ describe('RuleCoveragePanel telemetry', () => {
   it('reports RuleViewToggled with view: mitre_attack when MITRE toggle is clicked', () => {
     const { getByText } = render(<RuleCoveragePanel />);
     fireEvent.click(getByText('MITRE ATT&CK enabled rules'));
-    expect(mockReportEvent).toHaveBeenCalledWith(
-      SiemReadinessEventTypes.RuleViewToggled,
-      { view: 'mitre_attack' }
-    );
+    expect(mockReportEvent).toHaveBeenCalledWith(SiemReadinessEventTypes.RuleViewToggled, {
+      view: 'mitre_attack',
+    });
   });
 
   it('reports RuleViewToggled with view: all_rules when All rules toggle is clicked', () => {
@@ -62,9 +61,8 @@ describe('RuleCoveragePanel telemetry', () => {
     fireEvent.click(getByText('MITRE ATT&CK enabled rules'));
     mockReportEvent.mockClear();
     fireEvent.click(getByText('All enabled rules'));
-    expect(mockReportEvent).toHaveBeenCalledWith(
-      SiemReadinessEventTypes.RuleViewToggled,
-      { view: 'all_rules' }
-    );
+    expect(mockReportEvent).toHaveBeenCalledWith(SiemReadinessEventTypes.RuleViewToggled, {
+      view: 'all_rules',
+    });
   });
 });
