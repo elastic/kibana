@@ -40,6 +40,7 @@ describe(
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
             'entityAnalyticsNewHomePageEnabled',
           ])}`,
+          '--uiSettings.overrides.securitySolution:entityStoreEnableV2=true',
         ],
       },
     },
@@ -47,6 +48,13 @@ describe(
   () => {
     before(() => {
       cy.task('esArchiverLoad', { archiveName: ARCHIVE_NAME });
+    });
+
+    beforeEach(() => {
+      cy.intercept('GET', '/api/security/entity_store/status', {
+        statusCode: 200,
+        body: { status: 'running', engines: [] },
+      }).as('entityStoreStatus');
     });
 
     after(() => {
@@ -60,7 +68,6 @@ describe(
         visit(ENTITY_ANALYTICS_HOME_PAGE_URL);
         cy.get(PAGE_TITLE).should('exist');
         // Resolution is the default grouping
-        cy.wait('@entityStoreSearch');
         waitForGroupingTable();
       });
 

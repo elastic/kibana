@@ -45,6 +45,7 @@ describe(
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
             'entityAnalyticsNewHomePageEnabled',
           ])}`,
+          '--uiSettings.overrides.securitySolution:entityStoreEnableV2=true',
         ],
       },
     },
@@ -55,6 +56,10 @@ describe(
     });
 
     beforeEach(() => {
+      cy.intercept('GET', '/api/security/entity_store/status', {
+        statusCode: 200,
+        body: { status: 'running', engines: [] },
+      }).as('entityStoreStatus');
       login();
       setGrouping(['none']);
       visit(ENTITY_ANALYTICS_HOME_PAGE_URL);
@@ -182,12 +187,17 @@ describe(
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
             'entityAnalyticsNewHomePageEnabled',
           ])}`,
+          '--uiSettings.overrides.securitySolution:entityStoreEnableV2=true',
         ],
       },
     },
   },
   () => {
     beforeEach(() => {
+      cy.intercept('GET', '/api/security/entity_store/status', {
+        statusCode: 200,
+        body: { status: 'running', engines: [] },
+      }).as('entityStoreStatus');
       login();
       setGrouping(['none']);
       visit(ENTITY_ANALYTICS_HOME_PAGE_URL);
