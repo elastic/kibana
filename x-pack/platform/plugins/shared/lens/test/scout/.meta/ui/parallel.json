@@ -1,5 +1,5 @@
 {
-  "sha1": "465f30cd0567b92b8187c0effa76f92a87e8020e",
+  "sha1": "d00f9afc03ac2f92b6ee6d24a3c43776b4788f67",
   "tests": [
     {
       "id": "a88e11e11af63ac-04de5a79d29d1c0",
@@ -62,6 +62,99 @@
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/esql_conversion_enabled.spec.ts",
         "line": 119,
         "column": 12
+      }
+    },
+    {
+      "id": "12223476f066f7e-00047d302ca0c1c",
+      "title": "Lens ES|QL filter data view selector dashboard add filter from ES|QL panel should not show duplicate data view names",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/esql_filter_dataview.spec.ts",
+        "line": 55,
+        "column": 14
+      }
+    },
+    {
+      "id": "12223476f066f7e-d35e8ca1522ac6f",
+      "title": "Lens ES|QL filter data view selector filter fields should be available after changing ES|QL query source",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/esql_filter_dataview.spec.ts",
+        "line": 133,
+        "column": 14
+      }
+    },
+    {
+      "id": "7ebf0691fb127ce-860bfc39e7dc7d8",
+      "title": "Lens ES|QL timeseries via dashboard API renders a time-scaled x-axis for TBUCKET",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/esql_timeseries_dashboard_api.spec.ts",
+        "line": 157,
+        "column": 14
+      }
+    },
+    {
+      "id": "7ebf0691fb127ce-f45a8d1af623cbf",
+      "title": "Lens ES|QL timeseries via dashboard API renders a time-scaled x-axis for BUCKET on timestamp",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/esql_timeseries_dashboard_api.spec.ts",
+        "line": 178,
+        "column": 14
+      }
+    },
+    {
+      "id": "7ebf0691fb127ce-fb36f233d1a3e49",
+      "title": "Lens ES|QL timeseries via dashboard API renders a time-scaled x-axis for DATE_TRUNC on timestamp",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/esql_timeseries_dashboard_api.spec.ts",
+        "line": 199,
+        "column": 14
+      }
+    },
+    {
+      "id": "87de2e194eba8a5-085afac13830272",
+      "title": "Lens metric trendline on dashboard (DSL) renders trendline when panel uses inline data view spec",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_trendline.spec.ts",
+        "line": 81,
+        "column": 14
+      }
+    },
+    {
+      "id": "87de2e194eba8a5-1fa09f3d15077a3",
+      "title": "Lens metric trendline on dashboard (DSL) renders trendline when panel uses stored data view reference",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_trendline.spec.ts",
+        "line": 121,
+        "column": 14
       }
     }
   ]
