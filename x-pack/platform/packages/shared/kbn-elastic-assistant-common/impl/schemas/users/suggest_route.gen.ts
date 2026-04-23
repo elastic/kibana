@@ -14,55 +14,59 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const SuggestUsersRequestBody = lazySchema(() =>
+  z.object({
+    /**
+     * Search term to filter users
+     */
+    searchTerm: z.string().optional(),
+    /**
+     * Number of users to return
+     */
+    size: z.number().optional(),
+  })
+);
 export type SuggestUsersRequestBody = z.infer<typeof SuggestUsersRequestBody>;
-export const SuggestUsersRequestBody = z.object({
-  /**
-   * Search term to filter users
-   */
-  searchTerm: z.string().optional(),
-  /**
-   * Number of users to return
-   */
-  size: z.number().optional(),
-});
 export type SuggestUsersRequestBodyInput = z.input<typeof SuggestUsersRequestBody>;
 
 /**
  * Array of user profiles
  */
-export type SuggestUsersResponse = z.infer<typeof SuggestUsersResponse>;
-export const SuggestUsersResponse = z.array(
-  z.object({
-    /**
-     * A unique identifier for the user profile.
-     */
-    uid: z.string(),
-    /**
-     * Indicates whether user profile is enabled or not.
-     */
-    enabled: z.boolean(),
-    /**
-     * User specific data associated with the profile.
-     */
-    data: z.object({}).catchall(z.unknown()),
-    /**
-     * Information about the user that owns profile.
-     */
-    user: z.object({
+export const SuggestUsersResponse = lazySchema(() =>
+  z.array(
+    z.object({
       /**
-       * The username of the user.
+       * A unique identifier for the user profile.
        */
-      username: z.string(),
+      uid: z.string(),
       /**
-       * The full name of the user.
+       * Indicates whether user profile is enabled or not.
        */
-      full_name: z.string().optional(),
+      enabled: z.boolean(),
       /**
-       * The email address of the user.
+       * User specific data associated with the profile.
        */
-      email: z.string().optional(),
-    }),
-  })
+      data: z.object({}).catchall(z.unknown()),
+      /**
+       * Information about the user that owns profile.
+       */
+      user: z.object({
+        /**
+         * The username of the user.
+         */
+        username: z.string(),
+        /**
+         * The full name of the user.
+         */
+        full_name: z.string().optional(),
+        /**
+         * The email address of the user.
+         */
+        email: z.string().optional(),
+      }),
+    })
+  )
 );
+export type SuggestUsersResponse = z.infer<typeof SuggestUsersResponse>;

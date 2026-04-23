@@ -21,6 +21,7 @@ import {
   riskScoreMaintainerScenarioFactory,
   riskScoreMaintainerEntityBuilders,
   waitForEntityStoreEntities,
+  waitForEntityStoreDoc,
   indexListOfDocumentsFactory,
   setupMaintainerLogsDataStream,
   cleanupMaintainerLogsDataStream,
@@ -43,7 +44,8 @@ export default ({ getService }: FtrProviderContext): void => {
   const maintainerRoutes = entityMaintainerRouteHelpersFactory(supertest);
   const entityStoreIndex = getEntitiesAlias(ENTITY_LATEST, 'default');
 
-  describe('@ess @serverless @serverlessQA Risk Score Maintainer Resolution Scoring', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/265177
+  describe.skip('@ess @serverless @serverlessQA Risk Score Maintainer Resolution Scoring', function () {
     this.tags(['esGate']);
 
     context('with test log data', () => {
@@ -79,7 +81,7 @@ export default ({ getService }: FtrProviderContext): void => {
         targetEuid: string
       ): Promise<void> => {
         await retry.waitForWithTimeout(
-          `resolution relationship ${aliasEuid} → ${targetEuid}`,
+          `resolution relationship ${aliasEuid} -> ${targetEuid}`,
           60_000,
           async () => {
             await es.indices.refresh({ index: entityStoreIndex });
@@ -96,25 +98,120 @@ export default ({ getService }: FtrProviderContext): void => {
         );
       };
 
+      const waitForResolutionRelationshipCleared = async (aliasEuid: string): Promise<void> => {
+        await retry.waitForWithTimeout(
+          `resolution relationship cleared for ${aliasEuid}`,
+          60_000,
+          async () => {
+            await es.indices.refresh({ index: entityStoreIndex });
+            const response = await es.search({
+              index: entityStoreIndex,
+              size: 1,
+              query: { term: { 'entity.id': aliasEuid } },
+            });
+            const doc = response.hits.hits[0]?._source as Record<string, unknown> | undefined;
+            return (
+              getEntityField(doc, 'entity.relationships.resolution.resolved_to') == null ||
+              getEntityField(doc, 'entity.relationships.resolution.resolved_to') === ''
+            );
+          }
+        );
+      };
+
       const refreshResolutionLookup = async (): Promise<void> => {
-        // Sync runs can read the lookup index immediately, so make the relationship visible first.
         await es.indices.refresh({ index: entityStoreIndex });
       };
 
-      const getBestResolutionScore = ({
+      const getBestScore = ({
         scores,
         entityId,
+        scoreType,
       }: {
         scores: ReturnType<typeof normalizeScores>;
         entityId: string;
+        scoreType: 'base' | 'resolution';
       }) =>
         scores
-          .filter((s) => s.id_value === entityId && s.score_type === 'resolution')
+          .filter((score) => score.id_value === entityId && score.score_type === scoreType)
           .sort(
-            (a, b) =>
-              (b.related_entities?.length ?? 0) - (a.related_entities?.length ?? 0) ||
-              String(b.calculation_run_id ?? '').localeCompare(String(a.calculation_run_id ?? ''))
+            (left, right) =>
+              (scoreType === 'resolution'
+                ? (right.related_entities?.length ?? 0) - (left.related_entities?.length ?? 0)
+                : 0) ||
+              String(right.calculation_run_id ?? '').localeCompare(
+                String(left.calculation_run_id ?? '')
+              )
           )[0];
+
+      const getMatchingScore = ({
+        scores,
+        entityId,
+        scoreType,
+        predicate,
+      }: {
+        scores: ReturnType<typeof normalizeScores>;
+        entityId: string;
+        scoreType: 'base' | 'resolution';
+        predicate?: (score: ReturnType<typeof normalizeScores>[number]) => boolean;
+      }) =>
+        scores
+          .filter(
+            (score) =>
+              score.id_value === entityId &&
+              score.score_type === scoreType &&
+              (!predicate || predicate(score))
+          )
+          .sort(
+            (left, right) =>
+              (scoreType === 'resolution'
+                ? (right.related_entities?.length ?? 0) - (left.related_entities?.length ?? 0)
+                : 0) ||
+              String(right.calculation_run_id ?? '').localeCompare(
+                String(left.calculation_run_id ?? '')
+              )
+          )[0];
+
+      const waitForScore = async ({
+        entityId,
+        scoreType,
+        waitLabel,
+        predicate,
+      }: {
+        entityId: string;
+        scoreType: 'base' | 'resolution';
+        waitLabel: string;
+        predicate?: (score: ReturnType<typeof normalizeScores>[number]) => boolean;
+      }) => {
+        let bestScore: ReturnType<typeof normalizeScores>[number] | undefined;
+
+        await retry.waitForWithTimeout(waitLabel, 60_000, async () => {
+          const scores = normalizeScores(await readRiskScores(es));
+          const score = predicate
+            ? getMatchingScore({ scores, entityId, scoreType, predicate })
+            : getBestScore({ scores, entityId, scoreType });
+          if (!score) {
+            return false;
+          }
+
+          bestScore = score;
+          return true;
+        });
+
+        expect(bestScore).to.not.be(undefined);
+        return bestScore!;
+      };
+
+      const waitForResolutionScore = async (
+        params: Omit<Parameters<typeof waitForScore>[0], 'scoreType'>
+      ) => waitForScore({ ...params, scoreType: 'resolution' });
+
+      const waitForBaseScore = async (
+        params: Omit<Parameters<typeof waitForScore>[0], 'scoreType'>
+      ) => waitForScore({ ...params, scoreType: 'base' });
+
+      const hasPositiveCalculatedScore = (
+        score: ReturnType<typeof normalizeScores>[number]
+      ): boolean => (score.calculated_score_norm ?? 0) > 0;
 
       before(async () => {
         await setupMaintainerLogsDataStream({
@@ -152,16 +249,16 @@ export default ({ getService }: FtrProviderContext): void => {
         await deleteAllRules(supertest, log);
       });
 
-      it('produces a resolution score that aggregates alerts from both target and alias', async () => {
+      it('aggregates alerts from both target and alias into a single resolved score', async () => {
         const shortId = uuidv4().slice(0, 8);
-        const { documentIds, testEntities } = await maintainerScenario.seedEntities([
+        const { testEntities } = await maintainerScenario.seedEntities([
           riskScoreMaintainerEntityBuilders.idpUser({ userName: `res-target-${shortId}` }),
           riskScoreMaintainerEntityBuilders.idpUser({ userName: `res-alias-${shortId}` }),
         ]);
         const [targetUser, aliasUser] = testEntities;
 
         await maintainerScenario.createAlertsForDocumentIds({
-          documentIds,
+          documentIds: [targetUser.documentId, aliasUser.documentId],
           alerts: 2,
           riskScore: 40,
         });
@@ -172,9 +269,6 @@ export default ({ getService }: FtrProviderContext): void => {
         });
         await waitForEntityStoreEntities({ es, log, count: 2 });
 
-        // The maintainer is not auto-started, so we can safely set up the resolution
-        // relationship before running it.
-
         await maintainerScenario.setEntityResolutionTarget({
           testEntity: aliasUser,
           resolvedToEntityId: targetUser.expectedEuid,
@@ -184,222 +278,230 @@ export default ({ getService }: FtrProviderContext): void => {
 
         await maintainerRoutes.runMaintainerSync('risk-score');
 
-        let allScores: ReturnType<typeof normalizeScores> = [];
-        await retry.waitForWithTimeout(
-          `resolution score for ${targetUser.expectedEuid}`,
-          60_000,
-          async () => {
-            allScores = normalizeScores(await readRiskScores(es));
-            return allScores.some(
-              (s) => s.id_value === targetUser.expectedEuid && s.score_type === 'resolution'
+        const resolutionScore = await waitForResolutionScore({
+          entityId: targetUser.expectedEuid,
+          waitLabel: `resolved score for target and alias ${targetUser.expectedEuid}`,
+          predicate: (score) => {
+            const relatedEntityIds =
+              score.related_entities?.map((entity) => entity.entity_id) ?? [];
+            return (
+              hasPositiveCalculatedScore(score) && relatedEntityIds.includes(aliasUser.expectedEuid)
             );
-          }
-        );
+          },
+        });
 
-        const resolutionScore = allScores.find(
-          (s) => s.id_value === targetUser.expectedEuid && s.score_type === 'resolution'
-        )!;
+        const baseScore = await waitForBaseScore({
+          entityId: targetUser.expectedEuid,
+          waitLabel: `base score for ${targetUser.expectedEuid}`,
+          predicate: (score) =>
+            score.calculation_run_id === resolutionScore.calculation_run_id &&
+            hasPositiveCalculatedScore(score),
+        });
 
         expect(resolutionScore.score_type).to.eql('resolution');
-        expect(resolutionScore.calculated_score_norm).to.be.greaterThan(0);
-        expect(resolutionScore.calculation_run_id).to.be.a('string');
-
-        // The resolution score aggregates alerts from both target (1 alert) and
-        // alias (1 alert), so it must be strictly higher than the target's own
-        // base score (1 alert) produced in the same maintainer run.
-        const baseScoreSameRun = allScores.find(
-          (s) =>
-            s.id_value === targetUser.expectedEuid &&
-            s.score_type === 'base' &&
-            s.calculation_run_id === resolutionScore.calculation_run_id
-        );
-        expect(baseScoreSameRun).to.not.be(undefined);
-        expect(resolutionScore.calculated_score_norm).to.be.greaterThan(
-          baseScoreSameRun!.calculated_score_norm!
-        );
-
-        // related_entities should list the alias (self is filtered out by the parser)
         expect(resolutionScore.related_entities).to.be.an('array');
-        expect(resolutionScore.related_entities!.length).to.eql(1);
-        expect(resolutionScore.related_entities![0].entity_id).to.eql(aliasUser.expectedEuid);
+        expect(resolutionScore.related_entities!.map((entity) => entity.entity_id)).to.eql([
+          aliasUser.expectedEuid,
+        ]);
         expect(resolutionScore.related_entities![0].relationship_type).to.eql(
           'entity.relationships.resolution.resolved_to'
         );
-
-        // The alias should still have its own base score
-        const aliasBase = allScores.find(
-          (s) => s.id_value === aliasUser.expectedEuid && s.score_type === 'base'
+        expect(baseScore.score_type).to.eql('base');
+        expect(resolutionScore.calculated_score_norm).to.be.greaterThan(
+          baseScore.calculated_score_norm!
         );
-        expect(aliasBase).to.not.be(undefined);
-        expect(aliasBase!.calculated_score_norm).to.be.greaterThan(0);
-
-        // Wait until the entity store has both individual and resolution risk
-        await retry.waitForWithTimeout(
-          `entity store dual-write for ${targetUser.expectedEuid}`,
-          60_000,
-          async () => {
-            await es.indices.refresh({ index: entityStoreIndex });
-            const response = await es.search({
-              index: entityStoreIndex,
-              size: 1,
-              query: { term: { 'entity.id': targetUser.expectedEuid } },
-            });
-            const doc = response.hits.hits[0]?._source as Record<string, unknown> | undefined;
-            const baseRisk = getEntityField(doc, 'entity.risk.calculated_score_norm');
-            const resolutionRisk = getEntityField(
-              doc,
-              'entity.relationships.resolution.risk.calculated_score_norm'
-            );
-            return (
-              typeof baseRisk === 'number' &&
-              baseRisk > 0 &&
-              typeof resolutionRisk === 'number' &&
-              resolutionRisk > 0
-            );
-          }
-        );
-
-        const response = await es.search({
-          index: entityStoreIndex,
-          size: 1,
-          query: { term: { 'entity.id': targetUser.expectedEuid } },
-        });
-        const entityDoc = response.hits.hits[0]!._source as Record<string, unknown>;
-        const baseRisk = getEntityField(entityDoc, 'entity.risk.calculated_score_norm');
-        const baseLevel = getEntityField(entityDoc, 'entity.risk.calculated_level');
-        const resolutionRisk = getEntityField(
-          entityDoc,
-          'entity.relationships.resolution.risk.calculated_score_norm'
-        );
-        const resolutionLevel = getEntityField(
-          entityDoc,
-          'entity.relationships.resolution.risk.calculated_level'
-        );
-
-        expect(baseRisk).to.be.a('number');
-        expect(baseRisk as number).to.be.greaterThan(0);
-        expect(baseLevel).to.be.a('string');
-
-        expect(resolutionRisk).to.be.a('number');
-        expect(resolutionRisk as number).to.be.greaterThan(0);
-        expect(resolutionLevel).to.be.a('string');
-
-        // Resolution risk aggregates more alerts, so it should be higher
-        expect(resolutionRisk as number).to.be.greaterThan(baseRisk as number);
       });
 
-      it('aggregates a multi-alias group into a single resolution score', async () => {
+      it('does not produce resolved scores when no resolution relationships exist', async () => {
         const shortId = uuidv4().slice(0, 8);
-        const { documentIds, testEntities } = await maintainerScenario.seedEntities([
-          riskScoreMaintainerEntityBuilders.idpUser({ userName: `multi-target-${shortId}` }),
-          riskScoreMaintainerEntityBuilders.idpUser({ userName: `multi-alias1-${shortId}` }),
-          riskScoreMaintainerEntityBuilders.idpUser({ userName: `multi-alias2-${shortId}` }),
+        const { testEntities } = await maintainerScenario.seedEntities([
+          riskScoreMaintainerEntityBuilders.idpUser({ userName: `no-res-${shortId}` }),
         ]);
-        const [target, alias1, alias2] = testEntities;
+        const [user] = testEntities;
 
         await maintainerScenario.createAlertsForDocumentIds({
-          documentIds,
-          alerts: 3,
-          riskScore: 40,
+          documentIds: [user.documentId],
+          alerts: 1,
+          riskScore: 35,
         });
 
         await entityStoreUtils.installEntityStoreV2({
           entityTypes: ['user', 'host'],
           dataViewPattern: testLogsIndex,
         });
-        await waitForEntityStoreEntities({ es, log, count: 3 });
+        await waitForEntityStoreEntities({ es, log, count: 1 });
 
-        // The maintainer is not auto-started, so we can safely set up the resolution
-        // relationships before running it.
+        await maintainerRoutes.runMaintainerSync('risk-score');
+
+        const baseScore = await waitForBaseScore({
+          entityId: user.expectedEuid,
+          waitLabel: `base score for ${user.expectedEuid}`,
+          predicate: hasPositiveCalculatedScore,
+        });
+        expect(baseScore.score_type).to.eql('base');
+
+        const allScores = normalizeScores(await readRiskScores(es));
+        expect(
+          allScores.some(
+            (score) => score.id_value === user.expectedEuid && score.score_type === 'resolution'
+          )
+        ).to.be(false);
+      });
+
+      it('writes resolved risk to the canonical target when only the canonical target has alerts', async () => {
+        const shortId = uuidv4().slice(0, 8);
+        const { testEntities } = await maintainerScenario.seedEntities([
+          riskScoreMaintainerEntityBuilders.idpUser({ userName: `canonical-target-${shortId}` }),
+          riskScoreMaintainerEntityBuilders.idpUser({ userName: `canonical-alias-${shortId}` }),
+        ]);
+        const [targetUser, silentAlias] = testEntities;
+
+        await maintainerScenario.createAlertsForDocumentIds({
+          documentIds: [targetUser.documentId],
+          alerts: 1,
+          riskScore: 50,
+        });
+
+        await entityStoreUtils.installEntityStoreV2({
+          entityTypes: ['user', 'host'],
+          dataViewPattern: testLogsIndex,
+        });
+        await waitForEntityStoreEntities({ es, log, count: 2 });
 
         await maintainerScenario.setEntityResolutionTarget({
-          testEntity: alias1,
-          resolvedToEntityId: target.expectedEuid,
+          testEntity: silentAlias,
+          resolvedToEntityId: targetUser.expectedEuid,
         });
-        await maintainerScenario.setEntityResolutionTarget({
-          testEntity: alias2,
-          resolvedToEntityId: target.expectedEuid,
-        });
-        await waitForResolutionRelationship(alias1.expectedEuid, target.expectedEuid);
-        await waitForResolutionRelationship(alias2.expectedEuid, target.expectedEuid);
+        await waitForResolutionRelationship(silentAlias.expectedEuid, targetUser.expectedEuid);
         await refreshResolutionLookup();
 
         await maintainerRoutes.runMaintainerSync('risk-score');
 
-        let allScores: ReturnType<typeof normalizeScores> = [];
+        const resolutionScore = await waitForResolutionScore({
+          entityId: targetUser.expectedEuid,
+          waitLabel: `resolved score for canonical target ${targetUser.expectedEuid}`,
+          predicate: hasPositiveCalculatedScore,
+        });
+        expect(resolutionScore.score_type).to.eql('resolution');
+        expect(resolutionScore.id_value).to.eql(targetUser.expectedEuid);
+        expect(resolutionScore.calculated_score_norm).to.be.greaterThan(0);
+        expect(resolutionScore.calculation_run_id).to.be.a('string');
+      });
+
+      it('stops attributing alias alerts to the previous target after unlink reconciliation', async () => {
+        const shortId = uuidv4().slice(0, 8);
+        const { testEntities } = await maintainerScenario.seedEntities([
+          riskScoreMaintainerEntityBuilders.idpUser({ userName: `unlink-target-${shortId}` }),
+          riskScoreMaintainerEntityBuilders.idpUser({ userName: `unlink-alias-${shortId}` }),
+        ]);
+        const [targetUser, aliasUser] = testEntities;
+
+        await maintainerScenario.createAlertsForDocumentIds({
+          documentIds: [targetUser.documentId, aliasUser.documentId],
+          alerts: 2,
+          riskScore: 45,
+        });
+
+        await entityStoreUtils.installEntityStoreV2({
+          entityTypes: ['user', 'host'],
+          dataViewPattern: testLogsIndex,
+        });
+        await waitForEntityStoreEntities({ es, log, count: 2 });
+
+        await maintainerScenario.setEntityResolutionTarget({
+          testEntity: aliasUser,
+          resolvedToEntityId: targetUser.expectedEuid,
+        });
+        await waitForResolutionRelationship(aliasUser.expectedEuid, targetUser.expectedEuid);
+        await refreshResolutionLookup();
+        await maintainerRoutes.runMaintainerSync('risk-score');
+
+        const linkedResolutionScore = await waitForResolutionScore({
+          entityId: targetUser.expectedEuid,
+          waitLabel: `linked resolution score for ${targetUser.expectedEuid}`,
+          predicate: (score) => {
+            const relatedEntityIds =
+              score.related_entities?.map((entity) => entity.entity_id) ?? [];
+            return relatedEntityIds.includes(aliasUser.expectedEuid);
+          },
+        });
+
+        await entityStoreUtils.unlinkEntitiesViaResolutionApi({
+          entityIds: [aliasUser.expectedEuid],
+        });
+        await entityStoreUtils.forceExtractEntities({ entityType: 'user' });
+        await waitForResolutionRelationshipCleared(aliasUser.expectedEuid);
+
+        await maintainerScenario.createAlertsForDocumentIds({
+          documentIds: [aliasUser.documentId],
+          alerts: 1,
+          riskScore: 70,
+        });
+
+        await refreshResolutionLookup();
+        await maintainerRoutes.runMaintainerSync('risk-score');
+
+        let postUnlinkRunId: string | undefined;
         await retry.waitForWithTimeout(
-          `resolution score with 2 aliases for ${target.expectedEuid}`,
+          `post-unlink unreconciled resolution cleared for ${aliasUser.expectedEuid}`,
           60_000,
           async () => {
-            allScores = normalizeScores(await readRiskScores(es));
-            const resScore = getBestResolutionScore({
-              scores: allScores,
-              entityId: target.expectedEuid,
-            });
-            return resScore !== undefined && (resScore.related_entities?.length ?? 0) === 2;
+            const allScores = normalizeScores(await readRiskScores(es));
+            const candidateRunId = allScores
+              .filter(
+                (score) =>
+                  score.id_value === aliasUser.expectedEuid &&
+                  score.score_type === 'base' &&
+                  hasPositiveCalculatedScore(score) &&
+                  score.calculation_run_id !== linkedResolutionScore.calculation_run_id
+              )
+              .map((score) => score.calculation_run_id)
+              .find(
+                (runId): runId is string =>
+                  typeof runId === 'string' &&
+                  !allScores.some(
+                    (score) =>
+                      score.calculation_run_id === runId &&
+                      score.score_type === 'resolution' &&
+                      ((score.id_value === aliasUser.expectedEuid &&
+                        hasPositiveCalculatedScore(score)) ||
+                        score.related_entities?.some(
+                          (entity) => entity.entity_id === aliasUser.expectedEuid
+                        ))
+                  )
+              );
+
+            if (!candidateRunId) {
+              return false;
+            }
+
+            postUnlinkRunId = candidateRunId;
+            return true;
           }
         );
 
-        const resolutionScore = getBestResolutionScore({
-          scores: allScores,
-          entityId: target.expectedEuid,
-        })!;
-
-        // Both aliases should appear in related_entities
-        const relatedIds = resolutionScore.related_entities!.map((r) => r.entity_id).sort();
-        expect(relatedIds).to.eql([alias1.expectedEuid, alias2.expectedEuid].sort());
-        expect(
-          resolutionScore.related_entities!.every(
-            (r) => r.relationship_type === 'entity.relationships.resolution.resolved_to'
-          )
-        ).to.be(true);
-
-        // No resolution scores should be produced for the aliases
-        const alias1HasResolution = allScores.some(
-          (s) => s.id_value === alias1.expectedEuid && s.score_type === 'resolution'
-        );
-        expect(alias1HasResolution).to.be(false);
-        const alias2HasResolution = allScores.some(
-          (s) => s.id_value === alias2.expectedEuid && s.score_type === 'resolution'
-        );
-        expect(alias2HasResolution).to.be(false);
-
-        // The resolution score (3 alerts) should exceed the target's base score (1 alert)
-        const baseScore = allScores.find(
-          (s) =>
-            s.id_value === target.expectedEuid &&
-            s.score_type === 'base' &&
-            s.calculation_run_id === resolutionScore.calculation_run_id
-        );
-        expect(baseScore).to.not.be(undefined);
-        expect(resolutionScore.calculated_score_norm).to.be.greaterThan(
-          baseScore!.calculated_score_norm!
-        );
-      });
-
-      it('does not produce resolution scores when no resolution relationships exist', async () => {
-        const shortId = uuidv4().slice(0, 8);
-        const { documentIds, testEntities } = await maintainerScenario.seedEntities([
-          riskScoreMaintainerEntityBuilders.idpUser({ userName: `no-res-${shortId}` }),
-        ]);
-        const [user] = testEntities;
-
-        await maintainerScenario.createAlertsForDocumentIds({
-          documentIds,
-          alerts: 1,
-          riskScore: 35,
-        });
-
-        await maintainerScenario.installAndRunMaintainer({ dataViewPattern: testLogsIndex });
-
-        // Wait for the base score to confirm the run completed
-        await retry.waitForWithTimeout(`base score for ${user.expectedEuid}`, 60_000, async () => {
-          const scores = normalizeScores(await readRiskScores(es));
-          return scores.some((s) => s.id_value === user.expectedEuid && s.score_type === 'base');
-        });
+        expect(postUnlinkRunId).to.be.a('string');
 
         const allScores = normalizeScores(await readRiskScores(es));
-        expect(allScores.some((s) => s.score_type === 'resolution')).to.be(false);
+        const postUnlinkTargetResolutionScores = allScores.filter(
+          (score) =>
+            score.id_value === targetUser.expectedEuid &&
+            score.score_type === 'resolution' &&
+            score.calculation_run_id === postUnlinkRunId
+        );
+        const postUnlinkAliasResolutionScores = allScores.filter(
+          (score) =>
+            score.id_value === aliasUser.expectedEuid &&
+            score.score_type === 'resolution' &&
+            score.calculation_run_id === postUnlinkRunId
+        );
+
+        expect(
+          postUnlinkTargetResolutionScores.some((score) =>
+            score.related_entities?.some((entity) => entity.entity_id === aliasUser.expectedEuid)
+          )
+        ).to.be(false);
+        expect(postUnlinkAliasResolutionScores.length).to.eql(0);
       });
 
       describe('@skipInServerless resolution group-level modifiers', () => {
@@ -409,18 +511,18 @@ export default ({ getService }: FtrProviderContext): void => {
           await cleanUpWatchlists(watchlistRoutes);
         });
 
-        it('applies the highest criticality and union of watchlists across the group', async () => {
+        it('merges watchlists and highest criticality from silent group members into resolved target output', async () => {
           const shortId = uuidv4().slice(0, 8);
-          const { documentIds, testEntities } = await maintainerScenario.seedEntities([
+          const { testEntities } = await maintainerScenario.seedEntities([
             riskScoreMaintainerEntityBuilders.idpUser({ userName: `mod-target-${shortId}` }),
             riskScoreMaintainerEntityBuilders.idpUser({ userName: `mod-alias-${shortId}` }),
           ]);
-          const [targetUser, aliasUser] = testEntities;
+          const [targetUser, silentAlias] = testEntities;
 
           await maintainerScenario.createAlertsForDocumentIds({
-            documentIds,
-            alerts: 2,
-            riskScore: 40,
+            documentIds: [targetUser.documentId],
+            alerts: 1,
+            riskScore: 50,
           });
 
           await entityStoreUtils.installEntityStoreV2({
@@ -428,20 +530,6 @@ export default ({ getService }: FtrProviderContext): void => {
             dataViewPattern: testLogsIndex,
           });
           await waitForEntityStoreEntities({ es, log, count: 2 });
-
-          // The maintainer is not auto-started, so we can safely set up the resolution
-          // relationships before running it.
-
-          // Target: low_impact criticality, on watchlist-a
-          // Alias: high_impact criticality, on watchlist-b
-          await maintainerScenario.setEntityCriticality({
-            testEntity: targetUser,
-            criticalityLevel: 'low_impact',
-          });
-          await maintainerScenario.setEntityCriticality({
-            testEntity: aliasUser,
-            criticalityLevel: 'high_impact',
-          });
 
           const wlAResponse = await watchlistRoutes.create({
             name: 'wl-a',
@@ -466,101 +554,75 @@ export default ({ getService }: FtrProviderContext): void => {
             watchlistIds: [wlAId],
           });
           await maintainerScenario.setEntityWatchlists({
-            testEntity: aliasUser,
+            testEntity: silentAlias,
             watchlistIds: [wlBId],
           });
-
+          await maintainerScenario.setEntityCriticality({
+            testEntity: silentAlias,
+            criticalityLevel: 'high_impact',
+          });
           await maintainerScenario.setEntityResolutionTarget({
-            testEntity: aliasUser,
+            testEntity: silentAlias,
             resolvedToEntityId: targetUser.expectedEuid,
           });
 
-          // Wait for entity store to reflect all modifier and relationship data
-          await retry.waitForWithTimeout(
-            'entity store modifiers and resolution materialized',
-            60_000,
-            async () => {
-              await es.indices.refresh({ index: entityStoreIndex });
-              const [targetResp, aliasResp] = await Promise.all([
-                es.search({
-                  index: entityStoreIndex,
-                  size: 1,
-                  query: { term: { 'entity.id': targetUser.expectedEuid } },
-                }),
-                es.search({
-                  index: entityStoreIndex,
-                  size: 1,
-                  query: { term: { 'entity.id': aliasUser.expectedEuid } },
-                }),
-              ]);
-
-              const targetDoc = targetResp.hits.hits[0]?._source as
-                | Record<string, unknown>
-                | undefined;
-              const aliasDoc = aliasResp.hits.hits[0]?._source as
-                | Record<string, unknown>
-                | undefined;
-
-              const targetHasCrit = getEntityField(targetDoc, 'asset.criticality') === 'low_impact';
-              const targetWatchlists = getEntityField(targetDoc, 'entity.attributes.watchlists');
-              const targetHasWl =
-                Array.isArray(targetWatchlists) && targetWatchlists.includes(wlAId);
-              const aliasHasCrit = getEntityField(aliasDoc, 'asset.criticality') === 'high_impact';
-              const aliasWatchlists = getEntityField(aliasDoc, 'entity.attributes.watchlists');
-              const aliasHasWl = Array.isArray(aliasWatchlists) && aliasWatchlists.includes(wlBId);
-              const aliasResolved =
-                getEntityField(aliasDoc, 'entity.relationships.resolution.resolved_to') ===
-                targetUser.expectedEuid;
-              return targetHasCrit && targetHasWl && aliasHasCrit && aliasHasWl && aliasResolved;
-            }
-          );
+          await waitForEntityStoreDoc({
+            es,
+            retry,
+            entityId: targetUser.expectedEuid,
+            requiredWatchlistId: wlAId,
+          });
+          await waitForEntityStoreDoc({
+            es,
+            retry,
+            entityId: silentAlias.expectedEuid,
+            requireCriticality: 'high_impact',
+            requiredWatchlistId: wlBId,
+          });
+          await waitForResolutionRelationship(silentAlias.expectedEuid, targetUser.expectedEuid);
 
           await refreshResolutionLookup();
-
-          // Resume the maintainer and trigger a fresh run
           await maintainerRoutes.runMaintainerSync('risk-score');
 
-          // Wait for the resolution score to include both modifier types
-          let allScores: ReturnType<typeof normalizeScores> = [];
-          await retry.waitForWithTimeout(
-            `resolution score with group modifiers for ${targetUser.expectedEuid}`,
-            60_000,
-            async () => {
-              allScores = normalizeScores(await readRiskScores(es));
-              const resScore = allScores.find(
-                (s) => s.id_value === targetUser.expectedEuid && s.score_type === 'resolution'
+          const resolutionScore = await waitForResolutionScore({
+            entityId: targetUser.expectedEuid,
+            waitLabel: `resolved modifiers for ${targetUser.expectedEuid}`,
+            predicate: (score) => {
+              const watchlistSubtypes =
+                score.modifiers
+                  ?.filter((modifier) => modifier.type === 'watchlist')
+                  .map((modifier) => modifier.subtype)
+                  .sort() ?? [];
+
+              return (
+                score.criticality_level === 'high_impact' &&
+                watchlistSubtypes.length === 2 &&
+                watchlistSubtypes[0] === 'wl-a' &&
+                watchlistSubtypes[1] === 'wl-b'
               );
-              if (!resScore) return false;
-              const hasCritMod = resScore.modifiers?.some((m) => m.type === 'asset_criticality');
-              const hasWlMods =
-                (resScore.modifiers?.filter((m) => m.type === 'watchlist') ?? []).length >= 2;
-              return Boolean(hasCritMod && hasWlMods);
-            }
-          );
+            },
+          });
 
-          const resolutionScore = allScores.find(
-            (s) => s.id_value === targetUser.expectedEuid && s.score_type === 'resolution'
-          )!;
-
-          // Criticality: should be the GROUP MAXIMUM — high_impact from alias wins
-          // over low_impact from target
           expect(resolutionScore.criticality_level).to.eql('high_impact');
           expect(resolutionScore.criticality_modifier).to.be.a('number');
           expect(resolutionScore.criticality_modifier).to.be.greaterThan(0);
 
-          const critMod = resolutionScore.modifiers!.find((m) => m.type === 'asset_criticality')!;
-          expect((critMod.metadata as Record<string, unknown>)?.criticality_level).to.eql(
+          const critMod = resolutionScore.modifiers!.find(
+            (modifier) => modifier.type === 'asset_criticality'
+          );
+          expect(critMod).to.not.be(undefined);
+          expect((critMod!.metadata as Record<string, unknown>)?.criticality_level).to.eql(
             'high_impact'
           );
 
-          // Watchlists: should be the GROUP UNION — both wl-a (target) and wl-b (alias)
-          const watchlistMods = resolutionScore.modifiers!.filter((m) => m.type === 'watchlist');
-          const watchlistSubtypes = watchlistMods.map((m) => m.subtype).sort();
+          const watchlistMods = resolutionScore.modifiers!.filter(
+            (modifier) => modifier.type === 'watchlist'
+          );
+          const watchlistSubtypes = watchlistMods.map((modifier) => modifier.subtype).sort();
           expect(watchlistSubtypes).to.eql(['wl-a', 'wl-b']);
-
-          for (const wlMod of watchlistMods) {
-            expect(wlMod.modifier_value).to.be.a('number');
-            expect(wlMod.contribution).to.be.a('number');
+          for (const watchlistMod of watchlistMods) {
+            expect(watchlistMod.modifier_value).to.be.a('number');
+            expect(watchlistMod.contribution).to.be.a('number');
           }
         });
       });

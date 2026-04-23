@@ -48,6 +48,13 @@ test.describe.serial(
             searchSourceJSON: '{}',
           },
         },
+        references: [
+          {
+            type: 'indexpattern',
+            name: 'control-uuid:optionsListDataView',
+            id: 'apm_static_data_view_id_default',
+          },
+        ],
       });
       testDashboardId = dashboard.id;
     });
@@ -73,9 +80,7 @@ test.describe.serial(
           rangeFrom: testData.START_DATE,
           rangeTo: testData.END_DATE,
         });
-        await serviceDetailsPage.dashboardsTab.addServiceDashboardButton.waitFor({
-          state: 'visible',
-        });
+        await serviceDetailsPage.dashboardsTab.waitForDashboardsToLoad();
       });
 
       await test.step('Link the test dashboard', async () => {

@@ -24,7 +24,7 @@ import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { SecurityPageName } from '../../../../app/types';
 import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useSecurityAgentId } from '../../../../agent_builder/hooks/use_security_agent_id';
+import { RuleCreationEventTypes } from '../../../../common/lib/telemetry/types';
 import {
   NEW_FEATURES_TOUR_STORAGE_KEYS,
   SecurityAgentBuilderAttachments,
@@ -92,8 +92,7 @@ export const CreateRuleMenu: React.FC<CreateRuleContextMenuProps> = ({ loading, 
     prefix: 'createRuleContextMenuLinks',
   });
   const { services } = useKibana();
-  const { agentBuilder, storage, notifications } = services;
-  const agentId = useSecurityAgentId();
+  const { agentBuilder, storage, notifications, telemetry, aiRuleCreation } = services;
   const isTourEnabled = notifications.tours.isEnabled();
 
   const [aiRuleCreationMenuTourState, setAiRuleCreationMenuTourState] =
@@ -133,6 +132,12 @@ export const CreateRuleMenu: React.FC<CreateRuleContextMenuProps> = ({ loading, 
   const handleAiRuleCreation = useCallback(() => {
     closePopover();
 
+    const session = aiRuleCreation.startSession();
+    telemetry.reportEvent(RuleCreationEventTypes.CreationInitialized, {
+      creationSource: 'ai',
+      sessionId: session.sessionId,
+    });
+
     const emptyRuleAttachment: AttachmentInput = {
       id: SECURITY_RULE_ATTACHMENT_ID,
       type: SecurityAgentBuilderAttachments.rule,
@@ -148,11 +153,10 @@ export const CreateRuleMenu: React.FC<CreateRuleContextMenuProps> = ({ loading, 
         initialMessage: AI_RULE_CREATION_INITIAL_MESSAGE,
         autoSendInitialMessage: false,
         sessionTag: 'security',
-        ...(agentId ? { agentId } : {}),
         attachments: [emptyRuleAttachment],
       });
     }
-  }, [closePopover, agentBuilder, agentId]);
+  }, [closePopover, agentBuilder, aiRuleCreation, telemetry]);
 
   const createRuleButton = (
     <EuiButton
