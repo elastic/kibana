@@ -137,17 +137,19 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
             style={{
               position: 'relative',
               backgroundColor: euiTheme.euiTheme.colors.backgroundBasePlain,
-              paddingTop: euiTheme.euiTheme.size.m,
             }}
           >
             {isManageIntegrationsView ? (
-              <ManageIntegrationsTable
-                integrations={integrations}
-                isLoading={isLoadingCreatedIntegrations}
-                isError={isCreatedIntegrationsError}
-                onRefetch={refetchCreatedIntegrations}
-                prereleaseIntegrationsEnabled={prereleaseIntegrationsEnabled}
-              />
+              <>
+                <EuiSpacer size="m" />
+                <ManageIntegrationsTable
+                  integrations={integrations}
+                  isLoading={isLoadingCreatedIntegrations}
+                  isError={isCreatedIntegrationsError}
+                  onRefetch={refetchCreatedIntegrations}
+                  prereleaseIntegrationsEnabled={prereleaseIntegrationsEnabled}
+                />
+              </>
             ) : filteredCards.length === 0 && !isLoading ? (
               <NoDataPrompt />
             ) : (
