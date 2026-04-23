@@ -5191,16 +5191,16 @@
             "path": "x-pack/platform/plugins/shared/streams/server/routes/internal/streams/onboarding/route.ts"
           },
           {
-            "plugin": "dashboardAgent",
-            "path": "x-pack/platform/plugins/shared/dashboard_agent/server/tools/manage_dashboard/operations.ts"
-          },
-          {
-            "plugin": "dashboardAgent",
-            "path": "x-pack/platform/plugins/shared/dashboard_agent/server/tools/manage_dashboard/operations.ts"
-          },
-          {
             "plugin": "agentBuilderPlatform",
             "path": "x-pack/platform/plugins/shared/agent_builder_platform/server/tools/create_visualization/create_visualization.ts"
+          },
+          {
+            "plugin": "dashboardAgent",
+            "path": "x-pack/platform/plugins/shared/dashboard_agent/server/tools/manage_dashboard/operations.ts"
+          },
+          {
+            "plugin": "dashboardAgent",
+            "path": "x-pack/platform/plugins/shared/dashboard_agent/server/tools/manage_dashboard/operations.ts"
           },
           {
             "plugin": "@kbn/agent-builder-genai-utils",
@@ -14705,6 +14705,14 @@
                 "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts"
               },
               {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/common/stack_connectors_schema/inference.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/common/schema.ts"
+              },
+              {
                 "plugin": "@kbn/connector-schemas",
                 "path": "src/platform/packages/shared/kbn-connector-schemas/openai/schemas/v1.ts"
               },
@@ -14735,14 +14743,6 @@
               {
                 "plugin": "@kbn/sample-log-parser",
                 "path": "x-pack/platform/packages/shared/kbn-sample-parser/src/loghub/validate_queries.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/common/stack_connectors_schema/inference.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/common/schema.ts"
               },
               {
                 "plugin": "@kbn/connector-schemas",
@@ -15994,6 +15994,18 @@
                 "path": "x-pack/solutions/security/plugins/security_solution/common/api/endpoint/actions/response_actions/upload/upload.gen.ts"
               },
               {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/public/features/workflow_context/lib/get_steps_collection_schema.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/public/features/workflow_context/lib/get_context_for_path.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/public/features/validate_workflow_yaml/lib/validate_variables.ts"
+              },
+              {
                 "plugin": "entityStore",
                 "path": "x-pack/solutions/security/plugins/entity_store/server/domain/types.ts"
               },
@@ -16200,18 +16212,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/common/api/endpoint/actions/response_actions/run_script/run_script.gen.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/public/features/workflow_context/lib/get_steps_collection_schema.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/public/features/workflow_context/lib/get_context_for_path.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/public/features/validate_workflow_yaml/lib/validate_variables.ts"
               }
             ],
             "children": [
@@ -18505,6 +18505,110 @@
                 "path": "x-pack/platform/plugins/shared/alerting_v2/server/lib/notification_policy_client/utils.ts"
               },
               {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/live_query/create_live_query.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/live_query/create_live_query.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/live_query/find_live_query.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/live_query/find_live_query.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/live_query/find_live_query.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/live_query/find_live_query.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/packs/copy_pack.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/packs/copy_pack.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/packs/create_pack.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/packs/create_pack.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/packs/find_packs.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/packs/find_packs.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/packs/find_packs.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/packs/find_packs.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/packs/update_packs.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/packs/update_packs.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/saved_query/copy_saved_query.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/saved_query/copy_saved_query.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/saved_query/create_saved_query.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/saved_query/create_saved_query.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/saved_query/find_saved_query.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/saved_query/find_saved_query.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/saved_query/find_saved_query.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/saved_query/find_saved_query.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/saved_query/update_saved_query.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/saved_query/update_saved_query.gen.ts"
+              },
+              {
                 "plugin": "@kbn/securitysolution-exceptions-common",
                 "path": "x-pack/solutions/security/packages/kbn-securitysolution-exceptions-common/api/model/exception_list_common.gen.ts"
               },
@@ -18645,30 +18749,6 @@
                 "path": "x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/rule_monitoring/model/execution_event.gen.ts"
               },
               {
-                "plugin": "@kbn/securitysolution-lists-common",
-                "path": "x-pack/solutions/security/packages/kbn-securitysolution-lists-common/api/model/list_schemas.gen.ts"
-              },
-              {
-                "plugin": "@kbn/securitysolution-lists-common",
-                "path": "x-pack/solutions/security/packages/kbn-securitysolution-lists-common/api/model/list_schemas.gen.ts"
-              },
-              {
-                "plugin": "@kbn/securitysolution-lists-common",
-                "path": "x-pack/solutions/security/packages/kbn-securitysolution-lists-common/api/model/list_schemas.gen.ts"
-              },
-              {
-                "plugin": "@kbn/securitysolution-lists-common",
-                "path": "x-pack/solutions/security/packages/kbn-securitysolution-lists-common/api/model/list_schemas.gen.ts"
-              },
-              {
-                "plugin": "@kbn/securitysolution-lists-common",
-                "path": "x-pack/solutions/security/packages/kbn-securitysolution-lists-common/api/model/list_schemas.gen.ts"
-              },
-              {
-                "plugin": "@kbn/securitysolution-lists-common",
-                "path": "x-pack/solutions/security/packages/kbn-securitysolution-lists-common/api/model/list_schemas.gen.ts"
-              },
-              {
                 "plugin": "entityStore",
                 "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/force_log_extraction.ts"
               },
@@ -18683,6 +18763,30 @@
               {
                 "plugin": "entityStore",
                 "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/force_ccs_extract_to_updates.ts"
+              },
+              {
+                "plugin": "@kbn/securitysolution-lists-common",
+                "path": "x-pack/solutions/security/packages/kbn-securitysolution-lists-common/api/model/list_schemas.gen.ts"
+              },
+              {
+                "plugin": "@kbn/securitysolution-lists-common",
+                "path": "x-pack/solutions/security/packages/kbn-securitysolution-lists-common/api/model/list_schemas.gen.ts"
+              },
+              {
+                "plugin": "@kbn/securitysolution-lists-common",
+                "path": "x-pack/solutions/security/packages/kbn-securitysolution-lists-common/api/model/list_schemas.gen.ts"
+              },
+              {
+                "plugin": "@kbn/securitysolution-lists-common",
+                "path": "x-pack/solutions/security/packages/kbn-securitysolution-lists-common/api/model/list_schemas.gen.ts"
+              },
+              {
+                "plugin": "@kbn/securitysolution-lists-common",
+                "path": "x-pack/solutions/security/packages/kbn-securitysolution-lists-common/api/model/list_schemas.gen.ts"
+              },
+              {
+                "plugin": "@kbn/securitysolution-lists-common",
+                "path": "x-pack/solutions/security/packages/kbn-securitysolution-lists-common/api/model/list_schemas.gen.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -19329,7 +19433,2333 @@
               },
               {
                 "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/common/lib/zod/format_zod_error.ts"
+                "path": "src/platform/plugins/shared/workflows_management/public/widgets/workflow_yaml_editor/lib/snippets/generate_connector_snippet.ts"
+              },
+              {
+                "plugin": "@kbn/workflows",
+                "path": "src/platform/packages/shared/kbn-workflows/spec/kibana/kibana_connectors.test.ts"
+              },
+              {
+                "plugin": "@kbn/workflows",
+                "path": "src/platform/packages/shared/kbn-workflows/spec/kibana/kibana_connectors.test.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/public/features/workflow_context/lib/get_workflow_context_schema.legacy.test.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/public/features/workflow_context/lib/get_workflow_context_schema.legacy.test.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/public/features/workflow_context/lib/get_workflow_context_schema.legacy.test.ts"
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType._output",
+            "type": "Uncategorized",
+            "tags": [
+              "deprecated"
+            ],
+            "label": "_output",
+            "description": [],
+            "signature": [
+              "Internals[\"output\"]"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 11,
+            "columnNumber": 5,
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType._input",
+            "type": "Uncategorized",
+            "tags": [
+              "deprecated"
+            ],
+            "label": "_input",
+            "description": [],
+            "signature": [
+              "Internals[\"input\"]"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 13,
+            "columnNumber": 5,
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.standard",
+            "type": "Object",
+            "tags": [],
+            "label": "\"~standard\"",
+            "description": [],
+            "signature": [
+              "StandardSchemaWithJSONProps",
+              "<",
+              "input",
+              "<this>, ",
+              "output",
+              "<this>>"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 15,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.toJSONSchema",
+            "type": "Function",
+            "tags": [],
+            "label": "toJSONSchema",
+            "description": [
+              "Converts this schema to a JSON Schema representation."
+            ],
+            "signature": [
+              "(params?: ",
+              "ToJSONSchemaParams",
+              " | undefined) => ",
+              "ZodStandardJSONSchemaPayload",
+              "<this>"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 16,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.toJSONSchema.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "ToJSONSchemaParams",
+                  " | undefined"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 17,
+                "columnNumber": 18,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.check",
+            "type": "Function",
+            "tags": [],
+            "label": "check",
+            "description": [],
+            "signature": [
+              "(...checks: (",
+              "CheckFn",
+              "<",
+              "output",
+              "<this>> | ",
+              "node_modules/zod/v4/core/checks",
+              "$ZodCheck<",
+              "output",
+              "<this>>)[]) => this"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 18,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.check.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "checks",
+                "description": [],
+                "signature": [
+                  "(",
+                  "CheckFn",
+                  "<",
+                  "output",
+                  "<this>> | ",
+                  "node_modules/zod/v4/core/checks",
+                  "$ZodCheck<",
+                  "output",
+                  "<this>>)[]"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 18,
+                "columnNumber": 11,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.with",
+            "type": "Function",
+            "tags": [],
+            "label": "with",
+            "description": [],
+            "signature": [
+              "(...checks: (",
+              "CheckFn",
+              "<",
+              "output",
+              "<this>> | ",
+              "node_modules/zod/v4/core/checks",
+              "$ZodCheck<",
+              "output",
+              "<this>>)[]) => this"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 19,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.with.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "checks",
+                "description": [],
+                "signature": [
+                  "(",
+                  "CheckFn",
+                  "<",
+                  "output",
+                  "<this>> | ",
+                  "node_modules/zod/v4/core/checks",
+                  "$ZodCheck<",
+                  "output",
+                  "<this>>)[]"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 19,
+                "columnNumber": 10,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.clone",
+            "type": "Function",
+            "tags": [],
+            "label": "clone",
+            "description": [],
+            "signature": [
+              "(def?: Internals[\"def\"] | undefined, params?: { parent: boolean; } | undefined) => this"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 20,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.clone.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "def",
+                "description": [],
+                "signature": [
+                  "Internals[\"def\"] | undefined"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 20,
+                "columnNumber": 11,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.clone.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 20,
+                "columnNumber": 44,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/zod",
+                    "id": "def-common.ZodType.clone.$2.parent",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "parent",
+                    "description": [],
+                    "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                    "lineNumber": 21,
+                    "columnNumber": 9,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.register",
+            "type": "Function",
+            "tags": [],
+            "label": "register",
+            "description": [],
+            "signature": [
+              "<R extends ",
+              "node_modules/zod/v4/core/registries",
+              "$ZodRegistry<MetadataType, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodType<unknown, unknown, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<unknown, unknown>>>>(registry: R, ...meta: this extends R[\"_schema\"] ? undefined extends R[\"_meta\"] ? [any?] : [any] : [\"Incompatible schema\"]) => this"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 23,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.register.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "registry",
+                "description": [],
+                "signature": [
+                  "R"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 23,
+                "columnNumber": 43,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.register.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "meta",
+                "description": [],
+                "signature": [
+                  "this extends R[\"_schema\"] ? undefined extends R[\"_meta\"] ? [any?] : [any] : [\"Incompatible schema\"]"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 23,
+                "columnNumber": 56,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.brand",
+            "type": "Function",
+            "tags": [],
+            "label": "brand",
+            "description": [],
+            "signature": [
+              "<T extends PropertyKey = PropertyKey, Dir extends \"in\" | \"out\" | \"inout\" = \"out\">(value?: T | undefined) => PropertyKey extends T ? this : ",
+              "node_modules/zod/v4/core/core",
+              "$ZodBranded<this, T, Dir>"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 24,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.brand.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "T | undefined"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 24,
+                "columnNumber": 92,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.parse",
+            "type": "Function",
+            "tags": [],
+            "label": "parse",
+            "description": [],
+            "signature": [
+              "(data: unknown, params?: ",
+              "ParseContext",
+              "<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssue> | undefined) => ",
+              "output",
+              "<this>"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 25,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.parse.$1",
+                "type": "Unknown",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 25,
+                "columnNumber": 11,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.parse.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "ParseContext",
+                  "<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssue> | undefined"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 25,
+                "columnNumber": 26,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.safeParse",
+            "type": "Function",
+            "tags": [],
+            "label": "safeParse",
+            "description": [],
+            "signature": [
+              "(data: unknown, params?: ",
+              "ParseContext",
+              "<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssue> | undefined) => ",
+              "ZodSafeParseResult",
+              "<",
+              "output",
+              "<this>>"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 26,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.safeParse.$1",
+                "type": "Unknown",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 26,
+                "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.safeParse.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "ParseContext",
+                  "<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssue> | undefined"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 26,
+                "columnNumber": 30,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.parseAsync",
+            "type": "Function",
+            "tags": [],
+            "label": "parseAsync",
+            "description": [],
+            "signature": [
+              "(data: unknown, params?: ",
+              "ParseContext",
+              "<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssue> | undefined) => Promise<",
+              "output",
+              "<this>>"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 27,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.parseAsync.$1",
+                "type": "Unknown",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 27,
+                "columnNumber": 16,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.parseAsync.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "ParseContext",
+                  "<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssue> | undefined"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 27,
+                "columnNumber": 31,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.safeParseAsync",
+            "type": "Function",
+            "tags": [],
+            "label": "safeParseAsync",
+            "description": [],
+            "signature": [
+              "(data: unknown, params?: ",
+              "ParseContext",
+              "<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssue> | undefined) => Promise<",
+              "ZodSafeParseResult",
+              "<",
+              "output",
+              "<this>>>"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 28,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.safeParseAsync.$1",
+                "type": "Unknown",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 28,
+                "columnNumber": 20,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.safeParseAsync.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "ParseContext",
+                  "<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssue> | undefined"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 28,
+                "columnNumber": 35,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.spa",
+            "type": "Function",
+            "tags": [],
+            "label": "spa",
+            "description": [],
+            "signature": [
+              "(data: unknown, params?: ",
+              "ParseContext",
+              "<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssue> | undefined) => Promise<",
+              "ZodSafeParseResult",
+              "<",
+              "output",
+              "<this>>>"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 29,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.spa.$1",
+                "type": "Unknown",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 29,
+                "columnNumber": 11,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.spa.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "ParseContext",
+                  "<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssue> | undefined"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 29,
+                "columnNumber": 26,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.encode",
+            "type": "Function",
+            "tags": [],
+            "label": "encode",
+            "description": [],
+            "signature": [
+              "(data: ",
+              "output",
+              "<this>, params?: ",
+              "ParseContext",
+              "<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssue> | undefined) => ",
+              "input",
+              "<this>"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 30,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.encode.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  "output",
+                  "<this>"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 30,
+                "columnNumber": 12,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.encode.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "ParseContext",
+                  "<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssue> | undefined"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 30,
+                "columnNumber": 37,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.decode",
+            "type": "Function",
+            "tags": [],
+            "label": "decode",
+            "description": [],
+            "signature": [
+              "(data: ",
+              "input",
+              "<this>, params?: ",
+              "ParseContext",
+              "<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssue> | undefined) => ",
+              "output",
+              "<this>"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 31,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.decode.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  "input",
+                  "<this>"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 31,
+                "columnNumber": 12,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.decode.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "ParseContext",
+                  "<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssue> | undefined"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 31,
+                "columnNumber": 36,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.encodeAsync",
+            "type": "Function",
+            "tags": [],
+            "label": "encodeAsync",
+            "description": [],
+            "signature": [
+              "(data: ",
+              "output",
+              "<this>, params?: ",
+              "ParseContext",
+              "<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssue> | undefined) => Promise<",
+              "input",
+              "<this>>"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 32,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.encodeAsync.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  "output",
+                  "<this>"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 32,
+                "columnNumber": 17,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.encodeAsync.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "ParseContext",
+                  "<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssue> | undefined"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 32,
+                "columnNumber": 42,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.decodeAsync",
+            "type": "Function",
+            "tags": [],
+            "label": "decodeAsync",
+            "description": [],
+            "signature": [
+              "(data: ",
+              "input",
+              "<this>, params?: ",
+              "ParseContext",
+              "<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssue> | undefined) => Promise<",
+              "output",
+              "<this>>"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 33,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.decodeAsync.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  "input",
+                  "<this>"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 33,
+                "columnNumber": 17,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.decodeAsync.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "ParseContext",
+                  "<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssue> | undefined"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 33,
+                "columnNumber": 41,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.safeEncode",
+            "type": "Function",
+            "tags": [],
+            "label": "safeEncode",
+            "description": [],
+            "signature": [
+              "(data: ",
+              "output",
+              "<this>, params?: ",
+              "ParseContext",
+              "<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssue> | undefined) => ",
+              "ZodSafeParseResult",
+              "<",
+              "input",
+              "<this>>"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 34,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.safeEncode.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  "output",
+                  "<this>"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 34,
+                "columnNumber": 16,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.safeEncode.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "ParseContext",
+                  "<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssue> | undefined"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 34,
+                "columnNumber": 41,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.safeDecode",
+            "type": "Function",
+            "tags": [],
+            "label": "safeDecode",
+            "description": [],
+            "signature": [
+              "(data: ",
+              "input",
+              "<this>, params?: ",
+              "ParseContext",
+              "<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssue> | undefined) => ",
+              "ZodSafeParseResult",
+              "<",
+              "output",
+              "<this>>"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 35,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.safeDecode.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  "input",
+                  "<this>"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 35,
+                "columnNumber": 16,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.safeDecode.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "ParseContext",
+                  "<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssue> | undefined"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 35,
+                "columnNumber": 40,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.safeEncodeAsync",
+            "type": "Function",
+            "tags": [],
+            "label": "safeEncodeAsync",
+            "description": [],
+            "signature": [
+              "(data: ",
+              "output",
+              "<this>, params?: ",
+              "ParseContext",
+              "<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssue> | undefined) => Promise<",
+              "ZodSafeParseResult",
+              "<",
+              "input",
+              "<this>>>"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 36,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.safeEncodeAsync.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  "output",
+                  "<this>"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 36,
+                "columnNumber": 21,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.safeEncodeAsync.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "ParseContext",
+                  "<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssue> | undefined"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 36,
+                "columnNumber": 46,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.safeDecodeAsync",
+            "type": "Function",
+            "tags": [],
+            "label": "safeDecodeAsync",
+            "description": [],
+            "signature": [
+              "(data: ",
+              "input",
+              "<this>, params?: ",
+              "ParseContext",
+              "<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssue> | undefined) => Promise<",
+              "ZodSafeParseResult",
+              "<",
+              "output",
+              "<this>>>"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 37,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.safeDecodeAsync.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  "input",
+                  "<this>"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 37,
+                "columnNumber": 21,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.safeDecodeAsync.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "ParseContext",
+                  "<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssue> | undefined"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 37,
+                "columnNumber": 45,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.refine",
+            "type": "Function",
+            "tags": [],
+            "label": "refine",
+            "description": [],
+            "signature": [
+              "<Ch extends (arg: ",
+              "output",
+              "<this>) => unknown>(check: Ch, params?: string | { params?: Record<string, any> | undefined; path?: PropertyKey[] | undefined; abort?: boolean | undefined; when?: ((payload: ",
+              "ParsePayload",
+              "<unknown>) => boolean) | undefined; error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssue> | undefined; message?: string | undefined; } | undefined) => Ch extends (arg: any) => arg is infer R ? this & ",
+              "ZodType",
+              "<R, ",
+              "input",
+              "<this>, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<R, ",
+              "input",
+              "<this>>> : this"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 38,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.refine.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "check",
+                "description": [],
+                "signature": [
+                  "Ch"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 38,
+                "columnNumber": 79,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.refine.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "string | { params?: Record<string, any> | undefined; path?: PropertyKey[] | undefined; abort?: boolean | undefined; when?: ((payload: ",
+                  "ParsePayload",
+                  "<unknown>) => boolean) | undefined; error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssue> | undefined; message?: string | undefined; } | undefined"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 38,
+                "columnNumber": 90,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.superRefine",
+            "type": "Function",
+            "tags": [],
+            "label": "superRefine",
+            "description": [],
+            "signature": [
+              "(refinement: (arg: ",
+              "output",
+              "<this>, ctx: ",
+              "node_modules/zod/v4/core/api",
+              "$RefinementCtx<",
+              "output",
+              "<this>>) => void | Promise<void>) => this"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 39,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.superRefine.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "refinement",
+                "description": [],
+                "signature": [
+                  "(arg: ",
+                  "output",
+                  "<this>, ctx: ",
+                  "node_modules/zod/v4/core/api",
+                  "$RefinementCtx<",
+                  "output",
+                  "<this>>) => void | Promise<void>"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 39,
+                "columnNumber": 17,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.overwrite",
+            "type": "Function",
+            "tags": [],
+            "label": "overwrite",
+            "description": [],
+            "signature": [
+              "(fn: (x: ",
+              "output",
+              "<this>) => ",
+              "output",
+              "<this>) => this"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 40,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.overwrite.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "fn",
+                "description": [],
+                "signature": [
+                  "(x: ",
+                  "output",
+                  "<this>) => ",
+                  "output",
+                  "<this>"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 40,
+                "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.optional",
+            "type": "Function",
+            "tags": [],
+            "label": "optional",
+            "description": [],
+            "signature": [
+              "() => ",
+              "ZodOptional",
+              "<this>"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 41,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.exactOptional",
+            "type": "Function",
+            "tags": [],
+            "label": "exactOptional",
+            "description": [],
+            "signature": [
+              "() => ",
+              "ZodExactOptional",
+              "<this>"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 42,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.nonoptional",
+            "type": "Function",
+            "tags": [],
+            "label": "nonoptional",
+            "description": [],
+            "signature": [
+              "(params?: string | { error?: string | ",
+              "node_modules/zod/v4/core/errors",
+              "$ZodErrorMap<",
+              "node_modules/zod/v4/core/errors",
+              "$ZodIssueInvalidType<unknown>> | undefined; message?: string | undefined; } | undefined) => ",
+              "ZodNonOptional",
+              "<this>"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 43,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.nonoptional.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "string | { error?: string | ",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodErrorMap<",
+                  "node_modules/zod/v4/core/errors",
+                  "$ZodIssueInvalidType<unknown>> | undefined; message?: string | undefined; } | undefined"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 43,
+                "columnNumber": 17,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.nullable",
+            "type": "Function",
+            "tags": [],
+            "label": "nullable",
+            "description": [],
+            "signature": [
+              "() => ",
+              "ZodNullable",
+              "<this>"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 44,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.nullish",
+            "type": "Function",
+            "tags": [],
+            "label": "nullish",
+            "description": [],
+            "signature": [
+              "() => ",
+              "ZodOptional",
+              "<",
+              "ZodNullable",
+              "<this>>"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 45,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.default",
+            "type": "Function",
+            "tags": [],
+            "label": "default",
+            "description": [],
+            "signature": [
+              "{ (def: ",
+              "NoUndefined",
+              "<",
+              "output",
+              "<this>>): ",
+              "ZodDefault",
+              "<this>; (def: () => ",
+              "NoUndefined",
+              "<",
+              "output",
+              "<this>>): ",
+              "ZodDefault",
+              "<this>; }"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 46,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.default.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "def",
+                "description": [],
+                "signature": [
+                  "NoUndefined",
+                  "<",
+                  "output",
+                  "<this>>"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 46,
+                "columnNumber": 13,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.default",
+            "type": "Function",
+            "tags": [],
+            "label": "default",
+            "description": [],
+            "signature": [
+              "{ (def: ",
+              "NoUndefined",
+              "<",
+              "output",
+              "<this>>): ",
+              "ZodDefault",
+              "<this>; (def: () => ",
+              "NoUndefined",
+              "<",
+              "output",
+              "<this>>): ",
+              "ZodDefault",
+              "<this>; }"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 47,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.default.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "def",
+                "description": [],
+                "signature": [
+                  "() => ",
+                  "NoUndefined",
+                  "<",
+                  "output",
+                  "<this>>"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 47,
+                "columnNumber": 13,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.prefault",
+            "type": "Function",
+            "tags": [],
+            "label": "prefault",
+            "description": [],
+            "signature": [
+              "{ (def: () => ",
+              "input",
+              "<this>): ",
+              "ZodPrefault",
+              "<this>; (def: ",
+              "input",
+              "<this>): ",
+              "ZodPrefault",
+              "<this>; }"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 48,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.prefault.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "def",
+                "description": [],
+                "signature": [
+                  "() => ",
+                  "input",
+                  "<this>"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 48,
+                "columnNumber": 14,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.prefault",
+            "type": "Function",
+            "tags": [],
+            "label": "prefault",
+            "description": [],
+            "signature": [
+              "{ (def: () => ",
+              "input",
+              "<this>): ",
+              "ZodPrefault",
+              "<this>; (def: ",
+              "input",
+              "<this>): ",
+              "ZodPrefault",
+              "<this>; }"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 49,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.prefault.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "def",
+                "description": [],
+                "signature": [
+                  "input",
+                  "<this>"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 49,
+                "columnNumber": 14,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.array",
+            "type": "Function",
+            "tags": [],
+            "label": "array",
+            "description": [],
+            "signature": [
+              "() => ",
+              "ZodArray",
+              "<this>"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 50,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.or",
+            "type": "Function",
+            "tags": [],
+            "label": "or",
+            "description": [],
+            "signature": [
+              "<T extends ",
+              "SomeType",
+              ">(option: T) => ",
+              "ZodUnion",
+              "<[this, T]>"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 51,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.or.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "option",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 51,
+                "columnNumber": 33,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.and",
+            "type": "Function",
+            "tags": [],
+            "label": "and",
+            "description": [],
+            "signature": [
+              "<T extends ",
+              "SomeType",
+              ">(incoming: T) => ",
+              "ZodIntersection",
+              "<this, T>"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 52,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.and.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "incoming",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 52,
+                "columnNumber": 34,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.transform",
+            "type": "Function",
+            "tags": [],
+            "label": "transform",
+            "description": [],
+            "signature": [
+              "<NewOut>(transform: (arg: ",
+              "output",
+              "<this>, ctx: ",
+              "node_modules/zod/v4/core/api",
+              "$RefinementCtx<",
+              "output",
+              "<this>>) => NewOut | Promise<NewOut>) => ",
+              "ZodPipe",
+              "<this, ",
+              "ZodTransform",
+              "<Awaited<NewOut>, ",
+              "output",
+              "<this>>>"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 53,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.transform.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "transform",
+                "description": [],
+                "signature": [
+                  "(arg: ",
+                  "output",
+                  "<this>, ctx: ",
+                  "node_modules/zod/v4/core/api",
+                  "$RefinementCtx<",
+                  "output",
+                  "<this>>) => NewOut | Promise<NewOut>"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 53,
+                "columnNumber": 23,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.catch",
+            "type": "Function",
+            "tags": [],
+            "label": "catch",
+            "description": [],
+            "signature": [
+              "{ (def: ",
+              "output",
+              "<this>): ",
+              "ZodCatch",
+              "<this>; (def: (ctx: ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodCatchCtx) => ",
+              "output",
+              "<this>): ",
+              "ZodCatch",
+              "<this>; }"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 54,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.catch.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "def",
+                "description": [],
+                "signature": [
+                  "output",
+                  "<this>"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 54,
+                "columnNumber": 11,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.catch",
+            "type": "Function",
+            "tags": [],
+            "label": "catch",
+            "description": [],
+            "signature": [
+              "{ (def: ",
+              "output",
+              "<this>): ",
+              "ZodCatch",
+              "<this>; (def: (ctx: ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodCatchCtx) => ",
+              "output",
+              "<this>): ",
+              "ZodCatch",
+              "<this>; }"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 55,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.catch.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "def",
+                "description": [],
+                "signature": [
+                  "(ctx: ",
+                  "node_modules/zod/v4/core/schemas",
+                  "$ZodCatchCtx) => ",
+                  "output",
+                  "<this>"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 55,
+                "columnNumber": 11,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.pipe",
+            "type": "Function",
+            "tags": [],
+            "label": "pipe",
+            "description": [],
+            "signature": [
+              "<T extends ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodType<any, ",
+              "output",
+              "<this>, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<any, ",
+              "output",
+              "<this>>>>(target: T | ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodType<any, ",
+              "output",
+              "<this>, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<any, ",
+              "output",
+              "<this>>>) => ",
+              "ZodPipe",
+              "<this, T>"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 56,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.pipe.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "target",
+                "description": [],
+                "signature": [
+                  "T | ",
+                  "node_modules/zod/v4/core/schemas",
+                  "$ZodType<any, ",
+                  "output",
+                  "<this>, ",
+                  "node_modules/zod/v4/core/schemas",
+                  "$ZodTypeInternals<any, ",
+                  "output",
+                  "<this>>>"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 56,
+                "columnNumber": 59,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.readonly",
+            "type": "Function",
+            "tags": [],
+            "label": "readonly",
+            "description": [],
+            "signature": [
+              "() => ",
+              "ZodReadonly",
+              "<this>"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 57,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.describe",
+            "type": "Function",
+            "tags": [],
+            "label": "describe",
+            "description": [
+              "Returns a new instance that has been registered in `z.globalRegistry` with the specified description"
+            ],
+            "signature": [
+              "(description: string) => this"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 58,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.describe.$1",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 59,
+                "columnNumber": 14,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 60,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.meta",
+            "type": "Function",
+            "tags": [],
+            "label": "meta",
+            "description": [
+              "Returns the metadata associated with this instance in `z.globalRegistry`"
+            ],
+            "signature": [
+              "{ (): any; (data: any): this; }"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 61,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.meta",
+            "type": "Function",
+            "tags": [],
+            "label": "meta",
+            "description": [
+              "Returns a new instance that has been registered in `z.globalRegistry` with the specified metadata"
+            ],
+            "signature": [
+              "{ (): any; (data: any): this; }"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 63,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.meta.$1",
+                "type": "Any",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 64,
+                "columnNumber": 10,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.isOptional",
+            "type": "Function",
+            "tags": [
+              "deprecated"
+            ],
+            "label": "isOptional",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 65,
+            "columnNumber": 5,
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/workflows",
+                "path": "src/platform/packages/shared/kbn-workflows/spec/kibana/kibana_connectors.test.ts"
+              }
+            ],
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.isNullable",
+            "type": "Function",
+            "tags": [
+              "deprecated"
+            ],
+            "label": "isNullable",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 73,
+            "columnNumber": 5,
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [],
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.apply",
+            "type": "Function",
+            "tags": [],
+            "label": "apply",
+            "description": [],
+            "signature": [
+              "<T>(fn: (schema: this) => T) => T"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 82,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodType.apply.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "fn",
+                "description": [],
+                "signature": [
+                  "(schema: this) => T"
+                ],
+                "path": "node_modules/zod/v4/classic/schemas.d.ts",
+                "lineNumber": 82,
+                "columnNumber": 14,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/zod",
+        "id": "def-common.ZodType",
+        "type": "Interface",
+        "tags": [],
+        "label": "ZodType",
+        "description": [],
+        "signature": [
+          "ZodType",
+          "<Output, Input, Internals> extends ",
+          "node_modules/zod/v4/core/schemas",
+          "$ZodType<Output, Input, Internals>"
+        ],
+        "path": "node_modules/zod/v4/classic/schemas.d.ts",
+        "lineNumber": 6,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.def",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "def",
+            "description": [],
+            "signature": [
+              "Internals[\"def\"]"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 7,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType.type",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "Internals[\"def\"][\"type\"]"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 8,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodType._def",
+            "type": "Uncategorized",
+            "tags": [
+              "deprecated"
+            ],
+            "label": "_def",
+            "description": [],
+            "signature": [
+              "Internals[\"def\"]"
+            ],
+            "path": "node_modules/zod/v4/classic/schemas.d.ts",
+            "lineNumber": 9,
+            "columnNumber": 5,
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/workflows",
+                "path": "src/platform/packages/shared/kbn-workflows/spec/lib/get_workflow_json_schema.ts"
               },
               {
                 "plugin": "workflowsManagement",
@@ -21663,10 +24093,6 @@
               },
               {
                 "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/common/lib/zod/format_zod_error.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
                 "path": "src/platform/plugins/shared/workflows_management/public/widgets/workflow_yaml_editor/lib/snippets/generate_connector_snippet.ts"
               },
               {
@@ -23994,2344 +26420,6 @@
               {
                 "plugin": "@kbn/workflows",
                 "path": "src/platform/packages/shared/kbn-workflows/spec/lib/get_workflow_json_schema.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/common/lib/zod/format_zod_error.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/public/widgets/workflow_yaml_editor/lib/snippets/generate_connector_snippet.ts"
-              },
-              {
-                "plugin": "@kbn/workflows",
-                "path": "src/platform/packages/shared/kbn-workflows/spec/kibana/kibana_connectors.test.ts"
-              },
-              {
-                "plugin": "@kbn/workflows",
-                "path": "src/platform/packages/shared/kbn-workflows/spec/kibana/kibana_connectors.test.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/public/features/workflow_context/lib/get_workflow_context_schema.legacy.test.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/public/features/workflow_context/lib/get_workflow_context_schema.legacy.test.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/public/features/workflow_context/lib/get_workflow_context_schema.legacy.test.ts"
-              }
-            ]
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType._output",
-            "type": "Uncategorized",
-            "tags": [
-              "deprecated"
-            ],
-            "label": "_output",
-            "description": [],
-            "signature": [
-              "Internals[\"output\"]"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 11,
-            "columnNumber": 5,
-            "deprecated": true,
-            "trackAdoption": false,
-            "references": []
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType._input",
-            "type": "Uncategorized",
-            "tags": [
-              "deprecated"
-            ],
-            "label": "_input",
-            "description": [],
-            "signature": [
-              "Internals[\"input\"]"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 13,
-            "columnNumber": 5,
-            "deprecated": true,
-            "trackAdoption": false,
-            "references": []
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.standard",
-            "type": "Object",
-            "tags": [],
-            "label": "\"~standard\"",
-            "description": [],
-            "signature": [
-              "StandardSchemaWithJSONProps",
-              "<",
-              "input",
-              "<this>, ",
-              "output",
-              "<this>>"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 15,
-            "columnNumber": 5,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.toJSONSchema",
-            "type": "Function",
-            "tags": [],
-            "label": "toJSONSchema",
-            "description": [
-              "Converts this schema to a JSON Schema representation."
-            ],
-            "signature": [
-              "(params?: ",
-              "ToJSONSchemaParams",
-              " | undefined) => ",
-              "ZodStandardJSONSchemaPayload",
-              "<this>"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 16,
-            "columnNumber": 5,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.toJSONSchema.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "params",
-                "description": [],
-                "signature": [
-                  "ToJSONSchemaParams",
-                  " | undefined"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 17,
-                "columnNumber": 18,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.check",
-            "type": "Function",
-            "tags": [],
-            "label": "check",
-            "description": [],
-            "signature": [
-              "(...checks: (",
-              "CheckFn",
-              "<",
-              "output",
-              "<this>> | ",
-              "node_modules/zod/v4/core/checks",
-              "$ZodCheck<",
-              "output",
-              "<this>>)[]) => this"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 18,
-            "columnNumber": 5,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.check.$1",
-                "type": "Array",
-                "tags": [],
-                "label": "checks",
-                "description": [],
-                "signature": [
-                  "(",
-                  "CheckFn",
-                  "<",
-                  "output",
-                  "<this>> | ",
-                  "node_modules/zod/v4/core/checks",
-                  "$ZodCheck<",
-                  "output",
-                  "<this>>)[]"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 18,
-                "columnNumber": 11,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.with",
-            "type": "Function",
-            "tags": [],
-            "label": "with",
-            "description": [],
-            "signature": [
-              "(...checks: (",
-              "CheckFn",
-              "<",
-              "output",
-              "<this>> | ",
-              "node_modules/zod/v4/core/checks",
-              "$ZodCheck<",
-              "output",
-              "<this>>)[]) => this"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 19,
-            "columnNumber": 5,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.with.$1",
-                "type": "Array",
-                "tags": [],
-                "label": "checks",
-                "description": [],
-                "signature": [
-                  "(",
-                  "CheckFn",
-                  "<",
-                  "output",
-                  "<this>> | ",
-                  "node_modules/zod/v4/core/checks",
-                  "$ZodCheck<",
-                  "output",
-                  "<this>>)[]"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 19,
-                "columnNumber": 10,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.clone",
-            "type": "Function",
-            "tags": [],
-            "label": "clone",
-            "description": [],
-            "signature": [
-              "(def?: Internals[\"def\"] | undefined, params?: { parent: boolean; } | undefined) => this"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 20,
-            "columnNumber": 5,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.clone.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "def",
-                "description": [],
-                "signature": [
-                  "Internals[\"def\"] | undefined"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 20,
-                "columnNumber": 11,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              },
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.clone.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "params",
-                "description": [],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 20,
-                "columnNumber": 44,
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "@kbn/zod",
-                    "id": "def-common.ZodType.clone.$2.parent",
-                    "type": "boolean",
-                    "tags": [],
-                    "label": "parent",
-                    "description": [],
-                    "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                    "lineNumber": 21,
-                    "columnNumber": 9,
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.register",
-            "type": "Function",
-            "tags": [],
-            "label": "register",
-            "description": [],
-            "signature": [
-              "<R extends ",
-              "node_modules/zod/v4/core/registries",
-              "$ZodRegistry<MetadataType, ",
-              "node_modules/zod/v4/core/schemas",
-              "$ZodType<unknown, unknown, ",
-              "node_modules/zod/v4/core/schemas",
-              "$ZodTypeInternals<unknown, unknown>>>>(registry: R, ...meta: this extends R[\"_schema\"] ? undefined extends R[\"_meta\"] ? [any?] : [any] : [\"Incompatible schema\"]) => this"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 23,
-            "columnNumber": 5,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.register.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "registry",
-                "description": [],
-                "signature": [
-                  "R"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 23,
-                "columnNumber": 43,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.register.$2",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "meta",
-                "description": [],
-                "signature": [
-                  "this extends R[\"_schema\"] ? undefined extends R[\"_meta\"] ? [any?] : [any] : [\"Incompatible schema\"]"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 23,
-                "columnNumber": 56,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.brand",
-            "type": "Function",
-            "tags": [],
-            "label": "brand",
-            "description": [],
-            "signature": [
-              "<T extends PropertyKey = PropertyKey, Dir extends \"in\" | \"out\" | \"inout\" = \"out\">(value?: T | undefined) => PropertyKey extends T ? this : ",
-              "node_modules/zod/v4/core/core",
-              "$ZodBranded<this, T, Dir>"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 24,
-            "columnNumber": 5,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.brand.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "value",
-                "description": [],
-                "signature": [
-                  "T | undefined"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 24,
-                "columnNumber": 92,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.parse",
-            "type": "Function",
-            "tags": [],
-            "label": "parse",
-            "description": [],
-            "signature": [
-              "(data: unknown, params?: ",
-              "ParseContext",
-              "<",
-              "node_modules/zod/v4/core/errors",
-              "$ZodIssue> | undefined) => ",
-              "output",
-              "<this>"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 25,
-            "columnNumber": 5,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.parse.$1",
-                "type": "Unknown",
-                "tags": [],
-                "label": "data",
-                "description": [],
-                "signature": [
-                  "unknown"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 25,
-                "columnNumber": 11,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.parse.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "params",
-                "description": [],
-                "signature": [
-                  "ParseContext",
-                  "<",
-                  "node_modules/zod/v4/core/errors",
-                  "$ZodIssue> | undefined"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 25,
-                "columnNumber": 26,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.safeParse",
-            "type": "Function",
-            "tags": [],
-            "label": "safeParse",
-            "description": [],
-            "signature": [
-              "(data: unknown, params?: ",
-              "ParseContext",
-              "<",
-              "node_modules/zod/v4/core/errors",
-              "$ZodIssue> | undefined) => ",
-              "ZodSafeParseResult",
-              "<",
-              "output",
-              "<this>>"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 26,
-            "columnNumber": 5,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.safeParse.$1",
-                "type": "Unknown",
-                "tags": [],
-                "label": "data",
-                "description": [],
-                "signature": [
-                  "unknown"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 26,
-                "columnNumber": 15,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.safeParse.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "params",
-                "description": [],
-                "signature": [
-                  "ParseContext",
-                  "<",
-                  "node_modules/zod/v4/core/errors",
-                  "$ZodIssue> | undefined"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 26,
-                "columnNumber": 30,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.parseAsync",
-            "type": "Function",
-            "tags": [],
-            "label": "parseAsync",
-            "description": [],
-            "signature": [
-              "(data: unknown, params?: ",
-              "ParseContext",
-              "<",
-              "node_modules/zod/v4/core/errors",
-              "$ZodIssue> | undefined) => Promise<",
-              "output",
-              "<this>>"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 27,
-            "columnNumber": 5,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.parseAsync.$1",
-                "type": "Unknown",
-                "tags": [],
-                "label": "data",
-                "description": [],
-                "signature": [
-                  "unknown"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 27,
-                "columnNumber": 16,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.parseAsync.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "params",
-                "description": [],
-                "signature": [
-                  "ParseContext",
-                  "<",
-                  "node_modules/zod/v4/core/errors",
-                  "$ZodIssue> | undefined"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 27,
-                "columnNumber": 31,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.safeParseAsync",
-            "type": "Function",
-            "tags": [],
-            "label": "safeParseAsync",
-            "description": [],
-            "signature": [
-              "(data: unknown, params?: ",
-              "ParseContext",
-              "<",
-              "node_modules/zod/v4/core/errors",
-              "$ZodIssue> | undefined) => Promise<",
-              "ZodSafeParseResult",
-              "<",
-              "output",
-              "<this>>>"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 28,
-            "columnNumber": 5,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.safeParseAsync.$1",
-                "type": "Unknown",
-                "tags": [],
-                "label": "data",
-                "description": [],
-                "signature": [
-                  "unknown"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 28,
-                "columnNumber": 20,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.safeParseAsync.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "params",
-                "description": [],
-                "signature": [
-                  "ParseContext",
-                  "<",
-                  "node_modules/zod/v4/core/errors",
-                  "$ZodIssue> | undefined"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 28,
-                "columnNumber": 35,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.spa",
-            "type": "Function",
-            "tags": [],
-            "label": "spa",
-            "description": [],
-            "signature": [
-              "(data: unknown, params?: ",
-              "ParseContext",
-              "<",
-              "node_modules/zod/v4/core/errors",
-              "$ZodIssue> | undefined) => Promise<",
-              "ZodSafeParseResult",
-              "<",
-              "output",
-              "<this>>>"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 29,
-            "columnNumber": 5,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.spa.$1",
-                "type": "Unknown",
-                "tags": [],
-                "label": "data",
-                "description": [],
-                "signature": [
-                  "unknown"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 29,
-                "columnNumber": 11,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.spa.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "params",
-                "description": [],
-                "signature": [
-                  "ParseContext",
-                  "<",
-                  "node_modules/zod/v4/core/errors",
-                  "$ZodIssue> | undefined"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 29,
-                "columnNumber": 26,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.encode",
-            "type": "Function",
-            "tags": [],
-            "label": "encode",
-            "description": [],
-            "signature": [
-              "(data: ",
-              "output",
-              "<this>, params?: ",
-              "ParseContext",
-              "<",
-              "node_modules/zod/v4/core/errors",
-              "$ZodIssue> | undefined) => ",
-              "input",
-              "<this>"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 30,
-            "columnNumber": 5,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.encode.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "data",
-                "description": [],
-                "signature": [
-                  "output",
-                  "<this>"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 30,
-                "columnNumber": 12,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.encode.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "params",
-                "description": [],
-                "signature": [
-                  "ParseContext",
-                  "<",
-                  "node_modules/zod/v4/core/errors",
-                  "$ZodIssue> | undefined"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 30,
-                "columnNumber": 37,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.decode",
-            "type": "Function",
-            "tags": [],
-            "label": "decode",
-            "description": [],
-            "signature": [
-              "(data: ",
-              "input",
-              "<this>, params?: ",
-              "ParseContext",
-              "<",
-              "node_modules/zod/v4/core/errors",
-              "$ZodIssue> | undefined) => ",
-              "output",
-              "<this>"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 31,
-            "columnNumber": 5,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.decode.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "data",
-                "description": [],
-                "signature": [
-                  "input",
-                  "<this>"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 31,
-                "columnNumber": 12,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.decode.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "params",
-                "description": [],
-                "signature": [
-                  "ParseContext",
-                  "<",
-                  "node_modules/zod/v4/core/errors",
-                  "$ZodIssue> | undefined"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 31,
-                "columnNumber": 36,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.encodeAsync",
-            "type": "Function",
-            "tags": [],
-            "label": "encodeAsync",
-            "description": [],
-            "signature": [
-              "(data: ",
-              "output",
-              "<this>, params?: ",
-              "ParseContext",
-              "<",
-              "node_modules/zod/v4/core/errors",
-              "$ZodIssue> | undefined) => Promise<",
-              "input",
-              "<this>>"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 32,
-            "columnNumber": 5,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.encodeAsync.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "data",
-                "description": [],
-                "signature": [
-                  "output",
-                  "<this>"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 32,
-                "columnNumber": 17,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.encodeAsync.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "params",
-                "description": [],
-                "signature": [
-                  "ParseContext",
-                  "<",
-                  "node_modules/zod/v4/core/errors",
-                  "$ZodIssue> | undefined"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 32,
-                "columnNumber": 42,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.decodeAsync",
-            "type": "Function",
-            "tags": [],
-            "label": "decodeAsync",
-            "description": [],
-            "signature": [
-              "(data: ",
-              "input",
-              "<this>, params?: ",
-              "ParseContext",
-              "<",
-              "node_modules/zod/v4/core/errors",
-              "$ZodIssue> | undefined) => Promise<",
-              "output",
-              "<this>>"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 33,
-            "columnNumber": 5,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.decodeAsync.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "data",
-                "description": [],
-                "signature": [
-                  "input",
-                  "<this>"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 33,
-                "columnNumber": 17,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.decodeAsync.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "params",
-                "description": [],
-                "signature": [
-                  "ParseContext",
-                  "<",
-                  "node_modules/zod/v4/core/errors",
-                  "$ZodIssue> | undefined"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 33,
-                "columnNumber": 41,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.safeEncode",
-            "type": "Function",
-            "tags": [],
-            "label": "safeEncode",
-            "description": [],
-            "signature": [
-              "(data: ",
-              "output",
-              "<this>, params?: ",
-              "ParseContext",
-              "<",
-              "node_modules/zod/v4/core/errors",
-              "$ZodIssue> | undefined) => ",
-              "ZodSafeParseResult",
-              "<",
-              "input",
-              "<this>>"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 34,
-            "columnNumber": 5,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.safeEncode.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "data",
-                "description": [],
-                "signature": [
-                  "output",
-                  "<this>"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 34,
-                "columnNumber": 16,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.safeEncode.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "params",
-                "description": [],
-                "signature": [
-                  "ParseContext",
-                  "<",
-                  "node_modules/zod/v4/core/errors",
-                  "$ZodIssue> | undefined"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 34,
-                "columnNumber": 41,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.safeDecode",
-            "type": "Function",
-            "tags": [],
-            "label": "safeDecode",
-            "description": [],
-            "signature": [
-              "(data: ",
-              "input",
-              "<this>, params?: ",
-              "ParseContext",
-              "<",
-              "node_modules/zod/v4/core/errors",
-              "$ZodIssue> | undefined) => ",
-              "ZodSafeParseResult",
-              "<",
-              "output",
-              "<this>>"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 35,
-            "columnNumber": 5,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.safeDecode.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "data",
-                "description": [],
-                "signature": [
-                  "input",
-                  "<this>"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 35,
-                "columnNumber": 16,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.safeDecode.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "params",
-                "description": [],
-                "signature": [
-                  "ParseContext",
-                  "<",
-                  "node_modules/zod/v4/core/errors",
-                  "$ZodIssue> | undefined"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 35,
-                "columnNumber": 40,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.safeEncodeAsync",
-            "type": "Function",
-            "tags": [],
-            "label": "safeEncodeAsync",
-            "description": [],
-            "signature": [
-              "(data: ",
-              "output",
-              "<this>, params?: ",
-              "ParseContext",
-              "<",
-              "node_modules/zod/v4/core/errors",
-              "$ZodIssue> | undefined) => Promise<",
-              "ZodSafeParseResult",
-              "<",
-              "input",
-              "<this>>>"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 36,
-            "columnNumber": 5,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.safeEncodeAsync.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "data",
-                "description": [],
-                "signature": [
-                  "output",
-                  "<this>"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 36,
-                "columnNumber": 21,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.safeEncodeAsync.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "params",
-                "description": [],
-                "signature": [
-                  "ParseContext",
-                  "<",
-                  "node_modules/zod/v4/core/errors",
-                  "$ZodIssue> | undefined"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 36,
-                "columnNumber": 46,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.safeDecodeAsync",
-            "type": "Function",
-            "tags": [],
-            "label": "safeDecodeAsync",
-            "description": [],
-            "signature": [
-              "(data: ",
-              "input",
-              "<this>, params?: ",
-              "ParseContext",
-              "<",
-              "node_modules/zod/v4/core/errors",
-              "$ZodIssue> | undefined) => Promise<",
-              "ZodSafeParseResult",
-              "<",
-              "output",
-              "<this>>>"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 37,
-            "columnNumber": 5,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.safeDecodeAsync.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "data",
-                "description": [],
-                "signature": [
-                  "input",
-                  "<this>"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 37,
-                "columnNumber": 21,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.safeDecodeAsync.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "params",
-                "description": [],
-                "signature": [
-                  "ParseContext",
-                  "<",
-                  "node_modules/zod/v4/core/errors",
-                  "$ZodIssue> | undefined"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 37,
-                "columnNumber": 45,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.refine",
-            "type": "Function",
-            "tags": [],
-            "label": "refine",
-            "description": [],
-            "signature": [
-              "<Ch extends (arg: ",
-              "output",
-              "<this>) => unknown>(check: Ch, params?: string | { params?: Record<string, any> | undefined; path?: PropertyKey[] | undefined; abort?: boolean | undefined; when?: ((payload: ",
-              "ParsePayload",
-              "<unknown>) => boolean) | undefined; error?: string | ",
-              "node_modules/zod/v4/core/errors",
-              "$ZodErrorMap<",
-              "node_modules/zod/v4/core/errors",
-              "$ZodIssue> | undefined; message?: string | undefined; } | undefined) => Ch extends (arg: any) => arg is infer R ? this & ",
-              "ZodType",
-              "<R, ",
-              "input",
-              "<this>, ",
-              "node_modules/zod/v4/core/schemas",
-              "$ZodTypeInternals<R, ",
-              "input",
-              "<this>>> : this"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 38,
-            "columnNumber": 5,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.refine.$1",
-                "type": "Function",
-                "tags": [],
-                "label": "check",
-                "description": [],
-                "signature": [
-                  "Ch"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 38,
-                "columnNumber": 79,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.refine.$2",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "params",
-                "description": [],
-                "signature": [
-                  "string | { params?: Record<string, any> | undefined; path?: PropertyKey[] | undefined; abort?: boolean | undefined; when?: ((payload: ",
-                  "ParsePayload",
-                  "<unknown>) => boolean) | undefined; error?: string | ",
-                  "node_modules/zod/v4/core/errors",
-                  "$ZodErrorMap<",
-                  "node_modules/zod/v4/core/errors",
-                  "$ZodIssue> | undefined; message?: string | undefined; } | undefined"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 38,
-                "columnNumber": 90,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.superRefine",
-            "type": "Function",
-            "tags": [],
-            "label": "superRefine",
-            "description": [],
-            "signature": [
-              "(refinement: (arg: ",
-              "output",
-              "<this>, ctx: ",
-              "node_modules/zod/v4/core/api",
-              "$RefinementCtx<",
-              "output",
-              "<this>>) => void | Promise<void>) => this"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 39,
-            "columnNumber": 5,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.superRefine.$1",
-                "type": "Function",
-                "tags": [],
-                "label": "refinement",
-                "description": [],
-                "signature": [
-                  "(arg: ",
-                  "output",
-                  "<this>, ctx: ",
-                  "node_modules/zod/v4/core/api",
-                  "$RefinementCtx<",
-                  "output",
-                  "<this>>) => void | Promise<void>"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 39,
-                "columnNumber": 17,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.overwrite",
-            "type": "Function",
-            "tags": [],
-            "label": "overwrite",
-            "description": [],
-            "signature": [
-              "(fn: (x: ",
-              "output",
-              "<this>) => ",
-              "output",
-              "<this>) => this"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 40,
-            "columnNumber": 5,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.overwrite.$1",
-                "type": "Function",
-                "tags": [],
-                "label": "fn",
-                "description": [],
-                "signature": [
-                  "(x: ",
-                  "output",
-                  "<this>) => ",
-                  "output",
-                  "<this>"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 40,
-                "columnNumber": 15,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.optional",
-            "type": "Function",
-            "tags": [],
-            "label": "optional",
-            "description": [],
-            "signature": [
-              "() => ",
-              "ZodOptional",
-              "<this>"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 41,
-            "columnNumber": 5,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.exactOptional",
-            "type": "Function",
-            "tags": [],
-            "label": "exactOptional",
-            "description": [],
-            "signature": [
-              "() => ",
-              "ZodExactOptional",
-              "<this>"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 42,
-            "columnNumber": 5,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.nonoptional",
-            "type": "Function",
-            "tags": [],
-            "label": "nonoptional",
-            "description": [],
-            "signature": [
-              "(params?: string | { error?: string | ",
-              "node_modules/zod/v4/core/errors",
-              "$ZodErrorMap<",
-              "node_modules/zod/v4/core/errors",
-              "$ZodIssueInvalidType<unknown>> | undefined; message?: string | undefined; } | undefined) => ",
-              "ZodNonOptional",
-              "<this>"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 43,
-            "columnNumber": 5,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.nonoptional.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "params",
-                "description": [],
-                "signature": [
-                  "string | { error?: string | ",
-                  "node_modules/zod/v4/core/errors",
-                  "$ZodErrorMap<",
-                  "node_modules/zod/v4/core/errors",
-                  "$ZodIssueInvalidType<unknown>> | undefined; message?: string | undefined; } | undefined"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 43,
-                "columnNumber": 17,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.nullable",
-            "type": "Function",
-            "tags": [],
-            "label": "nullable",
-            "description": [],
-            "signature": [
-              "() => ",
-              "ZodNullable",
-              "<this>"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 44,
-            "columnNumber": 5,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.nullish",
-            "type": "Function",
-            "tags": [],
-            "label": "nullish",
-            "description": [],
-            "signature": [
-              "() => ",
-              "ZodOptional",
-              "<",
-              "ZodNullable",
-              "<this>>"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 45,
-            "columnNumber": 5,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.default",
-            "type": "Function",
-            "tags": [],
-            "label": "default",
-            "description": [],
-            "signature": [
-              "{ (def: ",
-              "NoUndefined",
-              "<",
-              "output",
-              "<this>>): ",
-              "ZodDefault",
-              "<this>; (def: () => ",
-              "NoUndefined",
-              "<",
-              "output",
-              "<this>>): ",
-              "ZodDefault",
-              "<this>; }"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 46,
-            "columnNumber": 5,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.default.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "def",
-                "description": [],
-                "signature": [
-                  "NoUndefined",
-                  "<",
-                  "output",
-                  "<this>>"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 46,
-                "columnNumber": 13,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.default",
-            "type": "Function",
-            "tags": [],
-            "label": "default",
-            "description": [],
-            "signature": [
-              "{ (def: ",
-              "NoUndefined",
-              "<",
-              "output",
-              "<this>>): ",
-              "ZodDefault",
-              "<this>; (def: () => ",
-              "NoUndefined",
-              "<",
-              "output",
-              "<this>>): ",
-              "ZodDefault",
-              "<this>; }"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 47,
-            "columnNumber": 5,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.default.$1",
-                "type": "Function",
-                "tags": [],
-                "label": "def",
-                "description": [],
-                "signature": [
-                  "() => ",
-                  "NoUndefined",
-                  "<",
-                  "output",
-                  "<this>>"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 47,
-                "columnNumber": 13,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.prefault",
-            "type": "Function",
-            "tags": [],
-            "label": "prefault",
-            "description": [],
-            "signature": [
-              "{ (def: () => ",
-              "input",
-              "<this>): ",
-              "ZodPrefault",
-              "<this>; (def: ",
-              "input",
-              "<this>): ",
-              "ZodPrefault",
-              "<this>; }"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 48,
-            "columnNumber": 5,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.prefault.$1",
-                "type": "Function",
-                "tags": [],
-                "label": "def",
-                "description": [],
-                "signature": [
-                  "() => ",
-                  "input",
-                  "<this>"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 48,
-                "columnNumber": 14,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.prefault",
-            "type": "Function",
-            "tags": [],
-            "label": "prefault",
-            "description": [],
-            "signature": [
-              "{ (def: () => ",
-              "input",
-              "<this>): ",
-              "ZodPrefault",
-              "<this>; (def: ",
-              "input",
-              "<this>): ",
-              "ZodPrefault",
-              "<this>; }"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 49,
-            "columnNumber": 5,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.prefault.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "def",
-                "description": [],
-                "signature": [
-                  "input",
-                  "<this>"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 49,
-                "columnNumber": 14,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.array",
-            "type": "Function",
-            "tags": [],
-            "label": "array",
-            "description": [],
-            "signature": [
-              "() => ",
-              "ZodArray",
-              "<this>"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 50,
-            "columnNumber": 5,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.or",
-            "type": "Function",
-            "tags": [],
-            "label": "or",
-            "description": [],
-            "signature": [
-              "<T extends ",
-              "SomeType",
-              ">(option: T) => ",
-              "ZodUnion",
-              "<[this, T]>"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 51,
-            "columnNumber": 5,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.or.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "option",
-                "description": [],
-                "signature": [
-                  "T"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 51,
-                "columnNumber": 33,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.and",
-            "type": "Function",
-            "tags": [],
-            "label": "and",
-            "description": [],
-            "signature": [
-              "<T extends ",
-              "SomeType",
-              ">(incoming: T) => ",
-              "ZodIntersection",
-              "<this, T>"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 52,
-            "columnNumber": 5,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.and.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "incoming",
-                "description": [],
-                "signature": [
-                  "T"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 52,
-                "columnNumber": 34,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.transform",
-            "type": "Function",
-            "tags": [],
-            "label": "transform",
-            "description": [],
-            "signature": [
-              "<NewOut>(transform: (arg: ",
-              "output",
-              "<this>, ctx: ",
-              "node_modules/zod/v4/core/api",
-              "$RefinementCtx<",
-              "output",
-              "<this>>) => NewOut | Promise<NewOut>) => ",
-              "ZodPipe",
-              "<this, ",
-              "ZodTransform",
-              "<Awaited<NewOut>, ",
-              "output",
-              "<this>>>"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 53,
-            "columnNumber": 5,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.transform.$1",
-                "type": "Function",
-                "tags": [],
-                "label": "transform",
-                "description": [],
-                "signature": [
-                  "(arg: ",
-                  "output",
-                  "<this>, ctx: ",
-                  "node_modules/zod/v4/core/api",
-                  "$RefinementCtx<",
-                  "output",
-                  "<this>>) => NewOut | Promise<NewOut>"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 53,
-                "columnNumber": 23,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.catch",
-            "type": "Function",
-            "tags": [],
-            "label": "catch",
-            "description": [],
-            "signature": [
-              "{ (def: ",
-              "output",
-              "<this>): ",
-              "ZodCatch",
-              "<this>; (def: (ctx: ",
-              "node_modules/zod/v4/core/schemas",
-              "$ZodCatchCtx) => ",
-              "output",
-              "<this>): ",
-              "ZodCatch",
-              "<this>; }"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 54,
-            "columnNumber": 5,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.catch.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "def",
-                "description": [],
-                "signature": [
-                  "output",
-                  "<this>"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 54,
-                "columnNumber": 11,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.catch",
-            "type": "Function",
-            "tags": [],
-            "label": "catch",
-            "description": [],
-            "signature": [
-              "{ (def: ",
-              "output",
-              "<this>): ",
-              "ZodCatch",
-              "<this>; (def: (ctx: ",
-              "node_modules/zod/v4/core/schemas",
-              "$ZodCatchCtx) => ",
-              "output",
-              "<this>): ",
-              "ZodCatch",
-              "<this>; }"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 55,
-            "columnNumber": 5,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.catch.$1",
-                "type": "Function",
-                "tags": [],
-                "label": "def",
-                "description": [],
-                "signature": [
-                  "(ctx: ",
-                  "node_modules/zod/v4/core/schemas",
-                  "$ZodCatchCtx) => ",
-                  "output",
-                  "<this>"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 55,
-                "columnNumber": 11,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.pipe",
-            "type": "Function",
-            "tags": [],
-            "label": "pipe",
-            "description": [],
-            "signature": [
-              "<T extends ",
-              "node_modules/zod/v4/core/schemas",
-              "$ZodType<any, ",
-              "output",
-              "<this>, ",
-              "node_modules/zod/v4/core/schemas",
-              "$ZodTypeInternals<any, ",
-              "output",
-              "<this>>>>(target: T | ",
-              "node_modules/zod/v4/core/schemas",
-              "$ZodType<any, ",
-              "output",
-              "<this>, ",
-              "node_modules/zod/v4/core/schemas",
-              "$ZodTypeInternals<any, ",
-              "output",
-              "<this>>>) => ",
-              "ZodPipe",
-              "<this, T>"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 56,
-            "columnNumber": 5,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.pipe.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "target",
-                "description": [],
-                "signature": [
-                  "T | ",
-                  "node_modules/zod/v4/core/schemas",
-                  "$ZodType<any, ",
-                  "output",
-                  "<this>, ",
-                  "node_modules/zod/v4/core/schemas",
-                  "$ZodTypeInternals<any, ",
-                  "output",
-                  "<this>>>"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 56,
-                "columnNumber": 59,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.readonly",
-            "type": "Function",
-            "tags": [],
-            "label": "readonly",
-            "description": [],
-            "signature": [
-              "() => ",
-              "ZodReadonly",
-              "<this>"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 57,
-            "columnNumber": 5,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.describe",
-            "type": "Function",
-            "tags": [],
-            "label": "describe",
-            "description": [
-              "Returns a new instance that has been registered in `z.globalRegistry` with the specified description"
-            ],
-            "signature": [
-              "(description: string) => this"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 58,
-            "columnNumber": 5,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.describe.$1",
-                "type": "string",
-                "tags": [],
-                "label": "description",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 59,
-                "columnNumber": 14,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.description",
-            "type": "string",
-            "tags": [],
-            "label": "description",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 60,
-            "columnNumber": 5,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.meta",
-            "type": "Function",
-            "tags": [],
-            "label": "meta",
-            "description": [
-              "Returns the metadata associated with this instance in `z.globalRegistry`"
-            ],
-            "signature": [
-              "{ (): any; (data: any): this; }"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 61,
-            "columnNumber": 5,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.meta",
-            "type": "Function",
-            "tags": [],
-            "label": "meta",
-            "description": [
-              "Returns a new instance that has been registered in `z.globalRegistry` with the specified metadata"
-            ],
-            "signature": [
-              "{ (): any; (data: any): this; }"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 63,
-            "columnNumber": 5,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.meta.$1",
-                "type": "Any",
-                "tags": [],
-                "label": "data",
-                "description": [],
-                "signature": [
-                  "any"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 64,
-                "columnNumber": 10,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.isOptional",
-            "type": "Function",
-            "tags": [
-              "deprecated"
-            ],
-            "label": "isOptional",
-            "description": [],
-            "signature": [
-              "() => boolean"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 65,
-            "columnNumber": 5,
-            "deprecated": true,
-            "trackAdoption": false,
-            "references": [
-              {
-                "plugin": "@kbn/workflows",
-                "path": "src/platform/packages/shared/kbn-workflows/spec/kibana/kibana_connectors.test.ts"
-              }
-            ],
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.isNullable",
-            "type": "Function",
-            "tags": [
-              "deprecated"
-            ],
-            "label": "isNullable",
-            "description": [],
-            "signature": [
-              "() => boolean"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 73,
-            "columnNumber": 5,
-            "deprecated": true,
-            "trackAdoption": false,
-            "references": [],
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.apply",
-            "type": "Function",
-            "tags": [],
-            "label": "apply",
-            "description": [],
-            "signature": [
-              "<T>(fn: (schema: this) => T) => T"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 82,
-            "columnNumber": 5,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/zod",
-                "id": "def-common.ZodType.apply.$1",
-                "type": "Function",
-                "tags": [],
-                "label": "fn",
-                "description": [],
-                "signature": [
-                  "(schema: this) => T"
-                ],
-                "path": "node_modules/zod/v4/classic/schemas.d.ts",
-                "lineNumber": 82,
-                "columnNumber": 14,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/zod",
-        "id": "def-common.ZodType",
-        "type": "Interface",
-        "tags": [],
-        "label": "ZodType",
-        "description": [],
-        "signature": [
-          "ZodType",
-          "<Output, Input, Internals> extends ",
-          "node_modules/zod/v4/core/schemas",
-          "$ZodType<Output, Input, Internals>"
-        ],
-        "path": "node_modules/zod/v4/classic/schemas.d.ts",
-        "lineNumber": 6,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.def",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "def",
-            "description": [],
-            "signature": [
-              "Internals[\"def\"]"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 7,
-            "columnNumber": 5,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType.type",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "signature": [
-              "Internals[\"def\"][\"type\"]"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 8,
-            "columnNumber": 5,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodType._def",
-            "type": "Uncategorized",
-            "tags": [
-              "deprecated"
-            ],
-            "label": "_def",
-            "description": [],
-            "signature": [
-              "Internals[\"def\"]"
-            ],
-            "path": "node_modules/zod/v4/classic/schemas.d.ts",
-            "lineNumber": 9,
-            "columnNumber": 5,
-            "deprecated": true,
-            "trackAdoption": false,
-            "references": [
-              {
-                "plugin": "@kbn/workflows",
-                "path": "src/platform/packages/shared/kbn-workflows/spec/lib/get_workflow_json_schema.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/common/lib/zod/format_zod_error.ts"
               },
               {
                 "plugin": "workflowsManagement",
@@ -29699,7 +29787,12 @@
         "columnNumber": 1,
         "deprecated": true,
         "trackAdoption": false,
-        "references": [],
+        "references": [
+          {
+            "plugin": "@kbn/streams-ai",
+            "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/suggest_processing_pipeline/format_zod_pipeline_errors.ts"
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -30773,40 +30866,40 @@
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/skills/validation.ts"
           },
           {
-            "plugin": "@kbn/alerting-v2-schemas",
-            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/common.ts"
-          },
-          {
-            "plugin": "@kbn/alerting-v2-schemas",
-            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/common.ts"
-          },
-          {
-            "plugin": "@kbn/alerting-v2-schemas",
-            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts"
-          },
-          {
-            "plugin": "@kbn/alerting-v2-schemas",
-            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts"
-          },
-          {
-            "plugin": "@kbn/entities-schema",
-            "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts"
-          },
-          {
-            "plugin": "@kbn/entities-schema",
-            "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts"
-          },
-          {
-            "plugin": "@kbn/entities-schema",
-            "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts"
-          },
-          {
             "plugin": "@kbn/connector-schemas",
             "path": "src/platform/packages/shared/kbn-connector-schemas/common/auth/schemas/v1.ts"
           },
           {
             "plugin": "@kbn/connector-schemas",
             "path": "src/platform/packages/shared/kbn-connector-schemas/http/schemas/v1.ts"
+          },
+          {
+            "plugin": "@kbn/alerting-v2-schemas",
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/common.ts"
+          },
+          {
+            "plugin": "@kbn/alerting-v2-schemas",
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/common.ts"
+          },
+          {
+            "plugin": "@kbn/alerting-v2-schemas",
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts"
+          },
+          {
+            "plugin": "@kbn/alerting-v2-schemas",
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts"
+          },
+          {
+            "plugin": "@kbn/entities-schema",
+            "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts"
+          },
+          {
+            "plugin": "@kbn/entities-schema",
+            "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts"
+          },
+          {
+            "plugin": "@kbn/entities-schema",
+            "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts"
           },
           {
             "plugin": "@kbn/connector-schemas",

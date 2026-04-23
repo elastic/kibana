@@ -1,5 +1,5 @@
 {
-  "sha1": "4e40196a1d58a7e78045c4ce6ff92a26b2a45fbc",
+  "sha1": "355f80ffb551acef4a742276ef8eb2cf2888cb5c",
   "tests": [
     {
       "id": "50b3a018a3d8e65-f2cd2d3cdc77643",
@@ -459,7 +459,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 70,
+        "line": 66,
         "column": 9
       }
     },
@@ -475,7 +475,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 80,
+        "line": 76,
         "column": 9
       }
     },
@@ -491,7 +491,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 100,
+        "line": 96,
         "column": 9
       }
     },
@@ -507,7 +507,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 135,
+        "line": 129,
         "column": 9
       }
     },
@@ -523,7 +523,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 168,
+        "line": 162,
         "column": 9
       }
     },
@@ -539,7 +539,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 208,
+        "line": 202,
         "column": 9
       }
     },
@@ -555,7 +555,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/saved_views.spec.ts",
-        "line": 87,
+        "line": 86,
         "column": 9
       }
     },
@@ -571,7 +571,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/saved_views.spec.ts",
-        "line": 112,
+        "line": 111,
         "column": 9
       }
     },
@@ -587,7 +587,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/saved_views.spec.ts",
-        "line": 124,
+        "line": 123,
         "column": 9
       }
     },
@@ -603,7 +603,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/saved_views.spec.ts",
-        "line": 150,
+        "line": 149,
         "column": 9
       }
     },
@@ -619,7 +619,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/saved_views.spec.ts",
-        "line": 176,
+        "line": 175,
         "column": 9
       }
     },
@@ -635,7 +635,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/saved_views.spec.ts",
-        "line": 210,
+        "line": 209,
         "column": 9
       }
     },
@@ -651,7 +651,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/saved_views.spec.ts",
-        "line": 239,
+        "line": 238,
         "column": 9
       }
     },
@@ -667,7 +667,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/saved_views.spec.ts",
-        "line": 295,
+        "line": 294,
         "column": 9
       }
     },
@@ -706,7 +706,7 @@
     {
       "id": "f99b488a0e6019e-b6ddb921df7e2cd",
       "title": "Node Details: host without metrics Overview Tab - KPI tiles show N/A",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -715,8 +715,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host_without_metrics.spec.ts",
-        "line": 22,
-        "column": 9
+        "line": 27,
+        "column": 10
       }
     },
     {

@@ -49,6 +49,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
     delete:
       summary: Delete cases
       operationId: deleteCaseDefaultSpace
@@ -68,6 +71,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
       x-code-samples:
         - label: curl
           lang: curl
@@ -116,6 +122,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
   /api/cases/_find:
     get:
       summary: Search cases
@@ -175,6 +184,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
   /api/cases/alerts/{alertId}:
     get:
       summary: Get cases for an alert
@@ -197,22 +209,28 @@ paths:
                 maxItems: 10000
                 items:
                   $ref: '#/components/schemas/related_case'
-                example:
-                  - id: 06116b80-e1c3-11ec-be9b-9b1838238ee6
-                    title: security_case
-                    description: Investigating suspicious activity
-                    status: open
-                    createdAt: '2020-02-19T23:06:33.798Z'
-                    totals:
-                      alerts: 1
-                      events: 0
-                      userComments: 0
+              examples:
+                getCasesByAlertResponse:
+                  summary: Cases associated with a given alert.
+                  value:
+                    - id: 06116b80-e1c3-11ec-be9b-9b1838238ee6
+                      title: security_case
+                      description: Investigating suspicious activity
+                      status: open
+                      createdAt: '2020-02-19T23:06:33.798Z'
+                      totals:
+                        alerts: 1
+                        events: 0
+                        userComments: 0
         '401':
           description: Authorization information is missing or invalid.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
   /api/cases/configure:
     get:
       summary: Get case settings
@@ -332,6 +350,20 @@ paths:
                           target:
                             type: string
                             example: summary
+                    observableTypes:
+                      type: array
+                      description: Custom observable type configuration details.
+                      items:
+                        type: object
+                        properties:
+                          key:
+                            type: string
+                            description: The observable type key.
+                            example: d312efda-ec2b-42ec-9e2c-84981795c581
+                          label:
+                            type: string
+                            description: The observable type label.
+                            example: My observable type
                     owner:
                       $ref: '#/components/schemas/owner'
                     templates:
@@ -376,6 +408,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
     post:
       summary: Add case settings
       operationId: setCaseConfigurationDefaultSpace
@@ -500,6 +535,20 @@ paths:
                         target:
                           type: string
                           example: summary
+                  observableTypes:
+                    type: array
+                    description: Custom observable type configuration details.
+                    items:
+                      type: object
+                      properties:
+                        key:
+                          type: string
+                          description: The observable type key.
+                          example: d312efda-ec2b-42ec-9e2c-84981795c581
+                        label:
+                          type: string
+                          description: The observable type label.
+                          example: My observable type
                   owner:
                     $ref: '#/components/schemas/owner'
                   templates:
@@ -544,6 +593,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
   /api/cases/configure/{configurationId}:
     patch:
       summary: Update case settings
@@ -670,6 +722,20 @@ paths:
                         target:
                           type: string
                           example: summary
+                  observableTypes:
+                    type: array
+                    description: Custom observable type configuration details.
+                    items:
+                      type: object
+                      properties:
+                        key:
+                          type: string
+                          description: The observable type key.
+                          example: d312efda-ec2b-42ec-9e2c-84981795c581
+                        label:
+                          type: string
+                          description: The observable type label.
+                          example: My observable type
                   owner:
                     $ref: '#/components/schemas/owner'
                   templates:
@@ -714,6 +780,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
   /api/cases/reporters:
     get:
       summary: Get case creators
@@ -763,6 +832,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
   /api/cases/tags:
     get:
       summary: Get case tags
@@ -792,6 +864,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
   /api/cases/{caseId}:
     get:
       summary: Get case information
@@ -820,6 +895,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
   /api/cases/{caseId}/alerts:
     get:
       summary: Get all alerts for a case
@@ -849,6 +927,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
   /api/cases/{caseId}/comments:
     post:
       summary: Add a case comment or alert
@@ -885,6 +966,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
     delete:
       summary: Delete all case comments and alerts
       operationId: deleteCaseCommentsDefaultSpace
@@ -904,6 +988,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
+      x-codeSamples:
+        - label: curl
+          lang: curl
+          source: |
+            curl \
+              --request DELETE 'https://localhost:5601/api/cases/9c235210-6834-11ea-a78c-6ffb38a34414/comments' \
+              --header "Authorization: $API_KEY" \
+              --header "kbn-xsrf: true"
+        - label: Console
+          lang: console
+          source: |
+            DELETE kbn:/api/cases/9c235210-6834-11ea-a78c-6ffb38a34414/comments
     patch:
       summary: Update a case comment or alert
       operationId: updateCaseCommentDefaultSpace
@@ -939,6 +1038,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
   /api/cases/{caseId}/comments/_find:
     get:
       summary: Find case comments
@@ -968,6 +1070,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
   /api/cases/{caseId}/comments/{commentId}:
     delete:
       summary: Delete a case comment or alert
@@ -989,6 +1094,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
+      x-codeSamples:
+        - label: curl
+          lang: curl
+          source: |
+            curl \
+              --request DELETE 'https://localhost:5601/api/cases/9c235210-6834-11ea-a78c-6ffb38a34414/comments/71ec1870-725b-11ea-a0b2-c51ea50a58e2' \
+              --header "Authorization: $API_KEY" \
+              --header "kbn-xsrf: true"
+        - label: Console
+          lang: console
+          source: |
+            DELETE kbn:/api/cases/9c235210-6834-11ea-a78c-6ffb38a34414/comments/71ec1870-725b-11ea-a0b2-c51ea50a58e2
     get:
       summary: Get a case comment or alert
       operationId: getCaseCommentDefaultSpace
@@ -1017,6 +1137,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
   /api/cases/{caseId}/connector/{connectorId}/_push:
     post:
       summary: Push a case to an external service
@@ -1035,6 +1158,10 @@ paths:
             schema:
               type: object
               nullable: true
+            examples:
+              pushCaseRequest:
+                summary: Push a case to an external service. No request body is required.
+                value: null
       responses:
         '200':
           description: Indicates a successful call.
@@ -1051,6 +1178,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
   /api/cases/{caseId}/user_actions/_find:
     get:
       summary: Find case activity
@@ -1093,6 +1223,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
   /api/cases/configure/connectors/_find:
     get:
       summary: Get case connectors
@@ -1143,6 +1276,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
   /api/cases/{caseId}/files:
     post:
       summary: Attach a file to a case
@@ -1162,6 +1298,11 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/add_case_file_request'
+            examples:
+              addCaseFileRequest:
+                summary: Attach a plain text file named "my_attachment".
+                value:
+                  filename: my_attachment
       responses:
         '200':
           description: Indicates a successful call.
@@ -1178,6 +1319,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
+      x-codeSamples:
+        - label: curl
+          lang: curl
+          source: |
+            curl \
+              --request POST 'https://localhost:5601/api/cases/9c235210-6834-11ea-a78c-6ffb38a34414/files' \
+              --header "Authorization: $API_KEY" \
+              --header "kbn-xsrf: true" \
+              --form "file=@/path/to/my_attachment.txt" \
+              --form "filename=my_attachment"
 components:
   parameters:
     kbn_xsrf:
@@ -1251,6 +1405,7 @@ components:
       schema:
         type: integer
         default: 1
+      example: 1
     page_size:
       in: query
       name: perPage
@@ -1260,6 +1415,7 @@ components:
         type: integer
         default: 20
         maximum: 100
+      example: 20
     reporters:
       in: query
       name: reporters
@@ -1275,6 +1431,7 @@ components:
       description: An Elasticsearch simple_query_string query that filters the objects in the response.
       schema:
         type: string
+      example: Case title 1
     searchFields:
       in: query
       name: searchFields
@@ -1294,6 +1451,7 @@ components:
           - high
           - low
           - medium
+      example: low
     sortField:
       in: query
       name: sortField
@@ -1321,6 +1479,7 @@ components:
           - asc
           - desc
         default: desc
+      example: desc
     status:
       in: query
       name: status
@@ -2408,6 +2567,12 @@ components:
         id:
           type: string
           example: 66b9aa00-94fa-11ea-9f74-e7e108796192
+        incremental_id:
+          type: integer
+          description: |
+            A monotonically increasing number assigned to each case, unique per space. This value is generated asynchronously after the case is created and may not be present immediately in the response.
+          nullable: true
+          example: 1
         observables:
           type: array
           description: Observables attached to the case.
@@ -3003,6 +3168,12 @@ components:
         id:
           type: string
           example: 66b9aa00-94fa-11ea-9f74-e7e108796192
+        incremental_id:
+          type: integer
+          description: |
+            A monotonically increasing number assigned to each case, unique per space. This value is generated asynchronously after the case is created and may not be present immediately in the response.
+          nullable: true
+          example: 1
         observables:
           type: array
           description: Observables attached to the case.
@@ -3612,16 +3783,21 @@ components:
           description: The type of action.
           enum:
             - assignees
-            - create_case
+            - category
             - comment
             - connector
+            - create_case
+            - customFields
+            - delete_case
             - description
+            - extended_fields
+            - observables
             - pushed
-            - tags
-            - title
-            - status
             - settings
             - severity
+            - status
+            - tags
+            - title
           example: create_case
     add_case_file_request:
       title: Add case file request properties
@@ -3710,6 +3886,12 @@ components:
             parent: null
             priority: High
         external_service: null
+    response_401:
+      summary: Authorization information is missing or invalid.
+      value:
+        error: Unauthorized
+        message: Unable to authenticate with the provided credentials.
+        statusCode: 401
     update_case_request:
       summary: Update the case description, tags, and connector.
       value:
@@ -3809,6 +3991,7 @@ components:
         total: 1
         cases:
           - id: abed3a70-71bd-11ea-a0b2-c51ea50a58e2
+            incremental_id: 1
             version: WzExMCwxXQ==
             comments: []
             observables: []
@@ -3870,6 +4053,7 @@ components:
               label: my-text-field
               required: false
               type: text
+          observableTypes: []
           owner: cases
           created_at: '2024-07-01T17:07:17.767Z'
           created_by:
@@ -4094,6 +4278,7 @@ components:
       summary: Get case response. Comments are not included; use the find case comments API. totalComment reflects the actual count.
       value:
         id: 31cdada0-02c1-11ed-85f2-4f7c222ca2fa
+        incremental_id: 1
         version: WzM2LDFd
         totalComment: 1
         totalAlerts: 1
@@ -4212,6 +4397,11 @@ components:
               username: elastic
               email: null
               full_name: null
+              profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+            pushed_at: null
+            pushed_by: null
+            updated_at: null
+            updated_by: null
         observables: []
         totalAlerts: 0
         totalEvents: 0
@@ -4397,16 +4587,21 @@ components:
         closed_at: null
         closed_by: null
         created_at: '2022-07-29T00:59:39.444Z'
+        assignees: []
+        category: null
+        customFields: []
         created_by:
           username: elastic
           email: null
           full_name: null
+          profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
         status: open
         updated_at: '2022-07-29T01:20:58.436Z'
         updated_by:
           username: elastic
           full_name: null
           email: null
+          profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
         connector:
           id: 09f8c0b0-0eda-11ed-bd18-65557fe66949
           name: My connector
