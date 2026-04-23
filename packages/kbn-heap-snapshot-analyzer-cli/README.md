@@ -147,9 +147,14 @@ Output sections:
   snapshot was captured with allocation tracking. Walks each live
   node's allocation-time call stack to the first plugin frame, so
   schema libraries roll up to the plugin that triggered them.
-- **Allocated by Package (allocation site)** — same walk as the
-  plugin view, but lands on the first package frame (not just
-  plugins). Surfaces non-plugin packages that drive allocations.
+- **Allocated by Module (allocation site)** — same walk, reports
+  third-party `node_modules` libraries (zod, joi, require-in-the-middle,
+  etc.). Tells you *where the allocator code lives*.
+- **Allocated by Package (allocation site)** — same walk, reports
+  `@kbn/*` Kibana packages, skipping library frames so wrapper packages
+  get credit for the library bytes they trigger (e.g. `@kbn/connector-schemas`
+  shows up with the zod bytes its callers allocated). Tells you *which
+  Kibana code triggered the allocations*.
 
 All tables include both percentage and absolute MB columns, so you
 can diff snapshots across interventions.
