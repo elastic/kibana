@@ -14,111 +14,123 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   ResponseActionCreateSuccessResponse,
   BaseActionSchema,
 } from '../../../model/schema/common.gen';
 
+export const RawScriptParameters = lazySchema(() =>
+  z.object({
+    /**
+     * Raw script content.
+     */
+    raw: z.string().min(1),
+    /**
+     * Command line arguments.
+     */
+    commandLine: z.string().min(1).optional(),
+    /**
+     * Timeout in seconds.
+     */
+    timeout: z.number().int().min(1).optional(),
+  })
+);
 export type RawScriptParameters = z.infer<typeof RawScriptParameters>;
-export const RawScriptParameters = z.object({
-  /**
-   * Raw script content.
-   */
-  raw: z.string().min(1),
-  /**
-   * Command line arguments.
-   */
-  commandLine: z.string().min(1).optional(),
-  /**
-   * Timeout in seconds.
-   */
-  timeout: z.number().int().min(1).optional(),
-});
 
+export const HostPathScriptParameters = lazySchema(() =>
+  z.object({
+    /**
+     * Absolute or relative path of script on host machine.
+     */
+    hostPath: z.string().min(1),
+    /**
+     * Command line arguments.
+     */
+    commandLine: z.string().min(1).optional(),
+    /**
+     * Timeout in seconds.
+     */
+    timeout: z.number().int().min(1).optional(),
+  })
+);
 export type HostPathScriptParameters = z.infer<typeof HostPathScriptParameters>;
-export const HostPathScriptParameters = z.object({
-  /**
-   * Absolute or relative path of script on host machine.
-   */
-  hostPath: z.string().min(1),
-  /**
-   * Command line arguments.
-   */
-  commandLine: z.string().min(1).optional(),
-  /**
-   * Timeout in seconds.
-   */
-  timeout: z.number().int().min(1).optional(),
-});
 
+export const CloudFileScriptParameters = lazySchema(() =>
+  z.object({
+    /**
+     * Script name in cloud storage.
+     */
+    cloudFile: z.string().min(1),
+    /**
+     * Command line arguments.
+     */
+    commandLine: z.string().min(1).optional(),
+    /**
+     * Timeout in seconds.
+     */
+    timeout: z.number().int().min(1).optional(),
+  })
+);
 export type CloudFileScriptParameters = z.infer<typeof CloudFileScriptParameters>;
-export const CloudFileScriptParameters = z.object({
-  /**
-   * Script name in cloud storage.
-   */
-  cloudFile: z.string().min(1),
-  /**
-   * Command line arguments.
-   */
-  commandLine: z.string().min(1).optional(),
-  /**
-   * Timeout in seconds.
-   */
-  timeout: z.number().int().min(1).optional(),
-});
 
 /**
  * Parameters for Run Script response action against SentinelOne agent type.
  */
+export const SentinelOneRunScriptParameters = lazySchema(() =>
+  z.object({
+    /**
+     * The script ID from SentinelOne scripts library that will be executed.
+     */
+    scriptId: z.string().min(1),
+    /**
+     * The input parameter arguments for the script that was selected.
+     */
+    scriptInput: z.string().min(1).optional(),
+  })
+);
 export type SentinelOneRunScriptParameters = z.infer<typeof SentinelOneRunScriptParameters>;
-export const SentinelOneRunScriptParameters = z.object({
-  /**
-   * The script ID from SentinelOne scripts library that will be executed.
-   */
-  scriptId: z.string().min(1),
-  /**
-   * The input parameter arguments for the script that was selected.
-   */
-  scriptInput: z.string().min(1).optional(),
-});
 
 /**
  * Parameters for Run Script response action against Microsoft Defender Endpoint agent type.
  */
-export type MDERunScriptParameters = z.infer<typeof MDERunScriptParameters>;
-export const MDERunScriptParameters = z.object({
-  /**
-   * The name of the script to execute from the cloud storage.
-   */
-  scriptName: z.string().min(1),
-  /**
-   * Optional command line arguments for the script.
-   */
-  args: z.string().min(1).optional(),
-});
-
-export type RunScriptRouteRequestBody = z.infer<typeof RunScriptRouteRequestBody>;
-export const RunScriptRouteRequestBody = BaseActionSchema.merge(
+export const MDERunScriptParameters = lazySchema(() =>
   z.object({
     /**
+     * The name of the script to execute from the cloud storage.
+     */
+    scriptName: z.string().min(1),
+    /**
+     * Optional command line arguments for the script.
+     */
+    args: z.string().min(1).optional(),
+  })
+);
+export type MDERunScriptParameters = z.infer<typeof MDERunScriptParameters>;
+
+export const RunScriptRouteRequestBody = lazySchema(() =>
+  BaseActionSchema.merge(
+    z.object({
+      /**
       * One of the following set of parameters must be provided
 
       */
-    parameters: z.union([
-      RawScriptParameters,
-      HostPathScriptParameters,
-      CloudFileScriptParameters,
-      SentinelOneRunScriptParameters,
-      MDERunScriptParameters,
-    ]),
-  })
+      parameters: z.union([
+        RawScriptParameters,
+        HostPathScriptParameters,
+        CloudFileScriptParameters,
+        SentinelOneRunScriptParameters,
+        MDERunScriptParameters,
+      ]),
+    })
+  )
 );
+export type RunScriptRouteRequestBody = z.infer<typeof RunScriptRouteRequestBody>;
 
+export const RunScriptActionRequestBody = lazySchema(() => RunScriptRouteRequestBody);
 export type RunScriptActionRequestBody = z.infer<typeof RunScriptActionRequestBody>;
-export const RunScriptActionRequestBody = RunScriptRouteRequestBody;
 export type RunScriptActionRequestBodyInput = z.input<typeof RunScriptActionRequestBody>;
 
+export const RunScriptActionResponse = lazySchema(() => ResponseActionCreateSuccessResponse);
 export type RunScriptActionResponse = z.infer<typeof RunScriptActionResponse>;
-export const RunScriptActionResponse = ResponseActionCreateSuccessResponse;
