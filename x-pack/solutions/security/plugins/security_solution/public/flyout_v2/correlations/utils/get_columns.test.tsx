@@ -71,7 +71,6 @@ describe('getColumns', () => {
 
     it('renders the preview button with correct test id', () => {
       const [previewColumn] = getColumns({
-        scopeId,
         dataTestSubj,
         onShowAlert: mockOnShowAlert,
         hidePreviewLink: false,
@@ -87,7 +86,6 @@ describe('getColumns', () => {
 
     it('calls onShowAlert with row id and index when clicked', async () => {
       const [previewColumn] = getColumns({
-        scopeId,
         dataTestSubj,
         onShowAlert: mockOnShowAlert,
         hidePreviewLink: false,
@@ -107,7 +105,6 @@ describe('getColumns', () => {
   describe('timestamp column', () => {
     it('renders formatted date', () => {
       const [, timestampColumn] = getColumns({
-        scopeId,
         dataTestSubj,
         onShowAlert: mockOnShowAlert,
         hidePreviewLink: false,
@@ -125,7 +122,6 @@ describe('getColumns', () => {
 
     it('has field @timestamp', () => {
       const [, timestampColumn] = getColumns({
-        scopeId,
         dataTestSubj,
         onShowAlert: mockOnShowAlert,
         hidePreviewLink: false,
@@ -142,7 +138,6 @@ describe('getColumns', () => {
 
     it('renders rule name as plain text when hidePreviewLink is true', () => {
       const [, , ruleColumn] = getColumns({
-        scopeId,
         dataTestSubj,
         onShowAlert: mockOnShowAlert,
         hidePreviewLink: true,
@@ -159,7 +154,6 @@ describe('getColumns', () => {
 
     it('renders rule name as a PreviewLink when hidePreviewLink is false', () => {
       const [, , ruleColumn] = getColumns({
-        scopeId,
         dataTestSubj,
         onShowAlert: mockOnShowAlert,
         hidePreviewLink: false,
@@ -187,7 +181,6 @@ describe('getColumns', () => {
       });
 
       const [, , ruleColumn] = getColumns({
-        scopeId,
         dataTestSubj,
         onShowAlert: mockOnShowAlert,
         hidePreviewLink: false,
@@ -206,7 +199,6 @@ describe('getColumns', () => {
   describe('reason column', () => {
     it('renders reason value', () => {
       const [, , , reasonColumn] = getColumns({
-        scopeId,
         dataTestSubj,
         onShowAlert: mockOnShowAlert,
         hidePreviewLink: false,
@@ -222,7 +214,6 @@ describe('getColumns', () => {
 
     it('has field kibana.alert.reason', () => {
       const [, , , reasonColumn] = getColumns({
-        scopeId,
         dataTestSubj,
         onShowAlert: mockOnShowAlert,
         hidePreviewLink: false,
@@ -234,7 +225,6 @@ describe('getColumns', () => {
   describe('severity column', () => {
     it('renders SeverityBadge for a valid severity value', () => {
       const [, , , , severityColumn] = getColumns({
-        scopeId,
         dataTestSubj,
         onShowAlert: mockOnShowAlert,
         hidePreviewLink: false,
@@ -251,7 +241,6 @@ describe('getColumns', () => {
 
     it('renders plain text for an invalid severity value', () => {
       const [, , , , severityColumn] = getColumns({
-        scopeId,
         dataTestSubj,
         onShowAlert: mockOnShowAlert,
         hidePreviewLink: false,
@@ -267,7 +256,6 @@ describe('getColumns', () => {
 
     it('has field kibana.alert.severity', () => {
       const [, , , , severityColumn] = getColumns({
-        scopeId,
         dataTestSubj,
         onShowAlert: mockOnShowAlert,
         hidePreviewLink: false,

@@ -45,10 +45,6 @@ export interface CorrelationsDetailsProps {
    * Defaults to true (hidden) for the new tools flyout which has no expandable flyout context.
    */
   hidePreviewLink?: boolean;
-  /**
-   * Callback to open the rule summary flyout for a given rule ID.
-   */
-  onShowRuleSummary?: (ruleId: string) => void;
 }
 
 /**
@@ -63,7 +59,6 @@ export const CorrelationsDetails = memo(
     onShowAlert,
     onShowAttack,
     hidePreviewLink = true,
-    onShowRuleSummary,
   }: CorrelationsDetailsProps) => {
     const { euiTheme } = useEuiTheme();
 
@@ -85,7 +80,7 @@ export const CorrelationsDetails = memo(
             onShowAlert={onShowAlert}
             onShowAttack={onShowAttack}
             hidePreviewLink={hidePreviewLink}
-            onShowRuleSummary={onShowRuleSummary}
+            openLinksAsSystemFlyout
           />
         </EuiFlyoutBody>
       </>

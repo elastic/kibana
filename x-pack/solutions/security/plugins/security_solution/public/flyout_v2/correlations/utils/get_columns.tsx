@@ -6,13 +6,7 @@
  */
 
 import React from 'react';
-import {
-  type EuiBasicTableColumn,
-  EuiButtonIcon,
-  EuiLink,
-  EuiToolTip,
-  formatDate,
-} from '@elastic/eui';
+import { type EuiBasicTableColumn, EuiButtonIcon, EuiToolTip, formatDate } from '@elastic/eui';
 import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { isRight } from 'fp-ts/Either';
 import { ALERT_REASON, ALERT_RULE_NAME } from '@kbn/rule-data-utils';
@@ -20,6 +14,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { SeverityBadge } from '../../../common/components/severity_badge';
 import { PreviewLink } from '../../../flyout/shared/components/preview_link';
+import { ChildLink } from '../../shared/components/child_link';
 
 export const TIMESTAMP_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
 
@@ -31,13 +26,13 @@ export const getColumns = ({
   dataTestSubj,
   onShowAlert,
   hidePreviewLink,
-  onShowRuleSummary,
+  openLinksAsSystemFlyout,
 }: {
   scopeId: string;
   dataTestSubj?: string;
   onShowAlert: (id: string, indexName: string) => void;
   hidePreviewLink: boolean;
-  onShowRuleSummary?: (ruleId: string) => void;
+  openLinksAsSystemFlyout?: boolean;
 }): Array<EuiBasicTableColumn<Record<string, unknown>>> => [
   {
     render: (row: Record<string, unknown>) => (
@@ -89,16 +84,15 @@ export const getColumns = ({
       return (
         <EuiToolTip content={ruleName}>
           {hidePreviewLink ? (
-            onShowRuleSummary && ruleId ? (
-              <EuiLink
-                onClick={() => onShowRuleSummary(ruleId)}
-                data-test-subj={`${dataTestSubj}RuleLink`}
-              >
-                <span>{ruleName}</span>
-              </EuiLink>
-            ) : (
+            <span>{ruleName}</span>
+          ) : openLinksAsSystemFlyout ? (
+            <ChildLink
+              field={ALERT_RULE_NAME}
+              value={ruleId}
+              data-test-subj={`${dataTestSubj}RuleLink`}
+            >
               <span>{ruleName}</span>
-            )
+            </ChildLink>
           ) : (
             <PreviewLink
               field={ALERT_RULE_NAME}

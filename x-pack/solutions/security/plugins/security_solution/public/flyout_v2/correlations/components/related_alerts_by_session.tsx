@@ -34,9 +34,9 @@ export interface RelatedAlertsBySessionProps {
    */
   hidePreviewLink: boolean;
   /**
-   * Callback to open the rule summary flyout for a given rule ID.
+   * Whether to use system flyout links (ChildLink) instead of expandable flyout links (PreviewLink)
    */
-  onShowRuleSummary?: (ruleId: string) => void;
+  openLinksAsSystemFlyout?: boolean;
 }
 
 /**
@@ -48,7 +48,7 @@ export const RelatedAlertsBySession: React.FC<RelatedAlertsBySessionProps> = ({
   eventId,
   onShowAlert,
   hidePreviewLink,
-  onShowRuleSummary,
+  openLinksAsSystemFlyout,
 }) => {
   const { loading, error, data, dataCount } = useFetchRelatedAlertsBySession({
     entityId,
@@ -62,9 +62,9 @@ export const RelatedAlertsBySession: React.FC<RelatedAlertsBySessionProps> = ({
         dataTestSubj: CORRELATIONS_DETAILS_BY_SESSION_SECTION_TEST_ID,
         onShowAlert,
         hidePreviewLink,
-        onShowRuleSummary,
+        openLinksAsSystemFlyout,
       }),
-    [scopeId, onShowAlert, hidePreviewLink, onShowRuleSummary]
+    [scopeId, onShowAlert, hidePreviewLink, openLinksAsSystemFlyout]
   );
 
   if (error) {

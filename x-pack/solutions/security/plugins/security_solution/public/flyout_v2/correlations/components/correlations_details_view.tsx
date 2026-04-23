@@ -52,9 +52,9 @@ export interface CorrelationsDetailsViewProps {
    */
   hidePreviewLink?: boolean;
   /**
-   * Callback to open the rule summary flyout for a given rule ID.
+   * Whether to use system flyout links (ChildLink) instead of expandable flyout links (PreviewLink)
    */
-  onShowRuleSummary?: (ruleId: string) => void;
+  openLinksAsSystemFlyout?: boolean;
 }
 
 /**
@@ -69,7 +69,7 @@ export const CorrelationsDetailsView = memo(
     onShowAlert,
     onShowAttack,
     hidePreviewLink = true,
-    onShowRuleSummary,
+    openLinksAsSystemFlyout,
   }: CorrelationsDetailsViewProps) => {
     const eventId = hit.raw._id ?? '';
     const ecsData = useMemo<Ecs>(
@@ -129,7 +129,7 @@ export const CorrelationsDetailsView = memo(
                   eventId={eventId}
                   onShowAlert={onShowAlert}
                   hidePreviewLink={hidePreviewLink}
-                  onShowRuleSummary={onShowRuleSummary}
+                  openLinksAsSystemFlyout={openLinksAsSystemFlyout}
                 />
               </EuiFlexItem>
             )}
@@ -141,7 +141,7 @@ export const CorrelationsDetailsView = memo(
                   eventId={eventId}
                   onShowAlert={onShowAlert}
                   hidePreviewLink={hidePreviewLink}
-                  onShowRuleSummary={onShowRuleSummary}
+                  openLinksAsSystemFlyout={openLinksAsSystemFlyout}
                 />
               </EuiFlexItem>
             )}
@@ -152,7 +152,7 @@ export const CorrelationsDetailsView = memo(
                   documentId={ancestryDocumentId}
                   onShowAlert={onShowAlert}
                   hidePreviewLink={hidePreviewLink}
-                  onShowRuleSummary={onShowRuleSummary}
+                  openLinksAsSystemFlyout={openLinksAsSystemFlyout}
                 />
               </EuiFlexItem>
             )}

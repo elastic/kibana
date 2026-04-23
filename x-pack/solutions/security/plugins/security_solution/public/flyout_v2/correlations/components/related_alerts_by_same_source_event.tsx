@@ -34,9 +34,9 @@ export interface RelatedAlertsBySameSourceEventProps {
    */
   hidePreviewLink: boolean;
   /**
-   * Callback to open the rule summary flyout for a given rule ID.
+   * Whether to use system flyout links (ChildLink) instead of expandable flyout links (PreviewLink)
    */
-  onShowRuleSummary?: (ruleId: string) => void;
+  openLinksAsSystemFlyout?: boolean;
 }
 
 /**
@@ -48,7 +48,7 @@ export const RelatedAlertsBySameSourceEvent: React.FC<RelatedAlertsBySameSourceE
   eventId,
   onShowAlert,
   hidePreviewLink,
-  onShowRuleSummary,
+  openLinksAsSystemFlyout,
 }) => {
   const { loading, data, dataCount } = useFetchRelatedAlertsBySameSourceEvent({
     originalEventId,
@@ -62,9 +62,9 @@ export const RelatedAlertsBySameSourceEvent: React.FC<RelatedAlertsBySameSourceE
         dataTestSubj: CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TEST_ID,
         onShowAlert,
         hidePreviewLink,
-        onShowRuleSummary,
+        openLinksAsSystemFlyout,
       }),
-    [scopeId, onShowAlert, hidePreviewLink, onShowRuleSummary]
+    [scopeId, onShowAlert, hidePreviewLink, openLinksAsSystemFlyout]
   );
 
   return (

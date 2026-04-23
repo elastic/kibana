@@ -30,7 +30,6 @@ import { PrevalenceDetails } from '../../prevalence';
 import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { CorrelationsDetails } from '../../correlations';
-import { RuleDetails } from '../../rule_details';
 import { ThreatIntelligenceDetails } from '../../threat_intelligence';
 import {
   useDefaultToolsFlyoutProperties,
@@ -137,24 +136,6 @@ export const InsightsSection = memo(({ hit, onAlertUpdated }: InsightsSectionPro
     [defaultDocumentFlyoutProperties, history, onAlertUpdated, overlays, services, store]
   );
 
-  const onShowRuleSummary = useCallback(
-    (targetRuleId: string) => {
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: <RuleDetails ruleId={targetRuleId} />,
-        }),
-        {
-          ...defaultDocumentFlyoutProperties,
-          session: 'inherit',
-        }
-      );
-    },
-    [defaultDocumentFlyoutProperties, history, overlays, services, store]
-  );
-
   const onShowCorrelationsDetails = useCallback(() => {
     overlays.openSystemFlyout(
       flyoutProviders({
@@ -167,7 +148,7 @@ export const InsightsSection = memo(({ hit, onAlertUpdated }: InsightsSectionPro
             scopeId=""
             isRulePreview={false}
             onShowAlert={onShowAlert}
-            onShowRuleSummary={onShowRuleSummary}
+            hidePreviewLink={false}
           />
         ),
       }),
@@ -183,7 +164,6 @@ export const InsightsSection = memo(({ hit, onAlertUpdated }: InsightsSectionPro
     historyKey,
     hit,
     onShowAlert,
-    onShowRuleSummary,
     overlays,
     services,
     store,
