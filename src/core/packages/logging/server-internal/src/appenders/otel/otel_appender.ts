@@ -12,7 +12,14 @@ import type { OTLPLogExporter as OTLPLogExporterGRPC } from '@opentelemetry/expo
 import type { OTLPLogExporter as OTLPLogExporterPROTO } from '@opentelemetry/exporter-logs-otlp-proto';
 import { schema } from '@kbn/config-schema';
 import type { DisposableAppender, Layout, LogLevel, LogRecord } from '@kbn/logging';
-import { ROOT_CONTEXT, TraceFlags, trace, type Context, type Attributes } from '@opentelemetry/api';
+import {
+  ROOT_CONTEXT,
+  TraceFlags,
+  trace,
+  type Context,
+  type Attributes,
+  type AttributeValue,
+} from '@opentelemetry/api';
 import type { AnyValueMap } from '@opentelemetry/api-logs';
 import { SeverityNumber, type Logger } from '@opentelemetry/api-logs';
 import { resources } from '@elastic/opentelemetry-node/sdk';
@@ -143,16 +150,24 @@ const toAttributes = (record: LogRecord, includeLogMeta: boolean): Attributes =>
     typeof record.meta === 'object' &&
     !Array.isArray(record.meta)
   ) {
+    // Extract the service object because we know that it always exists. Mapping it directly avoids calling the more expensive getFlattenedObject function for every log entry.
+    const {
+      service: { version, type, state, node: { roles } = {}, id, ...serviceRest } = {},
+      ...rest
+    } = record.meta;
+    attrs['service.version'] = version;
+    attrs['service.type'] = type;
+    attrs['service.state'] = state;
+    attrs['service.node.roles'] = roles;
+    attrs['service.id'] = id;
+    // Flatten anything that we don't know about into the service object (ideally, nothing).
+    Object.entries(getFlattenedObject(serviceRest)).forEach(([key, value]) => {
+      attrs[key] = value;
+    });
+
     // Only included for pattern layout: with JSON layout the meta is part of
     // the structured body and repeating it here would be redundant.
-    Object.entries(getFlattenedObject(record.meta)).forEach(([key, value]) => {
-      if (key.startsWith('service.')) {
-        // Service attributes are passed as-is to the resource.
-        attrs[key] = value;
-      } else {
-        attrs[`kibana.log.meta.${key}`] = value;
-      }
-    });
+    attrs['kibana.log.meta'] = rest as unknown as AttributeValue; // Force-casting because "objects" are actually allowed (and indexed as "flattened" types) in ES.
   }
 
   return attrs;
