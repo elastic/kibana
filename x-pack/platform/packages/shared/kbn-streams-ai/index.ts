@@ -16,10 +16,17 @@ export {
   getPipelineDefinitionJsonSchema,
   pipelineDefinitionSchema,
   postParsePipelineDefinitionSchema,
+  formatZodPipelineErrors,
+  buildSimulationFeedback,
+  detectTemporaryFields,
   type SuggestProcessingPipelineResult,
   type SuggestPipelineAgentSchema,
+  type SimulationFeedback,
 } from './workflows/suggest_processing_pipeline';
-export { generateSignificantEvents } from './src/significant_events/generate_significant_events';
+export {
+  generateSignificantEvents,
+  type ExistingQuerySummary,
+} from './src/significant_events/generate_significant_events';
 export {
   createDefaultSignificantEventsToolUsage,
   type SignificantEventsToolUsage,
@@ -27,6 +34,7 @@ export {
 export { sumTokens } from './src/helpers/sum_tokens';
 export {
   identifyFeatures,
+  toPreviouslyIdentifiedFeature,
   type IdentifyFeaturesOptions,
   type PreviouslyIdentifiedFeature,
   type ExcludedFeatureSummary,

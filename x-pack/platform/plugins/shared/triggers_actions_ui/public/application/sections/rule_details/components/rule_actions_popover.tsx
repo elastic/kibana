@@ -101,6 +101,10 @@ export const RuleActionsPopover: React.FunctionComponent<RuleActionsPopoverProps
 
   return (
     <EuiPopover
+      aria-label={i18n.translate(
+        'xpack.triggersActionsUI.sections.ruleDetails.actionsPopoverAriaLabel',
+        { defaultMessage: 'Rule actions' }
+      )}
       button={
         <EuiButtonEmpty
           disabled={false}

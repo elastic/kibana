@@ -11,6 +11,7 @@ import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { TextAreaField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
+import { getFieldSnakeKey } from '../../../../../common/utils';
 import type {
   TextareaFieldSchema,
   ConditionRenderProps,
@@ -81,7 +82,7 @@ export const Textarea = ({
   return (
     <UseField
       key={name}
-      path={`${CASE_EXTENDED_FIELDS}.${name}_as_${type}`}
+      path={`${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`}
       component={TextAreaField}
       config={{ validations }}
       componentProps={{

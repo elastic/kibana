@@ -80,6 +80,8 @@ export const bulkCreateWithSuppression = async <
         logger: sharedParams.ruleExecutionLogger,
         events: alerts,
         spaceId: params.spaceId,
+        experimentalFeatures: sharedParams.experimentalFeatures,
+        entityStoreCrudClient: sharedParams.entityStoreCrudClient,
       });
       return enrichedAlerts;
     } catch (error) {

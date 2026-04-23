@@ -25,7 +25,7 @@ describe('convert', () => {
       schema: {
         additionalProperties: false,
         properties: {
-          any: {},
+          any: { description: 'any type', nullable: true },
           array: {
             items: {
               additionalProperties: false,

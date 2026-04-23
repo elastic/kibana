@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ML_PAGES, useMlHref } from '@kbn/ml-plugin/public';
 import { RecentAnomaliesChart } from '../recent_anomalies/recent_anomalies_chart';
@@ -50,14 +50,17 @@ export const EntityAnalyticsRecentAnomalies: React.FC<{ watchlistId?: string }> 
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton color={'primary'} fill={false} iconType={'anomalySwimLane'}>
-            <EuiLink href={anomalyExplorerUrl} external={false} target="_blank">
-              <FormattedMessage
-                id="xpack.securitySolution.entityAnalytics.homePage.recentAnomalies.viewAllInAnomalyExplorer"
-                defaultMessage="View all in Anomaly Explorer"
-              />
-            </EuiLink>
-          </EuiButton>
+          <EuiButtonEmpty
+            color={'primary'}
+            iconType={'popout'}
+            href={anomalyExplorerUrl}
+            target="_blank"
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.entityAnalytics.homePage.recentAnomalies.viewAllInAnomalyExplorer"
+              defaultMessage="Open in Anomaly Explorer"
+            />
+          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size={'m'} />
