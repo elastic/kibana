@@ -24,7 +24,7 @@ const getSmlService = jest.fn(() => ({
 
 const mockContext = {
   spaceId: 'default',
-  esClient: { asCurrentUser: {} },
+  esClient: { asCurrentUser: {}, asInternalUser: {} },
   request: {},
   savedObjectsClient: {},
   attachments: { add: jest.fn() },
@@ -60,7 +60,7 @@ describe('createSmlSearchTool', () => {
       query: 'cpu usage',
       size: 20,
       spaceId: 'default',
-      esClient: mockContext.esClient.asCurrentUser,
+      esClient: mockContext.esClient,
       request: mockContext.request,
     });
   });

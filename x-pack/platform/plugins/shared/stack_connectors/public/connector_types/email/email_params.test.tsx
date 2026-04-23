@@ -66,13 +66,13 @@ describe('EmailParamsFields renders', () => {
     };
 
     renderWithI18n(
-        <EmailParamsFields
-          actionParams={actionParams}
-          errors={{ to: [], cc: [], bcc: [], subject: [], message: [] }}
-          editAction={() => {}}
-          defaultMessage={'Some default message'}
-          index={0}
-        />
+      <EmailParamsFields
+        actionParams={actionParams}
+        errors={{ to: [], cc: [], bcc: [], subject: [], message: [] }}
+        editAction={() => {}}
+        defaultMessage={'Some default message'}
+        index={0}
+      />
     );
 
     expect(screen.getByTestId('toEmailAddressInput')).toBeVisible();
@@ -92,13 +92,13 @@ describe('EmailParamsFields renders', () => {
     };
 
     renderWithI18n(
-        <EmailParamsFields
-          actionParams={actionParams}
-          errors={{ to: [], cc: [], bcc: [], subject: [], message: [], replyTo: [] }}
-          editAction={() => {}}
-          defaultMessage={'Some default message'}
-          index={0}
-        />
+      <EmailParamsFields
+        actionParams={actionParams}
+        errors={{ to: [], cc: [], bcc: [], subject: [], message: [], replyTo: [] }}
+        editAction={() => {}}
+        defaultMessage={'Some default message'}
+        index={0}
+      />
     );
 
     expect(screen.getByTestId('toEmailAddressInput')).toBeVisible();
@@ -153,13 +153,13 @@ describe('EmailParamsFields renders', () => {
     const editAction = jest.fn();
 
     renderWithI18n(
-        <EmailParamsFields
-          actionParams={actionParams}
-          errors={{ to: [], cc: [], bcc: [], subject: [], message: [], replyTo: [] }}
-          editAction={editAction}
-          defaultMessage={'Some default message'}
-          index={0}
-        />
+      <EmailParamsFields
+        actionParams={actionParams}
+        errors={{ to: [], cc: [], bcc: [], subject: [], message: [], replyTo: [] }}
+        editAction={editAction}
+        defaultMessage={'Some default message'}
+        index={0}
+      />
     );
 
     const replyToComboBox = screen.getByTestId('replyToEmailAddressInput');
