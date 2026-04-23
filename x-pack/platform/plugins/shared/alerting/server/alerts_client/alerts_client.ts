@@ -420,6 +420,7 @@ export class AlertsClient<
     // event action: new alert = 'new', active alert: 'active', otherwise 'close'
 
     const activeAlertsToIndex: Array<Alert & AlertData> = [];
+    const alertDelay = this.options.rule.alertDelay;
     for (const id of keys(rawActiveAlerts)) {
       // See if there's an existing active alert document
       if (activeAlerts[id]) {
@@ -455,7 +456,7 @@ export class AlertsClient<
         } else {
           // skip writing the alert document if the number of consecutive
           // active alerts is less than the rule alertDelay threshold
-          if (activeAlerts[id].getActiveCount() < this.options.rule.alertDelay) {
+          if (activeAlerts[id].getActiveCount() < alertDelay) {
             continue;
           }
           activeAlertsToIndex.push(
@@ -478,10 +479,15 @@ export class AlertsClient<
           );
         }
       } else {
-        this.options.logger.error(
-          `Error writing alert(${id}) to ${this.indexTemplateAndPattern.alias} - alert(${id}) doesn't exist in active alerts ${this.ruleInfoMessage}.`,
-          this.logTags
-        );
+        const activeCount = rawActiveAlerts[id].meta?.activeCount;
+        const delayedAlert = activeCount && activeCount < alertDelay;
+        // skip logging this error if there is a delayed alert bc it's expected the alert is not in the active alerts list
+        if (!delayedAlert) {
+          this.options.logger.error(
+            `Error writing alert(${id}) to ${this.indexTemplateAndPattern.alias} - alert(${id}) doesn't exist in active alerts ${this.ruleInfoMessage}.`,
+            this.logTags
+          );
+        }
       }
     }
 
