@@ -12,7 +12,7 @@ import { BULK_FILTER_MAX_RULES } from './constants';
 /**
  * Schema for bulk operation request bodies.
  *
- * Either `ids` or at least one of `filter`/`search` must be provided.
+ * When no fields are provided, the operation targets all rules (match-all).
  * `ids` cannot be combined with `filter` or `search`.
  */
 export const bulkOperationParamsSchema = z
@@ -33,9 +33,6 @@ export const bulkOperationParamsSchema = z
       .string()
       .optional()
       .describe('Free-text search string to match rules by name and description.'),
-  })
-  .refine((data) => data.ids != null || data.filter != null || data.search != null, {
-    message: 'Either ids, filter, or search must be provided.',
   })
   .refine((data) => data.ids == null || (data.filter == null && data.search == null), {
     message: 'ids cannot be combined with filter or search.',
