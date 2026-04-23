@@ -17,7 +17,7 @@ export const registerEmbeddables = (
   embeddable: EmbeddableSetup,
   core: CoreSetup<AiopsPluginStartDeps, AiopsPluginStart>
 ) => {
-  embeddable.registerReactEmbeddableFactory(EMBEDDABLE_CHANGE_POINT_CHART_TYPE, async () => {
+  embeddable.registerEmbeddablePublicDefinition(EMBEDDABLE_CHANGE_POINT_CHART_TYPE, async () => {
     const { getChangePointChartEmbeddableFactory } = await import('./change_point_chart');
     return getChangePointChartEmbeddableFactory(core.getStartServices);
   });
@@ -25,7 +25,7 @@ export const registerEmbeddables = (
     const { transformOut } = await import('./change_point_chart');
     return transformOut as (storedState: object, references?: Reference[]) => object;
   });
-  embeddable.registerReactEmbeddableFactory(EMBEDDABLE_PATTERN_ANALYSIS_TYPE, async () => {
+  embeddable.registerEmbeddablePublicDefinition(EMBEDDABLE_PATTERN_ANALYSIS_TYPE, async () => {
     const { getPatternAnalysisEmbeddableFactory } = await import('./pattern_analysis');
     return getPatternAnalysisEmbeddableFactory(core.getStartServices);
   });
@@ -33,7 +33,7 @@ export const registerEmbeddables = (
     const { transformOut } = await import('./pattern_analysis');
     return transformOut as (storedState: object, references?: Reference[]) => object;
   });
-  embeddable.registerReactEmbeddableFactory(EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE, async () => {
+  embeddable.registerEmbeddablePublicDefinition(EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE, async () => {
     const { getLogRateAnalysisEmbeddableFactory } = await import('./log_rate_analysis');
     return getLogRateAnalysisEmbeddableFactory(core.getStartServices);
   });
