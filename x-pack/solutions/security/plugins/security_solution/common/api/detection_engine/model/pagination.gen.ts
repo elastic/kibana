@@ -14,26 +14,28 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
  * Page number
  */
+export const Page = lazySchema(() => z.number().int().min(1));
 export type Page = z.infer<typeof Page>;
-export const Page = z.number().int().min(1);
 
 /**
  * Number of items per page
  */
+export const PerPage = lazySchema(() => z.number().int().min(0));
 export type PerPage = z.infer<typeof PerPage>;
-export const PerPage = z.number().int().min(0);
 
+export const PaginationResult = lazySchema(() =>
+  z.object({
+    page: Page,
+    per_page: PerPage,
+    /**
+     * Total number of items
+     */
+    total: z.number().int().min(0),
+  })
+);
 export type PaginationResult = z.infer<typeof PaginationResult>;
-export const PaginationResult = z.object({
-  page: Page,
-  per_page: PerPage,
-  /**
-   * Total number of items
-   */
-  total: z.number().int().min(0),
-});
