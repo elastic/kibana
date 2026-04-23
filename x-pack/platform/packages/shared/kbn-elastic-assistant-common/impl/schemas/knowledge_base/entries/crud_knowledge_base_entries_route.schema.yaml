@@ -6,7 +6,7 @@ paths:
   /api/security_ai_assistant/knowledge_base/entries:
     post:
       x-codegen-enabled: true
-      x-code-samples:
+      x-codeSamples:
         - lang: curl
           label: Example request
           source: |
@@ -72,7 +72,7 @@ paths:
   /api/security_ai_assistant/knowledge_base/entries/{id}:
     get:
       x-codegen-enabled: true
-      x-code-samples:
+      x-codeSamples:
         - lang: curl
           label: Example request
           source: |
@@ -128,7 +128,7 @@ paths:
                     message: "No Knowledge Base Entry found with the provided `id`."
     put:
       x-codegen-enabled: true
-      x-code-samples:
+      x-codeSamples:
         - lang: curl
           label: Example request
           source: |
@@ -200,7 +200,7 @@ paths:
                     message: "The 'text' field cannot be empty."
     delete:
       x-codegen-enabled: true
-      x-code-samples:
+      x-codeSamples:
         - lang: curl
           label: Example request
           source: |

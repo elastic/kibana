@@ -6,7 +6,7 @@ paths:
   /api/security_ai_assistant/knowledge_base/{resource}:
     post:
       x-codegen-enabled: true
-      x-code-samples:
+      x-codeSamples:
         - lang: curl
           label: Example request
           source: |
@@ -69,7 +69,7 @@ paths:
                     message: "[request query]: ignoreSecurityLabs: Invalid enum value. Expected 'true' | 'false', received 'yes', ignoreSecurityLabs: Expected boolean, received string"
     get:
       x-codegen-enabled: true
-      x-code-samples:
+      x-codeSamples:
         - lang: curl
           label: Example request
           source: |
@@ -123,7 +123,7 @@ paths:
   /api/security_ai_assistant/knowledge_base:
     post:
       x-codegen-enabled: true
-      x-code-samples:
+      x-codeSamples:
         - lang: curl
           label: Example request
           source: |
@@ -179,7 +179,7 @@ paths:
                     message: "[request query]: ignoreSecurityLabs: Invalid enum value. Expected 'true' | 'false', received 'yes', ignoreSecurityLabs: Expected boolean, received string"
     get:
       x-codegen-enabled: true
-      x-code-samples:
+      x-codeSamples:
         - lang: curl
           label: Example request
           source: |

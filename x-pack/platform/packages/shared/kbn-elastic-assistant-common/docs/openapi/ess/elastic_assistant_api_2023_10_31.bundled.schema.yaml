@@ -170,7 +170,7 @@ paths:
       tags:
         - Security AI Assistant API
         - Bulk API
-      x-code-samples:
+      x-codeSamples:
         - label: Example request
           lang: curl
           source: |
@@ -358,7 +358,7 @@ paths:
       tags:
         - Security AI Assistant API
         - AnonymizationFields API
-      x-code-samples:
+      x-codeSamples:
         - label: Example request
           lang: curl
           source: |
@@ -444,7 +444,7 @@ paths:
       tags:
         - Security AI Assistant API
         - Chat Complete API
-      x-code-samples:
+      x-codeSamples:
         - label: Example request
           lang: curl
           source: |
@@ -530,7 +530,7 @@ paths:
       tags:
         - Security AI Assistant API
         - Conversation API
-      x-code-samples:
+      x-codeSamples:
         - label: Example request
           lang: curl
           source: |
@@ -624,7 +624,7 @@ paths:
       tags:
         - Security AI Assistant API
         - Conversation API
-      x-code-samples:
+      x-codeSamples:
         - label: Example request
           lang: curl
           source: |
@@ -792,7 +792,7 @@ paths:
       tags:
         - Security AI Assistant API
         - Conversations API
-      x-code-samples:
+      x-codeSamples:
         - label: Example request
           lang: curl
           source: |
@@ -872,7 +872,7 @@ paths:
       tags:
         - Security AI Assistant API
         - Conversation API
-      x-code-samples:
+      x-codeSamples:
         - label: Example request
           lang: curl
           source: |
@@ -952,7 +952,7 @@ paths:
       tags:
         - Security AI Assistant API
         - Conversations API
-      x-code-samples:
+      x-codeSamples:
         - label: Example request
           lang: curl
           source: |
@@ -1051,7 +1051,7 @@ paths:
       tags:
         - Security AI Assistant API
         - Conversation API
-      x-code-samples:
+      x-codeSamples:
         - label: Example request
           lang: curl
           source: |
@@ -1100,7 +1100,7 @@ paths:
       tags:
         - Security AI Assistant API
         - KnowledgeBase API
-      x-code-samples:
+      x-codeSamples:
         - label: Example request
           lang: curl
           source: |
@@ -1164,7 +1164,7 @@ paths:
       tags:
         - Security AI Assistant API
         - KnowledgeBase API
-      x-code-samples:
+      x-codeSamples:
         - label: Example request
           lang: curl
           source: |
@@ -1219,7 +1219,7 @@ paths:
       tags:
         - Security AI Assistant API
         - KnowledgeBase API
-      x-code-samples:
+      x-codeSamples:
         - label: Example request
           lang: curl
           source: |
@@ -1288,7 +1288,7 @@ paths:
       tags:
         - Security AI Assistant API
         - KnowledgeBase API
-      x-code-samples:
+      x-codeSamples:
         - label: Example request
           lang: curl
           source: |
@@ -1354,7 +1354,7 @@ paths:
       tags:
         - Security AI Assistant API
         - Knowledge Base Entries API
-      x-code-samples:
+      x-codeSamples:
         - label: Example request
           lang: curl
           source: |
@@ -1500,7 +1500,7 @@ paths:
       tags:
         - Security AI Assistant API
         - Knowledge Base Entries Bulk API
-      x-code-samples:
+      x-codeSamples:
         - label: Example request
           lang: curl
           source: |
@@ -1646,7 +1646,7 @@ paths:
       tags:
         - Security AI Assistant API
         - Knowledge Base Entries API
-      x-code-samples:
+      x-codeSamples:
         - label: Example request
           lang: curl
           source: |
@@ -1694,7 +1694,7 @@ paths:
       tags:
         - Security AI Assistant API
         - Knowledge Base Entries API
-      x-code-samples:
+      x-codeSamples:
         - label: Example request
           lang: curl
           source: |
@@ -1753,7 +1753,7 @@ paths:
       tags:
         - Security AI Assistant API
         - Knowledge Base Entries API
-      x-code-samples:
+      x-codeSamples:
         - label: Example request
           lang: curl
           source: |
@@ -1826,7 +1826,7 @@ paths:
       tags:
         - Security AI Assistant API
         - Knowledge Base Entries API
-      x-code-samples:
+      x-codeSamples:
         - label: Example request
           lang: curl
           source: |
@@ -1957,7 +1957,7 @@ paths:
       tags:
         - Security AI Assistant API
         - Bulk API
-      x-code-samples:
+      x-codeSamples:
         - label: Example request
           lang: curl
           source: |
@@ -2135,7 +2135,7 @@ paths:
       tags:
         - Security AI Assistant API
         - Prompts API
-      x-code-samples:
+      x-codeSamples:
         - label: Example request
           lang: curl
           source: |

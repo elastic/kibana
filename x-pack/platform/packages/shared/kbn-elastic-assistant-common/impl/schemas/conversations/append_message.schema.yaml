@@ -6,7 +6,7 @@ paths:
   /internal/elastic_assistant/current_user/conversations/{id}/messages:
     post:
       x-codegen-enabled: true
-      x-code-samples:
+      x-codeSamples:
         - lang: curl
           label: Example request
           source: |

@@ -6,7 +6,7 @@ paths:
   /internal/elastic_assistant/alert_summary/_find:
     get:
       x-codegen-enabled: true
-      x-code-samples:
+      x-codeSamples:
         - lang: curl
           label: Example request
           source: |

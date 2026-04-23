@@ -6,7 +6,7 @@ paths:
   /api/security_ai_assistant/current_user/conversations:
     post:
       x-codegen-enabled: true
-      x-code-samples:
+      x-codeSamples:
         - lang: curl
           label: Example request
           source: |
@@ -96,7 +96,7 @@ paths:
                     message: "Missing required parameter: title"
     delete:
       x-codegen-enabled: true
-      x-code-samples:
+      x-codeSamples:
         - lang: curl
           label: Example request
           source: |
@@ -179,7 +179,7 @@ paths:
   /api/security_ai_assistant/current_user/conversations/{id}:
     get:
       x-codegen-enabled: true
-      x-code-samples:
+      x-codeSamples:
         - lang: curl
           label: Example request
           source: |
@@ -256,7 +256,7 @@ paths:
 
     put:
       x-codegen-enabled: true
-      x-code-samples:
+      x-codeSamples:
         - lang: curl
           label: Example request
           source: |
@@ -355,7 +355,7 @@ paths:
 
     delete:
       x-codegen-enabled: true
-      x-code-samples:
+      x-codeSamples:
         - lang: curl
           label: Example request
           source: |

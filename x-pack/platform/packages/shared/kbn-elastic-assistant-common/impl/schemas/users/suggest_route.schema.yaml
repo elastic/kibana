@@ -6,7 +6,7 @@ paths:
   /internal/elastic_assistant/users/_suggest:
     post:
       x-codegen-enabled: true
-      x-code-samples:
+      x-codeSamples:
         - lang: curl
           label: Example request
           source: |
