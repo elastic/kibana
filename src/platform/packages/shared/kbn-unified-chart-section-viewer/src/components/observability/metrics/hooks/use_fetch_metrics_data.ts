@@ -103,11 +103,8 @@ export function useFetchMetricsData({
         services.dataViews,
         parsed.metricItems,
         parsed.uniqueSources,
-        // Per Elasticsearch guidance, TSDB sources are effectively always data
-        // streams in practice. When `_resolve/index` can't confirm per-item
-        // classification, we prefer rendering everything as a data stream
-        // (with a stream link) over misclassifying data streams as plain
-        // indices (breaking the link).
+        // Per Elasticsearch guidance, TSDB sources are almost always data streams in practice.
+        // That's why we choose `'data_stream'` as the fallbackKind.
         { fallbackKind: 'data_stream' }
       );
 

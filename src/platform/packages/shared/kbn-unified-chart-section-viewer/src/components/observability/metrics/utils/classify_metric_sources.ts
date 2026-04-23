@@ -16,7 +16,7 @@ import type { MetricSourceKind, ParsedMetricItem, UnclassifiedMetricItem } from 
 //
 // TODO: Replace this string literal with a constant
 // exported from @kbn/data-views-plugin so both producer and consumer share
-// the same source of truth and a rename can't silently break this check.
+// the same source of truth. See https://github.com/elastic/kibana/issues/265126
 const DATA_STREAM_TAG_KEY = 'data_stream';
 
 const extractDataStreamNames = (items: MatchedItem[]): Set<string> =>
