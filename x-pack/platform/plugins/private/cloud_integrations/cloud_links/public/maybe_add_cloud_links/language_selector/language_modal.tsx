@@ -8,20 +8,31 @@
 import React, { type FC } from 'react';
 import {
   EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFormRow,
+  EuiIconTip,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiSelect,
-  EuiButtonEmpty,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import type { Theme } from '@emotion/react';
+import { css } from '@emotion/react';
 import { i18n, SUPPORTED_LOCALES } from '@kbn/i18n';
 import type { LocaleValue } from '@kbn/user-profile-components';
 
 import { useLanguage } from './use_language_hook';
+
+const betaBadgeStyle = ({ euiTheme }: Theme) => css`
+  padding: calc(${euiTheme.size.xxs} * 1.5);
+  border: ${euiTheme.border.width.thin} solid ${euiTheme.border.color};
+  border-radius: 50%;
+`;
 
 interface Props {
   closeModal: () => void;
@@ -47,9 +58,34 @@ export const LanguageModal: FC<Props> = ({ closeModal }) => {
 
       <EuiModalBody>
         <EuiFormRow
-          label={i18n.translate('xpack.cloudLinks.userMenuLinks.languageModalSelectLabel', {
-            defaultMessage: 'Display language',
-          })}
+          label={
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                {i18n.translate('xpack.cloudLinks.userMenuLinks.languageModalSelectLabel', {
+                  defaultMessage: 'Display language',
+                })}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <div css={betaBadgeStyle}>
+                  <EuiIconTip
+                    aria-label={i18n.translate(
+                      'xpack.cloudLinks.userMenuLinks.languageModalBetaBadgeLabel',
+                      { defaultMessage: 'beta' }
+                    )}
+                    content={i18n.translate(
+                      'xpack.cloudLinks.userMenuLinks.languageModalBetaBadgeTooltip',
+                      {
+                        defaultMessage:
+                          'The display language setting is currently a beta feature.',
+                      }
+                    )}
+                    type="beta"
+                    position="bottom"
+                  />
+                </div>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
           fullWidth
         >
           <EuiSelect
