@@ -35,8 +35,8 @@ export function registerDeleteDataSourceRoute(router: IRouter): void {
       const { id } = request.params;
       const { client } = (await context.core).elasticsearch;
       const dataSourcesClient = new DataSourcesClient(client.asCurrentUser);
-      const body = await dataSourcesClient.delete(id);
-      return response.ok({ body });
+      await dataSourcesClient.delete(id);
+      return response.ok();
     })
   );
 }

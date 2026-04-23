@@ -8,14 +8,10 @@
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
 
-import type { DataSource } from '../../../common';
 import { DATA_SOURCE_BY_ID_ROUTE_PATH } from '../../../common';
 import { DataSourcesClient } from '../../data_sources_client';
 
-const putDataSourceBodySchema = schema.object({
-  type: schema.string(),
-  description: schema.string(),
-});
+import { putDataSourceBodySchema } from './put_data_source_body_schema';
 
 export function registerPutDataSourceRoute(router: IRouter): void {
   router.put(
@@ -40,11 +36,10 @@ export function registerPutDataSourceRoute(router: IRouter): void {
     },
     router.handleLegacyErrors(async (context, request, response) => {
       const { id } = request.params;
-      const payload: DataSource = request.body;
       const { client } = (await context.core).elasticsearch;
       const dataSourcesClient = new DataSourcesClient(client.asCurrentUser);
-      const body = await dataSourcesClient.put(id, payload);
-      return response.ok({ body });
+      await dataSourcesClient.put(id, request.body);
+      return response.ok();
     })
   );
 }
