@@ -13,6 +13,9 @@ export class DocLinksService {
   public readonly models: string;
   public readonly chat: string;
   public readonly agentBuilderAgents: string;
+  public readonly skills: string;
+  public readonly plugins: string;
+  public readonly connectors: string;
   public readonly tools: string;
   public readonly programmaticAccess: string;
   public readonly kibanaApi: string;
@@ -27,6 +30,9 @@ export class DocLinksService {
     this.models = docLinks.agentBuilder.models;
     this.chat = docLinks.agentBuilder.chat;
     this.agentBuilderAgents = docLinks.agentBuilder.agentBuilderAgents;
+    this.skills = docLinks.agentBuilder.skills;
+    this.plugins = docLinks.agentBuilder.plugins;
+    this.connectors = docLinks.agentBuilder.connectors;
     this.tools = docLinks.agentBuilder.tools;
     this.programmaticAccess = docLinks.agentBuilder.programmaticAccess;
     this.kibanaApi = docLinks.agentBuilder.kibanaApi;

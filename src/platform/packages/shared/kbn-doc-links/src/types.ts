@@ -723,6 +723,9 @@ export interface DocLinks {
     readonly models: string;
     readonly chat: string;
     readonly agentBuilderAgents: string;
+    readonly skills: string;
+    readonly plugins: string;
+    readonly connectors: string;
     readonly tools: string;
     readonly programmaticAccess: string;
     readonly kibanaApi: string;
