@@ -14,20 +14,22 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { RuleSignatureId } from './rule_schema/common_attributes.gen';
 
+export const ErrorSchema = lazySchema(() =>
+  z
+    .object({
+      id: z.string().optional(),
+      rule_id: RuleSignatureId.optional(),
+      list_id: z.string().min(1).optional(),
+      item_id: z.string().min(1).optional(),
+      error: z.object({
+        status_code: z.number().int().min(400),
+        message: z.string(),
+      }),
+    })
+    .strict()
+);
 export type ErrorSchema = z.infer<typeof ErrorSchema>;
-export const ErrorSchema = z
-  .object({
-    id: z.string().optional(),
-    rule_id: RuleSignatureId.optional(),
-    list_id: z.string().min(1).optional(),
-    item_id: z.string().min(1).optional(),
-    error: z.object({
-      status_code: z.number().int().min(400),
-      message: z.string(),
-    }),
-  })
-  .strict();

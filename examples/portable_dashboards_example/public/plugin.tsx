@@ -51,7 +51,7 @@ export class PortableDashboardsExamplePlugin implements Plugin<void, void, Setup
       image: img,
     });
 
-    embeddable.registerReactEmbeddableFactory(FILTER_DEBUGGER_EMBEDDABLE_ID, async () => {
+    embeddable.registerEmbeddablePublicDefinition(FILTER_DEBUGGER_EMBEDDABLE_ID, async () => {
       const { factory } = await import('./filter_debugger_embeddable');
       return factory;
     });
