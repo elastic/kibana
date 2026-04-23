@@ -64,6 +64,28 @@ export function computePrefixRange(query: string): PrefixResult {
 // Replacement Range Resolver
 // =============================================
 
+/** Adds a replacement range for root-level query suggestions. */
+export function attachRootQueryReplacementRanges(
+  suggestions: ISuggestionItem[],
+  fullText: string,
+  offset: number
+): ISuggestionItem[] {
+  const start = computePrefixRange(fullText.substring(0, offset)).range.start;
+  const end = fullText.length;
+
+  // If there is nothing after the cursor, do not replace anything.
+  if (start === offset && end === offset) {
+    return suggestions;
+  }
+
+  const rangeToReplace = { start, end: end + 1 };
+
+  return suggestions.map((suggestion) => ({
+    ...suggestion,
+    rangeToReplace,
+  }));
+}
+
 /** Attaches replacement ranges, resolves preserveTypedPrefix and requiresExistingColumnMatch. */
 export function attachReplacementRanges(
   innerText: string,

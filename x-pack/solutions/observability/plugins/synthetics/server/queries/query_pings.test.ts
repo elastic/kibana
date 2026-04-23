@@ -290,5 +290,92 @@ describe('queryPings', () => {
         ],
       });
     });
+
+    it('should include kibanaUrl in remote info when present in source', async () => {
+      const params = {
+        syntheticsEsClient: mockEsClient as SyntheticsEsClient,
+        dateRange: { from: '2023-01-01', to: '2023-01-02' },
+        size: 10,
+        pageIndex: 0,
+      };
+
+      const mockResponse = {
+        body: {
+          hits: {
+            hits: [
+              {
+                _id: 'doc1',
+                _index: 'cluster1:synthetics-http-default',
+                _source: {
+                  '@timestamp': '2023-01-01T00:00:00Z',
+                  kibanaUrl: 'https://remote-kibana.example.com',
+                },
+              },
+            ],
+            total: { value: 1 },
+          },
+        },
+      };
+
+      (mockEsClient.search as jest.Mock).mockResolvedValueOnce(mockResponse);
+
+      const result = await queryPings(params);
+      expect(result).toEqual({
+        total: 1,
+        pings: [
+          {
+            '@timestamp': '2023-01-01T00:00:00Z',
+            kibanaUrl: 'https://remote-kibana.example.com',
+            docId: 'doc1',
+            timestamp: '2023-01-01T00:00:00Z',
+            remote: {
+              remoteName: 'cluster1',
+              kibanaUrl: 'https://remote-kibana.example.com',
+            },
+          },
+        ],
+      });
+    });
+
+    it('should not include kibanaUrl in remote info when absent from source', async () => {
+      const params = {
+        syntheticsEsClient: mockEsClient as SyntheticsEsClient,
+        dateRange: { from: '2023-01-01', to: '2023-01-02' },
+        size: 10,
+        pageIndex: 0,
+      };
+
+      const mockResponse = {
+        body: {
+          hits: {
+            hits: [
+              {
+                _id: 'doc1',
+                _index: 'cluster1:synthetics-http-default',
+                _source: { '@timestamp': '2023-01-01T00:00:00Z' },
+              },
+            ],
+            total: { value: 1 },
+          },
+        },
+      };
+
+      (mockEsClient.search as jest.Mock).mockResolvedValueOnce(mockResponse);
+
+      const result = await queryPings(params);
+      expect(result).toEqual({
+        total: 1,
+        pings: [
+          {
+            '@timestamp': '2023-01-01T00:00:00Z',
+            docId: 'doc1',
+            timestamp: '2023-01-01T00:00:00Z',
+            remote: {
+              remoteName: 'cluster1',
+            },
+          },
+        ],
+      });
+    });
   });
 });
