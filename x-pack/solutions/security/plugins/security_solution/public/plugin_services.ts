@@ -23,6 +23,7 @@ import { TopValuesPopoverService } from './app/components/top_values_popover/top
 import { createSiemMigrationsService } from './siem_migrations/service';
 import type { SecuritySolutionUiConfigType } from './common/types';
 import { AiRuleCreationService } from './detection_engine/common/ai_rule_creation_store';
+import { AiWatchlistService } from './detection_engine/common/ai_watchlist_service';
 import type {
   PluginStart,
   SetupPlugins,
@@ -38,6 +39,7 @@ export class PluginServices {
   private readonly storage = new Storage(localStorage);
   private readonly sessionStorage = new Storage(sessionStorage);
   public readonly aiRuleCreation = new AiRuleCreationService();
+  public readonly aiWatchlist = new AiWatchlistService();
 
   private readonly configSettings: ConfigSettings;
 
@@ -112,6 +114,7 @@ export class PluginServices {
     this.timelineQueryService.stop();
     licenseService.stop();
     this.aiRuleCreation.reset();
+    this.aiWatchlist.reset();
   }
 
   public async generateServices(
@@ -166,6 +169,7 @@ export class PluginServices {
       topValuesPopover: new TopValuesPopoverService(),
       productDocBase: startPlugins.productDocBase,
       aiRuleCreation: this.aiRuleCreation,
+      aiWatchlist: this.aiWatchlist,
       siemMigrations,
       ...(params && {
         onAppLeave: params.onAppLeave,
