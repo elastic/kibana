@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { updateConnectionBodySchema } from './schemas';
+import { OAUTH_MAX_STRING_FIELD_LENGTH, updateConnectionBodySchema } from './schemas';
 import type { RouteDefinitionParams } from '..';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
@@ -28,8 +28,8 @@ export function defineUpdateOAuthConnectionRoute({
       },
       validate: {
         params: schema.object({
-          client_id: schema.string(),
-          connection_id: schema.string(),
+          client_id: schema.string({ minLength: 1, maxLength: OAUTH_MAX_STRING_FIELD_LENGTH }),
+          connection_id: schema.string({ minLength: 1, maxLength: OAUTH_MAX_STRING_FIELD_LENGTH }),
         }),
         body: updateConnectionBodySchema,
       },

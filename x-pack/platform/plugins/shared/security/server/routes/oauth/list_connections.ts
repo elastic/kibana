@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { OAUTH_MAX_STRING_FIELD_LENGTH } from './schemas';
 import type { RouteDefinitionParams } from '..';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
@@ -27,8 +28,12 @@ export function defineListOAuthConnectionsRoute({
       },
       validate: {
         query: schema.object({
-          client_id: schema.maybe(schema.string()),
-          connection_id: schema.maybe(schema.string()),
+          client_id: schema.maybe(
+            schema.string({ minLength: 1, maxLength: OAUTH_MAX_STRING_FIELD_LENGTH })
+          ),
+          connection_id: schema.maybe(
+            schema.string({ minLength: 1, maxLength: OAUTH_MAX_STRING_FIELD_LENGTH })
+          ),
         }),
       },
       options: {

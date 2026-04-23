@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { OAUTH_MAX_STRING_FIELD_LENGTH } from './schemas';
 import type { RouteDefinitionParams } from '..';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
@@ -27,10 +28,10 @@ export function defineRevokeOAuthClientRoute({
       },
       validate: {
         params: schema.object({
-          client_id: schema.string(),
+          client_id: schema.string({ minLength: 1, maxLength: OAUTH_MAX_STRING_FIELD_LENGTH }),
         }),
         body: schema.object({
-          reason: schema.maybe(schema.string()),
+          reason: schema.maybe(schema.string({ maxLength: OAUTH_MAX_STRING_FIELD_LENGTH })),
         }),
       },
       options: {

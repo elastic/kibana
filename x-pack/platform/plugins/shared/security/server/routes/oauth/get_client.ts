@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { OAUTH_MAX_STRING_FIELD_LENGTH } from './schemas';
 import type { RouteDefinitionParams } from '..';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
@@ -27,7 +28,7 @@ export function defineGetOAuthClientRoute({
       },
       validate: {
         params: schema.object({
-          client_id: schema.string(),
+          client_id: schema.string({ minLength: 1, maxLength: OAUTH_MAX_STRING_FIELD_LENGTH }),
         }),
       },
       options: {
