@@ -14,7 +14,9 @@ import {
   EuiPanel,
   EuiTitle,
   useIsWithinBreakpoints,
+  EuiButtonIcon,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SecurityPageName } from '../../app/types';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
@@ -25,6 +27,8 @@ import { InputsModelId } from '../../common/store/inputs/constants';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useSourcererDataView } from '../../sourcerer/containers';
+import { useKibana } from '../../common/lib/kibana';
+import { EntityEventTypes } from '../../common/lib/telemetry';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { PageLoader } from '../../common/components/page_loader';
 import { useSpaceId } from '../../common/hooks/use_space_id';
@@ -44,6 +48,8 @@ import {
   type URLQuery,
 } from '../components/home/entities_table';
 import { DynamicRiskLevelPanel } from '../components/home/dynamic_risk_level_panel';
+import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
+import { TabId } from './entity_analytics_management_page';
 import { TopThreatHuntingLeads } from '../components/threat_hunting/top_threat_hunting_leads';
 import { ThreatHuntingLeadsFlyout } from '../components/threat_hunting/top_threat_hunting_leads/threat_hunting_leads_flyout';
 import { useHuntingLeads } from '../components/threat_hunting/top_threat_hunting_leads/use_hunting_leads';
@@ -58,6 +64,7 @@ const getDefaultQuery = ({ query, filters }: EntitiesBaseURLQuery): URLQuery => 
 });
 
 export const EntityAnalyticsHomePage = () => {
+  const { telemetry } = useKibana().services;
   const {
     indicesExist: oldIndicesExist,
     loading: oldIsSourcererLoading,
@@ -102,6 +109,7 @@ export const EntityAnalyticsHomePage = () => {
 
   const location = useLocation();
   const history = useHistory();
+  const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
 
   const selectedWatchlistId = useMemo(() => {
     const params = new URLSearchParams(location.search);
@@ -143,8 +151,11 @@ export const EntityAnalyticsHomePage = () => {
   const handleCloseFlyout = useCallback(() => setIsFlyoutOpen(false), []);
 
   const handleOpenLeadInChat = useCallback(
-    (lead: HuntingLead) => openAgentBuilderWithLead(lead),
-    [openAgentBuilderWithLead]
+    (lead: HuntingLead) => {
+      telemetry.reportEvent(EntityEventTypes.LeadGenerationLeadClicked, {});
+      openAgentBuilderWithLead(lead);
+    },
+    [openAgentBuilderWithLead, telemetry]
   );
 
   const handleHuntInChat = useCallback(() => {
@@ -177,14 +188,33 @@ export const EntityAnalyticsHomePage = () => {
           title={
             <FormattedMessage
               id="xpack.securitySolution.entityAnalytics.homePage.pageTitle"
-              defaultMessage="Entity Analytics"
+              defaultMessage="Entity analytics"
             />
           }
           rightSideItems={[
-            <WatchlistFilter
-              selectedId={selectedWatchlistId ?? ''}
-              onChangeSelectedId={setSelectedWatchlist}
-            />,
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <WatchlistFilter
+                  selectedId={selectedWatchlistId ?? ''}
+                  onChangeSelectedId={setSelectedWatchlist}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  display="base"
+                  iconType="gear"
+                  size="m"
+                  aria-label={i18n.translate(
+                    'xpack.securitySolution.entityAnalytics.homePage.watchlistsSettingsButtonAriaLabel',
+                    { defaultMessage: 'Watchlists settings' }
+                  )}
+                  href={getSecuritySolutionUrl({
+                    deepLinkId: SecurityPageName.entityAnalyticsManagement,
+                    path: `/${TabId.Watchlists}`,
+                  })}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>,
           ]}
         />
 

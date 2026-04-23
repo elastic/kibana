@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiComboBox,
   EuiFormRow,
@@ -81,15 +81,25 @@ export const DatasetComponent: React.FC<{
 
   const error = errors ? errors.join(', ') : undefined;
 
+  const updateValue = useCallback(
+    (val: SelectedDataset) => {
+      if (isDisabled) {
+        return;
+      }
+      onChange(val);
+    },
+    [onChange, isDisabled]
+  );
+
   useEffect(() => {
-    if (!value || typeof value === 'string') onChange(defaultOption.value as SelectedDataset);
-  }, [value, defaultOption.value, onChange, pkgName]);
+    if (!value || typeof value === 'string') updateValue(defaultOption.value as SelectedDataset);
+  }, [value, defaultOption.value, updateValue, pkgName]);
 
   const onDatasetChange = (newSelectedOptions: Array<{ label: string; value?: DataStream }>) => {
     setSelectedOptions(newSelectedOptions);
     const dataStream = newSelectedOptions[0].value;
 
-    onChange({
+    updateValue({
       dataset: newSelectedOptions[0].label,
       package: !dataStream || typeof dataStream === 'string' ? pkgName : dataStream.package,
     });
@@ -105,7 +115,7 @@ export const DatasetComponent: React.FC<{
       value: { dataset: searchValue, package: pkgName },
     };
     setSelectedOptions([newOption]);
-    onChange({
+    updateValue({
       dataset: searchValue,
       package: pkgName,
     });
