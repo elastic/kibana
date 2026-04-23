@@ -104,7 +104,7 @@ export const ResolutionMini: React.FC<ResolutionMiniProps> = ({
         }
       >
         <EuiSpacer size="s" />
-        {hasGroup || isLoading || isError ? (
+        {hasGroup || isLoading ? (
           <ResolutionGroupTable
             group={group ?? null}
             isLoading={isLoading}
