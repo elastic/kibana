@@ -175,6 +175,7 @@ export class ServiceManager {
       config: this.config,
       getToolRegistry: tools.getRegistry,
       analyticsService,
+      trackingService,
     });
 
     const runnerFactory = new RunnerFactoryImpl({

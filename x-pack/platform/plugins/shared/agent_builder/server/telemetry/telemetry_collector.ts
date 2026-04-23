@@ -54,6 +54,29 @@ export interface AgentBuilderTelemetry {
   custom_agents: {
     total: number;
   };
+  skills: {
+    total: number;
+    custom: number;
+    plugin: number;
+  };
+  plugins: {
+    total: number;
+  };
+  skill_invocations: {
+    total: number;
+    by_origin: {
+      builtin: number;
+      custom: number;
+      plugin: number;
+    };
+  };
+  plugin_imports: {
+    total: number;
+    by_source: {
+      url: number;
+      upload: number;
+    };
+  };
   conversations: ConversationMetrics;
   daily: ConversationMetrics;
   query_to_result_time: {
@@ -176,6 +199,84 @@ export function registerTelemetryCollector(
             type: 'long',
             _meta: {
               description: 'Total number of custom agents created by users',
+            },
+          },
+        },
+        skills: {
+          total: {
+            type: 'long',
+            _meta: {
+              description: 'Total number of persisted skills (custom + plugin-bundled)',
+            },
+          },
+          custom: {
+            type: 'long',
+            _meta: {
+              description: 'Number of user-created custom skills',
+            },
+          },
+          plugin: {
+            type: 'long',
+            _meta: {
+              description: 'Number of plugin-bundled skills',
+            },
+          },
+        },
+        plugins: {
+          total: {
+            type: 'long',
+            _meta: {
+              description: 'Total number of installed plugins',
+            },
+          },
+        },
+        skill_invocations: {
+          total: {
+            type: 'long',
+            _meta: {
+              description: 'Total skill invocations across all origins',
+            },
+          },
+          by_origin: {
+            builtin: {
+              type: 'long',
+              _meta: {
+                description: 'Skill invocations from built-in skills',
+              },
+            },
+            custom: {
+              type: 'long',
+              _meta: {
+                description: 'Skill invocations from user-created skills',
+              },
+            },
+            plugin: {
+              type: 'long',
+              _meta: {
+                description: 'Skill invocations from plugin-bundled skills',
+              },
+            },
+          },
+        },
+        plugin_imports: {
+          total: {
+            type: 'long',
+            _meta: {
+              description: 'Total plugin imports across all source types',
+            },
+          },
+          by_source: {
+            url: {
+              type: 'long',
+              _meta: {
+                description: 'Plugins imported via URL',
+              },
+            },
+            upload: {
+              type: 'long',
+              _meta: {
+                description: 'Plugins imported via file upload',
+              },
             },
           },
         },
@@ -559,6 +660,9 @@ export function registerTelemetryCollector(
 
           const customAgents = await queryUtils.getCustomAgentsMetrics();
 
+          const skillsMetrics = await queryUtils.getSkillsMetrics();
+          const pluginsCount = await queryUtils.getPluginsCount();
+
           const conversations = await queryUtils.getConversationMetrics();
 
           const dailyDateFilter = {
@@ -622,6 +726,43 @@ export function registerTelemetryCollector(
             0
           );
 
+          const skillInvocationCounters = await queryUtils.getCountersByPrefix(
+            AGENTBUILDER_USAGE_DOMAIN,
+            `${AGENTBUILDER_USAGE_DOMAIN}_skill_invocation_`
+          );
+
+          const skillInvocationsByOrigin = {
+            builtin:
+              skillInvocationCounters.get(
+                `${AGENTBUILDER_USAGE_DOMAIN}_skill_invocation_builtin`
+              ) || 0,
+            custom:
+              skillInvocationCounters.get(`${AGENTBUILDER_USAGE_DOMAIN}_skill_invocation_custom`) ||
+              0,
+            plugin:
+              skillInvocationCounters.get(`${AGENTBUILDER_USAGE_DOMAIN}_skill_invocation_plugin`) ||
+              0,
+          };
+          const totalSkillInvocations = Object.values(skillInvocationsByOrigin).reduce(
+            (sum, count) => sum + count,
+            0
+          );
+
+          const pluginImportCounters = await queryUtils.getCountersByPrefix(
+            AGENTBUILDER_USAGE_DOMAIN,
+            `${AGENTBUILDER_USAGE_DOMAIN}_plugin_import_`
+          );
+
+          const pluginImportsBySource = {
+            url: pluginImportCounters.get(`${AGENTBUILDER_USAGE_DOMAIN}_plugin_import_url`) || 0,
+            upload:
+              pluginImportCounters.get(`${AGENTBUILDER_USAGE_DOMAIN}_plugin_import_upload`) || 0,
+          };
+          const totalPluginImports = Object.values(pluginImportsBySource).reduce(
+            (sum, count) => sum + count,
+            0
+          );
+
           const llmProviderCounters = await queryUtils.getCountersByPrefix(
             AGENTBUILDER_USAGE_DOMAIN,
             `${AGENTBUILDER_USAGE_DOMAIN}_llm_provider_`
@@ -681,6 +822,16 @@ export function registerTelemetryCollector(
           const telemetry: AgentBuilderTelemetry = {
             custom_tools: customTools,
             custom_agents: { total: customAgents },
+            skills: skillsMetrics,
+            plugins: { total: pluginsCount },
+            skill_invocations: {
+              total: totalSkillInvocations,
+              by_origin: skillInvocationsByOrigin,
+            },
+            plugin_imports: {
+              total: totalPluginImports,
+              by_source: pluginImportsBySource,
+            },
             conversations,
             daily,
             query_to_result_time: queryToResultTime,
@@ -722,6 +873,23 @@ export function registerTelemetryCollector(
           return {
             custom_tools: { total: 0, by_type: [] },
             custom_agents: { total: 0 },
+            skills: { total: 0, custom: 0, plugin: 0 },
+            plugins: { total: 0 },
+            skill_invocations: {
+              total: 0,
+              by_origin: {
+                builtin: 0,
+                custom: 0,
+                plugin: 0,
+              },
+            },
+            plugin_imports: {
+              total: 0,
+              by_source: {
+                url: 0,
+                upload: 0,
+              },
+            },
             conversations: emptyConversationMetrics,
             daily: emptyConversationMetrics,
             query_to_result_time: {
