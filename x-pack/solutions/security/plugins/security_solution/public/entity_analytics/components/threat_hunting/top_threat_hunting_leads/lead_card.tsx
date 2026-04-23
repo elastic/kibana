@@ -42,7 +42,7 @@ export const LeadCard: React.FC<LeadCardProps> = ({ lead, onClick }) => {
   return (
     <EuiCard
       title={
-        <EuiToolTip anchorClassName="eui-textTruncate" display="block">
+        <EuiToolTip content={lead.title} anchorClassName="eui-textTruncate" display="block">
           <span>{lead.title}</span>
         </EuiToolTip>
       }

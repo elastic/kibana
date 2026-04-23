@@ -199,7 +199,7 @@ export const OPEN_GENAI_SETTINGS = i18n.translate(
   { defaultMessage: 'Open GenAI settings' }
 );
 
-export const NO_AI_AGENT_DESCRIPTION = i18n.translate(
+export const NO_CONNECTOR_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.entityAnalytics.threatHunting.noConnectorDescription',
   {
     defaultMessage:
