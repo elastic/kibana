@@ -7,7 +7,10 @@
 
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
-import { setGrouping } from '../../../tasks/entity_analytics/entity_analytics_home';
+import {
+  interceptEntityStoreStatus,
+  setGrouping,
+} from '../../../tasks/entity_analytics/entity_analytics_home';
 import { ENTITY_ANALYTICS_HOME_PAGE_URL } from '../../../urls/navigation';
 import {
   PAGE_TITLE,
@@ -56,13 +59,11 @@ describe(
     });
 
     beforeEach(() => {
-      cy.intercept('GET', '/api/security/entity_store/status', {
-        statusCode: 200,
-        body: { status: 'running', engines: [] },
-      }).as('entityStoreStatus');
+      interceptEntityStoreStatus('running');
       login();
       setGrouping(['none']);
       visit(ENTITY_ANALYTICS_HOME_PAGE_URL);
+      cy.wait('@entityStoreStatus');
       waitForTableToLoad();
     });
 
@@ -194,13 +195,11 @@ describe(
   },
   () => {
     beforeEach(() => {
-      cy.intercept('GET', '/api/security/entity_store/status', {
-        statusCode: 200,
-        body: { status: 'running', engines: [] },
-      }).as('entityStoreStatus');
+      interceptEntityStoreStatus('running');
       login();
       setGrouping(['none']);
       visit(ENTITY_ANALYTICS_HOME_PAGE_URL);
+      cy.wait('@entityStoreStatus');
       cy.get(PAGE_TITLE).should('exist');
     });
 
