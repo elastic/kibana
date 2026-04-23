@@ -41,11 +41,6 @@ interface HostPanelContentProps {
   /** When true (e.g. entity store v2 enabled but no entity found), hide risk score and asset criticality. */
   skipRiskAndCriticality?: boolean;
   entityStoreEntityId?: string;
-  /**
-   * Hides entity highlights (Elastic Assistant–backed). Use when rendering outside `AssistantProvider`,
-   * e.g. Agent Builder attachment Canvas.
-   */
-  hideEntityHighlights?: boolean;
 }
 
 export const HostPanelContent = ({
@@ -61,7 +56,6 @@ export const HostPanelContent = ({
   entityRecord,
   skipRiskAndCriticality = false,
   entityStoreEntityId,
-  hideEntityHighlights = false,
 }: HostPanelContentProps) => {
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
 
@@ -72,7 +66,7 @@ export const HostPanelContent = ({
 
   return (
     <>
-      {!skipRiskAndCriticality && !hideEntityHighlights && (
+      {!skipRiskAndCriticality && (
         <EntityHighlightsAccordion
           entityIdentifier={entityRecord ? entityRecord.entity.id : hostName}
           entityType={EntityType.host}

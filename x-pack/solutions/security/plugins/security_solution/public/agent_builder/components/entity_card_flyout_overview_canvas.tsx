@@ -418,7 +418,6 @@ const HostEntityFlyoutOverviewCanvas: React.FC<{
             entityRecord={entityStoreV2Enabled ? observedHost.entityRecord ?? undefined : undefined}
             skipRiskAndCriticality={noEntityInStore}
             entityStoreEntityId={entityStoreEntityId}
-            hideEntityHighlights
           />
         )}
       </FlyoutBody>
@@ -751,7 +750,6 @@ const UserEntityFlyoutOverviewCanvas: React.FC<{
             entityRecord={entityStoreV2Enabled ? observedUser.entityRecord ?? undefined : undefined}
             skipRiskAndCriticality={noEntityInStore}
             entityStoreEntityId={entityStoreEntityId}
-            hideEntityHighlights
           />
         )}
       </FlyoutBody>
