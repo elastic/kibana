@@ -27,6 +27,7 @@ import * as LABELS from '../translations';
 import type { InferenceEndpoint } from '../types/types';
 import { InferenceServiceFormFields } from './inference_service_form_fields';
 import { useInferenceEndpointMutation } from '../hooks/use_inference_endpoint_mutation';
+import { INTERNAL_OVERRIDE_FIELDS } from '../constants';
 
 const MIN_ALLOCATIONS = 0;
 const DEFAULT_NUM_THREADS = 1;
@@ -84,12 +85,17 @@ export const formSerializer = (formData: InferenceEndpoint) => {
       ...restProviderConfig
     } = providerConfig || {};
 
+    // Get hidden fields for the current provider and remove them from the config
+    const provider = formData.config?.provider;
+    const hiddenFields = INTERNAL_OVERRIDE_FIELDS[provider]?.hidden ?? [];
+    const filteredProviderConfig = omit(restProviderConfig, hiddenFields);
+
     return {
       ...formData,
       config: {
         ...formData.config,
         providerConfig: {
-          ...restProviderConfig,
+          ...filteredProviderConfig,
           ...(maxAllocations
             ? {
                 adaptive_allocations: {
