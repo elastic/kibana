@@ -22,7 +22,7 @@ const createMockProps = ({
 }: {
   isTelemetryGlobalSettingEnabled: boolean;
 }) => ({
-  getQuestions: jest.fn().mockReturnValue([]),
+  getQuestions: jest.fn().mockResolvedValue([]),
   getAppDetails: jest
     .fn()
     .mockReturnValue({ title: 'Test App', id: 'testApp', url: 'http://testapp.com' }),
