@@ -29,15 +29,6 @@ export const setGrouping = (activeGroups: string[]) => {
   );
 };
 
-x -
-  pack /
-    solutions /
-    security /
-    packages /
-    navigation /
-    src /
-    navigation_tree /
-    entity_analytics_navigation_tree.ts;
 /**
  * Waits for Kibana global navigation loading to finish, the Entity Analytics home
  * shell to mount (past EmptyPrompt / data-view PageLoader), and the page-level
