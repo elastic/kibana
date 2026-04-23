@@ -109,8 +109,12 @@ describe('QradarRulesXmlParser', () => {
       const rules = await parser.getRules();
 
       expect(rules).toHaveLength(1);
+      // Ensure core rule fields remain extractable after text-node sanitization.
+      expect(rules[0].title).toBe('Test Rule');
+      expect(rules[0].description).toBe('Test notes');
       expect(rules[0].rule_data).toContain('<text>when value is "&amp; and bold</text>');
       expect(rules[0].rule_data).not.toContain('&amp;quot;&amp;amp;');
+      // Guard against malformed XML regressions after sanitization.
       await expect(parser.parseSeverityFromRuleData(rules[0].rule_data)).resolves.toBeUndefined();
     });
 
@@ -130,10 +134,14 @@ describe('QradarRulesXmlParser', () => {
       const rules = await parser.getRules();
 
       expect(rules).toHaveLength(1);
+      // Ensure core rule fields remain extractable after text-node sanitization.
+      expect(rules[0].title).toBe('Test Rule');
+      expect(rules[0].description).toBe('Test notes');
       expect(rules[0].rule_data).toContain(
         '<text>when the event IP is contained in any of Blocked IPs - IP</text>'
       );
       expect(rules[0].rule_data).not.toContain('&nbsp;');
+      // Guard against malformed XML regressions after sanitization.
       await expect(parser.parseSeverityFromRuleData(rules[0].rule_data)).resolves.toBeUndefined();
     });
   });
