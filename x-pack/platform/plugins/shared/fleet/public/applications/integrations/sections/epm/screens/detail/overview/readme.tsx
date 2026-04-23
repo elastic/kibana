@@ -100,8 +100,7 @@ export function Readme({
       {markdownWithCollapsable !== undefined ? (
         <EuiText grow={true}>
           <ReactMarkdown
-            transformImageUri={handleImageUri}
-            components={markdownRenderers(refs)}
+            components={markdownRenderers(refs, handleImageUri)}
             rehypePlugins={[rehypeRaw, [rehypeSanitize]]}
             remarkPlugins={[remarkGfm]}
           >
