@@ -62,14 +62,20 @@ export function listChangedFiles({
   };
 
   // Ensure the merge base commit is available (shallow clones may not have it)
+  let isShallow = false;
   try {
     execSync(`git cat-file -e ${mergeBase}^{commit}`, { ...execOptions, stdio: 'pipe' });
   } catch {
     execSync(`git fetch --depth=1 origin ${mergeBase}`, execOptions);
+    isShallow = true;
   }
 
-  // To avoid symmetric diffs, and only care for changes from local towards the merge base
-  const actualBase = execSync(`git merge-base ${mergeBase} HEAD`, execOptions).trim();
+  // In a shallow clone the commit graphs are disconnected so `git merge-base`
+  // can't walk parents. The caller (GITHUB_PR_MERGE_BASE) already provides
+  // the real merge-base SHA, so we can use it directly.
+  const actualBase = isShallow
+    ? mergeBase
+    : execSync(`git merge-base ${mergeBase} HEAD`, execOptions).trim();
 
   let fileListOutput: string;
 
