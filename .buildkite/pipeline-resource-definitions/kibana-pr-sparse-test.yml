@@ -2,10 +2,10 @@
 apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
-  name: bk-kibana-pull-request
-  description: Runs manually for pull requests
+  name: bk-kibana-pull-request-sparse
+  description: Runs manually for pull requests (sparse checkout testing)
   links:
-    - url: 'https://buildkite.com/elastic/kibana-pull-request'
+    - url: 'https://buildkite.com/elastic/kibana-pull-request-sparse'
       title: Pipeline link
 spec:
   type: buildkite-pipeline
@@ -15,8 +15,8 @@ spec:
     apiVersion: buildkite.elastic.dev/v1
     kind: Pipeline
     metadata:
-      name: kibana / pull request
-      description: Runs manually for pull requests
+      name: kibana / pull request sparse
+      description: Runs manually for pull requests (sparse checkout testing)
     spec:
       env:
         ELASTIC_PR_COMMENTS_ENABLED: 'true'
@@ -29,6 +29,11 @@ spec:
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/scripts/pipelines/pull_request/pipeline.sh
+      initial_step_plugins:
+        - sparse-checkout#v1.6.0:
+            paths:
+              - .buildkite
+              - package.json
       provider_settings:
         build_branches: false
         build_pull_requests: true
