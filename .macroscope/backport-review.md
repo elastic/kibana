@@ -50,34 +50,47 @@ Highlight:
 - **Config drift ("ghost references"):** if a file is deleted, ensure no lingering references remain (e.g., `.github/CODEOWNERS`, deleted global setups still in Playwright config, `require.resolve` of deleted fixtures).
 - **Versions-specific terms:** flag APIs or terms that do not exist on the `targetBranch` (e.g., using "Data View" on a 7.17 backport).
 
-## 4. Output format
+## 4. Output
 
 Provide a compact review. Surface signal; humans decide on merging.
 
-### Inline Comments
+### Inline comments (primary output)
 
-Post inline on the offending line. Use this format (skip the `<details>` block if the fix genuinely fits in one line):
+Post findings as inline PR comments on the offending line. Each inline comment must use a collapsible section to keep the PR readable. Structure:
 
-**<short finding title>**
-<1–2 sentence overview of the issue and the fix.>
+```markdown
+<1–2 sentence high-level overview of the issue and the fix.>
 
 <details>
 <summary>See details</summary>
-<Full explanation, concrete fix, and link to the original PR line: [original PR line](https://github.com/elastic/kibana/pull/<originalPR>/files#diff-...).>
+
+<Full explanation, concrete fix, code blocks, before and after examples, and — for parity findings — a link to the equivalent line in the original PR like [original PR line](https://github.com/elastic/kibana/pull/<originalPR>/files#diff-...).>
+
 </details>
+```
 
-### Review body (always posted)
+- **Overview:** plain prose, no code. A developer skimming the PR should grasp what's wrong and whether to act on it without expanding.
+- **Details:** everything else — reasoning, code snippets, suggested fixes, links back to the original PR line for parity findings.
 
-Post exactly one top-level comment using this template. Do not include headings, severity breakdowns, or per-commit logs:
+Skip the `<details>` block if the finding genuinely fits in one line (e.g., a stray conflict marker). Preserve the blank lines inside the template exactly as shown; GitHub needs them to render the collapsible correctly.
 
+### Review body (only when issues are found)
+
+When at least one inline comment is posted, the review comment body should follow this structure:
+
+**Review body template (use verbatim):**
+
+```markdown
 **Backport Review**: <status>
-<sup>Share feedback in the [#appex-qa](https://elastic.slack.com/archives/C04HT4P1YS3) channel.</sup>
 
-**`<status>` must be exactly one of:**
+<sup>Share feedback in the [#appex-qa](https://elastic.slack.com/archives/C04HT4P1YS3) channel.</sup>
+```
+
+`<status>` must be exactly:
 
 - `found <N> issue(s). See inline comments for details.`
 
-Do not leave any review or comment if no issues are found.
+No heading (`##`), no severity breakdown, no per-commit log.
 
 ## 5. Re-run Behavior & Constraints
 
