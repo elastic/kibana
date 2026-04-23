@@ -6,7 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { getListOfCCSIndices } from './utils';
+
+import { getListOfCCSIndices } from './lookup_utils';
 import type { IndexAutocompleteItem } from '@kbn/esql-types';
 
 describe('getListOfCCSIndices', () => {
@@ -87,7 +88,7 @@ describe('getListOfCCSIndices', () => {
       createLookupItem('cluster1:index2'),
       createLookupItem('cluster2:index1', ['alias2']),
       createLookupItem('cluster2:index3'),
-      createLookupItem('cluster3:index1', ['alias1']), // alias1 is duplicated to test Set uniqueness
+      createLookupItem('cluster3:index1', ['alias1']),
       createLookupItem('cluster3:index4'),
     ];
     const result = getListOfCCSIndices(clusters, lookupIndices);
