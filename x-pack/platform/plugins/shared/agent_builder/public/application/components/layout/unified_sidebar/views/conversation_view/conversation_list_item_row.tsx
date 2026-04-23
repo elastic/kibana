@@ -135,7 +135,6 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
       <EuiContextMenuItem
         key="rename"
         icon="pencil"
-        size="s"
         data-test-subj={`agentBuilderSidebarConversationRename-${conversationId}`}
         onClick={() => {
           closePopover();
@@ -147,7 +146,6 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
       <EuiContextMenuItem
         key="delete"
         icon={<EuiIcon type="trash" color="danger" aria-hidden={true} />}
-        size="s"
         data-test-subj={`agentBuilderSidebarConversationDelete-${conversationId}`}
         css={css`
           color: ${euiTheme.colors.danger};
@@ -215,7 +213,7 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
               repositionOnScroll
               aria-label={labels.actionsMenu}
             >
-              <EuiContextMenuPanel size="s" items={menuItems} />
+              <EuiContextMenuPanel items={menuItems} />
             </EuiPopover>
           </div>
         </EuiFlexItem>

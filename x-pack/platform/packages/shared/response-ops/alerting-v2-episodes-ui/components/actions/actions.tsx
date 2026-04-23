@@ -150,7 +150,6 @@ export function AlertEpisodeActions({
               {episodeId && groupHash ? (
                 <EuiListGroupItem
                   label={i18n.ACTIONS_EDIT_ASSIGNEE_LABEL}
-                  size="s"
                   iconType="user"
                   onClick={() => {
                     setIsMoreOpen(false);
