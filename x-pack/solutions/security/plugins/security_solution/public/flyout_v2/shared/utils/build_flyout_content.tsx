@@ -12,7 +12,6 @@ import {
   SIGNAL_RULE_NAME_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
-import { DataViewManagerBootstrap } from '../../../one_discover/alert_flyout_overview_tab_component';
 import { Network } from '../../network_details';
 import { RuleDetails } from '../../rule_details';
 
@@ -32,12 +31,7 @@ export const buildFlyoutContent = (field: string, value: string): React.ReactEle
       ? FlowTargetSourceDest.destination
       : FlowTargetSourceDest.source;
 
-    return (
-      <>
-        <DataViewManagerBootstrap />
-        <Network ip={value} flowTarget={flowTarget} />
-      </>
-    );
+    return <Network ip={value} flowTarget={flowTarget} />;
   }
 
   if (field === SIGNAL_RULE_NAME_FIELD_NAME) {
