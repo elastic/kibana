@@ -58,7 +58,7 @@ export const EntitiesDetails: React.FC = () => {
     dataAsNestedObject
   ) as IdentityFields;
 
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
 
   /**
    * User EUID extraction applies postAggFilter (e.g. non-IDP path needs host.id), so many ECS docs

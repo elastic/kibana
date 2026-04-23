@@ -82,6 +82,10 @@ const USER_ENTITY_OVERVIEW_ID = 'user-entity-overview';
 
 export interface UserEntityOverviewProps {
   userName: string;
+
+  /**
+   * These identity fields for the user are wrong and need to be fixed
+   */
   identityFields: Record<string, string>;
   /**
    * When provided (e.g. from parent EntitiesOverview), use this record for risk/display
@@ -109,7 +113,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
   const { scopeId } = useDocumentDetailsContext();
   const { from, to } = useGlobalTime();
   const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
   const euidApi = useEntityStoreEuidApi();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
@@ -197,6 +201,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
     })
   );
   const { hasNonClosedAlerts } = useNonClosedAlerts({
+    entityRecord,
     identityFields: userIdentityFields,
     entityType: EntityType.user,
     to,
@@ -372,7 +377,8 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
         )}
       </EuiFlexItem>
       <AlertCountInsight
-        identityFields={userName ? { 'user.name': userName } : userIdentityFields}
+        entityRecord={entityRecord}
+        identityFields={userIdentityFields}
         entityType={EntityType.user}
         queryId={`${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-${USER_ENTITY_OVERVIEW_ID}`}
         openDetailsPanel={openDetailsPanel}
