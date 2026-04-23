@@ -19,15 +19,17 @@ import type { EsqlLanguageDeps } from '../types';
 // dependencies so the shared suggestion provider can resolve per-model callbacks.
 // Returned from the hook so `editorDidMount` can register new models.
 const esqlDepsByModelUri = new Map<string, EsqlLanguageDeps>();
+const getModelDependencies = (model: monaco.editor.ITextModel) =>
+  esqlDepsByModelUri.get(model.uri.toString());
 
 // Single shared provider per language; resolves callbacks per Monaco model.
 const sharedEsqlSuggestionProvider = ESQLLang.getSuggestionProvider?.({
-  getModelDependencies: (model) => esqlDepsByModelUri.get(model.uri.toString()),
+  getModelDependencies,
 });
 
 // This provider depends on getEditorMessages, so it needs to be model URI specific
 const sharedEsqlCodeActionProvider = ESQLLang.getCodeActionProvider?.({
-  getModelDependencies: (model) => esqlDepsByModelUri.get(model.uri.toString()),
+  getModelDependencies,
 });
 
 interface UseEditorConfigParams {
