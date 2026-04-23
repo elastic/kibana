@@ -286,6 +286,10 @@ export function jobsProvider(
         bucketSpanSeconds: parseInterval(job.analysis_config.bucket_span!)!.asSeconds(),
       };
 
+      if (serverless.cpsEnabled && hasDatafeed) {
+        tempJob.cpsMigrated = job.datafeed_config?.project_routing !== undefined;
+      }
+
       if (jobIds.find((j) => j === tempJob.id)) {
         tempJob.fullJob = job;
       }

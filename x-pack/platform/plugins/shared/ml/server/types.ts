@@ -49,6 +49,10 @@ export interface SystemRouteDeps {
   serverless: ServerlessInfo;
 }
 
+export interface JobServiceRouteDeps {
+  serverless: ServerlessInfo;
+}
+
 export interface SavedObjectsRouteDeps {
   getSpaces?: () => Promise<SpacesPluginStart>;
   resolveMlCapabilities: ResolveMlCapabilities;

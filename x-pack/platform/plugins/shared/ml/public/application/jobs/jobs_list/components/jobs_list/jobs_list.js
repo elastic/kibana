@@ -33,7 +33,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AnomalyDetectionJobIdLink } from './job_id_link';
-import { isManagedJob } from '../../../jobs_utils';
+import { isManagedJob, showCPSLegacyBadge } from '../../../jobs_utils';
 import { MLSavedObjectsSpacesList } from '../../../../components/ml_saved_objects_spaces_list';
 import { ANOMALY_DETECTOR_SAVED_OBJECT_TYPE } from '../../../../../../common/types/saved_objects';
 
@@ -182,29 +182,60 @@ export class JobsListUI extends Component {
         truncateText: false,
         width: '15%',
         render: (id, item) => {
-          if (!isManagedJob(item)) return id;
+          const showManaged = isManagedJob(item);
+          const showCpsLegacy = showCPSLegacyBadge(item);
+          if (!showManaged && !showCpsLegacy) {
+            return id;
+          }
 
           return (
             <>
               <span>
-                {id} &nbsp;
-                <EuiToolTip
-                  content={i18n.translate('xpack.ml.jobsList.managedBadgeTooltip', {
-                    defaultMessage:
-                      'This job is preconfigured and managed by Elastic; other parts of the product might have might have dependencies on its behavior.',
-                  })}
-                >
-                  <EuiBadge
-                    tabIndex={0}
-                    color="hollow"
-                    data-test-subj="mlJobListRowManagedLabel"
-                    size="xs"
-                  >
-                    {i18n.translate('xpack.ml.jobsList.managedBadgeLabel', {
-                      defaultMessage: 'Managed',
-                    })}
-                  </EuiBadge>
-                </EuiToolTip>
+                {id}
+                {showManaged && (
+                  <>
+                    {' '}
+                    <EuiToolTip
+                      content={i18n.translate('xpack.ml.jobsList.managedBadgeTooltip', {
+                        defaultMessage:
+                          'This job is preconfigured and managed by Elastic; other parts of the product might have might have dependencies on its behavior.',
+                      })}
+                    >
+                      <EuiBadge
+                        tabIndex={0}
+                        color="hollow"
+                        data-test-subj="mlJobListRowManagedLabel"
+                        size="xs"
+                      >
+                        {i18n.translate('xpack.ml.jobsList.managedBadgeLabel', {
+                          defaultMessage: 'Managed',
+                        })}
+                      </EuiBadge>
+                    </EuiToolTip>
+                  </>
+                )}
+                {showCpsLegacy && (
+                  <>
+                    {' '}
+                    <EuiToolTip
+                      content={i18n.translate('xpack.ml.jobsList.cpsLegacyBadgeTooltip', {
+                        defaultMessage:
+                          'This job is not using CPS project routing. Consider migrating the datafeed to use project routing.',
+                      })}
+                    >
+                      <EuiBadge
+                        tabIndex={0}
+                        color="hollow"
+                        data-test-subj="mlJobListRowCpsLegacyLabel"
+                        size="xs"
+                      >
+                        {i18n.translate('xpack.ml.jobsList.cpsLegacyBadgeLabel', {
+                          defaultMessage: 'Legacy',
+                        })}
+                      </EuiBadge>
+                    </EuiToolTip>
+                  </>
+                )}
               </span>
             </>
           );
