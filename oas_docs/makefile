@@ -71,6 +71,9 @@ api-docs-overlay: ## Apply all overlays (including bump-slim placeholder for Das
 	rm output/kibana.serverless.tmp*.yaml
 
 .PHONY: api-docs-overlay-external
+# TODO: once PR #265298 (required-field-fixes) merges into main and this branch is rebased,
+# add api-docs-fix-required as a dependency and prepend the required-field-fixes.overlays.yaml
+# step here (before kibana.overlays.yaml), matching what api-docs-overlay does.
 api-docs-overlay-external: ## Apply all overlays except bump-slim — output is kibana.external.yaml (full Dashboards & Visualizations for external hosting)
 	@./node_modules/.bin/bump overlay "output/kibana.yaml" "overlays/kibana.overlays.yaml" > "output/kibana.tmp1.yaml"
 	@./node_modules/.bin/bump overlay "output/kibana.tmp1.yaml" "overlays/alerting.overlays.yaml" > "output/kibana.tmp2.yaml"
