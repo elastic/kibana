@@ -24,8 +24,10 @@ const createWrapper = () => {
       queries: { retry: false, cacheTime: 0 },
     },
   });
-  return ({ children }: { children: React.ReactNode }) =>
+  const Wrapper = ({ children }: { children: React.ReactNode }) =>
     React.createElement(QueryClientProvider, { client }, children);
+  Wrapper.displayName = 'TestQueryClientProvider';
+  return Wrapper;
 };
 
 const parseLastFilterQuery = (): Record<string, unknown> => {

@@ -185,9 +185,7 @@ describe('render-tag-safe attachment id regression', () => {
       { identifierType: 'user', identifier: 'james.barton@acmecrm.com' },
       { identifierType: 'host', identifier: 'LAPTOP-SALES04@corp' },
     ]);
-    expect(id).toMatch(
-      new RegExp(`^${SecurityAgentBuilderAttachments.entity}:list:[a-f0-9]{64}$`)
-    );
+    expect(id).toMatch(new RegExp(`^${SecurityAgentBuilderAttachments.entity}:list:[a-f0-9]{64}$`));
     expect(id).not.toContain('@');
     expect(id).not.toMatch(/\s/);
   });

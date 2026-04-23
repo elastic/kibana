@@ -10,6 +10,7 @@ import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import type { RiskStats } from '../../../../../common/search_strategy';
+import { RiskSummaryMini } from './risk_summary_mini';
 
 jest.mock('../../../../entity_analytics/components/severity/common', () => ({
   RiskScoreLevel: ({ severity }: { severity?: string }) => (
@@ -24,8 +25,6 @@ jest.mock('../../../../entity_analytics/components/home/entities_table/risk_scor
     </span>
   ),
 }));
-
-const { RiskSummaryMini } = require('./risk_summary_mini') as typeof import('./risk_summary_mini');
 
 const stats = (override: Partial<RiskStats> = {}): RiskStats =>
   ({

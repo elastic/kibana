@@ -84,12 +84,16 @@ const useAttachmentWatchlists = (enabled: boolean) => {
 
   return useQuery<WatchlistListItem[]>({
     queryKey: [WATCHLISTS_QUERY_KEY],
-    queryFn: async ({ signal }) =>
-      http!.fetch<WatchlistListItem[]>(`${WATCHLISTS_URL}/list`, {
+    queryFn: async ({ signal }) => {
+      if (!http) {
+        throw new Error('Core http service is not available');
+      }
+      return http.fetch<WatchlistListItem[]>(`${WATCHLISTS_URL}/list`, {
         version: API_VERSIONS.public.v1,
         method: 'GET',
         signal,
-      }),
+      });
+    },
     enabled: Boolean(http) && enabled,
   });
 };

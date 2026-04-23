@@ -29,7 +29,7 @@ jest.mock('./entity_card/entity_card', () => ({
 
 jest.mock('./entity_table/entity_table', () => ({
   EntityTable: (props: Record<string, unknown>) => (
-    <div data-test-subj="entityTableMock">count:{(props.entities as unknown[]).length}</div>
+    <div data-test-subj="entityTableMock">{`count:${(props.entities as unknown[]).length}`}</div>
   ),
 }));
 

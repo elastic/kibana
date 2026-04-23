@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { useResolutionGroup } from '../../../../entity_analytics/components/entity_resolution/hooks/use_resolution_group';
 import { ResolutionMini } from './resolution_mini';
 
 jest.mock(
@@ -31,9 +32,7 @@ jest.mock(
   })
 );
 
-const mockedUseResolutionGroup =
-  require('../../../../entity_analytics/components/entity_resolution/hooks/use_resolution_group')
-    .useResolutionGroup as jest.Mock;
+const mockedUseResolutionGroup = useResolutionGroup as jest.Mock;
 
 const renderMini = (props: Partial<React.ComponentProps<typeof ResolutionMini>> = {}) =>
   render(

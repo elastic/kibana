@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EntityType } from '../../../../../common/entity_analytics/types';
-import type { EntityForAttachment } from '../use_entity_for_attachment';
+import { useEntityForAttachment, type EntityForAttachment } from '../use_entity_for_attachment';
 import { EntityCard } from './entity_card';
 
 jest.mock('../use_entity_for_attachment', () => ({
@@ -61,8 +61,7 @@ jest.mock('./risk_summary_mini', () => ({
   },
 }));
 
-const mockedUseEntityForAttachment = require('../use_entity_for_attachment')
-  .useEntityForAttachment as jest.Mock;
+const mockedUseEntityForAttachment = useEntityForAttachment as jest.Mock;
 
 const baseEntity = (override: Partial<EntityForAttachment> = {}): EntityForAttachment => ({
   entityType: EntityType.user,

@@ -250,8 +250,12 @@ export const useEntityForAttachment = (
     refetch,
   } = useQuery<EntityRecordShape | undefined, IHttpFetchError>({
     queryKey,
-    queryFn: ({ signal }) =>
-      fetchEntity({ http: http as HttpStart, identifier: identifier!, signal }),
+    queryFn: ({ signal }) => {
+      if (!identifier || !http) {
+        return undefined;
+      }
+      return fetchEntity({ http, identifier, signal });
+    },
     enabled,
   });
 

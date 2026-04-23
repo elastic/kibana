@@ -25,10 +25,7 @@ import type { ExperimentalFeatures } from '../../../../common';
 import type { EntityRiskScoreRecord } from '../../../../common/api/entity_analytics/common';
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../lib/telemetry/event_based/events';
-import {
-  buildRenderAttachmentTag,
-  buildSingleEntityAttachmentId,
-} from './entity_attachment_utils';
+import { buildRenderAttachmentTag, buildSingleEntityAttachmentId } from './entity_attachment_utils';
 import { getEntityTool, SECURITY_GET_ENTITY_TOOL_ID } from './get_entity_tool';
 
 jest.mock('../../utils/get_agent_builder_resource_availability', () => ({
