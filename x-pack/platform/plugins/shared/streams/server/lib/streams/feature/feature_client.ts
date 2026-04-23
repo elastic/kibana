@@ -202,7 +202,7 @@ export class FeatureClient {
     await this.clients.storageClient.clean();
   }
 
-  async bulk(stream: string, operations: FeatureBulkOperation[]) {
+  async bulk(stream: string, operations: FeatureBulkOperation[]): Promise<{ applied: number }> {
     validateFeatures(
       operations
         .filter((operation) => 'index' in operation)
@@ -211,7 +211,11 @@ export class FeatureClient {
 
     const resolvedOperations = await this.filterValidOperations(stream, operations);
 
-    return await this.clients.storageClient.bulk({
+    if (resolvedOperations.length === 0) {
+      return { applied: 0 };
+    }
+
+    await this.clients.storageClient.bulk({
       operations: resolvedOperations.map((operation) => {
         if ('index' in operation) {
           const document = toStorage(stream, operation.index.feature, this.inferenceAvailable);
@@ -227,6 +231,8 @@ export class FeatureClient {
       }),
       throwOnFail: true,
     });
+
+    return { applied: resolvedOperations.length };
   }
 
   async getFeatures(

@@ -179,5 +179,52 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(found).to.be(undefined);
       });
     });
+
+    describe('POST /internal/streams/features/_bulk_delete', () => {
+      it('deletes multiple features in one request and returns the right counts', async () => {
+        const feature1: BaseFeature = { ...testFeature, id: 'bulk-delete-1' };
+        const feature2: BaseFeature = { ...testFeature, id: 'bulk-delete-2' };
+
+        const { uuid: uuid1 } = await upsertFeature(apiClient, STREAM_NAME, feature1);
+        const { uuid: uuid2 } = await upsertFeature(apiClient, STREAM_NAME, feature2);
+
+        const response = await apiClient
+          .fetch('POST /internal/streams/features/_bulk_delete', {
+            params: {
+              body: {
+                operations: [
+                  { streamName: STREAM_NAME, id: uuid1 },
+                  { streamName: STREAM_NAME, id: uuid2 },
+                ],
+              },
+            },
+          })
+          .expect(200)
+          .then((res) => res.body);
+
+        expect(response).to.eql({ succeeded: 2, failed: 0 });
+
+        const { features } = await listFeatures(apiClient, STREAM_NAME, {
+          includeExcluded: true,
+        });
+        expect(features.find((f) => f.uuid === uuid1)).to.be(undefined);
+        expect(features.find((f) => f.uuid === uuid2)).to.be(undefined);
+      });
+
+      it('treats stale/unknown UUIDs as idempotent no-ops (succeeded=0, failed=0)', async () => {
+        const response = await apiClient
+          .fetch('POST /internal/streams/features/_bulk_delete', {
+            params: {
+              body: {
+                operations: [{ streamName: STREAM_NAME, id: 'non-existent-uuid' }],
+              },
+            },
+          })
+          .expect(200)
+          .then((res) => res.body);
+
+        expect(response).to.eql({ succeeded: 0, failed: 0 });
+      });
+    });
   });
 }

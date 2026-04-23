@@ -151,6 +151,7 @@ export const demoteBackedQueriesRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const queryClient = await getQueryClient();
+    // Only rule-backed queries can be demoted; unbacked queries have no rule to remove.
     const toDemote = await queryClient.getQueryLinks([], {
       ruleUnbacked: 'exclude',
       queryIds: params.body.queryIds,
@@ -185,6 +186,99 @@ export const demoteBackedQueriesRoute = createServerRoute({
     }
 
     return { demoted };
+  },
+});
+
+export const bulkDeleteQueriesRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/queries/_bulk_delete',
+  options: {
+    access: 'internal',
+    summary: 'Bulk delete queries across streams',
+    description:
+      'Hard-deletes stored significant-events queries across multiple streams in a single request. Removes backing Kibana rules for any backed queries.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    body: z.object({
+      queryIds: z.array(z.string()).min(1),
+    }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    logger,
+  }): Promise<{ succeeded: number; failed: number }> => {
+    const { getQueryClient, streamsClient, licensing, uiSettingsClient } = await getScopedClients({
+      request,
+    });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const queryClient = await getQueryClient();
+
+    // Bulk delete must cover both backed and unbacked queries; the default
+    // 'exclude' filter would skip unbacked (draft) ones.
+    const queryLinks = await queryClient.getQueryLinks([], {
+      queryIds: params.body.queryIds,
+      ruleUnbacked: 'include',
+    });
+
+    // Capture backed rule IDs per stream to log on mid-flight failure.
+    const byStream = new Map<string, { queryIds: string[]; backedRuleIds: string[] }>();
+    for (const link of queryLinks) {
+      const bucket = byStream.get(link.stream_name) ?? { queryIds: [], backedRuleIds: [] };
+      bucket.queryIds.push(link.query.id);
+      if (link.rule_backed && link.rule_id) {
+        bucket.backedRuleIds.push(link.rule_id);
+      }
+      byStream.set(link.stream_name, bucket);
+    }
+
+    const streamDefinitions = await streamsClient.listStreams();
+    const streamDefinitionsByName = new Map(
+      streamDefinitions.map((streamDefinition) => [streamDefinition.name, streamDefinition])
+    );
+
+    // syncQueries uninstalls rules before writing storage, so a mid-flight
+    // throw can leave rules gone while stored links still reference them. Log
+    // the backed rule IDs on failure so ops can reconcile manually.
+    const sigEventsLogger = logger.get('significant_events');
+
+    let succeeded = 0;
+    let failed = 0;
+
+    for (const [streamName, { queryIds, backedRuleIds }] of byStream) {
+      const definition = streamDefinitionsByName.get(streamName);
+      if (!definition) {
+        logger.warn(`Skipping bulk delete for missing stream ${streamName}`);
+        failed += queryIds.length;
+        continue;
+      }
+      try {
+        await queryClient.bulk(
+          definition,
+          queryIds.map((id) => ({ delete: { id } }))
+        );
+        succeeded += queryIds.length;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        const orphanContext =
+          backedRuleIds.length > 0 ? ` candidateOrphanedRuleIds=[${backedRuleIds.join(',')}]` : '';
+        sigEventsLogger.error(
+          `Bulk delete failed for stream ${streamName}: ${errorMessage}. ` +
+            `queryIds=[${queryIds.join(',')}]${orphanContext}`
+        );
+        failed += queryIds.length;
+      }
+    }
+
+    return { succeeded, failed };
   },
 });
 
@@ -321,6 +415,7 @@ export const internalQueriesRoutes = {
   ...getUnbackedQueriesCountRoute,
   ...promoteUnbackedQueriesRoute,
   ...demoteBackedQueriesRoute,
+  ...bulkDeleteQueriesRoute,
   ...getDiscoveryQueriesRoute,
   ...getDiscoveryQueriesOccurrencesRoute,
 };

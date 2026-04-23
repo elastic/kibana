@@ -284,6 +284,83 @@ export const bulkFeaturesRoute = createServerRoute({
   },
 });
 
+export const bulkDeleteFeaturesRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/features/_bulk_delete',
+  options: {
+    access: 'internal',
+    summary: 'Bulk delete features across streams',
+    description:
+      'Hard-deletes features across multiple streams in a single request. Each operation carries its own streamName; the server groups and delegates per-stream to featureClient.bulk.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    body: z.object({
+      operations: z
+        .array(
+          z.object({
+            streamName: z.string(),
+            id: z.string(),
+          })
+        )
+        .min(1),
+    }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    logger,
+  }): Promise<{ succeeded: number; failed: number }> => {
+    const { getFeatureClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const featureClient = await getFeatureClient();
+
+    const byStream = params.body.operations.reduce<Record<string, string[]>>(
+      (acc, { streamName, id }) => {
+        if (!acc[streamName]) {
+          acc[streamName] = [];
+        }
+        acc[streamName].push(id);
+        return acc;
+      },
+      {}
+    );
+
+    // featureClient.bulk silently drops ops for stale or mis-routed UUIDs. We
+    // treat those as no-ops (neither succeeded nor failed) since deleting
+    // something that is not there is idempotent. Only thrown batches count as
+    // failed.
+    let succeeded = 0;
+    let failed = 0;
+
+    for (const [streamName, ids] of Object.entries(byStream)) {
+      try {
+        const { applied } = await featureClient.bulk(
+          streamName,
+          ids.map((id) => ({ delete: { id } }))
+        );
+        succeeded += applied;
+      } catch (error) {
+        logger.error(
+          `Bulk feature delete failed for stream ${streamName}: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+        failed += ids.length;
+      }
+    }
+
+    return { succeeded, failed };
+  },
+});
+
 export const featuresStatusRoute = createServerRoute({
   endpoint: 'GET /internal/streams/{name}/features/_status',
   options: {
@@ -392,6 +469,7 @@ export const featureRoutes = {
   ...listFeaturesRoute,
   ...listAllFeaturesRoute,
   ...bulkFeaturesRoute,
+  ...bulkDeleteFeaturesRoute,
   ...featuresStatusRoute,
   ...featuresTaskRoute,
 };
