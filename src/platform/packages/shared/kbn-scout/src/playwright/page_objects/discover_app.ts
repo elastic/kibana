@@ -14,7 +14,7 @@ import { expect } from '..';
 import { KibanaCodeEditorWrapper } from '../ui_components';
 
 export class DiscoverApp {
-  private readonly codeEditor: KibanaCodeEditorWrapper;
+  public readonly codeEditor: KibanaCodeEditorWrapper;
 
   constructor(private readonly page: ScoutPage) {
     this.codeEditor = new KibanaCodeEditorWrapper(page);
