@@ -44,7 +44,7 @@ export const IntegrationSelectablePopover = (props: IntegrationSelectablePopover
   const { telemetry } = useKibana().services;
 
   const handleChange: EuiSelectableProps['onChange'] = useCallback(
-    (newOptions) => {
+    (newOptions: EuiSelectableOption[]) => {
       const selectedOption = newOptions.find((option) => option.checked === 'on');
 
       if (selectedOption?.key) {
