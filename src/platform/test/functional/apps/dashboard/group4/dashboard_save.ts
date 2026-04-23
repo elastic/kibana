@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const esArchiver = getService('esArchiver');
 
-  describe.only('dashboard save', function describeIndexTests() {
+  describe('dashboard save', function describeIndexTests() {
     this.tags('includeFirefox');
     const dashboardName = 'Dashboard Save Test';
     const dashboardNameEnterKey = 'Dashboard Save Test with Enter Key';

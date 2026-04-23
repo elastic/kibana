@@ -156,7 +156,7 @@ function NewPanelContent({ dashboardApi }: { dashboardApi: DashboardApi }) {
                 hasBorder
                 paddingSize="none"
                 onClick={lens.onClick}
-                data-test-subj="dashboardAddPanelFeatured-visualization"
+                data-test-subj="create-action-Lens"
                 css={{ cursor: 'pointer', padding: `${euiTheme.size.s} ${euiTheme.size.base}` }}
               >
                 <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
@@ -189,7 +189,7 @@ function NewPanelContent({ dashboardApi }: { dashboardApi: DashboardApi }) {
                 hasBorder
                 paddingSize="none"
                 onClick={esql.onClick}
-                data-test-subj="dashboardAddPanelFeatured-esqlVisualization"
+                data-test-subj="create-action-ES|QL"
                 css={{ cursor: 'pointer', padding: `${euiTheme.size.s} ${euiTheme.size.base}` }}
               >
                 <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>

@@ -50,7 +50,7 @@ export class DashboardAddPanelService extends FtrService {
   async clickCreateNewLink() {
     this.log.debug('DashboardAddPanel.clickAddNewPanelButton');
     await this.openAddPanelFlyout();
-    await this.testSubjects.click('dashboardAddPanelFeatured-visualization');
+    await this.testSubjects.click('create-action-Lens');
     await this.header.waitUntilLoadingHasFinished();
     await this.testSubjects.existOrFail('lnsApp', {
       timeout: 5000,

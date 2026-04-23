@@ -214,12 +214,6 @@ export class DashboardApp {
     await expect(this.panelSelectionFlyout).toBeVisible();
   }
 
-  async openNewLensPanel() {
-    await this.openAddPanelFlyout();
-    await this.page.testSubj.click('create-action-Lens');
-    await expect(this.page.testSubj.locator('lnsApp')).toBeVisible();
-  }
-
   async saveDashboard(name: string) {
     await this.page.testSubj.click('dashboardInteractiveSaveMenuItem');
     await this.savedObjectTitleInput.fill(name);
