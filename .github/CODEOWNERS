@@ -3256,11 +3256,11 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/intercepts/*.ts @elastic/appex-sharedux
 
 # OpenAPI spec files
-oas_docs/linters                              @elastic/experience-docs
-oas_docs/overlays                             @elastic/experience-docs
-oas_docs/kibana.info.serverless.yaml          @elastic/experience-docs
-oas_docs/kibana.info.yaml                     @elastic/experience-docs
-oas_docs/output                               @elastic/ski-docs
+oas_docs/linters                              @elastic/kibana-core
+oas_docs/overlays                             @elastic/kibana-core
+oas_docs/kibana.info.serverless.yaml          @elastic/kibana-core
+oas_docs/kibana.info.yaml                     @elastic/kibana-core
+oas_docs/output                               @elastic/kibana-core
 
 # Documentation settings files
 docs/settings-gen                             @elastic/experience-docs
@@ -3350,6 +3350,10 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.coderabbit.yml @elastic/kibana-operations
 
 # Buildkite overrides, and ownership shares
+/.buildkite/scripts/steps/checks/api_contracts.sh @elastic/kibana-core
+/.buildkite/scripts/steps/checks/capture_oas_snapshot.sh @elastic/kibana-core
+/.buildkite/scripts/steps/checks/notify_api_contract_owners.ts @elastic/kibana-core
+/.buildkite/scripts/steps/checks/notify_api_contract_owners.test.ts @elastic/kibana-core
 /.buildkite/pipelines/performance/streams_weekly.yml @elastic/obs-sig-events-team @elastic/obs-onboarding-team
 /.buildkite/pipeline-resource-definitions/kibana-otel-semconv-sync.yml @elastic/obs-onboarding-team
 /.buildkite/pipeline-resource-definitions/kibana-streams-performance-weekly.yml @elastic/obs-sig-events-team @elastic/obs-onboarding-team

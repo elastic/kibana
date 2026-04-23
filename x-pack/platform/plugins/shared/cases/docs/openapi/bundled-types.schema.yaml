@@ -74,7 +74,7 @@ paths:
               examples:
                 response401:
                   $ref: '#/components/examples/response_401'
-      x-code-samples:
+      x-codeSamples:
         - label: curl
           lang: curl
           source: |
