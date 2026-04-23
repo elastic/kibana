@@ -120,7 +120,7 @@
             }
           }
         },
-        "x-code-samples": [
+        "x-codeSamples": [
           {
             "label": "curl",
             "lang": "curl",
