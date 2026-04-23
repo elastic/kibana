@@ -19,7 +19,7 @@ import { withSpan } from '@kbn/apm-utils';
 import { conditionSchema, isConditionComplete, type Condition } from '@kbn/streamlang';
 import { createIdentifyFeaturesPrompt } from './prompt';
 import { formatRawDocument } from './utils/format_raw_document';
-import { EMPTY_TOKENS, sumTokens } from '../helpers/sum_tokens';
+import { sumTokens } from '../helpers/sum_tokens';
 
 export interface PreviouslyIdentifiedFeature {
   id: string;
@@ -130,7 +130,7 @@ export async function identifyFeatures({
   return {
     features,
     ignoredFeatures,
-    tokensUsed: sumTokens(EMPTY_TOKENS, response.tokens),
+    tokensUsed: sumTokens({ added: response.tokens }),
   };
 }
 

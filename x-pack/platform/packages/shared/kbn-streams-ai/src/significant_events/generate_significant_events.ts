@@ -291,15 +291,7 @@ export async function generateSignificantEvents({
 
   return {
     queries,
-    tokensUsed: sumTokens(
-      {
-        prompt: 0,
-        completion: 0,
-        total: 0,
-        cached: 0,
-      },
-      response.tokens
-    ),
+    tokensUsed: sumTokens({ added: response.tokens }),
     toolUsage,
   };
 }

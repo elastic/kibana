@@ -11,7 +11,7 @@ import type {
   ToolCallback,
   ToolDefinition,
 } from '@kbn/inference-common';
-import { sumTokens } from '@kbn/streams-ai';
+import { EMPTY_TOKENS, sumTokens } from '@kbn/streams-ai';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { Streams } from '@kbn/streams-schema';
 import type { GenerateInsightsResult } from '@kbn/streams-schema';
@@ -81,8 +81,8 @@ export async function generateInsights({
   );
 
   const tokensUsed = streamInsightsResults.reduce<ChatCompletionTokenCount>(
-    (acc, result) => sumTokens(acc, result.tokens_used),
-    { prompt: 0, completion: 0, total: 0 }
+    (acc, result) => sumTokens({ total: acc, added: result.tokens_used }),
+    EMPTY_TOKENS
   );
 
   // If no stream insights, return empty
@@ -123,7 +123,7 @@ export async function generateInsights({
 
     return {
       insights,
-      tokens_used: sumTokens(tokensUsed, response.tokens),
+      tokens_used: sumTokens({ total: tokensUsed, added: response.tokens }),
     };
   } catch (error) {
     if (
