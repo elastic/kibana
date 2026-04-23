@@ -15,7 +15,6 @@ import {
   initializeTitleManager,
   timeRangeComparators,
   titleComparators,
-  useBatchedPublishingSubjects,
   apiPublishesSettings,
   initializeUnsavedChanges,
 } from '@kbn/presentation-publishing';

@@ -494,10 +494,7 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
   return (
     <EuiResizeObserver onResize={resizeHandler}>
       {(resizeRef) => (
-        <div
-          data-test-subj="dataVisualizerTableContainer"
-          ref={resizeRef}
-        >
+        <div data-test-subj="dataVisualizerTableContainer" ref={resizeRef}>
           <EuiInMemoryTable<T>
             noItemsMessage={message}
             css={dvTableCss}

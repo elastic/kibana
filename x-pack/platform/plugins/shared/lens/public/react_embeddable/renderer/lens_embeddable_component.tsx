@@ -59,10 +59,7 @@ export function LensEmbeddableComponent({
   const rootRef = useDispatcher(hasRendered, api);
 
   return (
-    <div
-      css={{ width: '100%', height: '100%', position: 'relative' }}
-      ref={rootRef}
-    >
+    <div css={{ width: '100%', height: '100%', position: 'relative' }} ref={rootRef}>
       {expressionParams == null || blockingErrors.length ? null : (
         <ExpressionWrapper {...expressionParams} paddingTop={hideTitle || !panelTitle?.length} />
       )}

@@ -269,13 +269,7 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
             />
           );
 
-        return (
-          <div
-            css={flexCss}
-          >
-            {editorContent}
-          </div>
-        );
+        return <div css={flexCss}>{editorContent}</div>;
       },
     };
   },

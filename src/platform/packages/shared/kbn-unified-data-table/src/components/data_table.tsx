@@ -1377,11 +1377,7 @@ const InternalUnifiedDataTable = React.forwardRef<
 
     if (!rowCount) {
       return (
-        <div
-          className="euiDataGrid__noResults"
-          css={styles.emptyRow}
-          data-document-number={0}
-        >
+        <div className="euiDataGrid__noResults" css={styles.emptyRow} data-document-number={0}>
           <EuiText size="xs" color="subdued" textAlign="center">
             <EuiIcon type="discoverApp" size="m" color="subdued" aria-hidden="true" />
             <EuiSpacer size="s" />
