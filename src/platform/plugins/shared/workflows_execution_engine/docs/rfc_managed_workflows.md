@@ -474,7 +474,7 @@ steps:
 };
 ```
 
-Templating would be rendered at install time, not at runtime. The plugin calls `install(ID, { values })`, the platform invokes `yamlTemplate(values)` and stores the rendered YAML. The `definitionHash` is computed from the **rendered** YAML. No need to persist `values` on the document — the calling plugin is the source of truth and re-supplies them on every `install()` call.
+Templating would be rendered at install time, not at runtime. The plugin calls `install(ID, { values })`, the platform invokes `yamlTemplate(values)` and stores the rendered YAML. The `definitionHash` is computed from the **raw template YAML** (before variable substitution), not from the rendered output — this ensures version detection is deterministic regardless of what values were supplied. The `values` are persisted on the workflow document as `overrides`, so when a new template version ships, the platform can re-apply the existing overrides against the new version automatically. This aligns with the `overrides` mechanism described in [Mutability #4](#mutability).
 
 **Definition type:**
 
