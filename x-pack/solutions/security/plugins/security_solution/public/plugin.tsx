@@ -335,7 +335,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         agentBuilder: plugins.agentBuilder,
         chrome: core.chrome,
         experimentalFeatures: this.experimentalFeatures,
-        resolveSecurityCanvasContext: () => this.getSecurityCanvasContext(core, plugins),
+        resolveSecurityCanvasContext: () =>
+          this.getSecurityCanvasContext(core, plugins as StartPluginsDependencies),
         searchSession: plugins.data.search.session,
       });
     }
@@ -419,7 +420,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
    */
   private getSecurityCanvasContext(
     coreStart: CoreStart,
-    startPlugins: StartPlugins
+    startPlugins: StartPluginsDependencies
   ): Promise<SecurityCanvasEmbeddedBundle> {
     if (!this._securityCanvasContextPromise) {
       this._securityCanvasContextPromise = (async () => {

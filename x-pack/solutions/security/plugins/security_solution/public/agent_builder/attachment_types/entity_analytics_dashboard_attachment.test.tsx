@@ -129,9 +129,12 @@ const renderCanvas = (overrides: { searchSession?: ISessionService } = {}) => {
   });
   return render(
     <I18nProvider>
-      {definition.renderCanvasContent({
-        attachment: makeAttachment(),
-      } as unknown as Parameters<typeof definition.renderCanvasContent>[0])}
+      {definition.renderCanvasContent!(
+        {
+          attachment: makeAttachment(),
+        } as unknown as Parameters<NonNullable<typeof definition.renderCanvasContent>>[0],
+        {} as unknown as Parameters<NonNullable<typeof definition.renderCanvasContent>>[1]
+      )}
     </I18nProvider>
   );
 };

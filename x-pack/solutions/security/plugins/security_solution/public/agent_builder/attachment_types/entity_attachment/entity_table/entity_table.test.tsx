@@ -121,12 +121,12 @@ describe('EntityTable', () => {
         refetch: jest.fn(),
       });
       const application = { navigateToApp: jest.fn() } as unknown as ApplicationStart;
-      const agentBuilder = { toggleChat: jest.fn() } as unknown as Parameters<
-        typeof renderTable
-      >[0]['agentBuilder'];
-      const chrome = { sidebar: { getCurrentAppId: () => 'other' } } as unknown as Parameters<
-        typeof renderTable
-      >[0]['chrome'];
+      const agentBuilder = { toggleChat: jest.fn() } as unknown as NonNullable<
+        Parameters<typeof renderTable>[0]
+      >['agentBuilder'];
+      const chrome = { sidebar: { getCurrentAppId: () => 'other' } } as unknown as NonNullable<
+        Parameters<typeof renderTable>[0]
+      >['chrome'];
       const openSidebarConversation = jest.fn();
 
       renderTable({
