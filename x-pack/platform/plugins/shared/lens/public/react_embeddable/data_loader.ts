@@ -322,6 +322,10 @@ export function loadEmbeddableData(
     // This will catch also failed loaded dataViews
     const hasBlockingErrors = dispatchBlockingErrorIfAny();
 
+    if (hasBlockingErrors) {
+      endChartSpan('failure', internalApi.blockingError$.getValue() ?? undefined);
+    }
+
     if (params?.expression != null && !hasBlockingErrors) {
       internalApi.updateExpressionParams(params);
     }
