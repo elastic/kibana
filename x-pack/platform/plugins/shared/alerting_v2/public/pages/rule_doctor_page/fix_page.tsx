@@ -11,6 +11,7 @@ import {
   EuiPageHeader,
   EuiEmptyPrompt,
   EuiButton,
+  EuiCallOut,
   EuiSpacer,
   EuiBasicTable,
   EuiBasicTableColumn,
@@ -338,13 +339,13 @@ const ProposedRulePanel: React.FC<{
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton size="s" iconType="pencil" onClick={onEdit}>
-            Edit
+            Refine
           </EuiButton>
         </EuiFlexItem>
         {onEditWithAgent && (
           <EuiFlexItem grow={false}>
             <EuiButton size="s" iconType="sparkles" onClick={onEditWithAgent}>
-              Edit with agent
+              Refine with agent
             </EuiButton>
           </EuiFlexItem>
         )}
@@ -714,8 +715,10 @@ export const FixPage: React.FC = () => {
 
   const handleCreateCoverageRule = useCallback(() => {
     if (!finding?.proposed) return;
+    const query = safeGet(finding.proposed, 'evaluation.query.base') as string | undefined;
     history.push('/create', {
       initialValues: mapProposedToFormValues(finding.proposed),
+      ...(query ? { initialQuery: query } : {}),
     });
   }, [finding, history]);
 
@@ -944,7 +947,7 @@ export const FixPage: React.FC = () => {
                 {agentBuilder && (
                   <EuiFlexItem grow={false}>
                     <EuiButton size="s" iconType="sparkles" onClick={handleEditWithAgent}>
-                      Discuss with agent
+                      Refine with agent
                     </EuiButton>
                   </EuiFlexItem>
                 )}
@@ -1027,22 +1030,16 @@ export const FixPage: React.FC = () => {
             </EuiFlexItem>
           </EuiFlexGroup>
         }
-        description={
-          <>
-            <EuiText size="xs" color="subdued">
-              <strong>Rationale</strong>
-            </EuiText>
-            <EuiText size="s" color="subdued">
-              {finding.explanation}
-            </EuiText>
-          </>
-        }
         bottomBorder
         breadcrumbs={[
           { text: 'Rule Doctor', onClick: () => history.push('/doctor') },
           { text: 'Fix recommendation' },
         ]}
       />
+      <EuiSpacer />
+      <EuiCallOut title="Rationale" iconType="help" color="primary" size="s">
+        <EuiText size="s">{finding.explanation}</EuiText>
+      </EuiCallOut>
       <EuiSpacer />
       {loading ? <EuiLoadingSpinner size="xl" /> : renderFlowByType()}
     </>
