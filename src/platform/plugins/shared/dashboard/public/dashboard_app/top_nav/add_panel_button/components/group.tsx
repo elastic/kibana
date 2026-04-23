@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, type ComponentType, type ReactElement } from 'react';
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -19,9 +19,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { MenuItemGroup } from '../types';
-import { VegaIcon } from './vega_icon';
-
-const VEGA_ACTION_ID = 'addVegaPanelAction';
 
 export function Group({ group }: { group: MenuItemGroup }) {
   const listItems: EuiListGroupProps['listItems'] = useMemo(
@@ -37,7 +34,7 @@ export function Group({ group }: { group: MenuItemGroup }) {
         showToolTip: true,
         label: item.name,
         onClick: item.onClick,
-        iconType: item.id === VEGA_ACTION_ID ? VegaIcon : item.icon,
+        ...(typeof item.icon === 'string' ? { iconType: item.icon } : { icon: <item.icon /> }),
         isDisabled: item.isDisabled,
         'data-test-subj': item['data-test-subj'],
         role: 'menuitem',
