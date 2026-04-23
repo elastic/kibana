@@ -42,7 +42,7 @@ interface UseCombinedRiskScoreKpiResult {
 export const useCombinedRiskScoreKpi = (skip?: boolean): UseCombinedRiskScoreKpiResult => {
   const { from, to } = useGlobalTime();
   const { filterQuery } = useGlobalFilterQuery();
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false) === true;
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2) === true;
 
   const timerange = useMemo(
     () => ({

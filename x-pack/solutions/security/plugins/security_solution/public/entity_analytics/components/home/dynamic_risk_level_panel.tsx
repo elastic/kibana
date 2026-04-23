@@ -28,7 +28,7 @@ export const DynamicRiskLevelPanel: React.FC<DynamicRiskLevelPanelProps> = ({
 }) => {
   const spaceId = useSpaceId();
   const hasWatchlist = !!watchlistId;
-  const isEntityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false) === true;
+  const isEntityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2) === true;
 
   const useLegacy = !isEntityStoreV2Enabled;
 

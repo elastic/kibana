@@ -27,7 +27,7 @@ export const useEntityAnalyticsRiskScorePanelData = <T extends EntityType>({
   filterQuery?: ESQuery | string;
   timerange: { from: string; to: string };
 }) => {
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false) === true;
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2) === true;
   const isHostOrUserRiskEntity = riskEntity === EntityType.host || riskEntity === EntityType.user;
 
   const legacyKpi = useRiskScoreKpi({
