@@ -15,12 +15,7 @@ import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { ISessionService } from '@kbn/data-plugin/public';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiSkeletonText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSkeletonText } from '@elastic/eui';
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import { APP_UI_ID } from '../../../../common/constants';
 import type { EntityAttachment } from './types';
@@ -132,11 +127,7 @@ export const createEntityAttachmentDefinition = ({
           renderCanvasContent: (props: AttachmentRenderProps<EntityAttachment>) => (
             <React.Suspense
               fallback={
-                <EuiFlexGroup
-                  alignItems="center"
-                  justifyContent="center"
-                  css={{ minHeight: 200 }}
-                >
+                <EuiFlexGroup alignItems="center" justifyContent="center" css={{ minHeight: 200 }}>
                   <EuiFlexItem grow={false}>
                     <EuiLoadingSpinner size="l" />
                   </EuiFlexItem>

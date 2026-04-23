@@ -48,7 +48,6 @@ jest.mock('./entity_card/entity_card', () => ({
   ),
 }));
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { EntityAttachmentCanvasContent } = require('./entity_attachment_canvas_content');
 
 const experimentalFeatures = {

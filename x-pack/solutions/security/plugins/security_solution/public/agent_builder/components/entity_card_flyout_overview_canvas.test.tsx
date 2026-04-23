@@ -33,7 +33,6 @@ jest.mock('../../flyout/shared/components/flyout_loading', () => ({
 }));
 
 const mockedUseEntityForAttachment =
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
   require('../attachment_types/entity_attachment/use_entity_for_attachment')
     .useEntityForAttachment as jest.Mock;
 
@@ -50,7 +49,6 @@ const baseEntityData = (override: Partial<EntityForAttachment> = {}): EntityForA
   ...override,
 });
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { EntityCardFlyoutOverviewCanvas } = require('./entity_card_flyout_overview_canvas');
 
 const applicationStub = { navigateToApp: jest.fn() } as unknown as ApplicationStart;
