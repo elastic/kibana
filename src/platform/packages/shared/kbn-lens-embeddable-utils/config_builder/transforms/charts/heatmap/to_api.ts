@@ -52,7 +52,8 @@ function getLegendProps(legend: HeatmapVisualizationState['legend']): HeatmapCon
 
 function getGridConfigProps(
   gridConfig: HeatmapVisualizationState['gridConfig'],
-  xAxisScale?: XScaleSchemaType
+  xAxisScale?: XScaleSchemaType,
+  hasYAccessor?: boolean
 ): HeatmapConfig['axis'] {
   return {
     x: {
@@ -70,14 +71,18 @@ function getGridConfigProps(
       ...(gridConfig.xSortPredicate ? { sort: gridConfig.xSortPredicate } : {}),
       scale: xAxisScale ?? 'ordinal',
     },
-    y: {
-      labels: { visible: gridConfig.isYAxisLabelVisible },
-      title: {
-        text: gridConfig.yTitle,
-        visible: gridConfig.isYAxisTitleVisible,
-      },
-      ...(gridConfig.ySortPredicate ? { sort: gridConfig.ySortPredicate } : {}),
-    },
+    ...(hasYAccessor
+      ? {
+          y: {
+            labels: { visible: gridConfig.isYAxisLabelVisible },
+            title: {
+              text: gridConfig.yTitle,
+              visible: gridConfig.isYAxisTitleVisible,
+            },
+            ...(gridConfig.ySortPredicate ? { sort: gridConfig.ySortPredicate } : {}),
+          },
+        }
+      : {}),
   };
 }
 
@@ -104,7 +109,7 @@ function reverseBuildVisualizationState(
     ...generateApiLayer(layer),
     type: HEATMAP_NAME,
     legend: getLegendProps(visualization.legend),
-    axis: getGridConfigProps(visualization.gridConfig, xAxisScale),
+    axis: getGridConfigProps(visualization.gridConfig, xAxisScale, !!visualization.yAccessor),
     styling: {
       cells: {
         labels: { visible: visualization.gridConfig.isCellLabelVisible },
