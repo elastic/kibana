@@ -7,6 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { isValidUTCDate, formatTime, getPlaywrightGrepTag, execPromise } from './runner_utils';
+export {
+  isValidUTCDate,
+  formatTime,
+  getPlaywrightGrepTag,
+  execPromise,
+  withKibanaBabelRegister,
+} from './runner_utils';
 export { resolveSelector, type SelectorInput } from './locator_helper';
 export { checkA11y, type RunA11yScanOptions } from './axe';
