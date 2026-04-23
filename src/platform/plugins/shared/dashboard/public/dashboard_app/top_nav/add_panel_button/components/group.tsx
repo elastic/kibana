@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, type ComponentType, type ReactElement } from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiBadge,
   EuiFlexGroup,
