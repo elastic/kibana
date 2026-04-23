@@ -29,6 +29,9 @@ const DELETE_TEST_PARENT_STREAM_NAME = 'delete-test-parent-stream';
 const DELETE_TEST_CHILD_STREAM_NAME = 'delete-test-child-stream';
 const DELETE_TEST_GRANDCHILD_STREAM_NAME = 'delete-test-grandchild-stream';
 
+const ERROR_TEST_PARENT_STREAM_NAME = 'error-test-parent-stream';
+const ERROR_TEST_CHILD_STREAM_NAME = 'error-test-child-stream';
+
 const STREAM_NAMES_CREATED_BY_SPEC = [
   ...ROOT_STREAM_NAMES,
   QUERY_ROOT_STREAM_NAME,
@@ -36,6 +39,11 @@ const STREAM_NAMES_CREATED_BY_SPEC = [
   `${QUERY_ROOT_STREAM_NAME}.${QUERY_CHILD_STREAM_NAME}.${QUERY_GRANDCHILD_STREAM_NAME}`,
   `${INGEST_PARENT_STREAM_NAME}.${INGEST_CHILD_STREAM_NAME}`,
   `${INGEST_PARENT_STREAM_NAME}.${INGEST_CHILD_STREAM_NAME}.${INGEST_GRANDCHILD_STREAM_NAME}`,
+  DELETE_TEST_PARENT_STREAM_NAME,
+  `${DELETE_TEST_PARENT_STREAM_NAME}.${DELETE_TEST_CHILD_STREAM_NAME}`,
+  `${DELETE_TEST_PARENT_STREAM_NAME}.${DELETE_TEST_CHILD_STREAM_NAME}.${DELETE_TEST_GRANDCHILD_STREAM_NAME}`,
+  ERROR_TEST_PARENT_STREAM_NAME,
+  `${ERROR_TEST_PARENT_STREAM_NAME}.${ERROR_TEST_CHILD_STREAM_NAME}`,
 ];
 
 test.describe(
@@ -53,10 +61,11 @@ test.describe(
     });
 
     test.afterAll(async ({ kbnClient, esClient, apiServices }) => {
-      for (const streamName of STREAM_NAMES_CREATED_BY_SPEC) {
-        const esqlViewName = `$.${streamName}`;
-        await deleteQueryStream(apiServices, esClient, streamName, esqlViewName);
-      }
+      await Promise.all(
+        STREAM_NAMES_CREATED_BY_SPEC.map((streamName) =>
+          deleteQueryStream(apiServices, esClient, streamName, `$.${streamName}`)
+        )
+      );
       await deleteRootStreamViews(esClient);
       await disableQueryStreams(kbnClient);
     });
@@ -225,9 +234,30 @@ test.describe(
       await expect(page.getByTestId(`streamsNameLink-${grandchildFullName}`)).toBeHidden();
     });
 
-    test.fixme(
-      'Should error when child query stream references wrong parent in ES|QL query',
-      async () => {}
-    );
+    test('Should error when child query stream references wrong parent in ES|QL query', async ({
+      page,
+      pageObjects,
+    }) => {
+      // create parent root query stream
+      await pageObjects.streams.createRootQueryStream(
+        ERROR_TEST_PARENT_STREAM_NAME,
+        `FROM $.logs.ecs | LIMIT 100`
+      );
+      await expect(pageObjects.streams.queryStreamFlyout).toBeHidden();
+
+      // navigate back to the streams list view and create a child query stream under the parent
+      await pageObjects.streams.gotoStreamMainPage();
+      await pageObjects.streams.clickStreamNameLink(ERROR_TEST_PARENT_STREAM_NAME);
+      await pageObjects.streams.gotoPartitioningTab(ERROR_TEST_PARENT_STREAM_NAME);
+      await pageObjects.streams.selectChildStreamType('Query');
+      await pageObjects.streams.openCreateChildQueryStreamForm();
+      await pageObjects.streams.fillAndSaveChildQueryStream(
+        ERROR_TEST_CHILD_STREAM_NAME,
+        'FROM $.wrong-parent | LIMIT 100'
+      );
+
+      // verify wrong parent error is displayed
+      await expect(page.getByText(/must reference its parent stream/)).toBeVisible();
+    });
   }
 );
