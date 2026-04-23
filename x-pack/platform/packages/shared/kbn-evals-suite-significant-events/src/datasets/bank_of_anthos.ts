@@ -27,76 +27,109 @@ export const bankOfAnthosDataset: DatasetConfig = {
             id: 'entity-frontend',
             text: 'Must identify frontend service as an entity (evidence: resource.attributes.app=frontend OR resource.attributes.k8s.deployment.name=frontend)',
             score: 2,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'frontend' } }],
           },
           {
             id: 'entity-userservice',
             text: 'Must identify userservice as an entity (evidence: resource.attributes.app=userservice)',
             score: 2,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'userservice' } }],
           },
           {
             id: 'entity-contacts',
             text: 'Must identify contacts service as an entity (evidence: resource.attributes.app=contacts)',
             score: 2,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'contacts' } }],
           },
           {
             id: 'entity-ledgerwriter',
             text: 'Must identify ledgerwriter service as an entity (evidence: resource.attributes.app=ledgerwriter)',
             score: 2,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'ledgerwriter' } }],
           },
           {
             id: 'entity-balancereader',
             text: 'Must identify balancereader service as an entity (evidence: resource.attributes.app=balancereader)',
             score: 2,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'balancereader' } }],
           },
           {
             id: 'entity-transactionhistory',
             text: 'Must identify transactionhistory service as an entity (evidence: resource.attributes.app=transactionhistory)',
             score: 2,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'transactionhistory' } }],
           },
           {
             id: 'entity-ledger-db',
             text: 'Must identify ledger-db as an entity (evidence: resource.attributes.app=ledger-db)',
             score: 2,
+            sampling_filters: [{ term: { 'resource.attributes.app.keyword': 'ledger-db' } }],
           },
           {
             id: 'entity-accounts-db',
             text: 'Must identify accounts-db as an entity (evidence: resource.attributes.app=accounts-db)',
             score: 2,
+            sampling_filters: [{ term: { 'resource.attributes.app.keyword': 'accounts-db' } }],
           },
           {
             id: 'entity-load-generator',
             text: 'Must identify the load generator as an entity (evidence: resource.attributes.app=loadgenerator)',
             score: 1,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'loadgenerator' } }],
           },
           {
             id: 'dep-ledgerwriter-ledger-db',
             text: 'Must identify the dependency ledgerwriter -> ledger-db (evidence: JDBC connections)',
             score: 2,
+            sampling_filters: [
+              { term: { 'resource.attributes.app': 'ledgerwriter' } },
+              { term: { 'resource.attributes.app.keyword': 'ledger-db' } },
+            ],
           },
           {
             id: 'dep-balancereader-ledger-db',
             text: 'Must identify the dependency balancereader -> ledger-db (evidence: JDBC read connections for balance lookups)',
             score: 2,
+            sampling_filters: [
+              { term: { 'resource.attributes.app': 'balancereader' } },
+              { term: { 'resource.attributes.app.keyword': 'ledger-db' } },
+            ],
           },
           {
             id: 'dep-transactionhistory-ledger-db',
             text: 'Must identify the dependency transactionhistory -> ledger-db (evidence: JDBC read connections for transaction history)',
             score: 2,
+            sampling_filters: [
+              { term: { 'resource.attributes.app': 'transactionhistory' } },
+              { term: { 'resource.attributes.app.keyword': 'ledger-db' } },
+            ],
           },
           {
             id: 'dep-userservice-accounts-db',
             text: 'Must identify the dependency userservice -> accounts-db (evidence: JDBC connections for user account storage)',
             score: 2,
+            sampling_filters: [
+              { term: { 'resource.attributes.app': 'userservice' } },
+              { match_phrase: { 'resource.attributes.app': 'accounts-db' } },
+            ],
           },
           {
             id: 'dep-frontend-ledgerwriter',
             text: 'Must identify the dependency frontend -> ledgerwriter (evidence: HTTP calls from frontend to submit transactions)',
             score: 2,
+            sampling_filters: [
+              { term: { 'resource.attributes.app': 'frontend' } },
+              { term: { 'resource.attributes.app': 'ledgerwriter' } },
+            ],
           },
           {
             id: 'dep-frontend-userservice',
             text: 'Must identify the dependency frontend -> userservice (evidence: HTTP calls from frontend for login/account lookup)',
             score: 2,
+            sampling_filters: [
+              { term: { 'resource.attributes.app': 'frontend' } },
+              { term: { 'resource.attributes.app': 'userservice' } },
+            ],
           },
           {
             id: 'infra-kubernetes',
@@ -169,31 +202,107 @@ export const bankOfAnthosDataset: DatasetConfig = {
             id: 'entity-ledgerwriter',
             text: 'Must identify ledgerwriter as a failing entity (evidence: resource.attributes.app=ledgerwriter; JDBC connection errors to ledger-db)',
             score: 2,
+            sampling_filters: [
+              { term: { 'resource.attributes.app': 'ledgerwriter' } },
+              {
+                bool: {
+                  filter: [
+                    { term: { 'resource.attributes.app': 'ledgerwriter' } },
+                    { match_phrase: { 'body.text': 'SQLState: 08001' } },
+                  ],
+                },
+              },
+            ],
           },
           {
             id: 'entity-balancereader',
             text: 'Must identify balancereader as a failing entity (evidence: resource.attributes.app=balancereader; cannot read balances from ledger-db, cache errors)',
             score: 2,
+            sampling_filters: [
+              { term: { 'resource.attributes.app': 'balancereader' } },
+              {
+                bool: {
+                  filter: [
+                    { term: { 'resource.attributes.app': 'balancereader' } },
+                    { match_phrase: { 'body.text': 'getBalance | Cache error' } },
+                  ],
+                },
+              },
+            ],
           },
           {
             id: 'entity-transactionhistory',
             text: 'Must identify transactionhistory as a failing entity (evidence: resource.attributes.app=transactionhistory; cannot read transactions from ledger-db, cache errors)',
             score: 2,
+            sampling_filters: [
+              { term: { 'resource.attributes.app': 'transactionhistory' } },
+              {
+                bool: {
+                  filter: [
+                    { term: { 'resource.attributes.app': 'transactionhistory' } },
+                    { match_phrase: { 'body.text': 'getTransactions | Cache error' } },
+                  ],
+                },
+              },
+            ],
           },
           {
             id: 'entity-frontend',
             text: 'Must identify frontend service (evidence: resource.attributes.app=frontend; upstream impact)',
             score: 1,
+            sampling_filters: [
+              { term: { 'resource.attributes.app': 'frontend' } },
+              {
+                bool: {
+                  filter: [
+                    { term: { 'resource.attributes.app': 'frontend' } },
+                    { match_phrase: { 'body.text': 'Read timed out' } },
+                  ],
+                },
+              },
+            ],
           },
           {
             id: 'dep-services-ledger-db',
             text: 'Must identify the dependency ledgerwriter/balancereader/transactionhistory -> ledger-db (evidence: SQLState: 08001 connection refused, cache errors surfaced in service logs)',
             score: 3,
+            sampling_filters: [
+              {
+                bool: {
+                  should: [
+                    {
+                      terms: {
+                        'resource.attributes.app': [
+                          'ledgerwriter',
+                          'balancereader',
+                          'transactionhistory',
+                        ],
+                      },
+                    },
+                    { match_phrase: { 'resource.attributes.app': 'ledger-db' } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
           },
           {
             id: 'error-signatures',
             text: 'Must reference actual observed error signatures: SQLState: 08001 (PostgreSQL connection refused), cache errors, timeouts in evidence',
             score: 2,
+            sampling_filters: [
+              {
+                bool: {
+                  should: [
+                    { match_phrase: { 'body.text': 'SQLState: 08001' } },
+                    { match_phrase: { 'body.text': 'Cache error' } },
+                    { match_phrase: { 'body.text': 'The connection attempt failed' } },
+                    { match_phrase: { 'body.text': 'Read timed out' } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
           },
         ],
         min_features: 3,

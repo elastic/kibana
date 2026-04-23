@@ -27,106 +27,148 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
             id: 'entity-rest-heroes',
             text: 'Must identify rest-heroes service as an entity (evidence: resource.attributes.app=rest-heroes)',
             score: 2,
+            sampling_filters: [{ term: { 'resource.attributes.app.keyword': 'rest-heroes' } }],
           },
           {
             id: 'entity-rest-villains',
             text: 'Must identify rest-villains service as an entity (evidence: resource.attributes.app=rest-villains)',
             score: 2,
+            sampling_filters: [{ term: { 'resource.attributes.app.keyword': 'rest-villains' } }],
           },
           {
             id: 'entity-rest-fights',
             text: 'Must identify rest-fights service as an entity (evidence: resource.attributes.app=rest-fights)',
             score: 2,
+            sampling_filters: [{ term: { 'resource.attributes.app.keyword': 'rest-fights' } }],
           },
           {
             id: 'entity-rest-narration',
             text: 'Must identify rest-narration service as an entity (evidence: resource.attributes.app=rest-narration)',
             score: 2,
+            sampling_filters: [{ term: { 'resource.attributes.app.keyword': 'rest-narration' } }],
           },
           {
             id: 'entity-event-statistics',
             text: 'Must identify event-statistics service as an entity (evidence: resource.attributes.app=event-statistics)',
             score: 2,
+            sampling_filters: [{ term: { 'resource.attributes.app.keyword': 'event-statistics' } }],
           },
           {
             id: 'entity-apicurio-registry',
             text: 'Must identify Apicurio Registry as an entity (evidence: resource.attributes.app=apicurio)',
             score: 2,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'apicurio' } }],
           },
           {
             id: 'entity-heroes-db',
             text: 'Must identify Heroes PostgreSQL DB as an entity (evidence: resource.attributes.app=heroes-db)',
             score: 2,
+            sampling_filters: [{ term: { 'resource.attributes.app.keyword': 'heroes-db' } }],
           },
           {
             id: 'entity-fights-mongodb',
             text: 'Must identify Fights MongoDB as an entity (evidence: resource.attributes.app=fights-db)',
             score: 2,
+            sampling_filters: [{ term: { 'resource.attributes.app.keyword': 'fights-db' } }],
           },
           {
             id: 'entity-fights-kafka',
             text: 'Must identify Fights Kafka Broker as an entity (evidence: resource.attributes.app=fights-kafka)',
             score: 2,
+            sampling_filters: [{ term: { 'resource.attributes.app.keyword': 'fights-kafka' } }],
           },
           {
             id: 'entity-villains-db',
             text: 'Must identify Villains PostgreSQL DB as an entity (evidence: resource.attributes.app=villains-db)',
             score: 1,
+            sampling_filters: [{ term: { 'resource.attributes.app.keyword': 'villains-db' } }],
           },
           {
             id: 'entity-grpc-locations',
             text: 'Must identify grpc-locations service as an entity (evidence: resource.attributes.app=grpc-locations)',
             score: 1,
+            sampling_filters: [{ term: { 'resource.attributes.app.keyword': 'grpc-locations' } }],
           },
           {
             id: 'entity-locations-db',
             text: 'Must identify Locations MariaDB as an entity (evidence: resource.attributes.app=locations-db)',
             score: 1,
+            sampling_filters: [{ term: { 'resource.attributes.app.keyword': 'locations-db' } }],
           },
           {
             id: 'entity-ui-super-heroes',
             text: 'Must identify ui-super-heroes as an entity (evidence: resource.attributes.app=ui-super-heroes)',
             score: 1,
+            sampling_filters: [{ term: { 'resource.attributes.app.keyword': 'ui-super-heroes' } }],
           },
           {
             id: 'dep-rest-fights-rest-heroes',
             text: 'Must identify the dependency rest-fights -> rest-heroes (evidence: REST calls for hero lookup during fights)',
             score: 2,
+            sampling_filters: [
+              { term: { 'resource.attributes.app.keyword': 'rest-fights' } },
+              { term: { 'resource.attributes.app.keyword': 'rest-heroes' } },
+            ],
           },
           {
             id: 'dep-rest-heroes-heroes-db',
             text: 'Must identify the dependency rest-heroes -> heroes-db (evidence: reactive PostgreSQL database connection)',
             score: 2,
+            sampling_filters: [
+              { term: { 'resource.attributes.app.keyword': 'rest-heroes' } },
+              { term: { 'resource.attributes.app.keyword': 'heroes-db' } },
+            ],
           },
           {
             id: 'dep-rest-fights-rest-villains',
             text: 'Must identify the dependency rest-fights -> rest-villains (evidence: REST calls for villain lookup during fights)',
             score: 2,
+            sampling_filters: [
+              { term: { 'resource.attributes.app.keyword': 'rest-fights' } },
+              { term: { 'resource.attributes.app.keyword': 'rest-villains' } },
+            ],
           },
           {
             id: 'dep-rest-fights-fights-db',
             text: 'Must identify the dependency rest-fights -> fights-db (evidence: MongoDB connection for fight persistence)',
             score: 2,
+            sampling_filters: [
+              { term: { 'resource.attributes.app.keyword': 'rest-fights' } },
+              { term: { 'resource.attributes.app.keyword': 'fights-db' } },
+            ],
           },
           {
             id: 'dep-rest-villains-villains-db',
             text: 'Must identify the dependency rest-villains -> villains-db (evidence: JDBC PostgreSQL database connection)',
             score: 2,
+            sampling_filters: [
+              { term: { 'resource.attributes.app.keyword': 'rest-villains' } },
+              { term: { 'resource.attributes.app.keyword': 'villains-db' } },
+            ],
           },
           {
             id: 'dep-event-statistics-fights-kafka',
             text: 'Must identify the dependency event-statistics -> fights-kafka (evidence: Kafka connection for event consumption)',
             score: 2,
+            sampling_filters: [
+              { term: { 'resource.attributes.app.keyword': 'event-statistics' } },
+              { term: { 'resource.attributes.app.keyword': 'fights-kafka' } },
+            ],
           },
           {
             id: 'dep-grpc-locations-locations-db',
             text: 'Must identify the dependency grpc-locations -> locations-db (evidence: JDBC MariaDB database connection)',
             score: 1,
+            sampling_filters: [
+              { term: { 'resource.attributes.app.keyword': 'grpc-locations' } },
+              { term: { 'resource.attributes.app.keyword': 'locations-db' } },
+            ],
           },
           {
             id: 'dep-rest-narration-open-ai',
             text: 'Must identify the dependency rest-narration -> OpenAI/Azure OpenAI (evidence: langchain4j-openai and langchain4j-azure-openai Quarkus extensions)',
             score: 1,
+            sampling_filters: [{ term: { 'resource.attributes.app.keyword': 'rest-narration' } }],
           },
           {
             id: 'tech-kubernetes',
@@ -152,8 +194,12 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
         scenario_id: 'kafka-disconnect',
         log_query_filter: [
           {
-            terms: {
-              'resource.attributes.app': ['rest-fights', 'event-statistics'],
+            bool: {
+              should: [
+                { term: { 'resource.attributes.app.keyword': 'rest-fights' } },
+                { term: { 'resource.attributes.app.keyword': 'event-statistics' } },
+              ],
+              minimum_should_match: 1,
             },
           },
           {
@@ -180,21 +226,84 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
             id: 'entity-rest-fights',
             text: 'Must identify rest-fights as a failing entity (Kafka producer failures are present in the logs: unable to write to Kafka, message nacked, SRMSG18206, SRMSG18212)',
             score: 2,
+            sampling_filters: [
+              {
+                bool: {
+                  should: [
+                    { match_phrase: { 'body.text': 'SRMSG18206' } },
+                    { match_phrase: { 'body.text': 'SRMSG18212' } },
+                    { match_phrase: { 'body.text': 'Unable to write to Kafka' } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
           },
           {
             id: 'entity-event-statistics',
             text: 'Must identify event-statistics as a failing entity (Kafka consumer failures are present in the logs: topic not found, connection timeout, org.apache.kafka.common.errors.TimeoutException)',
             score: 2,
+            sampling_filters: [
+              {
+                bool: {
+                  should: [
+                    {
+                      match_phrase: {
+                        'body.text': 'topic not found',
+                      },
+                    },
+                    {
+                      match_phrase: {
+                        'body.text': 'org.apache.kafka.common.errors.TimeoutException',
+                      },
+                    },
+                    { match_phrase: { 'body.text': 'connection timeout' } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
           },
           {
             id: 'dep-event-statistics-fights-kafka',
             text: 'Must identify the dependency event-statistics -> fights-kafka (Kafka consumer failing: topic unavailable or connection timeout)',
             score: 1,
+            sampling_filters: [
+              {
+                bool: {
+                  should: [
+                    {
+                      match_phrase: {
+                        'body.text': 'Topic fights not present in metadata',
+                      },
+                    },
+                    {
+                      match_phrase: {
+                        'body.text': 'org.apache.kafka.common.errors.TimeoutException',
+                      },
+                    },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
           },
           {
             id: 'dep-rest-fights-fights-kafka',
             text: 'Must identify the dependency rest-fights -> fights-kafka (Kafka producer failing: unable to write or publish fight events)',
             score: 3,
+            sampling_filters: [
+              {
+                bool: {
+                  should: [
+                    { match_phrase: { 'body.text': 'SRMSG18206' } },
+                    { match_phrase: { 'body.text': 'SRMSG18212' } },
+                    { match_phrase: { 'body.text': 'Unable to write to Kafka' } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
           },
           {
             id: 'tech-kafka',
@@ -205,6 +314,28 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
             id: 'error-signatures',
             text: 'Must reference Kafka failure signals such as unable to write to Kafka, message nacked, topic not present in metadata, connection timeout, or equivalent producer/consumer error descriptions',
             score: 2,
+            sampling_filters: [
+              {
+                bool: {
+                  should: [
+                    { match_phrase: { 'body.text': 'SRMSG18206' } },
+                    { match_phrase: { 'body.text': 'SRMSG18212' } },
+                    {
+                      match_phrase: {
+                        'body.text': 'Topic fights not present in metadata',
+                      },
+                    },
+                    { match_phrase: { 'body.text': 'Unable to write to Kafka' } },
+                    {
+                      match_phrase: {
+                        'body.text': 'org.apache.kafka.common.errors.TimeoutException',
+                      },
+                    },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
           },
         ],
         min_features: 3,
@@ -225,8 +356,8 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
         scenario_id: 'fights-db-disconnect',
         log_query_filter: [
           {
-            terms: {
-              'resource.attributes.app': ['rest-fights'],
+            term: {
+              'resource.attributes.app.keyword': 'rest-fights',
             },
           },
           {
@@ -248,11 +379,35 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
             id: 'entity-rest-fights',
             text: 'Must identify rest-fights as the failing entity (evidence: MongoTimeoutException and MongoSocketOpenException in rest-fights logs, HTTP Request to /api/fights failed)',
             score: 2,
+            sampling_filters: [
+              {
+                bool: {
+                  should: [
+                    { match_phrase: { 'body.text': 'MongoTimeoutException' } },
+                    { match_phrase: { 'body.text': 'MongoSocketOpenException' } },
+                    { match_phrase: { 'body.text': 'HTTP Request to /api/fights failed' } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
           },
           {
             id: 'dep-rest-fights-mongodb',
             text: 'Must identify the dependency rest-fights -> fights-db/MongoDB (evidence: MongoTimeoutException: Timed out while waiting for a server, MongoSocketOpenException connecting to dead port)',
             score: 3,
+            sampling_filters: [
+              {
+                bool: {
+                  should: [
+                    { match_phrase: { 'body.text': 'MongoTimeoutException' } },
+                    { match_phrase: { 'body.text': 'MongoSocketOpenException' } },
+                    { match_phrase: { 'body.text': 'Timed out while waiting for a server' } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
           },
           {
             id: 'tech-mongodb',
@@ -263,6 +418,19 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
             id: 'error-signatures',
             text: 'Must reference MongoDB error signatures such as MongoTimeoutException (Timed out while waiting for a server that matches WritableServerSelector) or MongoSocketOpenException (Exception opening socket)',
             score: 2,
+            sampling_filters: [
+              {
+                bool: {
+                  should: [
+                    { match_phrase: { 'body.text': 'MongoTimeoutException' } },
+                    { match_phrase: { 'body.text': 'MongoSocketOpenException' } },
+                    { match_phrase: { 'body.text': 'Timed out while waiting for a server' } },
+                    { match_phrase: { 'body.text': 'HTTP Request to /api/fights failed' } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
           },
         ],
         min_features: 3,
@@ -283,8 +451,8 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
         scenario_id: 'heroes-service-unreachable',
         log_query_filter: [
           {
-            terms: {
-              'resource.attributes.app': ['rest-fights'],
+            match_phrase: {
+              'resource.attributes.app': 'rest-fights',
             },
           },
           {
@@ -309,16 +477,49 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
             id: 'entity-rest-fights',
             text: 'Must identify rest-fights as the affected entity (evidence: "Falling back on Hero" WARN and "Fallback hero" fight results in rest-fights logs)',
             score: 2,
+            sampling_filters: [
+              {
+                bool: {
+                  should: [
+                    { match_phrase: { 'body.text': 'Falling back on Hero' } },
+                    { match_phrase: { 'body.text': 'Fallback hero' } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
           },
           {
             id: 'dep-rest-fights-rest-heroes',
             text: 'Must identify the dependency rest-fights -> rest-heroes (fight simulation broken)',
             score: 3,
+            sampling_filters: [
+              {
+                bool: {
+                  should: [
+                    { match_phrase: { 'body.text': 'Falling back on Hero' } },
+                    { match_phrase: { 'body.text': 'Fallback hero' } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
           },
           {
             id: 'degradation-signatures',
             text: 'Must reference fault tolerance fallback signals: "Falling back on Hero" (WARN) and fights won by "Fallback hero" — indicating rest-heroes is unreachable and SmallRye Fault Tolerance activated the fallback',
             score: 2,
+            sampling_filters: [
+              {
+                bool: {
+                  should: [
+                    { match_phrase: { 'body.text': 'Falling back on Hero' } },
+                    { match_phrase: { 'body.text': 'Fallback hero' } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
           },
         ],
         min_features: 3,
@@ -339,8 +540,12 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
         scenario_id: 'heroes-db-disconnect',
         log_query_filter: [
           {
-            terms: {
-              'resource.attributes.app': ['rest-heroes', 'rest-fights'],
+            bool: {
+              should: [
+                { term: { 'resource.attributes.app.keyword': 'rest-heroes' } },
+                { term: { 'resource.attributes.app.keyword': 'rest-fights' } },
+              ],
+              minimum_should_match: 1,
             },
           },
           {
@@ -362,21 +567,87 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
             id: 'entity-rest-heroes',
             text: 'Must identify rest-heroes as the failing entity (evidence: Vert.x reactive connection pool timeout at startup — NoStackTraceThrowable: Timeout, HR000021: DDL command failed)',
             score: 2,
+            sampling_filters: [
+              {
+                bool: {
+                  filter: [
+                    { term: { 'resource.attributes.app.keyword': 'rest-heroes' } },
+                    {
+                      bool: {
+                        should: [
+                          { match_phrase: { 'body.text': 'NoStackTraceThrowable' } },
+                          { match_phrase: { 'body.text': 'HR000021' } },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
           },
           {
             id: 'entity-rest-fights',
             text: 'Must identify rest-fights as an affected upstream entity (evidence: Falling back on Hero / Fallback hero in fight results)',
             score: 1,
+            sampling_filters: [
+              {
+                bool: {
+                  filter: [
+                    { term: { 'resource.attributes.app.keyword': 'rest-fights' } },
+                    {
+                      bool: {
+                        should: [
+                          { match_phrase: { 'body.text': 'Falling back on Hero' } },
+                          { match_phrase: { 'body.text': 'Fallback hero' } },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
           },
           {
             id: 'dep-rest-heroes-heroes-db',
             text: 'Must identify the broken dependency rest-heroes -> heroes-db (evidence: Vert.x reactive pool NoStackTraceThrowable: Timeout connecting to heroes-db)',
             score: 3,
+            sampling_filters: [
+              {
+                bool: {
+                  filter: [
+                    { term: { 'resource.attributes.app.keyword': 'rest-heroes' } },
+                    {
+                      bool: {
+                        should: [
+                          { match_phrase: { 'body.text': 'NoStackTraceThrowable' } },
+                          { match_phrase: { 'body.text': 'HR000021' } },
+                          { match_phrase: { 'body.text': 'heroes-db' } },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
           },
           {
             id: 'error-signatures',
             text: 'Must reference reactive connection failure signatures (NoStackTraceThrowable: Timeout, HR000021: DDL command failed, Vert.x reactive pool timeout)',
             score: 2,
+            sampling_filters: [
+              {
+                bool: {
+                  should: [
+                    { match_phrase: { 'body.text': 'NoStackTraceThrowable: Timeout' } },
+                    { match_phrase: { 'body.text': 'HR000021: DDL command failed' } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
           },
         ],
         min_features: 3,
