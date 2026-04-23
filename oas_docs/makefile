@@ -50,7 +50,7 @@ api-docs-lint-serverless: ## Run redocly API docs linter on kibana.serverless.ya
 	@./node_modules/.bin/redocly lint "output/kibana.serverless.yaml" --config "linters/redocly.yaml" --format stylish --max-problems 500
 
 .PHONY: api-docs-overlay
-api-docs-overlay: ## Apply all overlays (including bump-slim placeholder for Dashboards & Visualizations)
+api-docs-overlay: ## Apply all overlays (bump-slim is intentionally skipped — full Dashboards & Visualizations content for external hosting)
 	@./node_modules/.bin/bump overlay "output/kibana.serverless.yaml" "overlays/kibana.overlays.serverless.yaml" > "output/kibana.serverless.tmp1.yaml"
 	@./node_modules/.bin/bump overlay "output/kibana.serverless.tmp1.yaml" "overlays/alerting.overlays.yaml" > "output/kibana.serverless.tmp2.yaml"
 	@./node_modules/.bin/bump overlay "output/kibana.serverless.tmp2.yaml" "overlays/connectors.overlays.yaml" > "output/kibana.serverless.tmp3.yaml"
@@ -63,9 +63,8 @@ api-docs-overlay: ## Apply all overlays (including bump-slim placeholder for Das
 	@./node_modules/.bin/bump overlay "output/kibana.tmp4.yaml" "overlays/streams.overlays.yaml" > "output/kibana.tmp5.yaml"
 	@./node_modules/.bin/bump overlay "output/kibana.tmp5.yaml" "overlays/dashboards.overlays.yaml" > "output/kibana.tmp6.yaml"
 	@./node_modules/.bin/bump overlay "output/kibana.tmp6.yaml" "overlays/visualizations.overlays.yaml" > "output/kibana.tmp7.yaml"
-	@./node_modules/.bin/bump overlay "output/kibana.tmp7.yaml" "overlays/kibana.overlays.bump-slim.yaml" > "output/kibana.tmp8.yaml"
 	@./node_modules/.bin/redocly bundle output/kibana.serverless.tmp5.yaml --ext yaml -o output/kibana.serverless.yaml
-	@./node_modules/.bin/redocly bundle output/kibana.tmp8.yaml --ext yaml -o output/kibana.yaml
+	@./node_modules/.bin/redocly bundle output/kibana.tmp7.yaml --ext yaml -o output/kibana.yaml
 	rm output/kibana.tmp*.yaml
 	rm output/kibana.serverless.tmp*.yaml
 
