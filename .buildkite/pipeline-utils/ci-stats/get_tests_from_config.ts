@@ -12,6 +12,11 @@ import { getKibanaDir } from '#pipeline-utils';
 
 const TEST_FILE_PATTERNS = ['**/*.test.{ts,tsx,js,jsx,mjs}', '**/*.spec.{ts,tsx,js,jsx,mjs}'];
 
+// Integration tests live under integration_tests/ dirs and are handled by
+// separate jest.integration.config.js configs, so exclude them when checking
+// unit configs to avoid false positives that skew CI stats grouping.
+const IGNORE_PATTERNS = ['**/node_modules/**', '**/integration_tests/**'];
+
 /**
  * Fast check for whether a jest config's directory contains any test files.
  * Uses a simple glob instead of Jest's full resolver (readConfig + Runtime.createContext
@@ -21,7 +26,7 @@ function hasTestFiles(configAbsPath: string): boolean {
   const dir = dirname(configAbsPath);
   const matches = globby.sync(TEST_FILE_PATTERNS, {
     cwd: dir,
-    ignore: ['**/node_modules/**'],
+    ignore: IGNORE_PATTERNS,
     onlyFiles: true,
   });
   return matches.length > 0;
