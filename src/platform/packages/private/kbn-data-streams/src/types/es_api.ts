@@ -21,7 +21,7 @@ export interface ClientSearchRequest<SearchRuntimeMappings extends BaseSearchRun
   /**
    * Optional space identifier. Controls which documents are included in the search:
    * - When undefined: only space-agnostic documents (no `kibana.space_ids` field) are returned.
-   * - When `'default'`: only documents with `kibana.space_ids: ['default']` are returned.
+   * -  `default` space **is distinct** from space-agnostic (`undefined`). It should be used to fulfil the same role as `default` space saved objects. Please note: no space authorization checks are performed in this client.
    * - When any other space: only documents belonging to that space are returned.
    *
    * The `kibana.space_ids` field is a system-managed property and is stripped from `_source` in all responses.
