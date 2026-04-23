@@ -17021,10 +17021,10 @@ babel-preset-jest@^29.6.3:
     babel-plugin-jest-hoist "^29.6.3"
     babel-preset-current-node-syntax "^1.0.0"
 
-backport@11.0.1:
-  version "11.0.1"
-  resolved "https://registry.yarnpkg.com/backport/-/backport-11.0.1.tgz#85fdcc3a5ad45962551d901cf1ffc94610c8930c"
-  integrity sha512-Ym/JoIP22ELx0OEbLSCKg0B7ZjSxTsbQAgoNIEmcQOfhWYQlfp/Qmmr2jC9IdN4cE/XH5zvHxraf1V+UmBD8aQ==
+backport@11.0.2:
+  version "11.0.2"
+  resolved "https://registry.yarnpkg.com/backport/-/backport-11.0.2.tgz#21295d9cb04b151b0f1bdf09ee8d0a1736ebb358"
+  integrity sha512-kYg+1tbJJ1yvgbN4XOSBN2MTRHaoWpWG4ndPXGXakzSfT16Ehz4X6HEQHT4QT6YjO/+isIJMeAEiQyXHyfXhkg==
   dependencies:
     "@graphql-typed-document-node/core" "^3.2.0"
     "@inquirer/prompts" "8.3.2"
@@ -17033,7 +17033,7 @@ backport@11.0.1:
     dotenv "^17.3.1"
     find-up "^8.0.0"
     graphql "^16.13.1"
-    handlebars "^4.7.8"
+    handlebars "^4.7.9"
     lodash-es "^4.17.21"
     ora "^9.3.0"
     p-retry "^7.1.1"
@@ -23163,7 +23163,7 @@ handle-thing@^2.0.0:
   resolved "https://registry.yarnpkg.com/handle-thing/-/handle-thing-2.0.0.tgz#0e039695ff50c93fc288557d696f3c1dc6776754"
   integrity sha512-d4sze1JNC454Wdo2fkuyzCr6aHcbL6PGGuFAz0Li/NcOm1tCHGnWDRmJP85dh9IhQErTc2svWFEX5xHIOo//kQ==
 
-handlebars@4.7.9, handlebars@^4.7.6, handlebars@^4.7.8:
+handlebars@4.7.9, handlebars@^4.7.6, handlebars@^4.7.8, handlebars@^4.7.9:
   version "4.7.9"
   resolved "https://registry.yarnpkg.com/handlebars/-/handlebars-4.7.9.tgz#6f139082ab58dc4e5a0e51efe7db5ae890d56a0f"
   integrity sha512-4E71E0rpOaQuJR2A3xDZ+GM1HyWYv1clR58tC8emQNeQe3RH7MAzSbat+V0wG78LQBo6m6bzSG/L4pBuCsgnUQ==
