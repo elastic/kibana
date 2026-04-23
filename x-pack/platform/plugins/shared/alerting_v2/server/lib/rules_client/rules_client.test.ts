@@ -1304,16 +1304,17 @@ describe('RulesClient', () => {
       const res = await client.bulkEnableRules({ ids: ['rule-1'] });
 
       expect(mockSavedObjectsClient.bulkUpdate).toHaveBeenCalledWith([
-        expect.objectContaining({
+        {
           type: RULE_SAVED_OBJECT_TYPE,
           id: 'rule-1',
-          attributes: expect.objectContaining({
+          attributes: {
             enabled: true,
             updatedBy: 'elastic_profile_uid',
             updatedAt: '2025-01-01T00:00:00.000Z',
-          }),
-        }),
+          },
+        },
       ]);
+      expect(mockSavedObjectsClient.bulkUpdate.mock.calls[0][0][0]).not.toHaveProperty('version');
 
       expect(taskManager.bulkSchedule).toHaveBeenCalledWith(
         [
@@ -1414,9 +1415,9 @@ describe('RulesClient', () => {
             attributes: {} as RuleSavedObjectAttributes,
             references: [],
             error: {
-              statusCode: 409,
-              error: 'Conflict',
-              message: 'Version conflict',
+              statusCode: 500,
+              error: 'Internal Server Error',
+              message: 'bulk update failed',
             },
           },
         ],
@@ -1426,7 +1427,7 @@ describe('RulesClient', () => {
 
       expect(res.rules).toEqual([]);
       expect(res.errors).toEqual([
-        { id: 'rule-1', error: { message: 'Version conflict', statusCode: 409 } },
+        { id: 'rule-1', error: { message: 'bulk update failed', statusCode: 500 } },
       ]);
     });
 
@@ -1545,16 +1546,17 @@ describe('RulesClient', () => {
       const res = await client.bulkDisableRules({ ids: ['rule-1'] });
 
       expect(mockSavedObjectsClient.bulkUpdate).toHaveBeenCalledWith([
-        expect.objectContaining({
+        {
           type: RULE_SAVED_OBJECT_TYPE,
           id: 'rule-1',
-          attributes: expect.objectContaining({
+          attributes: {
             enabled: false,
             updatedBy: 'elastic_profile_uid',
             updatedAt: '2025-01-01T00:00:00.000Z',
-          }),
-        }),
+          },
+        },
       ]);
+      expect(mockSavedObjectsClient.bulkUpdate.mock.calls[0][0][0]).not.toHaveProperty('version');
 
       expect(taskManager.bulkDisable).toHaveBeenCalledWith(['task:rule-1']);
 

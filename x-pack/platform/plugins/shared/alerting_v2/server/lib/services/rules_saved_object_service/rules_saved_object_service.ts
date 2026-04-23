@@ -58,7 +58,7 @@ export interface RulesSavedObjectServiceContract {
     patch: LastExecutionAttribute | null;
   }): Promise<void>;
   bulkUpdate(
-    items: Array<{ id: string; attrs: RuleSavedObjectAttributes; version?: string }>
+    items: Array<{ id: string; attrs: Partial<RuleSavedObjectAttributes> }>
   ): Promise<BulkUpdateResultItem[]>;
   delete(params: { id: string }): Promise<void>;
   bulkDelete(ids: string[]): Promise<BulkDeleteResult>;
@@ -199,18 +199,17 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
   }
 
   public async bulkUpdate(
-    items: Array<{ id: string; attrs: RuleSavedObjectAttributes; version?: string }>
+    items: Array<{ id: string; attrs: Partial<RuleSavedObjectAttributes> }>
   ): Promise<BulkUpdateResultItem[]> {
     if (items.length === 0) {
       return [];
     }
 
-    const result = await this.client.bulkUpdate<RuleSavedObjectAttributes>(
+    const result = await this.client.bulkUpdate<Partial<RuleSavedObjectAttributes>>(
       items.map((item) => ({
         type: RULE_SAVED_OBJECT_TYPE,
         id: item.id,
         attributes: item.attrs,
-        ...(item.version ? { version: item.version } : {}),
       }))
     );
 

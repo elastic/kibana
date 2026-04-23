@@ -18,6 +18,19 @@ function expectNoBulkTruncationMetadata(body: Record<string, unknown>) {
   expect(body).to.not.have.property('totalMatched');
 }
 
+/**
+ * Fields bulk enable/disable are expected to touch. Everything else on the rule
+ * SO must survive the partial update untouched. `last_execution` is excluded
+ * because the task runner may write it concurrently on an unrelated schedule.
+ */
+const MUTATING_FIELDS = ['enabled', 'updatedBy', 'updatedAt', 'last_execution'] as const;
+
+function stripMutatingFields(rule: Record<string, unknown>) {
+  const copy = { ...rule };
+  for (const key of MUTATING_FIELDS) delete copy[key];
+  return copy;
+}
+
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const samlAuth = getService('samlAuth');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -312,6 +325,59 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const finalRule3 = await getRule(roleAuthc, rule3.id);
         expect(finalRule3.enabled).to.be(true);
+      });
+
+      /**
+       * Bulk enable/disable must write a *partial* SO update so that sibling
+       * fields (metadata, schedule, evaluation, kind, timing, audit fields set
+       * at create time, etc.) are preserved. The API response is built from an
+       * in-memory merge, so a broken write would still look fine in the
+       * response body — we therefore round-trip through a fresh GET to observe
+       * the persisted SO.
+       */
+      it('should preserve all non-enabled fields across bulk disable and re-enable', async () => {
+        const created = await createRule(roleAuthc, 'preserve-fields', {
+          kind: 'alert',
+          time_field: '@timestamp',
+          schedule: { every: '15m' },
+          evaluation: { query: { base: 'FROM logs-* | WHERE @timestamp > NOW() | LIMIT 7' } },
+        });
+
+        const baseline = await getRule(roleAuthc, created.id);
+        expect(baseline.enabled).to.be(true);
+        const baselineStripped = stripMutatingFields(baseline);
+
+        const disableResponse = await supertestWithoutAuth
+          .post(`${RULE_API_PATH}/_bulk_disable`)
+          .set(roleAuthc.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
+          .send({ ids: [created.id] });
+
+        expect(disableResponse.status).to.be(200);
+        expect(disableResponse.body.rules.length).to.be(1);
+
+        const afterDisable = await getRule(roleAuthc, created.id);
+        expect(afterDisable.enabled).to.be(false);
+        expect(afterDisable.id).to.be(baseline.id);
+        expect(afterDisable.createdAt).to.be(baseline.createdAt);
+        expect(afterDisable.createdBy).to.eql(baseline.createdBy);
+        expect(stripMutatingFields(afterDisable)).to.eql(baselineStripped);
+
+        const enableResponse = await supertestWithoutAuth
+          .post(`${RULE_API_PATH}/_bulk_enable`)
+          .set(roleAuthc.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
+          .send({ ids: [created.id] });
+
+        expect(enableResponse.status).to.be(200);
+        expect(enableResponse.body.rules.length).to.be(1);
+
+        const afterEnable = await getRule(roleAuthc, created.id);
+        expect(afterEnable.enabled).to.be(true);
+        expect(afterEnable.id).to.be(baseline.id);
+        expect(afterEnable.createdAt).to.be(baseline.createdAt);
+        expect(afterEnable.createdBy).to.eql(baseline.createdBy);
+        expect(stripMutatingFields(afterEnable)).to.eql(baselineStripped);
       });
     });
 

@@ -516,8 +516,8 @@ export class RulesClient {
 
     const itemsToUpdate: Array<{
       id: string;
-      attrs: RuleSavedObjectAttributes;
-      version?: string;
+      partialAttrs: Partial<RuleSavedObjectAttributes>;
+      mergedAttrs: RuleSavedObjectAttributes;
     }> = [];
 
     for (const doc of fetchResults) {
@@ -535,18 +535,23 @@ export class RulesClient {
         continue;
       }
 
-      const nextAttrs: RuleSavedObjectAttributes = {
-        ...doc.attributes,
+      const partialAttrs: Partial<RuleSavedObjectAttributes> = {
         enabled: true,
         updatedBy: userProfileUid,
         updatedAt: nowIso,
       };
 
-      itemsToUpdate.push({ id: doc.id, attrs: nextAttrs, version: doc.version });
+      itemsToUpdate.push({
+        id: doc.id,
+        partialAttrs,
+        mergedAttrs: { ...doc.attributes, ...partialAttrs },
+      });
     }
 
     if (itemsToUpdate.length > 0) {
-      const updateResults = await this.rulesSavedObjectService.bulkUpdate(itemsToUpdate);
+      const updateResults = await this.rulesSavedObjectService.bulkUpdate(
+        itemsToUpdate.map((item) => ({ id: item.id, attrs: item.partialAttrs }))
+      );
 
       const tasksToSchedule: Array<{
         id: string;
@@ -573,12 +578,12 @@ export class RulesClient {
           continue;
         }
 
-        rules.push(transformRuleSoAttributesToRuleApiResponse(item.id, item.attrs));
+        rules.push(transformRuleSoAttributesToRuleApiResponse(item.id, item.mergedAttrs));
 
         tasksToSchedule.push({
           id: getRuleExecutorTaskId({ ruleId: item.id, spaceId }),
           taskType: ALERTING_RULE_EXECUTOR_TASK_TYPE,
-          schedule: { interval: item.attrs.schedule.every },
+          schedule: { interval: item.mergedAttrs.schedule.every },
           params: { ruleId: item.id, spaceId },
           state: {},
           scope: ['alerting'],
@@ -619,8 +624,8 @@ export class RulesClient {
 
     const itemsToUpdate: Array<{
       id: string;
-      attrs: RuleSavedObjectAttributes;
-      version?: string;
+      partialAttrs: Partial<RuleSavedObjectAttributes>;
+      mergedAttrs: RuleSavedObjectAttributes;
     }> = [];
 
     for (const doc of fetchResults) {
@@ -638,18 +643,23 @@ export class RulesClient {
         continue;
       }
 
-      const nextAttrs: RuleSavedObjectAttributes = {
-        ...doc.attributes,
+      const partialAttrs: Partial<RuleSavedObjectAttributes> = {
         enabled: false,
         updatedBy: userProfileUid,
         updatedAt: nowIso,
       };
 
-      itemsToUpdate.push({ id: doc.id, attrs: nextAttrs, version: doc.version });
+      itemsToUpdate.push({
+        id: doc.id,
+        partialAttrs,
+        mergedAttrs: { ...doc.attributes, ...partialAttrs },
+      });
     }
 
     if (itemsToUpdate.length > 0) {
-      const updateResults = await this.rulesSavedObjectService.bulkUpdate(itemsToUpdate);
+      const updateResults = await this.rulesSavedObjectService.bulkUpdate(
+        itemsToUpdate.map((item) => ({ id: item.id, attrs: item.partialAttrs }))
+      );
 
       for (let i = 0; i < updateResults.length; i++) {
         const updateResult = updateResults[i];
@@ -666,7 +676,7 @@ export class RulesClient {
           continue;
         }
 
-        rules.push(transformRuleSoAttributesToRuleApiResponse(item.id, item.attrs));
+        rules.push(transformRuleSoAttributesToRuleApiResponse(item.id, item.mergedAttrs));
       }
     }
 
