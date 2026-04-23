@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiBadge, EuiCard, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiCard, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import type { HuntingLead } from './types';
 import { MAX_VISIBLE_TAGS } from './utils';
 import { renderTextWithEntities, TagsPopover } from './shared_lead_components';
@@ -41,7 +41,11 @@ export const LeadCard: React.FC<LeadCardProps> = ({ lead, onClick }) => {
 
   return (
     <EuiCard
-      title={lead.title}
+      title={
+        <EuiToolTip anchorClassName="eui-textTruncate" display="block">
+          <span>{lead.title}</span>
+        </EuiToolTip>
+      }
       titleElement="h5"
       titleSize="xs"
       textAlign="left"
@@ -55,7 +59,10 @@ export const LeadCard: React.FC<LeadCardProps> = ({ lead, onClick }) => {
       paddingSize="l"
       onClick={handleClick}
       data-test-subj={`leadCard-${lead.id}`}
-      css={{ minWidth: 0 }}
+      css={{
+        minWidth: 0,
+        '.euiCard__titleButton': { maxWidth: '100%' },
+      }}
     />
   );
 };

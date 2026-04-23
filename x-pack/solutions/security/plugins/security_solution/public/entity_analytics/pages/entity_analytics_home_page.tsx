@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import { SecurityPageName } from '../../app/types';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { HeaderPage } from '../../common/components/header_page';
@@ -30,6 +31,7 @@ import { useSourcererDataView } from '../../sourcerer/containers';
 import { useKibana } from '../../common/lib/kibana';
 import { EntityEventTypes } from '../../common/lib/telemetry';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { useLicense } from '../../common/hooks/use_license';
 import { PageLoader } from '../../common/components/page_loader';
 import { useSpaceId } from '../../common/hooks/use_space_id';
 import { useStoredAssistantConnectorId } from '../../onboarding/components/hooks/use_stored_state';
@@ -64,21 +66,31 @@ const getDefaultQuery = ({ query, filters }: EntitiesBaseURLQuery): URLQuery => 
 });
 
 export const EntityAnalyticsHomePage = () => {
-  const { telemetry, agentBuilder } = useKibana().services;
+  const { telemetry, agentBuilder, http, settings } = useKibana().services;
   const {
     indicesExist: oldIndicesExist,
     loading: oldIsSourcererLoading,
     sourcererDataView: oldSourcererDataViewSpec,
   } = useSourcererDataView();
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const leadGenerationEnabled = useIsExperimentalFeatureEnabled('leadGenerationEnabled');
+  const isEnterprise = useLicense().isEnterprise();
+  const leadGenerationEnabled =
+    useIsExperimentalFeatureEnabled('leadGenerationEnabled') && isEnterprise;
   const spaceId = useSpaceId();
   const { dataView: entityDataView, isLoading: entityDataViewLoading } =
     useEntityStoreDataView(spaceId);
 
-  const resolvedSpaceId = spaceId ?? 'default';
-  const [storedConnectorId, setStoredConnectorId] = useStoredAssistantConnectorId(resolvedSpaceId);
-  const connectorId = spaceId ? storedConnectorId ?? '' : '';
+  const [storedConnectorId, setStoredConnectorId] = useStoredAssistantConnectorId(spaceId ?? '');
+  const { data: aiConnectors } = useLoadConnectors({
+    http,
+    featureId: 'lead_generation',
+    settings,
+  });
+  const connectorId = useMemo(() => {
+    if (!spaceId || !aiConnectors || !aiConnectors.length) return '';
+    const storedConnector = aiConnectors.find((c) => c.id === storedConnectorId);
+    return storedConnector?.id ?? aiConnectors[0]?.id ?? '';
+  }, [spaceId, aiConnectors, storedConnectorId]);
   const safeSetConnectorId = useCallback(
     (id: string | undefined) => {
       if (spaceId) {
@@ -114,11 +126,6 @@ export const EntityAnalyticsHomePage = () => {
   const selectedWatchlistId = useMemo(() => {
     const params = new URLSearchParams(location.search);
     return params.get('watchlistId') || undefined;
-  }, [location.search]);
-
-  const selectedWatchlistName = useMemo(() => {
-    const params = new URLSearchParams(location.search);
-    return params.get('watchlistName') || undefined;
   }, [location.search]);
 
   const setSelectedWatchlist = useCallback(
@@ -248,10 +255,7 @@ export const EntityAnalyticsHomePage = () => {
               >
                 <EuiFlexItem grow={1}>
                   <EuiPanel hasBorder>
-                    <DynamicRiskLevelPanel
-                      watchlistId={selectedWatchlistId}
-                      watchlistName={selectedWatchlistName}
-                    />
+                    <DynamicRiskLevelPanel watchlistId={selectedWatchlistId} />
                   </EuiPanel>
                 </EuiFlexItem>
                 <EuiFlexItem grow={2}>
@@ -265,7 +269,6 @@ export const EntityAnalyticsHomePage = () => {
             <EuiPanel hasBorder>
               <EntityAnalyticsEntitiesTable
                 watchlistId={selectedWatchlistId}
-                watchlistName={selectedWatchlistName}
                 entityDataView={entityDataView}
                 entityDataViewLoading={entityDataViewLoading}
               />
@@ -285,12 +288,10 @@ export const EntityAnalyticsHomePage = () => {
 
 const EntityAnalyticsEntitiesTable = ({
   watchlistId,
-  watchlistName,
   entityDataView,
   entityDataViewLoading,
 }: {
   watchlistId?: string;
-  watchlistName?: string;
   entityDataView: ReturnType<typeof useEntityStoreDataView>['dataView'];
   entityDataViewLoading: boolean;
 }) => {
@@ -308,20 +309,10 @@ const EntityAnalyticsEntitiesTable = ({
       <EuiFlexItem grow={false}>
         <EuiTitle size="s">
           <h3>
-            {watchlistId ? (
-              <FormattedMessage
-                id="xpack.securitySolution.entityAnalytics.homePage.entitiesTableTitleWithWatchlist"
-                defaultMessage="{watchlistName} entities"
-                values={{
-                  watchlistName: watchlistName ?? watchlistId,
-                }}
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.securitySolution.entityAnalytics.homePage.entitiesTableTitle"
-                defaultMessage="Entities"
-              />
-            )}
+            <FormattedMessage
+              id="xpack.securitySolution.entityAnalytics.homePage.entitiesTableTitle"
+              defaultMessage="Entities"
+            />
           </h3>
         </EuiTitle>
       </EuiFlexItem>

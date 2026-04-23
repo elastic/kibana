@@ -11,6 +11,27 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { TopThreatHuntingLeads } from '.';
 import type { HuntingLead, Observation } from './types';
 
+jest.mock('../../../../common/lib/kibana', () => ({
+  useKibana: () => ({
+    services: {
+      application: {
+        getUrlForApp: jest.fn(() => '/app/management/ai/genAiSettings'),
+      },
+    },
+  }),
+}));
+
+const mockIsAgentChatExperienceEnabled = jest.fn();
+
+jest.mock('../../../../agent_builder/hooks/use_agent_builder_availability', () => ({
+  useAgentBuilderAvailability: () => ({
+    isAgentBuilderEnabled: false,
+    hasAgentBuilderPrivilege: false,
+    isAgentChatExperienceEnabled: mockIsAgentChatExperienceEnabled(),
+    hasValidAgentBuilderLicense: false,
+  }),
+}));
+
 const createMockObservation = (overrides: Partial<Observation> = {}): Observation => ({
   entityId: 'entity-1',
   moduleId: 'risk_analysis',
@@ -58,6 +79,7 @@ const defaultProps = {
 describe('TopThreatHuntingLeads', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockIsAgentChatExperienceEnabled.mockReturnValue(true);
   });
 
   it('renders cards with mock leads data (shows card for each lead, max 5)', () => {
@@ -132,16 +154,31 @@ describe('TopThreatHuntingLeads', () => {
     expect(onSeeAll).toHaveBeenCalledTimes(1);
   });
 
-  it('"Generate" button is disabled when connectorId is not provided', () => {
-    render(<TopThreatHuntingLeads {...defaultProps} connectorId={undefined} />);
+  it('shows "Open GenAI Settings" button when Classic AI Assistant experience is active, regardless of connectorId', () => {
+    mockIsAgentChatExperienceEnabled.mockReturnValue(false);
 
-    expect(screen.getByTestId('generateLeadsButton')).toBeDisabled();
+    render(<TopThreatHuntingLeads {...defaultProps} connectorId="some-connector" />);
+
+    expect(screen.getByTestId('openGenAiSettingsButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('generateLeadsButton')).not.toBeInTheDocument();
   });
 
-  it('"Generate" button is disabled when connectorId is empty string', () => {
+  it('shows "Open GenAI Settings" button when Classic AI Assistant experience is active and connectorId is empty', () => {
+    mockIsAgentChatExperienceEnabled.mockReturnValue(false);
+
     render(<TopThreatHuntingLeads {...defaultProps} connectorId="" />);
 
-    expect(screen.getByTestId('generateLeadsButton')).toBeDisabled();
+    expect(screen.getByTestId('openGenAiSettingsButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('generateLeadsButton')).not.toBeInTheDocument();
+  });
+
+  it('disables "Generate" button under Agent experience when no connectorId is selected', () => {
+    render(<TopThreatHuntingLeads {...defaultProps} connectorId="" />);
+
+    const generateButton = screen.getByTestId('generateLeadsButton');
+    expect(generateButton).toBeInTheDocument();
+    expect(generateButton).toBeDisabled();
+    expect(screen.queryByTestId('openGenAiSettingsButton')).not.toBeInTheDocument();
   });
 
   it('shows "Generate" button when no leads exist and calls onGenerate', () => {

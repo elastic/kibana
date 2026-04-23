@@ -18,15 +18,10 @@ import { useRiskLevelsEsqlQuery } from '../watchlists/components/hooks/use_risk_
 
 interface DynamicRiskLevelPanelProps {
   watchlistId?: string;
-  watchlistName?: string;
 }
 
-export const DynamicRiskLevelPanel: React.FC<DynamicRiskLevelPanelProps> = ({
-  watchlistId,
-  watchlistName,
-}) => {
+export const DynamicRiskLevelPanel: React.FC<DynamicRiskLevelPanelProps> = ({ watchlistId }) => {
   const spaceId = useSpaceId();
-  const hasWatchlist = !!watchlistId;
   const { uiSettings } = useKibana().services;
   const isEntityStoreV2Enabled = uiSettings.get<boolean>('securitySolution:entityStoreEnableV2');
 
@@ -66,20 +61,10 @@ export const DynamicRiskLevelPanel: React.FC<DynamicRiskLevelPanelProps> = ({
         <EuiFlexGroup alignItems="center" css={{ minHeight: 40 }}>
           <EuiTitle size="s">
             <h3>
-              {hasWatchlist ? (
-                <FormattedMessage
-                  id="xpack.securitySolution.entityAnalytics.dynamicRiskLevel.watchlistTitle"
-                  defaultMessage="{watchlistName} risk levels"
-                  values={{
-                    watchlistName: watchlistName ?? watchlistId,
-                  }}
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.securitySolution.entityAnalytics.dynamicRiskLevel.entityTitle"
-                  defaultMessage="Entity risk levels"
-                />
-              )}
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.dynamicRiskLevel.entityTitle"
+                defaultMessage="Entity risk levels"
+              />
             </h3>
           </EuiTitle>
         </EuiFlexGroup>
