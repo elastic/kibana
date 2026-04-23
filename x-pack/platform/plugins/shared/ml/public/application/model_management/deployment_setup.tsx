@@ -550,22 +550,34 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
         <>
           <EuiCallOut
             announceOnMount
-            title={i18n.translate(
-              'xpack.ml.trainedModels.modelsList.startDeployment.rerankWarningTitle',
-              {
-                defaultMessage: 'High resource requirements',
-              }
-            )}
+            title={
+              showNodeInfo
+                ? i18n.translate(
+                    'xpack.ml.trainedModels.modelsList.startDeployment.rerankWarningTitle',
+                    { defaultMessage: 'Plan for 8 GB on the ML node' }
+                  )
+                : i18n.translate(
+                    'xpack.ml.trainedModels.modelsList.startDeployment.rerankWarningServerlessTitle',
+                    { defaultMessage: 'Plan for higher ML resource use' }
+                  )
+            }
             color="warning"
             iconType="warning"
             size="s"
             data-test-subj="mlModelsStartDeploymentModalRerankWarning"
           >
             <p>
-              <FormattedMessage
-                id="xpack.ml.trainedModels.modelsList.startDeployment.rerankWarningDescription"
-                defaultMessage="Rerank models are resource intensive and require a minimum of 8 GB of memory on the ML node."
-              />
+              {showNodeInfo ? (
+                <FormattedMessage
+                  id="xpack.ml.trainedModels.modelsList.startDeployment.rerankWarningDescription"
+                  defaultMessage="Rerank models are memory intensive and can require at least 8 GB of memory on the ML node, especially when running alongside other hosted models."
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.ml.trainedModels.modelsList.startDeployment.rerankWarningServerlessDescription"
+                  defaultMessage="Rerank models are resource intensive and increase ML processing usage, especially when running alongside other hosted models."
+                />
+              )}
             </p>
           </EuiCallOut>
           <EuiSpacer size="m" />
