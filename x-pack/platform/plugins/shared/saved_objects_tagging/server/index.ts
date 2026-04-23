@@ -17,5 +17,5 @@ export type { IAssignmentService } from './services';
 
 export const plugin = async (initializerContext: PluginInitializerContext) => {
   const { SavedObjectTaggingPlugin } = await import('./plugin');
-  return new SavedObjectTaggingPlugin();
+  return new SavedObjectTaggingPlugin(initializerContext);
 };

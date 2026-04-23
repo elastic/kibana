@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -36,6 +36,12 @@ interface StartDeps {
 export class SavedObjectTaggingPlugin
   implements Plugin<{}, SavedObjectTaggingStart, SetupDeps, StartDeps>
 {
+  private readonly logger;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get();
+  }
+
   public setup(
     { savedObjects, http, getStartServices }: CoreSetup<StartDeps, SavedObjectTaggingStart>,
     { features, usageCollection, security }: SetupDeps
@@ -43,7 +49,7 @@ export class SavedObjectTaggingPlugin
     savedObjects.registerType(tagType);
 
     const router = http.createRouter<TagsHandlerContext>();
-    registerRoutes({ router });
+    registerRoutes({ router, logger: this.logger });
 
     http.registerRouteHandlerContext<TagsHandlerContext, 'tags'>(
       'tags',

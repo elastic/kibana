@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import type { TagsPluginRouter } from '../../types';
 
-export const registerGetAllTagsRoute = (router: TagsPluginRouter) => {
+export const registerGetAllTagsRoute = (router: TagsPluginRouter, logger: Logger) => {
   router.get(
     {
       path: '/api/saved_objects_tagging/tags',
@@ -21,13 +22,22 @@ export const registerGetAllTagsRoute = (router: TagsPluginRouter) => {
       validate: {},
     },
     router.handleLegacyErrors(async (ctx, req, res) => {
-      const { tagsClient } = await ctx.tags;
-      const tags = await tagsClient.getAll();
-      return res.ok({
-        body: {
-          tags,
-        },
-      });
+      try {
+        const { tagsClient } = await ctx.tags;
+        const tags = await tagsClient.getAll();
+        return res.ok({
+          body: {
+            tags,
+          },
+        });
+      } catch (e) {
+        logger.error(
+          `GET /api/saved_objects_tagging/tags error: [${e.constructor?.name}] ${e.message} ` +
+            `(statusCode: ${e.statusCode ?? 'N/A'}, isBoom: ${!!e.isBoom}, ` +
+            `output.statusCode: ${e.output?.statusCode ?? 'N/A'})`
+        );
+        throw e;
+      }
     })
   );
 };

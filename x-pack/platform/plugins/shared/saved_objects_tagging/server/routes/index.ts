@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
+
 import {
   registerUpdateTagRoute,
   registerGetAllTagsRoute,
@@ -20,12 +22,18 @@ import {
 import { registerInternalFindTagsRoute, registerInternalBulkDeleteRoute } from './internal';
 import type { TagsPluginRouter } from '../types';
 
-export const registerRoutes = ({ router }: { router: TagsPluginRouter }) => {
+export const registerRoutes = ({
+  router,
+  logger,
+}: {
+  router: TagsPluginRouter;
+  logger: Logger;
+}) => {
   // tags API
   registerCreateTagRoute(router);
   registerUpdateTagRoute(router);
   registerDeleteTagRoute(router);
-  registerGetAllTagsRoute(router);
+  registerGetAllTagsRoute(router, logger);
   registerGetTagRoute(router);
   // assignment API
   registerFindAssignableObjectsRoute(router);
