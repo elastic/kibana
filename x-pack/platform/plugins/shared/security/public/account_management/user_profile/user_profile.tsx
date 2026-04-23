@@ -20,6 +20,7 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiIcon,
+  EuiIconTip,
   EuiPopover,
   EuiSelect,
   EuiSpacer,
@@ -38,6 +39,7 @@ import { i18n, SUPPORTED_LOCALES, toCanonicalLocaleId } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
+  betaBadgeStyle,
   ContrastKeyPadMenu,
   FormChangesProvider,
   FormField,
@@ -307,10 +309,32 @@ export const UserLocaleEditor: FunctionComponent<UserLocaleEditorProps> = ({ for
         name="data.userSettings.locale"
         label={
           <FormLabel for="data.userSettings.locale">
-            <FormattedMessage
-              id="xpack.security.accountManagement.userProfile.localeLabel"
-              defaultMessage="Display language"
-            />
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={true}>
+                <FormattedMessage
+                  id="xpack.security.accountManagement.userProfile.localeLabel"
+                  defaultMessage="Display language"
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <div css={betaBadgeStyle}>
+                  <EuiIconTip
+                    aria-label={i18n.translate(
+                      'xpack.security.accountManagement.userProfile.localeBetaBadge',
+                      { defaultMessage: 'beta' }
+                    )}
+                    content={i18n.translate(
+                      'xpack.security.accountManagement.userProfile.localeBetaBadge.tooltip',
+                      {
+                        defaultMessage: 'The display language setting is currently a beta feature.',
+                      }
+                    )}
+                    type="beta"
+                    position="bottom"
+                  />
+                </div>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </FormLabel>
         }
         fullWidth
