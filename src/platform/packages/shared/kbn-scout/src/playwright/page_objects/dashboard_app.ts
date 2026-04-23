@@ -149,7 +149,6 @@ export class DashboardApp {
     // The settings top-nav entry uses the same `data-test-subj="dashboardSettingsButton"`
     // in both stateful and serverless (see `use_dashboard_menu_items.tsx`). It is only
     // rendered in edit mode, so callers must switch to edit mode first.
-    await expect(this.settingsButton).toBeVisible();
     await this.settingsButton.click();
     await expect(this.getSettingsFlyout()).toBeVisible();
   }
@@ -630,7 +629,6 @@ export class DashboardApp {
     }
 
     const titleInput = this.page.testSubj.locator('customEmbeddablePanelTitleInput');
-    await expect(titleInput).toBeEnabled();
     await titleInput.click();
     await titleInput.fill(customTitle);
     // Verify the React-controlled value actually committed before moving on.
@@ -1063,7 +1061,6 @@ export class DashboardApp {
     // Match the FTR selector in `drilldowns_manage.ts` so behaviour stays consistent.
     const selectAll = process.platform === 'darwin' ? 'Meta+a' : 'Control+a';
     const monacoEditor = this.page.locator('.urlTemplateEditor__container .monaco-editor');
-    await expect(monacoEditor).toBeVisible();
     await monacoEditor.click();
     await this.page.keyboard.press(selectAll);
     await this.page.keyboard.type(url);
