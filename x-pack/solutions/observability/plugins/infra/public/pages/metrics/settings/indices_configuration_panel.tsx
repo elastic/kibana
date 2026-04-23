@@ -19,7 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { rulesLocatorID, type RulesLocatorParams } from '@kbn/deeplinks-observability';
+import { rulesLocatorID, type RulesLocatorParams } from '@kbn/rule-data-utils';
 import {
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   METRIC_THRESHOLD_ALERT_TYPE_ID,

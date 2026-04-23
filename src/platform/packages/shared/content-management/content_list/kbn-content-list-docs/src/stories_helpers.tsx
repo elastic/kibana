@@ -69,11 +69,13 @@ export { mockTagsService, createMockFavoritesClient, mockContentListUserProfiles
  * real Kibana content editor flyout (`@kbn/content-management-content-editor`)
  * which requires Kibana core services not available in Storybook.
  */
+const inspectFlyoutTitleId = 'inspect-flyout-title';
+
 const InspectFlyout = ({ item, onClose }: { item: ContentListItem; onClose: () => void }) => (
-  <EuiFlyout onClose={onClose} size="s" ownFocus>
+  <EuiFlyout onClose={onClose} size="s" ownFocus aria-labelledby={inspectFlyoutTitleId}>
     <EuiFlyoutHeader hasBorder>
       <EuiTitle size="m">
-        <h2>{item.title}</h2>
+        <h2 id={inspectFlyoutTitleId}>{item.title}</h2>
       </EuiTitle>
     </EuiFlyoutHeader>
     <EuiFlyoutBody>
