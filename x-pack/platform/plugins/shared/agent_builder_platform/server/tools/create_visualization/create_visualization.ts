@@ -14,7 +14,8 @@ import {
   type VisualizationAttachmentData,
 } from '@kbn/agent-builder-common/attachments';
 import { ToolResultType, SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { buildVisualizationConfig, type VisualizationConfig } from '@kbn/agent-builder-genai-utils';
+import { buildVisualizationConfig, type VisualizationConfig } from '@kbn/agent-builder-tools-base';
+import { generateEsql } from '@kbn/agent-builder-genai-utils';
 
 /** Attachment type for visualization configurations */
 const VISUALIZATION_ATTACHMENT_TYPE = 'visualization';
@@ -116,6 +117,7 @@ This tool will:
             logger,
             events,
             esClient,
+            generateEsql,
           });
 
         const visualizationData = {

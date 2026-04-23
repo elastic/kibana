@@ -6,7 +6,8 @@
  */
 
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { buildVisualizationConfig, type VisualizationConfig } from '@kbn/agent-builder-genai-utils';
+import { buildVisualizationConfig, type VisualizationConfig } from '@kbn/agent-builder-tools-base';
+import { generateEsql } from '@kbn/agent-builder-genai-utils';
 import { type ModelProvider, type ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
@@ -98,6 +99,7 @@ export const createVisualizationResolver = ({
         logger,
         events,
         esClient,
+        generateEsql,
       });
 
       return {

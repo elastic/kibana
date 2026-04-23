@@ -17,7 +17,6 @@ project:
   owner: '@elastic/workchat-eng'
   sourceRoot: x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils
 dependsOn:
-  - '@kbn/agent-builder-tools-base'
   - '@kbn/core-http-server'
   - '@kbn/agent-builder-common'
   - '@kbn/agent-builder-server'

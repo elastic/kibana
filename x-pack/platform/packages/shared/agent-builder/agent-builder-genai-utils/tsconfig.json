@@ -14,7 +14,6 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/agent-builder-tools-base",
     "@kbn/core-http-server",
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-server",
