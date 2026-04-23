@@ -20,6 +20,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { useQuery } from '@kbn/react-query';
 import { Context, useService } from '@kbn/core-di-browser';
 import {
@@ -34,7 +35,7 @@ import type { RuleApiResponse } from '../services/rules_api';
 import { paths } from '../constants';
 import { ruleKeys } from '../hooks/query_key_factory';
 
-export const PROPOSED_CHANGE_ATTACHMENT_TYPE = 'rule_doctor_proposed_change';
+export const RULE_SUGGESTION_ATTACHMENT_TYPE = 'rule_doctor_suggestion';
 
 export interface RelatedRuleInfo {
   id: string;
@@ -45,14 +46,21 @@ export interface RelatedRuleInfo {
   action: 'retain' | 'delete';
 }
 
-export interface ProposedChangeAttachmentData {
+export interface RuleSuggestionAttachmentData {
+  findingId: string;
+  findingType: string;
+  action: string;
+  impact: string;
+  confidence: string;
+  summary: string;
+  explanation: string;
   proposed: string;
   diffs: string;
   ruleName: string;
   relatedRules?: string;
 }
 
-type ProposedChangeAttachment = Attachment<string, ProposedChangeAttachmentData>;
+type RuleSuggestionAttachment = Attachment<string, RuleSuggestionAttachmentData>;
 
 interface ParsedDiff {
   field: string;
@@ -62,6 +70,25 @@ interface ParsedDiff {
 
 type DescItem = { title: NonNullable<React.ReactNode>; description: NonNullable<React.ReactNode> };
 
+const FINDING_TYPE_COLORS: Record<string, string> = {
+  deduplication: '#F5A623',
+  threshold_tuning: '#9B59B6',
+  stale_rule: '#E74C3C',
+  coverage_gap: '#2980B9',
+};
+
+const IMPACT_BADGE: Record<string, { color: 'danger' | 'warning' | 'default'; label: string }> = {
+  high: { color: 'danger', label: 'High impact' },
+  medium: { color: 'warning', label: 'Medium impact' },
+  low: { color: 'default', label: 'Low impact' },
+};
+
+const formatTypeName = (type: string): string =>
+  type
+    .split('_')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+
 const safeJsonParse = <T,>(value: string, fallback: T): T => {
   try {
     return JSON.parse(value) as T;
@@ -70,142 +97,70 @@ const safeJsonParse = <T,>(value: string, fallback: T): T => {
   }
 };
 
-const safeGet = (obj: Record<string, unknown>, path: string): unknown => {
-  const parts = path.split('.');
-  let current: unknown = obj;
-  for (const part of parts) {
-    if (current == null || typeof current !== 'object') return undefined;
-    current = (current as Record<string, unknown>)[part];
-  }
-  return current;
-};
-
-const ProposedChangeInlineContent: React.FC<
-  AttachmentRenderProps<ProposedChangeAttachment> & {
+const SuggestionInlineContent: React.FC<
+  AttachmentRenderProps<RuleSuggestionAttachment> & {
     onRuleClick?: (ruleId: string) => void;
   }
 > = ({ attachment, onRuleClick }) => {
-  const { proposed: proposedJson, diffs: diffsJson, ruleName, relatedRules: relatedRulesJson } =
-    attachment.data;
-  const proposed = safeJsonParse<Record<string, unknown>>(proposedJson, {});
+  const {
+    findingType,
+    action,
+    impact,
+    summary,
+    explanation,
+    diffs: diffsJson,
+    relatedRules: relatedRulesJson,
+  } = attachment.data;
+
+  const typeColor = FINDING_TYPE_COLORS[findingType] ?? '#95A5A6';
   const diffs = safeJsonParse<ParsedDiff[]>(diffsJson, []);
   const relatedRules = safeJsonParse<RelatedRuleInfo[]>(relatedRulesJson ?? '[]', []);
-  const changedFields = new Set(diffs.map((d) => d.field));
-
-  const metadata = proposed.metadata as Record<string, unknown> | undefined;
-  const schedule = proposed.schedule as Record<string, unknown> | undefined;
-
-  const kind = (proposed.kind as string) ?? '';
-  const every = (schedule?.every as string) ?? '';
-  const description = metadata?.description as string | undefined;
-  const query = safeGet(proposed, 'evaluation.query.base') as string | undefined;
-  const tags = (metadata?.tags as string[]) ?? [];
-
-  const changedBadge = (field: string) =>
-    changedFields.has(field) ? (
-      <>
-        {' '}
-        <EuiBadge color="accent">Changed</EuiBadge>
-      </>
-    ) : null;
+  const impactMeta = IMPACT_BADGE[impact];
 
   return (
-    <EuiPanel paddingSize="m" hasShadow={false} hasBorder={false}>
-      <EuiText size="xs">
-        <strong>Rule:</strong> {ruleName}
+    <EuiPanel
+      paddingSize="m"
+      hasShadow={false}
+      hasBorder
+      css={css`
+        border-left: 4px solid ${typeColor};
+      `}
+    >
+      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
+        <EuiFlexItem grow={false}>
+          <EuiBadge color={typeColor}>{formatTypeName(findingType)}</EuiBadge>
+        </EuiFlexItem>
+        {impactMeta && (
+          <EuiFlexItem grow={false}>
+            <EuiBadge color={impactMeta.color}>{impactMeta.label}</EuiBadge>
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem>
+          <EuiText size="s">
+            <strong>{summary}</strong>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiBadge color="hollow">{action}</EuiBadge>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="s" />
+      <EuiText size="s" color="subdued">
+        {explanation}
       </EuiText>
-      <EuiSpacer size="xs" />
-
-      {kind && (
-        <>
-          <EuiText size="xs">
-            <strong>Kind:</strong> {kind}
-            {changedBadge('kind')}
-          </EuiText>
-          <EuiSpacer size="xs" />
-        </>
-      )}
-
-      {every && (
-        <>
-          <EuiText size="xs">
-            <strong>Schedule:</strong> {every}
-            {changedBadge('schedule.every')}
-          </EuiText>
-          <EuiSpacer size="xs" />
-        </>
-      )}
-
-      {description && (
-        <>
-          <EuiText size="xs">
-            <strong>Description:</strong> {description}
-            {changedBadge('metadata.description')}
-          </EuiText>
-          <EuiSpacer size="xs" />
-        </>
-      )}
-
-      {query && (
-        <>
-          <EuiText size="xs">
-            <strong>ES|QL query</strong>
-            {changedBadge('evaluation.query.base')}
-          </EuiText>
-          <EuiSpacer size="xs" />
-          <EuiCodeBlock language="esql" fontSize="s" paddingSize="s" overflowHeight={150}>
-            {query}
-          </EuiCodeBlock>
-          <EuiSpacer size="xs" />
-        </>
-      )}
-
-      {tags.length > 0 && (
-        <>
-          <EuiText size="xs">
-            <strong>Tags</strong>
-            {changedBadge('metadata.tags')}
-          </EuiText>
-          <EuiSpacer size="xs" />
-          <EuiFlexGroup responsive={false} gutterSize="xs" wrap>
-            {tags.map((tag) => (
-              <EuiFlexItem grow={false} key={tag}>
-                <EuiBadge color="hollow">{tag}</EuiBadge>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
-          <EuiSpacer size="xs" />
-        </>
-      )}
-
-      {diffs.length > 0 && (
-        <EuiText size="xs" color="subdued">
-          {diffs.length} field{diffs.length === 1 ? '' : 's'} changed
-        </EuiText>
-      )}
 
       {relatedRules.length > 0 && (
         <>
           <EuiSpacer size="s" />
           <EuiText size="xs">
-            <strong>Related rules</strong>
+            <strong>Impacted rules</strong>
           </EuiText>
           <EuiSpacer size="xs" />
-          {relatedRules.map((rule) => (
-            <EuiFlexGroup
-              key={rule.id}
-              responsive={false}
-              gutterSize="s"
-              alignItems="center"
-              css={{ marginBottom: 2 }}
-            >
-              <EuiFlexItem grow={false}>
-                <EuiBadge color={rule.action === 'retain' ? 'success' : 'danger'}>
-                  {rule.action === 'retain' ? 'Retain' : 'Delete'}
-                </EuiBadge>
-              </EuiFlexItem>
-              <EuiFlexItem grow>
-                <EuiText size="xs">
+          <EuiFlexGroup gutterSize="s" wrap responsive={false} alignItems="center">
+            {relatedRules.map((rule) => (
+              <EuiFlexItem key={rule.id} grow={false}>
+                <EuiBadge color="hollow">
                   <EuiLink
                     href={paths.ruleDetails(rule.id)}
                     onClick={(e: React.MouseEvent) => {
@@ -217,15 +172,19 @@ const ProposedChangeInlineContent: React.FC<
                   >
                     {rule.name}
                   </EuiLink>
-                </EuiText>
+                </EuiBadge>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued">
-                  {rule.kind} &middot; {rule.schedule}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ))}
+            ))}
+          </EuiFlexGroup>
+        </>
+      )}
+
+      {diffs.length > 0 && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiText size="xs" color="subdued">
+            {diffs.length} field{diffs.length === 1 ? '' : 's'} changed
+          </EuiText>
         </>
       )}
     </EuiPanel>
@@ -332,14 +291,26 @@ const SingleRuleCanvasContent: React.FC<{
   return <RuleDetailCard rule={rule} action={action} />;
 };
 
-const ProposedChangeCanvasContent: React.FC<
-  AttachmentRenderProps<ProposedChangeAttachment> & {
+const SuggestionCanvasContent: React.FC<
+  AttachmentRenderProps<RuleSuggestionAttachment> & {
     focusedRuleId?: string;
   }
 > = ({ attachment, focusedRuleId }) => {
   const rulesApi = useService(RulesApi);
-  const { proposed: proposedJson, diffs: diffsJson, ruleName, relatedRules: relatedRulesJson } =
-    attachment.data;
+  const {
+    findingType,
+    action,
+    impact,
+    confidence,
+    summary,
+    explanation,
+    proposed: proposedJson,
+    diffs: diffsJson,
+    ruleName,
+    relatedRules: relatedRulesJson,
+  } = attachment.data;
+
+  const typeColor = FINDING_TYPE_COLORS[findingType] ?? '#95A5A6';
   const relatedRules = useMemo(
     () => safeJsonParse<RelatedRuleInfo[]>(relatedRulesJson ?? '[]', []),
     [relatedRulesJson]
@@ -362,25 +333,63 @@ const ProposedChangeCanvasContent: React.FC<
 
   const ruleIds = relatedRules.map((r) => r.id);
   const diffs = safeJsonParse<ParsedDiff[]>(diffsJson, []);
+  const impactMeta = IMPACT_BADGE[impact];
+  const isCoverageGap = findingType === 'coverage_gap';
 
-  return <FullDetailsCanvasContent
-    rulesApi={rulesApi}
-    ruleIds={ruleIds}
-    actionById={actionById}
-    diffs={diffs}
-    ruleName={ruleName}
-    proposedJson={proposedJson}
-  />;
+  return (
+    <CanvasFullView
+      rulesApi={rulesApi}
+      ruleIds={ruleIds}
+      actionById={actionById}
+      diffs={diffs}
+      ruleName={ruleName}
+      proposedJson={proposedJson}
+      findingType={findingType}
+      typeColor={typeColor}
+      action={action}
+      impact={impact}
+      impactMeta={impactMeta}
+      confidence={confidence}
+      summary={summary}
+      explanation={explanation}
+      isCoverageGap={isCoverageGap}
+    />
+  );
 };
 
-const FullDetailsCanvasContent: React.FC<{
+const CanvasFullView: React.FC<{
   rulesApi: RulesApi;
   ruleIds: string[];
   actionById: Map<string, 'retain' | 'delete'>;
   diffs: ParsedDiff[];
   ruleName: string;
   proposedJson: string;
-}> = ({ rulesApi, ruleIds, actionById, diffs, ruleName, proposedJson }) => {
+  findingType: string;
+  typeColor: string;
+  action: string;
+  impact: string;
+  impactMeta: { color: 'danger' | 'warning' | 'default'; label: string } | undefined;
+  confidence: string;
+  summary: string;
+  explanation: string;
+  isCoverageGap: boolean;
+}> = ({
+  rulesApi,
+  ruleIds,
+  actionById,
+  diffs,
+  ruleName,
+  proposedJson,
+  findingType,
+  typeColor,
+  action,
+  impact,
+  impactMeta,
+  confidence,
+  summary,
+  explanation,
+  isCoverageGap,
+}) => {
   const {
     data: fetchedRules,
     isLoading,
@@ -397,15 +406,40 @@ const FullDetailsCanvasContent: React.FC<{
 
   return (
     <div style={{ padding: 16, overflow: 'auto', height: '100%' }}>
+      {/* Header */}
+      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
+        <EuiFlexItem grow={false}>
+          <EuiBadge color={typeColor}>{formatTypeName(findingType)}</EuiBadge>
+        </EuiFlexItem>
+        {impactMeta && (
+          <EuiFlexItem grow={false}>
+            <EuiBadge color={impactMeta.color}>{impactMeta.label}</EuiBadge>
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem grow={false}>
+          <EuiBadge color="hollow">Confidence: {confidence}</EuiBadge>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiBadge color="hollow">{action}</EuiBadge>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
       <EuiTitle size="s">
-        <h3>Proposed change: {ruleName}</h3>
+        <h3>{summary}</h3>
       </EuiTitle>
+      <EuiSpacer size="s" />
+
+      {/* Explanation */}
+      <EuiText size="s" color="subdued">
+        {explanation}
+      </EuiText>
       <EuiSpacer size="m" />
 
+      {/* Impacted rules */}
       {ruleIds.length > 0 && (
         <>
           <EuiTitle size="xs">
-            <h4>Related rules</h4>
+            <h4>{isCoverageGap ? 'Related existing rules' : 'Impacted rules'}</h4>
           </EuiTitle>
           <EuiSpacer size="s" />
 
@@ -430,6 +464,7 @@ const FullDetailsCanvasContent: React.FC<{
         </>
       )}
 
+      {/* Field changes */}
       {diffs.length > 0 && (
         <>
           <EuiTitle size="xs">
@@ -444,7 +479,7 @@ const FullDetailsCanvasContent: React.FC<{
               description: (
                 <EuiText size="xs">
                   <code>{JSON.stringify(d.previous)}</code>
-                  {' → '}
+                  {' \u2192 '}
                   <code>{JSON.stringify(d.proposed)}</code>
                 </EuiText>
               ),
@@ -454,10 +489,15 @@ const FullDetailsCanvasContent: React.FC<{
         </>
       )}
 
+      {/* Proposed configuration */}
       <EuiTitle size="xs">
-        <h4>Proposed configuration</h4>
+        <h4>{isCoverageGap ? 'Suggested new rule' : 'Proposed configuration'}</h4>
       </EuiTitle>
       <EuiSpacer size="s" />
+      <EuiText size="xs" color="subdued">
+        <strong>Rule:</strong> {ruleName}
+      </EuiText>
+      <EuiSpacer size="xs" />
       <EuiCodeBlock language="json" fontSize="s" paddingSize="s" isCopyable overflowHeight={400}>
         {JSON.stringify(safeJsonParse(proposedJson, {}), null, 2)}
       </EuiCodeBlock>
@@ -465,7 +505,7 @@ const FullDetailsCanvasContent: React.FC<{
   );
 };
 
-export const registerProposedChangeAttachment = ({
+export const registerRuleSuggestionAttachment = ({
   attachments,
   container,
 }: {
@@ -475,13 +515,13 @@ export const registerProposedChangeAttachment = ({
   let openCanvasRef: (() => void) | undefined;
   let focusedRuleId: string | undefined;
 
-  attachments.addAttachmentType<ProposedChangeAttachment>(
-    PROPOSED_CHANGE_ATTACHMENT_TYPE,
+  attachments.addAttachmentType<RuleSuggestionAttachment>(
+    RULE_SUGGESTION_ATTACHMENT_TYPE,
     {
-      getLabel: (attachment) => attachment.data.ruleName ?? 'Proposed Rule Change',
+      getLabel: (attachment) => attachment.data.summary ?? attachment.data.ruleName ?? 'Rule Suggestion',
       getIcon: () => 'sparkles',
       renderInlineContent: (props) => (
-        <ProposedChangeInlineContent
+        <SuggestionInlineContent
           {...props}
           onRuleClick={(ruleId) => {
             focusedRuleId = ruleId;
@@ -491,7 +531,7 @@ export const registerProposedChangeAttachment = ({
       ),
       renderCanvasContent: (props) => (
         <Context.Provider value={container}>
-          <ProposedChangeCanvasContent {...props} focusedRuleId={focusedRuleId} />
+          <SuggestionCanvasContent {...props} focusedRuleId={focusedRuleId} />
         </Context.Provider>
       ),
       getActionButtons: ({ openCanvas, isCanvas }) => {
@@ -511,6 +551,6 @@ export const registerProposedChangeAttachment = ({
           },
         ];
       },
-    } satisfies AttachmentUIDefinition<ProposedChangeAttachment>
+    } satisfies AttachmentUIDefinition<RuleSuggestionAttachment>
   );
 };

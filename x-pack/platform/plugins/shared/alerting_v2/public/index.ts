@@ -64,8 +64,8 @@ export const module = new ContainerModule(({ bind }) => {
         const agentBuilder = diContainer.get(agentBuilderToken) as AgentBuilderPluginStart;
         if (agentBuilder.attachments) {
           import('./agent_builder/proposed_change_attachment').then(
-            ({ registerProposedChangeAttachment }) => {
-              registerProposedChangeAttachment({
+            ({ registerRuleSuggestionAttachment }) => {
+              registerRuleSuggestionAttachment({
                 attachments: agentBuilder.attachments,
                 container: diContainer,
               });

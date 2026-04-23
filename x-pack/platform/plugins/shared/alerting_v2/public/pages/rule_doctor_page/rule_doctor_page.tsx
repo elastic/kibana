@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -21,6 +21,7 @@ import { useRunAnalysis } from '../../hooks/use_run_analysis';
 import { useExecutionStream } from '../../hooks/use_execution_stream';
 
 type TabId = 'overview' | 'executions';
+const ACTIVE_STATUSES = new Set(['pending', 'waiting', 'waiting_for_input', 'running']);
 
 export const RuleDoctorPage = () => {
   const http = useService(CoreStart('http'));
@@ -48,6 +49,11 @@ export const RuleDoctorPage = () => {
       },
     });
   }, [runAnalysisMutation, executionStream]);
+
+  const isAnalysisRunning = useMemo(
+    () => (executionStream.executions ?? []).some((e) => ACTIVE_STATUSES.has(e.status)),
+    [executionStream.executions]
+  );
 
   const switchToExecutions = useCallback(() => {
     setActiveTab('executions');
@@ -118,7 +124,12 @@ export const RuleDoctorPage = () => {
       />
       <EuiSpacer size="m" />
 
-      {activeTab === 'overview' && <OverviewTab onSwitchToExecutions={switchToExecutions} />}
+      {activeTab === 'overview' && (
+        <OverviewTab
+          onSwitchToExecutions={switchToExecutions}
+          isAnalysisRunning={isAnalysisRunning}
+        />
+      )}
       {activeTab === 'executions' && <ExecutionsTab executionStream={executionStream} />}
     </>
   );

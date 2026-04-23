@@ -319,8 +319,8 @@ export interface RuleDoctorExecutionDetail extends RuleDoctorExecutionSummary {
 }
 
 export interface RuleDoctorWorkflowService {
-  ensureWorkflow(params: { request: KibanaRequest }): Promise<void>;
-  ensureWorkflows(params: { request: KibanaRequest }): Promise<void>;
+  ensureWorkflow(params: { request: KibanaRequest; spaceId?: string }): Promise<void>;
+  ensureWorkflows(params: { request: KibanaRequest; spaceId?: string }): Promise<void>;
   runAnalysis(params: {
     request: KibanaRequest;
     rules: unknown[];
@@ -354,16 +354,17 @@ export const createRuleDoctorWorkflowService = (
 
   const ensureSingleWorkflow = async (
     def: WorkflowDefinition,
-    request: KibanaRequest
+    request: KibanaRequest,
+    spaceId: string = DEFAULT_SPACE_ID
   ): Promise<void> => {
-    const existing = await managementApi.getWorkflow(def.id, DEFAULT_SPACE_ID);
+    const existing = await managementApi.getWorkflow(def.id, spaceId);
 
     if (existing) {
       if (existing.yaml !== def.yaml || !existing.enabled || !existing.valid) {
         const result = await managementApi.updateWorkflow(
           def.id,
           { yaml: def.yaml, enabled: true } as Partial<EsWorkflow>,
-          DEFAULT_SPACE_ID,
+          spaceId,
           request
         );
         if (result.validationErrors && result.validationErrors.length > 0) {
@@ -382,7 +383,7 @@ export const createRuleDoctorWorkflowService = (
       return;
     }
 
-    await managementApi.createWorkflow({ yaml: def.yaml, id: def.id }, DEFAULT_SPACE_ID, request);
+    await managementApi.createWorkflow({ yaml: def.yaml, id: def.id }, spaceId, request);
 
     log.info(`Created Rule Doctor ${def.label} workflow ${def.id}`);
   };
@@ -394,7 +395,7 @@ export const createRuleDoctorWorkflowService = (
     spaceId: string,
     extraInputs?: Record<string, unknown>
   ): Promise<string> => {
-    const workflow = await managementApi.getWorkflow(def.id, DEFAULT_SPACE_ID);
+    const workflow = await managementApi.getWorkflow(def.id, spaceId);
 
     if (!workflow) {
       throw new Error(`Rule Doctor workflow ${def.id} not found after ensure`);
@@ -424,24 +425,24 @@ export const createRuleDoctorWorkflowService = (
   };
 
   return {
-    async ensureWorkflow({ request }) {
-      await ensureSingleWorkflow(WORKFLOW_DEFINITIONS[0], request);
+    async ensureWorkflow({ request, spaceId = DEFAULT_SPACE_ID }) {
+      await ensureSingleWorkflow(WORKFLOW_DEFINITIONS[0], request, spaceId);
     },
 
-    async ensureWorkflows({ request }) {
+    async ensureWorkflows({ request, spaceId = DEFAULT_SPACE_ID }) {
       await Promise.all([
-        ...CORE_WORKFLOW_DEFINITIONS.map((def) => ensureSingleWorkflow(def, request)),
-        ensureSingleWorkflow(COVERAGE_GAP_DV_DEFINITION, request),
+        ...CORE_WORKFLOW_DEFINITIONS.map((def) => ensureSingleWorkflow(def, request, spaceId)),
+        ensureSingleWorkflow(COVERAGE_GAP_DV_DEFINITION, request, spaceId),
       ]);
     },
 
     async runAnalysis({ request, rules, spaceId = DEFAULT_SPACE_ID }) {
-      await this.ensureWorkflows({ request });
+      await this.ensureWorkflows({ request, spaceId });
       return scheduleWorkflow(WORKFLOW_DEFINITIONS[0], request, rules, spaceId);
     },
 
     async runAllAnalyses({ request, rules, spaceId = DEFAULT_SPACE_ID }) {
-      await this.ensureWorkflows({ request });
+      await this.ensureWorkflows({ request, spaceId });
 
       const results = await Promise.allSettled(
         CORE_WORKFLOW_DEFINITIONS.map((def) => scheduleWorkflow(def, request, rules, spaceId))
@@ -469,7 +470,7 @@ export const createRuleDoctorWorkflowService = (
       dataView,
       features,
     }) {
-      await ensureSingleWorkflow(COVERAGE_GAP_DV_DEFINITION, request);
+      await ensureSingleWorkflow(COVERAGE_GAP_DV_DEFINITION, request, spaceId);
       return scheduleWorkflow(COVERAGE_GAP_DV_DEFINITION, request, rules, spaceId, {
         data_view: dataView,
         features,

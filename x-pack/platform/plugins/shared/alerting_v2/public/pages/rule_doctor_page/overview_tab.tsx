@@ -12,6 +12,7 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiLoadingSpinner,
   EuiPagination,
   EuiSpacer,
@@ -58,22 +59,17 @@ const STATUS_OPTIONS = [
 
 interface OverviewTabProps {
   onSwitchToExecutions: () => void;
+  isAnalysisRunning: boolean;
 }
 
 const PAGE_SIZE = 10;
 
-export const OverviewTab: React.FC<OverviewTabProps> = ({ onSwitchToExecutions }) => {
+export const OverviewTab: React.FC<OverviewTabProps> = ({ onSwitchToExecutions, isAnalysisRunning }) => {
   const [status, setStatus] = useState<FindingStatus>('open');
   const [page, setPage] = useState(0);
   const { data, isLoading, isError, error } = useFetchFindings(status);
 
-  const findings = useMemo(
-    () =>
-      (data?.findings ?? [])
-        .map(toFinding)
-        .filter((f) => f.confidence !== 'low'),
-    [data]
-  );
+  const findings = useMemo(() => (data?.findings ?? []).map(toFinding), [data]);
   const analyzedAt = data?.findings?.[0]?.['@timestamp'] ?? null;
   const pageCount = Math.ceil(findings.length / PAGE_SIZE);
   const paginatedFindings = findings.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
@@ -236,35 +232,61 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ onSwitchToExecutions }
 
   return (
     <>
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="s">
-            <h2>
-              {status === 'open'
-                ? i18n.translate('xpack.alertingV2.ruleDoctor.overview.recommendationsTitle', {
-                    defaultMessage: 'AI Recommendations',
-                  })
-                : i18n.translate(
-                    'xpack.alertingV2.ruleDoctor.overview.dismissedRecommendationsTitle',
-                    { defaultMessage: 'Dismissed Recommendations' }
-                  )}
-            </h2>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonGroup
-            legend={i18n.translate(
-              'xpack.alertingV2.ruleDoctor.overview.statusFilterLegend',
-              { defaultMessage: 'Filter by status' }
-            )}
-            options={STATUS_OPTIONS}
-            idSelected={status}
-            onChange={handleStatusChange}
-            buttonSize="compressed"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="xs" />
+      {isAnalysisRunning && (
+        <>
+          <EuiCallOut
+            title={i18n.translate('xpack.alertingV2.ruleDoctor.overview.analysisRunningTitle', {
+              defaultMessage: 'Analysis in progress',
+            })}
+            color="primary"
+            iconType="clock"
+            size="s"
+          >
+            <p>
+              <FormattedMessage
+                id="xpack.alertingV2.ruleDoctor.overview.analysisRunningBody"
+                defaultMessage="Rule Doctor is currently analyzing your rules. Recommendations will update when analysis completes. {executionsLink}"
+                values={{
+                  executionsLink: (
+                    <EuiLink onClick={onSwitchToExecutions}>
+                      <FormattedMessage
+                        id="xpack.alertingV2.ruleDoctor.overview.viewExecutionsLink"
+                        defaultMessage="View executions"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </p>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      )}
+      <div css={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <EuiTitle size="s">
+          <h2>
+            {status === 'open'
+              ? i18n.translate('xpack.alertingV2.ruleDoctor.overview.recommendationsTitle', {
+                  defaultMessage: 'AI Recommendations',
+                })
+              : i18n.translate(
+                  'xpack.alertingV2.ruleDoctor.overview.dismissedRecommendationsTitle',
+                  { defaultMessage: 'Dismissed Recommendations' }
+                )}
+          </h2>
+        </EuiTitle>
+        <EuiButtonGroup
+          legend={i18n.translate(
+            'xpack.alertingV2.ruleDoctor.overview.statusFilterLegend',
+            { defaultMessage: 'Filter by status' }
+          )}
+          options={STATUS_OPTIONS}
+          idSelected={status}
+          onChange={handleStatusChange}
+          buttonSize="compressed"
+        />
+      </div>
+      <EuiSpacer size="s" />
       {renderBody()}
     </>
   );

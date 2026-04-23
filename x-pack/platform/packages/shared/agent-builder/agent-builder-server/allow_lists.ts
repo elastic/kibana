@@ -47,6 +47,9 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
 
   // Alerting V2
   `${internalNamespaces.alerting}.update_rule`,
+  `${internalNamespaces.alerting}.delete_rules`,
+  `${internalNamespaces.alerting}.create_rule`,
+  `${internalNamespaces.alerting}.update_finding_status`,
 
   // Streams – read
   `${internalNamespaces.streams}.list_streams`,

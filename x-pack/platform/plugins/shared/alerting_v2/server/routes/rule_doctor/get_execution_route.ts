@@ -6,9 +6,12 @@
  */
 
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { inject, injectable } from 'inversify';
+import { PluginStart } from '@kbn/core-di';
 import { Request } from '@kbn/core-di-server';
 import { z } from '@kbn/zod/v4';
+import type { AlertingServerStartDependencies } from '../../types';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
@@ -97,15 +100,18 @@ export class GetRuleDoctorExecutionRoute extends BaseAlertingRoute {
     @inject(Request)
     private readonly request: KibanaRequest<z.infer<typeof paramsSchema>>,
     @inject(RuleDoctorWorkflowServiceToken)
-    private readonly ruleDoctorService: RuleDoctorWorkflowService
+    private readonly ruleDoctorService: RuleDoctorWorkflowService,
+    @inject(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'))
+    private readonly spaces: SpacesPluginStart
   ) {
     super(ctx);
   }
 
   protected async execute() {
     const { executionId } = this.request.params;
+    const spaceId = this.spaces.spacesService.getSpaceId(this.request);
 
-    const detail = await this.ruleDoctorService.getExecution({ executionId });
+    const detail = await this.ruleDoctorService.getExecution({ executionId, spaceId });
 
     if (!detail) {
       return this.ctx.response.notFound({

@@ -85,13 +85,15 @@ export function streamNameMatchesPattern(streamName: string, pattern: string): b
 
 export async function fetchDataViews(
   soClient: SavedObjectsClientContract,
-  logger: { debug: (msg: string) => void }
+  logger: { debug: (msg: string) => void },
+  namespaces?: string[]
 ): Promise<Array<{ id: string; name: string; pattern: string }>> {
   try {
     const response = await soClient.find<{ title: string; name?: string }>({
       type: 'index-pattern',
       perPage: 100,
       fields: ['title', 'name'],
+      ...(namespaces ? { namespaces } : {}),
     });
     return response.saved_objects.map((so) => ({
       id: so.id,

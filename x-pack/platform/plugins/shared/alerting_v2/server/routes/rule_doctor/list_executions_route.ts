@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import type { RouteSecurity } from '@kbn/core-http-server';
+import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { inject, injectable } from 'inversify';
+import { PluginStart } from '@kbn/core-di';
+import { Request } from '@kbn/core-di-server';
 import { z } from '@kbn/zod/v4';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
@@ -15,6 +18,7 @@ import { AlertingRouteContext } from '../alerting_route_context';
 import { RuleDoctorWorkflowServiceToken } from '../../workflows/tokens';
 import type { RuleDoctorWorkflowService } from '../../workflows/rule_doctor_workflow';
 import { EsServiceInternalToken } from '../../lib/services/es_service/tokens';
+import type { AlertingServerStartDependencies } from '../../types';
 import { enrichExecutionsWithDataViewNames } from './enrich_executions';
 
 const responseSchema = z.object({
@@ -61,16 +65,20 @@ export class ListRuleDoctorExecutionsRoute extends BaseAlertingRoute {
 
   constructor(
     @inject(AlertingRouteContext) ctx: AlertingRouteContext,
+    @inject(Request) private readonly request: KibanaRequest,
     @inject(RuleDoctorWorkflowServiceToken)
     private readonly ruleDoctorService: RuleDoctorWorkflowService,
     @inject(EsServiceInternalToken)
-    private readonly esClient: ElasticsearchClient
+    private readonly esClient: ElasticsearchClient,
+    @inject(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'))
+    private readonly spaces: SpacesPluginStart
   ) {
     super(ctx);
   }
 
   protected async execute() {
-    const executions = await this.ruleDoctorService.listExecutions({});
+    const spaceId = this.spaces.spacesService.getSpaceId(this.request);
+    const executions = await this.ruleDoctorService.listExecutions({ spaceId });
     await enrichExecutionsWithDataViewNames(executions, this.esClient);
 
     return this.ctx.response.ok({

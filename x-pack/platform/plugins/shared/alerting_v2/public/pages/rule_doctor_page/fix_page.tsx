@@ -37,9 +37,9 @@ import {
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
-import { PROPOSED_CHANGE_ATTACHMENT_TYPE } from '../../agent_builder/proposed_change_attachment';
+import { RULE_SUGGESTION_ATTACHMENT_TYPE } from '../../agent_builder/proposed_change_attachment';
 import type {
-  ProposedChangeAttachmentData,
+  RuleSuggestionAttachmentData,
   RelatedRuleInfo,
 } from '../../agent_builder/proposed_change_attachment';
 import { RulesApi } from '../../services/rules_api';
@@ -49,6 +49,20 @@ import { paths } from '../../constants';
 import type { RuleDoctorFinding } from './types';
 
 type DescItem = { title: NonNullable<React.ReactNode>; description: NonNullable<React.ReactNode> };
+
+const FINDING_TYPE_LABELS: Record<string, string> = {
+  deduplication: 'Deduplication',
+  threshold_tuning: 'Threshold Tuning',
+  stale_rule: 'Stale Rule',
+  coverage_gap: 'Coverage Gap',
+};
+
+const FINDING_TYPE_COLORS: Record<string, string> = {
+  deduplication: '#F5A623',
+  threshold_tuning: '#9B59B6',
+  stale_rule: '#E74C3C',
+  coverage_gap: '#2980B9',
+};
 
 interface FixPageLocationState {
   finding?: RuleDoctorFinding;
@@ -319,7 +333,7 @@ const ProposedRulePanel: React.FC<{
       <EuiFlexGroup gutterSize="s" responsive={false} justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <EuiButton size="s" fill iconType="save" onClick={onUpdate} isLoading={updating}>
-            Update
+            Apply
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -573,10 +587,17 @@ export const FixPage: React.FC = () => {
       action: rule.id === retainRuleId ? 'retain' : 'delete',
     }));
 
-    const attachment: AttachmentInput<string, ProposedChangeAttachmentData> = {
-      id: `${PROPOSED_CHANGE_ATTACHMENT_TYPE}-${Date.now()}`,
-      type: PROPOSED_CHANGE_ATTACHMENT_TYPE,
+    const attachment: AttachmentInput<string, RuleSuggestionAttachmentData> = {
+      id: `${RULE_SUGGESTION_ATTACHMENT_TYPE}-${Date.now()}`,
+      type: RULE_SUGGESTION_ATTACHMENT_TYPE,
       data: {
+        findingId: finding.id,
+        findingType: finding.type,
+        action: finding.action,
+        impact: finding.impact,
+        confidence: finding.confidence,
+        summary: finding.summary,
+        explanation: finding.explanation,
         proposed: JSON.stringify(proposed),
         diffs: JSON.stringify(finding.diffs ?? []),
         ruleName,
@@ -587,7 +608,7 @@ export const FixPage: React.FC = () => {
     application.navigateToApp('agent_builder', {
       path: `/agents/${agentBuilderDefaultAgentId}`,
       state: {
-        initialMessage: `I have a proposed change from Rule Doctor for the rule "${ruleName}". Please help me refine these changes.`,
+        initialMessage: `I have a Rule Doctor suggestion: "${finding.summary}". Please help me review and refine these changes.`,
         attachments: [attachment],
       },
     });
@@ -996,7 +1017,16 @@ export const FixPage: React.FC = () => {
   return (
     <>
       <EuiPageHeader
-        pageTitle={`Fix: ${finding.summary}`}
+        pageTitle={
+          <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+            <EuiFlexItem grow={false}>{`Fix: ${finding.summary}`}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color={FINDING_TYPE_COLORS[finding.type] ?? 'default'}>
+                {FINDING_TYPE_LABELS[finding.type] ?? finding.type}
+              </EuiBadge>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
         description={
           <>
             <EuiText size="xs" color="subdued">

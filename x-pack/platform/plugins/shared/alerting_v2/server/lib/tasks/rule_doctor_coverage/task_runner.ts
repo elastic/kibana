@@ -173,7 +173,11 @@ export class RuleDoctorCoverageTaskRunner {
     const allSourcePatterns = new Set(ruleSourcePatterns.values().flatMap((p) => p));
 
     const soClient = this.savedObjects.getScopedClient(this.request);
-    const dataViews = await fetchDataViews(soClient, this.logger);
+    const dataViews = await fetchDataViews(
+      soClient,
+      this.logger,
+      namespace ? [namespace] : ['default']
+    );
 
     if (dataViews.length === 0) {
       this.logger.info('Coverage tick: no data views found');

@@ -7,8 +7,9 @@
 
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { inject, injectable } from 'inversify';
-import { Logger as PluginLogger } from '@kbn/core-di';
+import { Logger as PluginLogger, PluginStart } from '@kbn/core-di';
 import { Request } from '@kbn/core-di-server';
 import type { Logger } from '@kbn/logging';
 import { defer, timer, switchMap, map, distinctUntilChanged, takeWhile, share } from 'rxjs';
@@ -24,6 +25,7 @@ import type {
   RuleDoctorExecutionSummary,
 } from '../../workflows/rule_doctor_workflow';
 import { EsServiceInternalToken } from '../../lib/services/es_service/tokens';
+import type { AlertingServerStartDependencies } from '../../types';
 import { enrichExecutionsWithDataViewNames } from './enrich_executions';
 
 const POLL_INTERVAL_MS = 2000;
@@ -68,7 +70,9 @@ export class StreamExecutionsRoute extends BaseAlertingRoute {
     @inject(RuleDoctorWorkflowServiceToken)
     private readonly ruleDoctorService: RuleDoctorWorkflowService,
     @inject(EsServiceInternalToken)
-    private readonly esClient: ElasticsearchClient
+    private readonly esClient: ElasticsearchClient,
+    @inject(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'))
+    private readonly spaces: SpacesPluginStart
   ) {
     super(ctx);
   }
@@ -79,11 +83,13 @@ export class StreamExecutionsRoute extends BaseAlertingRoute {
       abortController.abort();
     });
 
+    const spaceId = this.spaces.spacesService.getSpaceId(this.request);
+
     const executions$: Observable<ExecutionUpdateEvent> = defer(() =>
       timer(0, POLL_INTERVAL_MS)
     ).pipe(
       switchMap(async () => {
-        const executions = await this.ruleDoctorService.listExecutions({});
+        const executions = await this.ruleDoctorService.listExecutions({ spaceId });
         await enrichExecutionsWithDataViewNames(executions, this.esClient);
         return executions;
       }),

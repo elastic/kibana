@@ -15,7 +15,11 @@ import { RulesSavedObjectService } from '../lib/services/rules_saved_object_serv
 import { UserService } from '../lib/services/user_service/user_service';
 import { RulesClient } from '../lib/rules_client/rules_client';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { EsServiceInternalToken } from '../lib/services/es_service/tokens';
 import { createUpdateRuleTool } from './update_rule_tool';
+import { createDeleteRulesTool } from './delete_rules_tool';
+import { createCreateRuleTool } from './create_rule_tool';
+import { createUpdateFindingStatusTool } from './update_finding_status_tool';
 
 /**
  * Creates a factory that produces a request-scoped RulesClient by resolving
@@ -51,5 +55,17 @@ export const registerAlertingV2Tools = (
   logger: Logger
 ): void => {
   const getRulesClient = buildScopedRulesClientFactory(container);
+
   agentBuilder.tools.register(createUpdateRuleTool(getRulesClient, logger));
+  agentBuilder.tools.register(createDeleteRulesTool(getRulesClient, logger));
+  agentBuilder.tools.register(createCreateRuleTool(getRulesClient, logger));
+
+  const getEsClient = () => container.get(EsServiceInternalToken);
+  const getSpaceId = (request: KibanaRequest) => {
+    const spaces = container.get(
+      PluginStart<AlertingServerStartDependencies['spaces']>('spaces')
+    );
+    return spaces.spacesService.getSpaceId(request);
+  };
+  agentBuilder.tools.register(createUpdateFindingStatusTool(getEsClient, getSpaceId, logger));
 };

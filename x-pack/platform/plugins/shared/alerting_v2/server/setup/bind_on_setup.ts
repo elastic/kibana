@@ -17,7 +17,7 @@ import { registerSavedObjects } from '../saved_objects';
 import { dispatcherUiSettings } from '../lib/dispatcher/ui_settings';
 import { experimentalFeaturesUiSettings } from '../ui_settings/experimental_features_setting';
 import { EsServiceInternalToken } from '../lib/services/es_service/tokens';
-import { registerProposedChangeAttachmentType } from '../agent_builder/proposed_change_attachment';
+import { registerRuleSuggestionAttachmentType } from '../agent_builder/proposed_change_attachment';
 import { registerAlertingV2Tools } from '../agent_builder/register_tools';
 import { validateRulesStepDefinition } from '../step_types/validate_rules';
 import { persistFindingsStepDefinition } from '../step_types/persist_findings';
@@ -61,7 +61,7 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
       PluginSetup<NonNullable<AlertingServerSetupDependencies['agentBuilder']>>('agentBuilder');
     if (container.isBound(agentBuilderToken)) {
       const agentBuilder = container.get(agentBuilderToken);
-      registerProposedChangeAttachmentType(agentBuilder);
+      registerRuleSuggestionAttachmentType(agentBuilder);
       registerAlertingV2Tools(agentBuilder, container, logger);
     }
 
