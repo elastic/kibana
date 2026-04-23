@@ -24,6 +24,15 @@ interface ChartTypeRegistryEntry {
   schema: { validate: (config: unknown) => any; getSchema: () => any };
   guidance: { description: string; guideline: string };
   configPromptRules?: string[];
+  /**
+   * Whether the chart's schema accepts a `colorByValueSchema` (`{ type: 'dynamic', steps: [...] }`).
+   *
+   * Used to decide whether the system prompt should describe the named Lens
+   * palettes the LLM can pick colors from. Charts that only expose
+   * `colorMappingSchema` (xy, pie, treemap, etc.) inherit Lens defaults and
+   * don't need that extra guidance.
+   */
+  supportsDynamicColoring?: boolean;
 }
 
 /**
@@ -46,6 +55,7 @@ export const chartTypeRegistry: Record<SupportedChartType, ChartTypeRegistryEntr
       guideline:
         "Choose 'metric' for single numerical statistics, aggregations, counts, or KPIs without ranges",
     },
+    supportsDynamicColoring: true,
   },
   [SupportedChartType.Gauge]: {
     schema: gaugeConfigSchemaESQL,
@@ -60,6 +70,7 @@ export const chartTypeRegistry: Record<SupportedChartType, ChartTypeRegistryEntr
       'Do not infer, synthesize, or backfill gauge bounds from the ES|QL results or the user request.',
       'Only include goal/target-related fields when the user explicitly asks for a goal or threshold.',
     ],
+    supportsDynamicColoring: true,
   },
   [SupportedChartType.XY]: {
     schema: xyConfigSchemaESQL,
@@ -81,6 +92,7 @@ export const chartTypeRegistry: Record<SupportedChartType, ChartTypeRegistryEntr
       guideline:
         "Choose 'heatmap' when both axes are buckets and you want to visualize density/intensity with color across the x/y grid",
     },
+    supportsDynamicColoring: true,
   },
   [SupportedChartType.Tagcloud]: {
     schema: tagcloudConfigSchemaESQL,
@@ -108,6 +120,7 @@ export const chartTypeRegistry: Record<SupportedChartType, ChartTypeRegistryEntr
       guideline:
         "Choose 'datatable' when the user needs precise values, sortable columns, or a spreadsheet-like view of the data",
     },
+    supportsDynamicColoring: true,
   },
   [SupportedChartType.Pie]: {
     schema: pieConfigSchemaESQL,
