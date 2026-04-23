@@ -31,8 +31,7 @@ export const controlWidthSchema = schema.oneOf(
   {
     defaultValue: DEFAULT_PINNED_CONTROL_STATE.width as typeof CONTROL_WIDTH_MEDIUM,
     meta: {
-      description:
-        'Minimum width of the control panel.',
+      description: 'Minimum width of the control panel.',
     },
   }
 );
