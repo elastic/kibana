@@ -226,6 +226,83 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
     }
   }
 
+  /**
+   * Updates `project_routing` on datafeeds selected by job ID and/or the `auto` flag.
+   * - When `jobIds` is non-empty, every datafeed whose `job_id` is in the list is included.
+   * - When `auto` is true, every datafeed with no `project_routing` is also included.
+   * - Datafeed IDs are deduplicated in a Set before updates are applied.
+   * - When `simulate` is true, no updates are sent; the same selection is returned with `simulated: true` per result.
+   */
+  async function bulkUpdateProjectRouting(
+    projectRouting: string,
+    jobIds?: string[],
+    auto?: boolean,
+    simulate?: boolean
+  ) {
+    const { datafeeds } = await mlClient.getDatafeeds();
+    const datafeedIdsToUpdate = new Set<string>();
+
+    if (jobIds !== undefined && jobIds.length > 0) {
+      const jobIdSet = new Set(jobIds);
+      for (const df of datafeeds) {
+        if (jobIdSet.has(df.job_id)) {
+          datafeedIdsToUpdate.add(df.datafeed_id);
+        }
+      }
+    }
+
+    if (auto === true) {
+      for (const df of datafeeds) {
+        // @ts-expect-error @elastic-elasticsearch datafeed_config type incorrect, missing project_routing
+        if (df.project_routing === undefined || df.project_routing === '') {
+          datafeedIdsToUpdate.add(df.datafeed_id);
+        }
+      }
+    }
+
+    const datafeedIdToJobId = new Map(
+      datafeeds.map((d) => [d.datafeed_id, d.job_id] as [string, string])
+    );
+
+    const results: {
+      [datafeedId: string]: {
+        success: boolean;
+        error?: unknown;
+        jobId?: string;
+        simulated?: boolean;
+      };
+    } = Object.create(null);
+
+    for (const datafeedId of datafeedIdsToUpdate) {
+      const jobId = datafeedIdToJobId.get(datafeedId);
+
+      if (simulate === true) {
+        results[datafeedId] = { success: true, jobId, simulated: true };
+        continue;
+      }
+
+      try {
+        await mlClient.updateDatafeed({
+          datafeed_id: datafeedId,
+          body: { project_routing: projectRouting },
+        });
+        results[datafeedId] = { success: true, jobId };
+      } catch (error) {
+        results[datafeedId] = {
+          success: false,
+          error: (error as { body?: unknown }).body ?? error,
+          jobId,
+        };
+      }
+    }
+
+    return {
+      simulate: simulate === true,
+      datafeedIds: [...datafeedIdsToUpdate],
+      results,
+    };
+  }
+
   return {
     forceStartDatafeeds,
     stopDatafeeds,
@@ -233,5 +310,6 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
     getDatafeedIdsByJobId,
     getJobIdsByDatafeedId,
     getDatafeedByJobId,
+    bulkUpdateProjectRouting,
   };
 }

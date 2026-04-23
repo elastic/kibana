@@ -167,3 +167,22 @@ export const bulkCreateSchema = schema.oneOf([
     datafeed: datafeedConfigSchema,
   }),
 ]);
+
+export const bulkUpdateProjectRoutingSchema = schema.object({
+  projectRouting: schema.string(),
+  jobIds: schema.maybe(
+    schema.arrayOf(schema.string(), { maxSize: 10000, meta: { description: 'Job IDs to update.' } })
+  ),
+  auto: schema.maybe(
+    schema.boolean({
+      defaultValue: false,
+      meta: { description: 'When true, also update datafeeds with no project_routing set.' },
+    })
+  ),
+  simulate: schema.maybe(
+    schema.boolean({
+      defaultValue: false,
+      meta: { description: 'When true, compute matching datafeeds but do not call update.' },
+    })
+  ),
+});

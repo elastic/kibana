@@ -27,6 +27,7 @@ import {
   bulkCreateSchema,
   deleteJobsSchema,
   stopDatafeedsSchema,
+  bulkUpdateProjectRoutingSchema,
 } from './schemas/job_service_schema';
 
 import { jobForCloningSchema, jobIdSchema } from './schemas/anomaly_detectors_schema';
@@ -1049,6 +1050,43 @@ export function jobServiceRoutes(
             datafeed: Datafeed;
           }>;
           const body = await bulkCreate(jobs);
+          return response.ok({
+            body,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
+
+  router.versioned
+    .post({
+      path: `${ML_INTERNAL_BASE_PATH}/jobs/bulk_update_project_routing`,
+      access: 'internal',
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canUpdateDatafeed'],
+        },
+      },
+      summary: 'Bulk update project routing on datafeeds',
+      description:
+        'Updates project_routing on datafeeds matched by job ID and/or on all datafeeds with no project_routing when auto is true. When simulate is true, returns the same selection without writing updates.',
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: bulkUpdateProjectRoutingSchema,
+          },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
+        try {
+          const { bulkUpdateProjectRouting } = jobServiceProvider(client, mlClient, serverless);
+          const { projectRouting, jobIds, auto, simulate } = request.body;
+          const body = await bulkUpdateProjectRouting(projectRouting, jobIds, auto, simulate);
+
           return response.ok({
             body,
           });
