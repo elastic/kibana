@@ -59,6 +59,8 @@ Provide a compact review. Surface signal; humans decide on merging.
 Post findings as inline PR comments on the offending line. Each inline comment must use a collapsible section to keep the PR readable. Structure:
 
 ```markdown
+**<short finding title>**
+
 <1–2 sentence high-level overview of the issue and the fix.>
 
 <details>
