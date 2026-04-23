@@ -62,13 +62,14 @@ export function listChangedFiles({
   };
 
   // Ensure the merge base commit is available (shallow clones may not have it)
-  let isShallow = false;
   try {
     execSync(`git cat-file -e ${mergeBase}^{commit}`, { ...execOptions, stdio: 'pipe' });
   } catch {
     execSync(`git fetch --depth=1 origin ${mergeBase}`, execOptions);
-    isShallow = true;
   }
+
+  const isShallow =
+    execSync('git rev-parse --is-shallow-repository', execOptions).trim() === 'true';
 
   // In a shallow clone the commit graphs are disconnected so `git merge-base`
   // can't walk parents. The caller (GITHUB_PR_MERGE_BASE) already provides
