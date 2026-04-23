@@ -8,31 +8,78 @@ info:
 
 actions:
   # ──────────────────────────────────────────────
-  # Remove all Dashboards API path operations so Bump renders only the tag intro.
+  # DASHBOARDS
+  # Strategy: remove all real operations, keep only one synthetic GET so Bump
+  # still creates a nav entry for the Dashboards tag.
   # ──────────────────────────────────────────────
-  - target: "$.paths['/api/dashboards']"
-    description: "Remove Dashboards collection endpoint for Bump slim output"
+  - target: "$.paths['/api/dashboards'].post"
+    description: "Remove POST /api/dashboards for Bump slim output"
     remove: true
 
   - target: "$.paths['/api/dashboards/{id}']"
-    description: "Remove Dashboards item endpoint for Bump slim output"
+    description: "Remove /api/dashboards/{id} entirely for Bump slim output"
     remove: true
 
+  # Remove the real GET so we can replace it with a clean placeholder below.
+  - target: "$.paths['/api/dashboards'].get"
+    description: "Remove real GET /api/dashboards before injecting placeholder"
+    remove: true
+
+  # Inject a minimal placeholder GET that keeps the tag alive in the Bump nav.
+  # ⚠️  TODO before tech preview GA: update the URL in the description below.
+  - target: "$.paths['/api/dashboards']"
+    description: "Add placeholder GET /api/dashboards with tech-preview notice"
+    update:
+      get:
+        tags:
+          - Dashboards
+        summary: "Dashboards API — full reference available externally"
+        operationId: placeholder-dashboards-external
+        description: |
+          > **Technical preview** — The Dashboards API is currently in technical preview and its reference documentation is temporarily hosted at a separate location.
+          >
+          > **[View the full Dashboards API reference →](https://thomthomson.github.io/dashboard-tech-preview-docs/#tag/Dashboards)**
+        responses:
+          '200':
+            description: See external documentation link above.
+
   # ──────────────────────────────────────────────
-  # Remove all Visualizations API path operations.
+  # VISUALIZATIONS
+  # Same strategy as Dashboards.
   # ──────────────────────────────────────────────
-  - target: "$.paths['/api/visualizations']"
-    description: "Remove Visualizations collection endpoint for Bump slim output"
+  - target: "$.paths['/api/visualizations'].post"
+    description: "Remove POST /api/visualizations for Bump slim output"
     remove: true
 
   - target: "$.paths['/api/visualizations/{id}']"
-    description: "Remove Visualizations item endpoint for Bump slim output"
+    description: "Remove /api/visualizations/{id} entirely for Bump slim output"
     remove: true
 
+  - target: "$.paths['/api/visualizations'].get"
+    description: "Remove real GET /api/visualizations before injecting placeholder"
+    remove: true
+
+  # ⚠️  TODO before tech preview GA: update the URL in the description below.
+  - target: "$.paths['/api/visualizations']"
+    description: "Add placeholder GET /api/visualizations with tech-preview notice"
+    update:
+      get:
+        tags:
+          - Visualizations
+        summary: "Visualizations API — full reference available externally"
+        operationId: placeholder-visualizations-external
+        description: |
+          > **Technical preview** — The Visualizations API is currently in technical preview and its reference documentation is temporarily hosted at a separate location.
+          >
+          > **[View the full Visualizations API reference →](https://thomthomson.github.io/dashboard-tech-preview-docs/#tag/Visualizations)**
+        responses:
+          '200':
+            description: See external documentation link above.
+
   # ──────────────────────────────────────────────
-  # Replace the Dashboards tag description with a tech-preview placeholder.
+  # Update the tag-level descriptions (shown as section intros in Bump).
   # ──────────────────────────────────────────────
-  # ⚠️  TODO before tech preview GA: update the URL below.
+  # ⚠️  TODO before tech preview GA: update the URLs below.
   - target: '$.tags[?(@.name=="Dashboards")]'
     description: "Replace Dashboards tag description with tech-preview notice"
     update:
@@ -41,10 +88,6 @@ actions:
         >
         > **[View the full Dashboards API reference →](https://thomthomson.github.io/dashboard-tech-preview-docs/#tag/Dashboards)**
 
-  # ──────────────────────────────────────────────
-  # Replace the Visualizations tag description with a tech-preview placeholder.
-  # ──────────────────────────────────────────────
-  # ⚠️  TODO before tech preview GA: update the URL below.
   - target: '$.tags[?(@.name=="Visualizations")]'
     description: "Replace Visualizations tag description with tech-preview notice"
     update:
