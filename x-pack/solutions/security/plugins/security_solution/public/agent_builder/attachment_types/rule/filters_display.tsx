@@ -6,9 +6,14 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import { FILTERS_LABEL } from '../../../detection_engine/rule_creation_ui/components/description_step/translations';
+
+const FILTERS_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.filtersLabel',
+  { defaultMessage: 'Filters' }
+);
 const SectionHeading: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <EuiText size="s">
     <strong>{children}</strong>

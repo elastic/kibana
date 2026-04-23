@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Suspense } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiBadge,
@@ -31,28 +31,61 @@ import type { RuleResponse } from '../../../../common/api/detection_engine/model
 import type { AiRuleCreationService } from '../../../detection_engine/common/ai_rule_creation_store';
 import { RULES_PATH, SecurityAgentBuilderAttachments } from '../../../../common/constants';
 import { hasCapabilities } from '../../../common/lib/capabilities';
-import {
-  INDEX_FIELD_LABEL,
-  RULE_TYPE_FIELD_LABEL,
-} from '../../../detection_engine/rule_management/components/rule_details/translations';
-import {
-  QUERY_LABEL,
-  EQL_QUERY_LABEL,
-  ESQL_QUERY_LABEL,
-  SAVED_QUERY_LABEL,
-  ML_TYPE_DESCRIPTION,
-  EQL_TYPE_DESCRIPTION,
-  QUERY_TYPE_DESCRIPTION,
-  THRESHOLD_TYPE_DESCRIPTION,
-  THREAT_MATCH_TYPE_DESCRIPTION,
-  NEW_TERMS_TYPE_DESCRIPTION,
-  ESQL_TYPE_DESCRIPTION,
-} from '../../../detection_engine/rule_creation_ui/components/description_step/translations';
+const INDEX_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.indexFieldLabel',
+  { defaultMessage: 'Index patterns' }
+);
+const RULE_TYPE_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleTypeFieldLabel',
+  { defaultMessage: 'Rule type' }
+);
+const QUERY_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.queryLabel',
+  { defaultMessage: 'Custom query' }
+);
+const EQL_QUERY_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.eqlQueryLabel',
+  { defaultMessage: 'EQL query' }
+);
+const ESQL_QUERY_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.esqlQueryLabel',
+  { defaultMessage: 'ES|QL query' }
+);
+const SAVED_QUERY_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.savedQueryLabel',
+  { defaultMessage: 'Saved query' }
+);
+const ML_TYPE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.mlRuleTypeDescription',
+  { defaultMessage: 'Machine Learning' }
+);
+const EQL_TYPE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.eqlRuleTypeDescription',
+  { defaultMessage: 'Event Correlation' }
+);
+const QUERY_TYPE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.queryRuleTypeDescription',
+  { defaultMessage: 'Query' }
+);
+const THRESHOLD_TYPE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.thresholdRuleTypeDescription',
+  { defaultMessage: 'Threshold' }
+);
+const THREAT_MATCH_TYPE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.threatMatchRuleTypeDescription',
+  { defaultMessage: 'Indicator Match' }
+);
+const NEW_TERMS_TYPE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.newTermsRuleTypeDescription',
+  { defaultMessage: 'New Terms' }
+);
+const ESQL_TYPE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.esqlRuleTypeDescription',
+  { defaultMessage: 'ES|QL' }
+);
 import { FiltersDisplay } from './filters_display';
 
-const LazyRuleTypeDetails = React.lazy(() =>
-  import('./rule_type_details').then((m) => ({ default: m.RuleTypeDetails }))
-);
+import { RuleTypeDetails } from './rule_type_details';
 
 type RuleAttachment = Attachment<string, { text: string; attachmentLabel?: string }>;
 
@@ -286,9 +319,7 @@ const RuleInlineContent: React.FC<AttachmentRenderProps<RuleAttachment>> = ({ at
       )}
 
       <EuiSpacer size="xs" />
-      <Suspense fallback={null}>
-        <LazyRuleTypeDetails rule={rule} />
-      </Suspense>
+      <RuleTypeDetails rule={rule} />
 
       {rule.tags && rule.tags.length > 0 && (
         <>
