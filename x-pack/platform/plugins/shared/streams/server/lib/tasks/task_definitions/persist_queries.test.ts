@@ -6,7 +6,7 @@
  */
 
 import type { GeneratedSignificantEventQuery, QueryLink, Streams } from '@kbn/streams-schema';
-import { persistQueries } from './onboarding';
+import { persistQueries } from '../../sig_events/persist_queries';
 import type { QueryClient } from '../../streams/assets/query/query_client';
 import type { StreamsClient } from '../../streams/client';
 
