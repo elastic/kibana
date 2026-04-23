@@ -112,7 +112,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
     const streamType = getStreamTypeFromDefinition(stream);
 
     try {
-      return await identifyInferredFeatures({
+      const result = await identifyInferredFeatures({
         esClient: scopedClusterClient.asCurrentUser,
         featureClient,
         soClient,
@@ -137,6 +137,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
         diverseOffset,
         trackFeaturesIdentified: (data) => telemetry.trackFeaturesIdentified(data),
       });
+      return { ...result, connectorId };
     } catch (error) {
       routeLogger.error(
         `Inferred feature identification failed for stream [${streamName}]: ${

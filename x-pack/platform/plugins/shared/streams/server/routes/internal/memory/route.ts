@@ -554,7 +554,9 @@ const generateMemoryRoute = createServerRoute({
     getScopedClients,
     server,
     logger,
-  }): Promise<MemoryGenerationResult & { skipped?: boolean; reason?: string }> => {
+  }): Promise<
+    MemoryGenerationResult & { skipped?: boolean; reason?: string; connectorId?: string }
+  > => {
     const { inferenceClient, uiSettingsClient } = await getScopedClients({ request });
 
     if (!(await isMemoryEnabled(uiSettingsClient))) {
@@ -576,7 +578,7 @@ const generateMemoryRoute = createServerRoute({
       request,
     });
 
-    return generateMemory(
+    const result = await generateMemory(
       { features, queries },
       {
         inferenceClient,
@@ -586,6 +588,8 @@ const generateMemoryRoute = createServerRoute({
         signal: getRequestAbortSignal(request),
       }
     );
+
+    return { ...result, connectorId };
   },
 });
 
