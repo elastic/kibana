@@ -8,39 +8,188 @@ info:
 
 actions:
   # ──────────────────────────────────────────────
-  # DASHBOARDS — remove all operations entirely.
-  # The Dashboards tag section should still appear in Bump from the root tags
-  # array entry (set by dashboards.overlays.yaml) even with no operations.
+  # DASHBOARDS
+  # Strategy: strip each operation down to just a redirect notice.
+  # - Remove real operation (parameters, requestBody, responses, description)
+  # - Re-inject a minimal shell with the tech-preview notice as the sole description
+  # This keeps every endpoint visible in the Bump nav while rendering nothing
+  # except the link to the external full reference.
   # ──────────────────────────────────────────────
-  - target: "$.paths['/api/dashboards'].post"
-    description: "Remove POST /api/dashboards for Bump slim output"
-    remove: true
 
+  # ⚠️  TODO before tech preview GA: update the URLs in the descriptions below.
   - target: "$.paths['/api/dashboards'].get"
-    description: "Remove GET /api/dashboards for Bump slim output"
+    description: "Strip GET /api/dashboards down to redirect notice"
     remove: true
+  - target: "$.paths['/api/dashboards'].post"
+    description: "Strip POST /api/dashboards down to redirect notice"
+    remove: true
+  - target: "$.paths['/api/dashboards']"
+    description: "Re-inject minimal GET and POST for /api/dashboards"
+    update:
+      get:
+        tags:
+          - Dashboards
+        summary: "Get dashboards"
+        operationId: get-dashboards-redirect
+        description: |
+          > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+          >
+          > **[View the full Dashboards API reference →](https://thomthomson.github.io/dashboard-tech-preview-docs/#tag/Dashboards)**
+        responses:
+          '200':
+            description: See the full Dashboards API reference linked above.
+      post:
+        tags:
+          - Dashboards
+        summary: "Create a dashboard"
+        operationId: create-dashboard-redirect
+        description: |
+          > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+          >
+          > **[View the full Dashboards API reference →](https://thomthomson.github.io/dashboard-tech-preview-docs/#tag/Dashboards)**
+        responses:
+          '200':
+            description: See the full Dashboards API reference linked above.
 
-  - target: "$.paths['/api/dashboards/{id}']"
-    description: "Remove /api/dashboards/{id} entirely for Bump slim output"
+  - target: "$.paths['/api/dashboards/{id}'].get"
+    description: "Strip GET /api/dashboards/{id} down to redirect notice"
     remove: true
+  - target: "$.paths['/api/dashboards/{id}'].put"
+    description: "Strip PUT /api/dashboards/{id} down to redirect notice"
+    remove: true
+  - target: "$.paths['/api/dashboards/{id}'].delete"
+    description: "Strip DELETE /api/dashboards/{id} down to redirect notice"
+    remove: true
+  - target: "$.paths['/api/dashboards/{id}']"
+    description: "Re-inject minimal GET, PUT, DELETE for /api/dashboards/{id}"
+    update:
+      get:
+        tags:
+          - Dashboards
+        summary: "Get a dashboard"
+        operationId: get-dashboard-redirect
+        description: |
+          > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+          >
+          > **[View the full Dashboards API reference →](https://thomthomson.github.io/dashboard-tech-preview-docs/#tag/Dashboards)**
+        responses:
+          '200':
+            description: See the full Dashboards API reference linked above.
+      put:
+        tags:
+          - Dashboards
+        summary: "Update a dashboard"
+        operationId: update-dashboard-redirect
+        description: |
+          > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+          >
+          > **[View the full Dashboards API reference →](https://thomthomson.github.io/dashboard-tech-preview-docs/#tag/Dashboards)**
+        responses:
+          '200':
+            description: See the full Dashboards API reference linked above.
+      delete:
+        tags:
+          - Dashboards
+        summary: "Delete a dashboard"
+        operationId: delete-dashboard-redirect
+        description: |
+          > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+          >
+          > **[View the full Dashboards API reference →](https://thomthomson.github.io/dashboard-tech-preview-docs/#tag/Dashboards)**
+        responses:
+          '200':
+            description: See the full Dashboards API reference linked above.
 
   # ──────────────────────────────────────────────
   # VISUALIZATIONS — same strategy.
   # ──────────────────────────────────────────────
-  - target: "$.paths['/api/visualizations'].post"
-    description: "Remove POST /api/visualizations for Bump slim output"
-    remove: true
 
+  # ⚠️  TODO before tech preview GA: update the URLs in the descriptions below.
   - target: "$.paths['/api/visualizations'].get"
-    description: "Remove GET /api/visualizations for Bump slim output"
+    description: "Strip GET /api/visualizations down to redirect notice"
     remove: true
+  - target: "$.paths['/api/visualizations'].post"
+    description: "Strip POST /api/visualizations down to redirect notice"
+    remove: true
+  - target: "$.paths['/api/visualizations']"
+    description: "Re-inject minimal GET and POST for /api/visualizations"
+    update:
+      get:
+        tags:
+          - Visualizations
+        summary: "Get visualizations"
+        operationId: get-visualizations-redirect
+        description: |
+          > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+          >
+          > **[View the full Visualizations API reference →](https://thomthomson.github.io/dashboard-tech-preview-docs/#tag/Visualizations)**
+        responses:
+          '200':
+            description: See the full Visualizations API reference linked above.
+      post:
+        tags:
+          - Visualizations
+        summary: "Create a visualization"
+        operationId: create-visualization-redirect
+        description: |
+          > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+          >
+          > **[View the full Visualizations API reference →](https://thomthomson.github.io/dashboard-tech-preview-docs/#tag/Visualizations)**
+        responses:
+          '200':
+            description: See the full Visualizations API reference linked above.
 
-  - target: "$.paths['/api/visualizations/{id}']"
-    description: "Remove /api/visualizations/{id} entirely for Bump slim output"
+  - target: "$.paths['/api/visualizations/{id}'].get"
+    description: "Strip GET /api/visualizations/{id} down to redirect notice"
     remove: true
+  - target: "$.paths['/api/visualizations/{id}'].put"
+    description: "Strip PUT /api/visualizations/{id} down to redirect notice"
+    remove: true
+  - target: "$.paths['/api/visualizations/{id}'].delete"
+    description: "Strip DELETE /api/visualizations/{id} down to redirect notice"
+    remove: true
+  - target: "$.paths['/api/visualizations/{id}']"
+    description: "Re-inject minimal GET, PUT, DELETE for /api/visualizations/{id}"
+    update:
+      get:
+        tags:
+          - Visualizations
+        summary: "Get a visualization"
+        operationId: get-visualization-redirect
+        description: |
+          > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+          >
+          > **[View the full Visualizations API reference →](https://thomthomson.github.io/dashboard-tech-preview-docs/#tag/Visualizations)**
+        responses:
+          '200':
+            description: See the full Visualizations API reference linked above.
+      put:
+        tags:
+          - Visualizations
+        summary: "Update a visualization"
+        operationId: update-visualization-redirect
+        description: |
+          > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+          >
+          > **[View the full Visualizations API reference →](https://thomthomson.github.io/dashboard-tech-preview-docs/#tag/Visualizations)**
+        responses:
+          '200':
+            description: See the full Visualizations API reference linked above.
+      delete:
+        tags:
+          - Visualizations
+        summary: "Delete a visualization"
+        operationId: delete-visualization-redirect
+        description: |
+          > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+          >
+          > **[View the full Visualizations API reference →](https://thomthomson.github.io/dashboard-tech-preview-docs/#tag/Visualizations)**
+        responses:
+          '200':
+            description: See the full Visualizations API reference linked above.
 
   # ──────────────────────────────────────────────
-  # Update the tag-level descriptions (shown as section intros in Bump).
+  # Tag-level descriptions (section intro above the operations list).
   # ──────────────────────────────────────────────
   # ⚠️  TODO before tech preview GA: update the URLs below.
   - target: '$.tags[?(@.name=="Dashboards")]'
