@@ -116,13 +116,18 @@ export class QradarRulesXmlParser extends XmlParser {
    * @returns Sanitized plain text
    */
   private sanitizeHtmlText(text: string): string {
-    // Decode entities in text payloads and normalize NBSP to plain spaces.
-    const decoded = he.decode(text).replace(/\u00A0/g, ' ');
-
-    return decoded
-      .replace(/<[^>]*>/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
+    return (
+      he
+        .decode(text)
+        // Convert non-breaking spaces to standard ASCII spaces.
+        .replace(/\u00A0/g, ' ')
+        // Remove HTML/XML tags while preserving word separation.
+        .replace(/<[^>]*>/g, ' ')
+        // Collapse repeated whitespace (spaces, tabs, newlines) to one space.
+        .replace(/\s+/g, ' ')
+        // Remove leading/trailing whitespace introduced by normalization.
+        .trim()
+    );
   }
 
   /**
