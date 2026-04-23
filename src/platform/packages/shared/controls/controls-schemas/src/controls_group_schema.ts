@@ -32,7 +32,7 @@ export const controlWidthSchema = schema.oneOf(
     defaultValue: DEFAULT_PINNED_CONTROL_STATE.width as typeof CONTROL_WIDTH_MEDIUM,
     meta: {
       description:
-        'Minimum width of the control panel. Accepts `small`, `medium`, or `large`. Defaults to `medium`.',
+        'Minimum width of the control panel.',
     },
   }
 );
@@ -98,7 +98,7 @@ export const getControlsGroupSchema = () => {
             id: 'kbn-controls-schemas-controls-group-schema-range-slider-control',
             title: RANGE_SLIDER_CONTROL,
             description:
-              'A slider control that filters data by selecting a numeric range for the configured field.',
+              'A slider control that filters data by selecting a numeric range for the configured field. Define the data view, field, and selection settings in `config`.',
           },
         }
       ),

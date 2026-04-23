@@ -28,7 +28,7 @@ export const optionsListDisplaySettingsSchema = schema.object({
   hide_action_bar: schema.maybe(
     schema.boolean({
       meta: {
-        description: 'When `true`, the apply and clear actions are hidden from the control.',
+        description: 'When `true`, the search bar, sorting options, and select all toggle are hidden from the control.
       },
     })
   ),
