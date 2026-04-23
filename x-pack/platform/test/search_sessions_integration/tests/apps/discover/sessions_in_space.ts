@@ -12,6 +12,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const spacesService = getService('spaces');
   const securityService = getService('security');
   const filterBar = getService('filterBar');
+  const log = getService('log');
   const { common, header, discover, security, timePicker } = getPageObjects([
     'common',
     'header',
@@ -60,6 +61,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Wait for discover to load
         await header.waitUntilLoadingHasFinished();
         await discover.waitForDocTableLoadingComplete();
+
+        if ((await toasts.getCount()) > 0) {
+          const title = await toasts.getTitleAndDismiss();
+          log.debug(`Session restoration related warnings found: ${title}`);
+          throw new Error('Session restoration related warnings found');
+        }
 
         // Check that session is restored
         expect(await toasts.getCount()).to.be(0); // no session restoration related warnings
