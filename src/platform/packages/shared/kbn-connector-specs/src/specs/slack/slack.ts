@@ -110,7 +110,7 @@ const SlackResolveChannelIdInputSchema = z.object({
     .string()
     .min(1)
     .describe(
-      'Channel name to resolve (e.g. "general" or "#general"). Returns the matching conversation ID (C.../G...).'
+      'Channel name to resolve (e.g. "general" or "#general"). Returns the first matching conversation ID (C.../G...). To list or browse channels (e.g. what is available), use listChannels instead of probing many names here.'
     ),
   types: z
     .array(z.enum(SLACK_CONVERSATION_TYPES))
@@ -122,7 +122,7 @@ const SlackResolveChannelIdInputSchema = z.object({
     .enum(['exact', 'contains'])
     .optional()
     .describe(
-      'How to match the channel name. exact is fastest/most precise. contains can help when you only know part of the name.'
+      'How to match the channel name. exact is fastest/most precise. contains is for a partial name you already know (e.g. a word from the channel name); do not use contains with very short strings to scan or discover channels — use listChannels for discovery.'
     ),
   excludeArchived: z.boolean().default(true).describe('Exclude archived channels (default true)'),
   cursor: z
@@ -216,7 +216,7 @@ const SlackSendMessageInputSchema = z.object({
     .string()
     .min(1)
     .describe(
-      'Conversation ID to send the message to (e.g. C... for channels, G... for private channels, D... for DMs). Use resolveChannelId to discover channel IDs.'
+      'Conversation ID to send the message to (e.g. C... for channels, G... for private channels, D... for DMs). Use listChannels to browse available channels, or resolveChannelId when you know the channel name and need its ID.'
     ),
   text: z.string().min(1).describe('The message text to send'),
   threadTs: z
@@ -589,7 +589,7 @@ export const Slack: ConnectorSpec = {
     resolveChannelId: {
       isTool: true,
       description:
-        'Look up a Slack channel/conversation ID from a human-readable channel name (e.g. "general" or "#general"). Use this before sendMessage when you only know the channel name — sendMessage requires a channel ID, not a name.',
+        'Look up a Slack channel/conversation ID from a human-readable channel name (e.g. "general" or "#general"). Use before sendMessage when you already know the target name but need its ID. To list or explore channels, use listChannels instead of many resolveChannelId calls.',
       input: SlackResolveChannelIdInputSchema,
       handler: async (ctx, input) => {
         const typedInput: SlackResolveChannelIdInput =
@@ -788,7 +788,7 @@ export const Slack: ConnectorSpec = {
     sendMessage: {
       isTool: true,
       description:
-        'Send a message to a Slack channel or DM. Requires a channel ID (use resolveChannelId to look up by name). Returns the message timestamp, which can be used as threadTs to post a reply in a thread.',
+        'Send a message to a Slack channel or DM. Requires a channel ID. Use listChannels to discover channels, or resolveChannelId when you know the channel name and need its ID. Returns the message timestamp, which can be used as threadTs to post a reply in a thread.',
       input: SlackSendMessageInputSchema,
       handler: async (ctx, input) => {
         const typedInput: SlackSendMessageInput = SlackSendMessageInputSchema.parse(input);
@@ -884,6 +884,8 @@ export const Slack: ConnectorSpec = {
   },
 
   skill: [
-    'Before sending a message to a channel by name, always call resolveChannelId first to get the channel ID, then pass it to sendMessage.',
+    'To list Slack channels or answer which channels exist, use listChannels. When the response has hasMore true, call listChannels again with the nextCursor from the previous response until you have enough context.',
+    'When sending to a channel whose name you know but whose ID you do not, call resolveChannelId to get the channel ID, then pass it to sendMessage.',
+    'Do not use resolveChannelId (especially match contains with very short strings) to enumerate or discover channels; use listChannels instead.',
   ].join('\n'),
 };

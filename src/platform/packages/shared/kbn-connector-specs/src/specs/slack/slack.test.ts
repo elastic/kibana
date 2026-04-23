@@ -8,6 +8,7 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
+import { getConnectorSpec } from '../../..';
 import { Slack } from './slack';
 
 describe('Slack', () => {
@@ -27,6 +28,13 @@ describe('Slack', () => {
 
   it('should be defined', () => {
     expect(Slack).toBeDefined();
+  });
+
+  it('should be discoverable via getConnectorSpec (all_specs wiring)', () => {
+    const spec = getConnectorSpec('.slack2');
+    expect(spec).toBe(Slack);
+    expect(spec?.actions.listChannels).toBeDefined();
+    expect(spec?.actions.listChannels.isTool).toBe(true);
   });
 
   it('should have correct metadata', () => {
@@ -223,6 +231,150 @@ describe('Slack', () => {
         source: 'conversations.list',
         pagesFetched: 2,
       });
+    });
+  });
+
+  describe('listChannels action', () => {
+    it('should be exposed as a tool', () => {
+      expect(Slack.actions.listChannels.isTool).toBe(true);
+    });
+
+    it('should list channels with default params', async () => {
+      const mockResponse = {
+        data: {
+          ok: true,
+          channels: [
+            {
+              id: 'C1',
+              name: 'general',
+              is_private: false,
+              is_archived: false,
+              is_member: true,
+            },
+            {
+              id: 'C2',
+              name: 'random',
+              is_private: false,
+              is_archived: false,
+              is_member: false,
+            },
+          ],
+          response_metadata: { next_cursor: 'page2cursor' },
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await Slack.actions.listChannels.handler(mockContext, {});
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://slack.com/api/conversations.list', {
+        params: {
+          types: 'public_channel',
+          exclude_archived: true,
+          limit: 1000,
+        },
+      });
+      expect(result).toEqual({
+        ok: true,
+        source: 'conversations.list',
+        channels: [
+          {
+            id: 'C1',
+            name: 'general',
+            is_private: false,
+            is_archived: false,
+            is_member: true,
+          },
+          {
+            id: 'C2',
+            name: 'random',
+            is_private: false,
+            is_archived: false,
+            is_member: false,
+          },
+        ],
+        nextCursor: 'page2cursor',
+        hasMore: true,
+      });
+    });
+
+    it('should pass cursor, limit, types, and excludeArchived when provided', async () => {
+      const mockResponse = {
+        data: {
+          ok: true,
+          channels: [{ id: 'G1', name: 'private-inc', is_private: true, is_archived: false }],
+          response_metadata: { next_cursor: '' },
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      await Slack.actions.listChannels.handler(mockContext, {
+        cursor: 'prev-cursor',
+        limit: 200,
+        types: ['private_channel'],
+        excludeArchived: false,
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://slack.com/api/conversations.list', {
+        params: {
+          types: 'private_channel',
+          exclude_archived: false,
+          limit: 200,
+          cursor: 'prev-cursor',
+        },
+      });
+    });
+
+    it('should set hasMore false and omit nextCursor when there is no next page', async () => {
+      const mockResponse = {
+        data: {
+          ok: true,
+          channels: [{ id: 'C9', name: 'only-page', is_private: false }],
+          response_metadata: { next_cursor: '' },
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await Slack.actions.listChannels.handler(mockContext, {});
+
+      expect(result).toEqual({
+        ok: true,
+        source: 'conversations.list',
+        channels: [
+          {
+            id: 'C9',
+            name: 'only-page',
+            is_private: false,
+            is_archived: undefined,
+            is_member: undefined,
+          },
+        ],
+        nextCursor: undefined,
+        hasMore: false,
+      });
+    });
+
+    it('should return raw Slack response when raw=true', async () => {
+      const mockResponse = {
+        data: {
+          ok: true,
+          channels: [{ id: 'C1', name: 'general' }],
+          response_metadata: { next_cursor: '' },
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await Slack.actions.listChannels.handler(mockContext, { raw: true });
+
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should throw when Slack API returns error', async () => {
+      const mockResponse = { data: { ok: false, error: 'missing_scope' } };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      await expect(Slack.actions.listChannels.handler(mockContext, {})).rejects.toThrow(
+        'Slack listChannels error: missing_scope'
+      );
     });
   });
 
