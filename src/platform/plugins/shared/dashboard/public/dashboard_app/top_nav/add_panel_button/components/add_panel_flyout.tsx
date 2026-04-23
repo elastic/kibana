@@ -280,9 +280,7 @@ function LibraryContent({ dashboardApi }: { dashboardApi: DashboardApi }) {
     );
   }
 
-  return (
-    <LibraryComponent data-test-subj={'dashboardPanelSelectionFlyout'} container={dashboardApi} />
-  );
+  return <LibraryComponent container={dashboardApi} />;
 }
 
 export function AddPanelFlyout({
