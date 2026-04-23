@@ -22,7 +22,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const yaml = require('../node_modules/js-yaml');
+const yaml = require('js-yaml');
 
 const OAS_DOCS_DIR = path.resolve(__dirname, '..');
 const STATEFUL_INPUT = path.join(OAS_DOCS_DIR, 'output', 'kibana.yaml');
@@ -107,7 +107,7 @@ function generateActions(bugs) {
     } else {
       lines.push('    update:');
       lines.push('      required:');
-      correctRequired.forEach((f) => lines.push(`        - ${f}`));
+      correctRequired.forEach((f) => lines.push(`        - ${JSON.stringify(f)}`));
     }
     lines.push('');
   }
@@ -115,15 +115,33 @@ function generateActions(bugs) {
 }
 
 function buildOverlayFile(statefulBugs, serverlessBugs) {
-  // Deduplicate: if a bug exists in both specs at the same path, emit it once.
+  // Deduplicate: if a bug exists in both specs at the same path with the same fix, emit it once.
+  // If the required arrays differ between specs at the same path, emit both and warn — the overlay
+  // is shared across both specs so a mismatch means one spec won't be fully correct; that situation
+  // should be investigated and fixed at the schema level.
+  const serverlessMap = new Map(serverlessBugs.map((b) => [b.jsonpath, b]));
   const seen = new Set();
   const allBugs = [];
   for (const bug of [...statefulBugs, ...serverlessBugs]) {
     const key = bug.jsonpath;
-    if (!seen.has(key)) {
-      seen.add(key);
-      allBugs.push(bug);
+    if (seen.has(key)) continue;
+    seen.add(key);
+
+    const counterpart = serverlessMap.get(key);
+    if (
+      counterpart &&
+      statefulBugs.some((b) => b.jsonpath === key) &&
+      JSON.stringify(counterpart.correctRequired.slice().sort()) !==
+        JSON.stringify(bug.correctRequired.slice().sort())
+    ) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `[warn] Path "${key}" has different required arrays in stateful vs serverless specs. ` +
+          `Stateful: [${bug.correctRequired}], Serverless: [${counterpart.correctRequired}]. ` +
+          `Using stateful fix; consider fixing the schema difference upstream.`
+      );
     }
+    allBugs.push(bug);
   }
 
   const timestamp = new Date().toISOString().slice(0, 10);
