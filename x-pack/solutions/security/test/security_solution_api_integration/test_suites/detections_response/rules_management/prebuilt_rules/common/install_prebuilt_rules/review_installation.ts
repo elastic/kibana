@@ -292,7 +292,7 @@ export default ({ getService }: FtrProviderContext): void => {
               400
             )
           ).toMatchObject({
-            message: '[request body]: per_page: Too big: expected number to be <=10000',
+            message: '[request body]: per_page: Too big: expected number to be <=500',
           });
         });
       });
