@@ -187,19 +187,18 @@ export class OverviewTab extends AssetDetailsTab {
   }
 
   /**
-   * Waits for all KPI Lens charts to finish loading.
-   *
-   * Lens wraps each KPI in a panel whose `data-test-subj` is suffixed with
-   * `-loading` while Lens fetches data. Tests that assert on chart content
-   * (e.g. the "CPU Usage" heading) only match once that suffix is dropped, so
-   * waiting explicitly here makes the assertions deterministic instead of
-   * racing against a single compound timeout.
+   * Waits for each KPI Lens chart to finish both attribute resolution and
+   * inner-embeddable rendering. `-loading` clears when Lens attributes are
+   * ready, but elastic-charts may still be painting; waiting on the metric
+   * value element guarantees the heading is in the DOM.
    */
   public async waitForKPIChartsToLoad(timeout?: number) {
     for (const metric of KPI_METRICS) {
       await expect(this.page.getByTestId(`infraAssetDetailsKPI${metric}-loading`)).toHaveCount(0, {
         timeout,
       });
+      await expect(this.page.getByTestId(`infraAssetDetailsKPI${metric}-error`)).toHaveCount(0);
+      await expect(this.getKPIValue(metric)).toBeVisible({ timeout });
     }
   }
 }
