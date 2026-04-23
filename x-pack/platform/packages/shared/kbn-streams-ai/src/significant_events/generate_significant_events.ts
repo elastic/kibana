@@ -41,7 +41,7 @@ import {
   type SignificantEventsToolUsage,
 } from './tools/tool_usage';
 
-const MAX_EXISTING_QUERIES_FOR_CONTEXT = 50;
+export const DEFAULT_MAX_EXISTING_QUERIES_FOR_CONTEXT = 50;
 
 export interface ExistingQuerySummary {
   id: string;
@@ -87,6 +87,7 @@ export async function generateSignificantEvents({
   additionalTools,
   additionalToolCallbacks,
   existingQueries,
+  maxExistingQueriesForContext = DEFAULT_MAX_EXISTING_QUERIES_FOR_CONTEXT,
 }: {
   stream: Streams.all.Definition;
   esClient: ElasticsearchClient;
@@ -102,6 +103,7 @@ export async function generateSignificantEvents({
   additionalTools?: Record<string, ToolDefinition>;
   additionalToolCallbacks?: Record<string, ToolCallback>;
   existingQueries?: ExistingQuerySummary[];
+  maxExistingQueriesForContext?: number;
 }): Promise<{
   queries: ParsedToolQuery[];
   tokensUsed: ChatCompletionTokenCount;
@@ -118,11 +120,13 @@ export async function generateSignificantEvents({
 
   const normalizedStoredEsqls = new Set(existingQueriesList.map((q) => normalizeEsqlSafe(q.esql)));
 
+  const contextLimit = Math.max(0, Math.floor(maxExistingQueriesForContext));
+
   const existingQueriesContext = existingQueriesList.length
     ? JSON.stringify(
         [...existingQueriesList]
           .sort((a, b) => (b.severity_score ?? 0) - (a.severity_score ?? 0))
-          .slice(0, MAX_EXISTING_QUERIES_FOR_CONTEXT)
+          .slice(0, contextLimit)
       )
     : '';
 
