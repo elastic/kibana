@@ -43,9 +43,7 @@ export class IndexInitializer implements IResourceInitializer {
       });
     }
 
-    const pipelineSetting = pipeline
-      ? { 'index.default_pipeline': pipeline.name }
-      : {};
+    const pipelineSetting = pipeline ? { 'index.default_pipeline': pipeline.name } : {};
 
     const exists = await this.esClient.indices.exists({ index: indexName });
 
@@ -93,9 +91,7 @@ export class IndexInitializer implements IResourceInitializer {
     try {
       const response = await this.esClient.indices.getMapping({ index: indexName });
       const indexMapping = response[indexName];
-      const meta = indexMapping?.mappings?._meta as
-        | { version?: number }
-        | undefined;
+      const meta = indexMapping?.mappings?._meta as { version?: number } | undefined;
       return meta?.version ?? null;
     } catch (error) {
       const message = error instanceof Error ? error.message : 'unknown error';
