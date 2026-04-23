@@ -226,7 +226,15 @@ export const pciComplianceTool = (
       const resolvedTimeRange =
         timeRange ??
         (() => {
-          const { from, to } = getTimeRangeForCheck(requirementIds[0]);
+          const ranges = requirementIds.map((id) => getTimeRangeForCheck(id));
+          const from = ranges.reduce(
+            (earliest, r) => (r.from < earliest ? r.from : earliest),
+            ranges[0].from
+          );
+          const to = ranges.reduce(
+            (latest, r) => (r.to > latest ? r.to : latest),
+            ranges[0].to
+          );
           return { from, to };
         })();
 
@@ -295,7 +303,9 @@ function buildCheckResponse({
         .flatMap((f) => f.evidence?.values.map((row) => [r.requirement, r.name, ...row]) ?? [])
     );
     if (evidenceRows.length > 0) {
-      const firstEvidence = redFindings[0]?.findings.find((f) => f.evidence);
+      const firstEvidence = redFindings
+        .flatMap((r) => r.findings)
+        .find((f) => f.evidence && f.evidence.values.length > 0);
       const evidenceColumns = [
         { name: 'requirement', type: 'keyword' },
         { name: 'check', type: 'keyword' },
