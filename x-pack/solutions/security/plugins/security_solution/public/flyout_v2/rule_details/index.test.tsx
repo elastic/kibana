@@ -10,7 +10,7 @@ import { render } from '@testing-library/react';
 import { TestProviders } from '../../common/mock';
 import { RuleDetails } from '.';
 import { getStepsData } from '../../detection_engine/common/helpers';
-import { useRuleDetails } from '../../flyout/rule_details/hooks/use_rule_details';
+import { useRuleDetails } from './hooks/use_rule_details';
 import type { RuleResponse } from '../../../common/api/detection_engine';
 import {
   RULE_DETAILS_BODY_TEST_ID,
@@ -27,7 +27,7 @@ jest.mock('./footer', () => ({
 }));
 
 const mockUseRuleDetails = useRuleDetails as jest.Mock;
-jest.mock('../../flyout/rule_details/hooks/use_rule_details');
+jest.mock('./hooks/use_rule_details');
 
 const mockGetStepsData = getStepsData as jest.Mock;
 jest.mock('../../detection_engine/common/helpers');

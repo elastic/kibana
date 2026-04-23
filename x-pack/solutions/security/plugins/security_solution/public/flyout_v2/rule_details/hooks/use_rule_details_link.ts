@@ -10,10 +10,10 @@ import { encode, safeDecode } from '@kbn/rison';
 import {
   getRuleDetailsUrl,
   useGetSecuritySolutionUrl,
-} from '../../../../common/components/link_to';
-import { URL_PARAM_KEY } from '../../../../common/hooks/use_url_state';
-import type { TimelineUrl } from '../../../../timelines/store/model';
-import { useUserPrivileges } from '../../../../common/components/user_privileges';
+} from '../../../common/components/link_to';
+import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
+import type { TimelineUrl } from '../../../timelines/store/model';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 
 export interface UseRuleDetailsLinkParams {
   /**

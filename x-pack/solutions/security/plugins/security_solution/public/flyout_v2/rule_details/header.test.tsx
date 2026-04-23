@@ -10,7 +10,7 @@ import { render } from '@testing-library/react';
 import type { HeaderProps } from './header';
 import { Header } from './header';
 import { TestProviders } from '../../common/mock';
-import { useRuleDetailsLink } from '../../flyout/document_details/shared/hooks/use_rule_details_link';
+import { useRuleDetailsLink } from './hooks/use_rule_details_link';
 import type { RuleResponse } from '../../../common/api/detection_engine';
 import {
   RULE_DETAILS_TITLE_TEST_ID,
@@ -20,7 +20,7 @@ import {
   RULE_DETAILS_UPDATED_BY_TEST_ID,
 } from './test_ids';
 
-jest.mock('../../flyout/document_details/shared/hooks/use_rule_details_link');
+jest.mock('./hooks/use_rule_details_link');
 
 const defaultProps: HeaderProps = {
   rule: { id: 'id', name: 'rule name' } as RuleResponse,

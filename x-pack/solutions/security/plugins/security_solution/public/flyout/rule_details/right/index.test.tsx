@@ -12,14 +12,15 @@ import { getMockTheme } from '../../../common/lib/kibana/kibana_react.mock';
 import { TestProviders } from '../../../common/mock';
 import { RulePanel } from '.';
 import { getStepsData } from '../../../detection_engine/common/helpers';
-import { useRuleDetails } from '../hooks/use_rule_details';
+import { useRuleDetails } from '../../../flyout_v2/rule_details/hooks/use_rule_details';
 import {
   mockAboutStepRule,
   mockDefineStepRule,
   mockScheduleStepRule,
 } from '../../../detection_engine/rule_management_ui/components/rules_table/__mocks__/mock';
 import type { RuleResponse } from '../../../../common/api/detection_engine';
-import { BODY_TEST_ID, LOADING_TEST_ID } from './test_ids';
+import { LOADING_TEST_ID } from './test_ids';
+import { RULE_DETAILS_BODY_TEST_ID } from '../../../flyout_v2/rule_details/test_ids';
 import type {
   ExpandableFlyoutApi,
   ExpandableFlyoutState,
@@ -40,7 +41,7 @@ jest.mock('../preview/footer', () => ({
 }));
 
 const mockUseRuleDetails = useRuleDetails as jest.Mock;
-jest.mock('../hooks/use_rule_details');
+jest.mock('../../../flyout_v2/rule_details/hooks/use_rule_details');
 
 const mockGetStepsData = getStepsData as jest.Mock;
 jest.mock('../../../detection_engine/common/helpers');
@@ -94,7 +95,7 @@ describe('<RulePanel />', () => {
 
     const { getByTestId, queryByTestId, queryByText } = renderRulePanel();
 
-    expect(getByTestId(BODY_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(RULE_DETAILS_BODY_TEST_ID)).toBeInTheDocument();
     expect(queryByTestId(LOADING_TEST_ID)).not.toBeInTheDocument();
     expect(queryByText(ERROR_MESSAGE)).not.toBeInTheDocument();
   });
@@ -120,7 +121,7 @@ describe('<RulePanel />', () => {
     mockGetStepsData.mockReturnValue({});
     const { queryByTestId, getByText } = renderRulePanel();
 
-    expect(queryByTestId(BODY_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(RULE_DETAILS_BODY_TEST_ID)).not.toBeInTheDocument();
     expect(getByText(ERROR_MESSAGE)).toBeInTheDocument();
   });
 

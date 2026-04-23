@@ -18,7 +18,7 @@ import {
 import { DELETED_RULE } from '../../detection_engine/rule_details_ui/pages/rule_details/translations';
 import { CreatedBy, UpdatedBy } from '../../detections/components/rules/rule_info';
 import type { RuleResponse } from '../../../common/api/detection_engine';
-import { useRuleDetailsLink } from '../../flyout/document_details/shared/hooks/use_rule_details_link';
+import { useRuleDetailsLink } from './hooks/use_rule_details_link';
 import { FlyoutTitle } from '../shared/components/flyout_title';
 import {
   RULE_DETAILS_TITLE_TEST_ID,

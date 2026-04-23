@@ -9,13 +9,13 @@ import type { FC } from 'react';
 import React, { memo } from 'react';
 import { EuiFlyoutHeader, EuiFlyoutBody, EuiLoadingSpinner, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useRuleDetails } from '../../flyout/rule_details/hooks/use_rule_details';
+import { useRuleDetails } from './hooks/use_rule_details';
 import { Header } from './header';
 import { Content } from './content';
 import { Footer } from './footer';
 import { RULE_DETAILS_LOADING_TEST_ID, RULE_DETAILS_ERROR_TEST_ID } from './test_ids';
 
-export interface RuleDetailsProps extends Record<string, unknown> {
+export interface RuleDetailsProps {
   ruleId: string;
 }
 

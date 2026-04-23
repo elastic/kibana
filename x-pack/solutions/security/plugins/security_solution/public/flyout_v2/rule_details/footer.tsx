@@ -9,7 +9,7 @@ import React, { memo } from 'react';
 import { EuiFlyoutFooter, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { RuleResponse } from '../../../common/api/detection_engine';
-import { useRuleDetailsLink } from '../../flyout/document_details/shared/hooks/use_rule_details_link';
+import { useRuleDetailsLink } from './hooks/use_rule_details_link';
 import { AddRuleAttachmentToChatButton } from '../../detection_engine/rule_creation_ui/components/add_rule_attachment_to_chat_button';
 import { useAgentBuilderAvailability } from '../../agent_builder/hooks/use_agent_builder_availability';
 import { RULE_DETAILS_FOOTER_TEST_ID, RULE_DETAILS_FOOTER_LINK_TEST_ID } from './test_ids';

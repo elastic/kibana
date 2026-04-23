@@ -8,13 +8,13 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { Footer } from './footer';
-import { useRuleDetailsLink } from '../../flyout/document_details/shared/hooks/use_rule_details_link';
+import { useRuleDetailsLink } from './hooks/use_rule_details_link';
 import { useAgentBuilderAvailability } from '../../agent_builder/hooks/use_agent_builder_availability';
 import { TestProviders } from '../../common/mock';
 import type { RuleResponse } from '../../../common/api/detection_engine';
 import { RULE_DETAILS_FOOTER_TEST_ID, RULE_DETAILS_FOOTER_LINK_TEST_ID } from './test_ids';
 
-jest.mock('../../flyout/document_details/shared/hooks/use_rule_details_link');
+jest.mock('./hooks/use_rule_details_link');
 jest.mock('../../agent_builder/hooks/use_agent_builder_availability');
 
 const renderFooter = () =>

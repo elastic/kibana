@@ -9,10 +9,10 @@ import type { RenderHookResult } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
 import type { UseRuleDetailsLinkParams } from './use_rule_details_link';
 import { useRuleDetailsLink } from './use_rule_details_link';
-import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { initialUserPrivilegesState } from '../../../../common/components/user_privileges/user_privileges_context';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
+import { initialUserPrivilegesState } from '../../../common/components/user_privileges/user_privileges_context';
 
-jest.mock('../../../../common/components/link_to', () => ({
+jest.mock('../../../common/components/link_to', () => ({
   useGetSecuritySolutionUrl: jest
     .fn()
     .mockReturnValue(
@@ -25,7 +25,7 @@ jest.mock('../../../../common/components/link_to', () => ({
   getRuleDetailsUrl: jest.fn().mockReturnValue(''),
 }));
 
-jest.mock('../../../../common/components/user_privileges');
+jest.mock('../../../common/components/user_privileges');
 
 const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
 
