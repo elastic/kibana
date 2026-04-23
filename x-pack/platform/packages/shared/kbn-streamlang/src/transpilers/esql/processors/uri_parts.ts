@@ -8,21 +8,12 @@
 import { Builder } from '@elastic/esql';
 import type { ESQLAstCommand, ESQLAstItem } from '@elastic/esql/types';
 import type { UriPartsProcessor } from '../../../../types/processors';
+import {
+  URI_PARTS_DEFAULT_TARGET,
+  URI_PARTS_SUCCESS_SUBFIELDS,
+} from '../../../actions/uri_parts/constants';
 import { conditionToESQLAst } from '../condition_to_esql';
 import { buildIgnoreMissingFilter, buildWhereCondition, combineOr } from './common';
-
-/**
- * Default column prefix / object target when `to` is not provided. Matches the
- * default of the Elasticsearch `uri_parts` ingest processor (`target_field: "url"`).
- */
-const DEFAULT_TARGET = 'url';
-
-/**
- * Suffixes treated as "parse succeeded" signals by `remove_if_successful`.
- * A valid absolute URI populates at least one of these; malformed or empty
- * inputs produce nulls for all parts.
- */
-const SUCCESS_SUFFIXES = ['scheme', 'domain'] as const;
 
 /**
  * Converts a Streamlang UriPartsProcessor into a list of ES|QL AST commands.
@@ -43,10 +34,15 @@ const SUCCESS_SUFFIXES = ['scheme', 'domain'] as const;
  *    processor's `target_field.original` shape. In the conditional path the
  *    assignment is gated (`CASE(condition, <from>, NULL)`) so rows that failed
  *    the condition are not touched.
- *  - `remove_if_successful` (default false): emit `EVAL <from> = CASE(<to>.scheme
- *    IS NOT NULL OR <to>.domain IS NOT NULL, NULL, <from>)` so the source field
- *    is nulled only on a successful parse. Both options are less idiomatic in
- *    ES|QL but are included for transpiler parity (see streams-program#554).
+ *  - `remove_if_successful` (default false): emit
+ *    `EVAL <from> = CASE(<to>.scheme IS NOT NULL OR <to>.domain IS NOT NULL
+ *    OR <to>.path IS NOT NULL OR ..., NULL, <from>)`.
+ *    The csv-spec (elasticsearch#140004) shows ES|QL URI_PARTS accepts
+ *    relative URIs — `/app/login?session=expired` parses to null scheme +
+ *    null domain + populated path/query — so the success signal must OR
+ *    across all primary sub-fields. Only an unparseable input nulls every
+ *    column. Both options are less idiomatic in ES|QL but are included for
+ *    transpiler parity (see streams-program#554).
  *
  * @example
  *   ```typescript
@@ -78,7 +74,7 @@ const SUCCESS_SUFFIXES = ['scheme', 'domain'] as const;
 export function convertUriPartsProcessorToESQL(processor: UriPartsProcessor): ESQLAstCommand[] {
   const {
     from,
-    to = DEFAULT_TARGET,
+    to = URI_PARTS_DEFAULT_TARGET,
     keep_original: keepOriginal = true,
     remove_if_successful: removeIfSuccessful = false,
     ignore_missing: ignoreMissing = false,
@@ -174,17 +170,20 @@ function buildKeepOriginalEval(
 }
 
 /**
- * `EVAL <from> = CASE(<to>.scheme IS NOT NULL OR <to>.domain IS NOT NULL, NULL, <from>)`.
- * Nulls the source field only on rows where the parse produced at least one
- * identifying part — matching the ingest processor's "remove only on success"
- * semantics.
+ * `EVAL <from> = CASE(<to>.scheme IS NOT NULL OR <to>.domain IS NOT NULL
+ * OR <to>.path IS NOT NULL OR ..., NULL, <from>)`.
+ * Nulls the source field only on rows where the parse populated at least one
+ * sub-field. Per the ES|QL URI_PARTS csv-spec, only an unparseable input
+ * nulls every column (with a warning); valid relative URIs leave scheme and
+ * domain null but populate path/query. Matches the ingest processor's
+ * "remove only on success" semantics.
  */
 function buildRemoveIfSuccessfulEval(
   targetPrefix: string,
   sourceName: string,
   sourceColumn: ESQLAstItem
 ): ESQLAstCommand {
-  const successPredicates = SUCCESS_SUFFIXES.map((suffix) =>
+  const successPredicates = URI_PARTS_SUCCESS_SUBFIELDS.map((suffix) =>
     Builder.expression.func.call('NOT', [
       Builder.expression.func.postfix(
         'IS NULL',

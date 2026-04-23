@@ -694,6 +694,7 @@ const PROCESSOR_GROUP_MAP: Record<
   grok: 'extract',
   dissect: 'extract',
   json_extract: 'extract',
+  uri_parts: 'extract',
   convert: 'convert',
   date: 'convert',
   replace: 'convert',

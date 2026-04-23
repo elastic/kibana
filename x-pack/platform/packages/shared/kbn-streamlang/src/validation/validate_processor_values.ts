@@ -51,6 +51,7 @@ export function validateProcessorValues(
     }
     case 'grok':
     case 'dissect':
+    case 'uri_parts':
     case 'date':
     case 'set':
     case 'rename':

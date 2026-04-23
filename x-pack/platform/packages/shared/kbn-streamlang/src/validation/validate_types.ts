@@ -7,6 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import type { StreamlangProcessorDefinition } from '../../types/processors';
+import {
+  URI_PARTS_DEFAULT_TARGET,
+  URI_PARTS_NUMBER_SUBFIELDS,
+  URI_PARTS_STRING_SUBFIELDS,
+} from '../actions/uri_parts/constants';
 import { isAlwaysCondition } from '../../types/conditions';
 import { parseGrokPattern, parseDissectPattern } from '../../types/utils';
 import {
@@ -69,6 +74,21 @@ export function extractModifiedFields(processor: StreamlangProcessorDefinition):
         });
       }
       break;
+
+    case 'uri_parts': {
+      const prefix = processor.to || URI_PARTS_DEFAULT_TARGET;
+      for (const sub of URI_PARTS_STRING_SUBFIELDS) {
+        fields.push(`${prefix}.${sub}`);
+      }
+      for (const sub of URI_PARTS_NUMBER_SUBFIELDS) {
+        fields.push(`${prefix}.${sub}`);
+      }
+      // keep_original defaults to true; only skip when explicitly disabled
+      if (processor.keep_original !== false) {
+        fields.push(`${prefix}.original`);
+      }
+      break;
+    }
 
     case 'convert':
       if (processor.to) {
@@ -249,6 +269,18 @@ export function getProcessorOutputType(
     case 'concat':
       return 'string';
 
+    case 'uri_parts': {
+      const prefix = processor.to || URI_PARTS_DEFAULT_TARGET;
+      if (
+        (URI_PARTS_NUMBER_SUBFIELDS as readonly string[]).includes(
+          fieldName.slice(prefix.length + 1)
+        )
+      ) {
+        return 'number';
+      }
+      return 'string';
+    }
+
     case 'date':
       return 'date';
 
@@ -357,6 +389,12 @@ export function getExpectedInputType(
       }
       return null;
 
+    case 'uri_parts':
+      if (processor.from === fieldName) {
+        return ['string'];
+      }
+      return null;
+
     case 'math':
       if (extractFieldsFromMathExpression(processor.expression).includes(fieldName)) {
         return ['number'];
@@ -443,6 +481,7 @@ export function trackFieldTypesAndValidate(flattenedSteps: StreamlangProcessorDe
       case 'remove':
       case 'grok':
       case 'dissect':
+      case 'uri_parts':
       case 'uppercase':
       case 'lowercase':
       case 'trim':
