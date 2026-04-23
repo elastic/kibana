@@ -1097,7 +1097,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     describe('query stream attachments', () => {
-      // Query-stream names use the `$.` prefix convention.
       const QUERY_ATTACH_TEST_STREAM = '$.logs.otel.query_attach_test';
 
       before(async () => {
@@ -1120,9 +1119,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         try {
           await deleteStream(apiClient, QUERY_ATTACH_TEST_STREAM);
         } catch (err) {
-          log.warning(
-            `Query stream cleanup: deleteStream failed for ${QUERY_ATTACH_TEST_STREAM}: ${err?.message ?? err}`
-          );
+          const message = String(err?.message ?? err);
+          if (!/\b404\b/.test(message)) {
+            throw err;
+          }
+          log.debug(`Query stream cleanup: ${QUERY_ATTACH_TEST_STREAM} already absent`);
         }
       });
 
@@ -1224,6 +1225,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('SLO cascade-unlink on stream deletion', () => {
       const SLO_TEST_STREAM = 'logs.otel.slo_test';
+      const SLO_QUERY_TEST_STREAM = '$.logs.otel.slo_query_test';
 
       const wiredChildStreamBody = {
         dashboards: [],
@@ -1245,6 +1247,30 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
       };
 
+      const sloFixture = (name: string) => ({
+        name,
+        description: 'Regression fixture for SLO cascade-unlink on stream delete',
+        indicator: {
+          type: 'sli.kql.custom',
+          params: {
+            index: 'logs.otel',
+            filter: '*',
+            good: 'message: *',
+            total: 'message: *',
+            timestampField: '@timestamp',
+          },
+        },
+        budgetingMethod: 'occurrences',
+        timeWindow: {
+          duration: '7d',
+          type: 'rolling',
+        },
+        objective: {
+          target: 0.99,
+        },
+        tags: ['streams-test'],
+      });
+
       it('removes SLO attachment links when the stream is deleted', async () => {
         let sloId = '';
         const supertest = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
@@ -1258,32 +1284,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const createSloResponse = await supertest
             .post('/api/observability/slos')
             .set('kbn-xsrf', 'foo')
-            .send({
-              name: 'streams-attachments-slo-unlink-regression',
-              description: 'Regression fixture for SLO cascade-unlink on stream delete',
-              indicator: {
-                type: 'sli.kql.custom',
-                params: {
-                  index: 'logs.otel',
-                  filter: '*',
-                  good: 'message: *',
-                  total: 'message: *',
-                  timestampField: '@timestamp',
-                },
-              },
-              budgetingMethod: 'occurrences',
-              timeWindow: {
-                duration: '7d',
-                type: 'rolling',
-              },
-              objective: {
-                target: 0.99,
-              },
-              tags: ['streams-test'],
-            })
+            .send(sloFixture('streams-attachments-slo-unlink-regression'))
             .expect(200);
 
+          expect(createSloResponse.body.id).to.be.a('string');
           sloId = createSloResponse.body.id as string;
+          expect(sloId).to.not.be.empty();
 
           await linkAttachment({
             apiClient,
@@ -1301,10 +1307,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           expect(linked.attachments[0].id).to.eql(sloId);
 
           await deleteStream(apiClient, SLO_TEST_STREAM);
-
-          // Listing attachments requires the stream to exist (ensureStream). Recreate the same
-          // child stream and assert no SLO links remain. If cascade unlink did not run, the
-          // recreated stream would still show the orphaned SLO attachment.
           await putStream(apiClient, SLO_TEST_STREAM, wiredChildStreamBody);
 
           const afterDelete = await getAttachments({
@@ -1317,9 +1319,75 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           try {
             await deleteStream(apiClient, SLO_TEST_STREAM);
           } catch (err) {
-            log.warning(
-              `SLO cascade-unlink cleanup: deleteStream failed for ${SLO_TEST_STREAM}: ${err?.message ?? err}`
-            );
+            // 404 expected — test already deleted the stream.
+            const message = String(err?.message ?? err);
+            if (!/\b404\b/.test(message)) {
+              throw err;
+            }
+          }
+          if (sloId) {
+            await supertest
+              .delete(`/api/observability/slos/${encodeURIComponent(sloId)}`)
+              .set('kbn-xsrf', 'foo')
+              .expect(204);
+          }
+        }
+      });
+
+      it('removes SLO attachment links when a query stream is deleted', async () => {
+        let sloId = '';
+        const supertest = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
+          useCookieHeader: true,
+          withInternalHeaders: true,
+        });
+        const queryStreamBody = { query: { esql: 'FROM logs.otel' } };
+
+        try {
+          await putQueryStream(apiClient, SLO_QUERY_TEST_STREAM, queryStreamBody);
+
+          const createSloResponse = await supertest
+            .post('/api/observability/slos')
+            .set('kbn-xsrf', 'foo')
+            .send(sloFixture('streams-attachments-slo-query-unlink-regression'))
+            .expect(200);
+
+          expect(createSloResponse.body.id).to.be.a('string');
+          sloId = createSloResponse.body.id as string;
+          expect(sloId).to.not.be.empty();
+
+          await linkAttachment({
+            apiClient,
+            stream: SLO_QUERY_TEST_STREAM,
+            type: 'slo',
+            id: sloId,
+          });
+
+          const linked = await getAttachments({
+            apiClient,
+            stream: SLO_QUERY_TEST_STREAM,
+            filters: { types: ['slo'] },
+          });
+          expect(linked.attachments.length).to.eql(1);
+          expect(linked.attachments[0].id).to.eql(sloId);
+
+          await deleteStream(apiClient, SLO_QUERY_TEST_STREAM);
+
+          await putQueryStream(apiClient, SLO_QUERY_TEST_STREAM, queryStreamBody);
+
+          const afterDelete = await getAttachments({
+            apiClient,
+            stream: SLO_QUERY_TEST_STREAM,
+            filters: { types: ['slo'] },
+          });
+          expect(afterDelete.attachments.length).to.eql(0);
+        } finally {
+          try {
+            await deleteStream(apiClient, SLO_QUERY_TEST_STREAM);
+          } catch (err) {
+            const message = String(err?.message ?? err);
+            if (!/\b404\b/.test(message)) {
+              throw err;
+            }
           }
           if (sloId) {
             await supertest

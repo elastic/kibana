@@ -292,13 +292,23 @@ export class ExecutionPlan {
       return;
     }
 
-    return Promise.all(
+    const results = await Promise.allSettled(
       actions.flatMap((action) =>
         ATTACHMENT_TYPES.map((type) =>
-          this.dependencies.attachmentClient.syncAttachmentList(action.request.name, [], type)
+          this.dependencies.attachmentClient
+            .syncAttachmentList(action.request.name, [], type)
+            .then(() => ({ stream: action.request.name, type }))
         )
       )
     );
+
+    for (const result of results) {
+      if (result.status === 'rejected') {
+        this.dependencies.logger.warn(
+          `Failed to cascade-unlink attachments on stream delete: ${getErrorMessage(result.reason)}`
+        );
+      }
+    }
   }
 
   private async unlinkSystems(actions: UnlinkSystemsAction[]) {
