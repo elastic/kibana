@@ -1746,6 +1746,9 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/platform/plugins/shared/streams/server/lib/streams/lifecycle/ilm_policies.test.ts @elastic/kibana-management
 /x-pack/platform/plugins/shared/streams/server/lib/streams/lifecycle/ilm_phases.ts @elastic/kibana-management
 /x-pack/platform/plugins/shared/streams/server/lib/streams/lifecycle/ilm_phases.test.ts @elastic/kibana-management
+/x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention @elastic/kibana-management
+/x-pack/platform/test/api_integration_deployment_agnostic/apis/streams/failure_store.ts @elastic/kibana-management
+/x-pack/platform/test/api_integration_deployment_agnostic/apis/streams/lifecycle_retention.ts @elastic/kibana-management
 
 # Streams - Data quality overrides (owned by Kibana Management)
 /x-pack/platform/plugins/shared/streams_app/public/components/stream_data_quality @elastic/kibana-management
@@ -1889,7 +1892,6 @@ x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events @elastic/
 
 # Observability-ui
 /x-pack/solutions/observability/test/serverless/api_integration/configs/index.ts @elastic/observability-ui
-/x-pack/solutions/observability/test/functional_solution_sidenav/ @elastic/observability-ui
 /x-pack/solutions/observability/test/functional/page_objects/observability_page.ts @elastic/observability-ui
 /x-pack/solutions/observability/plugins/observability/server/services/index.ts @elastic/observability-ui
 
@@ -2804,7 +2806,6 @@ x-pack/solutions/security/plugins/entity_store @elastic/core-analysis
 /x-pack/solutions/security/plugins/security_solution/public/detections/pages @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/detections/utils @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/flyout/document_details @elastic/security-threat-hunting
-/x-pack/solutions/security/plugins/security_solution/public/flyout/network_details @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/flyout/attack_details @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/flyout/shared @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/flyout/rule_details @elastic/security-threat-hunting
@@ -3255,11 +3256,11 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/intercepts/*.ts @elastic/appex-sharedux
 
 # OpenAPI spec files
-oas_docs/linters                              @elastic/experience-docs
-oas_docs/overlays                             @elastic/experience-docs
-oas_docs/kibana.info.serverless.yaml          @elastic/experience-docs
-oas_docs/kibana.info.yaml                     @elastic/experience-docs
-oas_docs/output                               @elastic/ski-docs
+oas_docs/linters                              @elastic/kibana-core
+oas_docs/overlays                             @elastic/kibana-core
+oas_docs/kibana.info.serverless.yaml          @elastic/kibana-core
+oas_docs/kibana.info.yaml                     @elastic/kibana-core
+oas_docs/output                               @elastic/kibana-core
 
 # Documentation settings files
 docs/settings-gen                             @elastic/experience-docs
@@ -3298,6 +3299,7 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /**/scout_*/.meta/**
 
 # Macroscope Check Run Agents
+/.macroscope/backport-review.md @elastic/appex-qa
 /.macroscope/scout-review.md @elastic/appex-qa
 /.macroscope/flaky-test-runner-nudge.md @elastic/appex-qa
 
@@ -3348,6 +3350,10 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.coderabbit.yml @elastic/kibana-operations
 
 # Buildkite overrides, and ownership shares
+/.buildkite/scripts/steps/checks/api_contracts.sh @elastic/kibana-core
+/.buildkite/scripts/steps/checks/capture_oas_snapshot.sh @elastic/kibana-core
+/.buildkite/scripts/steps/checks/notify_api_contract_owners.ts @elastic/kibana-core
+/.buildkite/scripts/steps/checks/notify_api_contract_owners.test.ts @elastic/kibana-core
 /.buildkite/pipelines/performance/streams_weekly.yml @elastic/obs-sig-events-team @elastic/obs-onboarding-team
 /.buildkite/pipeline-resource-definitions/kibana-otel-semconv-sync.yml @elastic/obs-onboarding-team
 /.buildkite/pipeline-resource-definitions/kibana-streams-performance-weekly.yml @elastic/obs-sig-events-team @elastic/obs-onboarding-team
