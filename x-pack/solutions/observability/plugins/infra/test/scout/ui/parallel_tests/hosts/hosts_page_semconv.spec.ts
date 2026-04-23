@@ -97,6 +97,7 @@ test.describe(
       await hostsPage.openHostFlyout(SEMCONV_HOST1_NAME);
 
       await test.step('verify overview tab loads with KPI charts', async () => {
+        await assetDetailsPage.hostOverviewTab.waitForKPIChartsToLoad(EXTENDED_TIMEOUT);
         await expect(
           assetDetailsPage.hostOverviewTab.kpiCpuUsageChart.getByRole('heading', {
             name: 'CPU Usage',

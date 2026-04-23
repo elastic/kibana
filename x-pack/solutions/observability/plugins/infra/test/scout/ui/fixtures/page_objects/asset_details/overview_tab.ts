@@ -6,8 +6,11 @@
  */
 
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import type { AssetDetailsPageTabName } from './asset_details_tab';
 import { AssetDetailsTab } from './asset_details_tab';
+
+const KPI_METRICS = ['cpuUsage', 'normalizedLoad1m', 'memoryUsage', 'diskUsage'] as const;
 
 export class OverviewTab extends AssetDetailsTab {
   public readonly tabName: AssetDetailsPageTabName = 'Overview';
@@ -181,5 +184,22 @@ export class OverviewTab extends AssetDetailsTab {
 
   public getKPIValue(metric: string): Locator {
     return this.page.getByTestId(`infraAssetDetailsKPI${metric}`).locator('.echMetricText__value');
+  }
+
+  /**
+   * Waits for all KPI Lens charts to finish loading.
+   *
+   * Lens wraps each KPI in a panel whose `data-test-subj` is suffixed with
+   * `-loading` while Lens fetches data. Tests that assert on chart content
+   * (e.g. the "CPU Usage" heading) only match once that suffix is dropped, so
+   * waiting explicitly here makes the assertions deterministic instead of
+   * racing against a single compound timeout.
+   */
+  public async waitForKPIChartsToLoad(timeout?: number) {
+    for (const metric of KPI_METRICS) {
+      await expect(this.page.getByTestId(`infraAssetDetailsKPI${metric}-loading`)).toHaveCount(0, {
+        timeout,
+      });
+    }
   }
 }

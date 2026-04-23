@@ -37,6 +37,7 @@ test.describe(
       await hostsPage.openHostFlyout(HOST1_NAME);
 
       await test.step('verify KPI charts are rendered', async () => {
+        await assetDetailsPage.hostOverviewTab.waitForKPIChartsToLoad(EXTENDED_TIMEOUT);
         await expect(
           assetDetailsPage.hostOverviewTab.kpiCpuUsageChart.getByRole('heading', {
             name: 'CPU Usage',
