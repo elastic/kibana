@@ -92,8 +92,10 @@ When at least one inline comment is posted, the review comment body should follo
 
 No heading (`##`), no severity breakdown, no per-commit log.
 
-## 5. Re-run Behavior & Constraints
+## 5. New commit pushes
 
-- On re-runs, update/resolve existing inline comments and update the main review body status. Do not post a new top-level comment.
+On new comment pushes:
+
+- Update/resolve existing inline comments. Do not post a new top-level comment. You may post additional inline comments if they're highly relevant.
 - Do not duplicate inline comments on unchanged lines.
 - **Ignore:** flaky test runner nudges and standard best-practices (these are handled by other agents).
