@@ -172,7 +172,53 @@ describe('runBackfillInstalledPackageInfo', () => {
     );
   });
 
-  it('should apply GA release override for CSPM policy template when release is absent', async () => {
+  it('should apply GA release override for CSPM policy template at or above sinceVersion', async () => {
+    soClient.find.mockResolvedValue({
+      total: 1,
+      page: 1,
+      per_page: 1,
+      saved_objects: [
+        {
+          id: 'cspm-pkg',
+          type: 'epm-packages',
+          references: [],
+          attributes: {
+            name: 'cloud_security_posture',
+            version: '1.13.0',
+            install_source: 'registry',
+          },
+        } as any,
+      ],
+    });
+
+    MockRegistry.fetchInfo.mockResolvedValue({
+      policy_templates: [
+        {
+          name: FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE,
+          deployment_modes: { agentless: { enabled: true } },
+        },
+      ],
+    } as any);
+
+    await runBackfillInstalledPackageInfo({ logger, abortController });
+
+    expect(soClient.bulkUpdate).toHaveBeenCalledWith([
+      expect.objectContaining({
+        attributes: {
+          policy_templates_deployment_info: [
+            {
+              name: FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE,
+              deployment_modes: {
+                agentless: { enabled: true, release: AgentlessDeploymentReleaseStatus.GA },
+              },
+            },
+          ],
+        },
+      }),
+    ]);
+  });
+
+  it('should not apply GA override for CSPM below sinceVersion', async () => {
     soClient.find.mockResolvedValue({
       total: 1,
       page: 1,
@@ -208,9 +254,7 @@ describe('runBackfillInstalledPackageInfo', () => {
           policy_templates_deployment_info: [
             {
               name: FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE,
-              deployment_modes: {
-                agentless: { enabled: true, release: AgentlessDeploymentReleaseStatus.GA },
-              },
+              deployment_modes: { agentless: { enabled: true } },
             },
           ],
         },

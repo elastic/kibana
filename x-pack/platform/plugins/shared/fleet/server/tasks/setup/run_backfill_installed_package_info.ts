@@ -15,26 +15,22 @@ import { PACKAGES_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
 import type { Installation } from '../../types';
 import { AgentlessDeploymentReleaseStatus } from '../../../common/types';
 import type { RegistryPolicyTemplate } from '../../../common/types';
-import { FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE } from '../../../common/constants';
+import { isGABeforeReleaseField } from '../../../common/services/agentless_policy_helper';
 import * as Registry from '../../services/epm/registry';
 
 const BATCH_SIZE = 50;
 
-// CSPM's agentless feature was GA before the release field was introduced — explicitly backfill GA.
-function buildCSPMDeploymentInfo(t: RegistryPolicyTemplate) {
-  if (t.deployment_modes?.agentless?.enabled && !t.deployment_modes.agentless.release) {
-    return {
-      name: t.name,
-      deployment_modes: {
-        ...t.deployment_modes,
-        agentless: {
-          ...t.deployment_modes?.agentless,
-          release: AgentlessDeploymentReleaseStatus.GA,
-        },
+function buildWithGARelease(t: RegistryPolicyTemplate) {
+  return {
+    name: t.name,
+    deployment_modes: {
+      ...t.deployment_modes,
+      agentless: {
+        ...t.deployment_modes?.agentless,
+        release: AgentlessDeploymentReleaseStatus.GA,
       },
-    };
-  }
-  return { name: t.name, deployment_modes: t.deployment_modes };
+    },
+  };
 }
 
 async function buildDeploymentInfoUpdates(
@@ -55,10 +51,13 @@ async function buildDeploymentInfoUpdates(
         id: so.id,
         policy_templates_deployment_info:
           pkgInfo.policy_templates?.map((t: RegistryPolicyTemplate) => {
-            if (t.name === FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE) {
-              return buildCSPMDeploymentInfo(t);
-            }
-            return { name: t.name, deployment_modes: t.deployment_modes };
+            const needsGAOverride =
+              isGABeforeReleaseField(name, t.name, version) &&
+              t.deployment_modes?.agentless?.enabled &&
+              !t.deployment_modes.agentless.release;
+            return needsGAOverride
+              ? buildWithGARelease(t)
+              : { name: t.name, deployment_modes: t.deployment_modes };
           }) ?? [],
       });
     } catch (err) {

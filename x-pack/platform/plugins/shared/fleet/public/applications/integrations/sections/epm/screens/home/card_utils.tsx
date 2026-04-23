@@ -146,15 +146,18 @@ export const mapToCard = ({
 
   // When an update is available, use the installed version's SO data so the badge reflects
   // installed maturity. Otherwise use the tile's pkgDeploymentInfo.
+  const packageName = 'name' in item ? item.name : undefined;
   const packageItemForRelease =
     isUpdateAvailable && installationInfo?.policy_templates_deployment_info
       ? {
           policy_templates: installationInfo.policy_templates_deployment_info,
           version: installationInfo.version,
+          name: packageName,
         }
       : {
           policy_templates: 'pkgDeploymentInfo' in item ? item.pkgDeploymentInfo : undefined,
           version,
+          name: packageName,
         };
 
   // Resolve the effective release: agentless override when relevant, semver otherwise.

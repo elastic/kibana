@@ -5,11 +5,15 @@
  * 2.0.
  */
 
+import semverGte from 'semver/functions/gte';
+
 import {
   AGENTLESS_DISABLED_INPUTS,
   AGENTLESS_GLOBAL_TAG_NAME_DIVISION,
   AGENTLESS_GLOBAL_TAG_NAME_TEAM,
   AGENTLESS_GLOBAL_TAG_NAME_ORGANIZATION,
+  FLEET_CLOUD_SECURITY_POSTURE_PACKAGE,
+  FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE,
 } from '../constants';
 import { PackagePolicyValidationError } from '../errors';
 import { AgentlessDeploymentReleaseStatus } from '../types';
@@ -22,7 +26,45 @@ export interface PolicyTemplateDeploymentRef {
 
 export interface PackageWithDeploymentInfo {
   policy_templates?: PolicyTemplateDeploymentRef[];
+  name?: string;
 }
+
+interface AgentlessGABeforeReleaseFieldEntry {
+  packageName: string;
+  integrationName: string;
+  sinceVersion: string;
+}
+
+/**
+ * Integrations that were GA on agentless before the `release` field convention was introduced.
+ * An absent `release` field on these integrations from `sinceVersion` onwards is treated as GA
+ * rather than falling back to the default least-mature inference.
+ */
+const AGENTLESS_GA_BEFORE_RELEASE_FIELD: AgentlessGABeforeReleaseFieldEntry[] = [
+  {
+    packageName: FLEET_CLOUD_SECURITY_POSTURE_PACKAGE,
+    integrationName: FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE,
+    sinceVersion: '1.13.0',
+  },
+];
+
+/**
+ * Returns true when the given package/integration/version combination predates the `release`
+ * field convention and should be treated as GA regardless of an absent release field.
+ */
+export const isGABeforeReleaseField = (
+  packageName: string | undefined,
+  integrationName: string | undefined,
+  version: string | undefined
+): boolean => {
+  if (!packageName || !integrationName || !version) return false;
+  return AGENTLESS_GA_BEFORE_RELEASE_FIELD.some(
+    (e) =>
+      e.packageName === packageName &&
+      e.integrationName === integrationName &&
+      semverGte(version, e.sinceVersion)
+  );
+};
 
 export interface RegistryInputForDeploymentMode {
   type: string;
@@ -205,7 +247,7 @@ const coerceRelease = (r?: AgentlessDeploymentReleaseStatus) =>
   r !== undefined && knownReleases.has(r) ? r : leastMature;
 
 export const getAgentlessRelease = (
-  packageInfo?: PackageWithDeploymentInfo,
+  packageInfo?: PackageWithDeploymentInfo & { version?: string },
   integrationToEnable?: string
 ): AgentlessDeploymentReleaseStatus | undefined => {
   const templates = packageInfo?.policy_templates ?? [];
@@ -218,7 +260,14 @@ export const getAgentlessRelease = (
   if (integrationToEnable) {
     const template = templates.find(({ name }) => name === integrationToEnable);
     if (!template?.deployment_modes?.agentless?.enabled) return undefined;
-    return coerceRelease(template.deployment_modes.agentless.release);
+    const { release } = template.deployment_modes.agentless;
+    if (
+      release === undefined &&
+      isGABeforeReleaseField(packageInfo?.name, integrationToEnable, packageInfo?.version)
+    ) {
+      return AgentlessDeploymentReleaseStatus.GA;
+    }
+    return coerceRelease(release);
   }
 
   const agentlessTemplates = templates.filter(
