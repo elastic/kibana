@@ -17,10 +17,7 @@ import { OtelTelemetryService } from './lib/services/otel_telemetry';
 import { TelemetryConfigProvider } from './lib/services/telemetry_config_provider';
 import { ConfigurationService } from './lib/services/configuration';
 import { ArtifactService } from './lib/services/artifact';
-import {
-  DEFAULT_CDN_CONFIG,
-  DEFAULT_OTEL_TELEMETRY_CONFIGURATION,
-} from './lib/constants';
+import { DEFAULT_CDN_CONFIG, DEFAULT_OTEL_TELEMETRY_CONFIGURATION } from './lib/constants';
 import type { CdnConfig } from './lib/constants';
 import type { PluginConfig } from './config';
 import type {

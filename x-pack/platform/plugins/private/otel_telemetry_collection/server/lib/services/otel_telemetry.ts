@@ -93,7 +93,9 @@ export class OtelTelemetryService {
     this.configSubscription = this.configurationService
       .getOtelTelemetryConfiguration$()
       .subscribe((cfg) => {
-        this.logger.debug('OTel telemetry configuration updated', { configuration: cfg } as LogMeta);
+        this.logger.debug('OTel telemetry configuration updated', {
+          configuration: cfg,
+        } as LogMeta);
         if (cfg) {
           this.configuration = cfg;
         }

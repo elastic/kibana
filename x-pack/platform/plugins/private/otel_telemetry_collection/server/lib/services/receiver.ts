@@ -6,7 +6,12 @@
  */
 
 import type { ElasticsearchClient, LogMeta, Logger } from '@kbn/core/server';
-import { SIGNAL_INDICES, TERMS_AGG_SIZE, SCOPE_NAMES_AGG_SIZE, SAMPLER_SHARD_SIZE } from '../constants';
+import {
+  SIGNAL_INDICES,
+  TERMS_AGG_SIZE,
+  SCOPE_NAMES_AGG_SIZE,
+  SAMPLER_SHARD_SIZE,
+} from '../constants';
 import type { SignalType, OtelTelemetryConfiguration } from '../constants';
 
 export interface CompositeBucketKey {

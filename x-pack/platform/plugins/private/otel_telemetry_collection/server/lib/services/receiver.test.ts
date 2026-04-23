@@ -155,7 +155,8 @@ describe('OtelTelemetryReceiver', () => {
 
       await receiver.fetchAllSignals(defaultConfig);
 
-      const sampleAggs = (esClient.search as jest.Mock).mock.calls[0][0].aggs.combos.aggs.sample.aggs;
+      const sampleAggs = (esClient.search as jest.Mock).mock.calls[0][0].aggs.combos.aggs.sample
+        .aggs;
       expect(sampleAggs.scope_names.terms.size).toBe(50);
       expect(sampleAggs.sdk_names.terms.size).toBe(5);
     });
@@ -172,11 +173,7 @@ describe('OtelTelemetryReceiver', () => {
       const indices = (esClient.search as jest.Mock).mock.calls.map(
         (call: [{ index: string }]) => call[0].index
       );
-      expect(indices).toEqual([
-        SIGNAL_INDICES.traces,
-        SIGNAL_INDICES.metrics,
-        SIGNAL_INDICES.logs,
-      ]);
+      expect(indices).toEqual([SIGNAL_INDICES.traces, SIGNAL_INDICES.metrics, SIGNAL_INDICES.logs]);
     });
 
     it('should return buckets grouped by signal', async () => {

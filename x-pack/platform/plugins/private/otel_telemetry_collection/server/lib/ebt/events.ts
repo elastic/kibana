@@ -39,7 +39,9 @@ export const OTEL_PER_SERVICE_EVENT: EventTypeOpts<OtelPerServicePayload> = {
           },
           service_id: {
             type: 'keyword',
-            _meta: { description: 'First 16 hex chars of the SHA-256 hash of the raw service.name' },
+            _meta: {
+              description: 'First 16 hex chars of the SHA-256 hash of the raw service.name',
+            },
           },
           environment: {
             type: 'keyword',

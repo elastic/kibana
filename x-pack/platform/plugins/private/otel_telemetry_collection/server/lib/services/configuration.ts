@@ -105,15 +105,19 @@ export class ConfigurationService {
       } else if (error instanceof ArtifactNotFoundError) {
         this.logger.warn('OTel telemetry configuration artifact not found', { error });
       } else if (cause && cause instanceof AggregateError) {
-        this.logger.error(
-          `AggregateError while getting OTel telemetry configuration: ${cause}`,
-          { error, code, message, cause } as LogMeta
-        );
+        this.logger.error(`AggregateError while getting OTel telemetry configuration: ${cause}`, {
+          error,
+          code,
+          message,
+          cause,
+        } as LogMeta);
       } else {
-        this.logger.error(
-          `Unexpected error while getting OTel telemetry configuration: ${error}`,
-          { error, code, message, cause } as LogMeta
-        );
+        this.logger.error(`Unexpected error while getting OTel telemetry configuration: ${error}`, {
+          error,
+          code,
+          message,
+          cause,
+        } as LogMeta);
       }
       return undefined;
     }
