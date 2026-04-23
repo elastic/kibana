@@ -19,14 +19,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import { capitalize } from 'lodash/fp';
 import type { EntityType } from '../../../../../common/entity_analytics/types';
-import type { RiskStats } from '../../../../../common/search_strategy';
+import type { RiskStats, RiskSeverity } from '../../../../../common/search_strategy';
 import { RiskScoreCell } from '../../../../entity_analytics/components/home/entities_table/risk_score_cell';
 import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
 import {
   columnsArray,
   getItems,
 } from '../../../../entity_analytics/components/risk_summary_flyout/common';
-import type { RiskSeverity } from '../../../../../common/search_strategy';
 
 interface RiskSummaryMiniProps {
   entityType: EntityType;
@@ -138,9 +137,7 @@ export const RiskSummaryMini: React.FC<RiskSummaryMiniProps> = ({
   }
 
   const showResolution =
-    !!resolutionRiskStats ||
-    resolutionRiskScore != null ||
-    !!resolutionRiskLevel;
+    !!resolutionRiskStats || resolutionRiskScore != null || !!resolutionRiskLevel;
 
   return (
     <EuiPanel

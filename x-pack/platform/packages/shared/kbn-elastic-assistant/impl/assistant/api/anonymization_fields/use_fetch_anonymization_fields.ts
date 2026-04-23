@@ -87,8 +87,7 @@ export const useFetchAnonymizationFields = (
 
   const assistantContext = useMaybeAssistantContext();
   const http = assistantContext?.http;
-  const isAssistantEnabled =
-    assistantContext?.assistantAvailability.isAssistantEnabled ?? false;
+  const isAssistantEnabled = assistantContext?.assistantAvailability.isAssistantEnabled ?? false;
 
   const fetchPage = useCallback(
     async ({ pageParam = { page, perPage, sortField, sortOrder, filter, all } }) => {

@@ -21,9 +21,7 @@ import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 describe('buildSingleEntityAttachmentId', () => {
   it('produces an id with the expected prefix and a 64-char hex hash', () => {
     const id = buildSingleEntityAttachmentId('user', 'lena.medhurst@acmecrm.com');
-    expect(id).toMatch(
-      new RegExp(`^${SecurityAgentBuilderAttachments.entity}:user:[a-f0-9]{64}$`)
-    );
+    expect(id).toMatch(new RegExp(`^${SecurityAgentBuilderAttachments.entity}:user:[a-f0-9]{64}$`));
   });
 
   it('is deterministic for the same (type, identifier) pair', () => {
@@ -48,7 +46,9 @@ describe('buildSingleEntityAttachmentId', () => {
     'contains no autolink-triggering characters after the type prefix for type %s',
     (identifierType: AttachmentIdentifierType) => {
       const id = buildSingleEntityAttachmentId(identifierType, 'lena.medhurst@acmecrm.com');
-      const suffix = id.slice(`${SecurityAgentBuilderAttachments.entity}:${identifierType}:`.length);
+      const suffix = id.slice(
+        `${SecurityAgentBuilderAttachments.entity}:${identifierType}:`.length
+      );
       expect(suffix).toMatch(/^[a-f0-9]{64}$/);
       expect(suffix).not.toMatch(/[@.:/]/);
     }
@@ -61,9 +61,7 @@ describe('buildListEntityAttachmentId', () => {
       { identifierType: 'user', identifier: 'alice' },
       { identifierType: 'host', identifier: 'server1' },
     ]);
-    expect(id).toMatch(
-      new RegExp(`^${SecurityAgentBuilderAttachments.entity}:list:[a-f0-9]{64}$`)
-    );
+    expect(id).toMatch(new RegExp(`^${SecurityAgentBuilderAttachments.entity}:list:[a-f0-9]{64}$`));
   });
 
   it('is stable regardless of entity ordering', () => {
@@ -203,7 +201,11 @@ describe('describeAttachmentForRow', () => {
   ];
 
   it('includes the raw entity.id as entityStoreId when present', () => {
-    const row = ['user', "user:Lena Medhurst@Lena's MacBook Pro@local", "Lena Medhurst@Lena's MacBook Pro"];
+    const row = [
+      'user',
+      "user:Lena Medhurst@Lena's MacBook Pro@local",
+      "Lena Medhurst@Lena's MacBook Pro",
+    ];
     const descriptor = describeAttachmentForRow({ columns, row });
     expect(descriptor).toEqual({
       identifierType: 'user',

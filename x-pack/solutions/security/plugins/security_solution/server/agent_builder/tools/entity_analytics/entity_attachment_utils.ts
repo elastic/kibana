@@ -20,8 +20,7 @@ export const ATTACHMENT_IDENTIFIER_TYPES = ['host', 'user', 'service', 'generic'
 export type AttachmentIdentifierType = (typeof ATTACHMENT_IDENTIFIER_TYPES)[number];
 
 export const isAttachmentIdentifierType = (value: unknown): value is AttachmentIdentifierType =>
-  typeof value === 'string' &&
-  (ATTACHMENT_IDENTIFIER_TYPES as readonly string[]).includes(value);
+  typeof value === 'string' && (ATTACHMENT_IDENTIFIER_TYPES as readonly string[]).includes(value);
 
 /**
  * Strips the `{type}:` prefix from a canonical entity id so the attachment

@@ -32,8 +32,7 @@ const TITLE = i18n.translate(
 
 const MEMBERS_LABEL = (count: number) =>
   i18n.translate('xpack.securitySolution.agentBuilder.entityAttachment.resolution.membersLabel', {
-    defaultMessage:
-      '{count, plural, one {# linked entity} other {# linked entities}}',
+    defaultMessage: '{count, plural, one {# linked entity} other {# linked entities}}',
     values: { count },
   });
 
@@ -55,7 +54,11 @@ export const ResolutionMini: React.FC<ResolutionMiniProps> = ({
   const accordionId = useGeneratedHtmlId({ prefix: 'entityAttachmentResolutionMini' });
   const enabled = Boolean(entityStoreEntityId);
 
-  const { data: group, isLoading, isError } = useResolutionGroup(entityStoreEntityId ?? '', {
+  const {
+    data: group,
+    isLoading,
+    isError,
+  } = useResolutionGroup(entityStoreEntityId ?? '', {
     enabled,
   });
 

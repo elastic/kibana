@@ -27,7 +27,9 @@ const OPEN_ENTITY_ANALYTICS_LABEL = i18n.translate(
  * affordance is a direct jump into the Entity Analytics app; richer chat
  * follow-ups live on the agent side via `<render_attachment>` and prose.
  */
-export const EntityCardActions: React.FC<EntityCardActionsProps> = ({ identifier: _identifier }) => {
+export const EntityCardActions: React.FC<EntityCardActionsProps> = ({
+  identifier: _identifier,
+}) => {
   const { services } = useKibana<{ application: ApplicationStart }>();
 
   const handleOpenEntityAnalytics = useCallback(() => {

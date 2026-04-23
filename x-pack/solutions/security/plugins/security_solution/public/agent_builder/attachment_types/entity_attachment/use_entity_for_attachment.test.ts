@@ -58,9 +58,7 @@ describe('useEntityForAttachment', () => {
     const parsed = parseLastFilterQuery();
     expect(parsed).toEqual({
       bool: {
-        filter: [
-          { term: { 'entity.id': "user:Lena Medhurst@Lena's MacBook Pro@local" } },
-        ],
+        filter: [{ term: { 'entity.id': "user:Lena Medhurst@Lena's MacBook Pro@local" } }],
       },
     });
   });

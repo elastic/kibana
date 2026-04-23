@@ -909,10 +909,7 @@ describe('searchEntitiesTool', () => {
         current_version: 1,
       });
 
-      const result = (await richTool.handler(
-        {},
-        context
-      )) as ToolHandlerStandardReturn;
+      const result = (await richTool.handler({}, context)) as ToolHandlerStandardReturn;
 
       expect(context.attachments.add).toHaveBeenCalledTimes(1);
       expect(context.attachments.add).toHaveBeenCalledWith({
@@ -958,10 +955,7 @@ describe('searchEntitiesTool', () => {
         current_version: 1,
       });
 
-      const result = (await richTool.handler(
-        {},
-        context
-      )) as ToolHandlerStandardReturn;
+      const result = (await richTool.handler({}, context)) as ToolHandlerStandardReturn;
 
       expect(context.attachments.add).toHaveBeenCalledTimes(1);
       expect(context.attachments.add).toHaveBeenCalledWith({
@@ -1008,10 +1002,7 @@ describe('searchEntitiesTool', () => {
         current_version: 2,
       });
 
-      const result = (await richTool.handler(
-        {},
-        context
-      )) as ToolHandlerStandardReturn;
+      const result = (await richTool.handler({}, context)) as ToolHandlerStandardReturn;
 
       expect(context.attachments.update).toHaveBeenCalledTimes(1);
       expect(context.attachments.update).toHaveBeenCalledWith(expectedSingleAttachmentId, {
@@ -1076,10 +1067,7 @@ describe('searchEntitiesTool', () => {
         current_version: 1,
       });
 
-      const result = (await richTool.handler(
-        {},
-        context
-      )) as ToolHandlerStandardReturn;
+      const result = (await richTool.handler({}, context)) as ToolHandlerStandardReturn;
 
       expect(context.attachments.add).toHaveBeenCalledTimes(1);
       expect(context.attachments.add).toHaveBeenCalledWith(
@@ -1127,10 +1115,7 @@ describe('searchEntitiesTool', () => {
 
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
 
-      const result = (await richTool.handler(
-        {},
-        context
-      )) as ToolHandlerStandardReturn;
+      const result = (await richTool.handler({}, context)) as ToolHandlerStandardReturn;
 
       expect(context.attachments.add).not.toHaveBeenCalled();
       expect(context.attachments.update).not.toHaveBeenCalled();

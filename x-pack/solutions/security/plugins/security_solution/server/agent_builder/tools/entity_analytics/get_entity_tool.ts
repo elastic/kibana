@@ -272,9 +272,7 @@ const searchRiskDocForCandidates = async ({
         bool: {
           filter: [
             { terms: { [idValueField]: idCandidates } },
-            ...(scoreType === 'resolution'
-              ? [{ term: { [scoreTypeField]: 'resolution' } }]
-              : []),
+            ...(scoreType === 'resolution' ? [{ term: { [scoreTypeField]: 'resolution' } }] : []),
           ],
           ...(scoreType === 'base'
             ? { must_not: [{ term: { [scoreTypeField]: 'resolution' } }] }
@@ -708,8 +706,7 @@ When exactly one entity is resolved, this tool also stores a \`security.entity\`
               const enrichment = await fetchRiskStatsForAttachment({
                 identifierType: baseDescriptor.identifierType,
                 identifier: baseDescriptor.identifier,
-                entityStoreEntityId:
-                  typeof rowEntityStoreId === 'string' ? rowEntityStoreId : '',
+                entityStoreEntityId: typeof rowEntityStoreId === 'string' ? rowEntityStoreId : '',
                 esClient: client,
                 spaceId,
                 logger,
@@ -732,9 +729,7 @@ When exactly one entity is resolved, this tool also stores a \`security.entity\`
                   identifierType: descriptor.identifierType,
                   identifier: descriptor.identifier,
                   attachmentLabel: descriptor.attachmentLabel,
-                  ...(descriptor.entityStoreId
-                    ? { entityStoreId: descriptor.entityStoreId }
-                    : {}),
+                  ...(descriptor.entityStoreId ? { entityStoreId: descriptor.entityStoreId } : {}),
                   ...(descriptor.riskStats ? { riskStats: descriptor.riskStats } : {}),
                   ...(descriptor.resolutionRiskStats
                     ? { resolutionRiskStats: descriptor.resolutionRiskStats }

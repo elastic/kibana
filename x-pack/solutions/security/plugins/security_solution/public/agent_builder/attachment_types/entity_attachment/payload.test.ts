@@ -62,9 +62,7 @@ describe('normaliseEntityAttachment', () => {
         entityStoreId: "user:Lena Medhurst@Lena's MacBook Pro@local",
       })
     );
-    expect(result?.entities[0].entityStoreId).toBe(
-      "user:Lena Medhurst@Lena's MacBook Pro@local"
-    );
+    expect(result?.entities[0].entityStoreId).toBe("user:Lena Medhurst@Lena's MacBook Pro@local");
   });
 
   it('drops malformed entityStoreId on a single-entity payload', () => {
@@ -163,21 +161,15 @@ describe('normaliseEntityAttachment', () => {
   });
 
   it('returns null when neither shape is valid', () => {
-    expect(
-      normaliseEntityAttachment(buildAttachment({ foo: 'bar' }))
-    ).toBeNull();
-    expect(
-      normaliseEntityAttachment(buildAttachment({ identifierType: 'host' }))
-    ).toBeNull();
+    expect(normaliseEntityAttachment(buildAttachment({ foo: 'bar' }))).toBeNull();
+    expect(normaliseEntityAttachment(buildAttachment({ identifierType: 'host' }))).toBeNull();
     expect(
       normaliseEntityAttachment(buildAttachment({ identifierType: 'host', identifier: '' }))
     ).toBeNull();
   });
 
   it('returns null when entities array is empty after filtering', () => {
-    expect(
-      normaliseEntityAttachment(buildAttachment({ entities: [{ bad: true }] }))
-    ).toBeNull();
+    expect(normaliseEntityAttachment(buildAttachment({ entities: [{ bad: true }] }))).toBeNull();
   });
 
   describe('riskStats / resolutionRiskStats forwarding', () => {

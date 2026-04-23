@@ -32,7 +32,6 @@ jest.mock(
 );
 
 const mockedUseResolutionGroup =
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
   require('../../../../entity_analytics/components/entity_resolution/hooks/use_resolution_group')
     .useResolutionGroup as jest.Mock;
 
