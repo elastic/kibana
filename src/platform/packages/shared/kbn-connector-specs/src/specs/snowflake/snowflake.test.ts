@@ -117,6 +117,168 @@ describe('Snowflake', () => {
     });
   });
 
+  describe('tool exposure (isTool flags)', () => {
+    it('exposes runQuery as an agent-facing tool', () => {
+      expect(Snowflake.actions.runQuery.isTool).toBe(true);
+    });
+
+    it('does not expose executeStatement as an agent-facing tool', () => {
+      expect(Snowflake.actions.executeStatement.isTool).toBe(false);
+    });
+
+    it('exposes getStatementStatus and cancelStatement as tools so agents can poll/abort runQuery handles', () => {
+      expect(Snowflake.actions.getStatementStatus.isTool).toBe(true);
+      expect(Snowflake.actions.cancelStatement.isTool).toBe(true);
+    });
+  });
+
+  describe('runQuery action', () => {
+    describe('allowed read-only statements', () => {
+      const allowedStatements: Array<[string, string]> = [
+        ['SELECT', 'SELECT * FROM customers LIMIT 10'],
+        ['WITH', 'WITH recent AS (SELECT * FROM orders) SELECT * FROM recent'],
+        ['SHOW', 'SHOW TABLES IN SCHEMA PROD_DB.PUBLIC'],
+        ['DESCRIBE', 'DESCRIBE TABLE PROD_DB.PUBLIC.ORDERS'],
+        ['DESC', 'DESC VIEW PROD_DB.PUBLIC.ORDERS_VW'],
+        ['EXPLAIN', 'EXPLAIN SELECT * FROM orders'],
+      ];
+
+      it.each(allowedStatements)(
+        'accepts %s and submits to the SQL API',
+        async (_label, statement) => {
+          mockClient.post.mockResolvedValue({ status: 202, data: { statementHandle: 'h' } });
+
+          await Snowflake.actions.runQuery.handler(mockContext, { statement });
+
+          expect(mockClient.post).toHaveBeenCalledTimes(1);
+          expect(mockClient.post).toHaveBeenCalledWith(
+            `${ACCOUNT_URL}/api/v2/statements`,
+            expect.objectContaining({ statement }),
+            expect.objectContaining({ params: { async: true } })
+          );
+        }
+      );
+
+      it('applies config defaults and bind variables just like executeStatement', async () => {
+        mockClient.post.mockResolvedValue({ status: 202, data: { statementHandle: 'h' } });
+
+        await Snowflake.actions.runQuery.handler(mockContext, {
+          statement: 'SELECT * FROM users WHERE id = ?',
+          bindings: { '1': { type: 'FIXED', value: '42' } },
+        });
+
+        expect(mockClient.post).toHaveBeenCalledWith(
+          expect.any(String),
+          expect.objectContaining({
+            warehouse: 'COMPUTE_WH',
+            database: 'PROD_DB',
+            schema: 'PUBLIC',
+            role: 'ANALYST',
+            bindings: { '1': { type: 'FIXED', value: '42' } },
+          }),
+          expect.any(Object)
+        );
+      });
+
+      it('tolerates leading whitespace, line comments, and block comments before the keyword', async () => {
+        mockClient.post.mockResolvedValue({ status: 202, data: { statementHandle: 'h' } });
+
+        const statements = [
+          '   SELECT 1',
+          '-- a note\nSELECT 1',
+          '/* a note */ SELECT 1',
+          '-- one\n/* two */\n  select 1',
+        ];
+        for (const statement of statements) {
+          await Snowflake.actions.runQuery.handler(mockContext, { statement });
+        }
+
+        expect(mockClient.post).toHaveBeenCalledTimes(statements.length);
+      });
+
+      it('is case-insensitive on the leading keyword', async () => {
+        mockClient.post.mockResolvedValue({ status: 202, data: { statementHandle: 'h' } });
+
+        await Snowflake.actions.runQuery.handler(mockContext, { statement: 'select 1' });
+        await Snowflake.actions.runQuery.handler(mockContext, { statement: 'Select 1' });
+
+        expect(mockClient.post).toHaveBeenCalledTimes(2);
+      });
+
+      it('tolerates a trailing semicolon when nothing follows it', async () => {
+        mockClient.post.mockResolvedValue({ status: 202, data: { statementHandle: 'h' } });
+
+        await Snowflake.actions.runQuery.handler(mockContext, { statement: 'SELECT 1;' });
+        await Snowflake.actions.runQuery.handler(mockContext, { statement: 'SELECT 1; -- done' });
+        await Snowflake.actions.runQuery.handler(mockContext, {
+          statement: 'SELECT 1; /* also done */',
+        });
+
+        expect(mockClient.post).toHaveBeenCalledTimes(3);
+      });
+    });
+
+    describe('rejected non-read-only statements', () => {
+      const rejectedStatements: Array<[string, string]> = [
+        ['INSERT', 'INSERT INTO t VALUES (1)'],
+        ['UPDATE', 'UPDATE t SET a = 1'],
+        ['DELETE', 'DELETE FROM t'],
+        ['MERGE', 'MERGE INTO t USING s ON t.id = s.id WHEN MATCHED THEN UPDATE SET a = 1'],
+        ['CREATE', 'CREATE TABLE t(id INT)'],
+        ['DROP', 'DROP TABLE t'],
+        ['ALTER', 'ALTER TABLE t ADD COLUMN c INT'],
+        ['TRUNCATE', 'TRUNCATE TABLE t'],
+        ['GRANT', 'GRANT SELECT ON t TO ROLE r'],
+        ['REVOKE', 'REVOKE SELECT ON t FROM ROLE r'],
+        ['CALL', 'CALL my_procedure()'],
+        ['USE', 'USE DATABASE PROD_DB'],
+        ['SET', 'SET foo = 1'],
+      ];
+
+      it.each(rejectedStatements)(
+        'rejects %s without making a network call',
+        async (_label, statement) => {
+          await expect(
+            Snowflake.actions.runQuery.handler(mockContext, { statement })
+          ).rejects.toThrow(/read-only/i);
+          expect(mockClient.post).not.toHaveBeenCalled();
+        }
+      );
+
+      it('rejection guidance points users at executeStatement for write / DDL', async () => {
+        await expect(
+          Snowflake.actions.runQuery.handler(mockContext, { statement: 'DROP TABLE t' })
+        ).rejects.toThrow(/executeStatement/);
+      });
+
+      it('rejects multi-statement submissions even when the first statement is read-only', async () => {
+        await expect(
+          Snowflake.actions.runQuery.handler(mockContext, {
+            statement: 'SELECT 1; DROP TABLE t',
+          })
+        ).rejects.toThrow(/multi-statement/i);
+        expect(mockClient.post).not.toHaveBeenCalled();
+      });
+
+      it('rejects write statements that hide behind leading comments', async () => {
+        await expect(
+          Snowflake.actions.runQuery.handler(mockContext, {
+            statement: '-- looks fine\nINSERT INTO t VALUES (1)',
+          })
+        ).rejects.toThrow(/read-only/i);
+        expect(mockClient.post).not.toHaveBeenCalled();
+      });
+    });
+
+    it('propagates API errors from the SQL endpoint', async () => {
+      mockClient.post.mockRejectedValue(new Error('SQL compilation error'));
+
+      await expect(
+        Snowflake.actions.runQuery.handler(mockContext, { statement: 'SELECT 1' })
+      ).rejects.toThrow('SQL compilation error');
+    });
+  });
+
   describe('executeStatement action', () => {
     it('should execute a simple SQL statement asynchronously', async () => {
       const mockResponse = {

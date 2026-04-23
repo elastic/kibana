@@ -10,13 +10,19 @@
 /**
  * Snowflake Connector (v2)
  *
- * Wraps the Snowflake SQL REST API (v2) for arbitrary SQL execution and the
- * Snowflake REST API v2 resource endpoints for metadata discovery and Cortex
- * Search. Actions:
- *  - SQL execution: executeStatement, getStatementStatus, cancelStatement
- *  - Data discovery: listDatabases, listSchemas, listTables, listViews,
- *    describeTable, describeView
- *  - Semantic search: listCortexSearchServices, cortexSearch
+ * Wraps the Snowflake SQL REST API (v2) for SQL execution and the Snowflake
+ * REST API v2 resource endpoints for metadata discovery and Cortex Search.
+ *
+ * Actions are split into agent-facing tools (isTool: true) and a
+ * workflow-only escape hatch (isTool: false):
+ *
+ *  - Read-only SQL (agent-facing): runQuery, getStatementStatus, cancelStatement.
+ *  - Full SQL (workflow-only): executeStatement — retained for write / DDL /
+ *    privilege / procedure / multi-statement use cases and blocked from agents
+ *    by the framework's isToolAction guard.
+ *  - Data discovery (agent-facing): listDatabases, listSchemas, listTables,
+ *    listViews, describeTable, describeView.
+ *  - Semantic search (agent-facing): listCortexSearchServices, cortexSearch.
  *
  * Auth:
  *  - OAuth 2.0 Authorization Code with PKCE (Snowflake managed OAuth)
@@ -30,9 +36,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
-import type { ConnectorSpec } from '../../connector_spec';
+import type { ActionContext, ConnectorSpec } from '../../connector_spec';
 import type {
   ExecuteStatementInput,
+  RunQueryInput,
   GetStatementStatusInput,
   CancelStatementInput,
   ListDatabasesInput,
@@ -46,6 +53,7 @@ import type {
 } from './types';
 import {
   ExecuteStatementInputSchema,
+  RunQueryInputSchema,
   GetStatementStatusInputSchema,
   CancelStatementInputSchema,
   ListDatabasesInputSchema,
@@ -76,13 +84,118 @@ const buildListParams = (input: {
   return params;
 };
 
+// ---------------------------------------------------------------------------
+// Read-only SQL guardrail for `runQuery`
+//
+// Strips leading whitespace + SQL comments (line `-- ...` and block `/* ... */`)
+// and matches the first remaining token against an allowlist of read-only
+// statement keywords. Multi-statement submissions are rejected.
+// ---------------------------------------------------------------------------
+
+const READ_ONLY_STATEMENT_PREFIXES = /^(SELECT|WITH|SHOW|DESCRIBE|DESC|EXPLAIN)\b/i;
+
+const stripLeadingCommentsAndWhitespace = (sql: string): string => {
+  let remaining = sql;
+  // Repeatedly strip whitespace, line comments, and block comments from the start
+  // until nothing matches.
+  while (true) {
+    const before = remaining;
+    remaining = remaining.replace(/^\s+/, '');
+    remaining = remaining.replace(/^--[^\n]*(?:\n|$)/, '');
+    remaining = remaining.replace(/^\/\*[\s\S]*?\*\//, '');
+    if (remaining === before) return remaining;
+  }
+};
+
+const hasTrailingStatement = (sql: string): boolean => {
+  // Detect semicolon-delimited multi-statement submissions. Anything after the
+  // first `;` that isn't whitespace or a comment counts as a second statement.
+  //
+  // Note: this is a conservative textual check — it does not parse string
+  // literals, so a query containing `;` inside a quoted string will be
+  // rejected. That is acceptable for a read-only guardrail; agents can
+  // rewrite such queries to avoid embedded semicolons.
+  const semicolonIndex = sql.indexOf(';');
+  if (semicolonIndex === -1) return false;
+  const trailing = stripLeadingCommentsAndWhitespace(sql.slice(semicolonIndex + 1));
+  return trailing.length > 0;
+};
+
+const isReadOnlyStatement = (sql: string): boolean => {
+  if (hasTrailingStatement(sql)) return false;
+  const head = stripLeadingCommentsAndWhitespace(sql);
+  return READ_ONLY_STATEMENT_PREFIXES.test(head);
+};
+
+// ---------------------------------------------------------------------------
+// Shared request builder for runQuery + executeStatement
+// ---------------------------------------------------------------------------
+
+const submitStatement = async (
+  ctx: ActionContext,
+  input: ExecuteStatementInput | RunQueryInput
+): Promise<unknown> => {
+  const {
+    accountUrl,
+    warehouse: defaultWarehouse,
+    database: defaultDatabase,
+    defaultSchema,
+    role: defaultRole,
+  } = ctx.config as {
+    accountUrl: string;
+    warehouse?: string;
+    database?: string;
+    defaultSchema?: string;
+    role?: string;
+  };
+
+  const body: Record<string, unknown> = { statement: input.statement };
+
+  if (input.timeout !== undefined) body.timeout = input.timeout;
+  if (input.bindings) body.bindings = input.bindings;
+
+  const warehouse = input.warehouse ?? defaultWarehouse;
+  const database = input.database ?? defaultDatabase;
+  const schema = input.schema ?? defaultSchema;
+  const role = input.role ?? defaultRole;
+
+  if (warehouse) body.warehouse = warehouse;
+  if (database) body.database = database;
+  if (schema) body.schema = schema;
+  if (role) body.role = role;
+
+  const multiStatementCount =
+    'multiStatementCount' in input ? input.multiStatementCount : undefined;
+  if (multiStatementCount !== undefined) {
+    body.parameters = {
+      ...(body.parameters as Record<string, unknown> | undefined),
+      MULTI_STATEMENT_COUNT: String(multiStatementCount),
+    };
+  }
+  if (input.queryTag) {
+    body.parameters = {
+      ...(body.parameters as Record<string, unknown> | undefined),
+      QUERY_TAG: input.queryTag,
+    };
+  }
+
+  const url = `${accountUrl}${SNOWFLAKE_SQL_API_PATH}`;
+
+  const response = await ctx.client.post(url, body, {
+    params: { async: true },
+    validateStatus: (status) => status === 200 || status === 202,
+  });
+
+  return response.data;
+};
+
 export const Snowflake: ConnectorSpec = {
   metadata: {
     id: '.snowflake',
     displayName: 'Snowflake',
     description: i18n.translate('core.kibanaConnectorSpecs.snowflake.metadata.description', {
       defaultMessage:
-        'Execute SQL, discover databases, schemas, tables and views, and run semantic searches via Cortex Search in Snowflake',
+        'Run SQL, discover databases, schemas, tables, and views, and run semantic searches through Cortex Search in Snowflake',
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
@@ -231,71 +344,34 @@ export const Snowflake: ConnectorSpec = {
   },
 
   actions: {
-    executeStatement: {
+    runQuery: {
       isTool: true,
       description:
-        'Execute a SQL statement asynchronously in Snowflake. Returns immediately with a statement handle that can be used to poll for results via getStatementStatus or cancel via cancelStatement. Supports bind variables, multi-statement execution, and session-scoped context (warehouse, database, schema, role). Always executes asynchronously — use getStatementStatus to retrieve results.',
-      input: ExecuteStatementInputSchema,
-      handler: async (ctx, input: ExecuteStatementInput) => {
-        const {
-          accountUrl,
-          warehouse: defaultWarehouse,
-          database: defaultDatabase,
-          defaultSchema,
-          role: defaultRole,
-        } = ctx.config as {
-          accountUrl: string;
-          warehouse?: string;
-          database?: string;
-          defaultSchema?: string;
-          role?: string;
-        };
-
-        const body: Record<string, unknown> = {
-          statement: input.statement,
-        };
-
-        if (input.timeout !== undefined) body.timeout = input.timeout;
-        if (input.bindings) body.bindings = input.bindings;
-
-        const warehouse = input.warehouse ?? defaultWarehouse;
-        const database = input.database ?? defaultDatabase;
-        const schema = input.schema ?? defaultSchema;
-        const role = input.role ?? defaultRole;
-
-        if (warehouse) body.warehouse = warehouse;
-        if (database) body.database = database;
-        if (schema) body.schema = schema;
-        if (role) body.role = role;
-
-        if (input.multiStatementCount !== undefined) {
-          body.parameters = {
-            ...(body.parameters as Record<string, unknown> | undefined),
-            MULTI_STATEMENT_COUNT: String(input.multiStatementCount),
-          };
+        'Run a read-only SQL query asynchronously in Snowflake. Accepts SELECT, WITH (CTE), SHOW, DESCRIBE / DESC, and EXPLAIN only. Write operations (INSERT, UPDATE, DELETE, MERGE), DDL (CREATE, ALTER, DROP, TRUNCATE), privilege changes (GRANT, REVOKE), stored procedure calls (CALL), and session state changes (USE, SET) are rejected before the request is sent. Returns a statement handle — use getStatementStatus to retrieve results, or cancelStatement to abort. Supports bind variables and session-scoped context (warehouse, database, schema, role). Single-statement only; multi-statement submissions are rejected. For write or DDL operations, ask the user to invoke executeStatement from a workflow.',
+      input: RunQueryInputSchema,
+      handler: async (ctx, input: RunQueryInput) => {
+        if (!isReadOnlyStatement(input.statement)) {
+          throw new Error(
+            'runQuery only accepts read-only SQL statements (SELECT, WITH, SHOW, DESCRIBE, DESC, EXPLAIN) and rejects semicolon-delimited multi-statement submissions. ' +
+              'For write (INSERT / UPDATE / DELETE / MERGE), DDL (CREATE / ALTER / DROP / TRUNCATE), privilege, procedure, or session-state statements, use the executeStatement action from a workflow.'
+          );
         }
-        if (input.queryTag) {
-          body.parameters = {
-            ...(body.parameters as Record<string, unknown> | undefined),
-            QUERY_TAG: input.queryTag,
-          };
-        }
-
-        const url = `${accountUrl}${SNOWFLAKE_SQL_API_PATH}`;
-
-        const response = await ctx.client.post(url, body, {
-          params: { async: true },
-          validateStatus: (status) => status === 200 || status === 202,
-        });
-
-        return response.data;
+        return submitStatement(ctx, input);
       },
+    },
+
+    executeStatement: {
+      isTool: false,
+      description:
+        'Run any SQL statement asynchronously in Snowflake. Exposed to workflow authors and direct API callers only — not available to agents (agents must use runQuery for read-only access). Can modify or destroy data: accepts SELECT, DML (INSERT, UPDATE, DELETE, MERGE), DDL (CREATE, ALTER, DROP, TRUNCATE), privilege changes, stored procedure calls, and session state statements. Returns a statement handle — use getStatementStatus to poll for results or cancelStatement to abort. Supports bind variables, multi-statement execution (via multiStatementCount), and session-scoped context (warehouse, database, schema, role).',
+      input: ExecuteStatementInputSchema,
+      handler: async (ctx, input: ExecuteStatementInput) => submitStatement(ctx, input),
     },
 
     getStatementStatus: {
       isTool: true,
       description:
-        'Check the status of a previously submitted SQL statement and retrieve results if execution is complete. Returns HTTP 200 with a ResultSet when finished, or HTTP 202 with a QueryStatus if still running. Use the statementHandle from the executeStatement response. For large result sets, use the partition parameter to page through data.',
+        'Check the status of a previously submitted SQL statement and retrieve results if execution is complete. Returns HTTP 200 with a ResultSet when finished, or HTTP 202 with a QueryStatus if still running. Use the statementHandle returned by runQuery. For large result sets, use the partition parameter to page through data.',
       input: GetStatementStatusInputSchema,
       handler: async (ctx, input: GetStatementStatusInput) => {
         const { accountUrl } = ctx.config as { accountUrl: string };
@@ -317,7 +393,7 @@ export const Snowflake: ConnectorSpec = {
     cancelStatement: {
       isTool: true,
       description:
-        'Cancel a running SQL statement in Snowflake. Use the statementHandle from the executeStatement response. Returns a confirmation with the cancellation status. Only works on statements that are still executing.',
+        'Cancel a running SQL statement in Snowflake. Use the statementHandle returned by runQuery. Returns a confirmation with the cancellation status. Only works on statements that are still executing.',
       input: CancelStatementInputSchema,
       handler: async (ctx, input: CancelStatementInput) => {
         const { accountUrl } = ctx.config as { accountUrl: string };
@@ -407,7 +483,7 @@ export const Snowflake: ConnectorSpec = {
     describeTable: {
       isTool: true,
       description:
-        'Get the full definition of a Snowflake table, including columns (name, type, nullable, default, comment), clustering keys, row count, size in bytes, owner, and other metadata. Returns a clean JSON Table object (not SQL row arrays). Does not require a warehouse. Use this before executeStatement to build correct SELECT, INSERT, UPDATE, or JOIN queries. Database, schema, and table names are all case-sensitive.',
+        'Get the full definition of a Snowflake table, including columns (name, type, nullable, default, comment), clustering keys, row count, size in bytes, owner, and other metadata. Returns a clean JSON Table object (not SQL row arrays). Does not require a warehouse. Use this before runQuery to build correct SELECT or JOIN queries against the table. Database, schema, and table names are all case-sensitive.',
       input: DescribeTableInputSchema,
       handler: async (ctx, input: DescribeTableInput) => {
         const { accountUrl } = ctx.config as { accountUrl: string };
@@ -515,9 +591,11 @@ export const Snowflake: ConnectorSpec = {
     '',
     'This connector exposes three capability groups against Snowflake:',
     '',
-    '1. **SQL execution** — `executeStatement`, `getStatementStatus`, `cancelStatement` (Snowflake SQL REST API).',
+    '1. **Read-only SQL** — `runQuery`, `getStatementStatus`, `cancelStatement` (Snowflake SQL REST API).',
     '2. **Data discovery** — `listDatabases`, `listSchemas`, `listTables`, `listViews`, `describeTable`, `describeView` (Snowflake REST API v2 resources).',
     '3. **Semantic search** — `listCortexSearchServices`, `cortexSearch` (Cortex Search).',
+    '',
+    'Write and DDL operations (INSERT, UPDATE, DELETE, MERGE, CREATE, ALTER, DROP, TRUNCATE, GRANT, REVOKE, CALL, USE, SET) are not available as tools. If a user asks to modify or destroy data, explain that they need to run the statement from a workflow using the `executeStatement` action, and do not attempt to work around the restriction.',
     '',
     '### Discovery pattern (agents without prior knowledge)',
     'When the target database, schema, or table is unknown, discover before querying:',
@@ -526,9 +604,9 @@ export const Snowflake: ConnectorSpec = {
     '2. `listSchemas` for that database → pick a schema.',
     '3. `listTables` (or `listViews`) for that schema → pick an object.',
     '4. `describeTable` (or `describeView`) to learn its columns, types, and constraints.',
-    '5. `executeStatement` to run the actual SELECT / INSERT / etc. — now you can build correct, well-scoped SQL.',
+    '5. `runQuery` to run a SELECT — now you can build a correct, well-scoped query.',
     '',
-    'Discovery actions hit REST v2 resource endpoints. They return clean JSON (not SQL row arrays), do not require a warehouse, and are cheaper than firing `SHOW` / `DESCRIBE` through `executeStatement`. Prefer them over SQL equivalents whenever possible. Use `executeStatement` as the escape hatch for anything REST v2 does not expose (grants, users, stages, functions, procedures, tasks, pipes, etc.).',
+    'Discovery actions hit REST v2 resource endpoints. They return clean JSON (not SQL row arrays), do not require a warehouse, and are cheaper than firing `SHOW` / `DESCRIBE` through `runQuery`. Prefer them over SQL equivalents whenever possible.',
     '',
     '### Semantic search pattern',
     'For unstructured text retrieval (product catalogs, support docs, chat logs), use Cortex Search instead of `LIKE`/`CONTAINS` in SQL:',
@@ -538,30 +616,28 @@ export const Snowflake: ConnectorSpec = {
     '',
     'Prefer `limit <= 20` and request only the columns you actually need to keep LLM context small.',
     '',
-    '### SQL execution pattern',
-    '1. Call `executeStatement` with your SQL. It returns a `statementHandle`.',
+    '### Query execution pattern',
+    '1. Call `runQuery` with a read-only SQL statement (SELECT, WITH, SHOW, DESCRIBE, EXPLAIN). It returns a `statementHandle`.',
     '2. Call `getStatementStatus` with that handle to poll for results.',
     '   - HTTP 202 means still running — wait and poll again.',
     '   - HTTP 200 means complete — the response contains `data` (array of row arrays) and `resultSetMetaData` (column definitions).',
     '3. If the query is no longer needed, call `cancelStatement` with the handle.',
     '',
-    '### Multi-statement execution',
-    'Separate statements with semicolons and set `multiStatementCount` to the number of statements (or 0 for variable count). The response includes `statementHandles` for each individual statement.',
+    '`runQuery` rejects write statements, DDL, privilege changes, stored procedure calls, session state changes, and semicolon-delimited multi-statement submissions before the request is sent.',
     '',
     '### Bind variables',
     'Use `?` placeholders in the SQL and provide `bindings` with 1-based keys. All binding values are strings. Example: `{"1": {"type": "TEXT", "value": "hello"}}`.',
     '',
     '### Context defaults',
-    'The connector config provides default warehouse, database, schema, and role. Per-request values in executeStatement override these defaults. Discovery actions require the database / schema to be passed explicitly — they do not fall back to the config defaults.',
+    'The connector config provides default warehouse, database, schema, and role. Per-request values in runQuery override these defaults. Discovery actions require the database / schema to be passed explicitly — they do not fall back to the config defaults.',
     '',
     '### Result set pagination',
     'Large SQL result sets are split into partitions by Snowflake. Use `getStatementStatus` with different `partition` values (0-based) to retrieve each partition. The `resultSetMetaData.partitionInfo` array describes the row count and size of each partition. List endpoints paginate via `fromName` (cursor) + `showLimit`.',
     '',
     '### Important notes',
     '- Snowflake identifiers (database, schema, table, view, warehouse, role, Cortex Search service) are case-sensitive and must match the casing returned by the list endpoints.',
-    '- Discovery actions and Cortex Search do not require a warehouse. Only `executeStatement` (and therefore `getStatementStatus` / `cancelStatement`) does.',
+    '- Discovery actions and Cortex Search do not require a warehouse. Only `runQuery` (and therefore `getStatementStatus` / `cancelStatement`) does.',
     '- `like` uses SQL wildcards (`%`, `_`) and is case-insensitive. `startsWith` is a literal prefix and case-sensitive.',
     '- The SQL API does not support all Snowflake SQL — see Snowflake docs for limitations.',
-    '- Bind variables are not supported in multi-statement requests.',
   ].join('\n'),
 };

@@ -9,7 +9,7 @@ applies_to:
 
 # Snowflake connector [snowflake-action-type]
 
-The Snowflake connector wraps the [Snowflake SQL REST API](https://docs.snowflake.com/en/developer-guide/sql-api/reference), the [Snowflake REST API v2](https://docs.snowflake.com/en/developer-guide/snowflake-rest-api/reference), and [Cortex Search](https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-search/query-cortex-search-service). Use it to run arbitrary SQL asynchronously, discover databases, schemas, tables, and views, describe their structure, and run semantic searches through Cortex Search.
+The Snowflake connector wraps the [Snowflake SQL REST API](https://docs.snowflake.com/en/developer-guide/sql-api/reference), the [Snowflake REST API v2](https://docs.snowflake.com/en/developer-guide/snowflake-rest-api/reference), and [Cortex Search](https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-search/query-cortex-search-service). Use it to run read-only SQL queries, discover databases, schemas, tables, and views, describe their structure, and run semantic searches through Cortex Search. Workflow authors can also run write and DDL statements through a separate action that is not exposed to AI agents.
 
 ## Create connectors in {{kib}} [define-snowflake-ui]
 
@@ -40,8 +40,19 @@ You can test connectors when you create or edit the connector in {{kib}}. The te
 
 The Snowflake connector has the following actions:
 
+Run query
+:   Run a read-only SQL query asynchronously in Snowflake. Accepts `SELECT`, `WITH` (CTE), `SHOW`, `DESCRIBE` / `DESC`, and `EXPLAIN` only. Write operations (`INSERT`, `UPDATE`, `DELETE`, `MERGE`), DDL (`CREATE`, `ALTER`, `DROP`, `TRUNCATE`), privilege changes (`GRANT`, `REVOKE`), stored procedure calls (`CALL`), and session-state changes (`USE`, `SET`) are rejected before the request is sent. Returns a statement handle for polling results through *Get statement status* or aborting through *Cancel statement*.
+    - `statement` (required): Read-only SQL statement. Use `?` placeholders for bind variables. Single-statement only — semicolon-delimited multi-statement submissions are rejected.
+    - `timeout` (optional): Timeout in seconds (0–604800). Set to 0 for the maximum timeout of 7 days.
+    - `warehouse` (optional): Warehouse override for this request.
+    - `database` (optional): Database override for this request.
+    - `schema` (optional): Schema override for this request.
+    - `role` (optional): Role override for this request.
+    - `bindings` (optional): Bind variable values keyed by 1-based position. Each value has a `type` (Snowflake data type) and `value` (string representation).
+    - `queryTag` (optional): Tag for tracking in Snowflake query history.
+
 Execute statement
-:   Run an SQL statement asynchronously in Snowflake. Returns a statement handle for polling results or cancellation. Supports bind variables, multi-statement execution, and per-request context overrides.
+:   Run any SQL statement asynchronously in Snowflake. This action is available to workflow authors and direct API callers only — it is not exposed to AI agents. Use it for write (`INSERT`, `UPDATE`, `DELETE`, `MERGE`), DDL (`CREATE`, `ALTER`, `DROP`, `TRUNCATE`), privilege changes, stored procedure calls, or multi-statement requests. Returns a statement handle for polling results or cancellation.
     - `statement` (required): SQL statement to run. Supports any Snowflake SQL. Use `?` placeholders for bind variables.
     - `timeout` (optional): Timeout in seconds (0–604800). Set to 0 for the maximum timeout of 7 days.
     - `warehouse` (optional): Warehouse override for this request.
@@ -54,7 +65,7 @@ Execute statement
 
 Get statement status
 :   Check the status of a previously submitted SQL statement and retrieve results if complete. Returns the full result set when the statement has finished, or a status message if still running.
-    - `statementHandle` (required): The statement handle returned by *Execute statement*.
+    - `statementHandle` (required): The statement handle returned by *Run query* or *Execute statement*.
     - `partition` (optional): Partition number (0-based) for large result sets split across multiple partitions.
 
 Cancel statement
@@ -116,10 +127,19 @@ Cortex Search
     - `limit` (optional): Maximum number of results to return (1–1000, default 10). Prefer `<=20` to keep results small.
 
 ::::{tip}
-Use *Execute statement* to submit a query, then poll with *Get statement status* using the returned `statementHandle`. If the response status is 202, the query is still running — wait and poll again. A 200 response contains the result data and column metadata. Use *Cancel statement* to stop long-running queries.
+Use *Run query* (or *Execute statement*, from a workflow) to submit SQL, then poll with *Get statement status* using the returned `statementHandle`. If the response status is 202, the statement is still running — wait and poll again. A 200 response contains the result data and column metadata. Use *Cancel statement* to stop long-running statements.
 
-For AI agents without prior knowledge of the target data, discover before querying: *List databases* → *List schemas* → *List tables* → *Describe table* → *Execute statement*. Discovery actions return clean JSON and do not require a warehouse, so they are faster and cheaper than equivalent `SHOW` / `DESCRIBE` calls through *Execute statement*.
+For AI agents without prior knowledge of the target data, discover before querying: *List databases* → *List schemas* → *List tables* → *Describe table* → *Run query*. Discovery actions return clean JSON and do not require a warehouse, so they are faster and cheaper than equivalent `SHOW` / `DESCRIBE` calls through *Run query*.
 ::::
+
+## Security model [snowflake-action-security-model]
+
+The connector splits SQL execution across two actions with different exposure:
+
+- *Run query* is available to AI agents and is restricted to read-only statements (`SELECT`, `WITH`, `SHOW`, `DESCRIBE`, `EXPLAIN`). The restriction is enforced in the connector before the request is sent, so write, DDL, privilege, procedure, and session-state statements never reach Snowflake.
+- *Execute statement* is available only to workflow authors and direct API callers. AI agents cannot invoke it. Use it when you deliberately want a workflow to write, modify schema, or run multi-statement SQL.
+
+For defense in depth, grant the connector credentials only the Snowflake privileges the intended use case requires. A read-only role paired with *Run query* keeps agents safely within SELECT access even if the underlying role is later expanded.
 
 ## Connector networking configuration [snowflake-connector-networking-configuration]
 
