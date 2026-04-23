@@ -339,6 +339,11 @@ const fetchRiskStatsForAttachment = async ({
       // in a multi-entity group. For standalone entities `group_size === 1`
       // and there is no meaningful resolution score to display.
       if (group.group_size > 1) {
+        // Single target, multiple possible `id_value` representations (V2
+        // prefixed EUID, V1 `entity.name`, and `<type>.name` fallbacks) — the
+        // `terms` clause inside `searchRiskDocForCandidates` OR-matches
+        // whichever shape the resolution risk doc was indexed with, so
+        // `size: 1` still returns the latest doc for this one target.
         const targetCandidates = getResolutionTargetRiskIdCandidates(group.target);
         resolution = await searchRiskDocForCandidates({
           esClient,
