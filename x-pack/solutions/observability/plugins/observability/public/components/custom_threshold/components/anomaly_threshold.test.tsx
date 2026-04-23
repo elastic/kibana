@@ -15,8 +15,8 @@ describe('AnomalyThreshold', () => {
   const defaultProps: AnomalyThresholdProps = {
     chartProps: { baseTheme: LIGHT_THEME },
     id: 'test-anomaly',
-    title: 'Anomaly detected',
-    value: 'Critical Latency Anomaly',
+    severity: 'Critical Latency anomaly',
+    severityThreshold: 'Alert when critical or above',
   };
 
   const renderComponent = (props: Partial<AnomalyThresholdProps> = {}) => {
@@ -32,15 +32,10 @@ describe('AnomalyThreshold', () => {
     expect(queryByTestId('anomaly-threshold-test-anomaly')).toBeTruthy();
   });
 
-  it('renders with extra content', () => {
+  it('renders with severity threshold', () => {
     const { queryByTestId } = renderComponent({
-      extra: 'Alert when severity is warning or above',
+      severityThreshold: 'Alert when warning or above',
     });
-    expect(queryByTestId('anomaly-threshold-test-anomaly')).toBeTruthy();
-  });
-
-  it('renders without extra when not provided', () => {
-    const { queryByTestId } = renderComponent({ extra: undefined });
     expect(queryByTestId('anomaly-threshold-test-anomaly')).toBeTruthy();
   });
 
