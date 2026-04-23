@@ -117,6 +117,21 @@ describe('searchEntitiesTool', () => {
       expect(result.success).toBe(false);
     });
 
+    it('accepts sortBy: "riskScore"', () => {
+      const result = tool.schema.safeParse({ sortBy: 'riskScore' });
+      expect(result.success).toBe(true);
+    });
+
+    it('accepts sortBy: "criticality"', () => {
+      const result = tool.schema.safeParse({ sortBy: 'criticality' });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects unknown sortBy values', () => {
+      const result = tool.schema.safeParse({ sortBy: 'firstSeen' });
+      expect(result.success).toBe(false);
+    });
+
     it('accepts watchlists', () => {
       const result = tool.schema.safeParse({ watchlists: ['vip', 'threat-actors'] });
       expect(result.success).toBe(true);
@@ -333,13 +348,13 @@ describe('searchEntitiesTool', () => {
       mockSingleEntityResponse();
 
       await tool.handler(
-        { riskScoreMin: 70, riskScoreMax: 100 },
+        { riskScoreMin: 70, riskScoreMax: 95 },
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
       const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
       expect(query).toContain('WHERE entity.risk.calculated_score_norm >= 70');
-      expect(query).toContain('WHERE entity.risk.calculated_score_norm <= 100');
+      expect(query).toContain('WHERE entity.risk.calculated_score_norm <= 95');
     });
 
     it('treats riskScoreMin:0 as "no floor" and does not emit a calculated_score_norm >= clause (keeps null-scored entities)', async () => {
@@ -390,6 +405,182 @@ describe('searchEntitiesTool', () => {
       expect(query).toContain('WHERE entity.risk.calculated_score_norm <= 0');
     });
 
+    it('drops riskScoreMax when it is 100 (no upper bound needed, preserves NULL rows)', async () => {
+      mockSingleEntityResponse();
+
+      await tool.handler(
+        { riskScoreMax: 100 },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      );
+
+      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      expect(query).not.toContain('entity.risk.calculated_score_norm <=');
+    });
+
+    it('still emits riskScoreMax when it is 99 (regression)', async () => {
+      mockSingleEntityResponse();
+
+      await tool.handler(
+        { riskScoreMax: 99 },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      );
+
+      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      expect(query).toContain('WHERE entity.risk.calculated_score_norm <= 99');
+    });
+
+    it('drops both firstSeen bounds when firstSeenAfter === firstSeenBefore (zero-width window)', async () => {
+      mockSingleEntityResponse();
+
+      await tool.handler(
+        {
+          firstSeenAfter: '2024-06-15T12:00:00Z',
+          firstSeenBefore: '2024-06-15T12:00:00Z',
+        },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      );
+
+      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      expect(query).not.toContain('entity.lifecycle.first_seen >=');
+      expect(query).not.toContain('entity.lifecycle.first_seen <=');
+    });
+
+    it('drops both lastSeen bounds when lastSeenAfter === lastSeenBefore (zero-width window)', async () => {
+      mockSingleEntityResponse();
+
+      await tool.handler(
+        {
+          lastSeenAfter: '2024-06-15T12:00:00Z',
+          lastSeenBefore: '2024-06-15T12:00:00Z',
+        },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      );
+
+      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      expect(query).not.toContain('entity.lifecycle.last_activity >=');
+      expect(query).not.toContain('entity.lifecycle.last_activity <=');
+    });
+
+    it('still emits both lifecycle bounds when the firstSeen values differ (regression)', async () => {
+      mockSingleEntityResponse();
+
+      await tool.handler(
+        {
+          firstSeenAfter: '2024-01-01T00:00:00Z',
+          firstSeenBefore: '2024-12-31T23:59:59Z',
+        },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      );
+
+      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      expect(query).toContain('WHERE entity.lifecycle.first_seen >= "2024-01-01T00:00:00Z"');
+      expect(query).toContain('WHERE entity.lifecycle.first_seen <= "2024-12-31T23:59:59Z"');
+    });
+
+    it('drops firstSeenAfter when it is at or before the 2000-01-01 epoch cutoff', async () => {
+      mockSingleEntityResponse();
+
+      await tool.handler(
+        { firstSeenAfter: '1970-01-01T00:00:00Z' },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      );
+
+      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      expect(query).not.toContain('entity.lifecycle.first_seen >=');
+    });
+
+    it('drops firstSeenAfter exactly at 2000-01-01 (cutoff boundary)', async () => {
+      mockSingleEntityResponse();
+
+      await tool.handler(
+        { firstSeenAfter: '2000-01-01T00:00:00Z' },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      );
+
+      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      expect(query).not.toContain('entity.lifecycle.first_seen >=');
+    });
+
+    it('keeps firstSeenAfter just past the cutoff (regression)', async () => {
+      mockSingleEntityResponse();
+
+      await tool.handler(
+        { firstSeenAfter: '2000-01-02T00:00:00Z' },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      );
+
+      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      expect(query).toContain('WHERE entity.lifecycle.first_seen >= "2000-01-02T00:00:00Z"');
+    });
+
+    it('drops firstSeenBefore when it is strictly after now (year 9999 sentinel)', async () => {
+      mockSingleEntityResponse();
+
+      await tool.handler(
+        { firstSeenBefore: '9999-12-31T23:59:59Z' },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      );
+
+      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      expect(query).not.toContain('entity.lifecycle.first_seen <=');
+    });
+
+    it('drops firstSeenBefore when it is strictly after now (year 2099 sentinel)', async () => {
+      mockSingleEntityResponse();
+
+      await tool.handler(
+        { firstSeenBefore: '2099-12-31T23:59:59Z' },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      );
+
+      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      expect(query).not.toContain('entity.lifecycle.first_seen <=');
+    });
+
+    it('keeps firstSeenBefore when it is in the past (regression)', async () => {
+      mockSingleEntityResponse();
+
+      await tool.handler(
+        { firstSeenBefore: '2020-01-01T00:00:00Z' },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      );
+
+      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      expect(query).toContain('WHERE entity.lifecycle.first_seen <= "2020-01-01T00:00:00Z"');
+    });
+
+    it('drops lastSeenAfter / lastSeenBefore using the same rule (parity with firstSeen*)', async () => {
+      mockSingleEntityResponse();
+
+      await tool.handler(
+        {
+          lastSeenAfter: '1970-01-01T00:00:00Z',
+          lastSeenBefore: '2099-12-31T23:59:59Z',
+        },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      );
+
+      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      expect(query).not.toContain('entity.lifecycle.last_activity >=');
+      expect(query).not.toContain('entity.lifecycle.last_activity <=');
+    });
+
+    it('keeps the genuine half when only one bound is a sentinel', async () => {
+      mockSingleEntityResponse();
+
+      await tool.handler(
+        {
+          firstSeenAfter: '2024-01-01T00:00:00Z',
+          firstSeenBefore: '9999-12-31T23:59:59Z',
+        },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      );
+
+      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      expect(query).toContain('WHERE entity.lifecycle.first_seen >= "2024-01-01T00:00:00Z"');
+      expect(query).not.toContain('entity.lifecycle.first_seen <=');
+    });
+
     it('includes risk level filter in query', async () => {
       mockSingleEntityResponse();
 
@@ -412,6 +603,176 @@ describe('searchEntitiesTool', () => {
 
       const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
       expect(query).toContain('WHERE asset.criticality IN ("high_impact", "extreme_impact")');
+    });
+
+    describe('sortBy', () => {
+      const EXPECTED_CRITICALITY_RANK_EVAL =
+        'EVAL criticality_rank = CASE(' +
+        'asset.criticality == "extreme_impact", 4, ' +
+        'asset.criticality == "high_impact", 3, ' +
+        'asset.criticality == "medium_impact", 2, ' +
+        'asset.criticality == "low_impact", 1, ' +
+        '0)';
+      const EXPECTED_CRITICALITY_SORT_CLAUSE =
+        'SORT criticality_rank DESC, entity.risk.calculated_score_norm DESC';
+
+      it('defaults to risk score sort and emits no criticality_rank EVAL when sortBy is omitted', async () => {
+        mockSingleEntityResponse();
+
+        await tool.handler({}, createToolHandlerContext(mockRequest, mockEsClient, mockLogger));
+
+        const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+        expect(query).toContain(EXPECTED_SORT_CLAUSE);
+        expect(query).not.toContain('criticality_rank');
+      });
+
+      it('keeps risk score sort when sortBy is explicitly "riskScore"', async () => {
+        mockSingleEntityResponse();
+
+        await tool.handler(
+          { sortBy: 'riskScore' },
+          createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+        );
+
+        const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+        expect(query).toContain(EXPECTED_SORT_CLAUSE);
+        expect(query).not.toContain('criticality_rank');
+      });
+
+      it('emits criticality_rank EVAL and composite SORT when sortBy is "criticality"', async () => {
+        mockSingleEntityResponse();
+
+        await tool.handler(
+          { sortBy: 'criticality' },
+          createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+        );
+
+        const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+        expect(query).toContain(EXPECTED_CRITICALITY_RANK_EVAL);
+        expect(query).toContain(EXPECTED_CRITICALITY_SORT_CLAUSE);
+        // Plain risk-score SORT should not be present when ordering by criticality.
+        expect(query).not.toMatch(/SORT entity\.risk\.calculated_score_norm DESC$/m);
+      });
+
+      it('applies the EVAL before the SORT so criticality_rank is defined when sorting', async () => {
+        mockSingleEntityResponse();
+
+        await tool.handler(
+          { sortBy: 'criticality' },
+          createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+        );
+
+        const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+        const evalIdx = query.indexOf(EXPECTED_CRITICALITY_RANK_EVAL);
+        const sortIdx = query.indexOf(EXPECTED_CRITICALITY_SORT_CLAUSE);
+        expect(evalIdx).toBeGreaterThan(-1);
+        expect(sortIdx).toBeGreaterThan(evalIdx);
+      });
+
+      it('does not leak criticality_rank into the KEEP projection', async () => {
+        mockSingleEntityResponse();
+
+        await tool.handler(
+          { sortBy: 'criticality' },
+          createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+        );
+
+        const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+        expect(query).toContain(EXPECTED_KEEP_CLAUSE);
+        // The KEEP list is an exact field enumeration, so criticality_rank
+        // is dropped from the projected columns after the SORT consumes it.
+        expect(query).not.toMatch(/KEEP[^\n]*criticality_rank/);
+      });
+
+      it('composes sortBy: "criticality" with criticalityLevels filter', async () => {
+        mockSingleEntityResponse();
+
+        await tool.handler(
+          {
+            sortBy: 'criticality',
+            criticalityLevels: ['extreme_impact', 'high_impact'],
+          },
+          createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+        );
+
+        const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+        expect(query).toContain('WHERE asset.criticality IN ("extreme_impact", "high_impact")');
+        expect(query).toContain(EXPECTED_CRITICALITY_RANK_EVAL);
+        expect(query).toContain(EXPECTED_CRITICALITY_SORT_CLAUSE);
+      });
+
+      it('drops riskScoreChangeInterval silently when sortBy: "criticality" is set (sortBy wins)', async () => {
+        mockSingleEntityResponse();
+
+        await tool.handler(
+          { sortBy: 'criticality', riskScoreChangeInterval: '30d' },
+          createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+        );
+
+        expect(executeEsql).toHaveBeenCalledTimes(1);
+        const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+        expect(query).toContain(EXPECTED_CRITICALITY_RANK_EVAL);
+        expect(query).toContain(EXPECTED_CRITICALITY_SORT_CLAUSE);
+        expect(query).not.toContain('risk_score_change');
+        expect(query).not.toContain('STATS');
+      });
+
+      it('drops riskScoreChangeInterval silently when sortBy: "riskScore" is set (sortBy wins)', async () => {
+        mockSingleEntityResponse();
+
+        await tool.handler(
+          { sortBy: 'riskScore', riskScoreChangeInterval: '7d' },
+          createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+        );
+
+        expect(executeEsql).toHaveBeenCalledTimes(1);
+        const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+        expect(query).toContain(EXPECTED_SORT_CLAUSE);
+        expect(query).not.toContain('risk_score_change');
+        expect(query).not.toContain('STATS');
+      });
+
+      it('handles the full ChatGPT over-fill shape gracefully (criticality sort, no STATS, no lifecycle, no <= 100)', async () => {
+        mockSingleEntityResponse();
+
+        await tool.handler(
+          {
+            entityTypes: ['user'],
+            sortBy: 'criticality',
+            maxResults: 5,
+            riskScoreChangeInterval: '1d',
+            riskScoreMax: 100,
+            riskScoreMin: 0,
+            firstSeenAfter: '1970-01-01T00:00:00Z',
+            firstSeenBefore: '2099-12-31T23:59:59Z',
+            lastSeenAfter: '1970-01-01T00:00:00Z',
+            lastSeenBefore: '2099-12-31T23:59:59Z',
+            managedOnly: false,
+            mfaEnabledOnly: false,
+            assetOnly: false,
+            riskLevels: [],
+            criticalityLevels: [],
+            sources: [],
+            watchlists: [],
+            namespaces: [],
+          },
+          createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+        );
+
+        expect(executeEsql).toHaveBeenCalledTimes(1);
+        const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+        expect(query).toContain(EXPECTED_CRITICALITY_RANK_EVAL);
+        expect(query).toContain(EXPECTED_CRITICALITY_SORT_CLAUSE);
+        expect(query).not.toContain('risk_score_change');
+        expect(query).not.toContain('STATS');
+        expect(query).not.toContain('entity.risk.calculated_score_norm <=');
+        expect(query).not.toContain('entity.lifecycle.first_seen >=');
+        expect(query).not.toContain('entity.lifecycle.first_seen <=');
+        expect(query).not.toContain('entity.lifecycle.last_activity >=');
+        expect(query).not.toContain('entity.lifecycle.last_activity <=');
+        expect(query).toContain('WHERE entity.EngineMetadata.Type IN ("user")');
+        expect(query).toContain('LIMIT 5');
+      });
     });
 
     it('includes watchlist filter using MV_CONTAINS in query', async () => {

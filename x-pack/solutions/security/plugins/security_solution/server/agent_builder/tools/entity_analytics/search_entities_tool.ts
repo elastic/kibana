@@ -221,10 +221,116 @@ const schema = z.object({
     .max(100)
     .optional()
     .describe('Maximum number of entities to return (1-100, default 10).'),
+  sortBy: z
+    .enum(['riskScore', 'criticality'])
+    .optional()
+    .describe(
+      'Field to order results by (always DESC). Defaults to "riskScore" (entity.risk.calculated_score_norm). ' +
+        'Use "criticality" when the user explicitly asks to order, rank, sort, or list top-N entities BY criticality ' +
+        '(extreme_impact > high_impact > medium_impact > low_impact; entities with no asset.criticality land last; ' +
+        'risk score is the tiebreaker within a tier). ' +
+        'Do NOT pass all four criticalityLevels to simulate a sort — that is a no-op filter. ' +
+        'Ignored when riskScoreChangeInterval is set (that flow always sorts by risk_score_change DESC).'
+    ),
 });
 type ToolParams = z.infer<typeof schema>;
 
 export const SECURITY_SEARCH_ENTITIES_TOOL_ID = securityTool('search_entities');
+
+const SENTINEL_LOWER_BOUND_CUTOFF_MS = Date.parse('2000-01-01T00:00:00Z');
+
+const parseIsoMs = (value: string | undefined): number | null => {
+  if (!value) return null;
+  const ms = Date.parse(value);
+  return Number.isFinite(ms) ? ms : null;
+};
+
+const isVacuousLowerBound = (value: string | undefined): boolean => {
+  const ms = parseIsoMs(value);
+  return ms !== null && ms <= SENTINEL_LOWER_BOUND_CUTOFF_MS;
+};
+
+const isVacuousUpperBound = (value: string | undefined, nowMs: number): boolean => {
+  const ms = parseIsoMs(value);
+  return ms !== null && ms > nowMs;
+};
+
+/**
+ * Silently sanitises a handful of "over-fill" patterns that some LLMs (most notably
+ * ChatGPT-class models) produce on the wire. Without this, perfectly reasonable user
+ * intent (e.g. "top 5 users by criticality") gets turned into a different query or
+ * silently filtered out because ES|QL comparisons against NULL are false. We would
+ * rather drop the problematic parameter than reject the call and force the model
+ * into a rejection loop.
+ */
+const normalizeParams = (params: ToolParams, logger: Logger): ToolParams => {
+  const dropped: string[] = [];
+  const out: ToolParams = { ...params };
+
+  if (out.sortBy && out.riskScoreChangeInterval) {
+    dropped.push('riskScoreChangeInterval');
+    out.riskScoreChangeInterval = undefined;
+  }
+
+  if (out.riskScoreMax !== undefined && out.riskScoreMax >= 100) {
+    dropped.push('riskScoreMax');
+    out.riskScoreMax = undefined;
+  }
+
+  // Treat "epoch-style" lower bounds and any strictly-future upper bound as
+  // sentinels. These restrict nothing for populated rows but, because ES|QL
+  // evaluates any NULL comparison to NULL (falsy in WHERE), silently drop
+  // entities whose lifecycle timestamps are not populated. Prune per field so
+  // mixed genuine/sentinel inputs keep the legitimate half.
+  const nowMs = Date.now();
+
+  if (isVacuousLowerBound(out.firstSeenAfter)) {
+    dropped.push('firstSeenAfter');
+    out.firstSeenAfter = undefined;
+  }
+  if (isVacuousUpperBound(out.firstSeenBefore, nowMs)) {
+    dropped.push('firstSeenBefore');
+    out.firstSeenBefore = undefined;
+  }
+  if (isVacuousLowerBound(out.lastSeenAfter)) {
+    dropped.push('lastSeenAfter');
+    out.lastSeenAfter = undefined;
+  }
+  if (isVacuousUpperBound(out.lastSeenBefore, nowMs)) {
+    dropped.push('lastSeenBefore');
+    out.lastSeenBefore = undefined;
+  }
+
+  if (
+    out.firstSeenAfter &&
+    out.firstSeenBefore &&
+    out.firstSeenAfter === out.firstSeenBefore
+  ) {
+    dropped.push('firstSeenAfter', 'firstSeenBefore');
+    out.firstSeenAfter = undefined;
+    out.firstSeenBefore = undefined;
+  }
+
+  if (
+    out.lastSeenAfter &&
+    out.lastSeenBefore &&
+    out.lastSeenAfter === out.lastSeenBefore
+  ) {
+    dropped.push('lastSeenAfter', 'lastSeenBefore');
+    out.lastSeenAfter = undefined;
+    out.lastSeenBefore = undefined;
+  }
+
+  if (dropped.length > 0) {
+    logger.debug(
+      `${SECURITY_SEARCH_ENTITIES_TOOL_ID} normalized over-filled params; dropped: ${dropped.join(
+        ', '
+      )}`
+    );
+  }
+
+  return out;
+};
 
 const escapeEsqlString = (value: string) => value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 
@@ -382,9 +488,38 @@ const buildStatsClause = ({ riskScoreChangeInterval }: ToolParams): string[] => 
   return [];
 };
 
-const buildSortClause = ({ riskScoreChangeInterval }: ToolParams): string[] => {
+const buildEvalClause = ({ sortBy, riskScoreChangeInterval }: ToolParams): string[] => {
+  if (riskScoreChangeInterval) {
+    return [];
+  }
+
+  // `asset.criticality` is a keyword, so alphabetical ordering would surface
+  // `medium_impact` above `high_impact`. Project a numeric rank so the SORT
+  // reflects the operator-facing ordering (extreme > high > medium > low),
+  // with NULL/unknown criticality landing at the bottom via the default `0`.
+  if (sortBy === 'criticality') {
+    return [
+      `EVAL criticality_rank = CASE(` +
+        `asset.criticality == "extreme_impact", 4, ` +
+        `asset.criticality == "high_impact", 3, ` +
+        `asset.criticality == "medium_impact", 2, ` +
+        `asset.criticality == "low_impact", 1, ` +
+        `0)`,
+    ];
+  }
+
+  return [];
+};
+
+const buildSortClause = ({ sortBy, riskScoreChangeInterval }: ToolParams): string[] => {
   if (riskScoreChangeInterval) {
     return [`SORT risk_score_change DESC`];
+  }
+
+  if (sortBy === 'criticality') {
+    // Risk score is the tiebreaker so "top N by criticality" still surfaces
+    // the riskiest high-impact entity above a quieter one within the same tier.
+    return [`SORT criticality_rank DESC, entity.risk.calculated_score_norm DESC`];
   }
 
   // default to sorting by risk score
@@ -422,6 +557,7 @@ const buildQuery = (
     ...buildLifecycleFilterClauses(params),
     ...buildRiskAndAssetCriticalityFilterClauses(params),
     ...buildStatsClause(params),
+    ...buildEvalClause(params),
     ...buildSortClause(params),
     ...buildKeepClause(params),
     `LIMIT ${params.maxResults ?? 10}`,
@@ -603,6 +739,8 @@ export const searchEntitiesTool = (
       let errorMessage: string | undefined;
 
       try {
+        const normalized = normalizeParams(params, logger);
+
         const client = esClient.asCurrentUser;
         const entityIndex = getEntitiesAlias(ENTITY_LATEST, spaceId);
         const entitySnapshotIndex = getHistorySnapshotIndexPattern(spaceId);
@@ -610,7 +748,7 @@ export const searchEntitiesTool = (
           index: entitySnapshotIndex,
         });
         const query = buildQuery(
-          params,
+          normalized,
           entityIndex,
           snapshotIndexExists ? entitySnapshotIndex : undefined
         );
@@ -639,7 +777,7 @@ export const searchEntitiesTool = (
         }));
 
         const attachmentSideEffectResults = await buildAttachmentSideEffectResults({
-          params,
+          params: normalized,
           columns,
           values,
           attachments,

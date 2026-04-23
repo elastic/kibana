@@ -237,8 +237,12 @@ For vendors not listed here, try \`namespaces: ['<event.module>']\` on user enti
 ### 1. Find entities to investigate
 - If entity ID (EUID) is known, continue directly to the next step
 - If not, use \`security.search_entities\` to find entities. Always use real entities from the entity store, do not invent entities.
-- ONLY pass \`riskScoreMin\` when the user explicitly specified a numeric floor (e.g. "users with score above 70", "hosts over 85"). Omit it otherwise — the tool already sorts by \`entity.risk.calculated_score_norm DESC\`, so the riskiest rows come first, and omitting \`riskScoreMin\` also keeps entities that do not yet have a computed risk score (which \`riskScoreMin: 0\` would silently drop because \`NULL >= 0\` is false in ES|QL).
-- You MUST call \`security.search_entities\` with a 'criticalityLevels' parameter if the user is asking about criticality.
+- ONLY pass \`riskScoreMin\` when the user explicitly specified a numeric floor (e.g. "users with score above 70", "hosts over 85"). Omit it otherwise — by default the tool sorts by \`entity.risk.calculated_score_norm DESC\`, so the riskiest rows come first, and omitting \`riskScoreMin\` also keeps entities that do not yet have a computed risk score (which \`riskScoreMin: 0\` would silently drop because \`NULL >= 0\` is false in ES|QL).
+- Criticality intent splits into **filter** vs **sort**, and you must pick the right parameter:
+  - Pass \`criticalityLevels\` to **filter** results down to one or more specific levels — e.g. "show high-impact users", "only extreme_impact hosts", "critical or high assets". Use this when the user restricts which levels are in scope.
+  - Pass \`sortBy: 'criticality'\` to **order / rank / list top-N** entities **by criticality** (extreme_impact > high_impact > medium_impact > low_impact, with risk score as the tiebreaker; entities with no asset criticality land last). Use this when the user says "by criticality", "sorted by criticality", "rank by criticality", "top N by criticality", etc.
+  - Do **NOT** stuff all four values into \`criticalityLevels\` (\`['extreme_impact','high_impact','medium_impact','low_impact']\`) to simulate a sort — that is a no-op filter and the tool will still sort by risk score. Use \`sortBy: 'criticality'\` instead.
+  - The two parameters compose: \`criticalityLevels: ['high_impact','extreme_impact']\` + \`sortBy: 'criticality'\` restricts to those tiers AND orders them (extreme above high, risk score as tiebreaker).
 - ONLY call \`security.search_entities\` with a 'riskScoreChangeInterval' parameter if the user is asking about changes or jumps in risk score.
 
 #### Source-scoped search strategy
@@ -340,6 +344,15 @@ Steps:
 2. Copy the \`renderTag\` string verbatim from the \`search_entities\` \`other\` result onto its own line so the user gets the entities table Canvas.
 3. Summarize in prose the riskiest hosts and why their criticality matters.
 
+### Example 3b: Top N Entities By Criticality
+
+User query: List the top 5 entities by criticality.
+
+Steps:
+1. Use \`security.search_entities\` with \`sortBy: 'criticality'\` and \`maxResults: 5\`. Do NOT pass \`criticalityLevels\` — the user did not restrict the levels, they asked for a ranking across all of them. (Stuffing all four levels into \`criticalityLevels\` is a no-op filter and would leave the tool sorting by risk score, which is NOT what the user asked for.)
+2. Copy the \`renderTag\` string verbatim from the \`search_entities\` \`other\` result onto its own line so the user gets the entities table Canvas — the rows will come back ordered extreme_impact → high_impact → medium_impact → low_impact, with risk score as the tiebreaker within each tier.
+3. In prose, call out which criticality tiers are represented in the top N and the riskiest entity inside the highest tier; recommend follow-ups for the extreme_impact rows first.
+
 ### Example 4: Risk Score History
 
 User query: Has Cielo39's risk score changed significantly?
@@ -355,7 +368,7 @@ Steps:
 User query: Who are my riskiest AWS users?
 
 Steps:
-1. The query is about **user** entities and AWS has a canonical namespace (pass-through), so try the normalized field first: \`security.search_entities\` with \`entityTypes: ['user']\` and \`namespaces: ['aws']\`. Do NOT set \`riskScoreMin\` — the user did not give a numeric floor, and the tool already sorts by risk score descending. Omitting the floor also keeps entities whose risk score hasn't been computed yet.
+1. The query is about **user** entities and AWS has a canonical namespace (pass-through), so try the normalized field first: \`security.search_entities\` with \`entityTypes: ['user']\` and \`namespaces: ['aws']\`. Do NOT set \`riskScoreMin\` — the user did not give a numeric floor, and the tool defaults to sorting by risk score descending. Omitting the floor also keeps entities whose risk score hasn't been computed yet.
 2. **If step 1 returns zero rows**, retry with \`sources: ['aws']\` (exact-or-prefix matching also covers \`aws.cloudtrail\`, \`aws.guardduty\`, \`aws.s3access\`, etc.) — do NOT fan out into \`['aws', 'aws.cloudtrail', 'aws.guardduty']\`.
 3. When 2+ entities are returned, render the inline aggregate \`security.entity\` attachment (see "Inline rendering" rules) instead of repeating a markdown table.
 4. In the prose, name the vendor the user filtered on (e.g. "6 AWS users scored above 70") and call out the riskiest entries the user may want to investigate. If both attempts returned zero, report "no matching entities" per the fallback in Investigation Step 1.
@@ -407,7 +420,7 @@ Steps:
 User query: Show me the most riskiest hosts and users in my system.
 
 Steps:
-1. Use \`security.search_entities\` with \`entityTypes: ["host", "user"]\` (or run one call per type when the user wants explicit parity) and \`maxResults\` for how many rows to show. Omit \`riskScoreMin\` — the user did not specify a numeric floor, and the tool sorts by risk score descending by default.
+1. Use \`security.search_entities\` with \`entityTypes: ["host", "user"]\` (or run one call per type when the user wants explicit parity) and \`maxResults\` for how many rows to show. Omit \`riskScoreMin\` — the user did not specify a numeric floor, and the tool defaults to sorting by risk score descending.
 2. Copy the \`renderTag\` string verbatim from the \`search_entities\` \`other\` result onto its own line — the entities table Canvas handles the mixed host/user list.
 3. In prose, summarize the highest-risk entities of each type.
 
