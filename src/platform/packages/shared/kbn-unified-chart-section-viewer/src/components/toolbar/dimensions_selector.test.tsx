@@ -545,6 +545,7 @@ describe('DimensionsSelector', () => {
     ): ParsedMetricItem => ({
       metricName,
       dataStream: 'metrics-test',
+      sourceKind: 'data_stream',
       units: [],
       metricTypes: [],
       fieldTypes: [],
