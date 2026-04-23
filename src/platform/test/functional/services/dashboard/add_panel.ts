@@ -103,6 +103,12 @@ export class DashboardAddPanelService extends FtrService {
     await this.clickAddNewPanelFromUIActionLink('Discover session');
   }
 
+  async clickAddCollapsibleSection() {
+    this.log.debug('DashboardAddPanel.clickAddCollapsibleSection');
+    await this.openAddPanelFlyout();
+    await this.clickAddNewPanelFromUIActionLink('Collapsible section');
+  }
+
   async openAddPanelFlyout() {
     this.log.debug('DashboardAddPanel.openAddPanelFlyout');
     await this.clickTopNavAddMenu();

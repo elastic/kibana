@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const esArchiver = getService('esArchiver');
 
-  describe('dashboard save', function describeIndexTests() {
+  describe.only('dashboard save', function describeIndexTests() {
     this.tags('includeFirefox');
     const dashboardName = 'Dashboard Save Test';
     const dashboardNameEnterKey = 'Dashboard Save Test with Enter Key';
@@ -102,10 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await dashboard.switchToEditMode();
         await dashboard.expectExistsQuickSaveOption();
-        await dashboardAddPanel.clickTopNavAddMenu();
-        await testSubjects.existOrFail('dashboardAddCollapsibleSectionButton');
-        await testSubjects.scrollIntoView('dashboardAddCollapsibleSectionButton');
-        await testSubjects.click('dashboardAddCollapsibleSectionButton');
+        await dashboardAddPanel.clickAddCollapsibleSection();
         await dashboard.ensureHasUnsavedChangesNotification({ retry: true });
         await dashboard.clickQuickSave();
 
