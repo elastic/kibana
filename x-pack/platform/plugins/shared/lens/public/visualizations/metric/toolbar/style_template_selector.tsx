@@ -57,20 +57,7 @@ export function StyleTemplateSelector({
 
   return (
     <div>
-      <EuiText size="s">
-        <h4>
-          {i18n.translate('xpack.lens.metric.appearancePopover.style.title', {
-            defaultMessage: 'Style',
-          })}
-        </h4>
-      </EuiText>
-      <EuiFlexGroup
-        gutterSize="s"
-        wrap
-        css={css`
-          margin-top: ${euiTheme.size.s};
-        `}
-      >
+      <EuiFlexGroup gutterSize="s" wrap>
         {styleTemplates.map(({ id, label, preview }) => (
           <EuiFlexItem
             key={id}
