@@ -58,6 +58,7 @@ import type {
   ConversationSidebarRef,
 } from './types';
 import type { EmbeddableConversationProps } from './embeddable/types';
+import type { EmbeddableConversationComponent } from './types';
 import type { OpenConversationSidebarOptions } from './sidebar/types';
 import {
   setSidebarServices,
@@ -65,7 +66,7 @@ import {
   clearSidebarRuntimeContext,
 } from './sidebar';
 import { createVisualizationAttachmentDefinition } from './application/components/attachments/visualization_attachment';
-import { createEmbeddableConversation } from './embeddable/create_embeddable_conversation';
+import { createLazyEmbeddableConversation } from './embeddable/lazy_embeddable_conversation';
 
 export class AgentBuilderPlugin
   implements
@@ -240,7 +241,10 @@ export class AgentBuilderPlugin
 
     const agentBuilderService: AgentBuilderPluginStart = {
       getEmbeddableConversation: () =>
-        createEmbeddableConversation({ services: internalServices, coreStart: core }),
+        createLazyEmbeddableConversation({
+          services: internalServices,
+          coreStart: core,
+        }) as EmbeddableConversationComponent,
       agents: createPublicAgentsContract({ agentService }),
       attachments: createPublicAttachmentContract({ attachmentsService }),
       tools: createPublicToolContract({ toolsService }),
