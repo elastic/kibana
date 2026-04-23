@@ -9,7 +9,7 @@ import type { Logger } from '@kbn/logging';
 import moment from 'moment';
 import { SavedObjectsErrorHelpers, type ElasticsearchClient } from '@kbn/core/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
-import { isCCSRemoteIndexName } from '@kbn/es-query';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import type {
   EntityType,
   ManagedEntityDefinition,
@@ -155,7 +155,8 @@ export class LogsExtractionClient {
         return operationResult;
       }
 
-      await this.engineDescriptorClient.update(type, {
+      await this.engineDescriptorClient.updateWith(type, (current) => ({
+        ...current,
         logExtractionState: {
           // we went through all the pages,
           // therefore we can leave the lastExecutionTimestamp as the beginning of the next
@@ -170,7 +171,7 @@ export class LogsExtractionClient {
           lastExecutionTimestamp: lastSearchTimestamp || moment().utc().toISOString(),
         },
         error: ccsError ? { message: ccsError.message, action: 'extractLogs' } : undefined,
-      });
+      }));
 
       return operationResult;
     } catch (error) {
@@ -755,7 +756,7 @@ export class LogsExtractionClient {
     const remoteIndexPatterns: string[] = [];
 
     withoutAlerts.forEach((index) => {
-      if (isCCSRemoteIndexName(index)) {
+      if (isNonLocalIndexName(index)) {
         remoteIndexPatterns.push(index);
       } else {
         localIndexPatterns.push(index);
