@@ -14,8 +14,10 @@ import type {
   ChromeStyle,
 } from '@kbn/core-chrome-browser';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
-import type { IconType } from '@elastic/eui';
+import type { EuiContextMenuPanelItemDescriptor, IconType } from '@elastic/eui';
+import type React from 'react';
 import { i18n } from '@kbn/i18n';
+import { isModifiedOrPrevented } from './nav_link';
 
 interface HelpData {
   menuLinks: ChromeHelpMenuLink[];
@@ -23,6 +25,9 @@ interface HelpData {
   supportUrl: string;
   globalExtensionMenuLinks: ChromeGlobalHelpExtensionMenuLink[];
   docLinks: DocLinksStart;
+  feedbackHandler?: () => void;
+  newsfeedHandler?: () => void;
+  newsfeedHasNew?: boolean;
 }
 
 export interface HelpMenuLinkItem {
@@ -34,6 +39,7 @@ export interface HelpMenuLinkItem {
   rel?: string;
   onClick?: () => void;
   isExternal?: boolean;
+  hasNewIndicator?: boolean;
   dataTestSubj?: string;
 }
 
@@ -46,15 +52,101 @@ export interface HelpLinks {
   };
 }
 
+export const toContextMenuItem = (
+  options: HelpMenuLinkItem,
+  navigateToUrl: (url: string) => Promise<void> | void,
+  closeMenu: () => void
+): EuiContextMenuPanelItemDescriptor =>
+  ({
+    name: options.name,
+    key: options.key,
+    icon: options.icon,
+    'data-test-subj': options.dataTestSubj,
+    ...(options.href
+      ? {
+          href: options.href,
+          target: options.target,
+          rel: options.rel,
+        }
+      : {}),
+    onClick: (event: React.MouseEvent<HTMLElement, MouseEvent>) => {
+      const isUnmodifiedPrimaryClick = !isModifiedOrPrevented(event) && event.button === 0;
+
+      if (!isModifiedOrPrevented(event)) {
+        options.onClick?.();
+      }
+
+      if (options.href && !options.isExternal && isUnmodifiedPrimaryClick) {
+        event.preventDefault();
+        closeMenu();
+        navigateToUrl(options.href);
+        return;
+      }
+
+      if (isUnmodifiedPrimaryClick) {
+        closeMenu();
+      }
+    },
+  } as EuiContextMenuPanelItemDescriptor);
+
+const buildNewsfeedLink = (newsfeedHandler?: () => void): ChromeHelpMenuLink[] =>
+  newsfeedHandler
+    ? [
+        {
+          title: i18n.translate('core.ui.chrome.headerGlobalNav.helpMenuWhatsNewTitle', {
+            defaultMessage: "What's new?",
+          }),
+          iconType: 'cheer',
+          onClick: newsfeedHandler,
+          dataTestSubj: 'helpMenuWhatsNewButton',
+        },
+      ]
+    : [];
+
+const buildFeedbackLink = (feedbackHandler?: () => void): ChromeHelpMenuLink[] =>
+  feedbackHandler
+    ? [
+        {
+          title: i18n.translate('core.ui.chrome.headerGlobalNav.helpMenuGiveFeedbackTitle', {
+            defaultMessage: 'Give feedback',
+          }),
+          iconType: 'comment',
+          onClick: feedbackHandler,
+          dataTestSubj: 'helpMenuGiveFeedbackButton',
+        },
+      ]
+    : [];
+
 export const buildDefaultContentLinks = ({
   chromeStyle,
   docLinks,
   helpSupportUrl,
+  feedbackHandler,
+  newsfeedHandler,
 }: {
   chromeStyle: ChromeStyle;
   docLinks: DocLinksStart;
   helpSupportUrl: string;
+  feedbackHandler?: () => void;
+  newsfeedHandler?: () => void;
+  newsfeedHasNew?: boolean;
 }): ChromeHelpMenuLink[] => [
+  ...buildNewsfeedLink(newsfeedHandler),
+  {
+    title: i18n.translate('core.ui.chrome.headerGlobalNav.helpMenuOpenGitHubIssueTitle', {
+      defaultMessage: 'Open GitHub issue',
+    }),
+    href: docLinks.links.kibana.createGithubIssue,
+    iconType: 'logoGithub',
+  },
+  {
+    title: i18n.translate('core.ui.chrome.headerGlobalNav.helpMenuAskElasticTitle', {
+      defaultMessage: 'Ask support',
+    }),
+    href: helpSupportUrl,
+    iconType: 'question',
+  },
+  ...buildFeedbackLink(feedbackHandler),
   {
     title: i18n.translate('core.ui.chrome.headerGlobalNav.helpMenuKibanaDocumentationTitle', {
       defaultMessage: 'Kibana documentation',
@@ -63,18 +155,7 @@ export const buildDefaultContentLinks = ({
       chromeStyle === 'project'
         ? docLinks.links.elasticStackGetStarted
         : docLinks.links.kibana.guide,
-  },
-  {
-    title: i18n.translate('core.ui.chrome.headerGlobalNav.helpMenuAskElasticTitle', {
-      defaultMessage: 'Ask Elastic',
-    }),
-    href: helpSupportUrl,
-  },
-  {
-    title: i18n.translate('core.ui.chrome.headerGlobalNav.helpMenuOpenGitHubIssueTitle', {
-      defaultMessage: 'Open an issue in GitHub',
-    }),
-    href: docLinks.links.kibana.createGithubIssue,
+    iconType: 'documentation',
   },
 ];
 
@@ -100,11 +181,18 @@ export const buildHelpLinks = ({
 
   const rawDefaultLinks =
     helpData.menuLinks.length > 0
-      ? helpData.menuLinks
+      ? [
+          ...buildNewsfeedLink(helpData.newsfeedHandler),
+          ...helpData.menuLinks,
+          ...buildFeedbackLink(helpData.feedbackHandler),
+        ]
       : buildDefaultContentLinks({
           chromeStyle,
           docLinks: helpData.docLinks,
           helpSupportUrl: helpData.supportUrl,
+          feedbackHandler: helpData.feedbackHandler,
+          newsfeedHandler: helpData.newsfeedHandler,
+          newsfeedHasNew: helpData.newsfeedHasNew,
         });
 
   const defaultLinks = rawDefaultLinks.map(
@@ -116,6 +204,8 @@ export const buildHelpLinks = ({
       target: href ? '_blank' : undefined,
       onClick,
       isExternal: Boolean(href),
+      hasNewIndicator:
+        dataTestSubj === 'helpMenuWhatsNewButton' && helpData.newsfeedHasNew === true,
       dataTestSubj,
     })
   );
@@ -129,7 +219,6 @@ export const buildHelpLinks = ({
           })
         : link.content,
       key: `extension-${index}`,
-      icon: link.iconType,
       href: link.href,
       target: link.target ?? (isDocumentation ? '_blank' : undefined),
       rel: link.rel ?? (isDocumentation ? 'noopener' : undefined),
