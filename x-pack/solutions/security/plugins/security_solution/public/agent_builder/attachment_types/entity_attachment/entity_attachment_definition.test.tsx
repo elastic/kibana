@@ -158,22 +158,25 @@ describe('createEntityAttachmentDefinition', () => {
       const searchSession = { clear: jest.fn() } as unknown as ISessionService;
       const def = buildDefinition({ searchSession });
 
-      const element = def.renderCanvasContent!(renderProps, renderCallbacks) as ReactElement<{
-        searchSession?: ISessionService;
+      const suspenseElement = def.renderCanvasContent!(
+        renderProps,
+        renderCallbacks
+      ) as ReactElement<{
+        children: ReactElement<{ searchSession?: ISessionService }>;
       }>;
 
-      expect(element.props.searchSession).toBe(searchSession);
+      expect(suspenseElement.props.children.props.searchSession).toBe(searchSession);
     });
 
     it('forwards searchSession into the inline content element', () => {
       const searchSession = { clear: jest.fn() } as unknown as ISessionService;
       const def = buildDefinition({ searchSession });
 
-      const element = def.renderInlineContent!(renderProps) as ReactElement<{
-        searchSession?: ISessionService;
+      const suspenseElement = def.renderInlineContent!(renderProps) as ReactElement<{
+        children: ReactElement<{ searchSession?: ISessionService }>;
       }>;
 
-      expect(element.props.searchSession).toBe(searchSession);
+      expect(suspenseElement.props.children.props.searchSession).toBe(searchSession);
     });
   });
 

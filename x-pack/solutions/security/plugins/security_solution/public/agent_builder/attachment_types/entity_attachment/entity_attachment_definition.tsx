@@ -15,24 +15,18 @@ import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { ISessionService } from '@kbn/data-plugin/public';
-import { QueryClientProvider } from '@kbn/react-query';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiSkeletonText,
+} from '@elastic/eui';
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
-import { APP_UI_ID } from '../../../../common/constants';
 import type { EntityAttachment } from './types';
+import { isFlyoutCapableIdentifierType } from './types';
 import { normaliseEntityAttachment } from './payload';
-import { EntityAttachmentInlineContent } from './entity_attachment_inline_content';
-import { entityAttachmentQueryClient } from './query_client';
-import { EntityCard } from './entity_card/entity_card';
-import {
-  SecurityReduxEmbeddedProvider,
-  type SecurityCanvasEmbeddedBundle,
-} from '../../components/security_redux_embedded_provider';
-import { EntityCardFlyoutOverviewCanvas } from '../../components/entity_card_flyout_overview_canvas';
-import {
-  navigateToSecurityEntityInApp,
-  type SecurityAgentBuilderChrome,
-} from '../entity_explore_navigation';
+import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
+import type { SecurityAgentBuilderChrome } from '../entity_explore_navigation';
 
 const DEFAULT_LABEL = i18n.translate(
   'xpack.securitySolution.agentBuilder.attachments.entity.label',
@@ -50,131 +44,30 @@ const PREVIEW_LABEL = i18n.translate(
   { defaultMessage: 'Preview' }
 );
 
-const OPEN_IN_SECURITY_LABEL = i18n.translate(
-  'xpack.securitySolution.agentBuilder.attachments.entity.openInSecurity',
-  { defaultMessage: 'Open in Security' }
+/**
+ * Lazy-loaded inline renderer — pulls `EntityAttachmentInlineContent` (entity card / table)
+ * into its own chunk so the main `securitySolution` entry bundle doesn't pick up the entity
+ * analytics card + table dependencies until an attachment is actually rendered in the chat.
+ */
+const LazyEntityAttachmentInlineContent = React.lazy(() =>
+  import(
+    /* webpackChunkName: "security_entity_attachment_inline" */
+    './entity_attachment_inline_content'
+  ).then((m) => ({ default: m.EntityAttachmentInlineContent }))
 );
 
-const isFlyoutCapableIdentifierType = (
-  identifierType: string | undefined
-): identifierType is 'host' | 'user' | 'service' =>
-  identifierType === 'host' || identifierType === 'user' || identifierType === 'service';
-
-export interface EntityAttachmentCanvasContentProps
-  extends AttachmentRenderProps<EntityAttachment> {
-  experimentalFeatures: ExperimentalFeatures;
-  application: ApplicationStart;
-  agentBuilder?: AgentBuilderPluginStart;
-  chrome?: SecurityAgentBuilderChrome;
-  resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
-  searchSession?: ISessionService;
-}
-
 /**
- * Canvas (Preview) view for single-entity `security.entity` attachments. Mounts the full
- * Security expandable-flyout overview inside `SecurityReduxEmbeddedProvider` so the same hooks
- * (`useGlobalTime`, `useRiskScore`, `useObservedHost`, sourcerer, …) that power the in-app flyout
- * work on the Agent Builder canvas surface.
- *
- * Multi-entity attachments intentionally bypass the canvas and keep the inline `EntityTable` —
- * per-row Explore links cover navigation without needing a separate canvas.
+ * Lazy-loaded canvas renderer — pulls `SecurityReduxEmbeddedProvider`,
+ * `EntityCardFlyoutOverviewCanvas`, and the full Security expandable-flyout overview into a
+ * separate chunk. This chunk only downloads when the user clicks the `Preview` action button,
+ * keeping the page-load bundle lean for users who never open an entity canvas.
  */
-export const EntityAttachmentCanvasContent: React.FC<EntityAttachmentCanvasContentProps> = ({
-  attachment,
-  experimentalFeatures,
-  application,
-  agentBuilder,
-  chrome,
-  resolveSecurityCanvasContext,
-  openSidebarConversation,
-  searchSession,
-}) => {
-  const parsed = normaliseEntityAttachment(attachment);
-  const watchlistsEnabled = experimentalFeatures.entityAnalyticsWatchlistEnabled;
-  const privmonModifierEnabled = experimentalFeatures.enableRiskScorePrivmonModifier;
-
-  if (!parsed || !parsed.isSingle) {
-    return (
-      <EuiPanel hasShadow={false} hasBorder={false} paddingSize="m">
-        <QueryClientProvider client={entityAttachmentQueryClient}>
-          {parsed?.isSingle === false ? null : parsed ? (
-            <EntityCard
-              identifier={parsed.entities[0]}
-              riskStats={parsed.riskStats}
-              resolutionRiskStats={parsed.resolutionRiskStats}
-              watchlistsEnabled={watchlistsEnabled}
-              privmonModifierEnabled={privmonModifierEnabled}
-            />
-          ) : null}
-        </QueryClientProvider>
-      </EuiPanel>
-    );
-  }
-
-  const identifier = parsed.entities[0];
-  if (!isFlyoutCapableIdentifierType(identifier.identifierType)) {
-    return (
-      <EuiPanel hasShadow={false} hasBorder={false} paddingSize="m">
-        <QueryClientProvider client={entityAttachmentQueryClient}>
-          <EntityCard
-            identifier={identifier}
-            riskStats={parsed.riskStats}
-            resolutionRiskStats={parsed.resolutionRiskStats}
-            watchlistsEnabled={watchlistsEnabled}
-            privmonModifierEnabled={privmonModifierEnabled}
-          />
-        </QueryClientProvider>
-      </EuiPanel>
-    );
-  }
-
-  const handleOpenInSecurity = () => {
-    navigateToSecurityEntityInApp({
-      application,
-      appId: APP_UI_ID,
-      row: {
-        entity_type: identifier.identifierType,
-        entity_id: identifier.entityStoreId ?? identifier.identifier,
-        entity_name: identifier.identifier,
-      },
-      agentBuilder,
-      chrome,
-      openSidebarConversation,
-      searchSession,
-    });
-  };
-
-  return (
-    <SecurityReduxEmbeddedProvider resolveCanvasContext={resolveSecurityCanvasContext}>
-      <EuiPanel hasShadow={false} hasBorder={false} paddingSize="m">
-        <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="s"
-              iconType="popout"
-              iconSide="right"
-              onClick={handleOpenInSecurity}
-              data-test-subj="entityAttachmentCanvasOpenInSecurity"
-            >
-              {OPEN_IN_SECURITY_LABEL}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <QueryClientProvider client={entityAttachmentQueryClient}>
-          <EntityCardFlyoutOverviewCanvas
-            identifier={identifier}
-            application={application}
-            agentBuilder={agentBuilder}
-            chrome={chrome}
-            openSidebarConversation={openSidebarConversation}
-            searchSession={searchSession}
-          />
-        </QueryClientProvider>
-      </EuiPanel>
-    </SecurityReduxEmbeddedProvider>
-  );
-};
+const LazyEntityAttachmentCanvasContent = React.lazy(() =>
+  import(
+    /* webpackChunkName: "security_entity_attachment_canvas" */
+    './entity_attachment_canvas_content'
+  ).then((m) => ({ default: m.EntityAttachmentCanvasContent }))
+);
 
 /**
  * Builds the rich `AttachmentUIDefinition` for `security.entity` attachments.
@@ -214,27 +107,43 @@ export const createEntityAttachmentDefinition = ({
     },
     getIcon: () => 'user',
     renderInlineContent: (props) => (
-      <EntityAttachmentInlineContent
-        {...props}
-        experimentalFeatures={experimentalFeatures}
-        application={application}
-        agentBuilder={agentBuilder}
-        chrome={chrome}
-        searchSession={searchSession}
-      />
+      <React.Suspense fallback={<EuiSkeletonText lines={4} />}>
+        <LazyEntityAttachmentInlineContent
+          {...props}
+          experimentalFeatures={experimentalFeatures}
+          application={application}
+          agentBuilder={agentBuilder}
+          chrome={chrome}
+          searchSession={searchSession}
+        />
+      </React.Suspense>
     ),
     ...(canRenderCanvas
       ? {
           renderCanvasContent: (props: AttachmentRenderProps<EntityAttachment>) => (
-            <EntityAttachmentCanvasContent
-              {...props}
-              experimentalFeatures={experimentalFeatures}
-              application={application!}
-              agentBuilder={agentBuilder}
-              chrome={chrome}
-              resolveSecurityCanvasContext={resolveSecurityCanvasContext!}
-              searchSession={searchSession}
-            />
+            <React.Suspense
+              fallback={
+                <EuiFlexGroup
+                  alignItems="center"
+                  justifyContent="center"
+                  css={{ minHeight: 200 }}
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiLoadingSpinner size="l" />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              }
+            >
+              <LazyEntityAttachmentCanvasContent
+                {...props}
+                experimentalFeatures={experimentalFeatures}
+                application={application!}
+                agentBuilder={agentBuilder}
+                chrome={chrome}
+                resolveSecurityCanvasContext={resolveSecurityCanvasContext!}
+                searchSession={searchSession}
+              />
+            </React.Suspense>
           ),
           getActionButtons: ({ attachment, isCanvas, openCanvas }) => {
             if (isCanvas || !openCanvas) {

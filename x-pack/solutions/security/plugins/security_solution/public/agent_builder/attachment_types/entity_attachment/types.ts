@@ -107,3 +107,16 @@ export interface NormalisedEntityAttachment {
   riskStats?: EntityAttachmentRiskStats;
   resolutionRiskStats?: EntityAttachmentRiskStats;
 }
+
+/**
+ * Type guard for identifier types that have a Security expandable-flyout overview
+ * (host / user / service). Used by both `entity_attachment_definition` (to decide
+ * whether to expose the Canvas `Preview` action button) and the canvas-content
+ * dispatcher (to decide between mounting the full flyout or falling back to an
+ * `EntityCard`). Kept in `types.ts` so it's reachable synchronously without
+ * dragging the canvas chunk into the definition bundle.
+ */
+export const isFlyoutCapableIdentifierType = (
+  identifierType: string | undefined
+): identifierType is 'host' | 'user' | 'service' =>
+  identifierType === 'host' || identifierType === 'user' || identifierType === 'service';

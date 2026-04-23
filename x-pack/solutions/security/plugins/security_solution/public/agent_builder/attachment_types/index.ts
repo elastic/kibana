@@ -12,7 +12,6 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { ISessionService } from '@kbn/data-plugin/public';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
-import { createEntityAttachmentDefinition } from './entity_attachment';
 import type { SecurityCanvasEmbeddedBundle } from '../components/security_redux_embedded_provider';
 import type { SecurityAgentBuilderChrome } from './entity_explore_navigation';
 
@@ -113,15 +112,20 @@ export const registerEntityAttachment = ({
   if (!experimentalFeatures.entityAttachmentRichRenderer) {
     return;
   }
-  attachments.addAttachmentType(
-    SecurityAgentBuilderAttachments.entity,
-    createEntityAttachmentDefinition({
-      experimentalFeatures,
-      application,
-      agentBuilder,
-      chrome,
-      resolveSecurityCanvasContext,
-      searchSession,
-    })
-  );
+  void import(
+    /* webpackChunkName: "security_entity_attachment_rich" */
+    './entity_attachment'
+  ).then(({ createEntityAttachmentDefinition }) => {
+    attachments.addAttachmentType(
+      SecurityAgentBuilderAttachments.entity,
+      createEntityAttachmentDefinition({
+        experimentalFeatures,
+        application,
+        agentBuilder,
+        chrome,
+        resolveSecurityCanvasContext,
+        searchSession,
+      })
+    );
+  });
 };
