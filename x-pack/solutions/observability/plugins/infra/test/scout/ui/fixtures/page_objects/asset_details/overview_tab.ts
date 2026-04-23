@@ -6,7 +6,6 @@
  */
 
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
-import { expect } from '@kbn/scout-oblt/ui';
 import type { AssetDetailsPageTabName } from './asset_details_tab';
 import { AssetDetailsTab } from './asset_details_tab';
 
@@ -194,11 +193,13 @@ export class OverviewTab extends AssetDetailsTab {
    */
   public async waitForKPIChartsToLoad(timeout?: number) {
     for (const metric of KPI_METRICS) {
-      await expect(this.page.getByTestId(`infraAssetDetailsKPI${metric}-loading`)).toHaveCount(0, {
-        timeout,
-      });
-      await expect(this.page.getByTestId(`infraAssetDetailsKPI${metric}-error`)).toHaveCount(0);
-      await expect(this.getKPIValue(metric)).toBeVisible({ timeout });
+      await this.page
+        .getByTestId(`infraAssetDetailsKPI${metric}-loading`)
+        .waitFor({ state: 'hidden', timeout });
+      await this.page
+        .getByTestId(`infraAssetDetailsKPI${metric}-error`)
+        .waitFor({ state: 'hidden' });
+      await this.getKPIValue(metric).waitFor({ state: 'visible', timeout });
     }
   }
 }
