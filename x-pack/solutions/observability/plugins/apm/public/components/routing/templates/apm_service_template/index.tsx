@@ -16,7 +16,6 @@ import { ApmIndexSettingsContextProvider } from '../../../../context/apm_index_s
 import { ApmServiceContextProvider } from '../../../../context/apm_service/apm_service_context';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { ServiceSloContextProvider } from '../../../../context/service_slo/service_slo_context';
-import { useBreadcrumb } from '../../../../context/breadcrumbs/use_breadcrumb';
 import { ServiceAnomalyTimeseriesContextProvider } from '../../../../context/service_anomaly_timeseries/service_anomaly_timeseries_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
@@ -50,7 +49,7 @@ export function ApmServiceTemplate(props: Props) {
   );
 }
 
-function TemplateWithContext({ title, children, selectedTab, searchBarOptions }: Props) {
+function TemplateWithContext({ children, selectedTab, searchBarOptions }: Props) {
   const {
     path: { serviceName },
     query,
@@ -87,17 +86,6 @@ function TemplateWithContext({ title, children, selectedTab, searchBarOptions }:
     path: { serviceName },
     query,
   });
-
-  useBreadcrumb(
-    () => ({
-      title,
-      href: router.link(`/services/{serviceName}/${selectedTab}` as const, {
-        path: { serviceName },
-        query,
-      }),
-    }),
-    [query, router, selectedTab, serviceName, title]
-  );
 
   // Configure agent builder global flyout with the service attachment
   useEffect(() => {

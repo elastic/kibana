@@ -55,7 +55,7 @@ export function MobileServiceTemplate(props: Props) {
   );
 }
 
-function TemplateWithContext({ title, children, selectedTabKey, searchBarOptions }: Props) {
+function TemplateWithContext({ children, selectedTabKey, searchBarOptions }: Props) {
   const {
     path: { serviceName },
     query,
@@ -67,7 +67,6 @@ function TemplateWithContext({ title, children, selectedTabKey, searchBarOptions
   const router = useApmRouter();
 
   const tabs = useTabs({ selectedTabKey });
-  const selectedTab = tabs?.find(({ isSelected }) => isSelected);
 
   const servicesLink = router.link('/services', {
     query: { ...query },
@@ -81,23 +80,15 @@ function TemplateWithContext({ title, children, selectedTabKey, searchBarOptions
         }),
         href: servicesLink,
       },
-      ...(selectedTab
-        ? [
-            {
-              title: serviceName,
-              href: router.link('/mobile-services/{serviceName}', {
-                path: { serviceName },
-                query,
-              }),
-            },
-            {
-              title: selectedTab.label,
-              href: selectedTab.href,
-            } as { title: string; href: string },
-          ]
-        : []),
+      {
+        title: serviceName,
+        href: router.link('/mobile-services/{serviceName}', {
+          path: { serviceName },
+          query,
+        }),
+      },
     ],
-    [query, router, selectedTab, serviceName, servicesLink],
+    [query, router, serviceName, servicesLink],
     {
       omitRootOnServerless: true,
     }
