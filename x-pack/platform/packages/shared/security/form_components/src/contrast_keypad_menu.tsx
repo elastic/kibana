@@ -51,7 +51,7 @@ export const ContrastKeyPadMenu: FunctionComponent<ContrastKeyPadMenuProps> = ({
         isDisabled={isDisabled}
         onChange={() => helpers.setValue(id)}
       >
-        <EuiIcon type={icon} size="l" />
+        <EuiIcon type={icon} size="l" aria-hidden={true} />
       </EuiKeyPadMenuItem>
     );
   };

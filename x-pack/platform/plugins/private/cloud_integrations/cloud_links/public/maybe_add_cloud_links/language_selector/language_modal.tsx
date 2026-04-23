@@ -75,8 +75,7 @@ export const LanguageModal: FC<Props> = ({ closeModal }) => {
                     content={i18n.translate(
                       'xpack.cloudLinks.userMenuLinks.languageModalBetaBadgeTooltip',
                       {
-                        defaultMessage:
-                          'The display language setting is currently a beta feature.',
+                        defaultMessage: 'The display language setting is currently a beta feature.',
                       }
                     )}
                     type="beta"
