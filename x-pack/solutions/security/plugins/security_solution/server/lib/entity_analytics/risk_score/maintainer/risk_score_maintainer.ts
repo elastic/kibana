@@ -340,7 +340,7 @@ const executeEntityTypeRun = async ({
   const runNow = new Date().toISOString();
   const runTag = toRunTag(calculationRunId);
   const runLogger = withLogContext(logger, `[risk_score_maintainer][${entityType}][run:${runTag}]`);
-  let runStatus: 'success' | 'error' = 'success';
+  let runStatus: 'success' | 'error' | 'aborted' = 'success';
   let runErrorKind: MaintainerErrorKind | undefined;
   const runMetrics = metricsTracker.newRun();
   const runTelemetry = telemetryReporter.forRun({
@@ -352,6 +352,9 @@ const executeEntityTypeRun = async ({
   const checkAbortBetweenStages = () => {
     if (abortSignal?.aborted) {
       runLogger.info('Risk score maintainer run aborted between stages');
+      if (runStatus === 'success') {
+        runStatus = 'aborted';
+      }
       skipRemainingStages = true;
     }
   };
