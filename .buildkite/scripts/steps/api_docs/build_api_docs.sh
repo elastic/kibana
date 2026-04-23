@@ -23,3 +23,31 @@ if [[ "${PUBLISH_API_DOCS_CHANGES:-}" == "true" ]]; then
 
   echo "API Docs changes uploaded"
 fi
+
+if [[ "${SKIP_DEPRECATED_REFS:-}" == "true" ]]; then
+  echo "--- Checking for API doc changes"
+  git add -N ./*.docnav.json
+  git add -N api_docs
+  if ! git diff --quiet api_docs ./*.docnav.json 2>/dev/null; then
+    echo "API docs changed — uploading non-blocking full metrics step"
+    buildkite-agent pipeline upload <<'YAML'
+steps:
+  - command: .buildkite/scripts/steps/api_docs/build_api_docs.sh
+    label: 'Build API Docs (full metrics)'
+    soft_fail: true
+    agents:
+      machineType: c4d-highmem-4
+      diskType: hyperdisk-balanced
+      preemptible: true
+      spotZones: us-central1-a,us-central1-b,us-central1-c
+      diskSizeGb: 105
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+YAML
+  else
+    echo "No API doc changes detected — skipping full metrics step"
+  fi
+fi
