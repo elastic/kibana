@@ -70,10 +70,28 @@ api-docs-overlay: ## Apply all overlays (including bump-slim placeholder for Das
 	rm output/kibana.tmp*.yaml
 	rm output/kibana.serverless.tmp*.yaml
 
+# ──────────────────────────────────────────────────────────────────────────────
+# Producing kibana.external.yaml for external Dashboards/Visualizations hosting
+# ──────────────────────────────────────────────────────────────────────────────
+# This target is NOT run by CI. Run it manually whenever you need to update the
+# external hosting repo (e.g. thomthomson.github.io/dashboard-tech-preview-docs).
+#
+# Full sequence:
+#   cd oas_docs
+#   make merge-api-docs               # regenerate the raw merged spec
+#   make api-docs-overlay-external    # apply all overlays except bump-slim
+#                                     # → writes output/kibana.external.yaml
+#   # then copy output/kibana.external.yaml to the external hosting repo and publish
+#
+# Note: space-aware-api-docs is intentionally NOT applied here — that step
+# injects Bump-specific HTML and would render incorrectly in other tools.
+#
+# TODO: once PR #265298 (required-field-fixes) merges into main and this branch
+# is rebased, add api-docs-fix-required as a dependency and prepend
+# required-field-fixes.overlays.yaml as the first overlay step here,
+# matching what api-docs-overlay does.
+# ──────────────────────────────────────────────────────────────────────────────
 .PHONY: api-docs-overlay-external
-# TODO: once PR #265298 (required-field-fixes) merges into main and this branch is rebased,
-# add api-docs-fix-required as a dependency and prepend the required-field-fixes.overlays.yaml
-# step here (before kibana.overlays.yaml), matching what api-docs-overlay does.
 api-docs-overlay-external: ## Apply all overlays except bump-slim — output is kibana.external.yaml (full Dashboards & Visualizations for external hosting)
 	@./node_modules/.bin/bump overlay "output/kibana.yaml" "overlays/kibana.overlays.yaml" > "output/kibana.tmp1.yaml"
 	@./node_modules/.bin/bump overlay "output/kibana.tmp1.yaml" "overlays/alerting.overlays.yaml" > "output/kibana.tmp2.yaml"
