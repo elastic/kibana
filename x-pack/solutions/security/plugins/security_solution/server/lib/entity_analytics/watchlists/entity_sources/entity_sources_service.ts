@@ -316,9 +316,15 @@ export const createEntitySourcesService = ({
       }
     }
 
-    logger.info(
-      `[WatchlistSync] Completed sync of ${watchlists.length} watchlist(s) for namespace "${namespace}"`
-    );
+    if (abortSignal?.aborted) {
+      logger.info(
+        `[WatchlistSync] Watchlist sync for namespace "${namespace}" stopped (abort) before all ${watchlists.length} watchlist(s) were processed.`
+      );
+    } else {
+      logger.info(
+        `[WatchlistSync] Completed sync of ${watchlists.length} watchlist(s) for namespace "${namespace}"`
+      );
+    }
   };
 
   const deleteWatchlistEntities = async (watchlistId: string) => {

@@ -310,6 +310,14 @@ describe('createEntitySourcesService', () => {
       expect(logger.info).toHaveBeenCalledWith(
         expect.stringContaining('Abort signal received: stopping watchlist sync')
       );
+      expect(logger.info).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Watchlist sync for namespace "default" stopped (abort) before all 2 watchlist(s) were processed'
+        )
+      );
+      expect(logger.info).not.toHaveBeenCalledWith(
+        expect.stringMatching(/Completed sync of 2 watchlist/)
+      );
     });
 
     it('does not sync any watchlists when abort signal is already fired', async () => {
@@ -322,6 +330,11 @@ describe('createEntitySourcesService', () => {
       await service.syncAllWatchlists({ abortSignal: controller.signal });
 
       expect(mockWatchlistGet).not.toHaveBeenCalled();
+      expect(logger.info).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Watchlist sync for namespace "default" stopped (abort) before all 1 watchlist(s) were processed'
+        )
+      );
     });
   });
 
