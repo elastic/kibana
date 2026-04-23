@@ -161,6 +161,53 @@ export const dissectProcessorSchema = processorBaseWithWhereSchema
   ) satisfies z.Schema<DissectProcessor>;
 
 /**
+ * URI parts processor
+ *
+ * Parses a URI string into its components (scheme, domain, port, path, query,
+ * fragment, user/password, extension). The Ingest Pipeline transpiler maps this
+ * to the native Elasticsearch `uri_parts` processor, which stores the parts as
+ * an object at `target_field`. The ES|QL transpiler maps it to the
+ * `URI_PARTS <prefix> = <source>` processing command, which emits flat prefixed
+ * columns sharing the same prefix.
+ */
+
+export interface UriPartsProcessor extends ProcessorBaseWithWhere {
+  action: 'uri_parts';
+  from: string;
+  to?: string;
+  keep_original?: boolean;
+  remove_if_successful?: boolean;
+  ignore_missing?: boolean;
+}
+
+export const uriPartsProcessorSchema = processorBaseWithWhereSchema
+  .extend({
+    action: z.literal('uri_parts'),
+    from: StreamlangSourceField.describe('Source field holding the URI string to parse'),
+    to: z
+      .optional(StreamlangTargetField)
+      .describe(
+        'Target field / column prefix for the extracted URI components (defaults to "url")'
+      ),
+    keep_original: z
+      .optional(z.boolean())
+      .describe(
+        'If true (default), preserve the original URI string alongside the extracted parts'
+      ),
+    remove_if_successful: z
+      .optional(z.boolean())
+      .describe(
+        'If true, remove the source field after a successful parse. Source field is kept on failure.'
+      ),
+    ignore_missing: z
+      .optional(z.boolean())
+      .describe('Skip processing when source field is missing'),
+  })
+  .describe(
+    'URI parts processor - Parse a URI into components (scheme, domain, port, path, query, fragment, ...)'
+  ) satisfies z.Schema<UriPartsProcessor>;
+
+/**
  * Date processor
  */
 
@@ -750,6 +797,7 @@ export type StreamlangProcessorDefinition =
   | DissectProcessor
   | DropDocumentProcessor
   | GrokProcessor
+  | UriPartsProcessor
   | MathProcessor
   | RenameProcessor
   | SetProcessor
@@ -774,6 +822,7 @@ export type StreamlangProcessorDefinition =
 export const streamlangProcessorSchema = z.union([
   grokProcessorSchema,
   dissectProcessorSchema,
+  uriPartsProcessorSchema,
   dateProcessorSchema,
   dropDocumentProcessorSchema,
   mathProcessorSchema,
@@ -809,6 +858,7 @@ export const isProcessWithIgnoreMissingOption = createIsNarrowSchema(
     renameProcessorSchema,
     grokProcessorSchema,
     dissectProcessorSchema,
+    uriPartsProcessorSchema,
     convertProcessorSchema,
     replaceProcessorSchema,
     redactProcessorSchema,
