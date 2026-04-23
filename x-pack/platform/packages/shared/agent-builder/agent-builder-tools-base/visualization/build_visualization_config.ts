@@ -13,7 +13,6 @@ import { createVisualizationGraph } from './graph_lens';
 import { guessChartType } from './guess_chart_type';
 import { getSchemaForChartType } from './schemas';
 import type { VisualizationConfig } from './types';
-import type { VisualizationGraphGenerateEsql } from './visualization_graph_generate_esql';
 
 export interface BuildVisualizationConfigParams {
   nlQuery: string;
@@ -28,8 +27,6 @@ export interface BuildVisualizationConfigParams {
   logger: Logger;
   events: ToolEventEmitter;
   esClient: IScopedClusterClient;
-  /** Injected to avoid a package cycle with @kbn/agent-builder-genai-utils. */
-  generateEsql: VisualizationGraphGenerateEsql;
 }
 
 interface BuildVisualizationConfigResult {
@@ -52,7 +49,6 @@ export const buildVisualizationConfig = async ({
   logger,
   events,
   esClient,
-  generateEsql,
 }: BuildVisualizationConfigParams): Promise<BuildVisualizationConfigResult> => {
   let selectedChartType: SupportedChartType = chartType || SupportedChartType.Metric;
 
@@ -72,8 +68,7 @@ export const buildVisualizationConfig = async ({
     events,
     esClient,
     includeTimeRange,
-    additionalChartConfigInstructions,
-    generateEsql
+    additionalChartConfigInstructions
   );
 
   const finalState = await graph.invoke({

@@ -10,8 +10,8 @@ import type { ScopedModel, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import { type IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
+import { generateEsql } from '@kbn/agent-builder-genai-utils';
 import { extractTextFromMessage } from '../utils/extract_text_from_message';
-import type { VisualizationGraphGenerateEsql } from './visualization_graph_generate_esql';
 import { chartTypeRegistry } from './chart_type_registry';
 import type { VisualizationConfig } from './chart_type_registry';
 import {
@@ -101,8 +101,7 @@ export const createVisualizationGraph = (
   events: ToolEventEmitter,
   esClient: IScopedClusterClient,
   includeTimeRange = true,
-  additionalChartConfigInstructions: string | undefined,
-  generateEsql: VisualizationGraphGenerateEsql
+  additionalChartConfigInstructions?: string
 ) => {
   // Node: Generate ES|QL query
   const generateESQLNode = async (state: VisualizationState) => {

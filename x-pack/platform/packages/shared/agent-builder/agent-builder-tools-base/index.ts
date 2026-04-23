@@ -11,9 +11,4 @@ export {
 } from './visualization/build_visualization_config';
 export { getChartTypeSelectionPromptContent } from './visualization/chart_type_guidance';
 export type { VisualizationConfig } from './visualization/types';
-export type {
-  VisualizationGraphGenerateEsql,
-  VisualizationGraphGenerateEsqlParams,
-  VisualizationGraphGenerateEsqlResult,
-} from './visualization/visualization_graph_generate_esql';
 export { getExecutionState, getWorkflowOutput, type WorkflowExecutionState } from './workflows';

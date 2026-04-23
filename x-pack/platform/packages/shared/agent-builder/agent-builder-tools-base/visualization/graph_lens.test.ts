@@ -6,13 +6,16 @@
  */
 
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
+import { generateEsql } from '@kbn/agent-builder-genai-utils';
 import type { ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { createVisualizationGraph } from './graph_lens';
 import type { VisualizationConfig } from './types';
 
-const mockGenerateEsql = jest.fn();
+jest.mock('@kbn/agent-builder-genai-utils', () => ({
+  generateEsql: jest.fn(),
+}));
 
 jest.mock('./chart_type_registry', () => ({
   chartTypeRegistry: new Proxy(
@@ -26,6 +29,8 @@ jest.mock('./chart_type_registry', () => ({
     }
   ),
 }));
+
+const mockedGenerateEsql = jest.mocked(generateEsql);
 
 const createMockLogger = (): Logger =>
   ({
@@ -49,7 +54,7 @@ describe('createVisualizationGraph', () => {
     } as const);
 
   beforeEach(() => {
-    mockGenerateEsql.mockReset();
+    mockedGenerateEsql.mockReset();
   });
 
   it('uses the provided esql query without generating a new one', async () => {
@@ -58,9 +63,7 @@ describe('createVisualizationGraph', () => {
       logger,
       events,
       esClient,
-      false,
-      undefined,
-      mockGenerateEsql
+      false
     );
     const esqlQuery = 'FROM logs-* | WHERE response.code != 503 | STATS count = COUNT(*)';
 
@@ -78,12 +81,12 @@ describe('createVisualizationGraph', () => {
       error: null,
     });
 
-    expect(mockGenerateEsql).not.toHaveBeenCalled();
+    expect(mockedGenerateEsql).not.toHaveBeenCalled();
     expect(finalState.esqlQuery).toBe(esqlQuery);
   });
 
   it('regenerates esql for edits and includes the existing query as context', async () => {
-    mockGenerateEsql.mockResolvedValue({
+    mockedGenerateEsql.mockResolvedValue({
       query: 'FROM logs-* | WHERE response.code != 503 | STATS count = COUNT(*)',
     });
 
@@ -92,9 +95,7 @@ describe('createVisualizationGraph', () => {
       logger,
       events,
       esClient,
-      false,
-      undefined,
-      mockGenerateEsql
+      false
     );
     const parsedExistingConfig = {
       type: 'metric',
@@ -118,7 +119,7 @@ describe('createVisualizationGraph', () => {
       error: null,
     });
 
-    expect(mockGenerateEsql).toHaveBeenCalledWith(
+    expect(mockedGenerateEsql).toHaveBeenCalledWith(
       expect.objectContaining({
         nlQuery: expect.stringContaining(
           'Existing esql query to modify: "FROM logs-* | STATS count = COUNT(*)"'
