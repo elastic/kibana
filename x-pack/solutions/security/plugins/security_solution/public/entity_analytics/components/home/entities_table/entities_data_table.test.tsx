@@ -14,7 +14,6 @@ import { useFetchGridData } from './hooks/use_fetch_grid_data';
 import { useInvestigateInTimeline } from '../../../../common/hooks/timeline/use_investigate_in_timeline';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { EntityURLStateResult } from './hooks/use_entity_url_state';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -28,7 +27,6 @@ const mockUseFetchGridData = jest.mocked(useFetchGridData);
 const mockUseInvestigateInTimeline = jest.mocked(useInvestigateInTimeline);
 const mockUseUserPrivileges = jest.mocked(useUserPrivileges);
 const mockUseGlobalTime = jest.mocked(useGlobalTime);
-const mockUseAgentBuilderAvailability = jest.mocked(useAgentBuilderAvailability);
 const mockUseKibana = jest.mocked(useKibana);
 
 jest.mock('@kbn/unified-data-table', () => {
@@ -49,7 +47,6 @@ jest.mock('@kbn/expandable-flyout', () => ({
 jest.mock('../../../../common/hooks/timeline/use_investigate_in_timeline');
 jest.mock('../../../../common/components/user_privileges');
 jest.mock('../../../../common/containers/use_global_time');
-jest.mock('../../../../agent_builder/hooks/use_agent_builder_availability');
 jest.mock('./hooks/use_fetch_grid_data');
 jest.mock('./hooks/use_styles', () => ({
   useStyles: () => ({
@@ -159,13 +156,6 @@ describe('EntitiesDataTable', () => {
       isInitializing: false,
       from: 'now-15m',
       to: 'now',
-    });
-
-    mockUseAgentBuilderAvailability.mockReturnValue({
-      isAgentBuilderEnabled: false,
-      hasAgentBuilderPrivilege: false,
-      isAgentChatExperienceEnabled: false,
-      hasValidAgentBuilderLicense: false,
     });
 
     mockUseKibana.mockReturnValue({
