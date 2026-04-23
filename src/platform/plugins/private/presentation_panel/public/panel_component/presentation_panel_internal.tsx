@@ -20,12 +20,12 @@ import {
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 
+import { BehaviorSubject } from 'rxjs';
 import { PresentationPanelHeader } from './panel_header/presentation_panel_header';
 import type { PresentationPanelHoverActionsProps } from './panel_header/presentation_panel_hover_actions';
 import { PresentationPanelHoverActionsWrapper } from './panel_header/presentation_panel_hover_actions_wrapper';
 import { PresentationPanelErrorInternal } from './presentation_panel_error_internal';
 import type { DefaultPresentationPanelApi, PresentationPanelInternalProps } from './types';
-import { BehaviorSubject } from 'rxjs';
 
 const PresentationPanelChrome = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
@@ -56,7 +56,8 @@ const PresentationPanelChrome = <
 
   const viewModeSubject = useMemo(() => {
     if (apiPublishesViewMode(componentApi)) return componentApi.viewMode$;
-    if (apiHasParentApi(componentApi) && apiPublishesViewMode(componentApi.parentApi)) return componentApi.parentApi.viewMode$;
+    if (apiHasParentApi(componentApi) && apiPublishesViewMode(componentApi.parentApi))
+      return componentApi.parentApi.viewMode$;
   }, [componentApi]);
 
   const [
@@ -78,7 +79,7 @@ const PresentationPanelChrome = <
     componentApi.defaultTitle$ ?? new BehaviorSubject(undefined),
     componentApi.defaultDescription$ ?? new BehaviorSubject(undefined),
     viewModeSubject ?? new BehaviorSubject(undefined),
-    (componentApi.parentApi as Partial<PublishesTitle>)?.hideTitle$  ?? new BehaviorSubject(false)
+    (componentApi.parentApi as Partial<PublishesTitle>)?.hideTitle$ ?? new BehaviorSubject(false)
   );
   const viewMode = rawViewMode ?? 'view';
 
@@ -161,7 +162,8 @@ export const PresentationPanelInternal = <
       componentApi.dataLoading$ ?? new BehaviorSubject(false),
       componentApi.blockingError$ ?? new BehaviorSubject<Error | undefined>(undefined),
       componentApi.hideBorder$ ?? new BehaviorSubject(false),
-      (componentApi.parentApi as Partial<PublishesHideBorder>)?.hideBorder$ ?? new BehaviorSubject(false)
+      (componentApi.parentApi as Partial<PublishesHideBorder>)?.hideBorder$ ??
+        new BehaviorSubject(false)
     );
   const hideBorder = Boolean(panelHideBorder) || Boolean(parentHideBorder);
 
@@ -176,23 +178,23 @@ export const PresentationPanelInternal = <
   );
 
   const [initialLoadComplete, setInitialLoadComplete] = useState(!dataLoading);
-  if (!initialLoadComplete && (dataLoading === false || (!componentApi.dataLoading$))) {
+  if (!initialLoadComplete && (dataLoading === false || !componentApi.dataLoading$)) {
     setInitialLoadComplete(true);
   }
 
   const InnerPanel = useMemo(() => {
     return (
       <>
-        {blockingError && <PresentationPanelErrorInternal api={componentApi} error={blockingError} />}
+        {blockingError && (
+          <PresentationPanelErrorInternal api={componentApi} error={blockingError} />
+        )}
         {!initialLoadComplete && <PanelLoader />}
         <div
           className={blockingError ? 'embPanel__content--hidden' : 'embPanel__content'}
           css={styles.embPanelContent}
         >
           <EuiErrorBoundary>
-            <Component
-              {...(componentProps as React.ComponentProps<typeof Component>)}
-            />
+            <Component {...(componentProps as React.ComponentProps<typeof Component>)} />
           </EuiErrorBoundary>
         </div>
       </>

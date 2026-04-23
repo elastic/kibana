@@ -93,7 +93,7 @@ export type PresentationPanelProps<
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
   PropsType extends {} = {}
 > = Omit<PresentationPanelInternalProps<ApiType, PropsType>, 'Component' | 'componentApi'> & {
-  getComponent: () => Promise<{Component: React.FC<PropsType> | null; componentApi: ApiType}>;
+  getComponent: () => Promise<{ Component: React.FC<PropsType> | null; componentApi: ApiType }>;
 };
 
 export type QuickActionIds = [

@@ -15,10 +15,10 @@ import {
 } from '@kbn/presentation-publishing';
 import { css } from '@emotion/react';
 import classNames from 'classnames';
+import { BehaviorSubject } from 'rxjs';
 import type { PresentationPanelHoverActionsProps } from './presentation_panel_hover_actions';
 import { PresentationPanelHoverActions } from './presentation_panel_hover_actions';
 import { useHoverActionStyles } from './use_hover_actions_styles';
-import { BehaviorSubject } from 'rxjs';
 
 const customActionsStyles = css({
   justifyContent: 'right !important',
@@ -40,7 +40,7 @@ export const PresentationPanelHoverActionsWrapper = (
       props.api.defaultTitle$ ?? new BehaviorSubject(undefined),
       props.api.title$ ?? new BehaviorSubject(undefined),
       props.api.hasLockedHoverActions$ ?? new BehaviorSubject(false),
-      props.api.overrideHoverActions$  ?? new BehaviorSubject(false)
+      props.api.overrideHoverActions$ ?? new BehaviorSubject(false)
     );
   const containerStyles = useHoverActionStyles(props.viewMode === 'edit', props.showBorder);
 

@@ -55,7 +55,7 @@ export const PresentationPanel = <
         results[2].status === 'fulfilled'
           ? results[2].value?.PresentationPanelErrorInternal
           : undefined,
-      component: results[1].status === 'fulfilled' ? results[1].value.Component : undefined,
+      Component: results[1].status === 'fulfilled' ? results[1].value.Component : undefined,
       componentApi: results[1].status === 'fulfilled' ? results[1].value.componentApi : undefined,
     };
 
@@ -78,7 +78,7 @@ export const PresentationPanel = <
 
   const Panel = value?.Panel;
   const PanelError = value?.PanelError;
-  const Component = value?.component;
+  const Component = value?.Component;
   const componentApi = value?.componentApi;
 
   if (value?.loadErrorReason || !Panel || !Component || !componentApi) {
@@ -94,13 +94,15 @@ export const PresentationPanel = <
   }
 
   return Panel ? (
-    <Panel<ApiType, PropsType> Component={Component} componentApi={componentApi} {...passThroughProps} />
+    <Panel<ApiType, PropsType>
+      Component={Component}
+      componentApi={componentApi}
+      {...passThroughProps}
+    />
   ) : (
     <EuiErrorBoundary>
       <Component
-        {...((passThroughProps.componentProps ?? {}) as React.ComponentProps<
-          typeof Component
-        >)}
+        {...((passThroughProps.componentProps ?? {}) as React.ComponentProps<typeof Component>)}
       />
     </EuiErrorBoundary>
   );
